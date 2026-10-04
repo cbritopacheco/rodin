@@ -1,0 +1,168 @@
+/**
+  @page guides-wngir Fitting a mesh interface with WNGIR
+  @brief Setup, solver stages, diagnostics, and extension points for engineers.
+
+  @tableofcontents
+
+  @section guides-wngir-setup Setup and ownership
+
+  @ref Rodin::Adaptation::WNGIR fits marked mesh facets to a supplied zero level
+  set. It writes accumulated displacement into the constructor's trial-function
+  solution. It does not move vertices, replace mesh transformations, or remesh.
+  The mesh is obtained from the displacement finite element space.
+
+  The mesh, finite element space, trial and test functions must outlive the
+  solver. Use matching vector-valued trial and test spaces on the local Eigen
+  backend. Mark the interface facets and prepare the mesh connectivity before
+  solving. The target gradient must be the derivative of the target level set
+  at the displaced points; no target Hessian is required.
+
+  @code{.cpp}
+  // mesh already has its interface facets marked with Interface.
+  P1<Math::SpatialVector<Real>, Geometry::LocalMesh> space(mesh, 2);
+  TrialFunction u(space);
+  TestFunction v(space);
+  Adaptation::WNGIR fitting(u, v);
+  Adaptation::WNGIRParameters parameters;
+  parameters.h = referenceSpacing;
+  fitting.setParameters(parameters).setInterfaceAttribute(Interface);
+  fitting += DirichletBC(u, VectorFunction(Real(0), Real(0))).on(FixedBoundary);
+
+  RealFunction phi([](const Geometry::Point& point) {
+    return point.x() - Real(0.55);
+  });
+  VectorFunction gradient(Real(1), Real(0));
+  const auto report = fitting.solve(phi, gradient);
+  const auto& displacement = u.getSolution();
+  @endcode
+
+  Homogeneous boundary conditions hold the current boundary position fixed:
+  they constrain each increment, not the accumulated displacement to zero.
+  Nonzero increment values and identification conditions are rejected.
+  For another solve on the same space, retain the solver and update its
+  parameters or target. The existing displacement is the next initial guess.
+  Create a new solver when replacing the mesh or finite element space.
+
+  Applying the result is a separate application decision. Vertex displacement
+  is appropriate for a linear geometric mesh. Higher-order geometry requires
+  updating its transformations, not merely moving its corner vertices.
+
+  @section guides-wngir-stages What the solver does
+
+  Each outer iteration has four stages:
+
+  1. Assemble the robust fitting force and the metric @f$M=F+D@f$.
+     Fitting makes motion responsive to the target normal. Distribution couples
+     neighboring elements through their current deviatoric strain. It does not
+     penalize pointwise isotropic strain or rigid motion. Continuity still
+     couples what different elements can do: shear is resisted, but uniform
+     size changes are not. Shared degrees of freedom transmit motion.
+  2. Solve for an unconstrained predictor. Directional Newton rescales the
+     physical predictor and its quadratic metric before applying the hinges.
+  3. Use native @ref Rodin::Solver::NewtonSolver to solve the frozen quadratic
+     model with affine quadratic quality hinges. Inactive hinges need no Newton
+     correction. Inner convergence uses the stationarity residual.
+  4. Backtrack with Armijo on the robust fitting energy. Every trial must also
+     satisfy the actual sampled Jacobian and distortion limits. Accept the
+     displacement only after both checks pass.
+
+  The retained linear adapter supports CG, SparseLU and optional MUMPS. MUMPS
+  retains symbolic analysis when the sparsity pattern is unchanged. Numerical
+  factors are reused only when the assembled operator is unchanged. Compatible
+  unresolved similarity modes are assigned zero during the linear solve; no
+  mass penalty or full-space completion is added. This is not a promise of
+  coercivity for arbitrary higher-order spaces or user metric additions.
+
+  @section guides-wngir-controls Main controls
+
+  | C++ parameter | Default | Purpose |
+  |--------------|---------|---------|
+  | `h` | Required | Fixed reference background mesh spacing |
+  | `kappaF` | 1 | Fitting weight |
+  | `kappaD` | 0.001 | Distribution weight; the assembled coefficient includes `h` |
+  | `muHat` | 100 | Quality-hinge strength relative to predicted model improvement |
+  | `qualityGuard` | 0.1 | Width of the hinge guard regions |
+  | `jSafe` | 0.01 | Relative Jacobian floor |
+  | `qMax` | 10 | Relative distortion budget |
+  | `maxIterations` | 30 | Maximum accepted outer steps |
+  | `innerIterations` | 15 | Maximum Newton corrections per outer iteration |
+  | `innerRelativeTolerance` | 0.001 | Inner stationarity tolerance relative to fitting force |
+  | `innerAbsoluteTolerance` | 1e-12 | Absolute inner stationarity allowance |
+  | `linearRelativeTolerance` | 1e-6 | Linear residual tolerance for every backend |
+  | `linearMaxIterations` | 1000 | Iteration cap for CG only |
+  | `geometricSupTolerance` | 0 | Automatic reference-scale target; positive values override it |
+
+  MUMPS is the default when compiled in; otherwise SparseLU is selected.
+  Set `linearSolver` and `linearSolverThreads` explicitly for reproducible runs.
+  Quadrature orders are selected automatically unless overridden.
+  The examples retain their existing solver and inner-iteration command-line
+  spellings for campaign compatibility. The removed rigid-observation diagnostic
+  and its `--wngir-rigid-diagnostics` option are no longer supported.
+
+  @section guides-wngir-results Reading results
+
+  Use `report.reason` rather than parsing a message. A geometric target hit is
+  `WNGIRReport::Reason::GeometricTarget`. Budget, small-step and small-energy
+  exits are best-effort results, not geometric convergence. The stable text
+  token is available through `report.getReasonString()`.
+
+  The main geometric response is `geometricSup`, the maximum sampled normalized
+  level-set residual on the complete interface, including its vertices.
+  Normalization divides the absolute level-set value by the local target-gradient
+  magnitude, giving a local distance estimate rather than a raw level-set value.
+  The automatic target is @f$h^{p+1}@f$, using the reference spacing and the
+  interface finite element order. This is not a certified Hausdorff error;
+  a single target hit does not establish a refinement order.
+
+  Monitor `energy`, `geometricSup`, `geometricSupTarget`, `minJ`, `maxQRel`,
+  `iterations`, `innerIterations`, `lastInnerIterations`, `maxInnerIterations`
+  and `innerRelativeResidual`. `innerIterations` in the report is the total
+  correction count, whereas the parameter is a per-outer-iteration cap.
+  `interfaceMeasure` is the reference integration measure used by the fitting
+  energy. Energy and maximum error answer different questions; neither should
+  silently replace the other as a stopping certificate.
+
+  The quality budget is available to spend while fitting. A larger final
+  distortion is not itself failure if it remains below the configured limit.
+  `qualityBudgetSatisfied` records the sampled checks, not an everywhere-valid
+  certificate for a curved element. Inspect the reason and quality fields even
+  when the target was not reached.
+
+  @code{.cpp}
+  fitting.setMonitor([](const Adaptation::WNGIRReport& report) {
+    // Record or display report.energy, report.geometricSup and quality fields.
+  });
+  @endcode
+
+  The monitor receives one snapshot per accepted step and one final report,
+  including early returns. The final snapshot may repeat the last accepted
+  step. It must not modify the problem or throw. `getReport()` holds the last
+  completed solve. `trace` additionally enables the examples' diagnostic logs.
+
+  @section guides-wngir-extension Adding metric terms
+
+  `getMetric()` exposes a native additional bilinear form, not the internal
+  scratch problem or a replacement for the canonical fitting and distribution.
+  Both local and global bilinear integrators use Rodin's normal form interface.
+
+  @code{.cpp}
+  fitting.getMetric() += Integral(Dot(u, v));
+  fitting.getMetric() -= Integral(Dot(u, v));
+  @endcode
+
+  Added terms are assembled again at each outer iteration. They change the
+  quadratic direction model, not the robust energy or its fitting force.
+  Maintain symmetry, nonnegative curvature and compatible unresolved modes.
+  Arbitrary linear loads are deliberately not exposed: a load without a
+  corresponding fitting energy would invalidate Armijo's descent model.
+
+  @section guides-wngir-layout Implementation layout
+
+  All method-specific code lives in `Adaptation/WNGIR/`:
+  `Solver.h` owns outer orchestration; `FittingCoefficient.h` and
+  `FittingForce.h` assemble fitting; `Distribution.h` assembles distribution;
+  `Hinge.h`, `HingeMetric.h`, `HingeForce.h` and `HingeProblem.h` define the
+  inner model; `LinearSolver.h` adapts native linear solvers.
+  `Parameters.h` and `Report.h` are the configuration and diagnostic surfaces.
+  Geometry evaluation uses the shared adaptation deformation infrastructure.
+*/

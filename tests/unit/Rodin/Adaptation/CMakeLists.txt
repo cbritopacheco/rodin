@@ -9,14 +9,14 @@ gtest_discover_tests(RodinAdaptationCellDeformationTest
     LABELS unit
 )
 
-add_executable(RodinAdaptationWNGIRPrimalBarrierStateTest
-  WNGIRPrimalBarrierStateTest.cpp)
-target_link_libraries(RodinAdaptationWNGIRPrimalBarrierStateTest
+add_executable(RodinAdaptationWNGIRHingeStateTest
+  WNGIRHingeStateTest.cpp)
+target_link_libraries(RodinAdaptationWNGIRHingeStateTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
   Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationWNGIRPrimalBarrierStateTest
+gtest_discover_tests(RodinAdaptationWNGIRHingeStateTest
   PROPERTIES
     LABELS unit
 )

@@ -12,9 +12,8 @@ namespace Rodin::Adaptation
 {
     /// @brief Affine hinge Hessian or nonlinear hinge Gauss-Newton tangent.
   template <class TrialFunction, class TestFunction, class Displacement>
-  class WNGIRPrimalBarrierMetric final
-    : public Variational::LocalBilinearFormIntegratorBase<
-        typename TrialFunction::ScalarType>
+  class WNGIRHingeMetric final : public Variational::LocalBilinearFormIntegratorBase<
+                                   typename TrialFunction::ScalarType>
   {
     public:
       /// @brief Scalar value type.
@@ -22,21 +21,21 @@ namespace Rodin::Adaptation
       /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      /// @brief Constructs the w n g i r primal barrier metric.
-      WNGIRPrimalBarrierMetric(const TrialFunction& du, const TestFunction& z,
+      /// @brief Constructs the WNGIR hinge metric.
+      WNGIRHingeMetric(const TrialFunction& du, const TestFunction& z,
         const Displacement& current, const Displacement& inner,
-        const WNGIRParameters& parameters, Real barrierCoefficient)
+        const WNGIRParameters& parameters, Real hingeCoefficient)
         : Parent(du.getLeaf(), z.getLeaf()),
           m_du(du),
           m_z(z),
           m_current(current),
           m_inner(inner),
           m_parameters(parameters),
-          m_barrierCoefficient(barrierCoefficient)
+          m_hingeCoefficient(hingeCoefficient)
       {}
 
       /// @brief Copy constructor.
-      WNGIRPrimalBarrierMetric(const WNGIRPrimalBarrierMetric&) = default;
+      WNGIRHingeMetric(const WNGIRHingeMetric&) = default;
 
       /// @brief Returns the current polytope.
       const Geometry::Polytope& getPolytope() const final override
@@ -46,8 +45,7 @@ namespace Rodin::Adaptation
       }
 
       /// @brief Binds to a polytope and assembles the local system.
-      WNGIRPrimalBarrierMetric& setPolytope(
-        const Geometry::Polytope& polytope) final override
+      WNGIRHingeMetric& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
         const std::size_t dim = polytope.getDimension();
@@ -88,8 +86,8 @@ namespace Rodin::Adaptation
           deformation.setDisplacementGradient(currentJacobian.getValue(ip));
           if (!deformation.isAdmissible())
             continue;
-          const WNGIRPrimalBarrierState state(
-            deformation, innerJacobian.getValue(ip), parameters, m_barrierCoefficient);
+          const WNGIRHingeState state(
+            deformation, innerJacobian.getValue(ip), parameters, m_hingeCoefficient);
           assert(state.isFeasible());
           if (!state.isFeasible())
             continue;
@@ -148,9 +146,9 @@ namespace Rodin::Adaptation
       }
 
       /// @brief Clones this object.
-      WNGIRPrimalBarrierMetric* copy() const noexcept final override
+      WNGIRHingeMetric* copy() const noexcept final override
       {
-        return new WNGIRPrimalBarrierMetric(*this);
+        return new WNGIRHingeMetric(*this);
       }
 
     private:
@@ -159,7 +157,7 @@ namespace Rodin::Adaptation
       std::reference_wrapper<const Displacement> m_current;
       std::reference_wrapper<const Displacement> m_inner;
       std::reference_wrapper<const WNGIRParameters> m_parameters;
-      Real m_barrierCoefficient;
+      Real m_hingeCoefficient;
       const Geometry::Polytope* m_polytope = nullptr;
       std::vector<Real> m_jTrial;
       std::vector<Real> m_qTrial;

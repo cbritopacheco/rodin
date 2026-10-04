@@ -11,6 +11,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -128,6 +129,15 @@ namespace Rodin::Adaptation
       using SpatialMat = Math::SpatialMatrix<Real>;
 
     public:
+      using Monitor = std::function<void(const WNGIRReport&)>;
+
+      /// @brief Observes accepted steps and the final report, without changing the solve.
+      WNGIR& setMonitor(Optional<Monitor> monitor)
+      {
+        m_monitor = std::move(monitor);
+        return *this;
+      }
+
       /// @brief Mesh-validity summary of a displacement.
       struct AdmissibilityState
       {
@@ -169,19 +179,6 @@ namespace Rodin::Adaptation
           Real activeSup = 0;
       };
 
-      /// @brief Observation coercivity restricted to rigid displacements.
-      struct RigidModeState
-      {
-          /// @brief Smallest generalized observation eigenvalue.
-          Real minimum = std::numeric_limits<Real>::quiet_NaN();
-
-          /// @brief Ratio of the smallest to largest generalized eigenvalue.
-          Real ratio = std::numeric_limits<Real>::quiet_NaN();
-
-          /// @brief Dimension of the rigid-motion space tested.
-          std::size_t dimension = 0;
-      };
-
       /**
        * @brief Kink of the discrete interface across facet boundaries.
        *
@@ -206,28 +203,31 @@ namespace Rodin::Adaptation
           m_metricProblem(m_duStep, m_vStep),
           m_hingeProblem(m_duStep, m_vStep),
           m_linearSolver(m_hingeProblem),
-          m_regularityForm(m_duStep, m_vStep),
-          m_localMetricForm(m_duStep, m_vStep),
-          m_surfaceForm(m_vStep),
+          m_distributionForm(m_duStep, m_vStep),
+          m_fittingMetric(m_duStep, m_vStep),
+          m_fittingForce(m_vStep),
           m_additionalMetric(du, v)
       {}
 
       WNGIR(const WNGIR&) = delete;
       WNGIR& operator=(const WNGIR&) = delete;
 
-      /// @brief Adds a bilinear metric term; the robust fitting objective is unchanged.
-      WNGIR& operator+=(const Variational::LocalBilinearFormIntegratorBase<Real>& term)
+      /// @brief Additional metric terms, assembled afresh at each outer iteration.
+      /// These augment F + D; they do not change the fitting energy or force.
+      BilinearFormType& getMetric()
       {
-        m_additionalMetric += term;
-        m_hasAdditionalMetric = true;
-        return *this;
+        return m_additionalMetric;
       }
 
-      /// @brief Subtracts a bilinear metric term; the resulting metric must remain PSD.
-      WNGIR& operator-=(const Variational::LocalBilinearFormIntegratorBase<Real>& term)
+      const BilinearFormType& getMetric() const
       {
-        m_additionalMetric -= term;
-        m_hasAdditionalMetric = true;
+        return m_additionalMetric;
+      }
+
+      /// @brief Selects the marked interface to fit on the displacement mesh.
+      WNGIR& setInterfaceAttribute(Geometry::Attribute attribute)
+      {
+        m_parameters.interfaceAttribute = attribute;
         return *this;
       }
 
@@ -257,7 +257,7 @@ namespace Rodin::Adaptation
           !std::is_same_v<VectorType, Math::Vector<Real>>)
           Alert::Exception() << "WNGIR requires the local Eigen backend." << Alert::Raise;
 #ifndef RODIN_USE_MUMPS
-        if (parameters.directSolver == WNGIRParameters::DirectSolver::MUMPS)
+        if (parameters.linearSolver == WNGIRParameters::LinearSolver::MUMPS)
           Alert::Exception() << "WNGIR MUMPS solves require RODIN_USE_MUMPS."
                              << Alert::Raise;
 #endif
@@ -267,24 +267,24 @@ namespace Rodin::Adaptation
                                 "fitting/distribution weights."
                              << Alert::Raise;
         for (const Real value :
-          {parameters.kappaJ, parameters.kappaQ,
-            parameters.primalBarrierAbsoluteTolerance, parameters.energyStagTol,
-            parameters.stepTol, parameters.acceptedStepOverHTol, parameters.robustScale})
+          {parameters.kappaJ, parameters.kappaQ, parameters.innerAbsoluteTolerance,
+            parameters.energyStagTol, parameters.stepTol, parameters.acceptedStepOverHTol,
+            parameters.robustScale})
           if (!std::isfinite(value) || value < Real(0))
             Alert::Exception()
               << "WNGIR weights and tolerances must be finite and nonnegative."
               << Alert::Raise;
-        if (!std::isfinite(parameters.primalBarrierRelativeTolerance) ||
-          !(parameters.primalBarrierRelativeTolerance > Real(0)) ||
-          !std::isfinite(parameters.cgRelativeTolerance) ||
-          !(parameters.cgRelativeTolerance > Real(0)) ||
+        if (!std::isfinite(parameters.innerRelativeTolerance) ||
+          !(parameters.innerRelativeTolerance > Real(0)) ||
+          !std::isfinite(parameters.linearRelativeTolerance) ||
+          !(parameters.linearRelativeTolerance > Real(0)) ||
           !(parameters.armijoCoefficient > Real(0) &&
             parameters.armijoCoefficient < Real(1)) ||
           !(parameters.omegaMin > Real(0) && parameters.omegaMin <= Real(1)) ||
           !(parameters.jMinRatio > Real(0) && parameters.jMinRatio < Real(1)) ||
           !(parameters.jLineSearchRatio > Real(0) &&
             parameters.jLineSearchRatio < Real(1)) ||
-          parameters.primalBarrierIterations == 0 || parameters.stagnationIterations == 0)
+          parameters.innerIterations == 0 || parameters.stagnationIterations == 0)
           Alert::Exception()
             << "WNGIR requires valid residual tolerances, budgets and line search."
             << Alert::Raise;
@@ -326,25 +326,22 @@ namespace Rodin::Adaptation
        * first variation of the line-search energy. An independently supplied
        * sensitivity is supported, but then defines a pseudo-gradient.
        */
-      template <class Mesh, class PhiDerived, class GradDerived>
-      WNGIRReport solve(const Mesh& mesh,
-        const std::vector<Rodin::Index>& interfaceFacets,
-        const Variational::RealFunctionBase<PhiDerived>& phi,
+      template <class PhiDerived, class GradDerived>
+      WNGIRReport solve(const Variational::RealFunctionBase<PhiDerived>& phi,
         const Variational::VectorFunctionBase<Real, GradDerived>& grad)
       {
         using Rodin::Index;
         const WNGIRParameters& p = m_parameters;
         Displacement& u = *m_u;
         const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        using Mesh = std::remove_cvref_t<decltype(mesh)>;
         const std::size_t meshDim = mesh.getDimension();
 
         WNGIRReport rep;
         const Real h = p.h;
         if (!std::isfinite(h) || !(h > Real(0)))
           Alert::Exception() << "WNGIR requires a finite positive reference mesh size."
-                             << Alert::Raise;
-        if (&mesh != &fes.getMesh())
-          Alert::Exception() << "WNGIR mesh must match the displacement space."
                              << Alert::Raise;
         assembleBoundaryConditions();
         const Real acceptedJacobianFloor = std::max(p.jLineSearchRatio, p.jSafe);
@@ -364,41 +361,27 @@ namespace Rodin::Adaptation
         for (auto cell = mesh.getCell(); cell; ++cell)
         {
           const Index cellIndex = cell->getIndex();
-          if constexpr (requires { mesh.getShard().isOwned(meshDim, cellIndex); })
-          {
-            if (!mesh.getShard().isOwned(meshDim, cellIndex))
-              continue;
-          }
           validationCells.push_back(cellIndex);
         }
 
-        if (!p.hasInterfaceAttribute)
+        if (!p.interfaceAttribute)
         {
-          rep.exitReason = "missing-interface-attribute";
-          m_report = rep;
-          return rep;
+          rep.reason = WNGIRReport::Reason::MissingInterface;
+          return finish(rep);
         }
 
         // One bounding-volume locator per solve: the background mesh is fixed
         // for the frame, and the index builds lazily on first query.
         const Location::AABB<Mesh> locator(mesh);
+        std::vector<Index> interfaceFacets;
+        for (auto face = mesh.getFace(); face; ++face)
+          if (face->getAttribute() == *p.interfaceAttribute)
+            interfaceFacets.push_back(face->getIndex());
         if (interfaceFacets.empty())
         {
-          rep.exitReason = "empty-interface";
-          m_report = rep;
-          return rep;
+          rep.reason = WNGIRReport::Reason::EmptyInterface;
+          return finish(rep);
         }
-        std::vector<Index> markedFacets;
-        for (auto face = mesh.getFace(); face; ++face)
-          if (face->getAttribute() == p.interfaceAttribute)
-            markedFacets.push_back(face->getIndex());
-        auto suppliedFacets = interfaceFacets;
-        std::sort(markedFacets.begin(), markedFacets.end());
-        std::sort(suppliedFacets.begin(), suppliedFacets.end());
-        if (markedFacets != suppliedFacets)
-          Alert::Exception()
-            << "WNGIR facet list must exactly match the interface attribute."
-            << Alert::Raise;
         const auto normalJump = getNormalJump(mesh, fes, interfaceFacets, meshDim);
         rep.normalJumpRMS = normalJump.rms;
         rep.normalJumpMax = normalJump.max;
@@ -414,12 +397,10 @@ namespace Rodin::Adaptation
         if (!(robustScale.gradientScale > Real(0)) ||
           !std::isfinite(robustScale.gradientScale))
         {
-          rep.exitReason = "degenerate-target-gradient";
-          m_report = rep;
-          return rep;
+          rep.reason = WNGIRReport::Reason::DegenerateGradient;
+          return finish(rep);
         }
         const Real sigma = robustScale.sigma;
-        const Real sigma2 = sigma * sigma;
         const Real levelSetMeshScale = h * robustScale.gradientScale;
         const Real dataNormalization =
           Real(1) / (robustScale.gradientScale * robustScale.gradientScale);
@@ -477,26 +458,16 @@ namespace Rodin::Adaptation
         if (initialAdm.inadmissibleCount > 0 ||
           initialAdm.minJ <= acceptedJacobianFloor || initialAdm.maxQ >= p.qMax)
         {
-          rep.exitReason = "initial-state-not-strictly-feasible";
-          m_report = rep;
-          return rep;
+          rep.reason = WNGIRReport::Reason::InvalidInitialGeometry;
+          return finish(rep);
         }
 
         SurfaceState currentSurface = surfaceState(u);
         recordSurfaceState(currentSurface);
-        if (p.rigidDiagnostics)
-        {
-          const RigidModeState initialRigid = getRigidModeState(mesh, fes, u, phi, grad,
-            interfaceFacets, sigma2, dataNormalization, meshDim, locator);
-          rep.rigidModeCoercivity = initialRigid.minimum;
-          rep.rigidModeCoercivityRatio = initialRigid.ratio;
-          rep.rigidModeDimension = initialRigid.dimension;
-        }
         if (!(currentSurface.activeLen > Real(0)))
         {
-          rep.exitReason = "observation-degenerate-active-set";
-          m_report = rep;
-          return rep;
+          rep.reason = WNGIRReport::Reason::EmptyActiveSet;
+          return finish(rep);
         }
 
         Real ePrev = currentSurface.energy;
@@ -512,20 +483,21 @@ namespace Rodin::Adaptation
                     << "  geom_rms=" << geometry.rms << "  geom_sup=" << geometry.sup
                     << "  normal_rms=" << geometry.normalRMS << "  h=" << h
                     << "  min_j=" << rep.minJ << "  max_qrel=" << rep.maxQRel
-                    << "  inner_total=" << rep.primalBarrierIterations
-                    << "  inner_last=" << rep.lastPrimalBarrierIterations
-                    << "  inner_converged=" << rep.primalBarrierConverged
-                    << "  inner_residual=" << rep.primalBarrierResidual
-                    << "  inner_relative_residual=" << rep.primalBarrierRelativeResidual
-                    << "  inner_residual_tolerance=" << rep.primalBarrierResidualTolerance
+                    << "  inner_total=" << rep.innerIterations
+                    << "  inner_last=" << rep.lastInnerIterations
+                    << "  inner_converged=" << rep.innerConverged
+                    << "  inner_residual=" << rep.innerResidual
+                    << "  inner_relative_residual=" << rep.innerRelativeResidual
+                    << "  inner_residual_tolerance=" << rep.innerResidualTolerance
                     << "  geom_sup_target=" << geometricTarget
                     << "  inactive_hinge_skips=" << rep.inactiveHingeSkips
                     << "  direct_analyses=" << rep.directAnalyses
                     << "  direct_factorizations=" << rep.directFactorizations
                     << "  fit_energy=" << rep.energy
-                    << "  inner_assembly_seconds=" << rep.tPrimalBarrierAssembly
-                    << "  inner_solve_seconds=" << rep.tPrimalBarrierSolve
-                    << "  inner_ls_seconds=" << rep.tPrimalBarrierLineSearch
+                    << "  interface_measure=" << rep.interfaceMeasure
+                    << "  inner_assembly_seconds=" << rep.tInnerAssembly
+                    << "  inner_solve_seconds=" << rep.tInnerSolve
+                    << "  inner_ls_seconds=" << rep.tInnerLineSearch
                     << "  seconds=" << secondsSince(traceStart) << std::endl;
           std::cout.flags(flags);
           std::cout.precision(precision);
@@ -541,9 +513,8 @@ namespace Rodin::Adaptation
           rep.qualityBudgetSatisfied = true;
           if (!std::isfinite(geometry.sup))
           {
-            rep.exitReason = "geometric-validation-failed";
-            m_report = rep;
-            return rep;
+            rep.reason = WNGIRReport::Reason::InvalidGeometry;
+            return finish(rep);
           }
           if (geometry.sup <= geometricTarget)
           {
@@ -552,9 +523,8 @@ namespace Rodin::Adaptation
             rep.normalRMS = geometry.normalRMS;
             rep.geometricTargetReached = true;
             rep.qualityBudgetSatisfied = true;
-            rep.exitReason = "full-interface-geometric-sup-converged";
-            m_report = rep;
-            return rep;
+            rep.reason = WNGIRReport::Reason::GeometricTarget;
+            return finish(rep);
           }
         }
 
@@ -572,26 +542,27 @@ namespace Rodin::Adaptation
         for (; rep.iterations < p.maxIterations; ++rep.iterations)
         {
           auto tic = Clock::now();
-          WNGIRObservationCoefficient obsCoeff(
+          WNGIRFittingCoefficient obsCoeff(
             grad, u, locator, p, dataNormalization, meshDim);
           auto obsMetric =
             Variational::FaceIntegral(Variational::Dot(obsCoeff * m_duStep, m_vStep));
           obsMetric.setOrder(surfaceOrder);
-          obsMetric.over(p.interfaceAttribute);
-          WNGIRSurfaceForceCoefficient forceCoeff(
+          obsMetric.over(*p.interfaceAttribute);
+          WNGIRFittingForce forceCoeff(
             phi, grad, u, locator, loss, dataNormalization, meshDim);
           auto surfaceForce = Variational::FaceIntegral(forceCoeff, m_vStep);
           surfaceForce.setOrder(surfaceOrder);
-          surfaceForce.over(p.interfaceAttribute);
+          surfaceForce.over(*p.interfaceAttribute);
           // The observation metric and the fitting force depend on the outer
           // displacement, not on the barrier increment, so they are assembled
           // here and reused by every correction below.
-          m_localMetricForm = obsMetric;
-          m_localMetricForm.assemble();
-          if (m_hasAdditionalMetric)
+          m_fittingMetric = obsMetric;
+          m_fittingMetric.assemble();
+          if (!m_additionalMetric.getLocalIntegrators().empty() ||
+            !m_additionalMetric.getGlobalIntegrators().empty())
           {
             m_additionalMetric.assemble();
-            m_localMetricForm.getOperator() += m_additionalMetric.getOperator();
+            m_fittingMetric.getOperator() += m_additionalMetric.getOperator();
           }
           const Real coefficient = p.h * p.kappaD;
           size_t order = 2;
@@ -600,15 +571,15 @@ namespace Rodin::Adaptation
               order, 2 * fes.getFiniteElement(meshDim, cell->getIndex()).getOrder());
           if (p.quadratureOrder > 0)
             order = p.quadratureOrder;
-          m_regularityForm =
-            WNGIRCurrentStrainMetric(m_duStep, m_vStep, u, coefficient, order);
-          m_regularityForm.assemble();
-          m_surfaceForm = surfaceForce;
-          m_surfaceForm.assemble();
+          m_distributionForm =
+            WNGIRDistribution(m_duStep, m_vStep, u, coefficient, order);
+          m_distributionForm.assemble();
+          m_fittingForce = surfaceForce;
+          m_fittingForce.assemble();
           bool solveOk = true;
           Real predictorAction = Real(0);
-          typename ProblemType::ProblemBodyType predictorBody(m_regularityForm);
-          predictorBody = predictorBody + m_localMetricForm - m_surfaceForm;
+          typename ProblemType::ProblemBodyType predictorBody(m_distributionForm);
+          predictorBody = predictorBody + m_fittingMetric - m_fittingForce;
           m_metricProblem = predictorBody;
           assembleStep();
           rep.tAssembly += secondsSince(tic);
@@ -635,7 +606,7 @@ namespace Rodin::Adaptation
           rep.tSolve += secondsSince(tic);
           if (!solveOk)
           {
-            rep.exitReason = "solve-predictor-failed";
+            rep.reason = WNGIRReport::Reason::PredictorFailure;
             break;
           }
 
@@ -644,7 +615,7 @@ namespace Rodin::Adaptation
             interfaceFacets, loss, dataNormalization, meshDim, locator);
           if (!(predictorAction > Real(0)) || !std::isfinite(predictorAction))
           {
-            rep.exitReason = "no-descent-predictor";
+            rep.reason = WNGIRReport::Reason::NonDescentPredictor;
             break;
           }
           rep.predictorScale = Real(1);
@@ -660,7 +631,7 @@ namespace Rodin::Adaptation
                 curvatures.second, norm, h * p.directionalNewtonMaxStepOverH);
             if (!(rep.predictorScale > Real(0)) || !std::isfinite(rep.predictorScale))
             {
-              rep.exitReason = "invalid-directional-scaling";
+              rep.reason = WNGIRReport::Reason::InvalidScaling;
               break;
             }
             // The predictor, frozen quadratic form and hinge scale describe the same motion.
@@ -668,8 +639,8 @@ namespace Rodin::Adaptation
             vK = predictor;
             predictorAction *= rep.predictorScale;
             fixedMetric *= Real(1) / rep.predictorScale;
-            m_regularityForm.getOperator() *= Real(1) / rep.predictorScale;
-            m_localMetricForm.getOperator() *= Real(1) / rep.predictorScale;
+            m_distributionForm.getOperator() *= Real(1) / rep.predictorScale;
+            m_fittingMetric.getOperator() *= Real(1) / rep.predictorScale;
             if (p.trace)
             {
               const auto precision = std::cout.precision();
@@ -688,49 +659,46 @@ namespace Rodin::Adaptation
 
           {
             const Real modelDecrease = Real(0.5) * std::max(Real(0), predictorAction);
-            const Real barrierCoefficient =
+            const Real hingeCoefficient =
               domainMeasure > Real(0) ? p.muHat * modelDecrease / domainMeasure : Real(0);
-            rep.primalBarrierCoefficient = barrierCoefficient;
-            const size_t innerIterations = std::max<size_t>(1, p.primalBarrierIterations);
+            rep.hingeCoefficient = hingeCoefficient;
+            const size_t innerIterations = p.innerIterations;
             const Real predictorNorm =
               std::max(std::abs(predictor.max()), std::abs(predictor.min()));
             const Real residualScale = fixedForce.norm();
-            const Real residualTolerance = p.primalBarrierAbsoluteTolerance +
-              p.primalBarrierRelativeTolerance * residualScale;
+            const Real residualTolerance =
+              p.innerAbsoluteTolerance + p.innerRelativeTolerance * residualScale;
             bool innerConverged = false;
-            rep.lastPrimalBarrierIterations = 0;
-            rep.lastPrimalBarrierAlpha = 0;
-            rep.minPrimalBarrierAlpha = 1;
-            rep.fullPrimalBarrierSteps = 0;
-            if (!hasActivePrimalHinges(
-                  mesh, fes, validationCells, u, vK, meshDim, barrierCoefficient))
+            rep.lastInnerIterations = 0;
+            rep.lastInnerAlpha = 0;
+            rep.minInnerAlpha = 1;
+            rep.fullInnerSteps = 0;
+            if (!hasActiveHinges(
+                  mesh, fes, validationCells, u, vK, meshDim, hingeCoefficient))
             {
               const Math::Vector<Real> image = fixedMetric * vK.getData();
-              rep.primalBarrierResidual = (image - fixedForce).norm();
-              rep.primalBarrierResidualTolerance = residualTolerance;
-              rep.primalBarrierRelativeResidual = residualScale > Real(0)
-                ? rep.primalBarrierResidual / residualScale
-                : rep.primalBarrierResidual;
-              innerConverged = rep.primalBarrierResidual <= residualTolerance;
-              rep.primalBarrierConverged = innerConverged;
-              rep.primalBarrierRelativeCorrection = Real(0);
+              rep.innerResidual = (image - fixedForce).norm();
+              rep.innerResidualTolerance = residualTolerance;
+              rep.innerRelativeResidual = residualScale > Real(0)
+                ? rep.innerResidual / residualScale
+                : rep.innerResidual;
+              innerConverged = rep.innerResidual <= residualTolerance;
+              rep.innerConverged = innerConverged;
+              rep.innerRelativeCorrection = Real(0);
               if (p.trace)
                 std::cout << "        barrier skip: outer=" << rep.iterations
-                          << "  reason=inactive-hinges  residual="
-                          << rep.primalBarrierResidual
-                          << "  rel=" << rep.primalBarrierRelativeResidual
+                          << "  reason=inactive-hinges  residual=" << rep.innerResidual
+                          << "  rel=" << rep.innerRelativeResidual
                           << "  converged=" << innerConverged << '\n';
               if (innerConverged)
                 ++rep.inactiveHingeSkips;
             }
             if (!innerConverged)
             {
-              WNGIRPrimalBarrierMetric barrierMetric(
-                m_duStep, m_vStep, u, vK, p, barrierCoefficient);
-              WNGIRPrimalBarrierForce barrierForce(m_vStep, u, vK, p, barrierCoefficient);
-              typename ProblemType::ProblemBodyType body(m_regularityForm);
-              body =
-                body + m_localMetricForm + barrierMetric - m_surfaceForm - barrierForce;
+              WNGIRHingeMetric hingeMetric(m_duStep, m_vStep, u, vK, p, hingeCoefficient);
+              WNGIRHingeForce hingeForce(m_vStep, u, vK, p, hingeCoefficient);
+              typename ProblemType::ProblemBodyType body(m_distributionForm);
+              body = body + m_fittingMetric + hingeMetric - m_fittingForce - hingeForce;
               m_hingeProblem = body;
               m_hingeProblem.setState(vK).setBoundaryDOFs(m_fixedIncrementDOFs);
               using Newton = Solver::NewtonSolver<WNGIRLinearSolver<LinearSystemType>>;
@@ -742,10 +710,10 @@ namespace Rodin::Adaptation
               const auto recordResidual = [&](Real residual, size_t inner) {
                 const Real assemblySeconds = m_hingeProblem.getAssemblySeconds();
                 rep.tAssembly += assemblySeconds;
-                rep.tPrimalBarrierAssembly += assemblySeconds;
-                rep.primalBarrierResidual = residual;
-                rep.primalBarrierResidualTolerance = residualTolerance;
-                rep.primalBarrierRelativeResidual =
+                rep.tInnerAssembly += assemblySeconds;
+                rep.innerResidual = residual;
+                rep.innerResidualTolerance = residualTolerance;
+                rep.innerRelativeResidual =
                   residualScale > Real(0) ? residual / residualScale : residual;
                 innerConverged = std::isfinite(residual) && residual <= residualTolerance;
                 if (p.trace)
@@ -755,7 +723,7 @@ namespace Rodin::Adaptation
                             << "        barrier residual: outer=" << rep.iterations
                             << "  inner=" << inner << "  residual=" << residual
                             << "  force_norm=" << residualScale
-                            << "  rel=" << rep.primalBarrierRelativeResidual
+                            << "  rel=" << rep.innerRelativeResidual
                             << "  tolerance=" << residualTolerance
                             << "  converged=" << innerConverged << '\n';
                   std::cout.precision(precision);
@@ -767,21 +735,21 @@ namespace Rodin::Adaptation
               });
               newton.setStepPolicy([&](auto&, auto& system, auto& newtonReport) {
                 recordResidual(newtonReport.finalResidual, newtonReport.iterations);
-                const size_t barrierIterations = m_linearSolver.getIterations();
-                const Real barrierError = m_linearSolver.getError();
-                recordLinearSolve(barrierIterations, barrierError);
+                const size_t linearIterations = m_linearSolver.getIterations();
+                const Real linearError = m_linearSolver.getError();
+                recordLinearSolve(linearIterations, linearError);
                 const Real innerSolveSeconds = m_linearSolver.getSolveSeconds();
                 rep.tSolve += innerSolveSeconds;
-                rep.tPrimalBarrierSolve += innerSolveSeconds;
+                rep.tInnerSolve += innerSolveSeconds;
                 solveOk = m_linearSolver.success();
                 if (!solveOk)
                 {
                   if (p.trace)
                     std::cout << "        barrier inner=" << (newtonReport.iterations + 1)
                               << "  outer=" << rep.iterations << "  linear_ok=0"
-                              << "  cg_it=" << barrierIterations
-                              << "  cg_err=" << barrierError << std::endl;
-                  rep.exitReason = "solve-linear-failed";
+                              << "  cg_it=" << linearIterations
+                              << "  cg_err=" << linearError << std::endl;
+                  rep.reason = WNGIRReport::Reason::LinearFailure;
                   return typename Newton::StepResult{false, false, Real(0)};
                 }
                 scratch.setData(system.getSolution());
@@ -793,89 +761,82 @@ namespace Rodin::Adaptation
                   ? correctionNorm / correctionScale
                   : (correctionNorm == Real(0) ? Real(0)
                                                : std::numeric_limits<Real>::infinity());
-                rep.primalBarrierRelativeCorrection = relativeCorrection;
-                ++rep.primalBarrierIterations;
-                ++rep.lastPrimalBarrierIterations;
-                rep.maxPrimalBarrierIterations = std::max(
-                  rep.maxPrimalBarrierIterations, rep.lastPrimalBarrierIterations);
+                rep.innerRelativeCorrection = relativeCorrection;
+                ++rep.innerIterations;
+                ++rep.lastInnerIterations;
+                rep.maxInnerIterations =
+                  std::max(rep.maxInnerIterations, rep.lastInnerIterations);
                 Real innerAlpha = Real(1);
-                if constexpr (std::is_same_v<typename FormLanguage::Traits<
-                                               LinearSystemType>::OperatorType,
-                                Math::SparseMatrix<Real>>)
                 {
+                  const auto meritStart = Clock::now();
+                  const auto merit = [&](const Displacement& increment) {
+                    Math::Vector<Real> image;
+                    image = fixedMetric * increment.getData();
+                    const Real quadratic = Real(0.5) * increment.getData().dot(image);
+                    const Real force = fixedForce.dot(increment.getData());
+                    const Real quality = getHingeEnergy(mesh, fes, validationCells, u,
+                      increment, meshDim, hingeCoefficient);
+                    return std::pair<Real, Real>{quadratic - force + quality,
+                      std::abs(quadratic) + std::abs(force) + std::abs(quality)};
+                  };
+                  const auto before = merit(vK);
+                  const Real slope = -system.getVector().dot(scratch.getData());
+                  bool meritAccepted = false;
+                  std::size_t backtracks = 0;
+                  Real after = std::numeric_limits<Real>::infinity();
+                  for (; backtracks < InnerMaxBacktracks; ++backtracks)
                   {
-                    const auto meritStart = Clock::now();
-                    const auto merit = [&](const Displacement& increment) {
-                      Math::Vector<Real> image;
-                      image = fixedMetric * increment.getData();
-                      const Real quadratic = Real(0.5) * increment.getData().dot(image);
-                      const Real force = fixedForce.dot(increment.getData());
-                      const Real quality = getPrimalBarrierEnergy(mesh, fes,
-                        validationCells, u, increment, meshDim, barrierCoefficient);
-                      return std::pair<Real, Real>{quadratic - force + quality,
-                        std::abs(quadratic) + std::abs(force) + std::abs(quality)};
-                    };
-                    const auto before = merit(vK);
-                    const Real slope = -system.getVector().dot(scratch.getData());
-                    bool meritAccepted = false;
-                    std::size_t backtracks = 0;
-                    Real after = std::numeric_limits<Real>::infinity();
-                    for (; backtracks < InnerMaxBacktracks; ++backtracks)
+                    uTrial = scratch;
+                    uTrial *= innerAlpha;
+                    uTrial += vK;
+                    const auto trial = merit(uTrial);
+                    after = trial.first;
+                    const Real rounding = MeritRoundoffFactor *
+                      std::numeric_limits<Real>::epsilon() *
+                      std::max(before.second, trial.second);
+                    if (std::isfinite(before.first) && std::isfinite(after) &&
+                      std::isfinite(slope) && slope < Real(0) &&
+                      after <= before.first +
+                          InnerArmijoCoefficient * innerAlpha * std::min(Real(0), slope) +
+                          rounding)
                     {
-                      uTrial = scratch;
-                      uTrial *= innerAlpha;
-                      uTrial += vK;
-                      const auto trial = merit(uTrial);
-                      after = trial.first;
-                      const Real rounding = MeritRoundoffFactor *
-                        std::numeric_limits<Real>::epsilon() *
-                        std::max(before.second, trial.second);
-                      if (std::isfinite(before.first) && std::isfinite(after) &&
-                        std::isfinite(slope) && slope < Real(0) &&
-                        after <= before.first +
-                            InnerArmijoCoefficient * innerAlpha *
-                              std::min(Real(0), slope) +
-                            rounding)
-                      {
-                        meritAccepted = true;
-                        break;
-                      }
-                      innerAlpha *= BacktrackingReduction;
+                      meritAccepted = true;
+                      break;
                     }
-                    rep.primalBarrierBacktracks += backtracks;
-                    rep.tPrimalBarrierLineSearch += secondsSince(meritStart);
+                    innerAlpha *= BacktrackingReduction;
+                  }
+                  rep.innerBacktracks += backtracks;
+                  rep.tInnerLineSearch += secondsSince(meritStart);
+                  if (p.trace)
+                  {
+                    const auto precision = std::cout.precision();
+                    std::cout << std::setprecision(
+                                   std::numeric_limits<Real>::max_digits10)
+                              << "        barrier merit: outer=" << rep.iterations
+                              << "  inner=" << (newtonReport.iterations + 1)
+                              << "  before=" << before.first << "  after=" << after
+                              << "  slope=" << slope << "  alpha=" << innerAlpha
+                              << "  backtracks=" << backtracks
+                              << "  accepted=" << meritAccepted << std::endl;
+                    std::cout.precision(precision);
+                  }
+                  if (!meritAccepted)
+                  {
                     if (p.trace)
-                    {
-                      const auto precision = std::cout.precision();
                       std::cout
-                        << std::setprecision(std::numeric_limits<Real>::max_digits10)
-                        << "        barrier merit: outer=" << rep.iterations
-                        << "  inner=" << (newtonReport.iterations + 1)
-                        << "  before=" << before.first << "  after=" << after
-                        << "  slope=" << slope << "  alpha=" << innerAlpha
-                        << "  backtracks=" << backtracks << "  accepted=" << meritAccepted
-                        << std::endl;
-                      std::cout.precision(precision);
-                    }
-                    if (!meritAccepted)
-                    {
-                      if (p.trace)
-                        std::cout
-                          << "        barrier inner=" << (newtonReport.iterations + 1)
-                          << "  outer=" << rep.iterations << "  linear_ok=1"
-                          << "  merit_ok=0  converged=0  cg_it=" << barrierIterations
-                          << "  cg_err=" << barrierError << std::endl;
-                      rep.exitReason = "primal-barrier-line-search-failure";
-                      solveOk = false;
-                      return typename Newton::StepResult{false, false, Real(0)};
-                    }
+                        << "        barrier inner=" << (newtonReport.iterations + 1)
+                        << "  outer=" << rep.iterations << "  linear_ok=1"
+                        << "  merit_ok=0  converged=0  cg_it=" << linearIterations
+                        << "  cg_err=" << linearError << std::endl;
+                    rep.reason = WNGIRReport::Reason::InnerLineSearchFailure;
+                    solveOk = false;
+                    return typename Newton::StepResult{false, false, Real(0)};
                   }
                 }
-                rep.lastPrimalBarrierAlpha = innerAlpha;
-                rep.minPrimalBarrierAlpha =
-                  std::min(rep.minPrimalBarrierAlpha, innerAlpha);
+                rep.lastInnerAlpha = innerAlpha;
+                rep.minInnerAlpha = std::min(rep.minInnerAlpha, innerAlpha);
                 if (innerAlpha >= Real(1) - FullStepTolerance)
-                  ++rep.fullPrimalBarrierSteps;
+                  ++rep.fullInnerSteps;
                 if (p.trace)
                 {
                   const auto precision = std::cout.precision();
@@ -884,9 +845,9 @@ namespace Rodin::Adaptation
                             << "  outer=" << rep.iterations << "  corr=" << correctionNorm
                             << "  iterate=" << iterateNorm
                             << "  rel=" << relativeCorrection << "  alpha=" << innerAlpha
-                            << "  linear_ok=1  cg_it=" << barrierIterations
-                            << "  cg_err=" << barrierError
-                            << "  mu_eff=" << barrierCoefficient << std::endl;
+                            << "  linear_ok=1  cg_it=" << linearIterations
+                            << "  cg_err=" << linearError
+                            << "  mu_eff=" << hingeCoefficient << std::endl;
                   std::cout.precision(precision);
                 }
                 scratch *= innerAlpha;
@@ -905,23 +866,19 @@ namespace Rodin::Adaptation
                   m_hingeProblem.getLinearSystem().getVector().norm(), innerIterations);
               }
             }
-            rep.primalBarrierConverged = innerConverged;
+            rep.innerConverged = innerConverged;
             if (solveOk && !innerConverged)
             {
-              rep.exitReason = "primal-barrier-inner-not-converged";
+              rep.reason = WNGIRReport::Reason::InnerIterationLimit;
               solveOk = false;
             }
           }
           if (!solveOk)
-          {
-            if (rep.exitReason == StringView("iter-budget"))
-              rep.exitReason = "solve-linear-failed";
             break;
-          }
 
           if (!(std::isfinite(vK.max()) && std::isfinite(vK.min())))
           {
-            rep.exitReason = "solve-nonfinite";
+            rep.reason = WNGIRReport::Reason::NonfiniteDirection;
             break;
           }
 
@@ -937,7 +894,7 @@ namespace Rodin::Adaptation
             predictorNorm > Real(0) ? directionNorm / predictorNorm : Real(0);
           if (!(std::isfinite(directionAction) && directionAction > Real(0)))
           {
-            rep.exitReason = "no-descent-direction";
+            rep.reason = WNGIRReport::Reason::NonDescentDirection;
             break;
           }
 
@@ -1020,7 +977,7 @@ namespace Rodin::Adaptation
           if (!accepted)
           {
             u = previousU;
-            rep.exitReason = "line-search-failure";
+            rep.reason = WNGIRReport::Reason::LineSearchFailure;
             break;
           }
 
@@ -1048,11 +1005,24 @@ namespace Rodin::Adaptation
           {
             const auto geometry = getInterfaceGeometryState(
               mesh, fes, u, phi, grad, interfaceFacets, meshDim, locator);
+            rep.geometricRMS = geometry.rms;
+            rep.geometricSup = geometry.sup;
+            rep.normalRMS = geometry.normalRMS;
+            rep.qualityBudgetSatisfied =
+              rep.minJ > acceptedJacobianFloor && rep.maxQRel < p.qMax;
+            rep.geometricTargetReached =
+              rep.qualityBudgetSatisfied && geometry.sup <= geometricTarget;
+            if (m_monitor)
+            {
+              auto snapshot = rep;
+              ++snapshot.iterations;
+              (*m_monitor)(snapshot);
+            }
             if (p.trace)
               traceGeometry(geometry, rep.iterations + 1, "accepted");
             if (!std::isfinite(geometry.sup))
             {
-              rep.exitReason = "geometric-validation-failed";
+              rep.reason = WNGIRReport::Reason::InvalidGeometry;
               ++rep.iterations;
               break;
             }
@@ -1060,7 +1030,7 @@ namespace Rodin::Adaptation
           }
           if (!(surf.activeLen > Real(0)))
           {
-            rep.exitReason = "observation-degenerate-active-set";
+            rep.reason = WNGIRReport::Reason::EmptyActiveSet;
             ++rep.iterations;
             break;
           }
@@ -1074,12 +1044,12 @@ namespace Rodin::Adaptation
                       << "  actFrac=" << rep.activeFraction
                       << "  step/h=" << (h > Real(0) ? rep.acceptedStep / h : Real(0))
                       << "  linIt=" << rep.linearIterations << "  alpha=" << alpha
-                      << "  muEff=" << rep.primalBarrierCoefficient
-                      << "  pbIt=" << rep.lastPrimalBarrierIterations
-                      << "  pbRel=" << rep.primalBarrierRelativeCorrection
+                      << "  muEff=" << rep.hingeCoefficient
+                      << "  pbIt=" << rep.lastInnerIterations
+                      << "  pbRel=" << rep.innerRelativeCorrection
                       << "  predictor_action=" << rep.predictorAction
-                      << "  inner_residual=" << rep.primalBarrierResidual
-                      << "  inner_relative_residual=" << rep.primalBarrierRelativeResidual
+                      << "  inner_residual=" << rep.innerResidual
+                      << "  inner_relative_residual=" << rep.innerRelativeResidual
                       << "  desc=" << rep.descentRatio
                       << "  dirNorm=" << rep.directionNormRatio
                       << "  ared/pred=" << rep.actualPredictedDecrease
@@ -1090,7 +1060,7 @@ namespace Rodin::Adaptation
 
           if (geometricTargetReached)
           {
-            rep.exitReason = "full-interface-geometric-sup-converged";
+            rep.reason = WNGIRReport::Reason::GeometricTarget;
             ++rep.iterations;
             break;
           }
@@ -1107,22 +1077,13 @@ namespace Rodin::Adaptation
           if (consecutiveSmallAcceptedSteps >= p.stagnationIterations ||
             consecutiveSmallEnergyChanges >= p.stagnationIterations)
           {
-            rep.exitReason = consecutiveSmallAcceptedSteps >= p.stagnationIterations
-              ? "best-effort-step-stagnation"
-              : "best-effort-energy-stagnation";
+            rep.reason = consecutiveSmallAcceptedSteps >= p.stagnationIterations
+              ? WNGIRReport::Reason::SmallAcceptedSteps
+              : WNGIRReport::Reason::SmallEnergyChanges;
             ++rep.iterations;
             break;
           }
           ePrev = eNow;
-        }
-
-        if (p.rigidDiagnostics)
-        {
-          const RigidModeState finalRigid = getRigidModeState(mesh, fes, u, phi, grad,
-            interfaceFacets, sigma2, dataNormalization, meshDim, locator);
-          rep.rigidModeCoercivity = finalRigid.minimum;
-          rep.rigidModeCoercivityRatio = finalRigid.ratio;
-          rep.rigidModeDimension = finalRigid.dimension;
         }
 
         const InterfaceGeometryState geometry = getInterfaceGeometryState(
@@ -1137,11 +1098,18 @@ namespace Rodin::Adaptation
         if (p.trace)
           traceGeometry(geometry, rep.iterations, "final");
 
-        m_report = rep;
-        return rep;
+        return finish(rep);
       }
 
     private:
+      WNGIRReport finish(const WNGIRReport& report)
+      {
+        m_report = report;
+        if (m_monitor)
+          (*m_monitor)(m_report);
+        return m_report;
+      }
+
       /// @brief Geometric discrepancy of the complete fitted interface.
       struct InterfaceGeometryState
       {
@@ -1285,7 +1253,7 @@ namespace Rodin::Adaptation
 #pragma omp parallel
 #endif
         {
-          WNGIRSurfaceForceCoefficient force(
+          WNGIRFittingForce force(
             phi, grad, current, locator, loss, normalization, dimension);
 #ifdef RODIN_USE_OPENMP
 #pragma omp for schedule(static)
@@ -1312,122 +1280,9 @@ namespace Rodin::Adaptation
         return action;
       }
 
-      /**
-       * @brief Observation coercivity on the rigid-motion kernel of the bulk form.
-       *
-       * The matrices are the sampled realizations of @f$G_R@f$ and @f$H_R@f$
-       * from the analytical model. No essential boundary condition is imposed,
-       * so the rigid kernel is always present and the diagnostic is never
-       * vacuous.
-       */
-      template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
-      RigidModeState getRigidModeState(const Mesh& mesh, const FES& fes,
-        const Displacement& current, const PhiType& phi, const GradType& grad,
-        const std::vector<Index>& interfaceFacets, Real sigma2, Real normalization,
-        std::size_t dimension, const LocatorType& locator) const
-      {
-        const std::size_t count = dimension * (dimension + 1) / 2;
-        if (count == 0)
-          return {std::numeric_limits<Real>::infinity(), Real(1), 0};
-
-        std::vector<Math::Matrix<Real>> gradients(
-          count, Math::Matrix<Real>::Zero(dimension, dimension));
-        std::size_t mode = dimension;
-        for (std::size_t a = 0; a < dimension; ++a)
-        {
-          for (std::size_t b = a + 1; b < dimension; ++b)
-          {
-            gradients[mode](static_cast<Eigen::Index>(a), static_cast<Eigen::Index>(b)) =
-              Real(-1);
-            gradients[mode](static_cast<Eigen::Index>(b), static_cast<Eigen::Index>(a)) =
-              Real(1);
-            ++mode;
-          }
-        }
-
-        auto valuesAt = [&](const Math::SpatialPoint& point) {
-          std::vector<SpatialVec> values(count, SpatialVec::Zero(dimension));
-          for (std::size_t axis = 0; axis < dimension; ++axis)
-            values[axis](static_cast<Eigen::Index>(axis)) = Real(1);
-          std::size_t rotation = dimension;
-          for (std::size_t a = 0; a < dimension; ++a)
-          {
-            for (std::size_t b = a + 1; b < dimension; ++b)
-            {
-              values[rotation](static_cast<Eigen::Index>(a)) =
-                -point(static_cast<Eigen::Index>(b));
-              values[rotation](static_cast<Eigen::Index>(b)) =
-                point(static_cast<Eigen::Index>(a));
-              ++rotation;
-            }
-          }
-          return values;
-        };
-
-        Math::Matrix<Real> hGram = Math::Matrix<Real>::Zero(count, count);
-        for (auto cell = mesh.getCell(); cell; ++cell)
-        {
-          const auto& qf = getQuadrature(*cell, fes);
-          const auto& quadrature = cell->getQuadrature(qf);
-          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-          {
-            const auto& point = quadrature.getPoint(q);
-            const Real weight = qf.getWeight(q) * point.getDistortion();
-            const auto values = valuesAt(point.getCoordinates());
-            for (std::size_t i = 0; i < count; ++i)
-            {
-              for (std::size_t j = 0; j < count; ++j)
-              {
-                hGram(static_cast<Eigen::Index>(i), static_cast<Eigen::Index>(j)) +=
-                  weight *
-                  (values[i].dot(values[j]) +
-                    (gradients[i].array() * gradients[j].array()).sum());
-              }
-            }
-          }
-        }
-
-        Math::Matrix<Real> observationGram = Math::Matrix<Real>::Zero(count, count);
-        WNGIRObservationCoefficient observation(
-          grad, current, locator, m_parameters, normalization, dimension);
-        for (const Index facetIndex : interfaceFacets)
-        {
-          const auto face = mesh.getFace(facetIndex);
-          const auto& qf = getQuadrature(*face, fes);
-          const auto& quadrature = face->getQuadrature(qf);
-          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-          {
-            const auto& point = quadrature.getPoint(q);
-            const Variational::IntegrationPoint ip(point, &qf, q);
-            const Real weight = qf.getWeight(q) * point.getDistortion();
-            const auto values = valuesAt(point.getCoordinates());
-            const SpatialMat coefficient = observation.getValue(ip);
-            for (std::size_t i = 0; i < count; ++i)
-            {
-              for (std::size_t j = 0; j < count; ++j)
-              {
-                observationGram(
-                  static_cast<Eigen::Index>(i), static_cast<Eigen::Index>(j)) +=
-                  weight * values[i].dot(coefficient * values[j]);
-              }
-            }
-          }
-        }
-
-        Eigen::GeneralizedSelfAdjointEigenSolver<Math::Matrix<Real>> eig(
-          observationGram, hGram, Eigen::EigenvaluesOnly);
-        if (eig.info() != Eigen::Success)
-          return {std::numeric_limits<Real>::quiet_NaN(),
-            std::numeric_limits<Real>::quiet_NaN(), count};
-        const Real minimum = std::max(Real(0), eig.eigenvalues().minCoeff());
-        const Real maximum = std::max(Real(0), eig.eigenvalues().maxCoeff());
-        const Real ratio = maximum > Real(0) ? minimum / maximum : Real(0);
-        return {minimum, ratio, count};
-      }
-
       /// @brief Integrated affine quality energy on the same quadrature as its force and Hessian.
       template <class Mesh, class FES>
-      bool hasActivePrimalHinges(const Mesh& mesh, const FES& fes,
+      bool hasActiveHinges(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& cells, const Displacement& current,
         const Displacement& inner, std::size_t dimension, Real coefficient) const
       {
@@ -1451,7 +1306,7 @@ namespace Rodin::Adaptation
             {
               const Variational::IntegrationPoint ip(quadrature.getPoint(q), &qf, q);
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-              const WNGIRPrimalBarrierState state(
+              const WNGIRHingeState state(
                 deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
               active = active || !state.isFeasible() ||
                 state.getJacobianHessian() != Real(0) ||
@@ -1463,7 +1318,7 @@ namespace Rodin::Adaptation
       }
 
       template <class Mesh, class FES>
-      Real getPrimalBarrierEnergy(const Mesh& mesh, const FES& fes,
+      Real getHingeEnergy(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& validationCells, const Displacement& current,
         const Displacement& inner, std::size_t dimension, Real coefficient) const
       {
@@ -1488,7 +1343,7 @@ namespace Rodin::Adaptation
               const auto& point = quadrature.getPoint(q);
               const Variational::IntegrationPoint ip(point, &qf, q);
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-              const WNGIRPrimalBarrierState state(
+              const WNGIRHingeState state(
                 deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
               energy += qf.getWeight(q) * point.getDistortion() *
                 state.getEnergy(m_parameters, coefficient);
@@ -2158,20 +2013,20 @@ namespace Rodin::Adaptation
       ProblemType m_metricProblem;
       WNGIRHingeProblem<TrialFunctionType, TestFunctionType> m_hingeProblem;
       WNGIRLinearSolver<LinearSystemType> m_linearSolver;
-      BilinearFormType m_regularityForm;
+      BilinearFormType m_distributionForm;
       Math::Matrix<Real> m_similarityModes;
       /// @brief Observation metric and fitting force at the outer displacement.
       ///
       /// Both depend on the outer displacement only, so they are assembled once
       /// per nonlinear iteration and reused by every barrier correction.
-      BilinearFormType m_localMetricForm;
-      LinearFormType m_surfaceForm;
+      BilinearFormType m_fittingMetric;
+      LinearFormType m_fittingForce;
       BilinearFormType m_additionalMetric;
-      bool m_hasAdditionalMetric = false;
       Variational::EssentialBoundary<Real> m_boundaryConditions;
       IndexMap<Real> m_fixedIncrementDOFs;
       WNGIRParameters m_parameters;
       WNGIRReport m_report;
+      Optional<Monitor> m_monitor;
   };
 }
 

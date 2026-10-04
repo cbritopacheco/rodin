@@ -973,13 +973,13 @@ int main(int argc, char** argv)
         argc, argv, h, interfaceAttribute, wngirDefaults);
       Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
       wngirSolver.setParameters(wngir);
-      const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+      const auto wngirRep = wngirSolver.solve(phi, gradPhi);
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
                 << "  cgIt=" << wngirRep.linearIterations
                 << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
-                << "  exit=" << wngirRep.exitReason << '\n';
+                << "  exit=" << wngirRep.getReasonString() << '\n';
       itCount = wngirRep.iterations;
       residualBest = wngirRep.activeRMS;
       interfaceFit = computeInterfaceFit(/*discrete=*/true);

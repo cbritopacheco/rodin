@@ -16,6 +16,75 @@ namespace Rodin::Adaptation
   /// @brief Diagnostics produced by a WNGIR solve.
   struct WNGIRReport
   {
+      enum class Reason
+      {
+        IterationLimit,
+        MissingInterface,
+        EmptyInterface,
+        DegenerateGradient,
+        InvalidInitialGeometry,
+        EmptyActiveSet,
+        InvalidGeometry,
+        GeometricTarget,
+        PredictorFailure,
+        NonDescentPredictor,
+        InvalidScaling,
+        LinearFailure,
+        InnerLineSearchFailure,
+        InnerIterationLimit,
+        NonfiniteDirection,
+        NonDescentDirection,
+        LineSearchFailure,
+        SmallAcceptedSteps,
+        SmallEnergyChanges
+      };
+
+      /// @brief Stable log token for the typed stopping reason.
+      const char* getReasonString() const
+      {
+        switch (reason)
+        {
+          case Reason::IterationLimit:
+            return "iter-budget";
+          case Reason::MissingInterface:
+            return "missing-interface-attribute";
+          case Reason::EmptyInterface:
+            return "empty-interface";
+          case Reason::DegenerateGradient:
+            return "degenerate-target-gradient";
+          case Reason::InvalidInitialGeometry:
+            return "initial-state-not-strictly-feasible";
+          case Reason::EmptyActiveSet:
+            return "observation-degenerate-active-set";
+          case Reason::InvalidGeometry:
+            return "geometric-validation-failed";
+          case Reason::GeometricTarget:
+            return "full-interface-geometric-sup-converged";
+          case Reason::PredictorFailure:
+            return "solve-predictor-failed";
+          case Reason::NonDescentPredictor:
+            return "no-descent-predictor";
+          case Reason::InvalidScaling:
+            return "invalid-directional-scaling";
+          case Reason::LinearFailure:
+            return "solve-linear-failed";
+          case Reason::InnerLineSearchFailure:
+            return "primal-barrier-line-search-failure";
+          case Reason::InnerIterationLimit:
+            return "primal-barrier-inner-not-converged";
+          case Reason::NonfiniteDirection:
+            return "solve-nonfinite";
+          case Reason::NonDescentDirection:
+            return "no-descent-direction";
+          case Reason::LineSearchFailure:
+            return "line-search-failure";
+          case Reason::SmallAcceptedSteps:
+            return "best-effort-step-stagnation";
+          case Reason::SmallEnergyChanges:
+            return "best-effort-energy-stagnation";
+        }
+        return "unknown";
+      }
     /// @brief Number of nonlinear iterations performed.
       std::size_t iterations = 0;
     /// @brief Robust-loss scale used for the interface residual.
@@ -46,31 +115,31 @@ namespace Rodin::Adaptation
       std::size_t energyRejections = 0;
       /// @brief Last accepted line-search factor.
       Real lastAlpha = 0;
-      /// @brief Effective per-volume coefficient assembled for the last barrier QP.
-      Real primalBarrierCoefficient = 0;
-      /// @brief Last primal-barrier Newton correction relative to the current iterate.
-      Real primalBarrierRelativeCorrection = 0;
+      /// @brief Effective per-volume coefficient assembled for the last hinge QP.
+      Real hingeCoefficient = 0;
+      /// @brief Last inner Newton correction relative to the current iterate.
+      Real innerRelativeCorrection = 0;
       /// @brief Euclidean norm of Mv-f+DB(v), at the last inner iterate.
-      Real primalBarrierResidual = std::numeric_limits<Real>::infinity();
+      Real innerResidual = std::numeric_limits<Real>::infinity();
       /// @brief Residual divided by the fixed fitting-force norm.
-      Real primalBarrierRelativeResidual = std::numeric_limits<Real>::infinity();
-      Real primalBarrierResidualTolerance = 0;
-      /// @brief Step factor accepted by the last primal-barrier correction.
-      Real lastPrimalBarrierAlpha = 0;
-      /// @brief Smallest step factor accepted by the final primal-barrier solve.
-      Real minPrimalBarrierAlpha = 1;
-      /// @brief Number of full primal-barrier Newton steps in the final inner solve.
-      std::size_t fullPrimalBarrierSteps = 0;
-      /// @brief Number of primal-barrier Newton corrections accumulated by the solve.
-      std::size_t primalBarrierIterations = 0;
-      /// @brief Number of primal-barrier Newton corrections in the final outer step.
-      std::size_t lastPrimalBarrierIterations = 0;
+      Real innerRelativeResidual = std::numeric_limits<Real>::infinity();
+      Real innerResidualTolerance = 0;
+      /// @brief Step factor accepted by the last inner correction.
+      Real lastInnerAlpha = 0;
+      /// @brief Smallest step factor accepted by the final inner solve.
+      Real minInnerAlpha = 1;
+      /// @brief Number of full inner Newton steps in the final inner solve.
+      std::size_t fullInnerSteps = 0;
+      /// @brief Number of inner Newton corrections accumulated by the solve.
+      std::size_t innerIterations = 0;
+      /// @brief Number of inner Newton corrections in the final outer step.
+      std::size_t lastInnerIterations = 0;
       /// @brief Largest number of Newton corrections in any outer iteration.
-      std::size_t maxPrimalBarrierIterations = 0;
-      /// @brief Whether the final primal-barrier inner solve met its tolerance.
-      bool primalBarrierConverged = false;
+      std::size_t maxInnerIterations = 0;
+      /// @brief Whether the final inner inner solve met its tolerance.
+      bool innerConverged = false;
       /// @brief Number of inner merit backtracks accumulated over the solve.
-      std::size_t primalBarrierBacktracks = 0;
+      std::size_t innerBacktracks = 0;
       /// @brief Maximum sampled component magnitude of the accepted physical displacement.
       Real acceptedStep = 0;
       /// @brief Minimum sampled Jacobian determinant.
@@ -99,21 +168,14 @@ namespace Rodin::Adaptation
       Real activeMeasure = 0;
       /// @brief Measure of the complete interface quadrature set.
       Real interfaceMeasure = 0;
-      /// @brief Smallest observation eigenvalue on the rigid-motion space.
-      Real rigidModeCoercivity = 0;
-      /// @brief Smallest-to-largest rigid-mode observation eigenvalue ratio.
-      Real rigidModeCoercivityRatio = 0;
-
-      /// @brief Dimension of the uncontrolled rigid-motion space.
-      std::size_t rigidModeDimension = 0;
       /// @brief RMS jump of the normal field across the interface.
       Real normalJumpRMS = 0;
       /// @brief Maximum jump of the normal field across the interface.
       Real normalJumpMax = 0;
       /// @brief Final Welsch fitting energy.
       Real energy = 0;
-      /// @brief Textual reason the iteration stopped.
-      const char* exitReason = "iter-budget";
+      /// @brief Why fitting stopped; only GeometricTarget certifies the target hit.
+      Reason reason = Reason::IterationLimit;
       // Wall-clock breakdown (seconds, accumulated over iterations).
       Real tAssembly = 0; ///< WNGIR variational problem assembly.
       std::size_t inactiveHingeSkips =
@@ -125,10 +187,9 @@ namespace Rodin::Adaptation
       Real tFactor = 0; ///< Linear solver setup/preconditioner.
       Real tSolve = 0; ///< Predictor and inner linear solves.
       Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.
-      Real tPrimalBarrierLineSearch =
-        0; ///< fixed-inner-merit evaluation and backtracking.
-      Real tPrimalBarrierAssembly = 0; ///< Inner direction-system assembly.
-      Real tPrimalBarrierSolve = 0; ///< Inner linear solves, excluding the predictor.
+      Real tInnerLineSearch = 0; ///< fixed-inner-merit evaluation and backtracking.
+      Real tInnerAssembly = 0; ///< Inner direction-system assembly.
+      Real tInnerSolve = 0; ///< Inner linear solves, excluding the predictor.
       std::size_t linearIterations = 0; ///< Accumulated linear iterations.
       std::size_t linearSolveCount = 0; ///< Number of linear solves performed.
       std::size_t maxLinearIterations = 0; ///< Largest iteration count of one solve.

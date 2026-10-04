@@ -15,9 +15,9 @@ namespace Rodin::Adaptation
   /// @brief Matrix coefficient of the WNGIR surface observation metric.
   /// Hessian of half the squared residual, with D2 phi omitted and fixed normalization.
   template <class GradDerived, class Displacement, class LocatorType>
-  class WNGIRObservationCoefficient final
+  class WNGIRFittingCoefficient final
     : public Variational::MatrixFunctionBase<Real,
-        WNGIRObservationCoefficient<GradDerived, Displacement, LocatorType>>
+        WNGIRFittingCoefficient<GradDerived, Displacement, LocatorType>>
   {
     public:
       /// @brief Scalar value type.
@@ -26,12 +26,12 @@ namespace Rodin::Adaptation
       using RangeType = Math::SpatialMatrix<ScalarType>;
       /// @brief Parent class type.
       using Parent = Variational::MatrixFunctionBase<ScalarType,
-        WNGIRObservationCoefficient<GradDerived, Displacement, LocatorType>>;
+        WNGIRFittingCoefficient<GradDerived, Displacement, LocatorType>>;
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
       /// @brief Constructs the WNGIR observation coefficient.
-      WNGIRObservationCoefficient(const GradType& grad, const Displacement& current,
+      WNGIRFittingCoefficient(const GradType& grad, const Displacement& current,
         const LocatorType& locator, const WNGIRParameters& parameters, Real normalization,
         std::size_t dimension)
         : m_grad(grad.copy()),
@@ -42,7 +42,7 @@ namespace Rodin::Adaptation
       {}
 
       /// @brief Copy constructor.
-      WNGIRObservationCoefficient(const WNGIRObservationCoefficient& other)
+      WNGIRFittingCoefficient(const WNGIRFittingCoefficient& other)
         : Parent(other),
           m_grad(other.m_grad->copy()),
           m_deformation(other.m_deformation),
@@ -88,9 +88,9 @@ namespace Rodin::Adaptation
       }
 
       /// @brief Clones this object.
-      WNGIRObservationCoefficient* copy() const noexcept override
+      WNGIRFittingCoefficient* copy() const noexcept override
       {
-        return new WNGIRObservationCoefficient(*this);
+        return new WNGIRFittingCoefficient(*this);
       }
 
     private:
@@ -102,9 +102,9 @@ namespace Rodin::Adaptation
   };
 
   template <class GradDerived, class Displacement, class LocatorType>
-  WNGIRObservationCoefficient(const Variational::VectorFunctionBase<Real, GradDerived>&,
+  WNGIRFittingCoefficient(const Variational::VectorFunctionBase<Real, GradDerived>&,
     const Displacement&, const LocatorType&, const WNGIRParameters&, Real,
-    std::size_t) -> WNGIRObservationCoefficient<GradDerived, Displacement, LocatorType>;
+    std::size_t) -> WNGIRFittingCoefficient<GradDerived, Displacement, LocatorType>;
 }
 
 #endif

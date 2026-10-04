@@ -15,9 +15,9 @@ namespace Rodin::Adaptation
 {
   /// @brief Negative first-variation coefficient of the robust interface energy.
   template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
-  class WNGIRSurfaceForceCoefficient final
+  class WNGIRFittingForce final
     : public Variational::VectorFunctionBase<Real,
-        WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>>
+        WNGIRFittingForce<PhiDerived, GradDerived, Displacement, LocatorType>>
   {
     public:
       /// @brief Scalar value type.
@@ -26,14 +26,14 @@ namespace Rodin::Adaptation
       using RangeType = Math::SpatialVector<ScalarType>;
       /// @brief Parent class type.
       using Parent = Variational::VectorFunctionBase<ScalarType,
-        WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>>;
+        WNGIRFittingForce<PhiDerived, GradDerived, Displacement, LocatorType>>;
       /// @brief Level-set function type.
       using PhiType = Variational::RealFunctionBase<PhiDerived>;
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
       /// @brief Constructs the WNGIR surface force coefficient.
-      WNGIRSurfaceForceCoefficient(const PhiType& phi, const GradType& grad,
+      WNGIRFittingForce(const PhiType& phi, const GradType& grad,
         const Displacement& current, const LocatorType& locator, const WNGIRLoss& loss,
         Real normalization, std::size_t dimension)
         : m_phi(phi.copy()),
@@ -45,7 +45,7 @@ namespace Rodin::Adaptation
       {}
 
       /// @brief Copy constructor.
-      WNGIRSurfaceForceCoefficient(const WNGIRSurfaceForceCoefficient& other)
+      WNGIRFittingForce(const WNGIRFittingForce& other)
         : Parent(other),
           m_phi(other.m_phi->copy()),
           m_grad(other.m_grad->copy()),
@@ -75,9 +75,9 @@ namespace Rodin::Adaptation
         return std::nullopt;
       }
 
-      WNGIRSurfaceForceCoefficient* copy() const noexcept override
+      WNGIRFittingForce* copy() const noexcept override
       {
-        return new WNGIRSurfaceForceCoefficient(*this);
+        return new WNGIRFittingForce(*this);
       }
 
     private:
@@ -90,10 +90,10 @@ namespace Rodin::Adaptation
   };
 
   template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
-  WNGIRSurfaceForceCoefficient(const Variational::RealFunctionBase<PhiDerived>&,
+  WNGIRFittingForce(const Variational::RealFunctionBase<PhiDerived>&,
     const Variational::VectorFunctionBase<Real, GradDerived>&, const Displacement&,
-    const LocatorType&, const WNGIRLoss&, Real, std::size_t)
-    -> WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>;
+    const LocatorType&, const WNGIRLoss&, Real,
+    std::size_t) -> WNGIRFittingForce<PhiDerived, GradDerived, Displacement, LocatorType>;
 }
 
 #endif

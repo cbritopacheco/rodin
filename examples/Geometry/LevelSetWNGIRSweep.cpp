@@ -618,7 +618,7 @@ int main(int argc, char** argv)
     bool geometricTargetReached = false;
     const char* exitReason = "iter-budget";
     {
-      const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+      const auto wngirRep = wngirSolver.solve(phi, gradPhi);
       Rodin::Examples::printWNGIRResponses(wngirRep);
       geometricTargetReached = wngirRep.geometricTargetReached;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
@@ -626,13 +626,13 @@ int main(int argc, char** argv)
                 << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
                 << "  cgIt=" << wngirRep.linearIterations
                 << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
-                << "  exit=" << wngirRep.exitReason << '\n';
+                << "  exit=" << wngirRep.getReasonString() << '\n';
       iterations = wngirRep.iterations;
       lastAlpha = wngirRep.lastAlpha;
       acceptedStep = wngirRep.acceptedStep;
       minJ = wngirRep.minJ;
       maxQRel = wngirRep.maxQRel;
-      exitReason = wngirRep.exitReason;
+      exitReason = wngirRep.getReasonString();
       interfaceFit = computeInterfaceFit();
       if (interfaceFit < bestFit)
       {
