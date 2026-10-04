@@ -192,7 +192,23 @@ exists yet.
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; native and real-PETSc SNES local/MPI; tangent controls | Analytic P1–P3; native and real-PETSc SNES local/MPI; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
 | P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Curved constant reproduction and analytic global means; no h-rate |
+| 0D / Point spaces | Exact-value and logical-index checks; no spatial rate | P0/P0g/P1 and H1 degrees 1–6; no degree-rate claim | Not applicable | Point SubMesh extraction from all seven parent cell families; structural MPI evidence |
 | Geometry approximation / Poisson patch | Map/derivative rates at fixed geometry degrees $q=1,2,3$ | $q=1\to2\to3$ at fixed $n=3$, with affine $p=q$ patches | $(n,q)=(2,1)\to(3,2)\to(5,3)$, with affine $p=q$ patches | Sine-map approximation and affine Poisson patches with $p=q$; native and real-PETSc local/MPI |
+
+On a single Point cell, every scalar family above represents $\mathbb F$,
+and an $m$-component space represents $\mathbb F^m$. Increasing the nominal
+degree does not create a spatial refinement sequence. The
+[MPI space regressions](../unit/Rodin/MPI/Assembly/MPIAssemblyTest.cpp)
+therefore check exact real/complex scalar/vector constants and restriction
+of a continuous parent P1 field, rather than a convergence slope. Their
+parent fields use $\phi(x)=c+\sum_j(j+1)x_j$ and vector components
+$\phi(x)+a$; a discontinuous parent P0 vertex trace is not selected without
+an incident-cell convention. Ranks 1, 2, 3, 4 and 8 check unique entity and
+DOF ownership, exact parent/child maps, owner/ghost declarations and halos,
+including empty shards. Pullbacks retain the distributed mesh identity so
+that a source GridFunction can follow SubMesh ancestry through logical
+indices. These are MPI space and rank-local field-evaluation checks in
+sequential/OpenMP configurations, not distributed PETSc solve evidence.
 
 The main refinement sequences can be read with $n$ grid points per coordinate
 axis, $h=1/(n-1)$, and field degree $p$:

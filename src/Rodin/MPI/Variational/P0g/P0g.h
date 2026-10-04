@@ -246,7 +246,11 @@ namespace Rodin::Variational
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& p, Callable&& v) const
       {
-        return m_fes.getPullback(p, std::forward<Callable>(v));
+        // Reuse the shared pullback implementation, but retain the MPI mesh
+        // identity. A shard-attached point loses SubMesh ancestry and cannot
+        // be included in a parent GridFunction's mesh.
+        const auto& [d, i] = p;
+        return Pullback<Callable>(*getMesh().getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**
@@ -479,7 +483,10 @@ namespace Rodin::Variational
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& p, Callable&& v) const
       {
-        return m_fes.getPullback(p, std::forward<Callable>(v));
+        // The mathematical pullback is shared; point provenance belongs to
+        // the MPI mesh, not its rank-local shard (as for MPI P0 and H1).
+        const auto& [d, i] = p;
+        return Pullback<Callable>(*getMesh().getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**
