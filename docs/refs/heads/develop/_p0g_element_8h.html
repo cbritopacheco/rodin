@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>IMPORTANT:</p><ul><li>P0g is a <em>space</em> with 1 global DOF (scalar) or vdim global DOFs (vector), but its <em>element</em> is still the constant basis function on each cell.</li></ul><p>This element is therefore essentially identical to P0Element:</p><ul><li>Scalar basis: phi(x) = 1</li><li>Vector basis: phi_i(x) = e_i (constant unit vectors)</li><li>All derivatives are zero.</li></ul><p>Having a dedicated P0gElement is mostly for naming/clarity and to decouple P0g from P0Element headers if you prefer.</p>
+<p>IMPORTANT:</p><ul><li>P0g is a <em>space</em> with 1 global DOF (scalar) or vdim global DOFs (vector), but its <em>element</em> is still the constant basis function on each cell.</li></ul><p>This element is therefore essentially identical to P0Element:</p><ul><li>Scalar basis: phi(x) = 1</li><li>Vector basis: phi_i(x) = e_i (constant unit vectors)</li><li>All derivatives are zero.</li></ul><p>Supported specializations:</p><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement&lt;Scalar&gt;</a></td><td>Scalar globally constant reference element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement&lt;SpatialVector&lt;Scalar&gt;&gt;</a></td><td>Vector globally constant reference element.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement&lt;SpatialMatrix&lt;Scalar&gt;&gt;</a></td><td>Full rectangular matrix globally constant reference element.</td></tr></tbody></table><p>Having a dedicated P0gElement is mostly for naming/clarity and to decouple P0g from P0Element headers if you prefer.</p>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -146,6 +146,19 @@
               class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1fc4dde2717229eb96fca3572f04acc22.html" class="m-doc">Rodin::Variational::P0gElement&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::BasisFunction::DerivativeFunction</a>
             </dt>
             <dd>Derivative of a vector-valued P0g basis function, identically zero.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::Variational::P0gElement&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Matrix-valued reference element built from scalar nodal functionals.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">Rodin::Variational::P0gElement&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;::BasisFunction</a>
+            </dt>
+            <dd>Matrix basis with one nonzero entry.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4_1_1_linear_form.html" class="m-doc">Rodin::Variational::P0gElement&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;::LinearForm</a>
+            </dt>
+            <dd>Matrix-range finite element or expression specialization.</dd>
           </dl>
         </section>
       </div>

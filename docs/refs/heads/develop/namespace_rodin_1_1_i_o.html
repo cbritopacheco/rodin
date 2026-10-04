@@ -126,6 +126,11 @@
             </dt>
             <dd>HDF5 grid function loader for local grid functions backed by <code>Math::Vector&lt;Scalar&gt;</code>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_f_e_s_00_01_mabbc9a86cabea2ab6e77ea469f5feace1.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MEDIT, FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Reads matrix entries stored as independent MEDIT scalar vertex fields. Higher-order spaces interpolate the vertex field, as required by SolAtVertices.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;size_t K, class Range&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_variational_1_94a7998c5e4a0c8f11c7e3140bb5d154.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MEDIT, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
             </dt>
@@ -135,6 +140,11 @@
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_variational_1_759081d00011f35269f7550058d038c7.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MEDIT, Variational::P1&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
             </dt>
             <dd>MEDIT grid-function loader for local P1 finite element spaces.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_f_e_s_00_01_math971bd62f483877e1a539011d5c867899.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Loads each MFEM component through the scalar family&#x27;s node mapping.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Range&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_e25ce5570c0c5790351369eb032d2a12.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
@@ -180,6 +190,11 @@
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_e_d_i_t_00_01_f_e_s_00_01_m0a53ca4f721c080cdcb0de309d8d05d7.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::MEDIT, FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
             </dt>
             <dd>MEDIT grid-function printer for vector-backed grid functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_f_e_m_00_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::MFEM, FES, ::Vec&gt;</a>
+            </dt>
+            <dd>Matrix PETSc fields export through the local scalar-family permutation.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_f_e_m_00_01_f_e_s_00_01_mata6ca80a751fa9ee6d15bb619b9a7f426.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::MFEM, FES, Math::Vector&lt;Scalar&gt;&gt;</a>

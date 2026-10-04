@@ -205,10 +205,10 @@ $ (i,j) $
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase&lt;Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t, size_t&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase&lt;FormLanguage::Traits&lt;FunctionBase&lt;OperandDerived&gt;&gt;::ScalarType, Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t, size_t&gt;&gt;</a>
             </dt>
-            <dd>Base class for real-valued functions defined on a mesh.</dd>
+            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -230,8 +230,8 @@ $ (i,j) $
               using <a href="#a56808c86c123d70341266761d0bc71d4" class="m-doc-self">RangeType</a> = <a href="#a4b4601a49c4eb2b5fab2fce8bbfae779" class="m-doc">ScalarType</a>
             </dt>
             <dd>Range (evaluation value) type.</dd>
-            <dt id="accc61d88f0bf001ab69ca252c478017f">
-              using <a href="#accc61d88f0bf001ab69ca252c478017f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;OperandDerived&gt;, size_t, size_t&gt;&gt;
+            <dt id="a3dab8d8216b784fa53bc34914ee9165b">
+              using <a href="#a3dab8d8216b784fa53bc34914ee9165b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;OperandDerived&gt;&gt;<a href="#a4b4601a49c4eb2b5fab2fce8bbfae779" class="m-doc">::<wbr />ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;OperandDerived&gt;, size_t, size_t&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -385,10 +385,11 @@ $ A_{ij}(p) $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to newly allocated copy</td>
+                  <td>Pointer to a newly allocated copy</td>
                 </tr>
               </tfoot>
             </table>
+<aside class="m-note m-info"><h4>Note</h4><p>Caller is responsible for managing the returned pointer</p></aside>
           </div></section>
         </section>
       </div>

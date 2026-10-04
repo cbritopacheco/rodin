@@ -75,11 +75,125 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_forward_decls_8h.html">&lt;Rodin/Variational/ForwardDecls.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class T&gt;</div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_matrix_function_8h.html">&lt;Rodin/Variational/MatrixFunction.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class F&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>MatrixFunction <span class="m-thin">class</span>
         </h1>
+        <p>Callable matrix coefficient with explicit row and column extents.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the MatrixFunction class, please see <code>Mat</code>rixFunctionSpecializations.</p></aside><aside class="m-note m-default"><h4>See also</h4><p>MatrixFunctionSpecializations</p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase&lt;FormLanguage::Traits&lt;std::invoke_result_t&lt;F, const Geometry::Point&amp;&gt;&gt;::ScalarType, MatrixFunction&lt;F&gt;&gt;</a>
+            </dt>
+            <dd>Base class for matrix-valued functions defined on a mesh.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a2a2657480d729405f0f89363dc949f66">
+              using <a href="#a2a2657480d729405f0f89363dc949f66" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::invoke_result_t&lt;F, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;&gt;&gt;::ScalarType
+            </dt>
+            <dd>Scalar type of matrix or tensor entries.</dd>
+            <dt id="a9e6ed8cbf80765f7c226d640bf45c15c">
+              using <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#a2a2657480d729405f0f89363dc949f66" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Evaluated matrix, tensor, or scalar range type.</dd>
+            <dt id="af4ed3bc2c99d0d54d4fc54d4494551ab">
+              using <a href="#af4ed3bc2c99d0d54d4fc54d4494551ab" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>&lt;<a href="#a2a2657480d729405f0f89363dc949f66" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&gt;
+            </dt>
+            <dd>CRTP or finite element base class.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a3a6e29f6aaebf89e2a7cc450b5358cd4">
+              <span class="m-doc-wrap-bumper"><a href="#a3a6e29f6aaebf89e2a7cc450b5358cd4" class="m-doc-self">MatrixFunction</a>(</span><span class="m-doc-wrap">size_t rows,
+              size_t columns,
+              F function)</span>
+            </dt>
+            <dd>Constructs a constant or callable matrix coefficient, or copies its value.</dd>
+            <dt id="a646e7c6f2b2ba84ea156810981f505a0">
+              <span class="m-doc-wrap-bumper"><a href="#a646e7c6f2b2ba84ea156810981f505a0" class="m-doc-self">MatrixFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp; other)</span>
+            </dt>
+            <dd>Constructs a constant or callable matrix coefficient, or copies its value.</dd>
+            <dt id="a534148e77bdf7e3dbf5c199369a31f91">
+              <span class="m-doc-wrap-bumper"><a href="#a534148e77bdf7e3dbf5c199369a31f91" class="m-doc-self">MatrixFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Constructs a constant or callable matrix coefficient, or copies its value.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="afba2c6fb1fbc0ff189962dbe92bdf6ef">
+              <span class="m-doc-wrap-bumper">auto <a href="#afba2c6fb1fbc0ff189962dbe92bdf6ef" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; point) const -&gt; <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a></span>
+            </dt>
+            <dd>Evaluates the expression at the supplied physical or integration point.</dd>
+            <dt id="a39ccf182b0ac2cfd4ec380a576423244">
+              <span class="m-doc-wrap-bumper">auto <a href="#a39ccf182b0ac2cfd4ec380a576423244" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; point) const -&gt; <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a></span>
+            </dt>
+            <dd>Evaluates the expression at the supplied physical or integration point.</dd>
+            <dt id="a0af0bdf821ec4bd24b0e14e7722f5f37">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0af0bdf821ec4bd24b0e14e7722f5f37" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Returns the number of matrix rows.</dd>
+            <dt id="af31837cc835e05a7dce74d5dbdfecac1">
+              <span class="m-doc-wrap-bumper">auto <a href="#af31837cc835e05a7dce74d5dbdfecac1" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Returns the number of matrix columns.</dd>
+            <dt id="a00fd1c1ae2f833b52937d82074273c5f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a00fd1c1ae2f833b52937d82074273c5f" class="m-doc-self">setOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp;</span>
+            </dt>
+            <dd>Declares polynomial order for coefficient quadrature selection.</dd>
+            <dt id="a80851815acd28e8401863a16cd094118">
+              <span class="m-doc-wrap-bumper">auto <a href="#a80851815acd28e8401863a16cd094118" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the polynomial order when it is known.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0996b2c9704d23cabe7292e7969c6a0e" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy of the function.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0996b2c9704d23cabe7292e7969c6a0e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>* Rodin::<wbr />Variational::<wbr />MatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0996b2c9704d23cabe7292e7969c6a0e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy of the function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to newly allocated copy</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

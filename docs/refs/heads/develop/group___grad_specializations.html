@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a></p></aside><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a></td><td>Generic gradient base for scalar grid functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;H1&lt;K, Scalar, Mesh&gt;, GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of an H1 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;H1&lt;K, Scalar, Mesh&gt;, ShapeFunction&lt;NestedDerived, H1&lt;K, Scalar, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of an H1 shape-function expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P1&lt;Range, Mesh&gt;, GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of a P1 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P1&lt;Range, Mesh&gt;, ShapeFunction&lt;NestedDerived, P1&lt;Range, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of a P1 shape-function expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P0&lt;Range, Mesh&gt;, GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of a P0 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P0&lt;Range, Mesh&gt;, ShapeFunction&lt;NestedDerived, P0&lt;Range, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of a P0 shape-function expression.</td></tr></tbody></table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a></p></aside><table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;GridFunction&lt;MatrixFES, Data&gt;&gt;</a></td><td>Matrix-valued grid-function operator for all supported spaces and backends.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;ShapeFunction&lt;Derived, MatrixFES, Space&gt;&gt;</a></td><td>Matrix shape-function operator with the scalar family&#x27;s geometry and trace semantics.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a></td><td>Generic gradient base for scalar grid functions.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;H1&lt;K, Scalar, Mesh&gt;, GridFunction&lt;H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of an H1 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;H1&lt;K, Scalar, Mesh&gt;, ShapeFunction&lt;NestedDerived, H1&lt;K, Scalar, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of an H1 shape-function expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P1&lt;Range, Mesh&gt;, GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of a P1 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P1&lt;Range, Mesh&gt;, ShapeFunction&lt;NestedDerived, P1&lt;Range, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of a P1 shape-function expression.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P0&lt;Range, Mesh&gt;, GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;</a></td><td>Gradient of a P0 grid function.</td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad&lt;P0&lt;Range, Mesh&gt;, ShapeFunction&lt;NestedDerived, P0&lt;Range, Mesh&gt;, Space&gt;&gt;</a></td><td>Gradient of a P0 shape-function expression.</td></tr></tbody></table>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -113,6 +113,16 @@
             </dt>
             <dd>Gradient of a ShapeFunction on H1&lt;K&gt; space.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh, class Data&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_h1_3_01_k_00_01_math_1_1_spatial_ma945021ac27314981b47f6b19d43a161d.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradient of a matrix H1 solution, with derivative axis last. Uses this family&#x27;s scalar basis and component ordering.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_derived_00_01_h1_3_01_k_00_01_mathfa3b545519db5738a6def29dabe25c13.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;Derived, H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradients of matrix H1 trial or test bases.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0_3_01_range_00_01_mesh_01_4_00_01_data_01_4_01_4.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;</a>
             </dt>
@@ -123,10 +133,40 @@
             </dt>
             <dd>Gradient of a P0 ShapeFunction.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0_3_01_math_1_1_spatial_matrix_3_00cb7d40ceecb21a995fa7b6900fc8f7d.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;P0&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradient of a matrix P0 solution, with derivative axis last. Uses this family&#x27;s scalar basis and component ordering.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_derived_00_01_p0_3_01_math_1_1_spa896c7fab0be25fd4e03c5bdfb626f716.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;Derived, P0&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradients of matrix P0 trial or test bases.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p0g_3_01_math_1_1_spatial_matrix_3_1351479fad793ffe6e8f98109837f792.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;P0g&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradient of a matrix P0g solution, with derivative axis last. Uses this family&#x27;s scalar basis and component ordering.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_derived_00_01_p0g_3_01_math_1_1_sp06b98832fb75025c4562659a68af6689.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;Derived, P0g&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradients of matrix P0g trial or test bases.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_nested_derived_00_01_p1_3_01_scalacde5300190b44b3a7a99aef6fcfa52a3.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;NestedDerived, P1&lt;Scalar, Mesh&gt;, SpaceType&gt;&gt;</a>
             </dt>
             <dd>Gradient of a ShapeFunction.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_grid_function_3_01_p1_3_01_math_1_1_spatial_matrix_3_0d79f9244dca26a35991ad2b24ec2a611.html" class="m-doc">Rodin::Variational::Grad&lt;GridFunction&lt;P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradient of a matrix P1 solution, with derivative axis last. Uses this family&#x27;s scalar basis and component ordering.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grad_3_01_shape_function_3_01_derived_00_01_p1_3_01_math_1_1_spa30b7b2770592471bafdc65bb1b344f62.html" class="m-doc">Rodin::Variational::Grad&lt;ShapeFunction&lt;Derived, P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;</a>
+            </dt>
+            <dd>Physical gradients of matrix P1 trial or test bases.</dd>
           </dl>
         </section>
       </div>

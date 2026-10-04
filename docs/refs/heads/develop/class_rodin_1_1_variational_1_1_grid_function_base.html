@@ -280,10 +280,9 @@ $ K \ge 2 $
             </dt>
             <dd>Gets the vector dimension of the grid function.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8988d177e65dc802b5e4b03bfdb47d55" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) -&gt; Derived&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abb3703990bb3bb02333cda7ef1cfd17b" class="m-doc">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
-            <dd>Loads grid function data from a file.</dd>
+            <dd>Returns the number of matrix rows.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ad1ee35b232ba18e7f94fee522ab836ee" class="m-doc">save</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
               <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt) const</span>
@@ -861,37 +860,25 @@ $ \mathbf{u} $
             </table>
 <p>For scalar functions, returns 1. For vector-valued functions, returns the space dimension.</p>
           </div></section>
-          <section class="m-doc-details" id="a8988d177e65dc802b5e4b03bfdb47d55"><div>
+          <section class="m-doc-details" id="abb3703990bb3bb02333cda7ef1cfd17b"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Derived, class FES, class Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8988d177e65dc802b5e4b03bfdb47d55" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a> fmt)</span></span>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />GridFunctionBase&lt;Derived, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abb3703990bb3bb02333cda7ef1cfd17b" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Loads grid function data from a file.</p>
+            <p>Returns the number of matrix rows.</p>
             <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Path to the file to load</td>
-                </tr>
-                <tr>
-                  <td>fmt&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>File format (default: MFEM)</td>
-                </tr>
-              </tbody>
               <tfoot>
                 <tr>
-                  <th>Returns</th>
+                  <th style="width: 1%">Returns</th>
                   <td>Reference to this grid function</td>
                 </tr>
               </tfoot>
             </table>
-<p>Reads DOF data from a file in the specified format. Supported formats include MFEM, and MEDIT.</p>
+<p>Loads grid function data from a file. 
+
+Reads DOF data from a file in the specified format. Supported formats include MFEM, and MEDIT.</p>
           </div></section>
           <section class="m-doc-details" id="ad1ee35b232ba18e7f94fee522ab836ee"><div>
             <h3>

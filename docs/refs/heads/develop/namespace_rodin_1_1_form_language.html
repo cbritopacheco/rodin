@@ -182,9 +182,19 @@
             <dd>Specialization for types declaring a <code>Specialized</code> member.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
-              struct <a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">IsVectorRange</a>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_tensor_range.html" class="m-doc">IsTensorRange</a>
             </dt>
             <dd>Type trait: whether <code>T</code> has vector range (a spatial vector or a single-column Eigen object).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, size_t Rank&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_tensor_range_3_01_math_1_1_spatial_tensor_3_01_scalar_00_01_rank_01_4_01_4.html" class="m-doc">IsTensorRange&lt;Math::SpatialTensor&lt;Scalar, Rank&gt;&gt;</a>
+            </dt>
+            <dd>Matrix-range finite element or expression specialization.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">IsVectorRange</a>
+            </dt>
+            <dd>Matrix-range finite element or expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
               class <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>
@@ -241,6 +251,11 @@
             </dt>
             <dd>Range type deduced for <code>Math::SpatialMatrix</code>.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar, size_t Rank&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_math_1_1_spatial_tensor_3_01_scalar_00_01_rank_01_4_01_4.html" class="m-doc">RangeOf&lt;Math::SpatialTensor&lt;Scalar, Rank&gt;&gt;</a>
+            </dt>
+            <dd>Range type for FunctionBase.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">RangeOf&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
             </dt>
@@ -254,7 +269,7 @@
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_variational_1_1_function_base_3_01_derived_01_4_01_4.html" class="m-doc">RangeOf&lt;Variational::FunctionBase&lt;Derived&gt;&gt;</a>
             </dt>
-            <dd>Range type for FunctionBase.</dd>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_range_of_3_01_variational_1_1_shape_function_base_3_01_derive3809fe9cae3a47d32df2a10b6ad6ada2.html" class="m-doc">RangeOf&lt;Variational::ShapeFunctionBase&lt;Derived, FES, Space&gt;&gt;</a>
@@ -541,10 +556,30 @@
             </dt>
             <dd>Type traits for <code>Grad</code> over a grid function: exposes the finite element space, the operand type and the range type.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_grid_fu6409770008ea2f8e314e65b093a082ee.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::GridFunction&lt;Variational::H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Rank-three physical gradient range for the matrix H1 solution.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_grid_fu2c7c4f7dc52d3793f7248205e6fb6475.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::GridFunction&lt;Variational::P0&lt;Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
             </dt>
             <dd>Type traits for <code>Grad</code> over a grid function: exposes the finite element space and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_grid_fu71be67ee3a8ca53e4c620fd328af8f2a.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::GridFunction&lt;Variational::P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Rank-three physical gradient range for the matrix P1 solution.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_shape_f07d8e222ad8c887d8db37c72db6f2065.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::ShapeFunction&lt;Derived, Variational::H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Rank-three physical gradient range for matrix H1 shape functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_shape_f678239a6df157d04031c0ce9f83bd467.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::ShapeFunction&lt;Derived, Variational::P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Rank-three physical gradient range for matrix P1 shape functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_shape_f52b7de22acea11f024d8aa919f87a953.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::ShapeFunction&lt;NestedDerived, FES, Space&gt;&gt;&gt;</a>
@@ -787,6 +822,7 @@
               <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aa10b4eb76294b70d7fd6df997ff06edb1" class="m-doc">Complex</a>,
               <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aa57dea6f5039281b7fee517fc43bf3110" class="m-doc">Vector</a>,
               <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aaf53df0293e169f562bc1d9a20e1d2589" class="m-doc">Matrix</a>,
+              <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aaf20fc369b14cb5d40e695dab98bcb742" class="m-doc">Tensor</a>,
               <a href="#ac6e4fa171f57a9659c9e8d1988e6b78aa88183b946cc5f0e8c96b2e66e1c74a7e" class="m-doc">Unknown</a> }</span>
             </dt>
             <dd>Type trait for deducing the result type of addition.</dd>

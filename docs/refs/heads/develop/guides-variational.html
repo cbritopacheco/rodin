@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="stylesheet" href="rodin.css" />
   <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
-  <link rel="prev" href="guides-quadrature.html" />
+  <link rel="prev" href="guides-ordering.html" />
   <link rel="next" href="guides-weak-formulations.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#22272e" />
@@ -1054,7 +1054,7 @@ $ \mathcal{F}_h^i $
 <span class="w">   </span><span class="o">+</span><span class="w"> </span><span class="n">InterfaceIntegral</span><span class="p">(</span><span class="n">sigma</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 <span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
 <span class="w">   </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span></pre><p>See the <a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/DG/Poisson.cpp">DG Poisson example</a> for a complete working implementation.</p></section></section><section id="guides-variational-see-also"><h2><a href="#guides-variational-see-also">See Also</a></h2><ul><li><a href="fem-spaces.html" class="m-doc">Finite element spaces</a> — Available spaces (P0, P0g, P1, H1)</li><li><a href="fem-ciarlet.html" class="m-doc">Ciarlet&#x27;s definition</a> — Mathematical foundations</li><li><a href="guides-io.html" class="m-doc">I/O in Rodin</a> — Saving and visualizing results</li><li><a href="examples-pdes-poisson.html" class="m-doc">Poisson example</a></li><li><a href="examples-pdes-elasticity.html" class="m-doc">Elasticity example</a></li><li><a href="examples-pdes-navierstokes.html" class="m-doc">Navier-Stokes example</a> — Mixed formulation</li><li><a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid module</a> — Hyperelastic constitutive laws and Newton solvers</li><li><a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection module</a> — Semi-Lagrangian transport</li><li><a href="guides-solvers.html" class="m-doc">Solvers guide</a> — Direct, iterative, and nonlinear solvers</li><li><a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a> — Projection, assembly signs, quadrature, constraints, and tangent consistency</li></ul></section>
-        <div class="m-note m-dim m-thin m-text-center"><a href="guides-quadrature.html" class="m-doc">&laquo; Quadrature formulas</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-weak-formulations.html" class="m-doc">Weak Formulations &raquo;</a></div>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-ordering.html" class="m-doc">&laquo; Matrix storage and finite-element component ordering</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-weak-formulations.html" class="m-doc">Weak Formulations &raquo;</a></div>
       </div>
     </div>
   </div>

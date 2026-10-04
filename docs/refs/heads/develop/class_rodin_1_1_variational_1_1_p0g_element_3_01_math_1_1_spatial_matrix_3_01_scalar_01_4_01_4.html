@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Variational::P0gElement&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="source-headers.html">Source headers</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0g_element_8h.html">&lt;Rodin/Variational/P0g/P0gElement.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P0gElement&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+        </h1>
+        <p>Matrix-valued reference element built from scalar nodal functionals.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase&lt;P0gElement&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Base class for finite elements.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">BasisFunction</a>
+            </dt>
+            <dd>Matrix basis with one nonzero entry.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4_1_1_linear_form.html" class="m-doc">LinearForm</a>
+            </dt>
+            <dd>Matrix-range finite element or expression specialization.</dd>
+            <dt id="aec4d571186aafc8ec3c2129af8095cd4">
+              using <a href="#aec4d571186aafc8ec3c2129af8095cd4" class="m-doc-self">ScalarElement</a> = <a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>&lt;Scalar&gt;
+            </dt>
+            <dd>Scalar reference element for this family.</dd>
+            <dt id="af759db74e135e3aaed19340727a253f5">
+              using <a href="#af759db74e135e3aaed19340727a253f5" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aec4d571186aafc8ec3c2129af8095cd4" class="m-doc">ScalarElement</a>&gt;::ScalarType
+            </dt>
+            <dd>Scalar type of matrix or tensor entries.</dd>
+            <dt id="a9e6ed8cbf80765f7c226d640bf45c15c">
+              using <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#af759db74e135e3aaed19340727a253f5" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Evaluated matrix, tensor, or scalar range type.</dd>
+            <dt id="a1b33b808659fe6f14d68fb9656ed3c22">
+              using <a href="#a1b33b808659fe6f14d68fb9656ed3c22" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_base.html" class="m-doc">FiniteElementBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;Scalar&gt;&gt;&gt;
+            </dt>
+            <dd>CRTP or finite element base class.</dd>
+            <dt id="adac684902559310637eea7b3828aef31">
+              using <a href="#adac684902559310637eea7b3828aef31" class="m-doc-self">ScalarBasis</a> = decltype(std::declval&lt;<a href="#aec4d571186aafc8ec3c2129af8095cd4" class="m-doc">ScalarElement</a>&gt;().<a href="#ad991e138cdf491a6cc8a919d134d1ea2" class="m-doc">getBasis</a>(0))
+            </dt>
+            <dd>Basis type of the underlying scalar element.</dd>
+            <dt id="a6a250adc2c454198727dac6f06022c93">
+              using <a href="#a6a250adc2c454198727dac6f06022c93" class="m-doc-self">ScalarLinearForm</a> = decltype(std::declval&lt;<a href="#aec4d571186aafc8ec3c2129af8095cd4" class="m-doc">ScalarElement</a>&gt;().<a href="#a52bc7b7d680eb4b064edef4606b823fd" class="m-doc">getLinearForm</a>(0))
+            </dt>
+            <dd>Nodal functional type of the underlying scalar element.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a4bdfe48e59191e598b9072aa694f1818">
+              <span class="m-doc-wrap-bumper"><a href="#a4bdfe48e59191e598b9072aa694f1818" class="m-doc-self">P0gElement</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> geometry,
+              size_t rows,
+              size_t cols)</span>
+            </dt>
+            <dd>Replicates a scalar reference element for a rectangular matrix range.</dd>
+            <dt id="af20338bcfd0c5f5dadd769b8ec9b22af">
+              <span class="m-doc-wrap-bumper"><a href="#af20338bcfd0c5f5dadd769b8ec9b22af" class="m-doc-self">P0gElement</a>(</span><span class="m-doc-wrap">const <a href="#aec4d571186aafc8ec3c2129af8095cd4" class="m-doc">ScalarElement</a>&amp; scalar,
+              size_t rows,
+              size_t cols)</span>
+            </dt>
+            <dd>Replicates a scalar reference element for a rectangular matrix range.</dd>
+            <dt id="ad949a790b183874e56b928d22f1f64df">
+              <span class="m-doc-wrap-bumper"><a href="#ad949a790b183874e56b928d22f1f64df" class="m-doc-self">P0gElement</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copies the element and its component extents.</dd>
+            <dt id="a0272415159873e7c08cd8b8a956a39cf">
+              <span class="m-doc-wrap-bumper"><a href="#a0272415159873e7c08cd8b8a956a39cf" class="m-doc-self">P0gElement</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Moves the element and its component extents.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a6c3225f608fd58e715031c56d496e0d9">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6c3225f608fd58e715031c56d496e0d9" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>&amp;) -&gt; <a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copies the element and its component extents.</dd>
+            <dt id="ac3ec48e0f1e783059461a75ad1535121">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac3ec48e0f1e783059461a75ad1535121" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Moves the element and its component extents.</dd>
+            <dt id="aa78a1cb014de4f72bb8faa3ea6719e00">
+              <div class="m-doc-template">template&lt;class Coefficient&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#aa78a1cb014de4f72bb8faa3ea6719e00" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap"><a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a>&amp; out,
+              Coefficient&amp;&amp; coefficient,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; point) const</span>
+            </dt>
+            <dd>Contracts each matrix entry with the scalar reference element.</dd>
+            <dt id="a636b1ea8f7b2b1920d81e6046be03eda">
+              <span class="m-doc-wrap-bumper">auto <a href="#a636b1ea8f7b2b1920d81e6046be03eda" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Returns the number of local matrix basis functions.</dd>
+            <dt id="a8b2e891192b815b6ba651bdd94558892">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8b2e891192b815b6ba651bdd94558892" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Returns the polynomial order when it is known.</dd>
+            <dt id="a0af0bdf821ec4bd24b0e14e7722f5f37">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0af0bdf821ec4bd24b0e14e7722f5f37" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Returns the number of matrix rows.</dd>
+            <dt id="af31837cc835e05a7dce74d5dbdfecac1">
+              <span class="m-doc-wrap-bumper">auto <a href="#af31837cc835e05a7dce74d5dbdfecac1" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Returns the number of matrix columns.</dd>
+            <dt id="ab4850bfac08cdab15c2efe909bebf01e">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab4850bfac08cdab15c2efe909bebf01e" class="m-doc-self">getScalarElement</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aec4d571186aafc8ec3c2129af8095cd4" class="m-doc">ScalarElement</a>&amp;</span>
+            </dt>
+            <dd>Returns the scalar element whose basis is replicated for matrix entries.</dd>
+            <dt id="a896745d8eed86a097f8bc1c365988c39">
+              <span class="m-doc-wrap-bumper">auto <a href="#a896745d8eed86a097f8bc1c365988c39" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; decltype(auto)</span>
+            </dt>
+            <dd>Returns the scalar reference node for the selected component DOF.</dd>
+            <dt id="ad991e138cdf491a6cc8a919d134d1ea2">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad991e138cdf491a6cc8a919d134d1ea2" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; BasisFunction</span>
+            </dt>
+            <dd>Returns a basis value at the bound integration point.</dd>
+            <dt id="a52bc7b7d680eb4b064edef4606b823fd">
+              <span class="m-doc-wrap-bumper">auto <a href="#a52bc7b7d680eb4b064edef4606b823fd" class="m-doc-self">getLinearForm</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a></span>
+            </dt>
+            <dd>Returns the scalar nodal functional applied to the selected matrix entry.</dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

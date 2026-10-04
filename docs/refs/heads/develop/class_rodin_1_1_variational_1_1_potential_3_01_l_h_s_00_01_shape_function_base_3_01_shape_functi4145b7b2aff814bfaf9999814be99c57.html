@@ -269,8 +269,8 @@
               using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
             </dt>
             <dd>Finite element space type.</dd>
-            <dt id="a515179486a633cd3bd8acc6d313ed50d">
-              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            <dt id="abdba688d76c906b73a3a133ed4665425">
+              using <a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;FES&gt;::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="a30a18d37c383eb23729bd8bfe40f0d13">
@@ -293,8 +293,8 @@
               using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afce56aa6fcddbcc9adc3ecbe68c4f1f7" class="m-doc">RHSType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the right-hand side operand.</dd>
-            <dt id="a445eec8df0727c551b208428b3bb251a">
-              using <a href="#a445eec8df0727c551b208428b3bb251a" class="m-doc-self">LHSRangeType</a> = std::conditional_t&lt;std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value, <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;, void&gt;&gt;
+            <dt id="afd10bb429f691869eae42f70d16efc6c">
+              using <a href="#afd10bb429f691869eae42f70d16efc6c" class="m-doc-self">LHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&gt;::LHSRangeType
             </dt>
             <dd>Range type of the left-hand side operand.</dd>
           </dl>

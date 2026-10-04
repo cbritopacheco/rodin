@@ -335,13 +335,14 @@
             <dd>Writes a single scalar value as a 1D dataset of length 1.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a6cd1932d8db41129204c3038fbd9faa3" class="m-doc">writeMatrixDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              <span class="m-doc-wrap-bumper">void <a href="#aac88fb19a31213070459607a989eb3a3" class="m-doc">writeMatrixDataset</a>(</span><span class="m-doc-wrap">hid_t file,
               const std::string&amp; path,
               const std::vector&lt;T&gt;&amp; values,
               hsize_t rows,
-              hsize_t cols)</span>
+              hsize_t cols,
+              hsize_t depth = 0)</span>
             </dt>
-            <dd>Writes a row-major packed vector as a 2D HDF5 dataset.</dd>
+            <dd>Writes packed matrix entries as a rank-two or rank-three HDF5 dataset.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac5ef11270094c2d08238cf5964cf2eed" class="m-doc">readMatrixShape</a>(</span><span class="m-doc-wrap">hid_t file,
               const std::string&amp; path) -&gt; std::pair&lt;hsize_t, hsize_t&gt;</span>
@@ -1453,19 +1454,20 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a6cd1932d8db41129204c3038fbd9faa3"><div>
+          <section class="m-doc-details" id="aac88fb19a31213070459607a989eb3a3"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6cd1932d8db41129204c3038fbd9faa3" class="m-doc-self">writeMatrixDataset</a>(</span><span class="m-doc-wrap">hid_t file,
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aac88fb19a31213070459607a989eb3a3" class="m-doc-self">writeMatrixDataset</a>(</span><span class="m-doc-wrap">hid_t file,
               const std::string&amp; path,
               const std::vector&lt;T&gt;&amp; values,
               hsize_t rows,
-              hsize_t cols)</span></span>
+              hsize_t cols,
+              hsize_t depth = 0)</span></span>
             </h3>
-            <p>Writes a row-major packed vector as a 2D HDF5 dataset.</p>
+            <p>Writes packed matrix entries as a rank-two or rank-three HDF5 dataset.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -1499,6 +1501,10 @@
                 <tr>
                   <td>cols&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Number of columns.</td>
+                </tr>
+                <tr>
+                  <td>depth&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Optional third extent; zero writes a rank-two dataset.</td>
                 </tr>
               </tbody>
             </table>

@@ -109,7 +109,7 @@
             </li>
           </ul>
         </nav>
-<p>Implements the complete printer for grid functions stored as Math::Vector objects.</p><section id="autotoc_md153"><h3><a href="#autotoc_md153">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<p>MFEM matrix fields reuse the scalar family&#x27;s node permutation. Entries are separate components in row-major matrix order. MFEM does not record matrix shape, so the destination space supplies it when loading.</p><p>Implements the complete printer for grid functions stored as Math::Vector objects.</p><section id="autotoc_md153"><h3><a href="#autotoc_md153">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="c1">// ... compute solution ...</span>
 <span class="n">GridFunctionPrinter</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">printer</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
@@ -118,6 +118,11 @@
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MFEM, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Base class for concrete grid function printers.</dd>
             <dt>
               <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MFEM, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
@@ -140,6 +145,10 @@
               using <a href="#a82935b4ee4c7eaf51ec5adff118900e7" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">FileFormat::<wbr />MFEM</a>, FES, <a href="#a8a7526d9972740e94101fd10bef3831f" class="m-doc">DataType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
+            <dt id="ae2b837d9a110d8e6a1b971c15c7b2fae">
+              using <a href="#ae2b837d9a110d8e6a1b971c15c7b2fae" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfead2fc2ac95a0b62e13572a658cf6390af" class="m-doc">FileFormat::<wbr />MFEM</a>, FES, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;
+            </dt>
+            <dd>CRTP or finite element base class.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -158,6 +167,14 @@
               <span class="m-doc-wrap-bumper">void <a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Prints the coefficient data values.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Prints object to an output stream.</dd>
+            <dt id="a9985f63b66e24614e02282b554dd4760">
+              <span class="m-doc-wrap-bumper">void <a href="#a9985f63b66e24614e02282b554dd4760" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp;) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Hook for format-specific coefficient printers.</dd>
           </dl>
         </section>
         <section>
@@ -202,6 +219,27 @@
               </tbody>
             </table>
 <p>Writes all coefficient values, one per line.</p>
+          </div></section>
+          <section class="m-doc-details" id="a2504fad917ab72c2e27e762f99fa6583"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />MFEM, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;FES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Prints object to an output stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Output stream to write to</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This pure virtual method must be implemented by derived classes to write the object data to the provided stream.</p>
           </div></section>
         </section>
       </div>
