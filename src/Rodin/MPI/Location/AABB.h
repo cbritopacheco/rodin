@@ -37,11 +37,18 @@ namespace Rodin::Location
   {
     public:
       explicit AABB(const MeshType& mesh)
-        : m_mesh(mesh), m_shard(mesh.getShard(), ownedCandidates(mesh))
+        : m_mesh(mesh),
+          m_shard(mesh.getShard(), ownedCandidates(mesh))
       {}
 
-      Real getTolerance() const { return m_shard.getTolerance(); }
-      Real getReferenceTolerance() const { return m_shard.getReferenceTolerance(); }
+      Real getTolerance() const
+      {
+        return m_shard.getTolerance();
+      }
+      Real getReferenceTolerance() const
+      {
+        return m_shard.getReferenceTolerance();
+      }
 
       AABB& setTolerance(Real tolerance)
       {
@@ -68,7 +75,8 @@ namespace Rodin::Location
       }
 
       /// Searches owned entities of dimension d and lifts the local result.
-      Optional<Geometry::Point> locate(size_t dimension, const Math::SpatialPoint& x) const
+      Optional<Geometry::Point> locate(
+        size_t dimension, const Math::SpatialPoint& x) const
       {
         auto hit = m_shard.locate(dimension, x);
         if (!hit)
@@ -86,10 +94,12 @@ namespace Rodin::Location
       }
 
     private:
-      static typename AABB<Geometry::LocalMesh>::Candidates ownedCandidates(const MeshType& mesh)
+      static typename AABB<Geometry::LocalMesh>::Candidates ownedCandidates(
+        const MeshType& mesh)
       {
         const auto& shard = mesh.getShard();
-        typename AABB<Geometry::LocalMesh>::Candidates candidates(mesh.getDimension() + 1);
+        typename AABB<Geometry::LocalMesh>::Candidates candidates(
+          mesh.getDimension() + 1);
         for (size_t d = 0; d <= shard.getDimension(); ++d)
         {
           for (Index i = 0; i < shard.getPolytopeCount(d); ++i)

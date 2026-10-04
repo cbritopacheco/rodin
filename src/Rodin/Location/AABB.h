@@ -31,6 +31,11 @@ namespace Rodin::Location
   /**
    * @brief Bounding-volume-hierarchy point locator over axis-aligned boxes.
    *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref AABB "AABB<MeshType>" | Local geometry, optionally restricted to supplied indices. |
+   * | @ref AABB "AABB<MPIMesh>" (MPI header) | Owned shard entities with MPI-attached results; also derived MPI meshes. |
+   *
    * @section AABBArchitecture Architecture
    *
    * The locator answers the following geometric query. Given a physical point
@@ -111,12 +116,14 @@ namespace Rodin::Location
           if (candidates[d].empty())
             continue;
           if (d > mesh.getDimension())
-            throw std::invalid_argument("AABB candidate dimension exceeds the mesh dimension.");
+            throw std::invalid_argument(
+              "AABB candidate dimension exceeds the mesh dimension.");
           auto sorted = candidates[d];
           std::sort(sorted.begin(), sorted.end());
           if (sorted.back() >= mesh.getPolytopeCount(d) ||
-              std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end())
-            throw std::invalid_argument("AABB candidate indices must be distinct and in range.");
+            std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end())
+            throw std::invalid_argument(
+              "AABB candidate indices must be distinct and in range.");
         }
         if (candidates.size() > m_index.size())
           m_index = std::vector<DimensionIndex>(candidates.size());
@@ -418,8 +425,8 @@ namespace Rodin::Location
         const std::vector<Index>* selected = m_candidates
           ? (dimension < m_candidates->size() ? &(*m_candidates)[dimension] : nullptr)
           : nullptr;
-        const size_t count = m_candidates
-          ? (selected ? selected->size() : 0) : mesh.getPolytopeCount(dimension);
+        const size_t count = m_candidates ? (selected ? selected->size() : 0)
+                                          : mesh.getPolytopeCount(dimension);
         const bool projectionsEnabled =
           m_projectionPruning && dimension == sdim && dimension > 1;
 

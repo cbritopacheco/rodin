@@ -18,6 +18,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--build", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--target", choices=["RodinAABBWorkload", "RodinMPIAABBBenchmarks"],
+                        default="RodinAABBWorkload")
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
     build = args.build.resolve()
@@ -66,7 +68,8 @@ def main():
     header = output / "AABBDiagnostic.h"
     header.write_text(source)
     entries = json.loads((build / "compile_commands.json").read_text())
-    entry = next(e for e in entries if e["file"].endswith("/AABBWorkload.cpp"))
+    source_name = "MPIAABB.cpp" if args.target == "RodinMPIAABBBenchmarks" else "AABBWorkload.cpp"
+    entry = next(e for e in entries if e["file"].endswith("/" + source_name))
     command = shlex.split(entry["command"])
     obj = output / "AABBWorkloadDiagnostic.o"
     command[command.index("-o") + 1] = str(obj)
@@ -74,11 +77,11 @@ def main():
                     "-I" + str(root / "src/Rodin/Location")]
     subprocess.run(command, cwd=entry["directory"], check=True)
     lines = subprocess.check_output(["ninja", "-C", str(build), "-t", "commands",
-                                     "RodinAABBWorkload"], text=True).splitlines()
+                                     args.target], text=True).splitlines()
     link = shlex.split(lines[-1].split(" && ")[1])
-    executable = output / "RodinAABBWorkloadDiagnostic"
+    executable = output / (args.target + "Diagnostic")
     link[link.index("-o") + 1] = str(executable)
-    link = [str(obj) if p.endswith("/AABBWorkload.cpp.o") else p for p in link]
+    link = [str(obj) if p.endswith("/" + source_name + ".o") else p for p in link]
     subprocess.run(link, cwd=build, check=True)
     print(executable)
 

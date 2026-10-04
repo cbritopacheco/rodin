@@ -77,4 +77,20 @@ namespace Rodin::Tests::Unit
     index.get({2, 0}, 1, factory);
     EXPECT_EQ(factoryCalls, 2u);
   }
+  TEST(Geometry_PolytopeTransformationIndex, FindDoesNotCreateCharts)
+  {
+    PolytopeTransformationIndex index;
+    index.initialize(2);
+    index.resize(2, 3);
+    EXPECT_EQ(index.find(2, 0), nullptr);
+    EXPECT_EQ(index.find(2, 3), nullptr);
+    EXPECT_EQ(index.find(3, 0), nullptr);
+    auto transformation = std::make_unique<IdentityTransformation>(2);
+    const auto* expected = transformation.get();
+    index.set({2, 1}, std::move(transformation));
+    EXPECT_EQ(index.find(2, 1), expected);
+    EXPECT_EQ(index.find(2, 0), nullptr);
+    index.clear();
+    EXPECT_EQ(index.find(2, 1), nullptr);
+  }
 }

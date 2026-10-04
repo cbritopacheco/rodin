@@ -34,8 +34,9 @@ namespace
       builder.setOwner(0, 2 * c, 0).setOwner(0, 2 * c + 1, 0);
       IndexArray vertices(2);
       vertices << 2 * c, 2 * c + 1;
-      const auto state = c == 0 ? Shard::State::Ghost :
-        c == 1 ? Shard::State::Shared : Shard::State::Owned;
+      const auto state = c == 0 ? Shard::State::Ghost
+        : c == 1                ? Shard::State::Shared
+                                : Shard::State::Owned;
       builder.polytope(1, 100 + c, Polytope::Type::Segment, vertices, state);
       if (state != Shard::State::Owned)
         builder.setOwner(1, c, 0);
@@ -94,7 +95,8 @@ namespace
             nodes(j, a) = x[j];
         }
         mesh.setPolytopeTransformation({d, cell->getIndex()},
-          new ParametricTransformation<Variational::RealH1Element<K>>(std::move(nodes), element));
+          new ParametricTransformation<Variational::RealH1Element<K>>(
+            std::move(nodes), element));
       }
       mesh.getConnectivity().compute(d, d);
     }
@@ -109,9 +111,9 @@ namespace
     const size_t d = Polytope::Traits(type).getDimension();
     Math::SpatialPoint expected;
     std::vector<Real> expectedJacobian;
-    Math::SpatialPoint rc = d == 0 ? Math::SpatialPoint(0) :
-      (Real(0.75) * Polytope::Traits(type).getCentroid() +
-       Real(0.25) * Polytope::Traits(type).getVertex(0));
+    Math::SpatialPoint rc = d == 0 ? Math::SpatialPoint(0)
+                                   : (Real(0.75) * Polytope::Traits(type).getCentroid() +
+                                       Real(0.25) * Polytope::Traits(type).getVertex(0));
     if (world->rank() == 0)
     {
       auto parent = curvedMesh<K>(type, embedded);
@@ -186,7 +188,9 @@ TEST(MPI_Location_AABB, OwnedSubsetBeforeSearchAndFallback)
   Context::MPI context(*environment, *world);
   auto mesh = overlappingMesh(context);
   Location::AABB locator(mesh);
-  locator.setExhaustiveFallback(true).setProjectionPruning(true).setTolerance(1e-9)
+  locator.setExhaustiveFallback(true)
+    .setProjectionPruning(true)
+    .setTolerance(1e-9)
     .setReferenceTolerance(1e-9);
   Math::SpatialPoint x(2);
   x[0] = Real(0.25);
@@ -261,8 +265,8 @@ TEST(MPI_Location_AABB, SharedBoundaryAndDimensionSpecificOwnership)
   for (Index v = 0; v < 3; ++v)
   {
     const int owner = v == 2 && world->size() > 1 ? 1 : 0;
-    const auto [i, inserted] = builder.include({0, v},
-      world->rank() == owner ? Shard::State::Owned : Shard::State::Shared);
+    const auto [i, inserted] = builder.include(
+      {0, v}, world->rank() == owner ? Shard::State::Owned : Shard::State::Shared);
     if (world->rank() != owner)
       builder.setOwner(0, i, owner);
     else
@@ -273,8 +277,8 @@ TEST(MPI_Location_AABB, SharedBoundaryAndDimensionSpecificOwnership)
   for (Index c = 0; c < 2; ++c)
   {
     const int owner = static_cast<int>(c % world->size());
-    const auto [i, inserted] = builder.include({1, c},
-      world->rank() == owner ? Shard::State::Owned : Shard::State::Ghost);
+    const auto [i, inserted] = builder.include(
+      {1, c}, world->rank() == owner ? Shard::State::Owned : Shard::State::Ghost);
     if (world->rank() != owner)
       builder.setOwner(1, i, owner);
     else
@@ -284,7 +288,15 @@ TEST(MPI_Location_AABB, SharedBoundaryAndDimensionSpecificOwnership)
   }
   auto mesh = MPIMesh::Builder(context).initialize(builder.finalize()).finalize();
   Location::AABB locator(mesh);
+  locator.setExhaustiveFallback(true);
   const auto& boundary = parent.getVertexCoordinates(1);
+  const auto rc = Polytope::Traits(Polytope::Type::Segment).getCentroid();
+  for (Index c = 0; c < 2; ++c)
+  {
+    const auto x = Point(*parent.getCell(c), rc).getPhysicalCoordinates();
+    EXPECT_EQ(locator.locate(x).has_value(),
+      world->rank() == static_cast<int>(c % world->size()));
+  }
   EXPECT_EQ(locator.locate(1, boundary).has_value(), world->rank() < 2);
   EXPECT_EQ(locator.locate(0, boundary).has_value(), world->rank() == 0);
   for (int q = 0; q <= world->rank(); ++q)
@@ -292,7 +304,8 @@ TEST(MPI_Location_AABB, SharedBoundaryAndDimensionSpecificOwnership)
   world->barrier();
 }
 
-class MPILocationGeometryTest : public ::testing::TestWithParam<Polytope::Type> {};
+class MPILocationGeometryTest : public ::testing::TestWithParam<Polytope::Type>
+{};
 TEST_P(MPILocationGeometryTest, TransfersAndLocatesAllOrders)
 {
   for (bool embedded : {false, true})
@@ -303,8 +316,8 @@ TEST_P(MPILocationGeometryTest, TransfersAndLocatesAllOrders)
     checkDistributedGeometry<4>(GetParam(), embedded);
   }
 }
-INSTANTIATE_TEST_SUITE_P(AllGeometries, MPILocationGeometryTest,
-  ::testing::ValuesIn(Polytope::Types));
+INSTANTIATE_TEST_SUITE_P(
+  AllGeometries, MPILocationGeometryTest, ::testing::ValuesIn(Polytope::Types));
 
 int main(int argc, char** argv)
 {

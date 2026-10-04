@@ -25,6 +25,9 @@ add_executable(RodinAABBWorkload AABBWorkload.cpp)
 target_link_libraries(RodinAABBWorkload PRIVATE Rodin::Variational)
 
 if (RODIN_USE_MPI)
+  add_executable(RodinMPIAABBBenchmarks MPIAABB.cpp)
+  target_link_libraries(RodinMPIAABBBenchmarks PRIVATE
+    Rodin::MPI Rodin::Variational Rodin::Location benchmark::benchmark)
   add_executable(RodinMPIConstructionBenchmarks MPIConstruction.cpp)
   target_link_libraries(RodinMPIConstructionBenchmarks PRIVATE
     Rodin::MPI
