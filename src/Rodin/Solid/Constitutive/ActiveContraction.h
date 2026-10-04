@@ -64,8 +64,8 @@ namespace Rodin::Solid
         const PassiveLaw& passiveLaw, const ActiveLaw& activeLaw = ActiveLaw())
         : m_passiveLaw(passiveLaw),
           m_activeLaw(activeLaw),
-          m_localTolerance(1e-12),
-          m_localMaxIterations(50)
+          m_localTolerance(DefaultLocalTolerance),
+          m_localMaxIterations(DefaultLocalMaxIterations)
       {}
 
       /// @brief Sets the convergence tolerance for the per-quadrature-point local
@@ -217,6 +217,11 @@ namespace Rodin::Solid
       }
 
     private:
+      /// @brief Absolute Newton-correction tolerance in active-strain ec units.
+      static constexpr Real DefaultLocalTolerance = 1e-12;
+      /// @brief Local Newton work budget; not a convergence guarantee.
+      static constexpr size_t DefaultLocalMaxIterations = 50;
+
       static bool hasDynamicData(const ConstitutivePoint& cp)
       {
         return cp.has<Tags::TimeStep>() && cp.has<Tags::PreviousActiveExtension>() &&

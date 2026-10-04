@@ -115,6 +115,16 @@ namespace Rodin::Geometry
         return m_fe.getOrder();
       }
 
+      /// @brief Returns the element's factor degree when available, otherwise
+      /// the conservative total-degree bound of the transformation interface.
+      size_t getFactorOrder() const override
+      {
+        if constexpr (requires { m_fe.getFactorOrder(); })
+          return m_fe.getFactorOrder();
+        else
+          return Parent::getFactorOrder();
+      }
+
       void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t pdim = getPhysicalDimension();
@@ -142,8 +152,11 @@ namespace Rodin::Geometry
           for (size_t i = 0; i < rdim; i++)
           {
             const auto derivative = basis.template getDerivative<1>(i);
-            for (size_t j = 0; j < pdim; j++)
-              pc(j, i) += m_pm(j, local) * derivative(rc);
+            // The reference derivative is shared by all physical components.
+            const Real value = derivative(rc);
+            // Expose the spatial storage bound to keep this a small loop.
+            for (size_t j = 0; j < pdim && j < Math::SpatialMatrix<Real>::MaxSize; j++)
+              pc(j, i) += m_pm(j, local) * value;
           }
         }
       }
