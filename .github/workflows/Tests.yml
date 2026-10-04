@@ -140,12 +140,14 @@ jobs:
 
   PETScDegreeConvergence:
     runs-on: ubuntu-24.04
-    # Higher-order mixed and nonlinear p/hp paths have independent runtime budgets.
+    # Keep scalar/mixed and vector degree matrices in independent runtime budgets.
+    # The measured local P4 vector pyramid registration alone takes several minutes.
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
+        suite: [scalar_mixed, linear_elasticity]
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -190,23 +192,32 @@ jobs:
           -DRODIN_USE_PETSC=ON
 
       - name: Build PETSc degree-refinement suites
-        run: >-
-          cmake --build build -j 2 --target
-          RodinConvergencePPETScNonlinearPoisson
-          RodinConvergenceHPPETScNonlinearPoisson
-          RodinConvergencePPETScReactionDiffusion
-          RodinConvergenceHPPETScReactionDiffusion
-          RodinConvergencePPETScPoisson
-          RodinConvergenceHPPETScPoisson
-          RodinConvergencePPETScConductivity
-          RodinConvergenceHPPETScConductivity
-          RodinConvergencePPETScStokes
-          RodinConvergenceHPPETScStokes
+        run: |
+          if [ "${{ matrix.suite }}" = linear_elasticity ]; then
+            cmake --build build -j 2 --target \
+              RodinConvergencePPETScLinearElasticity \
+              RodinConvergenceHPPETScLinearElasticity
+          else
+            cmake --build build -j 2 --target \
+              RodinConvergencePPETScNonlinearPoisson \
+              RodinConvergenceHPPETScNonlinearPoisson \
+              RodinConvergencePPETScReactionDiffusion \
+              RodinConvergenceHPPETScReactionDiffusion \
+              RodinConvergencePPETScPoisson RodinConvergenceHPPETScPoisson \
+              RodinConvergencePPETScConductivity RodinConvergenceHPPETScConductivity \
+              RodinConvergencePPETScStokes RodinConvergenceHPPETScStokes
+          fi
 
       - name: Run PETSc degree-refinement suites
-        run: >-
-          ctest --test-dir build/tests -R '^RodinConvergence(P|HP)PETSc'
-          --output-on-failure -j 1
+        run: |
+          if [ "${{ matrix.suite }}" = linear_elasticity ]; then
+            ctest --test-dir build/tests \
+              -R '^RodinConvergence(P|HP)PETScLinearElasticity_' \
+              --output-on-failure -j 1
+          else
+            ctest --test-dir build/tests -R '^RodinConvergence(P|HP)PETSc' \
+              -E 'LinearElasticity' --output-on-failure -j 1
+          fi
 
   PETScCurvedConvergence:
     runs-on: ubuntu-24.04
