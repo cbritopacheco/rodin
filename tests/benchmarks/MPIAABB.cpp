@@ -44,9 +44,9 @@ namespace
   };
   /// Small fixed batches amortize timing without dominating curved build runs.
   constexpr size_t QueryBatch = 16;
-  /// Cheap queries repeat batches for stable timing; expensive queries finish
-  /// after one batch. This does not synchronize or constrain locator calls.
-  [[maybe_unused]] constexpr double MinimumQuerySeconds = 0.005;
+  /// Cheap queries/builds repeat for stable timing; expensive operations finish
+  /// after one batch/build. This does not synchronize or constrain locator calls.
+  [[maybe_unused]] constexpr double MinimumSampleSeconds = 0.005;
   /// Repeated manual samples; all ranks execute the same number of collectives.
   constexpr size_t TimingSamples = 5;
   /// Offset from a reference vertex, well outside numerical locator tolerance.
@@ -219,21 +219,32 @@ namespace
       size_t operations = 1;
       if (category == Query::Build)
       {
-        if (backend == Backend::MPI)
+        operations = 0;
+        do
         {
-          Location::AABB locator(mesh);
-          checksum += locator.locate(d, queries.front()).has_value();
+          if (backend == Backend::MPI)
+          {
+            Location::AABB locator(mesh);
+            checksum += locator.locate(d, queries.front()).has_value();
+          }
+          else if (backend == Backend::OwnedSubset)
+          {
+            Location::AABB<LocalMesh> locator(shard, candidates);
+            checksum += locator.locate(d, queries.front()).has_value();
+          }
+          else
+          {
+            Location::AABB<LocalMesh> locator(shard);
+            checksum += locator.locate(d, queries.front()).has_value();
+          }
+          ++operations;
         }
-        else if (backend == Backend::OwnedSubset)
-        {
-          Location::AABB<LocalMesh> locator(shard, candidates);
-          checksum += locator.locate(d, queries.front()).has_value();
-        }
-        else
-        {
-          Location::AABB<LocalMesh> locator(shard);
-          checksum += locator.locate(d, queries.front()).has_value();
-        }
+#ifdef RODIN_AABB_WORKLOAD_DIAGNOSTICS
+        while (false);
+#else
+        while (std::chrono::duration<double>(Clock::now() - start).count() <
+          MinimumSampleSeconds);
+#endif
       }
       else
       {
@@ -256,7 +267,7 @@ namespace
         while (false); // One batch suffices for counters; no diagnostic timing.
 #else
         while (std::chrono::duration<double>(Clock::now() - start).count() <
-          MinimumQuerySeconds);
+          MinimumSampleSeconds);
 #endif
       }
       const auto stop = Clock::now();

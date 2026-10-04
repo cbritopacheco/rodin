@@ -41,7 +41,7 @@ cases across all geometries, orders 1–4, mesh resolutions, curvature and overl
 Mesh setup is excluded; build includes first lookup. Synthetic cyclic partitions
 and full-overlap cases stress ownership filtering rather than MPI communication.
 Benchmark-only barriers and reductions report the slowest rank; locator calls
-remain noncollective. Timings use adaptive batches for cheap queries.
+remain noncollective. Timings use adaptive repetition for cheap queries/builds.
 
 For example:
 
