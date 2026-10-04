@@ -36,38 +36,45 @@ namespace Rodin::Location
   class AABB<MeshType> final
   {
     public:
+      /// Snapshots owned shard-local candidates without communication.
       explicit AABB(const MeshType& mesh)
         : m_mesh(mesh),
           m_shard(mesh.getShard(), ownedCandidates(mesh))
       {}
 
+      /// Returns physical tolerance relative to the full shard's box diagonal.
       Real getTolerance() const
       {
         return m_shard.getTolerance();
       }
+      /// Returns the dimensionless reference-coordinate tolerance.
       Real getReferenceTolerance() const
       {
         return m_shard.getReferenceTolerance();
       }
 
+      /// Sets relative physical tolerance and invalidates local bounds.
       AABB& setTolerance(Real tolerance)
       {
         m_shard.setTolerance(tolerance);
         return *this;
       }
 
+      /// Sets the maximum reference-space overshoot before clipping.
       AABB& setReferenceTolerance(Real tolerance)
       {
         m_shard.setReferenceTolerance(tolerance);
         return *this;
       }
 
+      /// Enables exhaustive inversion restricted to owned candidates.
       AABB& setExhaustiveFallback(bool enabled)
       {
         m_shard.setExhaustiveFallback(enabled);
         return *this;
       }
 
+      /// Enables conservative projection pruning in the local engine.
       AABB& setProjectionPruning(bool enabled)
       {
         m_shard.setProjectionPruning(enabled);

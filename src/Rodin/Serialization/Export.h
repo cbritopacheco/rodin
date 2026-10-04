@@ -32,12 +32,16 @@ BOOST_CLASS_EXPORT(
 // Built-in curved geometry orders covered by MPI shard transfer. Applications
 // using other FE orders/types must register their transformation instantiations
 // with Boost.Serialization before transferring shards.
+/// @brief Registers real H1 order one geometry for MPI shard transport.
 BOOST_CLASS_EXPORT(
   Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealH1Element<1>>);
+/// @brief Registers real H1 order two geometry for MPI shard transport.
 BOOST_CLASS_EXPORT(
   Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealH1Element<2>>);
+/// @brief Registers real H1 order three geometry for MPI shard transport.
 BOOST_CLASS_EXPORT(
   Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealH1Element<3>>);
+/// @brief Registers real H1 order four geometry for MPI shard transport.
 BOOST_CLASS_EXPORT(
   Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealH1Element<4>>);
 
