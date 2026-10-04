@@ -1,0 +1,99 @@
+/**
+ * @page guides-ordering Matrix storage and finite-element component ordering
+ *
+ * @tableofcontents
+ *
+ * Matrix storage, tensor storage and finite-element coefficient numbering
+ * describe different representations. Storage order determines the position
+ * of an entry in an object's memory. Component numbering determines the
+ * association between a coefficient and a basis function. Mathematical
+ * indexing remains independent of both representations.
+ *
+ * @section ordering-matrix Matrix storage
+ *
+ * @ref Rodin::Math::Matrix and @ref Rodin::Math::FixedSizeMatrix use Eigen's
+ * default column-major storage. For a dense matrix with @f$m@f$ rows, entry
+ * @f$A_{ij}@f$ has offset @f$i+mj@f$, with zero-based indices. Rows vary
+ * fastest within each column. @ref Rodin::Math::SparseMatrix explicitly uses
+ * column-major compressed sparse storage; its entries are not a contiguous
+ * dense array.
+ *
+ * @ref Rodin::Math::SpatialMatrix also uses column-major storage, in a fixed
+ * three-by-three backing matrix. Its runtime dimensions select an active
+ * upper-left block. Consequently, its backing-storage offset is
+ * @f$i+3j@f$, including when the active row count is smaller than three.
+ * The active entries of a rectangular spatial matrix must not be treated
+ * as a packed array with leading dimension equal to its runtime row count.
+ * Access through @c operator()(i,j) preserves the mathematical indexing.
+ *
+ * Explicit row-major Eigen buffers occur in local integration kernels.
+ * These are internal storage choices and do not change the default storage
+ * of public matrix types or the numbering of finite-element coefficients.
+ *
+ * @section ordering-components Matrix finite-element coefficients
+ *
+ * The matrix specializations of P0, P0g, P1 and H1 currently interleave
+ * row-major components within each scalar basis index. For an
+ * @f$m\times n@f$ range, scalar basis index @f$a@f$ and matrix component
+ * @f$(i,j)@f$, the coefficient index is
+ * @f[
+ *   q=a(mn)+c,\qquad c=in+j.
+ * @f]
+ * The corresponding basis function is @f$\phi_a E_{ij}@f$, where
+ * @f$E_{ij}@f$ is the matrix unit with a single nonzero entry. For a
+ * two-by-three range, the component sequence at each scalar basis index is
+ * @f[
+ *   (0,0),\ (0,1),\ (0,2),\ (1,0),\ (1,1),\ (1,2).
+ * @f]
+ * This numbering is distinct from column-major matrix storage. No Voigt
+ * scaling, symmetry assumption or component reduction is applied. A
+ * column-major component convention would instead use @f$c=i+mj@f$;
+ * that is not the current matrix-space coefficient convention.
+ *
+ * Within these space families, local and global component expansion follows
+ * this rule relative to their respective scalar DOF maps. Generic algorithms
+ * must obtain local-to-global indices from the finite-element space rather
+ * than reconstructing them from this formula. Other conforming families,
+ * including future @f$H(\mathrm{div})@f$ and @f$H(\mathrm{curl})@f$ spaces,
+ * may have different basis functions, mappings and DOF distributions.
+ *
+ * @section ordering-tensor Spatial tensor storage and index meaning
+ *
+ * @ref Rodin::Math::SpatialTensor uses a fixed-capacity stack array with
+ * runtime extents. Active entries occupy a contiguous prefix, with the last
+ * index varying fastest. For rank @f$R@f$, extents @f$d_0,\ldots,d_{R-1}@f$
+ * and indices @f$i_0,\ldots,i_{R-1}@f$, the storage offset is
+ * @f[
+ *   p=\sum_{r=0}^{R-1} i_r\prod_{s=r+1}^{R-1}d_s.
+ * @f]
+ * The empty product equals one. An extent of zero makes the active tensor
+ * empty. This is the tensor analogue of row-major storage and differs from
+ * the column-major backing storage of @ref Rodin::Math::SpatialMatrix.
+ *
+ * Index roles are specified by each mathematical operation. In particular,
+ * the gradient of a matrix field has entries
+ * @f$G_{ijk}=\partial_k A_{ij}@f$, and a constitutive tensor acts through
+ * @f$(\mathcal C A)_{ij}=\sum_{kl}\mathcal C_{ijkl}A_{kl}@f$.
+ * These definitions do not depend on storage order. Tensor storage does not
+ * define a tensor-valued finite-element DOF convention; the current matrix
+ * solution API does not introduce higher-rank tensor solution spaces.
+ *
+ * @section ordering-assembly Consequences for assembly
+ *
+ * A change of component numbering permutes coefficient vectors and the rows
+ * and columns of assembled operators. Such a change requires coordinated
+ * updates to basis evaluation, component access, DOF maps, persistence and
+ * interoperability. Changing memory order alone does not redefine components.
+ *
+ * For uncoupled matrix mass and stiffness forms in the componentwise spaces,
+ * interleaved numbering gives @f$A_h=A_{\mathrm{scalar}}\otimes I_{mn}@f$.
+ * With @f$N@f$ scalar local basis functions, full dense traversal examines
+ * @f$(mn)^2N^2@f$ entries although only @f$mnN^2@f$ component pairs can
+ * contribute. Switching between row-major and column-major component
+ * numbering does not remove this structural work. Assembly must preserve
+ * the form's component coupling to avoid traversing absent pairs; coupled
+ * constitutive forms require their actual coupling pattern.
+ *
+ * @see @ref guides-spatial-matrix "Matrix solutions and spatial tensors"
+ * @see @ref fem-spaces "Finite element spaces"
+ */

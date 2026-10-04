@@ -14,6 +14,8 @@
 #ifndef RODIN_MATH_FORWARDDECLS_H
 #define RODIN_MATH_FORWARDDECLS_H
 
+#include <cstddef>
+
 namespace Rodin::Math
 {
   /**
@@ -50,6 +52,9 @@ namespace Rodin::Math
 
   template <class Scalar>
   class SpatialMatrix;
+
+  template <class Scalar, size_t Rank = 3>
+  class SpatialTensor;
 }
 
 #endif
