@@ -334,6 +334,16 @@ namespace Rodin::Tests::Convergence
       }
   };
 
+  /**
+   * @brief Independently integrated physical error norms.
+   *
+   * Mapped quadrature points are owned by each cell's integration scope, not
+   * retained in the mesh cache. For @f$ N @f$ cells and at most @f$ Q @f$
+   * points per cell, the additional mapped-point storage is @f$ O(Q) @f$
+   * rather than @f$ O(NQ) @f$. This does not clear or invalidate quadratures
+   * borrowed by assembly. MPI reductions remain intentional global sums of
+   * owned-cell contributions; constructing mapped points is rank-local.
+   */
   class ErrorNorm
   {
     public:
@@ -350,7 +360,7 @@ namespace Rodin::Tests::Convergence
               continue;
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
-          const auto& quadrature = cell->getQuadrature(qf);
+          const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& p = quadrature.getPoint(qp);
@@ -413,7 +423,7 @@ namespace Rodin::Tests::Convergence
               continue;
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
-          const auto& quadrature = cell->getQuadrature(qf);
+          const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& p = quadrature.getPoint(qp);
@@ -451,7 +461,7 @@ namespace Rodin::Tests::Convergence
               continue;
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(quadratureOrder, cell->getGeometry());
-          const auto& quadrature = cell->getQuadrature(qf);
+          const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& p = quadrature.getPoint(qp);

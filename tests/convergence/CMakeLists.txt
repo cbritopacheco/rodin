@@ -10,7 +10,7 @@ target_link_libraries(RodinConvergence
     Rodin::Variational
 )
 
-add_executable(RodinConvergenceUtilitiesTest ConvergenceTest.cpp)
+add_executable(RodinConvergenceUtilitiesTest ConvergenceTest.cpp ErrorNormTest.cpp)
 target_link_libraries(RodinConvergenceUtilitiesTest
   PRIVATE
     GTest::gtest
