@@ -222,16 +222,31 @@ $$
 The tests check this identity, nested ancestry composition, unique global
 entity ownership, owner/halo agreement, and shared DOF identity for P0, P0g,
 P1 and H1 degrees one through six in real/complex scalar/vector ranges.
+The requested and extracted cell selections must agree exactly in global
+parent indices, so an entirely dropped entity cannot disappear from the
+ownership oracle unnoticed.
 Boundary selection and identification rows are checked through degree six,
 independently of PDE solves. Actual native P1 restrictions use vertex-label
 coefficients $c_k=k+1$ or $c_k=(k+1)+\mathrm{i}(2k+1)$, with vector
 components $c_{k,j}=c_k+j$. Restriction must reproduce those coefficients
 exactly and retain the destination space, including nested ancestry.
+Full-dimensional native P0 restrictions use the same coefficient labels on
+cells, with parent cells selected through logical ancestry. A discontinuous
+P0 boundary trace is not selected without an incident-cell convention.
+An additional cell selection retains even global cell indices, so parent
+and child coefficient layouts differ when the parent has multiple cells;
+the single-cell families retain their sole cell. This checks actual
+restriction rather than an accidental equality of full-mesh layouts.
+Native P0g restrictions reproduce the constants $c_0$ and $c_{0,j}$ on
+held entities in cell, boundary, and nested selections. Empty shards check
+layout preservation; they have no geometric points at which to evaluate
+a restricted field. This is constant restriction, not a distributed mean
+projection of a nonconstant source.
 No coordinate matching or numerical tolerance determines correspondence.
 One-rank-only restriction calls check the noncollective value-operation
 contract after collective mesh/space construction; gathers belong only to
-the independent global ownership oracle and synchronization to its test
-protocol. Higher-order logical/index coverage is not a claim of numerical
+the independent global selection/ownership oracle and synchronization to its
+test protocol. Higher-order logical/index coverage is not a claim of numerical
 restriction or PDE convergence for every higher-order field.
 
 The main refinement sequences can be read with $n$ grid points per coordinate

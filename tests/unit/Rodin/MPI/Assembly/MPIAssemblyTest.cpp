@@ -17,7 +17,7 @@
  *   across real/complex scalar/vector ranges, including Point and empty shards
  * - Positive-dimensional cell, boundary, and nested SubMeshes preserve logical
  *   ancestry and shared DOF indices for the same families and value ranges,
- *   with exact P1 restrictions of logically labelled vertex coefficients
+ *   with exact P1 vertex-field, P0 cell-field, and P0g constant restrictions
  *
  * Run with mpirun -n 1/2/3/4/8 as registered in CMakeLists.txt.
  */
@@ -619,8 +619,11 @@ namespace Rodin::Tests::Unit
   /**
    * Positive-dimensional cell/boundary SubMeshes preserve logical ancestry
    * and shared DOF identity for all scalar/vector ranges and H1 orders 1--6.
-   * Real/complex scalar/vector P1 restrictions preserve vertex-label values
-   * and destination layouts, including nested ancestry, without tolerances.
+   * Real/complex scalar/vector P1, full-dimensional P0, and P0g restrictions
+   * preserve vertex/cell-label values or constants and destination layouts,
+   * including nested ancestry, without tolerances. No ambiguous P0 boundary
+   * trace is introduced. Values are checked on held entities, not nonexistent
+   * evaluation points of empty shards.
    * Gathers below certify global ownership and agreement among holders;
    * local entity maps and round trips themselves require no collective.
    */
@@ -632,10 +635,39 @@ namespace Rodin::Tests::Unit
     auto parent = dimension == 1 ? distributeFromRoot(context, GetParam(), {2})
       : dimension == 2           ? distributeFromRoot(context, GetParam(), {2, 2})
                                  : distributeFromRoot(context, GetParam(), {2, 2, 2});
-    const auto check = [&](const SubMesh<Context::MPI>& sub) {
+    const auto check = [&](const SubMesh<Context::MPI>& sub,
+                         const std::vector<Index>& selectedParentEntities) {
       const Mesh<Context::MPI>& mesh = sub;
       const auto& immediateParent = sub.getParent();
       const size_t subDimension = mesh.getDimension();
+      // Compare the explicit extraction request with the result, independently
+      // of the child's ownership/DOF tables. Otherwise a dropped entity could
+      // disappear from every subsequent ownership and ancestry assertion.
+      std::vector<Index> actualParents;
+      const auto& cellParents = sub.getPolytopeMap(subDimension).left;
+      for (auto cell = mesh.getCell(); cell; ++cell)
+        if (mesh.getShard().isOwned(subDimension, cell->getIndex()))
+        {
+          EXPECT_LT(cell->getIndex(), cellParents.size());
+          if (cell->getIndex() < cellParents.size())
+            actualParents.push_back(immediateParent.getGlobalIndex(
+              subDimension, cellParents[cell->getIndex()]));
+        }
+      using Selection = std::pair<std::vector<Index>, std::vector<Index>>;
+      std::vector<Selection> selections;
+      boost::mpi::all_gather(
+        world, Selection{selectedParentEntities, actualParents}, selections);
+      std::vector<Index> expectedSelection, actualSelection;
+      for (const auto& selection : selections)
+      {
+        expectedSelection.insert(
+          expectedSelection.end(), selection.first.begin(), selection.first.end());
+        actualSelection.insert(
+          actualSelection.end(), selection.second.begin(), selection.second.end());
+      }
+      std::sort(expectedSelection.begin(), expectedSelection.end());
+      std::sort(actualSelection.begin(), actualSelection.end());
+      EXPECT_EQ(actualSelection, expectedSelection);
       for (size_t d = 0; d <= subDimension; ++d)
         for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
         {
@@ -886,112 +918,153 @@ namespace Rodin::Tests::Unit
       orders.template operator()<4>();
       orders.template operator()<5>();
       orders.template operator()<6>();
-      const auto checkRestriction = [&]<class Range>() {
-        using Space = P1<Range, Mesh<Context::MPI>>;
-        using Scalar = typename Space::ScalarType;
-        constexpr bool vector = std::is_same_v<Range, Math::SpatialVector<Scalar>>;
-        SCOPED_TRACE(typeid(Range).name());
-        const auto sourceSpace = [&] {
-          if constexpr (vector)
-            return Space(parent, 3);
-          else
-            return Space(parent);
-        }();
-        const auto targetSpace = [&] {
-          if constexpr (vector)
-            return Space(mesh, 3);
-          else
-            return Space(mesh);
-        }();
-        GridFunction source(sourceSpace), restricted(targetSpace);
-        const auto value = [](Index vertex, size_t component) {
-          const Scalar base = [&] {
-            if constexpr (std::is_same_v<Scalar, Complex>)
-              return Complex(Real(vertex + 1), Real(2 * vertex + 1));
+      const auto checkRestriction =
+        [&]<class Range, template <class, class> class Family = P1>() {
+          using Space = Family<Range, Mesh<Context::MPI>>;
+          constexpr bool CellConstant =
+            std::is_same_v<Space, P0<Range, Mesh<Context::MPI>>>;
+          constexpr bool GlobalConstant =
+            std::is_same_v<Space, P0g<Range, Mesh<Context::MPI>>>;
+          using Scalar = typename Space::ScalarType;
+          constexpr bool vector = std::is_same_v<Range, Math::SpatialVector<Scalar>>;
+          SCOPED_TRACE(typeid(Space).name());
+          const auto sourceSpace = [&] {
+            if constexpr (vector)
+              return Space(parent, 3);
             else
-              return Real(vertex + 1);
+              return Space(parent);
           }();
-          return base + Scalar(component);
-        };
-        // Use logical global vertex labels, not coordinates, to seed a
-        // continuous P1 field. All holder coefficients are available locally.
-        for (Index vertex = 0; vertex < parent.getShard().getVertexCount(); ++vertex)
-        {
-          const IndexArray dofs = sourceSpace.getDOFs(0, vertex);
-          const Index global = parent.getGlobalIndex(0, vertex);
-          for (size_t component = 0; component < static_cast<size_t>(dofs.size());
-               ++component)
-            source[dofs(component)] = value(global, component);
-        }
-        // Different spaces must interpolate, rather than copy/rebind the
-        // source layout. The parent inclusion follows the actual value path.
-        // First exercise native coefficient restriction on one rank only:
-        // this operation has no global result and must not communicate.
-        // The barrier is test-protocol synchronization outside the operation;
-        // the bounded MPI test detects an accidental hidden collective.
-        if (world.rank() == 0)
-          restricted = source;
-        world.barrier();
-        restricted = source;
-        EXPECT_EQ(&restricted.getFiniteElementSpace(), &targetSpace);
-        EXPECT_EQ(restricted.getData().size(), targetSpace.getSize());
-        for (Index vertex = 0; vertex < mesh.getShard().getVertexCount(); ++vertex)
-        {
-          const auto& vertices = sub.getPolytopeMap(0).left;
-          EXPECT_LT(vertex, vertices.size());
-          if (vertex >= vertices.size())
-            continue;
-          Index ancestor = vertices[vertex];
-          if (immediateParent.isSubMesh())
+          const auto targetSpace = [&] {
+            if constexpr (vector)
+              return Space(mesh, 3);
+            else
+              return Space(mesh);
+          }();
+          GridFunction source(sourceSpace), restricted(targetSpace);
+          const auto value = [](Index entity, size_t component) {
+            const Scalar base = [&] {
+              if constexpr (std::is_same_v<Scalar, Complex>)
+                return Complex(Real(entity + 1), Real(2 * entity + 1));
+              else
+                return Real(entity + 1);
+            }();
+            return base + Scalar(component);
+          };
+          // P1 uses vertex labels; P0 uses cell labels and is restricted only
+          // to full-dimensional cells. No incident-cell choice defines a P0
+          // boundary trace here. P0g uses the same constant label on every held
+          // entity. All holder coefficients are available locally.
+          const size_t entityDimension = CellConstant ? dimension : 0;
+          for (Index entity = 0;
+               entity < parent.getShard().getPolytopeCount(entityDimension); ++entity)
           {
-            const auto& map = immediateParent.asSubMesh().getPolytopeMap(0);
-            EXPECT_LT(ancestor, map.left.size());
-            if (ancestor >= map.left.size())
-              continue;
-            ancestor = map.left[ancestor];
+            const IndexArray dofs = sourceSpace.getDOFs(entityDimension, entity);
+            const Index global =
+              GlobalConstant ? Index{0} : parent.getGlobalIndex(entityDimension, entity);
+            for (size_t component = 0; component < static_cast<size_t>(dofs.size());
+                 ++component)
+              source[dofs(component)] = value(global, component);
           }
-          const Index global = parent.getGlobalIndex(0, ancestor);
-          const IndexArray dofs = targetSpace.getDOFs(0, vertex);
-          for (size_t component = 0; component < static_cast<size_t>(dofs.size());
-               ++component)
-            EXPECT_EQ(restricted[dofs(component)], value(global, component));
-        }
-      };
+          // Different spaces must interpolate, rather than copy/rebind the
+          // source layout. The parent inclusion follows the actual value path.
+          // First exercise native coefficient restriction on one rank only:
+          // this operation has no global result and must not communicate.
+          // The barrier is test-protocol synchronization outside the operation;
+          // the bounded MPI test detects an accidental hidden collective.
+          if (world.rank() == 0)
+            restricted = source;
+          world.barrier();
+          restricted = source;
+          EXPECT_EQ(&restricted.getFiniteElementSpace(), &targetSpace);
+          EXPECT_EQ(restricted.getData().size(), targetSpace.getSize());
+          for (Index entity = 0;
+               entity < mesh.getShard().getPolytopeCount(entityDimension); ++entity)
+          {
+            const auto& ancestors = sub.getPolytopeMap(entityDimension).left;
+            EXPECT_LT(entity, ancestors.size());
+            if (entity >= ancestors.size())
+              continue;
+            Index ancestor = ancestors[entity];
+            if (immediateParent.isSubMesh())
+            {
+              const auto& map =
+                immediateParent.asSubMesh().getPolytopeMap(entityDimension);
+              EXPECT_LT(ancestor, map.left.size());
+              if (ancestor >= map.left.size())
+                continue;
+              ancestor = map.left[ancestor];
+            }
+            const Index global = GlobalConstant
+              ? Index{0}
+              : parent.getGlobalIndex(entityDimension, ancestor);
+            const IndexArray dofs = targetSpace.getDOFs(entityDimension, entity);
+            for (size_t component = 0; component < static_cast<size_t>(dofs.size());
+                 ++component)
+              EXPECT_EQ(restricted[dofs(component)], value(global, component));
+          }
+        };
       checkRestriction.template operator()<Real>();
       checkRestriction.template operator()<Complex>();
       checkRestriction.template operator()<Math::SpatialVector<Real>>();
       checkRestriction.template operator()<Math::SpatialVector<Complex>>();
+      if (subDimension == dimension)
+      {
+        checkRestriction.template operator()<Real, P0>();
+        checkRestriction.template operator()<Complex, P0>();
+        checkRestriction.template operator()<Math::SpatialVector<Real>, P0>();
+        checkRestriction.template operator()<Math::SpatialVector<Complex>, P0>();
+      }
+      checkRestriction.template operator()<Real, P0g>();
+      checkRestriction.template operator()<Complex, P0g>();
+      checkRestriction.template operator()<Math::SpatialVector<Real>, P0g>();
+      checkRestriction.template operator()<Math::SpatialVector<Complex>, P0g>();
     };
-    for (const size_t selectedDimension : {dimension, dimension - 1})
+    for (const auto& [selectedDimension, sparse] : {std::pair{dimension, false},
+           std::pair{dimension - 1, false}, std::pair{dimension, true}})
     {
       if (selectedDimension == 0)
         continue; // Point submeshes have their own exact-value coverage.
-      SCOPED_TRACE(::testing::Message() << "submesh dimension=" << selectedDimension);
+      SCOPED_TRACE(::testing::Message()
+        << "submesh dimension=" << selectedDimension << " sparse=" << sparse);
       SubMesh<Context::MPI>::Builder builder;
       builder.initialize(parent);
+      std::vector<Index> selected;
       if (selectedDimension == dimension)
       {
         for (auto cell = parent.getCell(); cell; ++cell)
-          if (parent.getShard().isOwned(dimension, cell->getIndex()))
+          if (parent.getShard().isOwned(dimension, cell->getIndex()) &&
+            (!sparse || parent.getGlobalIndex(dimension, cell->getIndex()) % 2 == 0))
+          {
             builder.include(dimension, cell->getIndex());
+            selected.push_back(parent.getGlobalIndex(dimension, cell->getIndex()));
+          }
       }
       else
       {
         for (auto face = parent.getBoundary(); face; ++face)
           if (parent.getShard().isOwned(selectedDimension, face->getIndex()))
+          {
             builder.include(selectedDimension, face->getIndex());
+            selected.push_back(
+              parent.getGlobalIndex(selectedDimension, face->getIndex()));
+          }
       }
       auto sub = builder.finalize();
       EXPECT_EQ(sub.getDimension(), selectedDimension);
-      check(sub);
+      check(sub, selected);
       SubMesh<Context::MPI>::Builder nestedBuilder;
       nestedBuilder.initialize(sub);
+      std::vector<Index> nestedSelected;
       for (auto cell = sub.getCell(); cell; ++cell)
         if (sub.getShard().isOwned(selectedDimension, cell->getIndex()))
+        {
           nestedBuilder.include(selectedDimension, cell->getIndex());
+          nestedSelected.push_back(
+            sub.getGlobalIndex(selectedDimension, cell->getIndex()));
+        }
       auto nested = nestedBuilder.finalize();
       EXPECT_EQ(nested.getDimension(), selectedDimension);
-      check(nested);
+      check(nested, nestedSelected);
     }
   }
 
