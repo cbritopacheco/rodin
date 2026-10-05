@@ -55,8 +55,8 @@ namespace Rodin::Adaptation
         const auto& trialFE = trialFES.getFiniteElement(dim, index);
         const auto& testFE = testFES.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
-        const std::size_t order = parameters.quadratureOrder > 0
-          ? parameters.quadratureOrder
+        const std::size_t order = parameters.quadrature.order > 0
+          ? parameters.quadrature.order
           : std::max<std::size_t>(2, 2 * trialFE.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());

@@ -395,8 +395,8 @@ int main(int argc, char** argv)
   std::cout << "  elements=" << mesh.getCellCount() << '\n';
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes << "  center=("
             << cx << ", " << cy << ", " << cz << ")"
-            << "  phase=" << phase << "  kappaF=" << wngirParams.kappaF
-            << " kappaD=" << wngirParams.kappaD << '\n';
+            << "  phase=" << phase << "  kappaF=" << wngirParams.model.fit
+            << " kappaD=" << wngirParams.model.distribution << '\n';
 
   clearXDMFRegionAttributes(mesh);
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
@@ -485,8 +485,8 @@ int main(int argc, char** argv)
       const auto face = mesh.getFace(facet);
       const auto& fe = fes.getFiniteElement(meshDim - 1, facet);
       const std::size_t nLocal = fe.getCount();
-      const std::size_t qFitOrder = wngirParams.geometricValidationOrder > 0
-        ? wngirParams.geometricValidationOrder
+      const std::size_t qFitOrder = wngirParams.quadrature.validation > 0
+        ? wngirParams.quadrature.validation
         : wngirGeometricValidationOrder(fe.getOrder());
       const auto& qf = QF::PolytopeQuadratureFormula::get(qFitOrder, face->getGeometry());
       const auto& quad = face->getQuadrature(qf);

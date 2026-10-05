@@ -57,12 +57,13 @@ namespace Rodin::Examples
 
   struct WNGIRExampleDefaults
   {
-      std::size_t maxIterations = Adaptation::WNGIRParameters{}.maxIterations;
+      std::size_t maxIterations =
+        Adaptation::WNGIRParameters{}.convergence.iterations.outer;
       std::size_t quadratureOrder = 0;
-      Real kappaF = Adaptation::WNGIRParameters{}.kappaF;
-      Real kappaD = Adaptation::WNGIRParameters{}.kappaD;
-      Real kappaJ = Adaptation::WNGIRParameters{}.kappaJ;
-      Real kappaQ = Adaptation::WNGIRParameters{}.kappaQ;
+      Real kappaF = Adaptation::WNGIRParameters{}.model.fit;
+      Real kappaD = Adaptation::WNGIRParameters{}.model.distribution;
+      Real kappaJ = Adaptation::WNGIRParameters{}.model.kappaJ;
+      Real kappaQ = Adaptation::WNGIRParameters{}.model.kappaQ;
   };
 
   inline bool findOption(
@@ -197,67 +198,75 @@ namespace Rodin::Examples
         Alert::Exception() << "Unknown or removed WNGIR option: " << name << Alert::Raise;
     }
     Adaptation::WNGIRParameters p;
-    p.h = h;
+    p.model.h = h;
 
-    p.kappaF = realOption(argc, argv, "wngir-kappa-f", defaults.kappaF);
-    p.robustScale = realOption(argc, argv, "wngir-robust-scale", p.robustScale);
+    p.model.fit = realOption(argc, argv, "wngir-kappa-f", defaults.kappaF);
+    p.model.robustScale =
+      realOption(argc, argv, "wngir-robust-scale", p.model.robustScale);
 
-    p.kappaJ = realOption(argc, argv, "wngir-kappa-j", defaults.kappaJ);
-    p.kappaQ = realOption(argc, argv, "wngir-kappa-q", defaults.kappaQ);
-    p.jSafe = realOption(argc, argv, "wngir-jsafe", "j-safe", p.jSafe);
-    p.qMax = realOption(argc, argv, "wngir-qmax", p.qMax);
-    p.qualityGuard = realOption(argc, argv, "wngir-quality-guard", p.qualityGuard);
-    p.kappaD = realOption(argc, argv, "wngir-kappa-d", defaults.kappaD);
-    p.directionalNewton =
-      boolOption(argc, argv, "wngir-directional-newton", p.directionalNewton);
-    p.directionalNewtonMaxStepOverH = realOption(
-      argc, argv, "wngir-directional-newton-max-step-h", p.directionalNewtonMaxStepOverH);
+    p.model.kappaJ = realOption(argc, argv, "wngir-kappa-j", defaults.kappaJ);
+    p.model.kappaQ = realOption(argc, argv, "wngir-kappa-q", defaults.kappaQ);
+    p.model.jacobian = realOption(argc, argv, "wngir-jsafe", "j-safe", p.model.jacobian);
+    p.model.distortion = realOption(argc, argv, "wngir-qmax", p.model.distortion);
+    p.model.qualityGuard =
+      realOption(argc, argv, "wngir-quality-guard", p.model.qualityGuard);
+    p.model.distribution = realOption(argc, argv, "wngir-kappa-d", defaults.kappaD);
+    p.globalization.directionalNewton = boolOption(
+      argc, argv, "wngir-directional-newton", p.globalization.directionalNewton);
+    p.globalization.maxStepOverH = realOption(
+      argc, argv, "wngir-directional-newton-max-step-h", p.globalization.maxStepOverH);
     p.traceQualityWitness = boolOption(argc, argv, "wngir-quality-witness", false);
     const auto defaultSolver =
-      p.linearSolver == Adaptation::WNGIRParameters::LinearSolver::MUMPS ? "mumps"
-                                                                         : "sparse-lu";
+      p.linear.solver == Adaptation::WNGIRParameters::LinearSolver::MUMPS ? "mumps"
+                                                                          : "sparse-lu";
     const auto linearSolver =
       stringOption(argc, argv, "wngir-direct-solver", defaultSolver);
     if (linearSolver == "mumps")
-      p.linearSolver = Adaptation::WNGIRParameters::LinearSolver::MUMPS;
+      p.linear.solver = Adaptation::WNGIRParameters::LinearSolver::MUMPS;
     else if (linearSolver == "sparse-lu")
-      p.linearSolver = Adaptation::WNGIRParameters::LinearSolver::SparseLU;
+      p.linear.solver = Adaptation::WNGIRParameters::LinearSolver::SparseLU;
     else if (linearSolver == "cg")
-      p.linearSolver = Adaptation::WNGIRParameters::LinearSolver::CG;
+      p.linear.solver = Adaptation::WNGIRParameters::LinearSolver::CG;
     else
       Alert::Exception() << "Unknown WNGIR solver: " << linearSolver << Alert::Raise;
-    p.linearSolverThreads = sizeOption(argc, argv, "wngir-direct-threads", 0);
-    p.geometricSupTolerance = realOption(argc, argv, "wngir-geometric-sup-tol", 0);
-    p.innerIterations =
-      sizeOption(argc, argv, "wngir-primal-barrier-iterations", p.innerIterations);
-    p.innerRelativeTolerance = realOption(
-      argc, argv, "wngir-primal-barrier-relative-tol", p.innerRelativeTolerance);
-    p.innerAbsoluteTolerance = realOption(
-      argc, argv, "wngir-primal-barrier-absolute-tol", p.innerAbsoluteTolerance);
-    p.stagnationIterations = sizeOption(argc, argv,
-      "wngir-stagnation-iterations", p.stagnationIterations);
-    p.muHat = realOption(argc, argv, "wngir-mu-hat", p.muHat);
-    p.omegaMin = realOption(argc, argv, "wngir-omega-min", p.omegaMin);
-    p.maxBacktracks = sizeOption(argc, argv, "wngir-max-backtracks", p.maxBacktracks);
-    p.armijoCoefficient = realOption(argc, argv, "wngir-armijo", p.armijoCoefficient);
+    p.linear.threads = sizeOption(argc, argv, "wngir-direct-threads", 0);
+    p.convergence.tolerance.geometric =
+      realOption(argc, argv, "wngir-geometric-sup-tol", 0);
+    p.convergence.iterations.inner = sizeOption(
+      argc, argv, "wngir-primal-barrier-iterations", p.convergence.iterations.inner);
+    p.convergence.tolerance.innerRelative = realOption(argc, argv,
+      "wngir-primal-barrier-relative-tol", p.convergence.tolerance.innerRelative);
+    p.convergence.tolerance.innerAbsolute = realOption(argc, argv,
+      "wngir-primal-barrier-absolute-tol", p.convergence.tolerance.innerAbsolute);
+    p.convergence.iterations.stagnation = sizeOption(
+      argc, argv, "wngir-stagnation-iterations", p.convergence.iterations.stagnation);
+    p.model.hinge = realOption(argc, argv, "wngir-mu-hat", p.model.hinge);
+    p.model.omegaMin = realOption(argc, argv, "wngir-omega-min", p.model.omegaMin);
+    p.convergence.iterations.backtracks =
+      sizeOption(argc, argv, "wngir-max-backtracks", p.convergence.iterations.backtracks);
+    p.globalization.armijo =
+      realOption(argc, argv, "wngir-armijo", p.globalization.armijo);
 
-    p.jMinRatio = realOption(argc, argv, "j-min", p.jMinRatio);
-    p.jLineSearchRatio =
-      realOption(argc, argv, "wngir-jls", "j-ls", std::max(p.jMinRatio, p.jSafe));
-    p.energyStagTol = realOption(argc, argv, "wngir-energy-stag-tol", p.energyStagTol);
-    p.stepTol = realOption(argc, argv, "wngir-step-tol", p.stepTol);
-    p.acceptedStepOverHTol =
-      realOption(argc, argv, "wngir-step-h-tol", p.acceptedStepOverHTol);
+    p.globalization.jMin = realOption(argc, argv, "j-min", p.globalization.jMin);
+    p.globalization.jFloor = realOption(
+      argc, argv, "wngir-jls", "j-ls", std::max(p.globalization.jMin, p.model.jacobian));
+    p.convergence.tolerance.energy =
+      realOption(argc, argv, "wngir-energy-stag-tol", p.convergence.tolerance.energy);
+    p.convergence.tolerance.step =
+      realOption(argc, argv, "wngir-step-tol", p.convergence.tolerance.step);
+    p.convergence.tolerance.stepOverH =
+      realOption(argc, argv, "wngir-step-h-tol", p.convergence.tolerance.stepOverH);
 
-    p.quadratureOrder = sizeOption(argc, argv, "quad-order", defaults.quadratureOrder);
-    p.geometricValidationOrder =
-      sizeOption(argc, argv, "geometric-validation-order", p.geometricValidationOrder);
-    p.maxIterations = sizeOption(argc, argv, "wngir-steps", defaults.maxIterations);
+    p.quadrature.order = sizeOption(argc, argv, "quad-order", defaults.quadratureOrder);
+    p.quadrature.validation =
+      sizeOption(argc, argv, "geometric-validation-order", p.quadrature.validation);
+    p.convergence.iterations.outer =
+      sizeOption(argc, argv, "wngir-steps", defaults.maxIterations);
 
-    p.linearRelativeTolerance =
-      realOption(argc, argv, "wngir-cg-rtol", p.linearRelativeTolerance);
-    p.linearMaxIterations =
-      sizeOption(argc, argv, "wngir-cg-max-iters", p.linearMaxIterations);
+    p.convergence.tolerance.linearRelative =
+      realOption(argc, argv, "wngir-cg-rtol", p.convergence.tolerance.linearRelative);
+    p.convergence.iterations.linear =
+      sizeOption(argc, argv, "wngir-cg-max-iters", p.convergence.iterations.linear);
     p.interfaceAttribute = interfaceAttribute;
     p.trace =
       boolOption(argc, argv, "trace", boolOption(argc, argv, "wngir-trace", false));

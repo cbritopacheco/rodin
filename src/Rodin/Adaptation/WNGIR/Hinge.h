@@ -26,8 +26,9 @@ namespace Rodin::Adaptation
           return;
         m_jAction = getJacobianRow(innerGradient);
         m_qAction = getDistortionRow(innerGradient);
-        m_jSlack = deformation.getJacobian() - parameters.jSafe - m_jAction;
-        m_qSlack = parameters.qMax - deformation.getRelativeDistortion() - m_qAction;
+        m_jSlack = deformation.getJacobian() - parameters.model.jacobian - m_jAction;
+        m_qSlack =
+          parameters.model.distortion - deformation.getRelativeDistortion() - m_qAction;
         const auto coefficients = [&](Real action, Real slack, Real delta, Real weight,
                                     Real& hessian, Real& force) {
           if (weight <= Real(0) || slack >= delta)
@@ -36,11 +37,11 @@ namespace Rodin::Adaptation
           force = hessian * (action - (delta - slack));
         };
         coefficients(m_jAction, m_jSlack,
-          parameters.qualityGuard * (Real(1) - parameters.jSafe), parameters.kappaJ,
-          m_jHessian, m_jForce);
+          parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
+          parameters.model.kappaJ, m_jHessian, m_jForce);
         coefficients(m_qAction, m_qSlack,
-          parameters.qualityGuard * (parameters.qMax - Real(1)), parameters.kappaQ,
-          m_qHessian, m_qForce);
+          parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
+          parameters.model.kappaQ, m_qHessian, m_qForce);
         m_feasible = true;
       }
 
@@ -53,10 +54,12 @@ namespace Rodin::Adaptation
           const Real violation = std::max(Real(0), Real(1) - slack / delta);
           return Real(0.5) * hingeCoefficient * weight * violation * violation;
         };
-        return energy(m_jSlack, parameters.qualityGuard * (Real(1) - parameters.jSafe),
-                 parameters.kappaJ) +
-          energy(m_qSlack, parameters.qualityGuard * (parameters.qMax - Real(1)),
-            parameters.kappaQ);
+        return energy(m_jSlack,
+                 parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
+                 parameters.model.kappaJ) +
+          energy(m_qSlack,
+            parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
+            parameters.model.kappaQ);
       }
 
       /// @brief Whether feasible.

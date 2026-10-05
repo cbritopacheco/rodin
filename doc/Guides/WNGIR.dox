@@ -1,6 +1,6 @@
 /**
   @page guides-wngir Fitting a mesh interface with WNGIR
-  @brief Setup, solver stages, diagnostics, and extension points for engineers.
+  @brief Mathematical model, solver stages, usage, diagnostics and extension points.
 
   @tableofcontents
 
@@ -20,19 +20,25 @@
   @code{.cpp}
   // mesh already has its interface facets marked with Interface.
   P1<Math::SpatialVector<Real>, Geometry::LocalMesh> space(mesh, 2);
+  // u owns the accumulated displacement; v tests increments on the same space.
   TrialFunction u(space);
   TestFunction v(space);
   Adaptation::WNGIR fitting(u, v);
   Adaptation::WNGIRParameters parameters;
-  parameters.h = referenceSpacing;
+  // The reference spacing stays fixed as the displacement changes.
+  parameters.model.h = referenceSpacing;
   fitting.setParameters(parameters).setInterfaceAttribute(Interface);
+  // Zero increments keep this boundary at its current position.
   fitting += DirichletBC(u, VectorFunction(Real(0), Real(0))).on(FixedBoundary);
 
+  // Fit to a vertical line using its exact gradient; no Hessian is needed.
   RealFunction phi([](const Geometry::Point& point) {
     return point.x() - Real(0.55);
   });
   VectorFunction gradient(Real(1), Real(0));
   const auto report = fitting.solve(phi, gradient);
+  // Check report.reason, geometricSup, minJ and maxQRel before using the result.
+  // Applying displacement to mesh geometry is a separate application step.
   const auto& displacement = u.getSolution();
   @endcode
 
@@ -46,6 +52,53 @@
   Applying the result is a separate application decision. Vertex displacement
   is appropriate for a linear geometric mesh. Higher-order geometry requires
   updating its transformations, not merely moving its corner vertices.
+
+  @section guides-wngir-model Mathematical model
+
+  The displacement metric is @f$M=F+D@f$: fitting observes normal motion on
+  the marked interface, while distribution couples that motion to the volume.
+  The metric defines the quadratic direction problem; it is not an additional
+  energy minimized over the accumulated deformation. Quality is recovered
+  through affine squared hinges on the increment and nonlinear checks on the
+  accepted mesh, not through a separate shape-curvature term in the metric.
+
+  For the current map @f$T_k(x)=x+u_k(x)@f$, set
+  @f$A_k=I+\nabla u_k@f$, @f$j_k=\det A_k@f$ and
+  @f$g_k=\nabla\phi(T_k(x))@f$. The two bilinear forms are
+  @f[
+    F_k[v,z]=\kappa_F G^{-2}\int_{\Gamma_0}
+      (g_k\cdot v)(g_k\cdot z)\,dS_x,
+    \qquad
+    D_k[v,z]=h\kappa_D\int_{\Omega_0}j_k\,
+      \operatorname{dev}\operatorname{sym}(\nabla v A_k^{-1}):
+      \operatorname{dev}\operatorname{sym}(\nabla z A_k^{-1})\,dx.
+  @f]
+  Here @f$\Gamma_0@f$ and @f$\Omega_0@f$ are the reference interface and volume;
+  @f$G@f$ is a fixed sampled target-gradient normalization. Fitting uses
+  squared-residual curvature without the level-set Hessian or robust weights.
+  The force and outer Armijo merit instead come from the fixed-scale Welsch
+  objective
+  @f[
+    E(u)=G^{-2}\int_{\Gamma_0}\frac{\sigma^2}{2}
+        \left(1-e^{-\phi(x+u(x))^2/\sigma^2}\right)\,dS_x,
+    \qquad f_k=-DE(u_k).
+  @f]
+  The reference measure and robust scale @f$\sigma@f$ are held fixed during a
+  solve. Thus the quadratic metric preconditions the robust descent; it does
+  not replace the robust objective with a least-squares objective.
+
+  Directional Newton scales the predictor before the affine hinge solve:
+  @f$\bar p_k=a_kp_k@f$ and @f$\bar M_k=M_k/a_k@f$. The inner model is
+  @f[
+    \min_{v\in V_h}\left\{
+       \tfrac12\bar M_k[v,v]-f_k[v]+B_k(v)\right\},
+  @f]
+  where @f$B_k@f$ is the squared-hinge penalty on frozen Jacobian and distortion
+  slacks. Its stationarity residual controls inner convergence. The outer
+  Armijo search then decreases @f$E@f$ while enforcing the actual sampled
+  quality budget. See the @ref Rodin::Adaptation::WNGIR "WNGIR class reference"
+  for the slack definitions, penalty scaling, Newton system, line search and
+  geometric stopping equations.
 
   @section guides-wngir-stages What the solver does
 
@@ -75,25 +128,42 @@
 
   @section guides-wngir-controls Main controls
 
-  | C++ parameter | Default | Purpose |
-  |--------------|---------|---------|
-  | `h` | Required | Fixed reference background mesh spacing |
-  | `kappaF` | 1 | Fitting weight |
-  | `kappaD` | 0.001 | Distribution weight; the assembled coefficient includes `h` |
-  | `muHat` | 100 | Quality-hinge strength relative to predicted model improvement |
-  | `qualityGuard` | 0.1 | Width of the hinge guard regions |
-  | `jSafe` | 0.01 | Relative Jacobian floor |
-  | `qMax` | 10 | Relative distortion budget |
-  | `maxIterations` | 30 | Maximum accepted outer steps |
-  | `innerIterations` | 15 | Maximum Newton corrections per outer iteration |
-  | `innerRelativeTolerance` | 0.001 | Inner stationarity tolerance relative to fitting force |
-  | `innerAbsoluteTolerance` | 1e-12 | Absolute inner stationarity allowance |
-  | `linearRelativeTolerance` | 1e-6 | Linear residual tolerance for every backend |
-  | `linearMaxIterations` | 1000 | Iteration cap for CG only |
-  | `geometricSupTolerance` | 0 | Automatic reference-scale target; positive values override it |
+  Model coefficients are grouped under `parameters.model`. Accuracy settings
+  and work budgets are independent groups under `parameters.convergence`:
+  `tolerance` and `iterations`. Globalization, linear-solver selection and
+  quadrature have their own groups. All values in the following table are
+  defaults except the required reference size.
+
+  | Parameter | C++ | Description | Value |
+  |-----------|-----|-------------|-------|
+  | @f$h@f$ | `model.h` | Fixed background reference size | Required |
+  | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness, not a force multiplier | @f$1@f$ |
+  | @f$\kappa_D@f$ | `model.distribution` | Deviatoric-strain distribution weight; assembled with @f$h@f$ | @f$10^{-3}@f$ |
+  | @f$\widehat\mu@f$ | `model.hinge` | Hinge strength relative to predicted fitting improvement | @f$100@f$ |
+  | @f$\kappa_J@f$ | `model.kappaJ` | Relative Jacobian-hinge row weight | @f$1@f$ |
+  | @f$\kappa_Q@f$ | `model.kappaQ` | Relative distortion-hinge row weight | @f$1@f$ |
+  | @f$\gamma@f$ | `model.qualityGuard` | Guard fraction defining hinge activation margins | @f$0.1@f$ |
+  | @f$j_{\mathrm{safe}}@f$ | `model.jacobian` | Relative Jacobian floor in the hinge and actual acceptance checks | @f$10^{-2}@f$ |
+  | @f$j_{\mathrm{ls}}@f$ | `globalization.jFloor` | Additional Jacobian floor for outer acceptance | @f$10^{-2}@f$ |
+  | @f$j_{\min}@f$ | `globalization.jMin` | Hard inadmissibility floor | @f$10^{-8}@f$ |
+  | @f$Q_{\max}@f$ | `model.distortion` | Spendable relative-distortion budget | @f$10@f$ |
+  | @f$\sigma@f$ | `model.robustScale` | Welsch robustness scale in level-set units | Automatic (`0`) |
+  | @f$\lambda_{\max}@f$ | `globalization.maxStepOverH` | Scaled predictor-motion limit divided by @f$h@f$ | @f$1@f$ |
+  | @f$c_A@f$ | `globalization.armijo` | Armijo sufficient-decrease coefficient | @f$10^{-4}@f$ |
+  | @f$\varepsilon_{\mathrm{geom}}@f$ | `convergence.tolerance.geometric` | Maximum sampled normalized-residual target | @f$h^{p+1}@f$, automatic (`0`) |
+  | @f$\tau_{\mathrm{rel}}@f$ | `convergence.tolerance.innerRelative` | Inner stationarity tolerance relative to fitting force | @f$10^{-3}@f$ |
+  | @f$\tau_{\mathrm{abs}}@f$ | `convergence.tolerance.innerAbsolute` | Absolute inner stationarity allowance | @f$10^{-12}@f$ |
+  | @f$\tau_{\mathrm{lin}}@f$ | `convergence.tolerance.linearRelative` | Relative linear residual tolerance for every backend | @f$10^{-6}@f$ |
+  | @f$N_{\mathrm{outer}}@f$ | `convergence.iterations.outer` | Maximum outer iterations | @f$30@f$ |
+  | @f$N_{\mathrm{inner}}@f$ | `convergence.iterations.inner` | Maximum Newton corrections per outer iteration | @f$15@f$ |
+  | @f$N_{\mathrm{CG}}@f$ | `convergence.iterations.linear` | Iteration cap per CG solve only | @f$1000@f$ |
+  | @f$N_{\mathrm{bt}}@f$ | `convergence.iterations.backtracks` | Maximum outer trial halvings | @f$32@f$ |
+  | @f$\varepsilon_{\mathrm{step}}/h@f$ | `convergence.tolerance.stepOverH` | Small accepted-motion threshold for a best-effort exit | @f$5\times10^{-4}@f$ |
+  | @f$\varepsilon_E@f$ | `convergence.tolerance.energy` | Relative energy-change threshold for a best-effort exit | @f$10^{-8}@f$ |
+  | @f$N_{\mathrm{stag}}@f$ | `convergence.iterations.stagnation` | Consecutive small steps or energy changes before stagnation exit | @f$5@f$ |
 
   MUMPS is the default when compiled in; otherwise SparseLU is selected.
-  Set `linearSolver` and `linearSolverThreads` explicitly for reproducible runs.
+  Set `linear.solver` and `linear.threads` explicitly for reproducible runs.
   Quadrature orders are selected automatically unless overridden.
   The examples retain their existing solver and inner-iteration command-line
   spellings for campaign compatibility. The removed rigid-observation diagnostic
@@ -116,8 +186,9 @@
 
   Monitor `energy`, `geometricSup`, `geometricSupTarget`, `minJ`, `maxQRel`,
   `iterations`, `innerIterations`, `lastInnerIterations`, `maxInnerIterations`
-  and `innerRelativeResidual`. `innerIterations` in the report is the total
-  correction count, whereas the parameter is a per-outer-iteration cap.
+  and `innerRelativeResidual`. The report's `innerIterations` is the total
+  correction count, whereas `parameters.convergence.iterations.inner` is the
+  per-outer-iteration cap.
   `interfaceMeasure` is the reference integration measure used by the fitting
   energy. Energy and maximum error answer different questions; neither should
   silently replace the other as a stopping certificate.
