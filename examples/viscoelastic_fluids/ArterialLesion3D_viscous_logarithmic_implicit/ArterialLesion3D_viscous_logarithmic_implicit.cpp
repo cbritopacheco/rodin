@@ -15,12 +15,13 @@
  *     -al_mesh ../resources/examples/viscoelastic_fluids/S75_pipe_coarse.mesh \
  *     -al_re 300 -al_wo 4 -al_amplitude 0.5 -al_wi 1
  *
- * Options (all prefixed -al_), identical to the 2D driver:
+ * Options (all prefixed -al_), those of the 2D driver plus dt:
  *   mesh, xdmf, csv, waveform                      strings
  *   diameter, rho, eta_s, eta_p, lambda, ptt_epsilon,
  *   lambda0_factor, lambda0_min                    fluid and pipe (SI)
  *   re, wo, amplitude, wi, de, ramp_cycles         dimensionless inflow
  *   harmonics, steps_per_cycle, cycles, output_every
+ *   dt                                             step (s); overrides steps_per_cycle
  *   outlet_pressure, vms_scale, graddiv_scale, pressure_scale,
  *   stress_div_scale, stress_scale, conformation_its, conformation_tol,
  *   newton_max_step, max_velocity_factor
@@ -30,6 +31,7 @@
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include <filesystem>
 #include <cassert>
 #include <cmath>
 #include <fstream>
@@ -953,13 +955,14 @@ namespace Rodin::Examples::ViscoelasticFluids
       throw std::runtime_error("Re must be positive.");
     if (!(m_cfg.womersley > 0.0))
       throw std::runtime_error("Wo must be positive; steady inflow is amplitude 0.");
-    if (!(m_cfg.stepsPerCycle > 0))
-      throw std::runtime_error("stepsPerCycle must be positive.");
-
     // Re = rho Ubar D/eta_0 and Wo = (D/2) sqrt(omega rho/eta_0).
     m_meanVelocity = m_cfg.reynolds * eta0 / (rho * D);
     const Real omega = 4.0 * m_cfg.womersley * m_cfg.womersley * eta0 / (rho * D * D);
     m_period = 2.0 * M_PI / omega;
+    if (m_cfg.timeStep > 0.0)
+      m_cfg.stepsPerCycle = std::max(1, static_cast<int>(std::lround(m_period / m_cfg.timeStep)));
+    if (!(m_cfg.stepsPerCycle > 0))
+      throw std::runtime_error("stepsPerCycle must be positive.");
     m_dt = m_period / static_cast<Real>(m_cfg.stepsPerCycle);
 
     // De = lambda/T wins over Wi = lambda Ubar/D, which wins over lambda.
@@ -1919,6 +1922,7 @@ int main(int argc, char** argv)
       getReal("-al_ramp_cycles", cfg.rampCycles);
       getInt("-al_harmonics", cfg.harmonics);
       getInt("-al_steps_per_cycle", cfg.stepsPerCycle);
+      getReal("-al_dt", cfg.timeStep);
       getInt("-al_cycles", cfg.cycles);
       getInt("-al_output_every", cfg.outputEvery);
 
@@ -1934,6 +1938,18 @@ int main(int argc, char** argv)
       getReal("-al_max_velocity_factor", cfg.maxVelocityFactor);
       getBool("-al_vms", cfg.useVMS);
       getBool("-al_inlet_conformation", cfg.inletConformation);
+
+      // The XDMF and CSV writers do not create directories.
+      if (world.rank() == 0)
+      {
+        for (const std::string& path : { cfg.xdmfBasename, cfg.csvPath })
+        {
+          const auto dir = std::filesystem::path(path).parent_path();
+          if (!dir.empty())
+            std::filesystem::create_directories(dir);
+        }
+      }
+      world.barrier();
 
       Simulation simulation(context, cfg);
       status = simulation.initialize().run();

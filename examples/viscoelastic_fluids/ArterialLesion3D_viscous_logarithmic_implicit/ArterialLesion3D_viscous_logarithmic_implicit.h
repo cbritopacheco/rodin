@@ -190,7 +190,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       {
           Real etaS = 3.19e-3;  ///< solvent viscosity eta_s (Pa s)
           Real etaP = 4.0e-4;   ///< polymeric viscosity eta_p (Pa s)
-          Real lambda = 0.06;   ///< relaxation time lambda (s)
+          Real lambda = 0.1;   ///< relaxation time lambda (s)
           /// @brief lambda0 = max(k lambda, lambda0_min).
           Real lambda0Factor = 1.0;
           Real lambda0Min = 0.0;
@@ -218,8 +218,9 @@ namespace Rodin::Examples::ViscoelasticFluids
           std::string meshPath =
             "../resources/examples/viscoelastic_fluids/S75_pipe_coarse.mesh";
 
-          std::string xdmfBasename = "ArterialLesion3D_viscous_logarithmic_implicit";
-          std::string csvPath = "ArterialLesion3D_viscous_logarithmic_implicit.csv";
+          /// @brief Output paths; missing directories are created.
+          std::string xdmfBasename = "results/ArterialLesion3D_viscous_logarithmic_implicit";
+          std::string csvPath = "results/ArterialLesion3D_viscous_logarithmic_implicit.csv";
 
           Labels labels;
 
@@ -256,6 +257,10 @@ namespace Rodin::Examples::ViscoelasticFluids
           Real outletBackflowStabilization = 1.0;
 
           int stepsPerCycle = 400;
+          /// @brief Time step (s). If > 0, it sets stepsPerCycle = round(T/dt),
+          ///        so that a cycle holds a whole number of steps, and the run
+          ///        uses dt = T/stepsPerCycle.
+          Real timeStep = 0.0;
           int cycles = 5;
 
           /// @brief XDMF output period, in steps; cycle boundaries always.
