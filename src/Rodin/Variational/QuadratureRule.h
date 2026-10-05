@@ -253,6 +253,9 @@ namespace Rodin::Variational
    * The configured order rule and attribute filter are forwarded to the
    * auxiliary linear-form integrator. An empty order rule retains inference;
    * explicit constant and per-polytope rules are not resolved before assembly.
+   * The auxiliary form has conjugate-linear action on complex test fields.
+   * Hence @f$\int u_h=\overline{L(u_h)}@f$; this final scalar conjugation
+   * restores linear grade-zero integration without changing form assembly.
    */
   template <class FES, class Data>
   class QuadratureRule<GridFunction<FES, Data>> : public Integrator
@@ -318,7 +321,7 @@ namespace Rodin::Variational
               lfi.over(m_attrs);
             m_lf = lfi;
             m_lf.assemble();
-            return m_value.emplace(m_lf(m_u.get()));
+            return m_value.emplace(Math::conj(m_lf(m_u.get())));
           }
           case Geometry::Region::Boundary:
           {
@@ -328,7 +331,7 @@ namespace Rodin::Variational
               lfi.over(m_attrs);
             m_lf = lfi;
             m_lf.assemble();
-            return m_value.emplace(m_lf(m_u.get()));
+            return m_value.emplace(Math::conj(m_lf(m_u.get())));
           }
           case Geometry::Region::Faces:
           {
@@ -338,7 +341,7 @@ namespace Rodin::Variational
               lfi.over(m_attrs);
             m_lf = lfi;
             m_lf.assemble();
-            return m_value.emplace(m_lf(m_u.get()));
+            return m_value.emplace(Math::conj(m_lf(m_u.get())));
           }
           case Geometry::Region::Interface:
           {
@@ -348,7 +351,7 @@ namespace Rodin::Variational
               lfi.over(m_attrs);
             m_lf = lfi;
             m_lf.assemble();
-            return m_value.emplace(m_lf(m_u.get()));
+            return m_value.emplace(Math::conj(m_lf(m_u.get())));
           }
         }
         assert(false);

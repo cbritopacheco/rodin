@@ -58,6 +58,16 @@ existing asserts to one. Better still: backend-independent code (form
 language, `Problem`, `LinearSolverBase`) should not touch PETSc at all —
 keep PETSc calls inside `src/Rodin/PETSc/`.
 
+## MPI collectives
+
+Use a collective only when the operation's mathematical or distributed-state
+contract is global, and document that requirement at the public entry point.
+Do not introduce collectives into local evaluation, accessors, copying, or
+rank-local Shard operations. Establish necessary global metadata during an
+explicitly collective construction or reconstruction phase and retain it for
+non-collective queries. A collective must not conceal missing connectivity,
+ownership metadata, or an incorrect caller protocol.
+
 ## Implementation locality
 
 **Prefer implementation locality and monolithic method style.** The method

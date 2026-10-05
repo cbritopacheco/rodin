@@ -97,8 +97,9 @@
   a different mathematical form is required.
 
   Eigen expresses the assembled action as `v.dot(A * u)`, and PETSc expresses
-  it as `VecDot(v, A * u)`. Both backend functions conjugate their first
-  operand, producing the same @f$ \mathbf{v}^* A \mathbf{u} @f$ action.
+  it as `VecDot(A * u, v)`. Eigen conjugates its first operand, whereas
+  PETSc conjugates its second operand. The differing argument orders produce
+  the same @f$ \mathbf{v}^* A \mathbf{u} @f$ action.
 
   The class names `LinearForm` and `BilinearForm` are retained for the common
   real and complex APIs. Over real-valued spaces conjugation is the identity,

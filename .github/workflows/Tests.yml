@@ -339,10 +339,11 @@ jobs:
           RodinConvergencePPETScHelmholtz RodinConvergenceHPPETScHelmholtz
           RodinConvergenceIsoparametricPETScHelmholtz
           RodinConvergenceIsoparametricPETScP0Projection
+          RodinPETScScalarIntegralTest RodinVariationalIntegralTest
 
       - name: Run complex PETSc convergence suite
         run: >-
-          ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP|Isoparametric)PETSc(MPI)?Helmholtz|RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_|RodinPETScSNESStateTest'
+          ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP|Isoparametric)PETSc(MPI)?Helmholtz|RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_|RodinPETScSNESStateTest|RodinPETSc(MPI)?ScalarIntegralTest|Rodin_Variational_Integral'
           --output-on-failure -j 2
 
   Unit:

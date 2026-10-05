@@ -1,3 +1,10 @@
+add_executable(RodinPETScScalarIntegralTest ScalarIntegralTest.cpp)
+target_link_libraries(RodinPETScScalarIntegralTest PRIVATE GTest::gtest Rodin::PETSc)
+add_test(NAME RodinPETScScalarIntegralTest
+  COMMAND $<TARGET_FILE:RodinPETScScalarIntegralTest> --gtest_filter=PETSc_ScalarIntegral.Local)
+set_tests_properties(RodinPETScScalarIntegralTest PROPERTIES LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScScalarIntegralTest)
+
 add_executable(RodinPETScGridFunctionTest GridFunctionTest.cpp)
 target_link_libraries(RodinPETScGridFunctionTest
   PUBLIC
@@ -66,6 +73,18 @@ if (RODIN_USE_MPI)
       set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "--oversubscribe")
     endif()
   endif()
+
+  target_link_libraries(RodinPETScScalarIntegralTest PRIVATE Rodin::MPI)
+  foreach(np 1 2 3 4 8)
+    add_test(NAME RodinPETScMPIScalarIntegralTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+        $<TARGET_FILE:RodinPETScScalarIntegralTest>
+        --gtest_filter=PETSc_ScalarIntegral.Distributed)
+    set_tests_properties(RodinPETScMPIScalarIntegralTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed" TIMEOUT 120 PROCESSORS ${np})
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIScalarIntegralTest_np${np})
+  endforeach()
 
   foreach(np 2 4)
     add_test(

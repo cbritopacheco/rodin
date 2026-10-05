@@ -63,7 +63,11 @@ Assembly stores `b[i] = L(psi_i)` and `A[i,j] = a(phi_j, psi_i)`. The local
 integrator returns this entry directly. Do not add a backend-level conjugation:
 `Integral(c * u, v)` represents `c * u * conj(v)`, not
 `conj(c) * conj(u) * v`. Eigen evaluates the action as `v.dot(A * u)` and
-PETSc as `VecDot(v, A * u)`; both backend calls conjugate their first operand.
+PETSc as `VecDot(A * u, v)`. Eigen conjugates its first operand; PETSc
+conjugates its second operand. Their argument order therefore differs even
+though both evaluate the same action. Likewise, PETSc linear-form action
+uses `VecDot(b, v)`. Do not infer one backend's dot-product convention from
+the other backend's API spelling.
 
 Sesquilinearity is not Hermitian symmetry. Whether `A == A*` is a separate
 property of the particular weak form and coefficients.
