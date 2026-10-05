@@ -204,21 +204,21 @@ TEST(CoefficientEvaluation, CacheLifecycleAndIndependentBindings)
   Cache first;
   Cache second;
   EXPECT_EQ(first.get(), nullptr);
-  first.refresh(f, ip);
+  EXPECT_EQ(&first.setIntegrationPoint(f, ip), &first);
   ASSERT_NE(first.get(), nullptr);
   EXPECT_EQ(*first.get(), 2);
   EXPECT_EQ(calls, 1);
   scale = 5;
-  second.refresh(f, ip);
+  second.setIntegrationPoint(f, ip);
   EXPECT_EQ(*first.get(), 2);
   ASSERT_NE(second.get(), nullptr);
   EXPECT_EQ(*second.get(), 5);
-  first.refresh(f, ip);
+  first.setIntegrationPoint(f, ip);
   EXPECT_EQ(*first.get(), 5);
   EXPECT_EQ(calls, 3);
   Cache copied(first);
   EXPECT_EQ(copied.get(), nullptr);
-  copied.refresh(f, ip);
+  copied.setIntegrationPoint(f, ip);
   copied = first;
   EXPECT_EQ(copied.get(), nullptr);
   Cache moved(std::move(second));
@@ -228,7 +228,7 @@ TEST(CoefficientEvaluation, CacheLifecycleAndIndependentBindings)
   ASSERT_NE(copied.get(), nullptr);
   EXPECT_EQ(*copied.get(), 5);
   const size_t before = calls;
-  first.refresh(f, IntegrationPoint(point));
+  first.setIntegrationPoint(f, IntegrationPoint(point));
   EXPECT_EQ(first.get(), nullptr);
   EXPECT_EQ(calls, before);
 }

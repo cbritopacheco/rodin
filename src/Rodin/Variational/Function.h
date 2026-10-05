@@ -293,7 +293,7 @@ namespace Rodin::Variational
        * @brief Function value retained for the current quadrature binding.
        *
        * Holds the function value at the quadrature point last passed to
-       * refresh(), allowing shape expressions to reuse it across basis indices.
+       * setIntegrationPoint(), allowing shape expressions to reuse it across basis indices.
        * The owning shape expression refreshes this snapshot on every point
        * binding, including reassembly at an unchanged point. Direct pointwise
        * bindings clear it and retain normal function evaluation. Only owning,
@@ -318,44 +318,76 @@ namespace Rodin::Variational
               std::is_base_of_v<Eigen::PlainObjectBase<Value>, Value>) &&
             std::is_copy_constructible_v<Value> && std::is_copy_assignable_v<Value>;
 
+          /// @brief Constructs an empty cache.
           Cache() = default;
 
-          /// @brief Copies start empty: the value belongs to one evaluation pass.
-          Cache(const Cache&)
+          /**
+           * @brief Constructs an empty cache when copying an evaluation pass.
+           * @param[in] other Source cache whose snapshot is deliberately not copied.
+           */
+          Cache([[maybe_unused]] const Cache& other)
             : Cache()
           {}
 
-          /// @brief Transfers the current snapshot.
-          Cache(Cache&&) = default;
+          /**
+           * @brief Transfers the current snapshot.
+           * @param[in] other Source cache to move from.
+           */
+          Cache(Cache&& other) = default;
 
-          /// @brief Clears the snapshot when copying another evaluation pass.
-          Cache& operator=(const Cache&)
+          /**
+           * @brief Clears the snapshot when copying another evaluation pass.
+           * @param[in] other Source cache whose snapshot is deliberately not copied.
+           * @returns This cache with an empty snapshot.
+           */
+          Cache& operator=([[maybe_unused]] const Cache& other)
           {
             m_value.reset();
             return *this;
           }
 
-          /// @brief Transfers the current snapshot on move assignment.
-          Cache& operator=(Cache&&) = default;
+          /**
+           * @brief Transfers the current snapshot on move assignment.
+           * @param[in] other Source cache to move from.
+           * @returns This cache.
+           */
+          Cache& operator=(Cache&& other) = default;
 
-          /// @brief Evaluates @p f at @p ip, if @p ip is a quadrature node.
-          void refresh(const FunctionBase& f, const IntegrationPoint& ip)
+          /**
+           * @brief Binds the cache to a function evaluation at an integration point.
+           * @param[in] f Function to evaluate; no reference to it is retained.
+           * @param[in] ip Evaluation point; no reference to it is retained.
+           * @returns This cache.
+           *
+           * When @ref Enabled is true and @p ip has quadrature metadata, evaluates
+           * @p f and owns its value. Every call evaluates again, even at the same
+           * point, so reassembly observes changed function data. A point without
+           * quadrature metadata clears the snapshot. With @ref Enabled false,
+           * leaves the cache empty and does not evaluate @p f.
+           */
+          Cache& setIntegrationPoint(const FunctionBase& f, const IntegrationPoint& ip)
           {
             if constexpr (Enabled)
             {
               if (!ip.getQuadratureFormula())
               {
                 m_value.reset();
-                return;
+                return *this;
               }
               if (m_value)
                 *m_value = f.getValue(ip);
               else
                 m_value.emplace(f.getValue(ip));
             }
+            return *this;
           }
 
-          /// @brief The current binding's value, or nullptr outside quadrature.
+          /**
+           * @brief Gets the snapshot for the current binding.
+           * @returns Pointer to the owned value, or @c nullptr when empty or disabled.
+           * @note The pointer is valid until this cache is rebound, assigned,
+           * moved from or destroyed. Consumers must not retain it across bindings.
+           */
           const Value* get() const
           {
             if constexpr (Enabled)

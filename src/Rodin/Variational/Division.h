@@ -320,14 +320,17 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets the integration point the expression is evaluated at.
+      /// @param[in] ip Point defining the current evaluation binding.
+      /// @returns This expression.
       Division& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
-        m_functionCache.refresh(getRHS(), ip);
+        m_functionCache.setIntegrationPoint(getRHS(), ip);
         return *this;
       }
 
       /// @brief Gets the basis function of a local degree of freedom.
+      /// @param[in] local Local basis index on the current polytope.
       auto getBasis(size_t local) const
       {
         const auto& ip = getIntegrationPoint();
