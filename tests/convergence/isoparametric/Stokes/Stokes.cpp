@@ -440,7 +440,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
               continue;
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(AssemblyOrder, cell->getGeometry());
-          const auto& quadrature = cell->getQuadrature(qf);
+          const Geometry::PolytopeQuadrature quadrature(*cell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& point = quadrature.getPoint(qp);

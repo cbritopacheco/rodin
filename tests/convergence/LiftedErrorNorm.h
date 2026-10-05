@@ -16,7 +16,7 @@ namespace Rodin::Tests::Convergence
    * the exact map is regular and orientation-preserving on the original box.
    * @par Architecture
    * The original unit-box mesh retains charts and exact logical cell indices.
-   * The represented mesh is its geometry-only copy. Cached quadrature and
+   * The represented mesh is its geometry-only copy. Cell-owned quadrature and
    * Geometry::Point provide both cell charts; the analytic map supplies the
    * exact-domain metric. For @f$x=\Phi(\xi)@f$ and
    * @f$x_h=\Phi_h(\xi)@f$, the lift is @f$u_h^\ell(x)=u_h(x_h)@f$.
@@ -30,6 +30,9 @@ namespace Rodin::Tests::Convergence
    * real geometric differential acts on both real and imaginary components.
    * MPI integrates owned original cells, reduces squared contributions, then
    * takes square roots. No inverse point location or coordinate matching is used.
+   * Both chart quadratures are released after each cell, so diagnostic mapped
+   * points do not accumulate on either mesh. Publicly borrowed cache objects
+   * are not cleared or invalidated.
    */
   class LiftedErrorNorm
   {
@@ -85,8 +88,8 @@ namespace Rodin::Tests::Convergence
           for (size_t i = 0; i < vertices.size(); ++i)
             assert(vertices[i] == mappedVertices[i]);
           const auto& qf = QF::PolytopeQuadratureFormula::get(order, cell->getGeometry());
-          const auto& originalQuadrature = cell->getQuadrature(qf);
-          const auto& mappedQuadrature = mapped->getQuadrature(qf);
+          const Geometry::PolytopeQuadrature originalQuadrature(*cell, qf);
+          const Geometry::PolytopeQuadrature mappedQuadrature(*mapped, qf);
           for (size_t qp = 0; qp < originalQuadrature.getSize(); ++qp)
           {
             const auto& original = originalQuadrature.getPoint(qp);

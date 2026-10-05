@@ -78,7 +78,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::GeometryApproximation
             EXPECT_EQ(vertices[local], originalVertices[local]);
           const auto& qf =
             QF::PolytopeQuadratureFormula::get(order, referenceCell->getGeometry());
-          const auto& quadrature = referenceCell->getQuadrature(qf);
+          const Geometry::PolytopeQuadrature quadrature(*referenceCell, qf);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
             const auto& referencePoint = quadrature.getPoint(qp);

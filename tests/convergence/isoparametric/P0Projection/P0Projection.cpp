@@ -138,7 +138,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::P0Projection
             }
             const auto& qf =
               QF::PolytopeQuadratureFormula::get(OracleOrder, cell->getGeometry());
-            const auto& quadrature = cell->getQuadrature(qf);
+            const Geometry::PolytopeQuadrature quadrature(*cell, qf);
             auto moment = exact(quadrature.getPoint(0));
             moment *= 0;
             Real volume = 0;

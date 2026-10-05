@@ -301,7 +301,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
             EXPECT_EQ(polytope->getTransformation().getOrder(), element.getOrder());
             const auto& qf =
               QF::PolytopeQuadratureFormula::get(4, polytope->getGeometry());
-            const auto& quadrature = polytope->getQuadrature(qf);
+            const Geometry::PolytopeQuadrature quadrature(*polytope, qf);
             for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
             {
               const auto& point = quadrature.getPoint(qp);
