@@ -11,20 +11,22 @@
 
 namespace Rodin::Adaptation
 {
-  /// @brief Quadratic-model minimizer, bounded by physical motion rather than raw alpha.
+  /// @brief Quadratic-model minimizer with an optional physical-motion bound.
   /// Positive fitting curvature supplies the fallback when robust curvature is nonpositive.
+  /// A zero maximumStep leaves the directional Newton scale unrestricted.
   inline Real wngirDirectionalNewtonStep(Real action, Real curvature,
     Real fittingCurvature, Real directionNorm, Real maximumStep)
   {
     if (!(action > Real(0)) || !std::isfinite(action) || !(directionNorm > Real(0)) ||
-      !std::isfinite(directionNorm) || !(maximumStep > Real(0)) ||
+      !std::isfinite(directionNorm) || maximumStep < Real(0) ||
       !std::isfinite(maximumStep))
       return Real(0);
     const Real positiveCurvature =
       curvature > Real(0) && std::isfinite(curvature) ? curvature : fittingCurvature;
     if (!(positiveCurvature > Real(0)) || !std::isfinite(positiveCurvature))
       return Real(0);
-    return std::min(action / positiveCurvature, maximumStep / directionNorm);
+    const Real scale = action / positiveCurvature;
+    return maximumStep > Real(0) ? std::min(scale, maximumStep / directionNorm) : scale;
   }
 }
 #endif

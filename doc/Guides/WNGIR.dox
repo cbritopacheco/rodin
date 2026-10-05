@@ -138,7 +138,7 @@
   |-----------|-----|-------------|-------|
   | @f$h@f$ | `model.h` | Fixed background reference size | Required |
   | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness, not a force multiplier | @f$1@f$ |
-  | @f$\kappa_D@f$ | `model.distribution` | Deviatoric-strain distribution weight; assembled with @f$h@f$ | @f$10^{-3}@f$ |
+  | @f$\kappa_D@f$ | `model.distribution` | Deviatoric-strain distribution weight; assembled with @f$h@f$ | @f$10^{-4}@f$ |
   | @f$\widehat\mu@f$ | `model.hinge` | Hinge strength relative to predicted fitting improvement | @f$100@f$ |
   | @f$\kappa_J@f$ | `model.kappaJ` | Relative Jacobian-hinge row weight | @f$1@f$ |
   | @f$\kappa_Q@f$ | `model.kappaQ` | Relative distortion-hinge row weight | @f$1@f$ |
@@ -148,7 +148,7 @@
   | @f$j_{\min}@f$ | `globalization.jMin` | Hard inadmissibility floor | @f$10^{-8}@f$ |
   | @f$Q_{\max}@f$ | `model.distortion` | Spendable relative-distortion budget | @f$10@f$ |
   | @f$\sigma@f$ | `model.robustScale` | Welsch robustness scale in level-set units | Automatic (`0`) |
-  | @f$\lambda_{\max}@f$ | `globalization.maxStepOverH` | Scaled predictor-motion limit divided by @f$h@f$ | @f$1@f$ |
+  | @f$\lambda_{\max}@f$ | `globalization.maxStepOverH` | Optional predictor-motion limit divided by @f$h@f$; zero leaves directional Newton unrestricted | @f$0@f$ |
   | @f$c_A@f$ | `globalization.armijo` | Armijo sufficient-decrease coefficient | @f$10^{-4}@f$ |
   | @f$\varepsilon_{\mathrm{geom}}@f$ | `convergence.tolerance.geometric` | Maximum sampled normalized-residual target | @f$h^{p+1}@f$, automatic (`0`) |
   | @f$\tau_{\mathrm{rel}}@f$ | `convergence.tolerance.innerRelative` | Inner stationarity tolerance relative to fitting force | @f$10^{-3}@f$ |

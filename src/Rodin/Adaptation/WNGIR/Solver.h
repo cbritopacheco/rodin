@@ -143,7 +143,7 @@ namespace Rodin::Adaptation
    * parameters.model.h = referenceSpacing;
    * // Set motion stiffness separately from quality recovery and admissibility.
    * parameters.model.fit = 1;
-   * parameters.model.distribution = Real(1e-3);
+   * parameters.model.distribution = Real(1e-4);
    * parameters.model.hinge = 100;
    * parameters.model.distortion = 10;
    * parameters.model.jacobian = Real(0.01);
@@ -268,11 +268,16 @@ namespace Rodin::Adaptation
    * First solve @f$M_k[p_k,z]=f_k[z]@f$ on the constrained increment space.
    * Directional Newton rescales this physical predictor using
    * @f[
-   * a_k=\min\left\{\frac{f_k[p_k]}{c_k},\,
-   *               \frac{\ell_{\max}}{\|p_k\|_{\infty,\mathrm{samp}}}\right\},
+   * a_k=\begin{cases}
+   * \dfrac{f_k[p_k]}{c_k}, & \lambda_{\max}=0,\\
+   * \min\left\{\dfrac{f_k[p_k]}{c_k},\,
+   * \dfrac{\ell_{\max}}{\|p_k\|_{\infty,\mathrm{samp}}}\right\},
+   * & \lambda_{\max}>0,
+   * \end{cases}
    * \qquad \bar p_k=a_kp_k,\qquad \bar M_k=M_k/a_k.
    * @f]
-   * The motion bound is @f$\ell_{\max}=h\lambda_{\max}@f$, where
+   * By default, @f$a_k=f_k[p_k]/c_k@f$ is unrestricted. A positive optional
+   * motion bound is @f$\ell_{\max}=h\lambda_{\max}@f$, where
    * @f$\lambda_{\max}>0@f$ is a dimensionless motion limit; the norm is the sampled
    * componentwise maximum of the physical field, not its coefficient vector.
    * The scalar curvature is selected from
@@ -366,7 +371,7 @@ namespace Rodin::Adaptation
    * |-----------|-----|-------------|-------|
    * | @f$h@f$ | `model.h` | Background reference size; scales distribution, motion limit and geometric target | Required |
    * | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness, not a force multiplier | @f$1@f$ |
-   * | @f$\kappa_D@f$ | `model.distribution` | Deviatoric-strain distribution weight; assembled with @f$h@f$ | @f$10^{-3}@f$ |
+   * | @f$\kappa_D@f$ | `model.distribution` | Deviatoric-strain distribution weight; assembled with @f$h@f$ | @f$10^{-4}@f$ |
    * | @f$\widehat\mu@f$ | `model.hinge` | Hinge strength relative to predicted fitting improvement | @f$100@f$ |
    * | @f$\kappa_J@f$ | `model.kappaJ` | Relative Jacobian-hinge row weight | @f$1@f$ |
    * | @f$\kappa_Q@f$ | `model.kappaQ` | Relative distortion-hinge row weight | @f$1@f$ |
@@ -376,7 +381,7 @@ namespace Rodin::Adaptation
    * | @f$j_{\min}@f$ | `globalization.jMin` | Hard inadmissibility floor | @f$10^{-8}@f$ |
    * | @f$Q_{\max}@f$ | `model.distortion` | Maximum admissible relative distortion | @f$10@f$ |
    * | @f$\sigma@f$ | `model.robustScale` | Welsch robustness scale in level-set units | Automatic (`0`) |
-   * | @f$\lambda_{\max}@f$ | `globalization.maxStepOverH` | Scaled predictor-motion limit divided by @f$h@f$ | @f$1@f$ |
+   * | @f$\lambda_{\max}@f$ | `globalization.maxStepOverH` | Optional predictor-motion limit divided by @f$h@f$; zero disables it | @f$0@f$ |
    * | @f$c_A@f$ | `globalization.armijo` | Armijo sufficient-decrease coefficient | @f$10^{-4}@f$ |
    * | @f$\varepsilon_{\mathrm{geom}}@f$ | `convergence.tolerance.geometric` | Maximum sampled normalized-residual target | @f$h^{p+1}@f$, automatic (`0`) |
    * | @f$\tau_{\mathrm{rel}}@f$ | `convergence.tolerance.innerRelative` | Inner stationarity tolerance relative to the fitting force norm | @f$10^{-3}@f$ |
@@ -406,7 +411,8 @@ namespace Rodin::Adaptation
    * size of the deformed elements. It scales distribution, the automatic
    * geometric target and the predictor-motion cap.
    * @ref WNGIRParameters::Globalization::maxStepOverH bounds the scaled
-   * predictor in units of @f$h@f$ before quality recovery. The hinge solve can
+   * predictor in units of @f$h@f$ before quality recovery when positive; zero
+   * leaves directional Newton unrestricted. The hinge solve can
    * alter that predictor, and outer backtracking checks the resulting motion.
    * @ref WNGIRParameters::Model::robustScale sets @f$\sigma@f$ in level-set units.
    * Residuals much larger than @f$\sigma@f$ have reduced influence on the
@@ -691,9 +697,9 @@ namespace Rodin::Adaptation
             << "WNGIR requires valid residual tolerances, budgets and line search."
             << Alert::Raise;
         if (!std::isfinite(parameters.globalization.maxStepOverH) ||
-          !(parameters.globalization.maxStepOverH > Real(0)))
+          parameters.globalization.maxStepOverH < Real(0))
           Alert::Exception()
-            << "Directional Newton requires a finite positive step/h bound."
+            << "Directional Newton requires a finite nonnegative step/h bound."
             << Alert::Raise;
         if (!(parameters.model.qualityGuard > Real(0) &&
               parameters.model.qualityGuard < Real(1)) ||

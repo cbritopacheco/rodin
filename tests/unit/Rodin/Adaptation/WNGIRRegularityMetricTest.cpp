@@ -12,6 +12,124 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+TEST(Rodin_Adaptation_WNGIRRegularityMetric, MeshScaleWeightsDistributionNotFittingP1P2P3)
+{
+  const auto check = []<size_t Order, size_t Dimension>() {
+    auto mesh = [&] {
+      if constexpr (Dimension == 2)
+        return LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+      else
+        return LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+    }();
+    mesh.scale(Real(0.5));
+    for (size_t from = 1; from <= Dimension; ++from)
+      for (size_t to = 0; to <= Dimension; ++to)
+        if (from != to)
+          mesh.getConnectivity().compute(from, to);
+    constexpr Attribute interface = 10;
+    for (auto face = mesh.getFace(); face; ++face)
+    {
+      bool marked = true;
+      for (const Index vertex : face->getVertices())
+        marked &= mesh.getVertexCoordinates(vertex)(0) == Real(1);
+      if (marked)
+        mesh.setAttribute({Dimension - 1, face->getIndex()}, interface);
+    }
+    auto fes = [&] {
+      if constexpr (Order == 1)
+        return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, Dimension);
+      else
+        return H1(std::integral_constant<size_t, Order>{}, mesh, Dimension);
+    }();
+    TrialFunction trial(fes);
+    TestFunction test(fes);
+    GridFunction current(fes), field(fes);
+    current = VectorFunction(
+      Dimension, [](const Point&) { return Math::SpatialVector<Real>::Zero(Dimension); });
+    field = VectorFunction(Dimension, [](const Point& point) {
+      Math::SpatialVector<Real> value = Math::SpatialVector<Real>::Zero(Dimension);
+      value(0) = point.getCoordinates()(0);
+      return value;
+    });
+    Math::SpatialMatrix<Real> normal(Dimension, Dimension);
+    normal.setZero();
+    normal(0, 0) = Real(1);
+    BilinearForm fitting(trial, test);
+    auto observation = FaceIntegral(Dot(MatrixFunction(normal) * trial, test));
+    observation.over(interface).setOrder(2 * Order);
+    fitting = observation;
+    fitting.assemble();
+    const Real fitAction = field.getData().dot(fitting.getOperator() * field.getData());
+    EXPECT_NEAR(fitAction, Real(1), Real(1e-11));
+    constexpr Real coefficient = Real(1e-4);
+    for (const Real h : {Real(0.5), Real(0.25), Real(0.125)})
+    {
+      BilinearForm distribution(trial, test);
+      distribution =
+        Adaptation::WNGIRDistribution(trial, test, current, coefficient * h, 2 * Order);
+      distribution.assemble();
+      const Real action =
+        field.getData().dot(distribution.getOperator() * field.getData());
+      const Real expected = coefficient * h * Real(Dimension - 1) / Real(Dimension);
+      EXPECT_NEAR(action / fitAction, expected, Real(1e-10) * expected);
+    }
+  };
+  check.template operator()<1, 2>();
+  check.template operator()<2, 2>();
+  check.template operator()<3, 2>();
+  check.template operator()<1, 3>();
+  check.template operator()<2, 3>();
+  check.template operator()<3, 3>();
+}
+
+TEST(Rodin_Adaptation_WNGIRRegularityMetric, ConformalInterpolationEnergyUnderRefinement)
+{
+  const auto check = []<size_t Order>() {
+    constexpr size_t dimension = 2;
+    for (const size_t n : {3u, 5u, 9u})
+    {
+      const Real h = Real(1) / Real(n - 1);
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
+      mesh.scale(h);
+      for (size_t from = 1; from <= 2; ++from)
+        for (size_t to = 0; to <= 2; ++to)
+          if (from != to)
+            mesh.getConnectivity().compute(from, to);
+      auto fes = [&] {
+        if constexpr (Order == 1)
+          return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, 2);
+        else
+          return H1(std::integral_constant<size_t, Order>{}, mesh, 2);
+      }();
+      TrialFunction trial(fes);
+      TestFunction test(fes);
+      GridFunction current(fes), field(fes);
+      current = VectorFunction(dimension, [](const Point&) -> Math::SpatialVector<Real> {
+        return Math::SpatialVector<Real>::Zero(2);
+      });
+      field = VectorFunction(dimension, [](const Point& point) {
+        const auto& x = point.getCoordinates();
+        return Math::SpatialVector<Real>{
+          x(0) * x(0) - x(1) * x(1), Real(2) * x(0) * x(1)};
+      });
+      BilinearForm distribution(trial, test);
+      distribution = Adaptation::WNGIRDistribution(trial, test, current, h, 2 * Order);
+      distribution.assemble();
+      const Real action =
+        field.getData().dot(distribution.getOperator() * field.getData());
+      // The exact quadratic conformal field has zero deviatoric strain;
+      // its P1 interpolant has integrated squared strain h^2 on this grid.
+      const Real expected = Order == 1 ? h * h * h : Real(0);
+      EXPECT_NEAR(action, expected, Real(1e-10));
+      std::cout << "conformal P" << Order << " h=" << h << " distribution=" << action
+                << '\n';
+    }
+  };
+  check.template operator()<1>();
+  check.template operator()<2>();
+  check.template operator()<3>();
+}
+
 TEST(Rodin_Adaptation_WNGIRRegularityMetric, DeviatoricCurrentStrainKernelAndEnergyP1P2P3)
 {
   const auto check = []<size_t Order, size_t Dimension>() {

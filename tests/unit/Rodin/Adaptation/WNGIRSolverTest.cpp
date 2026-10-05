@@ -31,13 +31,13 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(parameters.convergence.iterations.inner, 15);
       EXPECT_EQ(parameters.convergence.tolerance.innerRelative, Real(1e-3));
       EXPECT_EQ(parameters.convergence.iterations.linear, 1000);
-      EXPECT_EQ(parameters.model.distribution, Real(1e-3));
+      EXPECT_EQ(parameters.model.distribution, Real(1e-4));
       EXPECT_EQ(parameters.model.distortion, Real(10));
       EXPECT_EQ(parameters.model.jacobian, Real(1e-2));
       EXPECT_EQ(parameters.linear.threads, 0u);
       EXPECT_EQ(parameters.convergence.iterations.outer, 30);
       EXPECT_TRUE(parameters.globalization.directionalNewton);
-      EXPECT_EQ(parameters.globalization.maxStepOverH, Real(1));
+      EXPECT_EQ(parameters.globalization.maxStepOverH, Real(0));
       EXPECT_EQ(parameters.model.qualityGuard, Real(0.1));
       EXPECT_EQ(parameters.convergence.tolerance.geometric, Real(0));
       EXPECT_EQ(parameters.quadrature.validation, 0);
@@ -123,7 +123,7 @@ namespace Rodin::Tests::Unit
       WNGIR solver(trial, test);
       WNGIRParameters p;
       EXPECT_NO_THROW(solver.setParameters(p));
-      for (const Real invalid : {Real(0), Real(-1), std::numeric_limits<Real>::infinity(),
+      for (const Real invalid : {Real(-1), std::numeric_limits<Real>::infinity(),
              std::numeric_limits<Real>::quiet_NaN()})
       {
         p.globalization.maxStepOverH = invalid;

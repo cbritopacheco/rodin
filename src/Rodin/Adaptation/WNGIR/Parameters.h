@@ -39,7 +39,7 @@ namespace Rodin::Adaptation
           Real h = 0; ///< Fixed background reference size (required).
           Real fit = 1; ///< @f$\kappa_F@f$, target-normal fitting stiffness.
           Real distribution =
-            Real(1e-3); ///< @f$\kappa_D@f$, distribution weight, assembled with h.
+            Real(1e-4); ///< @f$\kappa_D@f$, distribution weight, assembled with h.
           Real distortion = 10; ///< @f$Q_{\max}@f$, relative-distortion budget.
           Real jacobian =
             Real(1e-2); ///< @f$j_{\mathrm{safe}}@f$, relative Jacobian floor.
@@ -87,7 +87,8 @@ namespace Rodin::Adaptation
       struct Globalization
       {
           bool directionalNewton = true; ///< Scale the model without a level-set Hessian.
-          Real maxStepOverH = 1; ///< Maximum scaled predictor motion divided by h.
+          Real maxStepOverH =
+            0; ///< Positive caps predictor motion/h; zero is unrestricted.
           Real armijo = Real(1e-4); ///< Armijo sufficient-decrease coefficient.
           Real jMin = Real(1e-8); ///< Hard inadmissibility floor.
           Real jFloor = Real(1e-2); ///< Additional Jacobian floor for outer acceptance.
