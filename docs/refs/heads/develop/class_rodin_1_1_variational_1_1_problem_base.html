@@ -213,6 +213,20 @@ $ Au = b $
             </dt>
             <dd>Assigns a problem body to this problem.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2c7601e857e4b5de9c02ccaf2dc9d39e" class="m-doc">getBody</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Returns the current formulation without exposing mutable assembly state.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Term&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5205aa8df7a3730c86d1afceeb47f586" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const Term&amp; term) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp;</span>
+            </dt>
+            <dd>Appends a term using problem-body addition and invalidates assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Term&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a90311b262b80f9812fb973c3c44e1eac" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const Term&amp; term) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp;</span>
+            </dt>
+            <dd>Appends a negative form contribution and invalidates assembly.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a5ba14a75d5ef9a77c71307f9ee4430b2" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">Solver::<wbr />LinearSolverBase</a>&lt;LinearSystem&gt;&amp; solver) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Solves the assembled linear system.</dd>
@@ -302,6 +316,49 @@ $ l(v) $
 <use x='14.390353' y='0' xlink:href='#eq3-g1-41'/>
 </g>
 </svg> defining the weak formulation.</p>
+          </div></section>
+          <section class="m-doc-details" id="a2c7601e857e4b5de9c02ccaf2dc9d39e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c7601e857e4b5de9c02ccaf2dc9d39e" class="m-doc-self">getBody</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Returns the current formulation without exposing mutable assembly state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Exceptions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Alert::Exception</td>
+                  <td>For adapters without a variational body.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The default keeps non-variational problem adapters source-compatible; concrete variational problems override this accessor.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5205aa8df7a3730c86d1afceeb47f586"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+                template&lt;class Term&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5205aa8df7a3730c86d1afceeb47f586" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const Term&amp; term)</span></span>
+            </h3>
+            <p>Appends a term using problem-body addition and invalidates assembly.</p>
+<p>Supports exactly the additions defined by the problem-body algebra, including integrators, preassembled forms and boundary conditions. Terms are owned through the existing clone-on-build semantics. Successful virtual body assignment sets the concrete problem&#x27;s assembly flag to false. The next solve() reassembles; merely reading getLinearSystem() does not refresh the stored system.</p>
+          </div></section>
+          <section class="m-doc-details" id="a90311b262b80f9812fb973c3c44e1eac"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+                template&lt;class Term&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a90311b262b80f9812fb973c3c44e1eac" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const Term&amp; term)</span></span>
+            </h3>
+            <p>Appends a negative form contribution and invalidates assembly.</p>
+<p>This is algebraic subtraction, not removal by identity. Boundary conditions cannot be subtracted because the body algebra does not define their negation. Existing residual/load sign conventions apply.</p>
           </div></section>
           <section class="m-doc-details" id="a5ba14a75d5ef9a77c71307f9ee4430b2"><div>
             <h3>

@@ -224,6 +224,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#af4ce40e19f9df3cd0ca5d0c83709c79b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_us_base.html" class="m-doc">ProblemUsBase</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Copy assignment.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a37c15d2c924b147e23a286bcbff4639c" class="m-doc">getBody</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the current formulation without exposing mutable assembly state.</dd>
             <dt id="a7125711204e361371134b655d1ff6762">
               <span class="m-doc-wrap-bumper">auto <a href="#a7125711204e361371134b655d1ff6762" class="m-doc-self">getTrialOffsets</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
@@ -257,6 +261,27 @@
             </h3>
             <p>Assembles if stale, solves the block linear system, and scatters the result into each trial function solution.</p>
 <p>Assigning a new problem body with operator=() marks the current assembly stale. If that happens, or if assemble() has not been called yet, this function calls assemble() before invoking the linear solver.</p>
+          </div></section>
+          <section class="m-doc-details" id="a37c15d2c924b147e23a286bcbff4639c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemUsBase&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37c15d2c924b147e23a286bcbff4639c" class="m-doc-self">getBody</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the current formulation without exposing mutable assembly state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Exceptions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Alert::Exception</td>
+                  <td>For adapters without a variational body.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The default keeps non-variational problem adapters source-compatible; concrete variational problems override this accessor.</p>
           </div></section>
           <section class="m-doc-details" id="ae0066c598d2649e1529665eeb06e7872"><div>
             <h3>
