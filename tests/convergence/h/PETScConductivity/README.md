@@ -85,8 +85,8 @@ hexahedron, and wedge. Distributed executions use 1, 2, 3, and 4 ranks.
 The coarsest P2 segment mesh has two cells, so the four-rank case also
 exercises ranks without owned cells. Point entities have no PDE h-rate here.
 The suite covers real scalar conductivity, affine geometry, and h refinement;
-complex/vector fields, curved geometry, p/hp paths, and other boundary
-partitions are not claimed by these tests.
+complex/vector fields, curved geometry and p/hp paths are not claimed by
+this Dirichlet target. The additional boundary target is specified below.
 
 `DistributedUniformGrid` in `tests/convergence/MPIConvergence.h` constructs
 the root mesh, computes the explicit incidence requirements, partitions it,
@@ -99,3 +99,61 @@ along with the existing PETSc Poisson suites. Configure with
 `RODIN_BUILD_CONVERGENCE_TESTS=ON`, `RODIN_USE_PETSC=ON`, and, for distributed
 cases, `RODIN_USE_MPI=ON`. Run
 `ctest --test-dir build/tests -R 'RodinConvergenceHPETSc(MPI)?Conductivity' --output-on-failure`.
+
+## Natural and Robin boundary target
+
+`RodinConvergenceHPETScConductivityBoundary` instantiates the shared scalar
+diffusion boundary fixture with the variable coefficient above. Its
+manufactured field is $u=\exp(\sum_jx_j)$, so
+
+$$
+\nabla u=u\boldsymbol{1},\qquad
+f=-d(\gamma+1)u,\qquad
+g_N=\gamma\nabla u\cdot n.
+$$
+
+The essential partition is the face $x_0=0$; the remaining faces carry
+either $g_N$ or the Robin datum $g_R=g_N+2u$. Boundary attributes are
+assigned before partitioning. The mixed weak form, for test functions
+vanishing on the essential partition, is
+
+$$
+\int_\Omega\gamma\nabla u\cdot\nabla v\,\mathrm{d}x
++\alpha\int_{\Gamma_N}uv\,\mathrm{d}s
+=\int_\Omega fv\,\mathrm{d}x
++\int_{\Gamma_N}(g_N+\alpha u)v\,\mathrm{d}s,
+\qquad \alpha\in\{0,2\}.
+$$
+
+With MUMPS available, a pure-Neumann variant uses all boundary faces and
+$u=\exp(\sum_jx_j)-(e-1)^d$, enforcing the zero integral by a constant
+Lagrange multiplier. The gradient and forcing are unchanged. Independently
+integrated mean and compatibility multiplier must satisfy absolute budgets
+$10^{-10}$; omitted flux must produce a compatibility defect above $10^{-2}$.
+
+Each boundary condition also checks the affine P1 and quadratic P2 fields
+specified above on `n=3`, requiring both independent field errors below
+$10^{-9}$. For pure Neumann data their unit-box means are respectively
+$1+d/2$ and $1+d/3$; subtracting these constants retains the exact gradient,
+forcing and flux while enforcing the same zero-mean gauge. Thus polynomial
+reproduction, smooth-field rates and the compatibility constraint have
+distinct oracles.
+
+Each condition uses P1 on `5→9→17` and P2/P3 on `3→5→9` grid points per
+axis. Every adjacent interval must reduce both errors and exceed the
+L2/H1-seminorm floors $1.65/0.75$, $2.45/1.55$, and $3.45/2.35$,
+respectively. These are case-specific acceptance floors, not a claim of
+universal mixed-boundary dual regularity. Assembly order 16 and independent
+norm order 18 are checked separately against orders 18 and 20. Tightening
+the solver tolerance from $10^{-13}$ to $10^{-14}$ must also change each
+error by less than $10^{-6}$ relatively. The independently recomputed
+coefficient residual satisfies
+$\|A u_h-b\|_2/\max(1,\|b\|_2)<10^{-11}$.
+
+Removing the natural flux while retaining the forcing and essential/Robin
+data must increase each field error by a factor greater than 5. This control
+distinguishes a genuinely exercised natural boundary from an irrelevant
+zero-flux example. All seven positive-dimensional geometries are registered
+for local meshes and MPI ranks 1–4, in both sequential and OpenMP CI jobs.
+Registration describes intended coverage; passing numerical evidence is
+required before certification. The target has its own CI runtime budget.
