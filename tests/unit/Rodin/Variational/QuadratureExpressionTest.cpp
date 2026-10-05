@@ -27,6 +27,24 @@ namespace Rodin::Tests::Unit
 {
   namespace
   {
+    /** Observes retention requests without altering mesh-cache lifetimes. */
+    class ObservedMesh : public LocalMesh
+    {
+      public:
+        explicit ObservedMesh(LocalMesh&& mesh)
+          : LocalMesh(std::move(mesh))
+        {}
+
+        const PolytopeQuadrature& getQuadrature(
+          size_t d, Index i, const QF::QuadratureFormulaBase& qf) const override
+        {
+          ++requests;
+          return LocalMesh::getQuadrature(d, i, qf);
+        }
+
+        mutable size_t requests = 0;
+    };
+
     /** @brief Original entry evaluation, independent of the production rule. */
     template <class I>
     auto reference(const I& integral, const Polytope& cell, size_t order)
@@ -41,7 +59,11 @@ namespace Rodin::Tests::Unit
     {
       integral.setOrder(order);
       const auto expected = reference(integral, cell, order);
+      const auto& mesh = static_cast<const ObservedMesh&>(cell.getMesh());
+      const size_t requests = mesh.requests;
       integral.setPolytope(cell);
+      EXPECT_EQ(mesh.requests, requests)
+        << "Local assembly must not retain mapped points for every mesh cell";
       for (Eigen::Index te = 0; te < expected.rows(); ++te)
         for (Eigen::Index tr = 0; tr < expected.cols(); ++tr)
           EXPECT_EQ(integral.integrate(tr, te), expected(te, tr))
@@ -69,7 +91,10 @@ namespace Rodin::Tests::Unit
       form = integral;
       for (size_t repeat = 0; repeat < 2; ++repeat)
       {
+        const auto& observed = static_cast<const ObservedMesh&>(mesh);
+        const size_t requests = observed.requests;
         form.assemble();
+        EXPECT_EQ(observed.requests, requests);
         const Math::Matrix<Scalar> actual = form.getOperator();
         EXPECT_LE((actual - expected).norm(), 1e-12 * std::max(Real(1), expected.norm()));
       }
@@ -125,7 +150,7 @@ namespace Rodin::Tests::Unit
     template <size_t K, class Scalar>
     void checkH1(Polytope::Type geometry)
     {
-      auto mesh = Convergence::UniformGrid(geometry).makeMesh(2);
+      ObservedMesh mesh(Convergence::UniformGrid(geometry).makeMesh(2));
       const size_t d = mesh.getDimension();
       H1<K, Scalar, LocalMesh> scalar(std::integral_constant<size_t, K>{}, mesh);
       H1<K, Math::SpatialVector<Scalar>, LocalMesh> vector(
@@ -148,6 +173,47 @@ namespace Rodin::Tests::Unit
     class QuadratureExpression : public ::testing::TestWithParam<Polytope::Type>
     {};
 
+    template <class F>
+    void checkFunctionLifetime(const FunctionBase<F>& function, const ObservedMesh& mesh)
+    {
+      using Rule = QuadratureRule<FunctionBase<F>>;
+      using Scalar = typename Rule::ScalarType;
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        const auto& qf = QF::PolytopeQuadratureFormula::get(1, cell->getGeometry());
+        const auto& borrowed = cell->getQuadrature(qf);
+        Scalar expected = 0;
+        for (size_t qp = 0; qp < borrowed.getSize(); ++qp)
+        {
+          const auto& p = borrowed.getPoint(qp);
+          expected += qf.getWeight(qp) * p.getDistortion() * function(p);
+        }
+
+        const size_t requests = mesh.requests;
+        Rule rule(function);
+        rule.setPolytope(*cell);
+        EXPECT_EQ(rule.compute(), expected);
+        Rule copy(rule);
+        copy.setPolytope(*cell);
+        EXPECT_EQ(copy.compute(), expected);
+        Rule moved(std::move(rule));
+        EXPECT_EQ(moved.compute(), expected);
+        EXPECT_EQ(mesh.requests, requests);
+        // Internal ownership must not evict a publicly borrowed quadrature.
+        EXPECT_EQ(&cell->getQuadrature(qf), &borrowed);
+      }
+    }
+
+    TEST_P(QuadratureExpression, FunctionOwnershipCopyMoveAndBorrowedCacheLifetime)
+    {
+      ObservedMesh mesh(Convergence::UniformGrid(GetParam()).makeMesh(3));
+      const RealFunction real([](const Point& p) { return 1 + p(0); });
+      const ComplexFunction complex(
+        [](const Point& p) { return Complex(1 + p(0), 2 - p(0)); });
+      checkFunctionLifetime(real, mesh);
+      checkFunctionLifetime(complex, mesh);
+    }
+
     TEST_P(QuadratureExpression, H1RealOrdersOneTwoThree)
     {
       checkH1<1, Real>(GetParam());
@@ -165,7 +231,7 @@ namespace Rodin::Tests::Unit
     template <class Scalar>
     void checkOtherSpaces(Polytope::Type geometry)
     {
-      auto mesh = Convergence::UniformGrid(geometry).makeMesh(2);
+      ObservedMesh mesh(Convergence::UniformGrid(geometry).makeMesh(2));
       const size_t d = mesh.getDimension();
       P1<Scalar, LocalMesh> p1(mesh);
       P1<Math::SpatialVector<Scalar>, LocalMesh> vp1(mesh, d);
@@ -233,7 +299,7 @@ namespace Rodin::Tests::Unit
 
     TEST(QuadratureExpressionRegression, CurvedCellAndFacetValues)
     {
-      auto mesh = Convergence::UniformGrid(Polytope::Type::Triangle).makeMesh(2);
+      ObservedMesh mesh(Convergence::UniformGrid(Polytope::Type::Triangle).makeMesh(2));
       const auto cell = mesh.getCell(0);
       RealH1Element<2> geometryFE(Polytope::Type::Triangle);
       PointCloud nodes(2, geometryFE.getCount());

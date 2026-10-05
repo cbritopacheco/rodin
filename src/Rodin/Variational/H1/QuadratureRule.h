@@ -91,7 +91,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -142,7 +142,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t nte = integrand.getDOFs(polytope);
 
@@ -202,7 +202,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -317,7 +317,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -369,7 +369,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t nte = integrand.getDOFs(polytope);
 
@@ -433,7 +433,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -552,7 +552,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -611,7 +611,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t ntr = lhs.getDOFs(polytope);
         const size_t nte = rhs.getDOFs(polytope);
@@ -702,7 +702,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -839,7 +839,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -900,7 +900,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t ntr = lhs.getDOFs(polytope);
         const size_t nte = rhs.getDOFs(polytope);
@@ -985,7 +985,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -1128,7 +1128,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -1190,7 +1190,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t ntr = lhs.getDOFs(polytope);
         const size_t nte = rhs.getDOFs(polytope);
@@ -1333,7 +1333,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -1464,7 +1464,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -1525,7 +1525,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t ntr = lhs.getDOFs(polytope);
         const size_t nte = rhs.getDOFs(polytope);
@@ -1587,7 +1587,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -1698,7 +1698,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -1758,7 +1758,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t ntr = lhs.getDOFs(polytope);
         const size_t nte = rhs.getDOFs(polytope);
@@ -1870,7 +1870,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -1981,7 +1981,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -2041,7 +2041,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t ntr = lhs.getDOFs(polytope);
         const size_t nte = rhs.getDOFs(polytope);
@@ -2152,7 +2152,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -2290,7 +2290,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -2352,7 +2352,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t ntr = lhs.getDOFs(polytope);
         const size_t nte = rhs.getDOFs(polytope);
@@ -2562,7 +2562,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -2697,7 +2697,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -2762,7 +2762,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t ntr = lhs.getDOFs(polytope);
         const size_t nte = rhs.getDOFs(polytope);
@@ -2918,7 +2918,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;
 
       const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
       const Geometry::Polytope* m_polytope;
       bool m_set;
@@ -3049,7 +3049,7 @@ namespace Rodin::Variational
           : Parent(std::move(other)),
             m_integrand(std::move(other.m_integrand)),
             m_qf(std::exchange(other.m_qf, nullptr)),
-            m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+            m_quadrature(std::move(other.m_quadrature)),
             m_polytope(std::exchange(other.m_polytope, nullptr)),
             m_set(std::exchange(other.m_set, false)),
             m_order(std::exchange(other.m_order, 0)),
@@ -3101,7 +3101,7 @@ namespace Rodin::Variational
           }
 
           assert(m_qf);
-          m_quadrature = &polytope.getQuadrature(*m_qf);
+          m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
           const size_t ntr = lhs.getDOFs(polytope);
           const size_t nte = rhs.getDOFs(polytope);
@@ -3288,7 +3288,7 @@ namespace Rodin::Variational
         std::unique_ptr<IntegrandType> m_integrand;
 
         const QF::QuadratureFormulaBase* m_qf;
-        const Geometry::PolytopeQuadrature* m_quadrature;
+        std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
         const Geometry::Polytope* m_polytope;
         bool m_set;
@@ -3407,7 +3407,7 @@ namespace Rodin::Variational
           : Parent(std::move(other)),
             m_integrand(std::move(other.m_integrand)),
             m_qf(std::exchange(other.m_qf, nullptr)),
-            m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+            m_quadrature(std::move(other.m_quadrature)),
             m_polytope(std::exchange(other.m_polytope, nullptr)),
             m_set(std::exchange(other.m_set, false)),
             m_order(std::exchange(other.m_order, 0)),
@@ -3456,7 +3456,7 @@ namespace Rodin::Variational
           }
 
           assert(m_qf);
-          m_quadrature = &polytope.getQuadrature(*m_qf);
+          m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
           const H1Element<KTrial, ScalarType> trialScalarElement(geometry);
           const H1Element<KTest, ScalarType> testScalarElement(geometry);
@@ -3575,7 +3575,7 @@ namespace Rodin::Variational
       private:
         std::unique_ptr<IntegrandType> m_integrand;
         const QF::QuadratureFormulaBase* m_qf;
-        const Geometry::PolytopeQuadrature* m_quadrature;
+        std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
         const Geometry::Polytope* m_polytope;
         bool m_set;
         size_t m_order;
@@ -3694,7 +3694,7 @@ namespace Rodin::Variational
           : Parent(std::move(other)),
             m_integrand(std::move(other.m_integrand)),
             m_qf(std::exchange(other.m_qf, nullptr)),
-            m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+            m_quadrature(std::move(other.m_quadrature)),
             m_polytope(std::exchange(other.m_polytope, nullptr)),
             m_set(std::exchange(other.m_set, false)),
             m_order(std::exchange(other.m_order, 0)),
@@ -3750,7 +3750,7 @@ namespace Rodin::Variational
           }
 
           assert(m_qf);
-          m_quadrature = &polytope.getQuadrature(*m_qf);
+          m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
           const size_t ntr = lhs.getDOFs(polytope);
           const size_t nte = rhs.getDOFs(polytope);
@@ -3868,7 +3868,7 @@ namespace Rodin::Variational
         std::unique_ptr<IntegrandType> m_integrand;
 
         const QF::QuadratureFormulaBase* m_qf;
-        const Geometry::PolytopeQuadrature* m_quadrature;
+        std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;
 
         const Geometry::Polytope* m_polytope;
         bool m_set;

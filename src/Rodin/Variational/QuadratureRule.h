@@ -27,8 +27,8 @@
  * module, while the mapped geometric points live in
  * @ref Rodin::Geometry::PolytopeQuadrature. This separation allows:
  * - canonical reuse of reference quadrature formulas,
- * - mesh-owned caching of mapped geometric quadrature points,
- * - simpler and more efficient integrator implementations.
+ * - integrator-owned mapped points for the currently bound polytope,
+ * - bounded mapped-point storage during a one-pass mesh traversal.
  *
  * ## Usage
  *
@@ -40,9 +40,16 @@
  * @endcode
  *
  * For local element integrators, setPolytope() binds the integrator to a
- * concrete polytope, selects an appropriate quadrature formula, and retrieves
- * the corresponding cached @ref Rodin::Geometry::PolytopeQuadrature from the
- * mesh.
+ * concrete polytope, selects an appropriate quadrature formula, and owns the
+ * corresponding @ref Rodin::Geometry::PolytopeQuadrature until the next bind
+ * or destruction. Moving a rule transfers this ownership without relocating
+ * the mapped points. Copying a rule does not copy its polytope binding.
+ * For @f$ T @f$ active rules with at most @f$ Q @f$ points per cell, mapped-point
+ * storage is @f$ O(TQ) @f$, independent of the number of traversed cells.
+ * The public mesh-owned quadrature cache remains available to callers that
+ * intentionally require stable borrowed quadratures across multiple cells;
+ * assembly neither evicts nor invalidates those objects. These lifetimes are
+ * independent of the assembly backend and require no collective operation.
  */
 #ifndef RODIN_VARIATIONAL_QUADRATURERULE_H
 #define RODIN_VARIATIONAL_QUADRATURERULE_H
@@ -92,7 +99,7 @@ namespace Rodin::Variational
    *
    * This specialization evaluates scalar-valued function integrals on a single
    * polytope using a quadrature formula and the corresponding mapped geometric
-   * quadrature points cached on the mesh.
+   * quadrature points owned by the rule.
    */
   template <class FunctionDerived>
   class QuadratureRule<FunctionBase<FunctionDerived>> final
@@ -144,7 +151,7 @@ namespace Rodin::Variational
           m_integrand(std::move(other.m_integrand)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_value(std::move(other.m_value))
       {}
 
@@ -170,7 +177,7 @@ namespace Rodin::Variational
        *
        * If no explicit quadrature formula was set previously, a default generic
        * polytope quadrature of order 1 is selected for the polytope geometry.
-       * The corresponding mapped quadrature is then retrieved from the mesh.
+       * The corresponding mapped quadrature is owned until the next bind.
        */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope)
       {
@@ -181,7 +188,7 @@ namespace Rodin::Variational
           m_qf = &QF::PolytopeQuadratureFormula::get(1, polytope.getGeometry());
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
         return *this;
       }
 
@@ -241,7 +248,7 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;                  ///< Integrand
       const Geometry::Polytope* m_polytope;                        ///< Bound polytope
       const QF::QuadratureFormulaBase* m_qf;                       ///< Reference quadrature formula
-      const Geometry::PolytopeQuadrature* m_quadrature;            ///< Mapped geometric quadrature
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;            ///< Mapped geometric quadrature
       Optional<ScalarType> m_value;                                ///< Cached value
   };
 
@@ -528,7 +535,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -599,7 +606,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t ntr = trial.getDOFs(*m_polytope);
         const size_t nte = test.getDOFs(*m_polytope);
@@ -673,7 +680,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;               ///< Integrand expression
       const QF::QuadratureFormulaBase* m_qf;                    ///< Reference quadrature formula
-      const Geometry::PolytopeQuadrature* m_quadrature;         ///< Mapped geometric quadrature
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;         ///< Mapped geometric quadrature
       const Geometry::Polytope* m_polytope;                     ///< Bound polytope
       bool m_set;                                               ///< Whether formula selection data are initialized
       size_t m_order;                                           ///< Cached quadrature order
@@ -761,7 +768,7 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+          m_quadrature(std::move(other.m_quadrature)),
           m_polytope(std::exchange(other.m_polytope, nullptr)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
@@ -825,7 +832,7 @@ namespace Rodin::Variational
         }
 
         assert(m_qf);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
+        m_quadrature = std::make_unique<Geometry::PolytopeQuadrature>(polytope, *m_qf);
 
         const size_t nte = integrand.getDOFs(polytope);
 
@@ -880,7 +887,7 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;               ///< Integrand expression
       const QF::QuadratureFormulaBase* m_qf;                    ///< Reference quadrature formula
-      const Geometry::PolytopeQuadrature* m_quadrature;         ///< Mapped geometric quadrature
+      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;         ///< Mapped geometric quadrature
       const Geometry::Polytope* m_polytope;                     ///< Bound polytope
       bool m_set;                                               ///< Whether formula selection data are initialized
       size_t m_order;                                           ///< Cached quadrature order

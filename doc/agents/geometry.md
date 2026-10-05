@@ -50,6 +50,10 @@ compare coordinate/key sets in tests.
 - `PointCloud` — sdim × n coordinate container with Eigen views, the input
   for parametric transformations.
 - `PolytopeQuadrature` caches quadrature data attached to mesh polytopes.
+  Variational rules own only their bound polytope's mapped points. The explicit
+  mesh cache is retained for callers requiring borrowed quadratures whose
+  lifetime extends until geometry is flushed; variational quadrature rules
+  do not populate it.
 
 ## Mesh algebra
 

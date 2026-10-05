@@ -94,6 +94,15 @@ points than optimized tables.
   process-wide pool. An eight-entry thread-local cache serves repeated hot-path
   lookups without locking; cache misses enter the locked canonical pool.
 
+Reference-formula reuse and mapped-point ownership are separate lifetimes.
+Variational quadrature rules own a `Geometry::PolytopeQuadrature` for their
+currently bound polytope; rebinding releases the previous mapped points.
+This bounds mapped-point storage by the active rules and quadrature sizes,
+not by the number of traversed cells. Explicit `mesh.getQuadrature(...)`
+calls still return mesh-owned, stable borrowed objects until geometry is
+flushed. Assembly does not evict these objects. Both lifetimes are
+backend-independent and introduce no MPI collective.
+
 The Xiao--Gimbutas coefficients are taken from the authors' `triasymq`
 distribution. The Witherden--Vincent coefficients are taken from PyFR's
 published quadrature tables. The transformed coefficients, exact source
