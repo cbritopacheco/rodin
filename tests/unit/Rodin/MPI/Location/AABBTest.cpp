@@ -149,10 +149,13 @@ namespace
         partitioner.partition(static_cast<size_t>(world->size()));
         sharder.shard(partitioner);
       }
-      sharder.scatter(0);
     }
+    // Broadcast before scatter waits for its sends: peers must be free to
+    // enter gather and receive shards without relying on eager MPI buffering.
     boost::mpi::broadcast(*world, expected, 0);
     boost::mpi::broadcast(*world, expectedJacobian, 0);
+    if (world->rank() == 0)
+      sharder.scatter(0);
     auto mesh = sharder.gather(0);
     Location::AABB locator(mesh);
     locator.setProjectionPruning(true);
