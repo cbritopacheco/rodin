@@ -73,6 +73,7 @@ namespace Rodin::Solver
 
       /**
        * @brief Returns the associated linear solver.
+       * @returns The associated linear solver.
        */
       const LinearSolver& getLinearSolver() const noexcept
       {
@@ -81,6 +82,7 @@ namespace Rodin::Solver
 
       /**
        * @brief Returns the associated linear solver.
+       * @returns The associated linear solver.
        */
       LinearSolver& getLinearSolver() noexcept
       {

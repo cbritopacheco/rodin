@@ -63,12 +63,15 @@ namespace Rodin::Variational
       using Parent = BooleanFunctionBase<OR<LHSType, RHSType>>;
 
       /// @brief Constructs the expression from its left and right operands.
+      /// @param lhs Left operand.
+      /// @param rhs Right operand.
       constexpr
       OR(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       OR(const OR& other)
         : Parent(other),
@@ -77,6 +80,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       OR(OR&& other)
         : Parent(std::move(other)),
@@ -85,6 +89,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Gets the left-hand side operand.
+      /// @returns The left-hand side operand.
       const auto& getLHS() const
       {
         assert(m_lhs);
@@ -92,6 +97,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the right-hand side operand.
+      /// @returns The right-hand side operand.
       const auto& getRHS() const
       {
         assert(m_rhs);
@@ -99,6 +105,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the expression at a geometric point.
+      /// @param p Point at which the operation is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -106,6 +114,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the expression at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -130,6 +140,9 @@ namespace Rodin::Variational
   template <class LHSDerived, class RHSDerived>
   constexpr auto
   /// @brief Logical disjunction of two boolean function expressions.
+  /// @param lhs Left operand.
+  /// @param rhs Right operand.
+  /// @returns Pointwise logical-disjunction expression.
   operator||(const BooleanFunctionBase<LHSDerived>& lhs,
     const BooleanFunctionBase<RHSDerived>& rhs)
   {
@@ -139,6 +152,9 @@ namespace Rodin::Variational
   template <class RHSDerived>
   constexpr auto
   /// @brief Logical disjunction of two boolean function expressions.
+  /// @param lhs Left operand.
+  /// @param rhs Right operand.
+  /// @returns Pointwise logical-disjunction expression.
   operator||(Boolean lhs, const BooleanFunctionBase<RHSDerived>& rhs)
   {
     return OR(BooleanFunction(lhs), rhs);
@@ -147,6 +163,9 @@ namespace Rodin::Variational
   template <class LHSDerived>
   constexpr auto
   /// @brief Logical disjunction of two boolean function expressions.
+  /// @param lhs Left operand.
+  /// @param rhs Right operand.
+  /// @returns Pointwise logical-disjunction expression.
   operator||(const BooleanFunctionBase<LHSDerived>& lhs, Boolean rhs)
   {
     return OR(lhs, BooleanFunction(rhs));

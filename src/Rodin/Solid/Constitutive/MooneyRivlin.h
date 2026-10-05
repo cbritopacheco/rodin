@@ -77,15 +77,20 @@ namespace Rodin::Solid
       MooneyRivlin(MooneyRivlin&&) = default;
 
       /// @brief Gets @f$ c_1 @f$.
+      /// @returns @f$ c_1 @f$.
       Real getMaterialConstantC1() const { return m_c1; }
 
       /// @brief Gets @f$ c_2 @f$.
+      /// @returns @f$ c_2 @f$.
       Real getMaterialConstantC2() const { return m_c2; }
 
       /// @brief Gets the bulk modulus @f$ \kappa @f$.
+      /// @returns The bulk modulus @f$ \kappa @f$.
       Real getBulkModulus() const { return m_kappa; }
 
       /// @brief Populates the invariant cache at a constitutive point.
+      /// @param cache Storage for the constitutive invariant cache.
+      /// @param cp Constitutive evaluation point.
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
@@ -105,6 +110,9 @@ namespace Rodin::Solid
       }
 
       /// @brief Returns the stored strain-energy density.
+      /// @param cache Constitutive invariant cache populated by setCache().
+      /// @param cp Constitutive evaluation point.
+      /// @returns The stored strain-energy density.
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
         const Real dd = static_cast<Real>(cp.getKinematicState().getDimension());
@@ -114,6 +122,9 @@ namespace Rodin::Solid
       }
 
       /// @brief Computes the first Piola-Kirchhoff stress.
+      /// @param P Storage for the first Piola-Kirchhoff stress.
+      /// @param cache Constitutive invariant cache populated by setCache().
+      /// @param cp Constitutive evaluation point.
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
@@ -148,6 +159,10 @@ namespace Rodin::Solid
       }
 
       /// @brief Computes the material tangent action.
+      /// @param dP Storage for the resulting stress increment.
+      /// @param cache Constitutive invariant cache populated by setCache().
+      /// @param cp Constitutive evaluation point.
+      /// @param dF Increment of the deformation gradient.
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,

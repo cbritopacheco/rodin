@@ -83,10 +83,10 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = ScalarFunctionBase<ScalarType, RealFunctionBase<Derived>>;
 
-      /// @brief Import traceOf methods from parent
+      // Import traceOf methods from parent.
       using Parent::traceOf;
 
-      /// @brief Import operator() from parent
+      // Import operator() from parent.
       using Parent::operator();
 
       /// @brief Default constructor
@@ -143,6 +143,7 @@ namespace Rodin::Variational
        *
        * @tparam Args Variadic template for trace domain specification
        * @returns Reference to derived object (for method chaining)
+       * @param args Arguments forwarded to the constructed object.
        */
       template <class ... Args>
       constexpr
@@ -312,6 +313,7 @@ namespace Rodin::Variational
       /**
        * @brief Leaves constant functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param args Arguments forwarded to the constructed object.
        */
       template <class ... Args>
       RealFunction& traceOf(Args&&... args) noexcept
@@ -397,6 +399,7 @@ namespace Rodin::Variational
       /**
        * @brief Leaves constant functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param args Arguments forwarded to the constructed object.
        */
       template <class ... Args>
       RealFunction& traceOf(Args&&... args) noexcept
@@ -496,6 +499,7 @@ namespace Rodin::Variational
       /**
        * @brief Leaves callable functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param args Arguments forwarded to the constructed object.
        */
       template <class ... Args>
       RealFunction& traceOf(Args&&... args) noexcept

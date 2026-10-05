@@ -112,6 +112,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the integration point the expression is evaluated at.
+      /// @returns The integration point the expression is evaluated at.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_ref.get().getIntegrationPoint();
@@ -189,6 +190,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets the name of the field.
+      /// @param name Name of the object.
+      /// @returns Reference to this object after the operation.
       TrialFunctionReference& setName(const std::string& name)
       {
         m_ref.get().setName(name);
@@ -196,6 +199,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the name of the field.
+      /// @returns The name of the field.
       Optional<StringView> getName() const override
       {
         return m_ref.get().getName();
@@ -312,7 +316,8 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy assignment is deleted
-      void operator=(const TrialFunction&) = delete;
+      /// @param other Object to copy from.
+      void operator=(const TrialFunction& other) = delete;
 
       /// @brief Move assignment is deleted
       void operator=(TrialFunction&&) = delete;
@@ -384,6 +389,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets the name of the field.
+      /// @param name Name of the object.
+      /// @returns Reference to this object after the operation.
       TrialFunction& setName(const std::string& name)
       {
         m_gf.setName(name);
@@ -391,6 +398,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the name of the field.
+      /// @returns The name of the field.
       Optional<StringView> getName() const override
       {
         return m_gf.getName();

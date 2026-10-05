@@ -22,6 +22,11 @@ namespace Rodin::Adaptation::Detail
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
 
       /// @brief Constructs the w n g i r primal barrier force.
+      /// @param z Function operand.
+      /// @param parameters Parameters configuring the operation.
+      /// @param current Current displacement field.
+      /// @param inner Inner displacement field.
+      /// @param barrierCoefficient Coefficient multiplying the determinant barrier.
       WNGIRPrimalBarrierForce(const TestFunction& z, const Displacement& current,
         const Displacement& inner, const WNGIRParameters& parameters,
         Real barrierCoefficient)
@@ -37,6 +42,7 @@ namespace Rodin::Adaptation::Detail
       WNGIRPrimalBarrierForce(const WNGIRPrimalBarrierForce&) = default;
 
       /// @brief Returns the current polytope.
+      /// @returns The current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
@@ -44,6 +50,8 @@ namespace Rodin::Adaptation::Detail
       }
 
       /// @brief Binds to a polytope and assembles the local system.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Reference to this object after the operation.
       WNGIRPrimalBarrierForce& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -97,18 +105,22 @@ namespace Rodin::Adaptation::Detail
       }
 
       /// @brief Returns an entry of the assembled local system.
+      /// @param local Index in the local numbering.
+      /// @returns Integral computed by the quadrature rule.
       ScalarType integrate(std::size_t local) final override
       {
         return m_vector(static_cast<Eigen::Index>(local));
       }
 
       /// @brief Returns the integration region.
+      /// @returns The integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
       /// @brief Clones this object.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       WNGIRPrimalBarrierForce* copy() const noexcept final override
       {
         return new WNGIRPrimalBarrierForce(*this);

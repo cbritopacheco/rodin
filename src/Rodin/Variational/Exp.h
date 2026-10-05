@@ -113,6 +113,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         // Exponential of a polynomial is not a polynomial unless operand is constant.
@@ -145,6 +147,8 @@ namespace Rodin::Variational
   template <class NestedDerived>
   constexpr auto
   /// @brief Builds the pointwise exponential of a function expression.
+  /// @param op Function operand.
+  /// @returns Pointwise exponential expression.
   exp(const FunctionBase<NestedDerived>& op)
   {
     return Exp(op);

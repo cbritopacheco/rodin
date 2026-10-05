@@ -117,6 +117,9 @@ namespace Rodin::Geometry
           struct SymmetricEquality
           {
               /// @brief Returns whether two keys have the same vertex multiset.
+              /// @returns Reference to this object after the operation.
+              /// @param a First key.
+              /// @param b Second key.
               bool operator()(const Key& a, const Key& b) const;
           };
 
@@ -130,10 +133,14 @@ namespace Rodin::Geometry
           struct SymmetricHash
           {
               /// @brief Returns an order-independent hash of the key's vertices.
+              /// @param poly Mesh entity used by this operation.
+              /// @returns Reference to this object after the operation.
               std::size_t operator()(const Key& poly) const;
           };
 
           /// @brief SplitMix64 bit-mixing hash of a 64-bit value.
+          /// @param x Integer state to mix.
+          /// @returns Mixed 64-bit hash value.
           constexpr
           static inline std::uint64_t sm64(std::uint64_t x)
           {
@@ -153,6 +160,8 @@ namespace Rodin::Geometry
           }
 
           /// @brief Sorts @p a and @p b into non-decreasing order.
+          /// @param a Index updated by the conditional swap.
+          /// @param b Index updated by the conditional swap.
           constexpr
           static inline void cswap(Index& a, Index& b)
           {
@@ -164,45 +173,64 @@ namespace Rodin::Geometry
           Key();
 
           /// @brief Constructs a key with @p n uninitialized vertices.
+          /// @param n Number of entries.
           Key(std::uint8_t n);
 
           /// @brief Constructs a key from a list of vertex indices.
+          /// @param vertices Vertex indices defining the key.
           Key(std::initializer_list<Index> vertices);
 
           /// @brief Returns a reference to vertex index @p i.
+          /// @param i Index of the requested entry.
+          /// @returns Value of the expression at the supplied evaluation point.
           Index& operator()(std::uint8_t i);
 
           /// @brief Returns a const reference to vertex index @p i.
+          /// @param i Index of the requested entry.
+          /// @returns Value of the expression at the supplied evaluation point.
           const Index& operator()(std::uint8_t i) const;
 
           /// @brief Returns a reference to vertex index @p i.
+          /// @param i Index of the requested entry.
+          /// @returns Entry at the supplied index.
           Index& operator[](std::uint8_t i);
 
           /// @brief Returns a const reference to vertex index @p i.
+          /// @param i Index of the requested entry.
+          /// @returns Entry at the supplied index.
           const Index& operator[](std::uint8_t i) const;
 
           /// @brief Sets the number of vertices; returns a reference to this key.
+          /// @param n Number of entries.
+          /// @returns Reference to this key after changing the vertex count.
           Key& resize(std::uint8_t n);
 
           /// @brief Returns the number of vertices.
+          /// @returns The number of vertices.
           std::uint8_t size() const;
 
           /// @brief Returns the underlying fixed-capacity vertex array.
+          /// @returns The underlying fixed-capacity vertex array.
           const Vertices& getVertices() const;
 
           /// @brief Returns an iterator to the first vertex index.
+          /// @returns Iterator to the first entry.
           Vertices::iterator begin();
 
           /// @brief Returns an iterator past the last vertex index.
+          /// @returns Iterator past the last entry.
           Vertices::iterator end();
 
           /// @brief Returns a const iterator to the first vertex index.
+          /// @returns Iterator to the first entry.
           Vertices::const_iterator begin() const;
 
           /// @brief Returns a const iterator past the last vertex index.
+          /// @returns Iterator past the last entry.
           Vertices::const_iterator end() const;
 
           /// @brief Serializes the key (for boost::serialization).
+          /// @param ar Serialization archive.
           template <class Archive>
           void serialize(Archive& ar, const unsigned int)
           {
@@ -379,6 +407,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Polytope(const Polytope& other)
         : m_dimension(other.m_dimension),
@@ -388,6 +417,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Polytope(Polytope&& other)
         : m_dimension(std::exchange(other.m_dimension, 0)),
@@ -397,6 +427,8 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
        */
       Polytope& operator=(const Polytope& other)
       {
@@ -411,6 +443,8 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
        */
       Polytope& operator=(Polytope&& other)
       {
@@ -543,6 +577,7 @@ namespace Rodin::Geometry
       /**
        * @brief Gets cached quadrature for this polytope.
        * @param[in] qf Quadrature formula
+       * @returns Cached quadrature for this polytope.
        */
       const PolytopeQuadrature& getQuadrature(const QF::QuadratureFormulaBase& qf) const;
 
@@ -600,6 +635,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Cell(const Cell& other)
         : Polytope(other)
@@ -607,6 +643,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Cell(Cell&& other)
         :  Polytope(std::move(other))
@@ -647,6 +684,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Face(const Face& other)
         : Polytope(other)
@@ -654,6 +692,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Face(Face&& other)
         : Polytope(std::move(other))
@@ -706,6 +745,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Vertex(const Vertex& other)
         : Polytope(other)

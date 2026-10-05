@@ -35,6 +35,7 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Constructs an integration point from a geometric point.
+      /// @param p Point at which the operation is evaluated.
       IntegrationPoint(const Geometry::Point& p)
         : m_p(p),
           m_qf(nullptr),

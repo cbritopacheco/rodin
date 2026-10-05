@@ -99,6 +99,10 @@ namespace Rodin::Variational
 
     public:
       /// @brief Constructs the P1 linear elasticity integrator.
+      /// @param u Function operand.
+      /// @param v Function operand.
+      /// @param lambda First Lame parameter field.
+      /// @param mu Shear-modulus field.
       LinearElasticityIntegrator(
           const TrialFunction<Solution, TrialFESType>& u,
           const TestFunction<TestFESType>& v,
@@ -114,6 +118,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       LinearElasticityIntegrator(const LinearElasticityIntegrator& other)
         : Parent(other),
           m_lambda(other.m_lambda ? other.m_lambda->copy() : nullptr),
@@ -127,6 +132,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       LinearElasticityIntegrator(LinearElasticityIntegrator&& other)
         : Parent(std::move(other)),
           m_lambda(std::move(other.m_lambda)),
@@ -140,12 +146,15 @@ namespace Rodin::Variational
       {}
 
       /// @brief Returns the current polytope.
+      /// @returns The current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         return m_polytope.value().get();
       }
 
       /// @brief Sets the current polytope and assembles the local matrix.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Reference to this object after the operation.
       LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -300,6 +309,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns an entry of the current element stiffness matrix.
+      /// @param tr Trial shape-function expression.
+      /// @param te Test shape-function expression.
+      /// @returns Integral computed by the quadrature rule.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -328,12 +340,14 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the integration region.
+      /// @returns The integration region.
       Geometry::Region getRegion() const override
       {
         return Geometry::Region::Cells;
       }
 
       /// @brief Polymorphically copies this linear-elasticity integrator.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       LinearElasticityIntegrator* copy() const noexcept override
       {
         return new LinearElasticityIntegrator(*this);

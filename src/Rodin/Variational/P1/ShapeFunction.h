@@ -68,6 +68,8 @@ namespace Rodin::Variational
               }
 
           /// @brief Equality comparison.
+          /// @returns Whether the operands compare equal.
+          /// @param o Key to compare with this key.
               bool operator==(const StructureKey& o) const noexcept
               {
                 if (!valid || !o.valid)
@@ -76,7 +78,8 @@ namespace Rodin::Variational
               }
 
           /// @brief Resets the key, invalidating the cached entry.
-              void operator=(std::initializer_list<int>) noexcept
+          /// @param other Object to copy from.
+              void operator=(std::initializer_list<int> other) noexcept
               {
                 valid = false;
                 geom = Geometry::Polytope::Type::Point;
@@ -101,6 +104,8 @@ namespace Rodin::Variational
             }
 
           /// @brief Equality comparison.
+          /// @returns Whether the operands compare equal.
+          /// @param o Key to compare with this key.
             bool operator==(const ValueKey& o) const noexcept
             {
               if (!valid || !o.valid)
@@ -109,7 +114,8 @@ namespace Rodin::Variational
             }
 
           /// @brief Resets the key, invalidating the cached entry.
-            void operator=(std::initializer_list<int>) noexcept
+          /// @param other Object to copy from.
+            void operator=(std::initializer_list<int> other) noexcept
             {
               valid = false;
               qf = nullptr;
@@ -135,6 +141,7 @@ namespace Rodin::Variational
       ShapeFunction() = delete;
 
       /// @brief Constructs the shape function over a finite element space.
+      /// @param fes Finite element space.
       constexpr
       ShapeFunction(const FESType& fes)
         : Parent(fes),
@@ -142,6 +149,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       ShapeFunction(const ShapeFunction& other)
         : Parent(other),
@@ -150,6 +158,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other)),
@@ -157,7 +166,9 @@ namespace Rodin::Variational
           m_cache(std::move(other.m_cache))
       {}
 
-      /// @brief Gets the global DOF indices for a polytope.
+      /// @brief Returns the number of local basis functions for a polytope.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Number of local basis functions on the selected entity.
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
@@ -173,6 +184,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the integration point the expression is evaluated at.
+      /// @returns The integration point the expression is evaluated at.
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -183,6 +195,8 @@ namespace Rodin::Variational
       /**
        * Fallback path (non-quadrature evaluations).
        * Keeps your previous behavior (pushforward of each basis at p).
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
        */
       ShapeFunction& setIntegrationPoint(const IntegrationPoint& ip)
       {
@@ -285,6 +299,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the basis function of a local degree of freedom.
+      /// @param local Index in the local numbering.
+      /// @returns Value of the selected local basis function at the evaluation point.
       constexpr
       const RangeType& getBasis(size_t local) const
       {
@@ -294,6 +310,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the operand in the shape function expression.
+      /// @returns The operand in the shape function expression.
       constexpr
       const auto& getLeaf() const
       {
@@ -301,6 +318,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
@@ -338,19 +357,24 @@ namespace Rodin::Variational
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = typename FormLanguage::Traits<FES>::RangeType;
       /// @brief Constructs matrix basis tabulation on the supplied finite element space.
+      /// @param fes Finite element space.
       explicit ShapeFunction(const FES& fes)
         : Parent(fes)
       {}
       /// @brief Constructs matrix basis tabulation on the supplied finite element space.
+      /// @param other Object to copy from.
       ShapeFunction(const ShapeFunction& other)
         : Parent(other)
       {}
       /// @brief Constructs matrix basis tabulation on the supplied finite element space.
+      /// @param other Object to move from.
       ShapeFunction(ShapeFunction&& other)
         : Parent(std::move(other))
       {}
 
       /// @brief Returns the local basis count for the selected polytope.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Number of local basis functions on the selected entity.
       size_t getDOFs(const Geometry::Polytope& poly) const
       {
         return this->getFiniteElementSpace()
@@ -359,6 +383,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the currently bound integration point.
+      /// @returns The currently bound integration point.
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
@@ -366,6 +391,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Binds the integration point and prepares local basis values.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Reference to this object after the operation.
       Shape& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
@@ -398,16 +425,21 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns a basis value at the bound integration point.
+      /// @param local Index in the local numbering.
+      /// @returns Value of the selected local basis function at the evaluation point.
       const RangeType& getBasis(size_t local) const
       {
         return m_basis.at(local);
       }
       /// @brief Returns the leaf shape function used for assembly.
+      /// @returns The leaf shape function used for assembly.
       const auto& getLeaf() const
       {
         return static_cast<const Derived&>(*this).getLeaf();
       }
       /// @brief Returns the polynomial order when it is known.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return this->getFiniteElementSpace()

@@ -111,7 +111,8 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy assignment is deleted
-      void operator=(const TestFunction&) = delete;
+      /// @param other Object to copy from.
+      void operator=(const TestFunction& other) = delete;
 
       /// @brief Move assignment is deleted
       void operator=(TestFunction&&) = delete;

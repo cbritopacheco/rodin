@@ -57,6 +57,8 @@ namespace Rodin::Variational
       };
 
       /// @brief Gets the index offset of a pyramid layer.
+      /// @returns The index offset of a pyramid layer.
+      /// @param layer Lattice layer index.
       static constexpr size_t getLayerOffset(size_t layer)
       {
         size_t out = 0;
@@ -69,6 +71,10 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the linear index of a tensor-product mode.
+      /// @param i Index of the requested entry.
+      /// @param j Index of the second coordinate.
+      /// @returns The linear index of a tensor-product mode.
+      /// @param k Index of the requested lattice entry.
       static constexpr size_t getIndex(size_t i, size_t j, size_t k)
       {
         const size_t n = K - k + 1;
@@ -76,6 +82,10 @@ namespace Rodin::Variational
       }
 
       /// @brief Decodes a linear index into its tensor-product indices.
+      /// @param idx Index of the requested entry.
+      /// @param i Index of the requested entry.
+      /// @param j Index of the second coordinate.
+      /// @param k Storage for the decoded lattice index.
       static constexpr void decode(size_t idx, size_t& i, size_t& j, size_t& k)
       {
         size_t rem = idx;
@@ -96,6 +106,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the number of modes on a triangular lattice.
+      /// @returns The number of modes on a triangular lattice.
+      /// @param alpha Basis or lattice index in the reference element.
       static constexpr IJ getTriangleLattice(size_t alpha)
       {
         size_t pos = 0;
@@ -111,6 +123,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the index of a mode on a pyramid side.
+      /// @param local Index in the local numbering.
+      /// @returns The index of a mode on a pyramid side.
+      /// @param alpha Basis or lattice index in the reference element.
       static constexpr size_t getSideIndex(size_t local, size_t alpha)
       {
         const auto ij = getTriangleLattice(alpha);
@@ -140,6 +155,9 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Gets a binomial coefficient.
+      /// @returns A binomial coefficient.
+      /// @param n Nonnegative upper argument of the binomial coefficient.
+      /// @param k Lower argument of the binomial coefficient.
       static Real getBinomial(size_t n, size_t k)
       {
         if (k > n)
@@ -157,6 +175,10 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the basis function of a local degree of freedom.
+      /// @param i Local basis-function index.
+      /// @returns Value of the selected local basis function at the evaluation point.
+      /// @param n Basis or lattice index in the reference element.
+      /// @param x Reference-coordinate component at which the basis is evaluated.
       static Real getBasis(size_t n, size_t i, Real x)
       {
         if (i > n)
@@ -171,6 +193,10 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the derivative of the basis function.
+      /// @param i Index of the requested entry.
+      /// @returns Derivative evaluated at the supplied point.
+      /// @param n Basis or lattice index in the reference element.
+      /// @param x Reference-coordinate component at which the basis is evaluated.
       static Real getDerivative(size_t n, size_t i, Real x)
       {
         if (n == 0)
@@ -194,6 +220,9 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Gets the basis function of a local degree of freedom.
+      /// @param r Point at which the operation is evaluated.
+      /// @returns Value of the selected local basis function at the evaluation point.
+      /// @param mode Basis-mode index.
       static Real getBasis(size_t mode, const Math::SpatialPoint& r)
       {
         size_t i, j, k;
@@ -213,6 +242,10 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the derivative of the basis function.
+      /// @param r Point at which the operation is evaluated.
+      /// @returns Derivative evaluated at the supplied point.
+      /// @param mode Basis-mode index.
+      /// @param deriv Coordinate direction of differentiation.
       static Real getDerivative(size_t mode, size_t deriv, const Math::SpatialPoint& r)
       {
         size_t i, j, k;
@@ -250,6 +283,7 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Gets the underlying matrix.
+      /// @returns The underlying matrix.
       static const Math::Matrix<Real>& getMatrix()
       {
         static const Math::Matrix<Real> s_vandermonde = [] {
@@ -270,6 +304,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the inverse of the matrix.
+      /// @returns The inverse of the matrix.
       static const Math::Matrix<Real>& getInverse()
       {
         static const Math::Matrix<Real> s_inv = [] {

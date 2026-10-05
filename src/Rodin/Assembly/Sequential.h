@@ -74,12 +74,16 @@ namespace Rodin::Assembly
       Geometry::Polytope getPolytope(Index i) const;
 
       /// @brief Gets the topological dimension of the iteration.
+      /// @returns The topological dimension of the iteration.
       size_t getDimension() const;
 
       /// @brief Gets the number of candidate polytopes.
+      /// @returns The number of candidate polytopes.
       size_t getCount() const;
 
       /// @brief Tests whether a candidate belongs to the iteration region.
+      /// @param i Index of the requested entry.
+      /// @returns Whether the candidate belongs to the integration region.
       bool filter(Index i) const;
 
     private:
@@ -88,6 +92,7 @@ namespace Rodin::Assembly
   };
 
   /// @brief Template argument deduction guide for SequentialIteration
+  /// @param mesh Mesh on which the object is defined.
   SequentialIteration(
       const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
     -> SequentialIteration<Geometry::Mesh<Context::Local>>;
@@ -145,11 +150,13 @@ namespace Rodin::Assembly
       Sequential() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -157,6 +164,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the vector associated to the
        * linear form.
+       * @param input Input data.
+       * @param res Storage for the computed values.
        */
       void execute(VectorType& res, const InputType& input) const override
       {
@@ -255,11 +264,13 @@ namespace Rodin::Assembly
       Sequential() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -267,6 +278,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
@@ -402,11 +415,13 @@ namespace Rodin::Assembly
       Sequential() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -414,6 +429,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
@@ -491,11 +508,13 @@ namespace Rodin::Assembly
       Sequential() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -503,6 +522,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
@@ -641,11 +662,13 @@ namespace Rodin::Assembly
       Sequential() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -731,11 +754,13 @@ namespace Rodin::Assembly
         Sequential() = default;
 
         /// @brief Copy constructor.
+        /// @param other Object to copy from.
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
         /// @brief Move constructor.
+        /// @param other Object to move from.
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
@@ -793,11 +818,13 @@ namespace Rodin::Assembly
         Sequential() = default;
 
         /// @brief Copy constructor.
+        /// @param other Object to copy from.
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
         /// @brief Move constructor.
+        /// @param other Object to move from.
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
@@ -1962,11 +1989,13 @@ namespace Rodin::Assembly
         Sequential() = default;
 
         /// @brief Copy constructor.
+        /// @param other Object to copy from.
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
         /// @brief Move constructor.
+        /// @param other Object to move from.
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
@@ -2069,11 +2098,13 @@ namespace Rodin::Assembly
         Sequential() = default;
 
         /// @brief Copy constructor.
+        /// @param other Object to copy from.
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
         /// @brief Move constructor.
+        /// @param other Object to move from.
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}

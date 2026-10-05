@@ -96,24 +96,43 @@ namespace Rodin::Geometry
 
       /// @brief Returns the unary cost of labeling a cell Inside, given its
       /// volume and signed moment.
+      /// @returns The unary cost of labeling a cell Inside, given its volume and signed moment.
+      /// @param volume Cell volume.
+      /// @param moment Integral of the field over the cell.
       static Real getInsideCost(Real volume, Real moment) noexcept;
 
       /// @brief Returns the unary cost of labeling a cell Outside, given its
       /// volume and signed moment.
+      /// @returns The unary cost of labeling a cell Outside, given its volume and signed moment.
+      /// @param volume Cell volume.
+      /// @param moment Integral of the field over the cell.
       static Real getOutsideCost(Real volume, Real moment) noexcept;
 
       /// @brief Classifies cells into Inside/Outside via a Potts min s-t cut
       /// built from per-cell volumes and moments.
+      /// @param volumes Cell volumes.
+      /// @param moments Cell integrals of the field.
+      /// @param edges Edges carrying the interface penalty.
+      /// @returns Cell labels and the value of the minimum-cut objective.
       Result classify(const std::vector<Real>& volumes, const std::vector<Real>& moments,
         const std::vector<Edge>& edges) const;
 
       /// @brief Classifies cells with additional @ref Options (narrow-band
       /// restriction, far-field pinning, per-edge weighting).
+      /// @param volumes Cell volumes.
+      /// @param moments Cell integrals of the field.
+      /// @param edges Edges carrying the interface penalty.
+      /// @param options Options controlling the classification.
+      /// @returns Cell labels and the value of the minimum-cut objective.
       Result classify(const std::vector<Real>& volumes, const std::vector<Real>& moments,
         const std::vector<Edge>& edges, const Options& options) const;
 
       /// @brief Solves the s-t min cut directly from precomputed unary costs
       /// and edges.
+      /// @param insideCosts Costs of assigning each cell to the inside region.
+      /// @param outsideCosts Costs of assigning each cell to the outside region.
+      /// @param edges Edges carrying the interface penalty.
+      /// @returns Cell labels and the value of the minimum-cut objective.
       Result solve(const std::vector<Real>& insideCosts,
         const std::vector<Real>& outsideCosts, const std::vector<Edge>& edges) const;
   };

@@ -106,5 +106,7 @@ jobs:
             https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
           tar -xzf doxygen.tar.gz
           echo "$PWD/doxygen-1.14.0/bin" >> "$GITHUB_PATH"
+      - name: Test documentation warning enforcement
+        run: python3 -m unittest discover -s dev -p test_doxygen_warnings.py -v
       - name: Check for new documentation warnings
         run: python3 dev/check_doxygen_warnings.py

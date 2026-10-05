@@ -45,6 +45,7 @@ namespace Rodin::Adaptation
   {
     public:
       /// @brief Constructs an undeformed state of the given spatial dimension.
+      /// @param d Topological dimension of the entity.
       explicit CellDeformation(std::size_t d)
         : m_d(d)
       {
@@ -56,6 +57,8 @@ namespace Rodin::Adaptation
       /**
        * @brief Sets the displacement gradient @f$H=\nabla u@f$, giving
        * @f$F=I+H@f$, and invalidates the derived quantities.
+       * @returns Reference to this object after the operation.
+       * @param H Displacement-gradient matrix.
        */
       CellDeformation& setDisplacementGradient(const Math::SpatialMatrix<Real>& H)
       {
@@ -67,6 +70,8 @@ namespace Rodin::Adaptation
       }
 
       /// @brief Sets the deformation gradient @f$F@f$ directly.
+      /// @returns Reference to this object after the operation.
+      /// @param F Deformation-gradient matrix.
       CellDeformation& setDeformationGradient(const Math::SpatialMatrix<Real>& F)
       {
         m_F = F;
@@ -75,18 +80,21 @@ namespace Rodin::Adaptation
       }
 
       /// @brief The spatial dimension.
+      /// @returns The dimension.
       std::size_t getDimension() const
       {
         return m_d;
       }
 
       /// @brief The deformation gradient @f$F=I+\nabla u@f$.
+      /// @returns The deformation gradient.
       const Math::SpatialMatrix<Real>& getDeformationGradient() const
       {
         return m_F;
       }
 
       /// @brief The Jacobian @f$j=\det F@f$, computed once and cached.
+      /// @returns Derivative evaluated at the supplied point.
       Real getJacobian() const
       {
         if (!m_j)
@@ -98,6 +106,7 @@ namespace Rodin::Adaptation
        * @brief Whether the cell is non-inverted, @f$j>0@f$.
        *
        * The derived shape quantities are defined only in this case.
+       * @returns Whether the Jacobian determinant is strictly positive.
        */
       bool isAdmissible() const
       {
@@ -110,6 +119,7 @@ namespace Rodin::Adaptation
        * Weaker than @ref isAdmissible — an inverted cell (@f$j<0@f$) is
        * invertible. Mesh adaptation relies on this distinction when evaluating
        * the cofactor in linearized sampled constraints.
+       * @returns Whether the absolute Jacobian determinant exceeds machine precision.
        */
       bool isInvertible() const
       {
@@ -122,6 +132,7 @@ namespace Rodin::Adaptation
        *
        * Defined for inverted cells too: only the cofactor structure is needed,
        * not the sign of @f$j@f$.
+       * @returns The inverse transpose.
        */
       const Math::SpatialMatrix<Real>& getInverseTranspose() const
       {
@@ -137,6 +148,7 @@ namespace Rodin::Adaptation
        *
        * Invariant under @f$F\mapsto sRF@f$ for scalars @f$s>0@f$ and rotations
        * @f$R@f$, and minimal at similarities.
+       * @returns The relative distortion.
        */
       Real getRelativeDistortion() const
       {
@@ -152,6 +164,7 @@ namespace Rodin::Adaptation
       /**
        * @brief The gradient @f$\partial Q_{\operatorname{rel}}/\partial F@f$;
        * requires @ref isAdmissible.
+       * @returns The relative distortion gradient.
        */
       const Math::SpatialMatrix<Real>& getRelativeDistortionGradient() const
       {
@@ -173,6 +186,8 @@ namespace Rodin::Adaptation
        *
        * This is the directional derivative of @f$j@f$ along @f$G=\nabla v@f$,
        * and requires only @ref isInvertible.
+       * @returns The jacobian action.
+       * @param G Increment in the deformation gradient.
        */
       Real getJacobianAction(const Math::SpatialMatrix<Real>& G) const
       {
@@ -183,6 +198,8 @@ namespace Rodin::Adaptation
        * @brief The linearised action of the relative distortion,
        * @f$a_Q(G)=\partial_F Q_{\operatorname{rel}}:G@f$; requires
        * @ref isAdmissible.
+       * @returns The relative distortion action.
+       * @param G Increment in the deformation gradient.
        */
       Real getRelativeDistortionAction(const Math::SpatialMatrix<Real>& G) const
       {

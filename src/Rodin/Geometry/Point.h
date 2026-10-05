@@ -99,11 +99,13 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       PointBase(const PointBase& other);
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       PointBase(PointBase&& other);
 
@@ -347,11 +349,13 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Point(const Point& other);
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Point(Point&& other);
 
@@ -474,6 +478,9 @@ namespace Rodin::Geometry
   }
 
   /// @brief Adds a spatial vector to a point.
+  /// @param v Vector operand.
+  /// @param p Point at which the operation is evaluated.
+  /// @returns Sum of the operands.
   template <class Scalar>
   auto operator+(
     const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
@@ -482,6 +489,9 @@ namespace Rodin::Geometry
   }
 
   /// @brief Adds a point to a spatial vector.
+  /// @param p Point at which the operation is evaluated.
+  /// @param v Vector operand.
+  /// @returns Sum of the operands.
   template <class Scalar>
   auto operator+(
     const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
@@ -490,6 +500,9 @@ namespace Rodin::Geometry
   }
 
   /// @brief Subtracts a point's coordinates from a spatial vector.
+  /// @param v Vector operand.
+  /// @param p Point at which the operation is evaluated.
+  /// @returns Difference of the operands, or the negated operand for the unary overload.
   template <class Scalar>
   auto operator-(
     const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
@@ -498,6 +511,9 @@ namespace Rodin::Geometry
   }
 
   /// @brief Subtracts a spatial vector from a point's coordinates.
+  /// @param p Point at which the operation is evaluated.
+  /// @param v Vector operand.
+  /// @returns Difference of the operands, or the negated operand for the unary overload.
   template <class Scalar>
   auto operator-(
     const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)

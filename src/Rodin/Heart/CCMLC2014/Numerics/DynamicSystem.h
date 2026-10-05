@@ -42,6 +42,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
     public:
       /**
        * @brief Construct the dynamic system assembler.
+       * @param input Input data.
        */
       explicit DynamicSystem(const Input& input)
         : m_input(input)
@@ -49,6 +50,12 @@ namespace Rodin::Heart::CCMLC2014::Numerics
 
       /**
        * @brief Build intermediate evaluation data from candidate unknowns.
+       * @param dt Time-step size.
+       * @param candidateUnknowns Candidate vector of unknowns at the new time step.
+       * @param currentState State at the current time step.
+       * @param previousState State at the previous time step.
+       * @param tnp1 Time at the new time step.
+       * @param evalData Evaluation data for the residual or Jacobian.
        */
       template <class DenseVector, class StateType, class EvalData>
       void buildEvalData(
@@ -93,6 +100,8 @@ namespace Rodin::Heart::CCMLC2014::Numerics
 
       /**
        * @brief Evaluate the coupled 0D residual vector.
+       * @param evalData Evaluation data for the residual or Jacobian.
+       * @param residualVector Storage for the residual vector.
        */
       template <class DenseVector, class EvalData>
       void evaluateResidual(
@@ -176,6 +185,8 @@ namespace Rodin::Heart::CCMLC2014::Numerics
 
       /**
        * @brief Assemble the exact Jacobian of the coupled residual.
+       * @param evalData Evaluation data for the residual or Jacobian.
+       * @param jacobianMatrix Storage for the Jacobian matrix.
        */
       template <class DenseMatrix, class EvalData>
       void evaluateJacobian(const EvalData& evalData, DenseMatrix& jacobianMatrix,

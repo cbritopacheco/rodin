@@ -139,6 +139,7 @@ namespace Rodin::Assembly
       }
 
       /// @brief Creates a heap-allocated copy of this assembly backend.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       MPI* copy() const noexcept override
       {
         return new MPI(*this);
@@ -263,6 +264,7 @@ namespace Rodin::Assembly
       }
 
       /// @brief Creates a heap-allocated copy of this assembly backend.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       MPI* copy() const noexcept override
       {
         return new MPI(*this);
@@ -900,6 +902,7 @@ namespace Rodin::Assembly
 
     public:
       /// @brief Creates a heap-allocated copy of this assembly backend.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       MPI* copy() const noexcept override
       {
         return new MPI(*this);
@@ -1657,6 +1660,7 @@ namespace Rodin::Assembly
 
     public:
       /// @brief Creates a heap-allocated copy of this assembly backend.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       MPI* copy() const noexcept override
       {
         return new MPI(*this);

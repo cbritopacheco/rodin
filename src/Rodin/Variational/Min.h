@@ -120,6 +120,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = getLHS().getOrder(polytope);
@@ -307,24 +309,29 @@ namespace Rodin::Variational
       using Parent = Min<FunctionBase<NestedDerived>, Real>;
 
       /// @brief Constructs the expression from its left and right operands.
+      /// @param a Left operand.
+      /// @param b Right operand.
       constexpr
       Min(const LHSType& a, const RHSType& b)
         : Parent(b, a)
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       Min(const Min& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       Min(Min&& other)
         : Parent(std::move(other))
       {}
 
       /// @brief Creates a polymorphic copy.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       virtual Min* copy() const noexcept override
       {
         return new Min(*this);

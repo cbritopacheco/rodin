@@ -34,6 +34,8 @@ namespace Rodin::Adaptation
   };
 
   /// @brief Returns the sampled admissibility quadrature order for FE order.
+  /// @param feOrder Polynomial order of the displacement finite element.
+  /// @returns Maximum of two and twice the finite element order.
   inline std::size_t wngirAdmissibilityQuadratureOrder(std::size_t feOrder)
   {
     return std::max<std::size_t>(2, 2 * feOrder);
@@ -41,6 +43,11 @@ namespace Rodin::Adaptation
 
   template <class Displacement>
   /// @brief Evaluates sampled Jacobian and relative-distortion admissibility.
+  /// @param u Displacement field whose coefficients are replaced with the candidate data.
+  /// @param uData Displacement coefficients assigned before sampling.
+  /// @param jMin Lower admissible Jacobian-determinant bound.
+  /// @param quadratureOrder Sampling quadrature order; zero selects the order from the finite element.
+  /// @returns Minimum sampled Jacobian determinant, inadmissible sample count, and maximum relative distortion.
   WNGIRAdmissibilityReport evaluateWNGIRAdmissibilitySampled(Displacement& u,
     const Math::Vector<Real>& uData, Real jMin, std::size_t quadratureOrder = 0)
   {

@@ -94,21 +94,25 @@ namespace Rodin::Solver
       using Parent::solve;
 
       /// @brief Constructs the solver from the problem to be solved.
+      /// @param pb Variational problem to operate on.
       PartialPivLU(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       PartialPivLU(const PartialPivLU& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       PartialPivLU(PartialPivLU&& other)
         : Parent(std::move(other))
       {}
 
       /// @brief Solves the assembled linear system.
+      /// @param axb Variational expression defining the problem.
       void solve(LinearSystemType& axb) override
       {
         const auto& A = axb.getOperator();
@@ -126,6 +130,7 @@ namespace Rodin::Solver
       }
 
       /// @brief Returns a polymorphic copy of this solver.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       PartialPivLU* copy() const noexcept override
       {
         return new PartialPivLU(*this);
@@ -135,6 +140,7 @@ namespace Rodin::Solver
        * @brief Returns the underlying Eigen solver.
        *
        * Useful for diagnostics such as permutationP(), matrixLU(), rcond().
+       * @returns The underlying Eigen solver.
        */
       const Eigen::PartialPivLU<OperatorType>& getSolver() const noexcept
       {

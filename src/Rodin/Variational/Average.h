@@ -156,6 +156,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the expression at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       auto getValue(const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -186,6 +188,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param p Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
@@ -255,6 +259,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       Average(const Average& other)
         : Parent(other),
@@ -263,6 +268,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       Average(Average&& other)
         : Parent(std::move(other)),
@@ -374,6 +380,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param p Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {

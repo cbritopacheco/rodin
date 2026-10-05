@@ -312,7 +312,9 @@ namespace Rodin::IO
           /// @brief Copy constructor.
           Grid(const Grid&) = default;
           /// @brief Copy assignment operator.
-          Grid& operator=(const Grid&) = default;
+          /// @returns Reference to this object after the operation.
+          /// @param other Object to copy from.
+          Grid& operator=(const Grid& other) = default;
 
           /**
            * @brief Returns the name of this grid.
@@ -463,7 +465,12 @@ namespace Rodin::IO
       XDMF(const XDMF&) = delete;        ///< Non-copyable.
       XDMF& operator=(const XDMF&) = delete;  ///< Non-copyable.
       XDMF(XDMF&&) = default;           ///< Move constructible.
-      XDMF& operator=(XDMF&&) = default; ///< Move assignable.
+      /**
+       * @brief Move assignment.
+       * @param other Writer to move from.
+       * @returns Reference to this writer.
+       */
+      XDMF& operator=(XDMF&& other) = default;
 
       ~XDMF() = default;
 

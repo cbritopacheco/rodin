@@ -32,9 +32,14 @@ namespace Rodin::QF
   {
     public:
       /// @brief Highest tabulated degree for @p g, or zero if unsupported.
+      /// @param g Mesh entity used by this operation.
+      /// @returns The max degree.
       static size_t getMaxDegree(Geometry::Polytope::Type g);
 
       /// @brief Whether a rule of strength @p degree is tabulated for @p g.
+      /// @param degree Polynomial degree.
+      /// @param g Mesh entity used by this operation.
+      /// @returns Whether a quadrature formula of the requested strength is available for the geometry.
       static bool isAvailable(size_t degree, Geometry::Polytope::Type g)
       {
         return degree >= 1 && degree <= getMaxDegree(g);
@@ -43,6 +48,8 @@ namespace Rodin::QF
       /**
        * @brief Constructs the rule of strength @p degree on @p g.
        * @pre isAvailable(degree, g)
+       * @param degree Polynomial degree.
+       * @param g Mesh entity used by this operation.
        */
       WitherdenVincent(size_t degree, Geometry::Polytope::Type g);
 
@@ -67,6 +74,7 @@ namespace Rodin::QF
       }
 
       /// @brief The element this rule is defined on.
+      /// @returns The geometry.
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;

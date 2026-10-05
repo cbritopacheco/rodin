@@ -111,6 +111,7 @@ namespace Rodin::Variational
        *
        * State the order with @ref setOrder(size_t) whenever the degree the
        * integrand actually has is not the degree inference can see.
+       * @returns Reference to this object after the operation.
        */
       Integrator& setOrder(std::nullopt_t)
       {
@@ -132,6 +133,7 @@ namespace Rodin::Variational
        * share one degree; prefer @ref setOrder(OrderType) otherwise.
        *
        * @param[in] order Integration order to use on every polytope
+       * @returns Reference to this object after the operation.
        */
       Integrator& setOrder(size_t order)
       {
@@ -151,6 +153,7 @@ namespace Rodin::Variational
        * meaningless and typically too low in both cases.
        *
        * @param[in] order Rule invoked with the polytope being integrated
+       * @returns Reference to this object after the operation.
        */
       Integrator& setOrder(OrderType order)
       {

@@ -106,6 +106,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Derivative(const Derivative& other)
         : Parent(other),
@@ -114,6 +115,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Derivative(Derivative&& other)
         : Parent(std::move(other)),
@@ -121,6 +123,8 @@ namespace Rodin::Variational
       {}
 
       /// @brief Interpolates at an integration point.
+      /// @param out Storage for the computed result.
+      /// @param ip Integration point at which the expression is evaluated.
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -239,6 +243,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param geom Reference geometry.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -247,6 +253,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Creates a polymorphic copy.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       Derivative* copy() const noexcept override
       {
         return new Derivative(*this);

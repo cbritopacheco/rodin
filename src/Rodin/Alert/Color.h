@@ -142,10 +142,12 @@ namespace Rodin::Alert
     RGB(RGB&&) = default;
 
     /// @brief Copy assignment operator.
-    constexpr
-    RGB& operator=(const RGB&) = default;
+    /// @returns Reference to this object after the operation.
+    /// @param other Object to copy from.
+    constexpr RGB& operator=(const RGB& other) = default;
 
     /// @brief Move assignment operator.
+    /// @returns Reference to this object after the operation.
     constexpr
     RGB& operator=(RGB&&) = default;
 
@@ -254,10 +256,12 @@ namespace Rodin::Alert
       Color(Color&&) = default;
 
       /// @brief Copy assignment operator.
-      constexpr
-      Color& operator=(const Color&) = default;
+      /// @returns Reference to this object after the operation.
+      /// @param other Object to copy from.
+      constexpr Color& operator=(const Color& other) = default;
 
       /// @brief Move assignment operator.
+      /// @returns Reference to this object after the operation.
       constexpr
       Color& operator=(Color&&) = default;
 
@@ -312,6 +316,8 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for red color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
    */
   inline
   std::ostream& operator<<(std::ostream& os, const RedT&)
@@ -332,6 +338,8 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for green color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
    */
   inline
   std::ostream& operator<<(std::ostream& os, const GreenT&)
@@ -352,6 +360,8 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for blue color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
    */
   inline
   std::ostream& operator<<(std::ostream& os, const BlueT&)
@@ -372,6 +382,8 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for yellow color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
    */
   inline
   std::ostream& operator<<(std::ostream& os, const YellowT&)
@@ -392,6 +404,8 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for magenta color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
    */
   inline
   std::ostream& operator<<(std::ostream& os, const MagentaT&)
@@ -412,6 +426,8 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for cyan color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
    */
   inline
   std::ostream& operator<<(std::ostream& os, const CyanT&)
@@ -432,6 +448,8 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for white color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
    */
   inline
   std::ostream& operator<<(std::ostream& os, const WhiteT&)
@@ -452,6 +470,8 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for gray color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
    */
   inline
   std::ostream& operator<<(std::ostream& os, const GrayT&)
@@ -472,6 +492,8 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for bright gray color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
    */
   inline
   std::ostream& operator<<(std::ostream& os, const BrightGrayT&)
@@ -492,6 +514,8 @@ namespace Rodin::Alert
 
   /**
    * @brief Stream insertion operator for bright white color.
+   * @param os Output stream.
+   * @returns Output stream after writing the object.
    */
   inline
   std::ostream& operator<<(std::ostream& os, const BrightWhiteT&)

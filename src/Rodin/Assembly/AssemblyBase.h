@@ -344,11 +344,13 @@ namespace Rodin::Assembly
       AssemblyBase() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       AssemblyBase(const AssemblyBase& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       AssemblyBase(AssemblyBase&& other)
         : Parent(std::move(other))
       {}
@@ -406,11 +408,13 @@ namespace Rodin::Assembly
       AssemblyBase() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       AssemblyBase(const AssemblyBase& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       AssemblyBase(AssemblyBase&& other)
         : Parent(std::move(other))
       {}

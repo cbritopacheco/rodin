@@ -155,6 +155,8 @@ namespace Rodin::Variational
           using CallableType = Callable;
 
           /// @brief Constructs the pullback of a function on a polytope.
+          /// @param polytope Mesh entity used by this operation.
+          /// @param v Function operand.
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
@@ -164,6 +166,8 @@ namespace Rodin::Variational
           Pullback(const Pullback&) = default;
 
           /// @brief Evaluates at a point on the reference element.
+          /// @param r Reference coordinates at which to evaluate the basis.
+          /// @returns Value of the expression at the supplied evaluation point.
           auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
@@ -197,6 +201,8 @@ namespace Rodin::Variational
           Pushforward(const Pushforward&) = default;
 
           /// @brief Evaluates at a geometric point.
+          /// @param p Point at which the operation is evaluated.
+          /// @returns Value of the expression at the supplied evaluation point.
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
@@ -446,14 +452,22 @@ namespace Rodin::Variational
       class Pullback : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
-          /** Binds the physical cell and callable field. */
+          /**
+           * Binds the physical cell and callable field.
+           * @param polytope Mesh entity used by this operation.
+           * @param function Function to evaluate.
+           */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& function)
             : m_polytope(polytope),
               m_function(std::forward<Function>(function))
           {}
 
-          /** Evaluates the physical field at a reference coordinate. */
+          /**
+           * Evaluates the physical field at a reference coordinate.
+           * @param reference Point at which the operation is evaluated.
+           * @returns Reference to the entry at the supplied indices.
+           */
           auto operator()(const Math::SpatialPoint& reference) const
           {
             return m_function(Geometry::Point(m_polytope, reference));
@@ -469,13 +483,20 @@ namespace Rodin::Variational
       class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
-          /** Binds a reference-domain callable. */
+          /**
+           * Binds a reference-domain callable.
+           * @param function Function to evaluate.
+           */
           template <class Function>
           explicit Pushforward(Function&& function)
             : m_function(std::forward<Function>(function))
           {}
 
-          /** Evaluates the reference field at a physical point's chart coordinate. */
+          /**
+           * Evaluates the reference field at a physical point's chart coordinate.
+           * @param point Point at which the operation is evaluated.
+           * @returns Reference to the entry at the supplied indices.
+           */
           auto operator()(const Geometry::Point& point) const
           {
             return m_function(point.getReferenceCoordinates());
@@ -485,7 +506,11 @@ namespace Rodin::Variational
           Callable m_function;
       };
 
-      /** Constructs a cellwise vector space with @p vdim components. */
+      /**
+       * Constructs a cellwise vector space with @p vdim components.
+       * @param mesh Mesh on which the object is defined.
+       * @param vdim Number of components in the value range.
+       */
       explicit P0(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
           m_vdim(vdim)
@@ -501,7 +526,10 @@ namespace Rodin::Variational
         }
       }
 
-      /** Constructs a cellwise vector space with compile-time component count. */
+      /**
+       * Constructs a cellwise vector space with compile-time component count.
+       * @param mesh Mesh on which the object is defined.
+       */
       template <size_t VDim>
       explicit P0(std::integral_constant<size_t, VDim>, const MeshType& mesh)
         : P0(mesh, VDim)
@@ -526,7 +554,12 @@ namespace Rodin::Variational
         return m_mesh.get();
       }
 
-      /** Returns the constant vector element for polytope @p i of dimension @p d. */
+      /**
+       * Returns the constant vector element for polytope @p i of dimension @p d.
+       * @param i Index of the requested entry.
+       * @returns The finite element.
+       * @param d Topological dimension of the entity.
+       */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         const auto geometry = getMesh().getGeometry(d, i);
@@ -550,7 +583,12 @@ namespace Rodin::Variational
         return idx.second * m_vdim + local;
       }
 
-      /** Creates the physical-to-reference field pullback on a cell. */
+      /**
+       * Creates the physical-to-reference field pullback on a cell.
+       * @param idx Index of the requested entry.
+       * @param function Function to evaluate.
+       * @returns The pullback.
+       */
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& idx, Callable&& function) const
       {
@@ -558,7 +596,11 @@ namespace Rodin::Variational
           std::forward<Callable>(function));
       }
 
-      /** Creates the reference-to-physical field pushforward on a cell. */
+      /**
+       * Creates the reference-to-physical field pushforward on a cell.
+       * @param function Function to evaluate.
+       * @returns The pushforward.
+       */
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>&, Callable&& function) const
       {

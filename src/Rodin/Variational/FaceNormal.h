@@ -161,18 +161,21 @@ namespace Rodin::Variational
       }
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       FaceNormal(const FaceNormal& other)
         : Parent(other),
           m_sdim(other.m_sdim)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       FaceNormal(FaceNormal&& other)
         : Parent(std::move(other)),
           m_sdim(std::move(other.m_sdim))
       {}
 
       /// @brief Gets the topological dimension.
+      /// @returns The topological dimension.
       constexpr
       size_t getDimension() const
       {
@@ -180,6 +183,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the expression at a geometric point.
+      /// @param p Point at which the operation is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       RangeType getValue(const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -336,6 +341,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {

@@ -360,6 +360,8 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for PETSc-backed BilinearForm.
+   * @param u Function operand.
+   * @param v Function operand.
    */
   template <class Solution, class TrialFES, class TestFES>
   BilinearForm(

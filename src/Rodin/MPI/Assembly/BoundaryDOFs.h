@@ -45,7 +45,11 @@ namespace Rodin::Assembly
       static constexpr bool Global = std::is_same_v<FES,
         Variational::P0g<typename FES::RangeType, typename FES::MeshType>>;
 
-      /** Selects the boundary functional source for each required DOF. */
+      /**
+       * Selects the boundary functional source for each required DOF.
+       * @param fes Finite element space.
+       * @param attributes Mesh attributes selecting the region.
+       */
       MPIBoundaryDOFs(const FES& fes, const FlatSet<Geometry::Attribute>& attributes)
         : m_fes(fes)
       {
@@ -120,12 +124,16 @@ namespace Rodin::Assembly
       }
 
       /// Global DOF -> (shard-local face, face-local functional ordinal).
+      /// @returns Degrees of freedom associated with the supplied mesh entity.
       const auto& getDOFs() const
       {
         return m_dofs;
       }
 
-      /** Broadcasts only the globally supported P0g payload; otherwise a no-op. */
+      /**
+       * Broadcasts only the globally supported P0g payload; otherwise a no-op.
+       * @param values Values used by the operation.
+       */
       template <class Payload>
       void synchronize(IndexMap<Payload>& values) const
       {
@@ -142,7 +150,11 @@ namespace Rodin::Assembly
         }
       }
 
-      /** Evaluates prescribed values or affine offsets at the selected functionals. */
+      /**
+       * Evaluates prescribed values or affine offsets at the selected functionals.
+       * @param values Values used by the operation.
+       * @param function Function to evaluate.
+       */
       template <class Function>
       void assemble(IndexMap<Scalar>& values, const Function& function) const
       {

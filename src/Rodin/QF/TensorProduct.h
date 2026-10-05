@@ -24,6 +24,9 @@ namespace Rodin::QF
   {
     public:
       /// @brief Constructs the Cartesian product of two quadrature formulae.
+      /// @param g Mesh entity used by this operation.
+      /// @param left Quadrature formula for the first tensor-product factor.
+      /// @param right Quadrature formula for the second tensor-product factor.
       TensorProduct(Geometry::Polytope::Type g, const QuadratureFormulaBase& left,
         const QuadratureFormulaBase& right)
         : m_geometry(g)
@@ -32,6 +35,10 @@ namespace Rodin::QF
       }
 
       /// @brief Constructs the Cartesian product of three quadrature formulae.
+      /// @param g Mesh entity used by this operation.
+      /// @param first Quadrature formula for the first tensor-product factor.
+      /// @param second Quadrature formula for the second tensor-product factor.
+      /// @param third Quadrature formula for the third tensor-product factor.
       TensorProduct(Geometry::Polytope::Type g, const QuadratureFormulaBase& first,
         const QuadratureFormulaBase& second, const QuadratureFormulaBase& third)
         : m_geometry(g)
@@ -61,6 +68,7 @@ namespace Rodin::QF
       }
 
       /// @brief Returns the reference element associated with the product rule.
+      /// @returns The reference element associated with the product rule.
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;

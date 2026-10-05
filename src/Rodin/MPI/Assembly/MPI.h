@@ -156,6 +156,7 @@ namespace Rodin::Assembly
 
       /**
        * @brief Copy-constructs the MPI assembler.
+       * @param other Object to copy from.
        */
       MPI(const MPI& other)
         : Parent(other)
@@ -163,6 +164,7 @@ namespace Rodin::Assembly
 
       /**
        * @brief Move-constructs the MPI assembler.
+       * @param other Object to move from.
        */
       MPI(MPI&& other)
         : Parent(std::move(other))
@@ -233,10 +235,12 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       MPI() = default;
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       MPI(const MPI& other)
         : Parent(other)
       {}
       /// @brief Move constructor.
+      /// @param other Object to move from.
       MPI(MPI&& other)
         : Parent(std::move(other))
       {}
@@ -292,7 +296,13 @@ namespace Rodin::Assembly
         }
       }
 
-      /** Evaluates affine data through the same halo-aware functional selection. */
+      /**
+       * Evaluates affine data through the same halo-aware functional selection.
+       * @param values Values used by the operation.
+       * @param fes Finite element space.
+       * @param attributes Mesh attributes selecting the region.
+       * @param function Function to evaluate.
+       */
       template <class Function>
       void assembleValues(IndexMap<Scalar>& values, const FES1& fes,
         const FlatSet<Geometry::Attribute>& attributes, const Function& function) const
@@ -301,6 +311,7 @@ namespace Rodin::Assembly
       }
 
       /// @brief Creates a polymorphic copy of this assembler.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       MPI* copy() const noexcept override
       {
         return new MPI(*this);

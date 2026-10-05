@@ -102,6 +102,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor
+       * @param other Object to copy from.
        */
       DivBase(const DivBase& other)
         : Parent(other),
@@ -110,6 +111,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor
+       * @param other Object to move from.
        */
       DivBase(DivBase&& other)
         : Parent(std::move(other)),
@@ -123,6 +125,8 @@ namespace Rodin::Variational
        * Resolves mesh ownership and dispatches to the derived class's
        * @c interpolate. Falls back to inclusion / submesh restriction
        * when the polytope's mesh is not the FES mesh.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       ScalarType getValue(const Geometry::Point& p) const
       {
@@ -157,6 +161,8 @@ namespace Rodin::Variational
        * If the polytope is owned by the FES mesh, dispatches to
        * @c interpolate(out, ip). Otherwise falls back to inclusion / submesh
        * restriction.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       ScalarType getValue(const IntegrationPoint& ip) const
       {
@@ -214,6 +220,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Interpolates at an integration point.
+      /// @param out Storage for the computed result.
+      /// @param ip Integration point at which the expression is evaluated.
       constexpr
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
@@ -224,6 +232,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(poly);
@@ -231,6 +241,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy function to be overriden in Derived type.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
       DivBase* copy() const noexcept override
       {
@@ -293,25 +304,31 @@ namespace Rodin::Variational
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialVector<ScalarType>;
       /// @brief Constructs row-wise divergence of a matrix field.
+      /// @param operand Operand expression.
       Div(const OperandType& operand)
         : m_gradient(operand)
       {}
       /// @brief Constructs row-wise divergence of a matrix field.
+      /// @param other Object to copy from.
       Div(const Div& other)
         : Parent(other),
           m_gradient(other.m_gradient)
       {}
       /// @brief Constructs row-wise divergence of a matrix field.
+      /// @param other Object to move from.
       Div(Div&& other)
         : Parent(std::move(other)),
           m_gradient(std::move(other.m_gradient))
       {}
       /// @brief Returns the differentiated or indexed operand.
+      /// @returns The differentiated or indexed operand.
       const OperandType& getOperand() const
       {
         return m_gradient.getOperand();
       }
       /// @brief Evaluates the expression at the supplied physical or integration point.
+      /// @param point Point at which the operation is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       template <class Point>
       RangeType getValue(const Point& point) const
       {
@@ -330,6 +347,8 @@ namespace Rodin::Variational
         return value;
       }
       /// @brief Returns the polynomial order when it is known.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return m_gradient.getOrder(poly);
@@ -363,47 +382,59 @@ namespace Rodin::Variational
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialVector<ScalarType>;
       /// @brief Constructs row-wise divergence of a matrix field.
+      /// @param operand Operand expression.
       Div(const OperandType& operand)
         : Parent(operand.getFiniteElementSpace()),
           m_gradient(operand)
       {}
       /// @brief Constructs row-wise divergence of a matrix field.
+      /// @param other Object to copy from.
       Div(const Div& other)
         : Parent(other),
           m_gradient(other.m_gradient)
       {}
       /// @brief Constructs row-wise divergence of a matrix field.
+      /// @param other Object to move from.
       Div(Div&& other)
         : Parent(std::move(other)),
           m_gradient(std::move(other.m_gradient))
       {}
       /// @brief Returns the differentiated or indexed operand.
+      /// @returns The differentiated or indexed operand.
       const OperandType& getOperand() const
       {
         return m_gradient.getOperand();
       }
       /// @brief Returns the leaf shape function used for assembly.
+      /// @returns The leaf shape function used for assembly.
       const auto& getLeaf() const
       {
         return m_gradient.getLeaf();
       }
       /// @brief Returns the local basis count for the selected polytope.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Number of local basis functions on the selected entity.
       size_t getDOFs(const Geometry::Polytope& poly) const
       {
         return m_gradient.getDOFs(poly);
       }
       /// @brief Returns the currently bound integration point.
+      /// @returns The currently bound integration point.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_gradient.getIntegrationPoint();
       }
       /// @brief Binds the integration point and prepares local basis values.
+      /// @param point Point at which the operation is evaluated.
+      /// @returns Reference to this object after the operation.
       Div& setIntegrationPoint(const IntegrationPoint& point)
       {
         m_gradient.setIntegrationPoint(point);
         return *this;
       }
       /// @brief Returns a basis value at the bound integration point.
+      /// @param local Index in the local numbering.
+      /// @returns Value of the selected local basis function at the evaluation point.
       RangeType getBasis(size_t local) const
       {
         const auto gradient = m_gradient.getBasis(local);
@@ -419,6 +450,8 @@ namespace Rodin::Variational
         return value;
       }
       /// @brief Returns the polynomial order when it is known.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return m_gradient.getOrder(poly);

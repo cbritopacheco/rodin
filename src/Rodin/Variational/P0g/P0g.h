@@ -120,12 +120,16 @@ namespace Rodin::Variational
           using CallableType = Callable;
 
           /// @brief Constructs the pullback of a function on a polytope.
+          /// @param polytope Mesh entity used by this operation.
+          /// @param v Function operand.
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
           /// @brief Evaluates at a point on the reference element.
+          /// @param r Reference coordinates at which to evaluate the basis.
+          /// @returns Value of the expression at the supplied evaluation point.
           auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
@@ -147,12 +151,15 @@ namespace Rodin::Variational
           using CallableType = Callable;
 
           /// @brief Constructs the pushforward of a function.
+          /// @param v Function operand.
           template <class Function>
           explicit Pushforward(Function&& v)
             : m_v(std::forward<Function>(v))
           {}
 
           /// @brief Evaluates at a geometric point.
+          /// @param p Point at which the operation is evaluated.
+          /// @returns Value of the expression at the supplied evaluation point.
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
@@ -314,12 +321,16 @@ namespace Rodin::Variational
           using CallableType = Callable;
 
           /// @brief Constructs the pullback of a function on a polytope.
+          /// @param polytope Mesh entity used by this operation.
+          /// @param v Function operand.
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
           /// @brief Evaluates at a point on the reference element.
+          /// @param r Reference coordinates at which to evaluate the basis.
+          /// @returns Reference to the entry at the supplied indices.
           auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p(m_polytope, r);
@@ -341,12 +352,15 @@ namespace Rodin::Variational
           using CallableType = Callable;
 
           /// @brief Constructs the pushforward of a function.
+          /// @param v Function operand.
           template <class Function>
           explicit Pushforward(Function&& v)
             : m_v(std::forward<Function>(v))
           {}
 
           /// @brief Evaluates at a geometric point.
+          /// @param p Point at which the operation is evaluated.
+          /// @returns Reference to the entry at the supplied indices.
           constexpr
           auto operator()(const Geometry::Point& p) const
           {

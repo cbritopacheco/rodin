@@ -72,12 +72,15 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$.
+      /// @returns @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$.
       Real getFirstInvariant() const { return m_I1; }
 
       /// @brief Gets @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$.
+      /// @returns @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$.
       Real getSecondInvariant() const { return m_I2; }
 
       /// @brief Gets @f$ I_3 = \det(\mathbf{C}) = J^2 @f$.
+      /// @returns @f$ I_3 = \det(\mathbf{C}) = J^2 @f$.
       Real getThirdInvariant() const { return m_I3; }
 
     private:
@@ -133,9 +136,11 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C} \, \mathbf{a}_0 @f$.
+      /// @returns @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C} \, \mathbf{a}_0 @f$.
       Real getFourthInvariant() const { return m_I4; }
 
       /// @brief Gets @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2 \, \mathbf{a}_0 @f$.
+      /// @returns @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2 \, \mathbf{a}_0 @f$.
       Real getFifthInvariant() const { return m_I5; }
 
     private:

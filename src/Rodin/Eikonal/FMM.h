@@ -625,6 +625,8 @@ namespace Rodin::Eikonal
    * @brief Deduction guide for FMM constructor.
    *
    * Allows template argument deduction when constructing FMM objects.
+   * @param speed Function operand.
+   * @param u Solution field updated by the fast marching method.
    */
   template <class Solution, class SpeedFunction>
   FMM(Solution& u, SpeedFunction&& speed) -> FMM<Solution, SpeedFunction>;

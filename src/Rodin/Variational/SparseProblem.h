@@ -76,6 +76,8 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c SparseProblem.
    * @ingroup RodinCTAD
+   * @param u Trial shape function.
+   * @param v Test shape function.
    */
   template <class U, class V>
   SparseProblem(U& u, V& v)

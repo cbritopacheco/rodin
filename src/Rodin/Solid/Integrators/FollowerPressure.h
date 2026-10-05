@@ -90,6 +90,10 @@ namespace Rodin::Solid
   namespace Internal
   {
     /// Scalar P1 basis on the reference segment/triangle.
+    /// @param rc Coordinates in the reference element.
+    /// @param a Basis or lattice index in the reference element.
+    /// @param faceDim Dimension of the reference face.
+    /// @returns Value of the selected linear reference-face basis function.
     inline Real p1FaceBasis(size_t a, const Math::SpatialVector<Real>& rc, size_t faceDim)
     {
       if (faceDim == 1)
@@ -107,6 +111,10 @@ namespace Rodin::Solid
     }
 
     /// Constant reference gradient component d(phi_a)/d(xi_j).
+    /// @param j Index of the second coordinate.
+    /// @param a Basis or lattice index in the reference element.
+    /// @param faceDim Dimension of the reference face.
+    /// @returns Reference-coordinate derivative of the selected linear face basis function.
     inline Real p1FaceBasisGrad(size_t a, size_t j, size_t faceDim)
     {
       if (faceDim == 1)
@@ -119,6 +127,10 @@ namespace Rodin::Solid
 
     /// "Cross product" carrying normal direction and area element:
     /// 3D: t1 x t2; 2D: +90-degree rotation of t1 (t2 ignored).
+    /// @param out Storage for the computed result.
+    /// @param sdim Dimension of the embedding space.
+    /// @param t1 First tangent vector.
+    /// @param t2 Second tangent vector.
     inline void surfaceCross(Math::SpatialVector<Real>& out,
       const Math::SpatialVector<Real>& t1, const Math::SpatialVector<Real>& t2,
       size_t sdim)
@@ -151,6 +163,7 @@ namespace Rodin::Solid
         Real orientation;               ///< +-1: makes the cross point OUTWARD
 
         /// @brief Initializes the geometric data associated with a boundary face.
+        /// @param face Mesh entity used by this operation.
         void setFace(const Geometry::Polytope& face)
         {
           const auto& mesh = face.getMesh();
@@ -199,12 +212,20 @@ namespace Rodin::Solid
         }
 
         /// Nodal displacement of face vertex a, component c.
+        /// @param fes Finite element space.
+        /// @param d Surface kinematic state.
+        /// @param a Surface node index.
+        /// @param c Displacement component index.
+        /// @returns Displacement component at the specified surface node.
         Real nodal(const StateFES& fes, const State& d, size_t a, size_t c) const
         {
           return d[fes.getGlobalIndex({0, vertices[a]}, c)];
         }
 
         /// Deformed tangents at this face (P1: constant over the face).
+        /// @param fes Finite element space.
+        /// @param xjac Storage for the deformed tangent matrix.
+        /// @param d Surface kinematic state.
         void deformedTangents(
           Math::SpatialMatrix<Real>& xjac, const StateFES& fes, const State& d) const
         {
@@ -250,6 +271,9 @@ namespace Rodin::Solid
         "Solid::FollowerPressureForce expects a Rodin test function.");
 
       /// Pressure captured BY REFERENCE: all copies follow the variable.
+      /// @param displacement Displacement field.
+      /// @param pressure Pressure applied on the surface.
+      /// @param v Test shape-function expression.
       FollowerPressureForce(
         const Real& pressure, const TestType& v, const StateType& displacement)
         : Parent(v),
@@ -264,6 +288,8 @@ namespace Rodin::Solid
       FollowerPressureForce(const FollowerPressureForce&) = default;
 
       /// @brief Sets the current face and assembles the element residual.
+      /// @param face Mesh entity used by this operation.
+      /// @returns Reference to this object after the operation.
       FollowerPressureForce& setPolytope(const Geometry::Polytope& face) final override
       {
         m_polytope = face;
@@ -307,12 +333,15 @@ namespace Rodin::Solid
       }
 
       /// @brief Returns an entry of the current element residual vector.
+      /// @param te Test shape-function expression.
+      /// @returns Integral computed by the quadrature rule.
       ScalarType integrate(size_t te) final override
       {
         return m_elemVec(te);
       }
 
       /// @brief Returns the current face polytope.
+      /// @returns The current face polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
@@ -320,12 +349,14 @@ namespace Rodin::Solid
       }
 
       /// @brief Returns the integration region.
+      /// @returns The integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Boundary;
       }
 
       /// @brief Polymorphically copies this follower-pressure residual.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       FollowerPressureForce* copy() const noexcept final override
       {
         return new FollowerPressureForce(*this);
@@ -407,6 +438,8 @@ namespace Rodin::Solid
       FollowerPressureTangent(const FollowerPressureTangent&) = default;
 
       /// @brief Sets the current face and assembles the element tangent.
+      /// @param face Mesh entity used by this operation.
+      /// @returns Reference to this object after the operation.
       FollowerPressureTangent& setPolytope(const Geometry::Polytope& face) final override
       {
         m_polytope = face;
@@ -473,12 +506,16 @@ namespace Rodin::Solid
       }
 
       /// @brief Returns an entry of the current element tangent matrix.
+      /// @param tr Trial shape-function expression.
+      /// @param te Test shape-function expression.
+      /// @returns Integral computed by the quadrature rule.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
       /// @brief Returns the current face polytope.
+      /// @returns The current face polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
@@ -486,12 +523,14 @@ namespace Rodin::Solid
       }
 
       /// @brief Returns the integration region.
+      /// @returns The integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Boundary;
       }
 
       /// @brief Polymorphically copies this follower-pressure tangent.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       FollowerPressureTangent* copy() const noexcept final override
       {
         return new FollowerPressureTangent(*this);

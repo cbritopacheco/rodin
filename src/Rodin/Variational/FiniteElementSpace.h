@@ -105,16 +105,21 @@ namespace Rodin::Variational
       FiniteElementSpaceBase(FiniteElementSpaceBase&&) = default;
 
       /// @brief Move assignment.
-      constexpr
-      FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
+      /// @returns Reference to this object after the operation.
+      /// @param other Object to move from.
+      constexpr FiniteElementSpaceBase& operator=(
+        FiniteElementSpaceBase&& other) = default;
 
       /// @brief Copy assignment.
+      /// @returns Reference to this object after the operation.
       constexpr
       FiniteElementSpaceBase& operator=(const FiniteElementSpaceBase&) = default;
 
       virtual ~FiniteElementSpaceBase() = default;
 
       /// @brief Equality comparison.
+      /// @param other Other operand.
+      /// @returns Whether the operands compare equal.
       constexpr
       bool operator==(const FiniteElementSpaceBase& other) const
       {
@@ -122,6 +127,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Inequality comparison.
+      /// @param other Other operand.
+      /// @returns Whether the operands compare unequal.
       constexpr
       bool operator!=(const FiniteElementSpaceBase& other) const
       {
@@ -184,6 +191,7 @@ namespace Rodin::Variational
        * @f$ (d, i) @f$-polytope.
        * @param[in] idx Pair representing the @f$ (d, i) @f$-polytope.
        * @param[in] local Local degree of freedom index.
+       * @returns The global index for the local degree of freedom on the @f$ (d, i) @f$-polytope.
        */
       virtual Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const
       {
@@ -217,16 +225,19 @@ namespace Rodin::Variational
       FiniteElementSpace(FiniteElementSpace&&) = default;
 
       /// @brief Move assignment.
-      constexpr
-      FiniteElementSpace& operator=(FiniteElementSpace&&) = default;
+      /// @returns Reference to this object after the operation.
+      /// @param other Object to move from.
+      constexpr FiniteElementSpace& operator=(FiniteElementSpace&& other) = default;
 
       /// @brief Copy assignment.
+      /// @returns Reference to this object after the operation.
       constexpr
       FiniteElementSpace& operator=(const FiniteElementSpace&) = default;
 
       virtual ~FiniteElementSpace() = default;
 
       /// @brief Gets the underlying mesh.
+      /// @returns The underlying mesh.
       const Mesh& getMesh() const override
       {
         return static_cast<const Derived&>(*this).getMesh();
@@ -234,6 +245,9 @@ namespace Rodin::Variational
 
       /**
        * @note CRTP function to be overriden in Derived class.
+       * @param i Index of the requested entry.
+       * @returns The finite element.
+       * @param d Topological dimension of the entity.
        */
       decltype(auto) getFiniteElement(size_t d, Index i) const
       {
@@ -248,6 +262,7 @@ namespace Rodin::Variational
        * @param[in] v Function defined on an element of the mesh
        *
        * @note CRTP function to be overriden in Derived class.
+       * @returns The mapping of the function from the physical element to the reference element.
        */
       template <class Callable>
       decltype(auto) getPullback(const std::pair<size_t, Index>& p, const Callable& v) const
@@ -257,6 +272,9 @@ namespace Rodin::Variational
 
       /**
        * @note CRTP function to be overriden in Derived class.
+       * @param idx Index of the requested entry.
+       * @returns The pushforward.
+       * @param v Operand expression.
        */
       template <class CallableType>
       decltype(auto) getPushforward(const std::pair<size_t, Index>& idx, const CallableType& v) const
@@ -336,10 +354,12 @@ namespace Rodin::Variational
       FiniteElementSpacePullbackBase(FiniteElementSpacePullbackBase&&) = default;
 
       /// @brief Move assignment.
+      /// @returns Reference to this object after the operation.
       constexpr
       FiniteElementSpacePullbackBase& operator=(FiniteElementSpacePullbackBase&&) = default;
 
       /// @brief Copy assignment.
+      /// @returns Reference to this object after the operation.
       constexpr
       FiniteElementSpacePullbackBase& operator=(const FiniteElementSpacePullbackBase&) = default;
 
@@ -356,6 +376,8 @@ namespace Rodin::Variational
        * on the reference coordinates @f$ r \in K @f$.
        *
        * @note CRTP function to be overriden in Derived class.
+       * @returns Value of the expression at the supplied evaluation point.
+       * @param r Reference coordinates at which to evaluate the basis.
        */
       auto operator()(const Math::SpatialVector<Real>& r) const
       {
@@ -395,10 +417,13 @@ namespace Rodin::Variational
       FiniteElementSpacePushforwardBase(FiniteElementSpacePushforwardBase&&) = default;
 
       /// @brief Move assignment.
-      constexpr
-      FiniteElementSpacePushforwardBase& operator=(FiniteElementSpacePushforwardBase&&) = default;
+      /// @returns Reference to this object after the operation.
+      /// @param other Object to move from.
+      constexpr FiniteElementSpacePushforwardBase& operator=(
+        FiniteElementSpacePushforwardBase&& other) = default;
 
       /// @brief Copy assignment.
+      /// @returns Reference to this object after the operation.
       constexpr
       FiniteElementSpacePushforwardBase& operator=(const FiniteElementSpacePushforwardBase&) = default;
 
@@ -415,6 +440,8 @@ namespace Rodin::Variational
        * on the physical coordinates @f$ p \in \tau @f$.
        *
        * @note CRTP function to be overriden in Derived class.
+       * @param pc Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       auto operator()(const Geometry::Point& pc) const
       {

@@ -253,11 +253,15 @@ namespace Rodin::Solid
       /// @brief Move constructor.
       ConstitutivePoint(ConstitutivePoint&&) = default;
       /// @brief Copy assignment operator.
-      ConstitutivePoint& operator=(const ConstitutivePoint&) = default;
+      /// @returns Reference to this object after the operation.
+      /// @param other Object to copy from.
+      ConstitutivePoint& operator=(const ConstitutivePoint& other) = default;
       /// @brief Move assignment operator.
+      /// @returns Reference to this object after the operation.
       ConstitutivePoint& operator=(ConstitutivePoint&&) = default;
 
       /// @brief Gets the kinematic state.
+      /// @returns The kinematic state.
       const KinematicState& getKinematicState() const { return m_state.get(); }
 
       /**

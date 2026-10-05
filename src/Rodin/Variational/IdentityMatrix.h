@@ -99,6 +99,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {

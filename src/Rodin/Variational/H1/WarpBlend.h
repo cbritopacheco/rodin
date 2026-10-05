@@ -106,6 +106,7 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Gets the alpha parameter.
+      /// @returns The alpha parameter.
       static constexpr Real getAlpha()
       {
         if constexpr (K <= 2)
@@ -154,6 +155,7 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Gets the alpha parameter.
+      /// @returns The alpha parameter.
       static constexpr Real getAlpha()
       {
         if constexpr (K <= 3)
@@ -201,6 +203,11 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Applies the warp to the given barycentric coordinates.
+      /// @param L1 Barycentric coordinate of the node.
+      /// @param L2 Barycentric coordinate of the node.
+      /// @param L3 Barycentric coordinate of the node.
+      /// @param alpha Warp blending parameter.
+      /// @returns Warp displacement in the reference coordinates.
       static std::array<Real, 2> apply(Real L1, Real L2, Real L3, Real alpha)
       {
         if constexpr (K <= 1)
@@ -259,6 +266,12 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Applies the warp to the given barycentric coordinates.
+      /// @param La Barycentric coordinate of the node.
+      /// @param Lb Barycentric coordinate of the node.
+      /// @param Lc Barycentric coordinate of the node.
+      /// @param Ld Barycentric coordinate of the node.
+      /// @param alpha Warp blending parameter.
+      /// @returns Warp displacement in the reference coordinates.
       static std::array<Real, 2> apply(Real La, Real Lb, Real Lc, Real Ld, Real alpha)
       {
         (void) La;
@@ -288,6 +301,7 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Applies the transformation to the reference nodes.
+      /// @param nodes Interpolation nodes.
       template <size_t N>
       static void apply(std::array<Math::SpatialPoint, N>& nodes)
       {
@@ -527,6 +541,7 @@ namespace Rodin::Variational
 
     public:
       /// @brief Applies the transformation to the reference nodes.
+      /// @param nodes Interpolation nodes.
       template <size_t N>
       static void apply(std::array<Math::SpatialPoint, N>& nodes)
       {

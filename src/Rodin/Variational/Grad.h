@@ -163,6 +163,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor
+       * @param other Object to copy from.
        */
       GradBase(const GradBase& other)
         : Parent(other),
@@ -171,6 +172,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor
+       * @param other Object to move from.
        */
       GradBase(GradBase&& other)
         : Parent(std::move(other)),
@@ -197,6 +199,8 @@ namespace Rodin::Variational
        * Resolves mesh ownership and dispatches to the derived class's
        * @c interpolate. Falls back to inclusion / submesh restriction
        * when the polytope's mesh is not the FES mesh.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       SpatialVectorType getValue(const Geometry::Point& p) const
       {
@@ -231,6 +235,8 @@ namespace Rodin::Variational
        * If the polytope is owned by the FES mesh, dispatches to
        * @c interpolate(out, ip). Otherwise falls back to inclusion / submesh
        * restriction.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       SpatialVectorType getValue(const IntegrationPoint& ip) const
       {
@@ -278,6 +284,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Interpolates at an integration point.
+      /// @param out Storage for the computed result.
+      /// @param ip Integration point at which the expression is evaluated.
       constexpr
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
@@ -298,6 +306,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -306,6 +316,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy function to be overriden in Derived type.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
       GradBase* copy() const noexcept override
       {

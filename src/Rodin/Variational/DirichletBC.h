@@ -364,6 +364,7 @@ namespace Rodin::Variational
        * Consumer assemblies use this to locate @f$ v @f$'s trial block and
        * apply the correct global offset when assembling identified-DOF
        * constraints.
+       * @returns The UUID of @f$ v @f$'s leaf trial function for an identification BC, or nullopt for a value-prescribing BC.
        */
       virtual Optional<Identifiable::UUID> getValueUUID() const
       {
@@ -376,6 +377,7 @@ namespace Rodin::Variational
        * Value-prescribing BCs and homogeneous identification BCs return an
        * empty map. Affine identification BCs override this to provide the
        * known additive defect value for each slave row.
+       * @returns Optional defects for affine identification BCs.
        */
       virtual const IdentificationValues& getIdentificationValues() const
       {
@@ -496,6 +498,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor
+       * @param other Object to copy from.
        */
       DirichletBC(const DirichletBC& other)
         : Parent(other),
@@ -508,6 +511,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor
+       * @param other Object to move from.
        */
       DirichletBC(DirichletBC&& other)
         : Parent(std::move(other)),
@@ -522,6 +526,7 @@ namespace Rodin::Variational
        * @brief Specifies the region of the boundary over which the condition
        * will be imposed.
        * @param[in] bdrAtr Attribute associated to the boundary region
+       * @returns Reference to this object after the operation.
        */
       constexpr
       DirichletBC& on(Geometry::Attribute bdrAtr)
@@ -531,6 +536,10 @@ namespace Rodin::Variational
 
       template <class A1, class A2, class... As>
       /// @brief Restricts the boundary condition to the given mesh attributes.
+      /// @param a1 Mesh attributes selecting the region.
+      /// @param a2 Mesh attributes selecting the region.
+      /// @param as Mesh attributes selecting the region.
+      /// @returns Reference to this object after the operation.
       constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
       {
         return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
@@ -540,6 +549,7 @@ namespace Rodin::Variational
        * @brief Specifies the regions of the boundary over which the condition
        * will be imposed.
        * @param[in] bdrAttrs Attributes associated to the boundary regions
+       * @returns Reference to this object after the operation.
        */
       constexpr
       DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
@@ -605,6 +615,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the assembly backend.
+      /// @returns The assembly backend.
       const Assembly::AssemblyBase<ValueDOFs, DirichletBC>& getAssembly() const
       {
         assert(m_assembly);
@@ -839,9 +850,12 @@ namespace Rodin::Variational
           virtual ~DefectBase() = default;
 
           /// @brief Evaluates the expression at a geometric point.
+          /// @param p Point at which the operation is evaluated.
+          /// @returns Value of the expression at the supplied evaluation point.
           virtual FESRangeType getValue(const Geometry::Point& p) const = 0;
 
           /// @brief Creates a polymorphic copy.
+          /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
           virtual DefectBase* copy() const noexcept = 0;
       };
 
@@ -854,22 +868,27 @@ namespace Rodin::Variational
           using FunctionType = FunctionBase<DefectDerived>;
 
           /// @brief Constructs the defect from the prescribed value.
+          /// @param value Function operand.
           explicit Defect(const FunctionType& value)
             : m_value(value.copy())
           {}
 
           /// @brief Copy constructor.
+          /// @param other Object to copy from.
           Defect(const Defect& other)
             : m_value(other.m_value->copy())
           {}
 
           /// @brief Evaluates the expression at a geometric point.
+          /// @param p Point at which the operation is evaluated.
+          /// @returns Value of the expression at the supplied evaluation point.
           FESRangeType getValue(const Geometry::Point& p) const override
           {
             return (*m_value)(p);
           }
 
           /// @brief Creates a polymorphic copy.
+          /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
           Defect* copy() const noexcept override
           {
             return new Defect(*this);
@@ -914,6 +933,7 @@ namespace Rodin::Variational
       {}
 
       /// Copy constructor
+      /// @param other Object to copy from.
       DirichletBC(const DirichletBC& other)
         : Parent(other),
           m_u(other.m_u),
@@ -926,6 +946,7 @@ namespace Rodin::Variational
       {}
 
       /// Move constructor
+      /// @param other Object to move from.
       DirichletBC(DirichletBC&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -943,6 +964,8 @@ namespace Rodin::Variational
        * Selects tagged codimension-one facets over which the identification
        * @f$ u=A(v) @f$ is enforced. Both slave and master DOFs are read from
        * the *same* face polytopes — there is no cross-face matching.
+       * @param bdrAtr Boundary attribute selecting the region.
+       * @returns Reference to this object after the operation.
        */
       constexpr DirichletBC& on(Geometry::Attribute bdrAtr)
       {
@@ -951,6 +974,10 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets @f$ \Gamma_D @f$ to the union of multiple attributes.
+       * @param a1 Mesh attributes selecting the region.
+       * @param a2 Mesh attributes selecting the region.
+       * @param as Mesh attributes selecting the region.
+       * @returns Reference to this object after the operation.
        */
       template <class A1, class A2, class... As>
       constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
@@ -960,6 +987,8 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets @f$ \Gamma_D @f$ to a precomputed attribute set.
+       * @returns Reference to this object after the operation.
+       * @param bdrAttrs Boundary attributes selecting the region.
        */
       constexpr DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
       {
@@ -1109,6 +1138,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the assembly backend.
+      /// @returns The assembly backend.
       const Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly() const
       {
         return m_assembly;

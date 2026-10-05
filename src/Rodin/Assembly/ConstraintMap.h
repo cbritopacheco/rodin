@@ -93,6 +93,7 @@ namespace Rodin::Assembly
       /**
        * @brief Tests whether a DOF is fixed to a value.
        * @param i DOF index.
+       * @returns Whether the degree of freedom has a prescribed value.
        */
       bool isFixed(Index i) const
       {
@@ -103,6 +104,7 @@ namespace Rodin::Assembly
       /**
        * @brief Tests whether a DOF is identified with master DOFs.
        * @param i DOF index.
+       * @returns Whether the degree of freedom is identified with master degrees of freedom.
        */
       bool isIdentified(Index i) const
       {

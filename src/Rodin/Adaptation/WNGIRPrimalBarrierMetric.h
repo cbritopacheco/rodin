@@ -23,6 +23,12 @@ namespace Rodin::Adaptation::Detail
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
       /// @brief Constructs the w n g i r primal barrier metric.
+      /// @param du Function operand.
+      /// @param z Function operand.
+      /// @param parameters Parameters configuring the operation.
+      /// @param current Current displacement field.
+      /// @param inner Inner displacement field.
+      /// @param barrierCoefficient Coefficient multiplying the determinant barrier.
       WNGIRPrimalBarrierMetric(const TrialFunction& du, const TestFunction& z,
         const Displacement& current, const Displacement& inner,
         const WNGIRParameters& parameters, Real barrierCoefficient)
@@ -39,6 +45,7 @@ namespace Rodin::Adaptation::Detail
       WNGIRPrimalBarrierMetric(const WNGIRPrimalBarrierMetric&) = default;
 
       /// @brief Returns the current polytope.
+      /// @returns The current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
@@ -46,6 +53,8 @@ namespace Rodin::Adaptation::Detail
       }
 
       /// @brief Binds to a polytope and assembles the local system.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Reference to this object after the operation.
       WNGIRPrimalBarrierMetric& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -135,6 +144,9 @@ namespace Rodin::Adaptation::Detail
       }
 
       /// @brief Returns an entry of the assembled local system.
+      /// @returns Integral computed by the quadrature rule.
+      /// @param trial Local trial basis index.
+      /// @param test Local test basis index.
       ScalarType integrate(std::size_t trial, std::size_t test) final override
       {
         return m_matrix(
@@ -142,12 +154,14 @@ namespace Rodin::Adaptation::Detail
       }
 
       /// @brief Returns the integration region.
+      /// @returns The integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
       /// @brief Clones this object.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       WNGIRPrimalBarrierMetric* copy() const noexcept final override
       {
         return new WNGIRPrimalBarrierMetric(*this);

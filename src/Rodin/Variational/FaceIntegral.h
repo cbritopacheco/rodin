@@ -200,6 +200,8 @@ namespace Rodin::Variational
       using Parent = QuadratureRule<IntegrandType>;
 
       /// @brief Constructs the face integral of the given integrand.
+      /// @param lhs Left operand.
+      /// @param rhs Right operand.
       template <class LHSDerived, class RHSDerived>
       FaceIntegral(
           const FunctionBase<LHSDerived>& lhs,
@@ -208,16 +210,19 @@ namespace Rodin::Variational
       {}
 
       /// @brief Constructs the integrator for the given integrand.
+      /// @param integrand Expression to integrate.
       FaceIntegral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       FaceIntegral(const FaceIntegral& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       FaceIntegral(FaceIntegral&& other)
         : Parent(std::move(other))
       {}

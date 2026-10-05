@@ -168,8 +168,9 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy assignment (deleted).
+       * @param other Object to copy from.
        */
-      SubMesh& operator=(const SubMesh&) = delete;
+      SubMesh& operator=(const SubMesh& other) = delete;
 
       /**
        * @brief Move assignment operator.

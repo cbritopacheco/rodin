@@ -319,6 +319,7 @@ namespace Rodin::Geometry
        * Thread-safety:
        * - Safe if @p other is not being moved concurrently.
        * - Copy is not a globally atomic snapshot across dimensions.
+       * @param other Object to copy from.
        */
       AttributeIndex(const AttributeIndex& other)
         : m_dimensions(other.m_dimensions)
@@ -336,6 +337,8 @@ namespace Rodin::Geometry
        * Thread-safety:
        * - Serializes storage growth per dimension; slot snapshots are atomic.
        * - Not an atomic snapshot across dimensions.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
        */
       AttributeIndex& operator=(const AttributeIndex& other)
       {
@@ -358,6 +361,7 @@ namespace Rodin::Geometry
        *
        * Thread-safety:
        * - Requires external synchronization: no concurrent access to either object.
+       * @param other Object to move from.
        */
       AttributeIndex(AttributeIndex&& other) noexcept
         : m_dimensions(std::move(other.m_dimensions))
@@ -370,6 +374,8 @@ namespace Rodin::Geometry
        *
        * Thread-safety:
        * - Requires external synchronization: no concurrent access to either object.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
        */
       AttributeIndex& operator=(AttributeIndex&& other) noexcept
       {

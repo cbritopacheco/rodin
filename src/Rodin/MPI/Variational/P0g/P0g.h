@@ -335,6 +335,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy-constructs the distributed vector P0g space.
+      /// @param other Object to copy from.
       P0g(const P0g& other)
         : Parent(other),
           m_mesh(other.m_mesh),
@@ -342,6 +343,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move-constructs the distributed vector P0g space.
+      /// @param other Object to move from.
       P0g(P0g&& other)
         : Parent(std::move(other)),
           m_mesh(other.m_mesh),
@@ -349,6 +351,8 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy-assigns the distributed vector P0g space.
+      /// @param other Object to copy from.
+      /// @returns Reference to this object after the operation.
       P0g& operator=(const P0g& other)
       {
         if (this != &other)
@@ -361,6 +365,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Move-assigns the distributed vector P0g space.
+      /// @param other Object to move from.
+      /// @returns Reference to this object after the operation.
       P0g& operator=(P0g&& other)
       {
         if (this != &other)
@@ -376,6 +382,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the underlying local shard P0g space.
+       * @returns The underlying local shard P0g space.
        */
       const FESType& getShard() const
       {
@@ -409,6 +416,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the global number of degrees of freedom (@p vdim).
+       * @returns The global number of degrees of freedom (vdim).
        */
       size_t getSize() const override
       {
@@ -417,6 +425,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the vector dimension.
+       * @returns The vector dimension.
        */
       size_t getVectorDimension() const override
       {
@@ -425,6 +434,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the distributed mesh on which the space is defined.
+       * @returns The distributed mesh on which the space is defined.
        */
       const MeshType& getMesh() const override
       {
@@ -433,6 +443,9 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the finite element attached to local polytope @f$(d, i)@f$.
+       * @param i Index of the requested entry.
+       * @returns The finite element attached to local polytope @f$(d, i)@f$.
+       * @param d Topological dimension of the entity.
        */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
@@ -443,6 +456,9 @@ namespace Rodin::Variational
        * @brief Returns the global DOF array for local polytope @f$(d, i)@f$.
        *
        * For vector P0g every polytope maps to DOFs @f$\{0, 1, \ldots, \text{vdim}-1\}@f$.
+       * @param i Index of the requested entry.
+       * @returns Degrees of freedom associated with the supplied mesh entity.
+       * @param d Topological dimension of the entity.
        */
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
@@ -468,6 +484,9 @@ namespace Rodin::Variational
        * @brief Returns the global DOF index for local basis function @p localDof.
        *
        * For vector P0g this returns @p localDof (global index equals local index).
+       * @returns The global DOF index for local basis function localDof.
+       * @param p Entity identified by its dimension and local index.
+       * @param localDof Index of the degree of freedom within the entity.
        */
       Index getGlobalIndex(const std::pair<size_t, Index>& p, Index localDof) const override
       {
@@ -476,6 +495,9 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns a pullback wrapper on local polytope @f$(d, i)@f$.
+       * @returns A pullback wrapper on local polytope @f$(d, i)@f$.
+       * @param p Entity identified by its dimension and local index.
+       * @param v Operand expression.
        */
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& p, Callable&& v) const
@@ -485,6 +507,9 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
+       * @returns A pushforward wrapper on local polytope @f$(d, i)@f$.
+       * @param p Entity identified by its dimension and local index.
+       * @param v Operand expression.
        */
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>& p, Callable&& v) const
@@ -539,6 +564,9 @@ namespace Rodin::Variational
       /// @brief Local or distributed execution context.
       using ContextType = typename ScalarSpace::ContextType;
       /// @brief Expands scalar DOF maps into interleaved row-major matrix components.
+      /// @param mesh Mesh on which the object is defined.
+      /// @param rows Number of rows.
+      /// @param cols Number of columns.
       P0g(const MeshType& mesh, size_t rows, size_t cols)
         : m_scalar(ScalarSpace(mesh)),
           m_rows(rows),
@@ -577,8 +605,11 @@ namespace Rodin::Variational
       /// @brief Moves the space and its DOF maps.
       P0g(P0g&&) = default;
       /// @brief Copies the space and its DOF maps.
-      P0g& operator=(const P0g&) = default;
+      /// @returns Reference to this object after the operation.
+      /// @param other Object to copy from.
+      P0g& operator=(const P0g& other) = default;
       /// @brief Moves the space and its DOF maps.
+      /// @returns Reference to this object after the operation.
       P0g& operator=(P0g&&) = default;
 
       size_t getSize() const override
@@ -590,11 +621,13 @@ namespace Rodin::Variational
         return m_rows * m_cols;
       }
       /// @brief Returns the number of matrix rows.
+      /// @returns The number of matrix rows.
       size_t getRows() const
       {
         return m_rows;
       }
       /// @brief Returns the number of matrix columns.
+      /// @returns The number of matrix columns.
       size_t getColumns() const
       {
         return m_cols;
@@ -604,12 +637,16 @@ namespace Rodin::Variational
         return m_scalar.getMesh();
       }
       /// @brief Returns the scalar space supplying topology and component-independent maps.
+      /// @returns The scalar space supplying topology and component-independent maps.
       const ScalarSpace& getScalarSpace() const
       {
         return m_scalar;
       }
 
       /// @brief Returns the matrix reference element of a mesh entity.
+      /// @param i Index of the requested entry.
+      /// @returns The matrix reference element of a mesh entity.
+      /// @param d Topological dimension of the entity.
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         return m_elements.at(m_scalar.getFiniteElement(d, i).getGeometry());
@@ -628,6 +665,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Pulls a physical callable back to a reference element.
+      /// @param value Value to store or assign.
+      /// @returns The pullback.
+      /// @param p Entity identified by its dimension and local index.
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& p, Callable&& value) const
       {
@@ -635,6 +675,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Pushes a reference callable forward to the physical mesh.
+      /// @param value Value to store or assign.
+      /// @returns The pushforward.
+      /// @param p Entity identified by its dimension and local index.
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>& p, Callable&& value) const
       {
@@ -642,12 +685,15 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the matrix space on the local mesh shard.
+      /// @returns The matrix space on the local mesh shard.
       const FESType& getShard() const
       {
         return m_shard;
       }
 
       /// @brief Returns the half-open range of owned global component DOFs.
+      /// @param begin Iterator to the first entry.
+      /// @param end Iterator past the last entry.
       void getOwnershipRange(Index& begin, Index& end) const
       {
         this->getScalarSpace().getOwnershipRange(begin, end);
@@ -656,6 +702,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Maps a local component DOF to its global coefficient index.
+      /// @param local Index in the local numbering.
+      /// @returns The global index.
       Index getGlobalIndex(Index local) const
       {
         assert(static_cast<size_t>(local) < m_shard.getSize());
@@ -665,6 +713,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the shard-local index of a global DOF, if present.
+      /// @param global Index in the global numbering.
+      /// @returns The shard-local index of a global DOF, if present.
       Optional<Index> getLocalIndex(Index global) const
       {
         const auto it = m_globalToLocal.find(global);

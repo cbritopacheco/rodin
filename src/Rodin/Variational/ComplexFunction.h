@@ -65,11 +65,13 @@ namespace Rodin::Variational
       ComplexFunctionBase() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       ComplexFunctionBase(const ComplexFunctionBase& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       ComplexFunctionBase(ComplexFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -78,6 +80,8 @@ namespace Rodin::Variational
       virtual ~ComplexFunctionBase() = default;
 
       /// @brief Evaluates the complex function at a geometry point.
+      /// @param p Point at which the operation is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -85,6 +89,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the complex function at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -95,6 +101,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns an optional polynomial order bound.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return static_cast<const Derived&>(*this).getOrder(poly);
@@ -125,18 +133,21 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       ComplexFunction(const ComplexFunction& other)
         : Parent(other),
           m_x(other.m_x)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       ComplexFunction(ComplexFunction&& other)
         : Parent(std::move(other)),
           m_x(other.m_x)
       {}
 
       /// @brief Returns the stored constant value.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       const Integer& getValue() const
       {
@@ -144,6 +155,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the constant function at a point.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       Complex getValue(const Geometry::Point&) const
       {
@@ -151,6 +163,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns zero polynomial order for a constant function.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return 0;
@@ -190,18 +203,21 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       ComplexFunction(const ComplexFunction& other)
         : Parent(other),
           m_x(other.m_x)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       ComplexFunction(ComplexFunction&& other)
         : Parent(std::move(other)),
           m_x(other.m_x)
       {}
 
       /// @brief Returns the stored constant value.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       const Real& getValue() const
       {
@@ -209,6 +225,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the constant function at a point.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       Complex getValue(const Geometry::Point&) const
       {
@@ -216,6 +233,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns zero polynomial order for a constant function.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return 0;
@@ -258,18 +276,21 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       ComplexFunction(const ComplexFunction& other)
         : Parent(other),
           m_x(other.m_x)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       ComplexFunction(ComplexFunction&& other)
         : Parent(std::move(other)),
           m_x(other.m_x)
       {}
 
       /// @brief Returns the stored constant value.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       const Complex& getValue() const
       {
@@ -277,6 +298,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the constant function at a point.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       Complex getValue(const Geometry::Point&) const
       {
@@ -284,6 +306,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns zero polynomial order for a constant function.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return 0;
@@ -323,23 +346,28 @@ namespace Rodin::Variational
       using Parent::operator();
 
       /// @brief Constructs from a nested function.
+      /// @param nested Function operand.
       ComplexFunction(const FunctionBase<NestedDerived>& nested)
         : m_nested(nested.copy())
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       ComplexFunction(const ComplexFunction& other)
         : Parent(other),
           m_nested(other.m_nested->copy())
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       ComplexFunction(ComplexFunction&& other)
         : Parent(std::move(other)),
           m_nested(std::move(other.m_nested))
       {}
 
       /// @brief Evaluates the nested function at a geometry point.
+      /// @param v Point operand.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       ScalarType getValue(const Geometry::Point& v) const
       {
@@ -347,6 +375,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the nested function at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       ScalarType getValue(const IntegrationPoint& ip) const
       {
@@ -354,6 +384,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Forwards trace-domain configuration to the nested function.
+      /// @param args Arguments forwarded to the constructed object.
+      /// @returns Reference to this object after the operation.
       template <class ... Args>
       constexpr
       ComplexFunction& traceOf(const Args&... args)
@@ -363,6 +395,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the nested function order.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return m_nested->getOrder(poly);
@@ -424,23 +458,29 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<ImagFunctionRangeType, Real>);
 
       /// @brief Constructs from real and imaginary functions.
+      /// @param re Function operand.
+      /// @param imag Function operand.
       ComplexFunction(const RealFunctionType& re, const ImagFunctionType& imag)
         : m_re(re.copy()), m_imag(imag.copy())
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       ComplexFunction(const ComplexFunction& other)
         : Parent(other),
           m_re(other.m_re->copy()), m_imag(other.m_imag->copy())
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       ComplexFunction(ComplexFunction&& other)
         : Parent(std::move(other)),
           m_re(std::move(other.m_re)), m_imag(std::move(other.m_imag))
       {}
 
       /// @brief Evaluates the complex function at a geometry point.
+      /// @param p Point at which the operation is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       Complex getValue(const Geometry::Point& p) const
       {
@@ -448,6 +488,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the complex function at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       Complex getValue(const IntegrationPoint& ip) const
       {
@@ -465,6 +507,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Forwards trace-domain configuration to both parts.
+      /// @param args Arguments forwarded to the constructed object.
+      /// @returns Reference to this object after the operation.
       template <class ... Args>
       constexpr
       ComplexFunction& traceOf(const Args&... args)
@@ -475,6 +519,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the maximum order of the real and imaginary parts.
+      /// @param geom Reference geometry.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const auto reOrder = m_re->getOrder(geom);
@@ -521,23 +567,28 @@ namespace Rodin::Variational
       using Parent::operator();
 
       /// @brief Constructs from a callable.
+      /// @param f Function operand.
       ComplexFunction(const F& f)
         : m_f(f)
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       ComplexFunction(const ComplexFunction& other)
         : Parent(other),
           m_f(other.m_f)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       ComplexFunction(ComplexFunction&& other)
         : Parent(std::move(other)),
           m_f(std::move(other.m_f))
       {}
 
       /// @brief Evaluates the callable at a geometry point.
+      /// @param v Point operand.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       Complex getValue(const Geometry::Point& v) const
       {
@@ -545,6 +596,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the callable at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       Complex getValue(const IntegrationPoint& ip) const
       {
@@ -555,6 +608,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns no polynomial order for an arbitrary callable.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;
@@ -593,23 +647,29 @@ namespace Rodin::Variational
       using Parent::operator();
 
       /// @brief Constructs from real and imaginary callables.
+      /// @param re Real-part function.
+      /// @param imag Imaginary-part function.
       ComplexFunction(const FReal& re, const FImag& imag)
         : m_re(re), m_imag(imag)
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       ComplexFunction(const ComplexFunction& other)
         : Parent(other),
           m_re(other.m_re), m_imag(other.m_imag)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       ComplexFunction(ComplexFunction&& other)
         : Parent(std::move(other)),
           m_re(std::move(other.m_re)), m_imag(std::move(other.m_imag))
       {}
 
       /// @brief Evaluates the complex function at a geometry point.
+      /// @param p Point at which the operation is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       Complex getValue(const Geometry::Point& p) const
       {
@@ -617,6 +677,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the complex function at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       Complex getValue(const IntegrationPoint& ip) const
       {
@@ -634,6 +696,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns no polynomial order for arbitrary callables.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;

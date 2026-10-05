@@ -171,6 +171,8 @@ namespace Rodin::Adaptation
       };
 
       /// @brief Constructs the WNGIR solver from trial and test functions.
+      /// @param du Function operand.
+      /// @param v Function operand.
       WNGIR(TrialFunctionType& du, TestFunctionType& v)
         : m_u(&du.getSolution()),
           m_duStep(du.getFiniteElementSpace()),
@@ -183,6 +185,8 @@ namespace Rodin::Adaptation
       {}
 
       /// @brief Sets WNGIR runtime parameters.
+      /// @param parameters Parameters configuring the operation.
+      /// @returns Reference to this object after the operation.
       WNGIR& setParameters(const WNGIRParameters& parameters)
       {
         m_parameters = parameters;
@@ -214,12 +218,14 @@ namespace Rodin::Adaptation
       }
 
       /// @brief Returns the current WNGIR parameters.
+      /// @returns The current WNGIR parameters.
       const WNGIRParameters& getParameters() const
       {
         return m_parameters;
       }
 
       /// @brief Returns diagnostics from the most recent solve.
+      /// @returns Diagnostics from the most recent solve.
       const WNGIRReport& getReport() const
       {
         return m_report;
@@ -232,6 +238,11 @@ namespace Rodin::Adaptation
        * at the moved quadrature points for the assembled force to be the exact
        * first variation of the line-search energy. An independently supplied
        * sensitivity is supported, but then defines a pseudo-gradient.
+       * @param mesh Mesh on which the object is defined.
+       * @param phi Function operand.
+       * @param grad Function operand.
+       * @param interfaceFacets Facets used to impose the interface constraints.
+       * @returns Fitting diagnostics, including convergence and geometric admissibility.
        */
       template <class Mesh, class PhiDerived, class GradDerived>
       WNGIRReport solve(const Mesh& mesh,

@@ -55,7 +55,12 @@
 
 namespace Rodin::Variational
 {
-  /** @brief Subtracts an owned PETSc bilinear-form snapshot. */
+  /**
+   * @brief Subtracts an owned PETSc bilinear-form snapshot.
+   * @param pb Variational problem to operate on.
+   * @param bf Bilinear form.
+   * @returns Difference of the operands, or the negated operand for the unary overload.
+   */
   template <class Vector, class Scalar>
   auto operator-(
     const ProblemBody<::Mat, Vector, Scalar>& pb, const BilinearFormBase<::Mat>& bf)
@@ -69,7 +74,12 @@ namespace Rodin::Variational
     return res;
   }
 
-  /** @brief Adds a PETSc linear form to the residual, hence negates its load. */
+  /**
+   * @brief Adds a PETSc linear form to the residual, hence negates its load.
+   * @param pb Variational problem to operate on.
+   * @param lf Linear form.
+   * @returns Sum of the operands.
+   */
   template <class Operator, class Scalar>
   auto operator+(
     const ProblemBody<Operator, ::Vec, Scalar>& pb, const LinearFormBase<::Vec>& lf)
@@ -194,6 +204,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       Problem(const Problem& other)
         : Parent(other),
@@ -203,6 +214,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
@@ -270,6 +282,7 @@ namespace Rodin::Variational
        * function data as the initial guess: on entry to a linear solver the
        * solution vector is the guess, on exit it is the solution. Trial
        * functions are zero-initialized, so the guess is zero unless set.
+       * @returns Reference to this object after the operation.
        */
       Problem& assemble() override
       {
@@ -316,18 +329,21 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns a mutable reference to the linear system.
+      /// @returns A mutable reference to the linear system.
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
       /// @brief Returns a read-only reference to the linear system.
+      /// @returns A read-only reference to the linear system.
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
       /// @brief Creates a heap-allocated copy of this problem.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
@@ -539,6 +555,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Problem(const Problem& other)
         : Parent(other),
           m_assembled(other.m_assembled),
@@ -556,6 +573,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_assembled(std::exchange(other.m_assembled, false)),
@@ -655,6 +673,7 @@ namespace Rodin::Variational
        * function data, gathered at the trial offsets, as the initial guess:
        * on entry to a linear solver the solution vector is the guess, on
        * exit it is the solution.
+       * @returns Reference to this object after the operation.
        */
       Problem& assemble() override
       {
@@ -761,33 +780,42 @@ namespace Rodin::Variational
       // Accessors (useful for solvers / debugging)
       // --------------------------
       /// @brief Returns a mutable reference to the linear system.
+      /// @returns A mutable reference to the linear system.
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
       /// @brief Returns a read-only reference to the linear system.
+      /// @returns A read-only reference to the linear system.
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
       /// @brief Returns the DOF offset array for trial fields.
+      /// @returns The DOF offset array for trial fields.
       const auto& getTrialOffsets() const { return m_trialOffsets; }
       /// @brief Returns the DOF offset array for test fields.
+      /// @returns The DOF offset array for test fields.
       const auto& getTestOffsets()  const { return m_testOffsets;  }
 
       /// @brief Returns the total number of trial DOFs across all fields.
+      /// @returns The total number of trial DOFs across all fields.
       size_t getTotalTrialSize() const { return m_totalTrial; }
       /// @brief Returns the total number of test DOFs across all fields.
+      /// @returns The total number of test DOFs across all fields.
       size_t getTotalTestSize()  const { return m_totalTest;  }
 
       /// @brief Returns the UUID-to-index map for trial functions.
+      /// @returns The UUID-to-index map for trial functions.
       const auto& getTrialUUIDMap() const { return m_trialUUIDMap; }
       /// @brief Returns the UUID-to-index map for test functions.
+      /// @returns The UUID-to-index map for test functions.
       const auto& getTestUUIDMap()  const { return m_testUUIDMap;  }
 
       /// @brief Creates a heap-allocated copy of this problem.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       Problem* copy() const noexcept override
       {
         return new Problem(*this);

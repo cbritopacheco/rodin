@@ -101,6 +101,7 @@ namespace Rodin::Assembly
   };
 
   /// @brief Template argument deduction guide for OpenMPIteration
+  /// @param mesh Mesh on which the object is defined.
   OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
     -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
 
@@ -183,12 +184,14 @@ namespace Rodin::Assembly
       }
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -197,6 +200,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
@@ -366,12 +371,14 @@ namespace Rodin::Assembly
       }
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_assembly(other.m_assembly)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_assembly(std::move(other.m_assembly))
@@ -380,6 +387,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
@@ -485,12 +494,14 @@ namespace Rodin::Assembly
       OpenMP() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -683,12 +694,14 @@ namespace Rodin::Assembly
       OpenMP() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -836,12 +849,14 @@ namespace Rodin::Assembly
       OpenMP() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -991,12 +1006,14 @@ namespace Rodin::Assembly
       OpenMP() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)), m_threadCount(other.m_threadCount)
       {}
@@ -1726,12 +1743,14 @@ namespace Rodin::Assembly
       OpenMP() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(other.m_threadCount)
@@ -2427,11 +2446,13 @@ namespace Rodin::Assembly
       OpenMP() = default;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       OpenMP(const OpenMP& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other))
       {}

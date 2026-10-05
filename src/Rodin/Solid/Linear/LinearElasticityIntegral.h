@@ -142,6 +142,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Returns the current polytope.
+      /// @returns The current polytope.
       const Geometry::Polytope& getPolytope() const override
       {
         return m_polytope.value().get();
@@ -319,6 +320,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns an entry of the current element stiffness matrix.
+      /// @param tr Trial shape-function expression.
+      /// @param te Test shape-function expression.
+      /// @returns Integral computed by the quadrature rule.
       ScalarType integrate(size_t tr, size_t te) override
       {
         return m_matrix(te, tr);

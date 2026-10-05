@@ -49,7 +49,7 @@ namespace Rodin::Solid
     public:
       /**
        * @brief Sets the cache from the constitutive point.
-       * @param[out] cache Cache to populate
+       * @param[out] cache Storage for the constitutive invariant cache.
        * @param[in] cp Constitutive point (kinematic state, coordinates, region, etc.)
        */
       template <class Cache>
@@ -66,7 +66,7 @@ namespace Rodin::Solid
        * @f]
        *
        * @param[out] P Output stress tensor
-       * @param[in] cache Precomputed cache
+       * @param[in] cache Constitutive invariant cache populated by setCache().
        * @param[in] cp Constitutive point
        */
       template <class Cache>
@@ -89,7 +89,7 @@ namespace Rodin::Solid
        * @f]
        *
        * @param[out] dP Output tangent stress increment
-       * @param[in] cache Precomputed cache
+       * @param[in] cache Constitutive invariant cache populated by setCache().
        * @param[in] cp Constitutive point
        * @param[in] dF Perturbation of the deformation gradient
        */
@@ -110,7 +110,7 @@ namespace Rodin::Solid
        *   W(\mathbf{F})
        * @f]
        *
-       * @param[in] cache Precomputed cache
+       * @param[in] cache Constitutive invariant cache populated by setCache().
        * @param[in] cp Constitutive point
        * @returns Strain energy density value
        */
@@ -130,8 +130,11 @@ namespace Rodin::Solid
       /// @brief Move constructor.
       HyperElasticLaw(HyperElasticLaw&&) = default;
       /// @brief Copy assignment operator.
-      HyperElasticLaw& operator=(const HyperElasticLaw&) = default;
+      /// @returns Reference to this object after the operation.
+      /// @param other Object to copy from.
+      HyperElasticLaw& operator=(const HyperElasticLaw& other) = default;
       /// @brief Move assignment operator.
+      /// @returns Reference to this object after the operation.
       HyperElasticLaw& operator=(HyperElasticLaw&&) = default;
   };
 }

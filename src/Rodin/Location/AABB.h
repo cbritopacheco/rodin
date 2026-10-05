@@ -90,6 +90,7 @@ namespace Rodin::Location
   {
     public:
       /// @brief Builds a locator bound to a fixed mesh.
+      /// @param mesh Mesh on which the object is defined.
       explicit AABB(const MeshType& mesh)
         : m_mesh(mesh),
           m_tolerance(DefaultPhysicalTolerance),
@@ -103,12 +104,15 @@ namespace Rodin::Location
       }
 
       /// Relative physical tolerance (scaled by the mesh diagonal).
+      /// @returns The tolerance.
       Real getTolerance() const
       {
         return m_tolerance;
       }
 
       /// Sets the relative physical tolerance and invalidates the index.
+      /// @param tolerance Tolerance used by the operation.
+      /// @returns Reference to this object after the operation.
       AABB& setTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
@@ -120,12 +124,15 @@ namespace Rodin::Location
       }
 
       /// Maximum reference-space overshoot before clipping and residual check.
+      /// @returns The reference tolerance.
       Real getReferenceTolerance() const
       {
         return m_referenceTolerance;
       }
 
       /// @brief Sets the maximum reference-space overshoot before clipping.
+      /// @param tolerance Tolerance used by the operation.
+      /// @returns Reference to this object after the operation.
       AABB& setReferenceTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
@@ -142,6 +149,8 @@ namespace Rodin::Location
        * Useful as a diagnostic when a transformation's degree metadata does
        * not describe its image. Unreliable control-point conversions already
        * leave their entries unpruned. Costs one full narrow-phase sweep per miss.
+       * @returns Reference to this object after the operation.
+       * @param fallback Whether to enable the exhaustive fallback search.
        */
       AABB& setExhaustiveFallback(bool fallback)
       {
@@ -156,6 +165,8 @@ namespace Rodin::Location
        * geometry and query reuse. Enable to reduce Newton retries on overlapping
        * boxes during repeated point location. Membership checks and
        * Newton seed retries are unchanged. Invalidates the existing index.
+       * @returns Reference to this object after the operation.
+       * @param enabled Whether to enable projection-based pruning.
        */
       AABB& setProjectionPruning(bool enabled)
       {
@@ -170,6 +181,9 @@ namespace Rodin::Location
        * Returns an empty optional when the point is outside every candidate
        * polytope, when the coordinate dimension is incompatible with the mesh,
        * or when the inverse transformation does not pass the residual checks.
+       * @param x Point at which the operation is evaluated.
+       * @param dimension Topological dimension of the entities to search.
+       * @returns Located mesh point, or an empty optional when the query cannot be certified.
        */
       Optional<Geometry::Point> locate(
         size_t dimension, const Math::SpatialPoint& x) const
@@ -190,6 +204,8 @@ namespace Rodin::Location
       }
 
       /// @brief Locates a physical point on a cell of the mesh dimension.
+      /// @param x Point at which the operation is evaluated.
+      /// @returns Located mesh point, or an empty optional when the query cannot be certified.
       Optional<Geometry::Point> locate(const Math::SpatialPoint& x) const
       {
         return locate(m_mesh.get().getDimension(), x);

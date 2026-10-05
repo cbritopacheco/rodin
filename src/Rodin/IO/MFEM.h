@@ -725,7 +725,7 @@ namespace Rodin::IO::MFEM
 
   /**
    * @brief Converts Rodin polytope type to MFEM geometry type.
-   * @param[in] t Rodin polytope type
+   * @param[in] t Type of polytope to construct.
    * @returns Optional MFEM geometry type, empty if conversion not supported
    *
    * Maps Rodin's polytope type system to MFEM's internal geometry type enumeration.
@@ -1084,6 +1084,7 @@ namespace Rodin::IO::MFEM
       static constexpr size_t Count = (K + 1) * (K + 2) / 2;
 
       /// @brief Returns the MFEM reference nodes for the triangle.
+      /// @returns The MFEM reference nodes for the triangle.
       static const std::vector<Math::SpatialPoint>& getNodes()
       {
         static thread_local std::vector<Math::SpatialPoint> s_nodes;
@@ -1149,6 +1150,7 @@ namespace Rodin::IO::MFEM
   {
     public:
       /// @brief Returns the Dubiner Vandermonde matrix evaluated at MFEM triangle nodes.
+      /// @returns The Dubiner Vandermonde matrix evaluated at MFEM triangle nodes.
       static const Math::Matrix<Real>& getMatrix()
       {
         static thread_local Math::Matrix<Real> s_vandermonde;
@@ -1186,6 +1188,7 @@ namespace Rodin::IO::MFEM
       }
 
       /// @brief Returns the inverse of @ref getMatrix().
+      /// @returns The inverse of getMatrix().
       static const Math::Matrix<Real>& getInverse()
       {
         static thread_local Math::Matrix<Real> s_inv;
@@ -1232,6 +1235,7 @@ namespace Rodin::IO::MFEM
       static constexpr size_t Count = (K + 1) * (K + 2) * (K + 3) / 6;
 
       /// @brief Returns the MFEM reference nodes for the tetrahedron.
+      /// @returns The MFEM reference nodes for the tetrahedron.
       static const std::vector<Math::SpatialPoint>& getNodes()
       {
         static thread_local std::vector<Math::SpatialPoint> s_nodes;
@@ -1389,6 +1393,7 @@ namespace Rodin::IO::MFEM
   {
     public:
       /// @brief Returns the Dubiner Vandermonde matrix evaluated at MFEM tetrahedron nodes.
+      /// @returns The Dubiner Vandermonde matrix evaluated at MFEM tetrahedron nodes.
       static const Math::Matrix<Real>& getMatrix()
       {
         static thread_local Math::Matrix<Real> s_vandermonde;
@@ -1430,6 +1435,7 @@ namespace Rodin::IO::MFEM
       }
 
       /// @brief Returns the inverse of @ref getMatrix().
+      /// @returns The inverse of getMatrix().
       static const Math::Matrix<Real>& getInverse()
       {
         static thread_local Math::Matrix<Real> s_inv;
@@ -1469,6 +1475,7 @@ namespace Rodin::IO::MFEM
       static constexpr size_t Count = TriangleCount * (K + 1);
 
       /// @brief Returns the MFEM reference nodes for the wedge.
+      /// @returns The MFEM reference nodes for the wedge.
       static const std::vector<Math::SpatialPoint>& getNodes()
       {
         static thread_local std::vector<Math::SpatialPoint> s_nodes;
@@ -1596,6 +1603,7 @@ namespace Rodin::IO::MFEM
   {
     public:
       /// @brief Returns the change-of-nodes matrix from Rodin to MFEM wedge nodes.
+      /// @returns The change-of-nodes matrix from Rodin to MFEM wedge nodes.
       static const Math::Matrix<Real>& getMatrix()
       {
         static thread_local Math::Matrix<Real> s_change;
@@ -1619,6 +1627,7 @@ namespace Rodin::IO::MFEM
       }
 
       /// @brief Returns the inverse of @ref getMatrix().
+      /// @returns The inverse of getMatrix().
       static const Math::Matrix<Real>& getInverse()
       {
         static thread_local Math::Matrix<Real> s_inv;

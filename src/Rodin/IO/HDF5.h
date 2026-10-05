@@ -366,6 +366,7 @@ namespace Rodin::IO
     hid_t getNativeType();
 
     /// @brief Returns the native HDF5 type for unsigned 64-bit integers.
+    /// @returns The native HDF5 type for unsigned 64-bit integers.
     template <>
     inline hid_t getNativeType<U64>()
     {
@@ -373,6 +374,7 @@ namespace Rodin::IO
     }
 
     /// @brief Returns the native HDF5 type for signed 32-bit integers.
+    /// @returns The native HDF5 type for signed 32-bit integers.
     template <>
     inline hid_t getNativeType<I32>()
     {
@@ -380,6 +382,7 @@ namespace Rodin::IO
     }
 
     /// @brief Returns the native HDF5 type for 64-bit floating point values.
+    /// @returns The native HDF5 type for 64-bit floating point values.
     template <>
     inline hid_t getNativeType<F64>()
     {
@@ -387,6 +390,7 @@ namespace Rodin::IO
     }
 
     /// @brief Returns the native HDF5 type for unsigned 8-bit integers.
+    /// @returns The native HDF5 type for unsigned 8-bit integers.
     template <>
     inline hid_t getNativeType<U8>()
     {
@@ -600,7 +604,7 @@ namespace Rodin::IO
 
     /**
      * @brief Maps a Rodin polytope type to its XDMF mixed-topology type id.
-     * @param[in] t  Polytope geometry type.
+     * @param[in] t  Type of polytope to construct.
      * @returns XDMF type id (e.g. Triangle=4, Quadrilateral=5, Tetrahedron=6).
      *
      * @see <a href="https://www.xdmf.org/index.php/XDMF_Model_and_Format">
@@ -632,7 +636,7 @@ namespace Rodin::IO
 
     /**
      * @brief Maps a Rodin polytope type to its quadratic XDMF mixed-topology id.
-     * @param[in] t Polytope geometry type.
+     * @param[in] t Type of polytope to construct.
      * @returns XDMF quadratic topology id for order-2 visualization.
      *
      * Only XDMF-supported quadratic topologies are returned. The coordinates
@@ -671,7 +675,7 @@ namespace Rodin::IO
 
     /**
      * @brief Returns the XDMF uniform topology name for a quadratic cell type.
-     * @param[in] t Polytope geometry type.
+     * @param[in] t Type of polytope to construct.
      * @returns XDMF topology name string.
      */
     inline const char* getXDMFQuadraticTopologyName(Geometry::Polytope::Type t)
@@ -745,6 +749,9 @@ namespace Rodin::IO
      * transformation is sampled at XDMF's quadratic node locations. This keeps
      * visualization independent of Rodin's internal finite-element node layout
      * while intentionally approximating higher-order geometry by quadratic XDMF.
+     * @param t Type of polytope to construct.
+     * @param order Polynomial order.
+     * @returns The x d m f reference nodes.
      */
     inline std::vector<Math::SpatialPoint> getXDMFReferenceNodes(
       Geometry::Polytope::Type t, size_t order)
@@ -870,6 +877,8 @@ namespace Rodin::IO
      * twice (once from the owning rank, once from each rank carrying it
      * as a ghost). For a plain `Mesh<Context::Local>` this returns
      * nullptr and the writers iterate every cell.
+     * @param mesh Mesh on which the object is defined.
+     * @returns A non-null `Shard*` iff `mesh` is a partition shard.
      */
     inline const Geometry::Shard* asShard(const Geometry::MeshBase& mesh)
     {
@@ -881,6 +890,10 @@ namespace Rodin::IO
      *
      * On a `Shard` this means `isOwned(D, i)`. On a non-shard local mesh
      * the predicate is identically true.
+     * @param i Index of the requested entry.
+     * @param shard Mesh shard, or a null pointer for a local mesh.
+     * @param D Topological dimension of the cells.
+     * @returns Whether the cell is owned by this rank and should be written.
      */
     inline bool isXDMFOwnedCell(const Geometry::Shard* shard, std::size_t D, Index i)
     {
@@ -892,6 +905,8 @@ namespace Rodin::IO
      *
      * Equals the shard's owned-cell count when `mesh` is a `Shard`,
      * otherwise `mesh.getCellCount()`.
+     * @param mesh Mesh on which the object is defined.
+     * @returns The x d m f rendered cell count.
      */
     inline std::size_t getXDMFRenderedCellCount(const Geometry::MeshBase& mesh)
     {
@@ -2458,6 +2473,7 @@ namespace Rodin::IO
        * @brief Stream-based printing is not supported for HDF5.
        *
        * Always raises an exception. Use the file-path overload instead.
+       * @param os Output stream.
        */
       void print(std::ostream& os) override
       {
@@ -2947,6 +2963,7 @@ namespace Rodin::IO
        * @brief Stream-based printing is not supported for HDF5.
        *
        * Always raises an exception. Use the file-path overload instead.
+       * @param os Output stream.
        */
       void print(std::ostream& os) override
       {

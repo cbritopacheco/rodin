@@ -33,10 +33,12 @@ namespace Rodin::Alert
     ResetT(ResetT&&) = default;
 
     /// @brief Copy assignment operator.
-    constexpr
-    ResetT& operator=(const ResetT&) = default;
+    /// @returns Reference to this object after the operation.
+    /// @param other Object to copy from.
+    constexpr ResetT& operator=(const ResetT& other) = default;
 
     /// @brief Move assignment operator.
+    /// @returns Reference to this object after the operation.
     constexpr
     ResetT& operator=(ResetT&&) = default;
   };

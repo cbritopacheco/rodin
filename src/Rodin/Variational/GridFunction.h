@@ -160,6 +160,7 @@ namespace Rodin::Variational
       /**
        * @brief Constructs the LazyEvaluator object from a constant reference
        * the data-full object.
+       * @param ref Reference to the wrapped grid function.
        */
       explicit
       constexpr
@@ -169,6 +170,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       constexpr
       GridFunctionBaseReference(const GridFunctionBaseReference& other)
@@ -178,6 +180,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       constexpr
       GridFunctionBaseReference(GridFunctionBaseReference&& other)
@@ -190,6 +193,8 @@ namespace Rodin::Variational
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
       /// @brief Evaluates at a geometric point.
+      /// @param p Point at which the operation is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       auto operator()(const Geometry::Point& p) const
       {
@@ -197,6 +202,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
@@ -204,6 +211,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the expression at a geometric point.
+      /// @param p Point at which the operation is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
@@ -211,6 +220,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the expression at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -218,6 +229,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the first component.
+      /// @returns The first component.
       constexpr
       auto x() const
       {
@@ -225,6 +237,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the second component.
+      /// @returns The second component.
       constexpr
       auto y() const
       {
@@ -232,6 +245,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the third component.
+      /// @returns The third component.
       constexpr
       auto z() const
       {
@@ -239,6 +253,9 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets the degree-of-freedom data.
+      /// @param data Data used by the operation.
+      /// @param offset Offset in the indexed data.
+      /// @returns Reference to this grid function after replacing its coefficient data.
       template <class DataType>
       constexpr decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
@@ -247,6 +264,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns a constant reference to the GridFunction data.
+       * @returns A constant reference to the GridFunction data.
        */
       constexpr
       const auto& getData()
@@ -255,6 +273,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the finite element space.
+      /// @returns The finite element space.
       constexpr
       const auto& getFiniteElementSpace() const
       {
@@ -262,6 +281,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the number of degrees of freedom.
+      /// @returns The number of degrees of freedom.
       constexpr
       size_t getSize() const
       {
@@ -269,12 +289,15 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param geom Reference geometry.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
         return m_ref.get().getOrder(geom);
       }
 
       /// @brief Creates a polymorphic copy.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       GridFunctionBaseReference* copy() const noexcept final override
       {
         return new GridFunctionBaseReference(*this);
@@ -540,6 +563,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the number of matrix rows.
+      /// @returns The number of matrix rows.
       size_t getRows() const
         requires FormLanguage::IsMatrixRange<RangeType>::Value
       {
@@ -547,6 +571,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the number of matrix columns.
+      /// @returns The number of matrix columns.
       size_t getColumns() const
         requires FormLanguage::IsMatrixRange<RangeType>::Value
       {
@@ -799,6 +824,8 @@ namespace Rodin::Variational
        * the `(dimension, index)` pair @p p.
        *
        * @returns Reference to this grid function
+       * @param fn Function to evaluate.
+       * @param p Entity identified by its dimension and local index.
        */
       template <class Function>
       Derived& project(const std::pair<size_t, Index>& p, const Function& fn)
@@ -822,6 +849,8 @@ namespace Rodin::Variational
        * the `(dimension, index)` pair @p p.
        *
        * @returns Reference to this grid function
+       * @param p Entity identified by its dimension and local index.
+       * @param v Function or value to transform or project.
        */
       Derived& project(const std::pair<size_t, Index>& p, const RangeType& v)
       {
@@ -836,6 +865,7 @@ namespace Rodin::Variational
        * The source object @p v is forwarded to project().
        *
        * @returns Reference to this grid function
+       * @param v Value to assign.
        */
       template <class T>
       Derived& operator=(const T& v)
@@ -850,6 +880,7 @@ namespace Rodin::Variational
        * The source object @p fn is interpolated on every cell.
        *
        * @returns Reference to this grid function
+       * @param fn Function to evaluate.
        */
       template <class T>
       Derived& project(const T& fn)
@@ -865,6 +896,8 @@ namespace Rodin::Variational
        * The source object @p fn is interpolated over @p region.
        *
        * @returns Reference to this grid function
+       * @param region Region on which to apply the operation.
+       * @param fn Function to evaluate.
        */
       template <class T>
       Derived& project(const Geometry::Region& region, const T& fn)
@@ -881,6 +914,9 @@ namespace Rodin::Variational
        * whose attribute equals @p attr.
        *
        * @returns Reference to this grid function
+       * @param region Region on which to apply the operation.
+       * @param fn Function to evaluate.
+       * @param attr Mesh attribute selecting the region.
        */
       template <class T>
       Derived& project(
@@ -900,6 +936,9 @@ namespace Rodin::Variational
        * entities in the region.
        *
        * @returns Reference to this grid function
+       * @param region Region on which to apply the operation.
+       * @param fn Function to evaluate.
+       * @param attrs Mesh attributes selecting the region.
        */
       template <class T>
       Derived& project(
@@ -919,6 +958,9 @@ namespace Rodin::Variational
        * accepted by @p pred.
        *
        * @returns Reference to this grid function
+       * @param region Region on which to apply the operation.
+       * @param fn Function to evaluate.
+       * @param pred Predicate selecting the entities on which to project.
        */
       template <class Pred>
       Derived& project(const Geometry::Region& region, const RangeType& fn, const Pred& pred)
@@ -931,6 +973,10 @@ namespace Rodin::Variational
 
       /**
        * @note CRTP function to be overriden in Derived class.
+       * @param region Region on which to apply the operation.
+       * @param fn Function to evaluate.
+       * @param pred Predicate selecting the entities on which to project.
+       * @returns Reference to this object after the operation.
        */
       template <class Function, class Pred>
       Derived& project(const Geometry::Region& region, const Function& fn, const Pred& pred)
@@ -1593,11 +1639,14 @@ namespace Rodin::Variational
   };
 
   /// @brief Deduces the default dense-vector grid function type.
+  /// @param fes Finite element space.
   template <class FES>
   GridFunction(const FES& fes)
     -> GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
 
   /// @brief Deduces a grid function type from a finite element space and data object.
+  /// @param fes Finite element space.
+  /// @param data Data used by the operation.
   template <class FES, class Data>
   GridFunction(const FES& fes, Data&& data)
     -> GridFunction<FES, Data>;

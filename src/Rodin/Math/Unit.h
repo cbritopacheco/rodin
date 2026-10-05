@@ -101,10 +101,12 @@ namespace Rodin::Math
       Unit(Unit&&) = default;
 
       /// @brief Copy assignment operator.
-      constexpr
-      Unit& operator=(const Unit&) = default;
+      /// @returns Reference to this object after the operation.
+      /// @param other Object to copy from.
+      constexpr Unit& operator=(const Unit& other) = default;
 
       /// @brief Move assignment operator.
+      /// @returns Reference to this object after the operation.
       constexpr
       Unit& operator=(Unit&&) = default;
 

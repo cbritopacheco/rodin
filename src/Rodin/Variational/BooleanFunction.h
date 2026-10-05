@@ -58,8 +58,8 @@ namespace Rodin::Variational
     public:
       /// @brief Parent class type
       using Parent = FunctionBase<BooleanFunctionBase<Derived>>;
-      
-      /// @brief Import operator() from parent
+
+      // Import operator() from parent.
       using Parent::operator();
 
       /// @brief Default constructor
@@ -96,6 +96,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the expression at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -113,6 +115,7 @@ namespace Rodin::Variational
        *
        * @tparam Args Variadic template for trace domain specification
        * @returns Reference to derived object (for method chaining)
+       * @param args Arguments forwarded to the constructed object.
        */
       template <class ... Args>
       constexpr
@@ -141,23 +144,27 @@ namespace Rodin::Variational
       using Parent = BooleanFunctionBase<BooleanFunction<Boolean>>;
 
       /// @brief Constructs the constant boolean function.
+      /// @param v Constant Boolean value.
       BooleanFunction(Boolean v)
         : m_v(v)
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       BooleanFunction(const BooleanFunction& other)
         : Parent(other),
           m_v(other.m_v)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       BooleanFunction(BooleanFunction&& other)
         : Parent(std::move(other)),
           m_v(other.m_v)
       {}
 
       /// @brief Evaluates the expression at a geometric point.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       Boolean getValue(const Geometry::Point&) const
       {
@@ -165,6 +172,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Restricts the trace of the expression to a mesh attribute.
+      /// @param args Arguments forwarded to the constructed object.
+      /// @returns Reference to this object after the operation.
       template <class ... Args>
       constexpr
       BooleanFunction& traceOf(const Args& ... args)

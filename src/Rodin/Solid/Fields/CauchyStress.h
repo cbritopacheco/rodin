@@ -89,6 +89,7 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets the constitutive law.
+      /// @returns The constitutive law.
       const LawType& getLaw() const { return m_law; }
 
     private:

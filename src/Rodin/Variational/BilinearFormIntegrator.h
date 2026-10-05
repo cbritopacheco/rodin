@@ -186,6 +186,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       template <class OtherNumber>
       LocalBilinearFormIntegratorBase(const LocalBilinearFormIntegratorBase<OtherNumber>& other)
@@ -195,6 +196,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       template <class OtherNumber>
       LocalBilinearFormIntegratorBase(LocalBilinearFormIntegratorBase<OtherNumber>&& other)
@@ -204,6 +206,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the attributes of the elements being integrated.
+       * @returns The attributes of the elements being integrated.
        */
       const FlatSet<Geometry::Attribute>& getAttributes() const
       {
@@ -216,6 +219,7 @@ namespace Rodin::Variational
        *
        * Specifies the material reference over which the integration should
        * take place.
+       * @param attr Mesh attribute selecting the region.
        */
       LocalBilinearFormIntegratorBase& over(const Geometry::Attribute& attr)
       {
@@ -223,6 +227,10 @@ namespace Rodin::Variational
       }
 
       /// @brief Restricts integration to the given mesh attributes.
+      /// @param attrs Mesh attributes selecting the region.
+      /// @param a1 Mesh attributes selecting the region.
+      /// @param a2 Mesh attributes selecting the region.
+      /// @returns Reference to this object after the operation.
       template <class A1, class A2, class ... As>
       LocalBilinearFormIntegratorBase& over(const A1& a1, const A2& a2, const As&... attrs)
       {
@@ -235,6 +243,7 @@ namespace Rodin::Variational
        *
        * Specifies the material references over which the integration should
        * take place.
+       * @param attrs Mesh attributes selecting the region.
        */
       LocalBilinearFormIntegratorBase& over(const FlatSet<Geometry::Attribute>& attrs)
       {
@@ -244,15 +253,22 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polytope the expression is bound to.
+      /// @returns The polytope the expression is bound to.
       virtual const Geometry::Polytope& getPolytope() const = 0;
 
       /// @brief Binds the expression to a polytope.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Reference to this object after the operation.
       virtual LocalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
       /// @brief Returns an entry of the element matrix.
+      /// @param tr Trial shape-function expression.
+      /// @param te Test shape-function expression.
+      /// @returns Integral computed by the quadrature rule.
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
       /// @brief Returns the integration region.
+      /// @returns The integration region.
       virtual Geometry::Region getRegion() const = 0;
 
       virtual
@@ -278,6 +294,7 @@ namespace Rodin::Variational
       using Parent::Parent;
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       template <class OtherNumber>
       GlobalBilinearFormIntegratorBase(const GlobalBilinearFormIntegratorBase<OtherNumber>& other)
         : Parent(other),
@@ -287,6 +304,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       template <class OtherNumber>
       GlobalBilinearFormIntegratorBase(GlobalBilinearFormIntegratorBase<OtherNumber>&& other)
@@ -297,6 +315,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the attributes of the elements being integrated.
+       * @returns The attributes of the elements being integrated.
        */
       const FlatSet<Geometry::Attribute>& getTrialAttributes() const
       {
@@ -305,6 +324,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Gets the attributes of the elements being integrated.
+       * @returns The attributes of the elements being integrated.
        */
       const FlatSet<Geometry::Attribute>& getTestAttributes() const
       {
@@ -317,6 +337,7 @@ namespace Rodin::Variational
        *
        * Specifies the material reference over which the integration should
        * take place.
+       * @param attrs Mesh attributes selecting the region.
        */
       GlobalBilinearFormIntegratorBase& setTrialAttributes(
           const FlatSet<Geometry::Attribute>& attrs)
@@ -331,6 +352,7 @@ namespace Rodin::Variational
        *
        * Specifies the material reference over which the integration should
        * take place.
+       * @param attrs Mesh attributes selecting the region.
        */
       GlobalBilinearFormIntegratorBase& setTestAttributes(
           const FlatSet<Geometry::Attribute>& attrs)
@@ -340,16 +362,24 @@ namespace Rodin::Variational
       }
 
       /// @brief Binds the expression to a polytope.
+      /// @param tau Mesh entity used by this operation.
+      /// @param t Mesh entity used by this operation.
+      /// @returns Reference to this object after the operation.
       virtual
       GlobalBilinearFormIntegratorBase& setPolytope(const Geometry::Polytope& tau, const Geometry::Polytope& t) = 0;
 
       /// @brief Returns an entry of the element matrix.
+      /// @param tr Trial shape-function expression.
+      /// @param te Test shape-function expression.
+      /// @returns Integral computed by the quadrature rule.
       virtual ScalarType integrate(size_t tr, size_t te) = 0;
 
       /// @brief Returns the region the trial function is integrated over.
+      /// @returns The region the trial function is integrated over.
       virtual Geometry::Region getTrialRegion() const = 0;
 
       /// @brief Returns the region the test function is integrated over.
+      /// @returns The region the test function is integrated over.
       virtual Geometry::Region getTestRegion() const = 0;
 
       virtual

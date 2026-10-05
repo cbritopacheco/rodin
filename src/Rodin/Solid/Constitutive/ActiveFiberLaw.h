@@ -66,6 +66,7 @@ namespace Rodin::Solid
           Real beta = 0.0;
 
           /// @brief Returns the active stress @f$\gamma\beta@f$.
+          /// @returns The active stress @f$\gamma\beta@f$.
           Real activeStress() const
           {
             return gamma * beta;
@@ -97,17 +98,20 @@ namespace Rodin::Solid
       {}
 
       /// @brief Constructs the active law from parameters.
+      /// @param parameters Parameters configuring the operation.
       explicit ActiveFiberLaw(const Parameters& parameters)
         : m_parameters(parameters)
       {}
 
       /// @brief Returns the material parameters.
+      /// @returns The material parameters.
       const Parameters& getParameters() const
       {
         return m_parameters;
       }
 
       /// @brief Builds the initial internal active-fiber state.
+      /// @returns Initial active-fiber internal state.
       State initialState() const
       {
         State state;
@@ -117,6 +121,9 @@ namespace Rodin::Solid
       }
 
       /// @brief Evaluates active stress at fiber strain @p e and extension @p c.
+      /// @param e Muscle strain.
+      /// @param c Contractile state.
+      /// @returns Active stress at the supplied strain and extension.
       Real stress(Real e, Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
@@ -124,6 +131,8 @@ namespace Rodin::Solid
       }
 
       /// @brief Evaluates @f$\partial\sigma/\partial e@f$ at fixed extension.
+      /// @param c Contractile state.
+      /// @returns Derivative of active stress with respect to strain at fixed extension.
       Real dStressDe(Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
@@ -131,6 +140,9 @@ namespace Rodin::Solid
       }
 
       /// @brief Evaluates @f$\partial\sigma/\partial c@f$ at fixed fiber strain.
+      /// @param e Muscle strain.
+      /// @param c Contractile state.
+      /// @returns Derivative of active stress with respect to extension at fixed strain.
       Real dStressDc(Real e, Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
@@ -139,6 +151,9 @@ namespace Rodin::Solid
       }
 
       /// @brief Evaluates the static active response.
+      /// @param e Muscle strain.
+      /// @param c Contractile state.
+      /// @returns Static active stress and tangent response.
       Response evaluateStatic(Real e, Real c) const
       {
         Response response;
@@ -155,6 +170,12 @@ namespace Rodin::Solid
       }
 
       /// @brief Advances the internal active-fiber state.
+      /// @param dt Time-step size.
+      /// @param oldState State at the previous time step.
+      /// @param previousActiveExtension Active extension at the previous time step.
+      /// @param activeExtension Active extension field.
+      /// @param activation Activation at the current time step.
+      /// @returns Updated active-fiber internal state.
       State update(Real dt, const State& oldState, Real previousActiveExtension,
         Real activeExtension, Real activation) const
       {
@@ -204,6 +225,7 @@ namespace Rodin::Solid
       ///   @p e is the current strain. Only the condensed tangent depends on
       ///   it, since the global tangent differentiates with respect to
       ///   @f$e_{1D}^{n+1}@f$.
+      /// @returns Dynamic active stress and condensed tangent response.
       Response evaluateDynamic(Real dt, const State& oldState, const State& newState,
         Real e, Real previousActiveExtension, Real activeExtension, Real activation,
         Real strainFactor = 1.0) const
@@ -241,6 +263,12 @@ namespace Rodin::Solid
       }
 
       /// @brief Evaluates the derivative of active stress with respect to extension.
+      /// @param dt Time-step size.
+      /// @param oldState State at the previous time step.
+      /// @param activation Activation at the current time step.
+      /// @param previousActiveExtension Active extension at the previous time step.
+      /// @param activeExtension Active extension field.
+      /// @returns Derivative of active stress with respect to the active extension.
       Real dActiveStressDc(Real dt, const State& oldState, Real activation,
         Real previousActiveExtension, Real activeExtension) const
       {
@@ -283,6 +311,8 @@ namespace Rodin::Solid
       }
 
       /// @brief Evaluates the length-dependent Starling activation factor.
+      /// @param activeExtension Active extension field.
+      /// @returns Length-dependent activation factor.
       static Real starling(Real activeExtension)
       {
         const Real x1 = -0.4;

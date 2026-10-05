@@ -67,12 +67,15 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Constructs the trace of a function on a mesh attribute.
+      /// @param fn Function to evaluate.
+      /// @param attr Mesh attribute selecting the region.
       TraceOperator(const FunctionBase& fn, Geometry::Attribute attr)
         : m_fn(fn.copy()),
           m_attr(attr)
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       TraceOperator(const TraceOperator& other)
         :  FunctionBase(other),
           m_fn(other.m_fn->copy()),
@@ -80,6 +83,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       TraceOperator(TraceOperator&& other)
         :  FunctionBase(std::move(other)),
           m_fn(std::move(other.m_fn)),

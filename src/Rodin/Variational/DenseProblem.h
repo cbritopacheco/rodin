@@ -75,6 +75,8 @@ namespace Rodin::Variational
   };
 
   /// @brief Deduction guide for @c DenseProblem.
+  /// @param u Trial shape function.
+  /// @param v Test shape function.
   template <class U, class V>
   DenseProblem(U& u, V& v)
     -> DenseProblem<

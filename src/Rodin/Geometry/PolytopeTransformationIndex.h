@@ -116,8 +116,9 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy assignment operator (deleted).
+       * @param other Object to copy from.
        */
-      Dimension& operator=(const Dimension&) = delete;
+      Dimension& operator=(const Dimension& other) = delete;
 
       /**
        * @brief Move constructor.
@@ -176,6 +177,7 @@ namespace Rodin::Geometry
 
     /**
      * @brief Move constructor.
+     * @param other Object to move from.
      */
     PolytopeTransformationIndex(PolytopeTransformationIndex&& other) noexcept
       : m_dimensions(std::move(other.m_dimensions))
@@ -183,6 +185,8 @@ namespace Rodin::Geometry
 
     /**
      * @brief Move assignment operator.
+     * @param other Object to move from.
+     * @returns Reference to this object after the operation.
      */
     PolytopeTransformationIndex& operator=(PolytopeTransformationIndex&& other) noexcept
     {

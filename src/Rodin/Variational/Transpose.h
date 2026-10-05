@@ -65,6 +65,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       Transpose(const Transpose& other)
         : Parent(other),
@@ -72,6 +73,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
@@ -106,6 +108,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return getOperand().getOrder(polytope);
@@ -162,6 +166,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       Transpose(const Transpose& other)
         : Parent(other),
@@ -169,6 +174,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
@@ -217,6 +223,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets the integration point the expression is evaluated at.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Reference to this object after the operation.
       Transpose& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_operand->setIntegrationPoint(ip);
@@ -249,6 +257,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return getOperand().getOrder(polytope);

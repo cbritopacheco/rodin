@@ -96,6 +96,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       Component(const Component& other)
         : Parent(other),
@@ -104,6 +105,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       Component(Component&& other)
         : Parent(std::move(other)),
@@ -145,6 +147,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param geom Reference geometry.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -214,6 +218,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       Component(const Component& other)
         : Parent(other),
@@ -223,6 +228,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       Component(Component&& other)
         : Parent(std::move(other)),
@@ -255,6 +261,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param geom Reference geometry.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -319,6 +327,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       Component(const Component& other)
         : Parent(other),
@@ -327,6 +336,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       Component(Component&& other)
         : Parent(std::move(other)),
@@ -367,6 +377,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param geom Reference geometry.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -438,6 +450,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Component(const Component& other)
         : Parent(other),
           m_u(other.m_u->copy()),
@@ -445,6 +458,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Component(Component&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -505,6 +519,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets the integration point the expression is evaluated at.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Reference to this object after the operation.
       Component& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_u->setIntegrationPoint(ip);
@@ -524,6 +540,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param geom Reference geometry.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -604,6 +622,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Constructs entry access, or copies the owned expression operand.
+      /// @param other Object to copy from.
       Component(const Component& other)
         : Parent(other),
           m_u(other.m_u->copy()),
@@ -612,6 +631,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Constructs entry access, or copies the owned expression operand.
+      /// @param other Object to move from.
       Component(Component&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -669,6 +689,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Binds the integration point and prepares local basis values.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Reference to this object after the operation.
       Component& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_u->setIntegrationPoint(ip);
@@ -687,6 +709,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order when it is known.
+      /// @param geom Reference geometry.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         return getOperand().getOrder(geom);
@@ -727,6 +751,10 @@ namespace Rodin::Variational
       /// @brief CRTP or finite element base class.
       using Parent = ScalarFunctionBase<ScalarType, Component>;
       /// @brief Constructs entry access, or copies the owned expression operand.
+      /// @param operand Operand expression.
+      /// @param direction Direction in which the derivative is evaluated.
+      /// @param row Row component index.
+      /// @param column Column component index.
       Component(const OperandType& operand, size_t row, size_t column, size_t direction)
         : m_operand(operand.copy()),
           m_row(row),
@@ -734,6 +762,7 @@ namespace Rodin::Variational
           m_direction(direction)
       {}
       /// @brief Constructs entry access, or copies the owned expression operand.
+      /// @param other Object to copy from.
       Component(const Component& other)
         : Parent(other),
           m_operand(other.m_operand->copy()),
@@ -742,6 +771,7 @@ namespace Rodin::Variational
           m_direction(other.m_direction)
       {}
       /// @brief Constructs entry access, or copies the owned expression operand.
+      /// @param other Object to move from.
       Component(Component&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand)),
@@ -750,12 +780,16 @@ namespace Rodin::Variational
           m_direction(other.m_direction)
       {}
       /// @brief Evaluates the expression at the supplied physical or integration point.
+      /// @param point Point at which the operation is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       template <class Point>
       ScalarType getValue(const Point& point) const
       {
         return m_operand->getValue(point)(m_row, m_column, m_direction);
       }
       /// @brief Returns the polynomial order when it is known.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return m_operand->getOrder(poly);
@@ -789,6 +823,10 @@ namespace Rodin::Variational
       /// @brief CRTP or finite element base class.
       using Parent = ShapeFunctionBase<Component, FES, Space>;
       /// @brief Constructs entry access, or copies the owned expression operand.
+      /// @param operand Operand expression.
+      /// @param direction Direction in which the derivative is evaluated.
+      /// @param row Row component index.
+      /// @param column Column component index.
       Component(const OperandType& operand, size_t row, size_t column, size_t direction)
         : Parent(operand.getFiniteElementSpace()),
           m_operand(operand.copy()),
@@ -797,6 +835,7 @@ namespace Rodin::Variational
           m_direction(direction)
       {}
       /// @brief Constructs entry access, or copies the owned expression operand.
+      /// @param other Object to copy from.
       Component(const Component& other)
         : Parent(other),
           m_operand(other.m_operand->copy()),
@@ -805,6 +844,7 @@ namespace Rodin::Variational
           m_direction(other.m_direction)
       {}
       /// @brief Constructs entry access, or copies the owned expression operand.
+      /// @param other Object to move from.
       Component(Component&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand)),
@@ -813,32 +853,42 @@ namespace Rodin::Variational
           m_direction(other.m_direction)
       {}
       /// @brief Returns the leaf shape function used for assembly.
+      /// @returns The leaf shape function used for assembly.
       const auto& getLeaf() const
       {
         return m_operand->getLeaf();
       }
       /// @brief Returns the local basis count for the selected polytope.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Number of local basis functions on the selected entity.
       size_t getDOFs(const Geometry::Polytope& poly) const
       {
         return m_operand->getDOFs(poly);
       }
       /// @brief Returns the currently bound integration point.
+      /// @returns The currently bound integration point.
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_operand->getIntegrationPoint();
       }
       /// @brief Binds the integration point and prepares local basis values.
+      /// @param point Point at which the operation is evaluated.
+      /// @returns Reference to this object after the operation.
       Component& setIntegrationPoint(const IntegrationPoint& point)
       {
         m_operand->setIntegrationPoint(point);
         return *this;
       }
       /// @brief Returns a basis value at the bound integration point.
+      /// @param local Index in the local numbering.
+      /// @returns Value of the selected local basis function at the evaluation point.
       ScalarType getBasis(size_t local) const
       {
         return m_operand->getBasis(local)(m_row, m_column, m_direction);
       }
       /// @brief Returns the polynomial order when it is known.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return m_operand->getOrder(poly);

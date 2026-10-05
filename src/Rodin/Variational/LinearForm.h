@@ -260,6 +260,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Replaces the integrators of the form.
+      /// @param lfis Linear form integrators.
+      /// @returns Reference to this object after the operation.
       constexpr
       LinearFormBase& operator=(const LinearFormIntegratorBaseListType& lfis)
       {
@@ -281,18 +283,21 @@ namespace Rodin::Variational
       /**
        * @brief Gets the reference to the (local) associated vector
        * to the LinearForm.
+       * @returns The reference to the (local) associated vector to the LinearForm.
        */
       virtual VectorType& getVector() = 0;
 
       /**
        * @brief Gets the reference to the (local) associated vector
        * to the LinearForm.
+       * @returns The reference to the (local) associated vector to the LinearForm.
        */
       virtual const VectorType& getVector() const = 0;
 
       /**
        * @brief Gets the test function argument associated to this linear
        * form.
+       * @returns The test function argument associated to this linear form.
        */
       virtual const FormLanguage::Base& getTestFunction() const = 0;
 
@@ -354,7 +359,7 @@ namespace Rodin::Variational
       using Parent =
         LinearFormBase<VectorType>;
 
-      /// @brief Replaces the integrators of the form.
+      // Import the documented assignment overloads from the parent.
       using Parent::operator=;
 
       using Parent::operator+=;
@@ -372,6 +377,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       constexpr
       LinearForm(const LinearForm& other)
         : Parent(other),
@@ -381,6 +387,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       constexpr
       LinearForm(LinearForm&& other)
         : Parent(std::move(other)),
@@ -390,6 +397,8 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy assignment.
+      /// @param other Object to copy from.
+      /// @returns Reference to this object after the operation.
       LinearForm& operator=(const LinearForm& other)
       {
         if (this != &other)
@@ -403,6 +412,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Move assignment.
+      /// @param other Object to move from.
+      /// @returns Reference to this object after the operation.
       LinearForm& operator=(LinearForm&& other) noexcept
       {
         if (this != &other)
@@ -422,6 +433,7 @@ namespace Rodin::Variational
        * action of the form @f$ L(u) @f$.
        *
        * @returns The value which the linear form takes at @f$ u @f$.
+       * @param u Function operand.
        */
       template <class Data>
       constexpr
@@ -437,12 +449,14 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the assembled vector.
+      /// @returns The assembled vector.
       VectorType& getVector() override
       {
         return m_vector;
       }
 
       /// @brief Gets the assembled vector.
+      /// @returns The assembled vector.
       const VectorType& getVector() const override
       {
         return m_vector;

@@ -82,8 +82,11 @@ namespace Rodin::Solid
       /// @brief Move constructor.
       Input(Input&&) = default;
       /// @brief Copy assignment operator.
-      Input& operator=(const Input&) = default;
+      /// @returns Reference to this object after the operation.
+      /// @param other Object to copy from.
+      Input& operator=(const Input& other) = default;
       /// @brief Move assignment operator.
+      /// @returns Reference to this object after the operation.
       Input& operator=(Input&&) = default;
   };
 

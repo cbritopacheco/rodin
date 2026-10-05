@@ -61,9 +61,11 @@ namespace Rodin::Solid
       Hooke(Hooke&&) = default;
 
       /// @brief Gets the first Lamé parameter.
+      /// @returns The first Lamé parameter.
       Real getLameFirstParameter() const { return m_lambda; }
 
       /// @brief Gets the shear modulus.
+      /// @returns The shear modulus.
       Real getShearModulus() const { return m_mu; }
 
       /**

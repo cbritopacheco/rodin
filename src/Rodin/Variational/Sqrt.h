@@ -105,6 +105,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);
@@ -139,6 +141,8 @@ namespace Rodin::Variational
 
   /**
    * @brief Helper function to construct objects of type Sqrt.
+   * @param f Function operand.
+   * @returns Pointwise square-root expression.
    */
   template <class NestedDerived>
   auto sqrt(const FunctionBase<NestedDerived>& f)

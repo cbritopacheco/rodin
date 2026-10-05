@@ -70,7 +70,7 @@ namespace Rodin::Solid
       /**
        * @brief Computes @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$.
        * @param[out] P Output stress tensor
-       * @param[in] cache Precomputed law cache
+       * @param[in] cache Constitutive invariant cache populated by setCache().
        * @param[in] cp Constitutive point
        */
       void getFirstPiolaKirchhoffStress(
@@ -82,6 +82,7 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets the constitutive law.
+      /// @returns The constitutive law.
       const LawType& getLaw() const { return m_law; }
 
     private:

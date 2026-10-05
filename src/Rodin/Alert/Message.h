@@ -97,6 +97,7 @@ namespace Rodin::Alert
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       MessagePrefix(const MessagePrefix& other)
         : Parent(other)
@@ -104,6 +105,7 @@ namespace Rodin::Alert
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       MessagePrefix(MessagePrefix&& other)
         : Parent(std::move(other))

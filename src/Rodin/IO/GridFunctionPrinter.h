@@ -102,6 +102,7 @@ namespace Rodin::IO
 
       /**
        * @brief Returns the grid function bound to this printer.
+       * @returns The grid function bound to this printer.
        */
       const ObjectType& getObject() const override
       {

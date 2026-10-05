@@ -714,14 +714,20 @@ namespace Rodin::IO
       }
 
       /// @brief Prints the full MEDIT mesh body.
+      /// @param os Output stream.
+      /// @param printEnd Whether to write the mesh terminator.
       void printMesh(std::ostream& os, bool printEnd);
       /// @brief Prints the MEDIT file version section.
+      /// @param os Output stream.
       void printVersion(std::ostream& os);
       /// @brief Prints the MEDIT dimension section.
+      /// @param os Output stream.
       void printDimension(std::ostream& os);
       /// @brief Prints all supported mesh entity sections.
+      /// @param os Output stream.
       void printEntities(std::ostream& os);
       /// @brief Prints the MEDIT end marker.
+      /// @param os Output stream.
       void printEnd(std::ostream& os);
   };
 
@@ -770,6 +776,9 @@ namespace Rodin::IO
       }
 
       /// @brief Reads one input line and advances the line counter.
+      /// @param is Input stream.
+      /// @param line Input line to parse.
+      /// @returns The line.
       std::istream& getline(std::istream& is, std::string& line)
       {
         m_currentLineNumber++;
@@ -777,6 +786,8 @@ namespace Rodin::IO
       }
 
       /// @brief Skips blank lines and returns the first nonblank line.
+      /// @param is Input stream.
+      /// @returns First nonblank input line, or an empty string when the stream ends.
       std::string skipEmptyLines(std::istream& is)
       {
         std::string line;
@@ -789,6 +800,7 @@ namespace Rodin::IO
       }
 
       /// @brief Reads the MEDIT solution-file version section.
+      /// @param is Input stream.
       void readVersion(std::istream& is)
       {
         auto line = skipEmptyLines(is);
@@ -810,6 +822,7 @@ namespace Rodin::IO
       }
 
       /// @brief Reads the MEDIT solution-file dimension section.
+      /// @param is Input stream.
       void readDimension(std::istream& is)
       {
         auto line = skipEmptyLines(is);
@@ -828,6 +841,7 @@ namespace Rodin::IO
       }
 
       /// @brief Reads the MEDIT SolAtVertices data section.
+      /// @param is Input stream.
       void readData(std::istream& is)
       {
         auto& gf = this->getObject();
@@ -1434,12 +1448,14 @@ namespace Rodin::IO
       }
 
       /// @brief Prints the MEDIT solution-file version section.
+      /// @param os Output stream.
       void printVersion(std::ostream& os)
       {
         os << MEDIT::Keyword::MeshVersionFormatted << "\n2" << "\n\n";
       }
 
       /// @brief Prints the MEDIT solution-file dimension section.
+      /// @param os Output stream.
       void printDimension(std::ostream& os)
       {
         const auto& gf = this->getObject();
@@ -1449,6 +1465,7 @@ namespace Rodin::IO
       }
 
       /// @brief Prints the MEDIT end marker.
+      /// @param os Output stream.
       void printEnd(std::ostream& os)
       {
         os << '\n' << IO::MEDIT::Keyword::End;
@@ -1460,6 +1477,7 @@ namespace Rodin::IO
       }
 
       /// @brief Prints the concrete grid-function coefficient data.
+      /// @param os Output stream.
       virtual void printData(std::ostream& os) = 0;
 
     private:
@@ -1497,6 +1515,7 @@ namespace Rodin::IO
       using Parent::Parent;
 
       /// @brief Prints one value per mesh vertex in MEDIT solution order.
+      /// @param os Output stream.
       void printData(std::ostream& os)
       {
         const auto& gf = this->getObject();

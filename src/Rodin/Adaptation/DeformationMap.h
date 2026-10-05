@@ -46,6 +46,7 @@ namespace Rodin::Adaptation
       {}
 
       /// @brief The underlying displacement field.
+      /// @returns The displacement.
       const Displacement& getDisplacement() const
       {
         return m_u.get();
@@ -54,6 +55,9 @@ namespace Rodin::Adaptation
       /**
        * @brief The displacement @f$u(x)@f$ at an integration point, as a
        * spatial vector.
+       * @param pt Point at which the operation is evaluated.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns The displacement value.
        */
       Math::SpatialVector<Real> getDisplacementValue(
         const Geometry::Point& pt, const Variational::IntegrationPoint& ip) const
@@ -74,6 +78,7 @@ namespace Rodin::Adaptation
        *
        * @param ip Integration point on the reference configuration; its
        * polytope and quadrature index form the cache key.
+       * @returns The moved point.
        */
       const Geometry::Point& getMovedPoint(const Variational::IntegrationPoint& ip) const
       {

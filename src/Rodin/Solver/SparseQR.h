@@ -172,6 +172,7 @@ namespace Rodin::Solver
        *
        * Updated by every factorization and every solve, so a caller reads it
        * after the call it wants to check.
+       * @returns The outcome of the most recent operation.
        */
       const Info& getInfo() const noexcept
       {

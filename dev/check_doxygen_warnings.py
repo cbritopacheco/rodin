@@ -61,12 +61,14 @@ def run_doxygen(binary, tmpdir):
         "GENERATE_LATEX = NO\n"
         "GENERATE_XML = NO\n"
         "QUIET = YES\n"
+        "WARN_AS_ERROR = NO\n"
         f"WARN_LOGFILE = {log}\n"
     )
     doxyfile = os.path.join(tmpdir, "Doxyfile")
     with open(doxyfile, "w", encoding="utf-8") as f:
         f.write(cfg)
-    subprocess.run([binary, doxyfile], cwd=REPO, check=False,
+    # Collect all warnings for the ratchet, but never accept a failed run.
+    subprocess.run([binary, doxyfile], cwd=REPO, check=True,
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return log
 
@@ -142,7 +144,12 @@ def main():
     else:
         version = doxygen_version(args.doxygen)
         with tempfile.TemporaryDirectory() as tmpdir:
-            log = run_doxygen(args.doxygen, tmpdir)
+            try:
+                log = run_doxygen(args.doxygen, tmpdir)
+            except subprocess.CalledProcessError as error:
+                print(color("1;31", "error:", tty),
+                      f"doxygen failed with exit status {error.returncode}")
+                return 2
             if not os.path.exists(log):
                 print(color("1;31", "error:", tty),
                       "doxygen produced no warning log")

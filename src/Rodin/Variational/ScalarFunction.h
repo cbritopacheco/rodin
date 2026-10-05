@@ -71,10 +71,10 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = FunctionBase<ScalarFunctionBase<ScalarType, Derived>>;
 
-      /// @brief Import traceOf methods from parent
+      // Import traceOf methods from parent.
       using Parent::traceOf;
 
-      /// @brief Import operator() from parent
+      // Import operator() from parent.
       using Parent::operator();
 
       /// @brief Default constructor
@@ -110,6 +110,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the expression at an integration point.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -120,6 +122,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param poly Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {

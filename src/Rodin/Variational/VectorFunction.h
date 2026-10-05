@@ -92,7 +92,7 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = FunctionBase<VectorFunctionBase<Scalar, Derived>>;
 
-      /// @brief Import operator() from parent
+      // Import operator() from parent.
       using Parent::operator();
 
       /// @brief Default constructor
@@ -289,6 +289,7 @@ namespace Rodin::Variational
       /**
        * @brief Leaves constant vectors unchanged on trace domains.
        * @returns Reference to this function
+       * @param attr Mesh attribute selecting the region.
        */
       constexpr
       VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
@@ -599,6 +600,7 @@ namespace Rodin::Variational
       /**
        * @brief Leaves callable vector functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param attr Mesh attribute selecting the region.
        */
       constexpr
       VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)

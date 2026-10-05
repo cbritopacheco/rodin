@@ -73,6 +73,8 @@ namespace Rodin::Variational::F
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return polytope.getTransformation().getOrder();
@@ -149,6 +151,8 @@ namespace Rodin::Variational::F
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return polytope.getTransformation().getOrder();
@@ -225,6 +229,8 @@ namespace Rodin::Variational::F
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return polytope.getTransformation().getOrder();

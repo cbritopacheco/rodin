@@ -84,16 +84,19 @@ namespace Rodin::Variational
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
       /// @brief Constructs the expression from its operand.
+      /// @param u Operand expression.
       Jacobian(const OperandType& u)
         : Parent(u)
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Jacobian(const Jacobian& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Jacobian(Jacobian&& other)
         : Parent(std::move(other))
       {}
@@ -104,6 +107,8 @@ namespace Rodin::Variational
        * The output matrix is sized (vdim x d), where:
        * - vdim = vector dimension of the FE space (typically mesh dim)
        * - d    = dimension of the polytope we are evaluating on (cell or face)
+       * @param out Storage for the computed result.
+       * @param p Point at which the operation is evaluated.
        */
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
@@ -119,6 +124,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -127,6 +133,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Creates a polymorphic copy.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
@@ -169,6 +176,7 @@ namespace Rodin::Variational
           SpaceType>;
 
       /// @brief Constructs the expression from its operand.
+      /// @param u Operand expression.
       explicit Jacobian(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
@@ -176,6 +184,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Jacobian(const Jacobian& other)
         : Parent(other),
           m_u(other.m_u),
@@ -183,6 +192,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -190,13 +200,16 @@ namespace Rodin::Variational
       {}
 
       /// @brief Gets the operand function.
+      /// @returns The operand function.
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
+      /// @brief Returns the number of local basis functions for a polytope.
+      /// @param element Finite element used by the operation.
+      /// @returns Number of local basis functions on the selected entity.
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
@@ -204,6 +217,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the integration point the expression is evaluated at.
+      /// @returns The integration point the expression is evaluated at.
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -212,6 +226,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets the integration point the expression is evaluated at.
+      /// @param ip Integration point at which the expression is evaluated.
+      /// @returns Reference to this object after the operation.
       Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
       {
         // keep operand aligned
@@ -234,6 +250,8 @@ namespace Rodin::Variational
        * @brief Returns the Jacobian of the local basis function (always zero).
        *
        * ShapeFunction Jacobian basis is a matrix (vdim x d).
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
        */
       constexpr
       const SpatialMatrixType& getBasis(size_t local) const
@@ -244,6 +262,7 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {

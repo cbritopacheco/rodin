@@ -227,11 +227,14 @@ namespace Rodin::Variational
       using Parent = FunctionBase<Potential<LHSType, RHSType>>;
 
       /// @brief Constructs the potential of an operand against a kernel.
+      /// @param kernel Kernel of the nonlocal integral operator.
+      /// @param u Operand expression.
       Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel), m_u(u.copy())
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Potential(const Potential& other)
         : Parent(other),
           m_kernel(other.m_kernel),
@@ -239,6 +242,7 @@ namespace Rodin::Variational
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Potential(Potential&& other)
         : Parent(std::move(other)),
           m_kernel(std::move(other.m_kernel)),
@@ -246,12 +250,14 @@ namespace Rodin::Variational
       {}
 
       /// @brief Gets the kernel of the potential.
+      /// @returns The kernel of the potential.
       const auto& getKernel() const
       {
         return m_kernel.get();
       }
 
       /// @brief Gets the operand function.
+      /// @returns The operand function.
       const auto& getOperand() const
       {
         assert(m_u);
@@ -259,6 +265,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Evaluates the expression at a geometric point.
+      /// @param p Point at which the operation is evaluated.
+      /// @returns Value of the expression at the supplied evaluation point.
       auto getValue(const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();
@@ -335,6 +343,7 @@ namespace Rodin::Variational
       // }
 
       /// @brief Gets the quadrature formula of the potential.
+      /// @returns The quadrature formula of the potential.
       const auto& getQuadratureFormula() const
       {
         return m_qf;
@@ -410,35 +419,42 @@ namespace Rodin::Variational
       using LHSRangeType = typename FormLanguage::Traits<Potential>::LHSRangeType;
 
       /// @brief Constructs the potential of an operand against a kernel.
+      /// @param kernel Kernel of the nonlocal integral operator.
+      /// @param u Operand expression.
       Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel), m_u(u)
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Potential(const Potential& other)
         : Parent(other),
           m_kernel(other.m_kernel), m_u(other.m_u)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Potential(Potential&& other)
         : Parent(std::move(other)),
           m_kernel(std::move(other.m_kernel)), m_u(std::move(other.m_u))
       {}
 
       /// @brief Gets the kernel of the potential.
+      /// @returns The kernel of the potential.
       const KernelType& getKernel() const
       {
         return m_kernel;
       }
 
       /// @brief Gets the operand function.
+      /// @returns The operand function.
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
       /// @brief Returns the integration region.
+      /// @returns The integration region.
       Geometry::Region getRegion() const
       {
         return Geometry::Region::Cells;
@@ -499,32 +515,39 @@ namespace Rodin::Variational
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
       /// @brief Constructs the expression from its left and right operands.
+      /// @param lhs Left operand.
+      /// @param rhs Right operand.
       Integral(const LHSType& lhs, const RHSType& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
       /// @brief Constructs the integrator for the given integrand.
+      /// @param integrand Expression to integrate.
       Integral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
       /// @brief Copy constructor.
+      /// @param other Object to copy from.
       Integral(const Integral& other)
         : Parent(other)
       {}
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
 
       /// @brief Returns the region the test function is integrated over.
+      /// @returns The region the test function is integrated over.
       Geometry::Region getTestRegion() const override
       {
         return Geometry::Region::Cells;
       }
 
       /// @brief Creates a polymorphic copy.
+      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
       Integral* copy() const noexcept override
       {
         return new Integral(*this);

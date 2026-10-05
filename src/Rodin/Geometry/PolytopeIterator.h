@@ -81,6 +81,8 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
        */
       PolytopeIteratorBase& operator=(PolytopeIteratorBase&& other)
       {
@@ -271,11 +273,14 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       PolytopeIterator(PolytopeIterator&& other) = default;
 
       /**
        * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
        */
       PolytopeIterator& operator=(PolytopeIterator&& other)
       {
@@ -286,18 +291,21 @@ namespace Rodin::Geometry
       /**
        * @brief Assigns from a CellIterator.
        * @param[in] it Cell iterator to convert from
+       * @returns Reference to this object after the operation.
        */
       PolytopeIterator& operator=(CellIterator it);
 
       /**
        * @brief Assigns from a FaceIterator.
        * @param[in] it Face iterator to convert from
+       * @returns Reference to this object after the operation.
        */
       PolytopeIterator& operator=(FaceIterator it);
 
       /**
        * @brief Assigns from a VertexIterator.
        * @param[in] it Vertex iterator to convert from
+       * @returns Reference to this object after the operation.
        */
       PolytopeIterator& operator=(VertexIterator it);
 
@@ -363,13 +371,16 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       CellIterator(CellIterator&& other) = default;
 
       /**
        * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      CellIterator& operator=(CellIterator&&) = default;
+      CellIterator& operator=(CellIterator&& other) = default;
 
       /**
        * @brief Constructs the cell at the current iterator position.
@@ -439,6 +450,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
        */
       FaceIterator& operator=(FaceIterator&&) = default;
 
@@ -510,6 +522,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
        */
       VertexIterator& operator=(VertexIterator&&) = default;
 

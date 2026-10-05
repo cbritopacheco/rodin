@@ -51,6 +51,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       IdentityTransformation(const IdentityTransformation& other)
         : Parent(other)
@@ -58,6 +59,7 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       IdentityTransformation(IdentityTransformation&& other)
         : Parent(std::move(other))

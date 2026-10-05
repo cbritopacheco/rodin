@@ -45,18 +45,22 @@ namespace Rodin::Variational
       static constexpr size_t Count = K + 1;
 
       /// Number of GLL nodes (K + 1).
+      /// @returns The count.
       static constexpr size_t getCount()
       {
         return Count;
       }
 
       /// i-th GLL node in [-1, 1], 0 <= i <= K.
+      /// @param i Index of the requested entry.
+      /// @returns The node.
       static constexpr Real getNode(size_t i)
       {
         return s_nodes[i];
       }
 
       /// Full array of GLL nodes in ascending order.
+      /// @returns The nodes.
       static constexpr const std::array<Real, K + 1>& getNodes()
       {
         return s_nodes;
@@ -159,18 +163,22 @@ namespace Rodin::Variational
   {
     public:
       /// Number of GLL nodes (K + 1).
+      /// @returns The count.
       static constexpr size_t getCount()
       {
         return K + 1;
       }
 
       /// i-th mapped GLL node in [0, 1], 0 <= i <= K.
+      /// @param i Index of the requested entry.
+      /// @returns The node.
       static constexpr Real getNode(size_t i)
       {
         return s_nodes[i];
       }
 
       /// Full array of mapped GLL nodes in ascending order.
+      /// @returns The nodes.
       static constexpr const std::array<Real, K + 1>& getNodes()
       {
         return s_nodes;

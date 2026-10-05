@@ -95,8 +95,10 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      PolytopeTransformation& operator=(PolytopeTransformation&&) = default;
+      PolytopeTransformation& operator=(PolytopeTransformation&& other) = default;
 
       /**
        * @brief Virtual destructor.
@@ -139,6 +141,7 @@ namespace Rodin::Geometry
        * factor degree. Isotropic tensor and collapsed-coordinate elements may
        * override this with their known factor degree. A total degree alone must
        * not be divided by the number of factors for an arbitrary transformation.
+       * @returns The factor order.
        */
       virtual size_t getFactorOrder() const
       {

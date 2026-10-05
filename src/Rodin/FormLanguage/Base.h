@@ -48,6 +48,7 @@ namespace Rodin::FormLanguage
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Base(const Base& other)
         : Copyable(other),
@@ -56,6 +57,7 @@ namespace Rodin::FormLanguage
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Base(Base&& other)
         : Copyable(std::move(other)),
@@ -69,8 +71,9 @@ namespace Rodin::FormLanguage
 
       /**
        * @brief Copy assignment is not allowed.
+       * @param other Object to copy from.
        */
-      Base& operator=(const Base&) = delete;
+      Base& operator=(const Base& other) = delete;
 
       /**
        * @brief Move assignment is not allowed.

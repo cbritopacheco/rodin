@@ -119,6 +119,8 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
+      /// @param g Mesh entity used by this operation.
+      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
       Optional<size_t> getOrder(const Geometry::Polytope& g) const
       {
         const auto o = getOperand().getOrder(g);
@@ -150,6 +152,8 @@ namespace Rodin::Variational
 
   /**
    * @brief Helper function to construct objects of type Cos.
+   * @param f Function operand.
+   * @returns Pointwise cosine expression.
    */
   template <class NestedDerived>
   auto cos(const FunctionBase<NestedDerived>& f)

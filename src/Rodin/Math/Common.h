@@ -889,6 +889,9 @@ namespace Rodin::Math
     return min(max(x, lo), hi);
   }
   /// @brief Frobenius contraction of spatial tensors, conjugating the RHS.
+  /// @returns Scalar Frobenius contraction of the operands.
+  /// @param lhs Left operand.
+  /// @param rhs Right operand.
   template <class LHSScalar, class RHSScalar, size_t Rank>
   auto dot(
     const SpatialTensor<LHSScalar, Rank>& lhs, const SpatialTensor<RHSScalar, Rank>& rhs)
@@ -897,6 +900,8 @@ namespace Rodin::Math
   }
 
   /// @brief Entrywise tensor conjugation.
+  /// @param value Value to store or assign.
+  /// @returns Entrywise conjugate of the tensor.
   template <class Scalar, size_t Rank>
   auto conj(const SpatialTensor<Scalar, Rank>& value)
   {

@@ -96,12 +96,15 @@ namespace Rodin::Heart::CCMLC2014::Solver
           }
 
           /// @brief Problem bodies are not assigned into this specialized problem.
-          Parent& operator=(const ProblemBodyType&) override
+          /// @returns Reference to this object after the operation.
+          /// @param other Object to copy from.
+          Parent& operator=(const ProblemBodyType& other) override
           {
             return *this;
           }
 
           /// @brief Assembles the dense linear system for one step.
+          /// @returns Reference to this object after the operation.
           Problem& assemble() override
           {
             assert(m_xCurrent);
@@ -132,13 +135,16 @@ namespace Rodin::Heart::CCMLC2014::Solver
           }
 
           /// @brief Gets the mutable linear system.
+          /// @returns The mutable linear system.
           DenseLinearSystem& getLinearSystem() override { return m_system; }
           /// @brief Gets the linear system.
+          /// @returns The linear system.
           const DenseLinearSystem& getLinearSystem() const override
           {
             return m_system;
           }
           /// @brief Polymorphically copies this stepper problem.
+          /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
           Problem* copy() const noexcept override { return new Problem(*this); }
 
           /**
@@ -328,12 +334,16 @@ namespace Rodin::Heart::CCMLC2014::Solver
       }
 
       /// @brief Returns the current state.
+      /// @returns The current state.
       const State& getState() const noexcept { return m_state; }
       /// @brief Returns the stored time history.
+      /// @returns The stored time history.
       const History& getHistory() const noexcept { return m_history; }
       /// @brief Returns the most recent nonlinear solve report.
+      /// @returns The most recent nonlinear solve report.
       const Report& getReport() const noexcept { return m_report; }
       /// @brief Returns the packed unknown vector.
+      /// @returns The packed unknown vector.
       const DenseVector& getUnknowns() const noexcept { return m_x; }
 
       /**

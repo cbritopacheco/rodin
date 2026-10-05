@@ -102,6 +102,7 @@ namespace Rodin::Solver
 
       /**
        * @brief Returns the associated problem.
+       * @returns The associated problem.
        */
       ProblemBaseType& getProblem() noexcept
       {
@@ -110,6 +111,7 @@ namespace Rodin::Solver
 
       /**
        * @brief Returns the associated problem (const).
+       * @returns The associated problem (const).
        */
       const ProblemBaseType& getProblem() const noexcept
       {

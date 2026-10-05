@@ -124,9 +124,11 @@ namespace Rodin::Solver
                          PetscInt  maxIt) noexcept;
 
       /// @brief Returns the iteration count from the most recent solve.
+      /// @returns The iteration count from the most recent solve.
       std::size_t getIterationNumber() const;
 
       /// @brief Returns the residual norm from the most recent solve.
+      /// @returns The residual norm from the most recent solve.
       Real getError() const;
 
       /**

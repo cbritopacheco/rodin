@@ -120,12 +120,14 @@ namespace Rodin::Math
           {}
 
           /// @brief Copy constructor (deep-copies PETSc index sets).
+          /// @param other Object to copy from.
           FieldSplits(const FieldSplits& other)
           {
             copyFrom(other);
           }
 
           /// @brief Move constructor.
+          /// @param other Object to move from.
           FieldSplits(FieldSplits&& other) noexcept
             : m_splits(std::move(other.m_splits))
           {}
@@ -167,12 +169,14 @@ namespace Rodin::Math
           }
 
           /// @brief Returns a mutable reference to the splits vector.
+          /// @returns A mutable reference to the splits vector.
           std::vector<Split>& getSplits() noexcept
           {
             return m_splits;
           }
 
           /// @brief Returns a read-only reference to the splits vector.
+          /// @returns A read-only reference to the splits vector.
           const std::vector<Split>& getSplits() const noexcept
           {
             return m_splits;
@@ -248,12 +252,14 @@ namespace Rodin::Math
           }
 
           /// @brief Returns the number of splits.
+          /// @returns The number of splits.
           size_t size() const noexcept
           {
             return m_splits.size();
           }
 
           /// @brief Returns true if there are no splits.
+          /// @returns True if there are no splits.
           bool empty() const noexcept
           {
             return m_splits.empty();
@@ -270,18 +276,24 @@ namespace Rodin::Math
       LinearSystem(MPI_Comm comm);
 
       /// @brief Copy constructor (increments PETSc handle reference counts).
+      /// @param other Object to copy from.
       LinearSystem(const LinearSystem& other);
 
       /// @brief Move constructor.
+      /// @param other Object to move from.
       LinearSystem(LinearSystem&& other) noexcept;
 
       /// @brief Destructor; destroys owned PETSc matrix and vector handles.
       virtual ~LinearSystem();
 
       /// @brief Copy-assignment operator.
+      /// @param other Object to copy from.
+      /// @returns Reference to this object after the operation.
       LinearSystem& operator=(const LinearSystem& other);
 
       /// @brief Move-assignment operator.
+      /// @param other Object to move from.
+      /// @returns Reference to this object after the operation.
       LinearSystem& operator=(LinearSystem&& other) noexcept;
 
       /**
@@ -357,6 +369,9 @@ namespace Rodin::Math
       /**
        * @brief Merges periodic DOF constraints into the linear system.
        * @note Currently unimplemented — throws at runtime.
+       * @param offset Offset in the indexed data.
+       * @returns Reference to this object after the operation.
+       * @param dofs DOF-to-functional map to merge.
        */
       template <class DOFScalar>
       LinearSystemBase& merge(
@@ -367,6 +382,7 @@ namespace Rodin::Math
       }
 
       /// @brief Returns the MPI communicator of this linear system.
+      /// @returns The MPI communicator of this linear system.
       constexpr
       MPI_Comm getCommunicator() const noexcept
       {
@@ -374,6 +390,7 @@ namespace Rodin::Math
       }
 
       /// @brief Returns a mutable reference to the system matrix @f$ A @f$.
+      /// @returns A mutable reference to the system matrix @f$ A @f$.
       constexpr
       MatrixType& getOperator()
       {
@@ -381,6 +398,7 @@ namespace Rodin::Math
       }
 
       /// @brief Returns a read-only reference to the system matrix @f$ A @f$.
+      /// @returns A read-only reference to the system matrix @f$ A @f$.
       constexpr
       const MatrixType& getOperator() const
       {
@@ -388,6 +406,7 @@ namespace Rodin::Math
       }
 
       /// @brief Returns a mutable reference to the right-hand side vector @f$ b @f$.
+      /// @returns A mutable reference to the right-hand side vector @f$ b @f$.
       constexpr
       VectorType& getVector()
       {
@@ -395,6 +414,7 @@ namespace Rodin::Math
       }
 
       /// @brief Returns a read-only reference to the right-hand side vector @f$ b @f$.
+      /// @returns A read-only reference to the right-hand side vector @f$ b @f$.
       constexpr
       const VectorType& getVector() const
       {
@@ -402,6 +422,7 @@ namespace Rodin::Math
       }
 
       /// @brief Returns a mutable reference to the solution vector @f$ x @f$.
+      /// @returns A mutable reference to the solution vector @f$ x @f$.
       constexpr
       VectorType& getSolution()
       {
@@ -409,6 +430,7 @@ namespace Rodin::Math
       }
 
       /// @brief Returns a read-only reference to the solution vector @f$ x @f$.
+      /// @returns A read-only reference to the solution vector @f$ x @f$.
       constexpr
       const VectorType& getSolution() const
       {
@@ -427,6 +449,7 @@ namespace Rodin::Math
       }
 
       /// @brief Returns the current field-split configuration.
+      /// @returns The current field-split configuration.
       const FieldSplits& getFieldSplits() const noexcept
       {
         return m_fieldSplits;

@@ -194,23 +194,30 @@ namespace Rodin::Variational
       }
 
       /// @brief Gets the integrator type.
+      /// @returns The integrator type.
       Integrator::Type getType() const final override
       {
         return Integrator::Type::Linear;
       }
 
       /// @brief Returns the polytope the expression is bound to.
+      /// @returns The polytope the expression is bound to.
       virtual const Geometry::Polytope& getPolytope() const = 0;
 
       /// @brief Binds the expression to a polytope.
+      /// @param polytope Mesh entity used by this operation.
+      /// @returns Reference to this object after the operation.
       virtual LinearFormIntegratorBase& setPolytope(const Geometry::Polytope& polytope) = 0;
 
       /// @brief Returns an entry of the element vector.
+      /// @param local Index in the local numbering.
+      /// @returns Integral computed by the quadrature rule.
       virtual ScalarType integrate(size_t local) = 0;
 
       virtual LinearFormIntegratorBase* copy() const noexcept override = 0;
 
       /// @brief Returns the integration region.
+      /// @returns The integration region.
       virtual Geometry::Region getRegion() const = 0;
 
     private:
