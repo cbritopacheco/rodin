@@ -227,10 +227,28 @@ sewn output, vectors are rotated and averaged at coincident vertices.
 paired-point surrogate differential, before the volume null-space
 projection. It is written on the design and interface grids for inspecting
 the thickness contribution separately from `Theta`.
+The normal projection and curvature are optional diagnostics enabled with
+`--thickness-diagnostics` (default: disabled). They do not enter the geometric
+rays or the paired load. Without this flag, the corresponding CSV diagnostics
+are unavailable (`nan`), and the diagnostic normal/curvature fields are zero.
+Geometric normals, ray directions, and the thickness descent remain available.
+Guarded and nominal penalties share one first-hit traversal.
+
+The thickness, objective, and volume differentials are identified with the same
+Hilbert operator within each design. Rodin's RHS-only assembly changes the load;
+the MUMPS factorization is retained for these three identifications and released
+before output, transport, and reconstruction. Its finite element space is
+destroyed before the reconstructed mesh replaces the current mesh.
+
+Mapped trace matrices are composed as preassembled Rodin bilinear forms, so
+`Problem` performs essential-boundary elimination together with the volume
+forms. The AABB traversal and matched-point omission policy are unchanged.
+
 Thickness is evaluated at three quadrature points per interface triangle.
 Each iterate reports the penalty, number of rays exiting before $d_{\min}$,
 minimum exit distance, maximum deficit, and minimum exit transversality,
-diagnostic normal alignment, and the range of smoothed curvature. The minimum exit
+and, when enabled, diagnostic normal alignment and the range of smoothed curvature.
+The minimum exit
 distance is clipped at $d_{\min}$ when no ray exits early.
 The maximum rotated jumps of `Geometric_Normal`, `Smoothed_Normal`, and
 `Ray_Direction` are
@@ -358,8 +376,8 @@ projected into $W_h$ with the penalty
 j_h(r, s) = \gamma_\phi\, h_\Sigma \int_{\Sigma_{\mathrm{s}}} [r]_G\,[s]_G\,dS ,
 ```
 
-with $\gamma_\phi$ = `--level-set-penalty` (default 1), so that the two sides of each cut carry the
-same distance before transport. The Eikonal distance is computed on the chamber
+with $\gamma_\phi$ = `--level-set-penalty` (default 1), to reduce the
+distance mismatch between the paired cuts before transport. The Eikonal distance is computed on the chamber
 alone and misses the interface in the neighbouring copies, so near the cuts the
 correction reaches a third of $h$. The distance is therefore held at zero on
 $\Gamma$ during the projection: the correction only reconciles the traces
@@ -372,9 +390,21 @@ and a large $\gamma_\phi$ asks two independent piecewise-linear traces to
 agree pointwise, which only traces that barely change can do: it froze the
 level set on the cuts, and the interface there moved by 31–67% of the
 prescribed motion at $\gamma_\phi = 320$ against 92–102% at
-$\gamma_\phi = 1$. The same penalty acts in the transport below. A characteristic that reaches a cut continues
-from its rotated partner, and the semi-Lagrangian update carries the same
-penalty on both sides, so a zero step leaves $\phi$ unchanged.
+$\gamma_\phi = 1$. A characteristic that reaches a cut continues
+from its rotated partner. The transported field $\phi^\star$ is projected by
+
+$$
+(\phi^{n+1},v)_D+j_h(\phi^{n+1},v)=(\phi^\star,v)_D.
+$$
+
+The volume integrals use the retained characteristic samples and the
+previous-distance fallback in cells with insufficient coverage. The periodic
+jump target is zero: no old-jump term is added to the load. Even at zero
+advection time, an existing trace mismatch is corrected; a constant periodic
+field is unchanged. This is a finite-penalty projection, not exact trace
+identification. It does not guarantee matching reconstructed zero contours.
+The preceding distance projection still pins the current design interface
+and therefore cannot repair an already incompatible rim without moving it.
 
 The transported distance is integrated with order 8 by default
 (`--advection-quadrature`); the composition with the characteristic flow is not

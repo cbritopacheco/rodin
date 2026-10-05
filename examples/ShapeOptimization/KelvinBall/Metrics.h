@@ -131,21 +131,24 @@ namespace KelvinBall
           if (missed != 0)
           {
             mesh.save("kelvin-cut-coverage-failure.mesh", IO::FileFormat::MEDIT);
-            Alert::Warning() <<
-              "The rotated chamber faces do not cover each other for slave attribute " +
-              std::to_string(pair.slave) + " and master attribute " +
-              std::to_string(pair.master) + ": " + std::to_string(found) +
-              " quadrature points located and " + std::to_string(missed) + " missed. " +
-              "First rotated miss: (" + std::to_string(firstMiss(0)) + ", " +
-              std::to_string(firstMiss(1)) + ", " + std::to_string(firstMiss(2)) +
-              "). Saved kelvin-cut-coverage-failure.mesh."
-              << Alert::NewLine << "      Policy: Drop unmatched quadrature points."
-              << Alert::NewLine << "      Missed cut area: "
-              << Alert::Notation::Number(missedArea)
-              << Alert::NewLine << "      Missed cut area fraction: "
-              << Alert::Notation::Number(totalArea > 0 ? missedArea / totalArea : 0)
-              << Alert::NewLine << "      The chamber coupling is approximate."
-              << Alert::Raise;
+            Alert::Warning() << "The rotated chamber faces do not cover each other for "
+                                "slave attribute " +
+                std::to_string(pair.slave) + " and master attribute " +
+                std::to_string(pair.master) + ": " + std::to_string(found) +
+                " quadrature points located and " + std::to_string(missed) + " missed. " +
+                "First rotated miss: (" + std::to_string(firstMiss(0)) + ", " +
+                std::to_string(firstMiss(1)) + ", " + std::to_string(firstMiss(2)) +
+                "). Saved kelvin-cut-coverage-failure.mesh."
+                             << Alert::NewLine
+                             << "      Policy: Drop unmatched quadrature points."
+                             << Alert::NewLine << "      Missed cut area: "
+                             << Alert::Notation::Number(missedArea) << Alert::NewLine
+                             << "      Missed cut area fraction: "
+                             << Alert::Notation::Number(
+                                  totalArea > 0 ? missedArea / totalArea : 0)
+                             << Alert::NewLine
+                             << "      The chamber coupling is approximate."
+                             << Alert::Raise;
           }
         }
       }
@@ -187,21 +190,25 @@ namespace KelvinBall
         const auto tau = m_parameters.cellStabilization();
 
         Problem stokes(u0, p0, u1, p1, u2, p2, v0, q0, v1, q1, v2, q2);
-        stokes = Integral(Real(2) * Mu * Du0, Dv0) - Integral(p0, Div(v0)) -
-          Integral(Div(u0), q0) - Integral(tau * Grad(p0), Grad(q0)) +
-          Integral(Real(2) * Mu * Du1, Dv1) - Integral(p1, Div(v1)) -
-          Integral(Div(u1), q1) - Integral(tau * Grad(p1), Grad(q1)) +
-          Integral(Real(2) * Mu * Du2, Dv2) - Integral(p2, Div(v2)) -
-          Integral(Div(u2), q2) - Integral(tau * Grad(p2), Grad(q2)) +
-          DirichletBC(u0, rigid0).on(Gamma) + DirichletBC(u1, rigid1).on(Gamma) +
-          DirichletBC(u2, rigid2).on(Gamma) +
+        const auto trace =
+          coupling.stokesTrace(Tuple(std::cref(u0), std::cref(p0), std::cref(u1),
+                                 std::cref(p1), std::cref(u2), std::cref(p2)),
+            Tuple(std::cref(v0), std::cref(q0), std::cref(v1), std::cref(q1),
+              std::cref(v2), std::cref(q2)),
+            Mu, m_parameters.nitschePenalty, -stabilization);
+        stokes = Integral(Real(2) * Mu * Du0, Dv0) + trace.getBFs() -
+          Integral(p0, Div(v0)) - Integral(Div(u0), q0) -
+          Integral(tau * Grad(p0), Grad(q0)) + Integral(Real(2) * Mu * Du1, Dv1) -
+          Integral(p1, Div(v1)) - Integral(Div(u1), q1) -
+          Integral(tau * Grad(p1), Grad(q1)) + Integral(Real(2) * Mu * Du2, Dv2) -
+          Integral(p2, Div(v2)) - Integral(Div(u2), q2) -
+          Integral(tau * Grad(p2), Grad(q2)) + DirichletBC(u0, rigid0).on(Gamma) +
+          DirichletBC(u1, rigid1).on(Gamma) + DirichletBC(u2, rigid2).on(Gamma) +
           DirichletBC(u0, VectorFunction{0, 0, 0}).on(Outer) +
           DirichletBC(u1, VectorFunction{0, 0, 0}).on(Outer) +
           DirichletBC(u2, VectorFunction{0, 0, 0}).on(Outer);
         stokes.assemble();
         auto& system = stokes.getLinearSystem();
-        coupling.assembleStokes<1>(Vh, Qh, stokes.getTrialOffsets(), system, Mu,
-          m_parameters.nitschePenalty, -stabilization, FlatSet<Attribute>{Gamma, Outer});
         solveDirect(stokes);
         const Real residual =
           (system.getOperator() * system.getSolution() - system.getVector()).norm() /

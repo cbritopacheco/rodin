@@ -14,10 +14,11 @@ gtest_discover_tests(RodinMMGTest
 add_executable(KelvinBallCutCoverageTest
   KelvinBallCutCoverageTest.cpp
   ${PROJECT_SOURCE_DIR}/examples/ShapeOptimization/KelvinBall/Common.cpp
-  ${PROJECT_SOURCE_DIR}/examples/ShapeOptimization/KelvinBall/RotatedNitscheIntegrator.cpp)
+  ${PROJECT_SOURCE_DIR}/examples/ShapeOptimization/KelvinBall/RotatedNitscheIntegrator.cpp
+  ${PROJECT_SOURCE_DIR}/examples/ShapeOptimization/KelvinBall/SewedOutput.cpp)
 target_include_directories(KelvinBallCutCoverageTest PRIVATE ${PROJECT_SOURCE_DIR})
 target_link_libraries(KelvinBallCutCoverageTest PRIVATE
-  GTest::gtest_main Rodin::Rodin Rodin::MMG)
+  GTest::gtest_main Rodin::Rodin Rodin::MMG Rodin::Solver)
 gtest_discover_tests(KelvinBallCutCoverageTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit)
 

@@ -44,6 +44,7 @@ namespace KelvinBall
       struct Result
       {
           Real penalty = 0;
+          Real nominalPenalty = 0;
           Real minimumExit = std::numeric_limits<Real>::infinity();
           Real maximumDeficit = 0;
           Real minimumTransversality = Real(1);
@@ -163,10 +164,15 @@ namespace KelvinBall
        * uses the bounded separation rate @f$ V_n(x)+a V_n(y) @f$, weighted
        * by @f$ a^2 @f$. Source-area variation is omitted.
        */
-      template <class ChamberMesh, class Space, class Normal, class Load>
-      Result evaluate(const ChamberMesh& mesh, const Space& space,
-        const Normal& projectedNormal, Load& load) const
+      template <class ChamberMesh, class Space, class Load>
+      Result evaluate(const ChamberMesh& mesh, const Space& space, Load& load,
+        Real nominalMinimum = 0,
+        const GridFunction<Space, Math::Vector<Real>>* projectedNormal = nullptr) const
       {
+        if (!std::isfinite(nominalMinimum) || nominalMinimum < 0 ||
+          nominalMinimum > m_minimum)
+          throw std::runtime_error(
+            "The nominal thickness must lie between zero and the guard distance.");
         static constexpr std::array<std::array<Real, 3>, 3> quadrature{
           {{Real(2) / 3, Real(1) / 6, Real(1) / 6},
             {Real(1) / 6, Real(2) / 3, Real(1) / 6},
@@ -212,75 +218,83 @@ namespace KelvinBall
             throw std::runtime_error(
               "The thickness interface contains a degenerate face.");
           const Real area = doubledArea / 2;
-          const Math::SpatialVector<Real> orientation = orientedArea / doubledArea;
-          const std::array<Math::SpatialVector<Real>, 3> edgeOpposite{
-            b - c, c - a, a - b};
           Math::SpatialMatrix<Real> gradientNormal(3, 3);
           gradientNormal.setZero();
-          Math::SpatialMatrix<Real> gradientPosition(3, 3);
-          gradientPosition.setZero();
-          for (size_t k = 0; k < 3; ++k)
+          if (projectedNormal)
           {
-            const auto dofs = space.getDOFs(0, vertices[k]);
-            Math::SpatialVector<Real> value(3);
-            for (size_t component = 0; component < 3; ++component)
-              value(component) = projectedNormal.getData()(dofs(component));
-            const Math::SpatialVector<Real> gradientBasis =
-              cross(edgeOpposite[k], orientation) / doubledArea;
-            for (size_t i = 0; i < 3; ++i)
-              for (size_t j = 0; j < 3; ++j)
-              {
-                gradientNormal(i, j) += value(i) * gradientBasis(j);
-                gradientPosition(i, j) +=
-                  mesh.getVertexCoordinates(vertices[k])(i) * gradientBasis(j);
-              }
+            const Math::SpatialVector<Real> orientation = orientedArea / doubledArea;
+            const std::array<Math::SpatialVector<Real>, 3> edgeOpposite{
+              b - c, c - a, a - b};
+            Math::SpatialMatrix<Real> gradientPosition(3, 3);
+            gradientPosition.setZero();
+            for (size_t k = 0; k < 3; ++k)
+            {
+              const auto dofs = space.getDOFs(0, vertices[k]);
+              Math::SpatialVector<Real> value(3);
+              for (size_t component = 0; component < 3; ++component)
+                value(component) = projectedNormal->getData()(dofs(component));
+              const Math::SpatialVector<Real> gradientBasis =
+                cross(edgeOpposite[k], orientation) / doubledArea;
+              for (size_t i = 0; i < 3; ++i)
+                for (size_t j = 0; j < 3; ++j)
+                {
+                  gradientNormal(i, j) += value(i) * gradientBasis(j);
+                  gradientPosition(i, j) +=
+                    mesh.getVertexCoordinates(vertices[k])(i) * gradientBasis(j);
+                }
+            }
+            if (std::abs(gradientPosition.trace() - Real(2)) > Real(1e-8))
+              throw std::runtime_error(
+                "The surface barycentric gradient is inconsistent: " +
+                std::to_string(gradientPosition.trace()));
           }
-          if (std::abs(gradientPosition.trace() - Real(2)) > Real(1e-8))
-            throw std::runtime_error(
-              "The surface barycentric gradient is inconsistent: " +
-              std::to_string(gradientPosition.trace()));
           for (const auto& barycentric : quadrature)
           {
             const Math::SpatialVector<Real> s =
               barycentric[0] * a + barycentric[1] * b + barycentric[2] * c;
             const Geometry::Point surfacePoint(*face, s);
-            // Use the P1 face trace of the fixed nodal field.
-            Math::SpatialVector<Real> rawNormal = Math::SpatialVector<Real>::Zero(3);
-            for (size_t k = 0; k < 3; ++k)
-            {
-              const auto dofs = space.getDOFs(0, vertices[k]);
-              for (size_t component = 0; component < 3; ++component)
-                rawNormal(component) +=
-                  barycentric[k] * projectedNormal.getData()(dofs(component));
-            }
-            const Real magnitude = rawNormal.norm();
-            if (!(std::isfinite(magnitude) && magnitude > Real(1e-12)))
-              throw std::runtime_error("The smoothed thickness normal vanishes.");
-            result.minimumNormalMagnitude =
-              std::min(result.minimumNormalMagnitude, magnitude);
-            result.maximumNormalMagnitude =
-              std::max(result.maximumNormalMagnitude, magnitude);
-            const Math::SpatialVector<Real> smoothNormal = rawNormal / magnitude;
             const Math::SpatialVector<Real> geometricNormal =
               -fluidNormal.getValue(surfacePoint);
             for (size_t k = 0; k < 3; ++k)
               result.geometricNormal[vertices[k]] +=
                 area * barycentric[k] / 3 * geometricNormal;
-            const Real alignment = smoothNormal.dot(geometricNormal);
-            result.minimumNormalAlignment =
-              std::min(result.minimumNormalAlignment, alignment);
-            result.meanNormalAlignment += alignment;
             ++result.samples;
-            const Real curvature =
-              (gradientNormal.trace() - smoothNormal.dot(gradientNormal * smoothNormal)) /
-              magnitude;
-            result.minimumCurvature = std::min(result.minimumCurvature, curvature);
-            result.maximumCurvature = std::max(result.maximumCurvature, curvature);
-            for (size_t k = 0; k < 3; ++k)
+            if (projectedNormal)
             {
-              const Real mass = area * barycentric[k] / 3;
-              result.curvature[vertices[k]] += mass * curvature;
-              curvatureMass[vertices[k]] += mass;
+            // Use the P1 face trace of the fixed nodal field.
+              Math::SpatialVector<Real> rawNormal = Math::SpatialVector<Real>::Zero(3);
+              for (size_t k = 0; k < 3; ++k)
+              {
+                const auto dofs = space.getDOFs(0, vertices[k]);
+                for (size_t component = 0; component < 3; ++component)
+                  rawNormal(component) +=
+                    barycentric[k] * projectedNormal->getData()(dofs(component));
+              }
+              const Real magnitude = rawNormal.norm();
+              if (std::isfinite(magnitude) && magnitude > Real(1e-12))
+              {
+                result.minimumNormalMagnitude =
+                  std::min(result.minimumNormalMagnitude, magnitude);
+                result.maximumNormalMagnitude =
+                  std::max(result.maximumNormalMagnitude, magnitude);
+                const Math::SpatialVector<Real> smoothNormal = rawNormal / magnitude;
+                const Real alignment = smoothNormal.dot(geometricNormal);
+                result.minimumNormalAlignment =
+                  std::min(result.minimumNormalAlignment, alignment);
+                result.meanNormalAlignment += alignment;
+                const Real curvature =
+                  (gradientNormal.trace() -
+                    smoothNormal.dot(gradientNormal * smoothNormal)) /
+                  magnitude;
+                result.minimumCurvature = std::min(result.minimumCurvature, curvature);
+                result.maximumCurvature = std::max(result.maximumCurvature, curvature);
+                for (size_t k = 0; k < 3; ++k)
+                {
+                  const Real mass = area * barycentric[k] / 3;
+                  result.curvature[vertices[k]] += mass * curvature;
+                  curvatureMass[vertices[k]] += mass;
+                }
+              }
             }
             const Math::SpatialVector<Real> direction = -geometricNormal;
             for (size_t k = 0; k < 3; ++k)
@@ -302,6 +316,8 @@ namespace KelvinBall
             const Triangle& target = m_triangles[exit.triangle];
             const Real a = exit.transversality;
             result.penalty += measure * deficit * deficit;
+            const Real nominalDeficit = std::max(nominalMinimum - exit.distance, Real(0));
+            result.nominalPenalty += measure * nominalDeficit * nominalDeficit;
             const Real taper = a * a;
             const Math::SpatialVector<Real> targetNormal =
               rotations[exit.rotation] * target.normal;

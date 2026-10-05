@@ -45,6 +45,7 @@
 #include "RotatedNitscheIntegrator.h"
 #include "SewedOutput.h"
 #include "Thickness.h"
+#include "HilbertIdentification.h"
 #include "Sphere.h"
 #include "../../WNGIRExampleParameters.h"
 
@@ -65,20 +66,124 @@ namespace KelvinBall
       int run();
 
     private:
-      static constexpr Attribute Obstacle = KelvinBall::Obstacle;
-      static constexpr Attribute Fluid = KelvinBall::Fluid;
-      static constexpr Attribute Outer = KelvinBall::Outer;
-      static constexpr Attribute Gamma = KelvinBall::Gamma;
-      static constexpr Attribute SigmaPlus = KelvinBall::SigmaPlus;
-      static constexpr Attribute SigmaMinus = KelvinBall::SigmaMinus;
-      static constexpr Attribute SigmaXYPlus = KelvinBall::SigmaXYPlus;
-      static constexpr Attribute SigmaXYMinus = KelvinBall::SigmaXYMinus;
+      struct Options
+      {
+          Options()
+            : motionForce(3)
+          {
+            motionForce.setZero();
+            motionForce(0) = 1;
+          }
+
+          Configuration configuration;
+          size_t maxIterations = 1;
+          bool saveMeshDiagnostic = false;
+          bool geometryOnly = false;
+          bool stateOnly = false;
+          bool thicknessDiagnostics = false;
+          Real regularizationFactor = 4;
+          Real normalRegularizationFactor = 1;
+          Real stepFactor = 0.1;
+          Real levelSetPenalty = 1;
+          Real minimumThickness = 0;
+          Math::SpatialVector<Real> motionForce;
+          size_t advectionQuadratureOrder = 8;
+          std::string reconstructionMethod = "mmg";
+
+          bool parse(int argc, char** argv)
+          {
+            for (int argument = 1; argument < argc; ++argument)
+            {
+              const std::string_view mode(argv[argument]);
+              if (configuration.parse(mode))
+                continue;
+              if (mode.rfind("--iterations=", 0) == 0)
+                maxIterations = std::stoul(std::string(mode.substr(13)));
+              else if (mode.rfind("--regularization=", 0) == 0)
+                regularizationFactor = std::stod(std::string(mode.substr(17)));
+              else if (mode.rfind("--normal-regularization=", 0) == 0)
+                normalRegularizationFactor = std::stod(std::string(mode.substr(24)));
+              else if (mode.rfind("--step=", 0) == 0)
+                stepFactor = std::stod(std::string(mode.substr(7)));
+              else if (mode.rfind("--level-set-penalty=", 0) == 0)
+                levelSetPenalty = std::stod(std::string(mode.substr(20)));
+              else if (mode.rfind("--thickness-min=", 0) == 0)
+                minimumThickness = std::stod(std::string(mode.substr(16)));
+              else if (mode.rfind("--motion-force=", 0) == 0)
+              {
+                std::istringstream components{std::string(mode.substr(15))};
+                std::string component;
+                for (Eigen::Index i = 0; i < 3; ++i)
+                {
+                  if (!std::getline(components, component, ','))
+                    throw std::runtime_error(
+                      "--motion-force needs three components fx,fy,fz.");
+                  motionForce(i) = std::stod(component);
+                }
+              }
+              else if (mode.rfind("--advection-quadrature=", 0) == 0)
+                advectionQuadratureOrder = std::stoul(std::string(mode.substr(23)));
+              else if (mode.rfind("--reconstruction=", 0) == 0)
+                reconstructionMethod = std::string(mode.substr(17));
+              else if (mode.rfind("--wngir-", 0) == 0 ||
+                mode.rfind("--quad-order=", 0) == 0 || mode == "--trace" ||
+                mode.rfind("--trace=", 0) == 0 || mode.rfind("--j-safe=", 0) == 0 ||
+                mode.rfind("--j-ls=", 0) == 0 || mode.rfind("--j-min=", 0) == 0)
+                continue;
+              else if (mode == "--save-mesh")
+                saveMeshDiagnostic = true;
+              else if (mode == "--geometry-only")
+                geometryOnly = true;
+              else if (mode == "--thickness-diagnostics")
+                thicknessDiagnostics = true;
+              else if (mode == "--state-only")
+                stateOnly = true;
+              else if (mode == "--help")
+              {
+                printUsage(argv[0]);
+                return false;
+              }
+              else
+                throw std::runtime_error(
+                  "Unknown KelvinBall option: " + std::string(mode));
+            }
+            configuration.finalize();
+            if (maxIterations == 0)
+              throw std::runtime_error("The iteration count must be positive.");
+            if (!(regularizationFactor > 0))
+              throw std::runtime_error("The regularization factor must be positive.");
+            if (!(normalRegularizationFactor > 0))
+              throw std::runtime_error(
+                "The normal regularization factor must be positive.");
+            if (!(stepFactor > 0))
+              throw std::runtime_error("The advection step factor must be positive.");
+            if (!(levelSetPenalty > 0))
+              throw std::runtime_error("The level-set trace penalty must be positive.");
+            if (!std::isfinite(minimumThickness) || minimumThickness < 0)
+              throw std::runtime_error("--thickness-min must be nonnegative.");
+            if (!std::isfinite(motionForce.norm()) || !(motionForce.norm() > 0))
+              throw std::runtime_error("The motion force must be finite and nonzero.");
+            if (advectionQuadratureOrder == 0)
+              throw std::runtime_error(
+                "The advection quadrature order must be positive.");
+            if (reconstructionMethod != "mmg" && reconstructionMethod != "wngir")
+              throw std::runtime_error("The reconstruction method must be mmg or wngir.");
+            if (configuration.mmgSnap > 0 && reconstructionMethod != "mmg")
+              throw std::runtime_error(
+                "--mmg-snap applies only to --reconstruction=mmg.");
+            if (geometryOnly && stateOnly)
+              throw std::runtime_error(
+                "Use either --geometry-only or --state-only, not both.");
+            return true;
+          }
+      };
+
+      Options m_options;
 
       static constexpr Real mu = KelvinBall::Mu;
       static constexpr Real remeshGradation = 2.0;
       static constexpr Real rotatedTracePhysicalTolerance = 0.01;
       static constexpr Real rotatedTraceReferenceTolerance = 0.25;
-      static constexpr Real linearResidualTolerance = KelvinBall::LinearResidualTolerance;
       static constexpr size_t chamberMultiplicity = KelvinBall::ChamberMultiplicity;
 #ifdef RODIN_USE_OPENMP
       static constexpr const char* assemblyBackend = "OpenMP";
@@ -120,10 +225,10 @@ namespace KelvinBall
       template <class Field>
       InterfaceComponents interfaceComponents(const Mesh& mesh, const Field& field) const
       {
-        static constexpr std::array<std::array<Real, 3>, 3> quadrature{{
-          {Real(2) / 3, Real(1) / 6, Real(1) / 6},
-          {Real(1) / 6, Real(2) / 3, Real(1) / 6},
-          {Real(1) / 6, Real(1) / 6, Real(2) / 3}}};
+        static constexpr std::array<std::array<Real, 3>, 3> quadrature{
+          {{Real(2) / 3, Real(1) / 6, Real(1) / 6},
+            {Real(1) / 6, Real(2) / 3, Real(1) / 6},
+            {Real(1) / 6, Real(1) / 6, Real(2) / 3}}};
         auto fluidNormal = FaceNormal(mesh);
         fluidNormal.traceOf(Fluid);
         Real areaTotal = 0, normalSquared = 0, tangentialSquared = 0;
@@ -139,8 +244,8 @@ namespace KelvinBall
           areaTotal += area;
           for (const auto& barycentric : quadrature)
           {
-            const Geometry::Point point(*face,
-              barycentric[0] * a + barycentric[1] * b + barycentric[2] * c);
+            const Geometry::Point point(
+              *face, barycentric[0] * a + barycentric[1] * b + barycentric[2] * c);
             const auto velocity = field.getValue(point);
             const auto normal = -fluidNormal.getValue(point);
             const Real component = velocity.dot(normal);
@@ -195,8 +300,8 @@ namespace KelvinBall
               Math::SpatialVector<Real> source(3);
               for (size_t component = 0; component < 3; ++component)
                 source(component) = field.getData()(dofs(component));
-              jump.maximum = std::max(jump.maximum,
-                (field.getValue(*mapped) - pair.rotation * source).norm());
+              jump.maximum = std::max(
+                jump.maximum, (field.getValue(*mapped) - pair.rotation * source).norm());
               ++jump.samples;
             }
           }
@@ -216,11 +321,7 @@ namespace KelvinBall
         return text + std::string(text.size() < width ? width - text.size() : 1, ' ');
       }
 
-      struct GradientDiagnostics
-      {
-          Real residual;
-          Real jump;
-      };
+      using GradientDiagnostics = HilbertIdentification::Diagnostics;
 
       struct MeshDiagnostics
       {
@@ -237,11 +338,7 @@ namespace KelvinBall
 
       using ReconstructionDiagnostics = KelvinBall::ReconstructionDiagnostics;
 
-      struct MMGReconstruction
-      {
-          MMG::Mesh mesh;
-          ReconstructionDiagnostics diagnostics;
-      };
+      using MMGReconstruction = SphereDiscretization;
 
       template <class Displacement>
       void moveMesh(KelvinBall::Mesh& moved, const KelvinBall::Mesh& mesh,
@@ -309,8 +406,8 @@ namespace KelvinBall
         // Cells whose vertices have one sign retain that phase exactly.
         const auto partition = MinSTCut().classify(volumes, moments, edges, options);
         for (Index cell = 0; cell < classified.getCellCount(); ++cell)
-          classified.setAttribute({3, cell},
-            partition.labels[cell] == MinSTCut::Inside ? Obstacle : Fluid);
+          classified.setAttribute(
+            {3, cell}, partition.labels[cell] == MinSTCut::Inside ? Obstacle : Fluid);
         for (const auto& edge : partition.cutEdges)
           classified.setAttribute({2, edge.index}, Gamma);
         return classified;
@@ -318,23 +415,23 @@ namespace KelvinBall
 
       template <class LevelSet>
       MMGReconstruction fitLevelSetWNGIR(const KelvinBall::Mesh& mesh,
-        const LevelSet& levelSet, Real backgroundH, Real referenceSpacing, Real outerRadius,
-        int argc, char** argv)
+        const LevelSet& levelSet, Real backgroundH, Real referenceSpacing,
+        Real outerRadius, int argc, char** argv)
       {
-        std::vector<Index> interface;
+        size_t interfaceCount = 0;
         Real interfaceSizeSum = 0;
         for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
         {
           if (face->getAttribute() == Attribute{Gamma})
           {
-            interface.push_back(face->getIndex());
+            ++interfaceCount;
             interfaceSizeSum +=
               std::sqrt(Real(4) * face->getMeasure() / std::sqrt(Real(3)));
           }
         }
-        const Real meanInterfaceSize = interface.empty()
+        const Real meanInterfaceSize = interfaceCount == 0
           ? backgroundH
-          : interfaceSizeSum / static_cast<Real>(interface.size());
+          : interfaceSizeSum / static_cast<Real>(interfaceCount);
 
         // Classification changes labels only. Copy the P1 coefficients onto
         // that mesh so the locator used by WNGIR resolves both the target and
@@ -350,9 +447,8 @@ namespace KelvinBall
         TestFunction displacementTest(displacementSpace);
         Rodin::Examples::WNGIRExampleDefaults defaults;
         defaults.maxIterations = 30;
-        auto parameters =
-          Rodin::Examples::makeWNGIRParameters(
-            argc, argv, referenceSpacing, Gamma, defaults);
+        auto parameters = Rodin::Examples::makeWNGIRParameters(
+          argc, argv, referenceSpacing, Gamma, defaults);
         if (!Rodin::Examples::findOption(
               argc, argv, "wngir-primal-barrier-iterations", nullptr))
           parameters.innerIterations = 15;
@@ -487,8 +583,7 @@ namespace KelvinBall
         checkMaterials(moved);
         const MeshDiagnostics diagnostics = getMeshDiagnostics(moved);
         return {MMG::Mesh(std::move(moved)),
-          {backgroundH, backgroundH, 0,
-            parameters.fixedBoundaryAttributes.size(),
+          {backgroundH, backgroundH, 0, parameters.fixedBoundaryAttributes.size(),
             diagnostics.cells, diagnostics.cells}};
       }
 
@@ -535,22 +630,192 @@ namespace KelvinBall
         Alert::Info() << substageHeading("MMG adaptation after WNGIR reconstruction")
                       << Alert::NewLine << diagnosticLabel("Cell count:")
                       << Alert::Notation::Number(before.cells) << " -> "
-                      << Alert::Notation::Number(after.cells)
-                      << Alert::NewLine << diagnosticLabel("Interface triangles:")
+                      << Alert::Notation::Number(after.cells) << Alert::NewLine
+                      << diagnosticLabel("Interface triangles:")
                       << Alert::Notation::Number(before.interfaceTriangles) << " -> "
                       << Alert::Notation::Number(after.interfaceTriangles)
                       << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
                       << Alert::Notation::Number(before.minimumQuality) << " -> "
-                      << Alert::Notation::Number(after.minimumQuality)
-                      << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
+                      << Alert::Notation::Number(after.minimumQuality) << Alert::NewLine
+                      << diagnosticLabel("Mean tetrahedron quality:")
                       << Alert::Notation::Number(before.meanQuality) << " -> "
-                      << Alert::Notation::Number(after.meanQuality)
-                      << Alert::NewLine << diagnosticLabel("Mean tetra edge length h:")
+                      << Alert::Notation::Number(after.meanQuality) << Alert::NewLine
+                      << diagnosticLabel("Mean tetra edge length h:")
                       << Alert::Notation::Number(before.meanElementSize) << " -> "
                       << Alert::Notation::Number(after.meanElementSize) << Alert::Raise;
       }
 
-      void printUsage(const char* executable)
+      void reportConfiguration(Real requestedWelschScale)
+      {
+        const size_t points = m_options.configuration.points;
+        const Real outerRadius = m_options.configuration.outerRadius;
+        const Real nitschePenalty = m_options.configuration.nitschePenalty;
+        const Real stabilizationFactor = m_options.configuration.stabilizationFactor;
+        const Real initialGridSpacing = m_options.configuration.getGridSpacing();
+        Alert::Info configurationInfo;
+        configurationInfo << substageHeading("Configuration") << Alert::NewLine
+                          << diagnosticLabel("Grid points:")
+                          << Alert::Notation::Number(points) << Alert::NewLine
+                          << diagnosticLabel("Outer radius:")
+                          << Alert::Notation::Number(outerRadius) << Alert::NewLine
+                          << diagnosticLabel("Reference spacing h0:")
+                          << Alert::Notation::Number(initialGridSpacing) << Alert::NewLine
+                          << diagnosticLabel("Requested minimum size:")
+                          << Alert::Notation::Number(m_options.configuration.hmin)
+                          << Alert::NewLine << diagnosticLabel("Requested maximum size:")
+                          << Alert::Notation::Number(m_options.configuration.hmax)
+                          << Alert::NewLine << diagnosticLabel("Evaluated designs:")
+                          << Alert::Notation::Number(m_options.maxIterations)
+                          << Alert::NewLine << diagnosticLabel("Nitsche penalty:")
+                          << Alert::Notation::Number(nitschePenalty) << Alert::NewLine
+                          << diagnosticLabel("Stabilization factor:")
+                          << Alert::Notation::Number(stabilizationFactor)
+                          << Alert::NewLine << diagnosticLabel("Assembly backend:")
+                          << assemblyBackend << Alert::NewLine
+                          << diagnosticLabel("Direct solver:")
+                          << KelvinBall::DirectSolverName << Alert::NewLine
+                          << diagnosticLabel("Regularization length:")
+                          << Alert::Notation::Number(m_options.regularizationFactor)
+                          << " h0" << Alert::NewLine
+                          << diagnosticLabel("Thickness model:")
+                          << "Paired first-exit surrogate with aggregate correction"
+                          << Alert::NewLine << diagnosticLabel("Normal smoothing length:")
+                          << Alert::Notation::Number(m_options.normalRegularizationFactor)
+                          << " h0" << Alert::NewLine << diagnosticLabel("Advection step:")
+                          << Alert::Notation::Number(m_options.stepFactor) << " h0"
+                          << Alert::NewLine << diagnosticLabel("Level-set trace penalty:")
+                          << Alert::Notation::Number(m_options.levelSetPenalty)
+                          << Alert::NewLine
+                          << diagnosticLabel("Advection quadrature order:")
+                          << Alert::Notation::Number(m_options.advectionQuadratureOrder)
+                          << Alert::NewLine << diagnosticLabel("Transport velocity:")
+                          << "Full shape direction" << Alert::NewLine
+                          << diagnosticLabel("Reconstruction method:")
+                          << m_options.reconstructionMethod;
+        if (m_options.reconstructionMethod == "wngir" && !m_options.configuration.adapt)
+        {
+          configurationInfo << Alert::NewLine << diagnosticLabel("Background Hausdorff:")
+                            << Alert::Notation::Number(
+                                 m_options.configuration.backgroundHausdorff)
+                            << " h0" << Alert::NewLine
+                            << diagnosticLabel("Background gradation:")
+                            << Alert::Notation::Number(
+                                 m_options.configuration.backgroundGradation);
+        }
+        if (m_options.configuration.adapt)
+        {
+          configurationInfo << Alert::NewLine
+                            << diagnosticLabel("Adaptation hmin (interface):")
+                            << Alert::Notation::Number(m_options.configuration.hmin)
+                            << Alert::NewLine
+                            << diagnosticLabel("Adaptation hmax (far field):")
+                            << Alert::Notation::Number(m_options.configuration.hmax);
+          if (m_options.reconstructionMethod == "wngir")
+            configurationInfo << Alert::NewLine
+                              << diagnosticLabel("Background Hausdorff:")
+                              << Alert::Notation::Number(
+                                   m_options.configuration.backgroundHausdorff)
+                              << " h0";
+          if (m_options.reconstructionMethod == "wngir")
+            configurationInfo << Alert::NewLine
+                              << diagnosticLabel("Welsch size-map scale:")
+                              << (requestedWelschScale > 0
+                                     ? "User-specified"
+                                     : "3 h0 (fixed reference spacing)");
+          configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation gradation:")
+                            << Alert::Notation::Number(
+                                 m_options.configuration.adaptGradation);
+        }
+        if (m_options.configuration.mmgSnap > 0)
+          configurationInfo << Alert::NewLine
+                            << diagnosticLabel("Level-set snapping fraction:")
+                            << Alert::Notation::Number(m_options.configuration.mmgSnap);
+        configurationInfo << Alert::Raise;
+      }
+
+      struct InitialDesign
+      {
+          MMG::Mesh mesh;
+          Optional<MMG::Mesh> background;
+          Real backgroundH;
+          ReconstructionDiagnostics diagnostics;
+      };
+
+      InitialDesign initialize(const Sphere& sphere, Real requestedWelschScale)
+      {
+        const Real initialGridSpacing = m_options.configuration.getGridSpacing();
+        const Real outerRadius = m_options.configuration.outerRadius;
+        const int argc = m_argc;
+        char** argv = m_argv;
+        SphereDiscretization initial = m_options.reconstructionMethod == "wngir"
+          ? sphere.prepareWNGIRBackground(requestedWelschScale)
+          : sphere.discretize(false, requestedWelschScale);
+        ReconstructionDiagnostics reconstruction = initial.diagnostics;
+        Optional<MMG::Mesh> wngirBackground;
+        Real backgroundH = std::numeric_limits<Real>::quiet_NaN();
+        MMG::Mesh mesh;
+        if (m_options.reconstructionMethod == "wngir")
+        {
+          wngirBackground.emplace(std::move(initial.mesh));
+          const MeshDiagnostics backgroundDiagnostics =
+            getMeshDiagnostics(*wngirBackground, false);
+          backgroundH = backgroundDiagnostics.meanElementSize;
+          Alert::Info backgroundInfo;
+          backgroundInfo
+            << substageHeading(m_options.configuration.adapt
+                   ? "MMG background adaptation"
+                   : "MMG background optimization")
+            << Alert::NewLine << diagnosticLabel("Cell count:")
+            << Alert::Notation::Number(reconstruction.cellsBefore) << " -> "
+            << Alert::Notation::Number(backgroundDiagnostics.cells) << Alert::NewLine
+            << diagnosticLabel("Required boundary triangles:")
+            << Alert::Notation::Number(reconstruction.requiredBoundaryTriangles)
+            << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
+            << Alert::Notation::Number(backgroundDiagnostics.minimumQuality)
+            << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
+            << Alert::Notation::Number(backgroundDiagnostics.meanQuality)
+            << Alert::NewLine << diagnosticLabel("Mean tetra edge length h:")
+            << Alert::Notation::Number(backgroundDiagnostics.meanElementSize);
+          if (m_options.configuration.adapt)
+            backgroundInfo << Alert::NewLine << diagnosticLabel("Input chamber h:")
+                           << Alert::Notation::Number(
+                                reconstruction.backgroundMeanElementSize)
+                           << Alert::NewLine << diagnosticLabel("Welsch size-map scale:")
+                           << Alert::Notation::Number(reconstruction.welschScale);
+          backgroundInfo << Alert::Raise;
+          P1 sphereSpace(*wngirBackground);
+          GridFunction sphereLevelSet(sphereSpace);
+          sphereLevelSet = RealFunction([](const Geometry::Point& point) {
+            return point.getPhysicalCoordinates().norm() - Real(1);
+          });
+          MMG::Mesh classified =
+            classifyLevelSetForWNGIR(*wngirBackground, sphereLevelSet);
+          P1 classifiedSphereSpace(classified);
+          GridFunction classifiedSphereLevelSet(classifiedSphereSpace);
+          classifiedSphereLevelSet.getData() = sphereLevelSet.getData();
+          MMGReconstruction fitted =
+            fitLevelSetWNGIR(classified, classifiedSphereLevelSet, backgroundH,
+              initialGridSpacing, outerRadius, argc, argv);
+          if (m_options.configuration.adapt)
+          {
+            adaptWNGIR(fitted, sphere, m_options.configuration, requestedWelschScale);
+            reconstruction = fitted.diagnostics;
+          }
+          mesh = std::move(fitted.mesh);
+        }
+        else
+        {
+          mesh = std::move(initial.mesh);
+        }
+        if (wngirBackground && m_options.configuration.adapt)
+        {
+          wngirBackground.emplace(mesh);
+          backgroundH = meanElementSize(*wngirBackground);
+        }
+        return {std::move(mesh), std::move(wngirBackground), backgroundH, reconstruction};
+      }
+
+      static void printUsage(const char* executable)
       {
         Alert::Info()
           << "Usage" << Alert::NewLine << "  " << executable << " [options]"
@@ -572,7 +837,9 @@ namespace KelvinBall
           << "    P1--P1 pressure-stabilization factor (default: 0.05)." << Alert::NewLine
           << Alert::Notation("--regularization=<value>")
           << "   H1 smoothing length in multiples of h0 (default: 4)." << Alert::NewLine
-          << Alert::Notation("--normal-regularization=<value>")
+          << Alert::Notation("--thickness-diagnostics")
+          << "       Export diagnostic smoothed normals and curvature (default: off)."
+          << Alert::NewLine << Alert::Notation("--normal-regularization=<value>")
           << " Thickness-normal smoothing length in h0 (default: 1)." << Alert::NewLine
           << Alert::Notation("--step=<value>")
           << "             Advection time step in multiples of h0 (default: 0.1)."
@@ -659,11 +926,6 @@ namespace KelvinBall
       using LocalMesh = Geometry::Mesh<Context::Local>;
       using VelocitySpace = P1<Math::SpatialVector<Real>, LocalMesh>;
       using PressureSpace = P1<Real, LocalMesh>;
-
-      VelocitySpace makeVelocitySpace(const LocalMesh& mesh)
-      {
-        return VelocitySpace(mesh, 3);
-      }
 
       Real planeResidual(
         Attribute attribute, const Math::SpatialPoint& x, Real outerRadius)
@@ -860,8 +1122,8 @@ namespace KelvinBall
 
       template <class LevelSet>
       MMGReconstruction discretizeLevelSetMMG(MMG::Mesh& mesh, const LevelSet& levelSet,
-        Real targetSize, Real hmin, Real hmax, const Sphere& sphere, bool adapt, Real snap,
-        Real requestedWelschScale)
+        Real targetSize, Real hmin, Real hmax, const Sphere& sphere, bool adapt,
+        Real snap, Real requestedWelschScale)
       {
         const size_t previousCells = mesh.getCellCount();
         const Real hausdorff = 0.1 * targetSize * targetSize;
@@ -884,8 +1146,7 @@ namespace KelvinBall
                       << Alert::Notation::Number(inputDiagnostics.minimumQuality)
                       << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
                       << Alert::Notation::Number(inputDiagnostics.meanQuality)
-                      << Alert::NewLine
-                      << diagnosticLabel("Mean tetra edge length h:")
+                      << Alert::NewLine << diagnosticLabel("Mean tetra edge length h:")
                       << Alert::Notation::Number(inputDiagnostics.meanElementSize)
                       << Alert::Raise;
 
@@ -915,8 +1176,8 @@ namespace KelvinBall
           .setHMax(hmax)
           .setHausdorff(hausdorff)
           .setGradation(remeshGradation)
-          .setBaseReferences(FlatSet<Attribute>{
-            SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus})
+          .setBaseReferences(
+            FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus})
           .setBoundaryReference(Gamma)
           .setRMC(1e-5)
           .setAngleDetection(false);
@@ -1030,8 +1291,7 @@ namespace KelvinBall
                        << diagnosticLabel("Maximum snapped level set:")
                        << Alert::Notation::Number(displacement) << " = "
                        << Alert::Notation::Number(displacement / targetSize)
-                       << " target sizes"
-                       << Alert::NewLine
+                       << " target sizes" << Alert::NewLine
                        << diagnosticLabel("Minimum crossing after snapping:")
                        << Alert::Notation::Number(snappedMinimum);
         }
@@ -1118,45 +1378,19 @@ namespace KelvinBall
         return {std::move(reconstructed), diagnostics};
       }
 
-      template <class Space, class Density, class Output>
-      GradientDiagnostics identifyGradient(const Space& shapeSpace,
-        const Density& density, const KelvinBall::RotatedNitscheIntegrator& coupling,
-        Output& gradient, Real regularizationLength, Real nitschePenalty,
-        const char* name, const Math::Vector<Real>* additionalLoad = nullptr)
+      template <class Density>
+      GradientDiagnostics identifyGradient(HilbertIdentification& identification,
+        const Density& density, HilbertIdentification::Field& gradient, const char* name,
+        const Math::Vector<Real>* additionalLoad = nullptr)
       {
-        TrialFunction gradientTrial(shapeSpace);
-        TestFunction testField(shapeSpace);
-        auto interfaceNormal = FaceNormal(shapeSpace.getMesh());
-        interfaceNormal.traceOf(Fluid);
-        Problem identification(gradientTrial, testField);
-        identification =
-          Integral(regularizationLength * regularizationLength * Jacobian(gradientTrial),
-            Jacobian(testField)) +
-          Integral(gradientTrial, testField) -
-          FaceIntegral(density, Dot(interfaceNormal, testField)).over(Gamma) +
-          DirichletBC(gradientTrial, VectorFunction{0, 0, 0}).on(Outer);
-        identification.assemble();
-        auto& system = identification.getLinearSystem();
-        coupling.assembleVector(shapeSpace, system,
-          regularizationLength * regularizationLength, nitschePenalty,
-          FlatSet<Attribute>{Outer});
-        if (additionalLoad)
-          system.getVector() += *additionalLoad;
-        KelvinBall::solveDirect(identification);
-        const Real linearResidual =
-          (system.getOperator() * system.getSolution() - system.getVector()).norm() /
-          std::max(system.getVector().norm(), Real(1));
-        if (!std::isfinite(linearResidual) || linearResidual > linearResidualTolerance)
-          throw std::runtime_error(
-            "The gradient identification problem did not converge.");
-        gradient = gradientTrial.getSolution();
-        const Real jump = coupling.vectorJump(gradient);
+        const auto diagnostics =
+          identification.identify(density, gradient, additionalLoad);
         Alert::Info() << substageHeading(std::string(name) + " gradient")
                       << Alert::NewLine << diagnosticLabel("Linear residual:")
-                      << Alert::Notation::Number(linearResidual) << Alert::NewLine
-                      << diagnosticLabel("Rotated jump:") << Alert::Notation::Number(jump)
-                      << Alert::Raise;
-        return {linearResidual, jump};
+                      << Alert::Notation::Number(diagnostics.residual) << Alert::NewLine
+                      << diagnosticLabel("Rotated jump:")
+                      << Alert::Notation::Number(diagnostics.jump) << Alert::Raise;
+        return diagnostics;
       }
 
       int m_argc;
@@ -1165,261 +1399,50 @@ namespace KelvinBall
 }
 
 KelvinBall::KelvinBallOptimization::KelvinBallOptimization(int argc, char** argv)
-  : m_argc(argc),
-    m_argv(argv)
+  : m_implementation(std::make_unique<Implementation>(argc, argv))
 {}
+
+KelvinBall::KelvinBallOptimization::~KelvinBallOptimization() = default;
 
 int KelvinBall::KelvinBallOptimization::Implementation::run()
 {
   const int argc = m_argc;
   char** argv = m_argv;
-  Configuration configuration;
-  size_t maxIterations = 1;
-  bool saveMeshDiagnostic = false;
-  bool geometryOnly = false;
-  bool stateOnly = false;
-  Real regularizationFactor = 4.0;
-  Real normalRegularizationFactor = 1.0;
-  Real stepFactor = 0.1;
-  Real levelSetPenalty = 1;
-  Real minimumThickness = 0;
-  Math::SpatialVector<Real> motionForce(3);
-  motionForce(0) = 1;
-  motionForce(1) = 0;
-  motionForce(2) = 0;
-  size_t advectionQuadratureOrder = 8;
-  std::string reconstructionMethod = "mmg";
-  for (int argument = 1; argument < argc; ++argument)
-  {
-    const std::string_view mode(argv[argument]);
-    if (configuration.parse(mode))
-      continue;
-    if (mode.rfind("--iterations=", 0) == 0)
-      maxIterations = std::stoul(std::string(mode.substr(13)));
-    else if (mode.rfind("--regularization=", 0) == 0)
-      regularizationFactor = std::stod(std::string(mode.substr(17)));
-    else if (mode.rfind("--normal-regularization=", 0) == 0)
-      normalRegularizationFactor = std::stod(std::string(mode.substr(24)));
-    else if (mode.rfind("--step=", 0) == 0)
-      stepFactor = std::stod(std::string(mode.substr(7)));
-    else if (mode.rfind("--level-set-penalty=", 0) == 0)
-      levelSetPenalty = std::stod(std::string(mode.substr(20)));
-    else if (mode.rfind("--thickness-min=", 0) == 0)
-      minimumThickness = std::stod(std::string(mode.substr(16)));
-    else if (mode.rfind("--motion-force=", 0) == 0)
-    {
-      std::istringstream components{std::string(mode.substr(15))};
-      std::string component;
-      for (Eigen::Index i = 0; i < 3; ++i)
-      {
-        if (!std::getline(components, component, ','))
-          throw std::runtime_error("--motion-force needs three components fx,fy,fz.");
-        motionForce(i) = std::stod(component);
-      }
-    }
-    else if (mode.rfind("--advection-quadrature=", 0) == 0)
-      advectionQuadratureOrder = std::stoul(std::string(mode.substr(23)));
-    else if (mode.rfind("--reconstruction=", 0) == 0)
-      reconstructionMethod = std::string(mode.substr(17));
-    else if (mode.rfind("--wngir-", 0) == 0 || mode.rfind("--quad-order=", 0) == 0 ||
-      mode == "--trace" || mode.rfind("--trace=", 0) == 0 ||
-      mode.rfind("--j-safe=", 0) == 0 || mode.rfind("--j-ls=", 0) == 0 ||
-      mode.rfind("--j-min=", 0) == 0)
-      continue;
-    else if (mode == "--save-mesh")
-      saveMeshDiagnostic = true;
-    else if (mode == "--geometry-only")
-      geometryOnly = true;
-    else if (mode == "--state-only")
-      stateOnly = true;
-    else if (mode == "--help")
-    {
-      printUsage(argv[0]);
-      return 0;
-    }
-    else
-      throw std::runtime_error("Unknown KelvinBall option: " + std::string(mode));
-  }
-  configuration.finalize();
-  const size_t points = configuration.points;
-  const Real outerRadius = configuration.outerRadius;
-  const Real nitschePenalty = configuration.nitschePenalty;
-  const Real stabilizationFactor = configuration.stabilizationFactor;
-  if (maxIterations == 0)
-    throw std::runtime_error("The iteration count must be positive.");
-  if (!(regularizationFactor > 0))
-    throw std::runtime_error("The regularization factor must be positive.");
-  if (!(normalRegularizationFactor > 0))
-    throw std::runtime_error("The normal regularization factor must be positive.");
-  if (!(stepFactor > 0))
-    throw std::runtime_error("The advection step factor must be positive.");
-  if (!(levelSetPenalty > 0))
-    throw std::runtime_error("The level-set trace penalty must be positive.");
-  if (!std::isfinite(minimumThickness) || minimumThickness < 0)
-    throw std::runtime_error("--thickness-min must be nonnegative.");
-  if (!std::isfinite(motionForce.norm()) || !(motionForce.norm() > 0))
-    throw std::runtime_error("The motion force must be finite and nonzero.");
-  if (advectionQuadratureOrder == 0)
-    throw std::runtime_error("The advection quadrature order must be positive.");
-  if (reconstructionMethod != "mmg" && reconstructionMethod != "wngir")
-    throw std::runtime_error("The reconstruction method must be mmg or wngir.");
-  if (configuration.mmgSnap > 0 && reconstructionMethod != "mmg")
-    throw std::runtime_error("--mmg-snap applies only to --reconstruction=mmg.");
-  if (geometryOnly && stateOnly)
-    throw std::runtime_error("Use either --geometry-only or --state-only, not both.");
-  const Real initialGridSpacing = configuration.getGridSpacing();
+  if (!m_options.parse(argc, argv))
+    return 0;
+  const Real outerRadius = m_options.configuration.outerRadius;
+  const Real nitschePenalty = m_options.configuration.nitschePenalty;
+  const Real stabilizationFactor = m_options.configuration.stabilizationFactor;
+  const Real initialGridSpacing = m_options.configuration.getGridSpacing();
   const Real requestedWelschScale =
     Rodin::Examples::realOption(argc, argv, "wngir-robust-scale", Real(0));
-  Alert::Info configurationInfo;
-  configurationInfo << substageHeading("Configuration") << Alert::NewLine
-                    << diagnosticLabel("Grid points:") << Alert::Notation::Number(points)
-                    << Alert::NewLine << diagnosticLabel("Outer radius:")
-                    << Alert::Notation::Number(outerRadius) << Alert::NewLine
-                    << diagnosticLabel("Reference spacing h0:")
-                    << Alert::Notation::Number(initialGridSpacing)
-                    << Alert::NewLine << diagnosticLabel("Requested minimum size:")
-                    << Alert::Notation::Number(configuration.hmin)
-                    << Alert::NewLine << diagnosticLabel("Requested maximum size:")
-                    << Alert::Notation::Number(configuration.hmax)
-                    << Alert::NewLine << diagnosticLabel("Evaluated designs:")
-                    << Alert::Notation::Number(maxIterations) << Alert::NewLine
-                    << diagnosticLabel("Nitsche penalty:")
-                    << Alert::Notation::Number(nitschePenalty) << Alert::NewLine
-                    << diagnosticLabel("Stabilization factor:")
-                    << Alert::Notation::Number(stabilizationFactor) << Alert::NewLine
-                    << diagnosticLabel("Assembly backend:") << assemblyBackend
-                    << Alert::NewLine << diagnosticLabel("Direct solver:")
-                    << KelvinBall::DirectSolverName << Alert::NewLine
-                    << diagnosticLabel("Regularization length:")
-                    << Alert::Notation::Number(regularizationFactor) << " h0"
-                    << Alert::NewLine << diagnosticLabel("Thickness model:")
-                    << "Paired first-exit surrogate with aggregate correction"
-                    << Alert::NewLine << diagnosticLabel("Normal smoothing length:")
-                    << Alert::Notation::Number(normalRegularizationFactor) << " h0"
-                    << Alert::NewLine << diagnosticLabel("Advection step:")
-                    << Alert::Notation::Number(stepFactor) << " h0" << Alert::NewLine
-                    << diagnosticLabel("Level-set trace penalty:")
-                    << Alert::Notation::Number(levelSetPenalty) << Alert::NewLine
-                    << diagnosticLabel("Advection quadrature order:")
-                    << Alert::Notation::Number(advectionQuadratureOrder) << Alert::NewLine
-                    << diagnosticLabel("Transport velocity:")
-                    << "Full shape direction" << Alert::NewLine
-                    << diagnosticLabel("Reconstruction method:") << reconstructionMethod;
-  if (reconstructionMethod == "wngir" && !configuration.adapt)
-  {
-    configurationInfo << Alert::NewLine << diagnosticLabel("Background Hausdorff:")
-                      << Alert::Notation::Number(configuration.backgroundHausdorff)
-                      << " h0" << Alert::NewLine
-                      << diagnosticLabel("Background gradation:")
-                      << Alert::Notation::Number(configuration.backgroundGradation);
-  }
-  if (configuration.adapt)
-  {
-    configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation hmin (interface):")
-                      << Alert::Notation::Number(configuration.hmin)
-                      << Alert::NewLine << diagnosticLabel("Adaptation hmax (far field):")
-                      << Alert::Notation::Number(configuration.hmax);
-    if (reconstructionMethod == "wngir")
-      configurationInfo << Alert::NewLine << diagnosticLabel("Background Hausdorff:")
-                        << Alert::Notation::Number(configuration.backgroundHausdorff)
-                        << " h0";
-    if (reconstructionMethod == "wngir")
-      configurationInfo << Alert::NewLine
-                        << diagnosticLabel("Welsch size-map scale:")
-                        << (requestedWelschScale > 0
-                              ? "User-specified"
-                              : "3 h0 (fixed reference spacing)");
-    configurationInfo << Alert::NewLine << diagnosticLabel("Adaptation gradation:")
-                      << Alert::Notation::Number(configuration.adaptGradation);
-  }
-  if (configuration.mmgSnap > 0)
-    configurationInfo << Alert::NewLine << diagnosticLabel("Level-set snapping fraction:")
-                      << Alert::Notation::Number(configuration.mmgSnap);
-  configurationInfo << Alert::Raise;
+  reportConfiguration(requestedWelschScale);
   const Real nan = std::numeric_limits<Real>::quiet_NaN();
   const auto stage1Start = Clock::now();
-  announce(reconstructionMethod == "wngir"
+  announce(m_options.reconstructionMethod == "wngir"
       ? "Stage 1: Preparing the background mesh and fitting the initial sphere with "
         "WNGIR."
       : "Stage 1: Discretizing the initial sphere with MMG.");
-  Sphere sphere(configuration);
-  SphereDiscretization initial = reconstructionMethod == "wngir"
-    ? sphere.prepareWNGIRBackground(requestedWelschScale)
-    : sphere.discretize(false, requestedWelschScale);
+  Sphere sphere(m_options.configuration);
+  auto initial = initialize(sphere, requestedWelschScale);
+  MMG::Mesh mesh = std::move(initial.mesh);
+  Optional<MMG::Mesh> wngirBackground = std::move(initial.background);
+  Real backgroundH = initial.backgroundH;
   ReconstructionDiagnostics reconstruction = initial.diagnostics;
-  Optional<MMG::Mesh> wngirBackground;
-  Real backgroundH = nan;
-  MMG::Mesh mesh;
-  if (reconstructionMethod == "wngir")
-  {
-    wngirBackground.emplace(std::move(initial.mesh));
-    const MeshDiagnostics backgroundDiagnostics =
-      getMeshDiagnostics(*wngirBackground, false);
-    backgroundH = backgroundDiagnostics.meanElementSize;
-    Alert::Info backgroundInfo;
-    backgroundInfo << substageHeading(configuration.adapt
-           ? "MMG background adaptation"
-           : "MMG background optimization")
-      << Alert::NewLine << diagnosticLabel("Cell count:")
-      << Alert::Notation::Number(reconstruction.cellsBefore) << " -> "
-      << Alert::Notation::Number(backgroundDiagnostics.cells)
-      << Alert::NewLine << diagnosticLabel("Required boundary triangles:")
-      << Alert::Notation::Number(reconstruction.requiredBoundaryTriangles)
-      << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
-      << Alert::Notation::Number(backgroundDiagnostics.minimumQuality)
-      << Alert::NewLine << diagnosticLabel("Mean tetrahedron quality:")
-      << Alert::Notation::Number(backgroundDiagnostics.meanQuality)
-      << Alert::NewLine << diagnosticLabel("Mean tetra edge length h:")
-      << Alert::Notation::Number(backgroundDiagnostics.meanElementSize);
-    if (configuration.adapt)
-      backgroundInfo << Alert::NewLine
-                     << diagnosticLabel("Input chamber h:")
-                     << Alert::Notation::Number(reconstruction.backgroundMeanElementSize)
-                     << Alert::NewLine << diagnosticLabel("Welsch size-map scale:")
-                     << Alert::Notation::Number(reconstruction.welschScale);
-    backgroundInfo << Alert::Raise;
-    P1 sphereSpace(*wngirBackground);
-    GridFunction sphereLevelSet(sphereSpace);
-    sphereLevelSet = RealFunction([](const Geometry::Point& point) {
-      return point.getPhysicalCoordinates().norm() - Real(1);
-    });
-    MMG::Mesh classified = classifyLevelSetForWNGIR(*wngirBackground, sphereLevelSet);
-    P1 classifiedSphereSpace(classified);
-    GridFunction classifiedSphereLevelSet(classifiedSphereSpace);
-    classifiedSphereLevelSet.getData() = sphereLevelSet.getData();
-    MMGReconstruction fitted = fitLevelSetWNGIR(
-      classified, classifiedSphereLevelSet, backgroundH, initialGridSpacing, outerRadius,
-      argc, argv);
-    if (configuration.adapt)
-    {
-      adaptWNGIR(fitted, sphere, configuration, requestedWelschScale);
-      reconstruction = fitted.diagnostics;
-    }
-    mesh = std::move(fitted.mesh);
-  }
-  else
-  {
-    mesh = std::move(initial.mesh);
-  }
-  if (wngirBackground && configuration.adapt)
-  {
-    wngirBackground.emplace(mesh);
-    backgroundH = meanElementSize(*wngirBackground);
-  }
   const std::string reconstructionName =
-    reconstructionMethod == "wngir" ? "KelvinBallWNGIR" : "KelvinBallMMG";
+    m_options.reconstructionMethod == "wngir" ? "KelvinBallWNGIR" : "KelvinBallMMG";
   IO::XDMF reconstructionXdmf(reconstructionName);
   auto reconstructionOutput = reconstructionXdmf.grid("Reconstructed");
   reconstructionOutput.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   reconstructionXdmf.write(Real(0)).flush();
   checkFixedGeometry(mesh, outerRadius);
   checkMaterials(mesh);
-  if (saveMeshDiagnostic)
+  if (m_options.saveMeshDiagnostic)
     mesh.save("KelvinBallInitial.mesh", IO::FileFormat::MEDIT);
   reportSphereGeometry(mesh);
   const Real stage1Seconds = elapsedSeconds(stage1Start);
   reportStageTiming(1, stage1Seconds);
-  if (geometryOnly)
+  if (m_options.geometryOnly)
     return 0;
   const Real targetVolume = mesh.getVolume(Obstacle);
 
@@ -1486,7 +1509,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   Optional<Real> predictedVolumeChange;
   Optional<MMG::Mesh> nextMesh;
 
-  for (size_t iteration = 0; iteration < maxIterations; ++iteration)
+  for (size_t iteration = 0; iteration < m_options.maxIterations; ++iteration)
   {
     std::array<Real, 9> stageSeconds;
     stageSeconds.fill(nan);
@@ -1496,7 +1519,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     {
       mesh = std::move(*nextMesh);
       nextMesh.reset();
-      if (wngirBackground && configuration.adapt)
+      if (wngirBackground && m_options.configuration.adapt)
       {
         // Refresh only between iterations, after the previous spaces and
         // fields have expired. The background is fixed during each fit.
@@ -1506,13 +1529,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     }
     const Real h = meanElementSize(mesh);
     const auto meshDiagnostics = getMeshDiagnostics(mesh);
-    const Real hilbertLength = regularizationFactor * initialGridSpacing;
-    const Real normalLength = normalRegularizationFactor * initialGridSpacing;
-    const Real dt = stepFactor * initialGridSpacing;
+    const Real hilbertLength = m_options.regularizationFactor * initialGridSpacing;
+    const Real normalLength = m_options.normalRegularizationFactor * initialGridSpacing;
+    const Real dt = m_options.stepFactor * initialGridSpacing;
     Alert::Info() << " ------------------------------------------------------------"
                   << Alert::NewLine << " Iteration "
                   << Alert::Notation::Number(iteration + 1) << " of "
-                  << Alert::Notation::Number(maxIterations) << Alert::NewLine
+                  << Alert::Notation::Number(m_options.maxIterations) << Alert::NewLine
                   << " ------------------------------------------------------------"
                   << Alert::Raise;
     Alert::Info() << substageHeading("Current mesh scale") << Alert::NewLine
@@ -1522,8 +1545,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(hilbertLength) << Alert::NewLine
                   << diagnosticLabel("Normal smoothing length:")
                   << Alert::Notation::Number(normalLength) << Alert::NewLine
-                  << diagnosticLabel("Advection step:")
-                  << Alert::Notation::Number(dt) << Alert::Raise;
+                  << diagnosticLabel("Advection step:") << Alert::Notation::Number(dt)
+                  << Alert::Raise;
     const auto stage2Start = Clock::now();
     announce("Stage 2: Preparing the chamber fluid mesh.");
     Alert::Info() << substageHeading("Chamber cell counts") << Alert::NewLine
@@ -1547,7 +1570,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     fluidConnectivity.restrict(1, 0);
     fluidConnectivity.restrict(2, 3);
 
-    VelocitySpace Vh = makeVelocitySpace(fluid);
+    VelocitySpace Vh(fluid, 3);
     PressureSpace Qh(fluid);
     KelvinBall::RotatedNitscheIntegrator fluidCoupling(
       fluid, MasterCuts, rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
@@ -1569,9 +1592,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     const Real q = metrics.q;
     const Real resistanceDeterminant = k * q - c * c;
     const Math::SpatialVector<Real> motionTranslation =
-      (q / resistanceDeterminant) * motionForce;
+      (q / resistanceDeterminant) * m_options.motionForce;
     const Math::SpatialVector<Real> motionAngular =
-      (-c / resistanceDeterminant) * motionForce;
+      (-c / resistanceDeterminant) * m_options.motionForce;
     const Real rho = metrics.rho;
     const Real couplingSymmetry = metrics.couplingSymmetry;
     const Real volume = mesh.getVolume(Obstacle);
@@ -1633,17 +1656,17 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                                 const GradientDiagnostics& rhoGradientDiagnostics,
                                 const GradientDiagnostics& volumeGradientDiagnostics) {
       history << iteration << ',' << outerRadius << ',' << initialGridSpacing << ','
-              << configuration.hminFactor << ',' << configuration.hmaxFactor << ','
-              << configuration.hmin << ',' << configuration.hmax << ','
-              << h << ',' << dt << ','
-              << advectionQuadratureOrder << ',' << hilbertLength << ',' << nitschePenalty
-              << ',' << stabilizationFactor << ',' << assemblyBackend << ','
-              << KelvinBall::DirectSolverName << ',' << meshDiagnostics.vertices << ','
-              << meshDiagnostics.cells << ',' << meshDiagnostics.obstacleCells << ','
-              << meshDiagnostics.fluidCells << ',' << meshDiagnostics.interfaceTriangles
-              << ',' << meshDiagnostics.minimumQuality << ','
-              << meshDiagnostics.meanQuality << ',' << meshDiagnostics.maximumQuality
-              << ',' << backgroundH << ','
+              << m_options.configuration.hminFactor << ','
+              << m_options.configuration.hmaxFactor << ',' << m_options.configuration.hmin
+              << ',' << m_options.configuration.hmax << ',' << h << ',' << dt << ','
+              << m_options.advectionQuadratureOrder << ',' << hilbertLength << ','
+              << nitschePenalty << ',' << stabilizationFactor << ',' << assemblyBackend
+              << ',' << KelvinBall::DirectSolverName << ',' << meshDiagnostics.vertices
+              << ',' << meshDiagnostics.cells << ',' << meshDiagnostics.obstacleCells
+              << ',' << meshDiagnostics.fluidCells << ','
+              << meshDiagnostics.interfaceTriangles << ','
+              << meshDiagnostics.minimumQuality << ',' << meshDiagnostics.meanQuality
+              << ',' << meshDiagnostics.maximumQuality << ',' << backgroundH << ','
               << reconstruction.minimumSize << ',' << reconstruction.maximumSize << ','
               << reconstruction.hausdorffTolerance << ','
               << reconstruction.requiredBoundaryTriangles << ','
@@ -1669,8 +1692,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << k / determinant << ','
               << (c != 0 ? 2 * M_PI / motionAngular.norm() : nan) << ','
               << (c != 0 ? 2 * M_PI * q / std::abs(c) : nan) << ',' << std::sqrt(q / k)
-              << ',' << levelSetPenalty << ',' << minimumThickness << ',' << normalLength
-              << ',' << stageDiagnostics.thicknessPenalty << ','
+              << ',' << m_options.levelSetPenalty << ',' << m_options.minimumThickness
+              << ',' << normalLength << ',' << stageDiagnostics.thicknessPenalty << ','
               << stageDiagnostics.thicknessNominalPenalty << ','
               << stageDiagnostics.thicknessGuardDistance << ','
               << stageDiagnostics.thicknessActiveMultiplier << ','
@@ -1715,7 +1738,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << stageDiagnostics.transportOmittedFraction << ','
               << stageDiagnostics.transportFallbackCells;
       for (Eigen::Index component = 0; component < 3; ++component)
-        history << ',' << motionForce(component);
+        history << ',' << m_options.motionForce(component);
       history << '\n';
       history.flush();
     };
@@ -1755,7 +1778,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     {
       Alert::Info() << substageHeading("Free motion under the prescribed force")
                     << Alert::NewLine << diagnosticLabel("Force:")
-                    << vectorText(motionForce) << Alert::NewLine
+                    << vectorText(m_options.motionForce) << Alert::NewLine
                     << diagnosticLabel("Translational velocity Z:")
                     << vectorText(motionTranslation) << Alert::NewLine
                     << diagnosticLabel("Angular velocity omega:")
@@ -1770,7 +1793,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     }
     stageSeconds[3] = elapsedSeconds(stage4Start);
     reportStageTiming(4, stageSeconds[3]);
-    if (stateOnly)
+    if (m_options.stateOnly)
     {
       const GradientDiagnostics unavailable{nan, nan};
       writeHistory(nan, nan, nan, nan, nan, nan, unavailable, unavailable);
@@ -1821,116 +1844,131 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     Math::Vector<Real> thicknessLoad;
     GridFunction thicknessDescent(shapeSpace);
     GridFunction smoothedNormal(shapeSpace);
+    smoothedNormal.getData().setZero();
     GridFunction geometricNormal(shapeSpace);
     geometricNormal.getData().setZero();
     GridFunction rayDirection(shapeSpace);
     rayDirection.getData().setZero();
     GridFunction smoothedCurvature(levelSetSpace);
     smoothedCurvature.getData().setZero();
-    if (minimumThickness > 0)
+    if (m_options.minimumThickness > 0)
     {
       thicknessLoad = Math::Vector<Real>::Zero(shapeSpace.getSize());
       mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
-      const Real activeGuard = minimumThickness + Real(2) * dt;
+      const Real activeGuard = m_options.minimumThickness + Real(2) * dt;
       const KelvinBall::ThicknessPenalty thicknessPenalty(mesh, activeGuard);
-      const auto projectedNormal =
-        thicknessPenalty.projectNormal(shapeSpace, normalLength);
-      smoothedNormal = projectedNormal;
-      for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      Optional<GridFunction<decltype(shapeSpace), Math::Vector<Real>>> projectedNormal;
+      if (m_options.thicknessDiagnostics)
       {
-        const auto dofs = shapeSpace.getDOFs(0, vertex);
-        Math::SpatialVector<Real> normal(3);
-        for (size_t component = 0; component < 3; ++component)
-          normal(component) = smoothedNormal.getData()(dofs(component));
-        const Real magnitude = normal.norm();
-        if (std::isfinite(magnitude) && magnitude > Real(1e-12))
-          for (size_t component = 0; component < 3; ++component)
-            smoothedNormal.getData()(dofs(component)) /= magnitude;
-        else
-          for (size_t component = 0; component < 3; ++component)
-            smoothedNormal.getData()(dofs(component)) = 0;
-      }
-      const auto thickness = thicknessPenalty.evaluate(mesh, shapeSpace,
-        projectedNormal, thicknessLoad);
-      Math::Vector<Real> unused = Math::Vector<Real>::Zero(shapeSpace.getSize());
-      const KelvinBall::ThicknessPenalty nominalPenalty(mesh, minimumThickness);
-      stageDiagnostics.thicknessNominalPenalty =
-        nominalPenalty.evaluate(mesh, shapeSpace, projectedNormal, unused).penalty;
-      stageDiagnostics.thicknessGuardDistance = activeGuard;
+        projectedNormal.emplace(thicknessPenalty.projectNormal(shapeSpace, normalLength));
+        smoothedNormal = *projectedNormal;
         for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
         {
           const auto dofs = shapeSpace.getDOFs(0, vertex);
+          Math::SpatialVector<Real> normal(3);
           for (size_t component = 0; component < 3; ++component)
-          {
-            rayDirection.getData()(dofs(component)) =
-              thickness.rayDirection[vertex](component);
-            geometricNormal.getData()(dofs(component)) =
-              thickness.geometricNormal[vertex](component);
-          }
+            normal(component) = smoothedNormal.getData()(dofs(component));
+          const Real magnitude = normal.norm();
+          if (std::isfinite(magnitude) && magnitude > Real(1e-12))
+            for (size_t component = 0; component < 3; ++component)
+              smoothedNormal.getData()(dofs(component)) /= magnitude;
+          else
+            for (size_t component = 0; component < 3; ++component)
+              smoothedNormal.getData()(dofs(component)) = 0;
         }
-        const auto geometricSeam =
-          interfaceSeamJump(mesh, geometricNormal, shapeCoupling.getLocator());
-        const auto normalSeam =
-          interfaceSeamJump(mesh, smoothedNormal, shapeCoupling.getLocator());
-        const auto raySeam =
-          interfaceSeamJump(mesh, rayDirection, shapeCoupling.getLocator());
-        stageDiagnostics.thicknessGeometricSeamJump = geometricSeam.maximum;
-        stageDiagnostics.thicknessNormalSeamJump = normalSeam.maximum;
-        stageDiagnostics.thicknessRaySeamJump = raySeam.maximum;
-        stageDiagnostics.thicknessSeamSamples = static_cast<Real>(raySeam.samples);
-        stageDiagnostics.thicknessSeamUnmatched = static_cast<Real>(raySeam.unmatched);
-        for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      }
+      const auto thickness = thicknessPenalty.evaluate(mesh, shapeSpace, thicknessLoad,
+        m_options.minimumThickness, projectedNormal ? &*projectedNormal : nullptr);
+      stageDiagnostics.thicknessNominalPenalty = thickness.nominalPenalty;
+      stageDiagnostics.thicknessGuardDistance = activeGuard;
+      for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      {
+        const auto dofs = shapeSpace.getDOFs(0, vertex);
+        for (size_t component = 0; component < 3; ++component)
         {
-          const auto dofs = levelSetSpace.getDOFs(0, vertex);
-          smoothedCurvature.getData()(dofs(0)) = thickness.curvature[vertex];
+          rayDirection.getData()(dofs(component)) =
+            thickness.rayDirection[vertex](component);
+          geometricNormal.getData()(dofs(component)) =
+            thickness.geometricNormal[vertex](component);
         }
-        stageDiagnostics.thicknessPenalty = thickness.penalty;
-        stageDiagnostics.thicknessViolating = static_cast<Real>(thickness.violating);
-        stageDiagnostics.thicknessMaximumPairLoad = thickness.maximumPairLoad;
-        stageDiagnostics.thicknessTopOnePercentLoadShare =
-          thickness.topOnePercentLoadShare;
-        stageDiagnostics.thicknessMinimumExit = thickness.minimumExit;
-        stageDiagnostics.thicknessMaximumDeficit = thickness.maximumDeficit;
-        stageDiagnostics.thicknessMinimumTransversality = thickness.minimumTransversality;
-        stageDiagnostics.thicknessNormalAlignmentMin = thickness.minimumNormalAlignment;
-        stageDiagnostics.thicknessNormalAlignmentMean = thickness.meanNormalAlignment;
-        stageDiagnostics.thicknessCurvatureMin = thickness.minimumCurvature;
-        stageDiagnostics.thicknessCurvatureMax = thickness.maximumCurvature;
-        stageDiagnostics.thicknessNormalMagnitudeMin = thickness.minimumNormalMagnitude;
-        stageDiagnostics.thicknessNormalMagnitudeMax = thickness.maximumNormalMagnitude;
-        stageDiagnostics.actualThicknessChange =
-          previousThicknessPenalty ? thickness.penalty - *previousThicknessPenalty : nan;
-        stageDiagnostics.predictedThicknessChange =
-          predictedThicknessChange ? *predictedThicknessChange : nan;
-        Alert::Info() << substageHeading("Thickness penalty") << Alert::NewLine
-                      << diagnosticLabel("Minimum thickness:")
-                      << Alert::Notation::Number(minimumThickness)
-                      << Alert::NewLine << diagnosticLabel("Guard distance:")
-                      << Alert::Notation::Number(activeGuard)
-                      << Alert::NewLine << diagnosticLabel("Normal smoothing length:")
-                      << Alert::Notation::Number(normalLength) << Alert::NewLine
-                      << diagnosticLabel("Separation load:")
-                      << "Bounded paired-normal surrogate" << Alert::NewLine
-                      << diagnosticLabel("Penalty P:")
-                      << Alert::Notation::Number(thickness.penalty) << Alert::NewLine
-                      << diagnosticLabel("Nominal penalty:")
-                      << Alert::Notation::Number(stageDiagnostics.thicknessNominalPenalty)
-                      << Alert::NewLine
-                      << diagnosticLabel("Rays exiting before minimum:")
-                      << Alert::Notation::Number(thickness.violating) << " of "
-                      << Alert::Notation::Number(thickness.samples) << Alert::NewLine
-                      << diagnosticLabel("Largest estimated pair load:")
-                      << Alert::Notation::Number(thickness.maximumPairLoad)
-                      << Alert::NewLine << diagnosticLabel("Top 1% estimated load share:")
-                      << Alert::Notation::Number(thickness.topOnePercentLoadShare)
-                      << Alert::NewLine
-                      << diagnosticLabel("Minimum exit distance:")
-                      << Alert::Notation::Number(thickness.minimumExit) << Alert::NewLine
-                      << diagnosticLabel("Maximum thickness deficit:")
-                      << Alert::Notation::Number(thickness.maximumDeficit)
-                      << Alert::NewLine << diagnosticLabel("Minimum exit transversality:")
-                      << Alert::Notation::Number(thickness.minimumTransversality)
-                      << Alert::NewLine << diagnosticLabel("Minimum projected alignment:")
+      }
+      const auto geometricSeam =
+        interfaceSeamJump(mesh, geometricNormal, shapeCoupling.getLocator());
+      const auto normalSeam =
+        interfaceSeamJump(mesh, smoothedNormal, shapeCoupling.getLocator());
+      const auto raySeam =
+        interfaceSeamJump(mesh, rayDirection, shapeCoupling.getLocator());
+      stageDiagnostics.thicknessGeometricSeamJump = geometricSeam.maximum;
+      stageDiagnostics.thicknessNormalSeamJump =
+        m_options.thicknessDiagnostics ? normalSeam.maximum : nan;
+      stageDiagnostics.thicknessRaySeamJump = raySeam.maximum;
+      stageDiagnostics.thicknessSeamSamples = static_cast<Real>(raySeam.samples);
+      stageDiagnostics.thicknessSeamUnmatched = static_cast<Real>(raySeam.unmatched);
+      for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      {
+        const auto dofs = levelSetSpace.getDOFs(0, vertex);
+        smoothedCurvature.getData()(dofs(0)) = thickness.curvature[vertex];
+      }
+      stageDiagnostics.thicknessPenalty = thickness.penalty;
+      stageDiagnostics.thicknessViolating = static_cast<Real>(thickness.violating);
+      stageDiagnostics.thicknessMaximumPairLoad = thickness.maximumPairLoad;
+      stageDiagnostics.thicknessTopOnePercentLoadShare = thickness.topOnePercentLoadShare;
+      stageDiagnostics.thicknessMinimumExit = thickness.minimumExit;
+      stageDiagnostics.thicknessMaximumDeficit = thickness.maximumDeficit;
+      stageDiagnostics.thicknessMinimumTransversality = thickness.minimumTransversality;
+      stageDiagnostics.thicknessNormalAlignmentMin =
+        m_options.thicknessDiagnostics ? thickness.minimumNormalAlignment : nan;
+      stageDiagnostics.thicknessNormalAlignmentMean =
+        m_options.thicknessDiagnostics ? thickness.meanNormalAlignment : nan;
+      stageDiagnostics.thicknessCurvatureMin =
+        m_options.thicknessDiagnostics ? thickness.minimumCurvature : nan;
+      stageDiagnostics.thicknessCurvatureMax =
+        m_options.thicknessDiagnostics ? thickness.maximumCurvature : nan;
+      stageDiagnostics.thicknessNormalMagnitudeMin =
+        m_options.thicknessDiagnostics ? thickness.minimumNormalMagnitude : nan;
+      stageDiagnostics.thicknessNormalMagnitudeMax =
+        m_options.thicknessDiagnostics ? thickness.maximumNormalMagnitude : nan;
+      stageDiagnostics.actualThicknessChange =
+        previousThicknessPenalty ? thickness.penalty - *previousThicknessPenalty : nan;
+      stageDiagnostics.predictedThicknessChange =
+        predictedThicknessChange ? *predictedThicknessChange : nan;
+      Alert::Info() << substageHeading("Thickness penalty") << Alert::NewLine
+                    << diagnosticLabel("Minimum thickness:")
+                    << Alert::Notation::Number(m_options.minimumThickness)
+                    << Alert::NewLine << diagnosticLabel("Guard distance:")
+                    << Alert::Notation::Number(activeGuard) << Alert::NewLine
+                    << diagnosticLabel("Normal smoothing length:")
+                    << Alert::Notation::Number(normalLength) << Alert::NewLine
+                    << diagnosticLabel("Separation load:")
+                    << "Bounded paired-normal surrogate" << Alert::NewLine
+                    << diagnosticLabel("Penalty P:")
+                    << Alert::Notation::Number(thickness.penalty) << Alert::NewLine
+                    << diagnosticLabel("Nominal penalty:")
+                    << Alert::Notation::Number(stageDiagnostics.thicknessNominalPenalty)
+                    << Alert::NewLine << diagnosticLabel("Rays exiting before minimum:")
+                    << Alert::Notation::Number(thickness.violating) << " of "
+                    << Alert::Notation::Number(thickness.samples) << Alert::NewLine
+                    << diagnosticLabel("Largest estimated pair load:")
+                    << Alert::Notation::Number(thickness.maximumPairLoad)
+                    << Alert::NewLine << diagnosticLabel("Top 1% estimated load share:")
+                    << Alert::Notation::Number(thickness.topOnePercentLoadShare)
+                    << Alert::NewLine << diagnosticLabel("Minimum exit distance:")
+                    << Alert::Notation::Number(thickness.minimumExit) << Alert::NewLine
+                    << diagnosticLabel("Maximum thickness deficit:")
+                    << Alert::Notation::Number(thickness.maximumDeficit) << Alert::NewLine
+                    << diagnosticLabel("Minimum exit transversality:")
+                    << Alert::Notation::Number(thickness.minimumTransversality)
+                    << Alert::NewLine << diagnosticLabel("Geometric normal cut jump:")
+                    << Alert::Notation::Number(geometricSeam.maximum) << Alert::NewLine
+                    << diagnosticLabel("Ray direction cut jump:")
+                    << Alert::Notation::Number(raySeam.maximum) << Alert::NewLine
+                    << diagnosticLabel("Interface-cut samples:")
+                    << Alert::Notation::Number(raySeam.samples) << Alert::NewLine
+                    << diagnosticLabel("Unmatched cut samples:")
+                    << Alert::Notation::Number(raySeam.unmatched) << Alert::Raise;
+      if (m_options.thicknessDiagnostics)
+        Alert::Info() << substageHeading("Thickness normal diagnostics") << Alert::NewLine
+                      << diagnosticLabel("Minimum projected alignment:")
                       << Alert::Notation::Number(thickness.minimumNormalAlignment)
                       << Alert::NewLine << diagnosticLabel("Mean projected alignment:")
                       << Alert::Notation::Number(thickness.meanNormalAlignment)
@@ -1942,51 +1980,45 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                       << Alert::Notation::Number(thickness.minimumNormalMagnitude)
                       << " to "
                       << Alert::Notation::Number(thickness.maximumNormalMagnitude)
-                      << Alert::NewLine << diagnosticLabel("Geometric normal cut jump:")
-                      << Alert::Notation::Number(geometricSeam.maximum) << Alert::NewLine
-                      << diagnosticLabel("Projected normal cut jump:")
-                      << Alert::Notation::Number(normalSeam.maximum) << Alert::NewLine
-                      << diagnosticLabel("Ray direction cut jump:")
-                      << Alert::Notation::Number(raySeam.maximum) << Alert::NewLine
-                      << diagnosticLabel("Interface-cut samples:")
-                      << Alert::Notation::Number(raySeam.samples) << Alert::NewLine
-                      << diagnosticLabel("Unmatched cut samples:")
-                      << Alert::Notation::Number(raySeam.unmatched) << Alert::Raise;
+                      << Alert::NewLine << diagnosticLabel("Projected normal cut jump:")
+                      << Alert::Notation::Number(normalSeam.maximum) << Alert::Raise;
       if (previousThicknessPenalty)
         Alert::Info() << substageHeading("Thickness change (surrogate prediction)")
-                      << Alert::NewLine
-                      << diagnosticLabel("Actual delta P:")
+                      << Alert::NewLine << diagnosticLabel("Actual delta P:")
                       << Alert::Notation::Number(stageDiagnostics.actualThicknessChange)
-                      << Alert::NewLine
-                      << diagnosticLabel("Surrogate linear delta P:")
+                      << Alert::NewLine << diagnosticLabel("Surrogate linear delta P:")
                       << Alert::Notation::Number(
                            stageDiagnostics.predictedThicknessChange)
                       << Alert::Raise;
     }
-    if (minimumThickness > 0)
+    GradientDiagnostics rhoGradientDiagnostics{}, volumeGradientDiagnostics{};
     {
-      identifyGradient(shapeSpace, RealFunction{0}, shapeCoupling,
-        thicknessDescent, hilbertLength, nitschePenalty, "Thickness descent",
-        &thicknessLoad);
-      const auto components = interfaceComponents(mesh, thicknessDescent);
-      stageDiagnostics.thicknessDescentNormalRMS = components.normalRMS;
-      stageDiagnostics.thicknessDescentTangentRMS = components.tangentialRMS;
-      stageDiagnostics.thicknessDescentTangentFraction = components.tangentialFraction;
-      Alert::Info() << substageHeading("Thickness interface direction") << Alert::NewLine
-                    << diagnosticLabel("Normal RMS:")
-                    << Alert::Notation::Number(components.normalRMS) << Alert::NewLine
-                    << diagnosticLabel("Tangential RMS:")
-                    << Alert::Notation::Number(components.tangentialRMS) << Alert::NewLine
-                    << diagnosticLabel("Tangential fraction:")
-                    << Alert::Notation::Number(components.tangentialFraction)
-                    << Alert::Raise;
+    // Retain the factorization only while identifying the three differentials.
+    // Release it before output, transport, and reconstruction allocate systems.
+      HilbertIdentification identification(
+        shapeSpace, shapeCoupling, hilbertLength, nitschePenalty);
+      if (m_options.minimumThickness > 0)
+      {
+        identifyGradient(identification, RealFunction{0}, thicknessDescent,
+          "Thickness descent", &thicknessLoad);
+        const auto components = interfaceComponents(mesh, thicknessDescent);
+        stageDiagnostics.thicknessDescentNormalRMS = components.normalRMS;
+        stageDiagnostics.thicknessDescentTangentRMS = components.tangentialRMS;
+        stageDiagnostics.thicknessDescentTangentFraction = components.tangentialFraction;
+        Alert::Info() << substageHeading("Thickness interface direction")
+                      << Alert::NewLine << diagnosticLabel("Normal RMS:")
+                      << Alert::Notation::Number(components.normalRMS) << Alert::NewLine
+                      << diagnosticLabel("Tangential RMS:")
+                      << Alert::Notation::Number(components.tangentialRMS)
+                      << Alert::NewLine << diagnosticLabel("Tangential fraction:")
+                      << Alert::Notation::Number(components.tangentialFraction)
+                      << Alert::Raise;
+      }
+      rhoGradientDiagnostics =
+        identifyGradient(identification, -rhoDensity, rhoGradient, "Rho");
+      volumeGradientDiagnostics =
+        identifyGradient(identification, RealFunction{-1}, volumeGradient, "Volume");
     }
-    const GradientDiagnostics rhoGradientDiagnostics =
-      identifyGradient(shapeSpace, -rhoDensity, shapeCoupling, rhoGradient, hilbertLength,
-        nitschePenalty, "Rho");
-    const GradientDiagnostics volumeGradientDiagnostics =
-      identifyGradient(shapeSpace, RealFunction{-1}, shapeCoupling, volumeGradient,
-        hilbertLength, nitschePenalty, "Volume");
     TestFunction testField(shapeSpace);
     auto interfaceNormal = FaceNormal(mesh);
     interfaceNormal.traceOf(Fluid);
@@ -2001,10 +2033,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     Real nullSpaceMultiplier = -dVolume(rhoGradient) / volumeMetric;
     GridFunction xiRho(shapeSpace);
     xiRho = rhoGradient + nullSpaceMultiplier * volumeGradient;
-    if (minimumThickness > 0)
+    if (m_options.minimumThickness > 0)
     {
-      const Real thicknessVolumeMultiplier =
-        -dVolume(thicknessDescent) / volumeMetric;
+      const Real thicknessVolumeMultiplier = -dVolume(thicknessDescent) / volumeMetric;
       GridFunction thicknessRepair(shapeSpace);
       thicknessRepair = thicknessDescent + thicknessVolumeMultiplier * volumeGradient;
       GridFunction candidate(shapeSpace);
@@ -2015,8 +2046,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         const Real magnitude = std::max(candidateMagnitude.max(), Real(1e-30));
         return -thicknessLoad.dot(candidate.getData()) / magnitude;
       };
-      const Real targetRate = -stageDiagnostics.thicknessPenalty /
-        minimumThickness;
+      const Real targetRate =
+        -stageDiagnostics.thicknessPenalty / m_options.minimumThickness;
       Real multiplier = 0;
       bool feasible = true;
       if (thicknessRate(0) > targetRate)
@@ -2067,12 +2098,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       }
       stageDiagnostics.thicknessActiveMultiplier = multiplier;
       stageDiagnostics.thicknessActiveFeasible = feasible ? Real(1) : Real(0);
-      Alert::Info() << substageHeading("Aggregate thickness correction")
-                    << Alert::NewLine << diagnosticLabel("Target D guard P [theta]:")
-                    << Alert::Notation::Number(targetRate)
-                    << Alert::NewLine << diagnosticLabel("Selected multiplier:")
+      Alert::Info() << substageHeading("Aggregate thickness correction") << Alert::NewLine
+                    << diagnosticLabel("Target D guard P [theta]:")
+                    << Alert::Notation::Number(targetRate) << Alert::NewLine
+                    << diagnosticLabel("Selected multiplier:")
                     << (feasible ? std::to_string(multiplier) : "Repair-only fallback")
-                    << Alert::NewLine << diagnosticLabel("Target feasible in tested span:")
+                    << Alert::NewLine
+                    << diagnosticLabel("Target feasible in tested span:")
                     << (feasible ? "Yes" : "No") << Alert::Raise;
     }
     GridFunction xiRhoNorm(levelSetSpace);
@@ -2087,7 +2119,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     const Real thetaInfinityNorm = xiRhoNorm.max();
     const Real dRhoTheta = dRho(theta);
     const Real dVolumeTheta = dVolume(theta);
-    if (minimumThickness > 0)
+    if (m_options.minimumThickness > 0)
     {
       stageDiagnostics.dThicknessTheta = -thicknessLoad.dot(theta.getData());
       previousThicknessPenalty = stageDiagnostics.thicknessPenalty;
@@ -2107,7 +2139,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
                   << Alert::Notation::Number(dVolumeTheta) << Alert::NewLine
                   << diagnosticLabel("Required D volume [theta]:")
                   << Alert::Notation::Number(requiredDVolumeTheta) << Alert::Raise;
-    if (minimumThickness > 0)
+    if (m_options.minimumThickness > 0)
       Alert::Info() << substageHeading("Thickness directional derivative")
                     << Alert::NewLine << diagnosticLabel("Surrogate D thickness [theta]:")
                     << Alert::Notation::Number(stageDiagnostics.dThicknessTheta)
@@ -2131,11 +2163,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       eikonalDistanceLoad.setOrder(2);
     // The projection only reconciles the traces on the cuts: Gamma is pinned,
     // so it cannot move the interface the transport starts from.
-      distanceProjection = Integral(periodicDistance, distanceTest) -
+      distanceProjection = Integral(periodicDistance, distanceTest) +
+        shapeCoupling.scalarTrace(
+          periodicDistance, distanceTest, m_options.levelSetPenalty) -
         eikonalDistanceLoad + DirichletBC(periodicDistance, RealFunction(0)).on(Gamma);
-      distanceProjection.assemble();
-      shapeCoupling.assembleScalarTracePenalty(levelSetSpace,
-        distanceProjection.getLinearSystem(), levelSetPenalty, FlatSet<Attribute>{Gamma});
       Solver::CG(distanceProjection).solve();
       distance = periodicDistance.getSolution();
       const auto& distanceSystem = distanceProjection.getLinearSystem();
@@ -2205,7 +2236,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       chamber.clear();
       chamber.add("Distance", distance, IO::XDMF::Center::Node);
       chamber.add("Theta", theta, IO::XDMF::Center::Node);
-      if (minimumThickness > 0)
+      if (m_options.minimumThickness > 0)
         chamber.add("Thickness_Descent", thicknessDescent, IO::XDMF::Center::Node);
       SubMesh<Context::Local>::Builder interfaceBuilder;
       interfaceBuilder.initialize(mesh);
@@ -2221,7 +2252,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       GridFunction interfaceThicknessDescent(interfaceVectorSpace);
       GridFunction interfaceCurvature(interfaceScalarSpace);
       const auto& interfaceParentVertices = interfaceMesh.getPolytopeMap(0).left;
-      if (minimumThickness > 0)
+      if (m_options.minimumThickness > 0)
         for (Index vertex = 0; vertex < interfaceMesh.getVertexCount(); ++vertex)
         {
           const auto parent = interfaceParentVertices[vertex];
@@ -2244,7 +2275,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       auto interfaceOutput = xdmf.grid("Interface");
       interfaceOutput.clear();
       interfaceOutput.setMesh(interfaceMesh, IO::XDMF::MeshPolicy::Transient);
-      if (minimumThickness > 0)
+      if (m_options.minimumThickness > 0)
       {
         interfaceOutput.add(
           "Geometric_Normal", interfaceGeometricNormal, IO::XDMF::Center::Node);
@@ -2294,7 +2325,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       sewedDesignOutput.setMesh(sewedDesign.getMesh(), IO::XDMF::MeshPolicy::Transient);
       sewedDesignOutput.add("Distance", sewedDistance, IO::XDMF::Center::Node);
       sewedDesignOutput.add("Theta", sewedVelocity, IO::XDMF::Center::Node);
-      if (minimumThickness > 0)
+      if (m_options.minimumThickness > 0)
       {
         sewedDesign.setVector(sewedGeometricNormal, geometricNormal);
         sewedDesign.setVector(sewedNormal, smoothedNormal);
@@ -2329,7 +2360,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       GridFunction sewedInterfaceThicknessDescent(sewedInterfaceVectorSpace);
       GridFunction sewedInterfaceCurvature(sewedInterfaceScalarSpace);
       const auto& sewedInterfaceVertices = sewedInterfaceMesh.getPolytopeMap(0).left;
-      if (minimumThickness > 0)
+      if (m_options.minimumThickness > 0)
         for (Index vertex = 0; vertex < sewedInterfaceMesh.getVertexCount(); ++vertex)
         {
           const auto parent = sewedInterfaceVertices[vertex];
@@ -2352,7 +2383,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       auto sewedInterfaceOutput = sewedXdmf.grid("Interface");
       sewedInterfaceOutput.clear();
       sewedInterfaceOutput.setMesh(sewedInterfaceMesh, IO::XDMF::MeshPolicy::Transient);
-      if (minimumThickness > 0)
+      if (m_options.minimumThickness > 0)
       {
         sewedInterfaceOutput.add(
           "Geometric_Normal", sewedInterfaceGeometricNormal, IO::XDMF::Center::Node);
@@ -2367,7 +2398,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       }
 
       KelvinBall::SewedOutput sewedFluid(fluid, FlatSet<Attribute>{Gamma, Outer});
-      VelocitySpace sewedVelocitySpace = makeVelocitySpace(sewedFluid.getMesh());
+      VelocitySpace sewedVelocitySpace(sewedFluid.getMesh(), 3);
       PressureSpace sewedPressureSpace(sewedFluid.getMesh());
       GridFunction sewedUT0(sewedVelocitySpace), sewedUT1(sewedVelocitySpace),
         sewedUT2(sewedVelocitySpace), sewedUR0(sewedVelocitySpace),
@@ -2414,7 +2445,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       sewedFluidOutput.add("Motion", fluidMotion, IO::XDMF::Center::Node);
       sewedInterfaceOutput.add("Motion", bodyMotion, IO::XDMF::Center::Node);
 
-      if (iteration + 1 == maxIterations)
+      if (iteration + 1 == m_options.maxIterations)
       {
         xdmf.write(static_cast<Real>(iteration)).flush();
         sewedXdmf.write(static_cast<Real>(iteration)).flush();
@@ -2509,7 +2540,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     // P1 mass products are quadratic. A lower-order sampling rule cannot
     // determine all local coefficients, even with complete coverage.
       const size_t transportQuadratureOrder =
-        std::max(size_t(2), advectionQuadratureOrder);
+        std::max(size_t(2), m_options.advectionQuadratureOrder);
       const KelvinBall::TransportProjection projection(
         advectionMesh, advectionDistance, characteristic, transportQuadratureOrder);
       const RealFunction retained(
@@ -2520,10 +2551,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       mass.setOrder(transportQuadratureOrder);
       auto transportedDistance = Integral(transported, test);
       transportedDistance.setOrder(transportQuadratureOrder);
-      transport = mass - transportedDistance;
-      transport.assemble();
-      advectionCoupling.assembleScalarTracePenalty(advectionLevelSetSpace,
-        transport.getLinearSystem(), levelSetPenalty, advectionDistance);
+      transport = mass +
+        advectionCoupling.scalarTrace(advected, test, m_options.levelSetPenalty) -
+        transportedDistance;
+      // Project the transported field toward a zero periodic jump. Adding the
+      // old jump to the load would preserve an existing mismatch instead.
       Solver::CG(transport).solve();
       stageDiagnostics.transportAttempted = projection.getAttemptedCount();
       stageDiagnostics.transportOmitted = projection.getOmittedCount();
@@ -2590,22 +2622,21 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     }
 
     const auto stage9Start = Clock::now();
-    announce(reconstructionMethod == "wngir"
+    announce(m_options.reconstructionMethod == "wngir"
         ? "Stage 9: Fitting the advected interface with WNGIR."
         : "Stage 9: Reconstructing the advected interface with MMG.");
     MMGReconstruction result = [&]() {
-      if (reconstructionMethod == "wngir")
+      if (m_options.reconstructionMethod == "wngir")
       {
         MMG::Mesh classified =
           classifyLevelSetForWNGIR(*wngirBackground, advectedDistance);
         P1 classifiedLevelSetSpace(classified);
         GridFunction classifiedLevelSet(classifiedLevelSetSpace);
         classifiedLevelSet.getData() = advectedDistance.getData();
-        auto fitted = fitLevelSetWNGIR(
-          classified, classifiedLevelSet, backgroundH, initialGridSpacing, outerRadius,
-          argc, argv);
-        if (configuration.adapt)
-          adaptWNGIR(fitted, sphere, configuration, requestedWelschScale);
+        auto fitted = fitLevelSetWNGIR(classified, classifiedLevelSet, backgroundH,
+          initialGridSpacing, outerRadius, argc, argv);
+        if (m_options.configuration.adapt)
+          adaptWNGIR(fitted, sphere, m_options.configuration, requestedWelschScale);
         return fitted;
       }
       // A failed MMG stage is retried on the same advected level set with
@@ -2618,8 +2649,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         {
           const Real retryFactor = scale / initialGridSpacing;
           auto reconstructed = discretizeLevelSetMMG(mesh, advectedDistance, scale,
-            retryFactor * configuration.hmin, retryFactor * configuration.hmax,
-            sphere, configuration.adapt, configuration.mmgSnap,
+            retryFactor * m_options.configuration.hmin,
+            retryFactor * m_options.configuration.hmax, sphere,
+            m_options.configuration.adapt, m_options.configuration.mmgSnap,
             requestedWelschScale);
           reconstructed.diagnostics.scale = retryFactor;
           return reconstructed;
@@ -2633,15 +2665,14 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
           advectedDistance.save(failure + ".sol", IO::FileFormat::MEDIT);
           Alert::Warning() << "Saved the failed MMG input to " << failure << ".mesh and "
                            << failure << ".sol." << Alert::Raise;
-          if (attempt == configuration.mmgRetries)
+          if (attempt == m_options.configuration.mmgRetries)
             throw;
           Alert::Warning() << "MMG reconstruction failed at scale "
                            << Alert::Notation::Number(scale / initialGridSpacing)
-                           << " h0: " << error.what()
-                           << Alert::NewLine << "Retrying at scale "
+                           << " h0: " << error.what() << Alert::NewLine
+                           << "Retrying at scale "
                            << Alert::Notation::Number(scale / (2 * initialGridSpacing))
-                           << " h0."
-                           << Alert::Raise;
+                           << " h0." << Alert::Raise;
           scale /= 2;
         }
       }
@@ -2670,5 +2701,5 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
 
 int KelvinBall::KelvinBallOptimization::run()
 {
-  return Implementation(m_argc, m_argv).run();
+  return m_implementation->run();
 }

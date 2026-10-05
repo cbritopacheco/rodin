@@ -115,8 +115,4 @@ namespace KelvinBall
     return m_mesh;
   }
 
-  const std::vector<Math::SpatialMatrix<Real>>& SewedOutput::getRotations() const
-  {
-    return m_rotations;
-  }
 }

@@ -23,6 +23,7 @@
 #include <Rodin/Alert/Info.h>
 #include <Rodin/Alert/Notation.h>
 #include <Rodin/Variational.h>
+#include <Rodin/Variational/BilinearForm.h>
 
 #include "Common.h"
 
@@ -84,15 +85,9 @@ namespace KelvinBall
         if (const auto mapped =
               position->second.relaxed->locate(surface.getDimension(), point))
         {
-          ++m_relaxedHits;
           return toParent(*mapped);
         }
         return {};
-      }
-
-      size_t getRelaxedHitCount() const
-      {
-        return m_relaxedHits;
       }
 
     private:
@@ -105,7 +100,6 @@ namespace KelvinBall
 
       std::reference_wrapper<const Mesh> m_mesh;
       std::map<Attribute, Surface> m_surfaces;
-      mutable size_t m_relaxedHits = 0;
   };
 
   /**
@@ -126,6 +120,65 @@ namespace KelvinBall
 
       const Locator& getLocator() const;
 
+      /**
+       * @brief Sparse mapped trace form, before essential elimination.
+       *
+       * The AABB quadrature traversal assembles only located pairs. The
+       * returned Rodin bilinear form is composed with the volume forms and
+       * boundary conditions in Problem, so Assembly owns all elimination.
+       * No global all-pairs traversal is introduced.
+       */
+      template <class Trial, class Test>
+      auto scalarTrace(const Trial& u, const Test& v, Real penalty) const
+      {
+        BilinearForm form(u, v);
+        auto system = makeSystem(u.getFiniteElementSpace().getSize());
+        assembleScalarTracePenalty(u.getFiniteElementSpace(), system, penalty);
+        form.getOperator() = std::move(system.getOperator());
+        return form;
+      }
+
+      template <class Trial, class Test>
+      auto vectorTrace(const Trial& u, const Test& v, Real diffusion, Real penalty) const
+      {
+        BilinearForm form(u, v);
+        auto system = makeSystem(u.getFiniteElementSpace().getSize());
+        assembleVector(u.getFiniteElementSpace(), system, diffusion, penalty);
+        form.getOperator() = std::move(system.getOperator());
+        return form;
+      }
+
+      /** @brief The six-field Stokes trace form, with native block identities. */
+      template <class Trials, class Tests>
+      auto stokesTrace(Trials trials, Tests tests, Real viscosity, Real penalty,
+        Real pressureDiffusion) const
+      {
+        static_assert(Trials::Size == 6 && Tests::Size == 6);
+        std::array<size_t, 6> offsets{};
+        size_t size = 0;
+        trials.iapply([&](size_t i, const auto& trial) {
+          offsets[i] = size;
+          size += trial.get().getFiniteElementSpace().getSize();
+        });
+        auto system = makeSystem(size);
+        assembleStokes<1>(trials.template get<0>().get().getFiniteElementSpace(),
+          trials.template get<1>().get().getFiniteElementSpace(), offsets, system,
+          viscosity, penalty, pressureDiffusion);
+        ProblemBody<Math::SparseMatrix<Real>, Math::Vector<Real>, Real> result;
+        trials.iapply([&](size_t j, const auto& trial) {
+          tests.iapply([&](size_t i, const auto& test) {
+            const size_t rows = test.get().getFiniteElementSpace().getSize();
+            const size_t cols = trial.get().getFiniteElementSpace().getSize();
+            BilinearForm form(trial.get(), test.get());
+            form.getOperator() =
+              system.getOperator().block(offsets[i], offsets[j], rows, cols);
+            if (form.getOperator().nonZeros() != 0)
+              result.getBFs().add(form);
+          });
+        });
+        return result;
+      }
+
       // Unlocated rotated quadrature points contribute neither matrix nor
       // load terms. Trace diagnostics use only the located overlap; coverage
       // is reported separately by Metrics, not interpreted as a zero jump.
@@ -134,19 +187,20 @@ namespace KelvinBall
         class Offsets, class LinearSystem>
       void assembleStokes(const VelocitySpace& velocity, const PressureSpace& pressure,
         const Offsets& offsets, LinearSystem& system, Real viscosity, Real penalty,
-        Real pressureDiffusion, const FlatSet<Attribute>& fixedVelocityBoundaries) const;
+        Real pressureDiffusion) const;
 
       template <class VectorSpace, class LinearSystem>
       void assembleVector(const VectorSpace& space, LinearSystem& system, Real diffusion,
-        Real penalty, const FlatSet<Attribute>& fixedBoundaries) const;
+        Real penalty) const;
 
+      /**
+       * Add @f$\gamma h_\Sigma\int_{\Sigma_-}[u]_R[v]_R@f$ to the
+       * scalar operator, with zero jump as its target. The load is unchanged:
+       * an existing jump must be corrected, not transported as a datum.
+       */
       template <class ScalarSpace, class LinearSystem>
-      void assembleScalarTracePenalty(const ScalarSpace& space, LinearSystem& system,
-        Real penalty, const FlatSet<Attribute>& fixedBoundaries = {}) const;
-
-      template <class ScalarSpace, class LinearSystem, class Reference>
-      void assembleScalarTracePenalty(const ScalarSpace& space, LinearSystem& system,
-        Real penalty, const Reference& reference) const;
+      void assembleScalarTracePenalty(
+        const ScalarSpace& space, LinearSystem& system, Real penalty) const;
 
       template <class U>
       Real vectorJump(const U& field) const;
@@ -158,6 +212,16 @@ namespace KelvinBall
       Real familyJump(const U0& u0, const U1& u1, const U2& u2) const;
 
     private:
+      static Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>> makeSystem(
+        size_t size)
+      {
+        Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>> system;
+        system.getOperator().resize(size, size);
+        system.getVector().setZero(size);
+        system.getSolution().setZero(size);
+        return system;
+      }
+
       class Internal;
 
       static Alert::Text<Alert::YellowT> diagnosticHeading(const std::string& text)
@@ -290,73 +354,13 @@ namespace KelvinBall
       }
 
       template <class LinearSystem>
-      static void addWithEliminatedColumns(LinearSystem& system,
-        const std::vector<Eigen::Triplet<Real>>& entries, const IndexSet& fixed)
+      static void addEntries(
+        LinearSystem& system, const std::vector<Eigen::Triplet<Real>>& entries)
       {
         auto& matrix = system.getOperator();
-        auto& rhs = system.getVector();
         Math::SparseMatrix<Real> addition(matrix.rows(), matrix.cols());
         addition.setFromTriplets(entries.begin(), entries.end());
-        std::vector<Eigen::Triplet<Real>> freeEntries;
-        freeEntries.reserve(addition.nonZeros());
-        for (Eigen::Index column = 0; column < addition.outerSize(); ++column)
-        {
-          for (Math::SparseMatrix<Real>::InnerIterator coefficient(addition, column);
-               coefficient; ++coefficient)
-          {
-            if (fixed.contains(coefficient.row()))
-              continue;
-            if (fixed.contains(coefficient.col()))
-              rhs(coefficient.row()) -= coefficient.value() * rhs(coefficient.col());
-            else
-              freeEntries.emplace_back(
-                coefficient.row(), coefficient.col(), coefficient.value());
-          }
-        }
-        Math::SparseMatrix<Real> freeAddition(matrix.rows(), matrix.cols());
-        freeAddition.setFromTriplets(freeEntries.begin(), freeEntries.end());
-        matrix += freeAddition;
-      }
-
-      template <class Space>
-      static IndexSet getFixedDOFs(const Space& space,
-        const FlatSet<Attribute>& attributes, const std::array<size_t, 3>& blocks,
-        const std::vector<size_t>& offsets)
-      {
-        const auto& mesh = space.getMesh();
-        const size_t faceDimension = mesh.getDimension() - 1;
-        IndexSet fixed;
-        for (auto face = mesh.getPolytope(faceDimension); face; ++face)
-        {
-          const auto attribute = face->getAttribute();
-          if (!attribute || !attributes.contains(*attribute))
-            continue;
-          const auto dofs = space.getDOFs(faceDimension, face->getIndex());
-          for (const size_t block : blocks)
-          {
-            for (const Index dof : dofs)
-              fixed.insert(offsets[block] + dof);
-          }
-        }
-        return fixed;
-      }
-
-      template <class Space>
-      static IndexSet getFixedDOFs(
-        const Space& space, const FlatSet<Attribute>& attributes)
-      {
-        const auto& mesh = space.getMesh();
-        const size_t faceDimension = mesh.getDimension() - 1;
-        IndexSet fixed;
-        for (auto face = mesh.getPolytope(faceDimension); face; ++face)
-        {
-          const auto attribute = face->getAttribute();
-          if (!attribute || !attributes.contains(*attribute))
-            continue;
-          const auto dofs = space.getDOFs(faceDimension, face->getIndex());
-          fixed.insert(dofs.begin(), dofs.end());
-        }
-        return fixed;
+        matrix += addition;
       }
   };
 
@@ -364,16 +368,12 @@ namespace KelvinBall
     class LinearSystem>
   void RotatedNitscheIntegrator::assembleStokes(const VelocitySpace& velocity,
     const PressureSpace& pressure, const Offsets& offsets, LinearSystem& system,
-    Real viscosity, Real penalty, Real pressureDiffusion,
-    const FlatSet<Attribute>& fixedVelocityBoundaries) const
+    Real viscosity, Real penalty, Real pressureDiffusion) const
   {
     const auto& mesh = velocity.getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
     const std::array<size_t, 3> velocityBlocks{0, 2, 4};
     const std::array<size_t, 3> pressureBlocks{1, 3, 5};
-    const std::vector<size_t> blockOffsets(offsets.begin(), offsets.end());
-    const IndexSet fixed = Internal::getFixedDOFs(
-      velocity, fixedVelocityBoundaries, velocityBlocks, blockOffsets);
     FaceNormal normal(mesh);
     size_t quadraturePoints = 0;
     size_t skippedPoints = 0;
@@ -526,7 +526,7 @@ namespace KelvinBall
           }
         }
       }
-      Internal::addWithEliminatedColumns(system, entries, fixed);
+      Internal::addEntries(system, entries);
     }
     Alert::Info() << diagnosticHeading("Rotated Nitsche assembly") << Alert::NewLine
                   << diagnosticLabel("Attempted quadrature points:")
@@ -540,13 +540,11 @@ namespace KelvinBall
   }
 
   template <class VectorSpace, class LinearSystem>
-  void RotatedNitscheIntegrator::assembleVector(const VectorSpace& space,
-    LinearSystem& system, Real diffusion, Real penalty,
-    const FlatSet<Attribute>& fixedBoundaries) const
+  void RotatedNitscheIntegrator::assembleVector(
+    const VectorSpace& space, LinearSystem& system, Real diffusion, Real penalty) const
   {
     const auto& mesh = space.getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
-    const IndexSet fixed = Internal::getFixedDOFs(space, fixedBoundaries);
     FaceNormal normal(mesh);
     for (const RotationPair& pair : RotationPairs)
     {
@@ -610,17 +608,16 @@ namespace KelvinBall
           }
         }
       }
-      Internal::addWithEliminatedColumns(system, entries, fixed);
+      Internal::addEntries(system, entries);
     }
   }
 
   template <class ScalarSpace, class LinearSystem>
-  void RotatedNitscheIntegrator::assembleScalarTracePenalty(const ScalarSpace& space,
-    LinearSystem& system, Real penalty, const FlatSet<Attribute>& fixedBoundaries) const
+  void RotatedNitscheIntegrator::assembleScalarTracePenalty(
+    const ScalarSpace& space, LinearSystem& system, Real penalty) const
   {
     const auto& mesh = space.getMesh();
     const size_t faceDimension = mesh.getDimension() - 1;
-    const IndexSet fixed = Internal::getFixedDOFs(space, fixedBoundaries);
     for (const RotationPair& pair : RotationPairs)
     {
       std::vector<Eigen::Triplet<Real>> entries;
@@ -660,47 +657,7 @@ namespace KelvinBall
           }
         }
       }
-      Internal::addWithEliminatedColumns(system, entries, fixed);
-    }
-  }
-
-  template <class ScalarSpace, class LinearSystem, class Reference>
-  void RotatedNitscheIntegrator::assembleScalarTracePenalty(const ScalarSpace& space,
-    LinearSystem& system, Real penalty, const Reference& reference) const
-  {
-    assembleScalarTracePenalty(space, system, penalty);
-    auto& rhs = system.getVector();
-    const auto& mesh = space.getMesh();
-    const size_t faceDimension = mesh.getDimension() - 1;
-    for (const RotationPair& pair : RotationPairs)
-    {
-      for (auto face = mesh.getPolytope(faceDimension); face; ++face)
-      {
-        if (face->getAttribute() != pair.slave)
-          continue;
-        const auto& qf = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
-        const auto& quadrature = face->getQuadrature(qf);
-        for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
-        {
-          const auto& slavePoint = quadrature.getPoint(qp);
-          const auto mapped =
-            m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
-          if (!mapped)
-            continue;
-          const auto slave = Internal::evaluateScalarBasis<1>(
-            space, *face, slavePoint.getPhysicalCoordinates());
-          const auto master = Internal::evaluateScalarBasis<1>(
-            space, mapped->getPolytope(), mapped->getPhysicalCoordinates());
-          const Real referenceJump =
-            reference.getValue(*mapped) - reference.getValue(slavePoint);
-          const Real weight = qf.getWeight(qp) * slavePoint.getDistortion() * penalty *
-            Internal::diameter(*face);
-          for (size_t node = 0; node < master.values.size(); ++node)
-            rhs(master.dofs[node]) += weight * master.values[node] * referenceJump;
-          for (size_t node = 0; node < slave.values.size(); ++node)
-            rhs(slave.dofs[node]) -= weight * slave.values[node] * referenceJump;
-        }
-      }
+      Internal::addEntries(system, entries);
     }
   }
 

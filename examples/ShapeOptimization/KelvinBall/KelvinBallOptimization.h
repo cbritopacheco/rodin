@@ -7,6 +7,8 @@
 #ifndef KELVIN_BALL_OPTIMIZATION_H
 #define KELVIN_BALL_OPTIMIZATION_H
 
+#include <memory>
+
 namespace KelvinBall
 {
   /**
@@ -30,14 +32,17 @@ namespace KelvinBall
   {
     public:
       KelvinBallOptimization(int argc, char** argv);
+      ~KelvinBallOptimization();
+
+      KelvinBallOptimization(const KelvinBallOptimization&) = delete;
+      KelvinBallOptimization& operator=(const KelvinBallOptimization&) = delete;
 
       int run();
 
     private:
       class Implementation;
 
-      int m_argc;
-      char** m_argv;
+      std::unique_ptr<Implementation> m_implementation;
   };
 }
 
