@@ -109,6 +109,84 @@ Each geometry entry has `convergence;petsc;slow` labels, a 600-second budget,
 and the appropriate MPI processor count. Configure convergence and PETSc
 support; enable MPI for distributed entries. Run
 `ctest --test-dir build/tests -R 'RodinConvergenceHPETSc(MPI)?Stokes' --output-on-failure`.
-Complex fields, mixed boundary conditions, other velocity–pressure degree
-pairs, p/hp paths, curved maps, and scalable iterative preconditioning remain
-outside this suite's claims.
+These full-velocity-boundary studies do not cover complex fields, curved maps,
+or scalable iterative preconditioning. Degree refinement is specified in the
+linked p/hp suites; the distinct mixed-boundary formulation follows below.
+
+## Physical traction and the pressure level
+
+The `RodinConvergenceHPETScStokesBoundary` target uses
+`PETScStokesTractionProblem`, with two fields rather than a pressure-mean
+multiplier. Define $\Gamma_D=\{x\in\partial\Omega:x_0=0\}$ and
+$\Gamma_N=\partial\Omega\setminus\Gamma_D$. With viscosity $\nu=1$,
+the physical stress and boundary data are
+
+$$
+\sigma(u,p)=2\varepsilon(u)-pI,\qquad
+u|_{\Gamma_D}=g,\qquad \sigma(u,p)n|_{\Gamma_N}=t.
+$$
+
+For velocity tests vanishing on $\Gamma_D$, the implemented residual is
+
+$$
+2(\varepsilon(u),\varepsilon(v))-(p,\nabla\cdot v)
++(\nabla\cdot u,q)-(f,v)-\langle t,v\rangle_{\Gamma_N}=0.
+$$
+
+This differs from the full-boundary vector-Laplacian formulation above.
+For the manufactured divergence-free fields, their strong volume equations
+coincide, since $\nabla\cdot(2\varepsilon(u))=\Delta u$.
+Their natural boundary operators do not coincide. Prescribed traction fixes
+the pressure constant: adding a mean-zero constraint would generally impose
+an additional, incompatible condition.
+
+All traction cases use $p=p_0+2$, where $p_0$ is the corresponding zero-mean
+unit-box pressure. The nonzero pressure mean must be recovered, not removed.
+Quadratic velocity/affine pressure patches use P2/P1; cubic velocity/quadratic
+pressure patches use P3/P2. At `n=3`, velocity L2/H1 errors, pressure L2/H1
+errors, and divergence L2 must be below $10^{-9}$; the pressure integral must
+differ from $2$ by less than $10^{-9}$.
+
+The pressure-sensitive control changes traction alone to $t+c n$, with $c=2$.
+The exact solution is then $(u,p-c)$, so
+
+$$
+\|p_h-p\|_{L^2(\Omega)}=|c|=2,\qquad
+|p_h-p|_{H^1(\Omega)}=0,\qquad \int_\Omega p_h\,\mathrm dx=0.
+$$
+
+The velocity remains exact. These quantities are checked within the patch
+budget; velocity-only tests would miss an incorrect pressure level.
+
+Both degree pairs use `n=3→5→9`, hence $h=1/(n-1)$. P2/P1 uses cubic
+velocity and quadratic pressure; P3/P2 uses quartic velocity and cubic
+pressure. Under the relevant approximation, mixed stability, and dual
+regularity hypotheses, the expected L2/H1 orders are $(K+1,K)$ for velocity
+and $(K,K-1)$ for pressure. Every adjacent interval requires finite positive
+errors, strict reduction, and
+
+$$
+r_{u,0}>K+0.45,\quad r_{u,1}>K-0.45,\quad
+r_{p,0}>K-0.55,\quad r_{p,1}>K-1.45.
+$$
+
+These are case-specific acceptance floors, not a uniform inf-sup or mixed
+boundary regularity theorem for every element family. The measured pressure
+integral also obeys the independent unit-volume bound
+$|\int_\Omega p_h\,\mathrm dx-2|\leq\|p_h-p\|_{L^2(\Omega)}$,
+up to the stated $10^{-9}$ integration/solve budget.
+
+Assembly order 16 and independent norm order 18 are varied separately to
+18 and 20 at `n=3`; each nonzero field error may change by at most $10^{-6}$
+relative. The direct-solve residual budget is $10^{-11}$, as above.
+Pointwise stress and source evaluation are local. Distributed assembly,
+factorization, coefficient residuals, error norms, and pressure integrals have
+global semantics and require participation by the mesh communicator.
+
+The target registers six geometries, Local and MPI ranks 1–4, with sequential
+and OpenMP assembly selected at configuration time. Point and segment are
+excluded for the same incompressibility reason as the baseline suite.
+Registrations carry `slow` labels and a 1800-second budget. Run
+`ctest --test-dir build/tests -R '^RodinConvergenceHPETScStokesBoundary_' --output-on-failure -j 1`.
+Registration and the mathematical specification do not by themselves certify
+passing rates; backend/geometry validation is required separately.

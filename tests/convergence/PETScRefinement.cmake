@@ -3,9 +3,13 @@ include_guard(GLOBAL)
 # Shared geometry/rank registration for the p/hp backend counterparts.
 # The source provides AllGeometries/LocalTest and AllGeometries/MPITest.
 function(rodin_add_petsc_refinement target source)
+  cmake_parse_arguments(_refinement "" "" "GEOMETRIES" ${ARGN})
   add_executable(${target} ${source})
   target_link_libraries(${target} PRIVATE GTest::gtest RodinConvergence Rodin::PETSc)
   set(_geometries Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
+  if (_refinement_GEOMETRIES)
+    set(_geometries ${_refinement_GEOMETRIES})
+  endif()
   foreach(geometry IN LISTS _geometries)
     add_test(NAME ${target}_${geometry} COMMAND $<TARGET_FILE:${target}>
       "--gtest_filter=AllGeometries/LocalTest.*/${geometry}")

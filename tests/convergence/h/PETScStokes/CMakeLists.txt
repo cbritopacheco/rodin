@@ -1,3 +1,7 @@
+include(${CMAKE_CURRENT_LIST_DIR}/../../PETScRefinement.cmake)
+rodin_add_petsc_refinement(RodinConvergenceHPETScStokesBoundary Traction.cpp
+  GEOMETRIES Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
+
 add_executable(RodinConvergenceHPETScStokes Stokes.cpp)
 target_link_libraries(RodinConvergenceHPETScStokes
   PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)
