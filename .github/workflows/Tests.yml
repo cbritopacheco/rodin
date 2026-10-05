@@ -328,6 +328,7 @@ jobs:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
+        suite: [bulk, boundary]
     env:
       OMP_NUM_THREADS: 2
 
@@ -367,6 +368,7 @@ jobs:
           -DPETSc_DIR="$(pkg-config --variable=prefix PETSc)"
 
       - name: Build complex PETSc convergence suite
+        if: matrix.suite == 'bulk'
         run: >-
           cmake --build build -j 2 --target
           RodinConvergenceHPETScHelmholtz RodinPETScSNESStateTest
@@ -376,9 +378,21 @@ jobs:
           RodinPETScScalarIntegralTest RodinVariationalIntegralTest
 
       - name: Run complex PETSc convergence suite
+        if: matrix.suite == 'bulk'
         run: >-
           ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP|Isoparametric)PETSc(MPI)?Helmholtz|RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_|RodinPETScSNESStateTest|RodinPETSc(MPI)?ScalarIntegralTest|Rodin_Variational_Integral'
+          -E '^RodinConvergenceHPETScHelmholtzBoundary_'
           --output-on-failure -j 2
+
+      - name: Build complex PETSc Helmholtz boundary suite
+        if: matrix.suite == 'boundary'
+        run: cmake --build build -j 2 --target RodinConvergenceHPETScHelmholtzBoundary
+
+      - name: Run complex PETSc Helmholtz boundary suite
+        if: matrix.suite == 'boundary'
+        run: >-
+          ctest --test-dir build/tests -R '^RodinConvergenceHPETScHelmholtzBoundary_'
+          --output-on-failure -j 1
 
   Unit:
     runs-on: ubuntu-latest

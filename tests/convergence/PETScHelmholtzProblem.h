@@ -22,6 +22,10 @@ namespace Rodin::Tests::Convergence
    * Sources and traces retain the original mass term when the solved
    * operator deliberately omits it. The full-Dirichlet unit-box problem
    * is coercive since @f$1/4<\lambda_1=d\pi^2@f$.
+   * Mixed unit-box data prescribe the trace on @f$x_0=0@f$ and
+   * @f$\partial_nu+i\beta u@f$ elsewhere, with @f$\beta=0@f$ or 1.
+   * The mixed Poincare bound has @f$\lambda_1=\pi^2/4>1/4@f$.
+   * Complex impedance requires GMRES rather than Hermitian CG.
    * @par Architecture
    * Each measurement owns a fresh fixed-layout space and linear system.
    * Independent norm quadrature and a solve-scoped const observer support
@@ -31,25 +35,46 @@ namespace Rodin::Tests::Convergence
   class PETScHelmholtzProblem
   {
     public:
-      PETScHelmholtzProblem(
-        const MeshType& mesh, HelmholtzData::Field field, size_t assemblyOrder = 16)
+      enum class Boundary
+      {
+        Dirichlet,
+        MixedNeumann,
+        Impedance
+      };
+      static constexpr Geometry::Attribute DirichletAttribute = 301;
+      static constexpr Geometry::Attribute NaturalAttribute = 302;
+
+      PETScHelmholtzProblem(const MeshType& mesh, HelmholtzData::Field field,
+        size_t assemblyOrder = 16, Boundary boundary = Boundary::Dirichlet)
         : m_mesh(mesh),
           m_data(mesh.getDimension(), field),
-          m_order(assemblyOrder)
+          m_order(assemblyOrder),
+          m_boundary(boundary)
       {
         assert(mesh.getDimension() > 0);
         assert(mesh.getDimension() == mesh.getSpaceDimension());
       }
 
+      /** @brief Assemble, solve, and measure the global manufactured problem.
+       * @note For an MPI mesh, all ranks of its communicator must participate:
+       * distributed assembly, the linear solve, residual norms, and error
+       * norms are global operations. Manufactured pointwise data remain local.
+       */
       ErrorNorms solve(bool omitMass = false, Real tolerance = SolverTolerance,
-        size_t normOrder = 18) const
+        size_t normOrder = 18, bool omitFlux = false) const
       {
-        return solve(omitMass, tolerance, normOrder, [](const auto&, const auto&) {});
+        return solve(
+          omitMass, tolerance, normOrder, [](const auto&, const auto&) {}, omitFlux);
       }
 
+      /** @brief Solve with a solve-scoped observer before error integration.
+       * @note The same collective contract as the ordinary solve applies.
+       * The observer is invoked on each rank with that rank's solution view;
+       * it must not assume an independently replicated global field.
+       */
       template <class Observer>
-      ErrorNorms solve(
-        bool omitMass, Real tolerance, size_t normOrder, Observer&& observe) const
+      ErrorNorms solve(bool omitMass, Real tolerance, size_t normOrder,
+        Observer&& observe, bool omitFlux = false) const
       {
         using namespace Variational;
         const auto& mesh = m_mesh.get();
@@ -65,8 +90,44 @@ namespace Rodin::Tests::Convergence
         load.setOrder(m_order);
         mass.setOrder(m_order);
         Problem problem(u, v);
-        problem = stiffness - mass - load + DirichletBC(u, exact);
-        PETSc::Solver::CG solver(problem);
+        if (m_boundary == Boundary::Dirichlet)
+          problem = stiffness - mass - load + DirichletBC(u, exact);
+        else
+        {
+          const auto gradient = m_data.getGradient();
+          const Variational::BoundaryNormal normal(mesh);
+          const size_t dim = mesh.getDimension();
+          const ComplexFunction flux([gradient, normal, dim](const Geometry::Point& p) {
+            const auto derivative = gradient(p);
+            if (dim == 1)
+              return (p(0) < Real(0.5) ? Real(-1) : Real(1)) * derivative(0);
+            const auto outward = normal(p);
+            Complex result = 0;
+            // Physical normal contraction is bilinear, not a Hermitian dot
+            // product: conjugating the complex gradient would change the PDE.
+            for (size_t j = 0; j < dim; ++j)
+              result += derivative(j) * outward(j);
+            return result;
+          });
+          const Complex impedance =
+            m_boundary == Boundary::Impedance ? Complex(0, 1) : Complex(0);
+          auto boundaryMass = BoundaryIntegral(impedance * u, v);
+          auto boundaryLoad = BoundaryIntegral(
+            (omitFlux ? Real(0) : Real(1)) * flux + impedance * exact, v);
+          boundaryMass.setOrder(m_order);
+          boundaryLoad.setOrder(m_order);
+          problem = stiffness - mass + boundaryMass.over(NaturalAttribute) - load -
+            boundaryLoad.over(NaturalAttribute) +
+            DirichletBC(u, exact).on(DirichletAttribute);
+        }
+        PETSc::Solver::KSP solver(problem);
+        solver.setType(m_boundary == Boundary::Impedance ? KSPGMRES : KSPCG);
+        if (m_boundary == Boundary::Impedance)
+        {
+          PC pc = nullptr;
+          EXPECT_EQ(KSPGetPC(solver.getHandle(), &pc), PETSC_SUCCESS);
+          EXPECT_EQ(PCSetType(pc, PCJACOBI), PETSC_SUCCESS);
+        }
         solver.setTolerances(
           tolerance, AbsoluteTolerance, DivergenceTolerance, MaxIterations);
         solver.solve();
@@ -104,6 +165,7 @@ namespace Rodin::Tests::Convergence
       std::reference_wrapper<const MeshType> m_mesh;
       HelmholtzData m_data;
       size_t m_order;
+      Boundary m_boundary;
   };
 }
 

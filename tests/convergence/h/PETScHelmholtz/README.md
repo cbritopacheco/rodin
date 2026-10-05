@@ -96,6 +96,66 @@ The separate `PETScComplexConvergence` CI matrix uses complex PETSc 3.19
 on Ubuntu 24.04 and sequential/OpenMP local assembly configurations, while
 also running MPI at 1–4 ranks. Geometry suites have the `slow` label and
 600-second budgets, with MPI processor counts declared for scheduling; the
-assembly regression has a 60-second budget. Mixed boundaries,
-complex p/hp PETSc studies, curved geometry, and indefinite/high-frequency
+assembly regression has a 60-second budget. Complex p/hp PETSc studies,
+curved geometry, and indefinite/high-frequency
 Helmholtz remain outside this suite's claims. Point/0D has no PDE h-rate here.
+
+## Mixed Neumann and complex impedance target
+
+`RodinConvergenceHPETScHelmholtzBoundary` uses the same physical-coordinate
+`HelmholtzData` and shared PETSc problem as the degree-refinement studies.
+On the unit box, the face $x_0=0$ carries essential data; the remaining
+faces form $\Gamma_N$. With $k^2=1/4$, the natural condition is
+
+$$
+\partial_n u+\mathrm{i}\beta u=r,\qquad
+r=\nabla u\cdot n+\mathrm{i}\beta u,\qquad \beta\in\{0,1\}.
+$$
+
+The normal contraction uses no conjugation. The weak form is sesquilinear
+in the field and test function:
+
+$$
+\int_\Omega\nabla u\cdot\overline{\nabla v}\,\mathrm{d}x
+-k^2\int_\Omega u\overline v\,\mathrm{d}x
++\mathrm{i}\beta\int_{\Gamma_N}u\overline v\,\mathrm{d}s
+=\int_\Omega f\overline v\,\mathrm{d}x
++\int_{\Gamma_N}r\overline v\,\mathrm{d}s.
+$$
+
+For functions vanishing on $x_0=0$, the unit-box Poincare inequality gives
+$\|v\|_{L^2}^2\le4\|\nabla v\|_{L^2}^2/\pi^2$.
+Consequently the real part of the form is coercive since
+$k^2<\pi^2/4$. The mixed Neumann case uses CG; the non-Hermitian impedance
+case uses GMRES with Jacobi preconditioning. This low-frequency coercive
+configuration does not certify the indefinite or resonant regime.
+
+The affine P1 and quadratic P2 patches retain their nonzero real and
+imaginary parts and require L2/H1-seminorm errors below $10^{-9}$ at `n=3`.
+The rate field is $u=\exp(\mathrm{i}\sum_jx_j)$, with
+$f=(d-k^2)u$. Both boundary conditions use P1 on `5→9→17` and P2/P3 on
+`3→5→9`. Every adjacent interval must reduce both errors and exceed the
+L2/H1-seminorm floors $1.65/0.75$, $2.45/1.55$, and $3.45/2.55$.
+The floors are case-specific numerical criteria; optimal L2 estimates
+additionally require the corresponding adjoint regularity.
+
+Two controls retain the exact forcing and traces while independently
+removing the volume mass term or normal flux. Missing mass must violate
+the affine patch with L2 error above $10^{-3}$ and H1-seminorm error above
+$10^{-2}$; missing flux must increase each smooth-field error by a factor
+greater than 5. The impedance datum and boundary mass remain present in
+the missing-flux case.
+
+Assembly order 16, independent norm order 18 and relative solver tolerance
+$10^{-13}$ are varied independently to 18, 20 and $10^{-14}$, respectively;
+each field error must change by less than $10^{-6}$ relatively. Every solve
+checks positive solver status and an independently recomputed residual
+$\|Au_h-b\|_2/\max(1,\|b\|_2)<10^{-11}$. Global MPI norms and residuals have
+intentional collective semantics; boundary attributes are assigned before
+partitioning, without coordinate-based entity reconciliation.
+
+All seven positive-dimensional geometries have local and MPI rank 1–4
+registrations, including an empty-shard case on the coarsest segment mesh.
+Sequential and OpenMP boundary jobs have separate CI runtime budgets and
+1800-second, slow-tagged geometry registrations. These registrations state
+the verification scope; numerical certification requires passing results.

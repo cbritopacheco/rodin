@@ -1,4 +1,6 @@
 add_executable(RodinConvergenceHPETScHelmholtz Helmholtz.cpp)
+include(../../PETScRefinement.cmake)
+rodin_add_petsc_refinement(RodinConvergenceHPETScHelmholtzBoundary BoundaryConditions.cpp)
 target_link_libraries(RodinConvergenceHPETScHelmholtz
   PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)
 set(_RODIN_HELMHOLTZ_GEOMETRIES
