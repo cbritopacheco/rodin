@@ -79,6 +79,7 @@ jobs:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
+        suite: [bulk, poisson_boundary]
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -123,6 +124,7 @@ jobs:
           -DRODIN_USE_PETSC=ON
 
       - name: Build PETSc convergence suite
+        if: matrix.suite == 'bulk'
         run: >-
           cmake --build build -j 2 --target
           RodinConvergenceHPETScPoisson
@@ -134,8 +136,20 @@ jobs:
           RodinConvergenceHPETScStokes
 
       - name: Run PETSc convergence suite
+        if: matrix.suite == 'bulk'
         run: >-
           ctest --test-dir build/tests -R '^RodinConvergenceHPETSc'
+          -E '^RodinConvergenceHPETScPoissonBoundary_'
+          --output-on-failure -j 1
+
+      - name: Build PETSc Poisson boundary convergence suite
+        if: matrix.suite == 'poisson_boundary'
+        run: cmake --build build -j 2 --target RodinConvergenceHPETScPoissonBoundary
+
+      - name: Run PETSc Poisson boundary convergence suite
+        if: matrix.suite == 'poisson_boundary'
+        run: >-
+          ctest --test-dir build/tests -R '^RodinConvergenceHPETScPoissonBoundary_'
           --output-on-failure -j 1
 
   PETScDegreeConvergence:

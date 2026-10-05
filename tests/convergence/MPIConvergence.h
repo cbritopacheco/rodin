@@ -24,13 +24,28 @@ namespace Rodin::Tests::Convergence
           m_grid(geometry)
       {}
 
+      /** @brief Collectively constructs the distributed refinement mesh. */
       Geometry::Mesh<Context::MPI> makeMesh(size_t pointsPerAxis) const
+      {
+        return makeMesh(pointsPerAxis, [](auto&) {});
+      }
+
+      /**
+       * @brief Collectively constructs a mesh with root-initialized attributes.
+       * The initializer runs on the complete mesh on rank zero before
+       * partitioning. All ranks participate in distribution and finalization;
+       * local field evaluation and metadata queries introduce no collectives.
+       */
+      template <class Initialize>
+      Geometry::Mesh<Context::MPI> makeMesh(
+        size_t pointsPerAxis, Initialize&& initialize) const
       {
         Geometry::Sharder<Context::MPI> sharder(m_context);
         const auto& comm = m_context.getCommunicator();
         if (comm.rank() == 0)
         {
           auto mesh = m_grid.makeMesh(pointsPerAxis);
+          initialize(mesh);
           const size_t dim = mesh.getDimension();
           mesh.getConnectivity().compute(dim, dim);
           mesh.getConnectivity().compute(dim, 0);

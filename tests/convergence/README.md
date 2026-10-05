@@ -183,7 +183,7 @@ exists yet.
 
 | Context | h | p | hp | Isoparametric |
 | --- | --- | --- | --- | --- |
-| Poisson | P1–P3, boundary variants; PETSc local and MPI P1/P2 | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
+| Poisson | P1–P3, boundary variants; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
 | Complex Helmholtz | P1/P2; native-complex PETSc local/MPI P1/P2 | P1–P4; native and complex-PETSc local/MPI | P1–P3; native and complex-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native and complex-PETSc local/MPI |
 | Linear elasticity | Vector P1/P2, displacement and traction variants; PETSc local/MPI Dirichlet P1/P2 | Analytic vector P1→P2→P3→P4; native and real-PETSc local/MPI | Analytic vector P1–P3; native and real-PETSc local/MPI | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; native local and real-PETSc local/MPI |
@@ -369,7 +369,10 @@ The real-PETSc CI degree-refinement job runs these suites, Poisson,
 variable conductivity, coupled reaction–diffusion, linear elasticity and Stokes p/hp
 separately from the h job, with sequential and OpenMP assembly in each.
 Scalar/mixed and vector workloads have separate runtime partitions, without
-removing refinement levels or reducing quadrature orders. Vector linear
+removing refinement levels or reducing quadrature orders. Poisson boundary h
+studies have an independent CI runtime partition. Their
+[specification](h/PETScPoisson/README.md) distinguishes natural data, mean
+constraints and solver choices from field-error acceptance. Vector linear
 elasticity uses the same manufactured fields and Lamé parameters as the
 native [p](p/LinearElasticity/README.md) and [hp](hp/LinearElasticity/README.md)
 studies. Its PETSc [p](p/PETScLinearElasticity/README.md) and
