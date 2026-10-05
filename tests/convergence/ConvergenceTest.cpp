@@ -21,9 +21,68 @@
 #include "FieldConvergence.h"
 #include "Conductivity.h"
 #include "LinearElasticity.h"
+#include "Stokes.h"
 
 namespace Rodin::Tests::Convergence
 {
+  /** @brief A pressure offset changes traction data, not the Stokes source.
+   * @f$p_c=p_0+c@f$ implies @f$\nabla p_c=\nabla p_0@f$.
+   * Exact component comparisons require no entity-matching tolerance.
+   */
+  TEST(ConvergenceUtilities, StokesPressureOffsetPreservesVelocityAndSource)
+  {
+    constexpr Real PressureOffset = 2;
+    using Field = StokesData::Field;
+    using Type = Geometry::Polytope::Type;
+    for (const auto geometry : {Type::Triangle, Type::Quadrilateral, Type::Tetrahedron,
+           Type::Pyramid, Type::Hexahedron, Type::Wedge})
+    {
+      SCOPED_TRACE(UniformGrid::getGeometryName(geometry));
+      const auto mesh = UniformGrid(geometry).makeMesh(2);
+      const size_t dim = mesh.getDimension();
+      for (const auto field :
+        {Field::Affine, Field::Quadratic, Field::Cubic, Field::Quartic, Field::Smooth})
+        for (size_t axis = 1; axis < dim; ++axis)
+        {
+          const StokesData original(dim, field, axis);
+          const StokesData shifted(dim, field, axis, PressureOffset);
+          for (auto cell = mesh.getCell(); cell; ++cell)
+          {
+            const auto rc = Geometry::Polytope::Traits(geometry).getCentroid();
+            const Geometry::Point point(*cell, rc);
+            const auto& x = point.getPhysicalCoordinates();
+            EXPECT_EQ(shifted.getPressure(x), original.getPressure(x) + PressureOffset);
+            EXPECT_EQ(shifted.getPressure()(point), shifted.getPressure(x));
+            const auto velocity = original.getVelocity(x);
+            const auto shiftedVelocity = shifted.getVelocity(x);
+            const auto force = original.getForcing()(point);
+            const auto shiftedForce = shifted.getForcing()(point);
+            const auto gradient = original.getPressureGradient(x);
+            const auto shiftedGradient = shifted.getPressureGradient(x);
+            const auto jacobian = original.getVelocityJacobian(x);
+            const auto shiftedJacobian = shifted.getVelocityJacobian(x);
+            const auto stress = original.getStress(x);
+            const auto shiftedStress = shifted.getStress(x);
+            for (size_t i = 0; i < dim; ++i)
+            {
+              EXPECT_EQ(shiftedVelocity(i), velocity(i));
+              EXPECT_EQ(shiftedForce(i), force(i));
+              EXPECT_EQ(shiftedGradient(i), gradient(i));
+              for (size_t j = 0; j < dim; ++j)
+              {
+                EXPECT_EQ(shiftedJacobian(i, j), jacobian(i, j));
+                EXPECT_EQ(stress(i, j),
+                  jacobian(i, j) + jacobian(j, i) -
+                    (i == j ? original.getPressure(x) : Real(0)));
+                EXPECT_EQ(
+                  shiftedStress(i, j), i == j ? -shifted.getPressure(x) : stress(i, j));
+              }
+            }
+          }
+        }
+    }
+  }
+
   /** The analytic divergence-free shear field does not depend on lambda. */
   TEST(ConvergenceUtilities, DivergenceFreeElasticityHasKnownStressAndSource)
   {

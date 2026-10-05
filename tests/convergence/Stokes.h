@@ -20,7 +20,7 @@ namespace Rodin::Tests::Convergence
   };
 
   /** @brief Unit-box data for @f$-\Delta u+\nabla p=f@f$,
-   * @f$\nabla\cdot u=0@f$, and @f$\int_\Omega p=0@f$.
+   * @f$\nabla\cdot u=0@f$. The default pressure has zero unit-box mean.
    * The velocity has only its first component nonzero, depending on the
    * second coordinate; polynomial patches and smooth rate data are
    * therefore divergence-free in both two and three dimensions.
@@ -29,6 +29,10 @@ namespace Rodin::Tests::Convergence
    * @f$f=(\pi^2\sin(\pi x_1)-\pi\sin(\pi x_0))e_0@f$.
    * An optional nonzero shear axis replaces the default second coordinate.
    * It remains distinct from the velocity component, preserving zero divergence.
+   * An optional constant pressure offset leaves the velocity, pressure gradient,
+   * and body force unchanged. It changes the mean and the traction by
+   * @f$-c n@f$, and is intended for natural-boundary verification rather than
+   * the zero-mean fully prescribed-velocity workload.
    * Physical-coordinate overloads support exact-domain lift measurements.
    */
   class StokesData
@@ -43,10 +47,12 @@ namespace Rodin::Tests::Convergence
         Smooth
       };
 
-      StokesData(size_t dimension, Field field, size_t shearAxis = 1)
+      StokesData(
+        size_t dimension, Field field, size_t shearAxis = 1, Real pressureOffset = 0)
         : m_dimension(dimension),
           m_field(field),
-          m_shearAxis(shearAxis)
+          m_shearAxis(shearAxis),
+          m_pressureOffset(pressureOffset)
       {
         assert(dimension == 2 || dimension == 3);
         assert(shearAxis > 0 && shearAxis < dimension);
@@ -82,10 +88,12 @@ namespace Rodin::Tests::Convergence
 
       Real getPressure(const Math::SpatialPoint& x) const
       {
-        return m_field == Field::Smooth ? std::cos(Math::Constants::pi() * x(0))
-          : m_field == Field::Quartic   ? x(0) * x(0) * x(0) - Real(1) / 4
-          : m_field == Field::Cubic     ? x(0) * x(0) - Real(1) / 3
-                                        : x(0) - 0.5;
+        const Real pressure = m_field == Field::Smooth
+          ? std::cos(Math::Constants::pi() * x(0))
+          : m_field == Field::Quartic ? x(0) * x(0) * x(0) - Real(1) / 4
+          : m_field == Field::Cubic   ? x(0) * x(0) - Real(1) / 3
+                                      : x(0) - 0.5;
+        return pressure + m_pressureOffset;
       }
 
       auto getForcing() const
@@ -128,6 +136,24 @@ namespace Rodin::Tests::Convergence
         return j;
       }
 
+      /** @brief Physical viscous stress for manufactured traction data.
+       * @f$\sigma(u,p)=\nu(\nabla u+\nabla u^T)-pI@f$.
+       * This is pointwise data evaluation and has no collective semantics.
+       */
+      Math::SpatialMatrix<Real> getStress(
+        const Math::SpatialPoint& x, Real viscosity = 1) const
+      {
+        const auto gradient = getVelocityJacobian(x);
+        const Real pressure = getPressure(x);
+        Math::SpatialMatrix<Real> stress(
+          static_cast<std::uint8_t>(m_dimension), static_cast<std::uint8_t>(m_dimension));
+        for (size_t i = 0; i < m_dimension; ++i)
+          for (size_t j = 0; j < m_dimension; ++j)
+            stress(i, j) = viscosity * (gradient(i, j) + gradient(j, i)) -
+              (i == j ? pressure : Real(0));
+        return stress;
+      }
+
       auto getPressureGradient() const
       {
         return Variational::VectorFunction(
@@ -152,6 +178,7 @@ namespace Rodin::Tests::Convergence
       size_t m_dimension;
       Field m_field;
       size_t m_shearAxis;
+      Real m_pressureOffset;
   };
 }
 
