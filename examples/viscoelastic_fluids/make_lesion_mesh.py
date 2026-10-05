@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-"""Generate the planar lesion meshes of ArterialLesion2D as MEDIT "Dimension 2".
+"""Generate the lesion meshes of ArterialLesion2D (planar) and ArterialLesionAxi
+(axisymmetric) as MEDIT "Dimension 2".
 
-The geometry is lesion_2D.geo (same folder) with planar = 1: a channel of width
-D whose walls follow r(z)/R = 1 + a (1 + cos(pi z/ell))/2, a = sqrt(1-S) - 1
-(stenosis) or a = Gam - 1 (aneurysm), mirrored about y = 0. Lengths are in units
-of D; the driver scales the mesh by Config::diameter.
+The geometry is lesion_2D.geo (same folder): walls r(z)/R = 1 + a (1 +
+cos(pi z/ell))/2, a = sqrt(1-S) - 1 (stenosis) or a = Gam - 1 (aneurysm).
+Planar (default): the channel of width D, mirrored about y = 0. With --axi: the
+meridian half-plane 0 <= y <= r(x) of the pipe, y the radius, the axis tagged 4.
+Lengths are in units of D; the drivers scale the mesh by Config::diameter.
 
 Rodin reads the space dimension from the MEDIT "Dimension" keyword, so the file
 is written with two coordinates per vertex, triangles oriented to positive
 area, and every boundary edge carrying its Gmsh physical tag:
 
-    1 inlet   2 outlet   3 wall (parent vessel)   5 lesion wall   (10 fluid)
+    1 inlet   2 outlet   3 wall (parent vessel)   4 axis (--axi only)
+    5 lesion wall   (10 fluid)
 
 Usage:
-    python3 make_lesion_mesh.py <case> <rf> <output.mesh>
-    python3 make_lesion_mesh.py all <rf> <output directory> [suffix]
+    python3 make_lesion_mesh.py <case> <rf> <output.mesh> [--axi]
+    python3 make_lesion_mesh.py all <rf> <output directory> [suffix] [--axi]
 
     case: H, S25, S50, S75, A125, A150, A200    rf: mesh refinement factor
 """
@@ -38,13 +41,13 @@ CASES = {
 GEO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lesion_2D.geo")
 
 
-def build(case, rf):
+def build(case, rf, planar=1):
     # The .geo parameters are DefineConstant's, set the way the command line
     # sets them; the mesh is then read back through the API.
     with tempfile.TemporaryDirectory() as tmp:
         msh = os.path.join(tmp, "lesion.msh")
         cmd = ["gmsh", GEO, "-2", "-o", msh]
-        for key, value in dict(CASES[case], planar=1, rf=rf).items():
+        for key, value in dict(CASES[case], planar=planar, rf=rf).items():
             cmd += ["-setnumber", key, str(value)]
         subprocess.run(cmd, check=True, capture_output=True)
 
@@ -102,18 +105,21 @@ def report(case, xyz, triangles, edges):
 
 
 def main():
-    if len(sys.argv) < 4:
+    args = [a for a in sys.argv[1:] if a != "--axi"]
+    planar = 0 if "--axi" in sys.argv[1:] else 1
+    if len(args) < 3:
         sys.exit(__doc__)
-    case, rf, target = sys.argv[1], float(sys.argv[2]), sys.argv[3]
+    case, rf, target = args[0], float(args[1]), args[2]
     if case == "all":
-        suffix = sys.argv[4] if len(sys.argv) > 4 else "rf%g" % rf
+        suffix = args[3] if len(args) > 3 else "rf%g" % rf
+        domain = "planar" if planar else "axi"
         os.makedirs(target, exist_ok=True)
         for name in CASES:
-            xyz, tri, edg = build(name, rf)
-            write(os.path.join(target, "%s_planar_%s.mesh" % (name, suffix)), xyz, tri, edg)
+            xyz, tri, edg = build(name, rf, planar)
+            write(os.path.join(target, "%s_%s_%s.mesh" % (name, domain, suffix)), xyz, tri, edg)
             report(name, xyz, tri, edg)
     else:
-        xyz, tri, edg = build(case, rf)
+        xyz, tri, edg = build(case, rf, planar)
         write(target, xyz, tri, edg)
         report(case, xyz, tri, edg)
 
