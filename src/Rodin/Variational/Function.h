@@ -301,7 +301,7 @@ namespace Rodin::Variational
        * Each shape expression owns a separate cache so evaluation passes do not
        * share mutable state.
        */
-      class FunctionCache
+      class Cache
       {
         public:
           /// @brief Type returned when evaluating the enclosing function.
@@ -318,25 +318,25 @@ namespace Rodin::Variational
               std::is_base_of_v<Eigen::PlainObjectBase<Value>, Value>) &&
             std::is_copy_constructible_v<Value> && std::is_copy_assignable_v<Value>;
 
-          FunctionCache() = default;
+          Cache() = default;
 
           /// @brief Copies start empty: the value belongs to one evaluation pass.
-          FunctionCache(const FunctionCache&)
-            : FunctionCache()
+          Cache(const Cache&)
+            : Cache()
           {}
 
           /// @brief Transfers the current snapshot.
-          FunctionCache(FunctionCache&&) = default;
+          Cache(Cache&&) = default;
 
           /// @brief Clears the snapshot when copying another evaluation pass.
-          FunctionCache& operator=(const FunctionCache&)
+          Cache& operator=(const Cache&)
           {
             m_value.reset();
             return *this;
           }
 
           /// @brief Transfers the current snapshot on move assignment.
-          FunctionCache& operator=(FunctionCache&&) = default;
+          Cache& operator=(Cache&&) = default;
 
           /// @brief Evaluates @p f at @p ip, if @p ip is a quadrature node.
           void refresh(const FunctionBase& f, const IntegrationPoint& ip)

@@ -186,7 +186,7 @@ TEST(CoefficientEvaluation, RebindingCopiesAndDirectEvaluation)
   EXPECT_NEAR(moved.getBasis(0), 2 * a, 1e-12);
 }
 
-TEST(CoefficientEvaluation, FunctionCacheLifecycleAndIndependentBindings)
+TEST(CoefficientEvaluation, CacheLifecycleAndIndependentBindings)
 {
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
   const auto cell = *mesh.getCell();
@@ -199,7 +199,7 @@ TEST(CoefficientEvaluation, FunctionCacheLifecycleAndIndependentBindings)
     ++calls;
     return scale;
   });
-  using Cache = decltype(f)::FunctionCache;
+  using Cache = decltype(f)::Cache;
   static_assert(Cache::Enabled);
   Cache first;
   Cache second;
@@ -241,7 +241,7 @@ TEST(CoefficientEvaluation, LazyFunctionValuesRetainDirectEvaluation)
   size_t calls = 0;
   Real scale = 2;
   LazyVectorFunction f(calls, scale);
-  static_assert(!LazyVectorFunction::FunctionCache::Enabled);
+  static_assert(!LazyVectorFunction::Cache::Enabled);
   const auto cell = *mesh.getCell();
   const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
   const Point point(cell, qf.getPoint(0));

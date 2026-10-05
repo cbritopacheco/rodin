@@ -520,7 +520,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
 
       /// @brief Function value at the current quadrature binding.
-      typename LHSType::FunctionCache m_functionCache;
+      typename LHSType::Cache m_functionCache;
   };
 
   /// @brief Deduction guide for @c Mult.
@@ -705,7 +705,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
 
       /// @brief Function value at the current quadrature binding.
-      typename RHSType::FunctionCache m_functionCache;
+      typename RHSType::Cache m_functionCache;
   };
 
   /// @brief Deduction guide for @c Mult.

@@ -362,7 +362,7 @@ namespace Rodin::Variational
 
     private:
       /// @brief Function value at the current quadrature binding.
-      typename RHSType::FunctionCache m_functionCache;
+      typename RHSType::Cache m_functionCache;
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
   };
