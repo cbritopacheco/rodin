@@ -28,6 +28,8 @@
  */
 #include <algorithm>
 #include <array>
+#include <atomic>
+#include <cstdint>
 #include <cassert>
 #include <cmath>
 #include <fstream>
@@ -301,14 +303,30 @@ namespace Rodin::Examples::ViscoelasticFluids
         (f / m.lambda) * (Eigen::Matrix3d::Identity() - e.expMinus());
     }
 
-    LogPoint logPoint(const Eigen::Matrix3d& psi, const Eigen::Matrix3d& L, const LogModel& m)
+    /// @brief The parts of a LogPoint. Dexp (exp and Dexp[E_j]) costs one
+    ///        eigenproblem; Newton (A, P, r) thirteen more, twelve of them for
+    ///        the FD Jacobian. The step-value store (stabilisation) reads only
+    ///        Dexp.
+    enum LogPart : std::uint8_t
     {
-      LogPoint out;
-      const LogEig e = logEig(psi);
+      LogDexp = 1,
+      LogNewton = 2
+    };
+
+    /// @brief exp(psi) and Dexp[E_j], from the eigen-decomposition of psi.
+    void logPointDexp(LogPoint& out, const LogEig& e)
+    {
       out.exp = e.exp();
       const auto& B = voigtBasisEigen();
       for (size_t j = 0; j < 6; ++j)
         out.D[j] = e.dexp(B[j]);
+    }
+
+    /// @brief A, P and r; reads out.exp, so logPointDexp() comes first.
+    void logPointNewton(LogPoint& out, const LogEig& e, const Eigen::Matrix3d& psi,
+      const Eigen::Matrix3d& L, const LogModel& m)
+    {
+      const auto& B = voigtBasisEigen();
       // Central differences in the six Voigt directions (twelve 3x3
       // eigenproblems); the map is smooth in psi.
       const Real h = 1.0e-6 * std::max<Real>(1.0, psi.cwiseAbs().maxCoeff());
@@ -343,7 +361,6 @@ namespace Rodin::Examples::ViscoelasticFluids
             for (size_t b = 0; b < 3; ++b)
               out.P[C][b](k, a) = Q[a][b].cwiseProduct(Ek).sum();
         }
-      return out;
     }
 
     /// @brief A 3x3 tensor field given by a callable, evaluated pointwise.
@@ -386,9 +403,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     ///        iterate changes.
     ///
     /// @details Rodin assembles integrator by integrator over the whole mesh
-    ///          and evaluates a coefficient once per basis function, so a
-    ///          small recency cache recomputes the twelve eigenproblems of
-    ///          every point once per integrator that reads them. One store per
+    ///          so a small recency cache recomputes the twelve eigenproblems
+    ///          of every point once per integrator that reads them. One store per
     ///          psi_D field (the iterate psi^k and the step value psi^n),
     ///          cleared when the revision changes; keyed by the polytope
     ///          (dimension, index) and the reference coordinates. Every
@@ -427,8 +443,16 @@ namespace Rodin::Examples::ViscoelasticFluids
     class LogStore
     {
       public:
+        /// @brief A stored point and the parts already computed for it.
+        struct Entry
+        {
+            LogPoint value;
+            std::uint8_t have = 0;
+        };
+
         template <class GF>
-        const LogPoint& at(const LogFields<GF>& s, const Point& p, const PointKey& key)
+        const Entry& at(const LogFields<GF>& s, const Point& p, const PointKey& key,
+          std::uint8_t need)
         {
           const std::uint64_t revision = *s.revision;
 
@@ -438,63 +462,118 @@ namespace Rodin::Examples::ViscoelasticFluids
             m_points.clear();
             m_revision = revision;
           }
-          const auto it = m_points.find(key);
-          if (it != m_points.end())
-            return it->second;
+          Entry& e = m_points[key];
+          if (!(need & ~e.have))
+            return e;
 
-          const auto J = Jacobian(*s.u).getValue(p);   // Math::SpatialMatrix, not Eigen
-          Eigen::Matrix3d L;
-          for (int a = 0; a < 3; ++a)
-            for (int b = 0; b < 3; ++b)
-              L(a, b) = J(a, b);
-          return m_points.emplace(key,
-            logPoint(unpack(s.psiD->getValue(p), s.psiO->getValue(p)), L, s.model)).first->second;
+          // The Newton part reads exp, so it brings the Dexp part along.
+          const Eigen::Matrix3d psi = unpack(s.psiD->getValue(p), s.psiO->getValue(p));
+          const LogEig eig = logEig(psi);
+          if (!(e.have & LogDexp))
+          {
+            logPointDexp(e.value, eig);
+            e.have |= LogDexp;
+          }
+          if (need & LogNewton & ~e.have)
+          {
+            const auto J = Jacobian(*s.u).getValue(p);   // Math::SpatialMatrix, not Eigen
+            Eigen::Matrix3d L;
+            for (int a = 0; a < 3; ++a)
+              for (int b = 0; b < 3; ++b)
+                L(a, b) = J(a, b);
+            logPointNewton(e.value, eig, psi, L, s.model);
+            e.have |= LogNewton;
+          }
+          return e;
+        }
+
+        /// @brief Frees every stored point.
+        void release()
+        {
+          std::lock_guard<std::mutex> lock(m_mutex);
+          std::unordered_map<PointKey, Entry, PointKeyHash>().swap(m_points);
+          m_revision = std::numeric_limits<std::uint64_t>::max();
         }
 
       private:
         std::mutex m_mutex;
         std::uint64_t m_revision = std::numeric_limits<std::uint64_t>::max();
-        std::unordered_map<PointKey, LogPoint, PointKeyHash> m_points;
+        std::unordered_map<PointKey, Entry, PointKeyHash> m_points;
     };
 
+    /// @brief One store per psi_D field, and a counter bumped by every
+    ///        release so that no thread reuses a pointer into a freed store.
+    struct LogStores
+    {
+        std::map<const void*, LogStore> stores;
+        std::mutex mutex;
+        std::atomic<std::uint64_t> epoch{0};
+    };
+
+    LogStores& logStores()
+    {
+      static LogStores all;
+      return all;
+    }
+
+    /// @brief Frees the points stored for `field` (a psi_D field) once the
+    ///        forms that read them have been assembled.
+    void releaseLogPoints(const void* field)
+    {
+      auto& all = logStores();
+      LogStore* store = nullptr;
+      {
+        std::lock_guard<std::mutex> lock(all.mutex);
+        const auto it = all.stores.find(field);
+        if (it == all.stores.end())
+          return;
+        store = &it->second;
+      }
+      all.epoch.fetch_add(1);
+      store->release();
+    }
+
     template <class GF>
-    const LogPoint& logPointAt(const LogFields<GF>& s, const Point& p)
+    const LogPoint& logPointAt(const LogFields<GF>& s, const Point& p, std::uint8_t need)
     {
       // Consecutive evaluations are almost always at the same point: reuse
-      // the last value without locking. References into an unordered_map
+      // the last entry without locking. References into an unordered_map
       // survive insertions, and a store is cleared only when the revision
-      // changes, between assemblies.
+      // changes, between assemblies, or by a release, which bumps the epoch.
       struct Last
       {
           const void* field = nullptr;
           std::uint64_t revision = 0;
+          std::uint64_t epoch = 0;
           PointKey key{};
-          const LogPoint* value = nullptr;
+          const LogStore::Entry* entry = nullptr;
       };
       thread_local Last last;
+      auto& all = logStores();
       const PointKey key = PointKey::of(p);
       const std::uint64_t revision = *s.revision;
-      if (last.value && last.field == s.psiD && last.revision == revision && last.key == key)
-        return *last.value;
+      const std::uint64_t epoch = all.epoch.load();
+      if (last.entry && last.field == s.psiD && last.revision == revision &&
+          last.epoch == epoch && last.key == key && (last.entry->have & need) == need)
+        return last.entry->value;
 
-      static std::map<const void*, LogStore> stores;
-      static std::mutex mutex;
       LogStore* store = nullptr;
       {
-        std::lock_guard<std::mutex> lock(mutex);
-        store = &stores[s.psiD];
+        std::lock_guard<std::mutex> lock(all.mutex);
+        store = &all.stores[s.psiD];
       }
-      const LogPoint& value = store->at(s, p, key);
-      last = Last{ s.psiD, revision, key, &value };
-      return value;
+      const LogStore::Entry& entry = store->at(s, p, key, need);
+      last = Last{ s.psiD, revision, epoch, key, &entry };
+      return entry.value;
     }
 
-    /// @brief A pointwise matrix drawn from the cached LogPoint by `pick`.
+    /// @brief A pointwise matrix drawn from the cached LogPoint by `pick`,
+    ///        which reads only the parts in `need`.
     template <class GF, class Pick>
-    auto fromPoint(const LogFields<GF>& s, Pick pick)
+    auto fromPoint(const LogFields<GF>& s, std::uint8_t need, Pick pick)
     {
-      return PointwiseTensor([s, pick](const Point& p) -> Eigen::Matrix3d {
-        return pick(logPointAt(s, p)); });
+      return PointwiseTensor([s, need, pick](const Point& p) -> Eigen::Matrix3d {
+        return pick(logPointAt(s, p, need)); });
     }
 
     /// @brief Dexp_{psi(x)}[w] restricted to block B: sum_c w_c Dexp[E_{B,c}],
@@ -504,7 +583,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     {
       const auto D = [&](size_t c) {
         const size_t j = voigtIndex(B, c);
-        return fromPoint(s, [j](const LogPoint& q) { return q.D[j]; });
+        return fromPoint(s, LogDexp, [j](const LogPoint& q) { return q.D[j]; });
       };
       return D(0) * Component(w, 0) + D(1) * Component(w, 1) + D(2) * Component(w, 2);
     }
@@ -514,12 +593,13 @@ namespace Rodin::Examples::ViscoelasticFluids
       return b == Block::D ? 0 : 1;
     }
 
-    /// @brief A pointwise 3-vector drawn from the cached LogPoint by `pick`.
+    /// @brief A pointwise 3-vector drawn from the cached LogPoint by `pick`,
+    ///        which reads only the parts in `need`.
     template <class GF, class Pick>
-    auto fromPointVector(const LogFields<GF>& s, Pick pick)
+    auto fromPointVector(const LogFields<GF>& s, std::uint8_t need, Pick pick)
     {
-      return VectorFunction(size_t(3), [s, pick](const Point& p) -> Math::SpatialVector<Real> {
-        const Eigen::Vector3d v = pick(logPointAt(s, p));
+      return VectorFunction(size_t(3), [s, need, pick](const Point& p) -> Math::SpatialVector<Real> {
+        const Eigen::Vector3d v = pick(logPointAt(s, p, need));
         return Math::SpatialVector<Real>{{ v(0), v(1), v(2) }};
       });
     }
@@ -527,15 +607,14 @@ namespace Rodin::Examples::ViscoelasticFluids
     // The psi equation is tested against each block chi_C as a plain vector:
     // for a tensor Y, Y : tensor<C>(chi_C) = pair<C>(Y) . chi_C, pair<C>(Y)_k =
     // Y : E_{C,k}. The pairing is folded into the pointwise data, so the test
-    // side carries no coefficient: Rodin re-evaluates test-side coefficients
-    // for every (trial, test) pair, trial-side ones once per trial function.
+    // side carries no coefficient.
 
     /// @brief pair<C>(JN[w] + mass w) for w = psi_B: (A[C][B] + mass I) w.
     template <Block C, Block B, class GF, class W>
     auto pairedJacobianN(const LogFields<GF>& s, Real mass, const W& w)
     {
       constexpr size_t c = blockIndex(C), b = blockIndex(B);
-      return Mult(fromPoint(s, [mass](const LogPoint& q) -> Eigen::Matrix3d {
+      return Mult(fromPoint(s, LogNewton, [mass](const LogPoint& q) -> Eigen::Matrix3d {
         return q.A[c][b] + mass * Eigen::Matrix3d::Identity(); }), w);
     }
 
@@ -547,7 +626,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     {
       constexpr size_t c = blockIndex(C);
       const auto P = [&](size_t b) {
-        return fromPoint(s, [b](const LogPoint& q) -> Eigen::Matrix3d { return q.P[c][b]; });
+        return fromPoint(s, LogNewton, [b](const LogPoint& q) -> Eigen::Matrix3d { return q.P[c][b]; });
       };
       return Mult(P(0), Mult(Jacobian(v), unit(0))) + Mult(P(1), Mult(Jacobian(v), unit(1))) +
         Mult(P(2), Mult(Jacobian(v), unit(2)));
@@ -558,7 +637,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     auto pairedResidual(const LogFields<GF>& s)
     {
       constexpr size_t c = blockIndex(C);
-      return fromPointVector(s, [](const LogPoint& q) -> Eigen::Vector3d { return q.r[c]; });
+      return fromPointVector(s, LogNewton, [](const LogPoint& q) -> Eigen::Vector3d { return q.r[c]; });
     }
 
     /// @brief Block B's contribution to div exp(psi) = sum_j Dexp[d_j psi] e_j
@@ -569,6 +648,22 @@ namespace Rodin::Examples::ViscoelasticFluids
       return Mult(dexp<B>(s, Mult(Jacobian(psi), unit(0))), unit(0)) +
         Mult(dexp<B>(s, Mult(Jacobian(psi), unit(1))), unit(1)) +
         Mult(dexp<B>(s, Mult(Jacobian(psi), unit(2))), unit(2));
+    }
+
+    /// @brief divExp<B> for a trial function psi_B: sum_c Dexp[E_{B,c}]
+    ///        grad psi_c. A basis function of psi_B has one nonzero component
+    ///        c, where this is Dexp[E_{B,c}] grad phi, the value divExp<B>
+    ///        gives (the other terms are exact zeros), with three pointwise
+    ///        matrices per point instead of nine.
+    template <Block B, class GF, class S>
+    auto divExpTrial(const LogFields<GF>& s, const S& psi)
+    {
+      const auto D = [&](size_t c) {
+        const size_t j = voigtIndex(B, c);
+        return fromPoint(s, LogDexp, [j](const LogPoint& q) { return q.D[j]; });
+      };
+      const auto gradOf = [&](size_t c) { return Mult(Transpose(Jacobian(psi)), unit(c)); };
+      return Mult(D(0), gradOf(0)) + Mult(D(1), gradOf(1)) + Mult(D(2), gradOf(2));
     }
 
     /// @brief The projections invert mass matrices: CG + Jacobi, never the
@@ -1176,8 +1271,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto streamV = Mult(Jacobian(m_v), m_uOld);  // (grad v) u^n
 
     // (A u^n) . (B u^n) = (A u^n (u^n)^T) : B. Bilinear streamline terms are
-    // written this way so that u^n sits on the trial side: Rodin re-evaluates
-    // test-side coefficients for every (trial, test) pair.
+    // written this way so that u^n sits on the trial side.
     const auto uu = PointwiseTensor([this](const Point& p) -> Eigen::Matrix3d {
       const auto u = m_uOld.getValue(p);
       const Eigen::Vector3d w(u(0), u(1), u(2));
@@ -1189,7 +1283,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     const LogFields<VectorGridFunctionType> at{ &m_psiItD, &m_psiItO, &m_uIt, model, &m_psiRevision };
 
     // Momentum: exp(psi) ~ exp(psi^k) + Dexp[psi - psi^k], all at psi^k.
-    const auto Tn = fromPoint(at, [](const LogPoint& q) { return q.exp; });
+    const auto Tn = fromPoint(at, LogDexp, [](const LogPoint& q) { return q.exp; });
     const auto C = Tn - dexp<D>(at, m_psiItD) - dexp<O>(at, m_psiItO);
 
     // psi equation, Newton about (psi^k, u^k); see the 2D driver:
@@ -1253,10 +1347,10 @@ namespace Rodin::Examples::ViscoelasticFluids
       - rho * rho * Integral(m_tauK * (m_piConv.get() + (1.0 / dt) * m_sub.get()), streamV)
       + m_cfg.pressureScale * Integral(m_alpha1 * Grad(m_p), Grad(m_q))
       - m_cfg.pressureScale * Integral(m_alpha1 * m_piGradP.get(), Grad(m_q))
-      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExp<D>(at, m_psiD), divergence<D>(m_chiD)))
-      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExp<O>(at, m_psiO), divergence<D>(m_chiD)))
-      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExp<D>(at, m_psiD), divergence<O>(m_chiO)))
-      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExp<O>(at, m_psiO), divergence<O>(m_chiO)))
+      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrial<D>(at, m_psiD), divergence<D>(m_chiD)))
+      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrial<O>(at, m_psiO), divergence<D>(m_chiD)))
+      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrial<D>(at, m_psiD), divergence<O>(m_chiO)))
+      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrial<O>(at, m_psiO), divergence<O>(m_chiO)))
       - chiScale * m_cfg.stressDivScale * Integral(m_alpha1 * m_piDivSigma.get(), divergence<D>(m_chiD))
       - chiScale * m_cfg.stressDivScale * Integral(m_alpha1 * m_piDivSigma.get(), divergence<O>(m_chiO))
 
@@ -1361,6 +1455,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     const LogFields<VectorGridFunctionType> atOld{ &m_psiOldD, &m_psiOldO, &m_uOld, model, &m_psiRevision };
     const auto epsN = 0.5 * (Jacobian(m_uOld) + Transpose(Jacobian(m_uOld)));
     m_piDivSigma.project(s * (divExp<Block::D>(atOld, m_psiOldD) + divExp<Block::O>(atOld, m_psiOldO)));
+    // Nothing else reads psi^n pointwise this step: free its points.
+    releaseLogPoints(&m_psiOldD);
     m_piEpsD.project(voigtD(epsN));
     m_piEpsO.project(voigtO(epsN));
     m_piAdvPsiD.project(Mult(Jacobian(m_psiOldD), m_uOld));
