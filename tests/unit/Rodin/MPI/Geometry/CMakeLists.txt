@@ -1,3 +1,11 @@
+add_executable(RodinMPIGeometryMeshTest MeshTest.cpp)
+target_link_libraries(RodinMPIGeometryMeshTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::MPI
+  Rodin::IO)
+
 add_executable(RodinMPIGeometrySharderTest SharderTest.cpp)
 target_link_libraries(RodinMPIGeometrySharderTest
   PUBLIC
@@ -28,6 +36,19 @@ if (MPIEXEC_EXECUTABLE)
 endif()
 
 foreach(np 1 2 3 4 8)
+  add_test(
+    NAME RodinMPIGeometryMeshTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIGeometryMeshTest>)
+  set_tests_properties(RodinMPIGeometryMeshTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+    TIMEOUT 120
+  )
+  rodin_suppress_external_mpi_lsan_for_test(
+    RodinMPIGeometryMeshTest_np${np}
+    "HDF5_USE_FILE_LOCKING=FALSE")
+
   add_test(
     NAME RodinMPIGeometrySharderTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
