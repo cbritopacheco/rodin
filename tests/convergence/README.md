@@ -210,6 +210,30 @@ that a source GridFunction can follow SubMesh ancestry through logical
 indices. These are MPI space and rank-local field-evaluation checks in
 sequential/OpenMP configurations, not distributed PETSc solve evidence.
 
+The positive-dimensional SubMesh protocol extends these checks to cell and
+boundary selections and their nested copies. For each entity dimension $d$,
+the child-to-parent map is a dense array $L_d$, while its inverse $R_d$ is
+defined on the selected parent indices:
+
+$$
+R_d(L_d(i))=i.
+$$
+
+The tests check this identity, nested ancestry composition, unique global
+entity ownership, owner/halo agreement, and shared DOF identity for P0, P0g,
+P1 and H1 degrees one through six in real/complex scalar/vector ranges.
+Boundary selection and identification rows are checked through degree six,
+independently of PDE solves. Actual native P1 restrictions use vertex-label
+coefficients $c_k=k+1$ or $c_k=(k+1)+\mathrm{i}(2k+1)$, with vector
+components $c_{k,j}=c_k+j$. Restriction must reproduce those coefficients
+exactly and retain the destination space, including nested ancestry.
+No coordinate matching or numerical tolerance determines correspondence.
+One-rank-only restriction calls check the noncollective value-operation
+contract after collective mesh/space construction; gathers belong only to
+the independent global ownership oracle and synchronization to its test
+protocol. Higher-order logical/index coverage is not a claim of numerical
+restriction or PDE convergence for every higher-order field.
+
 The main refinement sequences can be read with $n$ grid points per coordinate
 axis, $h=1/(n-1)$, and field degree $p$:
 

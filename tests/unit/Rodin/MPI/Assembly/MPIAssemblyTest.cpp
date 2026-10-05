@@ -12,9 +12,12 @@
  *   on a distributed mesh
  * - For 1-rank runs the assembled boundary DOF set is consistent with the
  *   sequential assembly
- * - P1, H1 orders 1–4, P0g, and real/complex/vector traces reach DOF owners
+ * - P1, H1 orders 1–6, P0g, and real/complex/vector traces reach DOF owners
  * - P0, P0g, P1, and H1 orders 1–6 have non-collective fixed-layout metadata
  *   across real/complex scalar/vector ranges, including Point and empty shards
+ * - Positive-dimensional cell, boundary, and nested SubMeshes preserve logical
+ *   ancestry and shared DOF indices for the same families and value ranges,
+ *   with exact P1 restrictions of logically labelled vertex coefficients
  *
  * Run with mpirun -n 1/2/3/4/8 as registered in CMakeLists.txt.
  */
@@ -613,6 +616,385 @@ namespace Rodin::Tests::Unit
     orders.template operator()<6>();
   }
 
+  /**
+   * Positive-dimensional cell/boundary SubMeshes preserve logical ancestry
+   * and shared DOF identity for all scalar/vector ranges and H1 orders 1--6.
+   * Real/complex scalar/vector P1 restrictions preserve vertex-label values
+   * and destination layouts, including nested ancestry, without tolerances.
+   * Gathers below certify global ownership and agreement among holders;
+   * local entity maps and round trips themselves require no collective.
+   */
+  TEST_P(MPITraceGeometryTest, PositiveSubMeshesPreserveAllValueTypeIndices)
+  {
+    const auto& world = *g_world;
+    Context::MPI context(*g_env, world);
+    const size_t dimension = Polytope::Traits(GetParam()).getDimension();
+    auto parent = dimension == 1 ? distributeFromRoot(context, GetParam(), {2})
+      : dimension == 2           ? distributeFromRoot(context, GetParam(), {2, 2})
+                                 : distributeFromRoot(context, GetParam(), {2, 2, 2});
+    const auto check = [&](const SubMesh<Context::MPI>& sub) {
+      const Mesh<Context::MPI>& mesh = sub;
+      const auto& immediateParent = sub.getParent();
+      const size_t subDimension = mesh.getDimension();
+      for (size_t d = 0; d <= subDimension; ++d)
+        for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
+        {
+          const auto& map = sub.getPolytopeMap(d);
+          EXPECT_EQ(map.left.size(), mesh.getShard().getPolytopeCount(d));
+          EXPECT_LT(entity, map.left.size());
+          if (entity >= map.left.size())
+            continue;
+          const Index ancestor = map.left[entity];
+          const auto inverse = map.right.find(ancestor);
+          EXPECT_NE(inverse, map.right.end());
+          if (inverse != map.right.end())
+            EXPECT_EQ(inverse->second, entity);
+          const auto child = mesh.getPolytope(d, entity);
+          const auto parentEntity = immediateParent.getPolytope(d, ancestor);
+          const auto& childVertices = child->getVertices();
+          Polytope::Key mappedVertices(childVertices.size());
+          bool complete = true;
+          for (size_t j = 0; j < childVertices.size(); ++j)
+          {
+            const auto& vertices = sub.getPolytopeMap(0).left;
+            EXPECT_LT(childVertices(j), vertices.size());
+            if (childVertices(j) >= vertices.size())
+              complete = false;
+            else
+              mappedVertices(j) = vertices[childVertices(j)];
+          }
+          if (complete)
+            EXPECT_TRUE(Polytope::Key::SymmetricEquality{}(
+              mappedVertices, parentEntity->getVertices()));
+        }
+      // Entity ownership is a global invariant, distinct from DOF ownership.
+      for (size_t d = 0; d <= subDimension; ++d)
+      {
+        std::vector<std::pair<Index, Index>> ancestry;
+        std::vector<Index> owned;
+        for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
+        {
+          const Index global = mesh.getGlobalIndex(d, entity);
+          const auto& ancestors = sub.getPolytopeMap(d).left;
+          EXPECT_LT(entity, ancestors.size());
+          if (entity < ancestors.size())
+            ancestry.emplace_back(
+              global, immediateParent.getGlobalIndex(d, ancestors[entity]));
+          if (mesh.getShard().isOwned(d, entity))
+            owned.push_back(global);
+        }
+        using EntityState =
+          std::pair<std::vector<std::pair<Index, Index>>, std::vector<Index>>;
+        std::vector<EntityState> gathered;
+        boost::mpi::all_gather(world, EntityState{ancestry, owned}, gathered);
+        IndexMap<Index> expectedAncestor;
+        IndexMap<int> owners;
+        IndexMap<IndexSet> holders;
+        for (size_t rank = 0; rank < gathered.size(); ++rank)
+        {
+          for (const auto& [entity, ancestor] : gathered[rank].first)
+          {
+            const auto [it, inserted] = expectedAncestor.emplace(entity, ancestor);
+            if (!inserted)
+              EXPECT_EQ(it->second, ancestor);
+            holders[entity].insert(rank);
+          }
+          for (const Index entity : gathered[rank].second)
+          {
+            const auto [it, inserted] = owners.emplace(entity, static_cast<int>(rank));
+            EXPECT_TRUE(inserted) << "dimension=" << d << " entity=" << entity;
+          }
+        }
+        for (const auto& [entity, ancestor] : expectedAncestor)
+          EXPECT_TRUE(owners.contains(entity))
+            << "dimension=" << d << " entity=" << entity;
+        for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
+        {
+          const Index global = mesh.getGlobalIndex(d, entity);
+          const auto owner = owners.find(global);
+          if (owner == owners.end())
+            continue;
+          const auto& shard = mesh.getShard();
+          if (shard.isOwned(d, entity))
+          {
+            EXPECT_EQ(owner->second, world.rank());
+            auto expectedHalo = holders[global];
+            expectedHalo.erase(world.rank());
+            const auto halo = shard.getHalo(d).find(entity);
+            if (halo == shard.getHalo(d).end())
+              EXPECT_TRUE(expectedHalo.empty());
+            else
+              EXPECT_EQ(halo->second, expectedHalo);
+          }
+          else
+          {
+            const auto ghostOwner = shard.getOwner(d).find(entity);
+            EXPECT_NE(ghostOwner, shard.getOwner(d).end());
+            if (ghostOwner != shard.getOwner(d).end())
+              EXPECT_EQ(ghostOwner->second, owner->second);
+          }
+        }
+      }
+      const auto checkSpace = [&](const auto& space) {
+        using Space = std::remove_cvref_t<decltype(space)>;
+        constexpr bool cellOnly =
+          std::is_same_v<Space, P0<typename Space::RangeType, Mesh<Context::MPI>>>;
+        SCOPED_TRACE(typeid(space).name());
+        // Exercise the point provenance used by parent GridFunction evaluation.
+        // This is strictly rank-local ancestry, not a physical-coordinate match.
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const Index child = cell->getIndex();
+          const auto& ancestors = sub.getPolytopeMap(subDimension).left;
+          EXPECT_LT(child, ancestors.size());
+          if (child >= ancestors.size())
+            continue; // The entity-map checks above report the missing entry.
+          const Index ancestor = ancestors[child];
+          Index rootAncestor = ancestor;
+          if (immediateParent.isSubMesh())
+          {
+            const auto& parentMap =
+              immediateParent.asSubMesh().getPolytopeMap(subDimension);
+            EXPECT_LT(rootAncestor, parentMap.left.size());
+            if (rootAncestor >= parentMap.left.size())
+              continue;
+            rootAncestor = parentMap.left[rootAncestor];
+          }
+          const auto pullback =
+            space.getPullback({subDimension, child}, [&](const Point& point) {
+              if (point.getPolytope().getMesh() != static_cast<const MeshBase&>(mesh))
+                return false;
+              const auto immediate = immediateParent.inclusion(point);
+              const auto root = parent.inclusion(point);
+              return immediate && root &&
+                immediate->getPolytope().getMesh() ==
+                static_cast<const MeshBase&>(immediateParent) &&
+                immediate->getPolytope().getDimension() == subDimension &&
+                immediate->getPolytope().getIndex() == ancestor &&
+                root->getPolytope().getMesh() == static_cast<const MeshBase&>(parent) &&
+                root->getPolytope().getDimension() == subDimension &&
+                root->getPolytope().getIndex() == rootAncestor;
+            });
+          EXPECT_TRUE(pullback(Math::SpatialPoint::Zero(subDimension)));
+        }
+        for (Index local = 0; local < space.getShard().getSize(); ++local)
+        {
+          if constexpr (requires { space.getLocalIndex(Index{}); })
+            EXPECT_EQ(
+              space.getLocalIndex(space.getGlobalIndex(local)), Optional<Index>(local));
+          else
+            // P0g has a replicated constant view, not a local inverse-map API.
+            EXPECT_EQ(space.getGlobalIndex(local), local);
+        }
+        Index begin, end;
+        space.getOwnershipRange(begin, end);
+        std::vector<std::pair<Index, Index>> ranges;
+        boost::mpi::all_gather(world, std::pair{begin, end}, ranges);
+        Index next = 0;
+        for (const auto& range : ranges)
+        {
+          EXPECT_EQ(range.first, next);
+          EXPECT_GE(range.second, range.first);
+          next = range.second;
+        }
+        EXPECT_EQ(next, space.getSize());
+        using Record = std::pair<Index, std::vector<Index>>;
+        // P0 DOFs are defined on cells, not on their lower-dimensional faces.
+        for (size_t d = cellOnly ? subDimension : 0; d <= subDimension; ++d)
+        {
+          std::vector<Record> local;
+          for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
+          {
+            const auto& dofs = space.getDOFs(d, entity);
+            std::vector<Index> indices(dofs.begin(), dofs.end());
+            std::sort(indices.begin(), indices.end());
+            for (const Index dof : indices)
+            {
+              EXPECT_LT(dof, space.getSize());
+              if constexpr (requires { space.getLocalIndex(Index{}); })
+                EXPECT_TRUE(space.getLocalIndex(dof).has_value());
+              else
+                EXPECT_LT(dof, space.getShard().getSize());
+            }
+            local.emplace_back(mesh.getGlobalIndex(d, entity), std::move(indices));
+          }
+          std::vector<std::vector<Record>> gathered;
+          boost::mpi::all_gather(world, local, gathered);
+          IndexMap<std::vector<Index>> expected;
+          for (const auto& records : gathered)
+            for (const auto& [entity, indices] : records)
+            {
+              const auto [it, inserted] = expected.emplace(entity, indices);
+              if (!inserted)
+                EXPECT_EQ(it->second, indices)
+                  << "dimension=" << d << " entity=" << entity;
+            }
+        }
+      };
+      const auto compareRanges = [&](const auto& real, const auto& complex,
+                                   const auto& realVector, const auto& complexVector) {
+        constexpr bool cellOnly = std::is_same_v<std::remove_cvref_t<decltype(real)>,
+          P0<Real, Mesh<Context::MPI>>>;
+        EXPECT_EQ(real.getSize(), complex.getSize());
+        EXPECT_EQ(realVector.getSize(), 3 * real.getSize());
+        EXPECT_EQ(realVector.getSize(), complexVector.getSize());
+        checkSpace(real);
+        checkSpace(complex);
+        checkSpace(realVector);
+        checkSpace(complexVector);
+        for (size_t d = cellOnly ? subDimension : 0; d <= subDimension; ++d)
+          for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
+          {
+            // getDOFs may return a reusable scratch view. Compare snapshots,
+            // not two references that could alias the next query's storage.
+            const IndexArray scalar = real.getDOFs(d, entity);
+            const IndexArray complexScalar = complex.getDOFs(d, entity);
+            EXPECT_EQ(scalar.size(), complexScalar.size());
+            if (scalar.size() == complexScalar.size())
+              EXPECT_TRUE((scalar == complexScalar).all());
+            const IndexArray vector = realVector.getDOFs(d, entity);
+            const IndexArray complexValues = complexVector.getDOFs(d, entity);
+            EXPECT_EQ(vector.size(), complexValues.size());
+            if (vector.size() == complexValues.size())
+              EXPECT_TRUE((vector == complexValues).all());
+          }
+      };
+      const auto families = [&]<template <class, class> class Family>() {
+        Family<Real, Mesh<Context::MPI>> real(mesh);
+        Family<Complex, Mesh<Context::MPI>> complex(mesh);
+        Family<Math::SpatialVector<Real>, Mesh<Context::MPI>> realVector(mesh, 3);
+        Family<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(mesh, 3);
+        compareRanges(real, complex, realVector, complexVector);
+      };
+      families.template operator()<P0>();
+      families.template operator()<P0g>();
+      families.template operator()<P1>();
+      const auto orders = [&]<size_t K>() {
+        SCOPED_TRACE(K);
+        H1<K, Real, Mesh<Context::MPI>> real(std::integral_constant<size_t, K>{}, mesh);
+        H1<K, Complex, Mesh<Context::MPI>> complex(
+          std::integral_constant<size_t, K>{}, mesh);
+        H1<K, Math::SpatialVector<Real>, Mesh<Context::MPI>> realVector(
+          std::integral_constant<size_t, K>{}, mesh, 3);
+        H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(
+          std::integral_constant<size_t, K>{}, mesh, 3);
+        compareRanges(real, complex, realVector, complexVector);
+      };
+      orders.template operator()<1>();
+      orders.template operator()<2>();
+      orders.template operator()<3>();
+      orders.template operator()<4>();
+      orders.template operator()<5>();
+      orders.template operator()<6>();
+      const auto checkRestriction = [&]<class Range>() {
+        using Space = P1<Range, Mesh<Context::MPI>>;
+        using Scalar = typename Space::ScalarType;
+        constexpr bool vector = std::is_same_v<Range, Math::SpatialVector<Scalar>>;
+        SCOPED_TRACE(typeid(Range).name());
+        const auto sourceSpace = [&] {
+          if constexpr (vector)
+            return Space(parent, 3);
+          else
+            return Space(parent);
+        }();
+        const auto targetSpace = [&] {
+          if constexpr (vector)
+            return Space(mesh, 3);
+          else
+            return Space(mesh);
+        }();
+        GridFunction source(sourceSpace), restricted(targetSpace);
+        const auto value = [](Index vertex, size_t component) {
+          const Scalar base = [&] {
+            if constexpr (std::is_same_v<Scalar, Complex>)
+              return Complex(Real(vertex + 1), Real(2 * vertex + 1));
+            else
+              return Real(vertex + 1);
+          }();
+          return base + Scalar(component);
+        };
+        // Use logical global vertex labels, not coordinates, to seed a
+        // continuous P1 field. All holder coefficients are available locally.
+        for (Index vertex = 0; vertex < parent.getShard().getVertexCount(); ++vertex)
+        {
+          const IndexArray dofs = sourceSpace.getDOFs(0, vertex);
+          const Index global = parent.getGlobalIndex(0, vertex);
+          for (size_t component = 0; component < static_cast<size_t>(dofs.size());
+               ++component)
+            source[dofs(component)] = value(global, component);
+        }
+        // Different spaces must interpolate, rather than copy/rebind the
+        // source layout. The parent inclusion follows the actual value path.
+        // First exercise native coefficient restriction on one rank only:
+        // this operation has no global result and must not communicate.
+        // The barrier is test-protocol synchronization outside the operation;
+        // the bounded MPI test detects an accidental hidden collective.
+        if (world.rank() == 0)
+          restricted = source;
+        world.barrier();
+        restricted = source;
+        EXPECT_EQ(&restricted.getFiniteElementSpace(), &targetSpace);
+        EXPECT_EQ(restricted.getData().size(), targetSpace.getSize());
+        for (Index vertex = 0; vertex < mesh.getShard().getVertexCount(); ++vertex)
+        {
+          const auto& vertices = sub.getPolytopeMap(0).left;
+          EXPECT_LT(vertex, vertices.size());
+          if (vertex >= vertices.size())
+            continue;
+          Index ancestor = vertices[vertex];
+          if (immediateParent.isSubMesh())
+          {
+            const auto& map = immediateParent.asSubMesh().getPolytopeMap(0);
+            EXPECT_LT(ancestor, map.left.size());
+            if (ancestor >= map.left.size())
+              continue;
+            ancestor = map.left[ancestor];
+          }
+          const Index global = parent.getGlobalIndex(0, ancestor);
+          const IndexArray dofs = targetSpace.getDOFs(0, vertex);
+          for (size_t component = 0; component < static_cast<size_t>(dofs.size());
+               ++component)
+            EXPECT_EQ(restricted[dofs(component)], value(global, component));
+        }
+      };
+      checkRestriction.template operator()<Real>();
+      checkRestriction.template operator()<Complex>();
+      checkRestriction.template operator()<Math::SpatialVector<Real>>();
+      checkRestriction.template operator()<Math::SpatialVector<Complex>>();
+    };
+    for (const size_t selectedDimension : {dimension, dimension - 1})
+    {
+      if (selectedDimension == 0)
+        continue; // Point submeshes have their own exact-value coverage.
+      SCOPED_TRACE(::testing::Message() << "submesh dimension=" << selectedDimension);
+      SubMesh<Context::MPI>::Builder builder;
+      builder.initialize(parent);
+      if (selectedDimension == dimension)
+      {
+        for (auto cell = parent.getCell(); cell; ++cell)
+          if (parent.getShard().isOwned(dimension, cell->getIndex()))
+            builder.include(dimension, cell->getIndex());
+      }
+      else
+      {
+        for (auto face = parent.getBoundary(); face; ++face)
+          if (parent.getShard().isOwned(selectedDimension, face->getIndex()))
+            builder.include(selectedDimension, face->getIndex());
+      }
+      auto sub = builder.finalize();
+      EXPECT_EQ(sub.getDimension(), selectedDimension);
+      check(sub);
+      SubMesh<Context::MPI>::Builder nestedBuilder;
+      nestedBuilder.initialize(sub);
+      for (auto cell = sub.getCell(); cell; ++cell)
+        if (sub.getShard().isOwned(selectedDimension, cell->getIndex()))
+          nestedBuilder.include(selectedDimension, cell->getIndex());
+      auto nested = nestedBuilder.finalize();
+      EXPECT_EQ(nested.getDimension(), selectedDimension);
+      check(nested);
+    }
+  }
+
   /** Every boundary DOF reaches its owner, independently of boundary-face ownership. */
   TEST_P(MPITraceGeometryTest, BoundaryConstraintsReachOwnersAcrossSpaces)
   {
@@ -666,62 +1048,42 @@ namespace Rodin::Tests::Unit
     const VectorFunction vectorValue{realValue, realValue, realValue};
     P1<Real, Mesh<Context::MPI>> p1(mesh);
     probe(p1, realValue, "P1");
-    H1<1, Real, Mesh<Context::MPI>> h1(std::integral_constant<size_t, 1>{}, mesh);
-    probe(h1, realValue, "H1<1>");
-    H1<2, Real, Mesh<Context::MPI>> h2(std::integral_constant<size_t, 2>{}, mesh);
-    probe(h2, realValue, "H1<2>");
-    H1<3, Real, Mesh<Context::MPI>> h3(std::integral_constant<size_t, 3>{}, mesh);
-    probe(h3, realValue, "H1<3>");
-    H1<4, Real, Mesh<Context::MPI>> h4(std::integral_constant<size_t, 4>{}, mesh);
-    probe(h4, realValue, "H1<4>");
     P0g<Real, Mesh<Context::MPI>> p0g(mesh);
     probe(p0g, realValue, "P0g");
     P0g<Complex, Mesh<Context::MPI>> complexP0g(mesh);
     probe(complexP0g, complexValue, "P0g complex");
-    H1<2, Complex, Mesh<Context::MPI>> complexH2(
-      std::integral_constant<size_t, 2>{}, mesh);
-    probe(complexH2, complexValue, "H1<2> complex");
     P1<Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorP1(mesh, 3);
     probe(vectorP1, vectorValue, "P1 vector");
-    H1<2, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH2(
-      std::integral_constant<size_t, 2>{}, mesh, 3);
-    probe(vectorH2, vectorValue, "H1<2> vector");
     P0g<Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorP0g(mesh, 3);
     probe(vectorP0g, vectorValue, "P0g vector");
     P1<Complex, Mesh<Context::MPI>> complexP1(mesh);
     probe(complexP1, complexValue, "P1 complex");
-    H1<1, Complex, Mesh<Context::MPI>> complexH1(
-      std::integral_constant<size_t, 1>{}, mesh);
-    probe(complexH1, complexValue, "H1<1> complex");
-    H1<1, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH1(
-      std::integral_constant<size_t, 1>{}, mesh, 3);
-    probe(vectorH1, vectorValue, "H1<1> vector");
-    H1<3, Complex, Mesh<Context::MPI>> complexH3(
-      std::integral_constant<size_t, 3>{}, mesh);
-    probe(complexH3, complexValue, "H1<3> complex");
-    H1<3, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH3(
-      std::integral_constant<size_t, 3>{}, mesh, 3);
-    probe(vectorH3, vectorValue, "H1<3> vector");
-    H1<4, Complex, Mesh<Context::MPI>> complexH4(
-      std::integral_constant<size_t, 4>{}, mesh);
-    probe(complexH4, complexValue, "H1<4> complex");
-    H1<4, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH4(
-      std::integral_constant<size_t, 4>{}, mesh, 3);
-    probe(vectorH4, vectorValue, "H1<4> vector");
     const auto complexVectorValue = complexVectorTrace(Complex(1, 2));
     P1<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVectorP1(mesh, 3);
     probe(complexVectorP1, complexVectorValue, "P1 complex vector");
     P0g<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVectorP0g(mesh, 3);
     probe(complexVectorP0g, complexVectorValue, "P0g complex vector");
-    const auto complexVectorOrders = [&]<size_t K>() {
-      H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> space(
+    // Each order's metadata is released before constructing the next order.
+    const auto orders = [&]<size_t K>() {
+      SCOPED_TRACE(K);
+      H1<K, Real, Mesh<Context::MPI>> scalar(std::integral_constant<size_t, K>{}, mesh);
+      H1<K, Complex, Mesh<Context::MPI>> complex(
+        std::integral_constant<size_t, K>{}, mesh);
+      H1<K, Math::SpatialVector<Real>, Mesh<Context::MPI>> vector(
         std::integral_constant<size_t, K>{}, mesh, 3);
-      probe(space, complexVectorValue, "H1 complex vector");
+      H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(
+        std::integral_constant<size_t, K>{}, mesh, 3);
+      probe(scalar, realValue, "H1 real");
+      probe(complex, complexValue, "H1 complex");
+      probe(vector, vectorValue, "H1 vector");
+      probe(complexVector, complexVectorValue, "H1 complex vector");
     };
-    complexVectorOrders.template operator()<1>();
-    complexVectorOrders.template operator()<2>();
-    complexVectorOrders.template operator()<3>();
-    complexVectorOrders.template operator()<4>();
+    orders.template operator()<1>();
+    orders.template operator()<2>();
+    orders.template operator()<3>();
+    orders.template operator()<4>();
+    orders.template operator()<5>();
+    orders.template operator()<6>();
   }
 
   /**
@@ -833,6 +1195,8 @@ namespace Rodin::Tests::Unit
     orders.template operator()<2>();
     orders.template operator()<3>();
     orders.template operator()<4>();
+    orders.template operator()<5>();
+    orders.template operator()<6>();
   }
 
   TEST_P(MPITraceGeometryTest, IdentificationRowsReachRequiredDOFs)
@@ -892,61 +1256,41 @@ namespace Rodin::Tests::Unit
     };
     P1<Real, Mesh<Context::MPI>> p1(mesh);
     probe(p1, "P1 real");
-    H1<1, Real, Mesh<Context::MPI>> h1(std::integral_constant<size_t, 1>{}, mesh);
-    probe(h1, "H1<1> real");
-    H1<2, Real, Mesh<Context::MPI>> h2(std::integral_constant<size_t, 2>{}, mesh);
-    probe(h2, "H1<2> real");
-    H1<3, Real, Mesh<Context::MPI>> h3(std::integral_constant<size_t, 3>{}, mesh);
-    probe(h3, "H1<3> real");
-    H1<4, Real, Mesh<Context::MPI>> h4(std::integral_constant<size_t, 4>{}, mesh);
-    probe(h4, "H1<4> real");
     P0g<Real, Mesh<Context::MPI>> p0g(mesh);
     probe(p0g, "P0g real");
     P0g<Complex, Mesh<Context::MPI>> complexP0g(mesh);
     probe(complexP0g, "P0g complex");
-    H1<2, Complex, Mesh<Context::MPI>> complexH2(
-      std::integral_constant<size_t, 2>{}, mesh);
-    probe(complexH2, "H1<2> complex");
     P1<Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorP1(mesh, 3);
     probe(vectorP1, "P1 vector");
-    H1<2, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH2(
-      std::integral_constant<size_t, 2>{}, mesh, 3);
-    probe(vectorH2, "H1<2> vector");
     P0g<Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorP0g(mesh, 3);
     probe(vectorP0g, "P0g vector");
     P1<Complex, Mesh<Context::MPI>> complexP1(mesh);
     probe(complexP1, "P1 complex");
-    H1<1, Complex, Mesh<Context::MPI>> complexH1(
-      std::integral_constant<size_t, 1>{}, mesh);
-    probe(complexH1, "H1<1> complex");
-    H1<1, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH1(
-      std::integral_constant<size_t, 1>{}, mesh, 3);
-    probe(vectorH1, "H1<1> vector");
-    H1<3, Complex, Mesh<Context::MPI>> complexH3(
-      std::integral_constant<size_t, 3>{}, mesh);
-    probe(complexH3, "H1<3> complex");
-    H1<3, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH3(
-      std::integral_constant<size_t, 3>{}, mesh, 3);
-    probe(vectorH3, "H1<3> vector");
-    H1<4, Complex, Mesh<Context::MPI>> complexH4(
-      std::integral_constant<size_t, 4>{}, mesh);
-    probe(complexH4, "H1<4> complex");
-    H1<4, Math::SpatialVector<Real>, Mesh<Context::MPI>> vectorH4(
-      std::integral_constant<size_t, 4>{}, mesh, 3);
-    probe(vectorH4, "H1<4> vector");
     P1<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVectorP1(mesh, 3);
     probe(complexVectorP1, "P1 complex vector");
     P0g<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVectorP0g(mesh, 3);
     probe(complexVectorP0g, "P0g complex vector");
-    const auto complexVectorOrders = [&]<size_t K>() {
-      H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> space(
+    // Retain one order's four range layouts, not every preceding order.
+    const auto orders = [&]<size_t K>() {
+      SCOPED_TRACE(K);
+      H1<K, Real, Mesh<Context::MPI>> scalar(std::integral_constant<size_t, K>{}, mesh);
+      H1<K, Complex, Mesh<Context::MPI>> complex(
+        std::integral_constant<size_t, K>{}, mesh);
+      H1<K, Math::SpatialVector<Real>, Mesh<Context::MPI>> vector(
         std::integral_constant<size_t, K>{}, mesh, 3);
-      probe(space, "H1 complex vector");
+      H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(
+        std::integral_constant<size_t, K>{}, mesh, 3);
+      probe(scalar, "H1 real");
+      probe(complex, "H1 complex");
+      probe(vector, "H1 vector");
+      probe(complexVector, "H1 complex vector");
     };
-    complexVectorOrders.template operator()<1>();
-    complexVectorOrders.template operator()<2>();
-    complexVectorOrders.template operator()<3>();
-    complexVectorOrders.template operator()<4>();
+    orders.template operator()<1>();
+    orders.template operator()<2>();
+    orders.template operator()<3>();
+    orders.template operator()<4>();
+    orders.template operator()<5>();
+    orders.template operator()<6>();
   }
 
   /** Certifies the mesh metadata independently of constraint assembly. */
@@ -1047,6 +1391,8 @@ namespace Rodin::Tests::Unit
     orders.template operator()<2>();
     orders.template operator()<3>();
     orders.template operator()<4>();
+    orders.template operator()<5>();
+    orders.template operator()<6>();
   }
 
   /** Certifies the mesh metadata independently of constraint assembly. */

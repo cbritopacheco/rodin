@@ -21,7 +21,7 @@ endif()
 
 foreach(np 1 2 3 4 8)
   # The 3D affine-identification matrix uses a 9^3 tetrahedral grid and
-  # orders 1-4 in real, complex, and vector spaces. Keep its full rank and
+  # orders 1-6 in real, complex, and vector spaces. Keep its full rank and
   # geometry coverage, but run it in the dedicated slow CI job.
   set(_RODIN_MPI_SLOW_IDENTIFICATION_FILTER
     "AllGeometries/MPITraceGeometryTest.IdentificationRowsReachRequiredDOFs/Tetrahedron:AllGeometries/MPITraceGeometryTest.IdentificationRowsReachRequiredDOFs/Pyramid:AllGeometries/MPITraceGeometryTest.IdentificationRowsReachRequiredDOFs/Hexahedron:AllGeometries/MPITraceGeometryTest.IdentificationRowsReachRequiredDOFs/Wedge")
