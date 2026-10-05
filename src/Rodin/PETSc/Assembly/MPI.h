@@ -23,6 +23,7 @@
 #include <petscmacros.h>
 #include <petscmat.h>
 #include <cassert>
+#include <vector>
 
 #include "Rodin/Assembly/AssemblyBase.h"
 #include "Rodin/Assembly/ConstraintMap.h"
@@ -527,6 +528,20 @@ namespace Rodin::Assembly
         // ------------------------
         if (doMatrix)
         {
+          // An entity's local matrix goes to PETSc in one MatSetValues call
+          // when none of its rows or columns is constrained, and entry by
+          // entry through matrix_entry otherwise. An unconstrained DOF
+          // expands to itself with coefficient one, so the inserted values
+          // and the order of additions into each entry are the same.
+          std::vector<PetscInt> blockRows;
+          std::vector<PetscInt> blockCols;
+          std::vector<PetscScalar> blockValues;
+          const auto isFree = [&](Index g) {
+            if (constraints.isIdentified(g))
+              return false;
+            const auto& e = constraints.expand(g);
+            return e.size() == 1 && e[0].index == g && e[0].coefficient == PetscScalar(1);
+          };
           for (auto& bfi : pb.getLocalBFIs())
           {
             const auto& attrs = bfi.getAttributes();
@@ -552,6 +567,35 @@ namespace Rodin::Assembly
               // By value: MPI getDOFs() returns a thread_local buffer shared by all spaces of one type, so the next call would overwrite it.
               const auto rowsDOF = testFES.getDOFs(d, idx);
               const auto& colsDOF = trialFES.getDOFs(d, idx);
+
+              const size_t nr = static_cast<size_t>(rowsDOF.size());
+              const size_t nc = static_cast<size_t>(colsDOF.size());
+              bool free = true;
+              blockRows.resize(nr);
+              blockCols.resize(nc);
+              for (size_t i = 0; i < nr; ++i)
+              {
+                blockRows[i] = rowsDOF[static_cast<Index>(i)];
+                free = free && isFree(static_cast<Index>(blockRows[i]));
+              }
+              for (size_t j = 0; j < nc; ++j)
+              {
+                blockCols[j] = colsDOF[static_cast<Index>(j)];
+                free = free && isFree(static_cast<Index>(blockCols[j]));
+              }
+
+              if (free)
+              {
+                blockValues.resize(nr * nc);
+                for (size_t i = 0; i < nr; ++i)
+                  for (size_t j = 0; j < nc; ++j)
+                    blockValues[i * nc + j] = bfi.integrate(j, i);
+                ierr = MatSetValues(A, static_cast<PetscInt>(nr), blockRows.data(),
+                  static_cast<PetscInt>(nc), blockCols.data(), blockValues.data(), ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+                (void)ierr;
+                continue;
+              }
 
               for (Index i = 0; i < static_cast<Index>(rowsDOF.size()); ++i)
               {
@@ -1252,6 +1296,20 @@ namespace Rodin::Assembly
 
         if (doMatrix)
         {
+          // An entity's local matrix goes to PETSc in one MatSetValues call
+          // when none of its rows or columns is constrained, and entry by
+          // entry through matrix_entry otherwise. An unconstrained DOF
+          // expands to itself with coefficient one, so the inserted values
+          // and the order of additions into each entry are the same.
+          std::vector<PetscInt> blockRows;
+          std::vector<PetscInt> blockCols;
+          std::vector<PetscScalar> blockValues;
+          const auto isFree = [&](Index g) {
+            if (constraints.isIdentified(g))
+              return false;
+            const auto& e = constraints.expand(g);
+            return e.size() == 1 && e[0].index == g && e[0].coefficient == PetscScalar(1);
+          };
           for (auto& bfi : pb.getLocalBFIs())
           {
             const auto uUUID = bfi.getTrialFunction().getUUID();
@@ -1289,6 +1347,35 @@ namespace Rodin::Assembly
               // By value: MPI getDOFs() returns a thread_local buffer shared by all spaces of one type, so the next call would overwrite it.
               const auto rows = vFES.getDOFs(d, idx);
               const auto& cols = uFES.getDOFs(d, idx);
+
+              const size_t nr = static_cast<size_t>(rows.size());
+              const size_t nc = static_cast<size_t>(cols.size());
+              bool free = true;
+              blockRows.resize(nr);
+              blockCols.resize(nc);
+              for (size_t i = 0; i < nr; ++i)
+              {
+                blockRows[i] = vOff + rows[static_cast<Index>(i)];
+                free = free && isFree(static_cast<Index>(blockRows[i]));
+              }
+              for (size_t j = 0; j < nc; ++j)
+              {
+                blockCols[j] = uOff + cols[static_cast<Index>(j)];
+                free = free && isFree(static_cast<Index>(blockCols[j]));
+              }
+
+              if (free)
+              {
+                blockValues.resize(nr * nc);
+                for (size_t i = 0; i < nr; ++i)
+                  for (size_t j = 0; j < nc; ++j)
+                    blockValues[i * nc + j] = bfi.integrate(j, i);
+                ierr = MatSetValues(A, static_cast<PetscInt>(nr), blockRows.data(),
+                  static_cast<PetscInt>(nc), blockCols.data(), blockValues.data(), ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+                (void)ierr;
+                continue;
+              }
 
               for (Index i = 0; i < static_cast<Index>(rows.size()); ++i)
               {

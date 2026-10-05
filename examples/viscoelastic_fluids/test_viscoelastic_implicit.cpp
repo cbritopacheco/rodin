@@ -298,31 +298,6 @@ namespace Rodin::Examples::ViscoelasticFluids
         (f / m.lambda) * (Eigen::Matrix2d::Identity() - e.expMinus());
     }
 
-    LogPoint logPoint(const Eigen::Matrix2d& psi, const Eigen::Matrix2d& L, const LogModel& m)
-    {
-      LogPoint out;
-      const LogEig e = logEig(psi);
-      out.exp = e.exp();
-      const auto& B = voigtBasisEigen();
-      for (size_t j = 0; j < 3; ++j)
-        out.D[j] = e.dexp(B[j]);
-      out.N = nonlinearMap(psi, L, m, &out.f);
-      // Central differences in the three Voigt directions; the map is smooth
-      // and the eigenproblem is 2x2, so this costs six decompositions.
-      const Real h = 1.0e-6 * std::max<Real>(1.0, psi.cwiseAbs().maxCoeff());
-      for (size_t j = 0; j < 3; ++j)
-        out.JN[j] = (nonlinearMap(psi + h * B[j], L, m) - nonlinearMap(psi - h * B[j], L, m)) / (2.0 * h);
-      for (size_t a = 0; a < 2; ++a)
-        for (size_t b = 0; b < 2; ++b)
-        {
-          Eigen::Matrix2d E = Eigen::Matrix2d::Zero();
-          E(a, b) = 1.0;
-          out.Q[a][b] = -e.dexpInverse(E * out.exp + out.exp * E.transpose() -
-            0.5 * m.c * (E + E.transpose()));
-        }
-      return out;
-    }
-
     /// @brief A 2x2 tensor field given by a callable, evaluated pointwise.
     template <class F>
     class PointwiseTensor final
@@ -346,14 +321,29 @@ namespace Rodin::Examples::ViscoelasticFluids
         F m_f;
     };
 
+    /// @brief The parts of a LogPoint, each computed only when a form asks
+    ///        for it: the forms are assembled one integrator at a time over
+    ///        the whole mesh, so each pass recomputes the point and should pay
+    ///        only for what it reads (the FD Jacobian JN alone costs six
+    ///        eigenproblems).
+    enum LogPart : std::uint8_t
+    {
+      LogExp = 1,  ///< exp(psi)
+      LogD = 2,    ///< Dexp[B_j]
+      LogN = 4,    ///< N, and f
+      LogJN = 8,   ///< dN/dpsi_j
+      LogQ = 16    ///< Q_ab
+    };
+
     /// @brief logPoint(psi(x), grad u(x)), cached per quadrature point: the
     ///        form language evaluates a coefficient once per basis function,
     ///        and without the cache the eigenproblems dominate assembly. Keyed
     ///        by the psi field, its revision (bumped on every change of the
-    ///        pair), cell and reference coordinates.
+    ///        pair), cell and reference coordinates. Only the parts in `need`
+    ///        are guaranteed.
     template <class GF, class UF>
-    const LogPoint& logPointAt(
-      const GF& psi, const UF& u, const LogModel& m, std::uint64_t revision, const Point& p)
+    const LogPoint& logPointAt(const GF& psi, const UF& u, const LogModel& m,
+      std::uint64_t revision, const Point& p, std::uint8_t need)
     {
       struct Entry
       {
@@ -361,6 +351,12 @@ namespace Rodin::Examples::ViscoelasticFluids
         std::uint64_t revision = 0;
         Index cell = 0;
         Real r0 = 0, r1 = 0;
+        std::uint8_t have = 0;
+        bool hasEig = false;
+        bool hasL = false;
+        Eigen::Matrix2d psi;
+        Eigen::Matrix2d L;
+        LogEig eig;
         LogPoint value;
       };
       thread_local std::array<Entry, 16> cache;
@@ -368,28 +364,93 @@ namespace Rodin::Examples::ViscoelasticFluids
 
       const Index cell = p.getPolytope().getIndex();
       const auto& rc = p.getReferenceCoordinates();
-      for (const auto& e : cache)
+      Entry* hit = nullptr;
+      for (auto& e : cache)
         if (e.field == &psi && e.revision == revision && e.cell == cell &&
             e.r0 == rc(0) && e.r1 == rc(1))
-          return e.value;
+        {
+          hit = &e;
+          break;
+        }
 
-      auto& e = cache[next];
-      next = (next + 1) % cache.size();
-      const auto J = Jacobian(u).getValue(p);   // Math::SpatialMatrix, not Eigen
-      Eigen::Matrix2d L;
-      L << J(0, 0), J(0, 1), J(1, 0), J(1, 1);
-      e = Entry{ &psi, revision, cell, rc(0), rc(1),
-        logPoint(unpack(psi.getValue(p)), L, m) };
-      return e.value;
+      if (!hit)
+      {
+        hit = &cache[next];
+        next = (next + 1) % cache.size();
+        hit->field = &psi;
+        hit->revision = revision;
+        hit->cell = cell;
+        hit->r0 = rc(0);
+        hit->r1 = rc(1);
+        hit->have = 0;
+        hit->hasEig = false;
+        hit->hasL = false;
+        hit->psi = unpack(psi.getValue(p));
+      }
+
+      Entry& e = *hit;
+      const std::uint8_t missing = need & ~e.have;
+      if (!missing)
+        return e.value;
+
+      LogPoint& out = e.value;
+      if ((missing & (LogN | LogJN)) && !e.hasL)
+      {
+        const auto J = Jacobian(u).getValue(p);   // Math::SpatialMatrix, not Eigen
+        e.L << J(0, 0), J(0, 1), J(1, 0), J(1, 1);
+        e.hasL = true;
+      }
+      if ((missing & (LogExp | LogD | LogQ)) && !e.hasEig)
+      {
+        e.eig = logEig(e.psi);
+        e.hasEig = true;
+      }
+      if ((missing & (LogExp | LogQ)) && !(e.have & LogExp))
+      {
+        out.exp = e.eig.exp();
+        e.have |= LogExp;
+      }
+      if (missing & LogD)
+      {
+        const auto& B = voigtBasisEigen();
+        for (size_t j = 0; j < 3; ++j)
+          out.D[j] = e.eig.dexp(B[j]);
+      }
+      if (missing & LogN)
+        out.N = nonlinearMap(e.psi, e.L, m, &out.f);
+      if (missing & LogJN)
+      {
+        // Central differences in the three Voigt directions; the map is smooth
+        // and the eigenproblem is 2x2, so this costs six decompositions.
+        const auto& B = voigtBasisEigen();
+        const Real h = 1.0e-6 * std::max<Real>(1.0, e.psi.cwiseAbs().maxCoeff());
+        for (size_t j = 0; j < 3; ++j)
+          out.JN[j] = (nonlinearMap(e.psi + h * B[j], e.L, m) -
+            nonlinearMap(e.psi - h * B[j], e.L, m)) / (2.0 * h);
+      }
+      if (missing & LogQ)
+      {
+        for (size_t a = 0; a < 2; ++a)
+          for (size_t b = 0; b < 2; ++b)
+          {
+            Eigen::Matrix2d E = Eigen::Matrix2d::Zero();
+            E(a, b) = 1.0;
+            out.Q[a][b] = -e.eig.dexpInverse(E * out.exp + out.exp * E.transpose() -
+              0.5 * m.c * (E + E.transpose()));
+          }
+      }
+      e.have |= need;
+      return out;
     }
 
-    /// @brief A pointwise matrix drawn from the cached LogPoint by `pick`.
+    /// @brief A pointwise matrix drawn from the cached LogPoint by `pick`,
+    ///        which reads only the parts in `need`.
     template <class GF, class UF, class Pick>
     auto fromPoint(const GF& psi, const UF& u, const LogModel& m,
-      const std::uint64_t& revision, Pick pick)
+      const std::uint64_t& revision, std::uint8_t need, Pick pick)
     {
-      return PointwiseTensor([&psi, &u, m, &revision, pick](const Point& p) -> Eigen::Matrix2d {
-        return pick(logPointAt(psi, u, m, revision, p)); });
+      return PointwiseTensor([&psi, &u, m, &revision, need, pick](const Point& p) -> Eigen::Matrix2d {
+        return pick(logPointAt(psi, u, m, revision, p, need)); });
     }
 
     /// @brief Dexp_{psi(x)}[w] = sum_j w_j Dexp[B_j] for a Voigt w: psi itself
@@ -398,7 +459,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     auto dexp(const GF& psi, const UF& u, const LogModel& m, const std::uint64_t& revision, const W& w)
     {
       const auto D = [&](size_t j) {
-        return fromPoint(psi, u, m, revision, [j](const LogPoint& q) { return q.D[j]; });
+        return fromPoint(psi, u, m, revision, LogD, [j](const LogPoint& q) { return q.D[j]; });
       };
       return D(0) * Component(w, 0) + D(1) * Component(w, 1) + D(2) * Component(w, 2);
     }
@@ -408,7 +469,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     auto jacobianN(const GF& psi, const UF& u, const LogModel& m, const std::uint64_t& revision, const W& w)
     {
       const auto J = [&](size_t j) {
-        return fromPoint(psi, u, m, revision, [j](const LogPoint& q) { return q.JN[j]; });
+        return fromPoint(psi, u, m, revision, LogJN, [j](const LogPoint& q) { return q.JN[j]; });
       };
       return J(0) * Component(w, 0) + J(1) * Component(w, 1) + J(2) * Component(w, 2);
     }
@@ -420,7 +481,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     auto velocityMap(const GF& psi, const UF& u, const LogM& m, const std::uint64_t& revision, const V& v)
     {
       const auto Q = [&](size_t a, size_t b) {
-        return fromPoint(psi, u, m, revision, [a, b](const LogPoint& q) { return q.Q[a][b]; });
+        return fromPoint(psi, u, m, revision, LogQ, [a, b](const LogPoint& q) { return q.Q[a][b]; });
       };
       // L_ab = d v_a / d x_b = (J(v) e_b)_a
       const auto col0 = Mult(Jacobian(v), unit(0));
@@ -1109,8 +1170,8 @@ namespace Rodin::Examples::ViscoelasticFluids
         const auto X = tensor(m_chi);
         const auto I = MatrixFunction<Math::Matrix<Real>>(Math::Matrix<Real>::Identity(2, 2));
 
-        const auto at = [this, model](auto pick) {
-          return fromPoint(m_psiIt, m_uIt, model, m_psiRevision, pick); };
+        const auto at = [this, model](std::uint8_t need, auto pick) {
+          return fromPoint(m_psiIt, m_uIt, model, m_psiRevision, need, pick); };
         const auto Dexp = [this, model](const auto& w) {
           return dexp(m_psiIt, m_uIt, model, m_psiRevision, w); };
         const auto JN = [this, model](const auto& w) {
@@ -1123,9 +1184,9 @@ namespace Rodin::Examples::ViscoelasticFluids
         };
 
         const auto T = Dexp(m_psi);
-        const auto Tn = at([](const LogPoint& q) { return q.exp; });
+        const auto Tn = at(LogExp, [](const LogPoint& q) { return q.exp; });
         const auto C = Tn - Dexp(m_psiIt);
-        const auto N = at([](const LogPoint& q) { return q.N; });
+        const auto N = at(LogN, [](const LogPoint& q) { return q.N; });
         const auto known = N - JN(m_psiIt) - Gu(m_uIt) - (1.0 / dt) * tensor(m_psiOld)
           - advection(m_psiIt, m_uIt);
 
