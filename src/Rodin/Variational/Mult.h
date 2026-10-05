@@ -481,6 +481,7 @@ namespace Rodin::Variational
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_rhs->setIntegrationPoint(ip);
+        m_coefficient.refresh(getLHS(), ip);
         return *this;
       }
 
@@ -489,10 +490,14 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
-        const auto lhs = getLHS().getValue(p);
-        decltype(auto) rhs = getRHS().getBasis(local);
-        const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        const auto eval = [&](const auto& lhs) {
+          decltype(auto) rhs = getRHS().getBasis(local);
+          const auto product = lhs * rhs;
+          return Internal::materializeProduct(product);
+        };
+        if (const auto* lhs = m_coefficient.get())
+          return eval(*lhs);
+        return eval(getLHS().getValue(p));
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -513,6 +518,16 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
+      /// @brief Type returned by the coefficient's getValue().
+      using CoefficientType =
+        std::decay_t<decltype(std::declval<const LHSType&>().getValue(
+          std::declval<const IntegrationPoint&>()))>;
+
+      /// @brief The coefficient at the current quadrature point.
+      Internal::CoefficientCache<CoefficientType,
+        Internal::IsOwningCoefficient<CoefficientType, LHSRangeType>>
+        m_coefficient;
   };
 
   /// @brief Deduction guide for @c Mult.
@@ -658,6 +673,7 @@ namespace Rodin::Variational
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
+        m_coefficient.refresh(getRHS(), ip);
         return *this;
       }
 
@@ -666,10 +682,14 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
-        decltype(auto) lhs = this->getLHS().getBasis(local);
-        const auto rhs = this->getRHS().getValue(p);
-        const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        const auto eval = [&](const auto& rhs) {
+          decltype(auto) lhs = this->getLHS().getBasis(local);
+          const auto product = lhs * rhs;
+          return Internal::materializeProduct(product);
+        };
+        if (const auto* rhs = m_coefficient.get())
+          return eval(*rhs);
+        return eval(this->getRHS().getValue(p));
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -690,6 +710,16 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
+      /// @brief Type returned by the coefficient's getValue().
+      using CoefficientType =
+        std::decay_t<decltype(std::declval<const RHSType&>().getValue(
+          std::declval<const IntegrationPoint&>()))>;
+
+      /// @brief The coefficient at the current quadrature point.
+      Internal::CoefficientCache<CoefficientType,
+        Internal::IsOwningCoefficient<CoefficientType, RHSRangeType>>
+        m_coefficient;
   };
 
   /// @brief Deduction guide for @c Mult.

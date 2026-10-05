@@ -323,6 +323,7 @@ namespace Rodin::Variational
       Division& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
+        m_coefficient.refresh(getRHS(), ip);
         return *this;
       }
 
@@ -331,8 +332,15 @@ namespace Rodin::Variational
       {
         const auto& ip = getIntegrationPoint();
         decltype(auto) lhs = getLHS().getBasis(local);
-        const auto rhs = getRHS().getValue(ip);
-        return lhs / rhs;
+        const auto eval = [&](const auto& rhs) {
+          if constexpr (requires { (lhs / rhs).eval(); })
+            return (lhs / rhs).eval();
+          else
+            return lhs / rhs;
+        };
+        if (const auto* rhs = m_coefficient.get())
+          return eval(*rhs);
+        return eval(getRHS().getValue(ip));
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -353,6 +361,13 @@ namespace Rodin::Variational
       }
 
     private:
+      using CoefficientValue =
+        std::decay_t<decltype(std::declval<const RHSType&>().getValue(
+          std::declval<const IntegrationPoint&>()))>;
+      Internal::CoefficientCache<CoefficientValue,
+        Internal::IsOwningCoefficient<CoefficientValue,
+          typename FormLanguage::Traits<RHSType>::RangeType>>
+        m_coefficient;
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
   };

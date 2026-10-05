@@ -511,7 +511,8 @@ namespace Rodin::Variational
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_mat(std::move(other.m_mat))
+          m_mat(std::move(other.m_mat)),
+          m_testBasis(std::move(other.m_testBasis))
       {}
 
       /**
@@ -583,6 +584,7 @@ namespace Rodin::Variational
 
         m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_mat.setZero();
+        m_testBasis.resize(nte);
 
         // Eigen is assumed ColMajor. Columns are filled contiguously.
         ScalarType* __restrict M = m_mat.data();
@@ -602,6 +604,12 @@ namespace Rodin::Variational
           const IntegrationPoint ip(p, m_qf, qp);
           integrand.setIntegrationPoint(ip);
 
+          // Each test basis value is evaluated once per point, not once per
+          // trial index: a test expression with coefficients would otherwise
+          // be evaluated ntr * nte times.
+          for (size_t te = 0; te < nte; ++te)
+            m_testBasis[te] = test.getBasis(te);
+
           for (size_t tr = 0; tr < ntr; ++tr)
           {
             ScalarType* __restrict col = M + static_cast<Eigen::Index>(tr) * ld;
@@ -609,7 +617,7 @@ namespace Rodin::Variational
 
             for (size_t te = 0; te < nte; ++te)
             {
-              const auto& phi_te = test.getBasis(te);
+              const auto& phi_te = m_testBasis[te];
               col[static_cast<Eigen::Index>(te)] += wdet * Math::dot(phi_tr, phi_te);
             }
           }
@@ -650,6 +658,10 @@ namespace Rodin::Variational
       size_t m_order;                                           ///< Cached quadrature order
       Geometry::Polytope::Type m_geometry;                      ///< Cached geometry type
       Math::Matrix<ScalarType> m_mat;                           ///< Local matrix, rows=test, cols=trial
+      /// @brief Test basis values at the current quadrature point.
+      std::vector<typename FormLanguage::RangeOf<
+        std::decay_t<decltype(std::declval<const RHSType&>().getBasis(size_t()))>>::Type>
+        m_testBasis;
   };
 
   /**
