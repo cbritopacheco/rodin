@@ -19,6 +19,24 @@ using namespace Rodin::Variational;
 
 namespace
 {
+  class OwnedScalarFunction final : public FunctionBase<OwnedScalarFunction>
+  {
+    public:
+      mutable Real value = 2;
+      Real getValue(const Point&) const
+      {
+        return value;
+      }
+      Optional<size_t> getOrder(const Polytope&) const
+      {
+        return 0;
+      }
+      OwnedScalarFunction* copy() const noexcept override
+      {
+        return new OwnedScalarFunction(*this);
+      }
+  };
+
   class LazyVectorFunction final : public FunctionBase<LazyVectorFunction>
   {
     public:
@@ -201,24 +219,25 @@ TEST(CoefficientEvaluation, CacheLifecycleAndIndependentBindings)
   });
   using Cache = decltype(f)::Cache;
   static_assert(Cache::Enabled);
-  Cache first;
-  Cache second;
+  static_assert(!std::is_constructible_v<Cache, decltype(f)&&>);
+  Cache first(f);
+  Cache second(f);
   EXPECT_EQ(first.get(), nullptr);
-  EXPECT_EQ(&first.setIntegrationPoint(f, ip), &first);
+  EXPECT_EQ(&first.setIntegrationPoint(ip), &first);
   ASSERT_NE(first.get(), nullptr);
   EXPECT_EQ(*first.get(), 2);
   EXPECT_EQ(calls, 1);
   scale = 5;
-  second.setIntegrationPoint(f, ip);
+  second.setIntegrationPoint(ip);
   EXPECT_EQ(*first.get(), 2);
   ASSERT_NE(second.get(), nullptr);
   EXPECT_EQ(*second.get(), 5);
-  first.setIntegrationPoint(f, ip);
+  first.setIntegrationPoint(ip);
   EXPECT_EQ(*first.get(), 5);
   EXPECT_EQ(calls, 3);
   Cache copied(first);
   EXPECT_EQ(copied.get(), nullptr);
-  copied.setIntegrationPoint(f, ip);
+  copied.setIntegrationPoint(ip);
   copied = first;
   EXPECT_EQ(copied.get(), nullptr);
   Cache moved(std::move(second));
@@ -228,9 +247,44 @@ TEST(CoefficientEvaluation, CacheLifecycleAndIndependentBindings)
   ASSERT_NE(copied.get(), nullptr);
   EXPECT_EQ(*copied.get(), 5);
   const size_t before = calls;
-  first.setIntegrationPoint(f, IntegrationPoint(point));
+  first.setIntegrationPoint(IntegrationPoint(point));
   EXPECT_EQ(first.get(), nullptr);
   EXPECT_EQ(calls, before);
+}
+
+TEST(CoefficientEvaluation, ExpressionCopiesBindTheirOwnFunction)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  P1<Real> fes(mesh);
+  TestFunction v(fes);
+  OwnedScalarFunction f;
+  const auto cell = *mesh.getCell();
+  const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+  const Point point(cell, qf.getPoint(0));
+  const IntegrationPoint ip(point, &qf, 0);
+  const auto check = [&](auto expr) {
+    expr.setIntegrationPoint(ip);
+    const Real initial = expr.getBasis(0);
+    auto copied = expr;
+    if constexpr (requires { expr.getLHS().getDerived().value; })
+      expr.getLHS().getDerived().value = 5;
+    else
+      expr.getRHS().getDerived().value = 5;
+    copied.setIntegrationPoint(ip);
+    EXPECT_NEAR(copied.getBasis(0), initial, 1e-12);
+    auto moved = std::move(expr);
+    moved.setIntegrationPoint(ip);
+    const Real changed = moved.getBasis(0);
+    EXPECT_GT(std::abs(changed - initial), 1e-6);
+    auto copyAfterMove = moved;
+    copyAfterMove.setIntegrationPoint(ip);
+    EXPECT_NEAR(copyAfterMove.getBasis(0), changed, 1e-12);
+  };
+  check(f * v);
+  check(v * f);
+  check(Dot(f, v));
+  check(Dot(v, f));
+  check(v / f);
 }
 
 TEST(CoefficientEvaluation, LazyFunctionValuesRetainDirectEvaluation)

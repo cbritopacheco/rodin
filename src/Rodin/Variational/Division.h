@@ -325,7 +325,7 @@ namespace Rodin::Variational
       Division& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
-        m_functionCache.setIntegrationPoint(getRHS(), ip);
+        m_functionCache.setIntegrationPoint(ip);
         return *this;
       }
 
@@ -364,10 +364,10 @@ namespace Rodin::Variational
       }
 
     private:
-      /// @brief Function value at the current quadrature binding.
-      typename RHSType::Cache m_functionCache;
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+      /// @brief Function value at the current quadrature binding.
+      typename RHSType::Cache m_functionCache{*m_rhs};
   };
 
   /// @brief Deduction guide for @c Division.

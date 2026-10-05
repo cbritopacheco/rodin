@@ -15,6 +15,7 @@
 #ifndef RODIN_VARIATIONAL_FUNCTION_H
 #define RODIN_VARIATIONAL_FUNCTION_H
 
+#include <functional>
 #include <optional>
 #include <type_traits>
 
@@ -318,54 +319,66 @@ namespace Rodin::Variational
               std::is_base_of_v<Eigen::PlainObjectBase<Value>, Value>) &&
             std::is_copy_constructible_v<Value> && std::is_copy_assignable_v<Value>;
 
-          /// @brief Constructs an empty cache.
-          Cache() = default;
-
           /**
-           * @brief Constructs an empty cache when copying an evaluation pass.
-           * @param[in] other Source cache whose snapshot is deliberately not copied.
+           * @brief Constructs an empty cache bound to a function.
+           * @param[in] f Function to evaluate on subsequent point bindings.
+           * @note The function is not owned and must outlive this cache.
            */
-          Cache([[maybe_unused]] const Cache& other)
-            : Cache()
+          explicit Cache(const FunctionBase& f)
+            : m_function(f)
           {}
 
           /**
-           * @brief Transfers the current snapshot.
+           * @brief Prevents binding a cache to a temporary function.
+           * @param[in] f Temporary function whose lifetime cannot cover the cache.
+           */
+          Cache(FunctionBase&& f) = delete;
+
+          /**
+           * @brief Constructs an empty cache when copying an evaluation pass.
+           * @param[in] other Source cache whose function binding is copied, but whose snapshot is not.
+           */
+          Cache(const Cache& other)
+            : Cache(other.m_function.get())
+          {}
+
+          /**
+           * @brief Transfers the function binding and current snapshot.
            * @param[in] other Source cache to move from.
            */
           Cache(Cache&& other) = default;
 
           /**
            * @brief Clears the snapshot when copying another evaluation pass.
-           * @param[in] other Source cache whose snapshot is deliberately not copied.
+           * @param[in] other Source cache whose function binding is copied, but whose snapshot is not.
            * @returns This cache with an empty snapshot.
            */
-          Cache& operator=([[maybe_unused]] const Cache& other)
+          Cache& operator=(const Cache& other)
           {
+            m_function = other.m_function;
             m_value.reset();
             return *this;
           }
 
           /**
-           * @brief Transfers the current snapshot on move assignment.
+           * @brief Transfers the function binding and snapshot on move assignment.
            * @param[in] other Source cache to move from.
            * @returns This cache.
            */
           Cache& operator=(Cache&& other) = default;
 
           /**
-           * @brief Binds the cache to a function evaluation at an integration point.
-           * @param[in] f Function to evaluate; no reference to it is retained.
+           * @brief Evaluates the bound function at an integration point.
            * @param[in] ip Evaluation point; no reference to it is retained.
            * @returns This cache.
            *
            * When @ref Enabled is true and @p ip has quadrature metadata, evaluates
-           * @p f and owns its value. Every call evaluates again, even at the same
-           * point, so reassembly observes changed function data. A point without
+           * the bound function and owns its value. Every call evaluates again,
+           * even at the same point, so reassembly observes changed function data. A point without
            * quadrature metadata clears the snapshot. With @ref Enabled false,
-           * leaves the cache empty and does not evaluate @p f.
+           * leaves the cache empty and does not evaluate the function.
            */
-          Cache& setIntegrationPoint(const FunctionBase& f, const IntegrationPoint& ip)
+          Cache& setIntegrationPoint(const IntegrationPoint& ip)
           {
             if constexpr (Enabled)
             {
@@ -375,9 +388,9 @@ namespace Rodin::Variational
                 return *this;
               }
               if (m_value)
-                *m_value = f.getValue(ip);
+                *m_value = m_function.get().getValue(ip);
               else
-                m_value.emplace(f.getValue(ip));
+                m_value.emplace(m_function.get().getValue(ip));
             }
             return *this;
           }
@@ -399,6 +412,7 @@ namespace Rodin::Variational
           }
 
         private:
+          std::reference_wrapper<const FunctionBase> m_function;
           std::optional<Value> m_value;
       };
 
