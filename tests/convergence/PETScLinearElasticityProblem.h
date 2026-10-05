@@ -22,6 +22,11 @@ namespace Rodin::Tests::Convergence
    * @f$\sigma=\lambda(\nabla\cdot u)I+2\mu\varepsilon(u)@f$,
    * @f$\lambda=1.5@f$, @f$\mu=0.5@f$ and full manufactured traces.
    * Removing the volumetric stiffness retains the original source and trace.
+   * Mixed traction uses @f$t=\sigma(u)n@f$ on the natural partition; an
+   * independent missing-traction control retains the body force and trace.
+   * Optional Lamé parameters and divergence-free manufactured data reproduce
+   * the native nearly incompressible verification workload without changing
+   * the default full-Dirichlet studies.
    * @par Architecture
    * Each solve creates a fresh fixed-layout vector space and system. Shared
    * physical data and vector norms are independent of assembly; a const
@@ -33,26 +38,48 @@ namespace Rodin::Tests::Convergence
     public:
       using Data = LinearElasticity::ManufacturedSolution;
 
-      PETScLinearElasticityProblem(
-        const MeshType& mesh, Data::Field field, size_t assemblyOrder = 16)
+      enum class Boundary
+      {
+        Dirichlet,
+        MixedTraction
+      };
+      static constexpr Geometry::Attribute DirichletAttribute = 201;
+      static constexpr Geometry::Attribute TractionAttribute = 202;
+
+      PETScLinearElasticityProblem(const MeshType& mesh, Data::Field field,
+        size_t assemblyOrder = 16, Boundary boundary = Boundary::Dirichlet,
+        Real lambda = Lambda, Real mu = Mu, PCType preconditioner = nullptr)
         : m_mesh(mesh),
-          m_data(mesh.getDimension(), Lambda, Mu, field),
-          m_order(assemblyOrder)
+          m_data(mesh.getDimension(), lambda, mu, field),
+          m_order(assemblyOrder),
+          m_boundary(boundary),
+          m_preconditioner(preconditioner)
       {
         assert(mesh.getDimension() > 0);
         assert(mesh.getDimension() == mesh.getSpaceDimension());
       }
 
+      /** @brief Assemble, solve, and measure the global manufactured problem.
+       * @note For an MPI mesh, all ranks of its communicator must participate:
+       * distributed assembly, the linear solve, residual norms, and error
+       * norms are global operations. Manufactured pointwise data remain local.
+       */
       ErrorNorms solve(bool omitVolumetric = false, Real tolerance = SolverTolerance,
-        size_t normOrder = 18) const
+        size_t normOrder = 18, bool omitTraction = false) const
       {
         return solve(
-          omitVolumetric, tolerance, normOrder, [](const auto&, const auto&) {});
+          omitVolumetric, tolerance, normOrder, [](const auto&, const auto&) {},
+          omitTraction);
       }
 
+      /** @brief Solve with a solve-scoped observer before error integration.
+       * @note The same collective contract as the ordinary solve applies.
+       * The observer is invoked on each rank with that rank's solution view;
+       * it must not assume an independently replicated global field.
+       */
       template <class Observer>
-      ErrorNorms solve(
-        bool omitVolumetric, Real tolerance, size_t normOrder, Observer&& observe) const
+      ErrorNorms solve(bool omitVolumetric, Real tolerance, size_t normOrder,
+        Observer&& observe, bool omitTraction = false) const
       {
         using namespace Variational;
         const auto& mesh = m_mesh.get();
@@ -69,8 +96,40 @@ namespace Rodin::Tests::Convergence
         shear.setOrder(m_order);
         load.setOrder(m_order);
         Problem problem(u, v);
-        problem = volumetric + shear - load + DirichletBC(u, m_data.exact);
+        if (m_boundary == Boundary::MixedTraction)
+        {
+          const Variational::BoundaryNormal normal(mesh);
+          const Variational::VectorFunction traction(
+            mesh.getDimension(), [this, normal, omitTraction](const Geometry::Point& p) {
+              const size_t dim = m_data.getDimension();
+              Math::SpatialVector<Real> outward(static_cast<std::uint8_t>(dim));
+              if (dim == 1)
+                outward(0) = p(0) < Real(0.5) ? -1 : 1;
+              else
+                outward = normal(p);
+              const auto stress = m_data.stress(p);
+              Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+              value.setZero();
+              if (!omitTraction)
+                for (size_t i = 0; i < dim; ++i)
+                  for (size_t j = 0; j < dim; ++j)
+                    value(i) += stress(i, j) * outward(j);
+              return value;
+            });
+          auto boundaryLoad = BoundaryIntegral(traction, v);
+          boundaryLoad.setOrder(m_order);
+          problem = volumetric + shear - load - boundaryLoad.over(TractionAttribute) +
+            DirichletBC(u, m_data.exact).on(DirichletAttribute);
+        }
+        else
+          problem = volumetric + shear - load + DirichletBC(u, m_data.exact);
         PETSc::Solver::CG solver(problem);
+        if (m_preconditioner)
+        {
+          PC pc = nullptr;
+          EXPECT_EQ(KSPGetPC(solver.getHandle(), &pc), PETSC_SUCCESS);
+          EXPECT_EQ(PCSetType(pc, m_preconditioner), PETSC_SUCCESS);
+        }
         solver.setTolerances(
           tolerance, AbsoluteTolerance, DivergenceTolerance, MaxIterations);
         solver.solve();
@@ -110,6 +169,8 @@ namespace Rodin::Tests::Convergence
       std::reference_wrapper<const MeshType> m_mesh;
       Data m_data;
       size_t m_order;
+      Boundary m_boundary;
+      PCType m_preconditioner;
   };
 }
 

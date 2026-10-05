@@ -20,9 +20,58 @@
 #include "LiftedConvergence.h"
 #include "FieldConvergence.h"
 #include "Conductivity.h"
+#include "LinearElasticity.h"
 
 namespace Rodin::Tests::Convergence
 {
+  /** The analytic divergence-free shear field does not depend on lambda. */
+  TEST(ConvergenceUtilities, DivergenceFreeElasticityHasKnownStressAndSource)
+  {
+    using Data = LinearElasticity::ManufacturedSolution;
+    for (const auto geometry :
+      {Geometry::Polytope::Type::Triangle, Geometry::Polytope::Type::Quadrilateral,
+        Geometry::Polytope::Type::Tetrahedron, Geometry::Polytope::Type::Pyramid,
+        Geometry::Polytope::Type::Hexahedron, Geometry::Polytope::Type::Wedge})
+    {
+      const auto mesh = UniformGrid(geometry).makeMesh(2);
+      const size_t dim = mesh.getDimension();
+      const Data soft(dim, 1.5, 1, Data::Field::DivergenceFree);
+      const Data stiff(dim, 1e4, 1, Data::Field::DivergenceFree);
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        const auto rc = Geometry::Polytope::Traits(geometry).getCentroid();
+        const Geometry::Point p(*cell, rc);
+        const auto u = soft.exact(p), f = soft.forcing(p);
+        const auto gradient = soft.jacobian(p), strain = soft.strain(p),
+                   stress = soft.stress(p);
+        const Real pi = Math::Constants::pi();
+        EXPECT_EQ(u(0), std::sin(pi * p(1)));
+        EXPECT_EQ(f(0), pi * pi * u(0));
+        for (size_t i = 0; i < dim; ++i)
+        {
+          EXPECT_EQ(gradient(i, i), 0);
+          EXPECT_EQ(u(i), stiff.exact(p)(i));
+          EXPECT_EQ(f(i), stiff.forcing(p)(i));
+          if (i > 0)
+          {
+            EXPECT_EQ(u(i), 0);
+            EXPECT_EQ(f(i), 0);
+          }
+          for (size_t j = 0; j < dim; ++j)
+          {
+            const Real shear = (i == 0 && j == 1) || (i == 1 && j == 0)
+              ? pi * std::cos(pi * p(1))
+              : Real(0);
+            EXPECT_EQ(gradient(i, j), i == 0 && j == 1 ? shear : Real(0));
+            EXPECT_EQ(strain(i, j), shear / 2);
+            EXPECT_EQ(stress(i, j), shear);
+            EXPECT_EQ(stress(i, j), stiff.stress(p)(i, j));
+          }
+        }
+      }
+    }
+  }
+
   TEST(ConductivityDataTest, ExponentialPhysicalDataAndSourcesOnAllGeometries)
   {
     // Floating algebra budget, unrelated to entity identification or topology.

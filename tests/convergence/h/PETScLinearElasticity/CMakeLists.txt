@@ -1,3 +1,6 @@
+include(../../PETScRefinement.cmake)
+rodin_add_petsc_refinement(RodinConvergenceHPETScLinearElasticityBoundary Traction.cpp)
+
 add_executable(RodinConvergenceHPETScLinearElasticity LinearElasticity.cpp)
 target_link_libraries(RodinConvergenceHPETScLinearElasticity
   PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)

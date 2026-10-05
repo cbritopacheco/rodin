@@ -39,6 +39,10 @@ namespace Rodin::Tests::Convergence::LinearElasticity
    * @f$A_{ij}=(i+1)(j+1)+\delta_{i0}\delta_{j,d-1}@f$ and zero source.
    * Coordinate overloads permit exact-domain lift evaluation without constructing
    * an artificial Geometry::Point; Point-based field factories delegate to them.
+   * For @f$d\ge2@f$, the divergence-free shear field is
+   * @f$u=(\sin(\pi x_1),0,\ldots,0)@f$ with
+   * @f$f=\mu\pi^2u@f$. Its exact field and stress are independent of lambda;
+   * it supports a case-specific nearly incompressible convergence study.
    */
   class ManufacturedSolution
   {
@@ -49,7 +53,8 @@ namespace Rodin::Tests::Convergence::LinearElasticity
         Affine,
         Quadratic,
         Exponential,
-        AsymmetricAffine
+        AsymmetricAffine,
+        DivergenceFree
       };
 
     private:
@@ -65,6 +70,13 @@ namespace Rodin::Tests::Convergence::LinearElasticity
         for (size_t j = 0; j < dim; ++j)
           exponent += x(j);
         Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
+        if (field == Field::DivergenceFree)
+        {
+          assert(dim > 1);
+          value.setZero();
+          value(0) = std::sin(Math::Constants::pi() * x(1));
+          return value;
+        }
         for (size_t i = 0; i < dim; ++i)
         {
           if (field == Field::AsymmetricAffine)
@@ -103,13 +115,19 @@ namespace Rodin::Tests::Convergence::LinearElasticity
             }
             Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
             for (size_t i = 0; i < dim; ++i)
-              value(i) = -(field == Field::Exponential   ? std::exp(exponent)
-                             : field == Field::Quadratic ? Real(2)
-                                                         : Real(0)) *
-                (mu * Real(dim) * Real(i + 1) + (lambda + mu) * coefficientSum);
+              value(i) = field == Field::DivergenceFree
+                ? (i == 0 ? mu * Math::Constants::pi() * Math::Constants::pi() *
+                        std::sin(Math::Constants::pi() * p(1))
+                          : Real(0))
+                : -(field == Field::Exponential   ? std::exp(exponent)
+                      : field == Field::Quadratic ? Real(2)
+                                                  : Real(0)) *
+                  (mu * Real(dim) * Real(i + 1) + (lambda + mu) * coefficientSum);
             return value;
           })
-      {}
+      {
+        assert(field != Field::DivergenceFree || dim > 1);
+      }
 
       Math::SpatialMatrix<Real> jacobian(const Geometry::Point& p) const
       {
@@ -128,6 +146,13 @@ namespace Rodin::Tests::Convergence::LinearElasticity
           exponent += x(j);
         Math::SpatialMatrix<Real> value(
           static_cast<std::uint8_t>(m_dim), static_cast<std::uint8_t>(m_dim));
+        if (m_field == Field::DivergenceFree)
+        {
+          assert(m_dim > 1);
+          value.setZero();
+          value(0, 1) = Math::Constants::pi() * std::cos(Math::Constants::pi() * x(1));
+          return value;
+        }
         for (size_t i = 0; i < m_dim; ++i)
           for (size_t j = 0; j < m_dim; ++j)
             value(i, j) = m_field == Field::AsymmetricAffine
@@ -148,6 +173,14 @@ namespace Rodin::Tests::Convergence::LinearElasticity
       /** @brief Analytic symmetric gradient, independent of discrete operators. */
       Math::SpatialMatrix<Real> strain(const Geometry::Point& p) const
       {
+        if (m_field == Field::DivergenceFree)
+        {
+          Math::SpatialMatrix<Real> value(m_dim, m_dim);
+          value.setZero();
+          value(0, 1) = value(1, 0) =
+            Math::Constants::pi() * std::cos(Math::Constants::pi() * p(1)) / 2;
+          return value;
+        }
         Real sum = 0;
         for (size_t j = 0; j < m_dim; ++j)
           sum += p(j);
@@ -169,6 +202,14 @@ namespace Rodin::Tests::Convergence::LinearElasticity
       /** @brief Analytic Cauchy stress for the stated isotropic law. */
       Math::SpatialMatrix<Real> stress(const Geometry::Point& p) const
       {
+        if (m_field == Field::DivergenceFree)
+        {
+          Math::SpatialMatrix<Real> value(m_dim, m_dim);
+          value.setZero();
+          value(0, 1) = value(1, 0) =
+            m_mu * Math::Constants::pi() * std::cos(Math::Constants::pi() * p(1));
+          return value;
+        }
         Real sum = 0;
         for (size_t j = 0; j < m_dim; ++j)
           sum += p(j);

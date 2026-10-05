@@ -79,7 +79,7 @@ jobs:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        suite: [bulk, poisson_boundary]
+        suite: [bulk, poisson_boundary, elasticity_boundary]
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -139,7 +139,7 @@ jobs:
         if: matrix.suite == 'bulk'
         run: >-
           ctest --test-dir build/tests -R '^RodinConvergenceHPETSc'
-          -E '^RodinConvergenceHPETScPoissonBoundary_'
+          -E '^RodinConvergenceHPETSc(Poisson|LinearElasticity)Boundary_'
           --output-on-failure -j 1
 
       - name: Build PETSc Poisson boundary convergence suite
@@ -150,6 +150,16 @@ jobs:
         if: matrix.suite == 'poisson_boundary'
         run: >-
           ctest --test-dir build/tests -R '^RodinConvergenceHPETScPoissonBoundary_'
+          --output-on-failure -j 1
+
+      - name: Build PETSc linear elasticity boundary convergence suite
+        if: matrix.suite == 'elasticity_boundary'
+        run: cmake --build build -j 2 --target RodinConvergenceHPETScLinearElasticityBoundary
+
+      - name: Run PETSc linear elasticity boundary convergence suite
+        if: matrix.suite == 'elasticity_boundary'
+        run: >-
+          ctest --test-dir build/tests -R '^RodinConvergenceHPETScLinearElasticityBoundary_'
           --output-on-failure -j 1
 
   PETScDegreeConvergence:
