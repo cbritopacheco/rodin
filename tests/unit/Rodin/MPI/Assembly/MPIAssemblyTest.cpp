@@ -13,6 +13,8 @@
  * - For 1-rank runs the assembled boundary DOF set is consistent with the
  *   sequential assembly
  * - P1, H1 orders 1–4, P0g, and real/complex/vector traces reach DOF owners
+ * - P0, P0g, P1, and H1 orders 1–6 have non-collective fixed-layout metadata
+ *   across real/complex scalar/vector ranges, including Point and empty shards
  *
  * Run with mpirun -n 1/2/3/4/8 as registered in CMakeLists.txt.
  */
@@ -133,6 +135,8 @@ namespace
   {
     switch (type)
     {
+      case Polytope::Type::Point:
+        return "Point";
       case Polytope::Type::Tetrahedron:
         return "Tetrahedron";
       case Polytope::Type::Hexahedron:
@@ -177,6 +181,95 @@ namespace Rodin::Tests::Unit
       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
       Polytope::Type::Hexahedron, Polytope::Type::Wedge),
     [](const auto& info) { return polytopeName(info.param); });
+
+  class MPISpaceSizeTest : public testing::TestWithParam<Polytope::Type>
+  {};
+
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, MPISpaceSizeTest,
+    testing::Values(Polytope::Type::Point, Polytope::Type::Segment,
+      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
+    [](const auto& info) { return polytopeName(info.param); });
+
+  /** Fixed-layout space metadata can be queried and copied on one rank only. */
+  TEST_P(MPISpaceSizeTest, SpaceSizeQueriesAreNoncollective)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    const size_t dim = Polytope::Traits(GetParam()).getDimension();
+    auto mesh = [&] {
+      if (dim == 0)
+      {
+        Shard::Builder builder;
+        builder.initialize(0, 3);
+        if (world.rank() == world.size() - 1)
+          builder.vertex(0, Math::SpatialPoint{0, 0, 0}, Shard::State::Owned);
+        return Mesh<Context::MPI>::Builder(ctx).initialize(builder.finalize()).finalize();
+      }
+      if (dim == 1)
+        return distributeFromRoot(ctx, GetParam(), {2});
+      if (dim == 2)
+        return distributeFromRoot(ctx, GetParam(), {2, 2});
+      return distributeFromRoot(ctx, GetParam(), {2, 2, 2});
+    }();
+    for (size_t d = 0; d <= dim; ++d)
+      for (size_t dp = 0; dp <= dim; ++dp)
+        mesh.getConnectivity().compute(d, dp);
+    for (size_t d = 1; d < dim; ++d)
+      mesh.reconcile(d);
+
+    const auto check = [&](const auto& fes) {
+      Index begin = 0, end = 0;
+      fes.getOwnershipRange(begin, end);
+      const size_t expected = boost::mpi::all_reduce(
+        world, static_cast<size_t>(end - begin), std::plus<size_t>());
+      // Only the independent ownership-count oracle above is collective.
+      // A hidden collective in any query below must fail the bounded test.
+      if (world.rank() == 0)
+      {
+        EXPECT_EQ(fes.getSize(), expected);
+        auto copied = fes;
+        EXPECT_EQ(copied.getSize(), expected);
+        auto moved = std::move(copied);
+        EXPECT_EQ(moved.getSize(), expected);
+      }
+      world.barrier();
+    };
+    const auto range = [&]<class Range>() {
+      constexpr bool scalar =
+        std::is_same_v<Range, Real> || std::is_same_v<Range, Complex>;
+      if constexpr (scalar)
+      {
+        check(P0<Range, decltype(mesh)>(mesh));
+        check(P0g<Range, decltype(mesh)>(mesh));
+        check(P1<Range, decltype(mesh)>(mesh));
+      }
+      else
+      {
+        check(P0<Range, decltype(mesh)>(mesh, 3));
+        check(P0g<Range, decltype(mesh)>(mesh, 3));
+        check(P1<Range, decltype(mesh)>(mesh, 3));
+      }
+      const auto order = [&]<size_t K>() {
+        if constexpr (scalar)
+          check(H1<K, Range, decltype(mesh)>(std::integral_constant<size_t, K>{}, mesh));
+        else
+          check(
+            H1<K, Range, decltype(mesh)>(std::integral_constant<size_t, K>{}, mesh, 3));
+      };
+      order.template operator()<1>();
+      order.template operator()<2>();
+      order.template operator()<3>();
+      order.template operator()<4>();
+      order.template operator()<5>();
+      order.template operator()<6>();
+    };
+    range.template operator()<Real>();
+    range.template operator()<Complex>();
+    range.template operator()<Math::SpatialVector<Real>>();
+    range.template operator()<Math::SpatialVector<Complex>>();
+  }
 
   /** Reverse indices and shared-entity numbering survive unordered ghost exchange. */
   TEST_P(MPITraceGeometryTest, P0AndVectorP1GhostMapsAreBijective)

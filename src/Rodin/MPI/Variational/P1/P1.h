@@ -308,6 +308,10 @@ namespace Rodin::Variational
        * correspondence between local shard degrees of freedom and global distributed
        * degrees of freedom.
        *
+       * Construction is collective over the mesh communicator, including empty
+       * ranks. Global size is retained with this fixed ownership layout so that
+       * subsequent size queries and copies require no communication.
+       *
        * @param[in] mesh Distributed mesh on which the space is defined.
        */
       P1(const MeshType& mesh)
@@ -333,6 +337,7 @@ namespace Rodin::Variational
 
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
+        boost::mpi::all_reduce(comm, m_owned, m_globalSize, std::plus<size_t>());
 
         // Build the symmetric neighbor set from vertex halo ∪ owner.
         // Using the full neighbor set ensures every isend has a matching
@@ -459,6 +464,10 @@ namespace Rodin::Variational
        * This overload assigns @p vdim global dofs per mesh vertex and
        * synchronizes owned/ghost global numbering across neighboring ranks.
        *
+       * Construction is collective over the mesh communicator, including empty
+       * ranks. Global size is retained with this fixed ownership layout so that
+       * subsequent size queries and copies require no communication.
+       *
        * @param[in] mesh Distributed mesh on which the space is defined.
        * @param[in] vdim Vector dimension (number of components per vertex).
        */
@@ -488,6 +497,7 @@ namespace Rodin::Variational
 
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
+        boost::mpi::all_reduce(comm, m_owned, m_globalSize, std::plus<size_t>());
 
         // Build the symmetric neighbor set from vertex halo ∪ owner.
         std::vector<int> neighbors;
@@ -709,12 +719,12 @@ namespace Rodin::Variational
        *
        * where @f$N_v@f$ is the global number of mesh vertices.
        *
+       * @note Non-collective: returns the size established during construction.
        * @return Global number of degrees of freedom.
        */
       size_t getSize() const override
       {
-        const auto& mesh = getMesh();
-        return mesh.getVertexCount() * getVectorDimension();
+        return m_globalSize;
       }
 
       /**
@@ -861,6 +871,7 @@ namespace Rodin::Variational
 
       size_t m_offset;
       size_t m_owned;
+      size_t m_globalSize;
       IndexBimap m_localToGlobal;
   };
 }

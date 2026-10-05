@@ -44,7 +44,7 @@ namespace Rodin::Variational
    *
    * This specialization wraps a local shard P0 space and augments it with
    * distributed global indexing. Each cell of the distributed mesh carries
-   * exactly one degree of freedom. Owned cells receive contiguous global
+   * exactly one degree of freedom per field component. Owned cells receive contiguous global
    * indices per rank, and ghost cells synchronize their global DOF index
    * from the owning rank.
    *
@@ -248,13 +248,20 @@ namespace Rodin::Variational
        *   (recorded in @c shard.getOwner(D)) and installs the received global
        *   DOF index in the local-to-global map.
        *
+       * @note Collective over the mesh communicator, including empty ranks.
        * @param[in] mesh Distributed mesh on which the space is defined.
        */
       P0(const MeshType& mesh)
         : P0(mesh, 1)
       {}
 
-      /** Constructs one constant DOF per cell and field component. */
+      /**
+       * @brief Collectively constructs one constant DOF per cell and component.
+       *
+       * All ranks in the mesh communicator participate, including empty ranks.
+       * Ownership numbering and global size are established for this fixed
+       * layout; subsequent size queries and copies require no communication.
+       */
       P0(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
           m_fes(makeShardFES(mesh, vdim))
@@ -284,6 +291,7 @@ namespace Rodin::Variational
         // Assign contiguous global DOF range for owned cells via prefix scan.
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
+        boost::mpi::all_reduce(comm, m_owned, m_globalSize, std::plus<size_t>());
 
         // The local DOFs of cell i occupy [i * vdim, (i + 1) * vdim).
         // Pre-allocate the left map with an invalid sentinel.
@@ -494,16 +502,18 @@ namespace Rodin::Variational
        * in the distributed mesh:
        *
        * @f[
-       *   \dim(V_h) = N_c
+       *   \dim(V_h) = N_c \, k
        * @f]
        *
-       * where @f$ N_c @f$ is the global number of mesh cells.
+       * where @f$ N_c @f$ is the global number of mesh cells and @f$k@f$
+       * is the number of field components.
        *
+       * @note Non-collective: returns the size established during construction.
        * @return Global number of degrees of freedom.
        */
       size_t getSize() const override
       {
-        return getMesh().getCellCount() * getVectorDimension();
+        return m_globalSize;
       }
 
       /**
@@ -627,6 +637,7 @@ namespace Rodin::Variational
 
       size_t m_offset;
       size_t m_owned;
+      size_t m_globalSize;
       IndexBimap m_localToGlobal;
   };
 }
