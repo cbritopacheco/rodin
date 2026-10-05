@@ -76,6 +76,64 @@ At `n=5`, P2 sensitivity raises quadrature to 14 and tightens relative
 tolerance to $10^{-14}$; every component error must change by less than
 $10^{-6}$ relative to its baseline.
 
+## Natural-boundary extension
+
+`RodinConvergenceHPETScReactionDiffusionBoundary` uses the same coupled
+operator and manufactured fields. Let $\Gamma_D=\{x_0=0\}$ and
+$\Gamma_N=\partial\Omega\setminus\Gamma_D$. Mixed Neumann and Robin
+cases prescribe the exact trace on $\Gamma_D$ and
+
+$$
+\kappa_i\partial_nu_i+\beta u_i=g_i,
+\qquad g_i=\kappa_i\nabla u_i\cdot n+\beta u_i,
+\qquad \beta\in\{0,1\},
+$$
+
+on $\Gamma_N$. Pure Neumann cases instead use $\Gamma_D=\varnothing$,
+$\Gamma_N=\partial\Omega$, and $\beta=0$. The two-field test space is
+$V=\{v\in H^1(\Omega)^2:v|_{\Gamma_D}=0\}$, and the weak form is
+
+$$
+a(u,v)+\beta\sum_{i=1}^{2}\int_{\Gamma_N}u_iv_i\,\mathrm{d}s
+=\sum_{i=1}^{2}\left(\int_\Omega f_iv_i\,\mathrm{d}x
++\int_{\Gamma_N}g_iv_i\,\mathrm{d}s\right).
+$$
+
+In contrast to pure diffusion, constant fields do not form a nullspace:
+
+$$
+a(v,v)\ge\sum_{i=1}^{2}\|\nabla v_i\|_{L^2(\Omega)}^2
++0.8\sum_{i=1}^{2}\|v_i\|_{L^2(\Omega)}^2.
+$$
+
+Therefore pure Neumann cases require neither a compatibility projection nor
+a mean multiplier. The flux of the second field includes its diffusion
+coefficient $\kappa_2=2$. Segment endpoints use the signed outward normals
+$-1$ and $+1$; higher-dimensional faces use `BoundaryNormal`.
+
+For each boundary variant, P1 uses `n=5→9→17`; P2/P3 use `n=3→5→9`.
+Both fields and both adjacent intervals require positive finite, strictly
+decreasing errors. The L2/H1-seminorm rate floors are respectively
+$1.65/0.75$, $2.45/1.55$, and $3.45/2.55$. These are acceptance policies
+under the regularity hypotheses above, not substitutes for those hypotheses.
+Affine P1 and quadratic P2 patches at `n=3` require every field error below
+$10^{-9}$. Removing coupling while retaining affine manufactured loads
+must give both errors above $10^{-3}$ for each field. Independently removing
+normal flux, while retaining the Robin reaction term and its exact load,
+must increase each smooth P2 error by more than a factor of five.
+
+At `n=3`, independent sensitivity checks change assembly order $16\to18$,
+norm order $18\to20$, or relative solver tolerance $10^{-13}\to10^{-14}$,
+one at a time. Each field error must change by less than $10^{-6}$ relative
+to its baseline. Residual budgets are unchanged. All seven geometries have
+local and MPI rank 1–4 registrations: 24 cases per geometry/context, split
+into 35 CTest entries with `slow` labels and 1800-second limits. Run
+`ctest --test-dir build/tests -R '^RodinConvergenceHPETScReactionDiffusionBoundary_' --output-on-failure`.
+
+Distributed construction, assembly, solving, residuals, and error norms
+require the mesh communicator's participation. Manufactured data, normal
+contractions, and local metadata queries do not introduce collectives.
+
 ## Geometry and backend scope
 
 Local PETSc and MPI PETSc cover segment, triangle, quadrilateral,
@@ -93,7 +151,7 @@ Entries are split by geometry/rank count, labelled `slow`, and have a
 600-second timeout; MPI entries declare their process count. The dedicated
 PETSc CI job selects them explicitly by name.
 
-This suite certifies real two-field full-Dirichlet h studies on affine
-meshes. Complex fields, nonsymmetric reaction and mixed boundaries are
-outside this suite. The p/hp and curved studies have separate
+The original target covers real two-field full-Dirichlet h studies on affine
+meshes; the boundary target extends it as specified above. Complex fields
+and nonsymmetric reaction are outside these suites. The p/hp and curved studies have separate
 specifications. Point/0D has no PDE h-rate here.

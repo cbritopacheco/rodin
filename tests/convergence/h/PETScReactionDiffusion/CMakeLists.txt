@@ -1,4 +1,6 @@
 add_executable(RodinConvergenceHPETScReactionDiffusion ReactionDiffusion.cpp)
+include(../../PETScRefinement.cmake)
+rodin_add_petsc_refinement(RodinConvergenceHPETScReactionDiffusionBoundary BoundaryConditions.cpp)
 target_link_libraries(RodinConvergenceHPETScReactionDiffusion
   PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)
 set(_RODIN_REACTIONDIFFUSION_GEOMETRIES

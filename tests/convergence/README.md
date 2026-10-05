@@ -188,7 +188,7 @@ exists yet.
 | Linear elasticity | Vector P1/P2, displacement and traction variants; nearly incompressible divergence-free P2 in 2D/3D; native and real-PETSc local/MPI | Analytic vector P1→P2→P3→P4; native and real-PETSc local/MPI | Analytic vector P1–P3; native and real-PETSc local/MPI | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI; PETSc physical traction P2/P1 and P3/P2 without a mean multiplier | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3 with polynomial patches; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
-| Coupled reaction–diffusion | P1/P2; PETSc local/MPI P1/P2 | P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | Analytic two-field P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
+| Coupled reaction–diffusion | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin/pure Neumann P1–P3 with coupled polynomial patches | P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | Analytic two-field P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; native and real-PETSc SNES local/MPI; tangent controls | Analytic P1–P3; native and real-PETSc SNES local/MPI; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
 | P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Curved constant reproduction and analytic global means; no h-rate |
@@ -511,6 +511,18 @@ supported.
   suite specification; verification evidence belongs in the PR. Planned,
   implemented, locally verified, and CI-certified coverage remain distinct
   states.
+
+The natural-boundary extension uses the same diffusion and reaction matrix,
+with componentwise data $\kappa_i\partial_nu_i+\beta u_i=g_i$.
+Mixed Neumann and Robin cases use $\Gamma_D=\{x_0=0\}$ and
+$\beta=0$ or $1$ on the complementary boundary. Pure Neumann cases have
+$\Gamma_D=\varnothing$ and $\beta=0$; the reaction eigenvalue bound
+$\lambda_{\min}(R)=0.8$ controls constants, so no pressure-like mean
+constraint is introduced. Each component has P1–P3 rate studies with three
+levels, representable affine/quadratic patches, missing-coupling and
+missing-flux controls, and independently varied numerical budgets. The
+[boundary specification](h/PETScReactionDiffusion/README.md) gives the
+levels, rate floors, and local/MPI execution contract.
 
 After the reaction–diffusion h/hp, complex Helmholtz h, PETSc Stokes h,
 and native nonlinear Poisson p/hp batches, real-PETSc/SNES nonlinear Poisson

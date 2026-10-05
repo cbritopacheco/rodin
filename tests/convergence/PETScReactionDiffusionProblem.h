@@ -22,7 +22,10 @@ namespace Rodin::Tests::Convergence
    * @par Mathematical formulation
    * @f$-\kappa_i\Delta u_i+u_i+\alpha u_{1-i}=f_i@f$ with
    * @f$\kappa=(1,2)@f$ and @f$\alpha=0.2@f$, on a full-dimensional domain.
-   * Both fields have their manufactured Dirichlet trace. Omitting coupling
+   * Both fields have their manufactured Dirichlet trace by default. Mixed
+   * data prescribe this trace on one coordinate face and flux or Robin data
+   * elsewhere. Pure Neumann data need no mean constraint because the reaction
+   * matrix has eigenvalues 0.8 and 1.2. Omitting coupling
    * changes only the solved operator; sources retain the original reaction.
    * @par Architecture
    * Each solve constructs a fresh space and two-field fixed-layout system.
@@ -35,27 +38,48 @@ namespace Rodin::Tests::Convergence
   class PETScReactionDiffusionProblem
   {
     public:
+      enum class Boundary
+      {
+        Dirichlet,
+        MixedNeumann,
+        Robin,
+        PureNeumann
+      };
+      static constexpr Geometry::Attribute DirichletAttribute = 501;
+      static constexpr Geometry::Attribute NaturalAttribute = 502;
+
       explicit PETScReactionDiffusionProblem(const MeshType& mesh,
         ReactionDiffusionData::Field field = ReactionDiffusionData::Field::Smooth,
-        size_t assemblyOrder = 16)
+        size_t assemblyOrder = 16, Boundary boundary = Boundary::Dirichlet)
         : m_mesh(mesh),
           m_data(mesh.getDimension(), field),
-          m_order(assemblyOrder)
+          m_order(assemblyOrder),
+          m_boundary(boundary)
       {
         assert(mesh.getDimension() > 0);
         assert(mesh.getDimension() == mesh.getSpaceDimension());
       }
 
+      /** @brief Assemble, solve, and measure the global two-field problem.
+       * @note All ranks of an MPI mesh communicator must participate in
+       * distributed assembly, solving, residuals, and error norms. Pointwise
+       * manufactured field and boundary evaluations are noncollective.
+       */
       std::array<ErrorNorms, 2> solve(bool omitCoupling = false,
-        Real tolerance = SolverTolerance, size_t normOrder = 0) const
+        Real tolerance = SolverTolerance, size_t normOrder = 0,
+        bool omitFlux = false) const
       {
-        return solve(omitCoupling, tolerance, normOrder,
-          [](const auto&, const auto&, const auto&) {});
+        return solve(
+          omitCoupling, tolerance, normOrder,
+          [](const auto&, const auto&, const auto&) {}, omitFlux);
       }
 
+      /** @brief Solve with a rank-local solution observer before global norms.
+       * @note The same communicator participation as ordinary solve applies.
+       */
       template <class Observer>
-      std::array<ErrorNorms, 2> solve(
-        bool omitCoupling, Real tolerance, size_t normOrder, Observer&& observe) const
+      std::array<ErrorNorms, 2> solve(bool omitCoupling, Real tolerance, size_t normOrder,
+        Observer&& observe, bool omitFlux = false) const
       {
         using namespace Variational;
         const auto& mesh = m_mesh.get();
@@ -78,8 +102,47 @@ namespace Rodin::Tests::Convergence
         bU.setOrder(m_order);
         bW.setOrder(m_order);
         Problem problem(u, w, v, z);
-        problem = aUU + rUU + rUW - bU + aWW + rWW + rWU - bW + DirichletBC(u, exactU) +
-          DirichletBC(w, exactW);
+        if (m_boundary == Boundary::Dirichlet)
+          problem = aUU + rUU + rUW - bU + aWW + rWW + rWU - bW + DirichletBC(u, exactU) +
+            DirichletBC(w, exactW);
+        else
+        {
+          const BoundaryNormal normal(mesh);
+          const size_t dim = mesh.getDimension();
+          const auto flux = [&](size_t component) {
+            return RealFunction(
+              [gradient = m_data.getGradient(component), normal, dim,
+                coefficient = Real(component + 1)](const Geometry::Point& point) {
+                const auto derivative = gradient(point);
+                if (dim == 1)
+                  return coefficient * (point(0) < Real(0.5) ? Real(-1) : Real(1)) *
+                    derivative(0);
+                const auto outward = normal(point);
+                Real value = 0;
+                for (size_t j = 0; j < dim; ++j)
+                  value += coefficient * derivative(j) * outward(j);
+                return value;
+              });
+          };
+          const Real beta = m_boundary == Boundary::Robin ? Real(1) : Real(0);
+          const Real includeFlux = omitFlux ? Real(0) : Real(1);
+          auto robinU = BoundaryIntegral(beta * u, v);
+          auto robinW = BoundaryIntegral(beta * w, z);
+          auto fluxU = BoundaryIntegral(includeFlux * flux(0) + beta * exactU, v);
+          auto fluxW = BoundaryIntegral(includeFlux * flux(1) + beta * exactW, z);
+          robinU.setOrder(m_order);
+          robinW.setOrder(m_order);
+          fluxU.setOrder(m_order);
+          fluxW.setOrder(m_order);
+          if (m_boundary == Boundary::PureNeumann)
+            problem = aUU + rUU + rUW - bU + aWW + rWW + rWU - bW - fluxU - fluxW;
+          else
+            problem = aUU + rUU + rUW - bU + aWW + rWW + rWU - bW +
+              robinU.over(NaturalAttribute) + robinW.over(NaturalAttribute) -
+              fluxU.over(NaturalAttribute) - fluxW.over(NaturalAttribute) +
+              DirichletBC(u, exactU).on(DirichletAttribute) +
+              DirichletBC(w, exactW).on(DirichletAttribute);
+        }
         PETSc::Solver::CG solver(problem);
         solver.setTolerances(
           tolerance, AbsoluteTolerance, DivergenceTolerance, MaxIterations);
@@ -127,6 +190,7 @@ namespace Rodin::Tests::Convergence
       std::reference_wrapper<const MeshType> m_mesh;
       ReactionDiffusionData m_data;
       size_t m_order;
+      Boundary m_boundary;
   };
 }
 
