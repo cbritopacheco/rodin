@@ -15,6 +15,11 @@
 #ifndef RODIN_VARIATIONAL_FUNCTION_H
 #define RODIN_VARIATIONAL_FUNCTION_H
 
+#include <optional>
+#include <type_traits>
+
+#include <Eigen/Core>
+
 #include "Rodin/Cast.h"
 
 #include "Rodin/Geometry/Point.h"
@@ -283,6 +288,87 @@ namespace Rodin::Variational
         else
           return static_cast<const Derived&>(*this).getValue(ip.getPoint());
       }
+
+      /**
+       * @brief Function value retained for the current quadrature binding.
+       *
+       * Holds the function value at the quadrature point last passed to
+       * refresh(), allowing shape expressions to reuse it across basis indices.
+       * The owning shape expression refreshes this snapshot on every point
+       * binding, including reassembly at an unchanged point. Direct pointwise
+       * bindings clear it and retain normal function evaluation. Only owning,
+       * copyable values are held; lazy Eigen expressions retain direct evaluation.
+       * Each shape expression owns a separate cache so evaluation passes do not
+       * share mutable state.
+       */
+      class FunctionCache
+      {
+        public:
+          /// @brief Type returned when evaluating the enclosing function.
+          using Value =
+            std::decay_t<decltype(std::declval<const FunctionBase&>().getValue(
+              std::declval<const IntegrationPoint&>()))>;
+
+          /// @brief Declared range of the enclosing function.
+          using Range = typename FormLanguage::Traits<FunctionBase>::RangeType;
+
+          /// @brief Whether an owning, assignable snapshot can be retained.
+          static constexpr bool Enabled =
+            (std::is_same_v<Value, Range> ||
+              std::is_base_of_v<Eigen::PlainObjectBase<Value>, Value>) &&
+            std::is_copy_constructible_v<Value> && std::is_copy_assignable_v<Value>;
+
+          FunctionCache() = default;
+
+          /// @brief Copies start empty: the value belongs to one evaluation pass.
+          FunctionCache(const FunctionCache&)
+            : FunctionCache()
+          {}
+
+          /// @brief Transfers the current snapshot.
+          FunctionCache(FunctionCache&&) = default;
+
+          /// @brief Clears the snapshot when copying another evaluation pass.
+          FunctionCache& operator=(const FunctionCache&)
+          {
+            m_value.reset();
+            return *this;
+          }
+
+          /// @brief Transfers the current snapshot on move assignment.
+          FunctionCache& operator=(FunctionCache&&) = default;
+
+          /// @brief Evaluates @p f at @p ip, if @p ip is a quadrature node.
+          void refresh(const FunctionBase& f, const IntegrationPoint& ip)
+          {
+            if constexpr (Enabled)
+            {
+              if (!ip.getQuadratureFormula())
+              {
+                m_value.reset();
+                return;
+              }
+              if (m_value)
+                *m_value = f.getValue(ip);
+              else
+                m_value.emplace(f.getValue(ip));
+            }
+          }
+
+          /// @brief The current binding's value, or nullptr outside quadrature.
+          const Value* get() const
+          {
+            if constexpr (Enabled)
+            {
+              if (m_value)
+                return &*m_value;
+            }
+            return nullptr;
+          }
+
+        private:
+          std::optional<Value> m_value;
+      };
 
       /**
        * @brief Returns a geometry-dependent polynomial order bound of the expression

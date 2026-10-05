@@ -19,6 +19,34 @@ using namespace Rodin::Variational;
 
 namespace
 {
+  class LazyVectorFunction final : public FunctionBase<LazyVectorFunction>
+  {
+    public:
+      LazyVectorFunction(size_t& calls, Real& scale)
+        : m_calls(calls),
+          m_scale(scale),
+          m_value{1, 2}
+      {}
+      auto getValue(const Point&) const
+      {
+        ++m_calls.get();
+        return m_value * m_scale.get();
+      }
+      Optional<size_t> getOrder(const Polytope&) const
+      {
+        return 0;
+      }
+      LazyVectorFunction* copy() const noexcept override
+      {
+        return new LazyVectorFunction(*this);
+      }
+
+    private:
+      std::reference_wrapper<size_t> m_calls;
+      std::reference_wrapper<Real> m_scale;
+      Eigen::Vector2d m_value;
+  };
+
   template <class Expr>
   class CountingShape final : public ShapeFunctionBase<CountingShape<Expr>,
                                 typename Expr::FESType, Expr::SpaceType>
@@ -156,6 +184,76 @@ TEST(CoefficientEvaluation, RebindingCopiesAndDirectEvaluation)
   const auto a = moved.getBasis(0);
   scale = 12;
   EXPECT_NEAR(moved.getBasis(0), 2 * a, 1e-12);
+}
+
+TEST(CoefficientEvaluation, FunctionCacheLifecycleAndIndependentBindings)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  const auto cell = *mesh.getCell();
+  const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+  const Point point(cell, qf.getPoint(0));
+  const IntegrationPoint ip(point, &qf, 0);
+  Real scale = 2;
+  size_t calls = 0;
+  auto f = RealFunction([&](const Point&) {
+    ++calls;
+    return scale;
+  });
+  using Cache = decltype(f)::FunctionCache;
+  static_assert(Cache::Enabled);
+  Cache first;
+  Cache second;
+  EXPECT_EQ(first.get(), nullptr);
+  first.refresh(f, ip);
+  ASSERT_NE(first.get(), nullptr);
+  EXPECT_EQ(*first.get(), 2);
+  EXPECT_EQ(calls, 1);
+  scale = 5;
+  second.refresh(f, ip);
+  EXPECT_EQ(*first.get(), 2);
+  ASSERT_NE(second.get(), nullptr);
+  EXPECT_EQ(*second.get(), 5);
+  first.refresh(f, ip);
+  EXPECT_EQ(*first.get(), 5);
+  EXPECT_EQ(calls, 3);
+  Cache copied(first);
+  EXPECT_EQ(copied.get(), nullptr);
+  copied.refresh(f, ip);
+  copied = first;
+  EXPECT_EQ(copied.get(), nullptr);
+  Cache moved(std::move(second));
+  ASSERT_NE(moved.get(), nullptr);
+  EXPECT_EQ(*moved.get(), 5);
+  copied = std::move(moved);
+  ASSERT_NE(copied.get(), nullptr);
+  EXPECT_EQ(*copied.get(), 5);
+  const size_t before = calls;
+  first.refresh(f, IntegrationPoint(point));
+  EXPECT_EQ(first.get(), nullptr);
+  EXPECT_EQ(calls, before);
+}
+
+TEST(CoefficientEvaluation, LazyFunctionValuesRetainDirectEvaluation)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  P1<Math::SpatialVector<Real>> fes(mesh, 2);
+  TestFunction v(fes);
+  size_t calls = 0;
+  Real scale = 2;
+  LazyVectorFunction f(calls, scale);
+  static_assert(!LazyVectorFunction::FunctionCache::Enabled);
+  const auto cell = *mesh.getCell();
+  const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+  const Point point(cell, qf.getPoint(0));
+  const IntegrationPoint ip(point, &qf, 0);
+  auto expr = Dot(f, v);
+  expr.setIntegrationPoint(ip);
+  EXPECT_EQ(calls, 0);
+  const auto initial = expr.getBasis(0);
+  EXPECT_EQ(calls, 1);
+  scale = 5;
+  EXPECT_NEAR(expr.getBasis(0), 2.5 * initial, 1e-12);
+  EXPECT_EQ(calls, 2);
 }
 
 TEST(CoefficientEvaluation, VectorMatrixAndTensorCallables)

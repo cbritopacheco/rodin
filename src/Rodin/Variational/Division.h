@@ -323,7 +323,7 @@ namespace Rodin::Variational
       Division& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
-        m_coefficient.refresh(getRHS(), ip);
+        m_functionCache.refresh(getRHS(), ip);
         return *this;
       }
 
@@ -338,7 +338,7 @@ namespace Rodin::Variational
           else
             return lhs / rhs;
         };
-        if (const auto* rhs = m_coefficient.get())
+        if (const auto* rhs = m_functionCache.get())
           return eval(*rhs);
         return eval(getRHS().getValue(ip));
       }
@@ -361,13 +361,8 @@ namespace Rodin::Variational
       }
 
     private:
-      using CoefficientValue =
-        std::decay_t<decltype(std::declval<const RHSType&>().getValue(
-          std::declval<const IntegrationPoint&>()))>;
-      Internal::CoefficientCache<CoefficientValue,
-        Internal::IsOwningCoefficient<CoefficientValue,
-          typename FormLanguage::Traits<RHSType>::RangeType>>
-        m_coefficient;
+      /// @brief Function value at the current quadrature binding.
+      typename RHSType::FunctionCache m_functionCache;
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
   };

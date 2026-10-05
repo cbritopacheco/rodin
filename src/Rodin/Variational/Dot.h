@@ -459,7 +459,7 @@ namespace Rodin::Variational
       Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_rhs->setIntegrationPoint(ip);
-        m_coefficient.refresh(getLHS(), ip);
+        m_functionCache.refresh(getLHS(), ip);
         return *this;
       }
 
@@ -472,7 +472,7 @@ namespace Rodin::Variational
           decltype(auto) rhs = getRHS().getBasis(local);
           return Math::dot(lhs, rhs);
         };
-        if (const auto* lhs = m_coefficient.get())
+        if (const auto* lhs = m_functionCache.get())
           return eval(*lhs);
         return eval(getLHS().getValue(ip));
       }
@@ -497,15 +497,8 @@ namespace Rodin::Variational
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
 
-      /// @brief Type returned by the coefficient's getValue().
-      using CoefficientType =
-        std::decay_t<decltype(std::declval<const LHSType&>().getValue(
-          std::declval<const IntegrationPoint&>()))>;
-
-      /// @brief The coefficient at the current quadrature point.
-      Internal::CoefficientCache<CoefficientType,
-        Internal::IsOwningCoefficient<CoefficientType, LHSRangeType>>
-        m_coefficient;
+      /// @brief Function value at the current quadrature binding.
+      typename LHSType::FunctionCache m_functionCache;
   };
 
   /**
@@ -635,7 +628,7 @@ namespace Rodin::Variational
       Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
-        m_coefficient.refresh(getRHS(), ip);
+        m_functionCache.refresh(getRHS(), ip);
         return *this;
       }
 
@@ -648,7 +641,7 @@ namespace Rodin::Variational
           decltype(auto) lhs = getLHS().getBasis(local);
           return Math::dot(lhs, rhs);
         };
-        if (const auto* rhs = m_coefficient.get())
+        if (const auto* rhs = m_functionCache.get())
           return eval(*rhs);
         return eval(getRHS().getValue(p));
       }
@@ -673,15 +666,8 @@ namespace Rodin::Variational
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
 
-      /// @brief Type returned by the coefficient's getValue().
-      using CoefficientType =
-        std::decay_t<decltype(std::declval<const RHSType&>().getValue(
-          std::declval<const IntegrationPoint&>()))>;
-
-      /// @brief The coefficient at the current quadrature point.
-      Internal::CoefficientCache<CoefficientType,
-        Internal::IsOwningCoefficient<CoefficientType, RHSRangeType>>
-        m_coefficient;
+      /// @brief Function value at the current quadrature binding.
+      typename RHSType::FunctionCache m_functionCache;
   };
 
   /**
