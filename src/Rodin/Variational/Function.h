@@ -332,7 +332,7 @@ namespace Rodin::Variational
            * @brief Prevents binding a cache to a temporary function.
            * @param[in] f Temporary function whose lifetime cannot cover the cache.
            */
-          Cache(FunctionBase&& f) = delete;
+          Cache(const FunctionBase&& f) = delete;
 
           /**
            * @brief Constructs an empty cache when copying an evaluation pass.

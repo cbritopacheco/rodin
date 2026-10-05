@@ -220,6 +220,7 @@ TEST(CoefficientEvaluation, CacheLifecycleAndIndependentBindings)
   using Cache = decltype(f)::Cache;
   static_assert(Cache::Enabled);
   static_assert(!std::is_constructible_v<Cache, decltype(f)&&>);
+  static_assert(!std::is_constructible_v<Cache, const decltype(f)&&>);
   Cache first(f);
   Cache second(f);
   EXPECT_EQ(first.get(), nullptr);
