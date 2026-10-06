@@ -365,7 +365,7 @@ jobs:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        suite: [bulk, boundary]
+        suite: [bulk, boundary, submesh]
     env:
       OMP_NUM_THREADS: 2
 
@@ -430,6 +430,16 @@ jobs:
         run: >-
           ctest --test-dir build/tests -R '^RodinConvergenceHPETScHelmholtzBoundary_'
           --output-on-failure -j 1
+
+      - name: Build complex PETSc SubMesh restriction matrix
+        if: matrix.suite == 'submesh'
+        run: cmake --build build -j 2 --target RodinPETScMPIH1SubMeshRestrictionTest
+
+      - name: Run complex PETSc SubMesh restriction matrix
+        if: matrix.suite == 'submesh'
+        run: >-
+          ctest --test-dir build/tests -R '^RodinPETScMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
+          --output-on-failure --no-tests=error -j 1
 
   PETScMatrixRanges:
     # Preserve the upstream real/complex matrix-range gate independently of
@@ -640,14 +650,14 @@ jobs:
         id: slow_mpi_geometry
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L slow -R '^RodinMPI(AssemblyGeometrySlow|H1SubMeshRestriction)Test_np(1|2|3|4|8)$'
+          -L slow -R '^Rodin(MPI(AssemblyGeometrySlow|H1SubMeshRestriction)|PETScMPIH1SubMeshRestriction)Test_np(1|2|3|4|8)$'
           --output-on-failure -j 1
 
       - name: Rerun failed slow MPI geometry tests (verbose)
         if: steps.slow_mpi_geometry.outcome == 'failure'
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L slow -R '^RodinMPI(AssemblyGeometrySlow|H1SubMeshRestriction)Test_np(1|2|3|4|8)$'
+          -L slow -R '^Rodin(MPI(AssemblyGeometrySlow|H1SubMeshRestriction)|PETScMPIH1SubMeshRestriction)Test_np(1|2|3|4|8)$'
           --rerun-failed -V --output-on-failure
 
   Manufactured:

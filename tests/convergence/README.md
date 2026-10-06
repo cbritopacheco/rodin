@@ -259,6 +259,33 @@ can overwrite their result. Ranks 1, 2, 3, 4 and 8 use single-interval
 unit-box grids ($n=2$), including empty holders. This fixed-mesh restriction
 test is not a PDE convergence-rate claim or a PETSc restriction certificate.
 
+The complementary
+[PETSc-backed H1 restriction regression](../unit/Rodin/PETSc/MPIH1SubMeshRestrictionTest.cpp)
+uses the same orders, geometries, selections and rank counts with PETSc
+coefficient storage. Real and complex scalar builds each exercise scalar
+and three-component vector ranges, separately in sequential/OpenMP builds.
+Both affine parents and exact quadratic parents are included. Curvature is
+installed before partitioning, so the test exercises map transport as well
+as full, boundary, sparse and nested SubMesh extraction. On the curved domain,
+
+$$
+\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1},\qquad
+u_\star(x)=\widehat u(\Phi^{-1}(x)),\qquad \widehat u\in P_K,
+$$
+
+where the independently evaluated analytic inverse defines the manufactured
+field, not entity correspondence. Normalized mixed degree-$K$ reference
+polynomials excite higher modes without increasing the field scale with
+degree. Every held coefficient is compared with independent child-space
+interpolation, and physical samples use the analytic field with the same
+$10^{-10}$ budget. Logical ancestry and geometry factor degrees are checked
+exactly; a positive-dimensional curved child must retain factor degree two.
+Interpolation/restriction updates participate collectively because they
+change distributed PETSc coefficient and ghost state. Synchronized field
+reads, geometry evaluation and cached metadata queries are also exercised
+on rank zero alone. The five fixed-$n=2$ rank registrations per build are
+structural/reproduction checks, not spatial convergence slopes.
+
 The main refinement sequences can be read with $n$ grid points per coordinate
 axis, $h=1/(n-1)$, and field degree $p$:
 

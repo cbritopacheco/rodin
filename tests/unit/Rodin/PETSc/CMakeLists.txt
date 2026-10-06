@@ -144,6 +144,20 @@ if (RODIN_USE_MPI)
   endforeach()
 
   add_executable(RodinPETScMPISubMeshGridFunctionTest MPISubMeshGridFunctionTest.cpp)
+  add_executable(RodinPETScMPIH1SubMeshRestrictionTest MPIH1SubMeshRestrictionTest.cpp)
+  target_link_libraries(RodinPETScMPIH1SubMeshRestrictionTest PRIVATE
+    GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI Rodin::PETSc)
+  # Separate the full order/range matrix from short legacy SubMesh checks.
+  # The watchdog bounds protocol failures, not polynomial approximation error.
+  foreach(np 1 2 3 4 8)
+    add_test(NAME RodinPETScMPIH1SubMeshRestrictionTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+        $<TARGET_FILE:RodinPETScMPIH1SubMeshRestrictionTest>)
+    set_tests_properties(RodinPETScMPIH1SubMeshRestrictionTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed;slow" TIMEOUT 300 PROCESSORS ${np})
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIH1SubMeshRestrictionTest_np${np})
+  endforeach()
   target_link_libraries(RodinPETScMPISubMeshGridFunctionTest
     PUBLIC
     GTest::gtest
