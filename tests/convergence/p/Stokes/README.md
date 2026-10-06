@@ -1,6 +1,6 @@
 # Stokes degree-refinement verification
 
-For $\Omega=(0,1)^d$, $d\in\{2,3\}$, viscosity $\nu=1$, and coordinates
+For $\Omega=(0,1)^d$, $d\in\lbrace 2,3\rbrace $, viscosity $\nu=1$, and coordinates
 $x_0,\ldots,x_{d-1}$, the manufactured Stokes problem is
 
 $$
@@ -55,7 +55,7 @@ assembles homogeneous velocity constraints on a single quadrilateral or
 hexahedron. For the degree-two/degree-one tensor-product pair,
 
 $$
-\dim V_{h,2}^0=d<2^d-1=\dim Q_{h,1}^0,\qquad d\in\{2,3\}.
+\dim V_{h,2}^0=d<2^d-1=\dim Q_{h,1}^0,\qquad d\in\lbrace 2,3\rbrace .
 $$
 
 The discrete divergence cannot have full pressure rank, so a nonconstant
@@ -112,7 +112,7 @@ For each pair, a representable patch excites its highest field degrees:
 $$
 u=x_1^m e_0,\qquad p=x_0^{m-1}-\frac1m,\qquad
 f=\bigl(-m(m-1)x_1^{m-2}+(m-1)x_0^{m-2}\bigr)e_0,
-\qquad m\in\{2,3,4\}.
+\qquad m\in\lbrace 2,3,4\rbrace .
 $$
 
 The respective pairs use $m=k$. All four field errors and strong L2

@@ -57,7 +57,7 @@ and CG relative tolerance $10^{-13}\to10^{-14}$ vary separately.
 Each displacement error changes by less than $10^{-6}$ relatively. CG
 requires a positive reason, a finite reported residual below $10^{-8}$,
 and an independently recomputed residual
-$\|Ax-b\|_2/\max(1,\|b\|_2)<10^{-11}$.
+$\Vert Ax-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$.
 
 All seven positive-dimensional cell families run locally and on MPI ranks
 one through four, with sequential and OpenMP assembly. Complex PETSc is

@@ -1,6 +1,6 @@
 # PETSc coupled reaction–diffusion h-convergence
 
-On $\Omega=(0,1)^d$, $d\in\{1,2,3\}$, two real fields satisfy
+On $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, two real fields satisfy
 
 $$
 -\kappa_i\Delta u_i+\sum_{j=1}^{2}R_{ij}u_j=f_i,
@@ -26,7 +26,7 @@ it is not two independently solved scalar equations.
 ## Manufactured data and oracles
 
 Let $s=\sum_jx_j$. The shared `ReactionDiffusionData` supplies the following
-fields, with zero-based component index $i\in\{0,1\}$ and $c_i=i+1$:
+fields, with zero-based component index $i\in\lbrace 0,1\rbrace $ and $c_i=i+1$:
 
 | Case | Fields | Gradient entries | Laplacian |
 | --- | --- | --- | --- |
@@ -39,7 +39,7 @@ L2 and H1-seminorm errors are integrated separately:
 
 $$
 E_{0,i}^2=\int_\Omega|u_i-u_{h,i}|^2\,\mathrm{d}x,\qquad
-E_{1,i}^2=\int_\Omega\|\nabla u_i-\nabla u_{h,i}\|_2^2\,\mathrm{d}x.
+E_{1,i}^2=\int_\Omega\Vert \nabla u_i-\nabla u_{h,i}\Vert _2^2\,\mathrm{d}x.
 $$
 
 Patches use `n=5` grid points per axis and require both errors below
@@ -66,7 +66,7 @@ $10^{-13}$, absolute tolerance $10^{-14}$, divergence threshold $10^5$,
 and at most 50,000 iterations. Each solve requires a positive PETSc
 convergence reason and a finite reported residual below $10^{-8}$; this
 reported residual is distinct from the independently recomputed
-$\|Ax-b\|_2/\max(1,\|b\|_2)<10^{-11}$ also required by the shared
+$\Vert Ax-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$ also required by the shared
 `PETScReactionDiffusionProblem` workload. The workload constructs a fresh
 fixed-layout two-field problem for each measurement, with independently
 selectable norm quadrature and a solve-scoped const observer. It is shared
@@ -79,19 +79,19 @@ $10^{-6}$ relative to its baseline.
 ## Natural-boundary extension
 
 `RodinConvergenceHPETScReactionDiffusionBoundary` uses the same coupled
-operator and manufactured fields. Let $\Gamma_D=\{x_0=0\}$ and
+operator and manufactured fields. Let $\Gamma_D=\lbrace x_0=0\rbrace $ and
 $\Gamma_N=\partial\Omega\setminus\Gamma_D$. Mixed Neumann and Robin
 cases prescribe the exact trace on $\Gamma_D$ and
 
 $$
 \kappa_i\partial_nu_i+\beta u_i=g_i,
 \qquad g_i=\kappa_i\nabla u_i\cdot n+\beta u_i,
-\qquad \beta\in\{0,1\},
+\qquad \beta\in\lbrace 0,1\rbrace ,
 $$
 
 on $\Gamma_N$. Pure Neumann cases instead use $\Gamma_D=\varnothing$,
 $\Gamma_N=\partial\Omega$, and $\beta=0$. The two-field test space is
-$V=\{v\in H^1(\Omega)^2:v|_{\Gamma_D}=0\}$, and the weak form is
+$V=\lbrace v\in H^1(\Omega)^2:v|_{\Gamma_D}=0\rbrace $, and the weak form is
 
 $$
 a(u,v)+\beta\sum_{i=1}^{2}\int_{\Gamma_N}u_iv_i\,\mathrm{d}s
@@ -102,8 +102,8 @@ $$
 In contrast to pure diffusion, constant fields do not form a nullspace:
 
 $$
-a(v,v)\ge\sum_{i=1}^{2}\|\nabla v_i\|_{L^2(\Omega)}^2
-+0.8\sum_{i=1}^{2}\|v_i\|_{L^2(\Omega)}^2.
+a(v,v)\ge\sum_{i=1}^{2}\Vert \nabla v_i\Vert _{L^2(\Omega)}^2
++0.8\sum_{i=1}^{2}\Vert v_i\Vert _{L^2(\Omega)}^2.
 $$
 
 Therefore pure Neumann cases require neither a compatibility projection nor

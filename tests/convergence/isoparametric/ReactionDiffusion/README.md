@@ -13,7 +13,7 @@ The two physical fields satisfy
 $$
 -\kappa_i\Delta u_i+\sum_{j=0}^1R_{ij}u_j=f_i
 \quad\text{in }\Omega,\qquad u_i=g_i\quad\text{on }\partial\Omega,
-\qquad i\in\{0,1\},
+\qquad i\in\lbrace 0,1\rbrace ,
 $$
 
 with $\kappa=(1,2)$ and $R=\begin{pmatrix}1&0.2\\0.2&1\end{pmatrix}$.
@@ -33,7 +33,7 @@ $$
 f_i=-\kappa_i d u_i+u_i+0.2u_{1-i}.
 $$
 
-Both fields use degree $k\in\{1,2\}$ with exact quadratic geometry.
+Both fields use degree $k\in\lbrace 1,2\rbrace $ with exact quadratic geometry.
 The first case is superparametric; the second is strictly isoparametric.
 Native degree one uses P1; degree two and PETSc use H1.
 Workload owns the mapped mesh and creates a fresh two-field system per solve.
@@ -95,7 +95,7 @@ than $10^{-6}$. Mapped/nonpolynomial integrands are not claimed to be
 polynomial-exact. Every solve also checks
 
 $$
-\frac{\|A_hU_h-b_h\|_2}{\max(1,\|b_h\|_2)}<10^{-11}.
+\frac{\Vert A_hU_h-b_h\Vert _2}{\max(1,\Vert b_h\Vert _2)}<10^{-11}.
 $$
 
 Native solver success and PETSc positive convergence reason are required.

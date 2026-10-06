@@ -4,7 +4,7 @@ On $\Omega=(0,1)^d$, the two real fields satisfy
 
 $$
 -\kappa_i\Delta u_i+u_i+\alpha u_{1-i}=f_i,\qquad
-\kappa=(1,2),\quad\alpha=0.2,\quad i\in\{0,1\}.
+\kappa=(1,2),\quad\alpha=0.2,\quad i\in\lbrace 0,1\rbrace .
 $$
 
 Both fields have their manufactured Dirichlet trace. Positive diffusion and
@@ -32,7 +32,7 @@ universal exponential constant. A point has no nonconstant spatial rate.
 fresh fixed-layout two-field system per measurement. CG must terminate
 with a positive reason, a finite reported residual below $10^{-8}$, and
 an independently recomputed residual
-$\|Ax-b\|_2/\max(1,\|b\|_2)<10^{-11}$. `FieldConvergence` checks
+$\Vert Ax-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$. `FieldConvergence` checks
 each field and every interval without averaging errors across fields.
 The p/hp entry point and geometry/rank registration are shared.
 

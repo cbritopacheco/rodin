@@ -9,12 +9,12 @@ two and three; in dimension one it is $1+0.2\xi_0>0$ and $|\Omega|=1.1$.
 This is fixed curved-geometry field refinement, not a geometry-error study
 or a strictly isoparametric degree-zero discretization.
 
-For $\mathbb K\in\{\mathbb R,\mathbb C\}$ and scalar or two-component vector
+For $\mathbb K\in\lbrace \mathbb R,\mathbb C\rbrace $ and scalar or two-component vector
 fields, the discontinuous space is
 
 $$
-V_h=\{v\in L^2(\Omega;\mathbb K^m):v|_K
-\text{ is constant for each cell }K\},\qquad m\in\{1,2\}.
+V_h=\lbrace v\in L^2(\Omega;\mathbb K^m):v|_K
+\text{ is constant for each cell }K\rbrace ,\qquad m\in\lbrace 1,2\rbrace .
 $$
 
 The assembled mass problem computes the orthogonal projection:
@@ -60,9 +60,9 @@ Both vector components vary; complex references have nonzero imaginary parts.
 Physical error integration and independently evaluated cell moments measure
 
 $$
-E_h=\|u_h-f\|_{L^2(\Omega)},\qquad
+E_h=\Vert u_h-f\Vert _{L^2(\Omega)},\qquad
 M_h=\left(\sum_K\frac{1}{|K|}
-\left\|\int_K(u_h-f)\,dx\right\|_{\mathbb K^m}^2\right)^{1/2}.
+\left\Vert \int_K(u_h-f)\,dx\right\Vert _{\mathbb K^m}^2\right)^{1/2}.
 $$
 
 Projection must have $M_h<10^{-10}$ on every refinement level, while
@@ -117,7 +117,7 @@ with $10^{-14}$. Each positive error changes relatively by less than $10^{-6}$,
 and moments retain their absolute bound. Every solve also checks
 
 $$
-\frac{\|A_hU_h-b_h\|_2}{\max(1,\|b_h\|_2)}<10^{-11}.
+\frac{\Vert A_hU_h-b_h\Vert _2}{\max(1,\Vert b_h\Vert _2)}<10^{-11}.
 $$
 
 Native solver success and positive PETSc convergence reason are required.

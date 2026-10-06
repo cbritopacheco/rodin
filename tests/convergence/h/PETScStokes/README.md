@@ -1,6 +1,6 @@
 # PETSc Stokes h-convergence
 
-For $\Omega=(0,1)^d$, $d\in\{2,3\}$, velocity
+For $\Omega=(0,1)^d$, $d\in\lbrace 2,3\rbrace $, velocity
 $u:\Omega\to\mathbb R^d$ and pressure $p:\Omega\to\mathbb R$ satisfy
 
 $$
@@ -117,7 +117,7 @@ linked p/hp suites; the distinct mixed-boundary formulation follows below.
 
 The `RodinConvergenceHPETScStokesBoundary` target uses
 `PETScStokesTractionProblem`, with two fields rather than a pressure-mean
-multiplier. Define $\Gamma_D=\{x\in\partial\Omega:x_0=0\}$ and
+multiplier. Define $\Gamma_D=\lbrace x\in\partial\Omega:x_0=0\rbrace $ and
 $\Gamma_N=\partial\Omega\setminus\Gamma_D$. With viscosity $\nu=1$,
 the physical stress and boundary data are
 
@@ -151,7 +151,7 @@ The pressure-sensitive control changes traction alone to $t+c n$, with $c=2$.
 The exact solution is then $(u,p-c)$, so
 
 $$
-\|p_h-p\|_{L^2(\Omega)}=|c|=2,\qquad
+\Vert p_h-p\Vert _{L^2(\Omega)}=|c|=2,\qquad
 |p_h-p|_{H^1(\Omega)}=0,\qquad \int_\Omega p_h\,\mathrm dx=0.
 $$
 
@@ -173,7 +173,7 @@ $$
 These are case-specific acceptance floors, not a uniform inf-sup or mixed
 boundary regularity theorem for every element family. The measured pressure
 integral also obeys the independent unit-volume bound
-$|\int_\Omega p_h\,\mathrm dx-2|\leq\|p_h-p\|_{L^2(\Omega)}$,
+$|\int_\Omega p_h\,\mathrm dx-2|\leq\Vert p_h-p\Vert _{L^2(\Omega)}$,
 up to the stated $10^{-9}$ integration/solve budget.
 
 Assembly order 16 and independent norm order 18 are varied separately to

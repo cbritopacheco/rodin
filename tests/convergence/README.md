@@ -203,7 +203,7 @@ therefore check exact real/complex scalar/vector/matrix constants and restrictio
 of a continuous parent P1 field, rather than a convergence slope. Their
 parent fields use $\phi(x)=c+\sum_j(j+1)x_j$ and vector components
 $\phi(x)+a$. Non-square $2\times3$ matrix components use
-$\phi(x)+3r+s$, with $r\in\{0,1\}$ and $s\in\{0,1,2\}$;
+$\phi(x)+3r+s$, with $r\in\lbrace 0,1\rbrace $ and $s\in\lbrace 0,1,2\rbrace $;
 the six Point DOFs must be exactly $0,\ldots,5$, independently of the
 nominal H1 degree. Dimensions, constants and parent traces use exact
 comparisons. The selected entity owner alone performs restriction and
@@ -234,7 +234,7 @@ $2\times3$ matrix ranges. With scalar global DOF $g$ and zero-based matrix
 component $(r,s)$, their flattened DOF identity is checked exactly:
 
 $$
-g_{rs}=6g+3r+s,\qquad r\in\{0,1\},\quad s\in\{0,1,2\}.
+g_{rs}=6g+3r+s,\qquad r\in\lbrace 0,1\rbrace ,\quad s\in\lbrace 0,1,2\rbrace .
 $$
 
 Matrix dimensions, scalar-to-matrix size factors and real/complex index
@@ -317,8 +317,8 @@ u_\star(x)=\widehat u(\Phi^{-1}(x)),\qquad \widehat u\in P_K,
 $$
 
 where the independently evaluated analytic inverse defines the manufactured
-field, not entity correspondence. Normalized mixed degree-$K$ reference
-polynomials excite higher modes without increasing the field scale with
+field, not entity correspondence. Normalized mixed reference polynomials of
+degree $K$ excite higher modes without increasing the field scale with
 degree. Every held coefficient is compared with independent child-space
 interpolation, and physical samples use the analytic field with the same
 $10^{-10}$ budget. Logical ancestry and geometry factor degrees are checked
@@ -595,7 +595,7 @@ Manufactured sources are derived componentwise from
 
 $$
 f_i=-\kappa_i\Delta u_i+\sum_{j=1}^{2}R_{ij}u_j,
-\qquad i\in\{1,2\},
+\qquad i\in\lbrace 1,2\rbrace ,
 $$
 
 with full manufactured Dirichlet traces. Coupled-space and assembly/solver
@@ -623,7 +623,7 @@ supported.
 
 The natural-boundary extension uses the same diffusion and reaction matrix,
 with componentwise data $\kappa_i\partial_nu_i+\beta u_i=g_i$.
-Mixed Neumann and Robin cases use $\Gamma_D=\{x_0=0\}$ and
+Mixed Neumann and Robin cases use $\Gamma_D=\lbrace x_0=0\rbrace $ and
 $\beta=0$ or $1$ on the complementary boundary. Pure Neumann cases have
 $\Gamma_D=\varnothing$ and $\beta=0$; the reaction eigenvalue bound
 $\lambda_{\min}(R)=0.8$ controls constants, so no pressure-like mean

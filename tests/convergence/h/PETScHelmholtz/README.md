@@ -1,6 +1,6 @@
 # PETSc complex Helmholtz h-convergence
 
-For $\Omega=(0,1)^d$, $d\in\{1,2,3\}$, the complex field
+For $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, the complex field
 $u:\Omega\to\mathbb C$ satisfies
 
 $$
@@ -109,7 +109,7 @@ faces form $\Gamma_N$. With $k^2=1/4$, the natural condition is
 
 $$
 \partial_n u+\mathrm{i}\beta u=r,\qquad
-r=\nabla u\cdot n+\mathrm{i}\beta u,\qquad \beta\in\{0,1\}.
+r=\nabla u\cdot n+\mathrm{i}\beta u,\qquad \beta\in\lbrace 0,1\rbrace .
 $$
 
 The normal contraction uses no conjugation. The weak form is sesquilinear
@@ -124,7 +124,7 @@ $$
 $$
 
 For functions vanishing on $x_0=0$, the unit-box Poincare inequality gives
-$\|v\|_{L^2}^2\le4\|\nabla v\|_{L^2}^2/\pi^2$.
+$\Vert v\Vert _{L^2}^2\le4\Vert \nabla v\Vert _{L^2}^2/\pi^2$.
 Consequently the real part of the form is coercive since
 $k^2<\pi^2/4$. The mixed Neumann case uses CG; the non-Hermitian impedance
 case uses GMRES with Jacobi preconditioning. This low-frequency coercive
@@ -150,7 +150,7 @@ Assembly order 16, independent norm order 18 and relative solver tolerance
 $10^{-13}$ are varied independently to 18, 20 and $10^{-14}$, respectively;
 each field error must change by less than $10^{-6}$ relatively. Every solve
 checks positive solver status and an independently recomputed residual
-$\|Au_h-b\|_2/\max(1,\|b\|_2)<10^{-11}$. Global MPI norms and residuals have
+$\Vert Au_h-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$. Global MPI norms and residuals have
 intentional collective semantics; boundary attributes are assigned before
 partitioning, without coordinate-based entity reconciliation.
 

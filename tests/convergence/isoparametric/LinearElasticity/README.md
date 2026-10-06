@@ -1,7 +1,7 @@
 # Curved linear elasticity
 
 This suite verifies isotropic linear elasticity on the fixed physical domain
-$\Omega=\Phi((0,1)^d)$, for $d\in\{1,2,3\}$, where
+$\Omega=\Phi((0,1)^d)$, for $d\in\lbrace 1,2,3\rbrace $, where
 
 $$
 \Phi(\xi)=\xi+0.1\xi_0^2e_{d-1}.
@@ -50,10 +50,10 @@ In addition to displacement L2 and H1-seminorm errors, the suite integrates
 
 $$
 E_\varepsilon=\left(\int_\Omega
- \|\varepsilon(u_h)-\varepsilon(u)\|_F^2\,\mathrm{d}x\right)^{1/2},
+ \Vert \varepsilon(u_h)-\varepsilon(u)\Vert _F^2\,\mathrm{d}x\right)^{1/2},
 \qquad
 E_\sigma=\left(\int_\Omega
- \|\sigma(u_h)-\sigma(u)\|_F^2\,\mathrm{d}x\right)^{1/2}.
+ \Vert \sigma(u_h)-\sigma(u)\Vert _F^2\,\mathrm{d}x\right)^{1/2}.
 $$
 
 The expected orders are $p+1$ for displacement L2 and $p$ for its
@@ -87,7 +87,7 @@ Separate sensitivity solves increase assembly/norm orders to 16/18 or
 tighten the CG relative tolerance from $10^{-13}$ to $10^{-14}$; every error
 quantity must change by less than $10^{-6}$ relatively. The independently
 computed coefficient residual satisfies
-$\|Au_h-b\|_2/\max(1,\|b\|_2)<10^{-11}$.
+$\Vert Au_h-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$.
 
 An omitted-volumetric-term solve retains the original manufactured forcing
 and trace. It must produce at least twice the baseline displacement L2,
@@ -124,7 +124,7 @@ with $a=0.1$. The physical affine field is $u(x)=\mathbf{1}+Ax$, where
 
 $$
 A_{ij}=(i+1)(j+1)+\delta_{i0}\delta_{j,d-1},\qquad
-c=Ae_{d-1},\qquad C^2=\|c\|_2^2,\qquad s=a\pi.
+c=Ae_{d-1},\qquad C^2=\Vert c\Vert _2^2,\qquad s=a\pi.
 $$
 
 The field error vanishes for a P2 solve on the identity mesh. Geometry and
@@ -134,11 +134,11 @@ $$
 E_{G,0}=aC/\sqrt{2},\qquad
 E_{G,1}=\begin{cases}
 C\sqrt{(1-s^2)^{-1/2}-1},&d=1,\\
-sC/\sqrt{2},&d\in\{2,3\}.
+sC/\sqrt{2},&d\in\lbrace 2,3\rbrace .
 \end{cases}
 $$
 
-For $d\in\{2,3\}$, their constitutive norms are independently given by
+For $d\in\lbrace 2,3\rbrace $, their constitutive norms are independently given by
 
 $$
 E_{G,\varepsilon}=s\sqrt{(C^2+c_0^2)/4},\qquad

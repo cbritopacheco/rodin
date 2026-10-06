@@ -1,6 +1,6 @@
 # Semilinear Poisson p-convergence
 
-For $\Omega=(0,1)^d$, $d\in\{1,2,3\}$, the problem is
+For $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, the problem is
 
 $$
 -\Delta u+u+u^3=f,\qquad u|_{\partial\Omega}=0,

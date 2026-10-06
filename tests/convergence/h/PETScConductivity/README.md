@@ -1,6 +1,6 @@
 # PETSc conductivity h-convergence
 
-On the unit box $\Omega=(0,1)^d$, $d\in\{1,2,3\}$, the problem is
+On the unit box $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, the problem is
 
 $$
 -\nabla\cdot(\gamma\nabla u)=f\quad\text{in }\Omega,
@@ -122,7 +122,7 @@ $$
 +\alpha\int_{\Gamma_N}uv\,\mathrm{d}s
 =\int_\Omega fv\,\mathrm{d}x
 +\int_{\Gamma_N}(g_N+\alpha u)v\,\mathrm{d}s,
-\qquad \alpha\in\{0,2\}.
+\qquad \alpha\in\lbrace 0,2\rbrace .
 $$
 
 With MUMPS available, a pure-Neumann variant uses all boundary faces and
@@ -148,7 +148,7 @@ norm order 18 are checked separately against orders 18 and 20. Tightening
 the solver tolerance from $10^{-13}$ to $10^{-14}$ must also change each
 error by less than $10^{-6}$ relatively. The independently recomputed
 coefficient residual satisfies
-$\|A u_h-b\|_2/\max(1,\|b\|_2)<10^{-11}$.
+$\Vert A u_h-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$.
 
 Removing the natural flux while retaining the forcing and essential/Robin
 data must increase each field error by a factor greater than 5. This control

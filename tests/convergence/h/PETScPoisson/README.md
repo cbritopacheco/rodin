@@ -2,7 +2,7 @@
 
 This suite runs the same smooth sine-product Poisson problem as the local
 Eigen-backed suite, but assembles the weak form into PETSc matrices and vectors
-and solves with PETSc CG. In dimension $d\in\{1,2,3\}$, the exact field is
+and solves with PETSc CG. In dimension $d\in\lbrace 1,2,3\rbrace $, the exact field is
 $u_*(x)=\prod_{j=1}^d\sin(\pi x_j)$, the load is
 $f=d\pi^2u_*$, and the boundary trace is prescribed from $u_*$. It checks
 independently integrated $L^2$ and $H^1$-seminorm errors on all seven
@@ -25,7 +25,7 @@ run.
 `RodinConvergenceHPETScPoissonBoundary` adds real-PETSc local and MPI
 counterparts of the native boundary studies. On $\Omega=(0,1)^d$, let
 $U(x)=\exp(\sum_jx_j)$ and $f=-dU$. For the mixed cases,
-$\Gamma_D=\{x_0=0\}$ and $\Gamma_N=\partial\Omega\setminus\Gamma_D$.
+$\Gamma_D=\lbrace x_0=0\rbrace $ and $\Gamma_N=\partial\Omega\setminus\Gamma_D$.
 The prescribed trace is $U$ and the outward flux is
 $g=\nabla U\cdot n$. The Neumann weak form is
 

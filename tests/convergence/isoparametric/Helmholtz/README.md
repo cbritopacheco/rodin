@@ -1,7 +1,7 @@
 # Complex Helmholtz on exact and approximated geometry
 
 This suite isolates field approximation on curved cells from approximation
-of the physical domain. Let $Q=(0,1)^d$, $d\in\{1,2,3\}$, and define
+of the physical domain. Let $Q=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, and define
 
 $$
 \Phi(\xi)=\xi+a\xi_0^2e_{d-1},\qquad a=0.1,\qquad \Omega=\Phi(Q).
@@ -105,7 +105,7 @@ $$
 1&(1.65,2.35)&(0.75,1.25)\\
 2&(2.45,3.55)&(1.55,2.45)
 \end{array}
-\qquad i\in\{1,2\}.
+\qquad i\in\lbrace 1,2\rbrace .
 $$
 
 Mapped-element approximation and coercivity provide the expected
@@ -276,7 +276,7 @@ E_{G,0}=|c|\frac{a}{\sqrt2},\qquad |c|=\frac{\sqrt5}{2},
 E_{G,1}=
 \begin{cases}
 |c|\sqrt{(1-(a\pi)^2)^{-1/2}-1},&d=1,\\
-|c|a\pi/\sqrt2,&d\in\{2,3\}.
+|c|a\pi/\sqrt2,&d\in\lbrace 2,3\rbrace .
 \end{cases}
 $$
 

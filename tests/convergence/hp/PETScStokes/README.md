@@ -3,7 +3,7 @@
 The continuous problem and analytic data are those of the
 [PETSc degree study](../../p/PETScStokes/README.md), with viscosity
 $\nu=1$, full exact velocity trace, and zero-mean pressure on
-$\Omega=(0,1)^d$, $d\in\{2,3\}$:
+$\Omega=(0,1)^d$, $d\in\lbrace 2,3\rbrace $:
 
 $$
 u=\sin(\pi x_1)e_0,\qquad p=\cos(\pi x_0),\qquad
@@ -32,12 +32,12 @@ stability and smooth-data regularity remain hypotheses; the finite path
 does not prove uniform stability of the pyramid/wedge families.
 
 Independent physical-cell integration measures velocity and pressure
-L2 and H1-seminorm errors separately. For field $w\in\{u,p\}$ and
-norm index $j\in\{0,1\}$, the effective path rate is
+L2 and H1-seminorm errors separately. For field $w\in\lbrace u,p\rbrace $ and
+norm index $j\in\lbrace 0,1\rbrace $, the effective path rate is
 
 $$
 r_{w,j,i}=\frac{\log(E_{w,j,i-1}/E_{w,j,i})}
-{\log(h_{i-1}/h_i)},\qquad i\in\{1,2\}.
+{\log(h_{i-1}/h_i)},\qquad i\in\lbrace 1,2\rbrace .
 $$
 
 Each error must be finite and positive and strictly decrease on both

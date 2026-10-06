@@ -1,6 +1,6 @@
 # PETSc/SNES semilinear Poisson h-convergence
 
-On $\Omega=(0,1)^d$, $d\in\{1,2,3\}$, the homogeneous Dirichlet problem is
+On $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, the homogeneous Dirichlet problem is
 
 $$
 -\Delta u+u+u^3=f,\qquad
@@ -70,7 +70,7 @@ $$
 N_{\mathrm{free}}=N-\sum_r\#(\mathcal C_r\cap\mathcal I_r).
 $$
 
-For $N_{\mathrm{free}}=0$, the homogeneous test space is $\{0\}$;
+For $N_{\mathrm{free}}=0$, the homogeneous test space is $\lbrace 0\rbrace $;
 zero initial residual and zero SNES iterations are required exactly.
 The $n=2$, P1 regression checks this case on six families. Cube-centred
 pyramid generation instead contributes one interior vertex and retains
@@ -123,16 +123,16 @@ because SNES converges.
 
 `RodinConvergenceHPETScNonlinearPoissonBoundary` retains the same semilinear
 operator. Mixed cases prescribe the manufactured trace on
-$\Gamma_D=\{x_0=0\}$ and
+$\Gamma_D=\lbrace x_0=0\rbrace $ and
 
 $$
 \partial_nu+\beta u=g,\qquad
-g=\nabla u\cdot n+\beta u,\qquad \beta\in\{0,1\},
+g=\nabla u\cdot n+\beta u,\qquad \beta\in\lbrace 0,1\rbrace ,
 $$
 
 on $\Gamma_N=\partial\Omega\setminus\Gamma_D$. Pure Neumann uses
 $\Gamma_D=\varnothing$, $\Gamma_N=\partial\Omega$, and $\beta=0$.
-For $V=\{v\in H^1(\Omega):v|_{\Gamma_D}=0\}$, the physical residual
+For $V=\lbrace v\in H^1(\Omega):v|_{\Gamma_D}=0\rbrace $, the physical residual
 and its derivative are
 
 $$
@@ -199,7 +199,7 @@ Independent sensitivity changes assembly order $16\to18$, norm order
 $18\to20$, or SNES residual tolerance $10^{-12}\to10^{-13}$, one at a
 time; each error must change by less than $10^{-6}$ relative to baseline.
 The independently reassembled residual budget remains $10^{-10}$ relative
-to $\max(1,\|F(u_h^0)\|_2)$. Inner KSP tolerances track SNES as above.
+to $\max(1,\Vert F(u_h^0)\Vert _2)$. Inner KSP tolerances track SNES as above.
 There are 37 cases per geometry/context, registered on all seven geometries
 locally and at MPI ranks 1–4 in 35 `slow` CTest entries. The watchdog is
 1800 seconds except for tetrahedron entries, which allow 3600 seconds:

@@ -16,7 +16,7 @@ Two manufactured fields distinguish exact representation from finite-range
 degree decay:
 
 1. For $u_*(x)=\sum_j x_j^2$, the source is
-   $f_*(x)=-2\{\sum_j x_j+d\gamma(x)\}$. The degree-one solution has
+   $f_*(x)=-2\lbrace \sum_j x_j+d\gamma(x)\rbrace $. The degree-one solution has
    nonzero $L^2$ and $H^1$-seminorm errors, while the degree-two solution
    reproduces $u_*$ to an absolute error below $10^{-10}$ in both norms.
 2. For $u(x)=\exp(\sum_j x_j)$, one has $\nabla u=u(1,\ldots,1)$ and

@@ -39,7 +39,7 @@ and CG relative tolerance $10^{-13}\to10^{-14}$ vary separately.
 Each norm must change by less than $10^{-6}$ relatively. CG must return a
 positive convergence reason, a finite reported residual below $10^{-8}$,
 and an independent residual
-$\|Ax-b\|_2/\max(1,\|b\|_2)<10^{-11}$.
+$\Vert Ax-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$.
 
 All seven positive-dimensional cell families run with local meshes and
 MPI ranks one through four, under sequential and OpenMP assembly. MPI

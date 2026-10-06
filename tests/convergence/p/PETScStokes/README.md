@@ -2,7 +2,7 @@
 
 This suite extends the [native degree study](../Stokes/README.md) to
 real-scalar PETSc storage, local PETSc assembly, and distributed MPI meshes.
-On $\Omega=(0,1)^d$, $d\in\{2,3\}$, the continuous problem is
+On $\Omega=(0,1)^d$, $d\in\lbrace 2,3\rbrace $, the continuous problem is
 
 $$
 -\nu\Delta u+\nabla p=f,\qquad \nabla\cdot u=0,\qquad
@@ -98,7 +98,7 @@ Each pair reproduces its highest-degree polynomial patch on `n=3`:
 $$
 u=x_1^m e_0,\qquad p=x_0^{m-1}-\frac1m,\qquad
 f=\bigl(-m(m-1)x_1^{m-2}+(m-1)x_0^{m-2}\bigr)e_0,
-\qquad m=k_u\in\{2,3,4\}.
+\qquad m=k_u\in\lbrace 2,3,4\rbrace .
 $$
 
 All four field errors and strong L2 divergence must be below $10^{-9}$.

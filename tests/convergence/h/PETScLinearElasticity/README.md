@@ -1,6 +1,6 @@
 # PETSc linear-elasticity h-convergence
 
-On $\Omega=(0,1)^d$, $d\in\{1,2,3\}$, the real displacement
+On $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, the real displacement
 $u:\Omega\to\mathbb{R}^d$ satisfies
 
 $$
@@ -62,8 +62,8 @@ Dirichlet rate bounds as the existing Eigen elasticity h studies.
 Independent quadrature measures
 
 $$
-E_0^2=\int_\Omega\|u-u_h\|_2^2\,\mathrm{d}x,\qquad
-E_1^2=\int_\Omega\|Du-Du_h\|_F^2\,\mathrm{d}x.
+E_0^2=\int_\Omega\Vert u-u_h\Vert _2^2\,\mathrm{d}x,\qquad
+E_1^2=\int_\Omega\Vert Du-Du_h\Vert _F^2\,\mathrm{d}x.
 $$
 
 For MPI, `ErrorNorm::computeVector` integrates owned cells only and sums
@@ -117,7 +117,7 @@ CI execution.
 
 `RodinConvergenceHPETScLinearElasticityBoundary` reuses the common PETSc
 workload, manufactured fields and vector norms. For mixed conditions,
-$\Gamma_D=\{x_0=0\}$ and $\Gamma_T=\partial\Omega\setminus\Gamma_D$.
+$\Gamma_D=\lbrace x_0=0\rbrace $ and $\Gamma_T=\partial\Omega\setminus\Gamma_D$.
 The natural datum is the analytic traction $t=\sigma(u_*)n$, so that
 
 $$
@@ -133,8 +133,8 @@ in dimensions two and three and the explicit endpoint signs in one dimension.
 The traction uses the closed-form manufactured stress, independently of the
 discrete Jacobian used to measure the solution error.
 
-Let $V_D=\{v\in H^1(\Omega;\mathbb R^d):v|_{\Gamma_D}=0\}$ and
-$e_h=u_*-u_h$. For conforming degree-$p$ approximation of a smooth solution,
+Let $V_D=\lbrace v\in H^1(\Omega;\mathbb R^d):v|_{\Gamma_D}=0\rbrace $ and
+$e_h=u_*-u_h$. For conforming approximation of degree $p$ to a smooth solution,
 with compatible approximation of the essential data, the energy estimate is
 $\lVert e_h\rVert_{H^1}\le C h^p\lVert u_*\rVert_{H^{p+1}}$.
 The L2 estimate additionally depends on the adjoint problem: for
