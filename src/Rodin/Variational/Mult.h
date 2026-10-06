@@ -483,7 +483,7 @@ namespace Rodin::Variational
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_rhs->setIntegrationPoint(ip);
-        m_functionCache.setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
         return *this;
       }
 
@@ -498,7 +498,7 @@ namespace Rodin::Variational
           const auto product = lhs * rhs;
           return Internal::materializeProduct(product);
         };
-        if (const auto* lhs = m_functionCache.get())
+        if (const auto* lhs = m_cache.get())
           return eval(*lhs);
         return eval(getLHS().getValue(p));
       }
@@ -523,7 +523,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
 
       /// @brief Function value at the current quadrature binding.
-      typename LHSType::Cache m_functionCache{*m_lhs};
+      typename LHSType::Cache m_cache{*m_lhs};
   };
 
   /// @brief Deduction guide for @c Mult.
@@ -671,7 +671,7 @@ namespace Rodin::Variational
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
-        m_functionCache.setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
         return *this;
       }
 
@@ -686,7 +686,7 @@ namespace Rodin::Variational
           const auto product = lhs * rhs;
           return Internal::materializeProduct(product);
         };
-        if (const auto* rhs = m_functionCache.get())
+        if (const auto* rhs = m_cache.get())
           return eval(*rhs);
         return eval(this->getRHS().getValue(p));
       }
@@ -711,7 +711,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
 
       /// @brief Function value at the current quadrature binding.
-      typename RHSType::Cache m_functionCache{*m_rhs};
+      typename RHSType::Cache m_cache{*m_rhs};
   };
 
   /// @brief Deduction guide for @c Mult.
