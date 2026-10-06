@@ -64,6 +64,18 @@ namespace Rodin::Tests::Unit
       integral.setPolytope(cell);
       EXPECT_EQ(mesh.requests, requests)
         << "Local assembly must not retain mapped points for every mesh cell";
+      const auto& formula = QF::PolytopeQuadratureFormula::get(order, cell.getGeometry());
+      for (const auto* ip : {&integral.getIntegrand().getLHS().getIntegrationPoint(),
+             &integral.getIntegrand().getRHS().getIntegrationPoint()})
+      {
+        // The binding remains readable after setPolytope returns. ASan must
+        // reject a shape expression retaining a stack-local integration point.
+        EXPECT_EQ(ip->getQuadratureFormula(), &formula);
+        EXPECT_EQ(ip->getIndex(), formula.getSize() - 1);
+        EXPECT_EQ(ip->getPoint().getPolytope().getDimension(), cell.getDimension());
+        EXPECT_EQ(ip->getPoint().getPolytope().getIndex(), cell.getIndex());
+        EXPECT_EQ(&ip->getPoint().getPolytope().getMesh(), &cell.getMesh());
+      }
       for (Eigen::Index te = 0; te < expected.rows(); ++te)
         for (Eigen::Index tr = 0; tr < expected.cols(); ++tr)
           EXPECT_EQ(integral.integrate(tr, te), expected(te, tr))
@@ -138,10 +150,34 @@ namespace Rodin::Tests::Unit
         {
           auto conjugated = Integral(u + u, Conjugate(v + v));
           checkLocal(conjugated, *cell);
+          // The sum selects generic quadrature: specialised bare H1/P1
+          // kernels tabulate directly and do not bind the expression tree.
+          auto linear = Integral(v + v);
+          linear.setOrder(3);
+          linear.setPolytope(*cell);
+          const auto* bound = &linear.getIntegrand().getIntegrationPoint();
+          const auto& formula =
+            QF::PolytopeQuadratureFormula::get(3, cell->getGeometry());
+          EXPECT_EQ(bound->getQuadratureFormula(), &formula);
+          EXPECT_EQ(bound->getIndex(), formula.getSize() - 1);
+          EXPECT_EQ(bound->getPoint().getPolytope().getDimension(), cell->getDimension());
+          EXPECT_EQ(bound->getPoint().getPolytope().getIndex(), cell->getIndex());
+          EXPECT_EQ(&bound->getPoint().getPolytope().getMesh(), &cell->getMesh());
+          auto movedLinear = std::move(linear);
+          EXPECT_EQ(&movedLinear.getIntegrand().getIntegrationPoint(), bound);
+          auto copiedLinear = movedLinear;
+          copiedLinear.setPolytope(*cell);
+          EXPECT_NE(&copiedLinear.getIntegrand().getIntegrationPoint(), bound);
+          EXPECT_EQ(copiedLinear.getIntegrand().getIntegrationPoint().getIndex(),
+            formula.getSize() - 1);
         }
         auto copy = mass;
         checkLocal(copy, *cell, 3);
+        const auto* boundTrial = &copy.getIntegrand().getLHS().getIntegrationPoint();
+        const auto* boundTest = &copy.getIntegrand().getRHS().getIntegrationPoint();
         auto moved = std::move(copy);
+        EXPECT_EQ(&moved.getIntegrand().getLHS().getIntegrationPoint(), boundTrial);
+        EXPECT_EQ(&moved.getIntegrand().getRHS().getIntegrationPoint(), boundTest);
         checkLocal(moved, *cell);
       }
       checkAssembly(space, u, v, mass);
