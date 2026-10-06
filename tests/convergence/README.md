@@ -262,6 +262,24 @@ test is not a PDE convergence-rate claim or a PETSc restriction certificate.
 Curved-field data uses the same independently evaluated analytic inverse
 defined below; geometry is installed before partitioning in both storage paths.
 
+The independent [matrix element regression](../unit/Rodin/Variational/MatrixRangeTest.cpp)
+checks non-square $2\times3$ real and complex H1 elements of degrees
+$k=1,\ldots,6$ on Point and all seven positive-dimensional cell families.
+For scalar nodal basis functions $\varphi_i$ and matrix units $E_{rs}$,
+the tensor-product nodal identity is
+
+$$
+\ell_{i,rs}(\varphi_j E_{tu})
+=\delta_{ij}\delta_{rt}\delta_{su},\qquad
+a=6i+3r+s.
+$$
+
+The basis count is checked exactly against six times the scalar count.
+Every diagonal entry and selected off-diagonal entries with different
+components or neighbouring scalar nodes are checked within $10^{-8}$.
+These are reference-element checks, not a full off-diagonal enumeration,
+MPI ownership evidence or a convergence-rate study.
+
 The complementary
 [PETSc-backed H1 restriction regression](../unit/Rodin/PETSc/MPIH1SubMeshRestrictionTest.cpp)
 uses the same orders, geometries, selections and rank counts with PETSc
