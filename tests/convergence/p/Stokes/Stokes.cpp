@@ -8,36 +8,48 @@
 /** @file @brief Degree improvement for mixed Stokes velocity and pressure. */
 
 #include "../../StokesProblem.h"
+#include "../../CurvedGeometry.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Convergence::P::Stokes
 {
-  TEST(StokesSpaceTest, SingleTensorCellHasTooFewFreeVelocityDOFs)
+  TEST(StokesSpaceTest, CoarseMeshesHaveTooFewFreeVelocityDOFs)
   {
     using namespace Variational;
     for (const auto geometry :
-      {Polytope::Type::Quadrilateral, Polytope::Type::Hexahedron})
+      {Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(UniformGrid::getGeometryName(geometry));
-      auto mesh = UniformGrid(geometry).makeMesh(2);
-      const auto dimension = mesh.getDimension();
-      H1 velocitySpace(std::integral_constant<size_t, 2>{}, mesh, dimension);
-      H1 pressureSpace(std::integral_constant<size_t, 1>{}, mesh);
-      TrialFunction u(velocitySpace);
-      auto boundary = DirichletBC(u, Zero());
-      boundary.assemble();
-      const auto& constrained = std::get<IndexMap<Real>>(boundary.getDOFs());
-      ASSERT_LE(constrained.size(), velocitySpace.getSize());
-      for (const auto& [index, value] : constrained)
-        EXPECT_LT(index, velocitySpace.getSize());
-      const auto freeVelocity = velocitySpace.getSize() - constrained.size();
-      ASSERT_EQ(freeVelocity, dimension);
-      ASSERT_EQ(pressureSpace.getSize(), dimension == 2 ? 4u : 8u);
-      const auto zeroMeanPressure = pressureSpace.getSize() - 1;
-      // Rank(B) <= dim(V_h^0) < dim(Q_h^0): a pressure null mode is unavoidable.
-      EXPECT_LT(freeVelocity, zeroMeanPressure);
+      for (bool curved : {false, true})
+      {
+        SCOPED_TRACE(::testing::Message() << "curved=" << curved);
+        auto mesh = UniformGrid(geometry).makeMesh(2);
+        if (curved)
+        {
+          CurvedGeometry mapping(mesh);
+          mapping.install<2>();
+        }
+        const auto dimension = mesh.getDimension();
+        H1 velocitySpace(std::integral_constant<size_t, 2>{}, mesh, dimension);
+        H1 pressureSpace(std::integral_constant<size_t, 1>{}, mesh);
+        TrialFunction u(velocitySpace);
+        auto boundary = DirichletBC(u, Zero());
+        boundary.assemble();
+        const auto& constrained = std::get<IndexMap<Real>>(boundary.getDOFs());
+        ASSERT_LE(constrained.size(), velocitySpace.getSize());
+        for (const auto& [index, value] : constrained)
+          EXPECT_LT(index, velocitySpace.getSize());
+        const auto freeVelocity = velocitySpace.getSize() - constrained.size();
+        ASSERT_EQ(freeVelocity, dimension);
+        ASSERT_EQ(pressureSpace.getSize(), dimension == 2 ? 4u : 8u);
+        const auto zeroMeanPressure = pressureSpace.getSize() - 1;
+        // Rank(B) <= dim(V_h^0) < dim(Q_h^0), independently of the map:
+        // a nonconstant pressure null mode remains after fixing the mean.
+        EXPECT_LT(freeVelocity, zeroMeanPressure);
+      }
     }
   }
 

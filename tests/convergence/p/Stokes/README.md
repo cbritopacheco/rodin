@@ -51,8 +51,12 @@ bound on $\beta_{h,k}$ or an asymptotic exponential theorem as $k\to\infty$.
 In particular, simplex results are not silently transferred to pyramids.
 
 The fixed mesh starts at `n=3`, not `n=2`. An exact DOF-count regression
-assembles homogeneous velocity constraints on a single quadrilateral or
-hexahedron. For the degree-two/degree-one tensor-product pair,
+assembles homogeneous velocity constraints on the `n=2` triangle,
+quadrilateral, tetrahedron, hexahedron and wedge grids. Each grid covers
+the unit box; it need not consist of a single element. Affine geometry and
+the exact quadratic map
+$\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1}$ are checked separately. For the
+degree-two/degree-one pair on these grids,
 
 $$
 \dim V_{h,2}^0=d<2^d-1=\dim Q_{h,1}^0,\qquad d\in\lbrace 2,3\rbrace.
@@ -62,7 +66,10 @@ The discrete divergence cannot have full pressure rank, so a nonconstant
 pressure null mode remains even after fixing the mean. This is a logical
 rank obstruction, checked through actual constrained indices without a
 floating-point rank tolerance. Avoiding that coarse mesh does not, by
-itself, prove a uniform inf-sup bound on the larger meshes.
+itself, prove a uniform inf-sup bound on the larger meshes. The pyramid
+family is not included in this dimension obstruction: its additional
+interior entities change the free-velocity count. That exclusion is not
+a stability certificate for the pyramid pair.
 
 `StokesProblem` is shared by native h, p, and hp studies. Each solve creates
 fresh spaces and a fresh saddle-point system. In the form language it states

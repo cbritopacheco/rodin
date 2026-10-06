@@ -28,8 +28,8 @@ velocity degree $k$, and pressure degree $k-1$, the path is
 | 2 | 5 | $1/4$ | $4/3$ |
 
 The cell-appropriate scalar/vector H1 spaces use this degree offset on
-every tested geometry. The coarsest mesh avoids the single-cell
-tensor-product pressure-rank obstruction documented and logically tested
+every tested geometry. The coarsest mesh avoids the coarse-grid
+pressure-rank obstruction documented and logically tested
 in the p suite. Stability of a mixed pair remains a distinct hypothesis;
 a degree offset alone does not prove a uniform inf-sup bound, particularly
 on pyramid and wedge families.
