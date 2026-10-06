@@ -543,8 +543,8 @@ namespace Rodin::Assembly
 
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
-              for (size_t r = 0; r < rows.size(); ++r)
-                for (size_t c = 0; c < cols.size(); ++c)
+              for (Eigen::Index r = 0; r < rows.size(); ++r)
+                for (Eigen::Index c = 0; c < cols.size(); ++c)
                   local(rows(r), cols(c)) += lbfi->integrate(c, r);
             }
 
@@ -607,8 +607,8 @@ namespace Rodin::Assembly
 
                 const auto& rows = input.getTestFES().getDOFs(d, i);
                 const auto& cols = input.getTrialFES().getDOFs(rd, tr);
-                for (size_t r = 0; r < rows.size(); ++r)
-                  for (size_t c = 0; c < cols.size(); ++c)
+                for (Eigen::Index r = 0; r < rows.size(); ++r)
+                  for (Eigen::Index c = 0; c < cols.size(); ++c)
                     local(rows(r), cols(c)) += gbfi->integrate(c, r);
               }
             }
@@ -2500,10 +2500,10 @@ namespace Rodin::Assembly
 
             if (mIdx.empty())
               continue;
-            const Index n = static_cast<Index>(mIdx.size());
+            const Eigen::Index n = static_cast<Eigen::Index>(mIdx.size());
             IndexArray masters(n);
             Math::Vector<Scalar> coeffs(n);
-            for (Index k = 0; k < n; k++)
+            for (Eigen::Index k = 0; k < n; k++)
             {
               masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
               coeffs.coeffRef(k) = mCoef[static_cast<size_t>(k)];

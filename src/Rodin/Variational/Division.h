@@ -264,21 +264,24 @@ namespace Rodin::Variational
       Division(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()),
-          m_rhs(rhs.copy())
+          m_rhs(rhs.copy()),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Copy constructor.
       Division(const Division& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()),
-          m_rhs(other.m_rhs->copy())
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Move constructor.
       Division(Division&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),
-          m_rhs(std::move(other.m_rhs))
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Gets the operand in the shape function expression.
@@ -320,19 +323,33 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets the integration point the expression is evaluated at.
+      /// @param[in] ip Point defining the current evaluation binding.
+      /// @returns This expression.
       Division& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
         return *this;
       }
 
       /// @brief Gets the basis function of a local degree of freedom.
+      /// @param[in] local Local basis index on the current polytope.
       auto getBasis(size_t local) const
       {
         const auto& ip = getIntegrationPoint();
         decltype(auto) lhs = getLHS().getBasis(local);
-        const auto rhs = getRHS().getValue(ip);
-        return lhs / rhs;
+        if (const auto* rhs = m_cache.get())
+        {
+          if constexpr (requires { (lhs / *rhs).eval(); })
+            return (lhs / *rhs).eval();
+          else
+            return lhs / *rhs;
+        }
+        decltype(auto) rhs = getRHS().getValue(ip);
+        if constexpr (requires { (lhs / rhs).eval(); })
+          return (lhs / rhs).eval();
+        else
+          return lhs / rhs;
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -355,6 +372,8 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+      /// @brief Function value at the current quadrature binding.
+      typename RHSType::Cache m_cache;
   };
 
   /// @brief Deduction guide for @c Division.

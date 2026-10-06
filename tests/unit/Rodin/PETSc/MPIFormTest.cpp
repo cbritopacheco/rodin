@@ -211,6 +211,40 @@ namespace
     EXPECT_EQ(globalCols, static_cast<PetscInt>(fes.getSize()));
   }
 
+  /// @brief Generic coefficient binding and unchanged-mesh reassembly match specialized mass.
+  TEST(PETSc_MPI_Form, GenericCoefficientReassemblyMatchesSpecializedMass)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    Real scale = 2;
+    auto f = RealFunction([&](const Point& p) { return scale * (1 + p.x()); });
+    BilinearForm generic(u, v);
+    BilinearForm specialized(u, v);
+    generic = Integral(u, f * v);
+    specialized = Integral(f * u, v);
+    for (const Real value : {2.0, 5.0})
+    {
+      scale = value;
+      generic.assemble();
+      specialized.assemble();
+      ::Mat difference = nullptr;
+      PetscErrorCode ierr =
+        MatDuplicate(generic.getOperator(), MAT_COPY_VALUES, &difference);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = MatAXPY(difference, -1, specialized.getOperator(), SAME_NONZERO_PATTERN);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      PetscReal norm = 0;
+      ierr = MatNorm(difference, NORM_FROBENIUS, &norm);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_LE(norm, 1e-12);
+      ierr = MatDestroy(&difference);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+    }
+  }
+
   /// @brief Verifies distributed identification projects owned slave row for PET sc MPI form by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(PETSc_MPI_Form, DistributedIdentificationProjectsOwnedSlaveRow)
   {
