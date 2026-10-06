@@ -378,24 +378,27 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       /// @brief Constructs the expression from its left and right operands.
-      constexpr
-      Dot(const LHSType& lhs, const RHSType& rhs)
+      constexpr Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_lhs)
       {}
 
       /// @brief Copy constructor.
-      constexpr
-      Dot(const Dot& other)
+      constexpr Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_lhs)
       {}
 
       /// @brief Move constructor.
-      constexpr
-      Dot(Dot&& other)
+      constexpr Dot(Dot&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_lhs)
       {}
 
       /// @brief Gets the left-hand side operand.
@@ -471,13 +474,14 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& ip = this->getRHS().getIntegrationPoint();
-        const auto eval = [&](const auto& lhs) {
-          decltype(auto) rhs = getRHS().getBasis(local);
-          return Math::dot(lhs, rhs);
-        };
         if (const auto* lhs = m_cache.get())
-          return eval(*lhs);
-        return eval(getLHS().getValue(ip));
+        {
+          decltype(auto) rhs = getRHS().getBasis(local);
+          return Math::dot(*lhs, rhs);
+        }
+        decltype(auto) lhs = getLHS().getValue(ip);
+        decltype(auto) rhs = getRHS().getBasis(local);
+        return Math::dot(lhs, rhs);
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -501,7 +505,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
 
       /// @brief Function value at the current quadrature binding.
-      typename LHSType::Cache m_cache{*m_lhs};
+      typename LHSType::Cache m_cache;
   };
 
   /**
@@ -566,24 +570,27 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
       /// @brief Constructs the expression from its left and right operands.
-      constexpr
-      Dot(const LHSType& lhs, const RHSType& rhs)
+      constexpr Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Copy constructor.
-      constexpr
-      Dot(const Dot& other)
+      constexpr Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Move constructor.
-      constexpr
-      Dot(Dot&& other)
+      constexpr Dot(Dot&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Gets the left-hand side operand.
@@ -643,13 +650,14 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = getLHS().getIntegrationPoint();
-        const auto eval = [&](const auto& rhs) {
-          decltype(auto) lhs = getLHS().getBasis(local);
-          return Math::dot(lhs, rhs);
-        };
         if (const auto* rhs = m_cache.get())
-          return eval(*rhs);
-        return eval(getRHS().getValue(p));
+        {
+          decltype(auto) lhs = getLHS().getBasis(local);
+          return Math::dot(lhs, *rhs);
+        }
+        decltype(auto) rhs = getRHS().getValue(p);
+        decltype(auto) lhs = getLHS().getBasis(local);
+        return Math::dot(lhs, rhs);
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -673,7 +681,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
 
       /// @brief Function value at the current quadrature binding.
-      typename RHSType::Cache m_cache{*m_rhs};
+      typename RHSType::Cache m_cache;
   };
 
   /**

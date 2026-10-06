@@ -415,24 +415,27 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       /// @brief Constructs the expression from its left and right operands.
-      constexpr
-      Mult(const LHSType& lhs, const RHSType& rhs)
+      constexpr Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_lhs)
       {}
 
       /// @brief Copy constructor.
-      constexpr
-      Mult(const Mult& other)
+      constexpr Mult(const Mult& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_lhs)
       {}
 
       /// @brief Move constructor.
-      constexpr
-      Mult(Mult&& other)
+      constexpr Mult(Mult&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_lhs)
       {}
 
       /// @brief Gets the operand in the shape function expression.
@@ -493,14 +496,16 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
-        const auto eval = [&](const auto& lhs) {
-          decltype(auto) rhs = getRHS().getBasis(local);
-          const auto product = lhs * rhs;
-          return Internal::materializeProduct(product);
-        };
         if (const auto* lhs = m_cache.get())
-          return eval(*lhs);
-        return eval(getLHS().getValue(p));
+        {
+          decltype(auto) rhs = getRHS().getBasis(local);
+          const auto product = *lhs * rhs;
+          return Internal::materializeProduct(product);
+        }
+        decltype(auto) lhs = getLHS().getValue(p);
+        decltype(auto) rhs = getRHS().getBasis(local);
+        const auto product = lhs * rhs;
+        return Internal::materializeProduct(product);
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -523,7 +528,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
 
       /// @brief Function value at the current quadrature binding.
-      typename LHSType::Cache m_cache{*m_lhs};
+      typename LHSType::Cache m_cache;
   };
 
   /// @brief Deduction guide for @c Mult.
@@ -602,24 +607,27 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       /// @brief Constructs the expression from its left and right operands.
-      constexpr
-      Mult(const LHSType& lhs, const RHSType& rhs)
+      constexpr Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Copy constructor.
-      constexpr
-      Mult(const Mult& other)
+      constexpr Mult(const Mult& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Move constructor.
-      constexpr
-      Mult(Mult&& other)
+      constexpr Mult(Mult&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Gets the operand in the shape function expression.
@@ -681,14 +689,16 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
-        const auto eval = [&](const auto& rhs) {
-          decltype(auto) lhs = this->getLHS().getBasis(local);
-          const auto product = lhs * rhs;
-          return Internal::materializeProduct(product);
-        };
         if (const auto* rhs = m_cache.get())
-          return eval(*rhs);
-        return eval(this->getRHS().getValue(p));
+        {
+          decltype(auto) lhs = this->getLHS().getBasis(local);
+          const auto product = lhs * *rhs;
+          return Internal::materializeProduct(product);
+        }
+        decltype(auto) rhs = this->getRHS().getValue(p);
+        decltype(auto) lhs = this->getLHS().getBasis(local);
+        const auto product = lhs * rhs;
+        return Internal::materializeProduct(product);
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -711,7 +721,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
 
       /// @brief Function value at the current quadrature binding.
-      typename RHSType::Cache m_cache{*m_rhs};
+      typename RHSType::Cache m_cache;
   };
 
   /// @brief Deduction guide for @c Mult.
