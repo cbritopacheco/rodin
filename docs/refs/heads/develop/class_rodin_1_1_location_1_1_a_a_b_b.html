@@ -86,13 +86,14 @@
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<section id="AABBArchitecture"><h2><a href="#AABBArchitecture">Architecture</a></h2><p>The locator answers the following geometric query. Given a physical point <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
+<table class="m-table"><thead><tr><th>Specialization</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB&lt;MeshType&gt;</a></td><td>Local geometry, optionally restricted to supplied indices.</td></tr><tr><td><a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB&lt;MPIMesh&gt;</a> (MPI header)</td><td>Owned shard entities with MPI-attached results; also derived MPI meshes.</td></tr></tbody></table><section id="AABBArchitecture"><h2><a href="#AABBArchitecture">Architecture</a></h2><p>The locator answers the following geometric query. Given a physical point <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
 $ x $
 </title>
@@ -219,9 +220,23 @@ $ B_K $
 <use x='226.656557' y='-2.988792' xlink:href='#eq7-g3-58'/>
 </g>
 </svg></div><p>Tree nodes reject groups of polytopes, and leaf entries reject individual polytopes, using componentwise box containment. Optional control-hull projections reject further candidates before inversion.</p></li><li>Narrow phase. For each surviving candidate, the actual transformation is inverted by controlled Newton iteration, retrying from other reference points if the centroid attempt fails. A reference coordinate slightly outside the polytope is clipped back to it, then accepted only if the clipped point maps within physical tolerance of the query. The AABB never certifies membership; it only selects candidates to test.</li></ul><p>Boxes bound the whole curved image, not just sampled points on it. The transformation is resampled on a unisolvent reference lattice and converted into control points of a non-negative partition of unity (Bernstein on simplices, tensor Bernstein on quadrilaterals, hexahedra and wedges, the collapsed-coordinate basis on pyramids), whose extrema bound the image in exact arithmetic. Numerical boxes include a conversion roundoff allowance. Degree-one factors need no conversion: the mapped vertices are already the control points, so affine and multilinear cells keep the cheap vertex box. If a box cannot be computed reliably, that entry remains unpruned. An exhaustive narrow-phase fallback can also be enabled with setExhaustiveFallback(). The degree is obtained from PolytopeTransformation::getFactorOrder(); its default total-degree bound is conservative for custom polynomial maps.</p><p>Physical tolerance is relative to the mesh bounding-box diagonal. The reference tolerance only permits a small inversion overshoot before clipping; physical residual is checked again after clipping. Queries are thread-safe for concurrent queries on a fixed mesh and configuration: setters and mesh mutation must not overlap queries. The lazy build is guarded by a mutex and transformations are immutable after construction.</p></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a446180ecfbf673dfb9f8dbaf1ea86ce3">
+              using <a href="#a446180ecfbf673dfb9f8dbaf1ea86ce3" class="m-doc-self">Candidates</a> = std::vector&lt;std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
+            </dt>
+            <dd>Candidate local indices grouped by topological dimension.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
+              <a href="#a446180ecfbf673dfb9f8dbaf1ea86ce3" class="m-doc">Candidates</a> candidates)</span>
+            </dt>
+            <dd>Builds an index over an explicit candidate subset.</dd>
             <dt id="a63801bfa6ec89ed42b04b98140540687">
               <span class="m-doc-wrap-bumper"><a href="#a63801bfa6ec89ed42b04b98140540687" class="m-doc-self">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
@@ -268,6 +283,28 @@ $ B_K $
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a3a0960489603e2eb68890b26257b5108"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class MeshType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Location::<wbr />AABB&lt;MeshType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a0960489603e2eb68890b26257b5108" class="m-doc-self">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh,
+              <a href="#a446180ecfbf673dfb9f8dbaf1ea86ce3" class="m-doc">Candidates</a> candidates)</span></span>
+            </h3>
+            <p>Builds an index over an explicit candidate subset.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Exceptions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Alert::Exception</td>
+                  <td>For duplicate or out-of-range indices.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Entries retain their original mesh indices. Omitted dimensions and empty lists have no candidates, including in exhaustive fallback. Ownership and other selection policies belong to the caller. The tolerance scale still uses all mesh vertices. The candidate lists are a snapshot: reconstruct after topology, geometry or selection changes. Empty lists above the mesh dimension are permitted for empty shards.</p>
+          </div></section>
           <section class="m-doc-details" id="a45f13be3b8fa48212335ca5761617f49"><div>
             <h3>
               <div class="m-doc-template">

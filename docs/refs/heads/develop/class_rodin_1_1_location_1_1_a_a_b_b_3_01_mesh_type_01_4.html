@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Serialization/Export.h file | Rodin</title>
+  <title>Rodin::Location::AABB&lt;MeshType&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,43 +75,69 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_f006a5610f92871e4e317cbc468d5205.html">Serialization</a>/</span>Export.h <span class="m-thin">file</span>
+          <div class="m-doc-template">template&lt;class MeshType&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_location.html">Location</a>::<wbr/></span>AABB&lt;MeshType&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Polymorphic class export registrations for serialization (e.g. polytope transformations), required to serialize objects through base-class pointers.</p>
+        <p>Noncollective point location in owned entities of an MPI mesh.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
+            <li><a href="#MPIAABBArchitecture">Architecture</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#func-members">Functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
+<section id="MPIAABBArchitecture"><h2><a href="#MPIAABBArchitecture">Architecture</a></h2><p>The MPI layer snapshots owned shard-local indices in every dimension. A composed local AABB builds bounds and performs inversion on that subset. Successful points are attached to the MPI mesh with unchanged dimension, local index and coordinates. The MPI mesh delegates their transformations to the same shard. Construction, setters and queries perform no communication. This specialization also supports derived MPI meshes, including SubMesh.</p><p>An empty result is a rank-local miss. Different ranks may each return an owned incident entity at a shared spatial boundary; there is no global arbitration. Nonowned support vertices remain available to owned entities. Physical tolerance is relative to the full shard&#x27;s vertex-box diagonal, so its scale can vary with the partition and overlap. Reconstruct the locator after geometry, topology, ownership or reconciliation changes. The mesh must outlive the locator and its returned points.</p></section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ae09540c547a2450a1166b75b8506c168">
-              <span class="m-doc-wrap-bumper"><a href="#ae09540c547a2450a1166b75b8506c168" class="m-doc-self">BOOST_CLASS_EXPORT</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />ParametricTransformation</a>&lt;<a href="namespace_rodin_1_1_variational.html#a7ad60e2343371f6d9616a5678195d53d" class="m-doc">Rodin::<wbr />Variational::<wbr />RealP1Element</a>&gt;)</span>
+            <dt id="a63801bfa6ec89ed42b04b98140540687">
+              <span class="m-doc-wrap-bumper"><a href="#a63801bfa6ec89ed42b04b98140540687" class="m-doc-self">AABB</a>(</span><span class="m-doc-wrap">const MeshType&amp; mesh) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
-            <dd>Registers the real P1 parametric transformation for Boost export.</dd>
-            <dt id="a4909583f3c07278a8f0e504a3bf4ba2a">
-              <span class="m-doc-wrap-bumper"><a href="#a4909583f3c07278a8f0e504a3bf4ba2a" class="m-doc-self">BOOST_CLASS_EXPORT</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />ParametricTransformation</a>&lt;<a href="namespace_rodin_1_1_variational.html#a5519f0efb971b7fab2cf3dbbacf42c56" class="m-doc">Rodin::<wbr />Variational::<wbr />RealH1Element</a>&lt;1&gt;&gt;)</span>
+            <dd>Snapshots owned shard-local candidates without communication.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="aef53278f6d7eb7783958288e3f67e3a8">
+              <span class="m-doc-wrap-bumper">auto <a href="#aef53278f6d7eb7783958288e3f67e3a8" class="m-doc-self">getTolerance</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Registers real H1 order one geometry for MPI shard transport.</dd>
-            <dt id="af1519cc2176c8c0a46967bed1c445355">
-              <span class="m-doc-wrap-bumper"><a href="#af1519cc2176c8c0a46967bed1c445355" class="m-doc-self">BOOST_CLASS_EXPORT</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />ParametricTransformation</a>&lt;<a href="namespace_rodin_1_1_variational.html#a5519f0efb971b7fab2cf3dbbacf42c56" class="m-doc">Rodin::<wbr />Variational::<wbr />RealH1Element</a>&lt;2&gt;&gt;)</span>
+            <dd>Returns physical tolerance relative to the full shard&#x27;s box diagonal.</dd>
+            <dt id="acbd2172e8f33da1492e91afe5dc25b42">
+              <span class="m-doc-wrap-bumper">auto <a href="#acbd2172e8f33da1492e91afe5dc25b42" class="m-doc-self">getReferenceTolerance</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Registers real H1 order two geometry for MPI shard transport.</dd>
-            <dt id="ad4ee3fc397ab545a862c158938a93ce8">
-              <span class="m-doc-wrap-bumper"><a href="#ad4ee3fc397ab545a862c158938a93ce8" class="m-doc-self">BOOST_CLASS_EXPORT</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />ParametricTransformation</a>&lt;<a href="namespace_rodin_1_1_variational.html#a5519f0efb971b7fab2cf3dbbacf42c56" class="m-doc">Rodin::<wbr />Variational::<wbr />RealH1Element</a>&lt;3&gt;&gt;)</span>
+            <dd>Returns the dimensionless reference-coordinate tolerance.</dd>
+            <dt id="a00ccdca093e2b940d4744bfe3794320d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a00ccdca093e2b940d4744bfe3794320d" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
             </dt>
-            <dd>Registers real H1 order three geometry for MPI shard transport.</dd>
-            <dt id="ab8a2c18152054033183343d8035e2593">
-              <span class="m-doc-wrap-bumper"><a href="#ab8a2c18152054033183343d8035e2593" class="m-doc-self">BOOST_CLASS_EXPORT</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />ParametricTransformation</a>&lt;<a href="namespace_rodin_1_1_variational.html#a5519f0efb971b7fab2cf3dbbacf42c56" class="m-doc">Rodin::<wbr />Variational::<wbr />RealH1Element</a>&lt;4&gt;&gt;)</span>
+            <dd>Sets relative physical tolerance and invalidates local bounds.</dd>
+            <dt id="a87d84c72f462752e93738d1427b02635">
+              <span class="m-doc-wrap-bumper">auto <a href="#a87d84c72f462752e93738d1427b02635" class="m-doc-self">setReferenceTolerance</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> tolerance) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
             </dt>
-            <dd>Registers real H1 order four geometry for MPI shard transport.</dd>
+            <dd>Sets the maximum reference-space overshoot before clipping.</dd>
+            <dt id="a7c2fef590f61862bf2dfe7992ecae7da">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c2fef590f61862bf2dfe7992ecae7da" class="m-doc-self">setExhaustiveFallback</a>(</span><span class="m-doc-wrap">bool enabled) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
+            </dt>
+            <dd>Enables exhaustive inversion restricted to owned candidates.</dd>
+            <dt id="a8ca4fa70401fca758cc999bf754c02a6">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8ca4fa70401fca758cc999bf754c02a6" class="m-doc-self">setProjectionPruning</a>(</span><span class="m-doc-wrap">bool enabled) -&gt; <a href="class_rodin_1_1_location_1_1_a_a_b_b.html" class="m-doc">AABB</a>&amp;</span>
+            </dt>
+            <dd>Enables conservative projection pruning in the local engine.</dd>
+            <dt id="af65dae747e0bf8c3345fdf083dff5dd6">
+              <span class="m-doc-wrap-bumper">auto <a href="#af65dae747e0bf8c3345fdf083dff5dd6" class="m-doc-self">locate</a>(</span><span class="m-doc-wrap">size_t dimension,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt;</span>
+            </dt>
+            <dd>Searches owned entities of dimension d and lifts the local result.</dd>
+            <dt id="a93d9a733708bbdfa234fa7a5a3dec0a1">
+              <span class="m-doc-wrap-bumper">auto <a href="#a93d9a733708bbdfa234fa7a5a3dec0a1" class="m-doc-self">locate</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; x) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt;</span>
+            </dt>
+            <dd>Uses the MPI mesh&#x27;s logical dimension, including on empty submesh ranks.</dd>
           </dl>
         </section>
       </div>

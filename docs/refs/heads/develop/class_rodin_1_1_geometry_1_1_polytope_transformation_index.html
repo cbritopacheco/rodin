@@ -145,6 +145,11 @@
             </dt>
             <dd>Sets the transformation for a polytope with known count.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9eba820bd5569e36aefee53161b50b7b" class="m-doc">find</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>*</span>
+            </dt>
+            <dd>Returns an already attached/cached transformation without creating one.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Factory&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a4f55a9d3d429f3921de14ed6c96efa6d" class="m-doc">get</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               size_t count,
@@ -266,6 +271,22 @@
               </tbody>
             </table>
 <p>More efficient than set() when the total count is known in advance.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9eba820bd5569e36aefee53161b50b7b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>* Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9eba820bd5569e36aefee53161b50b7b" class="m-doc-self">find</a>(</span><span class="m-doc-wrap">size_t d,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
+            </h3>
+            <p>Returns an already attached/cached transformation without creating one.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Null if the dimension or slot is absent or has no transformation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Used when rebuilding a mesh to preserve attached geometry while leaving default charts lazy. As with get(), clear()/set() must not overlap use.</p>
           </div></section>
           <section class="m-doc-details" id="a4f55a9d3d429f3921de14ed6c96efa6d"><div>
             <h3>
