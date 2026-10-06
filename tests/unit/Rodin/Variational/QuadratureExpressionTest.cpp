@@ -313,7 +313,9 @@ namespace Rodin::Tests::Unit
           integral.setPolytope(*cell);
           const auto* bound = &integral.getIntegrand().getIntegrationPoint();
           if (retained)
+          {
             EXPECT_EQ(bound, retained);
+          }
           retained = bound;
           const auto verify = [&](const auto& rule, size_t order) {
             const auto& ip = rule.getIntegrand().getIntegrationPoint();
