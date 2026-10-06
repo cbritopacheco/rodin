@@ -124,7 +124,7 @@ $$
 $$
 
 For functions vanishing on $x_0=0$, the unit-box Poincare inequality gives
-$\Vert v\Vert _{L^2}^2\le4\Vert \nabla v\Vert _{L^2}^2/\pi^2$.
+$\Vert v\Vert_{L^2}^2\le4\Vert\nabla v\Vert_{L^2}^2/\pi^2$.
 Consequently the real part of the form is coercive since
 $k^2<\pi^2/4$. The mixed Neumann case uses CG; the non-Hermitian impedance
 case uses GMRES with Jacobi preconditioning. This low-frequency coercive
@@ -150,7 +150,7 @@ Assembly order 16, independent norm order 18 and relative solver tolerance
 $10^{-13}$ are varied independently to 18, 20 and $10^{-14}$, respectively;
 each field error must change by less than $10^{-6}$ relatively. Every solve
 checks positive solver status and an independently recomputed residual
-$\Vert Au_h-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$. Global MPI norms and residuals have
+$\Vert Au_h-b\Vert_2/\max(1,\Vert b\Vert_2)<10^{-11}$. Global MPI norms and residuals have
 intentional collective semantics; boundary attributes are assigned before
 partitioning, without coordinate-based entity reconciliation.
 

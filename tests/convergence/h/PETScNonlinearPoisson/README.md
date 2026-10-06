@@ -199,7 +199,7 @@ Independent sensitivity changes assembly order $16\to18$, norm order
 $18\to20$, or SNES residual tolerance $10^{-12}\to10^{-13}$, one at a
 time; each error must change by less than $10^{-6}$ relative to baseline.
 The independently reassembled residual budget remains $10^{-10}$ relative
-to $\max(1,\Vert F(u_h^0)\Vert _2)$. Inner KSP tolerances track SNES as above.
+to $\max(1,\Vert F(u_h^0)\Vert_2)$. Inner KSP tolerances track SNES as above.
 There are 37 cases per geometry/context, registered on all seven geometries
 locally and at MPI ranks 1–4 in 35 `slow` CTest entries. The watchdog is
 1800 seconds except for tetrahedron entries, which allow 3600 seconds:

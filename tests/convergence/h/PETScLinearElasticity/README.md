@@ -62,8 +62,8 @@ Dirichlet rate bounds as the existing Eigen elasticity h studies.
 Independent quadrature measures
 
 $$
-E_0^2=\int_\Omega\Vert u-u_h\Vert _2^2\,\mathrm{d}x,\qquad
-E_1^2=\int_\Omega\Vert Du-Du_h\Vert _F^2\,\mathrm{d}x.
+E_0^2=\int_\Omega\Vert u-u_h\Vert_2^2\,\mathrm{d}x,\qquad
+E_1^2=\int_\Omega\Vert Du-Du_h\Vert_F^2\,\mathrm{d}x.
 $$
 
 For MPI, `ErrorNorm::computeVector` integrates owned cells only and sums

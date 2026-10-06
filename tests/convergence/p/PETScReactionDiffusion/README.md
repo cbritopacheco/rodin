@@ -32,7 +32,7 @@ universal exponential constant. A point has no nonconstant spatial rate.
 fresh fixed-layout two-field system per measurement. CG must terminate
 with a positive reason, a finite reported residual below $10^{-8}$, and
 an independently recomputed residual
-$\Vert Ax-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$. `FieldConvergence` checks
+$\Vert Ax-b\Vert_2/\max(1,\Vert b\Vert_2)<10^{-11}$. `FieldConvergence` checks
 each field and every interval without averaging errors across fields.
 The p/hp entry point and geometry/rank registration are shared.
 

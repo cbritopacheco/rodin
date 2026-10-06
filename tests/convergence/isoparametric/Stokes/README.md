@@ -68,7 +68,7 @@ for arbitrary curved meshes or degrees.
 The independently integrated divergence is controlled through
 
 $$
-\Vert \operatorname{div}u_h\Vert _{L^2(\Omega)}
+\Vert\operatorname{div}u_h\Vert_{L^2(\Omega)}
 \le\sqrt d\,|u-u_h|_{H^1(\Omega)}.
 $$
 
@@ -77,7 +77,7 @@ It ties the divergence error to the decreasing velocity derivative error.
 A strict divergence rate is not imposed: cancellation can make this
 quantity vanish or reach roundoff before the field errors do.
 An MPI interpolation control with $u_h=x_0e_0$ independently checks
-$\Vert \operatorname{div}u_h\Vert _{L^2(\Omega)}=1$, counting owned cells once.
+$\Vert\operatorname{div}u_h\Vert_{L^2(\Omega)}=1$, counting owned cells once.
 
 ## Patch, negative and quadrature controls
 
@@ -101,7 +101,7 @@ Assembly and field-norm integration use quadrature order 12. A separate
 order-16 solve/integration must change each nonzero velocity and pressure
 norm by less than $10^{-6}$ relatively. Mapped derivative integrands are
 not assumed polynomial-exact. The coefficient residual obeys
-$\Vert Az-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$, where the coefficient vector
+$\Vert Az-b\Vert_2/\max(1,\Vert b\Vert_2)<10^{-11}$, where the coefficient vector
 collects velocity, pressure and mean-multiplier unknowns. The computed pressure integral
 has absolute magnitude below $10^{-10}$, in this dimensionless setting.
 Independent analytic-volume/gauge checks use an absolute $10^{-12}$ bound.
@@ -170,7 +170,7 @@ For each lifted velocity defect $E\in\lbrace F_u,G_u,T_u\rbrace $, independently
 integrated divergence obeys
 
 $$
-\Vert \operatorname{tr}DE\Vert _{L^2(\Omega)}\le\sqrt d\,|E|_{H^1(\Omega)}.
+\Vert\operatorname{tr}DE\Vert_{L^2(\Omega)}\le\sqrt d\,|E|_{H^1(\Omega)}.
 $$
 
 A lift of a physically divergence-free field on $\Omega_h$ need not remain

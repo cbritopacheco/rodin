@@ -64,8 +64,8 @@ Quadrilateral, Tetrahedron, Pyramid, Hexahedron and Wedge.
 Physical errors are integrated independently of the assembled equations:
 
 $$
-E_0(h)=\Vert u_h-u\Vert _{L^2(\Omega)},\qquad
-E_1(h)=\Vert \nabla u_h-\nabla u\Vert _{L^2(\Omega)}.
+E_0(h)=\Vert u_h-u\Vert_{L^2(\Omega)},\qquad
+E_1(h)=\Vert\nabla u_h-\nabla u\Vert_{L^2(\Omega)}.
 $$
 
 Under smoothness, stable conforming approximation, shape regularity and
@@ -102,7 +102,7 @@ Native solver success or a positive PETSc convergence reason is required.
 An independently recomputed residual must satisfy
 
 $$
-\frac{\Vert A_hU_h-b_h\Vert _2}{\max(1,\Vert b_h\Vert _2)}<10^{-11}.
+\frac{\Vert A_hU_h-b_h\Vert_2}{\max(1,\Vert b_h\Vert_2)}<10^{-11}.
 $$
 
 PETSc absolute tolerance is $10^{-14}$ and divergence tolerance is $10^5$.
@@ -160,8 +160,8 @@ with the same independently derived $f_{\mathrm P}$ and $f_{\mathrm C}$
 as above. Thus the measured field errors are
 
 $$
-E_{0,h}=\Vert u_h-u\Vert _{L^2(\Omega_{h,2})},\qquad
-E_{1,h}=\Vert \nabla u_h-\nabla u\Vert _{L^2(\Omega_{h,2})}.
+E_{0,h}=\Vert u_h-u\Vert_{L^2(\Omega_{h,2})},\qquad
+E_{1,h}=\Vert\nabla u_h-\nabla u\Vert_{L^2(\Omega_{h,2})}.
 $$
 
 The domain changes with refinement. These quantities do not compare solutions
@@ -235,8 +235,8 @@ $$
 \nabla e_T=B\nabla u_h(x_h)-\nabla u(x).
 $$
 
-For $X\in\lbrace F,G,T\rbrace $, report $E_{0,X}=\Vert e_X\Vert _{L^2(\Omega)}$ and
-$E_{1,X}=\Vert \nabla e_X\Vert _{L^2(\Omega)}$. These norms do not add. Both
+For $X\in\lbrace F,G,T\rbrace $, report $E_{0,X}=\Vert e_X\Vert_{L^2(\Omega)}$ and
+$E_{1,X}=\Vert\nabla e_X\Vert_{L^2(\Omega)}$. These norms do not add. Both
 the triangle and reverse-triangle inequalities are checked:
 
 $$

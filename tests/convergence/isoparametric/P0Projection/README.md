@@ -60,9 +60,9 @@ Both vector components vary; complex references have nonzero imaginary parts.
 Physical error integration and independently evaluated cell moments measure
 
 $$
-E_h=\Vert u_h-f\Vert _{L^2(\Omega)},\qquad
+E_h=\Vert u_h-f\Vert_{L^2(\Omega)},\qquad
 M_h=\left(\sum_K\frac{1}{|K|}
-\left\Vert \int_K(u_h-f)\,dx\right\Vert _{\mathbb K^m}^2\right)^{1/2}.
+\left\Vert\int_K(u_h-f)\,dx\right\Vert_{\mathbb K^m}^2\right)^{1/2}.
 $$
 
 Projection must have $M_h<10^{-10}$ on every refinement level, while
@@ -117,7 +117,7 @@ with $10^{-14}$. Each positive error changes relatively by less than $10^{-6}$,
 and moments retain their absolute bound. Every solve also checks
 
 $$
-\frac{\Vert A_hU_h-b_h\Vert _2}{\max(1,\Vert b_h\Vert _2)}<10^{-11}.
+\frac{\Vert A_hU_h-b_h\Vert_2}{\max(1,\Vert b_h\Vert_2)}<10^{-11}.
 $$
 
 Native solver success and positive PETSc convergence reason are required.

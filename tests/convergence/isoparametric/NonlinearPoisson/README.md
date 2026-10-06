@@ -57,7 +57,7 @@ diffusion refinement study is not defined on a point geometry.
 With $h=(n-1)^{-1}$, independent physical integration measures
 
 $$
-E_0(h)=\Vert u_h-u\Vert _{L^2(\Omega)},\qquad
+E_0(h)=\Vert u_h-u\Vert_{L^2(\Omega)},\qquad
 E_1(h)=|u_h-u|_{H^1(\Omega)}.
 $$
 
@@ -91,8 +91,8 @@ $\epsilon=10^{-5}$, the central-difference defect is
 
 $$
 D=\frac{\Vert J_hz_h-
-(F_h(w_h+\epsilon z_h)-F_h(w_h-\epsilon z_h))/(2\epsilon)\Vert _2}
-{\Vert (F_h(w_h+\epsilon z_h)-F_h(w_h-\epsilon z_h))/(2\epsilon)\Vert _2}.
+(F_h(w_h+\epsilon z_h)-F_h(w_h-\epsilon z_h))/(2\epsilon)\Vert_2}
+{\Vert(F_h(w_h+\epsilon z_h)-F_h(w_h-\epsilon z_h))/(2\epsilon)\Vert_2}.
 $$
 
 Both P1 and P2 require $D<10^{-6}$. Replacing $3u_h^2$ by $u_h^2$
@@ -110,7 +110,7 @@ each positive norm must be below $10^{-6}$. Mapped/nonpolynomial integrands
 are not claimed polynomial-exact. Native Newton uses SparseLU; PETSc SNES
 uses Newton line search with CG/Jacobi tangents. Both require nonlinear
 convergence and independently reassemble the final residual.
-Native residual normalized by $\max(1,\Vert F_h(w_{h,0})\Vert _2)$ is below $10^{-9}$;
+Native residual normalized by $\max(1,\Vert F_h(w_{h,0})\Vert_2)$ is below $10^{-9}$;
 PETSc requires $10^{-10}$. Linear solver success is checked whenever a
 correction was computed; exact initial patches need no linear solve.
 

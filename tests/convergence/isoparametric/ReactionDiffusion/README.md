@@ -95,7 +95,7 @@ than $10^{-6}$. Mapped/nonpolynomial integrands are not claimed to be
 polynomial-exact. Every solve also checks
 
 $$
-\frac{\Vert A_hU_h-b_h\Vert _2}{\max(1,\Vert b_h\Vert _2)}<10^{-11}.
+\frac{\Vert A_hU_h-b_h\Vert_2}{\max(1,\Vert b_h\Vert_2)}<10^{-11}.
 $$
 
 Native solver success and PETSc positive convergence reason are required.

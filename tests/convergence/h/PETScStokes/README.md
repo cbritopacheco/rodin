@@ -151,7 +151,7 @@ The pressure-sensitive control changes traction alone to $t+c n$, with $c=2$.
 The exact solution is then $(u,p-c)$, so
 
 $$
-\Vert p_h-p\Vert _{L^2(\Omega)}=|c|=2,\qquad
+\Vert p_h-p\Vert_{L^2(\Omega)}=|c|=2,\qquad
 |p_h-p|_{H^1(\Omega)}=0,\qquad \int_\Omega p_h\,\mathrm dx=0.
 $$
 
@@ -173,7 +173,7 @@ $$
 These are case-specific acceptance floors, not a uniform inf-sup or mixed
 boundary regularity theorem for every element family. The measured pressure
 integral also obeys the independent unit-volume bound
-$|\int_\Omega p_h\,\mathrm dx-2|\leq\Vert p_h-p\Vert _{L^2(\Omega)}$,
+$|\int_\Omega p_h\,\mathrm dx-2|\leq\Vert p_h-p\Vert_{L^2(\Omega)}$,
 up to the stated $10^{-9}$ integration/solve budget.
 
 Assembly order 16 and independent norm order 18 are varied separately to

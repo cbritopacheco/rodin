@@ -26,12 +26,12 @@ On each original cell, the geometric errors are measured by
 
 $$
 G_0(h,q)^2=\sum_K\int_K
-\Vert X_{K,q}\circ T_K^{-1}-\Phi\Vert ^2\,d\xi,
+\Vert X_{K,q}\circ T_K^{-1}-\Phi\Vert^2\,d\xi,
 $$
 
 $$
 G_1(h,q)^2=\sum_K\int_K
-\Vert D_rX_{K,q}(r)[D_rT_K(r)]^{-1}-D_\xi\Phi(\xi)\Vert _F^2\,d\xi,
+\Vert D_rX_{K,q}(r)[D_rT_K(r)]^{-1}-D_\xi\Phi(\xi)\Vert_F^2\,d\xi,
 \qquad r=T_K^{-1}(\xi).
 $$
 
@@ -111,8 +111,8 @@ Using field degree $p=q$, its pullback is represented by the same degree $q$
 space that represents the coordinate map. Physical norms must satisfy
 
 $$
-E_0=\Vert u_h-u\Vert _{L^2(\Omega_{h,q})}<10^{-9},\qquad
-E_1=\Vert \nabla u_h-\nabla u\Vert _{L^2(\Omega_{h,q})}<10^{-9},
+E_0=\Vert u_h-u\Vert_{L^2(\Omega_{h,q})}<10^{-9},\qquad
+E_1=\Vert\nabla u_h-\nabla u\Vert_{L^2(\Omega_{h,q})}<10^{-9},
 $$
 
 at $n=3$, while both geometry errors remain positive. This verifies field
@@ -141,7 +141,7 @@ $10^{-14}$ and divergence tolerance $10^5$. Native solver success or a
 positive PETSc convergence reason is required, together with
 
 $$
-\frac{\Vert A_hU_h-b_h\Vert _2}{\max(1,\Vert b_h\Vert _2)}<10^{-11},
+\frac{\Vert A_hU_h-b_h\Vert_2}{\max(1,\Vert b_h\Vert_2)}<10^{-11},
 $$
 
 computed independently of the solver's convergence report.

@@ -39,7 +39,7 @@ L2 and H1-seminorm errors are integrated separately:
 
 $$
 E_{0,i}^2=\int_\Omega|u_i-u_{h,i}|^2\,\mathrm{d}x,\qquad
-E_{1,i}^2=\int_\Omega\Vert \nabla u_i-\nabla u_{h,i}\Vert _2^2\,\mathrm{d}x.
+E_{1,i}^2=\int_\Omega\Vert\nabla u_i-\nabla u_{h,i}\Vert_2^2\,\mathrm{d}x.
 $$
 
 Patches use `n=5` grid points per axis and require both errors below
@@ -66,7 +66,7 @@ $10^{-13}$, absolute tolerance $10^{-14}$, divergence threshold $10^5$,
 and at most 50,000 iterations. Each solve requires a positive PETSc
 convergence reason and a finite reported residual below $10^{-8}$; this
 reported residual is distinct from the independently recomputed
-$\Vert Ax-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$ also required by the shared
+$\Vert Ax-b\Vert_2/\max(1,\Vert b\Vert_2)<10^{-11}$ also required by the shared
 `PETScReactionDiffusionProblem` workload. The workload constructs a fresh
 fixed-layout two-field problem for each measurement, with independently
 selectable norm quadrature and a solve-scoped const observer. It is shared
@@ -102,8 +102,8 @@ $$
 In contrast to pure diffusion, constant fields do not form a nullspace:
 
 $$
-a(v,v)\ge\sum_{i=1}^{2}\Vert \nabla v_i\Vert _{L^2(\Omega)}^2
-+0.8\sum_{i=1}^{2}\Vert v_i\Vert _{L^2(\Omega)}^2.
+a(v,v)\ge\sum_{i=1}^{2}\Vert\nabla v_i\Vert_{L^2(\Omega)}^2
++0.8\sum_{i=1}^{2}\Vert v_i\Vert_{L^2(\Omega)}^2.
 $$
 
 Therefore pure Neumann cases require neither a compatibility projection nor

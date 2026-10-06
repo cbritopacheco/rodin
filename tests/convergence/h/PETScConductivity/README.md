@@ -148,7 +148,7 @@ norm order 18 are checked separately against orders 18 and 20. Tightening
 the solver tolerance from $10^{-13}$ to $10^{-14}$ must also change each
 error by less than $10^{-6}$ relatively. The independently recomputed
 coefficient residual satisfies
-$\Vert A u_h-b\Vert _2/\max(1,\Vert b\Vert _2)<10^{-11}$.
+$\Vert A u_h-b\Vert_2/\max(1,\Vert b\Vert_2)<10^{-11}$.
 
 Removing the natural flux while retaining the forcing and essential/Robin
 data must increase each field error by a factor greater than 5. This control
