@@ -2170,7 +2170,7 @@ namespace Rodin::Variational
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
           m_refGrad(std::move(other.m_refGrad)),
-          m_testBasis(std::move(other.m_testBasis)),
+          m_test(std::move(other.m_test)),
           m_matrix(std::move(other.m_matrix))
       {}
 
@@ -2229,15 +2229,15 @@ namespace Rodin::Variational
           // at one point is exact only when the rule has a single point.
           const size_t nqp = m_qf->getSize();
 
-          m_testBasis.assign(nqp, {});
+          m_test.assign(nqp, {});
           m_refGrad.assign(nqp, {});
           for (size_t qp = 0; qp < nqp; ++qp)
           {
             const auto& rc = m_qf->getPoint(qp);
 
-            m_testBasis[qp].resize(testfe.getCount());
+            m_test[qp].resize(testfe.getCount());
             for (size_t i = 0; i < testfe.getCount(); ++i)
-              m_testBasis[qp][i] = testfe.getBasis(i)(rc);
+              m_test[qp][i] = testfe.getBasis(i)(rc);
 
             m_refGrad[qp].resize(trialfe.getCount());
             for (size_t i = 0; i < trialfe.getCount(); ++i)
@@ -2272,7 +2272,7 @@ namespace Rodin::Variational
 
           const auto& Jinv = p.getJacobianInverse();
           const auto& refGrad = m_refGrad[qp];
-          const auto& testBasis = m_testBasis[qp];
+          const auto& testBasis = m_test[qp];
           const size_t vdim = refGrad.empty() ? 0 : refGrad.front().size();
 
           for (size_t i = 0; i < refGrad.size(); ++i)
@@ -2319,7 +2319,7 @@ namespace Rodin::Variational
       /// @brief Reference gradients per quadrature point, dof and component.
       std::vector<std::vector<std::vector<Math::SpatialVector<ScalarType>>>> m_refGrad;
       /// @brief Test basis values per quadrature point and dof.
-      std::vector<std::vector<ScalarType>> m_testBasis;
+      std::vector<std::vector<ScalarType>> m_test;
       Math::Matrix<ScalarType> m_matrix;
   };
 

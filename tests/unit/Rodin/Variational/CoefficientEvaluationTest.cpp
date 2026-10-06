@@ -107,7 +107,13 @@ namespace
       auto getBasis(size_t i) const
       {
         ++m_calls.get();
-        return Variational::Internal::materializeProduct(m_expr.getBasis(i));
+        using BasisRange = typename FormLanguage::RangeOf<
+          std::remove_cvref_t<decltype(m_expr.getBasis(i))>>::Type;
+        BasisRange basis;
+        if constexpr (requires { basis.setZero(); })
+          basis.setZero();
+        basis = m_expr.getBasis(i);
+        return basis;
       }
       auto getOrder(const Polytope& cell) const
       {
@@ -136,8 +142,16 @@ namespace
       expr.setIntegrationPoint(ip);
       for (size_t i = 0; i < count; ++i)
       {
-        const auto a = Variational::Internal::materializeProduct(expr.getBasis(i));
-        const auto b = Variational::Internal::materializeProduct(expr.getBasis(i));
+        using BasisRange = typename FormLanguage::RangeOf<
+          std::remove_cvref_t<decltype(expr.getBasis(i))>>::Type;
+        BasisRange a, b;
+        if constexpr (requires { a.setZero(); })
+        {
+          a.setZero();
+          b.setZero();
+        }
+        a = expr.getBasis(i);
+        b = expr.getBasis(i);
         EXPECT_LE(std::abs(Math::dot(a, a) - Math::dot(b, b)), 1e-12);
       }
       EXPECT_EQ(calls, qp + 1);

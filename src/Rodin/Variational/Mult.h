@@ -150,22 +150,6 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
-  namespace Internal
-  {
-    template <class Product>
-    constexpr auto materializeProduct(const Product& product)
-    {
-      /// @brief Range (evaluation value) type.
-      using RangeType =
-        typename FormLanguage::RangeOf<std::remove_cvref_t<Product>>::Type;
-      RangeType out;
-      if constexpr (requires { out.setZero(); })
-        out.setZero();
-      out = product;
-      return out;
-    }
-  }
-
   /**
    * @defgroup MultSpecializations Mult Template Specializations
    * @brief Template specializations of the Mult class.
@@ -262,7 +246,13 @@ namespace Rodin::Variational
         const auto lhs = this->getLHS().getValue(p);
         const auto rhs = this->getRHS().getValue(p);
         const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        using ProductRange =
+          typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+        ProductRange out;
+        if constexpr (requires { out.setZero(); })
+          out.setZero();
+        out = product;
+        return out;
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -500,12 +490,24 @@ namespace Rodin::Variational
         {
           decltype(auto) rhs = getRHS().getBasis(local);
           const auto product = *lhs * rhs;
-          return Internal::materializeProduct(product);
+          using ProductRange =
+            typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+          ProductRange out;
+          if constexpr (requires { out.setZero(); })
+            out.setZero();
+          out = product;
+          return out;
         }
         decltype(auto) lhs = getLHS().getValue(p);
         decltype(auto) rhs = getRHS().getBasis(local);
         const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        using ProductRange =
+          typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+        ProductRange out;
+        if constexpr (requires { out.setZero(); })
+          out.setZero();
+        out = product;
+        return out;
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -693,12 +695,24 @@ namespace Rodin::Variational
         {
           decltype(auto) lhs = this->getLHS().getBasis(local);
           const auto product = lhs * *rhs;
-          return Internal::materializeProduct(product);
+          using ProductRange =
+            typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+          ProductRange out;
+          if constexpr (requires { out.setZero(); })
+            out.setZero();
+          out = product;
+          return out;
         }
         decltype(auto) rhs = this->getRHS().getValue(p);
         decltype(auto) lhs = this->getLHS().getBasis(local);
         const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        using ProductRange =
+          typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+        ProductRange out;
+        if constexpr (requires { out.setZero(); })
+          out.setZero();
+        out = product;
+        return out;
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
