@@ -3,7 +3,12 @@
 This suite uses the same two-field system and `ReactionDiffusionData` as the
 [PETSc h suite](../../h/PETScReactionDiffusion/README.md), with diffusion
 coefficients $(1,2)$, reaction matrix
-$R=\begin{pmatrix}1&0.2\\0.2&1\end{pmatrix}$, and full manufactured
+
+$$
+R=\begin{pmatrix}1&0.2\cr 0.2&1\end{pmatrix},
+$$
+
+and full manufactured
 Dirichlet traces. The analytic fields are $u_0=e^s$ and $u_1=2e^{-s}$,
 where $s=\sum_jx_j$. Sources and gradients are derived independently of the
 discrete fields; each component has its own L2 and H1 error history.

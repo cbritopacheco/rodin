@@ -3,7 +3,7 @@
 ## Reference domain and map errors
 
 The comparison domain is the fixed unit box $\widehat\Omega=(0,1)^d$,
-$d\in\lbrace 1,2,3\rbrace $. The prescribed map is
+$d\in\lbrace 1,2,3\rbrace$. The prescribed map is
 
 $$
 \Phi(\xi)=\xi+a\sin(\pi\xi_0)e_{d-1},\qquad a=0.1.
@@ -26,12 +26,12 @@ On each original cell, the geometric errors are measured by
 
 $$
 G_0(h,q)^2=\sum_K\int_K
-\Vert X_{K,q}\circ T_K^{-1}-\Phi\Vert^2\,d\xi,
+\Vert X_{K,q}\circ T_K^{-1}-\Phi\Vert^2\thinspace d\xi,
 $$
 
 $$
 G_1(h,q)^2=\sum_K\int_K
-\Vert D_rX_{K,q}(r)[D_rT_K(r)]^{-1}-D_\xi\Phi(\xi)\Vert_F^2\,d\xi,
+\Vert D_rX_{K,q}(r)[D_rT_K(r)]^{-1}-D_\xi\Phi(\xi)\Vert_F^2\thinspace d\xi,
 \qquad r=T_K^{-1}(\xi).
 $$
 
@@ -76,7 +76,7 @@ All errors must be finite and positive. Each interval requires
 
 $$
 G_j(h_{\ell},q_{\ell})<\rho G_j(h_{\ell-1},q_{\ell-1}),
-\qquad j\in\lbrace 0,1\rbrace ,\quad\ell\in\lbrace 1,2\rbrace ,
+\qquad j\in\lbrace 0,1\rbrace,\quad\ell\in\lbrace 1,2\rbrace,
 $$
 
 with $\rho=1/2$ for degree refinement and $\rho=1/4$ for combined

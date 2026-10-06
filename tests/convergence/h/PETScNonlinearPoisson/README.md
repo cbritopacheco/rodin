@@ -1,6 +1,6 @@
 # PETSc/SNES semilinear Poisson h-convergence
 
-On $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, the homogeneous Dirichlet problem is
+On $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace$, the homogeneous Dirichlet problem is
 
 $$
 -\Delta u+u+u^3=f,\qquad
@@ -67,10 +67,10 @@ uniquely owned DOF range and $\mathcal C_r$ the constrained-index set
 obtained from the assembled boundary map,
 
 $$
-N_{\mathrm{free}}=N-\sum_r\#(\mathcal C_r\cap\mathcal I_r).
+N_{\mathrm{free}}=N-\sum_r\operatorname{card}(\mathcal C_r\cap\mathcal I_r).
 $$
 
-For $N_{\mathrm{free}}=0$, the homogeneous test space is $\lbrace 0\rbrace $;
+For $N_{\mathrm{free}}=0$, the homogeneous test space is $\lbrace 0\rbrace$;
 zero initial residual and zero SNES iterations are required exactly.
 The $n=2$, P1 regression checks this case on six families. Cube-centred
 pyramid generation instead contributes one interior vertex and retains
@@ -110,7 +110,7 @@ coefficient is $c_d=64(3/4)^d/(d\pi^2+1)$. Thus
 
 $$
 \lVert z-u\rVert_{L^2}\ge c_d2^{-d/2},\qquad
-\lVert\nabla(z-u)\rVert_{L^2}\ge\pi\sqrt d\,c_d2^{-d/2}.
+\lVert\nabla(z-u)\rVert_{L^2}\ge\pi\sqrt d\thinspace c_d2^{-d/2}.
 $$
 
 These lower bounds exceed $0.31$ and $1.69$ over the tested dimensions.
@@ -123,28 +123,28 @@ because SNES converges.
 
 `RodinConvergenceHPETScNonlinearPoissonBoundary` retains the same semilinear
 operator. Mixed cases prescribe the manufactured trace on
-$\Gamma_D=\lbrace x_0=0\rbrace $ and
+$\Gamma_D=\lbrace x_0=0\rbrace$ and
 
 $$
 \partial_nu+\beta u=g,\qquad
-g=\nabla u\cdot n+\beta u,\qquad \beta\in\lbrace 0,1\rbrace ,
+g=\nabla u\cdot n+\beta u,\qquad \beta\in\lbrace 0,1\rbrace,
 $$
 
 on $\Gamma_N=\partial\Omega\setminus\Gamma_D$. Pure Neumann uses
 $\Gamma_D=\varnothing$, $\Gamma_N=\partial\Omega$, and $\beta=0$.
-For $V=\lbrace v\in H^1(\Omega):v|_{\Gamma_D}=0\rbrace $, the physical residual
+For $V=\lbrace v\in H^1(\Omega):v\rvert_{\Gamma_D}=0\rbrace$, the physical residual
 and its derivative are
 
 $$
 F_\beta(u;v)=\int_\Omega\bigl(\nabla u\cdot\nabla v
-+(u+u^3-f)v\bigr)\,\mathrm{d}x
-+\int_{\Gamma_N}(\beta u-g)v\,\mathrm{d}s,
++(u+u^3-f)v\bigr)\thinspace \mathrm{d}x
++\int_{\Gamma_N}(\beta u-g)v\thinspace \mathrm{d}s,
 $$
 
 $$
 J_\beta(u)[w;v]=\int_\Omega\bigl(\nabla w\cdot\nabla v
-+(1+3u^2)wv\bigr)\,\mathrm{d}x
-+\beta\int_{\Gamma_N}wv\,\mathrm{d}s.
++(1+3u^2)wv\bigr)\thinspace \mathrm{d}x
++\beta\int_{\Gamma_N}wv\thinspace \mathrm{d}s.
 $$
 
 Since $(a+a^3-b-b^3)(a-b)\ge|a-b|^2$ for real $a,b$, the

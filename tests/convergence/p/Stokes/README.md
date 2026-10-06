@@ -1,11 +1,11 @@
 # Stokes degree-refinement verification
 
-For $\Omega=(0,1)^d$, $d\in\lbrace 2,3\rbrace $, viscosity $\nu=1$, and coordinates
+For $\Omega=(0,1)^d$, $d\in\lbrace 2,3\rbrace$, viscosity $\nu=1$, and coordinates
 $x_0,\ldots,x_{d-1}$, the manufactured Stokes problem is
 
 $$
 -\nu\Delta u+\nabla p=f,\qquad \nabla\cdot u=0,\qquad
-u|_{\partial\Omega}=g,\qquad \int_\Omega p\,dx=0.
+u\rvert_{\partial\Omega}=g,\qquad \int_\Omega p\thinspace dx=0.
 $$
 
 The analytic fields and source, supplied by `StokesData`, are
@@ -55,7 +55,7 @@ assembles homogeneous velocity constraints on a single quadrilateral or
 hexahedron. For the degree-two/degree-one tensor-product pair,
 
 $$
-\dim V_{h,2}^0=d<2^d-1=\dim Q_{h,1}^0,\qquad d\in\lbrace 2,3\rbrace .
+\dim V_{h,2}^0=d<2^d-1=\dim Q_{h,1}^0,\qquad d\in\lbrace 2,3\rbrace.
 $$
 
 The discrete divergence cannot have full pressure rank, so a nonconstant
@@ -69,8 +69,8 @@ fresh spaces and a fresh saddle-point system. In the form language it states
 
 $$
 \begin{aligned}
-\nu(\nabla u_h,\nabla v_h)-(p_h,\nabla\cdot v_h)&=(f,v_h),\\
-(\nabla\cdot u_h,q_h)+\lambda_h(1,q_h)&=0,\\
+\nu(\nabla u_h,\nabla v_h)-(p_h,\nabla\cdot v_h)&=(f,v_h),\cr
+(\nabla\cdot u_h,q_h)+\lambda_h(1,q_h)&=0,\cr
 (p_h,1)&=0.
 \end{aligned}
 $$
@@ -112,7 +112,7 @@ For each pair, a representable patch excites its highest field degrees:
 $$
 u=x_1^m e_0,\qquad p=x_0^{m-1}-\frac1m,\qquad
 f=\bigl(-m(m-1)x_1^{m-2}+(m-1)x_0^{m-2}\bigr)e_0,
-\qquad m\in\lbrace 2,3,4\rbrace .
+\qquad m\in\lbrace 2,3,4\rbrace.
 $$
 
 The respective pairs use $m=k$. All four field errors and strong L2

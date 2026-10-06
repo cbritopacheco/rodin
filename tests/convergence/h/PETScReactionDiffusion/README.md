@@ -1,11 +1,11 @@
 # PETSc coupled reaction–diffusion h-convergence
 
-On $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, two real fields satisfy
+On $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace$, two real fields satisfy
 
 $$
 -\kappa_i\Delta u_i+\sum_{j=1}^{2}R_{ij}u_j=f_i,
 \qquad \kappa=(1,2),\qquad
-R=\begin{pmatrix}1&0.2\\0.2&1\end{pmatrix},
+R=\begin{pmatrix}1&0.2\cr 0.2&1\end{pmatrix},
 $$
 
 with full manufactured Dirichlet traces. The test space is
@@ -13,8 +13,8 @@ $H_0^1(\Omega)^2$ and the weak form is
 
 $$
 a(u,v)=\sum_{i=1}^{2}\int_\Omega\kappa_i\nabla u_i\cdot\nabla v_i
-+\sum_{j=1}^{2}R_{ij}u_jv_i\,\mathrm{d}x
-=\sum_{i=1}^{2}\int_\Omega f_iv_i\,\mathrm{d}x.
++\sum_{j=1}^{2}R_{ij}u_jv_i\thinspace \mathrm{d}x
+=\sum_{i=1}^{2}\int_\Omega f_iv_i\thinspace \mathrm{d}x.
 $$
 
 Positive diffusion and the symmetric reaction matrix, with eigenvalues
@@ -26,7 +26,7 @@ it is not two independently solved scalar equations.
 ## Manufactured data and oracles
 
 Let $s=\sum_jx_j$. The shared `ReactionDiffusionData` supplies the following
-fields, with zero-based component index $i\in\lbrace 0,1\rbrace $ and $c_i=i+1$:
+fields, with zero-based component index $i\in\lbrace 0,1\rbrace$ and $c_i=i+1$:
 
 | Case | Fields | Gradient entries | Laplacian |
 | --- | --- | --- | --- |
@@ -38,8 +38,8 @@ Sources are $f_i=-\kappa_i\Delta u_i+u_i+0.2u_{1-i}$. Each field's
 L2 and H1-seminorm errors are integrated separately:
 
 $$
-E_{0,i}^2=\int_\Omega|u_i-u_{h,i}|^2\,\mathrm{d}x,\qquad
-E_{1,i}^2=\int_\Omega\Vert\nabla u_i-\nabla u_{h,i}\Vert_2^2\,\mathrm{d}x.
+E_{0,i}^2=\int_\Omega|u_i-u_{h,i}|^2\thinspace \mathrm{d}x,\qquad
+E_{1,i}^2=\int_\Omega\Vert\nabla u_i-\nabla u_{h,i}\Vert_2^2\thinspace \mathrm{d}x.
 $$
 
 Patches use `n=5` grid points per axis and require both errors below
@@ -79,24 +79,24 @@ $10^{-6}$ relative to its baseline.
 ## Natural-boundary extension
 
 `RodinConvergenceHPETScReactionDiffusionBoundary` uses the same coupled
-operator and manufactured fields. Let $\Gamma_D=\lbrace x_0=0\rbrace $ and
+operator and manufactured fields. Let $\Gamma_D=\lbrace x_0=0\rbrace$ and
 $\Gamma_N=\partial\Omega\setminus\Gamma_D$. Mixed Neumann and Robin
 cases prescribe the exact trace on $\Gamma_D$ and
 
 $$
 \kappa_i\partial_nu_i+\beta u_i=g_i,
 \qquad g_i=\kappa_i\nabla u_i\cdot n+\beta u_i,
-\qquad \beta\in\lbrace 0,1\rbrace ,
+\qquad \beta\in\lbrace 0,1\rbrace,
 $$
 
 on $\Gamma_N$. Pure Neumann cases instead use $\Gamma_D=\varnothing$,
 $\Gamma_N=\partial\Omega$, and $\beta=0$. The two-field test space is
-$V=\lbrace v\in H^1(\Omega)^2:v|_{\Gamma_D}=0\rbrace $, and the weak form is
+$V=\lbrace v\in H^1(\Omega)^2:v\rvert_{\Gamma_D}=0\rbrace$, and the weak form is
 
 $$
-a(u,v)+\beta\sum_{i=1}^{2}\int_{\Gamma_N}u_iv_i\,\mathrm{d}s
-=\sum_{i=1}^{2}\left(\int_\Omega f_iv_i\,\mathrm{d}x
-+\int_{\Gamma_N}g_iv_i\,\mathrm{d}s\right).
+a(u,v)+\beta\sum_{i=1}^{2}\int_{\Gamma_N}u_iv_i\thinspace \mathrm{d}s
+=\sum_{i=1}^{2}\left(\int_\Omega f_iv_i\thinspace \mathrm{d}x
++\int_{\Gamma_N}g_iv_i\thinspace \mathrm{d}s\right).
 $$
 
 In contrast to pure diffusion, constant fields do not form a nullspace:

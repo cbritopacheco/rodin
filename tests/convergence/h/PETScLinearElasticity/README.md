@@ -1,6 +1,6 @@
 # PETSc linear-elasticity h-convergence
 
-On $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, the real displacement
+On $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace$, the real displacement
 $u:\Omega\to\mathbb{R}^d$ satisfies
 
 $$
@@ -14,8 +14,8 @@ $\lambda=1.5$ and $\mu=0.5$. The weak form is
 
 $$
 a(u,v)=\int_\Omega\lambda(\nabla\cdot u)(\nabla\cdot v)
-+2\mu\varepsilon(u):\varepsilon(v)\,\mathrm{d}x
-=\int_\Omega f\cdot v\,\mathrm{d}x.
++2\mu\varepsilon(u):\varepsilon(v)\thinspace \mathrm{d}x
+=\int_\Omega f\cdot v\thinspace \mathrm{d}x.
 $$
 
 The homogeneous test space is $H_0^1(\Omega;\mathbb{R}^d)$. Korn's
@@ -62,8 +62,8 @@ Dirichlet rate bounds as the existing Eigen elasticity h studies.
 Independent quadrature measures
 
 $$
-E_0^2=\int_\Omega\Vert u-u_h\Vert_2^2\,\mathrm{d}x,\qquad
-E_1^2=\int_\Omega\Vert Du-Du_h\Vert_F^2\,\mathrm{d}x.
+E_0^2=\int_\Omega\Vert u-u_h\Vert_2^2\thinspace \mathrm{d}x,\qquad
+E_1^2=\int_\Omega\Vert Du-Du_h\Vert_F^2\thinspace \mathrm{d}x.
 $$
 
 For MPI, `ErrorNorm::computeVector` integrates owned cells only and sums
@@ -117,13 +117,13 @@ CI execution.
 
 `RodinConvergenceHPETScLinearElasticityBoundary` reuses the common PETSc
 workload, manufactured fields and vector norms. For mixed conditions,
-$\Gamma_D=\lbrace x_0=0\rbrace $ and $\Gamma_T=\partial\Omega\setminus\Gamma_D$.
-The natural datum is the analytic traction $t=\sigma(u_*)n$, so that
+$\Gamma_D=\lbrace x_0=0\rbrace$ and $\Gamma_T=\partial\Omega\setminus\Gamma_D$.
+The natural datum is the analytic traction $t=\sigma(u_\ast)n$, so that
 
 $$
-a(u_h,v_h)=\int_\Omega f\cdot v_h\,\mathrm{d}x
-+\int_{\Gamma_T}t\cdot v_h\,\mathrm{d}s,
-\qquad v_h|_{\Gamma_D}=0.
+a(u_h,v_h)=\int_\Omega f\cdot v_h\thinspace \mathrm{d}x
++\int_{\Gamma_T}t\cdot v_h\thinspace \mathrm{d}s,
+\qquad v_h\rvert_{\Gamma_D}=0.
 $$
 
 The nonempty displacement partition removes rigid motions; no penalty
@@ -133,13 +133,13 @@ in dimensions two and three and the explicit endpoint signs in one dimension.
 The traction uses the closed-form manufactured stress, independently of the
 discrete Jacobian used to measure the solution error.
 
-Let $V_D=\lbrace v\in H^1(\Omega;\mathbb R^d):v|_{\Gamma_D}=0\rbrace $ and
-$e_h=u_*-u_h$. For conforming approximation of degree $p$ to a smooth solution,
+Let $V_D=\lbrace v\in H^1(\Omega;\mathbb R^d):v\rvert_{\Gamma_D}=0\rbrace$ and
+$e_h=u_\ast-u_h$. For conforming approximation of degree $p$ to a smooth solution,
 with compatible approximation of the essential data, the energy estimate is
-$\lVert e_h\rVert_{H^1}\le C h^p\lVert u_*\rVert_{H^{p+1}}$.
+$\lVert e_h\rVert_{H^1}\le C h^p\lVert u_\ast\rVert_{H^{p+1}}$.
 The L2 estimate additionally depends on the adjoint problem: for
 $g\in L^2(\Omega;\mathbb R^d)$, let $z_g\in V_D$ satisfy
-$a(v,z_g)=(g,v)_{L^2}$ for all $v\in V_D$. If
+$a(v,z_g)=\langle g,v\rangle_{L^2}$ for all $v\in V_D$. If
 $\lVert z_g\rVert_{H^{1+s}}\le C_{\mathrm{reg}}\lVert g\rVert_{L^2}$,
 $0<s\le1$, and the boundary approximation is dual-consistent, the expected
 L2 order is $p+s$. The familiar order $p+1$ corresponds to $s=1$; that
@@ -167,8 +167,8 @@ The nearly incompressible case retains full Dirichlet data and uses
 $\lambda=10^4$, $\mu=1$, with the exact divergence-free shear field
 
 $$
-u_*(x)=(\sin(\pi x_1),0,\ldots,0),\qquad
-\nabla\cdot u_*=0,\qquad f=\mu\pi^2u_*.
+u_\ast(x)=(\sin(\pi x_1),0,\ldots,0),\qquad
+\nabla\cdot u_\ast=0,\qquad f=\mu\pi^2u_\ast.
 $$
 
 It is defined in dimensions two and three. Its exact field, source and

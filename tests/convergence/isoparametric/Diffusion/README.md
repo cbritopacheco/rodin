@@ -3,7 +3,7 @@
 ## Continuous problems and reference fields
 
 The fixed physical domain is $\Omega=\Phi((0,1)^d)$, where
-$\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1}$ and $d\in\lbrace 1,2,3\rbrace $.
+$\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1}$ and $d\in\lbrace 1,2,3\rbrace$.
 The map is regular: its determinant is one for $d=2,3$ and
 $1+0.2\xi_0$ for $d=1$. Consequently, $|\Omega|=1$ in dimensions two
 and three, and $|\Omega|=1.1$ in dimension one. Exact quadratic geometry
@@ -17,7 +17,7 @@ $$
 -\nabla\cdot(\gamma\nabla u)=f\quad\text{in }\Omega,
 \qquad u=g\quad\text{on }\partial\Omega,
 \qquad
-\gamma(x)=\begin{cases}1&\text{Poisson},\\1+\sum_jx_j&\text{conductivity}.
+\gamma(x)=\begin{cases}1&\text{Poisson},\cr 1+\sum_jx_j&\text{conductivity}.
 \end{cases}
 $$
 
@@ -26,8 +26,8 @@ on the stated domains. For $V_{h,0}=V_h\cap H^1_0(\Omega)$, the discrete
 problem is to find $u_h\in g_h+V_{h,0}$ such that
 
 $$
-\int_\Omega\gamma\nabla u_h\cdot\nabla v_h\,dx
-=\int_\Omega f v_h\,dx\qquad(v_h\in V_{h,0}).
+\int_\Omega\gamma\nabla u_h\cdot\nabla v_h\thinspace dx
+=\int_\Omega f v_h\thinspace dx\qquad(v_h\in V_{h,0}).
 $$
 
 The common smooth reference, its gradient and its Laplacian are
@@ -43,7 +43,7 @@ Sources are derived from the selected continuous coefficient:
 $$
 f_{\mathrm P}=d\pi^2(u-1),\qquad
 f_{\mathrm C}=\gamma d\pi^2(u-1)-\sum_j\partial_j u,
-\qquad g=u|_{\partial\Omega}.
+\qquad g=u\rvert_{\partial\Omega}.
 $$
 
 The constant patch $u=1$ has $f=0$ for both problems. The physical affine
@@ -153,7 +153,7 @@ $u(x)=1+\prod_j\sin(\pi x_j)$ defines the continuous comparison problem
 
 $$
 -\nabla\cdot(\gamma\nabla u)=f\quad\text{in }\Omega_{h,2},
-\qquad g=u|_{\partial\Omega_{h,2}},
+\qquad g=u\rvert_{\partial\Omega_{h,2}},
 $$
 
 with the same independently derived $f_{\mathrm P}$ and $f_{\mathrm C}$
@@ -235,12 +235,12 @@ $$
 \nabla e_T=B\nabla u_h(x_h)-\nabla u(x).
 $$
 
-For $X\in\lbrace F,G,T\rbrace $, report $E_{0,X}=\Vert e_X\Vert_{L^2(\Omega)}$ and
+For $X\in\lbrace F,G,T\rbrace$, report $E_{0,X}=\Vert e_X\Vert_{L^2(\Omega)}$ and
 $E_{1,X}=\Vert\nabla e_X\Vert_{L^2(\Omega)}$. These norms do not add. Both
 the triangle and reverse-triangle inequalities are checked:
 
 $$
-|E_{i,F}-E_{i,G}|\le E_{i,T}\le E_{i,F}+E_{i,G},\qquad i\in\lbrace 0,1\rbrace .
+|E_{i,F}-E_{i,G}|\le E_{i,T}\le E_{i,F}+E_{i,G},\qquad i\in\lbrace 0,1\rbrace.
 $$
 
 The implemented geometry-limited studies solve both equations with the
@@ -262,7 +262,7 @@ $$
 E_{0,G}=E_{0,T}=\frac{a}{\sqrt{2}},\qquad
 E_{1,G}=E_{1,T}=
 \begin{cases}
-\left((1-(a\pi)^2)^{-1/2}-1\right)^{1/2},&d=1,\\
+\left((1-(a\pi)^2)^{-1/2}-1\right)^{1/2},&d=1,\cr
 a\pi/\sqrt{2},&d=2,3.
 \end{cases}
 $$

@@ -11,7 +11,7 @@ on uniform meshes of the unit interval, square, and cube. The manufactured
 plane wave
 
 $$
-  u(x)=\exp\!\left(i\sum_{j=1}^d x_j\right)
+  u(x)=\exp\negthinspace \left(i\sum_{j=1}^d x_j\right)
 $$
 
 satisfies

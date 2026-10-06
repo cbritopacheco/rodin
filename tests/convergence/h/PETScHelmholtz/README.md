@@ -1,6 +1,6 @@
 # PETSc complex Helmholtz h-convergence
 
-For $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, the complex field
+For $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace$, the complex field
 $u:\Omega\to\mathbb C$ satisfies
 
 $$
@@ -12,8 +12,8 @@ space is $H_0^1(\Omega;\mathbb C)$ and the trial-first form is
 
 $$
 a(u,v)=\int_\Omega\nabla u\cdot\overline{\nabla v}
--k^2u\overline v\,\mathrm{d}x
-=\int_\Omega f\overline v\,\mathrm{d}x.
+-k^2u\overline v\thinspace \mathrm{d}x
+=\int_\Omega f\overline v\thinspace \mathrm{d}x.
 $$
 
 On the unit box the first Dirichlet eigenvalue is $d\pi^2$. Since
@@ -39,8 +39,8 @@ complex loads and the trial/test conjugation convention.
 Independent quadrature measures
 
 $$
-E_0^2=\int_\Omega|u-u_h|^2\,\mathrm{d}x,\qquad
-E_1^2=\int_\Omega\sum_{j=1}^{d}|\partial_ju-\partial_ju_h|^2\,\mathrm{d}x.
+E_0^2=\int_\Omega|u-u_h|^2\thinspace \mathrm{d}x,\qquad
+E_1^2=\int_\Omega\sum_{j=1}^{d}|\partial_ju-\partial_ju_h|^2\thinspace \mathrm{d}x.
 $$
 
 Patches use `n=5` grid points per axis and require both errors below
@@ -109,18 +109,18 @@ faces form $\Gamma_N$. With $k^2=1/4$, the natural condition is
 
 $$
 \partial_n u+\mathrm{i}\beta u=r,\qquad
-r=\nabla u\cdot n+\mathrm{i}\beta u,\qquad \beta\in\lbrace 0,1\rbrace .
+r=\nabla u\cdot n+\mathrm{i}\beta u,\qquad \beta\in\lbrace 0,1\rbrace.
 $$
 
 The normal contraction uses no conjugation. The weak form is sesquilinear
 in the field and test function:
 
 $$
-\int_\Omega\nabla u\cdot\overline{\nabla v}\,\mathrm{d}x
--k^2\int_\Omega u\overline v\,\mathrm{d}x
-+\mathrm{i}\beta\int_{\Gamma_N}u\overline v\,\mathrm{d}s
-=\int_\Omega f\overline v\,\mathrm{d}x
-+\int_{\Gamma_N}r\overline v\,\mathrm{d}s.
+\int_\Omega\nabla u\cdot\overline{\nabla v}\thinspace \mathrm{d}x
+-k^2\int_\Omega u\overline v\thinspace \mathrm{d}x
++\mathrm{i}\beta\int_{\Gamma_N}u\overline v\thinspace \mathrm{d}s
+=\int_\Omega f\overline v\thinspace \mathrm{d}x
++\int_{\Gamma_N}r\overline v\thinspace \mathrm{d}s.
 $$
 
 For functions vanishing on $x_0=0$, the unit-box Poincare inequality gives

@@ -19,7 +19,7 @@ cell type. A separate three-level study installs the P1 vertex interpolant
 $\Phi_{1,h}$ and measures its map error on the *unwarped* unit box:
 
 $$
-G_h=\left(\int_{(0,1)^d}\lVert\Phi-\Phi_{1,h}\rVert^2\,\mathrm{d}\xi\right)^{1/2}.
+G_h=\left(\int_{(0,1)^d}\lVert\Phi-\Phi_{1,h}\rVert^2\thinspace \mathrm{d}\xi\right)^{1/2}.
 $$
 
 Both adjacent rates are required to lie between 1.7 and 2.3, consistent
@@ -55,10 +55,10 @@ budgets, hypotheses and limitations are stated in the suite specification.
 
 The same P2 map also supports a variable-conductivity study. In physical
 coordinates, $\gamma(x)=1+\sum_{j=0}^{d-1}x_j$ and
-$u_*(x)=\exp(\sum_{j=0}^{d-1}x_j)$ give the manufactured load
+$u_\ast(x)=\exp(\sum_{j=0}^{d-1}x_j)$ give the manufactured load
 
 $$
--\nabla\cdot(\gamma\nabla u_*)=-d(1+\gamma)u_*.
+-\nabla\cdot(\gamma\nabla u_\ast)=-d(1+\gamma)u_\ast.
 $$
 
 The exact trace is imposed on the mapped boundary. On all seven cell types,

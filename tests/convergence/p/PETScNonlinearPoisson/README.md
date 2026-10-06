@@ -4,7 +4,7 @@ This suite verifies real-PETSc/SNES solutions of
 
 $$
 -\Delta u+u+u^3=f\quad\text{in }\Omega=(0,1)^d,\qquad
-u|_{\partial\Omega}=0,\qquad
+u\rvert_{\partial\Omega}=0,\qquad
 u(x)=A\prod_{j=0}^{d-1}\sin(\pi x_j),\qquad
 f=(d\pi^2+1)u+u^3.
 $$
@@ -35,7 +35,7 @@ than duplicating assertions or PDE assembly.
 
 For every degree, the centered residual-difference tangent defect must be
 below $10^{-6}$. Replacing $3u^2$ by $u^2$ in the highest-degree tangent
-must produce a defect above $10^{-3}$. An amplitude-$4$ control retains
+must produce a defect above $10^{-3}$. An amplitude $4$ control retains
 the original source but omits the cubic reaction from the solved operator:
 the correct L2/H1 errors must be below $0.05/0.2$, while the incorrect
 errors must exceed these same bounds. This separates unresolved fields

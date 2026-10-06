@@ -3,8 +3,8 @@
 On $\Omega=(0,1)^d$, the real field satisfies
 
 $$
--\Delta u=f,\qquad u|_{\partial\Omega}=u_*,\qquad
-u_*(x)=e^{s(x)},\quad s(x)=\sum_{j=0}^{d-1}x_j,\quad f=-d e^s.
+-\Delta u=f,\qquad u\rvert_{\partial\Omega}=u_\ast,\qquad
+u_\ast(x)=e^{s(x)},\quad s(x)=\sum_{j=0}^{d-1}x_j,\quad f=-d e^s.
 $$
 
 Conforming $H^1$ spaces of degrees $p=1\to2\to3\to4$ are solved
@@ -26,7 +26,7 @@ uses `FieldConvergence` for every-interval acceptance. The
 suites share these classes and one test entry point. A solve-scoped const
 observer permits mapped-domain comparisons without new norm implementations.
 
-The polynomial field $u_*=1+\sum_jx_j^2$ has $f=-2d$.
+The polynomial field $u_\ast=1+\sum_jx_j^2$ has $f=-2d$.
 On $n=2$, degree one must have errors above $10^{-3}$ and $10^{-2}$,
 while degree two reproduces the field and gradient within $10^{-9}$.
 Degree four independently reproduces this patch on $n=3$. A resolved

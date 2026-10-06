@@ -4,7 +4,7 @@ On $\Omega=(0,1)^d$, the two real fields satisfy
 
 $$
 -\kappa_i\Delta u_i+u_i+\alpha u_{1-i}=f_i,\qquad
-\kappa=(1,2),\quad\alpha=0.2,\quad i\in\lbrace 0,1\rbrace .
+\kappa=(1,2),\quad\alpha=0.2,\quad i\in\lbrace 0,1\rbrace.
 $$
 
 Both fields have their manufactured Dirichlet trace. Positive diffusion and

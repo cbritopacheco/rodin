@@ -203,7 +203,7 @@ therefore check exact real/complex scalar/vector/matrix constants and restrictio
 of a continuous parent P1 field, rather than a convergence slope. Their
 parent fields use $\phi(x)=c+\sum_j(j+1)x_j$ and vector components
 $\phi(x)+a$. Non-square $2\times3$ matrix components use
-$\phi(x)+3r+s$, with $r\in\lbrace 0,1\rbrace $ and $s\in\lbrace 0,1,2\rbrace $;
+$\phi(x)+3r+s$, with $r\in\lbrace 0,1\rbrace$ and $s\in\lbrace 0,1,2\rbrace$;
 the six Point DOFs must be exactly $0,\ldots,5$, independently of the
 nominal H1 degree. Dimensions, constants and parent traces use exact
 comparisons. The selected entity owner alone performs restriction and
@@ -234,7 +234,7 @@ $2\times3$ matrix ranges. With scalar global DOF $g$ and zero-based matrix
 component $(r,s)$, their flattened DOF identity is checked exactly:
 
 $$
-g_{rs}=6g+3r+s,\qquad r\in\lbrace 0,1\rbrace ,\quad s\in\lbrace 0,1,2\rbrace .
+g_{rs}=6g+3r+s,\qquad r\in\lbrace 0,1\rbrace,\quad s\in\lbrace 0,1,2\rbrace.
 $$
 
 Matrix dimensions, scalar-to-matrix size factors and real/complex index
@@ -326,7 +326,7 @@ exactly; a positive-dimensional curved child must retain factor degree two.
 Interpolation/restriction updates participate collectively because they
 change distributed PETSc coefficient and ghost state. Synchronized field
 reads, geometry evaluation and cached metadata queries are also exercised
-on rank zero alone. The five fixed-$n=2$ rank registrations per build are
+on rank zero alone. The five fixed $n=2$ rank registrations per build are
 structural/reproduction checks, not spatial convergence slopes.
 
 The main refinement sequences can be read with $n$ grid points per coordinate
@@ -595,7 +595,7 @@ Manufactured sources are derived componentwise from
 
 $$
 f_i=-\kappa_i\Delta u_i+\sum_{j=1}^{2}R_{ij}u_j,
-\qquad i\in\lbrace 1,2\rbrace ,
+\qquad i\in\lbrace 1,2\rbrace,
 $$
 
 with full manufactured Dirichlet traces. Coupled-space and assembly/solver
@@ -623,7 +623,7 @@ supported.
 
 The natural-boundary extension uses the same diffusion and reaction matrix,
 with componentwise data $\kappa_i\partial_nu_i+\beta u_i=g_i$.
-Mixed Neumann and Robin cases use $\Gamma_D=\lbrace x_0=0\rbrace $ and
+Mixed Neumann and Robin cases use $\Gamma_D=\lbrace x_0=0\rbrace$ and
 $\beta=0$ or $1$ on the complementary boundary. Pure Neumann cases have
 $\Gamma_D=\varnothing$ and $\beta=0$; the reaction eigenvalue bound
 $\lambda_{\min}(R)=0.8$ controls constants, so no pressure-like mean

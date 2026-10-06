@@ -8,13 +8,13 @@ $$
 $$
 
 with Dirichlet traces from the exact fields. In spatial dimension $d$, let
-$s(x)=\sum_{j=1}^{d}x_j$, $u_*(x)=e^{s(x)}$ and $w_*(x)=e^{-s(x)}$. Then
-$\nabla u_*=u_*(1,\ldots,1)$, $\nabla w_*=-w_*(1,\ldots,1)$ and the
+$s(x)=\sum_{j=1}^{d}x_j$, $u_\ast(x)=e^{s(x)}$ and $w_\ast(x)=e^{-s(x)}$. Then
+$\nabla u_\ast=u_\ast(1,\ldots,1)$, $\nabla w_\ast=-w_\ast(1,\ldots,1)$ and the
 manufactured loads are
 
 $$
-f_u=(1-d)u_*+\alpha w_*,\qquad
-f_w=(1-d)w_*+\alpha u_*.
+f_u=(1-d)u_\ast+\alpha w_\ast,\qquad
+f_w=(1-d)w_\ast+\alpha u_\ast.
 $$
 
 Both fields use conforming `H1<K>` on the *same* mesh with two grid points
@@ -37,6 +37,6 @@ with assembly order 16 and independent norm order 18.
 `FieldConvergence` checks both norms of both fields on every interval.
 
 As a negative control, replacing the first load's coupling contribution
-$\alpha w_*$ by $20\alpha w_*$ caused the adjacent-degree assertions to
+$\alpha w_\ast$ by $20\alpha w_\ast$ caused the adjacent-degree assertions to
 fail on six of the seven geometries. The correct manufactured load was
 restored before the reported passing run.

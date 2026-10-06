@@ -7,7 +7,7 @@ study, the physical domain is fixed across all refinement levels:
 
 $$
 \Omega=\Phi((0,1)^d),\qquad
-\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1},\qquad d\in\lbrace 2,3\rbrace .
+\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1},\qquad d\in\lbrace 2,3\rbrace.
 $$
 
 All six applicable cell families are covered: triangle, quadrilateral,
@@ -23,7 +23,7 @@ With unit viscosity, the manufactured problem is
 
 $$
 -\Delta u+\nabla p=f,\qquad \operatorname{div}u=0,
-\qquad u|_{\partial\Omega}=g,\qquad \int_\Omega p\,\mathrm{d}x=0.
+\qquad u\rvert_{\partial\Omega}=g,\qquad \int_\Omega p\thinspace \mathrm{d}x=0.
 $$
 
 Since $\det D\Phi=1$ and $x_0=\xi_0$, the pressure fields retain their
@@ -37,8 +37,8 @@ $$
 The pressure gauge follows by change of variables:
 
 $$
-\int_\Omega p\,\mathrm{d}x
-=\int_{(0,1)^d}(\xi_0^2-\tfrac13)\,\mathrm{d}\xi=0.
+\int_\Omega p\thinspace \mathrm{d}x
+=\int_{(0,1)^d}(\xi_0^2-\tfrac13)\thinspace \mathrm{d}\xi=0.
 $$
 
 The exact volume and pressure mean are independently integrated on the
@@ -69,7 +69,7 @@ The independently integrated divergence is controlled through
 
 $$
 \Vert\operatorname{div}u_h\Vert_{L^2(\Omega)}
-\le\sqrt d\,|u-u_h|_{H^1(\Omega)}.
+\le\sqrt d\thinspace |u-u_h\rvert_{H^1(\Omega)}.
 $$
 
 This follows from $\operatorname{div}u=0$ and the Frobenius trace bound.
@@ -136,7 +136,7 @@ $\det D\Phi_h=1$ is assumed. Map regularity is checked independently by
 the shared geometry study and remains a hypothesis of the rate estimates.
 
 Let $\ell_h=\Phi_h\circ\Phi^{-1}$ and $w_h^\ell=w_h\circ\ell_h$.
-For either field $w\in\lbrace u,p\rbrace $, the measured defects on $\Omega$ are
+For either field $w\in\lbrace u,p\rbrace$, the measured defects on $\Omega$ are
 
 $$
 F_w=w\circ\ell_h-w_h^\ell,\qquad
@@ -166,11 +166,11 @@ tetrahedron and wedge levels avoid coarse pressure transients; the same
 fixed acceptance windows stated above apply without relaxation. These
 finite-hierarchy observations do not certify a uniform inf-sup constant.
 
-For each lifted velocity defect $E\in\lbrace F_u,G_u,T_u\rbrace $, independently
+For each lifted velocity defect $E\in\lbrace F_u,G_u,T_u\rbrace$, independently
 integrated divergence obeys
 
 $$
-\Vert\operatorname{tr}DE\Vert_{L^2(\Omega)}\le\sqrt d\,|E|_{H^1(\Omega)}.
+\Vert\operatorname{tr}DE\Vert_{L^2(\Omega)}\le\sqrt d\thinspace |E\rvert_{H^1(\Omega)}.
 $$
 
 A lift of a physically divergence-free field on $\Omega_h$ need not remain

@@ -2,7 +2,7 @@
 
 The equation, analytic data and wrong-coefficient control are those of
 the [degree suite](../../p/PETScConductivity/README.md), with
-$\gamma=1+\sum_jx_j$ and $u_*=e^{\sum_jx_j}$.
+$\gamma=1+\sum_jx_j$ and $u_\ast=e^{\sum_jx_j}$.
 The three-level path is
 
 $$

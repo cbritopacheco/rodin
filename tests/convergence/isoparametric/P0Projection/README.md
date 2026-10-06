@@ -9,22 +9,22 @@ two and three; in dimension one it is $1+0.2\xi_0>0$ and $|\Omega|=1.1$.
 This is fixed curved-geometry field refinement, not a geometry-error study
 or a strictly isoparametric degree-zero discretization.
 
-For $\mathbb K\in\lbrace \mathbb R,\mathbb C\rbrace $ and scalar or two-component vector
+For $\mathbb K\in\lbrace \mathbb R,\mathbb C\rbrace$ and scalar or two-component vector
 fields, the discontinuous space is
 
 $$
 V_h=\lbrace v\in L^2(\Omega;\mathbb K^m):v|_K
-\text{ is constant for each cell }K\rbrace ,\qquad m\in\lbrace 1,2\rbrace .
+\text{ is constant for each cell }K\rbrace,\qquad m\in\lbrace 1,2\rbrace.
 $$
 
 The assembled mass problem computes the orthogonal projection:
 
 $$
-\int_\Omega u_h\cdot\overline{v_h}\,dx
-=\int_\Omega f\cdot\overline{v_h}\,dx,\qquad v_h\in V_h.
+\int_\Omega u_h\cdot\overline{v_h}\thinspace dx
+=\int_\Omega f\cdot\overline{v_h}\thinspace dx,\qquad v_h\in V_h.
 $$
 
-Consequently, $u_h|_K=|K|^{-1}\int_K f\,dx$.
+Consequently, $u_h|_K=|K|^{-1}\int_K f\thinspace dx$.
 Assigning a function directly to a P0 grid function instead evaluates its
 DOF functional at the mapped reference centroid; that is interpolation,
 not the volume-weighted projection on a curved cell.
@@ -51,7 +51,7 @@ and the vector reference is
 
 $$
 f(x)=\begin{pmatrix}
-c(1.25,0.5)+c(1,-0.75)x_0\\
+c(1.25,0.5)+c(1,-0.75)x_0\cr
 c(-0.75,0.25)+c(0.8,0.2)x_{d-1}
 \end{pmatrix}.
 $$
@@ -62,7 +62,7 @@ Physical error integration and independently evaluated cell moments measure
 $$
 E_h=\Vert u_h-f\Vert_{L^2(\Omega)},\qquad
 M_h=\left(\sum_K\frac{1}{|K|}
-\left\Vert\int_K(u_h-f)\,dx\right\Vert_{\mathbb K^m}^2\right)^{1/2}.
+\left\Vert\int_K(u_h-f)\thinspace dx\right\Vert_{\mathbb K^m}^2\right)^{1/2}.
 $$
 
 Projection must have $M_h<10^{-10}$ on every refinement level, while

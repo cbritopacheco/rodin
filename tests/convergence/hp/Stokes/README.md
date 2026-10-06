@@ -3,7 +3,7 @@
 This suite uses the continuous problem, analytic data, pressure gauge, and
 native mixed formulation specified in the
 [degree-refinement suite](../../p/Stokes/README.md). On the unit box
-$\Omega=(0,1)^d$, $d\in\lbrace 2,3\rbrace $, the viscosity is $\nu=1$ and
+$\Omega=(0,1)^d$, $d\in\lbrace 2,3\rbrace$, the viscosity is $\nu=1$ and
 
 $$
 u=\sin(\pi x_1)e_0,\qquad p=\cos(\pi x_0),\qquad
@@ -11,7 +11,7 @@ f=\bigl(\pi^2\sin(\pi x_1)-\pi\sin(\pi x_0)\bigr)e_0.
 $$
 
 The exact velocity trace is imposed on the full boundary. A global
-$P_0^g$ multiplier enforces $\int_\Omega p_h\,dx=0$. Both fields are
+$P_0^g$ multiplier enforces $\int_\Omega p_h\thinspace dx=0$. Both fields are
 nonpolynomial, divergence vanishes, and the exact pressure has zero mean.
 The forcing, viscosity, domain, and boundary data remain fixed while the
 discrete spaces change.
@@ -49,7 +49,7 @@ both adjacent intervals. The effective path rate is
 
 $$
 r_{w,j,i}=\frac{\log(E_{w,j,i-1}/E_{w,j,i})}
-{\log(h_{i-1}/h_i)},\qquad w\in\lbrace u,p\rbrace ,\quad j\in\lbrace 0,1\rbrace .
+{\log(h_{i-1}/h_i)},\qquad w\in\lbrace u,p\rbrace,\quad j\in\lbrace 0,1\rbrace.
 $$
 
 The interval bounds are $r_{u,0,i}>2.5$, $r_{u,1,i}>1.5$,

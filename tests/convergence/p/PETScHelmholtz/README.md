@@ -4,8 +4,8 @@ On $\Omega=(0,1)^d$, the complex field satisfies
 
 $$
 -\Delta u-k^2u=f,\qquad k^2=\tfrac14,\qquad
-u|_{\partial\Omega}=u_*,\qquad
-u_*=e^{\mathrm{i}s},\quad s=\sum_jx_j,\quad f=(d-k^2)u_*.
+u\rvert_{\partial\Omega}=u_\ast,\qquad
+u_\ast=e^{\mathrm{i}s},\quad s=\sum_jx_j,\quad f=(d-k^2)u_\ast.
 $$
 
 The complex weak form uses conjugate test functions. With full Dirichlet
@@ -27,12 +27,12 @@ one entry point and the common geometry/rank registration. Norms use the
 complex modulus, and MPI sums owned-cell squared errors once globally.
 
 The quadratic patch is
-$u_*=1+2\mathrm{i}+(1+\mathrm{i}/2)s^2$, with
-$f=-2d(1+\mathrm{i}/2)-k^2u_*$. On $n=2$, degree one must have
+$u_\ast=1+2\mathrm{i}+(1+\mathrm{i}/2)s^2$, with
+$f=-2d(1+\mathrm{i}/2)-k^2u_\ast$. On $n=2$, degree one must have
 $E_{L^2}>10^{-3}$ and $E_{H^1}>10^{-2}$, while degree two reproduces
 the field and gradient within $10^{-9}$. Degree four reproduces this
 patch separately on $n=3$. A resolved affine control
-$u_*=1+2\mathrm{i}+(1+\mathrm{i}/2)s$ first satisfies the same exact-patch
+$u_\ast=1+2\mathrm{i}+(1+\mathrm{i}/2)s$ first satisfies the same exact-patch
 budget; omitting the mass term while retaining the correct source and
 trace must exceed both separation floors. Both real and imaginary parts
 have nontrivial manufactured data.

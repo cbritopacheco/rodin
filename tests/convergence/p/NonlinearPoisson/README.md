@@ -1,9 +1,9 @@
 # Semilinear Poisson p-convergence
 
-For $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, the problem is
+For $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace$, the problem is
 
 $$
--\Delta u+u+u^3=f,\qquad u|_{\partial\Omega}=0,
+-\Delta u+u+u^3=f,\qquad u\rvert_{\partial\Omega}=0,
 \qquad u=\prod_{j=0}^{d-1}\sin(\pi x_j).
 $$
 
@@ -59,7 +59,7 @@ c_d=\frac{4^3(3/4)^d}{d\pi^2+1}.
 $$
 
 Orthogonality gives $\lVert w-u\rVert_{L^2}\ge c_d2^{-d/2}$ and
-$\lVert\nabla(w-u)\rVert_{L^2}\ge\pi\sqrt d\,c_d2^{-d/2}$.
+$\lVert\nabla(w-u)\rVert_{L^2}\ge\pi\sqrt d\thinspace c_d2^{-d/2}$.
 The smallest bounds over $d=1,2,3$ exceed $0.31$ and $1.69$, respectively.
 The discrete incorrect solution must exceed $0.05$ in L2 and $0.2$ in H1
 seminorm; the correct formulation on the same mesh must give both errors

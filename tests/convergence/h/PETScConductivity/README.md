@@ -1,6 +1,6 @@
 # PETSc conductivity h-convergence
 
-On the unit box $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, the problem is
+On the unit box $\Omega=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace$, the problem is
 
 $$
 -\nabla\cdot(\gamma\nabla u)=f\quad\text{in }\Omega,
@@ -9,7 +9,7 @@ $$
 $$
 
 The coefficient satisfies $1\le\gamma\le d+1$. The weak form is
-$a(u,v)=\int_\Omega\gamma\nabla u\cdot\nabla v\,\mathrm{d}x$
+$a(u,v)=\int_\Omega\gamma\nabla u\cdot\nabla v\thinspace \mathrm{d}x$
 for $v\in H_0^1(\Omega)$, with the exact trace prescribed by Dirichlet
 elimination. Uniform positivity makes the constrained real scalar problem
 coercive and permits CG. These tests use Rodin's PETSc assembly and solver
@@ -118,11 +118,11 @@ assigned before partitioning. The mixed weak form, for test functions
 vanishing on the essential partition, is
 
 $$
-\int_\Omega\gamma\nabla u\cdot\nabla v\,\mathrm{d}x
-+\alpha\int_{\Gamma_N}uv\,\mathrm{d}s
-=\int_\Omega fv\,\mathrm{d}x
-+\int_{\Gamma_N}(g_N+\alpha u)v\,\mathrm{d}s,
-\qquad \alpha\in\lbrace 0,2\rbrace .
+\int_\Omega\gamma\nabla u\cdot\nabla v\thinspace \mathrm{d}x
++\alpha\int_{\Gamma_N}uv\thinspace \mathrm{d}s
+=\int_\Omega fv\thinspace \mathrm{d}x
++\int_{\Gamma_N}(g_N+\alpha u)v\thinspace \mathrm{d}s,
+\qquad \alpha\in\lbrace 0,2\rbrace.
 $$
 
 With MUMPS available, a pure-Neumann variant uses all boundary faces and

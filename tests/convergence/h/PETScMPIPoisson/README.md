@@ -23,7 +23,7 @@ and one through four ranks.
 The smooth manufactured field is $u(x)=\prod_{j=1}^{d}\sin(\pi x_j)$ on
 $\Omega=(0,1)^d$. It satisfies $-\Delta u=d\pi^2u$ and has zero trace on
 $\partial\Omega$. With $h=1/(n-1)$, successive error ratios are compared
-with $E_{L^2}=O(h^{p+1})$ and $|e|_{H^1}=O(h^p)$ for $p=1,2$. The norm
+with $E_{L^2}=O(h^{p+1})$ and $|e\rvert_{H^1}=O(h^p)$ for $p=1,2$. The norm
 quadrature is separate from the assembled forms, and CG uses relative and
 absolute residual tolerances $10^{-12}$ and $10^{-14}$, respectively.
 
@@ -35,7 +35,7 @@ except tetrahedra, which use 7, 9, and 11 to include the original failure.
 
 A separate P2 patch test uses the exact quadratic field
 $u(x)=1+\sum_{j=1}^{d}x_j^2$, source $f=-\Delta u=-2d$, and nonzero
-Dirichlet trace $g=u|_{\partial\Omega}$. Its independently integrated L2
+Dirichlet trace $g=u\rvert_{\partial\Omega}$. Its independently integrated L2
 and H1-seminorm errors must each be below $10^{-8}$ for both
 value-prescribed $u=g$ and affine-identified $u=-u+2g$ traces. The latter
 tests spatially varying affine offsets through the P2 DOF functionals.

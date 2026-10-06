@@ -21,13 +21,13 @@ For $v_h$ with homogeneous trace, the residual and tangent are
 $$
 F_h(w_h)[v_h]=\int_\Omega
 \nabla(g_h+w_h)\cdot\nabla v_h+
-(g_h+w_h+(g_h+w_h)^3-f)v_h\,dx,
+(g_h+w_h+(g_h+w_h)^3-f)v_h\thinspace dx,
 $$
 
 $$
 J_h(w_h)[z_h,v_h]=\int_\Omega
 \nabla z_h\cdot\nabla v_h+
-(1+3(g_h+w_h)^2)z_hv_h\,dx.
+(1+3(g_h+w_h)^2)z_hv_h\thinspace dx.
 $$
 
 The reaction derivative is positive, so the tangent is coercive.
@@ -39,7 +39,7 @@ with opt-in lifting and representable data; existing flat-mesh defaults
 remain homogeneous sine data with no lifting. Production solvers are unchanged.
 
 Workload owns the mesh and installs exact P2 maps before constructing
-spaces. Native and PETSc use scalar H1 elements of degree $k\in\lbrace 1,2\rbrace $.
+spaces. Native and PETSc use scalar H1 elements of degree $k\in\lbrace 1,2\rbrace$.
 P1 fields on quadratic geometry are superparametric; P2 is strictly
 isoparametric. Maps are installed on cells, boundary traces and MPI halos.
 
@@ -58,7 +58,7 @@ With $h=(n-1)^{-1}$, independent physical integration measures
 
 $$
 E_0(h)=\Vert u_h-u\Vert_{L^2(\Omega)},\qquad
-E_1(h)=|u_h-u|_{H^1(\Omega)}.
+E_1(h)=|u_h-u\rvert_{H^1(\Omega)}.
 $$
 
 Under smoothness, uniform map regularity, shape-regular refinement and
@@ -143,7 +143,7 @@ is given in the [coupled diffusion specification](../ReactionDiffusion/README.md
 Under the stated regularity hypotheses, represented and lifted-field errors
 have orders $(p+1,p)$ in L2/H1 seminorm; geometry defects have orders $(3,2)$;
 total errors have orders $(\min(p,2)+1,\min(p,2))$. Every adjacent interval
-checks positive, finite, decreasing errors within the original $0.55$/$0.45$
+checks positive, finite, decreasing errors within the original $0.55$ and $0.45$
 rate windows. P1 uses $n=5,9,17$ and P2 uses $n=3,5,9$, except
 Segment uses $n=5,9,17,33$ to resolve its coarse pre-asymptotic regime.
 

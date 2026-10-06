@@ -1,11 +1,11 @@
 # PETSc Stokes h-convergence
 
-For $\Omega=(0,1)^d$, $d\in\lbrace 2,3\rbrace $, velocity
+For $\Omega=(0,1)^d$, $d\in\lbrace 2,3\rbrace$, velocity
 $u:\Omega\to\mathbb R^d$ and pressure $p:\Omega\to\mathbb R$ satisfy
 
 $$
 -\nu\Delta u+\nabla p=f,\qquad \nabla\cdot u=0,\qquad
-u|_{\partial\Omega}=g,\qquad \int_\Omega p\,\mathrm dx=0,
+u\rvert_{\partial\Omega}=g,\qquad \int_\Omega p\thinspace \mathrm dx=0,
 $$
 
 with $\nu=1$. The mixed spaces are vector H1 degree 2, scalar H1 degree 1,
@@ -117,13 +117,13 @@ linked p/hp suites; the distinct mixed-boundary formulation follows below.
 
 The `RodinConvergenceHPETScStokesBoundary` target uses
 `PETScStokesTractionProblem`, with two fields rather than a pressure-mean
-multiplier. Define $\Gamma_D=\lbrace x\in\partial\Omega:x_0=0\rbrace $ and
+multiplier. Define $\Gamma_D=\lbrace x\in\partial\Omega:x_0=0\rbrace$ and
 $\Gamma_N=\partial\Omega\setminus\Gamma_D$. With viscosity $\nu=1$,
 the physical stress and boundary data are
 
 $$
 \sigma(u,p)=2\varepsilon(u)-pI,\qquad
-u|_{\Gamma_D}=g,\qquad \sigma(u,p)n|_{\Gamma_N}=t.
+u\rvert_{\Gamma_D}=g,\qquad \sigma(u,p)n\rvert_{\Gamma_N}=t.
 $$
 
 For velocity tests vanishing on $\Gamma_D$, the implemented residual is
@@ -152,7 +152,7 @@ The exact solution is then $(u,p-c)$, so
 
 $$
 \Vert p_h-p\Vert_{L^2(\Omega)}=|c|=2,\qquad
-|p_h-p|_{H^1(\Omega)}=0,\qquad \int_\Omega p_h\,\mathrm dx=0.
+|p_h-p\rvert_{H^1(\Omega)}=0,\qquad \int_\Omega p_h\thinspace \mathrm dx=0.
 $$
 
 The velocity remains exact. These quantities are checked within the patch
@@ -173,7 +173,7 @@ $$
 These are case-specific acceptance floors, not a uniform inf-sup or mixed
 boundary regularity theorem for every element family. The measured pressure
 integral also obeys the independent unit-volume bound
-$|\int_\Omega p_h\,\mathrm dx-2|\leq\Vert p_h-p\Vert_{L^2(\Omega)}$,
+$|\int_\Omega p_h\thinspace \mathrm dx-2|\leq\Vert p_h-p\Vert_{L^2(\Omega)}$,
 up to the stated $10^{-9}$ integration/solve budget.
 
 Assembly order 16 and independent norm order 18 are varied separately to

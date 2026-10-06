@@ -5,7 +5,7 @@ $\gamma(x)=1+s(x)>0$. The real field satisfies
 
 $$
 -\nabla\cdot(\gamma\nabla u)=f,\qquad
-u|_{\partial\Omega}=u_*,\qquad u_*=e^s,\qquad
+u\rvert_{\partial\Omega}=u_\ast,\qquad u_\ast=e^s,\qquad
 f=-d(1+\gamma)e^s.
 $$
 
@@ -23,7 +23,7 @@ controls and independent residual budget are specified in the
 [Poisson counterpart](../PETScPoisson/README.md). They are reused, not
 independently implemented for each coefficient or refinement axis.
 
-The resolved wrong-coefficient control instead uses $u_*=1+s$ on $n=3$,
+The resolved wrong-coefficient control instead uses $u_\ast=1+s$ on $n=3$,
 for which $f=-d$. The correct variable-coefficient operator first
 reproduces this affine field within $10^{-9}$ in both norms. Replacing
 $\gamma$ by $1$, while retaining $f$ and the trace, must produce

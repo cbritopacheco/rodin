@@ -32,7 +32,7 @@ All seven positive-dimensional geometries have local and MPI rank
 one-through-four registrations under sequential and OpenMP assembly.
 
 Tangent consistency is checked at degrees one through three, with the
-wrong derivative rejected at degree three. The amplitude-$4$ omitted-cubic
+wrong derivative rejected at degree three. The amplitude $4$ omitted-cubic
 control uses degree three on the fixed $n=5$ grid, so the correct field
 is resolved below the same rejection bounds. Independent assembly,
 norm-quadrature and SNES-tolerance controls use degree three on $n=3$,

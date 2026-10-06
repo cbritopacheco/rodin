@@ -10,7 +10,7 @@ $$
 (n,p)=(2,1)\to(3,2)\to(5,3),\qquad h=1/(n-1).
 $$
 
-For each field $j\in\lbrace 0,1\rbrace $ and each interval, the finite, positive
+For each field $j\in\lbrace 0,1\rbrace$ and each interval, the finite, positive
 $L^2$ error $E_{i,j}^{(0)}$ and $H^1$-seminorm error $E_{i,j}^{(1)}$
 must strictly decrease and satisfy
 

@@ -13,16 +13,21 @@ The two physical fields satisfy
 $$
 -\kappa_i\Delta u_i+\sum_{j=0}^1R_{ij}u_j=f_i
 \quad\text{in }\Omega,\qquad u_i=g_i\quad\text{on }\partial\Omega,
-\qquad i\in\lbrace 0,1\rbrace ,
+\qquad i\in\lbrace 0,1\rbrace,
 $$
 
-with $\kappa=(1,2)$ and $R=\begin{pmatrix}1&0.2\\0.2&1\end{pmatrix}$.
+with $\kappa=(1,2)$ and
+
+$$
+R=\begin{pmatrix}1&0.2\cr 0.2&1\end{pmatrix}.
+$$
+
 The eigenvalues of $R$ are $0.8$ and $1.2$. The coercive weak form is
 
 $$
-a(u,v)=\sum_{i=0}^1\int_\Omega\kappa_i\nabla u_i\cdot\nabla v_i\,dx
-+\sum_{i,j=0}^1\int_\Omega R_{ij}u_jv_i\,dx
-=\sum_{i=0}^1\int_\Omega f_iv_i\,dx.
+a(u,v)=\sum_{i=0}^1\int_\Omega\kappa_i\nabla u_i\cdot\nabla v_i\thinspace dx
++\sum_{i,j=0}^1\int_\Omega R_{ij}u_jv_i\thinspace dx
+=\sum_{i=0}^1\int_\Omega f_iv_i\thinspace dx.
 $$
 
 Boundary data and sources are prescribed in physical coordinates independently
@@ -33,7 +38,7 @@ $$
 f_i=-\kappa_i d u_i+u_i+0.2u_{1-i}.
 $$
 
-Both fields use degree $k\in\lbrace 1,2\rbrace $ with exact quadratic geometry.
+Both fields use degree $k\in\lbrace 1,2\rbrace$ with exact quadratic geometry.
 The first case is superparametric; the second is strictly isoparametric.
 Native degree one uses P1; degree two and PETSc use H1.
 Workload owns the mapped mesh and creates a fresh two-field system per solve.
@@ -54,9 +59,9 @@ rate has no counterpart on a point geometry.
 With $h=(n-1)^{-1}$, each component has independent physical error measurements
 
 $$
-E_{i,0}(h)=\left(\int_\Omega|u_{i,h}-u_i|^2\,dx\right)^{1/2},
+E_{i,0}(h)=\left(\int_\Omega|u_{i,h}-u_i|^2\thinspace dx\right)^{1/2},
 \qquad
-E_{i,1}(h)=\left(\int_\Omega|\nabla u_{i,h}-\nabla u_i|^2\,dx\right)^{1/2}.
+E_{i,1}(h)=\left(\int_\Omega|\nabla u_{i,h}-\nabla u_i|^2\thinspace dx\right)^{1/2}.
 $$
 
 For smooth solutions, regular maps, shape-regular refinement and the requisite

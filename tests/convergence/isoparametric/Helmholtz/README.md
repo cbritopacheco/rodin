@@ -1,7 +1,7 @@
 # Complex Helmholtz on exact and approximated geometry
 
 This suite isolates field approximation on curved cells from approximation
-of the physical domain. Let $Q=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace $, and define
+of the physical domain. Let $Q=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace$, and define
 
 $$
 \Phi(\xi)=\xi+a\xi_0^2e_{d-1},\qquad a=0.1,\qquad \Omega=\Phi(Q).
@@ -40,18 +40,18 @@ $$
 The smooth physical field, source, gradient, and trace are
 
 $$
-s(x)=\sum_{j=0}^{d-1}x_j,\qquad u_*(x)=e^{is(x)},\qquad
-f(x)=\left(d-\frac14\right)u_*(x),\qquad
-\nabla_xu_*=iu_*(1,\ldots,1)^T,\qquad g=u_*|_{\partial\Omega}.
+s(x)=\sum_{j=0}^{d-1}x_j,\qquad u_\ast(x)=e^{is(x)},\qquad
+f(x)=\left(d-\frac14\right)u_\ast(x),\qquad
+\nabla_xu_\ast=iu_\ast(1,\ldots,1)^T,\qquad g=u_\ast\rvert_{\partial\Omega}.
 $$
 
 `HelmholtzData` evaluates these quantities in physical coordinates, not
 reference coordinates. In trial-first, test-second convention, the form is
 
 $$
-a(u,v)=\int_\Omega\nabla u\cdot\overline{\nabla v}\,dx
--\frac14\int_\Omega u\overline v\,dx,
-\qquad \ell(v)=\int_\Omega f\overline v\,dx.
+a(u,v)=\int_\Omega\nabla u\cdot\overline{\nabla v}\thinspace dx
+-\frac14\int_\Omega u\overline v\thinspace dx,
+\qquad \ell(v)=\int_\Omega f\overline v\thinspace dx.
 $$
 
 The negative mass term does not make this selected workload indefinite.
@@ -91,8 +91,8 @@ The fixed regular map makes physical element diameters uniformly comparable
 to this spacing. Independent physical-cell integration measures
 
 $$
-E_{0,h}=\lVert u_*-u_h\rVert_{L^2(\Omega;\mathbb C)},\qquad
-E_{1,h}=\lVert\nabla_xu_*-\nabla_xu_h\rVert_{L^2(\Omega;\mathbb C^d)}.
+E_{0,h}=\lVert u_\ast-u_h\rVert_{L^2(\Omega;\mathbb C)},\qquad
+E_{1,h}=\lVert\nabla_xu_\ast-\nabla_xu_h\rVert_{L^2(\Omega;\mathbb C^d)}.
 $$
 
 Both errors must be finite, positive, and strictly decrease on each of the
@@ -101,11 +101,11 @@ $r_{j,i}=\log(E_{j,i-1}/E_{j,i})/\log(h_{i-1}/h_i)$ must satisfy
 
 $$
 \begin{array}{c|cc}
-\text{degree}&r_{0,i}&r_{1,i}\\\hline
-1&(1.65,2.35)&(0.75,1.25)\\
+\text{degree}&r_{0,i}&r_{1,i}\cr \hline
+1&(1.65,2.35)&(0.75,1.25)\cr
 2&(2.45,3.55)&(1.55,2.45)
 \end{array}
-\qquad i\in\lbrace 1,2\rbrace .
+\qquad i\in\lbrace 1,2\rbrace.
 $$
 
 Mapped-element approximation and coercivity provide the expected
@@ -130,9 +130,9 @@ $\lVert Ax-b\rVert_2/\max(1,\lVert b\rVert_2)<10^{-11}$.
 
 ## Independent controls
 
-- At $n=3$, degree one reproduces $u_*=1+2i$, with zero gradient and
-  $f=-u_*/4$. Degree two reproduces the physical affine patch
-  $u_*=1+2i+(1+i/2)s(x)$, whose quadratic pullback is exactly representable
+- At $n=3$, degree one reproduces $u_\ast=1+2i$, with zero gradient and
+  $f=-u_\ast/4$. Degree two reproduces the physical affine patch
+  $u_\ast=1+2i+(1+i/2)s(x)$, whose quadratic pullback is exactly representable
   on the degree-two geometry. Both field errors must be below $10^{-9}$.
   A physical quadratic field is not claimed to lie in this curved P2 space.
 - At $n=5$, the affine P2 source and trace are retained while the mass term
@@ -221,14 +221,14 @@ $$
 The three complex defects are
 
 $$
-e_F(x)=u_h(x_h)-u_*(x_h),\qquad
-e_G(x)=u_*(x_h)-u_*(x),\qquad
+e_F(x)=u_h(x_h)-u_\ast(x_h),\qquad
+e_G(x)=u_\ast(x_h)-u_\ast(x),\qquad
 e_T=e_F+e_G.
 $$
 
-Their gradients are respectively $B(\nabla u_h(x_h)-\nabla u_*(x_h))$,
-$B\nabla u_*(x_h)-\nabla u_*(x)$ and
-$B\nabla u_h(x_h)-\nabla u_*(x)$. Norms are integrated over
+Their gradients are respectively $B(\nabla u_h(x_h)-\nabla u_\ast(x_h))$,
+$B\nabla u_\ast(x_h)-\nabla u_\ast(x)$ and
+$B\nabla u_h(x_h)-\nabla u_\ast(x)$. Norms are integrated over
 $\Omega$ with exact-map determinant weights. Complex magnitudes satisfy
 $|z|^2=z\overline z$ and $|w|^2=\sum_jw_j\overline{w_j}$;
 discarding imaginary components is not admissible.
@@ -236,7 +236,7 @@ The represented-domain field error is also measured independently.
 For both $L^2$ and the $H^1$ seminorm, the measured components must satisfy
 the triangle and reverse-triangle inequalities within $10^{-11}$.
 
-For smooth $u_*=e^{is(x)}$, the expected orders are
+For smooth $u_\ast=e^{is(x)}$, the expected orders are
 
 | Quantity | $L^2$ order | $H^1$-seminorm order |
 | --- | --- | --- |
@@ -268,15 +268,15 @@ errors must exceed twice the correct total errors, whereas its geometry
 errors must remain exactly unchanged.
 
 An independent metric oracle uses the identity represented map, the exact
-sine map above, and $u_*=1+2i+c\sum_jx_j$, $c=1+i/2$. Hence
+sine map above, and $u_\ast=1+2i+c\sum_jx_j$, $c=1+i/2$. Hence
 
 $$
 E_{G,0}=|c|\frac{a}{\sqrt2},\qquad |c|=\frac{\sqrt5}{2},
 \qquad
 E_{G,1}=
 \begin{cases}
-|c|\sqrt{(1-(a\pi)^2)^{-1/2}-1},&d=1,\\
-|c|a\pi/\sqrt2,&d\in\lbrace 2,3\rbrace .
+|c|\sqrt{(1-(a\pi)^2)^{-1/2}-1},&d=1,\cr
+|c|a\pi/\sqrt2,&d\in\lbrace 2,3\rbrace.
 \end{cases}
 $$
 

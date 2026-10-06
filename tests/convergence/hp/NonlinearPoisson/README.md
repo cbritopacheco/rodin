@@ -20,7 +20,7 @@ and effective path orders $r_0>1.9$ and $r_1>0.9$, with
 
 $$
 r_{\ell,i}=\frac{\log(E_{\ell,i-1}/E_{\ell,i})}
-{\log(h_{i-1}/h_i)},\qquad \ell\in\lbrace 0,1\rbrace .
+{\log(h_{i-1}/h_i)},\qquad \ell\in\lbrace 0,1\rbrace.
 $$
 
 These are improvement criteria for this particular combined path, not

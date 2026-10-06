@@ -1,7 +1,7 @@
 # Curved linear elasticity
 
 This suite verifies isotropic linear elasticity on the fixed physical domain
-$\Omega=\Phi((0,1)^d)$, for $d\in\lbrace 1,2,3\rbrace $, where
+$\Omega=\Phi((0,1)^d)$, for $d\in\lbrace 1,2,3\rbrace$, where
 
 $$
 \Phi(\xi)=\xi+0.1\xi_0^2e_{d-1}.
@@ -22,7 +22,7 @@ the equations and full essential boundary condition are
 $$
 -\operatorname{div}\sigma(u)=f,\qquad
 \sigma(u)=\lambda\operatorname{div}(u)I+2\mu\varepsilon(u),\qquad
-\varepsilon(u)=\tfrac12(Du+Du^T),\qquad u|_{\partial\Omega}=g.
+\varepsilon(u)=\tfrac12(Du+Du^T),\qquad u\rvert_{\partial\Omega}=g.
 $$
 
 The smooth field is $u_i(x)=(i+1)\exp(s)$, with
@@ -50,10 +50,10 @@ In addition to displacement L2 and H1-seminorm errors, the suite integrates
 
 $$
 E_\varepsilon=\left(\int_\Omega
- \Vert\varepsilon(u_h)-\varepsilon(u)\Vert_F^2\,\mathrm{d}x\right)^{1/2},
+ \Vert\varepsilon(u_h)-\varepsilon(u)\Vert_F^2\thinspace \mathrm{d}x\right)^{1/2},
 \qquad
 E_\sigma=\left(\int_\Omega
- \Vert\sigma(u_h)-\sigma(u)\Vert_F^2\,\mathrm{d}x\right)^{1/2}.
+ \Vert\sigma(u_h)-\sigma(u)\Vert_F^2\thinspace \mathrm{d}x\right)^{1/2}.
 $$
 
 The expected orders are $p+1$ for displacement L2 and $p$ for its
@@ -133,12 +133,12 @@ total errors therefore coincide. Their displacement norms are
 $$
 E_{G,0}=aC/\sqrt{2},\qquad
 E_{G,1}=\begin{cases}
-C\sqrt{(1-s^2)^{-1/2}-1},&d=1,\\
-sC/\sqrt{2},&d\in\lbrace 2,3\rbrace .
+C\sqrt{(1-s^2)^{-1/2}-1},&d=1,\cr
+sC/\sqrt{2},&d\in\lbrace 2,3\rbrace.
 \end{cases}
 $$
 
-For $d\in\lbrace 2,3\rbrace $, their constitutive norms are independently given by
+For $d\in\lbrace 2,3\rbrace$, their constitutive norms are independently given by
 
 $$
 E_{G,\varepsilon}=s\sqrt{(C^2+c_0^2)/4},\qquad
@@ -175,7 +175,7 @@ e_G(x)=u(x_h)-u(x),\qquad e_T=e_F+e_G.
 $$
 
 All lifted norms use the exact-domain measure
-$\det D\Phi(\xi)\,\mathrm{d}\xi$. The strain and stress errors apply
+$\det D\Phi(\xi)\thinspace \mathrm{d}\xi$. The strain and stress errors apply
 their linear constitutive laws to $Je_F$, $Je_G$ and $Je_T$;
 they are not obtained by composing a represented-domain tensor with the lift.
 Both triangle and reverse-triangle inequalities are checked for all four
