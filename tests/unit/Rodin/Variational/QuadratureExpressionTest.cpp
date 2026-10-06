@@ -289,6 +289,83 @@ namespace Rodin::Tests::Unit
       checkOtherSpaces<Complex>(GetParam());
     }
 
+    TEST_P(QuadratureExpression, LinearBindingAllRangesAndH1Orders)
+    {
+      ObservedMesh mesh(Convergence::UniformGrid(GetParam()).makeMesh(2));
+      const auto check = [&]<class F>(const F& space) {
+        TestFunction v(space);
+        // A component is scalar-valued, but still binds the complete parent
+        // shape expression. This avoids a quadratic-size high-order matrix.
+        auto integrand = [&] {
+          using Range = typename FormLanguage::Traits<F>::RangeType;
+          if constexpr (FormLanguage::IsMatrixRange<Range>::Value)
+            return Component(v + v, 1, 2);
+          else if constexpr (FormLanguage::IsVectorRange<Range>::Value)
+            return Component(v + v, 2);
+          else
+            return v + v;
+        }();
+        auto integral = Integral(integrand);
+        const IntegrationPoint* retained = nullptr;
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          integral.setOrder(1);
+          integral.setPolytope(*cell);
+          const auto* bound = &integral.getIntegrand().getIntegrationPoint();
+          if (retained)
+            EXPECT_EQ(bound, retained);
+          retained = bound;
+          const auto verify = [&](const auto& rule, size_t order) {
+            const auto& ip = rule.getIntegrand().getIntegrationPoint();
+            const auto& formula =
+              QF::PolytopeQuadratureFormula::get(order, cell->getGeometry());
+            EXPECT_EQ(ip.getQuadratureFormula(), &formula);
+            EXPECT_EQ(ip.getIndex(), formula.getSize() - 1);
+            EXPECT_EQ(ip.getPoint().getPolytope().getDimension(), cell->getDimension());
+            EXPECT_EQ(ip.getPoint().getPolytope().getIndex(), cell->getIndex());
+            EXPECT_EQ(&ip.getPoint().getPolytope().getMesh(), &mesh);
+          };
+          verify(integral, 1);
+          auto copy = integral;
+          copy.setOrder(2);
+          copy.setPolytope(*cell);
+          const auto* independent = &copy.getIntegrand().getIntegrationPoint();
+          EXPECT_NE(independent, bound);
+          verify(copy, 2);
+          // Rebinding the copy cannot mutate the original borrowed context.
+          verify(integral, 1);
+          auto moved = std::move(copy);
+          EXPECT_EQ(&moved.getIntegrand().getIntegrationPoint(), independent);
+          verify(moved, 2);
+          moved.setOrder(1);
+          moved.setPolytope(*cell);
+          EXPECT_EQ(&moved.getIntegrand().getIntegrationPoint(), independent);
+          verify(moved, 1);
+        }
+      };
+      const auto ranges = [&]<class Scalar>() {
+        using Vector = Math::SpatialVector<Scalar>;
+        using Matrix = Math::SpatialMatrix<Scalar>;
+        check(P0<Matrix, LocalMesh>(mesh, 2, 3));
+        check(P0g<Matrix, LocalMesh>(mesh, 2, 3));
+        check(P1<Matrix, LocalMesh>(mesh, 2, 3));
+        const auto order = [&]<size_t K>(std::integral_constant<size_t, K> degree) {
+          SCOPED_TRACE(::testing::Message() << "degree=" << K);
+          check(H1<K, Scalar, LocalMesh>(degree, mesh));
+          check(H1<K, Vector, LocalMesh>(degree, mesh, 3));
+          check(H1<K, Matrix, LocalMesh>(degree, mesh, 2, 3));
+        };
+        order(std::integral_constant<size_t, 1>{});
+        order(std::integral_constant<size_t, 2>{});
+        order(std::integral_constant<size_t, 3>{});
+        order(std::integral_constant<size_t, 4>{});
+        order(std::integral_constant<size_t, 5>{});
+        order(std::integral_constant<size_t, 6>{});
+      };
+      ranges.template operator()<Real>();
+      ranges.template operator()<Complex>();
+    }
+
     INSTANTIATE_TEST_SUITE_P(AllGeometries, QuadratureExpression,
       ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
