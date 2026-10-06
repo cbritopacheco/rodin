@@ -2500,10 +2500,10 @@ namespace Rodin::Assembly
 
             if (mIdx.empty())
               continue;
-            const Index n = static_cast<Index>(mIdx.size());
+            const Eigen::Index n = static_cast<Eigen::Index>(mIdx.size());
             IndexArray masters(n);
             Math::Vector<Scalar> coeffs(n);
-            for (Index k = 0; k < n; k++)
+            for (Eigen::Index k = 0; k < n; k++)
             {
               masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
               coeffs.coeffRef(k) = mCoef[static_cast<size_t>(k)];
