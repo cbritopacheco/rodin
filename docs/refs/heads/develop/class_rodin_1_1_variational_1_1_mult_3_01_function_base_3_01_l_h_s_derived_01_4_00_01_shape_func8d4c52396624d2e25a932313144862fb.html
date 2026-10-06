@@ -219,12 +219,12 @@ $ f $
               <span class="m-doc-wrap-bumper">auto <a href="#a5634f938127c5224007acbd338b54e99" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp;</span>
             </dt>
             <dd>Gets the integration point the expression is evaluated at.</dd>
-            <dt id="a17bc2a8e1be9f0e5d0f6b69d8553ed5f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a17bc2a8e1be9f0e5d0f6b69d8553ed5f" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a17bc2a8e1be9f0e5d0f6b69d8553ed5f" class="m-doc">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>&amp;</span>
             </dt>
             <dd>Sets the integration point the expression is evaluated at.</dd>
-            <dt id="a4f47a104973d43f1c328e9c411af0286">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f47a104973d43f1c328e9c411af0286" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f47a104973d43f1c328e9c411af0286" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the basis function of a local degree of freedom.</dd>
             <dt id="a350edea67dfa070881b66ed34db4c27c">
@@ -239,6 +239,52 @@ $ f $
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a17bc2a8e1be9f0e5d0f6b69d8553ed5f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>&amp; Rodin::<wbr />Variational::<wbr />Mult&lt;FunctionBase&lt;LHSDerived&gt;, ShapeFunctionBase&lt;RHSDerived, FES, Space&gt;&gt;&lt;LHSDerived, RHSDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17bc2a8e1be9f0e5d0f6b69d8553ed5f" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip)</span></span>
+            </h3>
+            <p>Sets the integration point the expression is evaluated at.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Point defining the current evaluation binding.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>This expression.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4f47a104973d43f1c328e9c411af0286"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class RHSDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Mult&lt;FunctionBase&lt;LHSDerived&gt;, ShapeFunctionBase&lt;RHSDerived, FES, Space&gt;&gt;&lt;LHSDerived, RHSDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f47a104973d43f1c328e9c411af0286" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t local) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the basis function of a local degree of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">local&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Local basis index on the current polytope.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ad919c825b0e8d63078097ec3cf23fa53"><div>
             <h3>
               <div class="m-doc-template">
