@@ -8,7 +8,7 @@
 #define RODIN_LOCATION_AABB_H
 
 #include <cmath>
-#include <stdexcept>
+#include <type_traits>
 #include <array>
 #include <atomic>
 #include <mutex>
@@ -21,6 +21,9 @@
 #include <functional>
 #include <Eigen/QR>
 
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Context/ForwardDecls.h"
+
 #include "Rodin/Types.h"
 #include "Rodin/Geometry.h"
 
@@ -30,6 +33,11 @@ namespace Rodin::Location
 {
   /**
    * @brief Bounding-volume-hierarchy point locator over axis-aligned boxes.
+   *
+   * | Specialization | Description |
+   * |----------------|-------------|
+   * | @ref AABB "AABB<MeshType>" | Local geometry, optionally restricted to supplied indices. |
+   * | @ref AABB "AABB<MPIMesh>" (MPI header) | Owned shard entities with MPI-attached results; also derived MPI meshes. |
    *
    * @section AABBArchitecture Architecture
    *
@@ -89,6 +97,42 @@ namespace Rodin::Location
   class AABB
   {
     public:
+      /// Candidate local indices grouped by topological dimension.
+      using Candidates = std::vector<std::vector<Index>>;
+
+      /**
+       * @brief Builds an index over an explicit candidate subset.
+       *
+       * Entries retain their original mesh indices. Omitted dimensions and
+       * empty lists have no candidates, including in exhaustive fallback.
+       * Ownership and other selection policies belong to the caller.
+       * The tolerance scale still uses all mesh vertices. The candidate lists
+       * are a snapshot: reconstruct after topology, geometry or selection changes.
+       * Empty lists above the mesh dimension are permitted for empty shards.
+       * @throws Alert::Exception For duplicate or out-of-range indices.
+       */
+      AABB(const MeshType& mesh, Candidates candidates)
+        : AABB(mesh)
+      {
+        for (size_t d = 0; d < candidates.size(); ++d)
+        {
+          if (candidates[d].empty())
+            continue;
+          if (d > mesh.getDimension())
+            Alert::MemberFunctionException(*this, __func__)
+              << "AABB candidate dimension exceeds the mesh dimension." << Alert::Raise;
+          auto sorted = candidates[d];
+          std::sort(sorted.begin(), sorted.end());
+          if (sorted.back() >= mesh.getPolytopeCount(d) ||
+            std::adjacent_find(sorted.begin(), sorted.end()) != sorted.end())
+            Alert::MemberFunctionException(*this, __func__)
+              << "AABB candidate indices must be distinct and in range." << Alert::Raise;
+        }
+        if (candidates.size() > m_index.size())
+          m_index = std::vector<DimensionIndex>(candidates.size());
+        m_candidates = std::move(candidates);
+      }
+
       /// @brief Builds a locator bound to a fixed mesh.
       explicit AABB(const MeshType& mesh)
         : m_mesh(mesh),
@@ -99,6 +143,14 @@ namespace Rodin::Location
           m_projectionPruning(false),
           m_index(mesh.getDimension() + 1)
       {
+        // A missing MPI extension must fail at compile time rather than invoke
+        // collective MPI counts through the generic local implementation.
+        if constexpr (requires { mesh.getContext(); })
+        {
+          using MeshContext = std::remove_cvref_t<decltype(mesh.getContext())>;
+          static_assert(!std::is_same_v<MeshContext, Context::MPI>,
+            "Include Rodin/MPI/Location.h to locate points in an MPI mesh.");
+        }
         computeScale();
       }
 
@@ -112,8 +164,8 @@ namespace Rodin::Location
       AABB& setTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
-          throw std::invalid_argument(
-            "AABB physical tolerance must be finite and nonnegative.");
+          Alert::MemberFunctionException(*this, __func__)
+            << "AABB physical tolerance must be finite and nonnegative." << Alert::Raise;
         m_tolerance = tolerance;
         invalidate();
         return *this;
@@ -129,8 +181,8 @@ namespace Rodin::Location
       AABB& setReferenceTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
-          throw std::invalid_argument(
-            "AABB reference tolerance must be finite and nonnegative.");
+          Alert::MemberFunctionException(*this, __func__)
+            << "AABB reference tolerance must be finite and nonnegative." << Alert::Raise;
         m_referenceTolerance = tolerance;
         return *this;
       }
@@ -379,9 +431,25 @@ namespace Rodin::Location
 
       void build(DimensionIndex& index, size_t dimension) const
       {
+        // Select the traversal policy once, so ordinary mesh builds retain
+        // their original loop without a per-entry subset branch or callback.
+        if (m_candidates)
+          build<true>(index, dimension);
+        else
+          build<false>(index, dimension);
+      }
+
+      template <bool Restricted>
+      void build(DimensionIndex& index, size_t dimension) const
+      {
         const auto& mesh = m_mesh.get();
         const size_t sdim = mesh.getSpaceDimension();
-        const size_t count = mesh.getPolytopeCount(dimension);
+        const std::vector<Index>* selected = nullptr;
+        if constexpr (Restricted)
+          selected =
+            dimension < m_candidates->size() ? &(*m_candidates)[dimension] : nullptr;
+        const size_t count = Restricted ? (selected ? selected->size() : 0)
+                                        : mesh.getPolytopeCount(dimension);
         const bool projectionsEnabled =
           m_projectionPruning && dimension == sdim && dimension > 1;
 
@@ -399,21 +467,34 @@ namespace Rodin::Location
         std::vector<Bound> mid(count);
         index.entries.reserve(count);
         std::vector<ProjectionRange> ranges(projectionsEnabled ? count : 0);
-        size_t n = 0;
-        for (auto it = mesh.getPolytope(dimension); it; ++it, ++n)
+        auto it = mesh.getPolytope(dimension);
+        Geometry::Polytope candidate(dimension, 0, mesh);
+        for (size_t n = 0; n < count; ++n)
         {
+          const Geometry::Polytope& polytope = [&]() -> const Geometry::Polytope& {
+            if constexpr (Restricted)
+            {
+              // Sparse indices are mesh-local handles, so no iterator allocation
+              // is needed for an individual candidate.
+              candidate = Geometry::Polytope(dimension, (*selected)[n], mesh);
+              return candidate;
+            }
+            else
+              return *it;
+          }();
           if (projectionsEnabled)
             ranges[n].begin = index.projections.size();
-          makeBox(*it, lo[n], hi[n], index.projections);
+          makeBox(polytope, lo[n], hi[n], index.projections);
           if (projectionsEnabled)
             ranges[n].end = index.projections.size();
           for (size_t i = 0; i < sdim; ++i)
             mid[n][i] = std::isfinite(lo[n][i]) && std::isfinite(hi[n][i])
               ? Real(0.5) * lo[n][i] + Real(0.5) * hi[n][i]
               : Real(0);
-          index.entries.push_back(it->getIndex());
+          index.entries.push_back(polytope.getIndex());
+          if constexpr (!Restricted)
+            ++it;
         }
-        assert(n == count);
 
         std::vector<uint32_t> order(count);
         for (uint32_t i = 0; i < count; ++i)
@@ -1442,6 +1523,7 @@ namespace Rodin::Location
       bool m_projectionPruning;
       Real m_scale;
       mutable std::vector<DimensionIndex> m_index;
+      Optional<Candidates> m_candidates;
   };
 }
 

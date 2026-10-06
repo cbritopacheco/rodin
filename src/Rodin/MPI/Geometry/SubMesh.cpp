@@ -37,7 +37,10 @@ namespace Rodin::Geometry
     const Mesh<Context::MPI>& parent)
   {
     const auto& shard = parent.getShard();
-    const size_t dim = parent.getDimension();
+    // Ambient dimension bounds every selectable entity dimension, even on
+    // empty ranks. Use it only for builder capacity; completeOverlap() later
+    // establishes the selected topological dimension collectively.
+    const size_t dim = parent.getSpaceDimension();
 
     m_parent = parent;
 
