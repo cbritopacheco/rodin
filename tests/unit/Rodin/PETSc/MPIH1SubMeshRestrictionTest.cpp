@@ -319,7 +319,9 @@ namespace Rodin::Tests::Unit
               EXPECT_EQ(cell->getTransformation().getFactorOrder(),
                 original->getTransformation().getFactorOrder());
               if (curved && d > 0)
+              {
                 EXPECT_EQ(cell->getTransformation().getFactorOrder(), 2u);
+              }
               const IndexArray dofs = targetSpace.getDOFs(d, cell->getIndex());
               for (Index local = 0; local < static_cast<size_t>(dofs.size()); ++local)
               {

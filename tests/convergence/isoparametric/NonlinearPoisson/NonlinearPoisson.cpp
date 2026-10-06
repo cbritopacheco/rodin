@@ -236,7 +236,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
         const auto solver = problem.template solve<K>(
           Data::Field::Sine, false, AssemblyOrder, RefinedTolerance);
         for (const auto& e : {quad, solver})
-          for (const auto pair : {std::pair{base.getL2(), e.getL2()},
+          for (const auto& pair : {std::pair{base.getL2(), e.getL2()},
                  std::pair{base.getH1Seminorm(), e.getH1Seminorm()}})
           {
             ASSERT_TRUE(std::isfinite(pair.first));

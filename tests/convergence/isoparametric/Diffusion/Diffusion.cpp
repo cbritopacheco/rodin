@@ -231,10 +231,12 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
             for (size_t i = 0; i < vertices.size(); ++i)
               EXPECT_EQ(vertices[i], mappedVertices[i]);
             if constexpr (requires { reference.getShard(); })
+            {
               EXPECT_EQ(
                 reference.getShard().isOwned(problem.getDimension(), cell->getIndex()),
                 problem.getMesh().getShard().isOwned(
                   problem.getDimension(), cell->getIndex()));
+            }
           }
           for (bool poisson : {true, false})
           {
@@ -321,7 +323,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
             const std::array after{e.field, e.geometry, e.total};
             for (size_t component = field == Data::Field::Affine ? 1 : 0;
                  component < before.size(); ++component)
-              for (const auto pair :
+              for (const auto& pair :
                 {std::pair{before[component].getL2(), after[component].getL2()},
                   std::pair{
                     before[component].getH1Seminorm(), after[component].getH1Seminorm()}})
@@ -406,7 +408,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           // Geometry is independent of the discrete operator; total error is not.
           EXPECT_EQ(base.geometry.getL2(), wrong.geometry.getL2());
           EXPECT_EQ(base.geometry.getH1Seminorm(), wrong.geometry.getH1Seminorm());
-          for (const auto pair :
+          for (const auto& pair :
             {std::pair{base.field, wrong.field}, std::pair{base.total, wrong.total}})
           {
             EXPECT_GT(pair.second.getL2(), ControlRatio * pair.first.getL2());
@@ -515,7 +517,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           const auto norm = problem.template solve<K>(poisson, Data::Field::Smooth, false,
             AssemblyOrder, SolverTolerance, RefinedNormOrder);
           for (const auto& e : {quad, solver, norm})
-            for (const auto pair : {std::pair{base.getL2(), e.getL2()},
+            for (const auto& pair : {std::pair{base.getL2(), e.getL2()},
                    std::pair{base.getH1Seminorm(), e.getH1Seminorm()}})
             {
               ASSERT_TRUE(std::isfinite(pair.first));

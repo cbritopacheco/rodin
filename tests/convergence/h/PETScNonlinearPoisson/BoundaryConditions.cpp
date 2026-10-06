@@ -146,7 +146,9 @@ namespace Rodin::Tests::Convergence::NonlinearBoundaryTests
         const Real defect = problem.tangentDefect(direction);
         EXPECT_TRUE(std::isfinite(defect));
         if (wrongCubic || wrongRobin)
+        {
           EXPECT_GT(defect, Real(1e-3));
+        }
         else
           EXPECT_LT(defect, Real(1e-6));
       }

@@ -155,7 +155,7 @@ namespace Rodin::Tests::Convergence
         ObservedMesh reference(UniformGrid(geometry).makeMesh(2));
         ObservedMesh represented{Geometry::LocalMesh(reference)};
         CurvedGeometry mapping(represented, CurvedGeometry<ObservedMesh>::Map::Sine);
-        mapping.install<2>();
+        mapping.template install<2>();
         const size_t dim = reference.getDimension();
         auto space = [&] {
           if constexpr (FormLanguage::IsVectorRange<Range>::Value)

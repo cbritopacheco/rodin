@@ -145,7 +145,9 @@ namespace Rodin::Tests::Convergence
           PetscBool set = PETSC_FALSE;
           EXPECT_EQ(PetscOptionsHasName(nullptr, nullptr, name, &set), PETSC_SUCCESS);
           if (!set)
+          {
             EXPECT_EQ(PetscOptionsSetValue(nullptr, name, value), PETSC_SUCCESS);
+          }
         }
         PETSc::Solver::KSP solver(problem);
         solver.setType(KSPPREONLY);
@@ -167,7 +169,9 @@ namespace Rodin::Tests::Convergence
         // on the unit-volume box. Missing flux must violate compatibility.
         const Real defect = std::abs(compatibility.compute());
         if (wrongFlux)
+        {
           EXPECT_GT(defect, WrongFluxFloor);
+        }
         else
           EXPECT_LT(defect, GaugeTolerance);
         return measure();

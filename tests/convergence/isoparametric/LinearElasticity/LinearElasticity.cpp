@@ -525,8 +525,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
           for (size_t i = 0; i < vertices.size(); ++i)
             EXPECT_EQ(vertices[i], originalVertices[i]);
           if constexpr (requires { reference.getShard(); })
+          {
             EXPECT_EQ(reference.getShard().isOwned(dim, cell->getIndex()),
               problem.getMesh().getShard().isOwned(dim, cell->getIndex()));
+          }
         }
       }
 
@@ -627,7 +629,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
         const auto solver = problem.template solve<K>(
           Data::Field::Exponential, false, AssemblyOrder, RefinedTolerance);
         for (const auto& refined : {quadrature, solver})
-          for (const auto pair :
+          for (const auto& pair :
             {std::pair{baseline.displacement.getL2(), refined.displacement.getL2()},
               std::pair{baseline.displacement.getH1Seminorm(),
                 refined.displacement.getH1Seminorm()},

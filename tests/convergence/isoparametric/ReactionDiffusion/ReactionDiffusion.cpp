@@ -380,7 +380,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
           Data::Field::Smooth, false, AssemblyOrder, RefinedTolerance);
         for (const auto& refined : {quadrature, solver})
           for (size_t component = 0; component < 2; ++component)
-            for (const auto pair :
+            for (const auto& pair :
               {std::pair{baseline[component].getL2(), refined[component].getL2()},
                 std::pair{baseline[component].getH1Seminorm(),
                   refined[component].getH1Seminorm()}})

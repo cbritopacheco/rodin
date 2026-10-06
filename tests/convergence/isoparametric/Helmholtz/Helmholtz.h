@@ -194,10 +194,12 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
           for (size_t i = 0; i < vertices.size(); ++i)
             EXPECT_EQ(vertices[i], originalVertices[i]);
           if constexpr (requires { reference.getShard(); })
+          {
             EXPECT_EQ(reference.getShard().isOwned(
                         reference.getSpaceDimension(), cell->getIndex()),
               problem.getMesh().getShard().isOwned(
                 reference.getSpaceDimension(), cell->getIndex()));
+          }
         }
         EXPECT_TRUE(error.field.isFinite());
         EXPECT_LT(error.field.getL2(), PatchTolerance);

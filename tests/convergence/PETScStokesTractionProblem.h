@@ -113,7 +113,9 @@ namespace Rodin::Tests::Convergence
           PetscBool set = PETSC_FALSE;
           EXPECT_EQ(PetscOptionsHasName(nullptr, nullptr, name, &set), PETSC_SUCCESS);
           if (!set)
+          {
             EXPECT_EQ(PetscOptionsSetValue(nullptr, name, value), PETSC_SUCCESS);
+          }
         }
         PETSc::Solver::KSP solver(problem);
         solver.setType(KSPPREONLY);

@@ -414,7 +414,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         Workload<ContextType> problem(this->GetParam(), 3);
         const auto baseline = problem.solve(StokesData::Field::Cubic);
         const auto refined = problem.solve(StokesData::Field::Cubic, 1, RefinedOrder);
-        for (const auto pair : {std::pair{baseline.velocity, refined.velocity},
+        for (const auto& pair : {std::pair{baseline.velocity, refined.velocity},
                std::pair{baseline.pressure, refined.pressure}})
           for (const auto norms : {std::pair{pair.first.getL2(), pair.second.getL2()},
                  std::pair{pair.first.getH1Seminorm(), pair.second.getH1Seminorm()}})

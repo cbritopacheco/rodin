@@ -299,7 +299,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::GeometryApproximation
         Workload<ContextType, Q> problem(this->GetParam(), 3);
         const auto base = problem.mapErrors(),
                    refined = problem.mapErrors(RefinedMapOrder);
-        for (const auto pair : {std::pair{base.getL2(), refined.getL2()},
+        for (const auto& pair : {std::pair{base.getL2(), refined.getL2()},
                std::pair{base.getH1Seminorm(), refined.getH1Seminorm()}})
         {
           ASSERT_GT(pair.first, 0);

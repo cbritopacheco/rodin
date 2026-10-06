@@ -75,7 +75,9 @@ namespace Rodin::Tests::Convergence
             ASSERT_TRUE(std::isfinite(coarseParameter));
             ASSERT_TRUE(std::isfinite(fineParameter));
             if constexpr (Exponential)
+            {
               ASSERT_GT(fineParameter, coarseParameter);
+            }
             else
             {
               ASSERT_GT(fineParameter, 0);
