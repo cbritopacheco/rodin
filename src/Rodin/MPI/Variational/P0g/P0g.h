@@ -251,7 +251,8 @@ namespace Rodin::Variational
         // identity. A shard-attached point loses SubMesh ancestry and cannot
         // be included in a parent GridFunction's mesh.
         const auto& [d, i] = p;
-        return Pullback<Callable>(*getMesh().getPolytope(d, i), std::forward<Callable>(v));
+        return Pullback<Callable>(
+          *getMesh().getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**
@@ -487,7 +488,8 @@ namespace Rodin::Variational
         // The mathematical pullback is shared; point provenance belongs to
         // the MPI mesh, not its rank-local shard (as for MPI P0 and H1).
         const auto& [d, i] = p;
-        return Pullback<Callable>(*getMesh().getPolytope(d, i), std::forward<Callable>(v));
+        return Pullback<Callable>(
+          *getMesh().getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**

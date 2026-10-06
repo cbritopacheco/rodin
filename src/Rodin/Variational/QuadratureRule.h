@@ -248,7 +248,8 @@ namespace Rodin::Variational
       std::unique_ptr<IntegrandType> m_integrand;                  ///< Integrand
       const Geometry::Polytope* m_polytope;                        ///< Bound polytope
       const QF::QuadratureFormulaBase* m_qf;                       ///< Reference quadrature formula
-      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;            ///< Mapped geometric quadrature
+      std::unique_ptr<Geometry::PolytopeQuadrature>
+        m_quadrature; ///< Mapped geometric quadrature
       Optional<ScalarType> m_value;                                ///< Cached value
   };
 
@@ -678,7 +679,8 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;               ///< Integrand expression
       const QF::QuadratureFormulaBase* m_qf;                    ///< Reference quadrature formula
-      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;         ///< Mapped geometric quadrature
+      std::unique_ptr<Geometry::PolytopeQuadrature>
+        m_quadrature; ///< Mapped geometric quadrature
       const Geometry::Polytope* m_polytope;                     ///< Bound polytope
       bool m_set;                                               ///< Whether formula selection data are initialized
       size_t m_order;                                           ///< Cached quadrature order
@@ -888,7 +890,8 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<IntegrandType> m_integrand;               ///< Integrand expression
       const QF::QuadratureFormulaBase* m_qf;                    ///< Reference quadrature formula
-      std::unique_ptr<Geometry::PolytopeQuadrature> m_quadrature;         ///< Mapped geometric quadrature
+      std::unique_ptr<Geometry::PolytopeQuadrature>
+        m_quadrature; ///< Mapped geometric quadrature
       const Geometry::Polytope* m_polytope;                     ///< Bound polytope
       bool m_set;                                               ///< Whether formula selection data are initialized
       size_t m_order;                                           ///< Cached quadrature order
