@@ -222,6 +222,18 @@ $$
 The tests check this identity, nested ancestry composition, unique global
 entity ownership, owner/halo agreement, and shared DOF identity for P0, P0g,
 P1 and H1 degrees one through six in real/complex scalar/vector ranges.
+P0, P0g and P1 additionally exercise real/complex non-square
+$2\times3$ matrix ranges. With scalar global DOF $g$ and zero-based matrix
+component $(r,s)$, their flattened DOF identity is checked exactly:
+
+$$
+g_{rs}=6g+3r+s,\qquad r\in\{0,1\},\quad s\in\{0,1,2\}.
+$$
+
+Matrix dimensions, scalar-to-matrix size factors and real/complex index
+agreement are independent checks. Matrix restrictions use distinct labels
+for all six components in the same cell, boundary, sparse and nested
+selection protocol; P0 remains restricted to full-dimensional cells.
 The requested and extracted cell selections must agree exactly in global
 parent indices, so an entirely dropped entity cannot disappear from the
 ownership oracle unnoticed.

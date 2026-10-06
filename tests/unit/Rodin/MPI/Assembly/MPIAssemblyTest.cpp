@@ -619,7 +619,7 @@ namespace Rodin::Tests::Unit
   /**
    * Positive-dimensional cell/boundary SubMeshes preserve logical ancestry
    * and shared DOF identity for all scalar/vector ranges and H1 orders 1--6.
-   * Real/complex scalar/vector P1, full-dimensional P0, and P0g restrictions
+   * Real/complex scalar/vector/matrix P1, full-dimensional P0, and P0g restrictions
    * preserve vertex/cell-label values or constants and destination layouts,
    * including nested ancestry, without tolerances. No ambiguous P0 boundary
    * trace is introduced. Values are checked on held entities, not nonexistent
@@ -891,12 +891,43 @@ namespace Rodin::Tests::Unit
               EXPECT_TRUE((vector == complexValues).all());
           }
       };
+      const auto compareMatrices = [&](const auto& scalar, const auto& realMatrix,
+                                     const auto& complexMatrix) {
+        constexpr bool cellOnly = std::is_same_v<std::remove_cvref_t<decltype(scalar)>,
+          P0<Real, Mesh<Context::MPI>>>;
+        EXPECT_EQ(realMatrix.getRows(), 2);
+        EXPECT_EQ(realMatrix.getColumns(), 3);
+        EXPECT_EQ(complexMatrix.getRows(), 2);
+        EXPECT_EQ(complexMatrix.getColumns(), 3);
+        EXPECT_EQ(realMatrix.getSize(), 6 * scalar.getSize());
+        EXPECT_EQ(complexMatrix.getSize(), realMatrix.getSize());
+        checkSpace(realMatrix);
+        checkSpace(complexMatrix);
+        for (size_t d = cellOnly ? subDimension : 0; d <= subDimension; ++d)
+          for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
+          {
+            const IndexArray scalarDOFs = scalar.getDOFs(d, entity);
+            const IndexArray matrixDOFs = realMatrix.getDOFs(d, entity);
+            const IndexArray complexDOFs = complexMatrix.getDOFs(d, entity);
+            ASSERT_EQ(matrixDOFs.size(), 6 * scalarDOFs.size());
+            ASSERT_EQ(complexDOFs.size(), matrixDOFs.size());
+            for (Eigen::Index a = 0; a < matrixDOFs.size(); ++a)
+            {
+              EXPECT_EQ(matrixDOFs(a), 6 * scalarDOFs(a / 6) + a % 6);
+              EXPECT_EQ(complexDOFs(a), matrixDOFs(a));
+            }
+          }
+      };
       const auto families = [&]<template <class, class> class Family>() {
         Family<Real, Mesh<Context::MPI>> real(mesh);
         Family<Complex, Mesh<Context::MPI>> complex(mesh);
         Family<Math::SpatialVector<Real>, Mesh<Context::MPI>> realVector(mesh, 3);
         Family<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(mesh, 3);
         compareRanges(real, complex, realVector, complexVector);
+        Family<Math::SpatialMatrix<Real>, Mesh<Context::MPI>> realMatrix(mesh, 2, 3);
+        Family<Math::SpatialMatrix<Complex>, Mesh<Context::MPI>> complexMatrix(
+          mesh, 2, 3);
+        compareMatrices(real, realMatrix, complexMatrix);
       };
       families.template operator()<P0>();
       families.template operator()<P0g>();
@@ -927,15 +958,20 @@ namespace Rodin::Tests::Unit
             std::is_same_v<Space, P0g<Range, Mesh<Context::MPI>>>;
           using Scalar = typename Space::ScalarType;
           constexpr bool vector = std::is_same_v<Range, Math::SpatialVector<Scalar>>;
+          constexpr bool matrix = std::is_same_v<Range, Math::SpatialMatrix<Scalar>>;
           SCOPED_TRACE(typeid(Space).name());
           const auto sourceSpace = [&] {
-            if constexpr (vector)
+            if constexpr (matrix)
+              return Space(parent, 2, 3);
+            else if constexpr (vector)
               return Space(parent, 3);
             else
               return Space(parent);
           }();
           const auto targetSpace = [&] {
-            if constexpr (vector)
+            if constexpr (matrix)
+              return Space(mesh, 2, 3);
+            else if constexpr (vector)
               return Space(mesh, 3);
             else
               return Space(mesh);
@@ -971,53 +1007,65 @@ namespace Rodin::Tests::Unit
           // this operation has no global result and must not communicate.
           // The barrier is test-protocol synchronization outside the operation;
           // the bounded MPI test detects an accidental hidden collective.
+          const auto checkValues = [&] {
+            EXPECT_EQ(&restricted.getFiniteElementSpace(), &targetSpace);
+            EXPECT_EQ(restricted.getData().size(), targetSpace.getSize());
+            for (Index entity = 0;
+                 entity < mesh.getShard().getPolytopeCount(entityDimension); ++entity)
+            {
+              const auto& ancestors = sub.getPolytopeMap(entityDimension).left;
+              EXPECT_LT(entity, ancestors.size());
+              if (entity >= ancestors.size())
+                continue;
+              Index ancestor = ancestors[entity];
+              if (immediateParent.isSubMesh())
+              {
+                const auto& map =
+                  immediateParent.asSubMesh().getPolytopeMap(entityDimension);
+                EXPECT_LT(ancestor, map.left.size());
+                if (ancestor >= map.left.size())
+                  continue;
+                ancestor = map.left[ancestor];
+              }
+              const Index global = GlobalConstant
+                ? Index{0}
+                : parent.getGlobalIndex(entityDimension, ancestor);
+              const IndexArray dofs = targetSpace.getDOFs(entityDimension, entity);
+              for (size_t component = 0; component < static_cast<size_t>(dofs.size());
+                   ++component)
+                EXPECT_EQ(restricted[dofs(component)], value(global, component));
+            }
+          };
           if (world.rank() == 0)
+          {
             restricted = source;
+            checkValues();
+          }
           world.barrier();
           restricted = source;
-          EXPECT_EQ(&restricted.getFiniteElementSpace(), &targetSpace);
-          EXPECT_EQ(restricted.getData().size(), targetSpace.getSize());
-          for (Index entity = 0;
-               entity < mesh.getShard().getPolytopeCount(entityDimension); ++entity)
-          {
-            const auto& ancestors = sub.getPolytopeMap(entityDimension).left;
-            EXPECT_LT(entity, ancestors.size());
-            if (entity >= ancestors.size())
-              continue;
-            Index ancestor = ancestors[entity];
-            if (immediateParent.isSubMesh())
-            {
-              const auto& map =
-                immediateParent.asSubMesh().getPolytopeMap(entityDimension);
-              EXPECT_LT(ancestor, map.left.size());
-              if (ancestor >= map.left.size())
-                continue;
-              ancestor = map.left[ancestor];
-            }
-            const Index global = GlobalConstant
-              ? Index{0}
-              : parent.getGlobalIndex(entityDimension, ancestor);
-            const IndexArray dofs = targetSpace.getDOFs(entityDimension, entity);
-            for (size_t component = 0; component < static_cast<size_t>(dofs.size());
-                 ++component)
-              EXPECT_EQ(restricted[dofs(component)], value(global, component));
-          }
+          checkValues();
         };
       checkRestriction.template operator()<Real>();
       checkRestriction.template operator()<Complex>();
       checkRestriction.template operator()<Math::SpatialVector<Real>>();
       checkRestriction.template operator()<Math::SpatialVector<Complex>>();
+      checkRestriction.template operator()<Math::SpatialMatrix<Real>>();
+      checkRestriction.template operator()<Math::SpatialMatrix<Complex>>();
       if (subDimension == dimension)
       {
         checkRestriction.template operator()<Real, P0>();
         checkRestriction.template operator()<Complex, P0>();
         checkRestriction.template operator()<Math::SpatialVector<Real>, P0>();
         checkRestriction.template operator()<Math::SpatialVector<Complex>, P0>();
+        checkRestriction.template operator()<Math::SpatialMatrix<Real>, P0>();
+        checkRestriction.template operator()<Math::SpatialMatrix<Complex>, P0>();
       }
       checkRestriction.template operator()<Real, P0g>();
       checkRestriction.template operator()<Complex, P0g>();
       checkRestriction.template operator()<Math::SpatialVector<Real>, P0g>();
       checkRestriction.template operator()<Math::SpatialVector<Complex>, P0g>();
+      checkRestriction.template operator()<Math::SpatialMatrix<Real>, P0g>();
+      checkRestriction.template operator()<Math::SpatialMatrix<Complex>, P0g>();
     };
     for (const auto& [selectedDimension, sparse] : {std::pair{dimension, false},
            std::pair{dimension - 1, false}, std::pair{dimension, true}})
