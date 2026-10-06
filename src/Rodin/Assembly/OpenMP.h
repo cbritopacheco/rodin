@@ -543,8 +543,8 @@ namespace Rodin::Assembly
 
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
-              for (size_t r = 0; r < rows.size(); ++r)
-                for (size_t c = 0; c < cols.size(); ++c)
+              for (Eigen::Index r = 0; r < rows.size(); ++r)
+                for (Eigen::Index c = 0; c < cols.size(); ++c)
                   local(rows(r), cols(c)) += lbfi->integrate(c, r);
             }
 
@@ -607,8 +607,8 @@ namespace Rodin::Assembly
 
                 const auto& rows = input.getTestFES().getDOFs(d, i);
                 const auto& cols = input.getTrialFES().getDOFs(rd, tr);
-                for (size_t r = 0; r < rows.size(); ++r)
-                  for (size_t c = 0; c < cols.size(); ++c)
+                for (Eigen::Index r = 0; r < rows.size(); ++r)
+                  for (Eigen::Index c = 0; c < cols.size(); ++c)
                     local(rows(r), cols(c)) += gbfi->integrate(c, r);
               }
             }
