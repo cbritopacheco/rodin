@@ -28,6 +28,9 @@ for arbitrary nonlinear data or mesh families.
 
 ## Workload and acceptance
 
+The original target below retains its homogeneous Dirichlet configuration.
+The separate natural-boundary target is specified in the next section.
+
 Scalar H1 degrees $p=1,2$ use `n=5→9→17` and `n=3→5→9`, respectively,
 with $n$ points per axis and $h=1/(n-1)$. Every adjacent interval requires
 finite positive errors, strict reduction, L2 rates in $(p+0.5,p+1.5)$,
@@ -116,6 +119,102 @@ the incorrect solution must exceed both budgets. A self-consistent but
 physically incorrect residual–tangent pair therefore cannot pass solely
 because SNES converges.
 
+## Natural-boundary extension
+
+`RodinConvergenceHPETScNonlinearPoissonBoundary` retains the same semilinear
+operator. Mixed cases prescribe the manufactured trace on
+$\Gamma_D=\{x_0=0\}$ and
+
+$$
+\partial_nu+\beta u=g,\qquad
+g=\nabla u\cdot n+\beta u,\qquad \beta\in\{0,1\},
+$$
+
+on $\Gamma_N=\partial\Omega\setminus\Gamma_D$. Pure Neumann uses
+$\Gamma_D=\varnothing$, $\Gamma_N=\partial\Omega$, and $\beta=0$.
+For $V=\{v\in H^1(\Omega):v|_{\Gamma_D}=0\}$, the physical residual
+and its derivative are
+
+$$
+F_\beta(u;v)=\int_\Omega\bigl(\nabla u\cdot\nabla v
++(u+u^3-f)v\bigr)\,\mathrm{d}x
++\int_{\Gamma_N}(\beta u-g)v\,\mathrm{d}s,
+$$
+
+$$
+J_\beta(u)[w;v]=\int_\Omega\bigl(\nabla w\cdot\nabla v
++(1+3u^2)wv\bigr)\,\mathrm{d}x
++\beta\int_{\Gamma_N}wv\,\mathrm{d}s.
+$$
+
+Since $(a+a^3-b-b^3)(a-b)\ge|a-b|^2$ for real $a,b$, the
+reaction controls the constant mode even without essential data. No
+compatibility projection, pressure-like multiplier, or mean constraint is
+introduced. The global unconstrained dimension for pure Neumann is the
+space's cached global size; a local size query does not introduce a reduction.
+
+Nonzero traces use $u_h=I_hu+w_h$, with homogeneous correction on
+$\Gamma_D$ and unrestricted correction on $\Gamma_N$. Every SNES callback
+reconstructs this same physical state before residual or tangent assembly.
+The manufactured flux is independent of the current iterate. Robin residual
+and tangent both include their corresponding boundary term.
+
+Sine fields with $A=1$ provide P1–P3 studies. P1 uses `n=5→9→17`, and
+P2/P3 use `n=3→5→9`; every adjacent interval checks positive finite,
+strictly decreasing errors. Pure-Neumann P1 tetrahedra instead use
+`n=9→17→33`: the coarser `n=5→9` interval has an observed L2 rate
+of approximately $1.602$ and does not meet the unchanged $1.65$ floor.
+The finer hierarchy retains three levels and tests both adjacent intervals,
+without claiming that the finite-resolution floor holds on the rejected
+coarse hierarchy. Every accepted interval checks
+strictly decreasing errors, with L2/H1-seminorm floors $1.65/0.75$,
+$2.45/1.55$, and $3.45/2.55$. These policies retain the regularity
+hypotheses stated above. At `n=3`, constant and affine P1 patches and the
+quadratic P2 patch use $A=1/4$ and require both errors below $10^{-9}$:
+
+$$
+u=A,\qquad u=A\left(1+\sum_jx_j\right),\qquad
+u=A\left(1+\sum_jx_j^2\right).
+$$
+
+For the last patch, $\nabla u=2Ax$, $\Delta u=2Ad$, and
+$f=-2Ad+u+u^3$. Independent data tests check this formula on all seven
+affine cell families. Removing the cubic term while retaining the affine
+manufactured source must give $E_0,E_1>10^{-3}$. Independently removing
+normal flux, but retaining the Robin exact-value load, is tested on the same
+exactly representable affine P2 patch. The correct formulation must satisfy
+$E_0,E_1<10^{-9}$, whereas the omitted-flux formulation must satisfy
+$E_0,E_1>10^{-3}$ and exceed each corresponding correct error by a factor
+greater than five. This control isolates the boundary term from coarse-mesh
+approximation error; the sine field remains the rate-study solution.
+
+Residual–Jacobian checks use the centered callback difference with
+$\epsilon=10^{-5}$ described above. P1 and P2 require defect below
+$10^{-6}$; the missing cubic derivative and missing Robin derivative
+controls require defect above $10^{-3}$. The direction is proportional to
+$x_0$: it vanishes on $\Gamma_D$ but has nonzero Robin trace. A direction
+vanishing on the whole boundary could fail to detect the latter defect.
+
+Independent sensitivity changes assembly order $16\to18$, norm order
+$18\to20$, or SNES residual tolerance $10^{-12}\to10^{-13}$, one at a
+time; each error must change by less than $10^{-6}$ relative to baseline.
+The independently reassembled residual budget remains $10^{-10}$ relative
+to $\max(1,\|F(u_h^0)\|_2)$. Inner KSP tolerances track SNES as above.
+There are 37 cases per geometry/context, registered on all seven geometries
+locally and at MPI ranks 1–4 in 35 `slow` CTest entries. The watchdog is
+1800 seconds except for tetrahedron entries, which allow 3600 seconds:
+the complete one-rank tetrahedron registration took approximately 1317
+seconds with idle sleep prevented. The larger watchdog provides
+platform/version headroom, rather than accommodating host suspension.
+These are execution budgets, not numerical acceptance bounds. CI separates the
+tetrahedron and pyramid registrations from the other geometries. Run
+`ctest --test-dir build/tests -R '^RodinConvergenceHPETScNonlinearPoissonBoundary_' --output-on-failure`.
+
+Space construction, distributed assembly, state synchronization, nonlinear
+solving, residual norms, and error integration require communicator
+participation. Manufactured field evaluation, normal contractions, and
+cached layout queries are noncollective.
+
 ## Execution scope
 
 Segment, triangle, quadrilateral, tetrahedron, pyramid, hexahedron, and wedge
@@ -126,8 +225,8 @@ tests. Each geometry/rank entry has labels `convergence;petsc;slow`
 (plus `distributed` for MPI), a 600-second limit, and the MPI processor count.
 Run `ctest --test-dir build/tests -R 'RodinConvergenceHPETSc(MPI)?NonlinearPoisson' --output-on-failure`.
 
-The suite requires real-scalar PETSc. Complex cubic-reaction monotonicity,
-0D spatial rates, nonzero/mixed traces, curved maps, PETSc p/hp paths,
+Both targets require real-scalar PETSc. Complex cubic-reaction monotonicity,
+0D spatial rates, curved maps, PETSc p/hp paths,
 nonlinear divergence behavior, and arbitrary high degrees are not certified
 by this suite. CI uses PETSc 3.19's uncached callback path; local newer PETSc
 also exercises identity/state caching. Passing one version does not certify

@@ -37,6 +37,16 @@ namespace Rodin::Tests::Convergence
   class PETScNonlinearPoissonProblem
   {
     public:
+      enum class Boundary
+      {
+        Dirichlet,
+        MixedNeumann,
+        Robin,
+        PureNeumann
+      };
+      static constexpr Geometry::Attribute DirichletAttribute = 601;
+      static constexpr Geometry::Attribute NaturalAttribute = 602;
+
       using SpaceType = Variational::H1<K, Real, MeshType>;
       using StateType = PETSc::Variational::GridFunction<SpaceType>;
       using TrialType = PETSc::Variational::TrialFunction<StateType, SpaceType>;
@@ -44,10 +54,19 @@ namespace Rodin::Tests::Convergence
       using ProblemType =
         Variational::Problem<PETSc::Math::LinearSystem, TrialType, TestType>;
 
+      /** @brief Construct and assemble a fixed-layout nonlinear workload.
+       * @note MPI space construction, essential-DOF assembly, global free-DOF
+       * counting, and distributed problem assembly require communicator
+       * participation. Pointwise manufactured data and normal contractions
+       * remain noncollective. Pure Neumann uses the cached global space size;
+       * the positive reaction removes the constant nullspace.
+       */
       explicit PETScNonlinearPoissonProblem(const MeshType& mesh,
         size_t quadratureOrder = 12, Real amplitude = 1, bool omitCubic = false,
         bool wrongTangent = false, bool liftBoundary = false,
-        NonlinearPoissonData::Field field = NonlinearPoissonData::Field::Sine)
+        NonlinearPoissonData::Field field = NonlinearPoissonData::Field::Sine,
+        Boundary condition = Boundary::Dirichlet, bool omitFlux = false,
+        bool wrongBoundaryTangent = false)
         : m_mesh(mesh),
           m_order(quadratureOrder),
           m_data(mesh.getDimension(), amplitude, field),
@@ -78,26 +97,69 @@ namespace Rodin::Tests::Convergence
         s.setOrder(m_order);
         b.setOrder(m_order);
         auto boundary = DirichletBC(m_du, Zero());
-        boundary.assemble();
-        const auto& rows =
-          std::get<typename Variational::DirichletBCBase<Real>::ValueDOFs>(
-            boundary.getDOFs());
-        Index begin = 0, end = static_cast<Index>(m_space.getSize());
-        if constexpr (requires { mesh.getShard(); })
-          m_space.getOwnershipRange(begin, end);
-        m_freeDOFs = static_cast<size_t>(end - begin);
-        for (const auto& [global, value] : rows)
+        if (condition != Boundary::Dirichlet)
+          boundary.on(DirichletAttribute);
+        if (condition == Boundary::PureNeumann)
+          m_freeDOFs = m_space.getSize();
+        else
         {
-          (void)value;
-          if (global >= begin && global < end)
-            --m_freeDOFs;
-        }
+          boundary.assemble();
+          const auto& rows =
+            std::get<typename Variational::DirichletBCBase<Real>::ValueDOFs>(
+              boundary.getDOFs());
+          Index begin = 0, end = static_cast<Index>(m_space.getSize());
+          if constexpr (requires { mesh.getShard(); })
+            m_space.getOwnershipRange(begin, end);
+          m_freeDOFs = static_cast<size_t>(end - begin);
+          for (const auto& [global, value] : rows)
+          {
+            (void)value;
+            if (global >= begin && global < end)
+              --m_freeDOFs;
+          }
 #ifdef RODIN_USE_MPI
-        if constexpr (requires { mesh.getShard(); })
-          m_freeDOFs = boost::mpi::all_reduce(
-            mesh.getContext().getCommunicator(), m_freeDOFs, std::plus<size_t>());
+          if constexpr (requires { mesh.getShard(); })
+            m_freeDOFs = boost::mpi::all_reduce(
+              mesh.getContext().getCommunicator(), m_freeDOFs, std::plus<size_t>());
 #endif
-        m_problem = a + c + r + s - b + boundary;
+        }
+        if (condition == Boundary::Dirichlet)
+          m_problem = a + c + r + s - b + boundary;
+        else
+        {
+          const BoundaryNormal normal(mesh);
+          const size_t dim = mesh.getDimension();
+          const RealFunction flux(
+            [gradient = m_data.getGradient(), normal, dim](const Geometry::Point& point) {
+              const auto derivative = gradient(point);
+              if (dim == 1)
+                return (point(0) < Real(0.5) ? Real(-1) : Real(1)) * derivative(0);
+              const auto outward = normal(point);
+              Real value = 0;
+              for (size_t j = 0; j < dim; ++j)
+                value += derivative(j) * outward(j);
+              return value;
+            });
+          const Real beta = condition == Boundary::Robin ? Real(1) : Real(0);
+          auto natural = BoundaryIntegral(
+            (omitFlux ? Real(0) : Real(1)) * flux + beta * m_data.getSolution(), m_v);
+          natural.setOrder(m_order);
+          if (condition == Boundary::PureNeumann)
+            m_problem = a + c + r + s - b - natural;
+          else if (condition == Boundary::MixedNeumann)
+            m_problem = a + c + r + s - b - natural.over(NaturalAttribute) + boundary;
+          else
+          {
+            auto robinResidual = BoundaryIntegral(m_state, m_v);
+            auto robinTangent =
+              BoundaryIntegral((wrongBoundaryTangent ? Real(0) : Real(1)) * m_du, m_v);
+            robinResidual.setOrder(m_order);
+            robinTangent.setOrder(m_order);
+            m_problem = a + c + r + s - b - natural.over(NaturalAttribute) +
+              robinResidual.over(NaturalAttribute) + robinTangent.over(NaturalAttribute) +
+              boundary;
+          }
+        }
         m_problem.assemble();
       }
 
@@ -107,6 +169,10 @@ namespace Rodin::Tests::Convergence
         return m_freeDOFs;
       }
 
+      /** @brief Solve and integrate global manufactured field errors.
+       * @note MPI state synchronization, SNES/KSP, residuals, and error norms
+       * require every rank of the mesh communicator to participate.
+       */
       ErrorNorms solve(Real tolerance = 1e-11)
       {
         return solve(tolerance, 0, [](const auto&, const auto&) {});
@@ -165,6 +231,10 @@ namespace Rodin::Tests::Convergence
           m_data.getGradient(), normOrder == 0 ? m_order : normOrder);
       }
 
+      /** @brief Global residual/Jacobian consistency through SNES callbacks.
+       * @note All communicator ranks participate in the perturbed assemblies
+       * and vector norms. Directions must vanish on the essential partition.
+       */
       Real tangentDefect()
       {
         return tangentDefect(m_data.getSolution());

@@ -23,7 +23,9 @@ namespace Rodin::Tests::Convergence
    * @f$-\Delta u+u+u^3=f@f$ on the unit box.
    * The amplitude is prescribed independently of the discrete solution.
    * Constant and affine physical patches use zero Laplacian and
-   * @f$f=u+u^3@f$; sine data use @f$-\Delta u=d\pi^2u@f$.
+   * @f$f=u+u^3@f$; the quadratic patch
+   * @f$u=a(1+\sum_jx_j^2)@f$ uses @f$-\Delta u=-2ad@f$.
+   * Sine data use @f$-\Delta u=d\pi^2u@f$.
    */
   class NonlinearPoissonData
   {
@@ -32,7 +34,8 @@ namespace Rodin::Tests::Convergence
       {
         Sine,
         Constant,
-        Affine
+        Affine,
+        Quadratic
       };
       explicit NonlinearPoissonData(
         size_t dimension, Real amplitude = 1, Field field = Field::Sine)
@@ -59,6 +62,13 @@ namespace Rodin::Tests::Convergence
             sum += x(j);
           return m_amplitude * sum;
         }
+        if (m_field == Field::Quadratic)
+        {
+          Real sum = 1;
+          for (size_t j = 0; j < m_dimension; ++j)
+            sum += x(j) * x(j);
+          return m_amplitude * sum;
+        }
         Real value = m_amplitude;
         for (size_t j = 0; j < m_dimension; ++j)
           value *= std::sin(Math::Constants::pi() * x(j));
@@ -81,7 +91,9 @@ namespace Rodin::Tests::Convergence
         {
           if (m_field != Field::Sine)
           {
-            value(j) = m_field == Field::Constant ? Real(0) : m_amplitude;
+            value(j) = m_field == Field::Constant ? Real(0)
+              : m_field == Field::Quadratic       ? 2 * m_amplitude * x(j)
+                                                  : m_amplitude;
             continue;
           }
           value(j) = m_amplitude * pi * std::cos(pi * x(j));
@@ -95,11 +107,13 @@ namespace Rodin::Tests::Convergence
       auto getSource() const
       {
         return Variational::RealFunction(
-          [dim = m_dimension, field = m_field, exact = getSolution()](
-            const Geometry::Point& x) {
+          [dim = m_dimension, field = m_field, amplitude = m_amplitude,
+            exact = getSolution()](const Geometry::Point& x) {
             const Real u = exact(x), pi = Math::Constants::pi();
-            return (field == Field::Sine ? Real(dim) * pi * pi : Real(0)) * u + u +
-              u * u * u;
+            const Real diffusion = field == Field::Sine ? Real(dim) * pi * pi * u
+              : field == Field::Quadratic               ? -2 * amplitude * Real(dim)
+                                                        : Real(0);
+            return diffusion + u + u * u * u;
           });
       }
 

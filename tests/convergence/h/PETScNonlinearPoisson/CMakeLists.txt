@@ -1,4 +1,18 @@
 add_executable(RodinConvergenceHPETScNonlinearPoisson NonlinearPoisson.cpp)
+include(../../PETScRefinement.cmake)
+rodin_add_petsc_refinement(RodinConvergenceHPETScNonlinearPoissonBoundary BoundaryConditions.cpp)
+# The complete one-rank tetrahedron registration took 1317 seconds with
+# idle sleep prevented. Allow platform/version headroom for this resolved
+# study; overnight suspension is not a valid runtime measurement. The
+# watchdog remains an execution policy, not a numerical acceptance criterion.
+set_tests_properties(RodinConvergenceHPETScNonlinearPoissonBoundary_Tetrahedron
+  PROPERTIES TIMEOUT 3600)
+if (RODIN_USE_MPI)
+  foreach(np 1 2 3 4)
+    set_tests_properties(RodinConvergenceHPETScNonlinearPoissonBoundary_MPI_np${np}_Tetrahedron
+      PROPERTIES TIMEOUT 3600)
+  endforeach()
+endif()
 target_link_libraries(RodinConvergenceHPETScNonlinearPoisson
   PRIVATE GTest::gtest RodinConvergenceH Rodin::PETSc)
 set(_RODIN_NONLINEARPOISSON_GEOMETRIES

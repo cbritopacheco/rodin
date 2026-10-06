@@ -74,12 +74,14 @@ jobs:
     runs-on: ubuntu-24.04
     # Includes resolved vector and coupled studies on all geometries and 1-4 ranks.
     # The sequential job exhausted 90 minutes, including dependency/build time.
-    timeout-minutes: 120
+    # Nonlinear geometry partitions include the finer pure-Neumann tetrahedron
+    # study; give their rank matrix headroom without changing numerical gates.
+    timeout-minutes: ${{ startsWith(matrix.suite, 'nonlinear_boundary') && 240 || 120 }}
     strategy:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        suite: [bulk, poisson_boundary, conductivity_boundary, elasticity_boundary, stokes_boundary, reaction_boundary]
+        suite: [bulk, poisson_boundary, conductivity_boundary, elasticity_boundary, stokes_boundary, reaction_boundary, nonlinear_boundary, nonlinear_boundary_tetrahedron, nonlinear_boundary_pyramid]
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -139,7 +141,7 @@ jobs:
         if: matrix.suite == 'bulk'
         run: >-
           ctest --test-dir build/tests -R '^RodinConvergenceHPETSc'
-          -E '^RodinConvergenceHPETSc(Poisson|Conductivity|LinearElasticity|Stokes|ReactionDiffusion)Boundary_'
+          -E '^RodinConvergenceHPETSc(Poisson|Conductivity|LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson)Boundary_'
           --output-on-failure -j 1
 
       - name: Build PETSc Poisson boundary convergence suite
@@ -191,6 +193,21 @@ jobs:
         run: >-
           ctest --test-dir build/tests -R '^RodinConvergenceHPETScReactionDiffusionBoundary_'
           --output-on-failure -j 1
+
+      - name: Build PETSc nonlinear Poisson boundary convergence suite
+        if: startsWith(matrix.suite, 'nonlinear_boundary')
+        run: cmake --build build -j 2 --target RodinConvergenceHPETScNonlinearPoissonBoundary
+
+      - name: Run PETSc nonlinear Poisson boundary convergence suite
+        if: startsWith(matrix.suite, 'nonlinear_boundary')
+        run: |
+          if [ "${{ matrix.suite }}" = "nonlinear_boundary_tetrahedron" ]; then
+            ctest --test-dir build/tests -R '^RodinConvergenceHPETScNonlinearPoissonBoundary_.*Tetrahedron$' --output-on-failure -j 1
+          elif [ "${{ matrix.suite }}" = "nonlinear_boundary_pyramid" ]; then
+            ctest --test-dir build/tests -R '^RodinConvergenceHPETScNonlinearPoissonBoundary_.*Pyramid$' --output-on-failure -j 1
+          else
+            ctest --test-dir build/tests -R '^RodinConvergenceHPETScNonlinearPoissonBoundary_' -E '(Tetrahedron|Pyramid)$' --output-on-failure -j 1
+          fi
 
   PETScDegreeConvergence:
     runs-on: ubuntu-24.04

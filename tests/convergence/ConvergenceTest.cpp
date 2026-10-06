@@ -22,9 +22,47 @@
 #include "Conductivity.h"
 #include "LinearElasticity.h"
 #include "Stokes.h"
+#include "NonlinearPoisson.h"
 
 namespace Rodin::Tests::Convergence
 {
+  /** @brief Independent physical quadratic semilinear data on all cell families. */
+  TEST(ConvergenceUtilities, QuadraticSemilinearDataOnAllGeometries)
+  {
+    for (const auto geometry : {Geometry::Polytope::Type::Segment,
+           Geometry::Polytope::Type::Triangle, Geometry::Polytope::Type::Quadrilateral,
+           Geometry::Polytope::Type::Tetrahedron, Geometry::Polytope::Type::Pyramid,
+           Geometry::Polytope::Type::Hexahedron, Geometry::Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(UniformGrid::getGeometryName(geometry));
+      const auto mesh = UniformGrid(geometry).makeMesh(2);
+      const Real amplitude = Real(0.25);
+      const NonlinearPoissonData data(
+        mesh.getDimension(), amplitude, NonlinearPoissonData::Field::Quadratic);
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        const Geometry::Point point(
+          *cell, Geometry::Polytope::Traits(geometry).getCentroid());
+        const auto& x = point.getPhysicalCoordinates();
+        Real polynomial = 1;
+        for (size_t j = 0; j < mesh.getDimension(); ++j)
+          polynomial += x(j) * x(j);
+        const Real exact = amplitude * polynomial;
+        EXPECT_EQ(data.getSolution(x), exact);
+        EXPECT_EQ(data.getSolution()(point), exact);
+        const auto derivative = data.getGradient(x);
+        const auto evaluated = data.getGradient()(point);
+        for (size_t j = 0; j < mesh.getDimension(); ++j)
+        {
+          EXPECT_EQ(derivative(j), 2 * amplitude * x(j));
+          EXPECT_EQ(evaluated(j), derivative(j));
+        }
+        EXPECT_EQ(data.getSource()(point),
+          -2 * amplitude * Real(mesh.getDimension()) + exact + exact * exact * exact);
+      }
+    }
+  }
+
   /** @brief A pressure offset changes traction data, not the Stokes source.
    * @f$p_c=p_0+c@f$ implies @f$\nabla p_c=\nabla p_0@f$.
    * Exact component comparisons require no entity-matching tolerance.

@@ -189,7 +189,7 @@ exists yet.
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI; PETSc physical traction P2/P1 and P3/P2 without a mean multiplier | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3 with polynomial patches; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2; native local and real-PETSc local/MPI |
 | Coupled reaction–diffusion | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin/pure Neumann P1–P3 with coupled polynomial patches | P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | Analytic two-field P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
-| Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI | Analytic P1→P2→P3→P4; native and real-PETSc SNES local/MPI; tangent controls | Analytic P1–P3; native and real-PETSc SNES local/MPI; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
+| Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI; PETSc P1–P3 mixed Neumann/Robin/pure Neumann with patch, flux and tangent controls | Analytic P1→P2→P3→P4; native and real-PETSc SNES local/MPI; tangent controls | Analytic P1–P3; native and real-PETSc SNES local/MPI; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
 | P0g | Exact real/complex scalar and vector constants | Not applicable | Not applicable | Curved constant reproduction and analytic global means; no h-rate |
 | 0D / Point spaces | Exact-value and logical-index checks; no spatial rate | P0/P0g/P1 and H1 degrees 1–6; no degree-rate claim | Not applicable | Point SubMesh extraction from all seven parent cell families; structural MPI evidence |
@@ -409,6 +409,20 @@ $p=1\to2\to3\to4$ and combined $p=1\to2\to3$ paths;
 the [suite specification](h/PETScNonlinearPoisson/README.md) states the
 residual/tangent callback checks, independently reassembled final residual,
 and analytically bounded missing-reaction control.
+Its natural-boundary suite adds mixed Neumann, Robin, and pure Neumann
+P1–P3 studies on all seven positive-dimensional geometries, locally and
+with MPI ranks 1–4. Constant/affine P1 and quadratic P2 patches isolate
+exact reproduction; an affine omitted-flux control separates incorrect
+boundary data from approximation error. The positive reaction derivative
+$1+3u^2\geq1$ controls constants in the pure Neumann problem without an
+additional mean constraint. Robin residual and tangent terms are tested
+independently by finite differences. Three refinement levels and both
+adjacent rate intervals are required, with independent assembly/norm
+quadrature and nonlinear-tolerance checks; the
+[boundary specification](h/PETScNonlinearPoisson/README.md) records the
+levels, rate floors, and collective execution contract.
+Pure-Neumann P1 tetrahedra use `n=9→17→33`, rather than `n=5→9→17`,
+to test the finer regime without widening the rate floors.
 Its PETSc [p](p/PETScNonlinearPoisson/README.md) and
 [hp](hp/PETScNonlinearPoisson/README.md) specifications state the levels,
 every-interval acceptance, higher-degree tangent controls, separate
