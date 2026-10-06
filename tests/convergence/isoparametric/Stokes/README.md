@@ -22,7 +22,7 @@ MPI registrations cover one through four ranks.
 With unit viscosity, the manufactured problem is
 
 $$
--\Delta u+\nabla p=f,\qquad \operatorname{div}u=0,
+-\Delta u+\nabla p=f,\qquad \mathrm{div}u=0,
 \qquad u\rvert_{\partial\Omega}=g,\qquad \int_\Omega p\thinspace \mathrm{d}x=0.
 $$
 
@@ -68,16 +68,16 @@ for arbitrary curved meshes or degrees.
 The independently integrated divergence is controlled through
 
 $$
-\Vert\operatorname{div}u_h\Vert_{L^2(\Omega)}
+\Vert\mathrm{div}u_h\Vert_{L^2(\Omega)}
 \le\sqrt d\thinspace |u-u_h\rvert_{H^1(\Omega)}.
 $$
 
-This follows from $\operatorname{div}u=0$ and the Frobenius trace bound.
+This follows from $\mathrm{div}u=0$ and the Frobenius trace bound.
 It ties the divergence error to the decreasing velocity derivative error.
 A strict divergence rate is not imposed: cancellation can make this
 quantity vanish or reach roundoff before the field errors do.
 An MPI interpolation control with $u_h=x_0e_0$ independently checks
-$\Vert\operatorname{div}u_h\Vert_{L^2(\Omega)}=1$, counting owned cells once.
+$\Vert\mathrm{div}u_h\Vert_{L^2(\Omega)}=1$, counting owned cells once.
 
 ## Patch, negative and quadrature controls
 
@@ -170,7 +170,7 @@ For each lifted velocity defect $E\in\lbrace F_u,G_u,T_u\rbrace$, independently
 integrated divergence obeys
 
 $$
-\Vert\operatorname{tr}DE\Vert_{L^2(\Omega)}\le\sqrt d\thinspace |E\rvert_{H^1(\Omega)}.
+\Vert\mathrm{tr}DE\Vert_{L^2(\Omega)}\le\sqrt d\thinspace |E\rvert_{H^1(\Omega)}.
 $$
 
 A lift of a physically divergence-free field on $\Omega_h$ need not remain

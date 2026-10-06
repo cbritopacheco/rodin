@@ -67,7 +67,7 @@ uniquely owned DOF range and $\mathcal C_r$ the constrained-index set
 obtained from the assembled boundary map,
 
 $$
-N_{\mathrm{free}}=N-\sum_r\operatorname{card}(\mathcal C_r\cap\mathcal I_r).
+N_{\mathrm{free}}=N-\sum_r\mathrm{card}(\mathcal C_r\cap\mathcal I_r).
 $$
 
 For $N_{\mathrm{free}}=0$, the homogeneous test space is $\lbrace 0\rbrace$;

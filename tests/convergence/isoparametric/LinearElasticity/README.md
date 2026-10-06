@@ -20,8 +20,8 @@ With fixed dimensionless Lamé coefficients $\lambda=1.5$ and $\mu=0.5$,
 the equations and full essential boundary condition are
 
 $$
--\operatorname{div}\sigma(u)=f,\qquad
-\sigma(u)=\lambda\operatorname{div}(u)I+2\mu\varepsilon(u),\qquad
+-\mathrm{div}\sigma(u)=f,\qquad
+\sigma(u)=\lambda\mathrm{div}(u)I+2\mu\varepsilon(u),\qquad
 \varepsilon(u)=\tfrac12(Du+Du^T),\qquad u\rvert_{\partial\Omega}=g.
 $$
 
