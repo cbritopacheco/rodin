@@ -82,3 +82,18 @@ foreach(np 1 2 3 4 8)
     LABELS "unit;distributed;slow" TIMEOUT 300 PROCESSORS ${np})
   rodin_suppress_external_mpi_lsan_for_test(RodinMPIH1SubMeshRestrictionTest_np${np})
 endforeach()
+
+add_executable(RodinMPIMatrixRangeTest MatrixRangeTest.cpp)
+target_link_libraries(RodinMPIMatrixRangeTest
+  PUBLIC GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI)
+if(RODIN_USE_PETSC)
+  target_link_libraries(RodinMPIMatrixRangeTest PUBLIC Rodin::PETSc)
+  target_compile_definitions(RodinMPIMatrixRangeTest PRIVATE RODIN_TEST_WITH_PETSC)
+endif()
+foreach(np 1 2 3 4)
+  add_test(NAME RodinMPIMatrixRangeTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinMPIMatrixRangeTest>)
+  set_tests_properties(RodinMPIMatrixRangeTest_np${np} PROPERTIES LABELS "unit;distributed")
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIMatrixRangeTest_np${np})
+endforeach()

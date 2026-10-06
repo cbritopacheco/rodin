@@ -21,6 +21,7 @@
 #include <boost/mp11.hpp>
 
 #include "Rodin/Pair.h"
+#include "Rodin/Alert/Exception.h"
 
 #include "Rodin/Math/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
@@ -160,6 +161,53 @@ namespace Rodin::Variational
        * linear form @f$ l(v) @f$ defining the weak formulation.
        */
       virtual ProblemBase& operator=(const ProblemBodyType& rhs) = 0;
+
+      /**
+       * @brief Returns the current formulation without exposing mutable assembly state.
+       * @throws Alert::Exception For adapters without a variational body.
+       *
+       * The default keeps non-variational problem adapters source-compatible;
+       * concrete variational problems override this accessor.
+       */
+      virtual const ProblemBodyType& getBody() const
+      {
+        Alert::Exception error;
+        error << "This problem does not expose a variational body.";
+        throw error;
+      }
+
+      /**
+       * @brief Appends a term using problem-body addition and invalidates assembly.
+       *
+       * Supports exactly the additions defined by the problem-body algebra,
+       * including integrators, preassembled forms and boundary conditions.
+       * Terms are owned through the existing clone-on-build semantics.
+       * Successful virtual body assignment sets the concrete problem's
+       * assembly flag to false. The next solve() reassembles; merely reading
+       * getLinearSystem() does not refresh the stored system.
+       */
+      template <class Term>
+        requires requires(ProblemBase& problem, const ProblemBodyType& body,
+          const Term& term) { problem = body + term; }
+      ProblemBase& operator+=(const Term& term)
+      {
+        return *this = getBody() + term;
+      }
+
+      /**
+       * @brief Appends a negative form contribution and invalidates assembly.
+       *
+       * This is algebraic subtraction, not removal by identity. Boundary
+       * conditions cannot be subtracted because the body algebra does not
+       * define their negation. Existing residual/load sign conventions apply.
+       */
+      template <class Term>
+        requires requires(ProblemBase& problem, const ProblemBodyType& body,
+          const Term& term) { problem = body - term; }
+      ProblemBase& operator-=(const Term& term)
+      {
+        return *this = getBody() - term;
+      }
 
       /**
        * @brief Solves the assembled linear system.
@@ -538,6 +586,11 @@ namespace Rodin::Variational
         m_pb = rhs;
         m_assembled = false;
         return *this;
+      }
+
+      const ProblemBodyType& getBody() const override
+      {
+        return m_pb;
       }
 
       /// @brief Returns the assembled linear system.
@@ -992,6 +1045,11 @@ namespace Rodin::Variational
         m_pb = rhs;
         m_assembled = false;
         return *this;
+      }
+
+      const ProblemBodyType& getBody() const override
+      {
+        return m_pb;
       }
 
       /// @brief Gets the offsets of the trial degrees of freedom.

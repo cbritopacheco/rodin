@@ -331,6 +331,105 @@ namespace
     checkLocalBackendTargetedAssembly<Assembly::Sequential>();
   }
 
+  TEST(PETSc_TargetedAssembly, PreassembledFormSignsAndSnapshots)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    BilinearForm metric(u, v);
+    LinearForm load(v);
+    metric = Integral(u, v);
+    load = Integral(RealFunction(1), v);
+    metric.assemble();
+    load.assemble();
+    Problem expected(u, v), actual(u, v);
+    ProblemBase<PETSc::Math::LinearSystem>& base = actual;
+    base += metric;
+    base -= load;
+    expected = Integral(u, v) - Integral(RealFunction(1), v);
+    expected.assemble();
+    actual.assemble();
+    expectSameMatrix(
+      expected.getLinearSystem().getOperator(), actual.getLinearSystem().getOperator());
+    expectSameVector(
+      expected.getLinearSystem().getVector(), actual.getLinearSystem().getVector());
+    base -= metric;
+    base += load;
+    actual.assemble();
+    PetscReal norm = 0;
+    auto ierr = MatNorm(actual.getLinearSystem().getOperator(), NORM_FROBENIUS, &norm);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    EXPECT_LT(norm, 1e-12);
+    ierr = VecNorm(actual.getLinearSystem().getVector(), NORM_2, &norm);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    EXPECT_LT(norm, 1e-12);
+    base -= metric;
+    base += load;
+    ierr = MatScale(metric.getOperator(), 7);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecScale(load.getVector(), 9);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    expected = -Integral(u, v) + Integral(RealFunction(1), v);
+    expected.assemble();
+    actual.assemble();
+    expectSameMatrix(
+      expected.getLinearSystem().getOperator(), actual.getLinearSystem().getOperator());
+    expectSameVector(
+      expected.getLinearSystem().getVector(), actual.getLinearSystem().getVector());
+  }
+
+  TEST(PETSc_TargetedAssembly, CompoundAssignmentSingleAndMixedProblems)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.getConnectivity().compute(1, 2);
+    P1 fes(mesh);
+    P0 pressure(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TrialFunction p(pressure);
+    PETSc::Variational::TestFunction v(fes);
+    PETSc::Variational::TestFunction q(pressure);
+    Problem expected(u, v), actual(u, v);
+    expected =
+      Integral(u, v) - Integral(RealFunction(1), v) + DirichletBC(u, RealFunction(1));
+    ProblemBase<PETSc::Math::LinearSystem>& base = actual;
+    base += Integral(u, v);
+    base -= Integral(RealFunction(1), v);
+    base += DirichletBC(u, RealFunction(1));
+    expected.assemble();
+    actual.assemble();
+    expectSameMatrix(
+      expected.getLinearSystem().getOperator(), actual.getLinearSystem().getOperator());
+    expectSameVector(
+      expected.getLinearSystem().getVector(), actual.getLinearSystem().getVector());
+
+    using Mixed = Problem<PETSc::Math::LinearSystem, decltype(u), decltype(v),
+      decltype(p), decltype(q)>;
+    Mixed mixedExpected(u, v, p, q), mixedActual(u, v, p, q);
+    BilinearForm pressureMetric(p, q);
+    LinearForm pressureLoad(q);
+    pressureMetric = Integral(p, q);
+    pressureLoad = Integral(RealFunction(1), q);
+    pressureMetric.assemble();
+    pressureLoad.assemble();
+    mixedExpected =
+      Integral(u, v) + Integral(p, q) - Integral(p, v) - Integral(RealFunction(1), q);
+    mixedActual += Integral(u, v);
+    mixedActual += pressureMetric;
+    mixedActual += pressureMetric;
+    mixedActual -= pressureMetric;
+    mixedActual -= Integral(p, v);
+    mixedActual -= pressureLoad;
+    mixedActual += pressureLoad;
+    mixedActual -= pressureLoad;
+    mixedExpected.assemble();
+    mixedActual.assemble();
+    expectSameMatrix(mixedExpected.getLinearSystem().getOperator(),
+      mixedActual.getLinearSystem().getOperator());
+    expectSameVector(mixedExpected.getLinearSystem().getVector(),
+      mixedActual.getLinearSystem().getVector());
+  }
+
   /// @brief Verifies sequential reassembly keeps nonzero pattern for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, SequentialReassemblyKeepsNonzeroPattern)
   {

@@ -729,8 +729,8 @@ namespace Rodin::IO
    * @brief MEDIT grid-function loader for local P1 finite element spaces.
    */
   template <class Range>
-  class GridFunctionLoader<
-    FileFormat::MEDIT,
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  class GridFunctionLoader<FileFormat::MEDIT,
     Variational::P1<Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
     : public GridFunctionLoaderBase<
@@ -906,8 +906,8 @@ namespace Rodin::IO
    * @brief MEDIT grid-function loader for local H1 finite element spaces.
    */
   template <size_t K, class Range>
-  class GridFunctionLoader<
-    FileFormat::MEDIT,
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  class GridFunctionLoader<FileFormat::MEDIT,
     Variational::H1<K, Range, Geometry::Mesh<Context::Local>>,
     Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
     : public GridFunctionLoaderBase<
@@ -1413,11 +1413,18 @@ namespace Rodin::IO
         const auto& mesh = fes.getMesh();
         const size_t vdim = fes.getVectorDimension();
 
-        os << MEDIT::Keyword::SolAtVertices << '\n'
-           << mesh.getVertexCount() << '\n'
-           << 1 // Only one solution
-           << " " << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Real)
-           << '\n';
+        os << MEDIT::Keyword::SolAtVertices << '\n' << mesh.getVertexCount() << '\n';
+        if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+        {
+          os << vdim;
+          for (size_t c = 0; c < vdim; ++c)
+            os << " " << MEDIT::SolutionType::Real;
+          os << '\n';
+        }
+        else
+          os << 1 << " "
+             << ((vdim > 1) ? MEDIT::SolutionType::Vector : MEDIT::SolutionType::Real)
+             << '\n';
 
         this->printData(os);
 
@@ -1502,9 +1509,75 @@ namespace Rodin::IO
               *it,
               ts.getVertex(0),
               it->getCoordinates());
-          os << gf(p) << '\n';
+          if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
+          {
+            const auto value = gf(p);
+            for (size_t r = 0; r < fes.getRows(); ++r)
+              for (size_t c = 0; c < fes.getColumns(); ++c)
+                os << value(r, c) << ' ';
+            os << '\n';
+          }
+          else
+            os << gf(p) << '\n';
         }
         os << '\n';
+      }
+  };
+  /** @brief Reads matrix entries stored as independent MEDIT scalar vertex fields.
+   * Higher-order spaces interpolate the vertex field, as required by SolAtVertices.
+   */
+  template <class FES>
+    requires(
+      FormLanguage::IsMatrixRange<typename FormLanguage::Traits<FES>::RangeType>::Value)
+  class GridFunctionLoader<FileFormat::MEDIT, FES,
+    Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+    : public GridFunctionLoaderBase<FES,
+        Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
+  {
+    public:
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      /// @brief CRTP or finite element base class.
+      using Parent = GridFunctionLoaderBase<FES, Math::Vector<ScalarType>>;
+      using Parent::Parent;
+      void load(std::istream& is) override
+      {
+        auto& gf = this->getObject();
+        const auto& fes = gf.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const size_t components = fes.getVectorDimension();
+        std::string keyword;
+        size_t version, dimension, vertices, fields;
+        auto fail = [] {
+          Alert::Exception() << "Invalid MEDIT matrix vertex data." << Alert::Raise;
+        };
+        if (!(is >> keyword >> version) || keyword != "MeshVersionFormatted" ||
+          version != 2)
+          fail();
+        if (!(is >> keyword >> dimension) || keyword != "Dimension" ||
+          dimension != mesh.getSpaceDimension())
+          fail();
+        if (!(is >> keyword >> vertices >> fields) || keyword != "SolAtVertices" ||
+          vertices != mesh.getVertexCount() || fields != components)
+          fail();
+        for (size_t c = 0; c < fields; ++c)
+        {
+          size_t type;
+          if (!(is >> type) || type != MEDIT::SolutionType::Real)
+            fail();
+        }
+        Variational::P1<typename FormLanguage::Traits<FES>::RangeType,
+          Geometry::Mesh<Context::Local>>
+          vertexSpace(mesh, fes.getRows(), fes.getColumns());
+        Variational::GridFunction vertexField(vertexSpace);
+        for (size_t v = 0; v < vertices; ++v)
+        {
+          const auto& dofs = vertexSpace.getDOFs(0, v);
+          for (size_t c = 0; c < components; ++c)
+            if (!(is >> vertexField.getData().coeffRef(dofs[c])))
+              fail();
+        }
+        gf = vertexField;
       }
   };
 }

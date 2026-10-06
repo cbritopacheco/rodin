@@ -431,6 +431,64 @@ jobs:
           ctest --test-dir build/tests -R '^RodinConvergenceHPETScHelmholtzBoundary_'
           --output-on-failure -j 1
 
+  PETScMatrixRanges:
+    # Preserve the upstream real/complex matrix-range gate independently of
+    # the convergence partitions, which require a real PETSc build.
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        scalar: [real, complex]
+        multithreaded: [ON, OFF]
+    env:
+      OMP_NUM_THREADS: 2
+      OMP_WAIT_POLICY: PASSIVE
+      # Allow each MPI rank to schedule its OpenMP workers.
+      OMPI_MCA_hwloc_base_binding_policy: none
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc-14
+          cmake: true
+
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
+          libscotch-dev libmetis-dev libhdf5-dev
+          libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev
+
+      - name: Configure PETSc matrix-range build
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DRODIN_BUILD_SRC=ON
+          -DRODIN_BUILD_UNIT_TESTS=ON
+          -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=OFF
+          -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_BENCHMARKS=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
+
+      - name: Build distributed finite element tests
+        run: cmake --build build -j 2 --target RodinMPIMatrixRangeTest
+
+      - name: Run distributed finite element tests
+        run: >-
+          ctest --test-dir build/tests -R '^RodinMPIMatrixRangeTest_np[1-4]$'
+          --output-on-failure --no-tests=error -j 1
+
   Unit:
     runs-on: ubuntu-latest
     strategy:
