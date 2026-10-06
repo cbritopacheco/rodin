@@ -8,7 +8,7 @@
  * boundary, sparse and nested SubMeshes. Orders 1-6 and all seven parent
  * geometries use degree-matched reference polynomial oracles on affine and
  * exact quadratic domains. Real and
- * complex PETSc configurations each exercise scalar and vector fields.
+ * complex PETSc configurations each exercise scalar, vector and matrix fields.
  * Every held coefficient and physical sample is checked independently;
  * correspondence is determined exclusively by logical ancestry.
  * Mesh/space construction, interpolation and ghost-state updates are
@@ -169,11 +169,14 @@ namespace Rodin::Tests::Unit
             using Space = H1<K, Range, Mesh<Context::MPI>>;
             using Scalar = typename Space::ScalarType;
             constexpr bool vector = std::is_same_v<Range, Math::SpatialVector<Scalar>>;
-            SCOPED_TRACE(
-              (::testing::Message() << "degree=" << K << " vector=" << vector
-                                    << " complex=" << std::is_same_v<Scalar, Complex>));
+            constexpr bool matrix = std::is_same_v<Range, Math::SpatialMatrix<Scalar>>;
+            SCOPED_TRACE((::testing::Message()
+              << "degree=" << K << " vector=" << vector << " matrix=" << matrix
+              << " complex=" << std::is_same_v<Scalar, Complex>));
             const auto makeSpace = [](const Mesh<Context::MPI>& mesh) {
-              if constexpr (vector)
+              if constexpr (matrix)
+                return Space(std::integral_constant<size_t, K>{}, mesh, 2, 3);
+              else if constexpr (vector)
                 return Space(std::integral_constant<size_t, K>{}, mesh, 3);
               else
                 return Space(std::integral_constant<size_t, K>{}, mesh);
@@ -212,7 +215,15 @@ namespace Rodin::Tests::Unit
                 return Real(component + 1) * re;
             };
             const auto data = [&] {
-              if constexpr (vector)
+              if constexpr (matrix)
+                return MatrixFunction(size_t{2}, size_t{3}, [scalar](const Point& point) {
+                  Math::SpatialMatrix<Scalar> value(2, 3);
+                  for (size_t row = 0; row < 2; ++row)
+                    for (size_t column = 0; column < 3; ++column)
+                      value(row, column) = scalar(point, 3 * row + column);
+                  return value;
+                });
+              else if constexpr (vector)
                 return VectorFunction(size_t{3}, [scalar](const Point& point) {
                   Math::SpatialVector<Scalar> value(3);
                   for (size_t component = 0; component < 3; ++component)
@@ -235,7 +246,20 @@ namespace Rodin::Tests::Unit
             const auto checkValue = [&](const Point& point) {
               const auto actual = std::as_const(restricted)(point),
                          expected = data(point), wrong = std::as_const(rejected)(point);
-              if constexpr (vector)
+              if constexpr (matrix)
+              {
+                EXPECT_EQ(actual.rows(), 2);
+                EXPECT_EQ(actual.cols(), 3);
+                for (size_t row = 0; row < 2; ++row)
+                  for (size_t column = 0; column < 3; ++column)
+                  {
+                    EXPECT_LT(std::abs(actual(row, column) - expected(row, column)),
+                      PolynomialTolerance);
+                    EXPECT_GT(std::abs(wrong(row, column) - expected(row, column)),
+                      PolynomialTolerance);
+                  }
+              }
+              else if constexpr (vector)
               {
                 for (size_t component = 0; component < 3; ++component)
                 {
@@ -320,6 +344,7 @@ namespace Rodin::Tests::Unit
           const auto order = [&]<size_t K>() {
             range.template operator()<K, BackendScalar>();
             range.template operator()<K, Math::SpatialVector<BackendScalar>>();
+            range.template operator()<K, Math::SpatialMatrix<BackendScalar>>();
           };
           order.template operator()<1>();
           order.template operator()<2>();
