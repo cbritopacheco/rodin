@@ -248,22 +248,28 @@ contract after collective mesh/space construction; gathers belong only to
 the independent global selection/ownership oracle and synchronization to its
 test protocol.
 The separate native H1 restriction matrix checks degrees one through six in
-all four real/complex scalar/vector ranges on full, boundary, sparse and
-nested selections from every parent geometry. Degree-matched physical
-polynomials excite mixed higher-order terms; every held coefficient is
-compared with independent interpolation on the child space. Physical samples
+all six real/complex scalar/vector/matrix ranges on full, boundary, sparse and
+nested selections from every parent geometry. Degree-matched reference
+polynomials on affine and exact quadratic parents excite mixed higher-order
+terms; every held coefficient is compared with independent interpolation on
+the child space. Physical samples
 and a zero-field negative control supplement that oracle. The field-value
 budget is $10^{-10}$; entity correspondence remains exact. Rank-zero-only
-restriction and cached metadata access are checked before an all-rank call
+restriction, point evaluation and cached metadata access are checked before an all-rank call
 can overwrite their result. Ranks 1, 2, 3, 4 and 8 use single-interval
 unit-box grids ($n=2$), including empty holders. This fixed-mesh restriction
 test is not a PDE convergence-rate claim or a PETSc restriction certificate.
+Curved-field data uses the same independently evaluated analytic inverse
+defined below; geometry is installed before partitioning in both storage paths.
 
 The complementary
 [PETSc-backed H1 restriction regression](../unit/Rodin/PETSc/MPIH1SubMeshRestrictionTest.cpp)
 uses the same orders, geometries, selections and rank counts with PETSc
-coefficient storage. Real and complex scalar builds each exercise scalar
-and three-component vector ranges, separately in sequential/OpenMP builds.
+coefficient storage. Real and complex scalar builds each exercise scalar,
+three-component vector and non-square $2\times3$ matrix ranges, separately
+in sequential/OpenMP builds. Distinct component labels test storage ordering.
+Matrix dimensions and logical entity/DOF correspondence are checked exactly;
+field values retain the stated numerical budget.
 Both affine parents and exact quadratic parents are included. Curvature is
 installed before partitioning, so the test exercises map transport as well
 as full, boundary, sparse and nested SubMesh extraction. On the curved domain,

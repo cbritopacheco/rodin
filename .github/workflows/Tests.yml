@@ -70,6 +70,63 @@ jobs:
           ctest --test-dir build/tests -L convergence
           --output-on-failure -j 2
 
+  MPIH1Restriction:
+    runs-on: ubuntu-24.04
+    # Six ranges, degrees 1-6, affine/curved parents and five rank counts.
+    # Keep the complete numerical reproduction gate outside the short Debug
+    # unit job; smaller matrix/space tests still run with its sanitizers.
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        multithreaded: [ON, OFF]
+    env:
+      OMP_NUM_THREADS: 2
+      OPENBLAS_NUM_THREADS: 1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc-14
+          cmake: true
+
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost-all-dev libsuitesparse-dev libeigen3-dev
+          libscotch-dev libmetis-dev libhdf5-dev libomp-dev
+          mpi-default-bin mpi-default-dev
+
+      - name: Configure native MPI restriction build
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DRODIN_BUILD_SRC=ON
+          -DRODIN_BUILD_UNIT_TESTS=ON
+          -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=OFF
+          -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_BENCHMARKS=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+
+      - name: Build native MPI restriction suite
+        run: cmake --build build -j 2 --target RodinMPISubMeshGridFunctionTest
+
+      - name: Run complete native MPI restriction matrix
+        run: >-
+          ctest --test-dir build/tests
+          -R '^RodinMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
+          --no-tests=error --output-on-failure -j 1
+
   PETScConvergence:
     runs-on: ubuntu-24.04
     # Includes resolved vector and coupled studies on all geometries and 1-4 ranks.
@@ -646,18 +703,20 @@ jobs:
 
       # These cases remain in every sanitizer configuration, but have their
       # own CTest timeout instead of sharing the 120-second MPI assembly suite.
+      # Full H1 reproduction matrices run in MPIH1Restriction (native) and
+      # Slow (PETSc real) optimized builds; complex PETSc has its own submesh gate.
       - name: Run slow MPI geometry tests
         id: slow_mpi_geometry
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L slow -R '^Rodin(MPI(AssemblyGeometrySlow|H1SubMeshRestriction)|PETScMPIH1SubMeshRestriction)Test_np(1|2|3|4|8)$'
+          -L slow -R '^RodinMPIAssemblyGeometrySlowTest_np(1|2|3|4|8)$'
           --output-on-failure -j 1
 
       - name: Rerun failed slow MPI geometry tests (verbose)
         if: steps.slow_mpi_geometry.outcome == 'failure'
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L slow -R '^Rodin(MPI(AssemblyGeometrySlow|H1SubMeshRestriction)|PETScMPIH1SubMeshRestriction)Test_np(1|2|3|4|8)$'
+          -L slow -R '^RodinMPIAssemblyGeometrySlowTest_np(1|2|3|4|8)$'
           --rerun-failed -V --output-on-failure
 
   Manufactured:
@@ -836,6 +895,7 @@ jobs:
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow
+          -E '^RodinMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -844,6 +904,7 @@ jobs:
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow
+          -E '^RodinMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
           --rerun-failed -V --output-on-failure
 
   Coverage:

@@ -70,7 +70,9 @@ foreach(np 1 2 3 4)
 endforeach()
 
 # Keep the order/range restriction matrix separate from the short legacy
-# checks. The five-minute bound is a protocol watchdog, not a rate criterion.
+# checks. The affine/curved six-range gate takes about three minutes locally.
+# Allow oversubscribed hosted ranks headroom: this is a protocol watchdog,
+# not a polynomial-error or convergence-rate criterion.
 # Eight ranks also exercise empty holders on the single-cell families.
 foreach(np 1 2 3 4 8)
   add_test(NAME RodinMPIH1SubMeshRestrictionTest_np${np}
@@ -79,7 +81,7 @@ foreach(np 1 2 3 4 8)
       $<TARGET_FILE:RodinMPISubMeshGridFunctionTest>
       "--gtest_filter=MPISubMeshH1.ExplicitRestriction_AllOrdersAllRangesAllGeometries")
   set_tests_properties(RodinMPIH1SubMeshRestrictionTest_np${np} PROPERTIES
-    LABELS "unit;distributed;slow" TIMEOUT 300 PROCESSORS ${np})
+    LABELS "unit;distributed;slow" TIMEOUT 1200 PROCESSORS ${np})
   rodin_suppress_external_mpi_lsan_for_test(RodinMPIH1SubMeshRestrictionTest_np${np})
 endforeach()
 
