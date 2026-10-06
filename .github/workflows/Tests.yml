@@ -565,14 +565,14 @@ jobs:
         id: slow_mpi_geometry
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L slow -R '^RodinMPIAssemblyGeometrySlowTest_np(1|2|3|4|8)$'
+          -L slow -R '^RodinMPI(AssemblyGeometrySlow|H1SubMeshRestriction)Test_np(1|2|3|4|8)$'
           --output-on-failure -j 1
 
       - name: Rerun failed slow MPI geometry tests (verbose)
         if: steps.slow_mpi_geometry.outcome == 'failure'
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
-          -L slow -R '^RodinMPIAssemblyGeometrySlowTest_np(1|2|3|4|8)$'
+          -L slow -R '^RodinMPI(AssemblyGeometrySlow|H1SubMeshRestriction)Test_np(1|2|3|4|8)$'
           --rerun-failed -V --output-on-failure
 
   Manufactured:

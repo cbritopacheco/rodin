@@ -246,8 +246,18 @@ No coordinate matching or numerical tolerance determines correspondence.
 One-rank-only restriction calls check the noncollective value-operation
 contract after collective mesh/space construction; gathers belong only to
 the independent global selection/ownership oracle and synchronization to its
-test protocol. Higher-order logical/index coverage is not a claim of numerical
-restriction or PDE convergence for every higher-order field.
+test protocol.
+The separate native H1 restriction matrix checks degrees one through six in
+all four real/complex scalar/vector ranges on full, boundary, sparse and
+nested selections from every parent geometry. Degree-matched physical
+polynomials excite mixed higher-order terms; every held coefficient is
+compared with independent interpolation on the child space. Physical samples
+and a zero-field negative control supplement that oracle. The field-value
+budget is $10^{-10}$; entity correspondence remains exact. Rank-zero-only
+restriction and cached metadata access are checked before an all-rank call
+can overwrite their result. Ranks 1, 2, 3, 4 and 8 use single-interval
+unit-box grids ($n=2$), including empty holders. This fixed-mesh restriction
+test is not a PDE convergence-rate claim or a PETSc restriction certificate.
 
 The main refinement sequences can be read with $n$ grid points per coordinate
 axis, $h=1/(n-1)$, and field degree $p$:
