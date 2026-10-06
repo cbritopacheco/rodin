@@ -744,3 +744,8 @@ add_executable(RodinVariationalMatrixQuadratureTest MatrixQuadratureTest.cpp)
 target_link_libraries(RodinVariationalMatrixQuadratureTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalMatrixQuadratureTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalCoefficientEvaluationTest CoefficientEvaluationTest.cpp)
+target_link_libraries(RodinVariationalCoefficientEvaluationTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalCoefficientEvaluationTest PROPERTIES LABELS unit)

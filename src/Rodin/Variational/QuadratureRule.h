@@ -482,9 +482,6 @@ namespace Rodin::Variational
       using IntegrandType = Dot<LHSType, RHSType>;
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
-      /// @brief Owning range used for point-local test-expression tabulation.
-      using TestValueType = typename FormLanguage::RangeOf<std::remove_cvref_t<
-        decltype(std::declval<const RHSType&>().getBasis(size_t{}))>>::Type;
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -541,7 +538,7 @@ namespace Rodin::Variational
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
           m_mat(std::move(other.m_mat)),
-          m_testValues(std::move(other.m_testValues))
+          m_test(std::move(other.m_test))
       {}
 
       /**
@@ -613,7 +610,7 @@ namespace Rodin::Variational
 
         m_mat.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_mat.setZero();
-        m_testValues.resize(nte);
+        m_test.resize(nte);
 
         // Eigen is assumed ColMajor. Columns are filled contiguously.
         ScalarType* __restrict M = m_mat.data();
@@ -633,10 +630,11 @@ namespace Rodin::Variational
           const IntegrationPoint ip(p, m_qf, qp);
           integrand.setIntegrationPoint(ip);
 
-          // Own expression values and refresh them at every quadrature point,
-          // including after rebinds and coefficient changes.
+          // Each test basis value is evaluated once per point, not once per
+          // trial index: a test expression with coefficients would otherwise
+          // be evaluated ntr * nte times.
           for (size_t te = 0; te < nte; ++te)
-            m_testValues[te] = test.getBasis(te);
+            m_test[te] = test.getBasis(te);
 
           for (size_t tr = 0; tr < ntr; ++tr)
           {
@@ -645,7 +643,7 @@ namespace Rodin::Variational
 
             for (size_t te = 0; te < nte; ++te)
             {
-              const auto& phi_te = m_testValues[te];
+              const auto& phi_te = m_test[te];
               col[static_cast<Eigen::Index>(te)] += wdet * Math::dot(phi_tr, phi_te);
             }
           }
@@ -686,7 +684,10 @@ namespace Rodin::Variational
       size_t m_order;                                           ///< Cached quadrature order
       Geometry::Polytope::Type m_geometry;                      ///< Cached geometry type
       Math::Matrix<ScalarType> m_mat;                           ///< Local matrix, rows=test, cols=trial
-      std::vector<TestValueType> m_testValues; ///< Point-local owning scratch
+      /// @brief Test basis values at the current quadrature point.
+      std::vector<typename FormLanguage::RangeOf<
+        std::decay_t<decltype(std::declval<const RHSType&>().getBasis(size_t()))>>::Type>
+        m_test;
   };
 
   /**

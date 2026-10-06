@@ -784,8 +784,8 @@ TEST(MatrixRange, CurvedAndEmbeddedChainRule)
       }
       const auto& dofs = fes.getDOFs(2, cell->getIndex());
       Real assembledEnergy = 0;
-      for (size_t a = 0; a < dofs.size(); ++a)
-        for (size_t b = 0; b < dofs.size(); ++b)
+      for (Eigen::Index a = 0; a < dofs.size(); ++a)
+        for (Eigen::Index b = 0; b < dofs.size(); ++b)
           assembledEnergy += field[dofs[a]] * stiffness.integrate(a, b) * field[dofs[b]];
       EXPECT_NEAR(assembledEnergy, integratedGradient,
         1e-9 * std::max(Real(1), integratedGradient));

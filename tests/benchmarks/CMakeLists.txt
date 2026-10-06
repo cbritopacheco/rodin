@@ -11,6 +11,7 @@ set(RodinBenchmarks_SRCS
   AABB.cpp
   ParametricTransformation.cpp
   SpatialAlgebra.cpp
+  CoefficientEvaluation.cpp
   )
 
 add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})

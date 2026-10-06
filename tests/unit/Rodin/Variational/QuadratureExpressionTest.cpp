@@ -284,11 +284,11 @@ namespace Rodin::Tests::Unit
         {
           calls = 0;
           integral.setPolytope(*cell);
-          const size_t nt =
-            testSpace.getDOFs(mesh.getDimension(), cell->getIndex()).size();
           const size_t nq =
             QF::PolytopeQuadratureFormula::get(6, cell->getGeometry()).getSize();
-          EXPECT_EQ(calls, nq * nt);
+          // The function cache binds once per quadrature point, independently
+          // of both trial and test counts. Rebinding still refreshes its value.
+          EXPECT_EQ(calls, nq);
           const auto expected = reference(integral, *cell, 6);
           for (Eigen::Index te = 0; te < expected.rows(); ++te)
             for (Eigen::Index tr = 0; tr < expected.cols(); ++tr)
