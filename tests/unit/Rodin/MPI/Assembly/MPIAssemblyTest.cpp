@@ -479,8 +479,15 @@ namespace Rodin::Tests::Unit
       SCOPED_TRACE(typeid(Space).name());
       constexpr bool vector =
         std::is_same_v<typename Space::RangeType, Math::SpatialVector<Scalar>>;
-      const size_t count = vector ? 3 : 1;
+      constexpr bool matrix =
+        std::is_same_v<typename Space::RangeType, Math::SpatialMatrix<Scalar>>;
+      const size_t count = matrix ? 6 : vector ? 3 : 1;
       EXPECT_EQ(space.getSize(), count);
+      if constexpr (matrix)
+      {
+        EXPECT_EQ(space.getRows(), 2);
+        EXPECT_EQ(space.getColumns(), 3);
+      }
       Index begin, end;
       space.getOwnershipRange(begin, end);
       std::vector<std::pair<Index, Index>> ranges;
@@ -500,7 +507,15 @@ namespace Rodin::Tests::Unit
           return Real(2);
       }();
       const auto exact = [&] {
-        if constexpr (vector)
+        if constexpr (matrix)
+          return MatrixFunction(size_t{2}, size_t{3}, [first](const Point&) {
+            Math::SpatialMatrix<Scalar> value(2, 3);
+            for (size_t r = 0; r < 2; ++r)
+              for (size_t s = 0; s < 3; ++s)
+                value(r, s) = first + Scalar(3 * r + s);
+            return value;
+          });
+        else if constexpr (vector)
           return VectorFunction(size_t{3}, [first](const Point&) {
             return Math::SpatialVector<Scalar>{
               first, first + Scalar(1), first + Scalar(2)};
@@ -516,11 +531,20 @@ namespace Rodin::Tests::Unit
       {
         const auto& dofs = space.getDOFs(0, cell->getIndex());
         EXPECT_EQ(dofs.size(), count);
-        for (Index dof : dofs)
-          EXPECT_LT(dof, count);
+        for (Eigen::Index component = 0; component < dofs.size(); ++component)
+          EXPECT_EQ(dofs(component), component);
         const Point point(*cell, Math::SpatialPoint::Zero(0));
         const auto value = field(point);
-        if constexpr (vector)
+        if constexpr (matrix)
+        {
+          EXPECT_EQ(value.rows(), 2);
+          EXPECT_EQ(value.cols(), 3);
+          if (value.rows() == 2 && value.cols() == 3)
+            for (size_t r = 0; r < 2; ++r)
+              for (size_t s = 0; s < 3; ++s)
+                EXPECT_EQ(value(r, s), first + Scalar(3 * r + s));
+        }
+        else if constexpr (vector)
           for (size_t component = 0; component < count; ++component)
             EXPECT_EQ(value(component), first + Scalar(component));
         else
@@ -545,7 +569,9 @@ namespace Rodin::Tests::Unit
       // The parent field is continuous P1: its vertex trace is unambiguous,
       // unlike a general discontinuous parent P0 trace at a shared vertex.
       const auto parentSpace = [&] {
-        if constexpr (vector)
+        if constexpr (matrix)
+          return P1<typename Space::RangeType, Mesh<Context::MPI>>(parent, 2, 3);
+        else if constexpr (vector)
           return P1<typename Space::RangeType, Mesh<Context::MPI>>(parent, size_t{3});
         else
           return P1<typename Space::RangeType, Mesh<Context::MPI>>(parent);
@@ -558,7 +584,16 @@ namespace Rodin::Tests::Unit
         return value;
       };
       const auto affine = [&] {
-        if constexpr (vector)
+        if constexpr (matrix)
+          return MatrixFunction(size_t{2}, size_t{3}, [scalarTrace](const Point& point) {
+            const Scalar base = scalarTrace(point);
+            Math::SpatialMatrix<Scalar> value(2, 3);
+            for (size_t r = 0; r < 2; ++r)
+              for (size_t s = 0; s < 3; ++s)
+                value(r, s) = base + Scalar(3 * r + s);
+            return value;
+          });
+        else if constexpr (vector)
           return VectorFunction(size_t{3}, [scalarTrace](const Point& point) {
             const Scalar base = scalarTrace(point);
             return Math::SpatialVector<Scalar>{base, base + Scalar(1), base + Scalar(2)};
@@ -570,27 +605,54 @@ namespace Rodin::Tests::Unit
       }();
       GridFunction parentField(parentSpace);
       parentField = affine;
-      field = parentField;
-      for (auto cell = mesh.getCell(); cell; ++cell)
+      const auto checkTrace = [&] {
+        EXPECT_EQ(&field.getFiniteElementSpace(), &space);
+        EXPECT_EQ(field.getData().size(), space.getSize());
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const Point point(*cell, Math::SpatialPoint::Zero(0));
+          const auto actual = field(point), expected = affine(point);
+          if constexpr (matrix)
+          {
+            EXPECT_EQ(actual.rows(), 2);
+            EXPECT_EQ(actual.cols(), 3);
+            if (actual.rows() == 2 && actual.cols() == 3)
+              for (size_t r = 0; r < 2; ++r)
+                for (size_t s = 0; s < 3; ++s)
+                  EXPECT_EQ(actual(r, s), expected(r, s));
+          }
+          else if constexpr (vector)
+            for (size_t component = 0; component < count; ++component)
+              EXPECT_EQ(actual(component), expected(component));
+          else
+            EXPECT_EQ(actual, expected);
+        }
+      };
+      // The selected entity owner has an actual point to evaluate. Other ranks
+      // wait outside the local restriction/evaluation operation, so a hidden
+      // collective cannot be satisfied by an all-rank call.
+      if (world.rank() == owner)
       {
-        const Point point(*cell, Math::SpatialPoint::Zero(0));
-        const auto actual = field(point), expected = affine(point);
-        if constexpr (vector)
-          for (size_t component = 0; component < count; ++component)
-            EXPECT_EQ(actual(component), expected(component));
-        else
-          EXPECT_EQ(actual, expected);
+        field = parentField;
+        checkTrace();
       }
+      world.barrier();
+      field = parentField;
+      checkTrace();
     };
     const auto valueTypes = [&]<template <class, class> class Family>() {
       Family<Real, Mesh<Context::MPI>> real(mesh);
       Family<Complex, Mesh<Context::MPI>> complex(mesh);
       Family<Math::SpatialVector<Real>, Mesh<Context::MPI>> realVector(mesh, 3);
       Family<Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(mesh, 3);
+      Family<Math::SpatialMatrix<Real>, Mesh<Context::MPI>> realMatrix(mesh, 2, 3);
+      Family<Math::SpatialMatrix<Complex>, Mesh<Context::MPI>> complexMatrix(mesh, 2, 3);
       check(real);
       check(complex);
       check(realVector);
       check(complexVector);
+      check(realMatrix);
+      check(complexMatrix);
     };
     valueTypes.template operator()<P0>();
     valueTypes.template operator()<P0g>();
@@ -603,10 +665,16 @@ namespace Rodin::Tests::Unit
         std::integral_constant<size_t, K>{}, mesh, 3);
       H1<K, Math::SpatialVector<Complex>, Mesh<Context::MPI>> complexVector(
         std::integral_constant<size_t, K>{}, mesh, 3);
+      H1<K, Math::SpatialMatrix<Real>, Mesh<Context::MPI>> realMatrix(
+        std::integral_constant<size_t, K>{}, mesh, 2, 3);
+      H1<K, Math::SpatialMatrix<Complex>, Mesh<Context::MPI>> complexMatrix(
+        std::integral_constant<size_t, K>{}, mesh, 2, 3);
       check(real);
       check(complex);
       check(realVector);
       check(complexVector);
+      check(realMatrix);
+      check(complexMatrix);
     };
     orders.template operator()<1>();
     orders.template operator()<2>();

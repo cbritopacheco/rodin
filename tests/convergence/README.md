@@ -199,11 +199,18 @@ On a single Point cell, every scalar family above represents $\mathbb F$,
 and an $m$-component space represents $\mathbb F^m$. Increasing the nominal
 degree does not create a spatial refinement sequence. The
 [MPI space regressions](../unit/Rodin/MPI/Assembly/MPIAssemblyTest.cpp)
-therefore check exact real/complex scalar/vector constants and restriction
+therefore check exact real/complex scalar/vector/matrix constants and restriction
 of a continuous parent P1 field, rather than a convergence slope. Their
 parent fields use $\phi(x)=c+\sum_j(j+1)x_j$ and vector components
-$\phi(x)+a$; a discontinuous parent P0 vertex trace is not selected without
-an incident-cell convention. Ranks 1, 2, 3, 4 and 8 check unique entity and
+$\phi(x)+a$. Non-square $2\times3$ matrix components use
+$\phi(x)+3r+s$, with $r\in\{0,1\}$ and $s\in\{0,1,2\}$;
+the six Point DOFs must be exactly $0,\ldots,5$, independently of the
+nominal H1 degree. Dimensions, constants and parent traces use exact
+comparisons. The selected entity owner alone performs restriction and
+checks the destination layout and point values before test-protocol
+synchronization and an all-rank compatibility call. A discontinuous parent
+P0 vertex trace is not selected without an incident-cell convention.
+Ranks 1, 2, 3, 4 and 8 check unique entity and
 DOF ownership, exact parent/child maps, owner/ghost declarations and halos,
 including empty shards. Pullbacks retain the distributed mesh identity so
 that a source GridFunction can follow SubMesh ancestry through logical
