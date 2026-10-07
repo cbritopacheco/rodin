@@ -104,6 +104,10 @@ All four quantities are asserted separately; accurate velocity cannot conceal
 inaccurate pressure. Three pairs provide two measured intervals.
 
 SparseLU is used for the saddle-point system; no CG/SPD assumption is made.
+One same-precision residual correction reuses the direct LU factors, as
+specified in the [algebraic-accuracy methodology](../../isoparametric/Stokes/README.md#algebraic-accuracy-and-residual-correction).
+The library default remains zero correction steps; the native workload
+selects one without changing the operator, quadrature or error budgets.
 Factorization/solve success and an independently recomputed coefficient
 residual $\lVert Ax-b\rVert_2/\max(1,\lVert b\rVert_2)<10^{-11}$ are
 required. Assembly and error quadrature use order 16. Pressure mean is

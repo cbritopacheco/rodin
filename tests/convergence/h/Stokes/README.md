@@ -33,6 +33,10 @@ the native mixed solve and independent field-error measurements, shared
 with the [p](../../p/Stokes/README.md) and [hp](../../hp/Stokes/README.md)
 studies. The native configuration uses SparseLU and quadrature order 12,
 with patches at `n=3` and rates on `n=3→5→9`; $h=1/(n-1)$.
+One same-precision residual correction reuses the direct LU factors;
+the [algebraic-accuracy specification](../../isoparametric/Stokes/README.md#algebraic-accuracy-and-residual-correction)
+states the construction and its limitations. The library default remains
+zero correction steps; this setting is specific to the native test workload.
 Solver success and normalized coefficient residual below $10^{-11}$ are
 checked separately. Pressure mean is integrated at order 14 with absolute
 bound $10^{-10}$. These finite-workload checks do not establish a uniform

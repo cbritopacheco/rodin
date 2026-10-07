@@ -68,6 +68,10 @@ is shared with native h and p tests. SparseLU factorization/solve success,
 normalized coefficient residual below $10^{-11}$, and absolute pressure
 mean below $10^{-10}$ are checked before field-error integration. Assembly
 and error quadrature use order 16; the pressure-mean check uses order 18.
+The native workload selects one same-precision residual correction with
+the retained LU factors; the library default remains zero steps. The
+[algebraic-accuracy methodology](../../isoparametric/Stokes/README.md#algebraic-accuracy-and-residual-correction)
+states its construction and limitations without changing these budgets.
 SparseLU is appropriate to the saddle-point operator; an SPD assumption is
 not made.
 
