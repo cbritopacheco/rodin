@@ -383,14 +383,16 @@ jobs:
 
   PETScCurvedConvergence:
     runs-on: ubuntu-24.04
-    # The new approximated elasticity, coupled diffusion and nonlinear matrices
-    # alone take about 78 minutes on the local sequential stack. Include the
-    # existing curved suites and build time without weakening refinement gates.
+    # Matched geometry-degree matrices retain all local and MPI contexts.
+    # Separate scalar/vector/mixed workloads and the costly 3D cell families;
+    # each partition runs serially without changing numerical acceptance.
     timeout-minutes: 240
     strategy:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
+        suite: [scalar, linear_elasticity, stokes]
+        geometry: [light, tetrahedron, pyramid]
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -429,21 +431,39 @@ jobs:
           -DRODIN_USE_PETSC=ON
 
       - name: Build curved PETSc convergence suites
-        run: >-
-          cmake --build build -j 2 --target
-          RodinConvergenceIsoparametricPETScLinearElasticity
-          RodinConvergenceIsoparametricPETScStokes
-          RodinConvergenceIsoparametricPETScReactionDiffusion
-          RodinConvergenceIsoparametricPETScNonlinearPoisson
-          RodinConvergenceIsoparametricPETScP0Projection
-          RodinConvergenceIsoparametricPETScDiffusion
-          RodinConvergenceIsoparametricPETScGeometryApproximation
+        run: |
+          case "${{ matrix.suite }}" in
+            scalar)
+              cmake --build build -j 2 --target \
+                RodinConvergenceIsoparametricPETScReactionDiffusion \
+                RodinConvergenceIsoparametricPETScNonlinearPoisson \
+                RodinConvergenceIsoparametricPETScP0Projection \
+                RodinConvergenceIsoparametricPETScDiffusion \
+                RodinConvergenceIsoparametricPETScGeometryApproximation ;;
+            linear_elasticity)
+              cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScLinearElasticity ;;
+            stokes)
+              cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScStokes ;;
+            *) exit 1 ;;
+          esac
 
       - name: Run curved PETSc convergence suites
-        run: >-
-          ctest --test-dir build/tests
-          -R '^RodinConvergenceIsoparametricPETSc(MPI)?(LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson|P0Projection|Diffusion|ApproximatedDiffusion|LiftedDiffusion|SmoothLiftedDiffusion|GeometryApproximation)_'
-          --output-on-failure -j 1
+        run: |
+          case "${{ matrix.suite }}" in
+            scalar) physics_pattern='(ReactionDiffusion|NonlinearPoisson|P0Projection|Diffusion|ApproximatedDiffusion|LiftedDiffusion|SmoothLiftedDiffusion|GeometryApproximation)' ;;
+            linear_elasticity) physics_pattern='LinearElasticity' ;;
+            stokes) physics_pattern='Stokes' ;;
+            *) exit 1 ;;
+          esac
+          case "${{ matrix.geometry }}" in
+            tetrahedron) geometry_pattern='Tetrahedron' ;;
+            pyramid) geometry_pattern='Pyramid' ;;
+            light) geometry_pattern='(Segment|Triangle|Quadrilateral|Hexahedron|Wedge)' ;;
+            *) exit 1 ;;
+          esac
+          ctest --test-dir build/tests \
+            -R "^RodinConvergenceIsoparametricPETSc(MPI)?${physics_pattern}_.*${geometry_pattern}$" \
+            --output-on-failure --no-tests=error -j 1
 
   PETScComplexConvergence:
     # Pin the PETSc 3.19 compatibility gate, independently of the real build.
