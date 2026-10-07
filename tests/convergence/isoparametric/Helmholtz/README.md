@@ -290,6 +290,67 @@ under names containing `Approximated`, with a 1800-second limit and the
 same pyramid resource lock. Native and complex-PETSc local/MPI ranks 1–4
 are registered; real PETSc does not register the complex tests.
 
-Mixed boundary conditions, arbitrary field/geometry degrees, complex
-coefficients, and resonant or high-frequency Helmholtz workloads remain
-outside this suite's claim.
+### Linear and cubic geometry with a representable complex field
+
+Additional fixtures use geometry degree $q\in\lbrace 1,3\rbrace$
+and field degree $k=\max(2,q)$. The physical affine field
+$u_\ast(x)=1+2i+c\sum_jx_j$, $c=1+i/2$, has a pullback in the
+represented geometry family. Its source is $f=-u_\ast/4$.
+Thus field reproduction can be required independently of the geometry
+interpolation error; a small total error alone is not sufficient.
+
+The same exact sine map and logical-cell lift are retained. For
+$x_h=\Phi_h(\xi)$ and $x=\Phi(\xi)$, the isolated defect is
+
+$$
+e_G(x)=c\sum_j\bigl((x_h)_j-x_j\bigr),\qquad
+e_T=e_G+e_F.
+$$
+
+Both the represented-domain field errors and the lifted field defects
+must be below $10^{-9}$. The total and geometry norms must agree within
+the same absolute budget. Every adjacent refinement interval checks
+finite, positive, decreasing geometry and total errors, with observed
+$L^2$ rates in $(q+1-0.55,q+1+0.55)$ and gradient rates in
+$(q-0.45,q+0.45)$. These bands describe the finite sine-map experiment,
+not an assertion that every interpolation error has a nonzero leading term.
+
+| Geometry degree $q$ | Field degree $k$ | Grid points $n$ | Nominal geometry $L^2/H^1$ orders |
+| --- | --- | --- | --- |
+| 1 | 2 | $3\to5\to9$; segment $5\to9\to17$ | $2/1$ |
+| 3 | 3 | $3\to5\to9$; segment $5\to9\to17$ | $4/3$ |
+
+At $n=5$, assembly order $11\to16$, norm order $13\to18$,
+and solver tolerance $10^{-13}\to10^{-14}$ are varied separately.
+Field reproduction remains required in all four solves, and geometry
+and total norms must change by less than $10^{-6}$ relatively.
+The quadratic-geometry omitted-mass and independent complex metric
+controls remain separate from these new degree studies.
+
+For the one-dimensional paths, $h\le1/4$. A linear interpolant of
+$\sin(\pi\xi)$ has derivative magnitude at most $\pi$.
+For a cubic nodal interpolant on an interval of length $h$, Newton
+divided differences and the bounds on the first three sine derivatives give
+
+$$
+\lVert (I_h^3\sin(\pi\xi))'\rVert_\infty
+\le\pi+h\pi^2+\frac12h^2\pi^3
+\le\pi+\frac{\pi^2}{4}+\frac{\pi^3}{32}<10.
+$$
+
+Therefore the represented segment maps have positive derivatives for
+$a=0.1$ and unchanged endpoints; their physical domain is $(0,1)$.
+The lifted geometry defect in one dimension measures the prescribed
+parametrization comparison, not a changing physical interval. In higher
+dimensions the unchanged first coordinate gives the slab Poincaré
+bound stated above, subject to regular represented cells.
+
+All seven positive-dimensional geometries are registered for native local
+and complex-PETSc local/MPI ranks one through four. Sequential and OpenMP
+executions are distinct gates. The degree-specific entries have
+1800-second watchdogs, slow labels, MPI processor counts and the shared
+pyramid resource lock. Registration is not evidence of numerical completion.
+
+Mixed boundary conditions, arbitrary field/geometry degrees, complex material
+coefficients, and resonant or high-frequency Helmholtz workloads remain outside
+this suite's claim.

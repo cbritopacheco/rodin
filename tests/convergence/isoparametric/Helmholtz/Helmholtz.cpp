@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Native-complex Helmholtz on exact and approximated P2 geometry. */
+/** @file @brief Native-complex Helmholtz on exact and approximated geometry. */
 
 #include "Helmholtz.h"
 #include "Rodin/Assembly.h"
@@ -17,18 +17,22 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
 {
+  template <size_t Q = 2>
   class NativeProblem
   {
     public:
+      static constexpr size_t GeometryDegree = Q;
+
       NativeProblem(Polytope::Type geometry, size_t n,
         CurvedGeometry<LocalMesh>::Map map = CurvedGeometry<LocalMesh>::Map::Quadratic,
         bool lifted = false, Real amplitude = 0.1)
         : m_mesh(UniformGrid(geometry).makeMesh(n)),
+          m_reference(),
           m_geometry(m_mesh, map, amplitude)
       {
         if (lifted)
           m_reference.emplace(m_mesh);
-        m_geometry.install<2>();
+        m_geometry.install<Q>();
       }
 
       const auto& getMesh() const
@@ -93,7 +97,39 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
       CurvedGeometry<LocalMesh> m_geometry;
   };
 
-  using NativeHelmholtzTest = HelmholtzTest<NativeProblem>;
+  using NativeHelmholtzTest = HelmholtzTest<NativeProblem<>>;
+  using NativeHelmholtzQ1Test = HelmholtzTest<NativeProblem<1>>;
+  using NativeHelmholtzQ3Test = HelmholtzTest<NativeProblem<3>>;
+  TEST_P(NativeHelmholtzQ1Test, LiftedAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(NativeHelmholtzQ1Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  TEST_P(NativeHelmholtzQ3Test, LiftedAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(NativeHelmholtzQ3Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, NativeHelmholtzQ1Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, NativeHelmholtzQ3Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
   TEST_P(NativeHelmholtzTest, P1OptimalRates)
   {
     checkRates<1>();

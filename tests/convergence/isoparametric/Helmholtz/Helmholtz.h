@@ -23,7 +23,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
   inline constexpr size_t AssemblyOrder = 11;
 
   /**
-   * @brief Complex Helmholtz acceptance on exact and approximated P2 maps.
+   * @brief Complex Helmholtz acceptance on exact and approximated maps.
    * @par Architecture
    * Each workload owns a freshly mapped mesh and creates fresh field spaces
    * per solve. The continuous data and geometry remain fixed while nominal
@@ -58,6 +58,94 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
         {
           EXPECT_LE(values[2], values[0] + values[1] + RoundoffTolerance);
           EXPECT_GE(values[2], std::abs(values[0] - values[1]) - RoundoffTolerance);
+        }
+      }
+
+      // An affine physical field pulls back into the geometry family. Raising
+      // field degree to max(2,Q) isolates the nonpolynomial map interpolation.
+      void checkMatchedGeometryRates() const
+      {
+        constexpr size_t Q = Workload::GeometryDegree;
+        constexpr size_t K = std::max(size_t(2), Q);
+        const auto levels = this->GetParam() == Geometry::Polytope::Type::Segment
+          ? std::array<size_t, 3>{5, 9, 17}
+          : std::array<size_t, 3>{3, 5, 9};
+        std::array<ErrorHistory, 2> histories;
+        for (size_t n : levels)
+        {
+          SCOPED_TRACE(::testing::Message() << "geometry degree=" << Q << " n=" << n);
+          Workload problem(this->GetParam(), n, Map::Sine, true);
+          LiftedErrorNorm::Result e;
+          const auto represented = problem.template solve<K>(HelmholtzData::Field::Affine,
+            false, AssemblyOrder, SolverTolerance, NormOrder, &e);
+          checkDecomposition(e);
+          for (const auto& field : {represented, e.field})
+          {
+            EXPECT_LT(field.getL2(), PatchTolerance);
+            EXPECT_LT(field.getH1Seminorm(), PatchTolerance);
+          }
+          EXPECT_NEAR(e.total.getL2(), e.geometry.getL2(), PatchTolerance);
+          EXPECT_NEAR(
+            e.total.getH1Seminorm(), e.geometry.getH1Seminorm(), PatchTolerance);
+          const std::array norms{e.geometry, e.total};
+          for (size_t component = 0; component < norms.size(); ++component)
+          {
+            ASSERT_TRUE(norms[component].isFinite());
+            ASSERT_GT(norms[component].getL2(), 0);
+            ASSERT_GT(norms[component].getH1Seminorm(), 0);
+            histories[component].append(Real(1) / Real(n - 1), norms[component]);
+          }
+        }
+        for (const auto& history : histories)
+          for (size_t i = 1; i < history.getSize(); ++i)
+          {
+            const auto& coarse = history.getSample(i - 1).error;
+            const auto& fine = history.getSample(i).error;
+            const auto rate = history.getAlgebraicRates(i);
+            SCOPED_TRACE(::testing::Message()
+              << "interval=" << i << " rates=" << rate.getL2() << ","
+              << rate.getH1Seminorm());
+            EXPECT_GT(coarse.getL2(), fine.getL2());
+            EXPECT_GT(coarse.getH1Seminorm(), fine.getH1Seminorm());
+            EXPECT_GT(rate.getL2(), Q + 1 - L2Margin);
+            EXPECT_LT(rate.getL2(), Q + 1 + L2Margin);
+            EXPECT_GT(rate.getH1Seminorm(), Q - H1Margin);
+            EXPECT_LT(rate.getH1Seminorm(), Q + H1Margin);
+          }
+      }
+
+      void checkMatchedGeometrySensitivity() const
+      {
+        constexpr size_t K = std::max(size_t(2), Workload::GeometryDegree);
+        Workload problem(this->GetParam(), 5, Map::Sine, true);
+        std::array<LiftedErrorNorm::Result, 4> errors;
+        for (size_t i = 0; i < errors.size(); ++i)
+        {
+          const auto represented = problem.template solve<K>(HelmholtzData::Field::Affine,
+            false, i == 1 ? RefinedOrder : AssemblyOrder,
+            i == 2 ? RefinedTolerance : SolverTolerance,
+            i == 3 ? RefinedNormOrder : NormOrder, &errors[i]);
+          checkDecomposition(errors[i]);
+          for (const auto& field : {represented, errors[i].field})
+          {
+            EXPECT_LT(field.getL2(), PatchTolerance);
+            EXPECT_LT(field.getH1Seminorm(), PatchTolerance);
+          }
+        }
+        for (size_t i = 1; i < errors.size(); ++i)
+        {
+          const std::array base{errors[0].geometry, errors[0].total};
+          const std::array refined{errors[i].geometry, errors[i].total};
+          for (size_t component = 0; component < base.size(); ++component)
+            for (const auto& pair :
+              {std::pair{base[component].getL2(), refined[component].getL2()},
+                std::pair{
+                  base[component].getH1Seminorm(), refined[component].getH1Seminorm()}})
+            {
+              ASSERT_GT(pair.first, 0);
+              ASSERT_TRUE(std::isfinite(pair.second));
+              EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
+            }
         }
       }
 

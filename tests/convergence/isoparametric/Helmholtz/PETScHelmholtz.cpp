@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief PETSc local/MPI complex Helmholtz on exact/approximated P2 maps. */
+/** @file @brief PETSc local/MPI complex Helmholtz on exact/approximated maps. */
 
 #include "Helmholtz.h"
 #include "Rodin/Assembly.h"
@@ -31,20 +31,23 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
   boost::mpi::communicator* world = nullptr;
 #endif
 
-  template <class ContextType>
+  template <class ContextType, size_t Q = 2>
   class PETScProblem
   {
     public:
+      static constexpr size_t GeometryDegree = Q;
+
       PETScProblem(Polytope::Type geometry, size_t n,
         typename CurvedGeometry<Mesh<ContextType>>::Map map =
           CurvedGeometry<Mesh<ContextType>>::Map::Quadratic,
         bool lifted = false, Real amplitude = 0.1)
         : m_mesh(makeMesh(geometry, n)),
+          m_reference(),
           m_geometry(m_mesh, map, amplitude)
       {
         if (lifted)
           m_reference.emplace(m_mesh);
-        m_geometry.template install<2>();
+        m_geometry.template install<Q>();
       }
 
       const auto& getMesh() const
@@ -125,6 +128,40 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
       CurvedGeometry<Mesh<ContextType>> m_geometry;
   };
 
+  using PETScHelmholtzLocalQ1Test = HelmholtzTest<PETScProblem<Context::Local, 1>>;
+  TEST_P(PETScHelmholtzLocalQ1Test, LiftedAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(PETScHelmholtzLocalQ1Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, PETScHelmholtzLocalQ1Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
+  using PETScHelmholtzLocalQ3Test = HelmholtzTest<PETScProblem<Context::Local, 3>>;
+  TEST_P(PETScHelmholtzLocalQ3Test, LiftedAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(PETScHelmholtzLocalQ3Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, PETScHelmholtzLocalQ3Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
   using PETScHelmholtzLocalTest = HelmholtzTest<PETScProblem<Context::Local>>;
   TEST_P(PETScHelmholtzLocalTest, P1OptimalRates)
   {
@@ -191,6 +228,40 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
     });
 
 #ifdef RODIN_USE_MPI
+  using PETScHelmholtzMPIQ1Test = HelmholtzTest<PETScProblem<Context::MPI, 1>>;
+  TEST_P(PETScHelmholtzMPIQ1Test, LiftedAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(PETScHelmholtzMPIQ1Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, PETScHelmholtzMPIQ1Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
+  using PETScHelmholtzMPIQ3Test = HelmholtzTest<PETScProblem<Context::MPI, 3>>;
+  TEST_P(PETScHelmholtzMPIQ3Test, LiftedAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(PETScHelmholtzMPIQ3Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, PETScHelmholtzMPIQ3Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
   using PETScHelmholtzMPITest = HelmholtzTest<PETScProblem<Context::MPI>>;
   TEST_P(PETScHelmholtzMPITest, P1OptimalRates)
   {

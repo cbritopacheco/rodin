@@ -143,6 +143,30 @@ containing a PDE solve. Direct utility regressions include an invalid final
 interval and both violated triangle inequalities. Physics workloads retain
 their own manufactured data, solver policy and wrong-operator controls.
 
+Representable-field geometry studies use a distinct acceptance path.
+If $u_\ast\rvert_{\Omega_h}\in V_h$, the exact represented-domain
+field error vanishes. Its measured counterpart is tested against a stated
+absolute budget $\delta$, not fitted to a convergence rate. For
+$j\in\lbrace 0,1\rbrace$, the protocol requires
+
+$$
+E_{\mathrm{represented},j}<\delta,\qquad E_{F,j}<\delta,\qquad
+\left|E_{T,j}-E_{G,j}\right|\le\delta.
+$$
+
+Here $E_{F,j}$, $E_{G,j}$ and $E_{T,j}$ denote the lifted field,
+geometry and total norms defined above. `LiftedConvergence` retains
+only the geometry and total histories for this path; both must be finite,
+positive and decreasing over at least three levels. For geometry degree
+$q$, the expected orders are $q+1$ in L2 and $q$ in the H1 seminorm,
+subject to smooth regular maps and a nonvanishing leading interpolation
+defect. Every observed adjacent rate is checked directly. Quadrature and
+solver sensitivity remain separate controls; relative comparisons apply
+only to nonzero geometry and total norms. The budget $\delta$ is supplied
+by the physical workload in the measured norm's units. These field-error
+budgets do not identify mesh entities: chart correspondence and MPI
+ownership checks remain based on logical indices.
+
 At least three discretizations are required for a new rate claim so that two
 successive intervals are tested. The continuous data and measured quantity
 are held fixed. Each interval checks finite positive errors, strict error
@@ -184,7 +208,7 @@ exists yet.
 | Context | h | p | hp | Isoparametric |
 | --- | --- | --- | --- | --- |
 | Poisson | P1–P3, boundary variants; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
-| Complex Helmholtz | P1/P2; native-complex PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/impedance P1–P3 with polynomial patches | P1–P4; native and complex-PETSc local/MPI | P1–P3; native and complex-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native and complex-PETSc local/MPI |
+| Complex Helmholtz | P1/P2; native-complex PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/impedance P1–P3 with polynomial patches | P1–P4; native and complex-PETSc local/MPI | P1–P3; native and complex-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; affine P2/Q1 and P3/Q3 geometry-limited rates; native and complex-PETSc local/MPI |
 | Linear elasticity | Vector P1/P2, displacement and traction variants; nearly incompressible divergence-free P2 in 2D/3D; native and real-PETSc local/MPI | Analytic vector P1→P2→P3→P4; native and real-PETSc local/MPI | Analytic vector P1–P3; native and real-PETSc local/MPI | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; native local and real-PETSc local/MPI |
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI; PETSc physical traction P2/P1 and P3/P2 without a mean multiplier | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3 with polynomial patches; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
@@ -378,6 +402,11 @@ axis, $h=1/(n-1)$, and field degree $p$:
   field/geometry/total errors separately, using the same levels except P2
   Segment (`n=5→9→17→33`). Its complex affine metric oracle checks both
   real and imaginary contributions to the exact-domain norms.
+  Additional representable complex-affine studies use geometry degrees
+  $q=1,3$ and field degree $k=\max(2,q)$, with $n=3,5,9$ except
+  Segment ($n=5,9,17$). Both adjacent intervals check geometry and total
+  $L^2/H^1$ orders $q+1/q$; represented and lifted field errors must
+  separately remain below $10^{-9}$.
   Curved linear elasticity uses the same P1/P2 sequences and separately
   measures displacement, strain and stress; its
   [suite specification](isoparametric/LinearElasticity/README.md) states the
@@ -580,7 +609,7 @@ refinement path, and backend, rather than by the presence of a directory.
 | --- | --- | --- |
 | 1 | PETSc local and MPI PDE coverage: remaining boundary/refinement variants of Poisson, Helmholtz, conductivity, linear elasticity, Stokes, coupled reaction–diffusion, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
 | 2 | Curved Poisson, conductivity, Helmholtz, linear-elasticity, Stokes, reaction–diffusion and nonlinear Poisson boundary/degree extensions | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
-| 3 | Exact-domain comparisons and further degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches. At geometry degree 2, Poisson, conductivity, complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson have represented-domain and lifted P1/P2 studies; Taylor–Hood Stokes has the P2/P1 study. Poisson/conductivity additionally have lifted affine studies at geometry degrees 1–3, with field degree $p=\max(2,q)$. Further field/geometry degree combinations remain |
+| 3 | Exact-domain comparisons and further degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches. At geometry degree 2, Poisson, conductivity, complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson have represented-domain and lifted P1/P2 studies; Taylor–Hood Stokes has the P2/P1 study. Poisson/conductivity additionally have lifted affine studies at geometry degrees 1–3, with field degree $p=\max(2,q)$. Complex Helmholtz additionally has matched affine studies at geometry degrees 1 and 3. Further field/geometry degree combinations remain |
 | 4 | Remaining complex-vector and high-order structural combinations supported by the library | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction across geometries and rank counts |
 | Last | Independent NAFEMS benchmarks, after the convergence/structural/backend batches | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |
 | Separate PR | Assembly performance across existing physical contexts, geometries, spaces, and backends ([PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Isolated stage timings, reproducible workload metadata, verified assembled operators, and controlled thread/rank scaling in `tests/benchmarks`; tracked independently from convergence certification |

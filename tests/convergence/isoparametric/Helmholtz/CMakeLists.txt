@@ -62,6 +62,49 @@ if (RODIN_USE_PETSC AND RODIN_CONVERGENCE_PETSC_COMPLEX)
   endif()
 endif()
 
+# Matched field/geometry studies have separate fixtures and registrations.
+foreach(q 1 3)
+  foreach(geometry IN LISTS _RODIN_CURVED_HELMHOLTZ_GEOMETRIES)
+    set(_native_test RodinConvergenceIsoparametricHelmholtz_Q${q}_${geometry})
+    add_test(NAME ${_native_test}
+      COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricHelmholtz>
+        "--gtest_filter=AllGeometries/NativeHelmholtzQ${q}Test.*/${geometry}")
+    set_tests_properties(${_native_test}
+      PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
+    if (geometry STREQUAL "Pyramid")
+      set_tests_properties(${_native_test} PROPERTIES RESOURCE_LOCK curved_helmholtz_pyramid)
+    endif()
+    if (RODIN_USE_PETSC AND RODIN_CONVERGENCE_PETSC_COMPLEX)
+      set(_local_test RodinConvergenceIsoparametricPETScHelmholtz_Q${q}_${geometry})
+      add_test(NAME ${_local_test}
+        COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScHelmholtz>
+          "--gtest_filter=AllGeometries/PETScHelmholtzLocalQ${q}Test.*/${geometry}")
+      set_tests_properties(${_local_test}
+        PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
+      rodin_suppress_external_mpi_lsan_for_test(${_local_test})
+      if (geometry STREQUAL "Pyramid")
+        set_tests_properties(${_local_test} PROPERTIES RESOURCE_LOCK curved_helmholtz_pyramid)
+      endif()
+      if (RODIN_USE_MPI)
+        foreach(np 1 2 3 4)
+          set(_mpi_test RodinConvergenceIsoparametricPETScMPIHelmholtz_Q${q}_np${np}_${geometry})
+          add_test(NAME ${_mpi_test}
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinConvergenceIsoparametricPETScHelmholtz>
+              "--gtest_filter=AllGeometries/PETScHelmholtzMPIQ${q}Test.*/${geometry}")
+          set_tests_properties(${_mpi_test} PROPERTIES
+            LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
+          rodin_suppress_external_mpi_lsan_for_test(${_mpi_test})
+          if (geometry STREQUAL "Pyramid")
+            set_tests_properties(${_mpi_test} PROPERTIES RESOURCE_LOCK curved_helmholtz_pyramid)
+          endif()
+        endforeach()
+      endif()
+    endif()
+  endforeach()
+endforeach()
+
 # Keep the changing-domain hierarchy separate from the exact-map hierarchy.
 foreach(geometry IN LISTS _RODIN_CURVED_HELMHOLTZ_GEOMETRIES)
   set(_native_test RodinConvergenceIsoparametricHelmholtz_Approximated_${geometry})
