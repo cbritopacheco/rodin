@@ -197,9 +197,10 @@ namespace Rodin::Geometry
       /**
        * @brief Serialization method for Boost.Serialization.
        * @param[in,out] ar Archive object
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
-      template<class Archive>
-      void serialize(Archive & ar, const unsigned int)
+      template <class Archive>
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & m_rdim;
         ar & m_pdim;

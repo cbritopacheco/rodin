@@ -167,9 +167,13 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for @c Min.
+  /**
+   * @brief Deduction guide for @c Min.
+   * @param a Left operand.
+   * @param b Right operand.
+   */
   template <class LHSDerived, class RHSDerived>
-  Min(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+  Min(const FunctionBase<LHSDerived>& a, const FunctionBase<RHSDerived>& b)
     -> Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /// @brief Pointwise minimum of a function expression.
@@ -291,9 +295,14 @@ namespace Rodin::Variational
       RHSType m_rhs;
   };
 
-  /// @brief Deduction guide for @c Min.
+  /**
+   * @brief Deduction guide for @c Min.
+   * @param a Left operand.
+   * @param b Right operand.
+   */
   template <class NestedDerived>
-  Min(const FunctionBase<NestedDerived>&, Real) -> Min<FunctionBase<NestedDerived>, Real>;
+  Min(const FunctionBase<NestedDerived>& a,
+    Real b) -> Min<FunctionBase<NestedDerived>, Real>;
 
   /// @brief Pointwise minimum of a function expression.
   template <class NestedDerived>
@@ -348,9 +357,14 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for @c Min.
+  /**
+   * @brief Deduction guide for @c Min.
+   * @param a Left operand.
+   * @param b Right operand.
+   */
   template <class NestedDerived>
-  Min(Real, const FunctionBase<NestedDerived>&) -> Min<Real, FunctionBase<NestedDerived>>;
+  Min(Real a,
+    const FunctionBase<NestedDerived>& b) -> Min<Real, FunctionBase<NestedDerived>>;
 }
 
 #endif

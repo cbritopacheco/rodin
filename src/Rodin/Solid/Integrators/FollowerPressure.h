@@ -403,11 +403,17 @@ namespace Rodin::Solid
       Math::Vector<ScalarType> m_elemVec;
   };
 
-  /// @brief CTAD guide for the follower-pressure residual.
+  /**
+   * @brief CTAD guide for the follower-pressure residual.
+   * @param pressure Pressure applied on the surface.
+   * @param v Test shape-function expression.
+   * @param displacement Displacement field.
+   */
   template <class TestFunctionType, class DisplacementType>
-  FollowerPressureForce(const Real&, const TestFunctionType&,
-    const DisplacementType&) -> FollowerPressureForce<std::decay_t<TestFunctionType>,
-                               std::decay_t<DisplacementType>>;
+  FollowerPressureForce(
+    const Real& pressure, const TestFunctionType& v, const DisplacementType& displacement)
+    -> FollowerPressureForce<std::decay_t<TestFunctionType>,
+      std::decay_t<DisplacementType>>;
 
   /**
    * @brief Bilinear-form integrator: the EXACT load stiffness of the
@@ -592,10 +598,16 @@ namespace Rodin::Solid
       Math::Matrix<ScalarType> m_matrix;
   };
 
-  /// @brief CTAD guide for the follower-pressure tangent.
+  /**
+   * @brief CTAD guide for the follower-pressure tangent.
+   * @param pressure The applied pressure, captured by reference
+   * @param u The trial displacement function
+   * @param v The test displacement function
+   * @param displacement The current displacement state
+   */
   template <class TrialFunctionType, class TestFunctionType, class DisplacementType>
-  FollowerPressureTangent(const Real&, const TrialFunctionType&, const TestFunctionType&,
-    const DisplacementType&)
+  FollowerPressureTangent(const Real& pressure, const TrialFunctionType& u,
+    const TestFunctionType& v, const DisplacementType& displacement)
     -> FollowerPressureTangent<std::decay_t<TrialFunctionType>,
       std::decay_t<TestFunctionType>, std::decay_t<DisplacementType>>;
 }

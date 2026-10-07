@@ -144,8 +144,9 @@ namespace Rodin::Solid
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      HyperElasticLaw& operator=(HyperElasticLaw&&) = default;
+      HyperElasticLaw& operator=(HyperElasticLaw&& other) = default;
   };
 }
 

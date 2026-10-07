@@ -67,8 +67,11 @@ namespace Rodin::Geometry
         : m_dimension(dimension), m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)
       {}
 
-      /// @brief Copy constructor (deleted).
-      PolytopeIteratorBase(const PolytopeIterator&) = delete;
+      /**
+       * @brief Copy constructor (deleted).
+       * @param other Object whose copying or moving is disabled.
+       */
+      PolytopeIteratorBase(const PolytopeIterator& other) = delete;
 
       /**
        * @brief Move constructor.
@@ -259,8 +262,11 @@ namespace Rodin::Geometry
        */
       PolytopeIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-      /// @brief Copy constructor (deleted).
-      PolytopeIterator(const PolytopeIterator&) = delete;
+      /**
+       * @brief Copy constructor (deleted).
+       * @param other Object whose copying or moving is disabled.
+       */
+      PolytopeIterator(const PolytopeIterator& other) = delete;
 
       /**
        * @brief Move constructor.
@@ -351,8 +357,11 @@ namespace Rodin::Geometry
        */
       CellIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-      /// @brief Copy constructor (deleted).
-      CellIterator(const CellIterator&) = delete;
+      /**
+       * @brief Copy constructor (deleted).
+       * @param other Object whose copying or moving is disabled.
+       */
+      CellIterator(const CellIterator& other) = delete;
 
       /**
        * @brief Move constructor.
@@ -419,8 +428,11 @@ namespace Rodin::Geometry
        */
       FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-      /// @brief Copy constructor (deleted).
-      FaceIterator(const FaceIterator&) = delete;
+      /**
+       * @brief Copy constructor (deleted).
+       * @param other Object whose copying or moving is disabled.
+       */
+      FaceIterator(const FaceIterator& other) = delete;
 
       /**
        * @brief Move constructor.
@@ -431,8 +443,9 @@ namespace Rodin::Geometry
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      FaceIterator& operator=(FaceIterator&&) = default;
+      FaceIterator& operator=(FaceIterator&& other) = default;
 
       /**
        * @brief Constructs the face at the current iterator position.
@@ -486,8 +499,11 @@ namespace Rodin::Geometry
        */
       VertexIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-      /// @brief Copy constructor (deleted).
-      VertexIterator(const VertexIterator&) = delete;
+      /**
+       * @brief Copy constructor (deleted).
+       * @param other Object whose copying or moving is disabled.
+       */
+      VertexIterator(const VertexIterator& other) = delete;
 
       /**
        * @brief Move constructor.
@@ -498,8 +514,9 @@ namespace Rodin::Geometry
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      VertexIterator& operator=(VertexIterator&&) = default;
+      VertexIterator& operator=(VertexIterator&& other) = default;
 
       /**
        * @brief Constructs the vertex at the current iterator position.

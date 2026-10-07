@@ -69,9 +69,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for DGMRES
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  DGMRES(Variational::ProblemBase<LinearSystem>&) -> DGMRES<LinearSystem>;
+  DGMRES(Variational::ProblemBase<LinearSystem>& pb) -> DGMRES<LinearSystem>;
 
   /**
    * @ingroup DGMRESSpecializations

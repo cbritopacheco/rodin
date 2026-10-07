@@ -91,8 +91,10 @@ namespace Rodin::Adaptation::Detail
       /**
        * @brief Reports no intrinsic polynomial order.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
+      Optional<std::size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -110,11 +112,22 @@ namespace Rodin::Adaptation::Detail
       Real m_normalization;
       std::size_t m_dimension;
   };
+  /**
+   * @brief Deduction guide for WNGIRSurfaceForceCoefficient.
+   * @param phi Observation field.
+   * @param grad Gradient of the observation field.
+   * @param current Current displacement field.
+   * @param locator Point locator used to find mesh entities.
+   * @param sigma2 Variance used to scale the observation residual.
+   * @param normalization Normalization factor.
+   * @param dimension Spatial dimension.
+   */
 
   template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
-  WNGIRSurfaceForceCoefficient(const Variational::RealFunctionBase<PhiDerived>&,
-    const Variational::VectorFunctionBase<Real, GradDerived>&, const Displacement&,
-    const LocatorType&, Real, Real, std::size_t)
+  WNGIRSurfaceForceCoefficient(const Variational::RealFunctionBase<PhiDerived>& phi,
+    const Variational::VectorFunctionBase<Real, GradDerived>& grad,
+    const Displacement& current, const LocatorType& locator, Real sigma2,
+    Real normalization, std::size_t dimension)
     -> WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>;
 }
 

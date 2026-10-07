@@ -445,9 +445,10 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for P1 from mesh - deduces to RealP1
+   * @param mesh Mesh supporting the finite element space.
    */
   template <class Context>
-  P1(const Geometry::Mesh<Context>&) -> P1<Real, Geometry::Mesh<Context>>;
+  P1(const Geometry::Mesh<Context>& mesh) -> P1<Real, Geometry::Mesh<Context>>;
 
   /// Alias for a scalar real-valued P1 finite element space
   template <class Mesh>
@@ -549,7 +550,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates at a point on the reference element.
            * @param r Reference coordinates at which to evaluate the basis.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Transformed field value at the supplied evaluation point.
            */
           auto operator()(const Math::SpatialPoint& r) const
           {
@@ -593,7 +594,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates at a geometric point.
            * @param p Point at which the operation is evaluated.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Transformed field value at the supplied evaluation point.
            */
           constexpr
           auto operator()(const Geometry::Point& p) const
@@ -830,9 +831,11 @@ namespace Rodin::Variational
        * @brief Gets the pushforward of a callable on a polytope.
        * @returns The pushforward of a callable on a polytope.
        * @param v Operand expression.
+       * @param entity Mesh entity; this pushforward does not require entity-dependent data.
        */
       template <class Callable>
-      auto getPushforward(const std::pair<size_t, Index>&, Callable&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const std::pair<size_t, Index>& entity, Callable&& v) const
       {
         return Pushforward<Callable>(std::forward<Callable>(v));
       }
@@ -1026,10 +1029,15 @@ namespace Rodin::Variational
       std::map<Geometry::Polytope::Type, ElementType> m_elements;
   };
 
-  /// @brief Deduces a matrix range from explicit rows and columns.
+  /**
+   * @brief Deduces a matrix range from explicit rows and columns.
+   * @param mesh Mesh supporting the finite element space.
+   * @param rows Number of rows in the value range.
+   * @param cols Number of columns in the value range.
+   */
   template <class Context>
-  P1(const Geometry::Mesh<Context>&, size_t,
-    size_t) -> P1<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+  P1(const Geometry::Mesh<Context>& mesh, size_t rows,
+    size_t cols) -> P1<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
 
   /// @brief Matrix-valued continuous linear finite element space.
   template <class Mesh>

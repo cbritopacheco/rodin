@@ -71,8 +71,11 @@ namespace Rodin::FormLanguage
        */
       Base& operator=(const Base& other) = delete;
 
-      /// @brief Move assignment is not allowed.
-      Base& operator=(Base&&) = delete;
+      /**
+       * @brief Move assignment is not allowed.
+       * @param other Object to move from.
+       */
+      Base& operator=(Base&& other) = delete;
 
       /**
        * @brief Gets the human-readable name of this object.

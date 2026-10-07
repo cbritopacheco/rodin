@@ -189,8 +189,11 @@ namespace Rodin::Geometry
       /// @brief Destructor.
       ~PolytopeQuadratureIndex() = default;
 
-      /// @brief Copy constructor (deleted).
-      PolytopeQuadratureIndex(const PolytopeQuadratureIndex&) = delete;
+      /**
+       * @brief Copy constructor (deleted).
+       * @param other Object whose copying or moving is disabled.
+       */
+      PolytopeQuadratureIndex(const PolytopeQuadratureIndex& other) = delete;
 
       /**
        * @brief Copy assignment operator (deleted).
@@ -394,12 +397,21 @@ namespace Rodin::Geometry
       {
           // Heuristic lock-striping budget: shares locks among slots to bound storage.
           static constexpr size_t MutexCount = 64;
+          /**
+           * @brief Initializes the quadrature formula cache.
+           * @param qf Quadrature formula whose point slots are cached.
+           * @param count Required number of cache slots.
+           */
 
           Formula(const QF::QuadratureFormulaBase* qf, size_t count)
             : qf(qf),
               slots(count),
               publishedSize(count)
           {}
+          /**
+           * @brief Ensures that the quadrature formula has enough cache slots.
+           * @param count Required number of cache slots.
+           */
 
           void resize(size_t count)
           {
@@ -424,21 +436,38 @@ namespace Rodin::Geometry
           static constexpr size_t LookupCapacity = 16;
 
           Dimension() = default;
-          Dimension(const Dimension&) = delete;
-          Dimension& operator=(const Dimension&) = delete;
+          /**
+           * @brief Constructs an entity-dimension cache from another cache.
+           * @param other Object whose copying or moving is disabled.
+           */
+          Dimension(const Dimension& other) = delete;
+          /**
+           * @brief Assigns the state of another object.
+           * @param other Object to copy from.
+           */
+          Dimension& operator=(const Dimension& other) = delete;
+          /**
+           * @brief Constructs an entity-dimension cache from another cache.
+           * @param other Object to move from.
+           */
 
           Dimension(Dimension&& other) noexcept
             : formulas(std::move(other.formulas))
           {
             rebuildLookup();
           }
+          /**
+         * @brief Assigns the state of another object.
+         * @param other Object to move from.
+         * @returns Reference to this object after assignment.
+         */
 
-        Dimension& operator=(Dimension&& other) noexcept
-        {
-          formulas = std::move(other.formulas);
-          rebuildLookup();
-          return *this;
-        }
+          Dimension& operator=(Dimension&& other) noexcept
+          {
+            formulas = std::move(other.formulas);
+            rebuildLookup();
+            return *this;
+          }
 
         void rebuildLookup()
         {
@@ -455,13 +484,24 @@ namespace Rodin::Geometry
         std::atomic<Formula*> hot{nullptr};
         mutable std::mutex mutex;
       };
+      /**
+       * @brief Serializes the cached state.
+       * @param ar Archive storing or restoring the cached state.
+       * @param version Boost.Serialization class version; unused by this implementation.
+       */
 
       template <class Archive>
-      void save(Archive&, const unsigned int) const
+      void save(
+        [[maybe_unused]] Archive& ar, [[maybe_unused]] const unsigned int version) const
       {}
+      /**
+       * @brief Restores the cached state from an archive.
+       * @param ar Archive storing or restoring the cached state.
+       * @param version Boost.Serialization class version; unused by this implementation.
+       */
 
       template <class Archive>
-      void load(Archive&, const unsigned int)
+      void load([[maybe_unused]] Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         clear();
       }

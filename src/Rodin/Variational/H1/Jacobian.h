@@ -315,9 +315,11 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Jacobian of an H1 GridFunction
+   * @param u Operand expression.
    */
   template <size_t K, class Range, class Data, class Mesh>
-  Jacobian(const GridFunction<H1<K, Range, Mesh>, Data>&) -> Jacobian<GridFunction<H1<K, Range, Mesh>, Data>>;
+  Jacobian(const GridFunction<H1<K, Range, Mesh>, Data>& u)
+    -> Jacobian<GridFunction<H1<K, Range, Mesh>, Data>>;
 
   /**
    * @ingroup JacobianSpecializations
@@ -379,7 +381,10 @@ namespace Rodin::Variational
               /// @brief Whether the key holds a cached entry.
               bool valid = false;
 
-              /// @brief Tests whether the key holds a cached entry.
+              /**
+               * @brief Tests whether the key holds a cached entry.
+               * @returns True if the key identifies a cached entry; false otherwise.
+               */
               explicit operator bool() const noexcept
               {
                 return valid;
@@ -617,10 +622,16 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
-  /// @brief Deduction guide for @c Jacobian.
-  template <size_t K, class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
+  /**
+   * @brief Deduction guide for @c Jacobian.
+   * @param u Operand expression.
+   */
+  template <size_t K, class ShapeFunctionDerived, class Number, class Mesh,
+    ShapeFunctionSpaceType Space>
+  Jacobian(
+    const ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>,
+      Space>& u) -> Jacobian<ShapeFunction<ShapeFunctionDerived,
+                   H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
 #endif

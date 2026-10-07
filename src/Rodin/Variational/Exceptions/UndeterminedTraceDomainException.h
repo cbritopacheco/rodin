@@ -49,11 +49,18 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for @c UndeterminedTraceDomainException.
+  /**
+   * @brief Deduction guide for @c UndeterminedTraceDomainException.
+   * @param cls Object whose trace domain could not be determined.
+   * @param funcName Name of the function reporting the error.
+   * @param p Entity identified by its dimension and local index.
+   * @param begin Iterator to the first entry.
+   * @param end Iterator past the last entry.
+   */
   template <class T, class FuncName, class Iterator>
-  UndeterminedTraceDomainException(const T&, const FuncName&, const std::pair<size_t, Index>&, Iterator, Iterator)
-    -> UndeterminedTraceDomainException<T, FuncName>;
-
+  UndeterminedTraceDomainException(const T& cls, const FuncName& funcName,
+    const std::pair<size_t, Index>& p, Iterator begin,
+    Iterator end) -> UndeterminedTraceDomainException<T, FuncName>;
 }
 
 #endif

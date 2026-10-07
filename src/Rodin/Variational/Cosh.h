@@ -146,9 +146,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for @c Cosh.
+  /**
+   * @brief Deduction guide for @c Cosh.
+   * @param v Function to apply cosh to
+   */
   template <class NestedDerived>
-  Cosh(const FunctionBase<NestedDerived>&) -> Cosh<FunctionBase<NestedDerived>>;
+  Cosh(const FunctionBase<NestedDerived>& v) -> Cosh<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Helper function to construct objects of type Cosh.

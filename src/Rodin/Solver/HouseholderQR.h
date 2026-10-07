@@ -70,9 +70,11 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for HouseholderQR
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  HouseholderQR(Variational::ProblemBase<LinearSystem>&) -> HouseholderQR<LinearSystem>;
+  HouseholderQR(
+    Variational::ProblemBase<LinearSystem>& pb) -> HouseholderQR<LinearSystem>;
 
   /**
    * @ingroup HouseholderQRSpecializations

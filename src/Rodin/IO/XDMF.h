@@ -410,7 +410,11 @@ namespace Rodin::IO
         private:
           /// @cond RODIN_DOXYGEN_SKIP_IMPLEMENTATION
           friend class XDMF;
-          /// @endcond
+          /**
+           * @endcond
+           * @param owner Owning XDMF document.
+           * @param index Degree-of-freedom index.
+           */
 
           Grid(XDMF& owner, size_t index) noexcept;
 
@@ -464,9 +468,17 @@ namespace Rodin::IO
            const boost::filesystem::path& stem,
            size_t rootRank = 0);
 #endif
+      /**
+       * @brief Disables copying or moving this object.
+       * @param other Object whose copying or moving is disabled.
+       */
 
-      XDMF(const XDMF&) = delete;        ///< Non-copyable.
-      XDMF& operator=(const XDMF&) = delete;  ///< Non-copyable.
+      XDMF(const XDMF& other) = delete; ///< Non-copyable.
+      /**
+       * @brief Assigns the state of another object.
+       * @param other Object to copy from.
+       */
+      XDMF& operator=(const XDMF& other) = delete; ///< Non-copyable.
       /**
        * @brief Move constructor.
        * @param other Object to move from.
@@ -752,14 +764,23 @@ namespace Rodin::IO
       MPI_Comm m_comm = MPI_COMM_NULL;    ///< Non-owning MPI communicator.
 #endif
 
-      /// @brief Writes a single Uniform grid XML element.
+      /**
+       * @brief Writes a single Uniform grid XML element.
+       * @param os Output stream receiving the formatted data.
+       * @param gridName Grid name, possibly empty.
+       * @param snap Snapshot record to read or update.
+       * @param baseIndent Initial XML indentation level.
+       */
       void writeUniformGrid(
           std::ostream& os,
           const std::string& gridName,
           const SnapshotRecord& snap,
           size_t baseIndent) const;
 
-      /// @brief Gathers per-rank mesh metadata into snap.pieces.
+      /**
+       * @brief Gathers per-rank mesh metadata into snap.pieces.
+       * @param snap Snapshot record to read or update.
+       */
       void gatherPieceMeta(SnapshotRecord& snap) const;
   };
 

@@ -96,9 +96,10 @@ namespace Rodin::Variational
        * P0g has order 0; its gradient is identically 0.
        * Returning 0 is consistent with "zero polynomial".
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -243,9 +244,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order used on a mesh entity.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -417,7 +419,11 @@ namespace Rodin::Variational
       }
 
     private:
-      /// @brief Resolves the volume-side point for the selected trace domain.
+      /**
+       * @brief Resolves the volume-side point for the selected trace domain.
+       * @param point Evaluation point whose volume-side trace is resolved.
+       * @returns Volume-side evaluation point selected by the trace domain.
+       */
       Geometry::Point getDerivativePoint(const Geometry::Point& point) const
       {
         const auto& mesh = getOperand().getFiniteElementSpace().getMesh();

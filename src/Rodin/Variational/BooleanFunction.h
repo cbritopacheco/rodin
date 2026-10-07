@@ -178,9 +178,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the expression at a geometric point.
        * @returns Value of the expression at the supplied evaluation point.
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      Boolean getValue(const Geometry::Point&) const
+      constexpr Boolean getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return m_v;
       }
@@ -206,8 +206,11 @@ namespace Rodin::Variational
       const Boolean m_v;
   };
 
-  /// @brief Deduction guide for @c BooleanFunction.
-  BooleanFunction(Boolean) -> BooleanFunction<Boolean>;
+  /**
+   * @brief Deduction guide for @c BooleanFunction.
+   * @param v Constant Boolean value.
+   */
+  BooleanFunction(Boolean v) -> BooleanFunction<Boolean>;
 }
 
 #endif

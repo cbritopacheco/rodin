@@ -57,8 +57,9 @@ namespace Rodin::Assembly
        * @brief Constructs sequential iteration over a mesh region.
        *
        * @param mesh Mesh to iterate over
+       * @param region Mesh region selected for iteration.
        */
-      SequentialIteration(const MeshType& mesh, const Geometry::Region&);
+      SequentialIteration(const MeshType& mesh, const Geometry::Region& region);
 
       /**
        * @brief Gets an iterator over the selected region.
@@ -100,9 +101,10 @@ namespace Rodin::Assembly
   /**
    * @brief Template argument deduction guide for SequentialIteration
    * @param mesh Mesh on which the object is defined.
+   * @param region Mesh region selected for iteration.
    */
   SequentialIteration(
-      const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
+    const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region& region)
     -> SequentialIteration<Geometry::Mesh<Context::Local>>;
 }
 
@@ -1524,6 +1526,12 @@ namespace Rodin::Assembly
           LHS,
           RHS
         };
+        /**
+         * @brief Assembles the requested operator and vector contributions.
+         * @param axb Linear system receiving the assembled operator and vector.
+         * @param input Assembly input containing spaces and form integrators.
+         * @param mode Requested assembly mode.
+         */
 
         void execute(
           LinearSystemType& axb, const InputType& input, AssemblyMode mode) const

@@ -117,8 +117,10 @@ namespace Rodin::Solid
        * @brief Returns the stored strain-energy density.
        * @param cache Constitutive invariant cache populated by setCache().
        * @returns The stored strain-energy density.
+       * @param cp Constitutive point required by the material-law interface; unused because the energy is obtained from the cache.
        */
-      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint&) const
+      Real getStrainEnergyDensity(
+        const Cache& cache, [[maybe_unused]] const ConstitutivePoint& cp) const
       {
         return 0.5 * m_lambda * cache.trE * cache.trE
              + m_mu * cache.E.dot(cache.E);

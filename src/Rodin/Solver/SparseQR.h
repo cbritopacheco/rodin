@@ -72,9 +72,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for SparseQR
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  SparseQR(Variational::ProblemBase<LinearSystem>&) -> SparseQR<LinearSystem>;
+  SparseQR(Variational::ProblemBase<LinearSystem>& pb) -> SparseQR<LinearSystem>;
 
   /**
    * @ingroup SparseQRSpecializations
@@ -201,6 +202,7 @@ namespace Rodin::Solver
       /**
        * Underlying Eigen SparseQR solver with COLAMD ordering
        * @brief Records the Eigen status, and returns whether it succeeded.
+       * @returns True if the Eigen solver reports success; false otherwise.
        */
       Boolean record()
       {

@@ -114,14 +114,17 @@ namespace Rodin::Variational
           LinearForm(size_t i, Geometry::Polytope::Type g)
             : m_i(i), m_g(g)
           {}
+          /**
+           * @brief Disables copying or moving this object.
+           * @param other Object whose copying or moving is disabled.
+           */
 
-          constexpr
-          LinearForm(const LinearForm&) = delete;
+          constexpr LinearForm(const LinearForm& other) = delete;
 
           /**
            * @brief Applies the functional to a callable.
            * @returns Value of the expression at the supplied evaluation point.
-           * @param v Object whose identifier is hashed.
+           * @param v Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.
            */
           template <class T>
           ScalarType operator()(const T& v) const
@@ -950,10 +953,11 @@ namespace Rodin::Variational
       /**
        * @brief Serializes the object through a Boost archive.
        * @param ar Serialization archive.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
 
-      template<class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      template <class Archive>
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & boost::serialization::base_object<Parent>(*this);
       }
@@ -1008,9 +1012,12 @@ namespace Rodin::Variational
           LinearForm(size_t vdim, size_t local, Geometry::Polytope::Type g)
             : m_vdim(vdim), m_local(local), m_g(g)
           {}
+          /**
+           * @brief Disables copying or moving this object.
+           * @param other Object whose copying or moving is disabled.
+           */
 
-          constexpr
-          LinearForm(const LinearForm&) = delete;
+          constexpr LinearForm(const LinearForm& other) = delete;
 
           /**
            * @brief Move constructor.
@@ -1020,8 +1027,8 @@ namespace Rodin::Variational
 
           /**
            * @brief Applies the functional to a callable.
-           * @returns Reference to the entry at the supplied indices.
-           * @param v Object whose identifier is hashed.
+           * @returns Value of the nodal functional applied to the selected component of the callable.
+           * @param v Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.
            */
           template <class T>
           ScalarType operator()(const T& v) const
@@ -1086,7 +1093,7 @@ namespace Rodin::Variational
               /**
                * @brief Evaluates at a point on the reference element.
                * @param rc Coordinates in the reference element.
-               * @returns Reference to the entry at the supplied indices.
+               * @returns Basis or reference-coordinate derivative value at the supplied reference point.
                */
               constexpr
               Scalar operator()(const Math::SpatialPoint& rc) const
@@ -1159,7 +1166,7 @@ namespace Rodin::Variational
               /**
                * @brief Evaluates at a point on the reference element.
                * @param r Reference coordinates at which to evaluate the basis.
-               * @returns Reference to the entry at the supplied indices.
+               * @returns Basis or reference-coordinate derivative value at the supplied reference point.
                */
               ReturnType operator()(const Math::SpatialPoint& r) const
               {
@@ -1190,9 +1197,12 @@ namespace Rodin::Variational
           BasisFunction(size_t vdim, size_t local, Geometry::Polytope::Type g)
             : m_vdim(vdim), m_local(local), m_g(g)
           {}
+          /**
+           * @brief Disables copying or moving this object.
+           * @param other Object whose copying or moving is disabled.
+           */
 
-          constexpr
-          BasisFunction(const BasisFunction&) = delete;
+          constexpr BasisFunction(const BasisFunction& other) = delete;
 
           /**
            * @brief Move constructor.
@@ -1203,7 +1213,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates at a point on the reference element.
            * @param rc Coordinates in the reference element.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Basis or reference-coordinate derivative value at the supplied reference point.
            */
           ReturnType operator()(const Math::SpatialPoint& rc) const
           {
@@ -1468,7 +1478,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates the selected matrix basis or its component nodal functional.
            * @param point Point at which the operation is evaluated.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Matrix basis value with only the selected component nonzero.
            */
           RangeType operator()(const Math::SpatialPoint& point) const
           {
@@ -1522,7 +1532,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates the selected matrix basis or its component nodal functional.
            * @param function Function to evaluate.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Value of the nodal functional applied to the selected component of the callable.
            */
           template <class Callable>
           ScalarType operator()(const Callable& function) const

@@ -253,7 +253,10 @@ namespace Rodin::Variational
           /// @brief Whether the key holds a cached entry.
               bool valid = false;
 
-          /// @brief Tests whether the key holds a cached entry.
+          /**
+           * @brief Tests whether the key holds a cached entry.
+           * @returns True if the key identifies a cached entry; false otherwise.
+           */
               explicit operator bool() const noexcept
               {
                 return valid;
@@ -297,7 +300,10 @@ namespace Rodin::Variational
             /// @brief Whether the key holds a cached entry.
             bool valid = false;
 
-            /// @brief Tests whether the key holds a cached entry.
+            /**
+             * @brief Tests whether the key holds a cached entry.
+             * @returns True if the key identifies a cached entry; false otherwise.
+             */
             explicit operator bool() const noexcept
             {
               return valid;
@@ -315,8 +321,11 @@ namespace Rodin::Variational
               return qf == o.qf && qp == o.qp;
             }
 
-            /// @brief Resets the key, invalidating the cached entry.
-            void operator=(std::initializer_list<int>) noexcept
+            /**
+             * @brief Resets the key, invalidating the cached entry.
+             * @param reset Initializer-list tag; its contents are ignored when invalidating the key.
+             */
+            void operator=([[maybe_unused]] std::initializer_list<int> reset) noexcept
             {
               valid = false;
               qf = nullptr;
@@ -695,7 +704,11 @@ namespace Rodin::Variational
       }
 
     private:
-      /// @brief Resolves the volume-side point for the selected trace domain.
+      /**
+       * @brief Resolves the volume-side point for the selected trace domain.
+       * @param point Evaluation point whose volume-side trace is resolved.
+       * @returns Volume-side evaluation point selected by the trace domain.
+       */
       Geometry::Point getDerivativePoint(const Geometry::Point& point) const
       {
         const auto& mesh = getOperand().getFiniteElementSpace().getMesh();

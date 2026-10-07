@@ -103,9 +103,10 @@ namespace Rodin::Assembly
   /**
    * @brief Template argument deduction guide for OpenMPIteration
    * @param mesh Mesh on which the object is defined.
+   * @param region Geometric region defining the iteration domain
    */
-  OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
-    -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
+  OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh,
+    const Geometry::Region& region) -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
 
   /**
    * @brief OpenMP-based parallel assembly for bilinear forms.

@@ -89,6 +89,11 @@ namespace Rodin::QF
       }
 
     private:
+      /**
+       * @brief Appends product quadrature points and weights.
+       * @param left Left quadrature formula or serialized index sequence.
+       * @param right Right quadrature formula.
+       */
       void append(const QuadratureFormulaBase& left, const QuadratureFormulaBase& right)
       {
         m_points.reserve(left.getSize() * right.getSize());

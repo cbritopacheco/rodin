@@ -114,9 +114,9 @@ namespace Rodin::Math
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      constexpr
-      Unit& operator=(Unit&&) = default;
+      constexpr Unit& operator=(Unit&& other) = default;
 
       /**
        * @brief Explicit conversion to underlying type.

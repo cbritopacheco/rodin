@@ -94,8 +94,9 @@ namespace Rodin::Solid
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      KinematicState& operator=(KinematicState&&) = default;
+      KinematicState& operator=(KinematicState&& other) = default;
 
       /**
        * @brief Sets the displacement gradient @f$ \nabla \mathbf{u} @f$.

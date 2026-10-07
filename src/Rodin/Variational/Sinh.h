@@ -156,9 +156,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for @c Sinh.
+  /**
+   * @brief Deduction guide for @c Sinh.
+   * @param v Function to apply sinh to
+   */
   template <class NestedDerived>
-  Sinh(const FunctionBase<NestedDerived>&) -> Sinh<FunctionBase<NestedDerived>>;
+  Sinh(const FunctionBase<NestedDerived>& v) -> Sinh<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Helper function to construct objects of type Sinh.

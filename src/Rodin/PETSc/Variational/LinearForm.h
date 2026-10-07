@@ -297,9 +297,10 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for PETSc-backed LinearForm.
+   * @param test Test function.
    */
   template <class FES>
-  LinearForm(const PETSc::Variational::TestFunction<FES>&) -> LinearForm<FES, ::Vec>;
+  LinearForm(const PETSc::Variational::TestFunction<FES>& test) -> LinearForm<FES, ::Vec>;
 }
 
 namespace Rodin::PETSc::Variational

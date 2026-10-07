@@ -58,7 +58,10 @@ namespace Rodin::Variational
           /// @brief Whether the key holds a cached entry.
               bool valid = false;
 
-          /// @brief Tests whether the key holds a cached entry.
+          /**
+           * @brief Tests whether the key holds a cached entry.
+           * @returns True if the key identifies a cached entry; false otherwise.
+           */
               explicit operator bool() const noexcept
               {
                 return valid;
@@ -238,9 +241,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order used on a mesh entity.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         // P0 basis functions are constant on the reference element for any geometry.
         return 0;

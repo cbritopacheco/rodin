@@ -78,8 +78,11 @@ namespace Rodin::MMG
           /// @brief Default constructor.
           Builder() = default;
 
-          /// @brief Deleted copy constructor.
-          Builder(const Builder&) = delete;
+          /**
+           * @brief Deleted copy constructor.
+           * @param other Object whose copying or moving is disabled.
+           */
+          Builder(const Builder& other) = delete;
 
           /**
            * @brief Move constructor.
@@ -372,6 +375,7 @@ namespace Rodin::MMG
        * @brief Copy assignment is deleted.
        *
        * Parent @ref Geometry::Mesh<Context::Local> deletes copy assignment.
+       * @param other Object to copy from.
        */
       Mesh& operator=(const Mesh& other) = delete;
 

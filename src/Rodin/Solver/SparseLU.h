@@ -72,9 +72,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for SparseLU
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  SparseLU(Variational::ProblemBase<LinearSystem>&) -> SparseLU<LinearSystem>;
+  SparseLU(Variational::ProblemBase<LinearSystem>& pb) -> SparseLU<LinearSystem>;
 
   /**
    * @ingroup SparseLUSpecializations
@@ -211,7 +212,10 @@ namespace Rodin::Solver
       }
 
     private:
-      /// @brief Records the Eigen status, and returns whether it succeeded.
+      /**
+       * @brief Records the Eigen status, and returns whether it succeeded.
+       * @returns True if the Eigen solver reports success; false otherwise.
+       */
       Boolean record()
       {
         m_info.status = static_cast<Integer>(m_solver.info());

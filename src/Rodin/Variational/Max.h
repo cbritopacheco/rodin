@@ -172,9 +172,13 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for @c Max.
+  /**
+   * @brief Deduction guide for @c Max.
+   * @param a First function
+   * @param b Second function
+   */
   template <class LHSDerived, class RHSDerived>
-  Max(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+  Max(const FunctionBase<LHSDerived>& a, const FunctionBase<RHSDerived>& b)
     -> Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
@@ -297,9 +301,14 @@ namespace Rodin::Variational
       RHSType m_rhs;
   };
 
-  /// @brief Deduction guide for @c Max.
+  /**
+   * @brief Deduction guide for @c Max.
+   * @param a First function
+   * @param b Second function
+   */
   template <class NestedDerived>
-  Max(const FunctionBase<NestedDerived>&, Real) -> Max<FunctionBase<NestedDerived>, Real>;
+  Max(const FunctionBase<NestedDerived>& a,
+    Real b) -> Max<FunctionBase<NestedDerived>, Real>;
 
   /// @brief Pointwise maximum of a function expression.
   template <class NestedDerived>
@@ -354,9 +363,14 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for @c Max.
+  /**
+   * @brief Deduction guide for @c Max.
+   * @param a First function
+   * @param b Second function
+   */
   template <class NestedDerived>
-  Max(Real, const FunctionBase<NestedDerived>&) -> Max<Real, FunctionBase<NestedDerived>>;
+  Max(Real a,
+    const FunctionBase<NestedDerived>& b) -> Max<Real, FunctionBase<NestedDerived>>;
 }
 
 #endif

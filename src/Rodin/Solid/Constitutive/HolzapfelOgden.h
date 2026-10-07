@@ -133,8 +133,10 @@ namespace Rodin::Solid
        * @brief Returns the stored strain-energy density.
        * @param cache Constitutive invariant cache populated by setCache().
        * @returns The stored strain-energy density.
+       * @param cp Constitutive point required by the material-law interface; unused because the energy is obtained from the cache.
        */
-      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint&) const
+      Real getStrainEnergyDensity(
+        const Cache& cache, [[maybe_unused]] const ConstitutivePoint& cp) const
       {
         return m_params.mu1 * (cache.I1bar - 3.0) + m_params.mu2 * (cache.I2bar - 3.0) +
           m_params.C0 * std::exp(m_params.C1 * square(cache.I1bar - 3.0)) +
@@ -184,10 +186,21 @@ namespace Rodin::Solid
       }
 
     private:
+      /**
+       * @brief Computes the square of a scalar.
+       * @param x Scalar evaluation argument.
+       * @returns The scalar multiplied by itself.
+       */
       static Real square(Real x)
       {
         return x * x;
       }
+      /**
+       * @brief Updates the material cache from the kinematic state.
+       * @param cache Constitutive cache used or updated by the evaluation.
+       * @param state Kinematic state at the material point.
+       * @param direction Material direction to include in the stress contribution.
+       */
 
       void setCache(Cache& cache, const KinematicState& state,
         const Math::SpatialVector<Real>& direction) const
@@ -205,6 +218,12 @@ namespace Rodin::Solid
         cache.I4 = direction.dot(C * direction);
         cache.I4bar = cache.I4 * cache.I3m13;
       }
+      /**
+       * @brief Accumulates the cached first Piola-Kirchhoff stress.
+       * @param P First Piola-Kirchhoff stress accumulator.
+       * @param cache Constitutive cache used or updated by the evaluation.
+       * @param state Kinematic state at the material point.
+       */
 
       void computeFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P,
         const Cache& cache, const KinematicState& state) const

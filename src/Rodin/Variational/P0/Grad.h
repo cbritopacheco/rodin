@@ -208,9 +208,11 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Grad of a P0 GridFunction
+   * @param operand Operand expression.
    */
   template <class Range, class Data, class Mesh>
-  Grad(const GridFunction<P0<Range, Mesh>, Data>&) -> Grad<GridFunction<P0<Range, Mesh>, Data>>;
+  Grad(const GridFunction<P0<Range, Mesh>, Data>& operand)
+    -> Grad<GridFunction<P0<Range, Mesh>, Data>>;
 
   /**
    * @ingroup GradSpecializations
@@ -345,9 +347,12 @@ namespace Rodin::Variational
       const IntegrationPoint* m_ip;
   };
 
-  /// @brief Deduction guide for @c Grad.
+  /**
+   * @brief Deduction guide for @c Grad.
+   * @param operand Operand expression.
+   */
   template <class NestedDerived, class Range, class Mesh, ShapeFunctionSpaceType Space>
-  Grad(const ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>&)
+  Grad(const ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>& operand)
     -> Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>>;
 }
 
@@ -503,7 +508,11 @@ namespace Rodin::Variational
       }
 
     private:
-      /// @brief Resolves the volume-side point for the selected trace domain.
+      /**
+       * @brief Resolves the volume-side point for the selected trace domain.
+       * @param point Evaluation point whose volume-side trace is resolved.
+       * @returns Volume-side evaluation point selected by the trace domain.
+       */
       Geometry::Point getDerivativePoint(const Geometry::Point& point) const
       {
         const auto& mesh = getOperand().getFiniteElementSpace().getMesh();

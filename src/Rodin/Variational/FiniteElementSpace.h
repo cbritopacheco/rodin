@@ -119,9 +119,10 @@ namespace Rodin::Variational
       /**
        * @brief Copy assignment.
        * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
        */
-      constexpr
-      FiniteElementSpaceBase& operator=(const FiniteElementSpaceBase&) = default;
+      constexpr FiniteElementSpaceBase& operator=(
+        const FiniteElementSpaceBase& other) = default;
 
       virtual ~FiniteElementSpaceBase() = default;
 
@@ -248,9 +249,9 @@ namespace Rodin::Variational
       /**
        * @brief Copy assignment.
        * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
        */
-      constexpr
-      FiniteElementSpace& operator=(const FiniteElementSpace&) = default;
+      constexpr FiniteElementSpace& operator=(const FiniteElementSpace& other) = default;
 
       virtual ~FiniteElementSpace() = default;
 
@@ -382,16 +383,18 @@ namespace Rodin::Variational
       /**
        * @brief Move assignment.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      constexpr
-      FiniteElementSpacePullbackBase& operator=(FiniteElementSpacePullbackBase&&) = default;
+      constexpr FiniteElementSpacePullbackBase& operator=(
+        FiniteElementSpacePullbackBase&& other) = default;
 
       /**
        * @brief Copy assignment.
        * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
        */
-      constexpr
-      FiniteElementSpacePullbackBase& operator=(const FiniteElementSpacePullbackBase&) = default;
+      constexpr FiniteElementSpacePullbackBase& operator=(
+        const FiniteElementSpacePullbackBase& other) = default;
 
       virtual ~FiniteElementSpacePullbackBase() = default;
 
@@ -463,9 +466,10 @@ namespace Rodin::Variational
       /**
        * @brief Copy assignment.
        * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
        */
-      constexpr
-      FiniteElementSpacePushforwardBase& operator=(const FiniteElementSpacePushforwardBase&) = default;
+      constexpr FiniteElementSpacePushforwardBase& operator=(
+        const FiniteElementSpacePushforwardBase& other) = default;
 
       virtual ~FiniteElementSpacePushforwardBase() = default;
 

@@ -531,16 +531,22 @@ namespace Rodin::Variational
     private:
       Grad<OperandType> m_gradient;
   };
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param operand Operand expression.
+   */
   template <class FES, class Data>
     requires FormLanguage::IsMatrixRange<
                typename FormLanguage::Traits<FES>::RangeType>::Value
-  Jacobian(const GridFunction<FES, Data>&) -> Jacobian<GridFunction<FES, Data>>;
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  Jacobian(const GridFunction<FES, Data>& operand) -> Jacobian<GridFunction<FES, Data>>;
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param operand Operand expression.
+   */
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
     requires FormLanguage::IsMatrixRange<
                typename FormLanguage::Traits<FES>::RangeType>::Value
-  Jacobian(const ShapeFunction<Derived, FES, Space>&)
+  Jacobian(const ShapeFunction<Derived, FES, Space>& operand)
     -> Jacobian<ShapeFunction<Derived, FES, Space>>;
 }
 

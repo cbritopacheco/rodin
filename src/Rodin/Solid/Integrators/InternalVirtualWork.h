@@ -304,10 +304,14 @@ namespace Rodin::Solid
       OutputFunctionType m_output;
   };
 
-  /// CTAD deduction guide for InternalVirtualWork
+  /**
+   * CTAD deduction guide for InternalVirtualWork
+   * @param law The constitutive law (stored by value)
+   * @param displacement The current displacement (stored by reference)
+   */
   template <class Law, class State>
-  InternalVirtualWork(const Law&,
-    const State&) -> InternalVirtualWork<std::decay_t<Law>, std::decay_t<State>>;
+  InternalVirtualWork(const Law& law, const State& displacement)
+    -> InternalVirtualWork<std::decay_t<Law>, std::decay_t<State>>;
 }
 
 #endif

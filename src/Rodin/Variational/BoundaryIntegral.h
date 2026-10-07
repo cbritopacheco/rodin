@@ -153,15 +153,26 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for @c BoundaryIntegral.
+  /**
+   * @brief Deduction guide for @c BoundaryIntegral.
+   * @param integrand Expression to integrate.
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  BoundaryIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
-    -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+  BoundaryIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>& integrand)
+    -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
-  /// @brief Deduction guide for @c BoundaryIntegral.
+  /**
+   * @brief Deduction guide for @c BoundaryIntegral.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  BoundaryIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
-    -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+  BoundaryIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>& lhs,
+    const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>& rhs)
+    -> BoundaryIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
   /**
    * @ingroup BoundaryIntegralSpecializations
@@ -236,20 +247,25 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for @c BoundaryIntegral.
+  /**
+   * @brief Deduction guide for @c BoundaryIntegral.
+   * @param integrand Expression to integrate.
+   */
   template <class NestedDerived, class FES>
-  BoundaryIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
+  BoundaryIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>& integrand)
     -> BoundaryIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
-  /// @brief Deduction guide for @c BoundaryIntegral.
+  /**
+   * @brief Deduction guide for @c BoundaryIntegral.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived, class FES>
-  BoundaryIntegral(
-      const FunctionBase<LHSDerived>&,
-      const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
-    -> BoundaryIntegral<
-        ShapeFunctionBase<Dot<
-          FunctionBase<LHSDerived>,
-          ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
+  BoundaryIntegral(const FunctionBase<LHSDerived>& lhs,
+    const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
+    -> BoundaryIntegral<ShapeFunctionBase<
+      Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES,
+      TestSpace>>;
 }
 
 #endif

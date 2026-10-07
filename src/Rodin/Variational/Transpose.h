@@ -130,9 +130,13 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for function transpose.
+  /**
+   * @brief Deduction guide for function transpose.
+   * @param m Matrix function to transpose
+   */
   template <class NestedDerived>
-  Transpose(const FunctionBase<NestedDerived>&) -> Transpose<FunctionBase<NestedDerived>>;
+  Transpose(
+    const FunctionBase<NestedDerived>& m) -> Transpose<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Transpose of a matrix-valued ShapeFunction.
@@ -285,9 +289,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for ShapeFunction transpose.
+  /**
+   * @brief Deduction guide for ShapeFunction transpose.
+   * @param m Matrix function to transpose
+   */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  Transpose(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+  Transpose(const ShapeFunctionBase<NestedDerived, FES, Space>& m)
     -> Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 

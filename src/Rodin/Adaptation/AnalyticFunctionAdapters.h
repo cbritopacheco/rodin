@@ -118,8 +118,10 @@ namespace Rodin::Adaptation
       /**
        * @brief Returns no intrinsic polynomial order for analytic callables.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
+      Optional<std::size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -135,8 +137,12 @@ namespace Rodin::Adaptation
   };
 
   template <class F>
-  /// @brief Deduction guide for analytic vector functions.
-  AnalyticVectorFunction(F, std::size_t) -> AnalyticVectorFunction<F>;
+  /**
+   * @brief Deduction guide for analytic vector functions.
+   * @param f Function operand.
+   * @param dimension Spatial dimension.
+   */
+  AnalyticVectorFunction(F f, std::size_t dimension) -> AnalyticVectorFunction<F>;
 
   /**
    * @brief Matrix-valued `FunctionBase` adapter built from a single callable
@@ -221,8 +227,10 @@ namespace Rodin::Adaptation
       /**
        * @brief Returns no intrinsic polynomial order for analytic callables.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
+      Optional<std::size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -243,8 +251,14 @@ namespace Rodin::Adaptation
   };
 
   template <class F>
-  /// @brief Deduction guide for analytic matrix functions.
-  AnalyticMatrixFunction(F, std::size_t, std::size_t) -> AnalyticMatrixFunction<F>;
+  /**
+   * @brief Deduction guide for analytic matrix functions.
+   * @param f Function operand.
+   * @param rows Number of rows.
+   * @param cols Number of columns.
+   */
+  AnalyticMatrixFunction(
+    F f, std::size_t rows, std::size_t cols) -> AnalyticMatrixFunction<F>;
 }
 
 #endif

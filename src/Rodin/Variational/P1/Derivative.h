@@ -237,9 +237,11 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Derivative of a P1 GridFunction
+   * @param i Index of the direction the derivative is taken along
+   * @param u P1 GridFunction
    */
   template <class Range, class Data, class Mesh>
-  Derivative(size_t, const GridFunction<P1<Range, Mesh>, Data>&)
+  Derivative(size_t i, const GridFunction<P1<Range, Mesh>, Data>& u)
     -> Derivative<GridFunction<P1<Range, Mesh>, Data>>;
 }
 

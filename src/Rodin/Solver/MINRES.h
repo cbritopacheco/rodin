@@ -84,9 +84,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for MINRES
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  MINRES(Variational::ProblemBase<LinearSystem>&) -> MINRES<LinearSystem>;
+  MINRES(Variational::ProblemBase<LinearSystem>& pb) -> MINRES<LinearSystem>;
 
   /**
    * @ingroup MINRESSpecializations

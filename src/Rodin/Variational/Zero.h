@@ -80,9 +80,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the zero function at a point
        * @returns Always returns 0
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      ScalarType getValue(const Geometry::Point&) const
+      constexpr ScalarType getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return 0;
       }
@@ -200,8 +200,9 @@ namespace Rodin::Variational
    * @brief CTAD for vector Zero
    *
    * Deduces Zero<Math::SpatialVector<Real>> from Zero(size_t)
+   * @param vdim Number of components in the value range.
    */
-  Zero(size_t) -> Zero<Math::SpatialVector<Real>>;
+  Zero(size_t vdim) -> Zero<Math::SpatialVector<Real>>;
 
   /**
    * @brief Convenience typedef for vector zero function

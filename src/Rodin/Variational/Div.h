@@ -500,17 +500,23 @@ namespace Rodin::Variational
     private:
       Grad<OperandType> m_gradient;
   };
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param operand Operand expression.
+   */
   template <class FES, class Data>
     requires FormLanguage::IsMatrixRange<
                typename FormLanguage::Traits<FES>::RangeType>::Value
-  Div(const GridFunction<FES, Data>&) -> Div<GridFunction<FES, Data>>;
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  Div(const GridFunction<FES, Data>& operand) -> Div<GridFunction<FES, Data>>;
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param operand Operand expression.
+   */
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
     requires FormLanguage::IsMatrixRange<
                typename FormLanguage::Traits<FES>::RangeType>::Value
-  Div(
-    const ShapeFunction<Derived, FES, Space>&) -> Div<ShapeFunction<Derived, FES, Space>>;
+  Div(const ShapeFunction<Derived, FES, Space>& operand)
+    -> Div<ShapeFunction<Derived, FES, Space>>;
 }
 
 #endif

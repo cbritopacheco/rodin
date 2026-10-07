@@ -602,9 +602,11 @@ namespace Rodin::Variational
        * @tparam CallableType Callable defined on reference coordinates.
        * @param[in] v Reference-space callable.
        * @return Pushforward wrapper mapping physical points to reference evaluation.
+       * @param entity Mesh entity; this pushforward does not require entity-dependent data.
        */
       template <class CallableType>
-      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const std::pair<size_t, Index>& entity, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
@@ -615,14 +617,22 @@ namespace Rodin::Variational
        * @tparam CallableType Callable defined on reference coordinates.
        * @param[in] v Reference-space callable.
        * @return Pushforward wrapper mapping physical points to reference evaluation.
+       * @param entity Mesh entity; this pushforward does not require entity-dependent data.
        */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const Geometry::Polytope& entity, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
     private:
+      /**
+       * @brief Creates the local finite element space used by a mesh shard.
+       * @param mesh Mesh whose entities are traversed.
+       * @param vdim Number of components in the value range.
+       * @returns Local finite element space with the requested vector dimension.
+       */
       static FESType makeShardFES(const MeshType& mesh, size_t vdim)
       {
         if constexpr (std::is_same_v<Range, Real> || std::is_same_v<Range, Complex>)
@@ -735,8 +745,9 @@ namespace Rodin::Variational
       /**
        * @brief Moves the space and its DOF maps.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      P0& operator=(P0&&) = default;
+      P0& operator=(P0&& other) = default;
 
       size_t getSize() const override
       {

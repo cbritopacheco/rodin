@@ -72,9 +72,11 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for SimplicialLLT
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  SimplicialLLT(Variational::ProblemBase<LinearSystem>&) -> SimplicialLLT<LinearSystem>;
+  SimplicialLLT(
+    Variational::ProblemBase<LinearSystem>& pb) -> SimplicialLLT<LinearSystem>;
 
   /**
    * @ingroup SimplicialLLTSpecializations
@@ -197,6 +199,7 @@ namespace Rodin::Solver
       /**
        * Underlying Eigen SimplicialLLT solver
        * @brief Records the Eigen status, and returns whether it succeeded.
+       * @returns True if the Eigen solver reports success; false otherwise.
        */
       Boolean record()
       {

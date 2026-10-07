@@ -193,9 +193,13 @@ namespace Rodin::Variational
       std::unique_ptr<FunctionBase<LHSDerived>> m_lhs;
       std::unique_ptr<FunctionBase<RHSDerived>> m_rhs;
   };
-  /// @brief Deduction guide for Division.
+  /**
+   * @brief Deduction guide for Division.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived>
-  Division(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+  Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
     -> Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
@@ -402,11 +406,14 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for @c Division.
+  /**
+   * @brief Deduction guide for @c Division.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  Division(
-      const ShapeFunctionBase<LHSDerived, FES, Space>&,
-      const FunctionBase<RHSDerived>&)
+  Division(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+    const FunctionBase<RHSDerived>& rhs)
     -> Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
   /**

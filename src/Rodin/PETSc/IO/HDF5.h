@@ -161,8 +161,9 @@ namespace Rodin::IO
       /**
        * @brief Stream-based overload — not supported for HDF5.
        * @throws Alert::MemberFunctionException Always; use load(path) instead.
+       * @param is Input stream; stream-based loading is unsupported by this format.
        */
-      void load(std::istream&) override
+      void load([[maybe_unused]] std::istream& is) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 GridFunction loading is file-path based."

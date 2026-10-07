@@ -318,9 +318,13 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for Mult of two FunctionBase instances.
+  /**
+   * @brief Deduction guide for Mult of two FunctionBase instances.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived>
-  Mult(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+  Mult(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
     -> Mult<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
@@ -597,9 +601,14 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for @c Mult.
+  /**
+   * @brief Deduction guide for @c Mult.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  Mult(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, Space>&)
+  Mult(const FunctionBase<LHSDerived>& lhs,
+    const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
     -> Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
@@ -830,9 +839,14 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for @c Mult.
+  /**
+   * @brief Deduction guide for @c Mult.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  Mult(const ShapeFunctionBase<LHSDerived, FES, Space>&, const FunctionBase<RHSDerived>&)
+  Mult(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+    const FunctionBase<RHSDerived>& rhs)
     -> Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
@@ -990,9 +1004,13 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for @c Mult.
+  /**
+   * @brief Deduction guide for @c Mult.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class Number, class RHSScalar>
-  Mult(const Number&, const LocalBilinearFormIntegratorBase<RHSScalar>&)
+  Mult(const Number& lhs, const LocalBilinearFormIntegratorBase<RHSScalar>& rhs)
     -> Mult<Number, LocalBilinearFormIntegratorBase<RHSScalar>>;
 
   template <class Number, class RHSScalar>
@@ -1122,9 +1140,13 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for @c Mult.
+  /**
+   * @brief Deduction guide for @c Mult.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class Number, class RHSScalar>
-  Mult(const Number&, const LinearFormIntegratorBase<RHSScalar>&)
+  Mult(const Number& lhs, const LinearFormIntegratorBase<RHSScalar>& rhs)
     -> Mult<Number, LinearFormIntegratorBase<RHSScalar>>;
 
   template <class Number, class RHSScalar>

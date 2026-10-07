@@ -238,16 +238,17 @@ namespace Rodin::Variational
       Math::Vector<ScalarType> m_vec;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <size_t K, class NestedDerived, class Scalar, class Mesh>
   QuadratureRule(
-    const ShapeFunctionBase<
-      ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, TestSpace>,
-      H1<K, Scalar, Mesh>, TestSpace>&)
+    const ShapeFunctionBase<ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, TestSpace>,
+      H1<K, Scalar, Mesh>, TestSpace>& integrand)
     -> QuadratureRule<
-        ShapeFunctionBase<
-          ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, TestSpace>,
-          H1<K, Scalar, Mesh>, TestSpace>>;
+      ShapeFunctionBase<ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, TestSpace>,
+        H1<K, Scalar, Mesh>, TestSpace>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -509,24 +510,21 @@ namespace Rodin::Variational
       Math::Vector<ScalarType> m_vec;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <size_t K, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
-  QuadratureRule(
-    const ShapeFunctionBase<
-      Dot<
-        FunctionBase<LHSDerived>,
-        ShapeFunctionBase<
-          ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>,
+  QuadratureRule(const ShapeFunctionBase<
+    Dot<FunctionBase<LHSDerived>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>,
+        H1<K, Scalar, Mesh>, TestSpace>>,
+    H1<K, Scalar, Mesh>, TestSpace>& integrand)
+    -> QuadratureRule<ShapeFunctionBase<
+      Dot<FunctionBase<LHSDerived>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>,
           H1<K, Scalar, Mesh>, TestSpace>>,
-      H1<K, Scalar, Mesh>, TestSpace>&)
-    -> QuadratureRule<
-        ShapeFunctionBase<
-          Dot<
-            FunctionBase<LHSDerived>,
-            ShapeFunctionBase<
-              ShapeFunction<RHSDerived, H1<K, Scalar, Mesh>, TestSpace>,
-              H1<K, Scalar, Mesh>, TestSpace>>,
-          H1<K, Scalar, Mesh>, TestSpace>>;
+      H1<K, Scalar, Mesh>, TestSpace>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -811,24 +809,22 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
-  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar, class Mesh>
-  QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<
-        ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
+  template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived, class Scalar,
+    class Mesh>
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
+      H1<KTrial, Scalar, Mesh>, TrialSpace>,
+    ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+      H1<KTest, Scalar, Mesh>, TestSpace>>& integrand)
+    -> QuadratureRule<Dot<
+      ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
         H1<KTrial, Scalar, Mesh>, TrialSpace>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
-    -> QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
-            H1<KTrial, Scalar, Mesh>, TrialSpace>,
-          ShapeFunctionBase<
-            ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-            H1<KTest, Scalar, Mesh>, TestSpace>>>;
+      ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
+        H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1134,7 +1130,10 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
   QuadratureRule(const Dot<
@@ -1144,7 +1143,7 @@ namespace Rodin::Variational
           H1<KTrial, Scalar, Mesh>, TrialSpace>>,
       H1<KTrial, Scalar, Mesh>, TrialSpace>,
     ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-      H1<KTest, Scalar, Mesh>, TestSpace>>&)
+      H1<KTest, Scalar, Mesh>, TestSpace>>& integrand)
     -> QuadratureRule<
       Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
                               ShapeFunctionBase<ShapeFunction<LHSDerived,
@@ -1502,7 +1501,10 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
   QuadratureRule(const Dot<
@@ -1512,7 +1514,7 @@ namespace Rodin::Variational
                           H1<KTrial, Scalar, Mesh>, TrialSpace>>,
       H1<KTrial, Scalar, Mesh>, TrialSpace>,
     ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-      H1<KTest, Scalar, Mesh>, TestSpace>>&)
+      H1<KTest, Scalar, Mesh>, TestSpace>>& integrand)
     -> QuadratureRule<
       Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
                               ShapeFunctionBase<Grad<ShapeFunction<LHSDerived,
@@ -1773,14 +1775,17 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
   QuadratureRule(const Mult<FunctionBase<CoefficientDerived>,
     Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
           H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>>&)
+        H1<KTest, Scalar, Mesh>, TestSpace>>>& integrand)
     -> QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
       Dot<
         ShapeFunctionBase<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>,
@@ -2085,7 +2090,10 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
     class TrialRange, class TestRange, class Mesh>
   QuadratureRule(
@@ -2093,7 +2101,7 @@ namespace Rodin::Variational
                 Div<ShapeFunction<LHSDerived, H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
                 H1<KTrial, TrialRange, Mesh>, TrialSpace>,
       ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>,
-        H1<KTest, TestRange, Mesh>, TestSpace>>&)
+        H1<KTest, TestRange, Mesh>, TestSpace>>& integrand)
     -> QuadratureRule<Dot<ShapeFunctionBase<Div<ShapeFunction<LHSDerived,
                                               H1<KTrial, TrialRange, Mesh>, TrialSpace>>,
                             H1<KTrial, TrialRange, Mesh>, TrialSpace>,
@@ -2396,7 +2404,10 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
     class TrialRange, class TestRange, class Mesh>
   QuadratureRule(const Dot<
@@ -2404,7 +2415,7 @@ namespace Rodin::Variational
       H1<KTrial, TrialRange, Mesh>, TrialSpace>,
     ShapeFunctionBase<
       Div<ShapeFunction<RHSDerived, H1<KTest, TestRange, Mesh>, TestSpace>>,
-      H1<KTest, TestRange, Mesh>, TestSpace>>&)
+      H1<KTest, TestRange, Mesh>, TestSpace>>& integrand)
     -> QuadratureRule<Dot<ShapeFunctionBase<ShapeFunction<LHSDerived,
                                               H1<KTrial, TrialRange, Mesh>, TrialSpace>,
                             H1<KTrial, TrialRange, Mesh>, TrialSpace>,
@@ -2828,7 +2839,10 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
     class RHSDerived, class Scalar, class Mesh>
   QuadratureRule(const Dot<
@@ -2839,7 +2853,7 @@ namespace Rodin::Variational
       H1<KTrial, Scalar, Mesh>, TrialSpace>,
     ShapeFunctionBase<
       Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-      H1<KTest, Scalar, Mesh>, TestSpace>>&)
+      H1<KTest, Scalar, Mesh>, TestSpace>>& integrand)
     -> QuadratureRule<
       Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
                               ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
@@ -3281,7 +3295,10 @@ namespace Rodin::Variational
     };
 
     // CTAD helper
-    /// @brief Deduction guide for @c QuadratureRule.
+    /**
+     * @brief Deduction guide for @c QuadratureRule.
+     * @param integrand Expression to integrate.
+     */
     template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
       class Scalar, class Mesh>
     QuadratureRule(
@@ -3290,7 +3307,7 @@ namespace Rodin::Variational
                   H1<KTrial, Scalar, Mesh>, TrialSpace>,
         ShapeFunctionBase<
           Grad<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-          H1<KTest, Scalar, Mesh>, TestSpace>>&)
+          H1<KTest, Scalar, Mesh>, TestSpace>>& integrand)
       -> QuadratureRule<
         Dot<ShapeFunctionBase<
               Grad<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
@@ -3625,7 +3642,10 @@ namespace Rodin::Variational
     };
 
     // CTAD helper
-    /// @brief Deduction guide for @c QuadratureRule.
+    /**
+     * @brief Deduction guide for @c QuadratureRule.
+     * @param integrand Expression to integrate.
+     */
     template <size_t KTrial, size_t KTest, class LHSDerived, class RHSDerived,
       class Scalar, class Mesh>
     QuadratureRule(const Dot<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
@@ -3633,7 +3653,7 @@ namespace Rodin::Variational
                                H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<
         Jacobian<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
+        H1<KTest, Scalar, Mesh>, TestSpace>>& integrand)
       -> QuadratureRule<
         Dot<ShapeFunctionBase<
               Jacobian<ShapeFunction<LHSDerived, H1<KTrial, Scalar, Mesh>, TrialSpace>>,
@@ -4240,7 +4260,10 @@ namespace Rodin::Variational
     };
 
     // CTAD helper
-    /// @brief Deduction guide for @c QuadratureRule.
+    /**
+     * @brief Deduction guide for @c QuadratureRule.
+     * @param integrand Expression to integrate.
+     */
     template <size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived,
       class RHSDerived, class Scalar, class Mesh>
     QuadratureRule(const Dot<
@@ -4250,7 +4273,7 @@ namespace Rodin::Variational
                           FunctionBase<CoefficientDerived>>,
         H1<KTrial, Scalar, Mesh>, TrialSpace>,
       ShapeFunctionBase<ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
-        H1<KTest, Scalar, Mesh>, TestSpace>>&)
+        H1<KTest, Scalar, Mesh>, TestSpace>>& integrand)
       -> QuadratureRule<Dot<
         ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
                                                    H1<KTrial, Scalar, Mesh>, TrialSpace>>,

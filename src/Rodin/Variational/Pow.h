@@ -179,9 +179,12 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c Pow.
    * @ingroup RodinCTAD
+   * @param base Base function of the power.
+   * @param exponent Exponent of the power.
    */
   template <class BaseDerived, class Number>
-  Pow(const FunctionBase<BaseDerived>&, Number) -> Pow<FunctionBase<BaseDerived>, Number>;
+  Pow(const FunctionBase<BaseDerived>& base,
+    Number exponent) -> Pow<FunctionBase<BaseDerived>, Number>;
 
   /**
    * @brief Builds the pointwise power of a function expression.

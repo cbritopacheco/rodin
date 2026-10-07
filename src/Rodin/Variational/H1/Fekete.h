@@ -50,7 +50,10 @@ namespace Rodin::Variational
       }
 
     private:
-      /// Build equispaced nodes and apply warp–blend once.
+      /**
+       * Build equispaced nodes and apply warp–blend once.
+       * @returns Array of warp-blend interpolation nodes on the reference element.
+       */
       static constexpr std::array<Math::SpatialPoint, Count> compute()
       {
         std::array<Math::SpatialPoint, Count> nodes{};
@@ -122,7 +125,10 @@ namespace Rodin::Variational
       }
 
     private:
-      /// Build equispaced nodes and apply warp–blend once.
+      /**
+       * Build equispaced nodes and apply warp–blend once.
+       * @returns Array of warp-blend interpolation nodes on the reference element.
+       */
       static constexpr std::array<Math::SpatialPoint, Count> compute()
       {
         std::array<Math::SpatialPoint, Count> nodes{};

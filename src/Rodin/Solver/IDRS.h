@@ -69,9 +69,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for IDRS
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  IDRS(Variational::ProblemBase<LinearSystem>&) -> IDRS<LinearSystem>;
+  IDRS(Variational::ProblemBase<LinearSystem>& pb) -> IDRS<LinearSystem>;
 
   /**
    * @ingroup IDRSSpecializations

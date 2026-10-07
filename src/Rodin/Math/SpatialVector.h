@@ -961,9 +961,10 @@ namespace Rodin::Math
       /**
        * @brief Serializes the vector (for boost::serialization).
        * @param ar Serialization archive.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
-      template<class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      template <class Archive>
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & m_size;
         for (std::uint8_t i = 0; i < m_size; i++)

@@ -374,10 +374,14 @@ namespace Rodin::Variational
       std::unique_ptr<QF::QuadratureFormulaBase> m_qf;
   };
 
-  /// @brief CTAD for Potential.
+  /**
+   * @brief CTAD for Potential.
+   * @param kernel Kernel of the nonlocal integral operator.
+   * @param u Operand expression.
+   */
   template <class LHSType, class RHSDerived>
-  Potential(const LHSType&, const FunctionBase<RHSDerived>&)
-    -> Potential<LHSType, FunctionBase<RHSDerived>>;
+  Potential(const LHSType& kernel,
+    const FunctionBase<RHSDerived>& u) -> Potential<LHSType, FunctionBase<RHSDerived>>;
 
   /**
    * @ingroup PotentialSpecializations
@@ -494,10 +498,18 @@ namespace Rodin::Variational
       std::reference_wrapper<const OperandType> m_u;
   };
 
-  /// @brief CTAD for Potential.
-  template <class LHSType, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
-  Potential(const LHSType&, const ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>&)
-    -> Potential<LHSType, ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>>;
+  /**
+   * @brief CTAD for Potential.
+   * @param kernel Kernel of the nonlocal integral operator.
+   * @param u Operand expression.
+   */
+  template <class LHSType, class RHSDerived, class FESType,
+    ShapeFunctionSpaceType SpaceType>
+  Potential(const LHSType& kernel,
+    const ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType,
+      SpaceType>& u) -> Potential<LHSType,
+                       ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>,
+                         FESType, SpaceType>>;
 
   /// @brief Integral of a potential tested against a shape function.
   template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -588,25 +600,32 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for @c Integral.
-  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  /**
+   * @brief Deduction guide for @c Integral.
+   * @param integrand Expression to integrate.
+   */
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived,
+    class TestFES>
   Integral(
-      const Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
+    const Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>& integrand)
     -> Integral<
-          Dot<
-            Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+      Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+        ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
-  /// @brief Deduction guide for @c Integral.
-  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  /**
+   * @brief Deduction guide for @c Integral.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived,
+    class TestFES>
   Integral(
-      const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>&,
-      const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
+    const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>& lhs,
+    const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>& rhs)
     -> Integral<
-          Dot<
-            Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+      Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+        ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 }
 
 #endif

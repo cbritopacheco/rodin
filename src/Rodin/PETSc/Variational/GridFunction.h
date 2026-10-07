@@ -1584,9 +1584,10 @@ namespace Rodin::PETSc::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for PETSc::Variational::GridFunction.
+   * @param fes Finite element space.
    */
   template <class FES>
-  GridFunction(const FES&) -> GridFunction<FES>;
+  GridFunction(const FES& fes) -> GridFunction<FES>;
 }
 
 namespace Rodin::FormLanguage

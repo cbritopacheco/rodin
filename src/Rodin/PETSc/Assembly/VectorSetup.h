@@ -117,6 +117,12 @@ namespace Rodin::PETSc::Assembly
       // vector whose size matches is reused. A typed vector whose size differs
       // violates the constant-space contract and cannot be resized in place, so
       // it fails the debug assertion.
+      /**
+       * @brief Determines whether the vector needs structural setup.
+       * @param options Vector setup options.
+       * @param needsSetup Output flag indicating whether structural setup is required.
+       * @returns Zero on success, or a PETSc error code on failure.
+       */
       PetscErrorCode needsStructuralSetup(const Options& options, bool& needsSetup) const
       {
         VecType curType = nullptr;

@@ -136,9 +136,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order used on a mesh entity.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         // Identically zero.
         return 0;
@@ -292,9 +293,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order used on a mesh entity.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -313,15 +315,22 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Jacobian of a P0g vector GridFunction
+   * @param u Operand expression.
    */
   template <class Range, class Data, class Mesh>
-  Jacobian(const GridFunction<P0g<Range, Mesh>, Data>&)
+  Jacobian(const GridFunction<P0g<Range, Mesh>, Data>& u)
     -> Jacobian<GridFunction<P0g<Range, Mesh>, Data>>;
 
-  /// @brief Deduction guide for @c Jacobian.
-  template <class ShapeFunctionDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
+  /**
+   * @brief Deduction guide for @c Jacobian.
+   * @param u Operand expression.
+   */
+  template <class ShapeFunctionDerived, class Scalar, class Mesh,
+    ShapeFunctionSpaceType Space>
+  Jacobian(const ShapeFunction<ShapeFunctionDerived,
+    P0g<Math::SpatialVector<Scalar>, Mesh>, Space>& u)
+    -> Jacobian<
+      ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
 }
 
 #endif

@@ -246,9 +246,17 @@ namespace Rodin::IO
           : m_id(id),
             m_close(closeFn)
         {}
+        /**
+         * @brief Disables copying or moving this object.
+         * @param other Object whose copying or moving is disabled.
+         */
 
-        Handle(const Handle&) = delete;
-        Handle& operator=(const Handle&) = delete;
+        Handle(const Handle& other) = delete;
+        /**
+         * @brief Assigns the state of another object.
+         * @param other Object to copy from.
+         */
+        Handle& operator=(const Handle& other) = delete;
 
         /**
          * @brief Move constructor.
@@ -2191,8 +2199,9 @@ namespace Rodin::IO
        * @brief Stream-based loading is not supported for HDF5.
        *
        * Always raises an exception. Use the file-path overload instead.
+       * @param is Input stream; stream-based loading is unsupported by this format.
        */
-      void load(std::istream&) override
+      void load([[maybe_unused]] std::istream& is) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 mesh loading requires file-path based loading."
@@ -2242,6 +2251,11 @@ namespace Rodin::IO
       }
 
     private:
+      /**
+       * @brief Reads mesh coordinates from an HDF5 file.
+       * @param file Open HDF5 file handle.
+       * @returns Point cloud reconstructed from the stored vertices.
+       */
       Geometry::PointCloud readVertices(hid_t file) const
       {
         const auto [nv, sdim] = HDF5::readMatrixShape(file, HDF5::Path::MeshGeometryVertices);
@@ -2261,6 +2275,11 @@ namespace Rodin::IO
         }
         return vertices;
       }
+      /**
+       * @brief Reads mesh connectivity from an HDF5 file.
+       * @param file Open HDF5 file handle.
+       * @returns Mesh connectivity reconstructed from the stored entities and incidence data.
+       */
 
       Geometry::Connectivity<ContextType> readConnectivity(hid_t file) const
       {
@@ -2387,6 +2406,12 @@ namespace Rodin::IO
 
         return connectivity;
       }
+      /**
+       * @brief Reads mesh attributes from an HDF5 file.
+       * @param file Open HDF5 file handle.
+       * @param connectivity Mesh connectivity corresponding to the stored attributes.
+       * @returns Attribute index reconstructed for the supplied connectivity.
+       */
 
       Geometry::AttributeIndex readAttributes(
           hid_t file,
@@ -2524,6 +2549,10 @@ namespace Rodin::IO
       }
 
     private:
+      /**
+       * @brief Creates the mesh groups in the HDF5 file.
+       * @param file Open HDF5 file handle.
+       */
       void createBaseGroups(hid_t file) const
       {
         {
@@ -2583,6 +2612,10 @@ namespace Rodin::IO
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Transformations group." << Alert::Raise; }
         }
       }
+      /**
+       * @brief Writes point coordinates to the HDF5 file.
+       * @param file Open HDF5 file handle.
+       */
 
       void writeVertices(hid_t file) const
       {
@@ -2605,6 +2638,10 @@ namespace Rodin::IO
             static_cast<hsize_t>(nv),
             static_cast<hsize_t>(sdim));
       }
+      /**
+       * @brief Writes entity connectivity to the HDF5 file.
+       * @param file Open HDF5 file handle.
+       */
 
       void writeConnectivity(hid_t file) const
       {
@@ -2728,6 +2765,10 @@ namespace Rodin::IO
           }
         }
       }
+      /**
+       * @brief Writes mesh attributes to the HDF5 file.
+       * @param file Open HDF5 file handle.
+       */
 
       void writeAttributes(hid_t file) const
       {
@@ -2746,6 +2787,10 @@ namespace Rodin::IO
           HDF5::writeVectorDataset(file, HDF5::attributePath(d), attrs);
         }
       }
+      /**
+       * @brief Writes geometric transformations to the HDF5 file.
+       * @param file Open HDF5 file handle.
+       */
 
       void writeTransformations(hid_t file) const
       {
@@ -2825,8 +2870,9 @@ namespace Rodin::IO
        * @brief Stream-based loading is not supported for HDF5.
        *
        * Always raises an exception. Use the file-path overload instead.
+       * @param is Input stream; stream-based loading is unsupported by this format.
        */
-      void load(std::istream&) override
+      void load([[maybe_unused]] std::istream& is) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 GridFunction loading is file-path based."

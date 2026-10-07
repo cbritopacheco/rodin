@@ -244,9 +244,13 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for function sum.
+  /**
+   * @brief Deduction guide for function sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived>
-  Sum(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+  Sum(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
     -> Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
@@ -513,10 +517,16 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for @c Sum.
+  /**
+   * @brief Deduction guide for @c Sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  Sum(const ShapeFunctionBase<LHSDerived, FES, Space>&, const ShapeFunctionBase<RHSDerived, FES, Space>&)
-    -> Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>;
+  Sum(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+    const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
+    -> Sum<ShapeFunctionBase<LHSDerived, FES, Space>,
+      ShapeFunctionBase<RHSDerived, FES, Space>>;
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   constexpr auto
@@ -585,9 +595,14 @@ namespace Rodin::Variational
       {}
   };
 
-  /// @brief Deduction guide for @c Sum.
+  /**
+   * @brief Deduction guide for @c Sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSNumber, class RHSNumber>
-  Sum(const LinearFormIntegratorBase<LHSNumber>&, const LinearFormIntegratorBase<RHSNumber>&)
+  Sum(const LinearFormIntegratorBase<LHSNumber>& lhs,
+    const LinearFormIntegratorBase<RHSNumber>& rhs)
     -> Sum<LinearFormIntegratorBase<LHSNumber>, LinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
@@ -657,10 +672,16 @@ namespace Rodin::Variational
       {}
   };
 
-  /// @brief Deduction guide for @c Sum.
+  /**
+   * @brief Deduction guide for @c Sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSNumber, class RHSNumber>
-  Sum(const LinearFormIntegratorBase<LHSNumber>&, const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>&)
-    -> Sum<LinearFormIntegratorBase<LHSNumber>, FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
+  Sum(const LinearFormIntegratorBase<LHSNumber>& lhs,
+    const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& rhs)
+    -> Sum<LinearFormIntegratorBase<LHSNumber>,
+      FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
@@ -730,11 +751,16 @@ namespace Rodin::Variational
       {}
   };
 
-  /// @brief Deduction guide for @c Sum.
+  /**
+   * @brief Deduction guide for @c Sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSNumber, class RHSNumber>
-  Sum(const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>&,
-      const LinearFormIntegratorBase<RHSNumber>&)
-    -> Sum<FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>, LinearFormIntegratorBase<RHSNumber>>;
+  Sum(const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& lhs,
+    const LinearFormIntegratorBase<RHSNumber>& rhs)
+    -> Sum<FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>,
+      LinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
@@ -805,13 +831,16 @@ namespace Rodin::Variational
       {}
   };
 
-  /// @brief Deduction guide for @c Sum.
+  /**
+   * @brief Deduction guide for @c Sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSNumber, class RHSNumber>
-  Sum(const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>&,
-      const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>&)
-    -> Sum<
-        FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>,
-        FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
+  Sum(const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& lhs,
+    const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& rhs)
+    -> Sum<FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>,
+      FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
@@ -957,13 +986,16 @@ namespace Rodin::Variational
       {}
   };
 
-  /// @brief Deduction guide for @c Sum.
+  /**
+   * @brief Deduction guide for @c Sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSNumber, class RHSNumber>
-  Sum(const LocalBilinearFormIntegratorBase<LHSNumber>&,
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>&)
-    -> Sum<
-        LocalBilinearFormIntegratorBase<LHSNumber>,
-        FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>;
+  Sum(const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
+    const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
+    -> Sum<LocalBilinearFormIntegratorBase<LHSNumber>,
+      FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
@@ -1033,13 +1065,16 @@ namespace Rodin::Variational
       {}
   };
 
-  /// @brief Deduction guide for @c Sum.
+  /**
+   * @brief Deduction guide for @c Sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSNumber, class RHSNumber>
-  Sum(const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>&,
-      const LocalBilinearFormIntegratorBase<RHSNumber>&)
-    -> Sum<
-        FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,
-        LocalBilinearFormIntegratorBase<RHSNumber>>;
+  Sum(const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
+    const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
+    -> Sum<FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,
+      LocalBilinearFormIntegratorBase<RHSNumber>>;
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
@@ -1110,13 +1145,16 @@ namespace Rodin::Variational
       {}
   };
 
-  /// @brief Deduction guide for @c Sum.
+  /**
+   * @brief Deduction guide for @c Sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSNumber, class RHSNumber>
-  Sum(const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>&,
-      const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>&)
-    -> Sum<
-        FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,
-        FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>;
+  Sum(const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
+    const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
+    -> Sum<FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>,
+      FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>>;
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto

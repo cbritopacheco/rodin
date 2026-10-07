@@ -187,9 +187,13 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_op;
   };
 
-  /// @brief Deduction guide for UnaryMinus of FunctionBase.
+  /**
+   * @brief Deduction guide for UnaryMinus of FunctionBase.
+   * @param op Operand expression.
+   */
   template <class NestedDerived>
-  UnaryMinus(const FunctionBase<NestedDerived>&) -> UnaryMinus<FunctionBase<NestedDerived>>;
+  UnaryMinus(
+    const FunctionBase<NestedDerived>& op) -> UnaryMinus<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Applies unary minus to a function.
@@ -353,11 +357,13 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for UnaryMinus of ShapeFunctionBase.
+  /**
+   * @brief Deduction guide for UnaryMinus of ShapeFunctionBase.
+   * @param op Operand expression.
+   */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  UnaryMinus(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+  UnaryMinus(const ShapeFunctionBase<NestedDerived, FES, Space>& op)
     -> UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>;
-
 
   /**
    * @brief Applies unary minus to a shape function.
@@ -474,9 +480,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_op;
   };
 
-  /// @brief Deduction guide for UnaryMinus of LinearFormIntegratorBase.
+  /**
+   * @brief Deduction guide for UnaryMinus of LinearFormIntegratorBase.
+   * @param op Operand expression.
+   */
   template <class Number>
-  UnaryMinus(const LinearFormIntegratorBase<Number>&)
+  UnaryMinus(const LinearFormIntegratorBase<Number>& op)
     -> UnaryMinus<LinearFormIntegratorBase<Number>>;
 
   /**
@@ -543,9 +552,12 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for UnaryMinus of List<LinearFormIntegratorBase>.
+  /**
+   * @brief Deduction guide for UnaryMinus of List<LinearFormIntegratorBase>.
+   * @param op Operand expression.
+   */
   template <class Number>
-  UnaryMinus(const FormLanguage::List<LinearFormIntegratorBase<Number>>&)
+  UnaryMinus(const FormLanguage::List<LinearFormIntegratorBase<Number>>& op)
     -> UnaryMinus<FormLanguage::List<LinearFormIntegratorBase<Number>>>;
 
   /**
@@ -664,9 +676,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_op;
   };
 
-  /// @brief Deduction guide for UnaryMinus of LocalBilinearFormIntegratorBase.
+  /**
+   * @brief Deduction guide for UnaryMinus of LocalBilinearFormIntegratorBase.
+   * @param op Operand expression.
+   */
   template <class Number>
-  UnaryMinus(const LocalBilinearFormIntegratorBase<Number>&)
+  UnaryMinus(const LocalBilinearFormIntegratorBase<Number>& op)
     -> UnaryMinus<LocalBilinearFormIntegratorBase<Number>>;
 
   /**
@@ -738,9 +753,12 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for UnaryMinus of List<LocalBilinearFormIntegratorBase>.
+  /**
+   * @brief Deduction guide for UnaryMinus of List<LocalBilinearFormIntegratorBase>.
+   * @param op Operand expression.
+   */
   template <class Number>
-  UnaryMinus(const FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>&)
+  UnaryMinus(const FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>& op)
     -> UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>>;
 
   /**

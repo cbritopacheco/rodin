@@ -259,6 +259,11 @@ namespace Rodin::Solid
       static constexpr Real DefaultLocalTolerance = 1e-12;
       /// @brief Local Newton work budget; not a convergence guarantee.
       static constexpr size_t DefaultLocalMaxIterations = 50;
+      /**
+       * @brief Checks whether the constitutive point contains the active-law time data.
+       * @param cp Constitutive point containing the local material data.
+       * @returns True when all required time-step, previous active-state, and activation tags are present.
+       */
 
       static bool hasDynamicData(const ConstitutivePoint& cp)
       {

@@ -67,9 +67,10 @@ namespace Rodin::Geometry
        * @param[in,out] ar Archive object
        *
        * The serialization version argument is ignored.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
       template <class Archive>
-      void save(Archive& ar, const unsigned int) const
+      void save(Archive& ar, [[maybe_unused]] const unsigned int version) const
       {
         ar & owner; // polymorphic unique_ptr
       }
@@ -80,9 +81,10 @@ namespace Rodin::Geometry
        *
        * Restores both the unique_ptr and synchronizes the atomic pointer. The
        * serialization version argument is ignored.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
       template <class Archive>
-      void load(Archive& ar, const unsigned int)
+      void load(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & owner;
         ptr.store(owner.get(), std::memory_order_relaxed);
@@ -107,8 +109,11 @@ namespace Rodin::Geometry
       /// @brief Default constructor.
       Dimension() = default;
 
-      /// @brief Copy constructor (deleted).
-      Dimension(const Dimension&) = delete;
+      /**
+       * @brief Copy constructor (deleted).
+       * @param other Object whose copying or moving is disabled.
+       */
+      Dimension(const Dimension& other) = delete;
 
       /**
        * @brief Copy assignment operator (deleted).
@@ -116,13 +121,20 @@ namespace Rodin::Geometry
        */
       Dimension& operator=(const Dimension& other) = delete;
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Dimension(Dimension&& other) noexcept
         : slots(std::move(other.slots)),
           publishedSize(other.publishedSize.load(std::memory_order_relaxed))
       {}
 
-      /// @brief Move assignment operator.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after assignment.
+       */
       Dimension& operator=(Dimension&& other) noexcept
       {
         slots = std::move(other.slots);
@@ -138,9 +150,10 @@ namespace Rodin::Geometry
        * The serialization version argument is ignored.
        *
        * @note The mutex is not serialized.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
       template <class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & slots; // mutex is not serialized
       }
@@ -153,11 +166,18 @@ namespace Rodin::Geometry
     /// @brief Destructor.
     ~PolytopeTransformationIndex() = default;
 
-    /// @brief Copy constructor (deleted).
-    PolytopeTransformationIndex(const PolytopeTransformationIndex&) = delete;
+    /**
+     * @brief Copy constructor (deleted).
+     * @param other Object whose copying or moving is disabled.
+     */
+    PolytopeTransformationIndex(const PolytopeTransformationIndex& other) = delete;
 
-    /// @brief Copy assignment operator (deleted).
-    PolytopeTransformationIndex& operator=(const PolytopeTransformationIndex&) = delete;
+    /**
+     * @brief Copy assignment operator (deleted).
+     * @param other Object to copy from.
+     */
+    PolytopeTransformationIndex& operator=(
+      const PolytopeTransformationIndex& other) = delete;
 
     /**
      * @brief Move constructor.
@@ -363,9 +383,10 @@ namespace Rodin::Geometry
     /**
      * @brief Serialization save method.
      * @param[in,out] ar Archive object
+     * @param version Boost.Serialization class version; unused by this implementation.
      */
     template <class Archive>
-    void save(Archive& ar, const unsigned int) const
+    void save(Archive& ar, [[maybe_unused]] const unsigned int version) const
     {
       ar & m_dimensions;
     }
@@ -375,9 +396,10 @@ namespace Rodin::Geometry
      * @param[in,out] ar Archive object
      *
      * Clears existing data before loading.
+     * @param version Boost.Serialization class version; unused by this implementation.
      */
     template <class Archive>
-    void load(Archive& ar, const unsigned int)
+    void load(Archive& ar, [[maybe_unused]] const unsigned int version)
     {
       clear();
       ar & m_dimensions;

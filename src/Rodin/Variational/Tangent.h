@@ -150,9 +150,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for @c Tan.
+  /**
+   * @brief Deduction guide for @c Tan.
+   * @param v Function to apply tangent to
+   */
   template <class NestedDerived>
-  Tan(const FunctionBase<NestedDerived>&) -> Tan<FunctionBase<NestedDerived>>;
+  Tan(const FunctionBase<NestedDerived>& v) -> Tan<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Builds the pointwise tangent of a function expression.

@@ -213,9 +213,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for Average with FunctionBase.
+  /**
+   * @brief Deduction guide for Average with FunctionBase.
+   * @param op Shape function to average
+   */
   template <class Derived>
-  Average(const FunctionBase<Derived>&) -> Average<FunctionBase<Derived>>;
+  Average(const FunctionBase<Derived>& op) -> Average<FunctionBase<Derived>>;
 
   /**
    * @ingroup AverageSpecializations
@@ -406,9 +409,12 @@ namespace Rodin::Variational
       const IntegrationPoint* m_ip;
   };
 
-  /// @brief Deduction guide for Average with ShapeFunctionBase.
+  /**
+   * @brief Deduction guide for Average with ShapeFunctionBase.
+   * @param op Shape function to average
+   */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  Average(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+  Average(const ShapeFunctionBase<NestedDerived, FES, Space>& op)
     -> Average<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 

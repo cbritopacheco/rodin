@@ -118,9 +118,9 @@ namespace Rodin::Variational
       /**
        * @brief Called when a traced trajectory reaches a boundary.
        * @returns false, indicating that the trace should stop.
+       * @param hit Boundary-hit data; this stopping policy leaves it unchanged.
        */
-      constexpr
-      bool operator()(const BoundaryHit&) const
+      constexpr bool operator()([[maybe_unused]] const BoundaryHit& hit) const
       {
         return false;
       }
@@ -1309,8 +1309,9 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order used on a mesh entity.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<size_t> getOrder(const Geometry::Polytope&) const
+      Optional<size_t> getOrder([[maybe_unused]] const Geometry::Polytope& polytope) const
       {
         return {};
       }
@@ -1375,28 +1376,39 @@ namespace Rodin::Variational
       const Geometry::Point* m_p;
   };
 
-  /// @brief Deduction guide for @c Flow.
+  /**
+   * @brief Deduction guide for @c Flow.
+   * @param time Duration of the flow integration.
+   * @param operand Function transported along the flow.
+   * @param velocity Velocity field.
+   */
   template <class Derived, class Velocity>
-  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&)
-    -> Flow<
-         FunctionBase<Derived>,
-         Velocity,
-         Math::RungeKutta::RK4,
-         DefaultBoundaryPolicy>;
+  Flow(const Real& time, const FunctionBase<Derived>& operand,
+    Velocity&& velocity) -> Flow<FunctionBase<Derived>, Velocity, Math::RungeKutta::RK4,
+                           DefaultBoundaryPolicy>;
 
-  /// @brief Deduction guide for @c Flow.
+  /**
+   * @brief Deduction guide for @c Flow.
+   * @param time Duration of the flow integration.
+   * @param operand Function transported along the flow.
+   * @param velocity Velocity field.
+   * @param stepper Time integration method.
+   */
   template <class Derived, class Velocity, class Step>
-  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&)
-    -> Flow<
-         FunctionBase<Derived>,
-         Velocity,
-         Step,
-         DefaultBoundaryPolicy>;
+  Flow(const Real& time, const FunctionBase<Derived>& operand, Velocity&& velocity,
+    Step&& stepper) -> Flow<FunctionBase<Derived>, Velocity, Step, DefaultBoundaryPolicy>;
 
-  /// @brief Deduction guide for @c Flow.
+  /**
+   * @brief Deduction guide for @c Flow.
+   * @param t Signed tracing time.
+   * @param u Operand function.
+   * @param vel Velocity field.
+   * @param st Time integrator.
+   * @param bp Boundary policy.
+   */
   template <class Derived, class Velocity, class Step, class BBP>
-  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&, BBP&&)
-    -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
+  Flow(const Real& t, const FunctionBase<Derived>& u, Velocity&& vel, Step&& st,
+    BBP&& bp) -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
 }
 
 #endif

@@ -77,8 +77,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order when it is known.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         if constexpr (FormLanguage::IsTensorRange<Value>::Value)
           return 0;
@@ -93,8 +95,11 @@ namespace Rodin::Variational
     private:
       Value m_value;
   };
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param value Value to store or assign.
+   */
   template <class Value>
-  TensorFunction(Value) -> TensorFunction<Value>;
+  TensorFunction(Value value) -> TensorFunction<Value>;
 }
 #endif

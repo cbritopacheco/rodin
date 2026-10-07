@@ -72,9 +72,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for LDLT
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  LDLT(Variational::ProblemBase<LinearSystem>&) -> LDLT<LinearSystem>;
+  LDLT(Variational::ProblemBase<LinearSystem>& pb) -> LDLT<LinearSystem>;
 
   /**
    * @ingroup LDLTSpecializations
@@ -196,6 +197,7 @@ namespace Rodin::Solver
       /**
        * Underlying Eigen LDLT solver
        * @brief Records the Eigen status, and returns whether it succeeded.
+       * @returns True if the Eigen solver reports success; false otherwise.
        */
       Boolean record()
       {

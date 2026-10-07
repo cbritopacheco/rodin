@@ -81,7 +81,7 @@ namespace Rodin::Variational
     public:
       /**
        * @brief Constructs the LinearForm from the given arguments.
-       * @param g Function operand.
+       * @param g Reference-cell geometry.
        */
       constexpr explicit LinearForm(G g) : m_g(g) {}
       /**
@@ -93,7 +93,7 @@ namespace Rodin::Variational
       /**
        * @brief Applies the functional to a callable.
        * @returns Value of the expression at the supplied evaluation point.
-       * @param v Object whose identifier is hashed.
+       * @param v Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.
        */
       template <class T>
       constexpr ScalarType operator()(const T& v) const
@@ -128,8 +128,10 @@ namespace Rodin::Variational
         /**
          * @brief Evaluates at a point on the reference element.
          * @returns Value of the expression at the supplied evaluation point.
+         * @param xi Reference coordinates; the constant result is independent of this argument.
          */
-        constexpr ReturnType operator()(const Math::SpatialVector<Real>&) const
+        constexpr ReturnType operator()(
+          [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
         {
           return ReturnType(0);
         }
@@ -146,8 +148,10 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates at a point on the reference element.
        * @returns Value of the expression at the supplied evaluation point.
+       * @param xi Reference coordinates; the constant result is independent of this argument.
        */
-      constexpr ReturnType operator()(const Math::SpatialVector<Real>&) const
+      constexpr ReturnType operator()(
+        [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
       {
         return ReturnType(1);
       }
@@ -155,9 +159,11 @@ namespace Rodin::Variational
       /**
        * @brief Gets the derivative of the basis function.
        * @returns Reference-coordinate derivative function for the basis.
+       * @param direction Reference-coordinate direction; the constant basis has zero derivative in every direction.
        */
       template <size_t Order>
-      constexpr DerivativeFunction<Order> getDerivative(size_t) const
+      constexpr DerivativeFunction<Order> getDerivative(
+        [[maybe_unused]] size_t direction) const
       {
         return DerivativeFunction<Order>();
       }
@@ -269,8 +275,9 @@ namespace Rodin::Variational
     /**
      * @brief Gets the degree-of-freedom functional of a local degree of freedom.
      * @returns The degree-of-freedom functional of a local degree of freedom.
+     * @param local Local degree-of-freedom index; unused by this constant element.
      */
-    constexpr LinearForm getLinearForm(size_t) const
+    constexpr LinearForm getLinearForm([[maybe_unused]] size_t local) const
     {
       return LinearForm(this->getGeometry());
     }
@@ -278,8 +285,9 @@ namespace Rodin::Variational
     /**
      * @brief Gets the basis function of a local degree of freedom.
      * @returns Value of the selected local basis function at the evaluation point.
+     * @param local Local degree-of-freedom index; unused by this constant element.
      */
-    constexpr BasisFunction getBasis(size_t) const
+    constexpr BasisFunction getBasis([[maybe_unused]] size_t local) const
     {
       return BasisFunction();
     }
@@ -321,7 +329,7 @@ namespace Rodin::Variational
        * @brief Constructs the functional of a local degree of freedom.
        * @param vdim Number of components in the value range.
        * @param local Index in the local numbering.
-       * @param g Function operand.
+       * @param g Reference-cell geometry.
        */
       constexpr LinearForm(size_t vdim, size_t local, G g)
         : m_vdim(vdim), m_local(local), m_g(g)
@@ -335,8 +343,8 @@ namespace Rodin::Variational
 
       /**
        * @brief Applies the functional to a callable.
-       * @returns Reference to the entry at the supplied indices.
-       * @param v Object whose identifier is hashed.
+       * @returns Value of the nodal functional applied to the selected component of the callable.
+       * @param v Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.
        */
       template <class T>
       ScalarType operator()(const T& v) const
@@ -364,8 +372,18 @@ namespace Rodin::Variational
       class DerivativeFunction
       {
       public:
-        /// @brief Constructs the derivative of a local basis function.
-        constexpr DerivativeFunction(size_t, size_t, size_t, size_t, G) {}
+        /**
+         * @brief Constructs the derivative of a local basis function.
+         * @param i First differentiation direction; unused because the derivative is zero.
+         * @param j Second differentiation direction; unused because the derivative is zero.
+         * @param vdim Value-range dimension; unused because the derivative is zero.
+         * @param local Local basis index; unused because the derivative is zero.
+         * @param geometry Reference geometry; unused because the derivative is zero.
+         */
+        constexpr DerivativeFunction([[maybe_unused]] size_t i, [[maybe_unused]] size_t j,
+          [[maybe_unused]] size_t vdim, [[maybe_unused]] size_t local,
+          [[maybe_unused]] G geometry)
+        {}
         /**
          * @brief Copy constructor.
          * @param other Object to copy from.
@@ -374,9 +392,11 @@ namespace Rodin::Variational
 
         /**
          * @brief Evaluates at a point on the reference element.
-         * @returns Reference to the entry at the supplied indices.
+         * @returns Zero, since the basis function is constant.
+         * @param xi Reference coordinates; the constant result is independent of this argument.
          */
-        constexpr ScalarType operator()(const Math::SpatialVector<Real>&) const
+        constexpr ScalarType operator()(
+          [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
         {
           return ScalarType(0);
         }
@@ -390,7 +410,7 @@ namespace Rodin::Variational
        * @brief Constructs the basis function of a local degree of freedom.
        * @param vdim Number of components in the value range.
        * @param local Index in the local numbering.
-       * @param g Function operand.
+       * @param g Reference-cell geometry.
        */
       constexpr BasisFunction(size_t vdim, size_t local, G g)
         : m_vdim(vdim), m_local(local), m_g(g)
@@ -404,9 +424,11 @@ namespace Rodin::Variational
 
       /**
        * @brief Evaluates at a point on the reference element.
-       * @returns Reference to the entry at the supplied indices.
+       * @returns Reference to the thread-local vector basis value, overwritten by the next evaluation in this thread.
+       * @param xi Reference coordinates; the constant result is independent of this argument.
        */
-      const ReturnType& operator()(const Math::SpatialVector<Real>&) const
+      const ReturnType& operator()(
+        [[maybe_unused]] const Math::SpatialVector<Real>& xi) const
       {
         static thread_local ReturnType s_out;
         s_out = ReturnType(static_cast<std::uint8_t>(m_vdim));
@@ -559,10 +581,11 @@ namespace Rodin::Variational
      * @brief Evaluates the integrand into the output argument.
      * @param out Storage for the computed result.
      * @param coefficient Coefficient multiplying the expression.
+     * @param xi Reference coordinates; the constant result is independent of this argument.
      */
     template <class Coefficient>
-    constexpr void evaluate(
-      RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint&) const
+    constexpr void evaluate(RangeType& out, Coefficient&& coefficient,
+      [[maybe_unused]] const Math::SpatialPoint& xi) const
     {
       out.resize(m_vdim);
       for (size_t component = 0; component < m_vdim; ++component)
@@ -651,7 +674,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates the selected matrix basis or its component nodal functional.
            * @param point Point at which the operation is evaluated.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Matrix basis value with only the selected component nonzero.
            */
           RangeType operator()(const Math::SpatialPoint& point) const
           {
@@ -705,7 +728,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates the selected matrix basis or its component nodal functional.
            * @param function Function to evaluate.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Value of the nodal functional applied to the selected component of the callable.
            */
           template <class Callable>
           ScalarType operator()(const Callable& function) const

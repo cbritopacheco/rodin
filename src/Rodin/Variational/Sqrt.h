@@ -137,9 +137,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
-  /// @brief Deduction guide for @c Sqrt.
+  /**
+   * @brief Deduction guide for @c Sqrt.
+   * @param v Function to take square root of (must be non-negative)
+   */
   template <class NestedDerived>
-  Sqrt(const FunctionBase<NestedDerived>&) -> Sqrt<FunctionBase<NestedDerived>>;
+  Sqrt(const FunctionBase<NestedDerived>& v) -> Sqrt<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Helper function to construct objects of type Sqrt.

@@ -321,6 +321,10 @@ namespace Rodin::Solid
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& trialFES = m_trialfes.get();
@@ -654,6 +658,10 @@ namespace Rodin::Solid
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& trialFES = m_trialfes.get();
@@ -897,6 +905,10 @@ namespace Rodin::Solid
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& trialFES = m_trialfes.get();
@@ -1134,6 +1146,10 @@ namespace Rodin::Solid
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& trialFES = m_trialfes.get();
@@ -1160,34 +1176,58 @@ namespace Rodin::Solid
       Math::Matrix<ScalarType> m_matrix;
   };
 
-  /// CTAD deduction guide for the displacement-only tangent
+  /**
+   * CTAD deduction guide for the displacement-only tangent
+   * @param law The constitutive law
+   * @param u The trial displacement function
+   * @param v The test displacement function
+   * @param displacement The current displacement state
+   */
   template <class LawDerived, class TrialFunctionType, class TestFunctionType,
     class DisplacementType>
-  InternalVirtualWorkTangent(const LawDerived&, const TrialFunctionType&,
-    const TestFunctionType&, const DisplacementType&)
+  InternalVirtualWorkTangent(const LawDerived& law, const TrialFunctionType& u,
+    const TestFunctionType& v, const DisplacementType& displacement)
     -> InternalVirtualWorkTangent<LawDerived, std::decay_t<TrialFunctionType>,
       std::decay_t<TestFunctionType>, std::decay_t<DisplacementType>>;
 
-  /// CTAD deduction guide for the mixed u-p displacement block
+  /**
+   * CTAD deduction guide for the mixed u-p displacement block
+   * @param law The isochoric constitutive law
+   * @param u The trial displacement function
+   * @param v The test displacement function
+   * @param displacement The current displacement state
+   * @param pressure The current pressure state
+   */
   template <class LawDerived, class TrialFunctionType, class TestFunctionType,
     class DisplacementType, class PressureType>
-  InternalVirtualWorkTangent(const LawDerived&, const TrialFunctionType&,
-    const TestFunctionType&, const DisplacementType&, const PressureType&)
+  InternalVirtualWorkTangent(const LawDerived& law, const TrialFunctionType& u,
+    const TestFunctionType& v, const DisplacementType& displacement,
+    const PressureType& pressure)
     -> InternalVirtualWorkTangent<LawDerived, std::decay_t<TrialFunctionType>,
       std::decay_t<TestFunctionType>, std::decay_t<DisplacementType>,
       std::decay_t<PressureType>>;
 
-  /// CTAD deduction guide for the K_up block
+  /**
+   * CTAD deduction guide for the K_up block
+   * @param p The trial pressure function
+   * @param v The test displacement function
+   * @param displacement The current displacement state
+   */
   template <class TrialPressFunctionType, class TestFunctionType, class DisplacementType>
-  InternalVirtualWorkTangentUP(
-    const TrialPressFunctionType&, const TestFunctionType&, const DisplacementType&)
+  InternalVirtualWorkTangentUP(const TrialPressFunctionType& p, const TestFunctionType& v,
+    const DisplacementType& displacement)
     -> InternalVirtualWorkTangentUP<std::decay_t<TrialPressFunctionType>,
       std::decay_t<TestFunctionType>, std::decay_t<DisplacementType>>;
 
-  /// CTAD deduction guide for the K_pu block
+  /**
+   * CTAD deduction guide for the K_pu block
+   * @param u The trial displacement function
+   * @param q The test pressure function
+   * @param displacement The current displacement state
+   */
   template <class TrialFunctionType, class TestPressFunctionType, class DisplacementType>
-  InternalVirtualWorkTangentPU(
-    const TrialFunctionType&, const TestPressFunctionType&, const DisplacementType&)
+  InternalVirtualWorkTangentPU(const TrialFunctionType& u, const TestPressFunctionType& q,
+    const DisplacementType& displacement)
     -> InternalVirtualWorkTangentPU<std::decay_t<TrialFunctionType>,
       std::decay_t<TestPressFunctionType>, std::decay_t<DisplacementType>>;
 } // namespace Rodin::Solid

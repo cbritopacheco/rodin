@@ -146,9 +146,13 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
-  /// @brief CTAD for Conjugate.
+  /**
+   * @brief CTAD for Conjugate.
+   * @param v Function to conjugate
+   */
   template <class NestedDerived>
-  Conjugate(const FunctionBase<NestedDerived>&) -> Conjugate<FunctionBase<NestedDerived>>;
+  Conjugate(
+    const FunctionBase<NestedDerived>& v) -> Conjugate<FunctionBase<NestedDerived>>;
 
   /**
    * @ingroup ConjugateSpecializations
@@ -301,9 +305,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief CTAD for Conjugate on shape functions.
+  /**
+   * @brief CTAD for Conjugate on shape functions.
+   * @param v Function to conjugate
+   */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  Conjugate(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+  Conjugate(const ShapeFunctionBase<NestedDerived, FES, Space>& v)
     -> Conjugate<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 

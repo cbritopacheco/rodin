@@ -338,16 +338,18 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Grad of a GridFunction
+   * @param operand Operand determining the expression type.
    */
   template <class FES, class Data>
-  Grad(const GridFunction<FES, Data>&) -> Grad<GridFunction<FES, Data>>;
+  Grad(const GridFunction<FES, Data>& operand) -> Grad<GridFunction<FES, Data>>;
 
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Grad of a ShapeFunction
+   * @param operand Operand determining the expression type.
    */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  Grad(const ShapeFunction<NestedDerived, FES, Space>&)
+  Grad(const ShapeFunction<NestedDerived, FES, Space>& operand)
     -> Grad<ShapeFunction<NestedDerived, FES, Space>>;
 }
 

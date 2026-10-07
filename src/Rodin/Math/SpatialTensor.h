@@ -352,6 +352,11 @@ namespace Rodin::Math
       }
 
     private:
+      /**
+       * @brief Flattens a tensor multi-index.
+       * @param indices Tensor multi-index.
+       * @returns Linear storage index corresponding to the supplied tensor coordinates.
+       */
       size_t getIndex(const Extents& indices) const
       {
         size_t index = 0;

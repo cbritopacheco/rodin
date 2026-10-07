@@ -103,9 +103,9 @@ namespace Rodin::Variational
       /**
        * @brief Returns the number of local basis functions for a polytope.
        * @returns Number of local basis functions on the selected entity.
+       * @param polytope Mesh entity; this constant element reports an entity-independent local basis count.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope&) const
+      constexpr size_t getDOFs([[maybe_unused]] const Geometry::Polytope& polytope) const
       {
         if constexpr (IsScalarRange)
         {
@@ -175,9 +175,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order used on a mesh entity.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -198,6 +199,10 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Rebuilds constant vector basis data for the value-range dimension.
+       * @param vdim Number of components in the value range.
+       */
       void rebuildVectorCache(size_t vdim)
       {
         m_vcache.vdim = vdim;

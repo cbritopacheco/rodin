@@ -354,6 +354,12 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+      /**
+       * @brief Assembles the requested operator and vector contributions.
+       * @param axb Linear system receiving the assembled operator and vector.
+       * @param input Assembly input containing spaces and form integrators.
+       * @param mode Requested assembly mode.
+       */
 
       void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
       {
@@ -989,6 +995,12 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+      /**
+       * @brief Assembles the requested operator and vector contributions.
+       * @param axb Linear system receiving the assembled operator and vector.
+       * @param input Assembly input containing spaces and form integrators.
+       * @param mode Requested assembly mode.
+       */
 
       void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
       {

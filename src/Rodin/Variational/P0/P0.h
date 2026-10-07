@@ -482,7 +482,7 @@ namespace Rodin::Variational
           /**
            * Evaluates the physical field at a reference coordinate.
            * @param reference Point at which the operation is evaluated.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Transformed field value at the supplied evaluation point.
            */
           auto operator()(const Math::SpatialPoint& reference) const
           {
@@ -511,7 +511,7 @@ namespace Rodin::Variational
           /**
            * Evaluates the reference field at a physical point's chart coordinate.
            * @param point Point at which the operation is evaluated.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Transformed field value at the supplied evaluation point.
            */
           auto operator()(const Geometry::Point& point) const
           {
@@ -545,9 +545,11 @@ namespace Rodin::Variational
       /**
        * Constructs a cellwise vector space with compile-time component count.
        * @param mesh Mesh on which the object is defined.
+       * @param orderTag Compile-time order or value-range dimension tag.
        */
       template <size_t VDim>
-      explicit P0(std::integral_constant<size_t, VDim>, const MeshType& mesh)
+      explicit P0([[maybe_unused]] std::integral_constant<size_t, VDim> orderTag,
+        const MeshType& mesh)
         : P0(mesh, VDim)
       {}
 
@@ -624,9 +626,11 @@ namespace Rodin::Variational
        * Creates the reference-to-physical field pushforward on a cell.
        * @param function Function to evaluate.
        * @returns The pushforward.
+       * @param entity Mesh entity; this pushforward does not require entity-dependent data.
        */
       template <class Callable>
-      auto getPushforward(const std::pair<size_t, Index>&, Callable&& function) const
+      auto getPushforward([[maybe_unused]] const std::pair<size_t, Index>& entity,
+        Callable&& function) const
       {
         return Pushforward<Callable>(std::forward<Callable>(function));
       }
@@ -640,9 +644,10 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for P0 from mesh - deduces to RealP0
+   * @param mesh Mesh supporting the finite element space.
    */
   template <class Context>
-  P0(const Geometry::Mesh<Context>&) -> P0<Real, Geometry::Mesh<Context>>;
+  P0(const Geometry::Mesh<Context>& mesh) -> P0<Real, Geometry::Mesh<Context>>;
 
   /// Alias for a scalar real-valued P0 finite element space
   template <class Mesh>
@@ -804,10 +809,15 @@ namespace Rodin::Variational
       std::map<Geometry::Polytope::Type, ElementType> m_elements;
   };
 
-  /// @brief Deduces a matrix range from explicit rows and columns.
+  /**
+   * @brief Deduces a matrix range from explicit rows and columns.
+   * @param mesh Mesh supporting the finite element space.
+   * @param rows Number of rows in the value range.
+   * @param cols Number of columns in the value range.
+   */
   template <class Context>
-  P0(const Geometry::Mesh<Context>&, size_t,
-    size_t) -> P0<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+  P0(const Geometry::Mesh<Context>& mesh, size_t rows,
+    size_t cols) -> P0<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
 
   /// @brief Matrix-valued discontinuous constant finite element space.
   template <class Mesh>

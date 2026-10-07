@@ -96,8 +96,9 @@ namespace Rodin::Solid
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      Input& operator=(Input&&) = default;
+      Input& operator=(Input&& other) = default;
   };
 
   /// @brief Type-erased callable for input injection into ConstitutivePoint.

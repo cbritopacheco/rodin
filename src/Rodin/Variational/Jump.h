@@ -215,9 +215,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for Jump with FunctionBase.
+  /**
+   * @brief Deduction guide for Jump with FunctionBase.
+   * @param op Function to compute the jump of across interfaces
+   */
   template <class Derived>
-  Jump(const FunctionBase<Derived>&) -> Jump<FunctionBase<Derived>>;
+  Jump(const FunctionBase<Derived>& op) -> Jump<FunctionBase<Derived>>;
 
   /**
    * @ingroup JumpSpecializations
@@ -408,9 +411,12 @@ namespace Rodin::Variational
       const IntegrationPoint* m_ip;
   };
 
-  /// @brief Deduction guide for Jump with ShapeFunctionBase.
+  /**
+   * @brief Deduction guide for Jump with ShapeFunctionBase.
+   * @param op Function to compute the jump of across interfaces
+   */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  Jump(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+  Jump(const ShapeFunctionBase<NestedDerived, FES, Space>& op)
     -> Jump<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 

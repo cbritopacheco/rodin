@@ -146,9 +146,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for @c Cos.
+  /**
+   * @brief Deduction guide for @c Cos.
+   * @param v Function to apply cosine to
+   */
   template <class NestedDerived>
-  Cos(const FunctionBase<NestedDerived>&) -> Cos<FunctionBase<NestedDerived>>;
+  Cos(const FunctionBase<NestedDerived>& v) -> Cos<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Helper function to construct objects of type Cos.

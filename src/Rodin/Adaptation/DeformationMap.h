@@ -106,6 +106,13 @@ namespace Rodin::Adaptation
       }
 
     private:
+      /**
+       * @brief Resolves a point at moved physical coordinates.
+       * @param source Source point retaining the reference cell and coordinates.
+       * @param physical Moved physical coordinates.
+       * @param locator Locator used to resolve the moved point.
+       * @returns Located moved point, or an inverse-mapped point in the source volume cell or an adjacent volume cell when location fails.
+       */
       static Geometry::Point makeMovedPoint(const Geometry::Point& source,
         const Math::SpatialVector<Real>& physical, const LocatorType& locator)
       {
@@ -139,6 +146,11 @@ namespace Rodin::Adaptation
           std::size_t dimension;
           Index index;
           std::size_t qp;
+          /**
+           * @brief Compares the operands for equality.
+           * @param other Object compared with this object.
+           * @returns True when the operands compare equal.
+           */
 
           bool operator==(const Key& other) const
           {

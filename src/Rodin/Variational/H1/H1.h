@@ -666,7 +666,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates at a point on the reference element.
            * @param r Reference coordinates at which to evaluate the basis.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Transformed field value at the supplied evaluation point.
            */
           auto operator()(const Math::SpatialPoint& r) const
           {
@@ -710,7 +710,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates at a geometric point.
            * @param p Point at which the operation is evaluated.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Transformed field value at the supplied evaluation point.
            */
           constexpr
           auto operator()(const Geometry::Point& p) const
@@ -1094,10 +1094,17 @@ namespace Rodin::Variational
       std::map<Geometry::Polytope::Type, ElementType> m_elements;
   };
 
-  /// @brief Deduces a matrix range from explicit rows and columns.
+  /**
+   * @brief Deduces a matrix range from explicit rows and columns.
+   * @param orderTag Compile-time polynomial order tag.
+   * @param mesh Mesh supporting the finite element space.
+   * @param rows Number of rows in the value range.
+   * @param cols Number of columns in the value range.
+   */
   template <size_t K, class Context>
-  H1(std::integral_constant<size_t, K>, const Geometry::Mesh<Context>&, size_t,
-    size_t) -> H1<K, Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+  H1(std::integral_constant<size_t, K> orderTag, const Geometry::Mesh<Context>& mesh,
+    size_t rows,
+    size_t cols) -> H1<K, Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
 
   /// @brief Matrix-valued continuous finite element space of compile-time degree.
   template <size_t K, class Mesh>

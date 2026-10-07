@@ -387,11 +387,17 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;  ///< Local stiffness matrix
   };
 
-  /// @brief Deduction guide for LinearElasticityIntegrator.
+  /**
+   * @brief Deduction guide for LinearElasticityIntegrator.
+   * @param u Trial function (displacement)
+   * @param v Test function
+   * @param lambda First Lamé parameter function
+   * @param mu Second Lamé parameter (shear modulus) function
+   */
   template <class Solution, class FES, class LambdaDerived, class MuDerived>
-  LinearElasticityIntegrator(
-      const TrialFunction<Solution, FES>&, const TestFunction<FES>&,
-      const FunctionBase<LambdaDerived>&, const FunctionBase<MuDerived>&)
+  LinearElasticityIntegrator(const TrialFunction<Solution, FES>& u,
+    const TestFunction<FES>& v, const FunctionBase<LambdaDerived>& lambda,
+    const FunctionBase<MuDerived>& mu)
     -> LinearElasticityIntegrator<Solution, FES, LambdaDerived, MuDerived>;
 
   /**
@@ -450,10 +456,14 @@ namespace Rodin::Variational
       std::reference_wrapper<const TestFunction<FES>>  m_v;             ///< Test function
   };
 
-  /// @brief Deduction guide for LinearElasticityIntegral.
+  /**
+   * @brief Deduction guide for LinearElasticityIntegral.
+   * @param u Trial function (displacement)
+   * @param v Test function
+   */
   template <class Solution, class FES>
-  LinearElasticityIntegral(const TrialFunction<Solution, FES>&, const TestFunction<FES>&)
-    -> LinearElasticityIntegral<Solution, FES>;
+  LinearElasticityIntegral(const TrialFunction<Solution, FES>& u,
+    const TestFunction<FES>& v) -> LinearElasticityIntegral<Solution, FES>;
 }
 
 #endif

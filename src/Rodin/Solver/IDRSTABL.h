@@ -67,9 +67,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for IDRSTABL
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  IDRSTABL(Variational::ProblemBase<LinearSystem>&) -> IDRSTABL<LinearSystem>;
+  IDRSTABL(Variational::ProblemBase<LinearSystem>& pb) -> IDRSTABL<LinearSystem>;
 
   /**
    * @ingroup IDRSTABLSpecializations

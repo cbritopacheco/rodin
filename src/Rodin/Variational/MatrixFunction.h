@@ -245,9 +245,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the expression at a geometric point.
        * @returns Value of the expression at the supplied evaluation point.
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      MatrixType getValue(const Geometry::Point&) const
+      constexpr MatrixType getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return m_matrix;
       }
@@ -275,9 +275,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order used on a mesh entity.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& ) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -291,10 +292,13 @@ namespace Rodin::Variational
       const MatrixType m_matrix;
   };
 
-  /// @brief Deduction guide for @c MatrixFunction.
+  /**
+   * @brief Deduction guide for @c MatrixFunction.
+   * @param matrix Matrix operand.
+   */
   template <class Scalar>
-  MatrixFunction(const Math::Matrix<Scalar>&)
-    -> MatrixFunction<Math::Matrix<Scalar>>;
+  MatrixFunction(
+    const Math::Matrix<Scalar>& matrix) -> MatrixFunction<Math::Matrix<Scalar>>;
 }
 
 namespace Rodin::Variational
@@ -345,8 +349,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the expression at the supplied physical or integration point.
        * @returns Value of the expression at the supplied evaluation point.
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr MatrixType getValue(const Geometry::Point&) const
+      constexpr MatrixType getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return m_matrix;
       }
@@ -372,8 +377,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order when it is known.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -387,10 +394,13 @@ namespace Rodin::Variational
       const MatrixType m_matrix;
   };
 
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param matrix Matrix operand.
+   */
   template <class Scalar>
-  MatrixFunction(
-    const Math::SpatialMatrix<Scalar>&) -> MatrixFunction<Math::SpatialMatrix<Scalar>>;
+  MatrixFunction(const Math::SpatialMatrix<Scalar>& matrix)
+    -> MatrixFunction<Math::SpatialMatrix<Scalar>>;
 }
 
 namespace Rodin::Variational
@@ -502,8 +512,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order when it is known.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return m_order;
       }
@@ -517,9 +529,14 @@ namespace Rodin::Variational
       F m_function;
       Optional<size_t> m_order;
   };
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param rows Number of rows.
+   * @param columns Number of matrix columns.
+   * @param function Function to evaluate.
+   */
   template <class F>
-  MatrixFunction(size_t, size_t, F) -> MatrixFunction<F>;
+  MatrixFunction(size_t rows, size_t columns, F function) -> MatrixFunction<F>;
 }
 
 #endif

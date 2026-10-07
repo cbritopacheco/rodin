@@ -103,8 +103,14 @@ namespace Rodin::FormLanguage
           /**
            * @brief Post-increment operator.
            * @return Copy of iterator before increment
+           * @param postfix Unused integer tag distinguishing postfix from prefix increment.
            */
-          constexpr Iterator operator++(int) { Iterator r = *this; ++(*this); return r; }
+          constexpr Iterator operator++([[maybe_unused]] int postfix)
+          {
+            Iterator r = *this;
+            ++(*this);
+            return r;
+          }
 
           /**
            * @brief Equality comparison operator.
@@ -158,8 +164,14 @@ namespace Rodin::FormLanguage
           /**
            * @brief Post-increment operator.
            * @return Copy of iterator before increment
+           * @param postfix Unused integer tag distinguishing postfix from prefix increment.
            */
-          constexpr ConstIterator operator++(int) { ConstIterator r = *this; ++(*this); return r; }
+          constexpr ConstIterator operator++([[maybe_unused]] int postfix)
+          {
+            ConstIterator r = *this;
+            ++(*this);
+            return r;
+          }
 
           /**
            * @brief Equality comparison operator.

@@ -869,9 +869,10 @@ namespace Rodin::Solver
    * SparseLU solver(tangent);
    * NewtonSolver newton(solver);
    * @endcode
+   * @param solver Linear solver used for each tangential solve.
    */
   template <class LS>
-  NewtonSolver(LS&) -> NewtonSolver<LS>;
+  NewtonSolver(LS& solver) -> NewtonSolver<LS>;
 }
 
 #endif

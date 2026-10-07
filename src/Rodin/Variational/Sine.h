@@ -152,9 +152,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for @c Sin.
+  /**
+   * @brief Deduction guide for @c Sin.
+   * @param v Function to apply sine to
+   */
   template <class NestedDerived>
-  Sin(const FunctionBase<NestedDerived>&) -> Sin<FunctionBase<NestedDerived>>;
+  Sin(const FunctionBase<NestedDerived>& v) -> Sin<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Helper function to construct objects of type Sin.

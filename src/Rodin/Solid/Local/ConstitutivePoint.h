@@ -269,8 +269,9 @@ namespace Rodin::Solid
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      ConstitutivePoint& operator=(ConstitutivePoint&&) = default;
+      ConstitutivePoint& operator=(ConstitutivePoint&& other) = default;
 
       /**
        * @brief Gets the kinematic state.

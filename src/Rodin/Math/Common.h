@@ -161,9 +161,11 @@ namespace Rodin::Math
    * @tparam N Exponent
    * @param[in] x Base value
    * @return @f$ x^N @f$
+   * @param orderTag Compile-time order or value-range dimension tag.
    */
   template <class Base, size_t N>
-  constexpr Base pow(const Base& x, std::integral_constant<size_t, N>)
+  constexpr Base pow(
+    const Base& x, [[maybe_unused]] std::integral_constant<size_t, N> orderTag)
   {
     return pow<N>(x);
   }

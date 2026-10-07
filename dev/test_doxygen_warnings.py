@@ -81,6 +81,137 @@ int square(int value);
 """)
         self.assertEqual(status, 0, output)
 
+    def test_unnamed_parameter_fails_xml_audit(self):
+        status, output = self.check_fixture("""/// @file
+/** @brief Constant function.
+ * @returns One.
+ */
+int constant(int) { return 1; }
+""")
+        self.assertEqual(status, 1)
+        self.assertIn("is unnamed and lacks parameter documentation", output)
+
+    def test_internal_parameter_and_return_omissions_fail(self):
+        status, output = self.check_fixture("""/// @file
+/// @internal
+int helper(int value) { return value; }
+""")
+        self.assertEqual(status, 1)
+        self.assertIn("lacks parameter documentation", output)
+        self.assertIn("lacks return documentation", output)
+
+    def test_private_static_helper_omissions_fail(self):
+        status, output = self.check_fixture("""/// @file
+/// @brief Cache object.
+class Cache {
+ private:
+  static int helper(int value) { return value; }
+};
+""")
+        self.assertEqual(status, 1)
+        self.assertIn("lacks parameter documentation", output)
+        self.assertIn("lacks return documentation", output)
+
+    def test_empty_parameter_and_return_descriptions_fail(self):
+        status, output = self.check_fixture("""/// @file
+/** @brief Identity function.
+ * @param value
+ * @returns
+ */
+int identity(int value) { return value; }
+""")
+        self.assertEqual(status, 1)
+        self.assertIn("lacks parameter documentation", output)
+        self.assertIn("lacks return documentation", output)
+
+    def test_invalid_private_parameter_documentation_fails(self):
+        status, output = self.check_fixture("""/// @file
+/// @brief Cache object.
+class Cache {
+ private:
+  /** @brief Identity helper.
+   * @param value Input value.
+   * @param nonexistent Invalid parameter name.
+   * @returns Input value.
+   */
+  static int helper(int value) { return value; }
+};
+""")
+        self.assertEqual(status, 1)
+        self.assertIn("nonexistent", output)
+
+    def test_conversion_operator_requires_return_description(self):
+        status, output = self.check_fixture("""/// @file
+/// @brief Readiness marker.
+struct Ready {
+  /// @brief Tests readiness.
+  explicit operator bool() const { return true; }
+};
+""")
+        self.assertEqual(status, 1)
+        self.assertIn("return type of member operator bool lacks return documentation", output)
+
+    def test_unnamed_deduction_guide_parameter_fails(self):
+        status, output = self.check_fixture("""/// @file
+/** @brief Value wrapper.
+ * @tparam T Value type.
+ */
+template <class T> struct Box {
+  /** @brief Construct a wrapper.
+   * @param value Wrapped value.
+   */
+  Box(const T& value);
+};
+/// @brief Deduce the wrapped type.
+template <class T> Box(const T&) -> Box<T>;
+""")
+        self.assertEqual(status, 1)
+        self.assertIn("is unnamed and lacks parameter documentation", output)
+
+    def test_constructors_void_and_retval_do_not_need_returns(self):
+        status, output = self.check_fixture("""/// @file
+/** @brief Value wrapper. */
+struct Box {
+  /// @brief Default constructor.
+  constexpr Box() = default;
+  /** @brief Deleted copy constructor.
+   * @param other Source object.
+   */
+  Box(const Box& other) = delete;
+  /** @brief Deleted assignment.
+   * @param other Source object.
+   */
+  Box& operator=(const Box& other) = delete;
+  /// @brief No-op.
+  void reset() {}
+  /** @brief Gets the status.
+   * @retval true Always ready.
+   */
+  bool ready() const { return true; }
+};
+""")
+        self.assertEqual(status, 0, output)
+
+    def test_successful_doxygen_without_xml_cannot_pass(self):
+        with tempfile.TemporaryDirectory() as directory:
+            binary = Path(directory, "no-xml-doxygen")
+            binary.write_text(
+                f"#!{sys.executable}\n"
+                "import pathlib, re, sys\n"
+                "if sys.argv[1] == '--version':\n"
+                f"    print('{self.version}')\n"
+                "else:\n"
+                "    cfg = pathlib.Path(sys.argv[1]).read_text()\n"
+                "    log = re.findall(r'^WARN_LOGFILE = (.+)$', cfg, re.M)[-1]\n"
+                "    pathlib.Path(log).write_text('')\n")
+            binary.chmod(0o755)
+            with patch.object(sys, "argv", ["check", "--doxygen", str(binary)]):
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    status = checker.main()
+            self.assertEqual(status, 2)
+            self.assertIn("Doxygen produced no XML index", output.getvalue())
+
     def test_failed_doxygen_with_empty_log_cannot_pass(self):
         with tempfile.TemporaryDirectory() as directory:
             binary = Path(directory, "failed-doxygen")

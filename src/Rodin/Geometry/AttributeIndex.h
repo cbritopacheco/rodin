@@ -117,11 +117,20 @@ namespace Rodin::Geometry
       std::atomic<bool> engaged{false};
 
       Slot() = default;
+      /**
+       * @brief Constructs an attribute slot from another slot.
+       * @param other Object to copy from.
+       */
 
       Slot(const Slot& other)
       {
         assign(other.get());
       }
+      /**
+       * @brief Assigns the state of another object.
+       * @param other Object to copy from.
+       * @returns Reference to this object after assignment.
+       */
 
       Slot& operator=(const Slot& other)
       {
@@ -129,11 +138,20 @@ namespace Rodin::Geometry
           set(other.get());
         return *this;
       }
+      /**
+       * @brief Constructs an attribute slot from another slot.
+       * @param other Object to move from.
+       */
 
       Slot(Slot&& other) noexcept
       {
         assign(other.get());
       }
+      /**
+       * @brief Assigns the state of another object.
+       * @param other Object to move from.
+       * @returns Reference to this object after assignment.
+       */
 
       Slot& operator=(Slot&& other) noexcept
       {
@@ -141,6 +159,10 @@ namespace Rodin::Geometry
           set(other.get());
         return *this;
       }
+      /**
+       * @brief Reads a consistent snapshot of the attribute slot.
+       * @returns Stored attribute, or an empty optional if the slot is disengaged.
+       */
 
       Optional<Attribute> get() const
       {
@@ -157,6 +179,10 @@ namespace Rodin::Geometry
             return hasValue ? Optional<Attribute>(attribute) : std::nullopt;
         }
       }
+      /**
+       * @brief Stores or clears the attribute slot.
+       * @param attribute Attribute to store, or an empty optional to clear the slot.
+       */
 
       void set(const Optional<Attribute>& attribute)
       {
@@ -164,16 +190,26 @@ namespace Rodin::Geometry
         assign(attribute);
         sequence.fetch_add(1, std::memory_order_release);
       }
+      /**
+       * @brief Serializes the cached state.
+       * @param ar Archive storing or restoring the serialized state.
+       * @param version Boost.Serialization class version; unused by this implementation.
+       */
 
       template <class Archive>
-      void save(Archive& ar, const unsigned int) const
+      void save(Archive& ar, [[maybe_unused]] const unsigned int version) const
       {
         const Optional<Attribute> attribute = get();
         ar & attribute;
       }
+      /**
+       * @brief Restores the cached state from an archive.
+       * @param ar Archive storing or restoring the serialized state.
+       * @param version Boost.Serialization class version; unused by this implementation.
+       */
 
       template <class Archive>
-      void load(Archive& ar, const unsigned int)
+      void load(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         Optional<Attribute> attribute;
         ar & attribute;
@@ -183,6 +219,10 @@ namespace Rodin::Geometry
       BOOST_SERIALIZATION_SPLIT_MEMBER()
 
     private:
+      /**
+       * @brief Assigns the stored value and engagement state of the attribute slot.
+       * @param attribute Attribute to store, or an empty optional to clear the slot.
+       */
       void assign(const Optional<Attribute>& attribute)
       {
         if (attribute)
@@ -209,6 +249,7 @@ namespace Rodin::Geometry
        *
        * Thread-safety:
        * - Safe w.r.t. concurrent readers/writers of @p other.
+       * @param other Object to copy from.
        */
         Dimension(const Dimension& other)
         {
@@ -225,6 +266,8 @@ namespace Rodin::Geometry
        * Thread-safety:
        * - Safe w.r.t. concurrent readers/writers of either dimension.
        * - Not an atomic snapshot w.r.t. external observers of the whole container.
+       * @param other Object to copy from.
+       * @returns Reference to this object after assignment.
        */
         Dimension& operator=(const Dimension& other)
         {
@@ -245,6 +288,7 @@ namespace Rodin::Geometry
        *
        * Thread-safety:
        * - Requires that no other thread accesses @p other concurrently.
+       * @param other Object to move from.
        */
         Dimension(Dimension&& other) noexcept
         {
@@ -261,6 +305,8 @@ namespace Rodin::Geometry
        * Thread-safety:
        * - Requires external synchronization: no concurrent access to either
        *   dimension while moving.
+       * @param other Object to move from.
+       * @returns Reference to this object after assignment.
        */
         Dimension& operator=(Dimension&& other) noexcept
         {
@@ -278,16 +324,22 @@ namespace Rodin::Geometry
        * @param[in,out] ar Archive object
        *
        * The serialization version argument is ignored.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
         template <class Archive>
-        void save(Archive& ar, const unsigned int) const
+        void save(Archive& ar, [[maybe_unused]] const unsigned int version) const
         {
           std::lock_guard<std::mutex> lock(mutex);
           ar & slots;
         }
+        /**
+         * @brief Restores the cached state from an archive.
+         * @param ar Archive storing or restoring the serialized state.
+         * @param version Boost.Serialization class version; unused by this implementation.
+         */
 
         template <class Archive>
-        void load(Archive& ar, const unsigned int)
+        void load(Archive& ar, [[maybe_unused]] const unsigned int version)
         {
           ar & slots;
           publishedSize.store(slots.size(), std::memory_order_relaxed);
@@ -576,9 +628,10 @@ namespace Rodin::Geometry
       /**
        * @brief Serialization method for Boost.Serialization.
        * @param[in,out] ar Archive object
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
       template <class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & m_dimensions;
       }

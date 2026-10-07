@@ -844,9 +844,10 @@ namespace Rodin::Geometry
       /**
        * @brief Serializes the mesh (for boost::serialization).
        * @param ar Serialization archive.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
-      template<class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      template <class Archive>
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & m_name;
       }
@@ -893,8 +894,11 @@ namespace Rodin::Geometry
 
           virtual ~Builder() = default;
 
-          /// @brief Deleted copy constructor.
-          Builder(const Builder&) = delete;
+          /**
+           * @brief Deleted copy constructor.
+           * @param other Object whose copying or moving is disabled.
+           */
+          Builder(const Builder& other) = delete;
 
           /**
            * @brief Move constructor.
@@ -911,8 +915,9 @@ namespace Rodin::Geometry
           /**
            * @brief Move assignment.
            * @returns Reference to this object after the operation.
+           * @param other Object to move from.
            */
-          Builder& operator=(Builder&&) = default;
+          Builder& operator=(Builder&& other) = default;
 
           /**
            * @brief Reserves memory accross the data structure for the polytopes of

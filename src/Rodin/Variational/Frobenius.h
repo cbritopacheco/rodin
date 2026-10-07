@@ -145,9 +145,13 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
-  /// @brief Deduction guide for Frobenius norm.
+  /**
+   * @brief Deduction guide for Frobenius norm.
+   * @param v Function to compute the norm of
+   */
   template <class NestedDerived>
-  Frobenius(const FunctionBase<NestedDerived>&) -> Frobenius<FunctionBase<NestedDerived>>;
+  Frobenius(
+    const FunctionBase<NestedDerived>& v) -> Frobenius<FunctionBase<NestedDerived>>;
 }
 
 #endif

@@ -371,15 +371,14 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for two-field PETSc Problem.
+   * @param u Trial function.
+   * @param v Test function.
    */
   template <class Solution, class TrialFES, class TestFES>
-  Problem(
-      PETSc::Variational::TrialFunction<Solution, TrialFES>&,
-      PETSc::Variational::TestFunction<TestFES>&)
-    -> Problem<
-          PETSc::Math::LinearSystem,
-          TrialFunction<Solution, TrialFES>,
-          TestFunction<TestFES>>;
+  Problem(PETSc::Variational::TrialFunction<Solution, TrialFES>& u,
+    PETSc::Variational::TestFunction<TestFES>& v)
+    -> Problem<PETSc::Math::LinearSystem, TrialFunction<Solution, TrialFES>,
+      TestFunction<TestFES>>;
 
   /**
    * @brief PETSc variational problem for multiple coupled trial / test
@@ -994,7 +993,10 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Deduces the MPI communicator from the trial mesh contexts.
+      /**
+       * @brief Deduces the MPI communicator from the trial mesh contexts.
+       * @returns MPI communicator shared by the trial mesh contexts.
+       */
       MPI_Comm deduceCommunicator() const
       {
         // Take mesh context from the first trial function in the tuple.
@@ -1078,15 +1080,19 @@ namespace Rodin::Variational
          IsPETScTestFunction<std::decay_t<T>>::value) &&
         AllPETScTrialOrTest<Ts...>::value> {};
 
+  // PETSc-only CTAD guide (enabled only if ALL args are PETSc trial/test wrappers)
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for multi-field PETSc Problem.
+   * @param u1 First function (trial or test).
+   * @param u2 Second function.
+   * @param u3 Third function.
+   * @param us Additional functions.
    */
-  // PETSc-only CTAD guide (enabled only if ALL args are PETSc trial/test wrappers)
   template <class U1, class U2, class U3, class... Us>
     requires AllPETScTrialOrTest<U1, U2, U3, Us...>::value
-  Problem(U1&, U2&, U3&, Us&...)
-    -> Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>;
+  Problem(U1& u1, U2& u2, U3& u3,
+    Us&... us) -> Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>;
 }
 
 namespace Rodin::PETSc::Variational

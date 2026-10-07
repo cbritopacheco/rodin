@@ -516,6 +516,11 @@ namespace Rodin::Variational
       // Helper: index mapping (i,j,k) -> flat idx (no lambdas; avoids ASan
       // stack-use-after-scope reports from short-lifetime closure objects).
       // -------------------------------------------------------------------
+      /**
+       * @brief Locates a tetrahedral lattice layer in flattened storage.
+       * @param kk Layer index in the tetrahedral node lattice.
+       * @returns Number of nodes in the preceding layers.
+       */
       static constexpr size_t layerOffset(size_t kk)
       {
         size_t off = 0;
@@ -526,6 +531,12 @@ namespace Rodin::Variational
         }
         return off;
       }
+      /**
+       * @brief Locates a row within a tetrahedral lattice layer.
+       * @param kk Layer index in the tetrahedral node lattice.
+       * @param jj Row index within the tetrahedral layer.
+       * @returns Number of nodes in the preceding rows of the layer.
+       */
 
       static constexpr size_t rowOffsetWithinLayer(size_t kk, size_t jj)
       {
@@ -535,11 +546,25 @@ namespace Rodin::Variational
           off += (n + 1 - r);
         return off;
       }
+      /**
+       * @brief Flattens a tetrahedral lattice coordinate.
+       * @param i Integer lattice coordinate of the tetrahedral node.
+       * @param j Integer lattice coordinate of the tetrahedral node.
+       * @param k Integer lattice coordinate of the tetrahedral node.
+       * @returns Node index for the specified integer lattice coordinates.
+       */
 
       static constexpr size_t idxOf(size_t i, size_t j, size_t k)
       {
         return layerOffset(k) + rowOffsetWithinLayer(k, j) + i;
       }
+      /**
+       * @brief Assigns reference coordinates from barycentric coordinates.
+       * @param p Vertex being updated or physical point being assigned.
+       * @param L2 Second barycentric coordinate.
+       * @param L3 Third barycentric coordinate.
+       * @param L4 Fourth barycentric coordinate.
+       */
 
       static inline void setFromBary(Math::SpatialPoint& p, Real L2, Real L3, Real L4)
       {

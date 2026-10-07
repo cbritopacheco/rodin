@@ -345,7 +345,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates at a point on the reference element.
            * @param r Reference coordinates at which to evaluate the basis.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Transformed field value at the supplied evaluation point.
            */
           auto operator()(const Math::SpatialPoint& r) const
           {
@@ -379,7 +379,7 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates at a geometric point.
            * @param p Point at which the operation is evaluated.
-           * @returns Reference to the entry at the supplied indices.
+           * @returns Transformed field value at the supplied evaluation point.
            */
           constexpr
           auto operator()(const Geometry::Point& p) const
@@ -522,9 +522,12 @@ namespace Rodin::Variational
   };
 
   // CTAD (scalar)
-  /// @brief Deduction guide for @c P0g.
+  /**
+   * @brief Deduction guide for @c P0g.
+   * @param mesh Mesh supporting the finite element space.
+   */
   template <class Context>
-  P0g(const Geometry::Mesh<Context>&) -> P0g<Real, Geometry::Mesh<Context>>;
+  P0g(const Geometry::Mesh<Context>& mesh) -> P0g<Real, Geometry::Mesh<Context>>;
 
   // Aliases (scalar spaces)
   /// @brief Cellwise-constant real space with a global basis.
@@ -692,10 +695,15 @@ namespace Rodin::Variational
       std::map<Geometry::Polytope::Type, ElementType> m_elements;
   };
 
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param mesh Mesh supporting the finite element space.
+   * @param rows Number of rows in the value range.
+   * @param cols Number of columns in the value range.
+   */
   template <class Context>
-  P0g(const Geometry::Mesh<Context>&, size_t,
-    size_t) -> P0g<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+  P0g(const Geometry::Mesh<Context>& mesh, size_t rows,
+    size_t cols) -> P0g<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
 
   /// @brief Matrix-valued globally constant finite element space.
   template <class Mesh>

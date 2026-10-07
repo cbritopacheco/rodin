@@ -155,9 +155,9 @@ namespace Rodin::Alert
     /**
      * @brief Move assignment operator.
      * @returns Reference to this object after the operation.
+     * @param other Object to move from.
      */
-    constexpr
-    RGB& operator=(RGB&&) = default;
+    constexpr RGB& operator=(RGB&& other) = default;
 
     /**
      * @brief Gets the red component value.
@@ -281,9 +281,9 @@ namespace Rodin::Alert
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      constexpr
-      Color& operator=(Color&&) = default;
+      constexpr Color& operator=(Color&& other) = default;
 
       /**
        * @brief Gets the RGB color code.
@@ -303,9 +303,10 @@ namespace Rodin::Alert
   /**
    * @brief Deduction guide for Color.
    * @tparam Code The color code type.
+   * @param code The RGB color code (defaults to default-constructed Code).
    */
   template <class Code>
-  Color(const Code&) -> Color<Code>;
+  Color(const Code& code) -> Color<Code>;
 
   /**
    * @brief Stream insertion operator for custom RGB colors.
@@ -315,10 +316,11 @@ namespace Rodin::Alert
    *
    * Applies a custom RGB color to the output stream using the termcolor
    * library's color template.
+   * @param tag Formatting or action tag selected through its type.
    */
   template <class Code>
-  inline
-  std::ostream& operator<<(std::ostream& os, const Color<Code>&)
+  inline std::ostream& operator<<(
+    std::ostream& os, [[maybe_unused]] const Color<Code>& tag)
   {
     os << termcolor::color<Code::R, Code::G, Code::B>;
     return os;
@@ -334,9 +336,9 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for red color.
    * @param os Output stream.
    * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const RedT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const RedT& tag)
   {
     os << Color16::Red;
     return os;
@@ -352,9 +354,9 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for green color.
    * @param os Output stream.
    * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const GreenT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const GreenT& tag)
   {
     os << Color16::Green;
     return os;
@@ -370,9 +372,9 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for blue color.
    * @param os Output stream.
    * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const BlueT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const BlueT& tag)
   {
     os << Color16::Blue;
     return os;
@@ -388,9 +390,9 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for yellow color.
    * @param os Output stream.
    * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const YellowT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const YellowT& tag)
   {
     os << Color16::Yellow;
     return os;
@@ -406,9 +408,9 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for magenta color.
    * @param os Output stream.
    * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const MagentaT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const MagentaT& tag)
   {
     os << Color16::Magenta;
     return os;
@@ -424,9 +426,9 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for cyan color.
    * @param os Output stream.
    * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const CyanT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const CyanT& tag)
   {
     os << Color16::Cyan;
     return os;
@@ -442,9 +444,9 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for white color.
    * @param os Output stream.
    * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const WhiteT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const WhiteT& tag)
   {
     os << Color16::White;
     return os;
@@ -460,9 +462,9 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for gray color.
    * @param os Output stream.
    * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const GrayT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const GrayT& tag)
   {
     os << Color16::Gray;
     return os;
@@ -478,9 +480,10 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for bright gray color.
    * @param os Output stream.
    * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const BrightGrayT&)
+  inline std::ostream& operator<<(
+    std::ostream& os, [[maybe_unused]] const BrightGrayT& tag)
   {
     os << Color16::BrightGray;
     return os;
@@ -496,9 +499,10 @@ namespace Rodin::Alert
    * @brief Stream insertion operator for bright white color.
    * @param os Output stream.
    * @returns Output stream after writing the object.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const BrightWhiteT&)
+  inline std::ostream& operator<<(
+    std::ostream& os, [[maybe_unused]] const BrightWhiteT& tag)
   {
     os << Color16::BrightWhite;
     return os;

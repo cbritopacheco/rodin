@@ -290,9 +290,11 @@ namespace Rodin::Geometry
           /**
            * @brief Serialization save method.
            * @param[in,out] ar Archive object
+           * @param version Boost.Serialization class version; unused by this implementation.
            */
           template <class Archive>
-          void save(Archive& ar, const unsigned int /*version*/) const
+          void save(
+            Archive& ar, [[maybe_unused]] const unsigned int /*version*/ version) const
           {
             ar & right;
             std::vector<Polytope::Key> leftKeys;
@@ -305,9 +307,10 @@ namespace Rodin::Geometry
           /**
            * @brief Serialization load method.
            * @param[in,out] ar Archive object
+           * @param version Boost.Serialization class version; unused by this implementation.
            */
           template <class Archive>
-          void load(Archive& ar, const unsigned int /*version*/)
+          void load(Archive& ar, [[maybe_unused]] const unsigned int /*version*/ version)
           {
             ar & right;
             std::vector<Polytope::Key> leftKeys;

@@ -147,10 +147,16 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FunctionBase<GridFunctionBaseReference<Derived>>;
 
-      /// @brief R-Values are not allowed.
-      GridFunctionBaseReference(Derived&&) = delete;
+      /**
+       * @brief R-Values are not allowed.
+       * @param other Object whose copying or moving is disabled.
+       */
+      GridFunctionBaseReference(Derived&& other) = delete;
 
-      /// @brief Prevent implicit copies.
+      /**
+       * @brief Prevent implicit copies.
+       * @param ref Grid-function object being referenced.
+       */
       GridFunctionBaseReference(const Derived& ref) = delete;
 
       /**
@@ -183,10 +189,19 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_ref(std::move(other.m_ref))
       {}
+      /**
+       * @brief Assigns the state of another object.
+       * @param other Object to copy from.
+       */
 
-      GridFunctionBaseReference& operator=(const GridFunctionBaseReference&) = delete;
+      GridFunctionBaseReference& operator=(
+        const GridFunctionBaseReference& other) = delete;
+      /**
+       * @brief Assigns the state of another object.
+       * @param other Object to move from.
+       */
 
-      GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
+      GridFunctionBaseReference& operator=(GridFunctionBaseReference&& other) = delete;
 
       /**
        * @brief Evaluates at a geometric point.
@@ -1253,12 +1268,22 @@ namespace Rodin::Variational
         size_t qp = static_cast<size_t>(-1);
         std::vector<RangeType> basisValues;
       };
+      /**
+       * @brief Gets the thread-local evaluation cache.
+       * @returns Reference to the reusable evaluation cache.
+       */
 
       static EvaluationCache& getEvaluationCache()
       {
         thread_local EvaluationCache cache;
         return cache;
       }
+      /**
+       * @brief Gets cached entity degree-of-freedom indices.
+       * @param d Topological dimension of the evaluation entity.
+       * @param i Index of the evaluation entity.
+       * @returns Reference to the cached degree-of-freedom index list.
+       */
 
       const std::vector<Index>& getCachedDOFs(size_t d, Index i) const
       {
@@ -1283,6 +1308,13 @@ namespace Rodin::Variational
         }
         return cache.dofs;
       }
+      /**
+       * @brief Gets basis values cached for a quadrature point.
+       * @param d Topological dimension of the evaluation entity.
+       * @param i Index of the evaluation entity.
+       * @param ip Quadrature point identifying the cached basis values.
+       * @returns Reference to the cached local basis values at the integration point.
+       */
 
       const std::vector<RangeType>& getCachedBasisValues(
           size_t d, Index i, const IntegrationPoint& ip) const

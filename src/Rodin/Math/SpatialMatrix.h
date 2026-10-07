@@ -121,9 +121,9 @@ namespace Rodin::Math
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      constexpr
-      SpatialMatrix& operator=(SpatialMatrix&&) = default;
+      constexpr SpatialMatrix& operator=(SpatialMatrix&& other) = default;
 
       /**
        * @brief Constructs a spatial matrix from an Eigen matrix expression.

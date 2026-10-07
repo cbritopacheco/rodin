@@ -100,8 +100,9 @@ namespace Rodin::Geometry
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      PointCloud& operator=(PointCloud&&) = default;
+      PointCloud& operator=(PointCloud&& other) = default;
 
       /**
        * @brief Returns the active spatial dimension (0..3).
@@ -486,9 +487,10 @@ namespace Rodin::Geometry
       /**
        * @brief Serializes the point cloud (for boost::serialization).
        * @param ar Serialization archive.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
       template <class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & m_dimension;
         ar & m_pts;
@@ -499,13 +501,23 @@ namespace Rodin::Geometry
       Data m_pts;
 
       [[nodiscard]] inline
-      Scalar* rawData() noexcept
+        /**
+       * @brief Gets the contiguous point-coordinate storage.
+       * @returns Pointer to the first stored coordinate; ownership remains with the point cloud.
+       */
+        Scalar*
+        rawData() noexcept
       {
         return m_pts.empty() ? nullptr : m_pts.front().data();
       }
 
       [[nodiscard]] inline
-      const Scalar* rawData() const noexcept
+        /**
+       * @brief Gets the contiguous point-coordinate storage.
+       * @returns Pointer to the first stored coordinate; ownership remains with the point cloud.
+       */
+        const Scalar*
+        rawData() const noexcept
       {
         return m_pts.empty() ? nullptr : m_pts.front().data();
       }

@@ -128,6 +128,10 @@ namespace Rodin::Test
     private:
       /// @brief Absolute central-difference perturbation in solution units for a unit direction; heuristic.
       static constexpr Real DefaultDifferenceStep = 1e-6;
+      /**
+       * @brief Constructs a reproducible finite-difference probe direction.
+       * @returns Deterministic probe vector normalized when its norm is nonzero.
+       */
 
       VectorType makeDeterministicDirection()
       {
@@ -233,6 +237,10 @@ namespace Rodin::Test
     private:
       /// @brief Absolute central-difference perturbation in solution units for a unit direction; heuristic.
       static constexpr Real DefaultDifferenceStep = 1e-6;
+      /**
+       * @brief Constructs a reproducible finite-difference probe direction.
+       * @returns Deterministic probe vector normalized when its norm is nonzero.
+       */
 
       VectorType makeDeterministicDirection()
       {

@@ -642,9 +642,12 @@ namespace Rodin::Variational
    * @brief CTAD for DirichletBC
    * @tparam FES Type of finite element space
    * @tparam ValueDerived Derived type of FunctionBase
+   * @param u ShapeFunction object
+   * @param v Value object
    */
   template <class Solution, class FES, class FunctionDerived>
-  DirichletBC(const TrialFunction<Solution, FES>&, const FunctionBase<FunctionDerived>&)
+  DirichletBC(
+    const TrialFunction<Solution, FES>& u, const FunctionBase<FunctionDerived>& v)
     -> DirichletBC<TrialFunction<Solution, FES>, FunctionBase<FunctionDerived>>;
 
   /**
@@ -1176,18 +1179,26 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for the identification DirichletBC.
+   * @param u ShapeFunction object
+   * @param v Value object
    */
   template <class Solution, class FES1, class Derived2, class FES2,
     ShapeFunctionSpaceType Sp>
-  DirichletBC(
-    const TrialFunction<Solution, FES1>&, const ShapeFunctionBase<Derived2, FES2, Sp>&)
+  DirichletBC(const TrialFunction<Solution, FES1>& u,
+    const ShapeFunctionBase<Derived2, FES2, Sp>& v)
     -> DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>;
 
-  /// @brief Deduction guide for @c DirichletBC.
+  /**
+   * @brief Deduction guide for @c DirichletBC.
+   * @param u Slave trial function
+   * @param value Boundary value supplied as a shape-function expression.
+   * @param defect Boundary-value defect function.
+   */
   template <class Solution, class FES1, class Derived2, class FES2,
     ShapeFunctionSpaceType Sp, class DefectDerived>
-  DirichletBC(const TrialFunction<Solution, FES1>&,
-    const ShapeFunctionBase<Derived2, FES2, Sp>&, const FunctionBase<DefectDerived>&)
+  DirichletBC(const TrialFunction<Solution, FES1>& u,
+    const ShapeFunctionBase<Derived2, FES2, Sp>& value,
+    const FunctionBase<DefectDerived>& defect)
     -> DirichletBC<TrialFunction<Solution, FES1>, ShapeFunctionBase<Derived2, FES2, Sp>>;
 }
 

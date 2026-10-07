@@ -1125,10 +1125,10 @@ namespace Rodin::Variational
        *
        * @param[in] mesh  Distributed mesh on which the space is defined.
        * @param[in] vdim  Number of components per DOF node.
+       * @param orderTag Compile-time order or value-range dimension tag.
        */
-      H1(std::integral_constant<size_t, K>,
-         const MeshType& mesh,
-         size_t vdim)
+      H1([[maybe_unused]] std::integral_constant<size_t, K> orderTag,
+        const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),
           m_fes(std::integral_constant<size_t, K>{}, mesh.getShard(), vdim),
           m_vdim(vdim)
@@ -1345,9 +1345,11 @@ namespace Rodin::Variational
        * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
        * @returns A pushforward wrapper on local polytope @f$(d, i)@f$.
        * @param v Operand expression.
+       * @param entity Mesh entity; this pushforward does not require entity-dependent data.
        */
       template <class CallableType>
-      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const std::pair<size_t, Index>& entity, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
@@ -1356,9 +1358,11 @@ namespace Rodin::Variational
        * @brief Returns a pushforward wrapper for an explicit polytope object.
        * @returns A pushforward wrapper for an explicit polytope object.
        * @param v Operand expression.
+       * @param entity Mesh entity; this pushforward does not require entity-dependent data.
        */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const Geometry::Polytope& entity, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
@@ -1495,8 +1499,9 @@ namespace Rodin::Variational
       /**
        * @brief Moves the space and its DOF maps.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      H1& operator=(H1&&) = default;
+      H1& operator=(H1&& other) = default;
 
       size_t getSize() const override
       {

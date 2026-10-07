@@ -305,9 +305,10 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Div of an H1 GridFunction
+   * @param u Operand expression.
    */
   template <size_t K, class Scalar, class Data, class Mesh>
-  Div(const GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>&)
+  Div(const GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>& u)
     -> Div<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>;
 
   /**
@@ -362,7 +363,10 @@ namespace Rodin::Variational
               /// @brief Whether the key holds a cached entry.
               bool valid = false;
 
-              /// @brief Tests whether the key holds a cached entry.
+              /**
+               * @brief Tests whether the key holds a cached entry.
+               * @returns True if the key identifies a cached entry; false otherwise.
+               */
               explicit operator bool() const noexcept
               {
                 return valid;
@@ -593,9 +597,14 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
-  /// @brief Deduction guide for @c Div.
-  template <size_t K, class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Div(const ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>&)
+  /**
+   * @brief Deduction guide for @c Div.
+   * @param u Operand expression.
+   */
+  template <size_t K, class NestedDerived, class Number, class Mesh,
+    ShapeFunctionSpaceType Space>
+  Div(const ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>&
+      u)
     -> Div<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 

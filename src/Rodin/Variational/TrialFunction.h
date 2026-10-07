@@ -329,8 +329,11 @@ namespace Rodin::Variational
        */
       void operator=(const TrialFunction& other) = delete;
 
-      /// @brief Move assignment is deleted
-      void operator=(TrialFunction&&) = delete;
+      /**
+       * @brief Move assignment is deleted
+       * @param other Object to move from.
+       */
+      void operator=(TrialFunction&& other) = delete;
 
       /**
        * @brief Gets the x-component of a vector-valued trial function.
@@ -435,11 +438,12 @@ namespace Rodin::Variational
    * P1 Uh(mesh);
    * TrialFunction u(Uh);  // Type deduced automatically
    * ```
+   * @param fes Finite element space
    */
   template <class FES>
-  TrialFunction(const FES&)
+  TrialFunction(const FES& fes)
     -> TrialFunction<
-        GridFunction<FES, Math::Vector<
-          typename FormLanguage::Traits<FES>::ScalarType>>, FES>;
+      GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>,
+      FES>;
 }
 #endif

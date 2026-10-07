@@ -261,10 +261,14 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
+   * @param integrand Expression to integrate.
    */
   template <class NestedDerived, class Range, class Mesh>
-  QuadratureRule(const ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>&)
-    -> QuadratureRule<ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>>;
+  QuadratureRule(
+    const ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>&
+      integrand)
+    -> QuadratureRule<
+      ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -532,16 +536,14 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
+   * @param integrand Expression to integrate.
    */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(
-      const ShapeFunctionBase<
-        Dot<FunctionBase<LHSDerived>,
-        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    -> QuadratureRule<ShapeFunctionBase<
-        Dot<
-          FunctionBase<LHSDerived>,
-          ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+  QuadratureRule(const ShapeFunctionBase<Dot<FunctionBase<LHSDerived>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&
+      integrand)
+    -> QuadratureRule<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -889,18 +891,18 @@ namespace Rodin::Variational
       Optional<Geometry::Polytope::Type> m_geometry;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
   QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>&)
+    const Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>&
+      integrand)
     -> QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-          ShapeFunctionBase<
-            ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>;
+      Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1268,26 +1270,22 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_basis;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
-  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number, class Mesh>
-  QuadratureRule(const
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Number, Mesh>, TrialSpace>>>>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, P1<Number, Mesh>, TestSpace>>>&)
-  ->
-  QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Number, Mesh>, TrialSpace>>>>,
-      ShapeFunctionBase<
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number,
+    class Mesh>
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+      ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Number, Mesh>, TrialSpace>>>>,
+    ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Number, Mesh>, TestSpace>>>& integrand)
+    -> QuadratureRule<
+      Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+            ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Number, Mesh>, TrialSpace>>>>,
+        ShapeFunctionBase<
 
-        ShapeFunction<RHSDerived, P1<Number, Mesh>, TestSpace>>>>;
+          ShapeFunction<RHSDerived, P1<Number, Mesh>, TestSpace>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1571,15 +1569,18 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(
-      const Dot<
-        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
-        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    -> QuadratureRule<Dot<
-          ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
-          ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+    ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&
+      integrand)
+    -> QuadratureRule<
+      Dot<ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1976,21 +1977,19 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
+   * @param integrand Expression to integrate.
    */
-  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(
-      const Dot<
-        ShapeFunctionBase<
-          Mult<
-            FunctionBase<LHSFunctionDerived>,
-            ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
-        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    -> QuadratureRule<
-          Dot<ShapeFunctionBase<
-           Mult<
-             FunctionBase<LHSFunctionDerived>,
-             ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
-          ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Range,
+    class Mesh>
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+      ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
+    ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&
+      integrand)
+    -> QuadratureRule<Dot<
+      ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
+      ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -2253,20 +2252,19 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
-  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(
-    const Mult<
-      FunctionBase<CoefficientDerived>,
-      Dot<
-        ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    -> QuadratureRule<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          Dot<
-            ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-            ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range,
+    class Mesh>
+  QuadratureRule(const Mult<FunctionBase<CoefficientDerived>,
+    Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&
+      integrand)
+    -> QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
+      Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -2548,9 +2546,13 @@ namespace Rodin::Variational
         ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>,
         P1<Real, RHSMesh>, TestSpace>>;
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
-  QuadratureRule(const P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
+  QuadratureRule(
+    const P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>& integrand)
     -> QuadratureRule<P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
 
   /**
@@ -2833,9 +2835,13 @@ namespace Rodin::Variational
         Div<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>,
         P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>;
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
-  QuadratureRule(const P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
+  QuadratureRule(
+    const P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>& integrand)
     -> QuadratureRule<P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
 
   /**
@@ -3171,21 +3177,17 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
+   * @param integrand Expression to integrate.
    */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(const
-    Dot<
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+    ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&
+      integrand)
+    -> QuadratureRule<Dot<
+      ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    ->
-      QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+        Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -3906,26 +3908,19 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
+   * @param integrand Expression to integrate.
    */
   template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Mesh>
-  QuadratureRule(const
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<LHSFunctionDerived>,
-          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>&)
-  ->
-  QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<LHSFunctionDerived>,
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>>;
+  QuadratureRule(const Dot<ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+                             ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                               P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
+    ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived,
+      P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>& integrand)
+    -> QuadratureRule<Dot<ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+                            ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                              P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
+      ShapeFunctionBase<Jacobian<
+        ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -4257,6 +4252,7 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
    */
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range,
     class Mesh>
@@ -4267,7 +4263,7 @@ namespace Rodin::Variational
                                   FunctionBase<CoefficientDerived>>,
                 P1<Range, Mesh>, TrialSpace>,
       ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
-        P1<Range, Mesh>, TestSpace>>&)
+        P1<Range, Mesh>, TestSpace>>& integrand)
     -> QuadratureRule<
       Dot<ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
                                                      P1<Range, Mesh>, TrialSpace>>,

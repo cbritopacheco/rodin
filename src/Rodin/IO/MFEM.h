@@ -73,42 +73,84 @@ namespace Rodin::IO::MFEM
     }
     return nullptr;
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(const std::string& str, Keyword kw)
   {
     return str == toCharString(kw);
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(Keyword kw, const std::string& str)
   {
     return str == toCharString(kw);
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(Keyword kw, const char* str)
   {
     return strcmp(toCharString(kw), str) == 0;
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(const char* str, Keyword kw)
   {
     return strcmp(toCharString(kw), str) == 0;
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(const char* str, Keyword kw)
   {
     return !operator==(str, kw);
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(const std::string& str, Keyword kw)
   {
     return !operator==(str, kw);
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(Keyword kw, const std::string& str)
@@ -152,10 +194,23 @@ namespace Rodin::IO::MFEM
     return res;
   }
 
-  /// @internal
+  /**
+   * @internal
+   * @endinternal
+   * @param is Input stream from which a line is read.
+   * @param line Storage receiving the extracted line.
+   * @param currentLineNumber Line counter incremented for each consumed line.
+   * @returns Reference to the input stream after extraction.
+   */
   std::istream& getline(std::istream& is, std::string& line, size_t& currentLineNumber);
 
-  /// @internal
+  /**
+   * @internal
+   * @endinternal
+   * @param is Input stream from which a line is read.
+   * @param currentLineNumber Line counter incremented for each consumed line.
+   * @returns Next data line, or an empty string when the stream is exhausted.
+   */
   std::string skipEmptyLinesAndComments(std::istream& is, size_t& currentLineNumber);
 
   /// @internal
@@ -234,6 +289,12 @@ namespace Rodin::IO::MFEM
       Index index; ///< Face index in Rodin connectivity ordering.
       std::vector<Index> vertices; ///< Face vertices in MFEM local ordering.
   };
+  /**
+   * @brief Constructs an orientation-independent edge key.
+   * @param v0 Vertex index of the entity.
+   * @param v1 Vertex index of the entity.
+   * @returns The two vertex indices in ascending order.
+   */
 
   inline
   std::array<Index, 2> getSortedEdgeKey(Index v0, Index v1)
@@ -242,6 +303,13 @@ namespace Rodin::IO::MFEM
       std::swap(v0, v1);
     return { v0, v1 };
   }
+  /**
+   * @brief Constructs an orientation-independent triangular face key.
+   * @param v0 Vertex index of the entity.
+   * @param v1 Vertex index of the entity.
+   * @param v2 Vertex index of the entity.
+   * @returns The three vertex indices in ascending order.
+   */
 
   inline
   std::array<Index, 3> getTriangleFaceKey(Index v0, Index v1, Index v2)
@@ -250,6 +318,14 @@ namespace Rodin::IO::MFEM
     std::sort(key.begin(), key.end());
     return key;
   }
+  /**
+   * @brief Constructs an orientation-independent quadrilateral face key.
+   * @param v0 Vertex index of the entity.
+   * @param v1 Vertex index of the entity.
+   * @param v2 Vertex index of the entity.
+   * @param v3 Vertex index of the entity.
+   * @returns The three smallest vertex indices, in ascending order.
+   */
 
   inline
   std::array<Index, 3> getQuadrilateralFaceKey(Index v0, Index v1, Index v2, Index v3)
@@ -258,6 +334,11 @@ namespace Rodin::IO::MFEM
     std::sort(key.begin(), key.end());
     return { key[0], key[1], key[2] };
   }
+  /**
+   * @brief Enumerates local edges in MFEM order.
+   * @param geometry Reference-cell geometry whose local entities are enumerated.
+   * @param callback Callable receiving the local vertex indices of each entity.
+   */
 
   template <class Callback>
   inline
@@ -342,6 +423,11 @@ namespace Rodin::IO::MFEM
       }
     }
   }
+  /**
+   * @brief Enumerates local faces in MFEM order.
+   * @param geometry Reference-cell geometry whose local entities are enumerated.
+   * @param callback Callable receiving the local vertex indices of each entity.
+   */
 
   template <class Callback>
   inline
@@ -391,6 +477,11 @@ namespace Rodin::IO::MFEM
       }
     }
   }
+  /**
+   * @brief Orders mesh edges for MFEM output.
+   * @param mesh Mesh whose entities are traversed.
+   * @returns Rodin edge indices in first-encounter order under MFEM local edge traversal.
+   */
 
   inline
   std::vector<Index> getMFEMEdgeOrder(const Geometry::Mesh<Context::Local>& mesh)
@@ -443,6 +534,11 @@ namespace Rodin::IO::MFEM
     assert(out.size() == edgeCount);
     return out;
   }
+  /**
+   * @brief Orders mesh faces and their vertices for MFEM output.
+   * @param mesh Mesh whose entities are traversed.
+   * @returns Face indices and MFEM vertex orderings in first-encounter order over the cells.
+   */
 
   inline
   std::vector<FaceOrderEntry> getMFEMFaceOrder(const Geometry::Mesh<Context::Local>& mesh)
@@ -506,6 +602,13 @@ namespace Rodin::IO::MFEM
     assert(out.size() == faceCount);
     return out;
   }
+  /**
+   * @brief Flattens an integer barycentric triangle-node coordinate.
+   * @param bary0 Integer barycentric coordinate; the coordinates sum to the polynomial order.
+   * @param bary1 Integer barycentric coordinate; the coordinates sum to the polynomial order.
+   * @param bary2 Integer barycentric coordinate; the coordinates sum to the polynomial order.
+   * @returns Node index in row-major triangular lattice ordering.
+   */
 
   template <size_t K>
   inline
@@ -516,6 +619,12 @@ namespace Rodin::IO::MFEM
     const size_t j = bary2;
     return j * (K + 1) - (j * (j - 1)) / 2 + i;
   }
+  /**
+   * @brief Maps triangular node indices between vertex orderings.
+   * @param sourceVertices Vertices in the source entity ordering.
+   * @param targetVertices The same vertices in the target entity ordering.
+   * @returns Map indexed by target node index, with the corresponding source node index as its value.
+   */
 
   template <size_t K>
   inline
@@ -561,6 +670,12 @@ namespace Rodin::IO::MFEM
 
     return map;
   }
+  /**
+   * @brief Flattens an integer quadrilateral-node coordinate.
+   * @param i First supporting vertex index.
+   * @param j Second supporting vertex index.
+   * @returns Node index with the first coordinate varying fastest.
+   */
 
   template <size_t K>
   inline
@@ -570,6 +685,11 @@ namespace Rodin::IO::MFEM
     assert(j <= K);
     return j * (K + 1) + i;
   }
+  /**
+   * @brief Gets lattice coordinates of a quadrilateral corner.
+   * @param vertex Local corner index, from zero to three.
+   * @returns Integer corner coordinates at the specified polynomial order.
+   */
 
   template <size_t K>
   inline
@@ -586,6 +706,13 @@ namespace Rodin::IO::MFEM
         return { 0, 0 };
     }
   }
+  /**
+   * @brief Applies a quadrilateral rotation or reflection to lattice coordinates.
+   * @param transform Quadrilateral symmetry index, from zero to seven.
+   * @param i First supporting vertex index.
+   * @param j Second supporting vertex index.
+   * @returns Transformed integer node coordinates.
+   */
 
   template <size_t K>
   inline
@@ -606,6 +733,12 @@ namespace Rodin::IO::MFEM
         return { i, j };
     }
   }
+  /**
+   * @brief Maps quadrilateral node indices between vertex orderings.
+   * @param sourceVertices Vertices in the source entity ordering.
+   * @param targetVertices The same vertices in the target entity ordering.
+   * @returns Map indexed by target node index, with the corresponding source node index as its value.
+   */
 
   template <size_t K>
   inline
@@ -3731,7 +3864,11 @@ namespace Rodin::IO
           os << stream.rdbuf();
         }
       }
-      void printData(std::ostream&) override {}
+      /**
+       * @brief Provides the format-specific data-printer interface.
+       * @param os Output stream required by the printer interface; unused by this implementation.
+       */
+      void printData([[maybe_unused]] std::ostream& os) override {}
   };
 
   /// @brief Loads each MFEM component through the scalar family's node mapping.

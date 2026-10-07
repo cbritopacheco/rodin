@@ -116,8 +116,10 @@ namespace Rodin::Variational
       /**
        * @brief Interpolates div(u) at point p (always zero for P0g).
        * @param out Storage for the computed result.
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      void interpolate(ScalarType& out, const Geometry::Point&) const
+      void interpolate(
+        ScalarType& out, [[maybe_unused]] const Geometry::Point& point) const
       {
         out = ScalarType(0);
       }
@@ -125,9 +127,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order used on a mesh entity.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -263,9 +266,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order used on a mesh entity.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -284,14 +288,19 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Div of a P0g GridFunction
+   * @param u Operand expression.
    */
   template <class Scalar, class Data, class Mesh>
-  Div(const GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>&)
+  Div(const GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>& u)
     -> Div<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>;
 
-  /// @brief Deduction guide for @c Div.
+  /**
+   * @brief Deduction guide for @c Div.
+   * @param u Operand expression.
+   */
   template <class NestedDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  Div(const ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>&)
+  Div(
+    const ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>& u)
     -> Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
 }
 

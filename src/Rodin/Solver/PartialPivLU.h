@@ -63,9 +63,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD guide for PartialPivLU.
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  PartialPivLU(Variational::ProblemBase<LinearSystem>&) -> PartialPivLU<LinearSystem>;
+  PartialPivLU(Variational::ProblemBase<LinearSystem>& pb) -> PartialPivLU<LinearSystem>;
 
   /**
    * @brief Dense LU factorization solver with partial pivoting for general matrices.

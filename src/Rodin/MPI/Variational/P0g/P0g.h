@@ -314,9 +314,11 @@ namespace Rodin::Variational
        *
        * @tparam VDim  Compile-time vector dimension.
        * @param[in] mesh  Distributed mesh.
+       * @param orderTag Compile-time order or value-range dimension tag.
        */
       template <size_t VDim>
-      P0g(std::integral_constant<size_t, VDim>, const MeshType& mesh)
+      P0g([[maybe_unused]] std::integral_constant<size_t, VDim> orderTag,
+        const MeshType& mesh)
         : P0g(mesh, VDim)
       {}
 
@@ -611,8 +613,9 @@ namespace Rodin::Variational
       /**
        * @brief Moves the space and its DOF maps.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      P0g& operator=(P0g&&) = default;
+      P0g& operator=(P0g&& other) = default;
 
       size_t getSize() const override
       {

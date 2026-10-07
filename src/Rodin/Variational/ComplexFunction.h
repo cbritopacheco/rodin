@@ -173,9 +173,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the constant function at a point.
        * @returns Value of the expression at the supplied evaluation point.
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      Complex getValue(const Geometry::Point&) const
+      constexpr Complex getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return Complex(m_x, 0);
       }
@@ -183,8 +183,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns zero polynomial order for a constant function.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -198,8 +200,11 @@ namespace Rodin::Variational
       const Integer m_x;
   };
 
-  /// @brief Deduction guide for integer constants.
-  ComplexFunction(Integer) -> ComplexFunction<Integer>;
+  /**
+   * @brief Deduction guide for integer constants.
+   * @param x Constant integer value
+   */
+  ComplexFunction(Integer x) -> ComplexFunction<Integer>;
 
   /// @brief Complex-valued constant function built from a real.
   template <>
@@ -253,9 +258,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the constant function at a point.
        * @returns Value of the expression at the supplied evaluation point.
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      Complex getValue(const Geometry::Point&) const
+      constexpr Complex getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return Complex(m_x, 0);
       }
@@ -263,8 +268,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns zero polynomial order for a constant function.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -278,8 +285,11 @@ namespace Rodin::Variational
       const Real m_x;
   };
 
-  /// @brief Deduction guide for real constants.
-  ComplexFunction(Real) -> ComplexFunction<Real>;
+  /**
+   * @brief Deduction guide for real constants.
+   * @param x Constant Real value
+   */
+  ComplexFunction(Real x) -> ComplexFunction<Real>;
 
   /**
    * @ingroup ComplexFunctionSpecializations
@@ -336,9 +346,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the constant function at a point.
        * @returns Value of the expression at the supplied evaluation point.
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      Complex getValue(const Geometry::Point&) const
+      constexpr Complex getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return m_x;
       }
@@ -346,8 +356,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns zero polynomial order for a constant function.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -361,8 +373,11 @@ namespace Rodin::Variational
       const Complex m_x;
   };
 
-  /// @brief CTAD for ComplexFunction.
-  ComplexFunction(const Complex&) -> ComplexFunction<Complex>;
+  /**
+   * @brief CTAD for ComplexFunction.
+   * @param x Constant scalar value
+   */
+  ComplexFunction(const Complex& x) -> ComplexFunction<Complex>;
 
   /**
    * @ingroup ComplexFunctionSpecializations
@@ -463,9 +478,13 @@ namespace Rodin::Variational
       std::unique_ptr<FunctionBase<NestedDerived>> m_nested;
   };
 
-  /// @brief CTAD for ComplexFunction.
+  /**
+   * @brief CTAD for ComplexFunction.
+   * @param nested Function operand.
+   */
   template <class Derived>
-  ComplexFunction(const FunctionBase<Derived>&) -> ComplexFunction<FunctionBase<Derived>>;
+  ComplexFunction(
+    const FunctionBase<Derived>& nested) -> ComplexFunction<FunctionBase<Derived>>;
 
   /**
    * @ingroup ComplexFunctionSpecializations
@@ -606,9 +625,14 @@ namespace Rodin::Variational
       std::unique_ptr<ImagFunctionType> m_imag;
   };
 
-  /// @brief CTAD for ComplexFunction.
+  /**
+   * @brief CTAD for ComplexFunction.
+   * @param re Function operand.
+   * @param imag Function operand.
+   */
   template <class RealNestedDerived, class ImagNestedDerived>
-  ComplexFunction(const FunctionBase<RealNestedDerived>&, const FunctionBase<ImagNestedDerived>&)
+  ComplexFunction(const FunctionBase<RealNestedDerived>& re,
+    const FunctionBase<ImagNestedDerived>& imag)
     -> ComplexFunction<FunctionBase<RealNestedDerived>, FunctionBase<ImagNestedDerived>>;
 
   /**
@@ -682,8 +706,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns no polynomial order for an arbitrary callable.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -697,10 +723,14 @@ namespace Rodin::Variational
       const F m_f;
   };
 
-  /// @brief CTAD for ComplexFunction.
-  template <class F, typename =
-    std::enable_if_t<std::is_invocable_r_v<Complex, F, const Geometry::Point&>>>
-  ComplexFunction(const F&) -> ComplexFunction<F>;
+  /**
+   * @brief CTAD for ComplexFunction.
+   * @param f Function operand.
+   */
+  template <class F,
+    typename =
+      std::enable_if_t<std::is_invocable_r_v<Complex, F, const Geometry::Point&>>>
+  ComplexFunction(const F& f) -> ComplexFunction<F>;
 
   /// @brief Complex function built from real and imaginary callables.
   template <class FReal, class FImag>
@@ -780,8 +810,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns no polynomial order for arbitrary callables.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -796,11 +828,15 @@ namespace Rodin::Variational
       const FImag m_imag;
   };
 
-  /// @brief CTAD for ComplexFunction.
-  template <class FReal, class FImag, typename =
-    std::enable_if_t<
-      std::is_invocable_v<FReal, const Geometry::Point&> && std::is_invocable_v<FImag, const Geometry::Point&>>>
-  ComplexFunction(const FReal&, const FImag&) -> ComplexFunction<FReal, FImag>;
+  /**
+   * @brief CTAD for ComplexFunction.
+   * @param re Real-part function.
+   * @param imag Imaginary-part function.
+   */
+  template <class FReal, class FImag,
+    typename = std::enable_if_t<std::is_invocable_v<FReal, const Geometry::Point&> &&
+      std::is_invocable_v<FImag, const Geometry::Point&>>>
+  ComplexFunction(const FReal& re, const FImag& imag) -> ComplexFunction<FReal, FImag>;
 }
 
 #endif

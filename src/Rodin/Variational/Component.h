@@ -173,9 +173,14 @@ namespace Rodin::Variational
       const size_t m_idx;
   };
 
-  /// @brief Deduction guide for vector component extraction.
+  /**
+   * @brief Deduction guide for vector component extraction.
+   * @param fn Vector function to extract component from
+   * @param index Index of the selected component.
+   */
   template <class OperandDerived>
-  Component(const FunctionBase<OperandDerived>&, size_t) -> Component<FunctionBase<OperandDerived>, size_t>;
+  Component(const FunctionBase<OperandDerived>& fn,
+    size_t index) -> Component<FunctionBase<OperandDerived>, size_t>;
 
   /**
    * @brief Extracts a single entry from a matrix-valued function.
@@ -292,10 +297,15 @@ namespace Rodin::Variational
       const size_t m_j;
   };
 
-  /// @brief Deduction guide for matrix entry extraction.
+  /**
+   * @brief Deduction guide for matrix entry extraction.
+   * @param u Matrix-valued trial or test function
+   * @param row Zero-based row index
+   * @param column Zero-based column index
+   */
   template <class OperandDerived>
-  Component(const FunctionBase<OperandDerived>&, size_t, size_t)
-    -> Component<FunctionBase<OperandDerived>, size_t, size_t>;
+  Component(const FunctionBase<OperandDerived>& u, size_t row,
+    size_t column) -> Component<FunctionBase<OperandDerived>, size_t, size_t>;
 
   /**
    * @brief Extracts a component from a vector-valued GridFunction.
@@ -411,9 +421,14 @@ namespace Rodin::Variational
       const size_t m_idx;
   };
 
-  /// @brief Deduction guide for GridFunction component extraction.
+  /**
+   * @brief Deduction guide for GridFunction component extraction.
+   * @param fn Vector function to extract component from
+   * @param index Index of the selected component.
+   */
   template <class FES, class Data>
-  Component(GridFunction<FES, Data>&, size_t) -> Component<GridFunction<FES, Data>>;
+  Component(
+    GridFunction<FES, Data>& fn, size_t index) -> Component<GridFunction<FES, Data>>;
 
   /**
    * @brief Extracts a component from a vector-valued ShapeFunction.
@@ -580,10 +595,14 @@ namespace Rodin::Variational
       const size_t m_idx;
   };
 
-  /// @brief Deduction guide for ShapeFunction component extraction.
+  /**
+   * @brief Deduction guide for ShapeFunction component extraction.
+   * @param fn Vector function to extract component from
+   * @param index Index of the selected component.
+   */
   template <class OperandDerived, class FES, ShapeFunctionSpaceType Space>
-  Component(const ShapeFunctionBase<OperandDerived, FES, Space>&, size_t)
-    -> Component<ShapeFunctionBase<OperandDerived, FES, Space>>;
+  Component(const ShapeFunctionBase<OperandDerived, FES, Space>& fn,
+    size_t index) -> Component<ShapeFunctionBase<OperandDerived, FES, Space>>;
 }
 
 namespace Rodin::FormLanguage
@@ -754,10 +773,15 @@ namespace Rodin::Variational
       const size_t m_row, m_column;
   };
 
-  /// @brief Deduction guide for ShapeFunction component extraction.
+  /**
+   * @brief Deduction guide for ShapeFunction component extraction.
+   * @param u Matrix-valued trial or test function
+   * @param row Zero-based row index
+   * @param column Zero-based column index
+   */
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
-  Component(const ShapeFunctionBase<Derived, FES, Space>&, size_t,
-    size_t) -> Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t>;
+  Component(const ShapeFunctionBase<Derived, FES, Space>& u, size_t row,
+    size_t column) -> Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t>;
 }
 
 namespace Rodin::Variational
@@ -839,10 +863,16 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
       size_t m_row, m_column, m_direction;
   };
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param operand Operand expression.
+   * @param row Row component index.
+   * @param column Column component index.
+   * @param direction Direction in which the derivative is evaluated.
+   */
   template <class Derived>
-  Component(const FunctionBase<Derived>&, size_t, size_t,
-    size_t) -> Component<FunctionBase<Derived>, size_t, size_t, size_t>;
+  Component(const FunctionBase<Derived>& operand, size_t row, size_t column,
+    size_t direction) -> Component<FunctionBase<Derived>, size_t, size_t, size_t>;
 
   /// @brief One entry of a tensor-valued trial or test basis.
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
@@ -956,10 +986,17 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
       size_t m_row, m_column, m_direction;
   };
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param operand Operand expression.
+   * @param row Row component index.
+   * @param column Column component index.
+   * @param direction Direction in which the derivative is evaluated.
+   */
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
-  Component(const ShapeFunctionBase<Derived, FES, Space>&, size_t, size_t,
-    size_t) -> Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t, size_t>;
+  Component(const ShapeFunctionBase<Derived, FES, Space>& operand, size_t row,
+    size_t column, size_t direction)
+    -> Component<ShapeFunctionBase<Derived, FES, Space>, size_t, size_t, size_t>;
 }
 
 #endif

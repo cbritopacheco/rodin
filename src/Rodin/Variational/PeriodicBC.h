@@ -247,9 +247,11 @@ namespace Rodin::Variational
    * @brief CTAD for PeriodicBC
    * @tparam FES Type of finite element space
    * @tparam ValueDerived Derived type of FunctionBase
+   * @param u Operand expression.
+   * @param adjacency Adjacency relation.
    */
   template <class Solution, class FES>
-  PeriodicBC(const TrialFunction<Solution, FES>&, const IndexMap<IndexSet>&)
+  PeriodicBC(const TrialFunction<Solution, FES>& u, const IndexMap<IndexSet>& adjacency)
     -> PeriodicBC<TrialFunction<Solution, FES>, IndexMap<IndexSet>>;
 }
 

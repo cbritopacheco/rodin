@@ -105,8 +105,9 @@ namespace Rodin::Solid
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      Output& operator=(Output&&) = default;
+      Output& operator=(Output&& other) = default;
   };
 
   /**

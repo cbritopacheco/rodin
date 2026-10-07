@@ -88,9 +88,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for CG
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  CG(Variational::ProblemBase<LinearSystem>&) -> CG<LinearSystem>;
+  CG(Variational::ProblemBase<LinearSystem>& pb) -> CG<LinearSystem>;
 
   /**
    * @ingroup CGSpecializations

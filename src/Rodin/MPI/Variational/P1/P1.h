@@ -848,9 +848,11 @@ namespace Rodin::Variational
        * @tparam CallableType Callable defined on reference coordinates.
        * @param[in] v Reference-space callable.
        * @return Pushforward wrapper mapping physical points to reference evaluation.
+       * @param entity Mesh entity; this pushforward does not require entity-dependent data.
        */
       template <class CallableType>
-      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const std::pair<size_t, Index>& entity, CallableType&& v) const
       {
         return typename FESType::template Pushforward<CallableType>(
           std::forward<CallableType>(v));
@@ -862,9 +864,11 @@ namespace Rodin::Variational
        * @tparam CallableType Callable defined on reference coordinates.
        * @param[in] v Reference-space callable.
        * @return Pushforward wrapper mapping physical points to reference evaluation.
+       * @param entity Mesh entity; this pushforward does not require entity-dependent data.
        */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const Geometry::Polytope& entity, CallableType&& v) const
       {
         return typename FESType::template Pushforward<CallableType>(
           std::forward<CallableType>(v));
@@ -986,8 +990,9 @@ namespace Rodin::Variational
       /**
        * @brief Moves the space and its DOF maps.
        * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      P1& operator=(P1&&) = default;
+      P1& operator=(P1&& other) = default;
 
       size_t getSize() const override
       {

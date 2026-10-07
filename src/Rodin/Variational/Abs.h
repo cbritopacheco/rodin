@@ -131,9 +131,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
-  /// @brief Deduction guide for @c Abs.
+  /**
+   * @brief Deduction guide for @c Abs.
+   * @param v Function to take absolute value of
+   */
   template <class NestedDerived>
-  Abs(const FunctionBase<NestedDerived>&) -> Abs<FunctionBase<NestedDerived>>;
+  Abs(const FunctionBase<NestedDerived>& v) -> Abs<FunctionBase<NestedDerived>>;
 
   template <class NestedDerived>
   constexpr auto

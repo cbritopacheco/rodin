@@ -118,10 +118,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief CTAD for Im.
+  /**
+   * @brief CTAD for Im.
+   * @param f Complex-valued function operand
+   */
   template <class NestedDerived>
-  Im(const FunctionBase<NestedDerived>&) -> Im<FunctionBase<NestedDerived>>;
-
+  Im(const FunctionBase<NestedDerived>& f) -> Im<FunctionBase<NestedDerived>>;
 }
 
 #endif

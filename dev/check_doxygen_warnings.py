@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Doxygen documentation-warning ratchet for Rodin.
 
-Runs doxygen over the tree (HTML generation disabled — warnings only) and
-compares the normalized warning set against the committed baseline
-dev/doxygen_warnings.baseline:
+Runs doxygen over the tree with HTML generation disabled, audits its XML
+for parameter/return coverage, and compares the combined warning set against
+the committed baseline dev/doxygen_warnings.baseline:
 
   * a warning NOT in the baseline is NEW -> reported precisely and the
     check fails;
@@ -27,10 +27,12 @@ Usage:
 
 import argparse
 import os
+from pathlib import Path
 import re
 import subprocess
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASELINE_PATH = os.path.join(REPO, "dev", "doxygen_warnings.baseline")
@@ -70,7 +72,106 @@ def run_doxygen(binary, tmpdir):
     # Collect all warnings for the ratchet, but never accept a failed run.
     subprocess.run([binary, doxyfile], cwd=REPO, check=True,
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # Extract every function for the contract audit, including private/static
+    # helpers. EXTRACT_ALL disables undocumented-entity warnings, so collect
+    # the normal warning log above before doing this separate XML pass.
+    cfg += (
+        "\n# --- full extraction for the parameter/return XML audit ---\n"
+        "EXTRACT_ALL = YES\n"
+        "EXTRACT_PRIVATE = YES\n"
+        "EXTRACT_STATIC = YES\n"
+        "GENERATE_XML = YES\n"
+        f"WARN_LOGFILE = {tmpdir}/extraction-warnings.log\n"
+    )
+    with open(doxyfile, "w", encoding="utf-8") as f:
+        f.write(cfg)
+    subprocess.run([binary, doxyfile], cwd=REPO, check=True,
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return log
+
+
+def audit_xml(xml_directory):
+    """Check parameter/return coverage in Doxygen's extracted C++ functions.
+
+    Doxygen's warnings omit unnamed parameters and some internal helpers.
+    XML retains those declarations, so check their contracts directly too.
+    """
+    def text(element):
+        return "".join(element.itertext()).strip() if element is not None else ""
+
+    findings = {}
+    function_count = 0
+    files = sorted(Path(xml_directory).glob("*.xml"))
+    if not (Path(xml_directory) / "index.xml").is_file():
+        raise ValueError("Doxygen produced no XML index")
+    for xml_file in files:
+        if xml_file.name in ("index.xml", "Doxyfile.xml"):
+            continue
+        for member in ET.parse(xml_file).getroot().iter("memberdef"):
+            if member.get("kind") != "function":
+                continue
+            location = member.find("location")
+            if location is None:
+                continue
+            filename = location.get("file", "")
+            if os.path.isabs(filename):
+                filename = os.path.relpath(filename, REPO)
+            elif not filename.startswith("src/") and Path(REPO, "src", filename).is_file():
+                filename = "src/" + filename
+            if not filename.startswith("src/") or Path(filename).suffix not in (".h", ".hpp", ".cpp"):
+                continue
+            name = text(member.find("name"))
+            # A Boost export macro is parsed as a function by Doxygen.
+            if name == "BOOST_CLASS_EXPORT":
+                continue
+            function_count += 1
+            args = text(member.find("argsstring"))
+            documented = set()
+            for item in member.findall('.//parameterlist[@kind="param"]/parameteritem'):
+                if text(item.find("parameterdescription")):
+                    documented.update(text(parameter) for parameter in
+                                      item.findall("parameternamelist/parametername"))
+            parameters = []
+            for parameter in member.findall("param"):
+                param_type = text(parameter.find("type"))
+                param_name = text(parameter.find("declname")) or text(parameter.find("defname"))
+                # Doxygen 1.14 can split the reference after a nested decltype
+                # template argument into a separate XML param node.
+                if param_type in ("&", "&&") and parameters and not parameters[-1][1]:
+                    previous_type, _ = parameters.pop()
+                    parameters.append((previous_type + " " + param_type, param_name))
+                else:
+                    parameters.append((param_type, param_name))
+            messages = []
+            for index, (param_type, param_name) in enumerate(parameters, 1):
+                if param_type in ("void", "..."):
+                    continue
+                if not param_name or param_name == "...":
+                    messages.append(f"parameter #{index} of member {name} is unnamed "
+                                    "and lacks parameter documentation")
+                elif param_name not in documented:
+                    messages.append(f"parameter '{param_name}' of member {name} "
+                                    "lacks parameter documentation")
+            return_type = re.sub(
+                r"\b(constexpr|consteval|inline|virtual|static|friend|explicit)\b",
+                "", text(member.find("type"))).strip()
+            # Conversion operators have no <type>; their result type is in
+            # the function name (for example, "operator bool").
+            if not return_type and name.startswith("operator "):
+                return_type = name[len("operator "):].strip()
+            has_return = any(text(section) for section in
+                             member.findall('.//simplesect[@kind="return"]'))
+            has_retval = any(text(item.find("parameterdescription")) for item in
+                             member.findall('.//parameterlist[@kind="retval"]/parameteritem'))
+            if (return_type and return_type != "void" and "=delete" not in args
+                    and not has_return and not has_retval):
+                messages.append(f"return type of member {name} lacks return documentation")
+            for message in messages:
+                warning = f"{filename}:{location.get('line', '1')}: warning: {message}"
+                findings.setdefault(strip_line_number(warning), warning)
+    if not function_count:
+        raise ValueError("Doxygen XML contains no extracted C++ functions")
+    return findings
 
 
 def strip_line_number(warning):
@@ -155,6 +256,16 @@ def main():
                       "doxygen produced no warning log")
                 return 2
             current = normalize(log, tmpdir)
+            try:
+                current.update(normalize(os.path.join(tmpdir, "extraction-warnings.log"),
+                                         tmpdir))
+                xml_findings = audit_xml(os.path.join(tmpdir, "xml"))
+                current.update(xml_findings)
+                print(f"Doxygen full-extraction XML audit: {len(xml_findings)} "
+                      "missing parameter/return descriptions.")
+            except (ValueError, ET.ParseError, OSError) as error:
+                print(color("1;31", "error:", tty), f"Doxygen XML audit failed: {error}")
+                return 2
 
     if args.update_baseline:
         entries = sorted(current.keys())

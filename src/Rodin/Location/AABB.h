@@ -283,6 +283,8 @@ namespace Rodin::Location
       /**
        * Euclidean norm with the cheap squared-norm path at ordinary scales.
        * Scaling avoids overflow and avoids classifying nonzero tiny vectors as zero.
+       * @param v Vector whose norm or finiteness is tested.
+       * @returns Euclidean norm evaluated with scaling when needed to avoid overflow or underflow.
        */
       static Real stableNorm(const Math::SpatialPoint& v)
       {
@@ -294,6 +296,11 @@ namespace Rodin::Location
           norm = std::hypot(norm, v[i]);
         return norm;
       }
+      /**
+       * @brief Tests whether every coordinate is finite.
+       * @param v Vector whose norm or finiteness is tested.
+       * @returns True if all entries are finite.
+       */
 
       static bool isFinite(const Math::SpatialPoint& v)
       {
@@ -304,6 +311,11 @@ namespace Rodin::Location
         }
         return true;
       }
+      /**
+       * @brief Tests whether every coordinate is finite.
+       * @param m Matrix whose entries are tested for finiteness.
+       * @returns True if all entries are finite.
+       */
 
       static bool isFinite(const Math::SpatialMatrix<Real>& m)
       {
@@ -353,6 +365,10 @@ namespace Rodin::Location
           std::atomic<bool> built{false};
           mutable std::mutex mutex;
       };
+      /**
+       * @brief Invalidates the spatial indexes and optionally updates the mesh scale.
+       * @param updateScale Whether to recompute the mesh scale used by relative tolerances.
+       */
 
       void invalidate(bool updateScale = true)
       {
@@ -400,11 +416,19 @@ namespace Rodin::Location
           diag > Real(0) ? std::min(diag, std::numeric_limits<Real>::max()) : Real(1);
       }
 
-      /// Effective physical tolerance in mesh units.
+      /**
+       * Effective physical tolerance in mesh units.
+       * @returns Configured tolerance multiplied by the mesh scale and capped at the largest finite scalar.
+       */
       Real physicalTolerance() const
       {
         return std::min(m_tolerance * m_scale, std::numeric_limits<Real>::max());
       }
+      /**
+       * @brief Builds the entity-dimension index on demand.
+       * @param dimension Topological dimension of the indexed entities.
+       * @returns Reference to the current spatial index for the requested dimension.
+       */
 
       const DimensionIndex& ensureBuilt(size_t dimension) const
       {
@@ -420,6 +444,11 @@ namespace Rodin::Location
         }
         return index;
       }
+      /**
+       * @brief Builds the spatial index for an entity dimension.
+       * @param index Spatial index for the selected entity dimension.
+       * @param dimension Topological dimension of the indexed entities.
+       */
 
       void build(DimensionIndex& index, size_t dimension) const
       {
@@ -484,6 +513,18 @@ namespace Rodin::Location
         if (index.projections.empty())
           std::vector<ProjectionRange>().swap(index.projectionRanges);
       }
+      /**
+       * @brief Partitions an entity range and builds a bounding-volume tree node.
+       * @param index Spatial index for the selected entity dimension.
+       * @param order Entity permutation partitioned during tree construction.
+       * @param begin Beginning of the entity range to partition.
+       * @param end End of the entity range to partition.
+       * @param lo Lower bounding coordinates.
+       * @param hi Upper bounding coordinates.
+       * @param mid Entity bounding-box centers used for splitting.
+       * @param sdim Physical coordinate dimension.
+       * @returns Index of the newly built node in the dimension index.
+       */
 
       int32_t buildNode(DimensionIndex& index, std::vector<uint32_t>& order,
         uint32_t begin, uint32_t end, const std::vector<Bound>& lo,
@@ -550,6 +591,12 @@ namespace Rodin::Location
         index.nodes[self].right = right;
         return self;
       }
+      /**
+       * @brief Evaluates a binomial coefficient.
+       * @param n Polynomial degree.
+       * @param i Basis index.
+       * @returns Binomial coefficient for the supplied degree and index.
+       */
 
       static Real binomial(size_t n, size_t i)
       {
@@ -566,7 +613,13 @@ namespace Rodin::Location
         return out;
       }
 
-      /// @brief Univariate Bernstein polynomial of degree @f$ n @f$ on [0, 1].
+      /**
+       * @brief Univariate Bernstein polynomial of degree @f$ n @f$ on [0, 1].
+       * @param n Polynomial degree.
+       * @param i Basis index.
+       * @param x Evaluation coordinate or physical query point.
+       * @returns Value of the indexed univariate Bernstein polynomial at the supplied coordinate.
+       */
       static Real bernstein(size_t n, size_t i, Real x)
       {
         if (i > n)
@@ -579,7 +632,13 @@ namespace Rodin::Location
         return out;
       }
 
-      /// @brief Multinomial coefficient @f$ k! / \prod_i \alpha_i! @f$.
+      /**
+       * @brief Multinomial coefficient @f$ k! / \prod_i \alpha_i! @f$.
+       * @param k Polynomial degree.
+       * @param alpha Barycentric multi-index.
+       * @param count Number of active barycentric coordinates or control points.
+       * @returns Multinomial coefficient of the active multi-index entries.
+       */
       static Real multinomial(size_t k, const std::array<size_t, 4>& alpha, size_t count)
       {
         Real out = 1;
@@ -596,6 +655,11 @@ namespace Rodin::Location
       /**
        * @brief Bernstein polynomial of degree @f$ k @f$ on the reference
        * simplex of dimension @p rdim, indexed by a barycentric multi-index.
+       * @param k Polynomial degree.
+       * @param alpha Barycentric multi-index.
+       * @param rdim Reference dimension.
+       * @param r Reference evaluation point.
+       * @returns Value of the indexed simplex Bernstein polynomial at the reference point.
        */
       static Real simplexBernstein(size_t k, const std::array<size_t, 4>& alpha,
         size_t rdim, const Math::SpatialPoint& r)
@@ -614,7 +678,14 @@ namespace Rodin::Location
         return out;
       }
 
-      /// @brief Evaluates one control-point basis function of degree @p k.
+      /**
+       * @brief Evaluates one control-point basis function of degree @p k.
+       * @param g Reference-cell geometry.
+       * @param k Polynomial degree.
+       * @param mode Multi-index identifying the control-basis function.
+       * @param r Reference evaluation point.
+       * @returns Value of the selected control-point basis function at the reference point.
+       */
       static Real controlBasisValue(Geometry::Polytope::Type g, size_t k,
         const std::array<size_t, 4>& mode, const Math::SpatialPoint& r)
       {
@@ -665,6 +736,10 @@ namespace Rodin::Location
        * The lattice is the equispaced (collapsed, on pyramids) node set of
        * the corresponding finite element, so it is unisolvent for the space
        * the geometry transformation lives in.
+       * @param g Reference-cell geometry.
+       * @param k Polynomial degree.
+       * @param modes Output multi-indices for the control lattice.
+       * @param samples Output reference points for sampling the control basis.
        */
       static void makeControlLattice(Geometry::Polytope::Type g, size_t k,
         std::vector<std::array<size_t, 4>>& modes,
@@ -828,7 +903,12 @@ namespace Rodin::Location
           bool valid = false;
       };
 
-      /// @brief Returns the cached control-point basis of degree @p k on @p g.
+      /**
+       * @brief Returns the cached control-point basis of degree @p k on @p g.
+       * @param g Reference-cell geometry.
+       * @param k Polynomial degree.
+       * @returns Reference to the cached control-point basis for the requested geometry and degree.
+       */
       static const ControlBasis& getControlBasis(Geometry::Polytope::Type g, size_t k)
       {
         using Key = std::pair<int, size_t>;
@@ -894,6 +974,13 @@ namespace Rodin::Location
         }
         return s_cache.emplace(key, std::move(basis)).first->second;
       }
+      /**
+       * @brief Expands a bounding box by the physical padding.
+       * @param lo Lower bounding coordinates.
+       * @param hi Upper bounding coordinates.
+       * @param pad Physical padding added to the box.
+       * @param sdim Physical coordinate dimension.
+       */
 
       void padBox(Bound& lo, Bound& hi, Real pad, size_t sdim) const
       {
@@ -911,6 +998,11 @@ namespace Rodin::Location
        * projection cannot exceed their maximum. Axis-aligned directions are
        * already covered by the AABB. Normals select useful directions only;
        * they do not assert that curved faces themselves are planar.
+       * @param polytope Mesh entity whose physical image is bounded.
+       * @param count Number of active barycentric coordinates or control points.
+       * @param getControlPoint Callable returning a physical control point by index.
+       * @param conversionError Bound on the error in conversion to the control-point basis.
+       * @param projections Output directional projection bounds.
        */
       template <class GetControlPoint>
       void makeProjections(const Geometry::Polytope& polytope, size_t count,
@@ -966,6 +1058,13 @@ namespace Rodin::Location
           projections.push_back(bound);
         }
       }
+      /**
+       * @brief Bounds the physical image of a mesh entity.
+       * @param polytope Mesh entity whose physical image is bounded.
+       * @param lo Lower bounding coordinates.
+       * @param hi Upper bounding coordinates.
+       * @param projections Output directional projection bounds.
+       */
 
       void makeBox(const Geometry::Polytope& polytope, Bound& lo, Bound& hi,
         std::vector<ProjectionBound>& projections) const
@@ -1092,6 +1191,14 @@ namespace Rodin::Location
         lo.fill(-std::numeric_limits<Real>::infinity());
         hi.fill(std::numeric_limits<Real>::infinity());
       }
+      /**
+       * @brief Tests whether a physical point is inside an axis-aligned box.
+       * @param lo Lower bounding coordinates.
+       * @param hi Upper bounding coordinates.
+       * @param x Evaluation coordinate or physical query point.
+       * @param sdim Physical coordinate dimension.
+       * @returns True when every coordinate lies within the box bounds.
+       */
 
       bool boxContains(
         const Bound& lo, const Bound& hi, const Math::SpatialPoint& x, size_t sdim) const
@@ -1104,11 +1211,25 @@ namespace Rodin::Location
         }
         return true;
       }
+      /**
+       * @brief Tests whether a physical point is inside an axis-aligned box.
+       * @param node Tree node whose box is tested.
+       * @param x Evaluation coordinate or physical query point.
+       * @param sdim Physical coordinate dimension.
+       * @returns True when every coordinate lies within the box bounds.
+       */
 
       bool boxContains(const Node& node, const Math::SpatialPoint& x, size_t sdim) const
       {
         return boxContains(node.lo, node.hi, x, sdim);
       }
+      /**
+       * @brief Tests reference-cell containment with the configured tolerance.
+       * @param traits Reference-cell geometry traits.
+       * @param rc Reference coordinates, updated when inversion or clipping is requested.
+       * @param needsClip Output flag indicating whether accepted reference coordinates require clipping.
+       * @returns True when the point is accepted; the clipping flag reports whether it needs projection onto the reference boundary.
+       */
 
       bool containsReference(const Geometry::Polytope::Traits& traits,
         const Math::SpatialPoint& rc, bool& needsClip) const
@@ -1129,6 +1250,11 @@ namespace Rodin::Location
         }
         return true;
       }
+      /**
+       * @brief Projects reference coordinates onto the reference-cell boundary.
+       * @param geometry Reference-cell geometry.
+       * @param rc Reference coordinates, updated when inversion or clipping is requested.
+       */
 
       void clipReference(Geometry::Polytope::Type geometry, Math::SpatialPoint& rc) const
       {
@@ -1180,7 +1306,15 @@ namespace Rodin::Location
         }
       }
 
-      /// @brief Inverts a valid, injective map from several seeds with controlled steps.
+      /**
+       * @brief Inverts a valid, injective map from several seeds with controlled steps.
+       * @param transformation Map from reference to physical coordinates.
+       * @param geometry Reference-cell geometry.
+       * @param traits Reference-cell geometry traits.
+       * @param x Evaluation coordinate or physical query point.
+       * @param rc Reference coordinates, updated when inversion or clipping is requested.
+       * @returns True when an accepted inverse-map iterate is found; false when inversion fails.
+       */
       bool invert(const Geometry::PolytopeTransformation& transformation,
         Geometry::Polytope::Type geometry, const Geometry::Polytope::Traits& traits,
         const Math::SpatialPoint& x, Math::SpatialPoint& rc) const
@@ -1391,6 +1525,13 @@ namespace Rodin::Location
         }
         return false;
       }
+      /**
+       * @brief Certifies containment in one candidate mesh entity.
+       * @param dimension Topological dimension of the indexed entities.
+       * @param polytopeIndex Index of the candidate mesh entity.
+       * @param x Evaluation coordinate or physical query point.
+       * @returns Located reference/physical point, or an empty optional when certification fails.
+       */
 
       Optional<Geometry::Point> narrowPhase(
         size_t dimension, Index polytopeIndex, const Math::SpatialPoint& x) const
@@ -1413,6 +1554,13 @@ namespace Rodin::Location
           return {};
         return Geometry::Point(polytope, rc, x);
       }
+      /**
+       * @brief Traverses the spatial index and certifies candidate entities.
+       * @param index Spatial index for the selected entity dimension.
+       * @param dimension Topological dimension of the indexed entities.
+       * @param x Evaluation coordinate or physical query point.
+       * @returns First certified containing point, or an empty optional when no candidate contains the query.
+       */
 
       Optional<Geometry::Point> traverse(
         const DimensionIndex& index, size_t dimension, const Math::SpatialPoint& x) const
@@ -1466,6 +1614,13 @@ namespace Rodin::Location
         }
         return {};
       }
+      /**
+       * @brief Tests every indexed entity when tree traversal does not locate the point.
+       * @param index Spatial index for the selected entity dimension.
+       * @param dimension Topological dimension of the indexed entities.
+       * @param x Evaluation coordinate or physical query point.
+       * @returns First certified containing point, or an empty optional when none is found.
+       */
 
       Optional<Geometry::Point> exhaustive(
         const DimensionIndex& index, size_t dimension, const Math::SpatialPoint& x) const

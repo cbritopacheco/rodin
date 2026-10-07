@@ -597,7 +597,11 @@ namespace Rodin::IO
           localField)
           .print(os);
       }
-      void printData(std::ostream&) override {}
+      /**
+       * @brief Provides the format-specific data-printer interface.
+       * @param os Output stream required by the printer interface; unused by this implementation.
+       */
+      void printData([[maybe_unused]] std::ostream& os) override {}
   };
 }
 

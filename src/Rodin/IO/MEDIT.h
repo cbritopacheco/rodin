@@ -140,54 +140,108 @@ namespace Rodin::IO::MEDIT
     }
     return nullptr;
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(const std::string& str, Keyword kw)
   {
     return str == toCharString(kw);
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(const std::string& str, Keyword kw)
   {
     return str != toCharString(kw);
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(Keyword kw, const std::string& str)
   {
     return str == toCharString(kw);
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(Keyword kw, const std::string& str)
   {
     return str != toCharString(kw);
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(Keyword kw, const char* str)
   {
     return strcmp(toCharString(kw), str) == 0;
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(Keyword kw, const char* str)
   {
     return strcmp(toCharString(kw), str) != 0;
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(const char* str, Keyword kw)
   {
     return strcmp(toCharString(kw), str) == 0;
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(const char* str, Keyword kw)
   {
     return strcmp(toCharString(kw), str) != 0;
   }
+  /**
+   * @brief Writes the format keyword to a stream.
+   * @param os Output stream receiving the formatted data.
+   * @param kw Format keyword to compare or write.
+   * @returns Reference to the output stream after insertion.
+   */
 
   inline
   std::ostream& operator<<(std::ostream& os, Keyword kw)
@@ -195,6 +249,11 @@ namespace Rodin::IO::MEDIT
     os << toCharString(kw);
     return os;
   }
+  /**
+   * @brief Converts text to a format keyword.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns Matching keyword, or an empty optional if the text is not recognized.
+   */
 
   inline
   Optional<Keyword> toKeyword(const char* str)
@@ -958,11 +1017,22 @@ namespace Rodin::IO
       // -------------------------------------------------------------
       // Line helpers (same style as P1 loader)
       // -------------------------------------------------------------
+      /**
+       * @brief Reads one line while advancing the line counter.
+       * @param is Input stream from which a line is read.
+       * @param line Storage receiving the extracted line.
+       * @returns Reference to the input stream after extraction.
+       */
       std::istream& getline(std::istream& is, std::string& line)
       {
         m_currentLineNumber++;
         return std::getline(is, line);
       }
+      /**
+       * @brief Reads the next nonempty input line.
+       * @param is Input stream from which a line is read.
+       * @returns Next nonempty line, or an empty string when the input is exhausted.
+       */
 
       std::string skipEmptyLines(std::istream& is)
       {
@@ -974,6 +1044,10 @@ namespace Rodin::IO
         }
         return line;
       }
+      /**
+       * @brief Reads the mesh format version.
+       * @param is Input stream from which a line is read.
+       */
 
       void readVersion(std::istream& is)
       {
@@ -996,6 +1070,10 @@ namespace Rodin::IO
               << Alert::Raise;
         }
       }
+      /**
+       * @brief Reads the mesh spatial dimension.
+       * @param is Input stream from which a line is read.
+       */
 
       void readDimension(std::istream& is)
       {
@@ -1018,6 +1096,10 @@ namespace Rodin::IO
               << Alert::Raise;
         }
       }
+      /**
+       * @brief Reads the mesh data sections.
+       * @param is Input stream from which a line is read.
+       */
 
       void readData(std::istream& is)
       {

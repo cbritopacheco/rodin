@@ -142,9 +142,12 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
-  /// @brief Deduction guide for @c Exp.
+  /**
+   * @brief Deduction guide for @c Exp.
+   * @param v Function to exponentiate
+   */
   template <class NestedDerived>
-  Exp(const FunctionBase<NestedDerived>&) -> Exp<FunctionBase<NestedDerived>>;
+  Exp(const FunctionBase<NestedDerived>& v) -> Exp<FunctionBase<NestedDerived>>;
 
   template <class NestedDerived>
   constexpr auto

@@ -235,10 +235,40 @@ namespace Rodin::Solver
       }
 
     private:
+      /**
+       * @brief Updates the problem unknowns from the PETSc solution vector.
+       * @param x PETSc solution vector for the current nonlinear iterate.
+       * @param ctx Pointer to the owning SNES solver wrapper.
+       * @returns Zero on success, or a PETSc error code on failure.
+       */
       static PetscErrorCode Update(::Vec x, void* ctx);
+      /**
+       * @brief Updates the unknowns and assembles the requested system target.
+       * @param x PETSc solution vector for the current nonlinear iterate.
+       * @param ctx Pointer to the owning SNES solver wrapper.
+       * @param target Requested operator or vector assembly target.
+       * @returns Zero on success, or a PETSc error code on failure.
+       */
       static PetscErrorCode Assemble(
         ::Vec x, void* ctx, Variational::AssemblyTarget target);
+      /**
+       * @brief Assembles the nonlinear residual for the PETSc callback.
+       * @param snes PETSc nonlinear solver invoking the callback.
+       * @param x PETSc solution vector for the current nonlinear iterate.
+       * @param f Residual vector receiving the assembled residual.
+       * @param ctx Pointer to the owning SNES solver wrapper.
+       * @returns Zero on success, or a PETSc error code on failure.
+       */
       static PetscErrorCode Residual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
+      /**
+       * @brief Assembles the Jacobian for the PETSc nonlinear-solver callback.
+       * @param snes PETSc nonlinear solver invoking the callback.
+       * @param x PETSc solution vector for the current nonlinear iterate.
+       * @param J Jacobian matrix receiving the assembled tangent.
+       * @param P Preconditioning matrix associated with the Jacobian.
+       * @param ctx Pointer to the owning SNES solver wrapper.
+       * @returns Zero on success, or a PETSc error code on failure.
+       */
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
     private:

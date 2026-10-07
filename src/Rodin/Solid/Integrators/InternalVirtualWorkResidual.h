@@ -289,6 +289,10 @@ namespace Rodin::Solid
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& testFES = m_testfes.get();
@@ -570,6 +574,10 @@ namespace Rodin::Solid
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& testFES = m_testfes.get();
@@ -780,6 +788,10 @@ namespace Rodin::Solid
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& testFES = m_testfes.get();
@@ -800,24 +812,40 @@ namespace Rodin::Solid
       Math::Vector<ScalarType> m_elemVec;
   };
 
-  /// CTAD deduction guide for the displacement-only residual
+  /**
+   * CTAD deduction guide for the displacement-only residual
+   * @param law The constitutive law
+   * @param v The displacement test function
+   * @param displacement The current displacement state
+   */
   template <class LawDerived, class TestFunctionType, class DisplacementType>
-  InternalVirtualWorkResidual(
-    const LawDerived&, const TestFunctionType&, const DisplacementType&)
+  InternalVirtualWorkResidual(const LawDerived& law, const TestFunctionType& v,
+    const DisplacementType& displacement)
     -> InternalVirtualWorkResidual<LawDerived, std::decay_t<TestFunctionType>,
       std::decay_t<DisplacementType>>;
 
-  /// CTAD deduction guide for the mixed u-p momentum residual
+  /**
+   * CTAD deduction guide for the mixed u-p momentum residual
+   * @param law The isochoric constitutive law
+   * @param v The displacement test function
+   * @param displacement The current displacement state
+   * @param pressure The current pressure state
+   */
   template <class LawDerived, class TestFunctionType, class DisplacementType,
     class PressureType>
-  InternalVirtualWorkResidual(const LawDerived&, const TestFunctionType&,
-    const DisplacementType&, const PressureType&)
+  InternalVirtualWorkResidual(const LawDerived& law, const TestFunctionType& v,
+    const DisplacementType& displacement, const PressureType& pressure)
     -> InternalVirtualWorkResidual<LawDerived, std::decay_t<TestFunctionType>,
       std::decay_t<DisplacementType>, std::decay_t<PressureType>>;
 
-  /// CTAD deduction guide for the incompressibility constraint residual
+  /**
+   * CTAD deduction guide for the incompressibility constraint residual
+   * @param q The pressure test function
+   * @param displacement The current displacement state
+   */
   template <class TestPressFunctionType, class DisplacementType>
-  InternalVirtualWorkResidualP(const TestPressFunctionType&, const DisplacementType&)
+  InternalVirtualWorkResidualP(
+    const TestPressFunctionType& q, const DisplacementType& displacement)
     -> InternalVirtualWorkResidualP<std::decay_t<TestPressFunctionType>,
       std::decay_t<DisplacementType>>;
 }

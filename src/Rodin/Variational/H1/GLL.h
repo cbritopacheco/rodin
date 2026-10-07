@@ -73,6 +73,11 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Approximates cosine during constant evaluation.
+       * @param x Scalar evaluation argument.
+       * @returns Cosine approximation obtained from the implemented Taylor series.
+       */
       static constexpr Real constexprCos(Real x)
       {
         constexpr Real pi = Math::Constants::pi();
@@ -97,6 +102,10 @@ namespace Rodin::Variational
 
         return sum;
       }
+      /**
+       * @brief Constructs the reference interpolation nodes.
+       * @returns Array of Gauss-Lobatto-Legendre nodes on the reference interval.
+       */
 
       static constexpr std::array<Real, K + 1> compute()
       {
@@ -197,6 +206,10 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Constructs the reference interpolation nodes.
+       * @returns Array of Gauss-Lobatto-Legendre nodes on the reference interval.
+       */
       static constexpr std::array<Real, K + 1> compute()
       {
         std::array<Real, K + 1> nodes{};

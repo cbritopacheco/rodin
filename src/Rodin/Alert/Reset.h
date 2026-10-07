@@ -46,9 +46,9 @@ namespace Rodin::Alert
     /**
      * @brief Move assignment operator.
      * @returns Reference to this object after the operation.
+     * @param other Object to move from.
      */
-    constexpr
-    ResetT& operator=(ResetT&&) = default;
+    constexpr ResetT& operator=(ResetT&& other) = default;
   };
 
   /**
@@ -66,9 +66,9 @@ namespace Rodin::Alert
    *
    * Resets all terminal formatting and colors to default using the
    * termcolor library.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const ResetT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const ResetT& tag)
   {
     os << termcolor::reset;
     return os;

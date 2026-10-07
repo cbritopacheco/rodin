@@ -295,9 +295,11 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Jacobian of a P1 GridFunction
+   * @param u Operand expression.
    */
   template <class Range, class Data, class Mesh>
-  Jacobian(const GridFunction<P1<Range, Mesh>, Data>&) -> Jacobian<GridFunction<P1<Range, Mesh>, Data>>;
+  Jacobian(const GridFunction<P1<Range, Mesh>, Data>& u)
+    -> Jacobian<GridFunction<P1<Range, Mesh>, Data>>;
 
   /**
    * @ingroup JacobianSpecializations
@@ -355,7 +357,10 @@ namespace Rodin::Variational
               /// @brief Whether the key holds a cached entry.
               bool valid = false;
 
-              /// @brief Tests whether the key holds a cached entry.
+              /**
+               * @brief Tests whether the key holds a cached entry.
+               * @returns True if the key identifies a cached entry; false otherwise.
+               */
               explicit operator bool() const noexcept
               {
                 return valid;
@@ -400,7 +405,10 @@ namespace Rodin::Variational
             /// @brief Whether the key holds a cached entry.
             bool valid = false;
 
-            /// @brief Tests whether the key holds a cached entry.
+            /**
+             * @brief Tests whether the key holds a cached entry.
+             * @returns True if the key identifies a cached entry; false otherwise.
+             */
             explicit operator bool() const noexcept
             {
               return valid;
@@ -418,8 +426,11 @@ namespace Rodin::Variational
               return qf == o.qf && qp == o.qp;
             }
 
-            /// @brief Resets the key, invalidating the cached entry.
-            void operator=(std::initializer_list<int>) noexcept
+            /**
+             * @brief Resets the key, invalidating the cached entry.
+             * @param reset Initializer-list tag; its contents are ignored when invalidating the key.
+             */
+            void operator=([[maybe_unused]] std::initializer_list<int> reset) noexcept
             {
               valid = false;
               qf = nullptr;
@@ -694,10 +705,16 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
-  /// @brief Deduction guide for @c Jacobian.
-  template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
+  /**
+   * @brief Deduction guide for @c Jacobian.
+   * @param u Operand expression.
+   */
+  template <class ShapeFunctionDerived, class Number, class Mesh,
+    ShapeFunctionSpaceType Space>
+  Jacobian(const ShapeFunction<ShapeFunctionDerived,
+    P1<Math::SpatialVector<Number>, Mesh>, Space>& u)
+    -> Jacobian<
+      ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
 #endif

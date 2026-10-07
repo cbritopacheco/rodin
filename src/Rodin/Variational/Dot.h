@@ -325,9 +325,13 @@ namespace Rodin::Variational
       std::unique_ptr<FunctionBase<RHSDerived>> m_rhs;
   };
 
-  /// @brief Deduction guide for Dot product of two functions.
+  /**
+   * @brief Deduction guide for Dot product of two functions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived>
-  Dot(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+  Dot(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
     -> Dot<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
@@ -548,9 +552,14 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for Dot product of function and shape function.
+  /**
+   * @brief Deduction guide for Dot product of function and shape function.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  Dot(const FunctionBase<LHSDerived>&, const ShapeFunctionBase<RHSDerived, FES, Space>&)
+  Dot(const FunctionBase<LHSDerived>& lhs,
+    const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
     -> Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>;
 
   /**
@@ -748,9 +757,14 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for Dot product of shape function and function.
+  /**
+   * @brief Deduction guide for Dot product of shape function and function.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  Dot(const ShapeFunctionBase<LHSDerived, FES, Space>&, const FunctionBase<RHSDerived>&)
+  Dot(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+    const FunctionBase<RHSDerived>& rhs)
     -> Dot<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
   /**
@@ -916,11 +930,16 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_test;
   };
 
-  /// @brief Deduction guide for Dot product of trial and test shape functions.
+  /**
+   * @brief Deduction guide for Dot product of trial and test shape functions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  Dot(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&,
-      const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
-  -> Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>;
+  Dot(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>& lhs,
+    const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>& rhs)
+    -> Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>;
 
   /**
    * @ingroup DotSpecializations
@@ -1005,9 +1024,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order used on a mesh entity.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      std::optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr std::optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -1022,14 +1042,18 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for Dot product of potential and test shape function.
-  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  Dot(const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>&,
-      const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
-  -> Dot<
-      Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+  /**
+   * @brief Deduction guide for Dot product of potential and test shape function.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived,
+    class TestFES>
+  Dot(
+    const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>& lhs,
+    const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>& rhs)
+    -> Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
       ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>;
-
 }
 
 #endif

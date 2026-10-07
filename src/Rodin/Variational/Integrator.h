@@ -110,8 +110,9 @@ namespace Rodin::Variational
        * State the order with @ref setOrder(size_t) whenever the degree the
        * integrand actually has is not the degree inference can see.
        * @returns Reference to this object after the operation.
+       * @param automatic Tag selecting automatic quadrature-order inference.
        */
-      Integrator& setOrder(std::nullopt_t)
+      Integrator& setOrder([[maybe_unused]] std::nullopt_t automatic)
       {
         m_order = nullptr;
         return *this;

@@ -38,6 +38,9 @@ line, offending source, and suggested fix.
   specializations, and its deduction guides live together in that header.
 - **Documentation**: Use `/** ... */` for multiline Doxygen documentation
   and `///` for single-line documentation. Use `///<` for trailing member documentation.
+  Document every parameter and non-void return, including unused inputs,
+  deduction guides, and internal helpers. The Doxygen check audits the generated
+  XML to enforce coverage beyond Doxygen's ordinary warnings.
 - **Boundaries**: PETSc calls only under `src/Rodin/PETSc/`
   (`assert(ierr == PETSC_SUCCESS)` after each call — no checking macros);
   third-party integrations stay in their own directories; the core never

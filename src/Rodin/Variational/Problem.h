@@ -250,8 +250,9 @@ namespace Rodin::Variational
       /**
        * @brief Assembles only the requested target of the linear system.
        * @returns Reference to this object after the operation.
+       * @param target Requested assembly target; the default implementation reports unsupported targeted assembly.
        */
-      virtual ProblemBase& assemble(AssemblyTarget)
+      virtual ProblemBase& assemble([[maybe_unused]] AssemblyTarget target)
       {
         Alert::MemberFunctionException(*this, __func__)
           << "Targeted assembly is not implemented for this problem." << Alert::Raise;
