@@ -58,7 +58,7 @@ class CanonicalCampaignTest(unittest.TestCase):
             manifest = json.loads((Path(directory) / "canonical_p1_2d_manifest.json").read_text())
             self.assertEqual(manifest["expected_cases"], 6875)
             self.assertNotIn("shape_curvature", manifest)
-            self.assertEqual(manifest["model"], "F+D-pointwise-deviatoric-surface12-v9")
+            self.assertEqual(manifest["model"], "F+D-centered-strain-surface12-v10")
             profile = manifest["fixed_profile"]
             self.assertEqual(profile["model"], manifest["model"])
             self.assertEqual(profile["interface_quadrature_order"],
@@ -77,13 +77,14 @@ class CanonicalCampaignTest(unittest.TestCase):
 
     def test_primary_responses_preserve_precision_and_inner_counts(self):
         output = ("wngir responses: energy=1.2345678901234567e-5 "
-                  "geom_sup=0.0012345678901234567 geom_sup_target=0.002 "
+                  "geom_sup=0.0012345678901234567 geom_c=1.2345678901234567 geom_sup_target=0.002 "
                   "target_hit=1 quality_ok=1 inner_total=19 inner_max=4 "
                   "inner_last=2 inner_converged=1 inner_residual=1e-9 "
                   "inner_relative_residual=1e-4 inner_residual_tolerance=1e-8 "
                   "min_j=0.0100000000123 max_qrel=9.999999999987")
         fields = parse_responses(output)
         self.assertEqual(fields["geom_sup"], .0012345678901234567)
+        self.assertEqual(fields["geom_c"], 1.2345678901234567)
         self.assertEqual(fields["inner_total"], 19)
         self.assertEqual(fields["inner_max"], 4)
         self.assertLessEqual(fields["inner_residual"], fields["inner_residual_tolerance"])
@@ -100,17 +101,24 @@ class CanonicalCampaignTest(unittest.TestCase):
                                barrier_max_iters=15, cg_rtol=1e-8,
                                log_iterations=False)
         result = command(args, 20, 4, 5, 90, 30)
-        for option in ("--wngir-kappa-f=2", "--wngir-kappa-d=5"):
+        for option in ("--wngir-fit=2", "--wngir-distribution-deviatoric=5"):
             self.assertIn(option, result)
 
     def check_command(self, args):
-        self.assertIn("--wngir-kappa-f=1", args)
+        self.assertIn("--wngir-fit=1", args)
         self.assertFalse(any("kappa-s" in arg for arg in args))
-        self.assertIn("--wngir-kappa-d=1", args)
-        self.assertIn("--wngir-direct-solver=mumps", args)
-        self.assertIn("--wngir-primal-barrier-iterations=15", args)
-        self.assertIn("--wngir-steps=30", args)
-        self.assertTrue(any(arg.startswith("--wngir-geometric-sup-tol=") for arg in args))
+        self.assertIn("--wngir-distribution-deviatoric=1", args)
+        self.assertIn("--wngir-distribution-divergence=1", args)
+        self.assertFalse(any("omega-min" in arg or "jls" in arg or "volume-gauge" in arg
+                             for arg in args))
+        self.assertIn("--wngir-linear-solver=mumps", args)
+        self.assertIn("--wngir-inner-iterations=15", args)
+        self.assertIn("--wngir-outer-iterations=30", args)
+        self.assertIn("--wngir-step-tolerance=0", args)
+        self.assertIn("--wngir-step-over-h-tolerance=5e-4", args)
+        self.assertIn("--wngir-stagnation-iterations=5", args)
+        self.assertIn("--wngir-max-step-over-h=0", args)
+        self.assertTrue(any(arg.startswith("--wngir-geometric-tolerance=") for arg in args))
         self.assertFalse(any("rms-tol" in arg or "rms-floor" in arg or "descent-fraction" in arg
                              or "positive-shape-curvature" in arg for arg in args))
         self.assertFalse(any("rigid-stabilisation" in arg or "quality-model" in arg

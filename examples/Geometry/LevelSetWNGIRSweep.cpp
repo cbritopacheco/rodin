@@ -17,8 +17,6 @@
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Math.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
-#include <Rodin/Solver/CG.h>
-#include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Solid.h>
 #include <Rodin/Variational.h>
 
@@ -451,8 +449,9 @@ int main(int argc, char** argv)
   std::cout << "Wavy-circle WNGIR sweep on " << n << "x" << n << " unit-square mesh, "
             << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
-            << "  orbit R=" << orbitR << "  kappaF=" << wngirParams.model.fit
-            << " kappaD=" << wngirParams.model.distribution << '\n';
+            << "  orbit R=" << orbitR << "  fit=" << wngirParams.model.fit
+            << " deviatoric=" << wngirParams.model.distribution.deviatoric
+            << " divergence=" << wngirParams.model.distribution.divergence << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -611,7 +610,6 @@ int main(int argc, char** argv)
     Real minJ = Real(1);
     Real maxQRel = Real(1);
     Real lastAlpha = Real(0);
-    Real maxStep = Real(0);
     Real acceptedStep = Real(0);
     std::size_t iterations = 0;
 
@@ -623,7 +621,7 @@ int main(int argc, char** argv)
       geometricTargetReached = wngirRep.geometricTargetReached;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
-                << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
+                << "  setup=" << wngirRep.tSetup << "  solve=" << wngirRep.tSolve
                 << "  cgIt=" << wngirRep.linearIterations
                 << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.getReasonString() << '\n';
@@ -647,7 +645,7 @@ int main(int argc, char** argv)
     u.getData() = bestU;
     interfaceFit = bestFit;
     const auto bestAdm = evaluateWNGIRAdmissibilitySampled(
-      u, u.getData(), wngirParams.globalization.jMin, qOrder);
+      u, wngirParams.model.jacobian, qOrder);
     minJ = bestAdm.minJ;
     maxQRel = bestAdm.maxQRel;
 

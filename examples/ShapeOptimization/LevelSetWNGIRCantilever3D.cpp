@@ -659,8 +659,8 @@ int run(int argc, char** argv)
             << " classify=" << classifyEvery << " redistance=" << redistanceMode << "/"
             << redistanceEvery << " transfer=" << redistanceTransfer
             << " adaptive=" << adaptiveRedistance << " eikTol=" << redistanceEikonalTol
-            << "\n  WNGIR metric: kappaF=" << wp.model.fit
-            << " kappaD=" << wp.model.distribution << '\n';
+            << "\n  WNGIR metric: fit=" << wp.model.fit
+            << " deviatoric=" << wp.model.distribution.deviatoric << " divergence=" << wp.model.distribution.divergence << '\n';
 
   auto cellGradientMagnitude = [&](const auto& gf, const Polytope& cell) -> Real {
     const auto& vv = cell.getVertices();
@@ -868,10 +868,10 @@ int run(int argc, char** argv)
     const Real levelSetMeshScale = h * report.levelSetGradientScale;
     std::cout
       << "  WNGIR: it=" << report.iterations << " exit=" << report.getReasonString()
-      << " activeRMS=" << std::scientific << report.activeRMS << " activeRMS/(hG)="
-      << (levelSetMeshScale > Real(0) ? report.activeRMS / levelSetMeshScale : Real(0))
-      << " activeSup/(hG)="
-      << (levelSetMeshScale > Real(0) ? report.activeSup / levelSetMeshScale : Real(0))
+      << " residualRMS=" << std::scientific << report.residualRMS << " residualRMS/(hG)="
+      << (levelSetMeshScale > Real(0) ? report.residualRMS / levelSetMeshScale : Real(0))
+      << " residualSup/(hG)="
+      << (levelSetMeshScale > Real(0) ? report.residualSup / levelSetMeshScale : Real(0))
       << " Dinf=" << report.geometricSup << " DinfTarget=" << report.geometricSupTarget
       << " innerResidual=" << report.innerResidual << " nJumpRMS=" << report.normalJumpRMS
       << '\n';

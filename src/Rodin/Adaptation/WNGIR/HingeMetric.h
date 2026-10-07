@@ -10,7 +10,7 @@
 
 namespace Rodin::Adaptation
 {
-    /// @brief Affine hinge Hessian or nonlinear hinge Gauss-Newton tangent.
+  /// @brief Hessian of the affine quadratic quality hinges.
   template <class TrialFunction, class TestFunction, class Displacement>
   class WNGIRHingeMetric final : public Variational::LocalBilinearFormIntegratorBase<
                                    typename TrialFunction::ScalarType>
@@ -88,10 +88,6 @@ namespace Rodin::Adaptation
             continue;
           const WNGIRHingeState state(
             deformation, innerJacobian.getValue(ip), parameters, m_hingeCoefficient);
-          assert(state.isFeasible());
-          if (!state.isFeasible())
-            continue;
-
           trialJacobian.setIntegrationPoint(ip);
           for (std::size_t local = 0; local < nTrial; ++local)
           {

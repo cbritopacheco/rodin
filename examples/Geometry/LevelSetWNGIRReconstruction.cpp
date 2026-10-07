@@ -475,8 +475,9 @@ int run(int argc, char** argv)
   std::cout << "  elements=" << mesh.getCellCount() << '\n';
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes << "  center=(" << cx
             << ", " << cy << ")"
-            << "  phase=" << phase << "  kappaF=" << wngirParams.model.fit
-            << " kappaD=" << wngirParams.model.distribution << '\n';
+            << "  phase=" << phase << "  fit=" << wngirParams.model.fit
+            << " deviatoric=" << wngirParams.model.distribution.deviatoric
+            << " divergence=" << wngirParams.model.distribution.divergence << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -646,10 +647,9 @@ int run(int argc, char** argv)
     Real minJ = Real(1);
     Real maxJ = Real(1);
     Real maxQRel = Real(1);
-    Real activeRMS = Real(0);
-    Real activeSup = Real(0);
+    Real residualRMS = Real(0);
+    Real residualSup = Real(0);
     Real levelSetGradientScale = Real(0);
-    Real activeFraction = Real(0);
     Real geometricRMS = std::numeric_limits<Real>::infinity();
     Real geometricSup = std::numeric_limits<Real>::infinity();
     Real normalRMS = std::numeric_limits<Real>::infinity();
@@ -671,7 +671,7 @@ int run(int argc, char** argv)
       geometricTargetReached = wngirRep.geometricTargetReached;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
-                << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
+                << "  setup=" << wngirRep.tSetup << "  solve=" << wngirRep.tSolve
                 << "  cgIt=" << wngirRep.linearIterations
                 << "  cgSolves=" << wngirRep.linearSolveCount << "  cgMean="
                 << (wngirRep.linearSolveCount > 0
@@ -689,10 +689,9 @@ int run(int argc, char** argv)
       minJ = wngirRep.minJ;
       maxJ = wngirRep.maxJ;
       maxQRel = wngirRep.maxQRel;
-      activeRMS = wngirRep.activeRMS;
-      activeSup = wngirRep.activeSup;
+      residualRMS = wngirRep.residualRMS;
+      residualSup = wngirRep.residualSup;
       levelSetGradientScale = wngirRep.levelSetGradientScale;
-      activeFraction = wngirRep.activeFraction;
       geometricRMS = wngirRep.geometricRMS;
       geometricSup = wngirRep.geometricSup;
       normalRMS = wngirRep.normalRMS;
@@ -764,12 +763,12 @@ int run(int argc, char** argv)
     std::cout << "    WNGIR it=" << iterations << "  fit=" << std::scientific
               << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
               << "  step=" << acceptedStep << "  min_j=" << minJ << "  max_j=" << maxJ
-              << "  max_qrel=" << maxQRel << "  active_rms=" << activeRMS
-              << "  active_sup=" << activeSup << "  active_rms_hg="
+              << "  max_qrel=" << maxQRel << "  residual_rms=" << residualRMS
+              << "  residual_sup=" << residualSup << "  residual_rms_hg="
               << (h * levelSetGradientScale > Real(0)
-                     ? activeRMS / (h * levelSetGradientScale)
+                     ? residualRMS / (h * levelSetGradientScale)
                      : Real(0))
-              << "  act_frac=" << activeFraction << "  pb_alpha=" << lastInnerAlpha
+              << "  pb_alpha=" << lastInnerAlpha
               << "  pb_min_alpha=" << minInnerAlpha
               << "  pb_full_steps=" << fullInnerSteps << "  rej_j=" << jacobianRejections
               << "  rej_q=" << distortionRejections << "  rej_e=" << energyRejections

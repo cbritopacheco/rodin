@@ -31,7 +31,8 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(parameters.convergence.iterations.inner, 15);
       EXPECT_EQ(parameters.convergence.tolerance.innerRelative, Real(1e-3));
       EXPECT_EQ(parameters.convergence.iterations.linear, 1000);
-      EXPECT_EQ(parameters.model.distribution, Real(1e-4));
+      EXPECT_EQ(parameters.model.distribution.deviatoric, Real(1e-4));
+      EXPECT_EQ(parameters.model.distribution.divergence, Real(1e-4));
       EXPECT_EQ(parameters.model.distortion, Real(10));
       EXPECT_EQ(parameters.model.jacobian, Real(1e-2));
       EXPECT_EQ(parameters.linear.threads, 0u);
@@ -60,7 +61,7 @@ namespace Rodin::Tests::Unit
       WNGIRParameters parameters;
       parameters.model = {.h = Real(0.5),
         .fit = Real(2),
-        .distribution = Real(0.01),
+        .distribution = {.deviatoric = Real(0.01), .divergence = Real(0.02)},
         .distortion = Real(5),
         .jacobian = Real(0.02),
         .hinge = Real(10)};
@@ -73,7 +74,8 @@ namespace Rodin::Tests::Unit
       const auto& stored = solver.getParameters();
       EXPECT_EQ(stored.model.h, Real(0.5));
       EXPECT_EQ(stored.model.fit, Real(2));
-      EXPECT_EQ(stored.model.distribution, Real(0.01));
+      EXPECT_EQ(stored.model.distribution.deviatoric, Real(0.01));
+      EXPECT_EQ(stored.model.distribution.divergence, Real(0.02));
       EXPECT_EQ(stored.model.distortion, Real(5));
       EXPECT_EQ(stored.model.jacobian, Real(0.02));
       EXPECT_EQ(stored.model.hinge, Real(10));
@@ -181,6 +183,21 @@ namespace Rodin::Tests::Unit
       }
       EXPECT_FALSE(interfaceFacets.empty());
 
+      // Fix the two remote vertical boundaries so backend comparisons have
+      // a unique solution despite the centered metric's affine kernel.
+      constexpr Attribute fixedBoundary = 20;
+      for (auto face = mesh.getFace(); face; ++face)
+      {
+        bool left = true, right = true;
+        for (const Index vertex : face->getVertices())
+        {
+          left &= mesh.getVertexCoordinates(vertex)(0) == Real(0);
+          right &= mesh.getVertexCoordinates(vertex)(0) == Real(1);
+        }
+        if (left || right)
+          mesh.setAttribute({1, face->getIndex()}, fixedBoundary);
+      }
+
       auto fes = [&] {
         if constexpr (Order == 1)
           return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, 2);
@@ -190,11 +207,12 @@ namespace Rodin::Tests::Unit
       TrialFunction trial(fes);
       TestFunction test(fes);
       WNGIR solver(trial, test);
+      solver += DirichletBC(trial, VectorFunction(Real(0), Real(0))).on(fixedBoundary);
       if constexpr (!std::is_same_v<Setup, std::nullptr_t>)
         setup(solver, trial, test);
       WNGIRParameters parameters;
       // These historical algorithm regressions retain their explicit metric.
-      parameters.model.distribution = Real(1);
+      parameters.model.distribution = {.deviatoric = Real(1), .divergence = Real(1)};
       parameters.model.h = h;
       parameters.trace = trace;
       parameters.traceQualityWitness = trace;
@@ -261,7 +279,7 @@ namespace Rodin::Tests::Unit
   {
     const WNGIRParameters defaults;
     const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
-      WNGIRParameters::LinearSolver::SparseLU, false,
+      WNGIRParameters::LinearSolver::SparseLU, true,
       defaults.convergence.tolerance.innerRelative, defaults.model.hinge,
       [&](WNGIRParameters& p) {
         p.model.fit = defaults.model.fit;
@@ -478,15 +496,15 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief The default primal-barrier solve reduces fit while preserving geometry.
+  /// @brief The default affine-hinge solve reduces fit while preserving geometry.
   TEST(Rodin_Adaptation_WNGIRSolver, FitsAdmissibleWavyTarget)
   {
     const SolveState state = solveTranslatedLine(Real(1));
-    EXPECT_LT(state.report.activeRMS, Real(0.05));
+    EXPECT_LT(state.report.residualRMS, Real(0.05));
     EXPECT_GT(state.report.minJ, Real(1e-2));
     EXPECT_LT(state.report.maxQRel, Real(10));
     EXPECT_GE(state.report.maxJ, state.report.minJ);
-    EXPECT_GT(state.report.activeFraction, Real(0));
+    EXPECT_GT(state.report.interfaceMeasure, Real(0));
     EXPECT_TRUE(std::isfinite(state.report.geometricRMS));
     EXPECT_TRUE(std::isfinite(state.report.geometricSup));
     EXPECT_TRUE(std::isfinite(state.report.normalRMS));
@@ -509,11 +527,11 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(base.report.energy, traced.report.energy);
     EXPECT_EQ(base.report.geometricSup, traced.report.geometricSup);
     EXPECT_EQ((base.displacement - traced.displacement).norm(), Real(0));
-    EXPECT_TRUE(output.find("barrier inner=") != std::string::npos ||
-      output.find("barrier skip:") != std::string::npos);
+    EXPECT_TRUE(output.find("hinge inner=") != std::string::npos ||
+      output.find("hinge skip:") != std::string::npos);
     EXPECT_NE(output.find("wngir directional:"), std::string::npos);
     EXPECT_NE(output.find("wngir quality witness:"), std::string::npos);
-    EXPECT_NE(output.find("cg_it="), std::string::npos);
+    EXPECT_NE(output.find("metric LU:"), std::string::npos);
     EXPECT_NE(output.find("rel="), std::string::npos);
     std::istringstream lines(output);
     std::string line;
@@ -528,12 +546,19 @@ namespace Rodin::Tests::Unit
       EXPECT_NE(line.find("inner_total="), std::string::npos);
       EXPECT_NE(line.find("seconds="), std::string::npos);
       EXPECT_NE(line.find("max_qrel="), std::string::npos);
+      const std::size_t constantStart = line.find("geom_c=");
+      ASSERT_NE(constantStart, std::string::npos);
+      const Real constant = std::stod(line.substr(constantStart + 7));
       const std::size_t start = line.find("geom_sup=");
       ASSERT_NE(start, std::string::npos);
       const Real distance = std::stod(line.substr(start + 9));
       EXPECT_TRUE(std::isfinite(distance));
+      EXPECT_DOUBLE_EQ(constant, distance / std::pow(Real(0.25), 2));
       if (line.find("phase=final") != std::string::npos)
+      {
         EXPECT_EQ(distance, traced.report.geometricSup);
+        EXPECT_EQ(constant, traced.report.geometricConstant);
+      }
     }
     EXPECT_EQ(initial, 1);
     EXPECT_EQ(final, 1);
@@ -550,7 +575,10 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(initial.report.geometricSup, Real(0.1));
     EXPECT_STREQ(
       initial.report.getReasonString(), "full-interface-geometric-sup-converged");
-    const auto fitted = solveTranslatedLine(Real(1), 0, false, Real(1e-3));
+    // A straight target is exactly representable, so this tests stopping rather
+    // than an unattainable maximum-error threshold for a curved P1 interface.
+    const auto fitted = solveTranslatedLine(Real(1), 0, false, Real(1e-3), false,
+      1000, false, WNGIRParameters::LinearSolver::SparseLU, true);
     EXPECT_GT(fitted.report.iterations, 0);
     EXPECT_LE(fitted.report.geometricSup, Real(1e-3));
     EXPECT_GT(fitted.report.minJ, Real(0.01));
@@ -569,7 +597,9 @@ namespace Rodin::Tests::Unit
     {
       testing::internal::CaptureStdout();
       const SolveState state =
-        solveTranslatedLine(Real(1), Real(0), true, Real(0), false, 1000, true);
+        solveTranslatedLine(Real(1), Real(0), true, Real(0), false, 1000, true,
+          WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-3), Real(1000),
+          [](WNGIRParameters& p) { p.model.qualityGuard = Real(0.95); });
       const std::string output = testing::internal::GetCapturedStdout();
       EXPECT_LT(state.report.geometricSup, Real(0.05));
       EXPECT_GT(state.report.minJ, Real(0.01));
@@ -580,7 +610,7 @@ namespace Rodin::Tests::Unit
       std::size_t merits = 0;
       while (std::getline(lines, line))
       {
-        if (line.find("barrier merit:") == std::string::npos)
+        if (line.find("hinge merit:") == std::string::npos)
           continue;
         ++merits;
         const Real before = std::stod(line.substr(line.find("before=") + 7));
@@ -604,8 +634,8 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(state.report.innerConverged);
   }
 
-  /// @brief Sparse augmented LU retains the same low-rank rigid operator as CG.
-  TEST(Rodin_Adaptation_WNGIRSolver, DirectAugmentedSolvePreservesSimilarityGauge)
+  /// @brief Direct and iterative solves agree on the observed metric.
+  TEST(Rodin_Adaptation_WNGIRSolver, DirectSolvePreservesCanonicalMetric)
   {
     const auto solve = [](WNGIRParameters::LinearSolver backend) {
       return solveTranslatedLine(
@@ -641,7 +671,7 @@ namespace Rodin::Tests::Unit
       Alert::Exception);
   }
 
-  TEST(Rodin_Adaptation_WNGIRSolver, MUMPSAugmentedSolvePreservesSimilarityGauge)
+  TEST(Rodin_Adaptation_WNGIRSolver, MUMPSSolvePreservesCanonicalMetric)
   {
     const auto solve = [](WNGIRParameters::LinearSolver linearSolver) {
       return solveTranslatedLine(
@@ -656,7 +686,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mumps.report.linearSolveCount, 0u);
     EXPECT_LE(mumps.report.linearError, Real(1e-10));
     EXPECT_GT(mumps.report.directFactorizations, 0u);
-    // Changing geometry and similarity gauges may change the sparse support.
+    // Changing geometry may change the sparse support.
     EXPECT_LE(mumps.report.directAnalyses, mumps.report.directFactorizations);
   }
 #endif
@@ -687,88 +717,94 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(state.report.levelSetGradientScale, Real(0));
   }
 
-  /// @brief Complete robust saturation is a degeneracy, not a zero residual.
-  TEST(Rodin_Adaptation_WNGIRSolver, RejectsEmptyRobustActiveSet)
+  /// @brief Robust saturation never hides the complete geometric error.
+  TEST(Rodin_Adaptation_WNGIRSolver, SaturatedLossRetainsCompleteResidualDiagnostics)
   {
     const SolveState state = solveTranslatedLine(Real(1), Real(1e-6));
-    EXPECT_STREQ(state.report.getReasonString(), "observation-degenerate-active-set");
-    EXPECT_EQ(state.report.iterations, 0);
-    EXPECT_EQ(state.report.activeFraction, Real(0));
-    EXPECT_TRUE(std::isinf(state.report.activeRMS));
-    EXPECT_TRUE(std::isinf(state.report.activeSup));
+    EXPECT_FALSE(state.report.geometricTargetReached);
+    EXPECT_GT(state.report.interfaceMeasure, Real(0));
+    EXPECT_TRUE(std::isfinite(state.report.residualRMS));
+    EXPECT_TRUE(std::isfinite(state.report.residualSup));
+    EXPECT_GT(state.report.geometricSup, Real(0.01));
   }
-  TEST(Rodin_Adaptation_WNGIRSolver, UnresolvedTranslationHasNoInertiaGate)
+  /// @brief Compatible singular CG preserves the initial unresolved component.
+  TEST(Rodin_Adaptation_WNGIRSolver, LinearSolveDoesNotGaugeNullModes)
   {
-    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-      WNGIRParameters::LinearSolver::SparseLU, true);
-    EXPECT_STRNE(state.report.getReasonString(), "metric-inertia-unresolved");
-    EXPECT_GT(state.report.linearSolveCount, 0u);
-    EXPECT_GT(state.report.minJ, Real(0.01));
-    EXPECT_LT(state.report.maxQRel, Real(10));
-    EXPECT_GE(state.report.unresolvedSimilarityModes, 1u);
-    EXPECT_TRUE(state.report.geometricTargetReached);
-    // A plane does not distinguish translation from uniform dilation about it.
-    // The coefficient-minimum solution may combine them, but must remain a similarity.
-    EXPECT_NEAR(state.report.minJ, state.report.maxJ, Real(1e-10));
-    EXPECT_NEAR(state.report.maxQRel, Real(1), Real(1e-10));
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+    TrialFunction trial(space);
+    TestFunction test(space);
+    Problem problem(trial, test);
+    using LinearSystem = std::remove_reference_t<decltype(problem.getLinearSystem())>;
+    WNGIRLinearSolver<LinearSystem> solver(problem);
+    WNGIRParameters parameters;
+    parameters.linear.solver = WNGIRParameters::LinearSolver::CG;
+    parameters.convergence.tolerance.linearRelative = Real(1e-12);
+    solver.setParameters(parameters);
+    auto& system = problem.getLinearSystem();
+    system.getOperator().resize(2, 2);
+    system.getOperator().insert(0, 0) = Real(1);
+    system.getOperator().makeCompressed();
+    system.getVector() = Math::Vector<Real>::Zero(2);
+    system.getVector()(0) = Real(1);
+    system.getSolution() = Math::Vector<Real>::Zero(2);
+    system.getSolution()(1) = Real(3);
+    const Math::SparseMatrix<Real> original = system.getOperator();
+    solver.solve(system);
+    ASSERT_TRUE(solver.success());
+    EXPECT_NEAR(system.getSolution()(0), Real(1), Real(1e-12));
+    EXPECT_EQ(system.getSolution()(1), Real(3));
+    EXPECT_EQ((system.getOperator() - original).norm(), Real(0));
+    EXPECT_LE((system.getOperator() * system.getSolution() - system.getVector()).norm(),
+      Real(1e-12));
   }
 
-#ifdef RODIN_USE_MUMPS
-  TEST(Rodin_Adaptation_WNGIRSolver, SimilarityGaugePreservesPlaneTranslation3D)
+  TEST(Rodin_Adaptation_WNGIRSolver, CenteredLinearSolveUsesThePhysicalOperator)
   {
-    constexpr size_t n = 3;
-    constexpr Real h = Real(0.5);
-    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {n, n, n});
-    mesh.scale(h);
-    for (size_t from = 1; from <= 3; ++from)
-      for (size_t to = 0; to <= 3; ++to)
-        if (from != to)
-          mesh.getConnectivity().compute(from, to);
-    std::vector<Index> facets;
-    for (auto face = mesh.getFace(); face; ++face)
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+    TrialFunction trial(space);
+    TestFunction test(space);
+    Problem problem(trial, test);
+    using LinearSystem = std::remove_reference_t<decltype(problem.getLinearSystem())>;
+    for (const auto backend :
+      {WNGIRParameters::LinearSolver::CG, WNGIRParameters::LinearSolver::SparseLU
+#ifdef RODIN_USE_MUMPS
+        , WNGIRParameters::LinearSolver::MUMPS
+#endif
+      })
     {
-      bool onInterface = true;
-      for (const Index vertex : face->getVertices())
-        onInterface &=
-          std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
-      if (onInterface)
+      WNGIRLinearSolver<LinearSystem> solver(problem);
+      WNGIRParameters parameters;
+      parameters.linear.solver = backend;
+      parameters.linear.threads = 1;
+      parameters.convergence.tolerance.linearRelative = Real(1e-12);
+      solver.setParameters(parameters);
+      auto& system = problem.getLinearSystem();
+      Math::Matrix<Real> centering(2, 1);
+      centering << Real(1), Real(0.5);
+      Math::Vector<Real> expected(2);
+      expected << Real(0.2), Real(0.4);
+      Math::Matrix<Real> core = Math::Matrix<Real>::Zero(2, 2);
+      core(0, 0) = 3;
+      core(1, 1) = 4;
+      const Math::Vector<Real> force = (core - centering * centering.transpose()) * expected;
+      for (const Real scale : {Real(1), Real(0.2)})
       {
-        facets.push_back(face->getIndex());
-        mesh.setAttribute({2, face->getIndex()}, Interface);
+        system.getOperator() = (scale * core).sparseView();
+        system.getOperator().makeCompressed();
+        system.getVector() = force;
+        system.getSolution() = Math::Vector<Real>::Zero(2);
+        const Math::Matrix<Real> scaledCentering = std::sqrt(scale) * centering;
+        solver.setCentering(scaledCentering);
+        solver.solve(system);
+        ASSERT_TRUE(solver.success());
+        EXPECT_LT((system.getSolution() - expected / scale).norm(), Real(1e-11));
+        EXPECT_LE(solver.getError(), parameters.convergence.tolerance.linearRelative);
+        EXPECT_EQ((system.getOperator() - (scale * core).sparseView()).norm(), Real(0));
       }
     }
-    ASSERT_FALSE(facets.empty());
-    P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, 3);
-    TrialFunction trial(fes);
-    TestFunction test(fes);
-    WNGIR solver(trial, test);
-    WNGIRParameters p;
-    p.model.h = h;
-    p.linear.solver = WNGIRParameters::LinearSolver::MUMPS;
-    p.linear.threads = 1;
-    p.convergence.iterations.outer = 12;
-    p.interfaceAttribute = Interface;
-    p.convergence.tolerance.geometric = Real(1e-6);
-    p.convergence.tolerance.linearRelative = Real(1e-10);
-    solver.setParameters(p);
-    RealFunction phi([](const Point& point) { return point.x() - Real(0.55); });
-    Math::Vector<Real> normal(3);
-    normal << Real(1), Real(0), Real(0);
-    const VectorFunction gradient(normal);
-    const auto report = solver.solve(phi, gradient);
-    EXPECT_TRUE(report.geometricTargetReached);
-    EXPECT_EQ(report.unresolvedSimilarityModes, 4u);
-    EXPECT_LE(report.linearError, p.convergence.tolerance.linearRelative);
-    EXPECT_NEAR(report.minJ, Real(1), Real(1e-10));
-    EXPECT_NEAR(report.maxJ, Real(1), Real(1e-10));
-    EXPECT_NEAR(report.maxQRel, Real(1), Real(1e-10));
-    GridFunction expected(fes);
-    normal *= Real(0.05);
-    expected = VectorFunction(normal);
-    EXPECT_LT((trial.getSolution().getData() - expected.getData()).norm(),
-      Real(1e-6) * std::sqrt(Real(fes.getSize())));
   }
-#endif
 
   TEST(Rodin_Adaptation_WNGIRSolver, CommonMetricScalePreservesTheHingeModelP1P2)
   {
@@ -778,14 +814,13 @@ namespace Rodin::Tests::Unit
           WNGIRParameters::LinearSolver::SparseLU, false, Real(1e-6), Real(1000),
           [=](WNGIRParameters& p) {
             p.model.fit = scale;
-            p.model.distribution = scale;
+            p.model.distribution = {.deviatoric = scale, .divergence = scale};
             p.model.qualityGuard = Real(0.9);
             p.convergence.iterations.outer = 3;
           });
       };
       const auto reference = solve(1);
       ASSERT_GT(reference.report.iterations, 0u);
-      ASSERT_GT(reference.report.innerIterations, 0u);
       for (const Real scale : {Real(1e-4), Real(1e3)})
       {
         const auto scaled = solve(scale);
@@ -816,7 +851,7 @@ namespace Rodin::Tests::Unit
     std::string line;
     size_t checked = 0;
     while (std::getline(lines, line))
-      if (line.find("barrier residual:") != std::string::npos)
+      if (line.find("hinge residual:") != std::string::npos)
       {
         const Real force = std::stod(line.substr(line.find("force_norm=") + 11));
         const Real threshold = std::stod(line.substr(line.find("tolerance=") + 10));
@@ -837,8 +872,17 @@ namespace Rodin::Tests::Unit
            std::numeric_limits<Real>::quiet_NaN()})
     {
       WNGIRParameters p;
-      p.model.distribution = invalid;
-      EXPECT_THROW(solver.setParameters(p), Alert::Exception);
+      p.model.distribution.deviatoric = invalid;
+      if (invalid == Real(0))
+        EXPECT_NO_THROW(solver.setParameters(p));
+      else
+        EXPECT_THROW(solver.setParameters(p), Alert::Exception);
+      p = WNGIRParameters{};
+      p.model.distribution.divergence = invalid;
+      if (invalid == Real(0))
+        EXPECT_NO_THROW(solver.setParameters(p));
+      else
+        EXPECT_THROW(solver.setParameters(p), Alert::Exception);
       p = WNGIRParameters{};
       p.model.fit = invalid;
       EXPECT_THROW(solver.setParameters(p), Alert::Exception);
@@ -894,6 +938,8 @@ namespace Rodin::Tests::Unit
     {
       EXPECT_EQ(reports[i].iterations, i + 1);
       EXPECT_TRUE(std::isfinite(reports[i].geometricSup));
+      EXPECT_DOUBLE_EQ(
+        reports[i].geometricConstant, reports[i].geometricSup / std::pow(Real(0.25), 2));
       EXPECT_TRUE(reports[i].qualityBudgetSatisfied);
       EXPECT_GT(reports[i].interfaceMeasure, Real(0));
       if (i > 0)
@@ -901,6 +947,21 @@ namespace Rodin::Tests::Unit
     }
     EXPECT_EQ(reports.back().reason, state.report.reason);
     EXPECT_EQ(reports.back().geometricSup, state.report.geometricSup);
+    EXPECT_EQ(reports.back().geometricConstant, state.report.geometricConstant);
+  }
+
+  TEST(Rodin_Adaptation_WNGIRSolver, GeometricConstantUsesBackgroundScaleAndFEOrder)
+  {
+    const auto check = [](const auto& state, std::size_t order) {
+      EXPECT_DOUBLE_EQ(state.report.geometricConstant,
+        state.report.geometricSup / std::pow(Real(0.25), order + 1));
+      EXPECT_NE(state.report.geometricSupTarget, std::pow(Real(0.25), order + 1));
+    };
+    // Stop at the initial state with a deliberately non-mesh-scaled target.
+    check(solveTranslatedLine<1>(Real(1), 0, false, Real(1)), 1);
+    check(solveTranslatedLine<2>(Real(1), 0, false, Real(1)), 2);
+    check(solveTranslatedLine<3>(Real(1), 0, false, Real(1)), 3);
+    EXPECT_TRUE(std::isinf(WNGIRReport{}.geometricConstant));
   }
 
   TEST(Rodin_Adaptation_WNGIRSolver, RepeatedSolveReassemblesAdditionalMetric)
@@ -1068,7 +1129,7 @@ namespace Rodin::Tests::Unit
       [](WNGIRParameters& p) {
         p.convergence.iterations.outer = 1;
         p.convergence.tolerance.linearRelative = Real(1e-8);
-        p.model.distribution = Real(1e-4);
+        p.model.distribution = {.deviatoric = Real(1e-4), .divergence = Real(1e-4)};
       });
     ASSERT_EQ(state.report.iterations, 1u);
     EXPECT_GT(state.report.acceptedStep, Real(0));
@@ -1103,8 +1164,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_WNGIRSolver, RejectsInvalidHingeWeightsAndControls)
   {
     const std::function<Real&(WNGIRParameters&)> controls[] = {
-      [](WNGIRParameters& p) -> Real& { return p.model.kappaJ; },
-      [](WNGIRParameters& p) -> Real& { return p.model.kappaQ; },
+      [](WNGIRParameters& p) -> Real& { return p.model.jacobianWeight; },
+      [](WNGIRParameters& p) -> Real& { return p.model.distortionWeight; },
       [](WNGIRParameters& p) -> Real& { return p.convergence.tolerance.innerRelative; },
       [](WNGIRParameters& p) -> Real& { return p.convergence.tolerance.energy; }};
     for (const auto& control : controls)

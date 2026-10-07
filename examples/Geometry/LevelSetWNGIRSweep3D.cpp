@@ -383,8 +383,9 @@ int main(int argc, char** argv)
   std::cout << "Lobed-sphere WNGIR sweep on " << n << "x" << n << "x" << n
             << " tetrahedral unit-cube mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes
-            << "  orbit R=" << orbitR << "  kappaF=" << wngirParams.model.fit
-            << " kappaD=" << wngirParams.model.distribution << '\n';
+            << "  orbit R=" << orbitR << "  fit=" << wngirParams.model.fit
+            << " deviatoric=" << wngirParams.model.distribution.deviatoric
+            << " divergence=" << wngirParams.model.distribution.divergence << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -555,7 +556,7 @@ int main(int argc, char** argv)
       geometricTargetReached = wngirRep.geometricTargetReached;
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
-                << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
+                << "  setup=" << wngirRep.tSetup << "  solve=" << wngirRep.tSolve
                 << "  cgIt=" << wngirRep.linearIterations
                 << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.getReasonString() << '\n';

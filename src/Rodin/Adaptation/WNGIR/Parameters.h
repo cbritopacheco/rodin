@@ -38,18 +38,22 @@ namespace Rodin::Adaptation
       {
           Real h = 0; ///< Fixed background reference size (required).
           Real fit = 1; ///< @f$\kappa_F@f$, target-normal fitting stiffness.
-          Real distribution =
-            Real(1e-4); ///< @f$\kappa_D@f$, distribution weight, assembled with h.
+          /// @brief Global strain-variation weights, each assembled with h.
+          struct Distribution
+          {
+              Real deviatoric = Real(1e-4); ///< @f$\kappa_{\rm dev}@f$.
+              Real divergence = Real(1e-4); ///< @f$\kappa_{\rm div}@f$, with 1/d normalization.
+          };
+          Distribution distribution; ///< Centered current-strain distribution.
           Real distortion = 10; ///< @f$Q_{\max}@f$, relative-distortion budget.
           Real jacobian =
             Real(1e-2); ///< @f$j_{\mathrm{safe}}@f$, relative Jacobian floor.
           Real hinge = Real(100); ///< @f$\widehat\mu@f$, hinge/model-decrease ratio.
           Real qualityGuard = Real(0.1); ///< Guard fraction of the identity margins.
-          Real kappaJ = 1; ///< Relative Jacobian-hinge row weight.
-          Real kappaQ = 1; ///< Relative distortion-hinge row weight.
+          Real jacobianWeight = 1; ///< Relative Jacobian-hinge row weight.
+          Real distortionWeight = 1; ///< Relative distortion-hinge row weight.
           Real robustScale =
             0; ///< Positive fixes Welsch scale; zero selects it automatically.
-          Real omegaMin = Real(0.1); ///< Robust-weight threshold for active observations.
       };
 
       /// @brief Accuracy requirements and independent work budgets.
@@ -90,8 +94,6 @@ namespace Rodin::Adaptation
           Real maxStepOverH =
             0; ///< Positive caps predictor motion/h; zero is unrestricted.
           Real armijo = Real(1e-4); ///< Armijo sufficient-decrease coefficient.
-          Real jMin = Real(1e-8); ///< Hard inadmissibility floor.
-          Real jFloor = Real(1e-2); ///< Additional Jacobian floor for outer acceptance.
       };
 
       /// @brief Available local linear-solver backends.

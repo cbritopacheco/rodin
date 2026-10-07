@@ -976,12 +976,12 @@ int main(int argc, char** argv)
       const auto wngirRep = wngirSolver.solve(phi, gradPhi);
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
                 << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
-                << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
+                << "  setup=" << wngirRep.tSetup << "  solve=" << wngirRep.tSolve
                 << "  cgIt=" << wngirRep.linearIterations
                 << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.getReasonString() << '\n';
       itCount = wngirRep.iterations;
-      residualBest = wngirRep.activeRMS;
+      residualBest = wngirRep.residualRMS;
       interfaceFit = computeInterfaceFit(/*discrete=*/true);
     }
 
@@ -1012,7 +1012,7 @@ int main(int argc, char** argv)
 
     if (kVerbose)
       std::cout << "      WNGIR:"
-                << " it=" << itCount << "  activeRMS=" << std::scientific
+                << " it=" << itCount << "  residualRMS=" << std::scientific
                 << std::setprecision(3) << residualBest << '\n';
     finalFitPerFrame.push_back(interfaceFit);
 
@@ -1129,7 +1129,7 @@ int main(int argc, char** argv)
                 << '\n';
     }
 
-    std::cout << "    WNGIR it=" << report.iterations << "  activeRMS=" << std::scientific
+    std::cout << "    WNGIR it=" << report.iterations << "  residualRMS=" << std::scientific
               << std::setprecision(3) << report.final_residual
               << "  fit_h=" << std::setprecision(3) << interfaceFit
               << "  fit_an=" << std::setprecision(3) << interfaceFitAnalytic

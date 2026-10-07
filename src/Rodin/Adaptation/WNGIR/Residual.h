@@ -7,8 +7,6 @@
 #ifndef RODIN_ADAPTATION_WNGIR_RESIDUAL_H
 #define RODIN_ADAPTATION_WNGIR_RESIDUAL_H
 
-#include <cmath>
-
 #include "Rodin/Math.h"
 #include "Rodin/Types.h"
 #include "Rodin/Variational/IntegrationPoint.h"
@@ -25,12 +23,12 @@ namespace Rodin::Adaptation
       /// @brief Constructs the WNGIR residual state.
       WNGIRResidualState(const PhiType& phi, const GradType& grad,
         const DeformationType& deformation, const Variational::IntegrationPoint& ip,
-        const WNGIRLoss& loss, bool weighted)
+        const WNGIRLoss& loss)
       {
         const auto& moved = deformation.getMovedPoint(ip);
         m_residual = phi.getValue(moved);
         m_gradient = grad.getValue(moved);
-        m_weight = weighted ? loss.getWeight(m_residual) : Real(1);
+        m_weight = loss.getWeight(m_residual);
       }
 
       /// @brief The residual.

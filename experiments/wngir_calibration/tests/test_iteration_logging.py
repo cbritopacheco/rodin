@@ -60,6 +60,16 @@ class IterationLoggingTest(unittest.TestCase):
             path = save_case_trace(directory, {"lobes": 0}, [], self.trace())
             self.assertEqual(summarize(path, {"0": 20})["first_hit_outer"], 0)
 
+    def test_canonical_hinge_trace_matches_historical_barrier_trace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            identity = {"lobes": 2}
+            path = save_case_trace(directory, identity, [], self.trace())
+            historical = summarize(path, {"2": 1})
+            path = save_case_trace(directory, identity, [],
+                                   self.trace().replace("barrier inner=", "hinge inner="))
+            canonical = summarize(path, {"2": 1})
+            self.assertEqual(canonical, historical)
+
     def test_invalid_reference_coefficient_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             path = save_case_trace(directory, {"lobes": 0}, [], self.trace())

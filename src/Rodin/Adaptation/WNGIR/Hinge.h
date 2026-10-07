@@ -38,17 +38,16 @@ namespace Rodin::Adaptation
         };
         coefficients(m_jAction, m_jSlack,
           parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
-          parameters.model.kappaJ, m_jHessian, m_jForce);
+          parameters.model.jacobianWeight, m_jHessian, m_jForce);
         coefficients(m_qAction, m_qSlack,
           parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
-          parameters.model.kappaQ, m_qHessian, m_qForce);
-        m_feasible = true;
+          parameters.model.distortionWeight, m_qHessian, m_qForce);
       }
 
       /// @brief Affine quality energy with the construction parameters, evaluated only on demand.
       Real getEnergy(const WNGIRParameters& parameters, Real hingeCoefficient) const
       {
-        if (!m_feasible)
+        if (!isAdmissible())
           return std::numeric_limits<Real>::infinity();
         const auto energy = [&](Real slack, Real delta, Real weight) {
           const Real violation = std::max(Real(0), Real(1) - slack / delta);
@@ -56,16 +55,16 @@ namespace Rodin::Adaptation
         };
         return energy(m_jSlack,
                  parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
-                 parameters.model.kappaJ) +
+                 parameters.model.jacobianWeight) +
           energy(m_qSlack,
             parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
-            parameters.model.kappaQ);
+            parameters.model.distortionWeight);
       }
 
-      /// @brief Whether feasible.
-      bool isFeasible() const
+      /// @brief Whether the frozen deformation permits evaluation; affine slacks may be negative.
+      bool isAdmissible() const
       {
-        return m_feasible;
+        return m_rowDeformation.isAdmissible();
       }
       /// Negative Jacobian differential at the frozen outer state.
       Real getJacobianRow(const Math::SpatialMatrix<Real>& gradient) const
@@ -120,7 +119,6 @@ namespace Rodin::Adaptation
 
     private:
       CellDeformation m_rowDeformation;
-      bool m_feasible = false;
       Real m_jAction = 0;
       Real m_qAction = 0;
       Real m_jSlack = 0;

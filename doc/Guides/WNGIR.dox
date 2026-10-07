@@ -69,9 +69,15 @@
     F_k[v,z]=\kappa_F G^{-2}\int_{\Gamma_0}
       (g_k\cdot v)(g_k\cdot z)\,dS_x,
     \qquad
-    D_k[v,z]=h\kappa_D\int_{\Omega_0}j_k\,
-      \operatorname{dev}\operatorname{sym}(\nabla v A_k^{-1}):
-      \operatorname{dev}\operatorname{sym}(\nabla z A_k^{-1})\,dx.
+  D_k[v,z]=h\int_{\Omega_k}\left[
+    \kappa_{\rm dev}(\operatorname{dev}\varepsilon(v)
+         -\overline{\operatorname{dev}\varepsilon(v)}):
+        (\operatorname{dev}\varepsilon(z)
+         -\overline{\operatorname{dev}\varepsilon(z)})
+    +\frac{\kappa_{\rm div}}{d}
+        (\operatorname{div}v-\overline{\operatorname{div}v})
+        (\operatorname{div}z-\overline{\operatorname{div}z})
+    \right]dy.
   @f]
   Here @f$\Gamma_0@f$ and @f$\Omega_0@f$ are the reference interface and volume;
   @f$G@f$ is a fixed sampled target-gradient normalization. Fitting uses
@@ -100,16 +106,20 @@
   for the slack definitions, penalty scaling, Newton system, line search and
   geometric stopping equations.
 
+  For current-coordinate fields, @f$\varepsilon(v)=\operatorname{sym}\nabla_yv@f$;
+  the overbars are averages over the entire current domain @f$\Omega_k@f$.
+  They are not per-element means. Both distribution coefficients are independent.
+
   @section guides-wngir-stages What the solver does
 
   Each outer iteration has four stages:
 
   1. Assemble the robust fitting force and the metric @f$M=F+D@f$.
      Fitting makes motion responsive to the target normal. Distribution couples
-     neighboring elements through their current deviatoric strain. It does not
-     penalize pointwise isotropic strain or rigid motion. Continuity still
-     couples what different elements can do: shear is resisted, but uniform
-     size changes are not. Shared degrees of freedom transmit motion.
+     neighboring elements through variation of current strain about its global
+     mean. Coherent affine motions are free, including shear and anisotropic
+     stretching. Spatial strain variation is resisted. This does not permit
+     independent incompatible element motions; shared DOFs transmit motion.
   2. Solve for an unconstrained predictor. Directional Newton rescales the
      physical predictor and its quadratic metric before applying the hinges.
   3. Use native @ref Rodin::Solver::NewtonSolver to solve the frozen quadratic
@@ -121,10 +131,14 @@
 
   The retained linear adapter supports CG, SparseLU and optional MUMPS. MUMPS
   retains symbolic analysis when the sparsity pattern is unchanged. Numerical
-  factors are reused only when the assembled operator is unchanged. Compatible
-  unresolved similarity modes are assigned zero during the linear solve; no
-  mass penalty or full-space completion is added. This is not a promise of
-  coercivity for arbitrary higher-order spaces or user metric additions.
+  factors are reused only when the assembled operator is unchanged. Global
+  centering is represented by a low-rank subtraction from the sparse core.
+  Direct solvers factor the equivalent augmented system; CG applies the
+  centered operator without a dense matrix. No gauge, mass penalty or
+  stabilization is added. Singular systems remain subject to the selected
+  backend. With both centered weights positive, distribution is coercive in
+  H1 modulo global affine motions on a fixed connected bounded Lipschitz domain.
+  The mesh-scale factor and changing domain preclude an unconditional uniform bound.
 
   @section guides-wngir-controls Main controls
 
@@ -138,14 +152,13 @@
   |-----------|-----|-------------|-------|
   | @f$h@f$ | `model.h` | Fixed background reference size | Required |
   | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness, not a force multiplier | @f$1@f$ |
-  | @f$\kappa_D@f$ | `model.distribution` | Deviatoric-strain distribution weight; assembled with @f$h@f$ | @f$10^{-4}@f$ |
+  | @f$\kappa_{\rm dev}@f$ | `model.distribution.deviatoric` | Cost of deviatoric-strain variation about its global mean | @f$10^{-4}@f$ |
+  | @f$\kappa_{\rm div}@f$ | `model.distribution.divergence` | Cost of divergence variation about its global mean, normalized by @f$d@f$ | @f$10^{-4}@f$ |
   | @f$\widehat\mu@f$ | `model.hinge` | Hinge strength relative to predicted fitting improvement | @f$100@f$ |
-  | @f$\kappa_J@f$ | `model.kappaJ` | Relative Jacobian-hinge row weight | @f$1@f$ |
-  | @f$\kappa_Q@f$ | `model.kappaQ` | Relative distortion-hinge row weight | @f$1@f$ |
+  | @f$\kappa_J@f$ | `model.jacobianWeight` | Relative Jacobian-hinge row weight | @f$1@f$ |
+  | @f$\kappa_Q@f$ | `model.distortionWeight` | Relative distortion-hinge row weight | @f$1@f$ |
   | @f$\gamma@f$ | `model.qualityGuard` | Guard fraction defining hinge activation margins | @f$0.1@f$ |
   | @f$j_{\mathrm{safe}}@f$ | `model.jacobian` | Relative Jacobian floor in the hinge and actual acceptance checks | @f$10^{-2}@f$ |
-  | @f$j_{\mathrm{ls}}@f$ | `globalization.jFloor` | Additional Jacobian floor for outer acceptance | @f$10^{-2}@f$ |
-  | @f$j_{\min}@f$ | `globalization.jMin` | Hard inadmissibility floor | @f$10^{-8}@f$ |
   | @f$Q_{\max}@f$ | `model.distortion` | Spendable relative-distortion budget | @f$10@f$ |
   | @f$\sigma@f$ | `model.robustScale` | Welsch robustness scale in level-set units | Automatic (`0`) |
   | @f$\lambda_{\max}@f$ | `globalization.maxStepOverH` | Optional predictor-motion limit divided by @f$h@f$; zero leaves directional Newton unrestricted | @f$0@f$ |
@@ -165,9 +178,12 @@
   MUMPS is the default when compiled in; otherwise SparseLU is selected.
   Set `linear.solver` and `linear.threads` explicitly for reproducible runs.
   Quadrature orders are selected automatically unless overridden.
-  The examples retain their existing solver and inner-iteration command-line
-  spellings for campaign compatibility. The removed rigid-observation diagnostic
-  and its `--wngir-rigid-diagnostics` option are no longer supported.
+  Example flags use the same names as the C++ parameters: `--wngir-fit`,
+  `--wngir-distribution-deviatoric`, `--wngir-distribution-divergence`,
+  `--wngir-hinge`, `--wngir-jacobian` and `--wngir-distortion`.
+  Iteration flags are `--wngir-outer-iterations` and `--wngir-inner-iterations`.
+  Linear settings use `--wngir-linear-solver`, `--wngir-linear-threads` and
+  `--wngir-linear-relative-tolerance`. Legacy spellings are rejected.
 
   @section guides-wngir-results Reading results
 
@@ -184,7 +200,15 @@
   interface finite element order. This is not a certified Hausdorff error;
   a single target hit does not establish a refinement order.
 
-  Monitor `energy`, `geometricSup`, `geometricSupTarget`, `minJ`, `maxQRel`,
+  The report's `geometricConstant` is the dimensionless sampled score
+  @f[
+    C = \frac{D_\infty}{h_0^{p+1}}.
+  @f]
+  The background reference size @f$h_0@f$ remains fixed throughout fitting.
+  This normalization is independent of a user-specified stopping tolerance.
+  Geometry traces and canonical example responses expose the score as `geom_c`.
+
+  Monitor `energy`, `geometricSup`, `geometricConstant`, `geometricSupTarget`, `minJ`, `maxQRel`,
   `iterations`, `innerIterations`, `lastInnerIterations`, `maxInnerIterations`
   and `innerRelativeResidual`. The report's `innerIterations` is the total
   correction count, whereas `parameters.convergence.iterations.inner` is the

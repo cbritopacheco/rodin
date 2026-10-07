@@ -8,6 +8,7 @@
 #include <chrono>
 #include <type_traits>
 #include <utility>
+#include "Rodin/Assembly.h"
 #include "Rodin/Variational/Problem.h"
 
 namespace Rodin::Adaptation
@@ -49,6 +50,12 @@ namespace Rodin::Adaptation
         return *this;
       }
 
+      WNGIRHingeProblem& setCentering(const Math::Matrix<Real>& couplings)
+      {
+        m_centering = couplings;
+        return *this;
+      }
+
       WNGIRHingeProblem& assemble() override
       {
         assert(m_state);
@@ -62,6 +69,8 @@ namespace Rodin::Adaptation
           system.eliminate(*m_boundaryDOFs);
         matrix.makeCompressed();
         system.getVector() -= matrix * m_state->getData();
+        if (m_centering.size() != 0)
+          system.getVector() += m_centering * (m_centering.transpose() * m_state->getData());
         m_assemblySeconds =
           std::chrono::duration<Real>(std::chrono::steady_clock::now() - start).count();
         return *this;
@@ -80,6 +89,7 @@ namespace Rodin::Adaptation
     private:
       const Displacement* m_state = nullptr;
       const IndexMap<Real>* m_boundaryDOFs = nullptr;
+      Math::Matrix<Real> m_centering;
       Real m_assemblySeconds = 0;
   };
 }

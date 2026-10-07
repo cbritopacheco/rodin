@@ -23,7 +23,6 @@ namespace Rodin::Adaptation
         EmptyInterface,
         DegenerateGradient,
         InvalidInitialGeometry,
-        EmptyActiveSet,
         InvalidGeometry,
         GeometricTarget,
         PredictorFailure,
@@ -54,8 +53,6 @@ namespace Rodin::Adaptation
             return "degenerate-target-gradient";
           case Reason::InvalidInitialGeometry:
             return "initial-state-not-strictly-feasible";
-          case Reason::EmptyActiveSet:
-            return "observation-degenerate-active-set";
           case Reason::InvalidGeometry:
             return "geometric-validation-failed";
           case Reason::GeometricTarget:
@@ -69,9 +66,9 @@ namespace Rodin::Adaptation
           case Reason::LinearFailure:
             return "solve-linear-failed";
           case Reason::InnerLineSearchFailure:
-            return "primal-barrier-line-search-failure";
+            return "inner-line-search-failure";
           case Reason::InnerIterationLimit:
-            return "primal-barrier-inner-not-converged";
+            return "inner-iteration-limit";
           case Reason::NonfiniteDirection:
             return "solve-nonfinite";
           case Reason::NonDescentDirection:
@@ -95,8 +92,6 @@ namespace Rodin::Adaptation
       Real predictorAction = 0;
       /// @brief Directional scaling applied before constructing the hinge model.
       Real predictorScale = 1;
-      /// @brief Similarity modes assigned zero by the last linear solve, not by the metric.
-      size_t unresolvedSimilarityModes = 0;
       /// @brief Action of the negative energy derivative on the accepted direction.
       Real directionAction = 0;
       /// @brief Direction action divided by the unconstrained predictor action.
@@ -136,7 +131,7 @@ namespace Rodin::Adaptation
       std::size_t lastInnerIterations = 0;
       /// @brief Largest number of Newton corrections in any outer iteration.
       std::size_t maxInnerIterations = 0;
-      /// @brief Whether the final inner inner solve met its tolerance.
+      /// @brief Whether the final inner solve met its tolerance.
       bool innerConverged = false;
       /// @brief Number of inner merit backtracks accumulated over the solve.
       std::size_t innerBacktracks = 0;
@@ -148,24 +143,24 @@ namespace Rodin::Adaptation
       Real maxJ = 1;
       /// @brief Maximum sampled relative distortion.
       Real maxQRel = 1;
-      /// @brief Active-interface RMS residual.
-      Real activeRMS = 0;
-      /// @brief Active-interface supremum residual.
-      Real activeSup = 0;
-      /// @brief Fraction of interface quadrature in the active set.
-      Real activeFraction = 0;
+      /// @brief Complete-interface RMS residual.
+      Real residualRMS = 0;
+      /// @brief Complete-interface supremum residual.
+      Real residualSup = 0;
       /// @brief RMS normalized level-set residual over the complete fitted interface.
       Real geometricRMS = std::numeric_limits<Real>::infinity();
-      /// @brief Maximum normalized level-set residual over the complete fitted interface.
+      /// @brief Maximum sampled normalized level-set residual over the complete fitted interface.
       Real geometricSup = std::numeric_limits<Real>::infinity();
+      /// @brief Sampled geometric score @f$C=D_\infty/h_0^{p+1}@f$, using the
+      /// fixed background scale and interface FE order, not the stopping tolerance.
+      /// This score is not a certified Hausdorff bound or an observed error order.
+      Real geometricConstant = std::numeric_limits<Real>::infinity();
       /// @brief RMS unoriented normal discrepancy over the complete fitted interface.
       Real normalRMS = std::numeric_limits<Real>::infinity();
 
       Real geometricSupTarget = 0;
       bool geometricTargetReached = false;
       bool qualityBudgetSatisfied = false;
-      /// @brief Measure of the active interface quadrature set.
-      Real activeMeasure = 0;
       /// @brief Measure of the complete interface quadrature set.
       Real interfaceMeasure = 0;
       /// @brief RMS jump of the normal field across the interface.
@@ -184,7 +179,6 @@ namespace Rodin::Adaptation
       std::size_t directFactorizations =
         0; ///< MUMPS numeric factorizations initiated by WNGIR.
       Real tSetup = 0; ///< WNGIR geometry/sigma/validation tabulation.
-      Real tFactor = 0; ///< Linear solver setup/preconditioner.
       Real tSolve = 0; ///< Predictor and inner linear solves.
       Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.
       Real tInnerLineSearch = 0; ///< fixed-inner-merit evaluation and backtracking.

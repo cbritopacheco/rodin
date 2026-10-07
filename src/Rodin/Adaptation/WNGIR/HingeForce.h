@@ -75,10 +75,6 @@ namespace Rodin::Adaptation
             continue;
           const WNGIRHingeState state(
             deformation, innerJacobian.getValue(ip), parameters, m_hingeCoefficient);
-          assert(state.isFeasible());
-          if (!state.isFeasible())
-            continue;
-
           const Real coefficientJ = state.getJacobianForce();
           const Real coefficientQ = state.getDistortionForce();
           const Real weight = qf.getWeight(q) * point.getDistortion();

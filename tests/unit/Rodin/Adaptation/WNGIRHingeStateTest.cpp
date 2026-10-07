@@ -62,7 +62,7 @@ namespace Rodin::Tests::Unit
             rowQ;
         };
         WNGIRHingeState s(deformation, inner, p, mu);
-        ASSERT_TRUE(s.isFeasible());
+        ASSERT_TRUE(s.isAdmissible());
         const Math::SpatialMatrix<Real> plus(inner + eps * direction),
           minus(inner - eps * direction);
         EXPECT_NEAR(derivative(inner), (energy(plus) - energy(minus)) / (Real(2) * eps),
@@ -139,7 +139,7 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> increment = -Math::SpatialMatrix<Real>::Identity(2, 2);
     WNGIRParameters parameters;
     WNGIRHingeState state(outer, increment, parameters, Real(0.02));
-    EXPECT_TRUE(state.isFeasible());
+    EXPECT_TRUE(state.isAdmissible());
     EXPECT_LT(state.getJacobianSlack(), Real(0));
     EXPECT_TRUE(std::isfinite(state.getEnergy(parameters, Real(0.02))));
     EXPECT_GT(state.getJacobianHessian(), Real(0));
@@ -148,7 +148,7 @@ namespace Rodin::Tests::Unit
     increment(1, 1) = Real(1);
     outer.setDeformationGradient(increment);
     WNGIRHingeState inverted(outer, increment, parameters, Real(0.02));
-    EXPECT_FALSE(inverted.isFeasible());
+    EXPECT_FALSE(inverted.isAdmissible());
     EXPECT_TRUE(std::isinf(inverted.getEnergy(parameters, Real(0.02))));
   }
 
