@@ -95,8 +95,11 @@ degree. SparseLU has no iterative tolerance to tighten.
 Triangle, quadrilateral, tetrahedron, pyramid, hexahedron, and wedge
 families are tested with native Eigen sequential/OpenMP assembly.
 Point and segment are excluded from this non-degenerate incompressible
-workload. These finite-workload tests do not certify curved geometry,
-PETSc/MPI hp solves, or arbitrary higher degrees.
+workload. Curved geometry and PETSc/MPI hp solves have separate
+[isoparametric](../../isoparametric/Stokes/README.md) and
+[PETSc hp](../PETScStokes/README.md) specifications; their certificates
+are not implied by this native study. Arbitrary higher degrees remain
+outside these finite-workload tests.
 
 Geometry entries are labeled `convergence;slow` with a 600-second limit.
 Run `ctest --test-dir build/tests -R RodinConvergenceHPStokes --output-on-failure`.

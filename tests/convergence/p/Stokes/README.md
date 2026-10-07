@@ -145,9 +145,11 @@ only on algebraic solver convergence.
 Triangle, quadrilateral, tetrahedron, pyramid, hexahedron, and wedge meshes
 are tested with native Eigen sequential/OpenMP assembly. Point and segment
 are excluded from this non-degenerate incompressible Stokes workload.
-PETSc/MPI p studies, curved maps, and arbitrary higher degree are separate
-gaps, not implied by native success. The existing PETSc h suite has its own
-backend/rank matrix.
+The [PETSc/MPI p suite](../PETScStokes/README.md) and
+[isoparametric suite](../../isoparametric/Stokes/README.md) specify their
+own geometry, degree, backend and rank coverage; those results are not
+implied by this native study. Arbitrary higher degrees remain outside
+these finite-workload certificates.
 
 Each geometry entry has labels `convergence;slow` and a 600-second limit.
 Run `ctest --test-dir build/tests -R RodinConvergencePStokes --output-on-failure`.
