@@ -223,3 +223,81 @@ checks remain in force. Native and PETSc solvers expose const solution
 views only during a solve-scoped observer callback; the common lifted-norm
 helper evaluates owned quadrature points and reduces MPI contributions.
 It neither duplicates the mixed solve nor retains solution references.
+
+## Linear and cubic geometry with representable Taylor--Hood fields
+
+The additional geometry-degree suites use $q\in\lbrace1,3\rbrace$ and
+the same sine map, with velocity/pressure degrees $k/(k-1)$ for
+$k=\max(2,q)$. The physical data on every represented domain are
+
+$$
+u_\ast(x)=x_{d-1}e_0,\qquad p_\ast(x)=x_0-\tfrac12,\qquad
+f=e_0,\qquad \mathrm{div}u_\ast=0.
+$$
+
+The affine velocity pullback is represented at degree $k$; the pressure
+pullback is represented at degree $k-1$. With the code's defect convention,
+
+$$
+e_{G,u}(\Phi(\xi))=
+\left(\Phi_{h,d-1}(\xi)-\Phi_{d-1}(\xi)\right)e_0,
+\qquad e_{G,p}=0,
+\qquad e_{T,u}=e_{F,u}+e_{G,u}.
+$$
+
+The zero pressure geometry defect follows from preservation of $x_0$;
+its derivative defect is zero as well. Represented and lifted-field
+velocity errors, represented and lifted-field/total pressure errors,
+represented divergence, and lifted-field divergence use the dimensionless
+absolute budget $10^{-9}$. The pressure geometry norms retain the stricter
+$10^{-10}$ budget. No pressure or field roundoff error is fitted to a rate.
+
+| Geometry degree $q$ | Velocity/pressure degrees | Grid points per axis |
+| --- | --- | --- |
+| $1$ | $2/1$ | $3,5,9$ |
+| $3$ | $3/2$ | $3,5,9$ |
+
+Velocity geometry and total errors must decrease across both intervals,
+with expected $L^2/H^1$ orders $(q+1,q)$ and the existing $0.55/0.45$
+acceptance windows. These interpolation orders require a regular smooth
+map and a nonvanishing leading defect. The
+[Helmholtz specification](../Helmholtz/README.md) gives the map regularity
+argument. The full mixed system is solved at every level: residual and
+computed pressure-mean checks precede the solve-scoped lift observer.
+An independent $n=3$ physical integration checks represented volume one
+and analytic pressure mean zero for each geometry degree.
+
+For each lifted defect, divergence retains the Frobenius trace bound.
+Since the exact velocity is divergence-free, the field-divergence norm
+also bounds the difference of total and geometry divergence norms:
+
+$$
+\left|\Vert\mathrm{div}e_{T,u}\Vert_{L^2}
+-\Vert\mathrm{div}e_{G,u}\Vert_{L^2}\right|
+\le\Vert\mathrm{div}e_{F,u}\Vert_{L^2}
+\le\sqrt d\,|e_{F,u}|_{H^1}.
+$$
+
+At $n=5$, assembly order $12\to16$ and norm order $14\to18$ are
+varied independently. Positive velocity geometry/total norms require
+relative changes below $10^{-6}$; divergence comparisons use the absolute
+$10^{-9}$ budget. Both backends use direct solvers, so no fictitious
+iterative-tolerance variation is introduced. Every solve retains the
+coefficient residual budget $10^{-11}$ and the pressure-mean checks.
+
+The six applicable cell families are registered for native local and
+real-PETSc local/MPI configurations with ranks one through four.
+Sequential/OpenMP remains a build choice. These representable-field
+certificates do not prove a uniform inf-sup constant or nonpolynomial
+approximation rates for arbitrary mapped Taylor--Hood pairs.
+
+Matched cubic-geometry native and PETSc pyramid registrations include the complete
+rate hierarchy, independent quadrature study and pressure-gauge check.
+They retain the `slow` label and pyramid resource lock, with a one-hour
+CTest execution budget; the other matched-degree registrations retain
+their 30-minute budgets. These are scheduling limits, not numerical error
+budgets or performance regression thresholds. The cubic pyramid rate
+case alone took about 25 minutes with MPI rank one, before its separate
+quadrature study; the native rate hierarchy exceeded the 30-minute default.
+These execution observations do not establish an end-to-end stage breakdown
+or a controlled performance comparison.

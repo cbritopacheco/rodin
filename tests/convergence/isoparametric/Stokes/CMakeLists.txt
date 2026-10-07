@@ -25,12 +25,53 @@ foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
   endif()
 endforeach()
 
+# The native cubic-pyramid rate hierarchy exceeded the default 30-minute
+# watchdog; the PETSc MPI-one rate case alone took about 25 minutes before
+# its independent quadrature study. This one-hour execution policy changes
+# neither refinement levels nor numerical acceptance.
+set(_RODIN_CURVED_STOKES_Q3_PYRAMID_TIMEOUT 3600)
+foreach(q 1 3)
+  foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
+    set(_native_test RodinConvergenceIsoparametricStokes_Q${q}_${geometry})
+    add_test(NAME ${_native_test}
+      COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricStokes>
+        "--gtest_filter=AllGeometries/LocalQ${q}Test.*/${geometry}")
+    set_tests_properties(${_native_test}
+      PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
+    if (geometry STREQUAL "Pyramid")
+      set_tests_properties(${_native_test} PROPERTIES RESOURCE_LOCK curved_stokes_pyramid)
+      if (q EQUAL 3)
+        set_tests_properties(${_native_test}
+          PROPERTIES TIMEOUT ${_RODIN_CURVED_STOKES_Q3_PYRAMID_TIMEOUT})
+      endif()
+    endif()
+  endforeach()
+endforeach()
+
 if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
   add_executable(RodinConvergenceIsoparametricPETScStokes Stokes.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScStokes
     PRIVATE RODIN_CURVED_STOKES_PETSC)
   target_link_libraries(RodinConvergenceIsoparametricPETScStokes
     PRIVATE GTest::gtest RodinConvergence Rodin::PETSc)
+  foreach(q 1 3)
+    foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
+      set(_local_test RodinConvergenceIsoparametricPETScStokes_Q${q}_${geometry})
+      add_test(NAME ${_local_test}
+        COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
+          "--gtest_filter=AllGeometries/LocalQ${q}Test.*/${geometry}")
+      set_tests_properties(${_local_test}
+        PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
+      rodin_suppress_external_mpi_lsan_for_test(${_local_test})
+      if (geometry STREQUAL "Pyramid")
+        set_tests_properties(${_local_test} PROPERTIES RESOURCE_LOCK curved_stokes_pyramid)
+        if (q EQUAL 3)
+          set_tests_properties(${_local_test}
+            PROPERTIES TIMEOUT ${_RODIN_CURVED_STOKES_Q3_PYRAMID_TIMEOUT})
+        endif()
+      endif()
+    endforeach()
+  endforeach()
   foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
     add_test(NAME RodinConvergenceIsoparametricPETScStokes_${geometry}
       COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
@@ -59,6 +100,28 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
     if (_mpi_version_output MATCHES "Open MPI|OpenRTE")
       set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "--oversubscribe")
     endif()
+    foreach(q 1 3)
+      foreach(np 1 2 3 4)
+        foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
+          set(_mpi_test RodinConvergenceIsoparametricPETScMPIStokes_Q${q}_np${np}_${geometry})
+          add_test(NAME ${_mpi_test}
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
+              "--gtest_filter=AllGeometries/MPIQ${q}Test.*/${geometry}")
+          set_tests_properties(${_mpi_test} PROPERTIES
+            LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
+          rodin_suppress_external_mpi_lsan_for_test(${_mpi_test})
+          if (geometry STREQUAL "Pyramid")
+            set_tests_properties(${_mpi_test} PROPERTIES RESOURCE_LOCK curved_stokes_pyramid)
+            if (q EQUAL 3)
+              set_tests_properties(${_mpi_test}
+                PROPERTIES TIMEOUT ${_RODIN_CURVED_STOKES_Q3_PYRAMID_TIMEOUT})
+            endif()
+          endif()
+        endforeach()
+      endforeach()
+    endforeach()
     foreach(np 1 2 3 4)
       foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
         add_test(NAME RodinConvergenceIsoparametricPETScMPIStokes_np${np}_${geometry}

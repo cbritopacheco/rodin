@@ -168,12 +168,80 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
       bool m_sine;
   };
 
-  template <class ContextType>
+  template <class ContextType, size_t Q = 2>
   class CurvedStokesTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
       using Map = typename Workload<ContextType>::Map;
       static constexpr Real PressureGeometryTolerance = 1e-10;
+
+      /** @brief Affine shear isolates geometry without fitting zero pressure errors.
+       * The map changes the last coordinate but preserves x0 and volume.
+       * Velocity is represented at K=max(2,Q); affine pressure is represented
+       * at K-1. Field/pressure/divergence budgets are absolute and dimensionless.
+       */
+      void checkRepresentable(
+        const StokesErrors& represented, const LiftedErrors& lifted) const
+      {
+        checkLifted(lifted);
+        LiftedConvergence::expectRepresentable(
+          represented.velocity, lifted.velocity, PatchTolerance);
+        for (const auto& error : {represented.pressure, lifted.pressure.field,
+               lifted.pressure.total})
+        {
+          EXPECT_TRUE(error.isFinite());
+          EXPECT_LT(error.getL2(), PatchTolerance);
+          EXPECT_LT(error.getH1Seminorm(), PatchTolerance);
+        }
+        EXPECT_TRUE(std::isfinite(represented.divergence));
+        EXPECT_GE(represented.divergence, 0);
+        EXPECT_LT(represented.divergence, PatchTolerance);
+        EXPECT_LT(lifted.divergence[0], PatchTolerance);
+        const Real divergenceBudget =
+          std::sqrt(Real(UniformGrid(this->GetParam()).getDimension())) * PatchTolerance;
+        EXPECT_NEAR(lifted.divergence[2], lifted.divergence[1], divergenceBudget);
+      }
+
+      void liftedAffineVelocityRates() const
+      {
+        constexpr size_t K = std::max(size_t(2), Q);
+        LiftedConvergence velocity;
+        for (size_t n : {3u, 5u, 9u})
+        {
+          SCOPED_TRACE(::testing::Message() << "geometry degree=" << Q
+            << " velocity degree=" << K << " pressure degree=" << K - 1 << " n=" << n);
+          Workload<ContextType, Q> problem(this->GetParam(), n, Map::Sine, true);
+          LiftedErrors lifted;
+          const auto represented = problem.template solve<K>(
+            StokesData::Field::Affine, 1, AssemblyOrder, NormOrder, &lifted);
+          checkRepresentable(represented, lifted);
+          velocity.appendRepresentable(
+            Real(1) / Real(n - 1), represented.velocity, lifted.velocity, PatchTolerance);
+        }
+        velocity.expectGeometryRates(Q);
+      }
+
+      void liftedQuadratureSensitivity() const
+      {
+        constexpr size_t K = std::max(size_t(2), Q);
+        Workload<ContextType, Q> problem(this->GetParam(), 5, Map::Sine, true);
+        std::array<LiftedErrors, 3> errors;
+        for (size_t i = 0; i < errors.size(); ++i)
+        {
+          SCOPED_TRACE(::testing::Message() << "geometry degree=" << Q << " control=" << i);
+          const auto represented = problem.template solve<K>(StokesData::Field::Affine,
+            1, i == 1 ? RefinedOrder : AssemblyOrder,
+            i == 2 ? RefinedNormOrder : NormOrder, &errors[i]);
+          checkRepresentable(represented, errors[i]);
+        }
+        for (size_t i = 1; i < errors.size(); ++i)
+        {
+          LiftedConvergence::expectGeometrySensitivity(errors[0].velocity, errors[i].velocity);
+          for (size_t component : {1u, 2u})
+            EXPECT_NEAR(errors[0].divergence[component],
+              errors[i].divergence[component], PatchTolerance);
+        }
+      }
 
       void checkLifted(const LiftedErrors& error) const
       {
@@ -435,7 +503,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
 
       void checkGauge(Map map = Map::Quadratic) const
       {
-        Workload<ContextType> problem(this->GetParam(), 3, map);
+        Workload<ContextType, Q> problem(this->GetParam(), 3, map);
         const StokesData data(problem.getMesh().getDimension(), StokesData::Field::Cubic);
         const auto& mesh = problem.getMesh();
         const auto pressure = data.getPressure();
@@ -469,6 +537,46 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
       }
   };
 
+  using LocalQ1Test = CurvedStokesTest<Context::Local, 1>;
+  TEST_P(LocalQ1Test, LiftedAffineVelocityRates)
+  {
+    liftedAffineVelocityRates();
+  }
+  TEST_P(LocalQ1Test, LiftedQuadratureSensitivity)
+  {
+    liftedQuadratureSensitivity();
+  }
+  TEST_P(LocalQ1Test, LiftedPhysicalPressureGauge)
+  {
+    checkGauge(Map::Sine);
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalQ1Test,
+    ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+  using LocalQ3Test = CurvedStokesTest<Context::Local, 3>;
+  TEST_P(LocalQ3Test, LiftedAffineVelocityRates)
+  {
+    liftedAffineVelocityRates();
+  }
+  TEST_P(LocalQ3Test, LiftedQuadratureSensitivity)
+  {
+    liftedQuadratureSensitivity();
+  }
+  TEST_P(LocalQ3Test, LiftedPhysicalPressureGauge)
+  {
+    checkGauge(Map::Sine);
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalQ3Test,
+    ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
 #ifndef RODIN_CURVED_STOKES_PETSC
   /** @brief Fixed-mesh pressure forward-error regression, not a rate study.
    * The affine pressure is represented exactly on the q3 n5 wedge mesh.
@@ -542,6 +650,46 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
     });
 
 #if defined(RODIN_CURVED_STOKES_PETSC) && defined(RODIN_USE_MPI)
+  using MPIQ1Test = CurvedStokesTest<Context::MPI, 1>;
+  TEST_P(MPIQ1Test, LiftedAffineVelocityRates)
+  {
+    liftedAffineVelocityRates();
+  }
+  TEST_P(MPIQ1Test, LiftedQuadratureSensitivity)
+  {
+    liftedQuadratureSensitivity();
+  }
+  TEST_P(MPIQ1Test, LiftedPhysicalPressureGauge)
+  {
+    checkGauge(Map::Sine);
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIQ1Test,
+    ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+  using MPIQ3Test = CurvedStokesTest<Context::MPI, 3>;
+  TEST_P(MPIQ3Test, LiftedAffineVelocityRates)
+  {
+    liftedAffineVelocityRates();
+  }
+  TEST_P(MPIQ3Test, LiftedQuadratureSensitivity)
+  {
+    liftedQuadratureSensitivity();
+  }
+  TEST_P(MPIQ3Test, LiftedPhysicalPressureGauge)
+  {
+    checkGauge(Map::Sine);
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIQ3Test,
+    ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
   using MPITest = CurvedStokesTest<Context::MPI>;
   TEST_P(MPITest, ApproximatedPhysicalPressureGauge)
   {
