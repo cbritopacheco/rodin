@@ -20,8 +20,8 @@
   weights and points inside @f$ \widehat K @f$.
 
   This exactness choice is part of the assembled mathematical problem, not
-  just a performance setting. See @ref guides-numerical-contracts "Numerical
-  contracts" for how quadrature interacts with interpolation, projection,
+  just a performance setting. See @ref guides-numerical-contracts "Numerical contracts"
+  for how quadrature interacts with interpolation, projection,
   manufactured solutions, and specialized integrators.
 
   @section guides-quadrature-dispatch Default dispatch

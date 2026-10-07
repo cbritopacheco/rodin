@@ -75,6 +75,12 @@ def run_doxygen(binary, tmpdir):
     # Extract every function for the contract audit, including private/static
     # helpers. EXTRACT_ALL disables undocumented-entity warnings, so collect
     # the normal warning log above before doing this separate XML pass.
+    # Audit the XML commands used by the published m.css documentation too.
+    # The native configuration intentionally expands these aliases to nothing.
+    with open(os.path.join(REPO, "doc", "Doxygen.mcss.in"), encoding="utf-8") as f:
+        mcss = "\n".join(line for line in f.read().splitlines()
+                         if not line.startswith("@INCLUDE"))
+    cfg += "\n" + mcss + "\n"
     cfg += (
         "\n# --- full extraction for the parameter/return XML audit ---\n"
         "EXTRACT_ALL = YES\n"

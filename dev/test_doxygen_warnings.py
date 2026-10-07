@@ -21,6 +21,7 @@ class DoxygenWarningsTest(unittest.TestCase):
         if cls.binary is None:
             raise unittest.SkipTest("Doxygen is required")
         cls.template = Path(checker.REPO, "doc", "Doxygen.in").read_text()
+        cls.mcss_template = Path(checker.REPO, "doc", "Doxygen.mcss.in").read_text()
         cls.version = checker.doxygen_version(cls.binary)
 
     def check_fixture(self, source):
@@ -32,6 +33,7 @@ class DoxygenWarningsTest(unittest.TestCase):
             (repo / "src" / "fixture.h").write_text(source)
             (repo / "doc" / "Doxygen.in").write_text(
                 self.template + "\nCITE_BIB_FILES =\n")
+            (repo / "doc" / "Doxygen.mcss.in").write_text(self.mcss_template)
             baseline = repo / "baseline"
             baseline.write_text(f"# doxygen {self.version}\n")
             with patch.object(checker, "REPO", directory), \
@@ -80,6 +82,36 @@ int square(int value);
 int square(int value);
 """)
         self.assertEqual(status, 0, output)
+
+    def test_mcss_navigation_with_single_line_reference_passes(self):
+        status, output = self.check_fixture('''/// @file
+
+/// @brief Does nothing.
+void noop();
+/**
+ * @page guide Guide
+ * See @ref target "Target guide" for details.
+ * @m_footernavigation
+ */
+/** @page target Target guide */
+''')
+        self.assertEqual(status, 0, output)
+
+    def test_mcss_navigation_with_broken_reference_fails(self):
+        status, output = self.check_fixture('''/// @file
+
+/// @brief Does nothing.
+void noop();
+/**
+ * @page guide Guide
+ * See @ref target "Target
+ * guide" for details.
+ * @m_footernavigation
+ */
+/** @page target Target guide */
+''')
+        self.assertEqual(status, 1, output)
+        self.assertIn("unexpected command endxmlonly", output)
 
     def test_unnamed_parameter_fails_xml_audit(self):
         status, output = self.check_fixture("""/// @file
