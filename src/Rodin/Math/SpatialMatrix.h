@@ -1086,9 +1086,12 @@ namespace Rodin::Math
         return x;
       }
 
-      // Determinant specialized for 1x1, 2x2, 3x3 (+ generic fallback).
       /**
        * @brief Returns the determinant (specialized for 1x1, 2x2 and 3x3).
+       *
+       * Small matrices use specialized formulas; larger matrices use a generic
+       * fallback.
+       *
        * @returns The determinant (specialized for 1x1, 2x2 and 3x3).
        */
       constexpr
@@ -1136,10 +1139,12 @@ namespace Rodin::Math
         }
       }
 
-      // Inverse specialized for 1x1, 2x2, 3x3 (+ generic fallback).
-      // Returns a SpatialMatrix (same runtime size).
       /**
        * @brief Returns the matrix inverse (specialized for 1x1, 2x2 and 3x3).
+       *
+       * Small matrices use specialized formulas; larger matrices use a generic
+       * fallback. The returned matrix has the same runtime dimensions.
+       *
        * @returns The matrix inverse (specialized for 1x1, 2x2 and 3x3).
        */
       constexpr

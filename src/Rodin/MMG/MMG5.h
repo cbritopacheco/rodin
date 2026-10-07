@@ -74,7 +74,6 @@ namespace Rodin::MMG
       /// MMG mesh version tag used in generated MMG mesh objects.
       static constexpr int sMeshVersionFormatted = 2;
 
-      // ---- Mesh methods ---------------------------------------------------
       /**
        * @brief Allocates and initializes an MMG mesh object.
        * @param[in] version MMG mesh version.

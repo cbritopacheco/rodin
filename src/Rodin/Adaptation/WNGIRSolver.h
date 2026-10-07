@@ -1726,10 +1726,13 @@ namespace Rodin::Adaptation
           error <= std::max(relativeTolerance, LinearSolveAcceptanceFloor);
       }
 
-      // Solves the currently-assembled step problem with CG and copies the
-      // backend-matched solution GridFunction into @p out.
       /**
        * @brief Solves the assembled step problem and stores the displacement.
+       *
+       * The conjugate-gradient solver computes the solution of the assembled step
+       * problem. The solution grid function uses the same backend and is copied
+       * into @p out.
+       *
        * @param out Displacement receiving the computed solution.
        * @param iterations Output number of linear iterations performed.
        * @param error Output relative linear residual.

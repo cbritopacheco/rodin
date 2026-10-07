@@ -544,9 +544,6 @@ namespace Rodin::Variational
       using AssemblyInput =
         Assembly::ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
 
-      // --------------------------
-      // Ctors / assignment
-      // --------------------------
       /**
        * @brief Constructs a multi-field problem from trial and test functions.
        * @param u1 First function (trial or test).
@@ -657,9 +654,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      // --------------------------
-      // ProblemBody binding
-      // --------------------------
       /**
        * @brief Assigns a problem body (bilinear and linear forms).
        * @param[in] rhs Problem body to assign.
@@ -677,9 +671,6 @@ namespace Rodin::Variational
         return m_pb;
       }
 
-      // --------------------------
-      // Assembly / solve
-      // --------------------------
       /**
        * @brief Assembles the block-structured variational formulation and
        *        establishes the initial guess.
@@ -793,9 +784,6 @@ namespace Rodin::Variational
           });
       }
 
-      // --------------------------
-      // Accessors (useful for solvers / debugging)
-      // --------------------------
       /**
        * @brief Returns a mutable reference to the linear system.
        * @returns A mutable reference to the linear system.
@@ -1080,10 +1068,12 @@ namespace Rodin::Variational
          IsPETScTestFunction<std::decay_t<T>>::value) &&
         AllPETScTrialOrTest<Ts...>::value> {};
 
-  // PETSc-only CTAD guide (enabled only if ALL args are PETSc trial/test wrappers)
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for multi-field PETSc Problem.
+   *
+   * This guide is enabled only when all arguments are PETSc trial or test wrappers.
+   *
    * @param u1 First function (trial or test).
    * @param u2 Second function.
    * @param u3 Third function.

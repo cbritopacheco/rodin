@@ -521,7 +521,6 @@ namespace Rodin::Variational
       size_t m_vdim;
   };
 
-  // CTAD (scalar)
   /**
    * @brief Deduction guide for @c P0g.
    * @param mesh Mesh supporting the finite element space.

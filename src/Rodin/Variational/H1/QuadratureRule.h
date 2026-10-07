@@ -3294,7 +3294,6 @@ namespace Rodin::Variational
       Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
     };
 
-    // CTAD helper
     /**
      * @brief Deduction guide for @c QuadratureRule.
      * @param integrand Expression to integrate.
@@ -3641,7 +3640,6 @@ namespace Rodin::Variational
         Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
     };
 
-    // CTAD helper
     /**
      * @brief Deduction guide for @c QuadratureRule.
      * @param integrand Expression to integrate.
@@ -4259,7 +4257,6 @@ namespace Rodin::Variational
         Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_mat;
     };
 
-    // CTAD helper
     /**
      * @brief Deduction guide for @c QuadratureRule.
      * @param integrand Expression to integrate.

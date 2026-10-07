@@ -403,9 +403,11 @@ namespace Rodin::Eikonal
         return computeGeometricDistance(a, b, mesh);
       }
 
-      // Surface triangle update - works for 2D triangles embedded in any dimension
       /**
        * @brief Computes an arrival-time update on a surface triangle.
+       *
+       * The update applies to two-dimensional triangles embedded in any dimension.
+       *
        * @param p Vertex being updated or physical point being assigned.
        * @param i Index of a supporting accepted vertex.
        * @param j Index of a supporting accepted vertex.
@@ -482,9 +484,11 @@ namespace Rodin::Eikonal
         return t;
       }
 
-      // 3D volume element 2-neighbor update using geometric infrastructure
       /**
        * @brief Computes an arrival-time update in a volume cell.
+       *
+       * The update uses two accepted neighbors in a three-dimensional volume cell.
+       *
        * @param p Vertex being updated or physical point being assigned.
        * @param i Index of a supporting accepted vertex.
        * @param j Index of a supporting accepted vertex.
@@ -564,11 +568,15 @@ namespace Rodin::Eikonal
         return t;
       }
 
-      // 3D volume element 3-neighbor update (tetra) with "inside-simplex" (upwind) check.
-      // If the 3-neighbor minimizer lies outside the tetrahedron (in barycentric sense),
-      // return +inf so caller naturally falls back to 2-neighbor / 1-neighbor updates.
       /**
        * @brief Computes an arrival-time update in a volume cell.
+       *
+       * The update uses three accepted neighbors in a tetrahedron and checks the
+       * upwind condition using barycentric coordinates.
+       *
+       * @note A minimizer outside the tetrahedron yields positive infinity,
+       * allowing the caller to use a two-neighbor or one-neighbor update.
+       *
        * @param p Vertex being updated or physical point being assigned.
        * @param i Index of a supporting accepted vertex.
        * @param j Index of a supporting accepted vertex.

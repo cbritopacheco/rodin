@@ -155,9 +155,12 @@ namespace Rodin::Variational
   class LagrangeBasisSegment
   {
     public:
-      // Node index i, 0 <= i <= K, x in [0,1]
       /**
        * @brief Gets the basis function of a local degree of freedom.
+       *
+       * The node index satisfies @f$ 0 \le i \le K @f$, and the reference coordinate
+       * lies in @f$ [0,1] @f$.
+       *
        * @param i Local basis-function index.
        * @returns Value of the selected local basis function at the evaluation point.
        * @param x Reference-coordinate component at which the basis is evaluated.
@@ -231,9 +234,11 @@ namespace Rodin::Variational
   class LagrangeBasisTriangle
   {
     public:
-      // Node identified by (i,j) with i+j <= K.
       /**
        * @brief Gets the basis function of a local degree of freedom.
+       *
+       * The node is identified by @f$ (i,j) @f$ with @f$ i+j \le K @f$.
+       *
        * @param i Local basis-function index.
        * @param j Index of the second coordinate.
        * @returns Value of the selected local basis function at the evaluation point.
@@ -363,9 +368,11 @@ namespace Rodin::Variational
   class LagrangeBasisTetrahedron
   {
     public:
-      // Node (i,j,k) with i+j+k <= K.
       /**
        * @brief Gets the basis function of a local degree of freedom.
+       *
+       * The node is identified by @f$ (i,j,k) @f$ with @f$ i+j+k \le K @f$.
+       *
        * @param i Local basis-function index.
        * @param j Index of the second coordinate.
        * @returns Value of the selected local basis function at the evaluation point.
@@ -401,9 +408,12 @@ namespace Rodin::Variational
         return result;
       }
 
-      // deriv_dim = 0 -> \partial/\partialx, 1 -> \partial/\partialy, 2 -> \partial/\partialz
       /**
        * @brief Gets the derivative of the basis function.
+       *
+       * The differentiation direction is selected by @p deriv_dim: 0 for @f$ x @f$, 1
+       * for @f$ y @f$, and 2 for @f$ z @f$.
+       *
        * @param i Index of the requested entry.
        * @param j Index of the second coordinate.
        * @param deriv_dim Coordinate direction of differentiation.
@@ -512,9 +522,12 @@ namespace Rodin::Variational
   class LagrangeBasisQuadrilateral
   {
     public:
-      // Node (i,j), 0 ≤ i,j ≤ K, φ_{i,j}(x,y) = L_i^K(x) L_j^K(y)
       /**
        * @brief Gets the basis function of a local degree of freedom.
+       *
+       * The tensor-product basis is @f$ \phi_{i,j}(x,y) = L_i^K(x)L_j^K(y) @f$, with
+       * @f$ 0 \le i,j \le K @f$.
+       *
        * @param i Local basis-function index.
        * @param j Index of the second coordinate.
        * @returns Value of the selected local basis function at the evaluation point.
@@ -552,9 +565,12 @@ namespace Rodin::Variational
         return Lix * Ljy;
       }
 
-      // deriv_dim = 0 -> \partial/\partialx, deriv_dim = 1 -> \partial/\partialy
       /**
        * @brief Gets the derivative of the basis function.
+       *
+       * The differentiation direction is selected by @p deriv_dim: 0 for @f$ x @f$, 1
+       * for @f$ y @f$.
+       *
        * @param i Index of the requested entry.
        * @param j Index of the second coordinate.
        * @param deriv_dim Coordinate direction of differentiation.
@@ -677,9 +693,12 @@ namespace Rodin::Variational
   class LagrangeBasisWedge
   {
     public:
-      // Node (i,j,k): triangle indices (i,j) with i+j ≤ K, segment index k.
       /**
        * @brief Gets the basis function of a local degree of freedom.
+       *
+       * The node has triangle indices @f$ (i,j) @f$ with @f$ i+j \le K @f$ and segment
+       * index @f$ k @f$.
+       *
        * @param i Local basis-function index.
        * @param j Index of the second coordinate.
        * @returns Value of the selected local basis function at the evaluation point.
@@ -729,9 +748,12 @@ namespace Rodin::Variational
         return triVal * segVal;
       }
 
-      // deriv_dim = 0 -> \partial/\partialx, 1 -> \partial/\partialy, 2 -> \partial/\partialz
       /**
        * @brief Gets the derivative of the basis function.
+       *
+       * The differentiation direction is selected by @p deriv_dim: 0 for @f$ x @f$, 1
+       * for @f$ y @f$, and 2 for @f$ z @f$.
+       *
        * @param i Index of the requested entry.
        * @param j Index of the second coordinate.
        * @param deriv_dim Coordinate direction of differentiation.

@@ -1680,13 +1680,13 @@ namespace Rodin::Assembly
         }
       }
 
-      // Targeted (LHS-only / RHS-only) assembly. The parallel Eigen backend
-      // assembles the full system into a scratch object and exposes only the
-      // requested side, leaving the other operand untouched (the targeted
-      // contract). This keeps the intricate parallel BC-elimination logic in a
-      // single code path instead of duplicating a gated variant.
       /**
        * @brief Executes targeted problem assembly.
+       *
+       * The full system is assembled into temporary storage. Only the requested
+       * side is transferred to the output system; the other side is preserved.
+       * This uses the same boundary-condition elimination as full assembly.
+       *
        * @param axb Output linear system.
        * @param input Problem assembly input.
        * @param target Side of the system to assemble.
@@ -2396,12 +2396,13 @@ namespace Rodin::Assembly
         }
       }
 
-      // Targeted (LHS-only / RHS-only) assembly for the parallel block Eigen
-      // backend: assemble the full system into a scratch object and expose only
-      // the requested side, leaving the other operand untouched (the targeted
-      // contract). Keeps the parallel block BC-elimination logic in one path.
       /**
        * @brief Executes targeted mixed problem assembly.
+       *
+       * The full system is assembled into temporary storage. Only the requested
+       * side is transferred to the output system; the other side is preserved.
+       * This uses the same boundary-condition elimination as full assembly.
+       *
        * @param axb Output linear system.
        * @param input Mixed problem input.
        * @param target Side of the system to assemble.

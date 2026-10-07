@@ -22,7 +22,6 @@
 
 namespace Rodin::IO
 {
-  // ---- helpers (file-local) ------------------------------------------------
   /**
    * @brief Formats an index with leading zeros.
    * @param index Degree-of-freedom index.

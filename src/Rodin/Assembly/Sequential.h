@@ -1419,16 +1419,17 @@ namespace Rodin::Assembly
           }
         }
 
-        // Targeted (LHS-only / RHS-only) assembly for the block Eigen backend:
-        // assemble the full system into a scratch object and expose only the
-        // requested side, leaving the other operand untouched (the targeted
-        // contract). Keeps the block BC-elimination logic in one code path.
         /**
-       * @brief Executes targeted mixed problem assembly.
-       * @param axb Output linear system.
-       * @param input Mixed problem input.
-       * @param target Side of the system to assemble.
-       */
+         * @brief Executes targeted mixed problem assembly.
+         *
+         * The full system is assembled into temporary storage. Only the requested
+         * side is transferred to the output system; the other side is preserved.
+         * This uses the same boundary-condition elimination as full assembly.
+         *
+         * @param axb Output linear system.
+         * @param input Mixed problem input.
+         * @param target Side of the system to assemble.
+         */
         void execute(LinearSystemType& axb, const InputType& input,
           Rodin::Variational::AssemblyTarget target) const
         {

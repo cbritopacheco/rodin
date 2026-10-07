@@ -38,6 +38,8 @@ line, offending source, and suggested fix.
   specializations, and its deduction guides live together in that header.
 - **Documentation**: Use `/** ... */` for multiline Doxygen documentation
   and `///` for single-line documentation. Use `///<` for trailing member documentation.
+  Integrate API contracts and explanatory prose into the relevant Doxygen block;
+  remove redundant ordinary comments beside it.
   Document every parameter and non-void return, including unused inputs,
   deduction guides, and internal helpers. The Doxygen check audits the generated
   XML to enforce coverage beyond Doxygen's ordinary warnings.

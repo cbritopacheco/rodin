@@ -426,7 +426,6 @@ namespace Rodin::Geometry
         return this->getMatrix().squaredNorm();
       }
 
-      // raw container access (serialization, mesh APIs, etc.)
       /**
        * @brief Returns a reference to the underlying packed point storage.
        * @returns A reference to the underlying packed point storage.

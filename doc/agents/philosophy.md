@@ -217,6 +217,8 @@ rather than extended:
   deleted or omitted.
 - Use `/** ... */` for multiline Doxygen documentation and `///` for
   single-line documentation. Use `///<` for trailing member documentation.
+  Integrate API contracts and explanatory prose into the relevant Doxygen block;
+  remove redundant ordinary comments beside it.
   Document every parameter, including intentionally unused inputs and deduction
   guides, and every non-void return. Give unused inputs names and explain why
   they are unused; `[[maybe_unused]]` preserves compiler warning cleanliness.

@@ -512,10 +512,6 @@ namespace Rodin::Variational
   class WarpBlendTetrahedron
   {
     private:
-      // -------------------------------------------------------------------
-      // Helper: index mapping (i,j,k) -> flat idx (no lambdas; avoids ASan
-      // stack-use-after-scope reports from short-lifetime closure objects).
-      // -------------------------------------------------------------------
       /**
        * @brief Locates a tetrahedral lattice layer in flattened storage.
        * @param kk Layer index in the tetrahedral node lattice.

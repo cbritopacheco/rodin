@@ -1014,9 +1014,6 @@ namespace Rodin::IO
       }
 
     private:
-      // -------------------------------------------------------------
-      // Line helpers (same style as P1 loader)
-      // -------------------------------------------------------------
       /**
        * @brief Reads one line while advancing the line counter.
        * @param is Input stream from which a line is read.
