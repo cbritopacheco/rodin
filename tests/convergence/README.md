@@ -210,7 +210,7 @@ exists yet.
 | Poisson | P1–P3, boundary variants; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
 | Complex Helmholtz | P1/P2; native-complex PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/impedance P1–P3 with polynomial patches | P1–P4; native and complex-PETSc local/MPI | P1–P3; native and complex-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; affine P2/Q1 and P3/Q3 geometry-limited rates; native and complex-PETSc local/MPI |
 | Linear elasticity | Vector P1/P2, displacement and traction variants; nearly incompressible divergence-free P2 in 2D/3D; native and real-PETSc local/MPI | Analytic vector P1→P2→P3→P4; native and real-PETSc local/MPI | Analytic vector P1–P3; native and real-PETSc local/MPI | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; affine P2/Q1 and P3/Q3 geometry-limited displacement/strain/stress rates; native local and real-PETSc local/MPI |
-| Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI; native finite pressure-spectrum checks; PETSc physical traction P2/P1 and P3/P2 without a mean multiplier | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; affine $P_2/P_1$ on linear and $P_3/P_2$ on cubic geometry; native local and real-PETSc local/MPI |
+| Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI; native and real-PETSc local/MPI finite P2/P1 pressure-spectrum checks; PETSc physical traction P2/P1 and P3/P2 without a mean multiplier | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; affine $P_2/P_1$ on linear and $P_3/P_2$ on cubic geometry; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3 with polynomial patches; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
 | Coupled reaction–diffusion | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin/pure Neumann P1–P3 with coupled polynomial patches | P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | Analytic two-field P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 maps and represented/lifted sine-map domains; affine P2/Q1 and P3/Q3 componentwise geometry-limited rates; native local and real-PETSc local/MPI |
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI; PETSc P1–P3 mixed Neumann/Robin/pure Neumann with patch, flux and tangent controls | Analytic P1→P2→P3→P4; native and real-PETSc SNES local/MPI; tangent controls | Analytic P1–P3; native and real-PETSc SNES local/MPI; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
@@ -750,9 +750,15 @@ every larger pair. The separate [native pressure-spectrum gate](h/Stokes/README.
 checks all six applicable geometries at grid levels 2, 3 and 5, on affine and
 exact quadratic maps. Independently factored Schur and whitened-divergence
 spectra, quadrature sensitivity and a missing-divergence control provide
-finite-mesh evidence in sequential/OpenMP builds. They do not certify
-PETSc/MPI spectra or mesh-uniform stability; a uniform stability argument
-for the pyramid/wedge families remains unresolved.
+finite-mesh evidence in sequential/OpenMP builds. The separate
+[real-PETSc pressure-spectrum gate](h/PETScStokes/README.md) checks the same
+$P_2/P_1$ pair, six geometries, maps and levels in local contexts and at MPI
+ranks one through four, independently in both thread configurations. Its
+explicitly global oracle collects complete operators and integer boundary
+indices; it introduces no collectives into mesh queries or field evaluation.
+The finite matrix is locally verified, not hosted-CI certified. These gates
+do not establish mesh-uniform stability or stability of higher-order pairs;
+a uniform stability argument for the pyramid/wedge families remains unresolved.
 
 Each new suite must document its continuous problem, derived data, discrete
 spaces, geometry families, refinement levels, quadrature, algebraic error

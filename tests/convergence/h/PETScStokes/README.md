@@ -113,6 +113,73 @@ These full-velocity-boundary studies do not cover complex fields, curved maps,
 or scalable iterative preconditioning. Degree refinement is specified in the
 linked p/hp suites; the distinct mixed-boundary formulation follows below.
 
+## Finite pressure-spectrum verification
+
+The separate `RodinConvergenceHPETScStokesStability` target measures the
+finite-dimensional stability of the homogeneous-velocity $P_2/P_1$ pair
+without solving a manufactured saddle-point problem. The finite local/MPI
+matrix is locally verified in sequential/OpenMP configurations; this is not
+hosted-CI certification or a mesh-uniform stability theorem.
+Let $A\in\mathbb R^{N_u\times N_u}$ denote the velocity-gradient energy
+matrix, $B\in\mathbb R^{N_p\times N_u}$ the divergence matrix, and
+$M\in\mathbb R^{N_p\times N_p}$ the pressure mass matrix, assembled from
+
+$$
+a(u,v)=\int_\Omega Du:Dv\,\mathrm dx,\qquad
+b(u,q)=\int_\Omega q\,\mathrm{div}\,u\,\mathrm dx,\qquad
+m(p,q)=\int_\Omega pq\,\mathrm dx.
+$$
+
+Let $E\in\mathbb R^{N_u\times N_f}$ select the $N_f$ unconstrained velocity
+indices. Logical index elimination gives $A_f=E^TAE$ and $B_f=BE$.
+For the P1 constant coefficient vector $c=\mathbf 1$, a basis
+$T\in\mathbb R^{N_p\times(N_p-1)}$ is constructed for
+$\ker(c^TM)$, so pressure constants are excluded using the physical mass
+metric rather than an arbitrarily pinned node. The reduced generalized
+eigenproblem is
+
+$$
+T^TB_fA_f^{-1}B_f^TTz=\lambda T^TMTz,\qquad
+\beta_h^2=\min\lambda.
+$$
+
+The shared `MixedStability` oracle compares these eigenvalues with squared
+singular values obtained by independently whitening velocity energy and
+pressure mass. Eigenpair, factorization, and mean-basis defects are checked
+against the dimensionless algebraic consistency budget $10^{-10}$.
+Resolved positivity means that the smallest eigenvalue exceeds
+$10^{-10}$ times the largest absolute eigenvalue; this is a finite-precision
+spectral criterion, not a logical ownership or DOF correspondence test.
+Boundary indices are collected as integers, without coordinate matching.
+An independently specified two-velocity/two-pressure matrix requires
+$\beta_h^2=4/3$ after elimination of logical velocity index one. At multiple
+ranks, that index is supplied only by its matrix-row owner; ranks without
+owned rows still participate in the global oracle.
+
+All six applicable cell families are registered on affine and exact
+quadratic maps at $n=2,3,5$. The maps are installed before partitioning.
+Orders $16$ and $20$ are compared independently, with relative contamination
+below $10^{-8}$ for a resolved positive minimum. At $n=2$, all families except
+pyramid have fewer free velocity DOFs than zero-mean pressure DOFs; this
+dimension obstruction is checked by integer counts. At $n=3,5$, positivity
+is required. Removing divergence leaves the dimensions unchanged and must
+produce an exactly zero spectrum. These are spectral refinement studies,
+not error-slope studies: no power of $h$ is fitted to $\beta_h$.
+
+Local and MPI rank counts $1,2,3,4$ have separate geometry registrations,
+using the selected sequential/OpenMP assembly configuration. The
+`PETScMixedStability` adapter is explicitly collective on the matrix
+communicator because its mathematical input is the complete global operator.
+Sparse operators and integer constraint indices are replicated for this
+small-mesh oracle, then the backend-independent spectral calculation is
+performed. No collective is added to geometry queries, field evaluation, or
+rank-local Shard operations. Each dense workspace is bounded by the shared
+96 MiB admission policy before allocation; this is not a bound on total
+process memory, and replicated spectra are not a scalable solver benchmark.
+The registrations retain slow labels and 1800-second execution budgets.
+The finite matrix does not establish a mesh-uniform inf-sup theorem;
+the pyramid/wedge stability argument remains a separate unresolved item.
+
 ## Physical traction and the pressure level
 
 The `RodinConvergenceHPETScStokesBoundary` target uses

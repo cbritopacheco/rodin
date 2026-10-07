@@ -227,6 +227,7 @@ jobs:
           RodinConvergenceHPETScReactionDiffusion
           RodinConvergenceHPETScNonlinearPoisson
           RodinConvergenceHPETScStokes
+          RodinConvergenceHPETScStokesStability
 
       - name: Run PETSc convergence suite
         if: matrix.suite == 'bulk'
