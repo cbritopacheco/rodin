@@ -2504,7 +2504,7 @@ namespace Rodin::Assembly
       void execute(OutputType& res, const InputType& input) override
       {
         const auto& u = input.getOperand();
-        auto& Av = const_cast<ValueType&>(input.getShapeFunction());
+        auto& Av = input.getShapeFunction();
         const auto& essBdr = input.getEssentialBoundary();
 
         const auto& fesU = u.getFiniteElementSpace();

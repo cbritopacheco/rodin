@@ -14,6 +14,13 @@ was abandoned. When you do performance work, the acceptance bar is *identical
 numerics* (iteration counts, final energies/fits) against a baseline run —
 not just "tests pass".
 
+## Const correctness
+
+**`const_cast` is forbidden.** Operations that update assembly or evaluation
+state must express that requirement through non-const objects or explicitly
+borrowed non-const references. Use owned working storage when the input must
+remain read-only; never cast away constness to update it.
+
 ## Numerical constants
 
 Avoid unexplained numeric thresholds, safety factors, and iteration limits.

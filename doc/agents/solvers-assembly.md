@@ -13,8 +13,10 @@ contracts that assembly/solver changes are expected to preserve.
   configuration. The MPI and PETSc trees provide their own mirrored
   backends.
 - `AssemblyBase::execute` is non-const across all backends. Assemblers may
-  retain sparsity maps and working storage between calls; assembly inputs
-  remain const. Local named-form kernels also use non-const `compute`, with
+  retain sparsity maps and working storage between calls. Input wrappers
+  remain const; identification inputs explicitly borrow a non-const
+  shape-function expression for updating its integration-point cursor.
+  Local named-form kernels also use non-const `compute`, with
   one copy per assembly or OpenMP worker. Concurrent executions must use
   separate assembler instances. Custom backends must override non-const
   `execute`; const assembler callers must hold a non-const instance instead.

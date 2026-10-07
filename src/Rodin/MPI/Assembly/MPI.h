@@ -249,7 +249,7 @@ namespace Rodin::Assembly
       void execute(OutputType& res, const InputType& input) override
       {
         const auto& fesU = input.getOperand().getFiniteElementSpace();
-        auto& Av = const_cast<ValueType&>(input.getShapeFunction());
+        auto& Av = input.getShapeFunction();
         const auto& fesV = Av.getLeaf().getFiniteElementSpace();
         const size_t faceDim = fesU.getMesh().getDimension() - 1;
         const MPIBoundaryDOFs<FES1> boundary(fesU, input.getEssentialBoundary());

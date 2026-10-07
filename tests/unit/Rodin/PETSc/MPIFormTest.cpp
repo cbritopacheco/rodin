@@ -245,6 +245,46 @@ namespace
     }
   }
 
+  /// @brief A borrowed expression updates distributed identification rows on reassembly.
+  TEST(PETSc_MPI_Form, IdentificationBorrowedExpressionReassembly)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeP2Tetrahedron(ctx);
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TrialFunction master(fes);
+    Real scale = 2;
+    auto expression = RealFunction([&scale](const Point&) { return scale; }) * master;
+    DirichletBC dbc(u, expression);
+    using Input = typename decltype(dbc)::AssemblyType::InputType;
+    const FlatSet<Attribute> attributes;
+    const Input input(u, expression, attributes);
+    using Rows = DirichletBCBase<Real>::IdentifiedDOFs;
+    Rows rows;
+    FlatSet<Index> slaves;
+    for (const Real coefficient : {2., 5.})
+    {
+      scale = coefficient;
+      dbc.getAssembly().execute(rows, input);
+      const size_t count =
+        boost::mpi::all_reduce(world, rows.size(), std::plus<size_t>());
+      EXPECT_GT(count, 0u);
+      FlatSet<Index> currentSlaves;
+      for (const auto& [slave, row] : rows)
+      {
+        currentSlaves.insert(slave);
+        ASSERT_EQ(row.first.size(), 1);
+        EXPECT_EQ(row.first(0), slave);
+        EXPECT_DOUBLE_EQ(row.second(0), coefficient);
+      }
+      if (coefficient == 2)
+        slaves = currentSlaves;
+      else
+        EXPECT_EQ(currentSlaves, slaves);
+    }
+  }
+
   /// @brief Verifies distributed identification projects owned slave row for PET sc MPI form by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(PETSc_MPI_Form, DistributedIdentificationProjectsOwnedSlaveRow)
   {

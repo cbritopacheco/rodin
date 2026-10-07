@@ -2140,11 +2140,7 @@ namespace Rodin::Assembly
         void execute(OutputType& res, const InputType& input) override
         {
           const auto& u = input.getOperand();
-          // setIntegrationPoint mutates internal evaluation state; the input
-          // exposes Av as const, but we need to drive its IP cursor while
-          // probing each basis. The mutation is purely evaluation state, not
-          // semantic.
-          auto& Av = const_cast<ValueType&>(input.getShapeFunction());
+          auto& Av = input.getShapeFunction();
           const auto& essBdr = input.getEssentialBoundary();
 
           const auto& fesU = u.getFiniteElementSpace();
