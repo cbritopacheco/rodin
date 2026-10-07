@@ -16,13 +16,18 @@ concurrency:
 jobs:
   Convergence:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Keep the original h/p/hp gate separate from the growing curved matrix.
+    # A single new scalar 3D degree study took 21 minutes locally; the former
+    # 45-minute combined job no longer budgets build and complete refinement.
+    timeout-minutes: ${{ matrix.suite == 'baseline' && 45 || 180 }}
     strategy:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
+        suite: [baseline, curved_scalar, curved_elasticity, curved_stokes, curved_helmholtz]
     env:
       OMP_NUM_THREADS: 2
+      OPENBLAS_NUM_THREADS: 1
 
     steps:
       - uses: actions/checkout@v4
@@ -63,12 +68,41 @@ jobs:
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
 
       - name: Build convergence suites
-        run: cmake --build build -j 2
+        run: |
+          case "${{ matrix.suite }}" in
+            baseline) cmake --build build -j 2 ;;
+            curved_scalar)
+              cmake --build build -j 2 --target \
+                RodinConvergenceIsoparametricDiffusion \
+                RodinConvergenceIsoparametricReactionDiffusion \
+                RodinConvergenceIsoparametricNonlinearPoisson ;;
+            curved_elasticity)
+              cmake --build build -j 2 --target RodinConvergenceIsoparametricLinearElasticity ;;
+            curved_stokes)
+              cmake --build build -j 2 --target RodinConvergenceIsoparametricStokes ;;
+            curved_helmholtz)
+              cmake --build build -j 2 --target RodinConvergenceIsoparametricHelmholtz ;;
+            *) exit 1 ;;
+          esac
 
       - name: Run convergence suites
-        run: >-
-          ctest --test-dir build/tests -L convergence
-          --output-on-failure -j 2
+        run: |
+          curved_pattern='^RodinConvergenceIsoparametric(.*Diffusion|NonlinearPoisson|LinearElasticity|Stokes|Helmholtz)_'
+          case "${{ matrix.suite }}" in
+            baseline)
+              ctest --test-dir build/tests -L convergence -E "$curved_pattern" \
+                --output-on-failure --no-tests=error -j 2 ;;
+            curved_scalar) suite_pattern='(.*Diffusion|NonlinearPoisson)' ;;
+            curved_elasticity) suite_pattern='LinearElasticity' ;;
+            curved_stokes) suite_pattern='Stokes' ;;
+            curved_helmholtz) suite_pattern='Helmholtz' ;;
+            *) exit 1 ;;
+          esac
+          if [ "${{ matrix.suite }}" != baseline ]; then
+            ctest --test-dir build/tests -L convergence \
+              -R "^RodinConvergenceIsoparametric${suite_pattern}_" \
+              --output-on-failure --no-tests=error -j 1
+          fi
 
   MPIH1Restriction:
     runs-on: ubuntu-24.04

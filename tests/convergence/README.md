@@ -495,9 +495,15 @@ on cells, traces, and MPI halos. The
 superparametric P1 fields from strictly isoparametric P2 fields and records
 the fixed-domain field rates and independent controls.
 
-The CI convergence job runs the full local suite twice: once with sequential
-assembly and once with OpenMP assembly (`RODIN_MULTITHREADED=OFF/ON`). A
-separate real-PETSc sequential/OpenMP matrix checks local-context and
+The native CI matrix runs the full local suite in both sequential and
+OpenMP configurations (`RODIN_MULTITHREADED=OFF/ON`). Execution is partitioned
+into a baseline and curved scalar, linear-elasticity, Stokes and Helmholtz
+jobs. Every convergence registration belongs to exactly one partition in
+each configuration. The baseline retains its 45-minute job budget; curved
+partitions have 180-minute budgets and run one CTest process at a time.
+This scheduling policy changes neither refinement levels nor numerical
+acceptance and separates the large vector and mixed direct solves.
+A separate real-PETSc sequential/OpenMP matrix checks local-context and
 distributed P1/P2 Poisson,
 conductivity, full-Dirichlet vector linear elasticity, and coupled
 reaction–diffusion convergence with
