@@ -79,6 +79,29 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief The public backend accessor permits execution and const inspection.
+  TEST(Rodin_Variational_DirichletBC, BackendAccessorExecution)
+  {
+    auto mesh = makeUnitSquareMesh(2);
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    RealFunction value = 7;
+    DirichletBC dbc(u, value);
+    IndexMap<Real> dofs;
+    dbc.getAssembly().execute(dofs, {u, value, {}});
+    ASSERT_EQ(dofs.size(), 4u);
+    for (const auto& [index, coefficient] : dofs)
+      EXPECT_DOUBLE_EQ(coefficient, 7);
+    const auto& inspected = dbc;
+    using Backend = std::remove_reference_t<decltype(dbc.getAssembly())>;
+    std::unique_ptr<Backend> copy(inspected.getAssembly().copy());
+    dofs.clear();
+    copy->execute(dofs, {u, value, {}});
+    ASSERT_EQ(dofs.size(), 4u);
+    for (const auto& [index, coefficient] : dofs)
+      EXPECT_DOUBLE_EQ(coefficient, 7);
+  }
+
   /// @brief Verifies triangular uniform grid 2 for variational real P1 sanity test by checking exact expected values, form assembly.
   TEST(Rodin_Variational_Real_P1_SanityTest, TriangularUniformGrid2)
   {

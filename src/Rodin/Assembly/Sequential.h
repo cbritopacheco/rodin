@@ -132,7 +132,7 @@ namespace Rodin::Assembly
        * @param[in,out] out Matrix receiving the assembled form.
        * @param[in] input Form supplying the spaces, the region and the kernel.
        */
-      void execute(OperatorType& out, const InputType& input) const override
+      void execute(OperatorType& out, const InputType& input) override
       {
         const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
         const auto& testFES = input.getTestFunction().getFiniteElementSpace();
@@ -151,7 +151,7 @@ namespace Rodin::Assembly
       }
 
     private:
-      mutable ScatterMap<Scalar> m_scatterMap;
+      ScatterMap<Scalar> m_scatterMap;
   };
 
   /**
@@ -217,7 +217,7 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the vector associated to the
        * linear form.
        */
-      void execute(VectorType& res, const InputType& input) const override
+      void execute(VectorType& res, const InputType& input) override
       {
         res.resize(input.getFES().getSize());
         res.setZero();
@@ -327,7 +327,7 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
@@ -474,7 +474,7 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         std::vector<Math::SparseTriplet<ScalarType>> triplets;
         Sequential<std::vector<Math::SparseTriplet<ScalarType>>,
@@ -563,7 +563,7 @@ namespace Rodin::Assembly
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         const auto& mesh = input.getTrialFES().getMesh();
         res.clear();
@@ -714,7 +714,7 @@ namespace Rodin::Assembly
        * @param res Output triplet array.
        * @param input Block assembly input.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         using AssemblyTuple = Tuple<Sequential<std::vector<Math::SparseTriplet<Real>>,
           Variational::BilinearForm<Solution, TrialFES, TestFES,
@@ -726,13 +726,11 @@ namespace Rodin::Assembly
 
         // Compute each block of triplets
         std::array<std::vector<Math::SparseTriplet<Real>>, AssemblyTuple::Size> ts;
-        assembly.zip(t).iapply(
-            [&](const Index i, auto& p)
-            {
-              const auto& as = p.first();
-              const auto& in = p.second();
-              as.execute(ts[i], in);
-            });
+        assembly.zip(t).iapply([&](const Index i, auto& p) {
+          auto& as = p.first();
+          const auto& in = p.second();
+          as.execute(ts[i], in);
+        });
 
         // Add the triplets with the offsets
         size_t capacity = 0;
@@ -804,7 +802,7 @@ namespace Rodin::Assembly
          * @param res Output sparse matrix.
          * @param input Block assembly input.
          */
-        void execute(OperatorType& res, const InputType& input) const override
+        void execute(OperatorType& res, const InputType& input) override
         {
           Sequential<std::vector<Math::SparseTriplet<Real>>,
             Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES,
@@ -866,7 +864,7 @@ namespace Rodin::Assembly
          * @param res Output vector.
          * @param input Block assembly input.
          */
-        void execute(VectorType& res, const InputType& input) const override
+        void execute(VectorType& res, const InputType& input) override
         {
           using AssemblyTuple =
             Tuple<
@@ -882,14 +880,12 @@ namespace Rodin::Assembly
           AssemblyTuple assembly;
           VectorType vec;
 
-          assembly.zip(t).iapply(
-              [&](const Index i, const auto& p)
-              {
-                const auto& as = p.first();
-                const auto& in = p.second();
-                as.execute(vec, in);
-                res.segment(offsets[i], vec.size()) = vec;
-              });
+          assembly.zip(t).iapply([&](const Index i, auto& p) {
+            auto& as = p.first();
+            const auto& in = p.second();
+            as.execute(vec, in);
+            res.segment(offsets[i], vec.size()) = vec;
+          });
         }
 
         /**
@@ -936,7 +932,7 @@ namespace Rodin::Assembly
        * @param axb Output linear system.
        * @param input Mixed problem input.
        */
-        void execute(LinearSystemType& axb, const InputType& input) const override
+        void execute(LinearSystemType& axb, const InputType& input) override
         {
           auto& A = axb.getOperator();
           auto& b = axb.getVector();
@@ -1434,7 +1430,7 @@ namespace Rodin::Assembly
        * @param target Side of the system to assemble.
        */
         void execute(LinearSystemType& axb, const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+          Rodin::Variational::AssemblyTarget target)
         {
           LinearSystemType scratch;
           execute(scratch, input);
@@ -1500,7 +1496,7 @@ namespace Rodin::Assembly
        * @param axb Output linear system.
        * @param input Problem assembly input.
        */
-        void execute(LinearSystemType& axb, const InputType& input) const override
+        void execute(LinearSystemType& axb, const InputType& input) override
         {
           execute(axb, input, AssemblyMode::Full);
         }
@@ -1512,7 +1508,7 @@ namespace Rodin::Assembly
        * @param target Side of the system to assemble.
        */
         void execute(LinearSystemType& axb, const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+          Rodin::Variational::AssemblyTarget target)
         {
           switch (target)
           {
@@ -1533,8 +1529,7 @@ namespace Rodin::Assembly
           RHS
         };
 
-        void execute(
-          LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
+        void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode)
         {
           const bool doMatrix = mode != AssemblyMode::RHS;
           const bool doVector = mode != AssemblyMode::LHS;
@@ -2035,7 +2030,7 @@ namespace Rodin::Assembly
        * @param res Output map from constrained DOFs to values.
        * @param input Boundary condition input.
        */
-        void execute(IndexMap<Scalar>& res, const InputType& input) const override
+        void execute(IndexMap<Scalar>& res, const InputType& input) override
         {
           const auto& u = input.getOperand();
           const auto& essBdr = input.getEssentialBoundary();
@@ -2142,7 +2137,7 @@ namespace Rodin::Assembly
        * @param res Output map from slave DOFs to master DOF coefficients.
        * @param input Boundary condition input.
        */
-        void execute(OutputType& res, const InputType& input) const override
+        void execute(OutputType& res, const InputType& input) override
         {
           const auto& u = input.getOperand();
           // setIntegrationPoint mutates internal evaluation state; the input

@@ -166,7 +166,7 @@ namespace Rodin::Variational
            * @param[out] out Local matrix, test rows by trial columns.
            * @param[in] polytope Polytope to integrate over.
            */
-          void compute(MatrixType& out, const Geometry::Polytope& polytope) const
+          void compute(MatrixType& out, const Geometry::Polytope& polytope)
           {
             const size_t d = polytope.getDimension();
             const Index i = polytope.getIndex();
@@ -269,19 +269,17 @@ namespace Rodin::Variational
           std::reference_wrapper<const FES> m_testFES;
           std::unique_ptr<LambdaType> m_lambda;
           std::unique_ptr<MuType> m_mu;
-          mutable bool m_cached = false;
-          mutable Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
-          mutable size_t m_order = 0;
-          mutable size_t m_trialCount = 0;
-          mutable size_t m_testCount = 0;
-          mutable std::vector<std::vector<Math::SpatialMatrix<ScalarType>>>
-            m_trialDerivatives;
-          mutable std::vector<std::vector<Math::SpatialMatrix<ScalarType>>>
-            m_testDerivatives;
-          mutable std::vector<Math::SpatialMatrix<ScalarType>> m_trialSymmetric;
-          mutable std::vector<ScalarType> m_trialDivergence;
-          mutable std::vector<Math::SpatialMatrix<ScalarType>> m_testSymmetric;
-          mutable std::vector<ScalarType> m_testDivergence;
+          bool m_cached = false;
+          Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
+          size_t m_order = 0;
+          size_t m_trialCount = 0;
+          size_t m_testCount = 0;
+          std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_trialDerivatives;
+          std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_testDerivatives;
+          std::vector<Math::SpatialMatrix<ScalarType>> m_trialSymmetric;
+          std::vector<ScalarType> m_trialDivergence;
+          std::vector<Math::SpatialMatrix<ScalarType>> m_testSymmetric;
+          std::vector<ScalarType> m_testDivergence;
       };
 
       /// @brief Local kernel type, as the assembly asks for it.

@@ -153,7 +153,7 @@ namespace Rodin::Variational
            * @param[out] out Local matrix, test rows by trial columns.
            * @param[in] polytope Polytope to integrate over.
            */
-          void compute(MatrixType& out, const Geometry::Polytope& polytope) const
+          void compute(MatrixType& out, const Geometry::Polytope& polytope)
           {
             m_diffusion.compute(out, polytope);
             m_mass.compute(m_scratch, polytope);
@@ -163,7 +163,7 @@ namespace Rodin::Variational
         private:
           DiffusionKernelType m_diffusion;
           MassKernelType m_mass;
-          mutable MatrixType m_scratch;
+          MatrixType m_scratch;
       };
 
       /// @brief Local kernel type, as the assembly asks for it.

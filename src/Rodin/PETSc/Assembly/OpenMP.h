@@ -99,7 +99,7 @@ namespace Rodin::Assembly
        * @param[in,out] res PETSc vector receiving accumulated entries.
        * @param[in] input Linear-form assembly input.
        */
-      void execute(VectorType& res, const InputType& input) const override
+      void execute(VectorType& res, const InputType& input) override
       {
         assert(res);
         PetscErrorCode ierr;
@@ -275,7 +275,7 @@ namespace Rodin::Assembly
        * @param[in,out] res PETSc matrix receiving accumulated entries.
        * @param[in] input Bilinear-form assembly input.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         assert(res);
         PetscErrorCode ierr;
@@ -562,7 +562,7 @@ namespace Rodin::Assembly
        * @param[in,out] axb Linear system receiving operator, RHS, and solution layout.
        * @param[in] input Single-field problem assembly input.
        */
-      void execute(LinearSystemType& axb, const InputType& input) const override
+      void execute(LinearSystemType& axb, const InputType& input) override
       {
         execute(axb, input, AssemblyMode::Full);
       }
@@ -574,7 +574,7 @@ namespace Rodin::Assembly
        * @param[in] target Assembly target to update.
        */
       void execute(LinearSystemType& axb, const InputType& input,
-        Rodin::Variational::AssemblyTarget target) const
+        Rodin::Variational::AssemblyTarget target)
       {
         switch (target)
         {
@@ -595,7 +595,7 @@ namespace Rodin::Assembly
         RHS
       };
 
-      void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
+      void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode)
       {
         static_assert(std::is_same_v<TrialMeshContextType, Rodin::Context::Local>,
           "PETSc OpenMP assembly (sequential objects) supports only Local mesh context.");
@@ -1323,7 +1323,7 @@ namespace Rodin::Assembly
        * @param[in,out] axb Linear system receiving operator, RHS, and solution layout.
        * @param[in] input Multi-field problem assembly input.
        */
-      void execute(LinearSystemType& axb, const InputType& input) const override
+      void execute(LinearSystemType& axb, const InputType& input) override
       {
         execute(axb, input, AssemblyMode::Full);
       }
@@ -1335,7 +1335,7 @@ namespace Rodin::Assembly
        * @param[in] target Assembly target to update.
        */
       void execute(LinearSystemType& axb, const InputType& input,
-        Rodin::Variational::AssemblyTarget target) const
+        Rodin::Variational::AssemblyTarget target)
       {
         switch (target)
         {
@@ -1356,7 +1356,7 @@ namespace Rodin::Assembly
         RHS
       };
 
-      void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
+      void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode)
       {
         const bool doMatrix = mode != AssemblyMode::RHS;
         const bool doVector = mode != AssemblyMode::LHS;

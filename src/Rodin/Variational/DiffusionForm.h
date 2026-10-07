@@ -172,7 +172,7 @@ namespace Rodin::Variational
            * @param[out] out Local matrix, test rows by trial columns.
            * @param[in] polytope Polytope to integrate over.
            */
-          void compute(MatrixType& out, const Geometry::Polytope& polytope) const
+          void compute(MatrixType& out, const Geometry::Polytope& polytope)
           {
             const size_t d = polytope.getDimension();
             const Index i = polytope.getIndex();
@@ -255,16 +255,14 @@ namespace Rodin::Variational
           std::reference_wrapper<const TrialFES> m_trialFES;
           std::reference_wrapper<const TestFES> m_testFES;
           CoefficientPointer m_coefficient;
-          mutable bool m_cached = false;
-          mutable Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
-          mutable size_t m_order = 0;
-          mutable size_t m_trialCount = 0;
-          mutable size_t m_testCount = 0;
-          mutable std::vector<std::vector<Math::SpatialVector<ScalarType>>>
-            m_trialGradients;
-          mutable std::vector<std::vector<Math::SpatialVector<ScalarType>>>
-            m_testGradients;
-          mutable std::vector<Math::SpatialVector<ScalarType>> m_scratch;
+          bool m_cached = false;
+          Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
+          size_t m_order = 0;
+          size_t m_trialCount = 0;
+          size_t m_testCount = 0;
+          std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_trialGradients;
+          std::vector<std::vector<Math::SpatialVector<ScalarType>>> m_testGradients;
+          std::vector<Math::SpatialVector<ScalarType>> m_scratch;
       };
 
       /// @brief Local kernel type, as the assembly asks for it.

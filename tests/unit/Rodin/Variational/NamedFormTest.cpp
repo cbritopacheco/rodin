@@ -120,6 +120,82 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief A custom backend can retain state without mutable members.
+  TEST(Rodin_Variational_NamedForm, StatefulAssemblyThroughBaseInterface)
+  {
+    auto mesh = unitSquare();
+    P0 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    MassForm form(u, v);
+    using Form = decltype(form);
+    using Base = Assembly::AssemblyBase<Math::SparseMatrix<Real>, Form>;
+    struct StatefulAssembly final : Base
+    {
+        size_t executions = 0;
+        Assembly::Sequential<Math::SparseMatrix<Real>, Form> backend;
+
+        void execute(Math::SparseMatrix<Real>& out, const Form& input) override
+        {
+          backend.execute(out, input);
+          out *= static_cast<Real>(++executions);
+        }
+
+        StatefulAssembly* copy() const noexcept override
+        {
+          return new StatefulAssembly(*this);
+        }
+    } assembly;
+    Base& base = assembly;
+    const Form& input = form;
+    Math::SparseMatrix<Real> out;
+    base.execute(out, input);
+    expectNear(out, form.getOperator());
+    base.execute(out, input);
+    expectNear(out, 2 * form.getOperator());
+    EXPECT_EQ(assembly.executions, 2u);
+  }
+
+  /// @brief Non-const kernels use independent scratch storage on both scatter paths.
+  TEST(Rodin_Variational_NamedForm, StatefulKernelBuildAndReassembly)
+  {
+    auto mesh = unitSquare();
+    P0 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    MassForm form(u, v);
+    struct Kernel
+    {
+        Real coefficient = 1;
+        Math::Matrix<Real> scratch;
+
+        void compute(Math::Matrix<Real>& out, const Polytope& cell)
+        {
+          scratch.setConstant(1, 1, coefficient * cell.getMeasure());
+          out = scratch;
+        }
+    } prototype;
+    Assembly::SequentialIteration seq(mesh, form.getRegion());
+    const FlatSet<Attribute> attributes;
+    Assembly::ScatterMap<Real> sequential;
+    Math::SparseMatrix<Real> out;
+    sequential.assemble(out, prototype, fes, fes, seq, attributes);
+    expectNear(out, form.getOperator());
+    prototype.coefficient = 3;
+    sequential.assemble(out, prototype, fes, fes, seq, attributes);
+    expectNear(out, 3 * form.getOperator());
+#ifdef RODIN_USE_OPENMP
+    Assembly::ScatterMap<Real> parallel;
+    Math::SparseMatrix<Real> parallelOut;
+    parallel.assemble(parallelOut, prototype, fes, fes, seq, attributes, 2);
+    expectNear(parallelOut, 3 * form.getOperator());
+    prototype.coefficient = 5;
+    parallel.assemble(parallelOut, prototype, fes, fes, seq, attributes, 2);
+    expectNear(parallelOut, 5 * form.getOperator());
+#endif
+    EXPECT_EQ(prototype.scratch.size(), 0);
+  }
+
   /// @brief Parameterized fixture running the named forms over one cell geometry.
   class Rodin_Variational_NamedFormGeometry
     : public ::testing::TestWithParam<Polytope::Type>

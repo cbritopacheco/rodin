@@ -180,7 +180,7 @@ namespace Rodin::Assembly
        * @param[out] res   Target distributed index map.
        * @param[in] input  Assembly input wrapper carrying operand and value.
        */
-      void execute(IndexMap<Scalar>& res, const InputType& input) const override
+      void execute(IndexMap<Scalar>& res, const InputType& input) override
       {
         const auto& fes = input.getOperand().getFiniteElementSpace();
         MPIBoundaryDOFs<FES>(fes, input.getEssentialBoundary())
@@ -246,7 +246,7 @@ namespace Rodin::Assembly
        * @param[out] res Target map from slave DOFs to master DOFs and weights.
        * @param[in] input Assembly input wrapper carrying operand and boundary data.
        */
-      void execute(OutputType& res, const InputType& input) const override
+      void execute(OutputType& res, const InputType& input) override
       {
         const auto& fesU = input.getOperand().getFiniteElementSpace();
         auto& Av = const_cast<ValueType&>(input.getShapeFunction());

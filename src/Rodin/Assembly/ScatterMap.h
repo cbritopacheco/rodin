@@ -98,7 +98,7 @@ namespace Rodin::Assembly
       template <class KernelType, class IterationType, class TrialFES, class TestFES>
       void assemble(MatrixType& out, const KernelType& prototype,
         const TrialFES& trialFES, const TestFES& testFES, const IterationType& seq,
-        const FlatSet<Geometry::Attribute>& attributes) const
+        const FlatSet<Geometry::Attribute>& attributes)
       {
         const size_t d = seq.getDimension();
         const Index count = seq.getCount();
@@ -179,7 +179,7 @@ namespace Rodin::Assembly
       template <class KernelType, class IterationType, class TrialFES, class TestFES>
       void assemble(MatrixType& out, const KernelType& prototype,
         const TrialFES& trialFES, const TestFES& testFES, const IterationType& seq,
-        const FlatSet<Geometry::Attribute>& attributes, int threadCount) const
+        const FlatSet<Geometry::Attribute>& attributes, int threadCount)
       {
         const size_t d = seq.getDimension();
         const Index count = seq.getCount();
@@ -414,7 +414,7 @@ namespace Rodin::Assembly
        */
       template <class TrialFES, class TestFES>
       void build(const MatrixType& out, const TrialFES& trialFES, const TestFES& testFES,
-        size_t d, Index count, size_t fingerprint) const
+        size_t d, Index count, size_t fingerprint)
       {
         const auto* const outer = out.outerIndexPtr();
         const auto* const inner = out.innerIndexPtr();
@@ -452,13 +452,13 @@ namespace Rodin::Assembly
         m_built = true;
       }
 
-      mutable bool m_built = false;
-      mutable size_t m_nonZeroCount = 0;
-      mutable std::vector<typename MatrixType::StorageIndex> m_outerIndices;
-      mutable std::vector<typename MatrixType::StorageIndex> m_innerIndices;
-      mutable size_t m_fingerprint = 0;
-      mutable std::vector<size_t> m_offsets;
-      mutable std::vector<Index> m_indices;
+      bool m_built = false;
+      size_t m_nonZeroCount = 0;
+      std::vector<typename MatrixType::StorageIndex> m_outerIndices;
+      std::vector<typename MatrixType::StorageIndex> m_innerIndices;
+      size_t m_fingerprint = 0;
+      std::vector<size_t> m_offsets;
+      std::vector<Index> m_indices;
   };
 }
 

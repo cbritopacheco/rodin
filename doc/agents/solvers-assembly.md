@@ -12,6 +12,12 @@ contracts that assembly/solver changes are expected to preserve.
   (per-thread local evaluation, then merge). `Default.h` selects by build
   configuration. The MPI and PETSc trees provide their own mirrored
   backends.
+- `AssemblyBase::execute` is non-const across all backends. Assemblers may
+  retain sparsity maps and working storage between calls; assembly inputs
+  remain const. Local named-form kernels also use non-const `compute`, with
+  one copy per assembly or OpenMP worker. Concurrent executions must use
+  separate assembler instances. Custom backends must override non-const
+  `execute`; const assembler callers must hold a non-const instance instead.
 - Inputs are typed bundles: `BilinearFormAssemblyInput<TrialFES, TestFES>`
   (and the linear counterpart) carry the spaces plus **two integrator
   lists: local (per-polytope quadrature) and global** (whole-mesh
