@@ -621,8 +621,10 @@ TEST(MatrixRange, HigherOrdersPreserveComponentDuality)
         // The neighbouring scalar node has the same matrix component. The
         // adjacent flattened basis above usually checks a different component.
         if (fe.getScalarElement().getCount() > 1)
+        {
           EXPECT_LE(
             std::abs(fe.getLinearForm(a)(fe.getBasis((a + 6) % fe.getCount()))), 1e-8);
+        }
       }
     };
     for (auto geometry : {G::Point, G::Segment, G::Triangle, G::Quadrilateral,
