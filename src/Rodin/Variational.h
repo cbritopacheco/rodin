@@ -91,6 +91,7 @@
 #include "Variational/RealFunction.h"
 #include "Variational/VectorFunction.h"
 #include "Variational/MatrixFunction.h"
+#include "Variational/TensorFunction.h"
 #include "Variational/BooleanFunction.h"
 
 #include "Variational/P0.h"

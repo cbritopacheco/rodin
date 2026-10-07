@@ -28,6 +28,7 @@
 #define RODIN_VARIATIONAL_DIV_H
 
 #include "ForwardDecls.h"
+#include "Grad.h"
 
 #include "Jacobian.h"
 #include "GridFunction.h"
@@ -45,6 +46,8 @@ namespace Rodin::Variational
     *
     * | Specialization | Description |
     * |----------------|-------------|
+   * | @ref Div "Div<GridFunction<MatrixFES, Data>>" | Matrix-valued grid-function operator for all supported spaces and backends. |
+   * | @ref Div "Div<ShapeFunction<Derived, MatrixFES, Space>>" | Matrix shape-function operator with the scalar family's geometry and trace semantics. |
     * | @ref DivBase "DivBase<GridFunction<FES, Data>, Derived>" | Generic divergence base for vector-valued grid functions. |
     * | @ref Div "Div<P0g<Scalar, Mesh>, GridFunction<P0g<Scalar, Mesh>, Data>>" | Divergence of a discontinuous P0g grid function. |
     * | @ref Div "Div<P0g<Scalar, Mesh>, ShapeFunction<NestedDerived, P0g<Scalar, Mesh>, Space>>" | Divergence of a P0g shape-function expression. |
@@ -237,6 +240,208 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const OperandType> m_u;
   };
+}
+
+namespace Rodin::FormLanguage
+{
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <class FES, class Data>
+    requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
+  struct Traits<Variational::Div<Variational::GridFunction<FES, Data>>>
+  {
+      /// @brief Finite element space type.
+      using FESType = FES;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialVector<ScalarType>;
+  };
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
+    requires IsMatrixRange<typename Traits<FES>::RangeType>::Value
+  struct Traits<Variational::Div<Variational::ShapeFunction<Derived, FES, Space>>>
+  {
+      /// @brief Finite element space type.
+      using FESType = FES;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialVector<ScalarType>;
+      /// @brief Trial or test shape-function space.
+      static constexpr auto SpaceType = Space;
+  };
+}
+namespace Rodin::Variational
+{
+  /**
+   * @ingroup DivSpecializations
+   * @brief Matrix-field div, @f$ (\operatorname{div}A)_i=\sum_j\partial_j A_{ij} @f$.
+   */
+  template <class FES, class Data>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  class Div<GridFunction<FES, Data>> final
+    : public FunctionBase<Div<GridFunction<FES, Data>>>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = FunctionBase<Div>;
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = GridFunction<FES, Data>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialVector<ScalarType>;
+      /// @brief Constructs row-wise divergence of a matrix field.
+      Div(const OperandType& operand)
+        : m_gradient(operand)
+      {}
+      /// @brief Constructs row-wise divergence of a matrix field.
+      Div(const Div& other)
+        : Parent(other),
+          m_gradient(other.m_gradient)
+      {}
+      /// @brief Constructs row-wise divergence of a matrix field.
+      Div(Div&& other)
+        : Parent(std::move(other)),
+          m_gradient(std::move(other.m_gradient))
+      {}
+      /// @brief Returns the differentiated or indexed operand.
+      const OperandType& getOperand() const
+      {
+        return m_gradient.getOperand();
+      }
+      /// @brief Evaluates the expression at the supplied physical or integration point.
+      template <class Point>
+      RangeType getValue(const Point& point) const
+      {
+        auto gradientExpression = m_gradient;
+        gradientExpression.traceOf(this->getTraceDomain());
+        const auto gradient = gradientExpression.getValue(point);
+        RangeType value(gradient.getDimension(0));
+        value.setZero();
+        if (gradient.getDimension(1) != gradient.getDimension(2))
+          Alert::Exception()
+            << "Matrix divergence requires columns equal to the spatial dimension."
+            << Alert::Raise;
+        for (size_t row = 0; row < gradient.getDimension(0); ++row)
+          for (size_t k = 0; k < gradient.getDimension(2); ++k)
+            value(row) += gradient(row, k, k);
+        return value;
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return m_gradient.getOrder(poly);
+      }
+      Div* copy() const noexcept override
+      {
+        return new Div(*this);
+      }
+
+    private:
+      Grad<OperandType> m_gradient;
+  };
+
+  /**
+   * @ingroup DivSpecializations
+   * @brief Matrix-basis div, @f$ (\operatorname{div}A)_i=\sum_j\partial_j A_{ij} @f$.
+   */
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+    requires FormLanguage::IsMatrixRange<
+      typename FormLanguage::Traits<FES>::RangeType>::Value
+  class Div<ShapeFunction<Derived, FES, Space>> final
+    : public ShapeFunctionBase<Div<ShapeFunction<Derived, FES, Space>>, FES, Space>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = ShapeFunctionBase<Div, FES, Space>;
+      /// @brief Cloned or referenced expression operand type.
+      using OperandType = ShapeFunction<Derived, FES, Space>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialVector<ScalarType>;
+      /// @brief Constructs row-wise divergence of a matrix field.
+      Div(const OperandType& operand)
+        : Parent(operand.getFiniteElementSpace()),
+          m_gradient(operand)
+      {}
+      /// @brief Constructs row-wise divergence of a matrix field.
+      Div(const Div& other)
+        : Parent(other),
+          m_gradient(other.m_gradient)
+      {}
+      /// @brief Constructs row-wise divergence of a matrix field.
+      Div(Div&& other)
+        : Parent(std::move(other)),
+          m_gradient(std::move(other.m_gradient))
+      {}
+      /// @brief Returns the differentiated or indexed operand.
+      const OperandType& getOperand() const
+      {
+        return m_gradient.getOperand();
+      }
+      /// @brief Returns the leaf shape function used for assembly.
+      const auto& getLeaf() const
+      {
+        return m_gradient.getLeaf();
+      }
+      /// @brief Returns the local basis count for the selected polytope.
+      size_t getDOFs(const Geometry::Polytope& poly) const
+      {
+        return m_gradient.getDOFs(poly);
+      }
+      /// @brief Returns the currently bound integration point.
+      const IntegrationPoint& getIntegrationPoint() const
+      {
+        return m_gradient.getIntegrationPoint();
+      }
+      /// @brief Binds the integration point and prepares local basis values.
+      Div& setIntegrationPoint(const IntegrationPoint& point)
+      {
+        m_gradient.setIntegrationPoint(point);
+        return *this;
+      }
+      /// @brief Returns a basis value at the bound integration point.
+      RangeType getBasis(size_t local) const
+      {
+        const auto gradient = m_gradient.getBasis(local);
+        RangeType value(gradient.getDimension(0));
+        value.setZero();
+        if (gradient.getDimension(1) != gradient.getDimension(2))
+          Alert::Exception()
+            << "Matrix divergence requires columns equal to the spatial dimension."
+            << Alert::Raise;
+        for (size_t row = 0; row < gradient.getDimension(0); ++row)
+          for (size_t k = 0; k < gradient.getDimension(2); ++k)
+            value(row) += gradient(row, k, k);
+        return value;
+      }
+      /// @brief Returns the polynomial order when it is known.
+      Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
+      {
+        return m_gradient.getOrder(poly);
+      }
+      Div* copy() const noexcept override
+      {
+        return new Div(*this);
+      }
+
+    private:
+      Grad<OperandType> m_gradient;
+  };
+  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  template <class FES, class Data>
+    requires FormLanguage::IsMatrixRange<
+               typename FormLanguage::Traits<FES>::RangeType>::Value
+  Div(const GridFunction<FES, Data>&) -> Div<GridFunction<FES, Data>>;
+  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  template <class Derived, class FES, ShapeFunctionSpaceType Space>
+    requires FormLanguage::IsMatrixRange<
+               typename FormLanguage::Traits<FES>::RangeType>::Value
+  Div(
+    const ShapeFunction<Derived, FES, Space>&) -> Div<ShapeFunction<Derived, FES, Space>>;
 }
 
 #endif

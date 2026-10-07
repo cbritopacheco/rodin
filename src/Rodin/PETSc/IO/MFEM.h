@@ -39,14 +39,11 @@ namespace Rodin::IO
   // P0 MFEM printer for PETSc Vec
   // --------------------------------------------------------------------------
   template <class Range, class Ctx>
-  class GridFunctionPrinter<
-      FileFormat::MFEM,
-      Variational::P0<Range, Geometry::Mesh<Ctx>>,
-      ::Vec> final
-    : public GridFunctionPrinterBase<
-        FileFormat::MFEM,
-        Variational::P0<Range, Geometry::Mesh<Ctx>>,
-        ::Vec>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::P0<Range, Geometry::Mesh<Ctx>>,
+    ::Vec>
+    final : public GridFunctionPrinterBase<FileFormat::MFEM,
+              Variational::P0<Range, Geometry::Mesh<Ctx>>, ::Vec>
   {
     public:
       /// @brief Finite element space type.
@@ -126,14 +123,11 @@ namespace Rodin::IO
    * @tparam Ctx   Mesh context type (Local or MPI).
    */
   template <class Range, class Ctx>
-  class GridFunctionPrinter<
-      FileFormat::MFEM,
-      Variational::P1<Range, Geometry::Mesh<Ctx>>,
-      ::Vec> final
-    : public GridFunctionPrinterBase<
-        FileFormat::MFEM,
-        Variational::P1<Range, Geometry::Mesh<Ctx>>,
-        ::Vec>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  class GridFunctionPrinter<FileFormat::MFEM, Variational::P1<Range, Geometry::Mesh<Ctx>>,
+    ::Vec>
+    final : public GridFunctionPrinterBase<FileFormat::MFEM,
+              Variational::P1<Range, Geometry::Mesh<Ctx>>, ::Vec>
   {
     public:
       /// @brief Finite element space type.
@@ -218,14 +212,11 @@ namespace Rodin::IO
    * @tparam Ctx   Mesh context type (Local or MPI).
    */
   template <size_t K, class Range, class Ctx>
-  class GridFunctionPrinter<
-      FileFormat::MFEM,
-      Variational::H1<K, Range, Geometry::Mesh<Ctx>>,
-      ::Vec> final
-    : public GridFunctionPrinterBase<
-        FileFormat::MFEM,
-        Variational::H1<K, Range, Geometry::Mesh<Ctx>>,
-        ::Vec>
+    requires(!FormLanguage::IsMatrixRange<Range>::Value)
+  class GridFunctionPrinter<FileFormat::MFEM,
+    Variational::H1<K, Range, Geometry::Mesh<Ctx>>, ::Vec>
+    final : public GridFunctionPrinterBase<FileFormat::MFEM,
+              Variational::H1<K, Range, Geometry::Mesh<Ctx>>, ::Vec>
   {
     public:
       /// @brief Finite element space type.
@@ -567,6 +558,47 @@ namespace Rodin::IO
   template <size_t K, class Range>
   using MFEM_H1_PETSc_MPI_Printer =
     GridFunctionPrinter<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::MPI>>, ::Vec>;
+  /** @brief Matrix PETSc fields export through the local scalar-family permutation. */
+  template <class FES>
+    requires(
+      FormLanguage::IsMatrixRange<typename FormLanguage::Traits<FES>::RangeType>::Value)
+  class GridFunctionPrinter<FileFormat::MFEM, FES, ::Vec>
+    : public GridFunctionPrinterBase<FileFormat::MFEM, FES, ::Vec>
+  {
+    public:
+      /// @brief CRTP or finite element base class.
+      using Parent = GridFunctionPrinterBase<FileFormat::MFEM, FES, ::Vec>;
+      using Parent::Parent;
+      void print(std::ostream& os) override
+      {
+        const auto& field = this->getObject();
+        const auto& fes = field.getFiniteElementSpace();
+        const auto& local = [&]() -> const auto& {
+          if constexpr (requires { fes.getShard(); })
+            return fes.getShard();
+          else
+            return fes;
+        }();
+        using LocalFES = std::decay_t<decltype(local)>;
+        Variational::GridFunction<LocalFES, Math::Vector<PetscScalar>> localField(local);
+        field.acquire();
+        for (size_t a = 0; a < local.getSize(); ++a)
+        {
+          const Index global = [&]() {
+            if constexpr (requires { fes.getShard(); })
+              return fes.getGlobalIndex(a);
+            else
+              return static_cast<Index>(a);
+          }();
+          localField.getData()[a] = field[global];
+        }
+        field.flush();
+        GridFunctionPrinter<FileFormat::MFEM, LocalFES, Math::Vector<PetscScalar>>(
+          localField)
+          .print(os);
+      }
+      void printData(std::ostream&) override {}
+  };
 }
 
 #endif

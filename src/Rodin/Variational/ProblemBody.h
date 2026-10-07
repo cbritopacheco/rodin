@@ -1230,6 +1230,32 @@ namespace Rodin::Variational
     return res;
   }
 
+  /** @brief Subtracts an owned snapshot of a preassembled bilinear form. */
+  template <class Operator, class Vector, class Scalar>
+    requires requires(Operator& op) { op *= -1; }
+  auto operator-(
+    const ProblemBody<Operator, Vector, Scalar>& pb, const BilinearFormBase<Operator>& bf)
+  {
+    ProblemBody<Operator, Vector, Scalar> res(pb);
+    std::unique_ptr<BilinearFormBase<Operator>> negative(bf.copy());
+    negative->getOperator() *= -1;
+    res.getBFs().add(*negative);
+    return res;
+  }
+
+  /** @brief Adds a preassembled linear form to the residual, hence negates its load. */
+  template <class Operator, class Vector, class Scalar>
+    requires requires(Vector& vec) { vec *= -1; }
+  auto operator+(
+    const ProblemBody<Operator, Vector, Scalar>& pb, const LinearFormBase<Vector>& lf)
+  {
+    ProblemBody<Operator, Vector, Scalar> res(pb);
+    std::unique_ptr<LinearFormBase<Vector>> negative(lf.copy());
+    negative->getVector() *= -1;
+    res.getLFs().add(*negative);
+    return res;
+  }
+
   template <class LHSScalar, class RHSScalar>
   auto operator+(
       const FormLanguage::List<LinearFormIntegratorBase<LHSScalar>>& lfis,

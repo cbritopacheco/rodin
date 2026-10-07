@@ -45,6 +45,7 @@
 #ifndef RODIN_VARIATIONAL_POTENTIAL_H
 #define RODIN_VARIATIONAL_POTENTIAL_H
 
+#include "Rodin/Math/SpatialTensor.h"
 #include "Rodin/FormLanguage/Base.h"
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/QF/QuadratureFormula.h"
@@ -119,7 +120,7 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<Variational::ShapeFunction<RHSDerived, FES, Space>>>>
   {
       /// @brief Scalar value type.
-      using ScalarType = Real;
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
 
       /// @brief Finite element space type.
       using FESType = FES;
@@ -144,19 +145,22 @@ namespace Rodin::FormLanguage
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
       /// @brief Range type of the left-hand side operand.
-      using LHSRangeType = std::conditional_t<
-      // If
-        std::is_same_v<RHSRangeType, ScalarType>,
-      // Then
-        ScalarType,
-      // Else
-        std::conditional_t<
-        // If
-          FormLanguage::IsVectorRange<RHSRangeType>::Value,
-        // Then
-          Math::Matrix<ScalarType>,
-        // Else
-          void>>;
+      using LHSRangeType = typename decltype([] {
+        if constexpr (std::is_same_v<RHSRangeType, ScalarType> ||
+          std::is_invocable_v<const KernelType&, const Geometry::Point&,
+            const Geometry::Point&>)
+          return std::type_identity<ScalarType>{};
+        else if constexpr (FormLanguage::IsMatrixRange<RHSRangeType>::Value &&
+          std::is_invocable_v<const KernelType&, Math::SpatialTensor<ScalarType, 4>&,
+            const Geometry::Point&, const Geometry::Point&>)
+          return std::type_identity<Math::SpatialTensor<ScalarType, 4>>{};
+        else if constexpr (FormLanguage::IsMatrixRange<RHSRangeType>::Value)
+          return std::type_identity<Math::SpatialMatrix<ScalarType>>{};
+        else if constexpr (FormLanguage::IsVectorRange<RHSRangeType>::Value)
+          return std::type_identity<Math::Matrix<ScalarType>>{};
+        else
+          return std::type_identity<void>{};
+      }())::type;
 
       /// @brief Range (evaluation value) type.
       using RangeType = RHSRangeType;
@@ -385,7 +389,7 @@ namespace Rodin::Variational
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
       /// @brief Scalar value type.
-      using ScalarType = Real;
+      using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
 
       /// @brief Left-hand side operand type.
       using LHSType = LHS;
@@ -403,20 +407,7 @@ namespace Rodin::Variational
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
       /// @brief Range type of the left-hand side operand.
-      using LHSRangeType =
-        std::conditional_t<
-        // If
-        std::is_same_v<RHSRangeType, ScalarType>,
-        // Then
-        ScalarType,
-        // Else
-        std::conditional_t<
-          // If
-          FormLanguage::IsVectorRange<RHSRangeType>::Value,
-          // Then
-          Math::Matrix<ScalarType>,
-          // Else
-          void>>;
+      using LHSRangeType = typename FormLanguage::Traits<Potential>::LHSRangeType;
 
       /// @brief Constructs the potential of an operand against a kernel.
       Potential(const KernelType& kernel, const OperandType& u)

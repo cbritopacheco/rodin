@@ -133,6 +133,19 @@ namespace Rodin::Geometry
       virtual size_t getOrder() const = 0;
 
       /**
+       * @brief Conservative degree in each factor of the control-point basis.
+       *
+       * Defaults to the total polynomial order, which bounds every individual
+       * factor degree. Isotropic tensor and collapsed-coordinate elements may
+       * override this with their known factor degree. A total degree alone must
+       * not be divided by the number of factors for an arbitrary transformation.
+       */
+      virtual size_t getFactorOrder() const
+      {
+        return getOrder();
+      }
+
+      /**
        * @brief Computes the physical coordinates from reference coordinates.
        * @param[out] pc Physical coordinates @f$ p @f$ (resized automatically)
        * @param[in] rc Reference coordinates @f$ r \in K @f$

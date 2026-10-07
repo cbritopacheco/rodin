@@ -74,6 +74,17 @@ namespace Rodin::FormLanguage
       /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Tensor product range when the operands support a contraction.
+      using TensorProductRange = typename decltype([] {
+        if constexpr (FormLanguage::IsTensorRange<LHSRangeType>::Value &&
+          requires(const LHSRangeType& lhs, const RHSRangeType& rhs) { lhs* rhs; })
+          return std::type_identity<
+            typename FormLanguage::RangeOf<decltype(std::declval<const LHSRangeType&>() *
+              std::declval<const RHSRangeType&>())>::Type>{};
+        else
+          return std::type_identity<void>{};
+      }())::type;
+
       /// @brief Range (evaluation value) type.
       using RangeType = std::conditional_t<
         // If
@@ -119,7 +130,7 @@ namespace Rodin::FormLanguage
                   Math::SpatialMatrix<ScalarType>, void>>>,
             // ---------------------------------------------------------------
             // Else
-            void>>>;
+            TensorProductRange>>>;
   };
 
   /// @brief Type traits for @c Mult over a shape function: exposes the finite element
@@ -139,22 +150,6 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
-  namespace Internal
-  {
-    template <class Product>
-    constexpr auto materializeProduct(const Product& product)
-    {
-      /// @brief Range (evaluation value) type.
-      using RangeType =
-        typename FormLanguage::RangeOf<std::remove_cvref_t<Product>>::Type;
-      RangeType out;
-      if constexpr (requires { out.setZero(); })
-        out.setZero();
-      out = product;
-      return out;
-    }
-  }
-
   /**
    * @defgroup MultSpecializations Mult Template Specializations
    * @brief Template specializations of the Mult class.
@@ -251,7 +246,13 @@ namespace Rodin::Variational
         const auto lhs = this->getLHS().getValue(p);
         const auto rhs = this->getRHS().getValue(p);
         const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        using ProductRange =
+          typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+        ProductRange out;
+        if constexpr (requires { out.setZero(); })
+          out.setZero();
+        out = product;
+        return out;
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -404,24 +405,27 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       /// @brief Constructs the expression from its left and right operands.
-      constexpr
-      Mult(const LHSType& lhs, const RHSType& rhs)
+      constexpr Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_lhs)
       {}
 
       /// @brief Copy constructor.
-      constexpr
-      Mult(const Mult& other)
+      constexpr Mult(const Mult& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_lhs)
       {}
 
       /// @brief Move constructor.
-      constexpr
-      Mult(Mult&& other)
+      constexpr Mult(Mult&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_lhs)
       {}
 
       /// @brief Gets the operand in the shape function expression.
@@ -467,21 +471,43 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets the integration point the expression is evaluated at.
+      /// @param[in] ip Point defining the current evaluation binding.
+      /// @returns This expression.
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_rhs->setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
         return *this;
       }
 
       /// @brief Gets the basis function of a local degree of freedom.
+      /// @param[in] local Local basis index on the current polytope.
       constexpr
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
-        const auto lhs = getLHS().getValue(p);
+        if (const auto* lhs = m_cache.get())
+        {
+          decltype(auto) rhs = getRHS().getBasis(local);
+          const auto product = *lhs * rhs;
+          using ProductRange =
+            typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+          ProductRange out;
+          if constexpr (requires { out.setZero(); })
+            out.setZero();
+          out = product;
+          return out;
+        }
+        decltype(auto) lhs = getLHS().getValue(p);
         decltype(auto) rhs = getRHS().getBasis(local);
         const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        using ProductRange =
+          typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+        ProductRange out;
+        if constexpr (requires { out.setZero(); })
+          out.setZero();
+        out = product;
+        return out;
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -502,6 +528,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
+      /// @brief Function value at the current quadrature binding.
+      typename LHSType::Cache m_cache;
   };
 
   /// @brief Deduction guide for @c Mult.
@@ -580,24 +609,27 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       /// @brief Constructs the expression from its left and right operands.
-      constexpr
-      Mult(const LHSType& lhs, const RHSType& rhs)
+      constexpr Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Copy constructor.
-      constexpr
-      Mult(const Mult& other)
+      constexpr Mult(const Mult& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Move constructor.
-      constexpr
-      Mult(Mult&& other)
+      constexpr Mult(Mult&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_rhs)
       {}
 
       /// @brief Gets the operand in the shape function expression.
@@ -644,21 +676,43 @@ namespace Rodin::Variational
       }
 
       /// @brief Sets the integration point the expression is evaluated at.
+      /// @param[in] ip Point defining the current evaluation binding.
+      /// @returns This expression.
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
         return *this;
       }
 
       /// @brief Gets the basis function of a local degree of freedom.
+      /// @param[in] local Local basis index on the current polytope.
       constexpr
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
+        if (const auto* rhs = m_cache.get())
+        {
+          decltype(auto) lhs = this->getLHS().getBasis(local);
+          const auto product = lhs * *rhs;
+          using ProductRange =
+            typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+          ProductRange out;
+          if constexpr (requires { out.setZero(); })
+            out.setZero();
+          out = product;
+          return out;
+        }
+        decltype(auto) rhs = this->getRHS().getValue(p);
         decltype(auto) lhs = this->getLHS().getBasis(local);
-        const auto rhs = this->getRHS().getValue(p);
         const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        using ProductRange =
+          typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+        ProductRange out;
+        if constexpr (requires { out.setZero(); })
+          out.setZero();
+        out = product;
+        return out;
       }
 
       /// @brief Returns the polynomial order used on a mesh entity.
@@ -679,6 +733,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
+      /// @brief Function value at the current quadrature binding.
+      typename RHSType::Cache m_cache;
   };
 
   /// @brief Deduction guide for @c Mult.

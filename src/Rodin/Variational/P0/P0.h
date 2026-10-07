@@ -7,6 +7,7 @@
 #ifndef RODIN_VARIATIONAL_P0_P0_H
 #define RODIN_VARIATIONAL_P0_P0_H
 
+#include <map>
 #include <boost/multi_array.hpp>
 #include <functional>
 #include <type_traits>
@@ -70,6 +71,8 @@ namespace Rodin::Variational
    *
    * | Specialization | Description |
    * |----------------|-------------|
+   * | @ref P0 "P0<SpatialMatrix<Scalar>, Mesh<Context::Local>>" | Full rectangular matrix range with interleaved row-major components. |
+   * | @ref P0 "P0<SpatialMatrix<Scalar>, Mesh<Context::MPI>>" | Distributed full matrix range with expanded scalar ownership and ghost maps. |
    * | @ref P0 "P0<Range, Mesh<Context::Local>>" | Real or complex scalar/vector local-mesh discontinuous piecewise constant space. |
    * | @ref P0 "P0<Range, Mesh<Context::MPI>>" | Scalar or vector-valued distributed-mesh discontinuous piecewise constant space. |
    */
@@ -227,6 +230,7 @@ namespace Rodin::Variational
        */
       P0(const P0& other)
         : Parent(other),
+          m_dofs(other.m_dofs),
           m_mesh(other.m_mesh)
       {}
 
@@ -236,6 +240,7 @@ namespace Rodin::Variational
        */
       P0(P0&& other)
         : Parent(std::move(other)),
+          m_dofs(std::move(other.m_dofs)),
           m_mesh(other.m_mesh)
       {}
 
@@ -247,6 +252,8 @@ namespace Rodin::Variational
        * @return Reference to this P0 space
        */
       P0& operator=(P0&& other) = default;
+      /// @brief Assigns the scalar basis and matrix component dimensions.
+      P0& operator=(const P0& other) = default;
 
       /**
        * @brief Gets the finite element associated with a polytope.
@@ -578,6 +585,167 @@ namespace Rodin::Variational
   /// Alias for a scalar complex-valued P0 finite element space
   template <class Mesh>
   using ComplexP0 = P0<Complex, Mesh>;
+}
+
+namespace Rodin::FormLanguage
+{
+  /// @brief Type traits for the matrix or tensor expression specialization.
+  template <class Scalar, class Mesh>
+  struct Traits<Variational::P0<Math::SpatialMatrix<Scalar>, Mesh>>
+  {
+      /// @brief Mesh type supplying topology and physical transformations.
+      using MeshType = Mesh;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = Scalar;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<Scalar>;
+      /// @brief Local or distributed execution context.
+      using ContextType = typename Traits<Mesh>::ContextType;
+      /// @brief Reference finite element type.
+      using ElementType = Variational::P0Element<Math::SpatialMatrix<Scalar>>;
+  };
+}
+
+namespace Rodin::Variational
+{
+  /// @brief Matrix-valued finite element space with component-wise scalar basis replication.
+  template <class Scalar>
+  class P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>> final
+    : public FiniteElementSpace<Geometry::Mesh<Context::Local>,
+        P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>>
+  {
+    public:
+      /// @brief Mesh and execution context of this specialization.
+      using MeshType = Geometry::Mesh<Context::Local>;
+      /// @brief Scalar space supplying this family's DOF numbering.
+      using ScalarSpace = P0<Scalar, Geometry::Mesh<Context::Local>>;
+      /// @brief Matrix reference element for this family.
+      using ElementType = P0Element<Math::SpatialMatrix<Scalar>>;
+      /// @brief Existing finite-element-space interface.
+      using Parent = FiniteElementSpace<MeshType,
+        P0<Math::SpatialMatrix<Scalar>, Geometry::Mesh<Context::Local>>>;
+      /// @brief Scalar type of matrix or tensor entries.
+      using ScalarType = typename ScalarSpace::ScalarType;
+      /// @brief Evaluated matrix, tensor, or scalar range type.
+      using RangeType = Math::SpatialMatrix<ScalarType>;
+      /// @brief Local or distributed execution context.
+      using ContextType = typename ScalarSpace::ContextType;
+      /// @brief Expands scalar DOF maps into interleaved row-major matrix components.
+      P0(const MeshType& mesh, size_t rows, size_t cols)
+        : m_scalar(ScalarSpace(mesh)),
+          m_rows(rows),
+          m_cols(cols)
+      {
+        if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
+          cols > RODIN_MAXIMAL_SPACE_DIMENSION)
+          Alert::Exception() << "SpatialMatrix ranges require 1 to 3 rows and columns."
+                             << Alert::Raise;
+        // Distributed scalar spaces may compute their size collectively.
+        // Resolve it at construction, never from a local evaluation loop.
+        m_size = m_scalar.getSize() * rows * cols;
+        m_dofs.resize(mesh.getDimension() + 1);
+        for (size_t d = mesh.getDimension(); d <= mesh.getDimension(); ++d)
+        {
+          const size_t count = mesh.getConnectivity().getCount(d);
+          m_dofs[d].reserve(count);
+          for (size_t i = 0; i < count; ++i)
+          {
+            const auto& scalarDOFs = m_scalar.getDOFs(d, i);
+            auto& dofs = m_dofs[d].emplace_back(scalarDOFs.size() * rows * cols);
+            for (size_t a = 0; a < static_cast<size_t>(scalarDOFs.size()); ++a)
+              for (size_t c = 0; c < rows * cols; ++c)
+                dofs[a * rows * cols + c] = scalarDOFs[a] * rows * cols + c;
+            const auto& scalarFE = m_scalar.getFiniteElement(d, i);
+            m_elements.try_emplace(scalarFE.getGeometry(), scalarFE, rows, cols);
+          }
+        }
+      }
+
+      /// @brief Copies the space and its DOF maps.
+      P0(const P0&) = default;
+      /// @brief Moves the space and its DOF maps.
+      P0(P0&&) = default;
+      /// @brief Copies the space and its DOF maps.
+      P0& operator=(const P0&) = default;
+      /// @brief Moves the space and its DOF maps.
+      P0& operator=(P0&&) = default;
+
+      size_t getSize() const override
+      {
+        return m_size;
+      }
+      size_t getVectorDimension() const override
+      {
+        return m_rows * m_cols;
+      }
+      /// @brief Returns the number of matrix rows.
+      size_t getRows() const
+      {
+        return m_rows;
+      }
+      /// @brief Returns the number of matrix columns.
+      size_t getColumns() const
+      {
+        return m_cols;
+      }
+      const MeshType& getMesh() const override
+      {
+        return m_scalar.getMesh();
+      }
+      /// @brief Returns the scalar space supplying topology and component-independent maps.
+      const ScalarSpace& getScalarSpace() const
+      {
+        return m_scalar;
+      }
+
+      /// @brief Returns the matrix reference element of a mesh entity.
+      const ElementType& getFiniteElement(size_t d, Index i) const
+      {
+        return m_elements.at(m_scalar.getFiniteElement(d, i).getGeometry());
+      }
+
+      const IndexArray& getDOFs(size_t d, Index i) const override
+      {
+        return m_dofs.at(d).at(i);
+      }
+
+      Index getGlobalIndex(const std::pair<size_t, Index>& p, Index local) const override
+      {
+        const Index components = m_rows * m_cols;
+        return m_scalar.getGlobalIndex(p, local / components) * components +
+          local % components;
+      }
+
+      /// @brief Pulls a physical callable back to a reference element.
+      template <class Callable>
+      auto getPullback(const std::pair<size_t, Index>& p, Callable&& value) const
+      {
+        return m_scalar.getPullback(p, std::forward<Callable>(value));
+      }
+
+      /// @brief Pushes a reference callable forward to the physical mesh.
+      template <class Callable>
+      auto getPushforward(const std::pair<size_t, Index>& p, Callable&& value) const
+      {
+        return m_scalar.getPushforward(p, std::forward<Callable>(value));
+      }
+
+    private:
+      ScalarSpace m_scalar;
+      size_t m_rows, m_cols;
+      size_t m_size = 0;
+      std::vector<std::vector<IndexArray>> m_dofs;
+      std::map<Geometry::Polytope::Type, ElementType> m_elements;
+  };
+
+  /// @brief Deduces a matrix range from explicit rows and columns.
+  template <class Context>
+  P0(const Geometry::Mesh<Context>&, size_t,
+    size_t) -> P0<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+
+  /// @brief Matrix-valued discontinuous constant finite element space.
+  template <class Mesh>
+  using MatrixP0 = P0<Math::SpatialMatrix<Real>, Mesh>;
 }
 
 #endif

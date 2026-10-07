@@ -77,13 +77,13 @@ namespace Rodin::Math
         switch (m_rows)
         {
           case 3:
-            m_data(2,0) = vec(2);
+            m_data(2, 0) = vec(2);
             [[fallthrough]];
           case 2:
-            m_data(1,0) = vec(1);
+            m_data(1, 0) = vec(1);
             [[fallthrough]];
           case 1:
-            m_data(0,0) = vec(0);
+            m_data(0, 0) = vec(0);
             break;
           case 0:
             break;
@@ -165,13 +165,16 @@ namespace Rodin::Math
             switch (m_cols)
             {
               case 3:
-                m_data(2,2) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
+                m_data(2, 2) =
+                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                m_data(2,1) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
+                m_data(2, 1) =
+                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                m_data(2,0) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
+                m_data(2, 0) =
+                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
                 break;
               case 0:
                 break;
@@ -183,13 +186,16 @@ namespace Rodin::Math
             switch (m_cols)
             {
               case 3:
-                m_data(1,2) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
+                m_data(1, 2) =
+                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                m_data(1,1) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
+                m_data(1, 1) =
+                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                m_data(1,0) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
+                m_data(1, 0) =
+                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
                 break;
               case 0:
                 break;
@@ -201,13 +207,16 @@ namespace Rodin::Math
             switch (m_cols)
             {
               case 3:
-                m_data(0,2) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
+                m_data(0, 2) =
+                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                m_data(0,1) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
+                m_data(0, 1) =
+                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                m_data(0,0) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
+                m_data(0, 0) =
+                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
                 break;
               case 0:
                 break;
@@ -240,13 +249,16 @@ namespace Rodin::Math
             switch (m_cols)
             {
               case 3:
-                m_data(2,2) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
+                m_data(2, 2) =
+                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                m_data(2,1) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
+                m_data(2, 1) =
+                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                m_data(2,0) = other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
+                m_data(2, 0) =
+                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
                 break;
               case 0:
                 break;
@@ -258,13 +270,16 @@ namespace Rodin::Math
             switch (m_cols)
             {
               case 3:
-                m_data(1,2) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
+                m_data(1, 2) =
+                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                m_data(1,1) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
+                m_data(1, 1) =
+                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                m_data(1,0) = other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
+                m_data(1, 0) =
+                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
                 break;
               case 0:
                 break;
@@ -276,13 +291,16 @@ namespace Rodin::Math
             switch (m_cols)
             {
               case 3:
-                m_data(0,2) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
+                m_data(0, 2) =
+                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                m_data(0,1) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
+                m_data(0, 1) =
+                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                m_data(0,0) = other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
+                m_data(0, 0) =
+                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
                 break;
               case 0:
                 break;
@@ -313,66 +331,66 @@ namespace Rodin::Math
         switch (static_cast<unsigned>(m_rows) * 4u + static_cast<unsigned>(m_cols))
         {
           case 5u: // 1x1
-            m_data(0,0) += B(0,0);
+            m_data(0, 0) += B(0, 0);
             return *this;
 
           case 6u: // 1x2
-            m_data(0,0) += B(0,0);
-            m_data(0,1) += B(0,1);
+            m_data(0, 0) += B(0, 0);
+            m_data(0, 1) += B(0, 1);
             return *this;
 
           case 7u: // 1x3
-            m_data(0,0) += B(0,0);
-            m_data(0,1) += B(0,1);
-            m_data(0,2) += B(0,2);
+            m_data(0, 0) += B(0, 0);
+            m_data(0, 1) += B(0, 1);
+            m_data(0, 2) += B(0, 2);
             return *this;
 
           case 9u: // 2x1
-            m_data(0,0) += B(0,0);
-            m_data(1,0) += B(1,0);
+            m_data(0, 0) += B(0, 0);
+            m_data(1, 0) += B(1, 0);
             return *this;
 
           case 10u: // 2x2
-            m_data(0,0) += B(0,0);
-            m_data(0,1) += B(0,1);
-            m_data(1,0) += B(1,0);
-            m_data(1,1) += B(1,1);
+            m_data(0, 0) += B(0, 0);
+            m_data(0, 1) += B(0, 1);
+            m_data(1, 0) += B(1, 0);
+            m_data(1, 1) += B(1, 1);
             return *this;
 
           case 11u: // 2x3
-            m_data(0,0) += B(0,0);
-            m_data(0,1) += B(0,1);
-            m_data(0,2) += B(0,2);
-            m_data(1,0) += B(1,0);
-            m_data(1,1) += B(1,1);
-            m_data(1,2) += B(1,2);
+            m_data(0, 0) += B(0, 0);
+            m_data(0, 1) += B(0, 1);
+            m_data(0, 2) += B(0, 2);
+            m_data(1, 0) += B(1, 0);
+            m_data(1, 1) += B(1, 1);
+            m_data(1, 2) += B(1, 2);
             return *this;
 
           case 13u: // 3x1
-            m_data(0,0) += B(0,0);
-            m_data(1,0) += B(1,0);
-            m_data(2,0) += B(2,0);
+            m_data(0, 0) += B(0, 0);
+            m_data(1, 0) += B(1, 0);
+            m_data(2, 0) += B(2, 0);
             return *this;
 
           case 14u: // 3x2
-            m_data(0,0) += B(0,0);
-            m_data(0,1) += B(0,1);
-            m_data(1,0) += B(1,0);
-            m_data(1,1) += B(1,1);
-            m_data(2,0) += B(2,0);
-            m_data(2,1) += B(2,1);
+            m_data(0, 0) += B(0, 0);
+            m_data(0, 1) += B(0, 1);
+            m_data(1, 0) += B(1, 0);
+            m_data(1, 1) += B(1, 1);
+            m_data(2, 0) += B(2, 0);
+            m_data(2, 1) += B(2, 1);
             return *this;
 
           case 15u: // 3x3
-            m_data(0,0) += B(0,0);
-            m_data(0,1) += B(0,1);
-            m_data(0,2) += B(0,2);
-            m_data(1,0) += B(1,0);
-            m_data(1,1) += B(1,1);
-            m_data(1,2) += B(1,2);
-            m_data(2,0) += B(2,0);
-            m_data(2,1) += B(2,1);
-            m_data(2,2) += B(2,2);
+            m_data(0, 0) += B(0, 0);
+            m_data(0, 1) += B(0, 1);
+            m_data(0, 2) += B(0, 2);
+            m_data(1, 0) += B(1, 0);
+            m_data(1, 1) += B(1, 1);
+            m_data(1, 2) += B(1, 2);
+            m_data(2, 0) += B(2, 0);
+            m_data(2, 1) += B(2, 1);
+            m_data(2, 2) += B(2, 2);
             return *this;
 
           default:
@@ -442,8 +460,8 @@ namespace Rodin::Math
       }
 
       /// @brief Returns the squared Frobenius norm.
-      [[nodiscard]] constexpr
-      ScalarType squaredNorm() const noexcept
+      [[nodiscard]] constexpr typename Eigen::NumTraits<ScalarType>::Real
+      squaredNorm() const noexcept
       {
         const auto r = m_rows;
         const auto c = m_cols;
@@ -459,50 +477,49 @@ namespace Rodin::Math
           case 4u:  // 1x0
           case 8u:  // 2x0
           case 12u: // 3x0
-            return ScalarType(0);
+            return typename Eigen::NumTraits<ScalarType>::Real(0);
 
           case 5u: // 1x1
-            return Math::pow2(A(0,0));
+            return std::norm(A(0, 0));
 
           case 6u: // 1x2
-            return Math::pow2(A(0,0)) + Math::pow2(A(0,1));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1));
 
           case 7u: // 1x3
-            return Math::pow2(A(0,0)) + Math::pow2(A(0,1)) + Math::pow2(A(0,2));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1)) + std::norm(A(0, 2));
 
           case 9u: // 2x1
-            return Math::pow2(A(0,0)) + Math::pow2(A(1,0));
+            return std::norm(A(0, 0)) + std::norm(A(1, 0));
 
           case 10u: // 2x2
-            return Math::pow2(A(0,0)) + Math::pow2(A(0,1))
-                 + Math::pow2(A(1,0)) + Math::pow2(A(1,1));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1)) + std::norm(A(1, 0)) +
+              std::norm(A(1, 1));
 
           case 11u: // 2x3
-            return Math::pow2(A(0,0)) + Math::pow2(A(0,1)) + Math::pow2(A(0,2))
-                 + Math::pow2(A(1,0)) + Math::pow2(A(1,1)) + Math::pow2(A(1,2));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1)) + std::norm(A(0, 2)) +
+              std::norm(A(1, 0)) + std::norm(A(1, 1)) + std::norm(A(1, 2));
 
           case 13u: // 3x1
-            return Math::pow2(A(0,0)) + Math::pow2(A(1,0)) + Math::pow2(A(2,0));
+            return std::norm(A(0, 0)) + std::norm(A(1, 0)) + std::norm(A(2, 0));
 
           case 14u: // 3x2
-            return Math::pow2(A(0,0)) + Math::pow2(A(0,1))
-                 + Math::pow2(A(1,0)) + Math::pow2(A(1,1))
-                 + Math::pow2(A(2,0)) + Math::pow2(A(2,1));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1)) + std::norm(A(1, 0)) +
+              std::norm(A(1, 1)) + std::norm(A(2, 0)) + std::norm(A(2, 1));
 
           case 15u: // 3x3
-            return Math::pow2(A(0,0)) + Math::pow2(A(0,1)) + Math::pow2(A(0,2))
-                 + Math::pow2(A(1,0)) + Math::pow2(A(1,1)) + Math::pow2(A(1,2))
-                 + Math::pow2(A(2,0)) + Math::pow2(A(2,1)) + Math::pow2(A(2,2));
+            return std::norm(A(0, 0)) + std::norm(A(0, 1)) + std::norm(A(0, 2)) +
+              std::norm(A(1, 0)) + std::norm(A(1, 1)) + std::norm(A(1, 2)) +
+              std::norm(A(2, 0)) + std::norm(A(2, 1)) + std::norm(A(2, 2));
 
           default:
             assert(false);
-            return ScalarType(0);
+            return typename Eigen::NumTraits<ScalarType>::Real(0);
         }
       }
 
       /// @brief Returns the Frobenius norm.
-      [[nodiscard]] constexpr
-      ScalarType norm() const noexcept
+      [[nodiscard]] constexpr typename Eigen::NumTraits<ScalarType>::Real
+      norm() const noexcept
       {
         return Math::sqrt(this->squaredNorm());
       }
@@ -511,6 +528,9 @@ namespace Rodin::Math
       constexpr
       ScalarType dot(const SpatialMatrix& other) const noexcept
       {
+        if constexpr (std::is_same_v<ScalarType, Complex>)
+          return Math::dot(m_data.topLeftCorner(m_rows, m_cols),
+            other.getData().topLeftCorner(other.rows(), other.cols()));
         assert(m_rows == other.m_rows);
         assert(m_cols == other.m_cols);
 
@@ -540,64 +560,42 @@ namespace Rodin::Math
             return ScalarType(0);
 
           case 5u: // 1x1
-            return A(0,0) * B(0,0);
+            return A(0, 0) * B(0, 0);
 
           case 6u: // 1x2
-            return A(0,0) * B(0,0)
-                 + A(0,1) * B(0,1);
+            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1);
 
           case 7u: // 1x3
-            return A(0,0) * B(0,0)
-                 + A(0,1) * B(0,1)
-                 + A(0,2) * B(0,2);
+            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1) + A(0, 2) * B(0, 2);
 
           case 8u: // 2x0
             return ScalarType(0);
 
           case 9u: // 2x1
-            return A(0,0) * B(0,0)
-                 + A(1,0) * B(1,0);
+            return A(0, 0) * B(0, 0) + A(1, 0) * B(1, 0);
 
           case 10u: // 2x2
-            return A(0,0) * B(0,0)
-                 + A(0,1) * B(0,1)
-                 + A(1,0) * B(1,0)
-                 + A(1,1) * B(1,1);
+            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1) + A(1, 0) * B(1, 0) +
+              A(1, 1) * B(1, 1);
 
           case 11u: // 2x3
-            return A(0,0) * B(0,0)
-                 + A(0,1) * B(0,1)
-                 + A(0,2) * B(0,2)
-                 + A(1,0) * B(1,0)
-                 + A(1,1) * B(1,1)
-                 + A(1,2) * B(1,2);
+            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1) + A(0, 2) * B(0, 2) +
+              A(1, 0) * B(1, 0) + A(1, 1) * B(1, 1) + A(1, 2) * B(1, 2);
 
           case 12u: // 3x0
             return ScalarType(0);
 
           case 13u: // 3x1
-            return A(0,0) * B(0,0)
-                 + A(1,0) * B(1,0)
-                 + A(2,0) * B(2,0);
+            return A(0, 0) * B(0, 0) + A(1, 0) * B(1, 0) + A(2, 0) * B(2, 0);
 
           case 14u: // 3x2
-            return A(0,0) * B(0,0)
-                 + A(0,1) * B(0,1)
-                 + A(1,0) * B(1,0)
-                 + A(1,1) * B(1,1)
-                 + A(2,0) * B(2,0)
-                 + A(2,1) * B(2,1);
+            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1) + A(1, 0) * B(1, 0) +
+              A(1, 1) * B(1, 1) + A(2, 0) * B(2, 0) + A(2, 1) * B(2, 1);
 
           case 15u: // 3x3
-            return A(0,0) * B(0,0)
-                 + A(0,1) * B(0,1)
-                 + A(0,2) * B(0,2)
-                 + A(1,0) * B(1,0)
-                 + A(1,1) * B(1,1)
-                 + A(1,2) * B(1,2)
-                 + A(2,0) * B(2,0)
-                 + A(2,1) * B(2,1)
-                 + A(2,2) * B(2,2);
+            return A(0, 0) * B(0, 0) + A(0, 1) * B(0, 1) + A(0, 2) * B(0, 2) +
+              A(1, 0) * B(1, 0) + A(1, 1) * B(1, 1) + A(1, 2) * B(1, 2) +
+              A(2, 0) * B(2, 0) + A(2, 1) * B(2, 1) + A(2, 2) * B(2, 2);
 
           default:
             // Should be unreachable with MaxSize==3 and validated sizes.
@@ -618,13 +616,16 @@ namespace Rodin::Math
             switch (m_cols)
             {
               case 3:
-                s += m_data(2,2) * other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
+                s += m_data(2, 2) *
+                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                s += m_data(2,1) * other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
+                s += m_data(2, 1) *
+                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                s += m_data(2,0) * other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
+                s += m_data(2, 0) *
+                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
                 [[fallthrough]];
               case 0:
                 break;
@@ -636,13 +637,16 @@ namespace Rodin::Math
             switch (m_cols)
             {
               case 3:
-                s += m_data(1,2) * other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
+                s += m_data(1, 2) *
+                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                s += m_data(1,1) * other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
+                s += m_data(1, 1) *
+                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                s += m_data(1,0) * other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
+                s += m_data(1, 0) *
+                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
                 [[fallthrough]];
               case 0:
                 break;
@@ -654,13 +658,16 @@ namespace Rodin::Math
             switch (m_cols)
             {
               case 3:
-                s += m_data(0,2) * other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
+                s += m_data(0, 2) *
+                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                s += m_data(0,1) * other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
+                s += m_data(0, 1) *
+                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                s += m_data(0,0) * other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
+                s += m_data(0, 0) *
+                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
                 [[fallthrough]];
               case 0:
                 break;
@@ -932,7 +939,7 @@ namespace Rodin::Math
 
         if (n == 1)
         {
-          const ScalarType det = (*this)(0,0);
+          const ScalarType det = (*this)(0, 0);
           assert(det != ScalarType(0));
           x(0) = b(0) / det;
           return x;
@@ -940,8 +947,8 @@ namespace Rodin::Math
 
         if (n == 2)
         {
-          const ScalarType a00 = (*this)(0,0), a01 = (*this)(0,1);
-          const ScalarType a10 = (*this)(1,0), a11 = (*this)(1,1);
+          const ScalarType a00 = (*this)(0, 0), a01 = (*this)(0, 1);
+          const ScalarType a10 = (*this)(1, 0), a11 = (*this)(1, 1);
 
           const ScalarType det = a00*a11 - a01*a10;
           assert(det != ScalarType(0));
@@ -956,9 +963,9 @@ namespace Rodin::Math
 
         if (n == 3)
         {
-          const ScalarType a00 = (*this)(0,0), a01 = (*this)(0,1), a02 = (*this)(0,2);
-          const ScalarType a10 = (*this)(1,0), a11 = (*this)(1,1), a12 = (*this)(1,2);
-          const ScalarType a20 = (*this)(2,0), a21 = (*this)(2,1), a22 = (*this)(2,2);
+          const ScalarType a00 = (*this)(0, 0), a01 = (*this)(0, 1), a02 = (*this)(0, 2);
+          const ScalarType a10 = (*this)(1, 0), a11 = (*this)(1, 1), a12 = (*this)(1, 2);
+          const ScalarType a20 = (*this)(2, 0), a21 = (*this)(2, 1), a22 = (*this)(2, 2);
 
           // Cofactors (of A)
           const ScalarType c00 =  (a11*a22 - a12*a21);
@@ -1005,27 +1012,27 @@ namespace Rodin::Math
 
         if (r == 1)
         {
-          return (*this)(0,0);
+          return (*this)(0, 0);
         }
         else if (r == 2)
         {
-          const ScalarType a = (*this)(0,0);
-          const ScalarType b = (*this)(0,1);
-          const ScalarType c0 = (*this)(1,0);
-          const ScalarType d = (*this)(1,1);
+          const ScalarType a = (*this)(0, 0);
+          const ScalarType b = (*this)(0, 1);
+          const ScalarType c0 = (*this)(1, 0);
+          const ScalarType d = (*this)(1, 1);
           return a * d - b * c0;
         }
         else if (r == 3)
         {
-          const ScalarType a = (*this)(0,0);
-          const ScalarType b = (*this)(0,1);
-          const ScalarType c0 = (*this)(0,2);
-          const ScalarType d = (*this)(1,0);
-          const ScalarType e = (*this)(1,1);
-          const ScalarType f = (*this)(1,2);
-          const ScalarType g = (*this)(2,0);
-          const ScalarType h = (*this)(2,1);
-          const ScalarType i = (*this)(2,2);
+          const ScalarType a = (*this)(0, 0);
+          const ScalarType b = (*this)(0, 1);
+          const ScalarType c0 = (*this)(0, 2);
+          const ScalarType d = (*this)(1, 0);
+          const ScalarType e = (*this)(1, 1);
+          const ScalarType f = (*this)(1, 2);
+          const ScalarType g = (*this)(2, 0);
+          const ScalarType h = (*this)(2, 1);
+          const ScalarType i = (*this)(2, 2);
           return a * (e * i - f * h)
                - b * (d * i - f * g)
                + c0 * (d * h - e * g);
@@ -1057,39 +1064,39 @@ namespace Rodin::Math
 
         if (r == 1)
         {
-          const ScalarType a = (*this)(0,0);
+          const ScalarType a = (*this)(0, 0);
           assert(a != ScalarType(0));
-          inv(0,0) = ScalarType(1) / a;
+          inv(0, 0) = ScalarType(1) / a;
           return inv;
         }
         else if (r == 2)
         {
-          const ScalarType a = (*this)(0,0);
-          const ScalarType b = (*this)(0,1);
-          const ScalarType c0 = (*this)(1,0);
-          const ScalarType d = (*this)(1,1);
+          const ScalarType a = (*this)(0, 0);
+          const ScalarType b = (*this)(0, 1);
+          const ScalarType c0 = (*this)(1, 0);
+          const ScalarType d = (*this)(1, 1);
 
           const ScalarType det = a * d - b * c0;
           assert(det != ScalarType(0));
           const ScalarType invdet = ScalarType(1) / det;
 
-          inv(0,0) =  d * invdet;
-          inv(0,1) = -b * invdet;
-          inv(1,0) = -c0 * invdet;
-          inv(1,1) =  a * invdet;
+          inv(0, 0) = d * invdet;
+          inv(0, 1) = -b * invdet;
+          inv(1, 0) = -c0 * invdet;
+          inv(1, 1) = a * invdet;
           return inv;
         }
         else if (r == 3)
         {
-          const ScalarType a = (*this)(0,0);
-          const ScalarType b = (*this)(0,1);
-          const ScalarType c0 = (*this)(0,2);
-          const ScalarType d = (*this)(1,0);
-          const ScalarType e = (*this)(1,1);
-          const ScalarType f = (*this)(1,2);
-          const ScalarType g = (*this)(2,0);
-          const ScalarType h = (*this)(2,1);
-          const ScalarType i = (*this)(2,2);
+          const ScalarType a = (*this)(0, 0);
+          const ScalarType b = (*this)(0, 1);
+          const ScalarType c0 = (*this)(0, 2);
+          const ScalarType d = (*this)(1, 0);
+          const ScalarType e = (*this)(1, 1);
+          const ScalarType f = (*this)(1, 2);
+          const ScalarType g = (*this)(2, 0);
+          const ScalarType h = (*this)(2, 1);
+          const ScalarType i = (*this)(2, 2);
 
           // cofactors (same as in your PointBase code)
           const ScalarType A =  (e * i - f * h);
@@ -1107,17 +1114,17 @@ namespace Rodin::Math
           const ScalarType invdet = ScalarType(1) / det;
 
           // adjugate / det (note the transpose of cofactor matrix)
-          inv(0,0) = A * invdet;
-          inv(0,1) = D * invdet;
-          inv(0,2) = G * invdet;
+          inv(0, 0) = A * invdet;
+          inv(0, 1) = D * invdet;
+          inv(0, 2) = G * invdet;
 
-          inv(1,0) = B * invdet;
-          inv(1,1) = E * invdet;
-          inv(1,2) = H * invdet;
+          inv(1, 0) = B * invdet;
+          inv(1, 1) = E * invdet;
+          inv(1, 2) = H * invdet;
 
-          inv(2,0) = C * invdet;
-          inv(2,1) = F * invdet;
-          inv(2,2) = I * invdet;
+          inv(2, 0) = C * invdet;
+          inv(2, 1) = F * invdet;
+          inv(2, 2) = I * invdet;
 
           return inv;
         }
@@ -1235,32 +1242,58 @@ namespace Rodin::Math
         switch (static_cast<unsigned>(m_rows) * 4u + static_cast<unsigned>(m_cols))
         {
           case 5u:
-            m_data(0,0) *= s; return *this;
+            m_data(0, 0) *= s;
+            return *this;
           case 6u:
-            m_data(0,0) *= s; m_data(0,1) *= s; return *this;
+            m_data(0, 0) *= s;
+            m_data(0, 1) *= s;
+            return *this;
           case 7u:
-            m_data(0,0) *= s; m_data(0,1) *= s; m_data(0,2) *= s; return *this;
+            m_data(0, 0) *= s;
+            m_data(0, 1) *= s;
+            m_data(0, 2) *= s;
+            return *this;
           case 9u:
-            m_data(0,0) *= s; m_data(1,0) *= s; return *this;
+            m_data(0, 0) *= s;
+            m_data(1, 0) *= s;
+            return *this;
           case 10u:
-            m_data(0,0) *= s; m_data(0,1) *= s;
-            m_data(1,0) *= s; m_data(1,1) *= s;
+            m_data(0, 0) *= s;
+            m_data(0, 1) *= s;
+            m_data(1, 0) *= s;
+            m_data(1, 1) *= s;
             return *this;
           case 11u:
-            m_data(0,0) *= s; m_data(0,1) *= s; m_data(0,2) *= s;
-            m_data(1,0) *= s; m_data(1,1) *= s; m_data(1,2) *= s;
+            m_data(0, 0) *= s;
+            m_data(0, 1) *= s;
+            m_data(0, 2) *= s;
+            m_data(1, 0) *= s;
+            m_data(1, 1) *= s;
+            m_data(1, 2) *= s;
             return *this;
           case 13u:
-            m_data(0,0) *= s; m_data(1,0) *= s; m_data(2,0) *= s; return *this;
+            m_data(0, 0) *= s;
+            m_data(1, 0) *= s;
+            m_data(2, 0) *= s;
+            return *this;
           case 14u:
-            m_data(0,0) *= s; m_data(0,1) *= s;
-            m_data(1,0) *= s; m_data(1,1) *= s;
-            m_data(2,0) *= s; m_data(2,1) *= s;
+            m_data(0, 0) *= s;
+            m_data(0, 1) *= s;
+            m_data(1, 0) *= s;
+            m_data(1, 1) *= s;
+            m_data(2, 0) *= s;
+            m_data(2, 1) *= s;
             return *this;
           case 15u:
-            m_data(0,0) *= s; m_data(0,1) *= s; m_data(0,2) *= s;
-            m_data(1,0) *= s; m_data(1,1) *= s; m_data(1,2) *= s;
-            m_data(2,0) *= s; m_data(2,1) *= s; m_data(2,2) *= s;
+            m_data(0, 0) *= s;
+            m_data(0, 1) *= s;
+            m_data(0, 2) *= s;
+            m_data(1, 0) *= s;
+            m_data(1, 1) *= s;
+            m_data(1, 2) *= s;
+            m_data(2, 0) *= s;
+            m_data(2, 1) *= s;
+            m_data(2, 2) *= s;
             return *this;
           default:
             assert(false);
@@ -1303,31 +1336,31 @@ namespace Rodin::Math
 
         // Cache active lhs entries to handle aliasing (*this *= *this) safely
         // and to keep the hot path register-friendly.
-        const Scalar a00 = (r >= 1 && k >= 1) ? m_data(0,0) : Scalar(0);
-        const Scalar a01 = (r >= 1 && k >= 2) ? m_data(0,1) : Scalar(0);
-        const Scalar a02 = (r >= 1 && k >= 3) ? m_data(0,2) : Scalar(0);
+        const Scalar a00 = (r >= 1 && k >= 1) ? m_data(0, 0) : Scalar(0);
+        const Scalar a01 = (r >= 1 && k >= 2) ? m_data(0, 1) : Scalar(0);
+        const Scalar a02 = (r >= 1 && k >= 3) ? m_data(0, 2) : Scalar(0);
 
-        const Scalar a10 = (r >= 2 && k >= 1) ? m_data(1,0) : Scalar(0);
-        const Scalar a11 = (r >= 2 && k >= 2) ? m_data(1,1) : Scalar(0);
-        const Scalar a12 = (r >= 2 && k >= 3) ? m_data(1,2) : Scalar(0);
+        const Scalar a10 = (r >= 2 && k >= 1) ? m_data(1, 0) : Scalar(0);
+        const Scalar a11 = (r >= 2 && k >= 2) ? m_data(1, 1) : Scalar(0);
+        const Scalar a12 = (r >= 2 && k >= 3) ? m_data(1, 2) : Scalar(0);
 
-        const Scalar a20 = (r >= 3 && k >= 1) ? m_data(2,0) : Scalar(0);
-        const Scalar a21 = (r >= 3 && k >= 2) ? m_data(2,1) : Scalar(0);
-        const Scalar a22 = (r >= 3 && k >= 3) ? m_data(2,2) : Scalar(0);
+        const Scalar a20 = (r >= 3 && k >= 1) ? m_data(2, 0) : Scalar(0);
+        const Scalar a21 = (r >= 3 && k >= 2) ? m_data(2, 1) : Scalar(0);
+        const Scalar a22 = (r >= 3 && k >= 3) ? m_data(2, 2) : Scalar(0);
 
         const auto& B = rhs.m_data;
 
-        const Scalar b00 = (k >= 1 && c >= 1) ? B(0,0) : Scalar(0);
-        const Scalar b01 = (k >= 1 && c >= 2) ? B(0,1) : Scalar(0);
-        const Scalar b02 = (k >= 1 && c >= 3) ? B(0,2) : Scalar(0);
+        const Scalar b00 = (k >= 1 && c >= 1) ? B(0, 0) : Scalar(0);
+        const Scalar b01 = (k >= 1 && c >= 2) ? B(0, 1) : Scalar(0);
+        const Scalar b02 = (k >= 1 && c >= 3) ? B(0, 2) : Scalar(0);
 
-        const Scalar b10 = (k >= 2 && c >= 1) ? B(1,0) : Scalar(0);
-        const Scalar b11 = (k >= 2 && c >= 2) ? B(1,1) : Scalar(0);
-        const Scalar b12 = (k >= 2 && c >= 3) ? B(1,2) : Scalar(0);
+        const Scalar b10 = (k >= 2 && c >= 1) ? B(1, 0) : Scalar(0);
+        const Scalar b11 = (k >= 2 && c >= 2) ? B(1, 1) : Scalar(0);
+        const Scalar b12 = (k >= 2 && c >= 3) ? B(1, 2) : Scalar(0);
 
-        const Scalar b20 = (k >= 3 && c >= 1) ? B(2,0) : Scalar(0);
-        const Scalar b21 = (k >= 3 && c >= 2) ? B(2,1) : Scalar(0);
-        const Scalar b22 = (k >= 3 && c >= 3) ? B(2,2) : Scalar(0);
+        const Scalar b20 = (k >= 3 && c >= 1) ? B(2, 0) : Scalar(0);
+        const Scalar b21 = (k >= 3 && c >= 2) ? B(2, 1) : Scalar(0);
+        const Scalar b22 = (k >= 3 && c >= 3) ? B(2, 2) : Scalar(0);
 
         // key in [0..63] for (r,k,c) in [0..3]^3
         const unsigned key = static_cast<unsigned>(r) * 16u
@@ -1339,181 +1372,196 @@ namespace Rodin::Math
           // -------------------- k = 1 --------------------
 
           case 1u * 16u + 1u * 4u + 1u: // 1x1 * 1x1 => 1x1
-            m_data(0,0) = a00 * b00;
+            m_data(0, 0) = a00 * b00;
             break;
 
           case 1u * 16u + 1u * 4u + 2u: // 1x1 * 1x2 => 1x2
-            m_data(0,0) = a00 * b00;
-            m_data(0,1) = a00 * b01;
+            m_data(0, 0) = a00 * b00;
+            m_data(0, 1) = a00 * b01;
             break;
 
           case 1u * 16u + 1u * 4u + 3u: // 1x1 * 1x3 => 1x3
-            m_data(0,0) = a00 * b00;
-            m_data(0,1) = a00 * b01;
-            m_data(0,2) = a00 * b02;
+            m_data(0, 0) = a00 * b00;
+            m_data(0, 1) = a00 * b01;
+            m_data(0, 2) = a00 * b02;
             break;
 
           case 2u * 16u + 1u * 4u + 1u: // 2x1 * 1x1 => 2x1
-            m_data(0,0) = a00 * b00;
-            m_data(1,0) = a10 * b00;
+            m_data(0, 0) = a00 * b00;
+            m_data(1, 0) = a10 * b00;
             break;
 
           case 2u * 16u + 1u * 4u + 2u: // 2x1 * 1x2 => 2x2
-            m_data(0,0) = a00 * b00; m_data(0,1) = a00 * b01;
-            m_data(1,0) = a10 * b00; m_data(1,1) = a10 * b01;
+            m_data(0, 0) = a00 * b00;
+            m_data(0, 1) = a00 * b01;
+            m_data(1, 0) = a10 * b00;
+            m_data(1, 1) = a10 * b01;
             break;
 
           case 2u * 16u + 1u * 4u + 3u: // 2x1 * 1x3 => 2x3
-            m_data(0,0) = a00 * b00; m_data(0,1) = a00 * b01; m_data(0,2) = a00 * b02;
-            m_data(1,0) = a10 * b00; m_data(1,1) = a10 * b01; m_data(1,2) = a10 * b02;
+            m_data(0, 0) = a00 * b00;
+            m_data(0, 1) = a00 * b01;
+            m_data(0, 2) = a00 * b02;
+            m_data(1, 0) = a10 * b00;
+            m_data(1, 1) = a10 * b01;
+            m_data(1, 2) = a10 * b02;
             break;
 
           case 3u * 16u + 1u * 4u + 1u: // 3x1 * 1x1 => 3x1
-            m_data(0,0) = a00 * b00;
-            m_data(1,0) = a10 * b00;
-            m_data(2,0) = a20 * b00;
+            m_data(0, 0) = a00 * b00;
+            m_data(1, 0) = a10 * b00;
+            m_data(2, 0) = a20 * b00;
             break;
 
           case 3u * 16u + 1u * 4u + 2u: // 3x1 * 1x2 => 3x2
-            m_data(0,0) = a00 * b00; m_data(0,1) = a00 * b01;
-            m_data(1,0) = a10 * b00; m_data(1,1) = a10 * b01;
-            m_data(2,0) = a20 * b00; m_data(2,1) = a20 * b01;
+            m_data(0, 0) = a00 * b00;
+            m_data(0, 1) = a00 * b01;
+            m_data(1, 0) = a10 * b00;
+            m_data(1, 1) = a10 * b01;
+            m_data(2, 0) = a20 * b00;
+            m_data(2, 1) = a20 * b01;
             break;
 
           case 3u * 16u + 1u * 4u + 3u: // 3x1 * 1x3 => 3x3
-            m_data(0,0) = a00 * b00; m_data(0,1) = a00 * b01; m_data(0,2) = a00 * b02;
-            m_data(1,0) = a10 * b00; m_data(1,1) = a10 * b01; m_data(1,2) = a10 * b02;
-            m_data(2,0) = a20 * b00; m_data(2,1) = a20 * b01; m_data(2,2) = a20 * b02;
+            m_data(0, 0) = a00 * b00;
+            m_data(0, 1) = a00 * b01;
+            m_data(0, 2) = a00 * b02;
+            m_data(1, 0) = a10 * b00;
+            m_data(1, 1) = a10 * b01;
+            m_data(1, 2) = a10 * b02;
+            m_data(2, 0) = a20 * b00;
+            m_data(2, 1) = a20 * b01;
+            m_data(2, 2) = a20 * b02;
             break;
 
           // -------------------- k = 2 --------------------
 
           case 1u * 16u + 2u * 4u + 1u:
-            m_data(0,0) = a00*b00 + a01*b10;
+            m_data(0, 0) = a00 * b00 + a01 * b10;
             break;
 
           case 1u * 16u + 2u * 4u + 2u:
-            m_data(0,0) = a00*b00 + a01*b10;
-            m_data(0,1) = a00*b01 + a01*b11;
+            m_data(0, 0) = a00 * b00 + a01 * b10;
+            m_data(0, 1) = a00 * b01 + a01 * b11;
             break;
 
           case 1u * 16u + 2u * 4u + 3u:
-            m_data(0,0) = a00*b00 + a01*b10;
-            m_data(0,1) = a00*b01 + a01*b11;
-            m_data(0,2) = a00*b02 + a01*b12;
+            m_data(0, 0) = a00 * b00 + a01 * b10;
+            m_data(0, 1) = a00 * b01 + a01 * b11;
+            m_data(0, 2) = a00 * b02 + a01 * b12;
             break;
 
           case 2u * 16u + 2u * 4u + 1u:
-            m_data(0,0) = a00*b00 + a01*b10;
-            m_data(1,0) = a10*b00 + a11*b10;
+            m_data(0, 0) = a00 * b00 + a01 * b10;
+            m_data(1, 0) = a10 * b00 + a11 * b10;
             break;
 
           case 2u * 16u + 2u * 4u + 2u:
-            m_data(0,0) = a00*b00 + a01*b10;
-            m_data(0,1) = a00*b01 + a01*b11;
-            m_data(1,0) = a10*b00 + a11*b10;
-            m_data(1,1) = a10*b01 + a11*b11;
+            m_data(0, 0) = a00 * b00 + a01 * b10;
+            m_data(0, 1) = a00 * b01 + a01 * b11;
+            m_data(1, 0) = a10 * b00 + a11 * b10;
+            m_data(1, 1) = a10 * b01 + a11 * b11;
             break;
 
           case 2u * 16u + 2u * 4u + 3u:
-            m_data(0,0) = a00*b00 + a01*b10;
-            m_data(0,1) = a00*b01 + a01*b11;
-            m_data(0,2) = a00*b02 + a01*b12;
-            m_data(1,0) = a10*b00 + a11*b10;
-            m_data(1,1) = a10*b01 + a11*b11;
-            m_data(1,2) = a10*b02 + a11*b12;
+            m_data(0, 0) = a00 * b00 + a01 * b10;
+            m_data(0, 1) = a00 * b01 + a01 * b11;
+            m_data(0, 2) = a00 * b02 + a01 * b12;
+            m_data(1, 0) = a10 * b00 + a11 * b10;
+            m_data(1, 1) = a10 * b01 + a11 * b11;
+            m_data(1, 2) = a10 * b02 + a11 * b12;
             break;
 
           case 3u * 16u + 2u * 4u + 1u:
-            m_data(0,0) = a00*b00 + a01*b10;
-            m_data(1,0) = a10*b00 + a11*b10;
-            m_data(2,0) = a20*b00 + a21*b10;
+            m_data(0, 0) = a00 * b00 + a01 * b10;
+            m_data(1, 0) = a10 * b00 + a11 * b10;
+            m_data(2, 0) = a20 * b00 + a21 * b10;
             break;
 
           case 3u * 16u + 2u * 4u + 2u:
-            m_data(0,0) = a00*b00 + a01*b10;
-            m_data(0,1) = a00*b01 + a01*b11;
-            m_data(1,0) = a10*b00 + a11*b10;
-            m_data(1,1) = a10*b01 + a11*b11;
-            m_data(2,0) = a20*b00 + a21*b10;
-            m_data(2,1) = a20*b01 + a21*b11;
+            m_data(0, 0) = a00 * b00 + a01 * b10;
+            m_data(0, 1) = a00 * b01 + a01 * b11;
+            m_data(1, 0) = a10 * b00 + a11 * b10;
+            m_data(1, 1) = a10 * b01 + a11 * b11;
+            m_data(2, 0) = a20 * b00 + a21 * b10;
+            m_data(2, 1) = a20 * b01 + a21 * b11;
             break;
 
           case 3u * 16u + 2u * 4u + 3u:
-            m_data(0,0) = a00*b00 + a01*b10;
-            m_data(0,1) = a00*b01 + a01*b11;
-            m_data(0,2) = a00*b02 + a01*b12;
-            m_data(1,0) = a10*b00 + a11*b10;
-            m_data(1,1) = a10*b01 + a11*b11;
-            m_data(1,2) = a10*b02 + a11*b12;
-            m_data(2,0) = a20*b00 + a21*b10;
-            m_data(2,1) = a20*b01 + a21*b11;
-            m_data(2,2) = a20*b02 + a21*b12;
+            m_data(0, 0) = a00 * b00 + a01 * b10;
+            m_data(0, 1) = a00 * b01 + a01 * b11;
+            m_data(0, 2) = a00 * b02 + a01 * b12;
+            m_data(1, 0) = a10 * b00 + a11 * b10;
+            m_data(1, 1) = a10 * b01 + a11 * b11;
+            m_data(1, 2) = a10 * b02 + a11 * b12;
+            m_data(2, 0) = a20 * b00 + a21 * b10;
+            m_data(2, 1) = a20 * b01 + a21 * b11;
+            m_data(2, 2) = a20 * b02 + a21 * b12;
             break;
 
           // -------------------- k = 3 --------------------
 
           case 1u * 16u + 3u * 4u + 1u:
-            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
+            m_data(0, 0) = a00 * b00 + a01 * b10 + a02 * b20;
             break;
 
           case 1u * 16u + 3u * 4u + 2u:
-            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
-            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
+            m_data(0, 0) = a00 * b00 + a01 * b10 + a02 * b20;
+            m_data(0, 1) = a00 * b01 + a01 * b11 + a02 * b21;
             break;
 
           case 1u * 16u + 3u * 4u + 3u:
-            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
-            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
-            m_data(0,2) = a00*b02 + a01*b12 + a02*b22;
+            m_data(0, 0) = a00 * b00 + a01 * b10 + a02 * b20;
+            m_data(0, 1) = a00 * b01 + a01 * b11 + a02 * b21;
+            m_data(0, 2) = a00 * b02 + a01 * b12 + a02 * b22;
             break;
 
           case 2u * 16u + 3u * 4u + 1u:
-            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
-            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
+            m_data(0, 0) = a00 * b00 + a01 * b10 + a02 * b20;
+            m_data(1, 0) = a10 * b00 + a11 * b10 + a12 * b20;
             break;
 
           case 2u * 16u + 3u * 4u + 2u:
-            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
-            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
-            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
-            m_data(1,1) = a10*b01 + a11*b11 + a12*b21;
+            m_data(0, 0) = a00 * b00 + a01 * b10 + a02 * b20;
+            m_data(0, 1) = a00 * b01 + a01 * b11 + a02 * b21;
+            m_data(1, 0) = a10 * b00 + a11 * b10 + a12 * b20;
+            m_data(1, 1) = a10 * b01 + a11 * b11 + a12 * b21;
             break;
 
           case 2u * 16u + 3u * 4u + 3u:
-            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
-            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
-            m_data(0,2) = a00*b02 + a01*b12 + a02*b22;
-            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
-            m_data(1,1) = a10*b01 + a11*b11 + a12*b21;
-            m_data(1,2) = a10*b02 + a11*b12 + a12*b22;
+            m_data(0, 0) = a00 * b00 + a01 * b10 + a02 * b20;
+            m_data(0, 1) = a00 * b01 + a01 * b11 + a02 * b21;
+            m_data(0, 2) = a00 * b02 + a01 * b12 + a02 * b22;
+            m_data(1, 0) = a10 * b00 + a11 * b10 + a12 * b20;
+            m_data(1, 1) = a10 * b01 + a11 * b11 + a12 * b21;
+            m_data(1, 2) = a10 * b02 + a11 * b12 + a12 * b22;
             break;
 
           case 3u * 16u + 3u * 4u + 1u:
-            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
-            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
-            m_data(2,0) = a20*b00 + a21*b10 + a22*b20;
+            m_data(0, 0) = a00 * b00 + a01 * b10 + a02 * b20;
+            m_data(1, 0) = a10 * b00 + a11 * b10 + a12 * b20;
+            m_data(2, 0) = a20 * b00 + a21 * b10 + a22 * b20;
             break;
 
           case 3u * 16u + 3u * 4u + 2u:
-            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
-            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
-            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
-            m_data(1,1) = a10*b01 + a11*b11 + a12*b21;
-            m_data(2,0) = a20*b00 + a21*b10 + a22*b20;
-            m_data(2,1) = a20*b01 + a21*b11 + a22*b21;
+            m_data(0, 0) = a00 * b00 + a01 * b10 + a02 * b20;
+            m_data(0, 1) = a00 * b01 + a01 * b11 + a02 * b21;
+            m_data(1, 0) = a10 * b00 + a11 * b10 + a12 * b20;
+            m_data(1, 1) = a10 * b01 + a11 * b11 + a12 * b21;
+            m_data(2, 0) = a20 * b00 + a21 * b10 + a22 * b20;
+            m_data(2, 1) = a20 * b01 + a21 * b11 + a22 * b21;
             break;
 
           case 3u * 16u + 3u * 4u + 3u:
-            m_data(0,0) = a00*b00 + a01*b10 + a02*b20;
-            m_data(0,1) = a00*b01 + a01*b11 + a02*b21;
-            m_data(0,2) = a00*b02 + a01*b12 + a02*b22;
-            m_data(1,0) = a10*b00 + a11*b10 + a12*b20;
-            m_data(1,1) = a10*b01 + a11*b11 + a12*b21;
-            m_data(1,2) = a10*b02 + a11*b12 + a12*b22;
-            m_data(2,0) = a20*b00 + a21*b10 + a22*b20;
-            m_data(2,1) = a20*b01 + a21*b11 + a22*b21;
-            m_data(2,2) = a20*b02 + a21*b12 + a22*b22;
+            m_data(0, 0) = a00 * b00 + a01 * b10 + a02 * b20;
+            m_data(0, 1) = a00 * b01 + a01 * b11 + a02 * b21;
+            m_data(0, 2) = a00 * b02 + a01 * b12 + a02 * b22;
+            m_data(1, 0) = a10 * b00 + a11 * b10 + a12 * b20;
+            m_data(1, 1) = a10 * b01 + a11 * b11 + a12 * b21;
+            m_data(1, 2) = a10 * b02 + a11 * b12 + a12 * b22;
+            m_data(2, 0) = a20 * b00 + a21 * b10 + a22 * b20;
+            m_data(2, 1) = a20 * b01 + a21 * b11 + a22 * b21;
+            m_data(2, 2) = a20 * b02 + a21 * b12 + a22 * b22;
             break;
 
           default:
@@ -1550,12 +1598,20 @@ namespace Rodin::Math
       Data m_data;
   };
 
-  /// @brief Scalar-times-matrix product.
-  template <class Scalar>
-  [[nodiscard]] inline
-  SpatialMatrix<Scalar>
-  operator*(const Scalar& s, const SpatialMatrix<Scalar>& A) noexcept
+  /** @brief Scalar-times-matrix product with real/complex promotion.
+   * Arithmetic coefficients are converted to Real for a complex matrix,
+   * preserving real-times-complex arithmetic rather than complexifying them.
+   */
+  template <class LHSScalar, class RHSScalar>
+    requires(std::is_arithmetic_v<LHSScalar> || std::is_same_v<LHSScalar, Complex>)
+  [[nodiscard]] inline auto operator*(
+    const LHSScalar& value, const SpatialMatrix<RHSScalar>& A) noexcept
   {
+    using Coefficient = std::conditional_t<std::is_same_v<RHSScalar, Complex> &&
+        std::is_arithmetic_v<LHSScalar>,
+      Real, LHSScalar>;
+    using Scalar = typename FormLanguage::Mult<Coefficient, RHSScalar>::Type;
+    const Coefficient s = value;
     SpatialMatrix<Scalar> C(A.rows(), A.cols());
     const auto r = A.rows();
     const auto c = A.cols();
@@ -1637,15 +1693,17 @@ namespace Rodin::Math
         switch (r)
         {
           case 0: return C;
-          case 1: C(0,0) = static_cast<OutScalar>(A(0,0)) * x0; return C;
+          case 1:
+            C(0, 0) = static_cast<OutScalar>(A(0, 0)) * x0;
+            return C;
           case 2:
-            C(0,0) = static_cast<OutScalar>(A(0,0)) * x0;
-            C(1,0) = static_cast<OutScalar>(A(1,0)) * x0;
+            C(0, 0) = static_cast<OutScalar>(A(0, 0)) * x0;
+            C(1, 0) = static_cast<OutScalar>(A(1, 0)) * x0;
             return C;
           case 3:
-            C(0,0) = static_cast<OutScalar>(A(0,0)) * x0;
-            C(1,0) = static_cast<OutScalar>(A(1,0)) * x0;
-            C(2,0) = static_cast<OutScalar>(A(2,0)) * x0;
+            C(0, 0) = static_cast<OutScalar>(A(0, 0)) * x0;
+            C(1, 0) = static_cast<OutScalar>(A(1, 0)) * x0;
+            C(2, 0) = static_cast<OutScalar>(A(2, 0)) * x0;
             return C;
           default:
             assert(false);
@@ -1661,22 +1719,22 @@ namespace Rodin::Math
         {
           case 0: return C;
           case 1:
-            C(0,0) = static_cast<OutScalar>(A(0,0)) * x0
-                   + static_cast<OutScalar>(A(0,1)) * x1;
+            C(0, 0) =
+              static_cast<OutScalar>(A(0, 0)) * x0 + static_cast<OutScalar>(A(0, 1)) * x1;
             return C;
           case 2:
-            C(0,0) = static_cast<OutScalar>(A(0,0)) * x0
-                   + static_cast<OutScalar>(A(0,1)) * x1;
-            C(1,0) = static_cast<OutScalar>(A(1,0)) * x0
-                   + static_cast<OutScalar>(A(1,1)) * x1;
+            C(0, 0) =
+              static_cast<OutScalar>(A(0, 0)) * x0 + static_cast<OutScalar>(A(0, 1)) * x1;
+            C(1, 0) =
+              static_cast<OutScalar>(A(1, 0)) * x0 + static_cast<OutScalar>(A(1, 1)) * x1;
             return C;
           case 3:
-            C(0,0) = static_cast<OutScalar>(A(0,0)) * x0
-                   + static_cast<OutScalar>(A(0,1)) * x1;
-            C(1,0) = static_cast<OutScalar>(A(1,0)) * x0
-                   + static_cast<OutScalar>(A(1,1)) * x1;
-            C(2,0) = static_cast<OutScalar>(A(2,0)) * x0
-                   + static_cast<OutScalar>(A(2,1)) * x1;
+            C(0, 0) =
+              static_cast<OutScalar>(A(0, 0)) * x0 + static_cast<OutScalar>(A(0, 1)) * x1;
+            C(1, 0) =
+              static_cast<OutScalar>(A(1, 0)) * x0 + static_cast<OutScalar>(A(1, 1)) * x1;
+            C(2, 0) =
+              static_cast<OutScalar>(A(2, 0)) * x0 + static_cast<OutScalar>(A(2, 1)) * x1;
             return C;
           default:
             assert(false);
@@ -1693,28 +1751,22 @@ namespace Rodin::Math
         {
           case 0: return C;
           case 1:
-            C(0,0) = static_cast<OutScalar>(A(0,0)) * x0
-                   + static_cast<OutScalar>(A(0,1)) * x1
-                   + static_cast<OutScalar>(A(0,2)) * x2;
+            C(0, 0) = static_cast<OutScalar>(A(0, 0)) * x0 +
+              static_cast<OutScalar>(A(0, 1)) * x1 + static_cast<OutScalar>(A(0, 2)) * x2;
             return C;
           case 2:
-            C(0,0) = static_cast<OutScalar>(A(0,0)) * x0
-                   + static_cast<OutScalar>(A(0,1)) * x1
-                   + static_cast<OutScalar>(A(0,2)) * x2;
-            C(1,0) = static_cast<OutScalar>(A(1,0)) * x0
-                   + static_cast<OutScalar>(A(1,1)) * x1
-                   + static_cast<OutScalar>(A(1,2)) * x2;
+            C(0, 0) = static_cast<OutScalar>(A(0, 0)) * x0 +
+              static_cast<OutScalar>(A(0, 1)) * x1 + static_cast<OutScalar>(A(0, 2)) * x2;
+            C(1, 0) = static_cast<OutScalar>(A(1, 0)) * x0 +
+              static_cast<OutScalar>(A(1, 1)) * x1 + static_cast<OutScalar>(A(1, 2)) * x2;
             return C;
           case 3:
-            C(0,0) = static_cast<OutScalar>(A(0,0)) * x0
-                   + static_cast<OutScalar>(A(0,1)) * x1
-                   + static_cast<OutScalar>(A(0,2)) * x2;
-            C(1,0) = static_cast<OutScalar>(A(1,0)) * x0
-                   + static_cast<OutScalar>(A(1,1)) * x1
-                   + static_cast<OutScalar>(A(1,2)) * x2;
-            C(2,0) = static_cast<OutScalar>(A(2,0)) * x0
-                   + static_cast<OutScalar>(A(2,1)) * x1
-                   + static_cast<OutScalar>(A(2,2)) * x2;
+            C(0, 0) = static_cast<OutScalar>(A(0, 0)) * x0 +
+              static_cast<OutScalar>(A(0, 1)) * x1 + static_cast<OutScalar>(A(0, 2)) * x2;
+            C(1, 0) = static_cast<OutScalar>(A(1, 0)) * x0 +
+              static_cast<OutScalar>(A(1, 1)) * x1 + static_cast<OutScalar>(A(1, 2)) * x2;
+            C(2, 0) = static_cast<OutScalar>(A(2, 0)) * x0 +
+              static_cast<OutScalar>(A(2, 1)) * x1 + static_cast<OutScalar>(A(2, 2)) * x2;
             return C;
           default:
             assert(false);
@@ -1728,12 +1780,17 @@ namespace Rodin::Math
     }
   }
 
-  /// @brief Matrix-times-scalar product.
-  template <class Scalar>
-  [[nodiscard]] inline
-  SpatialMatrix<Scalar>
-  operator*(const SpatialMatrix<Scalar>& A, const Scalar& s) noexcept
+  /// @brief Matrix-times-scalar product with real/complex promotion.
+  template <class LHSScalar, class RHSScalar>
+    requires(std::is_arithmetic_v<RHSScalar> || std::is_same_v<RHSScalar, Complex>)
+  [[nodiscard]] inline auto operator*(
+    const SpatialMatrix<LHSScalar>& A, const RHSScalar& value) noexcept
   {
+    using Coefficient = std::conditional_t<std::is_same_v<LHSScalar, Complex> &&
+        std::is_arithmetic_v<RHSScalar>,
+      Real, RHSScalar>;
+    using Scalar = typename FormLanguage::Mult<LHSScalar, Coefficient>::Type;
+    const Coefficient s = value;
     SpatialMatrix<Scalar> C(A.rows(), A.cols());
 
     const std::uint8_t r = A.rows();
@@ -1801,12 +1858,13 @@ namespace Rodin::Math
     }
   }
 
-  /// @brief Matrix-matrix product.
-  template <class Scalar>
-  [[nodiscard]] inline
-  SpatialMatrix<Scalar>
-  operator*(const SpatialMatrix<Scalar>& A, const SpatialMatrix<Scalar>& B) noexcept
+  /// @brief Matrix-matrix product with real/complex promotion.
+  template <class LHSScalar, class RHSScalar>
+  [[nodiscard]] inline SpatialMatrix<
+    typename FormLanguage::Mult<LHSScalar, RHSScalar>::Type>
+  operator*(const SpatialMatrix<LHSScalar>& A, const SpatialMatrix<RHSScalar>& B) noexcept
   {
+    using Scalar = typename FormLanguage::Mult<LHSScalar, RHSScalar>::Type;
     assert(A.cols() == B.rows());
 
     const std::uint8_t r = A.rows();
@@ -2289,13 +2347,19 @@ namespace Rodin::Math
         Scalar s2 = Scalar(0);
         switch (r)
         {
-          case 3: s2 += v[2] * m(2,2); [[fallthrough]];
-          case 2: s2 += v[1] * m(1,2); [[fallthrough]];
-          case 1: s2 += v[0] * m(0,2); [[fallthrough]];
+          case 3:
+            s2 += v[2] * m(2, 2);
+            [[fallthrough]];
+          case 2:
+            s2 += v[1] * m(1, 2);
+            [[fallthrough]];
+          case 1:
+            s2 += v[0] * m(0, 2);
+            [[fallthrough]];
           case 0: break;
           default: assert(false);
         }
-        result(0,2) = s2;
+        result(0, 2) = s2;
         [[fallthrough]];
       }
       case 2:
@@ -2303,13 +2367,19 @@ namespace Rodin::Math
         Scalar s1 = Scalar(0);
         switch (r)
         {
-          case 3: s1 += v[2] * m(2,1); [[fallthrough]];
-          case 2: s1 += v[1] * m(1,1); [[fallthrough]];
-          case 1: s1 += v[0] * m(0,1); [[fallthrough]];
+          case 3:
+            s1 += v[2] * m(2, 1);
+            [[fallthrough]];
+          case 2:
+            s1 += v[1] * m(1, 1);
+            [[fallthrough]];
+          case 1:
+            s1 += v[0] * m(0, 1);
+            [[fallthrough]];
           case 0: break;
           default: assert(false);
         }
-        result(0,1) = s1;
+        result(0, 1) = s1;
         [[fallthrough]];
       }
       case 1:
@@ -2317,13 +2387,19 @@ namespace Rodin::Math
         Scalar s0 = Scalar(0);
         switch (r)
         {
-          case 3: s0 += v[2] * m(2,0); [[fallthrough]];
-          case 2: s0 += v[1] * m(1,0); [[fallthrough]];
-          case 1: s0 += v[0] * m(0,0); [[fallthrough]];
+          case 3:
+            s0 += v[2] * m(2, 0);
+            [[fallthrough]];
+          case 2:
+            s0 += v[1] * m(1, 0);
+            [[fallthrough]];
+          case 1:
+            s0 += v[0] * m(0, 0);
+            [[fallthrough]];
           case 0: break;
           default: assert(false);
         }
-        result(0,0) = s0;
+        result(0, 0) = s0;
         break;
       }
       case 0:
@@ -2427,6 +2503,23 @@ namespace Rodin::Math
       static_cast<Eigen::Index>(m.rows()),
       static_cast<Eigen::Index>(m.cols()));
     return os;
+  }
+}
+
+namespace Rodin::Math
+{
+  /// @brief Divide every active matrix entry by a scalar.
+  template <class Scalar, class Value>
+    requires(std::is_arithmetic_v<Value> || std::is_same_v<Value, Complex>)
+  auto operator/(const SpatialMatrix<Scalar>& matrix, const Value& divisor)
+  {
+    using Result = std::common_type_t<Scalar, Value>;
+    SpatialMatrix<Result> value(matrix.rows(), matrix.cols());
+    for (size_t row = 0; row < matrix.rows(); ++row)
+      for (size_t col = 0; col < matrix.cols(); ++col)
+        value(row, col) =
+          static_cast<Result>(matrix(row, col)) / static_cast<Result>(divisor);
+    return value;
   }
 }
 

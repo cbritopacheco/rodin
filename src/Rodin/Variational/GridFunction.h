@@ -240,8 +240,8 @@ namespace Rodin::Variational
         return m_ref.get().z();
       }
 
-      template <class DataType>
       /// @brief Sets the degree-of-freedom data.
+      template <class DataType>
       constexpr decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
         return m_ref.get().setData(data, offset);
@@ -357,9 +357,9 @@ namespace Rodin::Variational
       /// @brief Parent CRTP reference type.
       using Parent = GridFunctionBaseReference<Derived>;
 
-      static_assert(
-          std::is_same_v<RangeType, ScalarType> ||
-          FormLanguage::IsVectorRange<RangeType>::Value);
+      static_assert(std::is_same_v<RangeType, ScalarType> ||
+        FormLanguage::IsVectorRange<RangeType>::Value ||
+        FormLanguage::IsMatrixRange<RangeType>::Value);
 
       /**
        * @brief Constructs a grid function on the given finite element space.
@@ -539,6 +539,20 @@ namespace Rodin::Variational
       size_t getDimension() const
       {
         return m_fes.get().getVectorDimension();
+      }
+
+      /// @brief Returns the number of matrix rows.
+      size_t getRows() const
+        requires FormLanguage::IsMatrixRange<RangeType>::Value
+      {
+        return m_fes.get().getRows();
+      }
+
+      /// @brief Returns the number of matrix columns.
+      size_t getColumns() const
+        requires FormLanguage::IsMatrixRange<RangeType>::Value
+      {
+        return m_fes.get().getColumns();
       }
 
       /**

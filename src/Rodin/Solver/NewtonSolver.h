@@ -273,6 +273,13 @@ namespace Rodin::Solver
   class NewtonSolver final
     : public NewtonSolverBase<LinearSolver>
   {
+      /// @brief Newton work budget; does not guarantee convergence.
+      static constexpr size_t DefaultMaxIterations = 100;
+      /// @brief Absolute residual-norm tolerance in the assembled residual scaling.
+      static constexpr Real DefaultAbsoluteTolerance = 1e-12;
+      /// @brief Dimensionless residual tolerance relative to the initial residual.
+      static constexpr Real DefaultRelativeTolerance = 1e-8;
+
     public:
       /**
        * @brief Reason why the most recent solve terminated.
@@ -422,9 +429,9 @@ namespace Rodin::Solver
        */
       explicit NewtonSolver(LinearSolver& solver)
         : Parent(solver),
-          m_maxIt(100),
-          m_atol(1e-12),
-          m_rtol(1e-8),
+          m_maxIt(DefaultMaxIterations),
+          m_atol(DefaultAbsoluteTolerance),
+          m_rtol(DefaultRelativeTolerance),
           m_stol(0.0),
           m_alpha(1.0),
           m_monitor(std::nullopt),

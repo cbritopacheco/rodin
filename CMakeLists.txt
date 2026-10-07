@@ -19,6 +19,7 @@ project(Rodin VERSION 0.0.1 LANGUAGES CXX C)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(RodinUtilities)
+include(RodinThirdParty)
 include(RodinInstall)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -343,39 +344,16 @@ if (RODIN_BUILD_SRC)
   if (RODIN_BUILD_UNIT_TESTS OR RODIN_BUILD_BENCHMARKS OR
       RODIN_BUILD_MANUFACTURED_TESTS OR RODIN_BUILD_CONVERGENCE_TESTS)
     # ---- GoogleTest ----
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
-    # GoogleTest builds itself with -Wall; GCC then flags gtest-death-test.cc
-    # with -Wmaybe-uninitialized. Vendored code, so silence instead of patch.
-    foreach(_gtest_target gtest gtest_main gmock gmock_main)
-      if(TARGET ${_gtest_target})
-        target_compile_options(${_gtest_target} PRIVATE
-          $<$<CXX_COMPILER_ID:GNU>:-Wno-maybe-uninitialized>)
-      endif()
-    endforeach()
+    rodin_add_googletest()
     if (RODIN_BUILD_BENCHMARKS)
-      if (RODIN_LTO)
-        set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)
-      endif()
-      set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
-      set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
-      add_subdirectory(third-party/benchmark EXCLUDE_FROM_ALL)
+      rodin_add_benchmark()
     endif()
 
     add_subdirectory(tests)
   endif()
 
   if (RODIN_WITH_PY)
-    set(Python3_FIND_REGISTRY LAST)
-    set(Python3_FIND_VIRTUALENV FIRST)
-    find_package(Python 3.6 COMPONENTS Interpreter Development REQUIRED)
-    execute_process(
-      COMMAND "${PYTHON_EXECUTABLE}" -c
-              "import pybind11; print(pybind11.get_cmake_dir())"
-      OUTPUT_VARIABLE _tmp_dir
-      OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
-    list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
-    add_subdirectory(third-party/pybind11)
+    rodin_add_pybind11()
     add_subdirectory(py)
   endif()
 endif()

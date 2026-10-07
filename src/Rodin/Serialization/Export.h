@@ -16,6 +16,7 @@
 #include <boost/serialization/export.hpp>
 #include "Rodin/Geometry/ParametricTransformation.h"
 #include "Rodin/Variational/P1/P1Element.h"
+#include "Rodin/Variational/H1/H1Element.h"
 
 // ParametricTransformation<FE> requires a scalar real-valued finite
 // element (its static_assert enforces FE::RangeType == Real): geometry
@@ -27,5 +28,21 @@
 /// @brief Registers the real P1 parametric transformation for Boost export.
 BOOST_CLASS_EXPORT(
   Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealP1Element>);
+
+// Built-in curved geometry orders covered by MPI shard transfer. Applications
+// using other FE orders/types must register their transformation instantiations
+// with Boost.Serialization before transferring shards.
+/// @brief Registers real H1 order one geometry for MPI shard transport.
+BOOST_CLASS_EXPORT(
+  Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealH1Element<1>>);
+/// @brief Registers real H1 order two geometry for MPI shard transport.
+BOOST_CLASS_EXPORT(
+  Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealH1Element<2>>);
+/// @brief Registers real H1 order three geometry for MPI shard transport.
+BOOST_CLASS_EXPORT(
+  Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealH1Element<3>>);
+/// @brief Registers real H1 order four geometry for MPI shard transport.
+BOOST_CLASS_EXPORT(
+  Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealH1Element<4>>);
 
 #endif

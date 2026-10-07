@@ -57,6 +57,76 @@ TEST(Location_AABB, Locates0DVertex)
   EXPECT_EQ(p->getPolytope().getIndex(), 0);
 }
 
+class AABBGeometryTest : public ::testing::TestWithParam<Polytope::Type>
+{};
+
+TEST_P(AABBGeometryTest, LocatesMappedNonCentroidPoint)
+{
+  const auto type = GetParam();
+  const Polytope::Traits traits(type);
+  const size_t dimension = traits.getDimension();
+  if (type == Polytope::Type::Point)
+  {
+    Mesh mesh = Mesh<Context::Local>::Builder()
+                  .initialize(3)
+                  .nodes(1)
+                  .vertex({0.25, 0.5, 0.75})
+                  .finalize();
+    AABB locator(mesh);
+    const auto located = locator.locate(0, point({0.25, 0.5, 0.75}));
+    ASSERT_TRUE(located.has_value());
+    EXPECT_EQ(located->getPolytope().getGeometry(), type);
+    EXPECT_FALSE(locator.locate(0, point({-1, -1, -1})).has_value());
+    return;
+  }
+
+  Array<size_t> grid(dimension);
+  grid.setConstant(3);
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(type, grid);
+  AABB locator(mesh);
+  const Math::SpatialPoint rc =
+    Real(0.75) * traits.getCentroid() + Real(0.25) * traits.getVertex(0);
+  for (auto cell = mesh.getCell(); cell; ++cell)
+  {
+    Math::SpatialPoint x;
+    cell->getTransformation().transform(x, rc);
+    const auto located = locator.locate(x);
+    ASSERT_TRUE(located.has_value()) << "cell=" << cell->getIndex();
+    EXPECT_EQ(located->getPolytope().getGeometry(), type);
+    Math::SpatialPoint mapped;
+    located->getPolytope().getTransformation().transform(
+      mapped, located->getReferenceCoordinates());
+    EXPECT_LT((mapped - x).norm(), 1e-9);
+  }
+  Math::SpatialPoint outside(dimension);
+  outside.setConstant(-1);
+  EXPECT_FALSE(locator.locate(outside).has_value());
+}
+
+INSTANTIATE_TEST_SUITE_P(AllGeometries, AABBGeometryTest,
+  ::testing::ValuesIn(Polytope::Types), [](const auto& info) {
+    switch (info.param)
+    {
+      case Polytope::Type::Point:
+        return "Point";
+      case Polytope::Type::Segment:
+        return "Segment";
+      case Polytope::Type::Triangle:
+        return "Triangle";
+      case Polytope::Type::Quadrilateral:
+        return "Quadrilateral";
+      case Polytope::Type::Tetrahedron:
+        return "Tetrahedron";
+      case Polytope::Type::Hexahedron:
+        return "Hexahedron";
+      case Polytope::Type::Pyramid:
+        return "Pyramid";
+      case Polytope::Type::Wedge:
+        return "Wedge";
+    }
+    return "Unknown";
+  });
+
 TEST(Location_AABB, CurvedP2MappedPointsAcrossTreeLeaves)
 {
   for (const auto type : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
@@ -128,6 +198,265 @@ TEST(Location_AABB, RejectsSingularNewtonSystem)
 
   AABB locator(mesh);
   EXPECT_FALSE(locator.locate(point({0.0, 0.05})).has_value());
+}
+
+TEST(Location_AABB, LocatesMappedPointWhenCentroidNewtonStepIsZero)
+{
+  const auto map = [](Real t) {
+    const Real s = t - Real(0.5);
+    return point({s, Real(8) * s * s + s});
+  };
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(2)
+                .vertex({map(0)[0], map(0)[1]})
+                .vertex({map(1)[0], map(1)[1]})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  Variational::RealH1Element<2> element(Polytope::Type::Segment);
+  PointCloud nodes(2, element.getCount());
+  for (size_t a = 0; a < element.getCount(); ++a)
+  {
+    const auto x = map(element.getNode(a)[0]);
+    nodes(0, a) = x[0];
+    nodes(1, a) = x[1];
+  }
+  mesh.setPolytopeTransformation({1, 0},
+    new ParametricTransformation<Variational::RealH1Element<2>>(
+      std::move(nodes), element));
+
+  AABB locator(mesh);
+  const auto located = locator.locate(1, map(Real(0.25)));
+  ASSERT_TRUE(located.has_value());
+  EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.25, 1e-8);
+}
+
+TEST(Location_AABB, LocatesMappedPointAfterOversizedNewtonStep)
+{
+  const auto map = [](Real t) {
+    const Real s = t - Real(0.5);
+    return s * s * s + Real(1e-5) * t;
+  };
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(1)
+                .nodes(2)
+                .vertex({map(0)})
+                .vertex({map(1)})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  Variational::RealH1Element<3> element(Polytope::Type::Segment);
+  PointCloud nodes(1, element.getCount());
+  for (size_t a = 0; a < element.getCount(); ++a)
+    nodes(0, a) = map(element.getNode(a)[0]);
+  mesh.setPolytopeTransformation({1, 0},
+    new ParametricTransformation<Variational::RealH1Element<3>>(
+      std::move(nodes), element));
+
+  AABB locator(mesh);
+  const auto located = locator.locate(point({map(Real(0.9))}));
+  ASSERT_TRUE(located.has_value());
+  EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.9, 1e-8);
+}
+
+TEST(Location_AABB, BacktracksAfterNonFiniteTrialMapping)
+{
+  class Transformation final : public PolytopeTransformation
+  {
+    public:
+      explicit Transformation(Real invalid)
+        : PolytopeTransformation(1, 1),
+          m_invalid(invalid)
+      {}
+
+      static Real map(Real t)
+      {
+        const Real s = t - Real(0.5);
+        return s * s * s + Real(1e-3) * t;
+      }
+
+      size_t getOrder() const override
+      {
+        return 3;
+      }
+
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
+      {
+        pc.resize(1);
+        if (rc[0] < 0 || rc[0] > 1)
+        {
+          ++m_invalidTrials;
+          pc[0] = m_invalid;
+        }
+        else
+          pc[0] = map(rc[0]);
+      }
+
+      void jacobian(
+        Math::SpatialMatrix<Real>& jac, const Math::SpatialPoint& rc) const override
+      {
+        jac.resize(1, 1);
+        const Real s = rc[0] - Real(0.5);
+        jac(0, 0) = Real(3) * s * s + Real(1e-3);
+      }
+
+      Transformation* copy() const noexcept override
+      {
+        return new Transformation(*this);
+      }
+
+      mutable size_t m_invalidTrials = 0;
+
+    private:
+      Real m_invalid;
+  };
+
+  for (Real invalid :
+    {std::numeric_limits<Real>::quiet_NaN(), std::numeric_limits<Real>::infinity()})
+  {
+    Mesh mesh = Mesh<Context::Local>::Builder()
+                  .initialize(1)
+                  .nodes(2)
+                  .vertex({Transformation::map(0)})
+                  .vertex({Transformation::map(1)})
+                  .polytope(Polytope::Type::Segment, {0, 1})
+                  .finalize();
+    auto* transformation = new Transformation(invalid);
+    mesh.setPolytopeTransformation({1, 0}, transformation);
+    AABB locator(mesh);
+    const auto located = locator.locate(point({Transformation::map(0.9)}));
+    ASSERT_TRUE(located.has_value());
+    EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.9, 1e-8);
+    EXPECT_GT(transformation->m_invalidTrials, 0);
+  }
+}
+
+TEST(Location_AABB, LocatesPointOnThinEmbeddedTriangle)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(3)
+                .nodes(3)
+                .vertex({0, 0, 0})
+                .vertex({1, 0, 0})
+                .vertex({1, 1e-8, 0})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
+  AABB locator(mesh);
+  const auto located = locator.locate(2, point({0.4, 2e-9, 0}));
+  ASSERT_TRUE(located.has_value());
+  EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.2, 1e-8);
+  EXPECT_NEAR(located->getReferenceCoordinates()[1], 0.2, 1e-8);
+}
+
+TEST(Location_AABB, BroadPhaseAgreesWithExhaustiveNarrowPhase)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(3)
+                .vertex({0, 0})
+                .vertex({1, 0})
+                .vertex({1, 1})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
+  const auto x = point({-1.5e-10, -0.75e-10});
+  AABB locator(mesh);
+  AABB exhaustive(mesh);
+  exhaustive.setExhaustiveFallback(true);
+  EXPECT_EQ(locator.locate(x).has_value(), exhaustive.locate(x).has_value());
+}
+
+TEST(Location_AABB, ClipsNearBoundaryReferencePointAndChecksPhysicalResidual)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(3)
+                .vertex({0, 0})
+                .vertex({1, 0})
+                .vertex({0, 1})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
+  AABB locator(mesh);
+  const auto located = locator.locate(point({-5e-11, 0.2}));
+  ASSERT_TRUE(located.has_value());
+  EXPECT_GE(located->getReferenceCoordinates()[0], 0);
+  EXPECT_NEAR(located->getReferenceCoordinates()[1], 0.2, 1e-10);
+  Math::SpatialPoint mapped;
+  located->getPolytope().getTransformation().transform(
+    mapped, located->getReferenceCoordinates());
+  EXPECT_LE(
+    (mapped - point({-5e-11, 0.2})).norm(), locator.getTolerance() * std::sqrt(Real(2)));
+}
+
+TEST(Location_AABB, ResolvesReferenceCoordinateOnSmallCellOfLargeMesh)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(1)
+                .nodes(3)
+                .vertex({0})
+                .vertex({1e-6})
+                .vertex({1e6})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  AABB locator(mesh);
+  const auto located = locator.locate(point({0.9e-6}));
+  ASSERT_TRUE(located.has_value());
+  EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.9, 1e-8);
+}
+
+TEST(Location_AABB, ResolvesReferenceCoordinateOnSmallCurvedCellOfLargeMesh)
+{
+  const auto map = [](Real t) {
+    return Real(1e-12) * (t + Real(0.2) * t * (Real(1) - t));
+  };
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(1)
+                .nodes(3)
+                .vertex({map(0)})
+                .vertex({map(1)})
+                .vertex({1})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  Variational::RealH1Element<2> element(Polytope::Type::Segment);
+  PointCloud nodes(1, element.getCount());
+  for (size_t a = 0; a < element.getCount(); ++a)
+    nodes(0, a) = map(element.getNode(a)[0]);
+  mesh.setPolytopeTransformation({1, 0},
+    new ParametricTransformation<Variational::RealH1Element<2>>(
+      std::move(nodes), element));
+
+  AABB locator(mesh);
+  const auto located = locator.locate(point({map(Real(0.9))}));
+  ASSERT_TRUE(located.has_value());
+  EXPECT_NEAR(located->getReferenceCoordinates()[0], 0.9, 1e-8);
+}
+
+TEST(Location_AABB, ResolvesReferenceCoordinateOnAnisotropicCell)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(3)
+                .vertex({0, 0})
+                .vertex({1, 0})
+                .vertex({0, 1e-12})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
+  AABB locator(mesh);
+  const auto located = locator.locate(point({Real(1) / Real(3), 0.6e-12}));
+  ASSERT_TRUE(located.has_value());
+  EXPECT_NEAR(located->getReferenceCoordinates()[0], Real(1) / Real(3), 1e-8);
+  EXPECT_NEAR(located->getReferenceCoordinates()[1], 0.6, 1e-8);
+}
+
+TEST(Location_AABB, RejectsOffManifoldPointInsideEmbeddedSegmentBox)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(2)
+                .vertex({0, 0})
+                .vertex({1, 1})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  AABB locator(mesh);
+  EXPECT_FALSE(locator.locate(1, point({0.4, 0.6})).has_value());
 }
 
 TEST(Location_AABB, Locates1DSegment)
@@ -614,6 +943,8 @@ namespace
 
     AABB locator(mesh);
     locator.setExhaustiveFallback(false);
+    AABB pruned(mesh);
+    pruned.setProjectionPruning(true);
 
     const Polytope::Traits traits(type);
     const size_t nv = traits.getVertexCount();
@@ -645,6 +976,20 @@ namespace
         const auto located = locator.locate(x);
         ASSERT_TRUE(located.has_value()) << "type=" << static_cast<int>(type)
                                          << " K=" << K << " cell=" << cell->getIndex();
+
+        const auto filtered = pruned.locate(x);
+        ASSERT_TRUE(filtered.has_value());
+        EXPECT_EQ(filtered->getPolytope().getIndex(), located->getPolytope().getIndex());
+        EXPECT_LT(
+          (filtered->getReferenceCoordinates() - located->getReferenceCoordinates())
+            .norm(),
+          1e-9);
+
+        if (located->getPolytope().getIndex() == cell->getIndex())
+        {
+          EXPECT_LT((located->getReferenceCoordinates() - rc).norm(), 1e-9)
+            << "type=" << static_cast<int>(type) << " K=" << K;
+        }
 
         Math::SpatialPoint mapped;
         located->getPolytope().getTransformation().transform(
@@ -708,4 +1053,249 @@ TEST(Location_AABB, DegreeOneGeometryBasisIsANonNegativePartitionOfUnity)
       EXPECT_NEAR(sum, 1.0, 1e-12) << "type=" << static_cast<int>(type);
     }
   }
+}
+
+class QuadraticShear : public PolytopeTransformation
+{
+  public:
+    QuadraticShear()
+      : PolytopeTransformation(2, 2)
+    {}
+    size_t getOrder() const override
+    {
+      return 2;
+    }
+    void transform(Math::SpatialPoint& x, const Math::SpatialPoint& r) const override
+    {
+      x = point({r[0], r[1] + 4 * r[0] * (1 - r[0])});
+    }
+    void jacobian(
+      Math::SpatialMatrix<Real>& j, const Math::SpatialPoint& r) const override
+    {
+      ++jacobianCalls;
+      j.resize(2, 2);
+      j(0, 0) = 1;
+      j(0, 1) = 0;
+      j(1, 0) = 4 - 8 * r[0];
+      j(1, 1) = 1;
+    }
+    /// Counts dependency calls without altering the fixture map.
+    mutable size_t jacobianCalls = 0;
+
+    QuadraticShear* copy() const noexcept override
+    {
+      return new QuadraticShear(*this);
+    }
+};
+TEST(Location_AABB, QuadraticTensorMap)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(4)
+                .vertex({0, 0})
+                .vertex({1, 0})
+                .vertex({1, 1})
+                .vertex({0, 1})
+                .polytope(Polytope::Type::Quadrilateral, {0, 1, 2, 3})
+                .finalize();
+  mesh.setPolytopeTransformation({2, 0}, new QuadraticShear());
+  AABB locator(mesh);
+  const auto x = point({0.5, 1.5});
+  EXPECT_TRUE(locator.locate(x).has_value());
+  locator.setExhaustiveFallback(true);
+  EXPECT_TRUE(locator.locate(x).has_value());
+}
+TEST(Location_AABB, UnderflowedResidual)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(1)
+                .nodes(2)
+                .vertex({0})
+                .vertex({1e-200})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  AABB locator(mesh);
+  locator.setTolerance(1e-210);
+  const auto hit = locator.locate(point({0.75e-200}));
+  ASSERT_TRUE(hit.has_value());
+  EXPECT_NEAR(hit->getReferenceCoordinates()[0], 0.75, 1e-10);
+}
+TEST(Location_AABB, OverflowedPhysicalTolerance)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(2)
+                .vertex({0, 0})
+                .vertex({1e200, 0})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  AABB locator(mesh);
+  EXPECT_FALSE(locator.locate(point({0.5e200, 0.1e200})).has_value());
+}
+TEST(Location_AABB, ExtremeDeterminantScales)
+{
+  // Cubing these scales produces a zero, subnormal, or overflowing determinant.
+  for (Real scale : {1e-110, 1e-107, 1e110})
+  {
+    SCOPED_TRACE(scale);
+    Mesh mesh = Mesh<Context::Local>::Builder()
+                  .initialize(3)
+                  .nodes(4)
+                  .vertex({0, 0, 0})
+                  .vertex({scale, 0, 0})
+                  .vertex({0, scale, 0})
+                  .vertex({0, 0, scale})
+                  .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+                  .finalize();
+    AABB locator(mesh);
+    const auto hit = locator.locate(point({0.1 * scale, 0.2 * scale, 0.3 * scale}));
+    ASSERT_TRUE(hit.has_value());
+    EXPECT_NEAR(hit->getReferenceCoordinates()[0], 0.1, 1e-10);
+    EXPECT_NEAR(hit->getReferenceCoordinates()[1], 0.2, 1e-10);
+    EXPECT_NEAR(hit->getReferenceCoordinates()[2], 0.3, 1e-10);
+  }
+}
+class QuarticSegment : public PolytopeTransformation
+{
+  public:
+    QuarticSegment()
+      : PolytopeTransformation(1, 1)
+    {}
+    size_t getOrder() const override
+    {
+      return 4;
+    }
+    void transform(Math::SpatialPoint& x, const Math::SpatialPoint& r) const override
+    {
+      const Real s = r[0] - 0.5;
+      x = point({s / 16 + s * s * s * (1 - s)});
+    }
+    void jacobian(
+      Math::SpatialMatrix<Real>& j, const Math::SpatialPoint& r) const override
+    {
+      const Real s = r[0] - 0.5;
+      j.resize(1, 1);
+      j(0, 0) = Real(1) / 16 + s * s * (3 - 4 * s);
+    }
+    QuarticSegment* copy() const noexcept override
+    {
+      return new QuarticSegment(*this);
+    }
+};
+TEST(Location_AABB, OutsideNewtonRootDoesNotExcludeInsideRoot)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(1)
+                .nodes(2)
+                .vertex({-0.21875})
+                .vertex({0.09375})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  mesh.setPolytopeTransformation({1, 0}, new QuarticSegment());
+  AABB locator(mesh);
+  EXPECT_TRUE(locator.locate(point({Real(1) / 16})).has_value());
+  locator.setExhaustiveFallback(true);
+  EXPECT_TRUE(locator.locate(point({Real(1) / 16})).has_value());
+}
+
+TEST(Location_AABB, LocatesVeryLargeEmbeddedSegment)
+{
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(2)
+                .vertex({0, 0})
+                .vertex({1e200, 0})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
+  AABB locator(mesh);
+  const auto hit = locator.locate(point({0.75e200, 0}));
+  ASSERT_TRUE(hit.has_value());
+  EXPECT_NEAR(hit->getReferenceCoordinates()[0], 0.75, 1e-10);
+}
+
+TEST(Location_AABB, RejectsInvalidToleranceConfiguration)
+{
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {2});
+  AABB locator(mesh);
+  for (Real invalid :
+    {-1.0, std::numeric_limits<Real>::infinity(), std::numeric_limits<Real>::quiet_NaN()})
+  {
+    EXPECT_THROW(locator.setTolerance(invalid), Alert::Exception);
+    EXPECT_THROW(locator.setReferenceTolerance(invalid), Alert::Exception);
+  }
+  EXPECT_TRUE(locator.locate(point({0.25})).has_value());
+}
+
+TEST(Location_AABB, HighOrderCurvedBoxesAcrossEveryGeometry)
+{
+  for (const auto type : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    checkBoxesBoundCurvedImage<4>(type, 0.15);
+}
+
+TEST(Location_AABB, HighOrderTranslatedBoundaryIsNotPruned)
+{
+  constexpr Real Translation = 1e8;
+  const auto type = Polytope::Type::Quadrilateral;
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(type, {2, 2});
+  Variational::RealH1Element<4> element(type);
+  PointCloud nodes(2, element.getCount());
+  for (size_t a = 0; a < element.getCount(); ++a)
+  {
+    const auto r = element.getNode(a);
+    nodes(0, a) = Translation + r[0];
+    nodes(1, a) = Translation + r[1] + 0.2 * r[0] * (1 - r[0]);
+  }
+  mesh.setPolytopeTransformation({2, 0},
+    new ParametricTransformation<Variational::RealH1Element<4>>(
+      std::move(nodes), element));
+  AABB locator(mesh);
+  for (const auto& r :
+    {point({0, 0}), point({1, 0}), point({0, 1}), point({1, 1}), point({0.5, 1})})
+  {
+    Math::SpatialPoint x;
+    mesh.getPolytopeTransformation(2, 0).transform(x, r);
+    EXPECT_TRUE(locator.locate(x).has_value()) << "reference=" << r;
+  }
+}
+
+TEST(Location_AABB, ProjectionPruningCanBeDisabledAndReenabled)
+{
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+  AABB locator(mesh);
+  for (bool enabled : {false, true, false})
+  {
+    locator.setProjectionPruning(enabled);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+      EXPECT_TRUE(locator.locate(physicalCentroid(mesh, *cell)).has_value());
+    EXPECT_FALSE(locator.locate(point({-1, -1, -1})).has_value());
+  }
+}
+
+TEST(Location_AABB, ProjectionPruningIsOptIn)
+{
+  Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, {2, 2});
+  mesh.setPolytopeTransformation({2, 0}, new QuadraticShear());
+  const auto& transformation =
+    static_cast<const QuadraticShear&>(mesh.getPolytopeTransformation(2, 0));
+  const auto x = point({0.5, 1.5});
+  AABB locator(mesh);
+  const auto defaultHit = locator.locate(x);
+  ASSERT_TRUE(defaultHit.has_value());
+  // This query is exactly the mapped centroid and requires no Newton solve.
+  // The default must also avoid the Jacobian used to construct hull normals.
+  EXPECT_EQ(transformation.jacobianCalls, 0u);
+  locator.setProjectionPruning(true);
+  const auto prunedHit = locator.locate(x);
+  ASSERT_TRUE(prunedHit.has_value());
+  EXPECT_GT(transformation.jacobianCalls, 0u);
+  EXPECT_EQ(defaultHit->getPolytope().getIndex(), prunedHit->getPolytope().getIndex());
+  EXPECT_EQ(
+    (defaultHit->getReferenceCoordinates() - prunedHit->getReferenceCoordinates()).norm(),
+    0);
+  transformation.jacobianCalls = 0;
+  locator.setProjectionPruning(false);
+  ASSERT_TRUE(locator.locate(x).has_value());
+  EXPECT_EQ(transformation.jacobianCalls, 0u);
 }

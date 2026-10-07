@@ -30,6 +30,19 @@ namespace Rodin::Heart::CCMLC2014::Physics
    */
   struct SolverConfig
   {
+      /// @brief Absolute denominator floor in square-root shear-stress units; legacy clamp.
+      static constexpr Real sqrtStressFloor = 1e-12;
+      /// @brief Dimensionless Quemada alpha floor before negative powers; legacy clamp.
+      static constexpr Real alphaFloor = 1e-10;
+      /// @brief Dimensionless floor on 1-q in the logarithm denominator; legacy clamp.
+      static constexpr Real oneMinusQFloor = 1e-10;
+      /// @brief Dimensionless threshold below which the logarithm contribution is suppressed.
+      static constexpr Real logArgumentFloor = 1e-12;
+      /// @brief Dimensionless denominator floor in the shape-function derivative.
+      static constexpr Real shapeDerivativeFloor = 1e-12;
+      /// @brief Dimensionless shape-function floor for the flow derivative.
+      static constexpr Real flowShapeFloor = 1e-12;
+
       /// @brief Pressure-drop threshold for the Poiseuille fallback.
       static constexpr Real pressureDropTolerance = 1.0e-12;
       /// @brief Minimum shear-rate bracket.
@@ -178,10 +191,10 @@ namespace Rodin::Heart::CCMLC2014::Physics
           const Real sqrtTau0 = std::sqrt(tau_0);
           const Real sqrtNuInfLambda = std::sqrt(nu_inf * lambda);
 
-          const Real q =
-            (sqrtTau0 - sqrtNuInfLambda) / std::max(sqrtTau0 + sqrtNuInfLambda, 1e-12);
-          const Real alpha =
-            (sqrtTau0 + sqrtNuInfLambda) / std::max(std::sqrt(tauW), 1e-12);
+          const Real q = (sqrtTau0 - sqrtNuInfLambda) /
+            std::max(sqrtTau0 + sqrtNuInfLambda, SolverConfig::sqrtStressFloor);
+          const Real alpha = (sqrtTau0 + sqrtNuInfLambda) /
+            std::max(std::sqrt(tauW), SolverConfig::sqrtStressFloor);
 
           Real P[8];
           {
@@ -220,7 +233,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
           }
           else
           {
-            const Real a = std::max(alpha, 1e-10);
+            const Real a = std::max(alpha, SolverConfig::alphaFloor);
             const Real a2 = a * a;
             const Real a7 = a2 * a2 * a2 * a;
             const Real a8 = a7 * a;
@@ -237,15 +250,16 @@ namespace Rodin::Heart::CCMLC2014::Physics
             const Real T = std::max(0.0, 1.0 - 2.0 * a * q + a2);
             const Real sqrtT = std::sqrt(T);
 
-            const Real safeDenom = std::max(1.0 - q, 1e-10);
+            const Real safeDenom = std::max(1.0 - q, SolverConfig::oneMinusQFloor);
             const Real argLog = (1.0 - a * q + sqrtT) / (a * safeDenom);
-            const Real logT = (argLog <= 1e-12) ? 0.0 : std::log(argLog);
+            const Real logT =
+              (argLog <= SolverConfig::logArgumentFloor) ? 0.0 : std::log(argLog);
 
             const Real bracket = 1.0 - (8.0 / 7.0) * a * (1.0 + q) + (4.0 / 3.0) * a2 -
               a8 * P[6] + (1.0 + S) * sqrtT + a8 * P[7] * logT;
             F = 0.5 * bracket;
 
-            const Real eps = 1e-12;
+            constexpr Real eps = SolverConfig::shapeDerivativeFloor;
             const Real dSqrtT = (a - q) / std::max(sqrtT, eps);
             const Real dLogT =
               ((dSqrtT - q) / std::max(1.0 - a * q + sqrtT, eps)) - (1.0 / a);
@@ -264,8 +278,8 @@ namespace Rodin::Heart::CCMLC2014::Physics
             (8.0 * std::numbers::pi_v<Real> * std::pow(L, 3.0)) / std::pow(adp, 3.0);
           const Real qAbs = geomFactor * IQ;
 
-          const Real dqAbs =
-            (qAbs / adp) * (1.0 - 0.5 * alpha * dFdAlpha / std::max(F, 1e-12));
+          const Real dqAbs = (qAbs / adp) *
+            (1.0 - 0.5 * alpha * dFdAlpha / std::max(F, SolverConfig::flowShapeFloor));
 
           if (!std::isfinite(qAbs) || !std::isfinite(dqAbs) || dqAbs <= 0.0)
             return {dp / fallbackResistance, 1.0 / fallbackResistance};

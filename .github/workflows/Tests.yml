@@ -70,9 +70,19 @@ jobs:
           ctest --test-dir build/tests -L convergence
           --output-on-failure -j 2
 
-  PETScConvergence:
+  PETSc:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        scalar: [real, complex]
+        multithreaded: [ON, OFF]
+    env:
+      OMP_NUM_THREADS: 2
+      OMP_WAIT_POLICY: PASSIVE
+      # Allow each MPI rank to schedule its OpenMP workers.
+      OMPI_MCA_hwloc_base_binding_policy: none
 
     steps:
       - uses: actions/checkout@v4
@@ -95,31 +105,42 @@ jobs:
           libscotch-dev
           libmetis-dev
           libhdf5-dev
-          petsc-dev
-          mpich
+          libpetsc-${{ matrix.scalar }}-dev
+          libomp-dev
+          mpi-default-dev
 
-      - name: Configure PETSc convergence build
+      - name: Configure PETSc build
         run: >-
           cmake -S . -B build
           -DCMAKE_BUILD_TYPE=RelWithDebInfo
           -DRODIN_BUILD_SRC=ON
-          -DRODIN_BUILD_UNIT_TESTS=OFF
+          -DRODIN_BUILD_UNIT_TESTS=ON
           -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
-          -DRODIN_BUILD_CONVERGENCE_TESTS=ON
+          -DRODIN_BUILD_CONVERGENCE_TESTS=${{ matrix.scalar == 'real' && 'ON' || 'OFF' }}
           -DRODIN_BUILD_EXAMPLES=OFF
           -DRODIN_BUILD_BENCHMARKS=OFF
           -DRODIN_INSTALL_RESOURCES=OFF
-          -DRODIN_MULTITHREADED=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
 
+      - name: Build distributed finite element tests
+        run: cmake --build build -j 2 --target RodinMPIMatrixRangeTest
+
+      - name: Run distributed finite element tests
+        run: >-
+          ctest --test-dir build/tests -R '^RodinMPIMatrixRangeTest_np[1-4]$'
+          --output-on-failure --no-tests=error -j 1
+
       - name: Build PETSc convergence suite
+        if: matrix.scalar == 'real'
         run: >-
           cmake --build build -j 2 --target
           RodinConvergenceHPETScPoisson
           RodinConvergenceHPETScMPIPoisson
 
       - name: Run PETSc convergence suite
+        if: matrix.scalar == 'real'
         run: >-
           ctest --test-dir build/tests -R RodinConvergenceHPETSc
           --output-on-failure -j 1
@@ -306,6 +327,10 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+      - name: Hydrate test resources
+        run: >-
+          git lfs pull
+          --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
 
       - name: Free Disk Space
         run: |
@@ -406,6 +431,10 @@ jobs:
         with:
           submodules: recursive
           lfs: false
+      - name: Hydrate test resources
+        run: >-
+          git lfs pull
+          --include="resources/medit/Square.medit.mesh,resources/mfem/Square.mfem.mesh,resources/mfem/SquareWithHole.mfem.mesh,resources/mfem/StarSquare.mfem.mesh,resources/examples/ShapeOptimization/LevelSetCantilever2D.mfem.mesh,resources/tests/mfem/h1/**"
 
       - name: Setup Cpp (C++ / C)
         uses: aminya/setup-cpp@v1
