@@ -294,6 +294,25 @@ namespace Rodin::Geometry
     }
 
     /**
+     * @brief Returns an already attached/cached transformation without creating one.
+     * @param d Topological dimension of the indexed entity.
+     * @param idx Local entity index within that dimension.
+     * @returns Borrowed pointer to the attached transformation, or nullptr if the dimension, slot, or transformation is absent.
+     *
+     * Used when rebuilding a mesh to preserve attached geometry while leaving
+     * default charts lazy. As with get(), clear()/set() must not overlap use.
+     */
+    const PolytopeTransformation* find(size_t d, Index idx) const
+    {
+      if (d >= m_dimensions.size())
+        return nullptr;
+      const auto& dim = m_dimensions[d];
+      if (idx >= dim.publishedSize.load(std::memory_order_acquire))
+        return nullptr;
+      return dim.slots[idx].ptr.load(std::memory_order_acquire);
+    }
+
+    /**
      * @brief Gets or creates a transformation using a factory.
      * @tparam Factory Callable type that creates transformations
      * @param[in] p Pair of (dimension, index) identifying the polytope

@@ -154,27 +154,6 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
-  namespace Internal
-  {
-    /**
-     * @brief Evaluates a product into its concrete range type.
-     * @param product Product expression to evaluate.
-     * @returns Evaluated product stored in its concrete range type.
-     */
-    template <class Product>
-    constexpr auto materializeProduct(const Product& product)
-    {
-      /// @brief Range (evaluation value) type.
-      using RangeType =
-        typename FormLanguage::RangeOf<std::remove_cvref_t<Product>>::Type;
-      RangeType out;
-      if constexpr (requires { out.setZero(); })
-        out.setZero();
-      out = product;
-      return out;
-    }
-  }
-
   /**
    * @defgroup MultSpecializations Mult Template Specializations
    * @brief Template specializations of the Mult class.
@@ -291,7 +270,13 @@ namespace Rodin::Variational
         const auto lhs = this->getLHS().getValue(p);
         const auto rhs = this->getRHS().getValue(p);
         const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        using ProductRange =
+          typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+        ProductRange out;
+        if constexpr (requires { out.setZero(); })
+          out.setZero();
+        out = product;
+        return out;
       }
 
       /**
@@ -464,30 +449,33 @@ namespace Rodin::Variational
        * @param lhs Left operand.
        * @param rhs Right operand.
        */
-      constexpr
-      Mult(const LHSType& lhs, const RHSType& rhs)
+      constexpr Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_lhs)
       {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Mult(const Mult& other)
+      constexpr Mult(const Mult& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_lhs)
       {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Mult(Mult&& other)
+      constexpr Mult(Mult&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_lhs)
       {}
 
       /**
@@ -559,6 +547,7 @@ namespace Rodin::Variational
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_rhs->setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
         return *this;
       }
 
@@ -571,10 +560,28 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
-        const auto lhs = getLHS().getValue(p);
+        if (const auto* lhs = m_cache.get())
+        {
+          decltype(auto) rhs = getRHS().getBasis(local);
+          const auto product = *lhs * rhs;
+          using ProductRange =
+            typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+          ProductRange out;
+          if constexpr (requires { out.setZero(); })
+            out.setZero();
+          out = product;
+          return out;
+        }
+        decltype(auto) lhs = getLHS().getValue(p);
         decltype(auto) rhs = getRHS().getBasis(local);
         const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        using ProductRange =
+          typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+        ProductRange out;
+        if constexpr (requires { out.setZero(); })
+          out.setZero();
+        out = product;
+        return out;
       }
 
       /**
@@ -599,6 +606,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
+      /// @brief Function value at the current quadrature binding.
+      typename LHSType::Cache m_cache;
   };
 
   /**
@@ -701,30 +711,33 @@ namespace Rodin::Variational
        * @param lhs Left operand.
        * @param rhs Right operand.
        */
-      constexpr
-      Mult(const LHSType& lhs, const RHSType& rhs)
+      constexpr Mult(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_rhs)
       {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Mult(const Mult& other)
+      constexpr Mult(const Mult& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_rhs)
       {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Mult(Mult&& other)
+      constexpr Mult(Mult&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_rhs)
       {}
 
       /**
@@ -797,6 +810,7 @@ namespace Rodin::Variational
       Mult& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
         return *this;
       }
 
@@ -809,10 +823,28 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
+        if (const auto* rhs = m_cache.get())
+        {
+          decltype(auto) lhs = this->getLHS().getBasis(local);
+          const auto product = lhs * *rhs;
+          using ProductRange =
+            typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+          ProductRange out;
+          if constexpr (requires { out.setZero(); })
+            out.setZero();
+          out = product;
+          return out;
+        }
+        decltype(auto) rhs = this->getRHS().getValue(p);
         decltype(auto) lhs = this->getLHS().getBasis(local);
-        const auto rhs = this->getRHS().getValue(p);
         const auto product = lhs * rhs;
-        return Internal::materializeProduct(product);
+        using ProductRange =
+          typename FormLanguage::RangeOf<std::remove_cvref_t<decltype(product)>>::Type;
+        ProductRange out;
+        if constexpr (requires { out.setZero(); })
+          out.setZero();
+        out = product;
+        return out;
       }
 
       /**
@@ -837,6 +869,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
+      /// @brief Function value at the current quadrature binding.
+      typename RHSType::Cache m_cache;
   };
 
   /**

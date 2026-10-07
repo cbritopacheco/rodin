@@ -383,6 +383,17 @@ namespace Rodin::Geometry
     // --------------------------------------------------------------------------
     Shard res;
     res.Parent::operator=(m_build.finalize());
+    if (m_mode == Mode::Parent)
+    {
+      const auto& transforms = m_parent->get().getPolytopeTransformationIndex();
+      for (size_t d = 0; d < m_s2ds.size(); ++d)
+      {
+        const auto& map = m_s2ds[d].left;
+        for (Index i = 0; i < map.size(); ++i)
+          if (const auto* transformation = transforms.find(d, map[i]))
+            res.setPolytopeTransformation({d, i}, transformation->copy());
+      }
+    }
     res.m_s2ds  = std::move(m_s2ds);
     res.m_state = std::move(m_state);
     res.m_owner = std::move(m_owner);

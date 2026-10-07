@@ -394,30 +394,33 @@ namespace Rodin::Variational
        * @param lhs Left operand.
        * @param rhs Right operand.
        */
-      constexpr
-      Dot(const LHSType& lhs, const RHSType& rhs)
+      constexpr Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(rhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_lhs)
       {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Dot(const Dot& other)
+      constexpr Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_lhs)
       {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Dot(Dot&& other)
+      constexpr Dot(Dot&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_lhs)
       {}
 
       /**
@@ -510,6 +513,7 @@ namespace Rodin::Variational
       Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_rhs->setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
         return *this;
       }
 
@@ -522,7 +526,12 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& ip = this->getRHS().getIntegrationPoint();
-        const auto lhs = getLHS().getValue(ip);
+        if (const auto* lhs = m_cache.get())
+        {
+          decltype(auto) rhs = getRHS().getBasis(local);
+          return Math::dot(*lhs, rhs);
+        }
+        decltype(auto) lhs = getLHS().getValue(ip);
         decltype(auto) rhs = getRHS().getBasis(local);
         return Math::dot(lhs, rhs);
       }
@@ -550,6 +559,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
+      /// @brief Function value at the current quadrature binding.
+      typename LHSType::Cache m_cache;
   };
 
   /**
@@ -621,30 +633,33 @@ namespace Rodin::Variational
        * @param lhs Left operand.
        * @param rhs Right operand.
        */
-      constexpr
-      Dot(const LHSType& lhs, const RHSType& rhs)
+      constexpr Dot(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
-          m_lhs(lhs.copy()), m_rhs(rhs.copy())
+          m_lhs(lhs.copy()),
+          m_rhs(rhs.copy()),
+          m_cache(*m_rhs)
       {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      Dot(const Dot& other)
+      constexpr Dot(const Dot& other)
         : Parent(other),
-          m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
+          m_lhs(other.m_lhs->copy()),
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_rhs)
       {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr
-      Dot(Dot&& other)
+      constexpr Dot(Dot&& other)
         : Parent(std::move(other)),
-          m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
+          m_lhs(std::move(other.m_lhs)),
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_rhs)
       {}
 
       /**
@@ -715,6 +730,7 @@ namespace Rodin::Variational
       Dot& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
         return *this;
       }
 
@@ -727,8 +743,13 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = getLHS().getIntegrationPoint();
+        if (const auto* rhs = m_cache.get())
+        {
+          decltype(auto) lhs = getLHS().getBasis(local);
+          return Math::dot(lhs, *rhs);
+        }
+        decltype(auto) rhs = getRHS().getValue(p);
         decltype(auto) lhs = getLHS().getBasis(local);
-        const auto rhs = getRHS().getValue(p);
         return Math::dot(lhs, rhs);
       }
 
@@ -755,6 +776,9 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+
+      /// @brief Function value at the current quadrature binding.
+      typename RHSType::Cache m_cache;
   };
 
   /**
