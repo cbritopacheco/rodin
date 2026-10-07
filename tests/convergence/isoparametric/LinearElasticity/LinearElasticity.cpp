@@ -66,15 +66,28 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
 
   struct Errors
   {
-      ErrorNorms displacement{0, 0};
-      Real strain = 0;
-      Real stress = 0;
+      Errors(
+        ErrorNorms displacementValue = {0, 0}, Real strainValue = 0, Real stressValue = 0)
+        : displacement(displacementValue),
+          strain(strainValue),
+          stress(stressValue)
+      {}
+
+      ErrorNorms displacement;
+      Real strain;
+      Real stress;
   };
 
   struct LiftedErrors
   {
+      LiftedErrors()
+        : displacement(),
+          strain(),
+          stress()
+      {}
+
       LiftedErrorNorm::Result displacement;
-      std::array<Real, 3> strain{}, stress{};
+      std::array<Real, 3> strain, stress;
   };
 
   /**
@@ -95,6 +108,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
       Workload(Polytope::Type geometry, size_t n, Map map = Map::Quadratic,
         bool lifted = false, Real amplitude = 0.1)
         : m_mesh(makeMesh(geometry, n)),
+          m_reference(),
           m_geometry(m_mesh, map, amplitude)
       {
         if (lifted)
