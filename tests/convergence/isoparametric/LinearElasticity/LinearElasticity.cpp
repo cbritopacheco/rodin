@@ -93,14 +93,15 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
   /**
    * @brief A mapped elasticity workload with backend-independent observables.
    * @par Architecture
-   * A fresh mesh owns its P2 transformations, exact for the quadratic map or
+   * A fresh mesh owns its prescribed-degree transformations, exact at P2 for
+   * the quadratic map or
    * interpolated for the sine map. Each solve creates fresh
    * vector spaces and a linear system. Shared manufactured physical data are
    * consumed by native/PETSc assembly; the solver policy remains explicit.
    * ErrorNorm integrates physical quantities on owned cells and reduces MPI
    * squared norms once. No coefficient-layout assumptions enter the tests.
    */
-  template <class ContextType>
+  template <class ContextType, size_t Q = 2>
   class Workload
   {
     public:
@@ -113,7 +114,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
       {
         if (lifted)
           m_reference.emplace(m_mesh);
-        m_geometry.template install<2>();
+        m_geometry.template install<Q>();
       }
 
       const auto& getMesh() const
@@ -268,7 +269,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
       CurvedGeometry<Mesh<ContextType>> m_geometry;
   };
 
-  template <class ContextType>
+  template <class ContextType, size_t Q = 2>
   class CurvedLinearElasticityTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
@@ -300,6 +301,100 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
           EXPECT_LE(total, field + geometry + DecompositionTolerance);
           EXPECT_GE(total, std::abs(field - geometry) - DecompositionTolerance);
         }
+      }
+
+      void checkMatchedGeometryRates() const
+      {
+        constexpr size_t K = std::max(size_t(2), Q);
+        using Map = typename Workload<ContextType, Q>::Map;
+        const auto levels = this->GetParam() == Polytope::Type::Segment
+          ? std::array<size_t, 3>{5, 9, 17}
+          : std::array<size_t, 3>{3, 5, 9};
+        std::array<std::array<NormHistory, 4>, 2> histories;
+        for (size_t n : levels)
+        {
+          SCOPED_TRACE(::testing::Message() << "geometry degree=" << Q << " n=" << n);
+          Workload<ContextType, Q> problem(this->GetParam(), n, Map::Sine, true);
+          LiftedErrors lifted;
+          const auto represented =
+            problem.template solve<K>(Data::Field::AsymmetricAffine, false, AssemblyOrder,
+              SolverTolerance, NormOrder, &lifted);
+          checkDecomposition(lifted);
+          const auto errors = components(represented, lifted);
+          for (size_t component : {0u, 1u})
+            for (Real value : quantities(errors[component]))
+            {
+              EXPECT_TRUE(std::isfinite(value));
+              EXPECT_LT(value, PatchTolerance);
+            }
+          const auto geometry = quantities(errors[2]), total = quantities(errors[3]);
+          for (size_t quantity = 0; quantity < geometry.size(); ++quantity)
+          {
+            EXPECT_NEAR(geometry[quantity], total[quantity], PatchTolerance);
+            ASSERT_GT(geometry[quantity], 0);
+            ASSERT_GT(total[quantity], 0);
+            const Real h = Real(1) / Real(n - 1);
+            histories[0][quantity].append(h, geometry[quantity]);
+            histories[1][quantity].append(h, total[quantity]);
+          }
+        }
+        constexpr Real L2Margin = 0.55, DerivativeMargin = 0.45;
+        for (size_t component = 0; component < histories.size(); ++component)
+          for (size_t quantity = 0; quantity < histories[component].size(); ++quantity)
+          {
+            const auto& history = histories[component][quantity];
+            ASSERT_EQ(history.getSize(), 3u);
+            const Real order = Real(Q + (quantity == 0));
+            const Real margin = quantity == 0 ? L2Margin : DerivativeMargin;
+            for (size_t i = 1; i < history.getSize(); ++i)
+            {
+              const Real coarse = history.getSample(i - 1).error;
+              const Real fine = history.getSample(i).error;
+              const Real rate = history.getAlgebraicRate(i);
+              SCOPED_TRACE(::testing::Message()
+                << "component=" << component << " quantity=" << quantity << " interval="
+                << i << " errors=" << coarse << " -> " << fine << " rate=" << rate);
+              EXPECT_GT(coarse, fine);
+              EXPECT_GT(rate, order - margin);
+              EXPECT_LT(rate, order + margin);
+            }
+          }
+      }
+
+      void checkMatchedGeometrySensitivity() const
+      {
+        constexpr size_t K = std::max(size_t(2), Q);
+        using Map = typename Workload<ContextType, Q>::Map;
+        Workload<ContextType, Q> problem(this->GetParam(), 5, Map::Sine, true);
+        std::array<std::array<Errors, 4>, 4> errors;
+        for (size_t i = 0; i < errors.size(); ++i)
+        {
+          LiftedErrors lifted;
+          const auto represented = problem.template solve<K>(
+            Data::Field::AsymmetricAffine, false, i == 1 ? RefinedOrder : AssemblyOrder,
+            i == 2 ? RefinedTolerance : SolverTolerance,
+            i == 3 ? RefinedNormOrder : NormOrder, &lifted);
+          checkDecomposition(lifted);
+          errors[i] = components(represented, lifted);
+          for (size_t component : {0u, 1u})
+            for (Real value : quantities(errors[i][component]))
+            {
+              EXPECT_TRUE(std::isfinite(value));
+              EXPECT_LT(value, PatchTolerance);
+            }
+        }
+        for (size_t i = 1; i < errors.size(); ++i)
+          for (size_t component : {2u, 3u})
+            for (size_t quantity = 0; quantity < 4; ++quantity)
+            {
+              SCOPED_TRACE(::testing::Message() << "control=" << i << " component="
+                                                << component << " quantity=" << quantity);
+              const Real base = quantities(errors[0][component])[quantity];
+              const Real refined = quantities(errors[i][component])[quantity];
+              ASSERT_GT(base, 0);
+              ASSERT_TRUE(std::isfinite(refined));
+              EXPECT_LT(std::abs(refined / base - 1), SensitivityTolerance);
+            }
       }
 
       template <size_t K>
@@ -658,6 +753,40 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
       }
   };
 
+  using LocalQ1Test = CurvedLinearElasticityTest<Context::Local, 1>;
+  TEST_P(LocalQ1Test, LiftedAsymmetricAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(LocalQ1Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalQ1Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
+  using LocalQ3Test = CurvedLinearElasticityTest<Context::Local, 3>;
+  TEST_P(LocalQ3Test, LiftedAsymmetricAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(LocalQ3Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalQ3Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
   using LocalTest = CurvedLinearElasticityTest<Context::Local>;
   TEST_P(LocalTest, ApproximatedP1Rates)
   {
@@ -724,6 +853,40 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
     });
 
 #if defined(RODIN_CURVED_ELASTICITY_PETSC) && defined(RODIN_USE_MPI)
+  using MPIQ1Test = CurvedLinearElasticityTest<Context::MPI, 1>;
+  TEST_P(MPIQ1Test, LiftedAsymmetricAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(MPIQ1Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIQ1Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
+  using MPIQ3Test = CurvedLinearElasticityTest<Context::MPI, 3>;
+  TEST_P(MPIQ3Test, LiftedAsymmetricAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(MPIQ3Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIQ3Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
   using MPITest = CurvedLinearElasticityTest<Context::MPI>;
   TEST_P(MPITest, ApproximatedP1Rates)
   {

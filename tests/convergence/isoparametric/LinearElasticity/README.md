@@ -208,3 +208,68 @@ discrete operator. All seven geometries and the native, real-PETSc local/MPI
 and OpenMP configurations use the same observables and acceptance policies.
 The approximated-domain cases have separate `Approximated` CTest registrations,
 retaining the slow-test timeout and pyramid resource lock.
+
+## Linear and cubic geometry with a representable displacement
+
+The sine-map studies additionally use geometry degree
+$q\in\lbrace 1,3\rbrace$ and field degree $p=\max(2,q)$.
+The asymmetric affine field $u_\ast(x)=\mathbf{1}+Ax$, with $A$
+defined above, has constant strain and stress and zero body force.
+Its represented-domain pullback belongs to the field family. Consequently,
+represented and lifted field errors can be required to remain below
+$10^{-9}$, independently of the nonzero geometry defect.
+
+For $x=\Phi(\xi)$ and $x_h=\Phi_h(\xi)$, define
+
+$$
+e_G(x)=A\bigl(\Phi_h(\xi)-\Phi(\xi)\bigr),\qquad
+J_G=A\bigl(D\Phi_h(\xi)D\Phi(\xi)^{-1}-I\bigr).
+$$
+
+The geometry strain and stress defects are
+
+$$
+\varepsilon_G=\tfrac12(J_G+J_G^T),\qquad
+\sigma_G=\lambda\mathrm{tr}(J_G)I+2\mu\varepsilon_G.
+$$
+
+Their exact-domain norms use the same measure and component-row chain
+rule as the quadratic studies. The prescribed matrix has a nonzero last
+column and first entry, so the displacement and constitutive observables
+are sensitive to the chosen sine-map perturbation; arbitrary matrices
+could cancel a particular observable. The total and geometry norms must
+agree within the $10^{-9}$ field-reproduction budget, separately for
+displacement L2, displacement H1 seminorm, strain L2 and stress L2.
+
+| Geometry degree $q$ | Field degree $p$ | Grid points $n$ | Nominal displacement L2 / derivative orders |
+| --- | --- | --- | --- |
+| 1 | 2 | $3\to5\to9$; segment $5\to9\to17$ | $2/1$ |
+| 3 | 3 | $3\to5\to9$; segment $5\to9\to17$ | $4/3$ |
+
+Each adjacent interval requires finite, positive, decreasing geometry
+and total errors. Displacement L2 rates must lie within $0.55$ of
+$q+1$; displacement-gradient, strain and stress rates must lie within
+$0.45$ of $q$. These checks measure the nonvanishing interpolation defects
+of this finite experiment; an approximation upper bound alone does not
+prove these two-sided rate windows.
+
+At $n=5$, assembly order $11\to16$, norm order $13\to18$ and solver
+tolerance $10^{-13}\to10^{-14}$ are varied independently. Both
+represented and lifted field reproduction remain required in all four
+solves. Every geometry and total observable must change relatively by
+less than $10^{-6}$. The independent asymmetric metric and
+omitted-volumetric-term controls above remain separate.
+
+The segment regularity argument for these linear/cubic sine interpolants
+is given in the [complex Helmholtz geometry methodology](../Helmholtz/README.md#linear-and-cubic-geometry-with-a-representable-complex-field).
+In one dimension the represented physical interval is unchanged; the
+nonzero lifted geometry defects measure the prescribed parametrization
+comparison. Full essential traces and positive Lamé coefficients retain
+the displacement-only coercive formulation on regular represented domains.
+
+All seven positive-dimensional geometries have degree-specific entries
+for native and real-PETSc local/MPI ranks one through four. Sequential
+and OpenMP configurations are distinct verification gates. These entries
+retain slow labels, 1800-second watchdogs, MPI processor counts and the
+shared pyramid resource lock. The registration specifies the intended
+matrix, not evidence of a completed execution.
