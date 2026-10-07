@@ -600,9 +600,11 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
-  /// @brief Deduces the default sparse bilinear form type.
-  /// @param u Function operand.
-  /// @param v Function operand.
+  /**
+   * @brief Deduces the default sparse bilinear form type.
+   * @param u Function operand.
+   * @param v Function operand.
+   */
   template <class Solution, class TrialFES, class TestFES>
   BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> BilinearForm<

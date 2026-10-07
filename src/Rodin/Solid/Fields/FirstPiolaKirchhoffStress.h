@@ -62,10 +62,16 @@ namespace Rodin::Solid
         : m_law(law)
       {}
 
-      /// @brief Copy constructor.
-      FirstPiolaKirchhoffStress(const FirstPiolaKirchhoffStress&) = default;
-      /// @brief Move constructor.
-      FirstPiolaKirchhoffStress(FirstPiolaKirchhoffStress&&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      FirstPiolaKirchhoffStress(const FirstPiolaKirchhoffStress& other) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      FirstPiolaKirchhoffStress(FirstPiolaKirchhoffStress&& other) = default;
 
       /**
        * @brief Computes @f$ \mathbf{P} = \partial W / \partial \mathbf{F} @f$.
@@ -81,8 +87,10 @@ namespace Rodin::Solid
         m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
       }
 
-      /// @brief Gets the constitutive law.
-      /// @returns The constitutive law.
+      /**
+       * @brief Gets the constitutive law.
+       * @returns The constitutive law.
+       */
       const LawType& getLaw() const { return m_law; }
 
     private:

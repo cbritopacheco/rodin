@@ -281,9 +281,11 @@ namespace Rodin::Variational
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -354,32 +356,42 @@ namespace Rodin::Variational
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialTensor<ScalarType>;
-      /// @brief Constructs a rank-three matrix Jacobian.
-      /// @param operand Operand expression.
+      /**
+       * @brief Constructs a rank-three matrix Jacobian.
+       * @param operand Operand expression.
+       */
       Jacobian(const OperandType& operand)
         : m_gradient(operand)
       {}
-      /// @brief Constructs a rank-three matrix Jacobian.
-      /// @param other Object to copy from.
+      /**
+       * @brief Constructs a rank-three matrix Jacobian.
+       * @param other Object to copy from.
+       */
       Jacobian(const Jacobian& other)
         : Parent(other),
           m_gradient(other.m_gradient)
       {}
-      /// @brief Constructs a rank-three matrix Jacobian.
-      /// @param other Object to move from.
+      /**
+       * @brief Constructs a rank-three matrix Jacobian.
+       * @param other Object to move from.
+       */
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
           m_gradient(std::move(other.m_gradient))
       {}
-      /// @brief Returns the differentiated or indexed operand.
-      /// @returns The differentiated or indexed operand.
+      /**
+       * @brief Returns the differentiated or indexed operand.
+       * @returns The differentiated or indexed operand.
+       */
       const OperandType& getOperand() const
       {
         return m_gradient.getOperand();
       }
-      /// @brief Evaluates the expression at the supplied physical or integration point.
-      /// @param point Point at which the operation is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at the supplied physical or integration point.
+       * @param point Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       template <class Point>
       RangeType getValue(const Point& point) const
       {
@@ -388,9 +400,11 @@ namespace Rodin::Variational
         const auto gradient = gradientExpression.getValue(point);
         return gradient;
       }
-      /// @brief Returns the polynomial order when it is known.
-      /// @param poly Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return m_gradient.getOrder(poly);
@@ -423,68 +437,88 @@ namespace Rodin::Variational
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialTensor<ScalarType>;
-      /// @brief Constructs a rank-three matrix Jacobian.
-      /// @param operand Operand expression.
+      /**
+       * @brief Constructs a rank-three matrix Jacobian.
+       * @param operand Operand expression.
+       */
       Jacobian(const OperandType& operand)
         : Parent(operand.getFiniteElementSpace()),
           m_gradient(operand)
       {}
-      /// @brief Constructs a rank-three matrix Jacobian.
-      /// @param other Object to copy from.
+      /**
+       * @brief Constructs a rank-three matrix Jacobian.
+       * @param other Object to copy from.
+       */
       Jacobian(const Jacobian& other)
         : Parent(other),
           m_gradient(other.m_gradient)
       {}
-      /// @brief Constructs a rank-three matrix Jacobian.
-      /// @param other Object to move from.
+      /**
+       * @brief Constructs a rank-three matrix Jacobian.
+       * @param other Object to move from.
+       */
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
           m_gradient(std::move(other.m_gradient))
       {}
-      /// @brief Returns the differentiated or indexed operand.
-      /// @returns The differentiated or indexed operand.
+      /**
+       * @brief Returns the differentiated or indexed operand.
+       * @returns The differentiated or indexed operand.
+       */
       const OperandType& getOperand() const
       {
         return m_gradient.getOperand();
       }
-      /// @brief Returns the leaf shape function used for assembly.
-      /// @returns The leaf shape function used for assembly.
+      /**
+       * @brief Returns the leaf shape function used for assembly.
+       * @returns The leaf shape function used for assembly.
+       */
       const auto& getLeaf() const
       {
         return m_gradient.getLeaf();
       }
-      /// @brief Returns the local basis count for the selected polytope.
-      /// @param poly Mesh entity used by this operation.
-      /// @returns Number of local basis functions on the selected entity.
+      /**
+       * @brief Returns the local basis count for the selected polytope.
+       * @param poly Mesh entity used by this operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       size_t getDOFs(const Geometry::Polytope& poly) const
       {
         return m_gradient.getDOFs(poly);
       }
-      /// @brief Returns the currently bound integration point.
-      /// @returns The currently bound integration point.
+      /**
+       * @brief Returns the currently bound integration point.
+       * @returns The currently bound integration point.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_gradient.getIntegrationPoint();
       }
-      /// @brief Binds the integration point and prepares local basis values.
-      /// @param point Point at which the operation is evaluated.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Binds the integration point and prepares local basis values.
+       * @param point Point at which the operation is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Jacobian& setIntegrationPoint(const IntegrationPoint& point)
       {
         m_gradient.setIntegrationPoint(point);
         return *this;
       }
-      /// @brief Returns a basis value at the bound integration point.
-      /// @param local Index in the local numbering.
-      /// @returns Value of the selected local basis function at the evaluation point.
+      /**
+       * @brief Returns a basis value at the bound integration point.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       RangeType getBasis(size_t local) const
       {
         const auto gradient = m_gradient.getBasis(local);
         return gradient;
       }
-      /// @brief Returns the polynomial order when it is known.
-      /// @param poly Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return m_gradient.getOrder(poly);

@@ -95,6 +95,8 @@ Match the surrounding code. The rules the tooling enforces:
 - **Files**: one header = one concept; guard `RODIN_<PATH>_H` derived from the
   path (never `#pragma once`; `.hpp` companions end in `_HPP`); Boost license
   block on top; a `/** @file … @brief … */` block.
+- **Documentation**: Use `/** ... */` for multiline Doxygen documentation
+  and `///` for single-line documentation. Use `///<` for trailing member documentation.
 - **Idioms**: `using`, never `typedef`. Explicit return types, not `auto`, in
   declarations. `Alert::Exception … << Alert::Raise`, never raw `throw`.
   `static thread_local` caches, never mutexes in evaluation paths. `const`

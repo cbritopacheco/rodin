@@ -22,8 +22,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Conjugate over a shape function: exposes the finite
-  /// element space and the shape function space.
+  /**
+   * @brief Type traits for @c Conjugate over a shape function: exposes the finite
+   * element space and the shape function space.
+   */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Conjugate<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
@@ -124,9 +126,11 @@ namespace Rodin::Variational
         return *m_v;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param geometry Reference geometry.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geometry Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geometry) const noexcept
       {
@@ -142,9 +146,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
-  /**
-   * @brief CTAD for Conjugate.
-   */
+  /// @brief CTAD for Conjugate.
   template <class NestedDerived>
   Conjugate(const FunctionBase<NestedDerived>&) -> Conjugate<FunctionBase<NestedDerived>>;
 
@@ -187,16 +189,20 @@ namespace Rodin::Variational
           m_operand(op.copy())
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Conjugate(const Conjugate& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Conjugate(Conjugate&& other)
         : Parent(std::move(other)),
@@ -276,9 +282,11 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param geometry Reference geometry.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geometry Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geometry) const noexcept
       {
@@ -293,9 +301,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /**
-   * @brief CTAD for Conjugate on shape functions.
-   */
+  /// @brief CTAD for Conjugate on shape functions.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   Conjugate(const ShapeFunctionBase<NestedDerived, FES, Space>&)
     -> Conjugate<ShapeFunctionBase<NestedDerived, FES, Space>>;

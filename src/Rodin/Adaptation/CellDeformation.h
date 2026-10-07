@@ -44,8 +44,10 @@ namespace Rodin::Adaptation
   class CellDeformation
   {
     public:
-      /// @brief Constructs an undeformed state of the given spatial dimension.
-      /// @param d Topological dimension of the entity.
+      /**
+       * @brief Constructs an undeformed state of the given spatial dimension.
+       * @param d Topological dimension of the entity.
+       */
       explicit CellDeformation(std::size_t d)
         : m_d(d)
       {
@@ -69,9 +71,11 @@ namespace Rodin::Adaptation
         return *this;
       }
 
-      /// @brief Sets the deformation gradient @f$F@f$ directly.
-      /// @returns Reference to this object after the operation.
-      /// @param F Deformation-gradient matrix.
+      /**
+       * @brief Sets the deformation gradient @f$F@f$ directly.
+       * @returns Reference to this object after the operation.
+       * @param F Deformation-gradient matrix.
+       */
       CellDeformation& setDeformationGradient(const Math::SpatialMatrix<Real>& F)
       {
         m_F = F;
@@ -79,22 +83,28 @@ namespace Rodin::Adaptation
         return *this;
       }
 
-      /// @brief The spatial dimension.
-      /// @returns The dimension.
+      /**
+       * @brief The spatial dimension.
+       * @returns The dimension.
+       */
       std::size_t getDimension() const
       {
         return m_d;
       }
 
-      /// @brief The deformation gradient @f$F=I+\nabla u@f$.
-      /// @returns The deformation gradient.
+      /**
+       * @brief The deformation gradient @f$F=I+\nabla u@f$.
+       * @returns The deformation gradient.
+       */
       const Math::SpatialMatrix<Real>& getDeformationGradient() const
       {
         return m_F;
       }
 
-      /// @brief The Jacobian @f$j=\det F@f$, computed once and cached.
-      /// @returns Derivative evaluated at the supplied point.
+      /**
+       * @brief The Jacobian @f$j=\det F@f$, computed once and cached.
+       * @returns Derivative evaluated at the supplied point.
+       */
       Real getJacobian() const
       {
         if (!m_j)

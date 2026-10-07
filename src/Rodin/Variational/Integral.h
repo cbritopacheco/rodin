@@ -213,28 +213,36 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = QuadratureRule<IntegrandType>;
 
-      /// @brief Constructs the integral of the given integrand.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the integral of the given integrand.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       template <class LHSDerived, class RHSDerived>
       Integral(const FunctionBase<LHSDerived>& lhs, const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
-      /// @brief Constructs the integrator for the given integrand.
-      /// @param integrand Expression to integrate.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       Integral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Integral(const Integral& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
@@ -289,14 +297,18 @@ namespace Rodin::Variational
         assert(u.getFiniteElementSpace().getVectorDimension() == 1);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Integral(const Integral& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}

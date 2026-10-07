@@ -34,9 +34,7 @@ namespace Rodin::Geometry
   class IdentityTransformation final : public PolytopeTransformation
   {
     public:
-      /**
-       * @brief Parent class type.
-       */
+      /// @brief Parent class type.
       using Parent = PolytopeTransformation;
 
       /**

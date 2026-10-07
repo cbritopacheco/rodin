@@ -61,57 +61,71 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<LT<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       LT(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       LT(const LT& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()),
           m_rhs(other.m_rhs->copy())
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       LT(LT&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),
           m_rhs(std::move(other.m_rhs))
       {}
 
-      /// @brief Evaluates the expression at a geometric point.
-      /// @param p Point at which the operation is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at a geometric point.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       Boolean getValue(const Geometry::Point& p) const
       {
         return getLHS().getValue(p) < getRHS().getValue(p);
       }
 
-      /// @brief Evaluates the expression at an integration point.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       Boolean getValue(const IntegrationPoint& ip) const
       {
         return getLHS().getValue(ip) < getRHS().getValue(ip);
       }
 
-      /// @brief Gets the left-hand side operand.
-      /// @returns The left-hand side operand.
+      /**
+       * @brief Gets the left-hand side operand.
+       * @returns The left-hand side operand.
+       */
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      /// @brief Gets the right-hand side operand.
-      /// @returns The right-hand side operand.
+      /**
+       * @brief Gets the right-hand side operand.
+       * @returns The right-hand side operand.
+       */
       const auto& getRHS() const
       {
         assert(m_rhs);
@@ -128,18 +142,18 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /**
-   * @brief CTAD for LT.
-   */
+  /// @brief CTAD for LT.
   template <class LHSDerived, class RHSDerived>
   LT(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> LT<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   template <class LHSDerived, class RHSDerived>
-  /// @brief Less-than comparison of two function expressions.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Whether the left operand precedes the right operand.
+  /**
+   * @brief Less-than comparison of two function expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Whether the left operand precedes the right operand.
+   */
   constexpr auto operator<(
     const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
@@ -148,10 +162,12 @@ namespace Rodin::Variational
 
   template <class Number, class RHSDerived,
     typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  /// @brief Less-than comparison of two function expressions.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Whether the left operand precedes the right operand.
+  /**
+   * @brief Less-than comparison of two function expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Whether the left operand precedes the right operand.
+   */
   constexpr auto operator<(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return LT(RealFunction(lhs), rhs);
@@ -159,10 +175,12 @@ namespace Rodin::Variational
 
   template <class LHSDerived, class Number,
     typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
-  /// @brief Less-than comparison of two function expressions.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Whether the left operand precedes the right operand.
+  /**
+   * @brief Less-than comparison of two function expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Whether the left operand precedes the right operand.
+   */
   constexpr auto operator<(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return LT(lhs, RealFunction(rhs));

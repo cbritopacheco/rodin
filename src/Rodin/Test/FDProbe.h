@@ -21,9 +21,7 @@
 
 namespace Rodin::Test
 {
-  /**
-   * @brief Report produced by a finite-difference tangent probe.
-   */
+  /// @brief Report produced by a finite-difference tangent probe.
   struct FDProbeReport
   {
       /// @brief Central-difference step used by the probe.

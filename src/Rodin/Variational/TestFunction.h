@@ -20,8 +20,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c TestFunction: exposes the finite element space and the
-  /// shape function space.
+  /**
+   * @brief Type traits for @c TestFunction: exposes the finite element space and the
+   * shape function space.
+   */
   template <class FES>
   struct Traits<Variational::TestFunction<FES>>
   {
@@ -110,8 +112,10 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      /// @brief Copy assignment is deleted
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy assignment is deleted
+       * @param other Object to copy from.
+       */
       void operator=(const TestFunction& other) = delete;
 
       /// @brief Move assignment is deleted

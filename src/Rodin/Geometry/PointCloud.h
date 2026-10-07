@@ -65,9 +65,11 @@ namespace Rodin::Geometry
           m_pts()
       {}
 
-      /// @brief Constructs @p n zero-initialized points in @p rows dimensions.
-      /// @param rows Number of rows.
-      /// @param n Number of entries.
+      /**
+       * @brief Constructs @p n zero-initialized points in @p rows dimensions.
+       * @param rows Number of rows.
+       * @param n Number of entries.
+       */
       explicit
       PointCloud(std::uint8_t rows, size_t n)
         : m_dimension(rows),
@@ -76,64 +78,86 @@ namespace Rodin::Geometry
         assert(rows <= MaxRows);
       }
 
-      /// @brief Copy constructor.
-      PointCloud(const PointCloud&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      PointCloud(const PointCloud& other) = default;
 
-      /// @brief Move constructor.
-      PointCloud(PointCloud&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      PointCloud(PointCloud&& other) = default;
 
-      /// @brief Copy assignment operator.
-      /// @returns Reference to this object after the operation.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
       PointCloud& operator=(const PointCloud& other) = default;
 
-      /// @brief Move assignment operator.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       */
       PointCloud& operator=(PointCloud&&) = default;
 
-      /// @brief Returns the active spatial dimension (0..3).
-      /// @returns The active spatial dimension (0..3).
+      /**
+       * @brief Returns the active spatial dimension (0..3).
+       * @returns The active spatial dimension (0..3).
+       */
       [[nodiscard]] constexpr
       std::uint8_t getDimension() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Returns the active spatial dimension (Eigen-style row count).
-      /// @returns The active spatial dimension (Eigen-style row count).
+      /**
+       * @brief Returns the active spatial dimension (Eigen-style row count).
+       * @returns The active spatial dimension (Eigen-style row count).
+       */
       [[nodiscard]] constexpr
       std::uint8_t rows() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Returns the number of points (Eigen-style column count).
-      /// @returns The number of points (Eigen-style column count).
+      /**
+       * @brief Returns the number of points (Eigen-style column count).
+       * @returns The number of points (Eigen-style column count).
+       */
       [[nodiscard]] inline
       size_t cols() const noexcept
       {
         return m_pts.size();
       }
 
-      /// @brief Returns the number of points.
-      /// @returns The number of points.
+      /**
+       * @brief Returns the number of points.
+       * @returns The number of points.
+       */
       [[nodiscard]] inline
       size_t getCount() const noexcept
       {
         return m_pts.size();
       }
 
-      /// @brief Sets the active spatial dimension (must not exceed MaxRows).
-      /// @param r Number of rows.
+      /**
+       * @brief Sets the active spatial dimension (must not exceed MaxRows).
+       * @param r Number of rows.
+       */
       void setDimension(std::uint8_t r) noexcept
       {
         assert(r <= MaxRows);
         m_dimension = r;
       }
 
-      /// @brief Resizes to @p n points in @p r dimensions.
-      /// @param r Number of rows.
-      /// @param n Number of entries.
+      /**
+       * @brief Resizes to @p n points in @p r dimensions.
+       * @param r Number of rows.
+       * @param n Number of entries.
+       */
       void resize(std::uint8_t r, size_t n)
       {
         assert(r <= MaxRows);
@@ -141,8 +165,10 @@ namespace Rodin::Geometry
         m_pts.resize(static_cast<size_t>(n));
       }
 
-      /// @brief Reserves storage for @p n points.
-      /// @param n Number of entries.
+      /**
+       * @brief Reserves storage for @p n points.
+       * @param n Number of entries.
+       */
       void reserve(size_t n)
       {
         m_pts.reserve(static_cast<size_t>(n));
@@ -154,32 +180,40 @@ namespace Rodin::Geometry
         m_pts.clear();
       }
 
-      /// @brief Appends a 1D point (requires active dimension 1).
-      /// @param p Point coordinates.
+      /**
+       * @brief Appends a 1D point (requires active dimension 1).
+       * @param p Point coordinates.
+       */
       void push_back(const std::array<Scalar, 1>& p)
       {
         assert(m_dimension == 1);
         m_pts.push_back({ p[0], 0, 0 });
       }
 
-      /// @brief Appends a 2D point (requires active dimension 2).
-      /// @param p Point coordinates.
+      /**
+       * @brief Appends a 2D point (requires active dimension 2).
+       * @param p Point coordinates.
+       */
       void push_back(const std::array<Real, 2>& p)
       {
         assert(m_dimension == 2);
         m_pts.push_back({ p[0], p[1], 0 });
       }
 
-      /// @brief Appends a 3D point (requires active dimension 3).
-      /// @param p Point coordinates.
+      /**
+       * @brief Appends a 3D point (requires active dimension 3).
+       * @param p Point coordinates.
+       */
       void push_back(const std::array<Scalar, 3>& p)
       {
         assert(m_dimension == 3);
         m_pts.push_back(p);
       }
 
-      /// @brief Appends a spatial point, zero-padding unused coordinates.
-      /// @param p Point at which the operation is evaluated.
+      /**
+       * @brief Appends a spatial point, zero-padding unused coordinates.
+       * @param p Point at which the operation is evaluated.
+       */
       void push_back(const Math::SpatialPoint& p)
       {
         assert(p.size() <= MaxRows);
@@ -195,10 +229,12 @@ namespace Rodin::Geometry
         m_pts.push_back(pt);
       }
 
-      /// @brief Returns a reference to coordinate @p i of point @p j.
-      /// @param i Index of the requested entry.
-      /// @param j Index of the second coordinate.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Returns a reference to coordinate @p i of point @p j.
+       * @param i Index of the requested entry.
+       * @param j Index of the second coordinate.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       [[nodiscard]] inline
       Scalar& operator()(std::uint8_t i, size_t j) noexcept
       {
@@ -207,10 +243,12 @@ namespace Rodin::Geometry
         return m_pts[j][static_cast<size_t>(i)];
       }
 
-      /// @brief Returns a const reference to coordinate @p i of point @p j.
-      /// @param i Index of the requested entry.
-      /// @param j Index of the second coordinate.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Returns a const reference to coordinate @p i of point @p j.
+       * @param i Index of the requested entry.
+       * @param j Index of the second coordinate.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       [[nodiscard]] inline
       const Scalar& operator()(std::uint8_t i, size_t j) const noexcept
       {
@@ -219,9 +257,11 @@ namespace Rodin::Geometry
         return m_pts[j][i];
       }
 
-      /// @brief Returns a reference to the packed 3-coordinate storage of point @p j.
-      /// @param j Index of the second coordinate.
-      /// @returns A reference to the packed 3-coordinate storage of point @p j.
+      /**
+       * @brief Returns a reference to the packed 3-coordinate storage of point @p j.
+       * @param j Index of the second coordinate.
+       * @returns A reference to the packed 3-coordinate storage of point @p j.
+       */
       [[nodiscard]] inline
       std::array<Scalar, 3>& point3(size_t j) noexcept
       {
@@ -229,9 +269,11 @@ namespace Rodin::Geometry
         return m_pts[static_cast<size_t>(j)];
       }
 
-      /// @brief Returns a const reference to the packed 3-coordinate storage of point @p j.
-      /// @param j Index of the second coordinate.
-      /// @returns A const reference to the packed 3-coordinate storage of point @p j.
+      /**
+       * @brief Returns a const reference to the packed 3-coordinate storage of point @p j.
+       * @param j Index of the second coordinate.
+       * @returns A const reference to the packed 3-coordinate storage of point @p j.
+       */
       [[nodiscard]] inline
       const std::array<Scalar, 3>& point3(size_t j) const noexcept
       {
@@ -239,9 +281,11 @@ namespace Rodin::Geometry
         return m_pts[static_cast<size_t>(j)];
       }
 
-      /// @brief Returns point @p j as a SpatialPoint of the active dimension.
-      /// @param j Index of the second coordinate.
-      /// @returns Entry at the supplied index.
+      /**
+       * @brief Returns point @p j as a SpatialPoint of the active dimension.
+       * @param j Index of the second coordinate.
+       * @returns Entry at the supplied index.
+       */
       [[nodiscard]] inline
       Math::SpatialPoint operator[](size_t j) const noexcept
       {
@@ -259,9 +303,11 @@ namespace Rodin::Geometry
         return p;
       }
 
-      /// @brief Returns point @p j as a SpatialPoint (Eigen-style column accessor).
-      /// @param j Index of the second coordinate.
-      /// @returns Point @p j as a SpatialPoint (Eigen-style column accessor).
+      /**
+       * @brief Returns point @p j as a SpatialPoint (Eigen-style column accessor).
+       * @param j Index of the second coordinate.
+       * @returns Point @p j as a SpatialPoint (Eigen-style column accessor).
+       */
       [[nodiscard]] inline
       auto col(size_t j) const noexcept
       {
@@ -300,8 +346,10 @@ namespace Rodin::Geometry
         return getPackedMatrix().topRows(static_cast<Eigen::Index>(m_dimension));
       }
 
-      /// @brief Returns a (rows x N) matrix view of the active coordinates.
-      /// @returns A (rows x N) matrix view of the active coordinates.
+      /**
+       * @brief Returns a (rows x N) matrix view of the active coordinates.
+       * @returns A (rows x N) matrix view of the active coordinates.
+       */
       [[nodiscard]] inline
       auto getMatrix() const noexcept
       {
@@ -321,8 +369,10 @@ namespace Rodin::Geometry
         return MapType3xN(rawData(), static_cast<Eigen::Index>(MaxRows), getCount(), stride);
       }
 
-      /// @brief Returns a (3 x N) matrix view of the underlying packed storage.
-      /// @returns A (3 x N) matrix view of the underlying packed storage.
+      /**
+       * @brief Returns a (3 x N) matrix view of the underlying packed storage.
+       * @returns A (3 x N) matrix view of the underlying packed storage.
+       */
       [[nodiscard]] inline
       ConstMapType3xN getPackedMatrix() const noexcept
       {
@@ -332,9 +382,11 @@ namespace Rodin::Geometry
 
       // --- norms / dot using views ---
 
-      /// @brief Returns the Frobenius inner product of the active coordinates with another point cloud.
-      /// @param other Other operand.
-      /// @returns The Frobenius inner product of the active coordinates with another point cloud.
+      /**
+       * @brief Returns the Frobenius inner product of the active coordinates with another point cloud.
+       * @param other Other operand.
+       * @returns The Frobenius inner product of the active coordinates with another point cloud.
+       */
       [[nodiscard]] inline
       Scalar dot(const PointCloud& other) const noexcept
       {
@@ -345,9 +397,11 @@ namespace Rodin::Geometry
         return (this->getMatrix().cwiseProduct(other.getMatrix())).sum();
       }
 
-      /// @brief Returns the Frobenius inner product of the active coordinates with an Eigen matrix.
-      /// @param other Other operand.
-      /// @returns The Frobenius inner product of the active coordinates with an Eigen matrix.
+      /**
+       * @brief Returns the Frobenius inner product of the active coordinates with an Eigen matrix.
+       * @param other Other operand.
+       * @returns The Frobenius inner product of the active coordinates with an Eigen matrix.
+       */
       template <class EigenDerived>
       [[nodiscard]] inline
       Scalar dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
@@ -359,8 +413,10 @@ namespace Rodin::Geometry
         return (this->getMatrix().cwiseProduct(other)).sum();
       }
 
-      /// @brief Returns the squared Frobenius norm of the active coordinates.
-      /// @returns The squared Frobenius norm of the active coordinates.
+      /**
+       * @brief Returns the squared Frobenius norm of the active coordinates.
+       * @returns The squared Frobenius norm of the active coordinates.
+       */
       [[nodiscard]] inline
       Scalar squaredNorm() const noexcept
       {
@@ -370,24 +426,30 @@ namespace Rodin::Geometry
       }
 
       // raw container access (serialization, mesh APIs, etc.)
-      /// @brief Returns a reference to the underlying packed point storage.
-      /// @returns A reference to the underlying packed point storage.
+      /**
+       * @brief Returns a reference to the underlying packed point storage.
+       * @returns A reference to the underlying packed point storage.
+       */
       [[nodiscard]] inline
       std::vector<std::array<Scalar, 3>>& getPoints() noexcept
       {
         return m_pts;
       }
 
-      /// @brief Returns a const reference to the underlying packed point storage.
-      /// @returns A const reference to the underlying packed point storage.
+      /**
+       * @brief Returns a const reference to the underlying packed point storage.
+       * @returns A const reference to the underlying packed point storage.
+       */
       [[nodiscard]] inline
       const std::vector<std::array<Scalar, 3>>& getPoints() const noexcept
       {
         return m_pts;
       }
 
-      /// @brief Sets the active coordinates of all points to @p v.
-      /// @param v Value to assign.
+      /**
+       * @brief Sets the active coordinates of all points to @p v.
+       * @param v Value to assign.
+       */
       void setConstant(const Scalar& v) noexcept
       {
         // Set active prefix; keep inactive components unchanged.
@@ -396,9 +458,11 @@ namespace Rodin::Geometry
         this->getMatrix().setConstant(v);
       }
 
-      /// @brief Scales the active coordinates of all points by @p s in place.
-      /// @param s Scalar factor.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Scales the active coordinates of all points by @p s in place.
+       * @param s Scalar factor.
+       * @returns Reference to this object after the operation.
+       */
       PointCloud& operator*=(const Scalar& s) noexcept
       {
         if (m_dimension == 0 || getCount() == 0)
@@ -419,8 +483,10 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      /// @brief Serializes the point cloud (for boost::serialization).
-      /// @param ar Serialization archive.
+      /**
+       * @brief Serializes the point cloud (for boost::serialization).
+       * @param ar Serialization archive.
+       */
       template <class Archive>
       void serialize(Archive& ar, const unsigned int)
       {
@@ -447,10 +513,12 @@ namespace Rodin::Geometry
 
   // -------- free operators --------
 
-  /// @brief Scalar-times-point-cloud (scales the active coordinates).
-  /// @param s Scalar factor.
-  /// @param A System matrix.
-  /// @returns Product of the operands.
+  /**
+   * @brief Scalar-times-point-cloud (scales the active coordinates).
+   * @param s Scalar factor.
+   * @param A System matrix.
+   * @returns Product of the operands.
+   */
   [[nodiscard]] inline
   PointCloud operator*(const Real& s, const PointCloud& A)
   {
@@ -462,20 +530,24 @@ namespace Rodin::Geometry
     return C;
   }
 
-  /// @brief Point-cloud-times-scalar (scales the active coordinates).
-  /// @param A System matrix.
-  /// @param s Scalar factor.
-  /// @returns Product of the operands.
+  /**
+   * @brief Point-cloud-times-scalar (scales the active coordinates).
+   * @param A System matrix.
+   * @param s Scalar factor.
+   * @returns Product of the operands.
+   */
   [[nodiscard]] inline
   PointCloud operator*(const PointCloud& A, const Real& s)
   {
     return s * A;
   }
 
-  /// @brief Componentwise sum of two point clouds' active coordinates.
-  /// @param A System matrix.
-  /// @param B Second matrix operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Componentwise sum of two point clouds' active coordinates.
+   * @param A System matrix.
+   * @param B Second matrix operand.
+   * @returns Sum of the operands.
+   */
   [[nodiscard]] inline
   PointCloud operator+(const PointCloud& A, const PointCloud& B)
   {
@@ -489,10 +561,12 @@ namespace Rodin::Geometry
     return C;
   }
 
-  /// @brief Componentwise difference of two point clouds' active coordinates.
-  /// @param A System matrix.
-  /// @param B Second matrix operand.
-  /// @returns Difference of the operands, or the negated operand for the unary overload.
+  /**
+   * @brief Componentwise difference of two point clouds' active coordinates.
+   * @param A System matrix.
+   * @param B Second matrix operand.
+   * @returns Difference of the operands, or the negated operand for the unary overload.
+   */
   [[nodiscard]] inline
   PointCloud operator-(const PointCloud& A, const PointCloud& B)
   {
@@ -506,10 +580,12 @@ namespace Rodin::Geometry
     return C;
   }
 
-  /// @brief Product of the active-coordinate matrix and an Eigen matrix.
-  /// @param A System matrix.
-  /// @param B Second matrix operand.
-  /// @returns Product of the operands.
+  /**
+   * @brief Product of the active-coordinate matrix and an Eigen matrix.
+   * @param A System matrix.
+   * @param B Second matrix operand.
+   * @returns Product of the operands.
+   */
   template <class EigenDerived>
   [[nodiscard]] inline
   auto operator*(const PointCloud& A, const Eigen::MatrixBase<EigenDerived>& B)
@@ -518,10 +594,12 @@ namespace Rodin::Geometry
     return A.getMatrix() * B;
   }
 
-  /// @brief Product of an Eigen matrix and the active-coordinate matrix.
-  /// @param A System matrix.
-  /// @param B Second matrix operand.
-  /// @returns Product of the operands.
+  /**
+   * @brief Product of an Eigen matrix and the active-coordinate matrix.
+   * @param A System matrix.
+   * @param B Second matrix operand.
+   * @returns Product of the operands.
+   */
   template <class EigenDerived>
   [[nodiscard]] inline
   auto operator*(const Eigen::MatrixBase<EigenDerived>& A, const PointCloud& B)
@@ -530,10 +608,12 @@ namespace Rodin::Geometry
     return A * B.getMatrix();
   }
 
-  /// @brief Streams the active-coordinate matrix to an output stream.
-  /// @param os Output stream.
-  /// @param P Storage for the first Piola-Kirchhoff stress.
-  /// @returns Output stream after writing the object.
+  /**
+   * @brief Streams the active-coordinate matrix to an output stream.
+   * @param os Output stream.
+   * @param P Storage for the first Piola-Kirchhoff stress.
+   * @returns Output stream after writing the object.
+   */
   inline
   std::ostream& operator<<(std::ostream& os, const PointCloud& P)
   {

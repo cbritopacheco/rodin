@@ -87,9 +87,7 @@ namespace Rodin::IO
       /// @brief Coefficient data storage type.
       using DataType = Data;
 
-      /**
-       * @brief Type of mesh object being printed.
-       */
+      /// @brief Type of mesh object being printed.
       using ObjectType = Variational::GridFunction<FES, Data>;
 
       /**

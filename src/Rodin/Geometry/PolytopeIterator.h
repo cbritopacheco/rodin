@@ -54,9 +54,7 @@ namespace Rodin::Geometry
   class PolytopeIteratorBase
   {
     public:
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       PolytopeIteratorBase() = default;
 
       /**
@@ -69,15 +67,14 @@ namespace Rodin::Geometry
         : m_dimension(dimension), m_mesh(mesh), m_gen(std::move(gen).move()), m_dirty(false)
       {}
 
-      /**
-       * @brief Copy constructor (deleted).
-       */
+      /// @brief Copy constructor (deleted).
       PolytopeIteratorBase(const PolytopeIterator&) = delete;
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
-      PolytopeIteratorBase(PolytopeIteratorBase&&) = default;
+      PolytopeIteratorBase(PolytopeIteratorBase&& other) = default;
 
       /**
        * @brief Move assignment operator.
@@ -248,14 +245,10 @@ namespace Rodin::Geometry
   class PolytopeIterator : public PolytopeIteratorBase<Polytope, PolytopeIterator>
   {
     public:
-      /**
-       * @brief Parent class type.
-       */
+      /// @brief Parent class type.
       using Parent = PolytopeIteratorBase<Polytope, PolytopeIterator>;
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       PolytopeIterator() = default;
 
       /**
@@ -266,9 +259,7 @@ namespace Rodin::Geometry
        */
       PolytopeIterator(size_t dimension, const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-      /**
-       * @brief Copy constructor (deleted).
-       */
+      /// @brief Copy constructor (deleted).
       PolytopeIterator(const PolytopeIterator&) = delete;
 
       /**
@@ -347,14 +338,10 @@ namespace Rodin::Geometry
   class CellIterator : public PolytopeIteratorBase<Cell, CellIterator>
   {
     public:
-      /**
-       * @brief Parent class type.
-       */
+      /// @brief Parent class type.
       using Parent = PolytopeIteratorBase<Cell, CellIterator>;
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       CellIterator() = default;
 
       /**
@@ -364,9 +351,7 @@ namespace Rodin::Geometry
        */
       CellIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-      /**
-       * @brief Copy constructor (deleted).
-       */
+      /// @brief Copy constructor (deleted).
       CellIterator(const CellIterator&) = delete;
 
       /**
@@ -421,14 +406,10 @@ namespace Rodin::Geometry
   class FaceIterator : public PolytopeIteratorBase<Face, FaceIterator>
   {
     public:
-      /**
-       * @brief Parent class type.
-       */
+      /// @brief Parent class type.
       using Parent = PolytopeIteratorBase<Face, FaceIterator>;
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       FaceIterator() = default;
 
       /**
@@ -438,15 +419,14 @@ namespace Rodin::Geometry
        */
       FaceIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-      /**
-       * @brief Copy constructor (deleted).
-       */
+      /// @brief Copy constructor (deleted).
       FaceIterator(const FaceIterator&) = delete;
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
-      FaceIterator(FaceIterator&&) = default;
+      FaceIterator(FaceIterator&& other) = default;
 
       /**
        * @brief Move assignment operator.
@@ -493,14 +473,10 @@ namespace Rodin::Geometry
   class VertexIterator : public PolytopeIteratorBase<Vertex, VertexIterator>
   {
     public:
-      /**
-       * @brief Parent class type.
-       */
+      /// @brief Parent class type.
       using Parent = PolytopeIteratorBase<Vertex, VertexIterator>;
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       VertexIterator() = default;
 
       /**
@@ -510,15 +486,14 @@ namespace Rodin::Geometry
        */
       VertexIterator(const MeshBase& mesh, IndexGeneratorBase&& gen);
 
-      /**
-       * @brief Copy constructor (deleted).
-       */
+      /// @brief Copy constructor (deleted).
       VertexIterator(const VertexIterator&) = delete;
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
-      VertexIterator(VertexIterator&&) = default;
+      VertexIterator(VertexIterator&& other) = default;
 
       /**
        * @brief Move assignment operator.

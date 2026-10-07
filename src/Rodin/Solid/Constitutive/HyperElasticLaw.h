@@ -125,16 +125,26 @@ namespace Rodin::Solid
     protected:
       /// @brief Default constructor for derived CRTP laws.
       HyperElasticLaw() = default;
-      /// @brief Copy constructor.
-      HyperElasticLaw(const HyperElasticLaw&) = default;
-      /// @brief Move constructor.
-      HyperElasticLaw(HyperElasticLaw&&) = default;
-      /// @brief Copy assignment operator.
-      /// @returns Reference to this object after the operation.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      HyperElasticLaw(const HyperElasticLaw& other) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      HyperElasticLaw(HyperElasticLaw&& other) = default;
+      /**
+       * @brief Copy assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
       HyperElasticLaw& operator=(const HyperElasticLaw& other) = default;
-      /// @brief Move assignment operator.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       */
       HyperElasticLaw& operator=(HyperElasticLaw&&) = default;
   };
 }

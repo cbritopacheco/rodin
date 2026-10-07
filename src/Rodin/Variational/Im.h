@@ -95,9 +95,11 @@ namespace Rodin::Variational
         return getOperand().getValue(p).imag();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);
@@ -116,9 +118,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /**
-   * @brief CTAD for Im.
-   */
+  /// @brief CTAD for Im.
   template <class NestedDerived>
   Im(const FunctionBase<NestedDerived>&) -> Im<FunctionBase<NestedDerived>>;
 

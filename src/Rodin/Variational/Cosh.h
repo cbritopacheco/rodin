@@ -45,9 +45,7 @@ namespace Rodin::Variational
    * @see Sinh, Cos
    */
 
-  /**
-   * @ingroup CoshSpecializations
-   */
+  /// @ingroup CoshSpecializations
   template <class NestedDerived>
   class Cosh<FunctionBase<NestedDerived>> final
     : public RealFunctionBase<Cosh<FunctionBase<NestedDerived>>>
@@ -118,9 +116,11 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param g Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param g Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& g) const
       {
         const auto o = getOperand().getOrder(g);

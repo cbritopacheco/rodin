@@ -73,9 +73,7 @@ namespace Rodin::Geometry
   class PointBase
   {
     public:
-      /**
-       * @brief Enumeration of coordinate types.
-       */
+      /// @brief Enumeration of coordinate types.
       enum class Coordinates
       {
         Reference, ///< Reference coordinates @f$ r \in K @f$
@@ -325,9 +323,7 @@ namespace Rodin::Geometry
   class Point final : public PointBase
   {
     public:
-      /**
-       * @brief Parent class type.
-       */
+      /// @brief Parent class type.
       using Parent = PointBase;
 
       /**
@@ -477,10 +473,12 @@ namespace Rodin::Geometry
     return p.vector() * s;
   }
 
-  /// @brief Adds a spatial vector to a point.
-  /// @param v Vector operand.
-  /// @param p Point at which the operation is evaluated.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Adds a spatial vector to a point.
+   * @param v Vector operand.
+   * @param p Point at which the operation is evaluated.
+   * @returns Sum of the operands.
+   */
   template <class Scalar>
   auto operator+(
     const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
@@ -488,10 +486,12 @@ namespace Rodin::Geometry
     return v + p.vector();
   }
 
-  /// @brief Adds a point to a spatial vector.
-  /// @param p Point at which the operation is evaluated.
-  /// @param v Vector operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Adds a point to a spatial vector.
+   * @param p Point at which the operation is evaluated.
+   * @param v Vector operand.
+   * @returns Sum of the operands.
+   */
   template <class Scalar>
   auto operator+(
     const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
@@ -499,10 +499,12 @@ namespace Rodin::Geometry
     return p.vector() + v;
   }
 
-  /// @brief Subtracts a point's coordinates from a spatial vector.
-  /// @param v Vector operand.
-  /// @param p Point at which the operation is evaluated.
-  /// @returns Difference of the operands, or the negated operand for the unary overload.
+  /**
+   * @brief Subtracts a point's coordinates from a spatial vector.
+   * @param v Vector operand.
+   * @param p Point at which the operation is evaluated.
+   * @returns Difference of the operands, or the negated operand for the unary overload.
+   */
   template <class Scalar>
   auto operator-(
     const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
@@ -510,10 +512,12 @@ namespace Rodin::Geometry
     return v - p.vector();
   }
 
-  /// @brief Subtracts a spatial vector from a point's coordinates.
-  /// @param p Point at which the operation is evaluated.
-  /// @param v Vector operand.
-  /// @returns Difference of the operands, or the negated operand for the unary overload.
+  /**
+   * @brief Subtracts a spatial vector from a point's coordinates.
+   * @param p Point at which the operation is evaluated.
+   * @param v Vector operand.
+   * @returns Difference of the operands, or the negated operand for the unary overload.
+   */
   template <class Scalar>
   auto operator-(
     const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)

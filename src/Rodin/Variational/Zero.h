@@ -58,9 +58,7 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = ScalarFunctionBase<Scalar, Zero<Scalar>>;
 
-      /**
-       * @brief Default constructor
-       */
+      /// @brief Default constructor
       Zero() {}
 
       /**
@@ -89,9 +87,11 @@ namespace Rodin::Variational
         return 0;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param geom Reference geometry.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {

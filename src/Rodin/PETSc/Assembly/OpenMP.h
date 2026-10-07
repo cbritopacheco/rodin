@@ -69,31 +69,39 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
-      /// Set number of OpenMP threads
-      /// @returns Reference to this object after the operation.
-      /// @param tc Number of threads.
+      /**
+       * Set number of OpenMP threads
+       * @returns Reference to this object after the operation.
+       * @param tc Number of threads.
+       */
       OpenMP& setThreadCount(size_t tc) noexcept
       {
         m_threadCount = tc;
         return *this;
       }
 
-      /// Get current thread count or max if not set
-      /// @returns The thread count.
+      /**
+       * Get current thread count or max if not set
+       * @returns The thread count.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
@@ -194,8 +202,10 @@ namespace Rodin::Assembly
         (void)ierr2;
       }
 
-      /// @brief Creates a heap-allocated copy of this assembly backend.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -252,30 +262,38 @@ namespace Rodin::Assembly
 
       /// @brief Default constructor.
       OpenMP() = default;
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
-      /// Set number of OpenMP threads
-      /// @returns Reference to this object after the operation.
-      /// @param tc Number of threads.
+      /**
+       * Set number of OpenMP threads
+       * @returns Reference to this object after the operation.
+       * @param tc Number of threads.
+       */
       OpenMP& setThreadCount(size_t tc) noexcept
       {
         m_threadCount = tc;
         return *this;
       }
 
-      /// Get current thread count or max if not set
-      /// @returns The thread count.
+      /**
+       * Get current thread count or max if not set
+       * @returns The thread count.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
@@ -478,8 +496,10 @@ namespace Rodin::Assembly
         (void)ierr2;
       }
 
-      /// @brief Creates a heap-allocated copy of this assembly backend.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -542,14 +562,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other), m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)), m_threadCount(std::move(other.m_threadCount))
       {}
@@ -565,8 +589,10 @@ namespace Rodin::Assembly
         return *this;
       }
 
-      /// @brief Returns the configured thread count, or OpenMP's maximum.
-      /// @returns The configured thread count, or OpenMP's maximum.
+      /**
+       * @brief Returns the configured thread count, or OpenMP's maximum.
+       * @returns The configured thread count, or OpenMP's maximum.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
@@ -1247,8 +1273,10 @@ namespace Rodin::Assembly
       }
 
     public:
-      /// @brief Creates a heap-allocated copy of this assembly backend.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -1307,14 +1335,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other), m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)), m_threadCount(std::move(other.m_threadCount))
       {}
@@ -1330,8 +1362,10 @@ namespace Rodin::Assembly
         return *this;
       }
 
-      /// @brief Returns the configured thread count, or OpenMP's maximum.
-      /// @returns The configured thread count, or OpenMP's maximum.
+      /**
+       * @brief Returns the configured thread count, or OpenMP's maximum.
+       * @returns The configured thread count, or OpenMP's maximum.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
@@ -2106,8 +2140,10 @@ namespace Rodin::Assembly
       }
 
     public:
-      /// @brief Creates a heap-allocated copy of this assembly backend.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);

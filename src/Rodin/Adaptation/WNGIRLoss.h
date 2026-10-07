@@ -24,35 +24,43 @@ namespace Rodin::Adaptation
   class WNGIRLoss
   {
     public:
-      /// @brief Constructs a Welsch loss with positive scale.
-      /// @param scale Scale controlling the loss function.
+      /**
+       * @brief Constructs a Welsch loss with positive scale.
+       * @param scale Scale controlling the loss function.
+       */
       explicit WNGIRLoss(Real scale)
         : m_scale2(scale * scale)
       {
         assert(scale > Real(0));
       }
 
-      /// @brief Evaluates @f$\rho(r)@f$.
-      /// @param residual Residual to evaluate.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates @f$\rho(r)@f$.
+       * @param residual Residual to evaluate.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       Real getValue(Real residual) const
       {
         const Real s2 = residual * residual / m_scale2;
         return Real(0.5) * m_scale2 * (Real(1) - std::exp(-s2));
       }
 
-      /// @brief Evaluates the Welsch weight @f$w(r)=\rho'(r)/r@f$.
-      /// @param residual Residual to evaluate.
-      /// @returns The weight.
+      /**
+       * @brief Evaluates the Welsch weight @f$w(r)=\rho'(r)/r@f$.
+       * @param residual Residual to evaluate.
+       * @returns The weight.
+       */
       Real getWeight(Real residual) const
       {
         const Real s2 = residual * residual / m_scale2;
         return std::exp(-s2);
       }
 
-      /// @brief Evaluates the influence @f$\rho'(r)@f$.
-      /// @param residual Residual to evaluate.
-      /// @returns The influence.
+      /**
+       * @brief Evaluates the influence @f$\rho'(r)@f$.
+       * @param residual Residual to evaluate.
+       * @returns The influence.
+       */
       Real getInfluence(Real residual) const
       {
         return getWeight(residual) * residual;

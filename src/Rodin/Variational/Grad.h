@@ -25,8 +25,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Grad over a grid function: exposes the finite element
-  /// space, the operand type and the range type.
+  /**
+   * @brief Type traits for @c Grad over a grid function: exposes the finite element
+   * space, the operand type and the range type.
+   */
   template <class FES, class Data>
   struct Traits<Variational::Grad<Variational::GridFunction<FES, Data>>>
   {
@@ -41,8 +43,10 @@ namespace Rodin::FormLanguage
         Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
   };
 
-  /// @brief Type traits for @c Grad over a shape function: exposes the finite element
-  /// space, the shape function space, the operand type and the range type.
+  /**
+   * @brief Type traits for @c Grad over a shape function: exposes the finite element
+   * space, the shape function space, the operand type and the range type.
+   */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Grad<Variational::ShapeFunction<NestedDerived, FES, Space>>>
@@ -283,9 +287,11 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
-      /// @brief Interpolates at an integration point.
-      /// @param out Storage for the computed result.
-      /// @param ip Integration point at which the expression is evaluated.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       constexpr
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
@@ -305,9 +311,11 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {

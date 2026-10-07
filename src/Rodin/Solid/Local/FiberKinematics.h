@@ -22,9 +22,7 @@
 
 namespace Rodin::Solid
 {
-  /**
-   * @brief Preferred-direction kinematics at a constitutive point.
-   */
+  /// @brief Preferred-direction kinematics at a constitutive point.
   class FiberKinematics
   {
     public:
@@ -34,9 +32,11 @@ namespace Rodin::Solid
           m_strain(0.0)
       {}
 
-      /// @brief Constructs fiber kinematics from a state and reference direction.
-      /// @param direction Reference fiber direction.
-      /// @param state Kinematic state used to compute the fiber deformation.
+      /**
+       * @brief Constructs fiber kinematics from a state and reference direction.
+       * @param direction Reference fiber direction.
+       * @param state Kinematic state used to compute the fiber deformation.
+       */
       FiberKinematics(
         const KinematicState& state, const Math::SpatialVector<Real>& direction)
         : m_direction(normalize(direction)),
@@ -46,58 +46,74 @@ namespace Rodin::Solid
           m_strain(0.5 * (m_I4 - 1.0))
       {}
 
-      /// @brief Constructs fiber kinematics from a constitutive point.
-      /// @param cp Constitutive evaluation point.
+      /**
+       * @brief Constructs fiber kinematics from a constitutive point.
+       * @param cp Constitutive evaluation point.
+       */
       explicit FiberKinematics(const ConstitutivePoint& cp)
         : FiberKinematics(cp.getKinematicState(), direction(cp))
       {}
 
-      /// @brief Returns the normalized reference fiber direction.
-      /// @returns The normalized reference fiber direction.
+      /**
+       * @brief Returns the normalized reference fiber direction.
+       * @returns The normalized reference fiber direction.
+       */
       const Math::SpatialVector<Real>& direction() const
       {
         return m_direction;
       }
 
-      /// @brief Returns the structural tensor @f$a_0 \otimes a_0@f$.
-      /// @returns The structural tensor @f$a_0 \otimes a_0@f$.
+      /**
+       * @brief Returns the structural tensor @f$a_0 \otimes a_0@f$.
+       * @returns The structural tensor @f$a_0 \otimes a_0@f$.
+       */
       const Math::SpatialMatrix<Real>& tensor() const
       {
         return m_tensor;
       }
 
-      /// @brief Returns the current fiber direction @f$F a_0@f$.
-      /// @returns The current fiber direction @f$F a_0@f$.
+      /**
+       * @brief Returns the current fiber direction @f$F a_0@f$.
+       * @returns The current fiber direction @f$F a_0@f$.
+       */
       const Math::SpatialVector<Real>& current() const
       {
         return m_current;
       }
 
-      /// @brief Returns the fiber invariant @f$I_4 = a_0 \cdot C a_0@f$.
-      /// @returns The fiber invariant @f$I_4 = a_0 \cdot C a_0@f$.
+      /**
+       * @brief Returns the fiber invariant @f$I_4 = a_0 \cdot C a_0@f$.
+       * @returns The fiber invariant @f$I_4 = a_0 \cdot C a_0@f$.
+       */
       Real I4() const
       {
         return m_I4;
       }
 
-      /// @brief Returns the Green-Lagrange fiber strain.
-      /// @returns The Green-Lagrange fiber strain.
+      /**
+       * @brief Returns the Green-Lagrange fiber strain.
+       * @returns The Green-Lagrange fiber strain.
+       */
       Real strain() const
       {
         return m_strain;
       }
 
-      /// @brief Returns the directional derivative of fiber strain.
-      /// @param dF Increment of the deformation gradient.
-      /// @returns The directional derivative of fiber strain.
+      /**
+       * @brief Returns the directional derivative of fiber strain.
+       * @param dF Increment of the deformation gradient.
+       * @returns The directional derivative of fiber strain.
+       */
       Real dStrain(const Math::SpatialMatrix<Real>& dF) const
       {
         return m_current.dot(dF * m_direction);
       }
 
-      /// @brief Reads and normalizes the fiber direction from a constitutive point.
-      /// @returns Normalized fiber direction, defaulting to the first coordinate axis.
-      /// @param cp Constitutive evaluation point.
+      /**
+       * @brief Reads and normalizes the fiber direction from a constitutive point.
+       * @returns Normalized fiber direction, defaulting to the first coordinate axis.
+       * @param cp Constitutive evaluation point.
+       */
       static Math::SpatialVector<Real> direction(const ConstitutivePoint& cp)
       {
         const auto d = static_cast<std::uint8_t>(cp.getKinematicState().getDimension());
@@ -112,9 +128,11 @@ namespace Rodin::Solid
         return normalize(a);
       }
 
-      /// @brief Returns the dyadic tensor @f$a \otimes a@f$.
-      /// @param a Left operand.
-      /// @returns The dyadic tensor @f$a \otimes a@f$.
+      /**
+       * @brief Returns the dyadic tensor @f$a \otimes a@f$.
+       * @param a Left operand.
+       * @returns The dyadic tensor @f$a \otimes a@f$.
+       */
       static Math::SpatialMatrix<Real> dyad(const Math::SpatialVector<Real>& a)
       {
         const auto d = static_cast<std::uint8_t>(a.size());
@@ -126,9 +144,11 @@ namespace Rodin::Solid
         return A;
       }
 
-      /// @brief Returns a normalized copy of @p a when its norm is nonzero.
-      /// @param a Left operand.
-      /// @returns A normalized copy of @p a when its norm is nonzero.
+      /**
+       * @brief Returns a normalized copy of @p a when its norm is nonzero.
+       * @param a Left operand.
+       * @returns A normalized copy of @p a when its norm is nonzero.
+       */
       static Math::SpatialVector<Real> normalize(Math::SpatialVector<Real> a)
       {
         const Real n = std::sqrt(a.dot(a));

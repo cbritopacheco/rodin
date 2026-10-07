@@ -136,9 +136,7 @@ namespace Rodin::IO
         HEXAHEDRON_27   = 50   ///< Triquadratic hexahedron (27 nodes).
       };
 
-      /**
-       * @brief XML element names used in the XDMF 3 document format.
-       */
+      /// @brief XML element names used in the XDMF 3 document format.
       struct Keyword
       {
         static constexpr const char* Xdmf      = "Xdmf";       ///< Root element.
@@ -309,11 +307,16 @@ namespace Rodin::IO
       class Grid
       {
         public:
-          /// @brief Copy constructor.
-          Grid(const Grid&) = default;
-          /// @brief Copy assignment operator.
-          /// @returns Reference to this object after the operation.
-          /// @param other Object to copy from.
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          Grid(const Grid& other) = default;
+          /**
+           * @brief Copy assignment operator.
+           * @returns Reference to this object after the operation.
+           * @param other Object to copy from.
+           */
           Grid& operator=(const Grid& other) = default;
 
           /**
@@ -464,7 +467,11 @@ namespace Rodin::IO
 
       XDMF(const XDMF&) = delete;        ///< Non-copyable.
       XDMF& operator=(const XDMF&) = delete;  ///< Non-copyable.
-      XDMF(XDMF&&) = default;           ///< Move constructible.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      XDMF(XDMF&& other) = default; ///< Move constructible.
       /**
        * @brief Move assignment.
        * @param other Writer to move from.

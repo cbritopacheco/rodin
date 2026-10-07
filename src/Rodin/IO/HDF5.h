@@ -365,32 +365,40 @@ namespace Rodin::IO
     template <class T>
     hid_t getNativeType();
 
-    /// @brief Returns the native HDF5 type for unsigned 64-bit integers.
-    /// @returns The native HDF5 type for unsigned 64-bit integers.
+    /**
+     * @brief Returns the native HDF5 type for unsigned 64-bit integers.
+     * @returns The native HDF5 type for unsigned 64-bit integers.
+     */
     template <>
     inline hid_t getNativeType<U64>()
     {
       return H5T_NATIVE_ULLONG;
     }
 
-    /// @brief Returns the native HDF5 type for signed 32-bit integers.
-    /// @returns The native HDF5 type for signed 32-bit integers.
+    /**
+     * @brief Returns the native HDF5 type for signed 32-bit integers.
+     * @returns The native HDF5 type for signed 32-bit integers.
+     */
     template <>
     inline hid_t getNativeType<I32>()
     {
       return H5T_NATIVE_INT;
     }
 
-    /// @brief Returns the native HDF5 type for 64-bit floating point values.
-    /// @returns The native HDF5 type for 64-bit floating point values.
+    /**
+     * @brief Returns the native HDF5 type for 64-bit floating point values.
+     * @returns The native HDF5 type for 64-bit floating point values.
+     */
     template <>
     inline hid_t getNativeType<F64>()
     {
       return H5T_NATIVE_DOUBLE;
     }
 
-    /// @brief Returns the native HDF5 type for unsigned 8-bit integers.
-    /// @returns The native HDF5 type for unsigned 8-bit integers.
+    /**
+     * @brief Returns the native HDF5 type for unsigned 8-bit integers.
+     * @returns The native HDF5 type for unsigned 8-bit integers.
+     */
     template <>
     inline hid_t getNativeType<U8>()
     {

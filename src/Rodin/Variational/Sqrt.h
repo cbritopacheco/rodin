@@ -104,9 +104,11 @@ namespace Rodin::Variational
         return Math::sqrt(this->getOperand().getValue(p));
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);

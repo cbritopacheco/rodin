@@ -97,8 +97,10 @@ namespace Rodin::Variational
       /// @brief Default constructor.
       ProblemBodyBase() = default;
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemBodyBase(const ProblemBodyBase& other)
         : Parent(other),
           m_lfis(other.m_lfis),
@@ -108,9 +110,11 @@ namespace Rodin::Variational
           m_periodicBdr(other.m_periodicBdr)
       {}
 
-      /// @brief Copy assignment operator.
-      /// @param other Object to copy from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBodyBase& operator=(const ProblemBodyBase& other)
       {
         if (this != &other)
@@ -124,8 +128,10 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemBodyBase(ProblemBodyBase&& other)
         : Parent(std::move(other)),
           m_lfis(std::move(other.m_lfis)),
@@ -135,9 +141,11 @@ namespace Rodin::Variational
           m_periodicBdr(std::move(other.m_periodicBdr))
       {}
 
-      /// @brief Move assignment operator.
-      /// @param other Object to move from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBodyBase& operator=(ProblemBodyBase&& other)
       {
         m_lfis = std::move(other.m_lfis);
@@ -148,78 +156,100 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns periodic boundary conditions.
-      /// @returns Periodic boundary conditions.
+      /**
+       * @brief Returns periodic boundary conditions.
+       * @returns Periodic boundary conditions.
+       */
       PeriodicBoundaryType& getPBCs()
       {
         return m_periodicBdr;
       }
 
-      /// @brief Returns essential boundary conditions.
-      /// @returns Essential boundary conditions.
+      /**
+       * @brief Returns essential boundary conditions.
+       * @returns Essential boundary conditions.
+       */
       EssentialBoundaryType& getDBCs()
       {
         return m_essBdr;
       }
 
-      /// @brief Returns local bilinear form integrators.
-      /// @returns Local bilinear form integrators.
+      /**
+       * @brief Returns local bilinear form integrators.
+       * @returns Local bilinear form integrators.
+       */
       LocalBilinearFormIntegratorBaseListType& getLocalBFIs()
       {
         return m_lbfis;
       }
 
-      /// @brief Returns global bilinear form integrators.
-      /// @returns Global bilinear form integrators.
+      /**
+       * @brief Returns global bilinear form integrators.
+       * @returns Global bilinear form integrators.
+       */
       GlobalBilinearFormIntegratorBaseListType& getGlobalBFIs()
       {
         return m_gbfis;
       }
 
-      /// @brief Returns linear form integrators.
-      /// @returns Linear form integrators.
+      /**
+       * @brief Returns linear form integrators.
+       * @returns Linear form integrators.
+       */
       LinearFormIntegratorBaseListType& getLFIs()
       {
         return m_lfis;
       }
 
-      /// @brief Returns periodic boundary conditions.
-      /// @returns Periodic boundary conditions.
+      /**
+       * @brief Returns periodic boundary conditions.
+       * @returns Periodic boundary conditions.
+       */
       const PeriodicBoundaryType& getPBCs() const
       {
         return m_periodicBdr;
       }
 
-      /// @brief Returns essential boundary conditions.
-      /// @returns Essential boundary conditions.
+      /**
+       * @brief Returns essential boundary conditions.
+       * @returns Essential boundary conditions.
+       */
       const EssentialBoundaryType& getDBCs() const
       {
         return m_essBdr;
       }
 
-      /// @brief Returns linear form integrators.
-      /// @returns Linear form integrators.
+      /**
+       * @brief Returns linear form integrators.
+       * @returns Linear form integrators.
+       */
       const LinearFormIntegratorBaseListType& getLFIs() const
       {
         return m_lfis;
       }
 
-      /// @brief Returns local bilinear form integrators.
-      /// @returns Local bilinear form integrators.
+      /**
+       * @brief Returns local bilinear form integrators.
+       * @returns Local bilinear form integrators.
+       */
       const LocalBilinearFormIntegratorBaseListType& getLocalBFIs() const
       {
         return m_lbfis;
       }
 
-      /// @brief Returns global bilinear form integrators.
-      /// @returns Global bilinear form integrators.
+      /**
+       * @brief Returns global bilinear form integrators.
+       * @returns Global bilinear form integrators.
+       */
       const GlobalBilinearFormIntegratorBaseListType& getGlobalBFIs() const
       {
         return m_gbfis;
       }
 
-      /// @brief Polymorphically copies this problem body base.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Polymorphically copies this problem body base.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual ProblemBodyBase* copy() const noexcept override
       {
         return new ProblemBodyBase(*this);
@@ -246,21 +276,27 @@ namespace Rodin::Variational
       /// @brief Default constructor.
       ProblemBody() = default;
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemBody(const ProblemBody& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Copy assignment operator.
-      /// @param other Object to copy from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -270,9 +306,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment operator.
-      /// @param other Object to move from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -282,8 +320,10 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Polymorphically copies this problem body.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Polymorphically copies this problem body.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual ProblemBody* copy() const noexcept override
       {
         return new ProblemBody(*this);
@@ -314,23 +354,29 @@ namespace Rodin::Variational
       /// @brief Default constructor.
       ProblemBody() = default;
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemBody(const ProblemBody& other)
         : Parent(other),
           m_bfs(other.m_bfs)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other)),
           m_bfs(std::move(other.m_bfs))
       {}
 
-      /// @brief Copy assignment operator.
-      /// @param other Object to copy from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -341,9 +387,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment operator.
-      /// @param other Object to move from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -354,22 +402,28 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns bilinear forms.
-      /// @returns Bilinear forms.
+      /**
+       * @brief Returns bilinear forms.
+       * @returns Bilinear forms.
+       */
       BilinearFormBaseListType& getBFs()
       {
         return m_bfs;
       }
 
-      /// @brief Returns bilinear forms.
-      /// @returns Bilinear forms.
+      /**
+       * @brief Returns bilinear forms.
+       * @returns Bilinear forms.
+       */
       const BilinearFormBaseListType& getBFs() const
       {
         return m_bfs;
       }
 
-      /// @brief Polymorphically copies this problem body.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Polymorphically copies this problem body.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual ProblemBody* copy() const noexcept override
       {
         return new ProblemBody(*this);
@@ -399,29 +453,37 @@ namespace Rodin::Variational
       /// @brief Default constructor.
       ProblemBody() = default;
 
-      /// @brief Retains inline integrators when introducing a preassembled vector.
-      /// @param other Object to copy from.
+      /**
+       * @brief Retains inline integrators when introducing a preassembled vector.
+       * @param other Object to copy from.
+       */
       ProblemBody(const ProblemBody<void, void, Scalar>& other)
         : Parent(other)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemBody(const ProblemBody& other)
         : Parent(other),
           m_lfs(other.m_lfs)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other)),
           m_lfs(std::move(other.m_lfs))
       {}
 
-      /// @brief Copy assignment operator.
-      /// @param other Object to copy from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -432,9 +494,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment operator.
-      /// @param other Object to move from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -445,15 +509,19 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns linear forms.
-      /// @returns Linear forms.
+      /**
+       * @brief Returns linear forms.
+       * @returns Linear forms.
+       */
       LinearFormBaseListType& getLFs()
       {
         return m_lfs;
       }
 
-      /// @brief Gets the linear forms of the problem.
-      /// @returns The linear forms of the problem.
+      /**
+       * @brief Gets the linear forms of the problem.
+       * @returns The linear forms of the problem.
+       */
       const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
@@ -468,8 +536,10 @@ namespace Rodin::Variational
       LinearFormBaseListType m_lfs;
   };
 
-  /// @brief Accumulated bilinear forms, linear forms and boundary conditions of a
-  /// Problem.
+  /**
+   * @brief Accumulated bilinear forms, linear forms and boundary conditions of a
+   * Problem.
+   */
   template <class Operator, class Vector, class Scalar>
   class ProblemBody : public ProblemBodyBase<Scalar>
   {
@@ -525,82 +595,104 @@ namespace Rodin::Variational
 
       ProblemBody() = default;
 
-      /// @brief Constructs the ProblemBody from the given arguments.
-      /// @param bfi Bilinear form integrator.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param bfi Bilinear form integrator.
+       */
       ProblemBody(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         this->getLocalBFIs().add(bfi);
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
-      /// @param bfi Bilinear form integrator.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param bfi Bilinear form integrator.
+       */
       ProblemBody(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
         this->getGlobalBFIs().add(bfi);
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
-      /// @param bfis Bilinear form integrators.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param bfis Bilinear form integrators.
+       */
       ProblemBody(const LocalBilinearFormIntegratorBaseListType& bfis)
       {
         this->getLocalBFIs().add(bfis);
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
-      /// @param bfis Bilinear form integrators.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param bfis Bilinear form integrators.
+       */
       ProblemBody(const GlobalBilinearFormIntegratorBaseListType& bfis)
       {
         this->getGlobalBFIs().add(bfis);
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
-      /// @param pbo Problem body supplying the operator terms.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param pbo Problem body supplying the operator terms.
+       */
       ProblemBody(const ProblemBody<OperatorType, void, Scalar>& pbo)
         : Parent(pbo)
       {
         m_bfs.add(pbo.getBFs());
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
-      /// @param bf Bilinear form.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param bf Bilinear form.
+       */
       ProblemBody(const BilinearFormBaseType& bf)
       {
         m_bfs.add(bf);
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
-      /// @param pbv Problem body supplying the vector terms.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param pbv Problem body supplying the vector terms.
+       */
       ProblemBody(const ProblemBody<void, VectorType, Scalar>& pbv)
         : Parent(pbv)
       {
         m_lfs.add(pbv.getLFs());
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
-      /// @param parent Problem body supplying the boundary conditions.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param parent Problem body supplying the boundary conditions.
+       */
       ProblemBody(const ProblemBody<void, void, Scalar>& parent)
         : Parent(parent)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemBody(const ProblemBody& other)
         : Parent(other),
           m_lfs(other.m_lfs),
           m_bfs(other.m_bfs)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other)),
           m_lfs(std::move(other.m_lfs)),
           m_bfs(std::move(other.m_bfs))
       {}
 
-      /// @brief Copy assignment.
-      /// @param other Object to copy from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -612,9 +704,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment.
-      /// @param other Object to move from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -626,29 +720,37 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the linear forms of the problem.
-      /// @returns The linear forms of the problem.
+      /**
+       * @brief Gets the linear forms of the problem.
+       * @returns The linear forms of the problem.
+       */
       LinearFormBaseListType& getLFs()
       {
         return m_lfs;
       }
 
-      /// @brief Gets the bilinear forms of the problem.
-      /// @returns The bilinear forms of the problem.
+      /**
+       * @brief Gets the bilinear forms of the problem.
+       * @returns The bilinear forms of the problem.
+       */
       BilinearFormBaseListType& getBFs()
       {
         return m_bfs;
       }
 
-      /// @brief Gets the linear forms of the problem.
-      /// @returns The linear forms of the problem.
+      /**
+       * @brief Gets the linear forms of the problem.
+       * @returns The linear forms of the problem.
+       */
       const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
       }
 
-      /// @brief Gets the bilinear forms of the problem.
-      /// @returns The bilinear forms of the problem.
+      /**
+       * @brief Gets the bilinear forms of the problem.
+       * @returns The bilinear forms of the problem.
+       */
       const BilinearFormBaseListType& getBFs() const
       {
         return m_bfs;

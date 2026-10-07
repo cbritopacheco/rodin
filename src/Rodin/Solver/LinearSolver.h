@@ -69,9 +69,7 @@ namespace Rodin::Solver
       /// Parent class type
       using Parent = Copyable;
 
-      /**
-       * @brief Default virtual destructor.
-       */
+      /// @brief Default virtual destructor.
       virtual ~LinearSolverBase() = default;
 
       /**

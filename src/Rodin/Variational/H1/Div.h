@@ -29,8 +29,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Div over a grid function: exposes the finite element
-  /// space, the scalar type and the operand type.
+  /**
+   * @brief Type traits for @c Div over a grid function: exposes the finite element
+   * space, the scalar type and the operand type.
+   */
   template <size_t K, class Scalar, class Data, class Mesh>
   struct Traits<Variational::Div<Variational::GridFunction<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
@@ -44,8 +46,10 @@ namespace Rodin::FormLanguage
           Data>;
   };
 
-  /// @brief Type traits for @c Div over a shape function: exposes the finite element
-  /// space, the shape function space, the scalar type and the operand type.
+  /**
+   * @brief Type traits for @c Div over a shape function: exposes the finite element
+   * space, the shape function space, the scalar type and the operand type.
+   */
   template <size_t K, class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Div<
@@ -101,19 +105,27 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
-      /// @brief Constructs the expression from its operand.
-      /// @param u Operand expression.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       Div(const OperandType& u) : Parent(u) {}
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Div(const Div& other) : Parent(other) {}
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Div(Div&& other) : Parent(std::move(other)) {}
 
-      /// @brief Interpolates at an integration point.
-      /// @param out Storage for the computed result.
-      /// @param ip Integration point at which the expression is evaluated.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -153,9 +165,11 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Interpolates at a geometric point.
-      /// @param out Storage for the computed result.
-      /// @param p Point at which the operation is evaluated.
+      /**
+       * @brief Interpolates at a geometric point.
+       * @param out Storage for the computed result.
+       * @param p Point at which the operation is evaluated.
+       */
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -266,9 +280,11 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param geom Reference geometry.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -276,8 +292,10 @@ namespace Rodin::Variational
         return (k == 0) ? 0 : (k - 1);
       }
 
-      /// @brief Creates a polymorphic copy.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Div* copy() const noexcept override
       {
         return new Div(*this);
@@ -350,9 +368,11 @@ namespace Rodin::Variational
                 return valid;
               }
 
-              /// @brief Equality comparison.
-              /// @returns Whether the operands compare equal.
-              /// @param o Key to compare with this key.
+              /**
+               * @brief Equality comparison.
+               * @returns Whether the operands compare equal.
+               * @param o Key to compare with this key.
+               */
               bool operator==(const Key& o) const noexcept
               {
                 if (!valid || !o.valid)
@@ -361,8 +381,10 @@ namespace Rodin::Variational
                   qp == o.qp;
               }
 
-              /// @brief Resets the key, invalidating the cached entry.
-              /// @param other Object to copy from.
+              /**
+               * @brief Resets the key, invalidating the cached entry.
+               * @param other Object to copy from.
+               */
               void operator=(std::initializer_list<int> other) noexcept
               {
                 valid = false;
@@ -380,16 +402,20 @@ namespace Rodin::Variational
         Key key;
       };
 
-      /// @brief Constructs the expression from its operand.
-      /// @param u Operand expression.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       Div(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Div(const Div& other)
         : Parent(other),
           m_u(other.m_u),
@@ -397,8 +423,10 @@ namespace Rodin::Variational
           m_cache(other.m_cache)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Div(Div&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -406,42 +434,52 @@ namespace Rodin::Variational
           m_cache(std::move(other.m_cache))
       {}
 
-      /// @brief Gets the operand function.
-      /// @returns The operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      /// @returns The operand in the shape function expression.
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      /// @brief Returns the number of local basis functions for a polytope.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Number of local basis functions on the selected entity.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         return getOperand().getDOFs(polytope);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
-      /// @returns The integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Div& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
@@ -507,9 +545,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
-      /// @param local Index in the local numbering.
-      /// @returns Value of the selected local basis function at the evaluation point.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       ScalarType getBasis(size_t local) const
       {
         assert(m_cache.key);
@@ -517,17 +557,21 @@ namespace Rodin::Variational
         return m_cache.divPhys[local];
       }
 
-      /// @brief Gets the finite element space.
-      /// @returns The finite element space.
+      /**
+       * @brief Gets the finite element space.
+       * @returns The finite element space.
+       */
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param geom Reference geometry.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {

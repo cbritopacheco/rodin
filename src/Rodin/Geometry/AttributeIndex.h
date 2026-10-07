@@ -199,9 +199,7 @@ namespace Rodin::Geometry
         std::atomic<size_t> publishedSize{0}; ///< Lock-free readable slot count
         mutable std::mutex mutex; ///< Serializes storage growth and slot writes
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
         Dimension() = default;
 
       /**
@@ -306,9 +304,7 @@ namespace Rodin::Geometry
        */
       AttributeIndex() = default;
 
-      /**
-       * @brief Destructor.
-       */
+      /// @brief Destructor.
       ~AttributeIndex() = default;
 
       /**

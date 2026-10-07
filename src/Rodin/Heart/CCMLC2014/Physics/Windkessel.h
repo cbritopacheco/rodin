@@ -25,9 +25,7 @@
 
 namespace Rodin::Heart::CCMLC2014::Physics
 {
-  /**
-   * @brief Numerical tolerances and iteration limits for branch-flow solves.
-   */
+  /// @brief Numerical tolerances and iteration limits for branch-flow solves.
   struct SolverConfig
   {
       /// @brief Absolute denominator floor in square-root shear-stress units; legacy clamp.
@@ -77,9 +75,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
 
   namespace Rheology
   {
-    /**
-     * @brief Linear Newtonian branch-flow law.
-     */
+    /// @brief Linear Newtonian branch-flow law.
     struct Newtonian
     {
       /**
@@ -100,9 +96,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
         }
     };
 
-  /**
-   * @brief Power-law non-Newtonian branch-flow law.
-   */
+    /// @brief Power-law non-Newtonian branch-flow law.
     struct PowerLaw
     {
     /**
@@ -145,9 +139,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
         }
     };
 
-  /**
-   * @brief Quemada non-Newtonian branch-flow law.
-   */
+    /// @brief Quemada non-Newtonian branch-flow law.
     struct Quemada
     {
     /**
@@ -288,9 +280,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
         }
     };
 
-  /**
-   * @brief Cross non-Newtonian branch-flow law.
-   */
+    /// @brief Cross non-Newtonian branch-flow law.
     struct Cross
     {
     /**
@@ -433,9 +423,7 @@ namespace Rodin::Heart::CCMLC2014::Physics
         }
     };
 
-  /**
-   * @brief Carreau-Yasuda non-Newtonian branch-flow law.
-   */
+    /// @brief Carreau-Yasuda non-Newtonian branch-flow law.
     struct CarreauYasuda
     {
     /**

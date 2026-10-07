@@ -105,26 +105,34 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      /// @brief Constructs the solver from the problem to be solved.
-      /// @param pb Variational problem to operate on.
+      /**
+       * @brief Constructs the solver from the problem to be solved.
+       * @param pb Variational problem to operate on.
+       */
       HouseholderQR(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       HouseholderQR(const HouseholderQR& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       HouseholderQR(HouseholderQR&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Solves the assembled linear system.
-      /// @param axb Variational expression defining the problem.
+      /**
+       * @brief Solves the assembled linear system.
+       * @param axb Variational expression defining the problem.
+       */
       void solve(LinearSystemType& axb) override
       {
         // Eigen reports no status for HouseholderQR, so this solver has no
@@ -134,8 +142,10 @@ namespace Rodin::Solver
         axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
-      /// @brief Returns a polymorphic copy of this solver.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Returns a polymorphic copy of this solver.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       HouseholderQR* copy() const noexcept override
       {
         return new HouseholderQR(*this);

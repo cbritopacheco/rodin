@@ -27,12 +27,14 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = Alert::MemberFunctionException<T, FuncName>;
 
-      /// @brief Constructs the exception for the offending call site.
-      /// @param begin Iterator to the first entry.
-      /// @param end Iterator past the last entry.
-      /// @param cls Object whose trace domain could not be determined.
-      /// @param funcName Name of the function reporting the error.
-      /// @param p Entity identified by its dimension and local index.
+      /**
+       * @brief Constructs the exception for the offending call site.
+       * @param begin Iterator to the first entry.
+       * @param end Iterator past the last entry.
+       * @param cls Object whose trace domain could not be determined.
+       * @param funcName Name of the function reporting the error.
+       * @param p Entity identified by its dimension and local index.
+       */
       template <class Iterator>
       UndeterminedTraceDomainException(const T& cls, const FuncName& funcName,
           const std::pair<size_t, Index>& p, Iterator begin, Iterator end)

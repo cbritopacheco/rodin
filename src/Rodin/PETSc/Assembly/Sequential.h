@@ -118,8 +118,10 @@ namespace Rodin::Assembly
         (void)ierr;
       }
 
-      /// @brief Creates a heap-allocated copy of this assembly backend.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -261,8 +263,10 @@ namespace Rodin::Assembly
         (void)ierr;
       }
 
-      /// @brief Creates a heap-allocated copy of this assembly backend.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -800,8 +804,10 @@ namespace Rodin::Assembly
       }
 
     public:
-      /// @brief Creates a heap-allocated copy of this assembly backend.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -1478,8 +1484,10 @@ namespace Rodin::Assembly
       }
 
     public:
-      /// @brief Creates a heap-allocated copy of this assembly backend.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);

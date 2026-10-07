@@ -16,8 +16,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for a Math::LinearSystem: exposes the operator,
-  /// vector, and scalar types.
+  /**
+   * @brief Type traits for a Math::LinearSystem: exposes the operator,
+   * vector, and scalar types.
+   */
   template <class Operator, class Vector>
   struct Traits<Math::LinearSystem<Operator, Vector>>
   {
@@ -61,28 +63,36 @@ namespace Rodin::Math
       constexpr
       LinearSystemBase() = default;
 
-      /// Copy constructor
-      /// @param other Object to copy from.
+      /**
+       * Copy constructor
+       * @param other Object to copy from.
+       */
       constexpr
       LinearSystemBase(const LinearSystemBase& other) = default;
 
-      /// Move constructor
-      /// @param other Object to move from.
+      /**
+       * Move constructor
+       * @param other Object to move from.
+       */
       constexpr
       LinearSystemBase(LinearSystemBase&& other) noexcept = default;
 
       /// Virtual destructor
       virtual ~LinearSystemBase() = default;
 
-      /// Copy assignment operator
-      /// @param other Object to copy from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * Copy assignment operator
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       LinearSystemBase& operator=(const LinearSystemBase& other) = default;
 
-      /// Move assignment operator
-      /// @param other Object to move from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * Move assignment operator
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       LinearSystemBase& operator=(LinearSystemBase&& other) noexcept = default;
 
@@ -222,8 +232,10 @@ namespace Rodin::Math
       constexpr
       LinearSystem() = default;
 
-      /// Copy constructor
-      /// @param other Object to copy from.
+      /**
+       * Copy constructor
+       * @param other Object to copy from.
+       */
       constexpr
       LinearSystem(const LinearSystem& other)
         : Parent(other),
@@ -232,8 +244,10 @@ namespace Rodin::Math
           m_solution(other.m_solution)
       {}
 
-      /// Move constructor
-      /// @param other Object to move from.
+      /**
+       * Move constructor
+       * @param other Object to move from.
+       */
       constexpr
       LinearSystem(LinearSystem&& other) noexcept
         : Parent(std::move(other)),
@@ -242,9 +256,11 @@ namespace Rodin::Math
           m_solution(std::move(other.m_solution))
       {}
 
-      /// Copy assignment operator
-      /// @param other Object to copy from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * Copy assignment operator
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       LinearSystem& operator=(const LinearSystem& other)
       {
@@ -258,9 +274,11 @@ namespace Rodin::Math
         return *this;
       }
 
-      /// Move assignment operator
-      /// @param other Object to move from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * Move assignment operator
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       LinearSystem& operator=(LinearSystem&& other) noexcept
       {
@@ -474,48 +492,60 @@ namespace Rodin::Math
         return *this;
       }
 
-      /// @brief Returns the system operator matrix @f$ A @f$.
-      /// @returns The system operator matrix @f$ A @f$.
+      /**
+       * @brief Returns the system operator matrix @f$ A @f$.
+       * @returns The system operator matrix @f$ A @f$.
+       */
       constexpr
       MatrixType& getOperator()
       {
         return m_operator;
       }
 
-      /// @brief Returns the system operator matrix @f$ A @f$.
-      /// @returns The system operator matrix @f$ A @f$.
+      /**
+       * @brief Returns the system operator matrix @f$ A @f$.
+       * @returns The system operator matrix @f$ A @f$.
+       */
       constexpr
       const MatrixType& getOperator() const
       {
         return m_operator;
       }
 
-      /// @brief Returns the right-hand side vector @f$ b @f$.
-      /// @returns The right-hand side vector @f$ b @f$.
+      /**
+       * @brief Returns the right-hand side vector @f$ b @f$.
+       * @returns The right-hand side vector @f$ b @f$.
+       */
       constexpr
       VectorType& getVector()
       {
         return m_vector;
       }
 
-      /// @brief Returns the right-hand side vector @f$ b @f$.
-      /// @returns The right-hand side vector @f$ b @f$.
+      /**
+       * @brief Returns the right-hand side vector @f$ b @f$.
+       * @returns The right-hand side vector @f$ b @f$.
+       */
       constexpr
       const VectorType& getVector() const
       {
         return m_vector;
       }
 
-      /// @brief Returns the solution vector @f$ x @f$.
-      /// @returns The solution vector @f$ x @f$.
+      /**
+       * @brief Returns the solution vector @f$ x @f$.
+       * @returns The solution vector @f$ x @f$.
+       */
       constexpr
       VectorType& getSolution()
       {
         return m_solution;
       }
 
-      /// @brief Returns the solution vector @f$ x @f$.
-      /// @returns The solution vector @f$ x @f$.
+      /**
+       * @brief Returns the solution vector @f$ x @f$.
+       * @returns The solution vector @f$ x @f$.
+       */
       constexpr
       const VectorType& getSolution() const
       {
@@ -559,8 +589,10 @@ namespace Rodin::Math
       constexpr
       LinearSystem() = default;
 
-      /// Copy constructor
-      /// @param other Object to copy from.
+      /**
+       * Copy constructor
+       * @param other Object to copy from.
+       */
       constexpr
       LinearSystem(const LinearSystem& other)
         : Parent(other),
@@ -569,8 +601,10 @@ namespace Rodin::Math
           m_solution(other.m_solution)
       {}
 
-      /// Move constructor
-      /// @param other Object to move from.
+      /**
+       * Move constructor
+       * @param other Object to move from.
+       */
       constexpr
       LinearSystem(LinearSystem&& other) noexcept
         : Parent(std::move(other)),
@@ -582,9 +616,11 @@ namespace Rodin::Math
       /// Virtual destructor
       virtual ~LinearSystem() = default;
 
-      /// @brief Copy assignment operator.
-      /// @param other Object to copy from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       LinearSystem& operator=(const LinearSystem& other)
       {
@@ -598,9 +634,11 @@ namespace Rodin::Math
         return *this;
       }
 
-      /// @brief Move assignment operator.
-      /// @param other Object to move from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       LinearSystem& operator=(LinearSystem&& other) noexcept
       {
@@ -795,48 +833,60 @@ namespace Rodin::Math
         return *this;
       }
 
-      /// @brief Returns the system operator matrix @f$ A @f$.
-      /// @returns The system operator matrix @f$ A @f$.
+      /**
+       * @brief Returns the system operator matrix @f$ A @f$.
+       * @returns The system operator matrix @f$ A @f$.
+       */
       constexpr
       MatrixType& getOperator()
       {
         return m_operator;
       }
 
-      /// @brief Returns the system operator matrix @f$ A @f$.
-      /// @returns The system operator matrix @f$ A @f$.
+      /**
+       * @brief Returns the system operator matrix @f$ A @f$.
+       * @returns The system operator matrix @f$ A @f$.
+       */
       constexpr
       const MatrixType& getOperator() const
       {
         return m_operator;
       }
 
-      /// @brief Returns the right-hand side vector @f$ b @f$.
-      /// @returns The right-hand side vector @f$ b @f$.
+      /**
+       * @brief Returns the right-hand side vector @f$ b @f$.
+       * @returns The right-hand side vector @f$ b @f$.
+       */
       constexpr
       VectorType& getVector()
       {
         return m_vector;
       }
 
-      /// @brief Returns the right-hand side vector @f$ b @f$.
-      /// @returns The right-hand side vector @f$ b @f$.
+      /**
+       * @brief Returns the right-hand side vector @f$ b @f$.
+       * @returns The right-hand side vector @f$ b @f$.
+       */
       constexpr
       const VectorType& getVector() const
       {
         return m_vector;
       }
 
-      /// @brief Returns the solution vector @f$ x @f$.
-      /// @returns The solution vector @f$ x @f$.
+      /**
+       * @brief Returns the solution vector @f$ x @f$.
+       * @returns The solution vector @f$ x @f$.
+       */
       constexpr
       VectorType& getSolution()
       {
         return m_solution;
       }
 
-      /// @brief Returns the solution vector @f$ x @f$.
-      /// @returns The solution vector @f$ x @f$.
+      /**
+       * @brief Returns the solution vector @f$ x @f$.
+       * @returns The solution vector @f$ x @f$.
+       */
       constexpr
       const VectorType& getSolution() const
       {
@@ -883,10 +933,12 @@ namespace std
 
 namespace Rodin::Math
 {
-  /// @brief Structured-binding accessor: element @p I of @p ls
-  /// (0 = operator @f$ A @f$, 1 = solution @f$ x @f$, 2 = right-hand side @f$ b @f$).
-  /// @param ls Linear system to solve.
-  /// @returns The .
+  /**
+   * @brief Structured-binding accessor: element @p I of @p ls
+   * (0 = operator @f$ A @f$, 1 = solution @f$ x @f$, 2 = right-hand side @f$ b @f$).
+   * @param ls Linear system to solve.
+   * @returns The .
+   */
   template <std::size_t I, class Matrix, class Vector>
   decltype(auto) get(LinearSystem<Matrix, Vector>& ls)
   {
@@ -896,9 +948,11 @@ namespace Rodin::Math
     else return (ls.getVector());
   }
 
-  /// @brief Structured-binding accessor (const overload); see get(LinearSystem&).
-  /// @param ls Linear system to solve.
-  /// @returns The .
+  /**
+   * @brief Structured-binding accessor (const overload); see get(LinearSystem&).
+   * @param ls Linear system to solve.
+   * @returns The .
+   */
   template <std::size_t I, class Matrix, class Vector>
   decltype(auto) get(const LinearSystem<Matrix, Vector>& ls)
   {
@@ -908,9 +962,11 @@ namespace Rodin::Math
     else return (ls.getVector());
   }
 
-  /// @brief Structured-binding accessor (rvalue overload); moves out element @p I.
-  /// @param ls Linear system to solve.
-  /// @returns The .
+  /**
+   * @brief Structured-binding accessor (rvalue overload); moves out element @p I.
+   * @param ls Linear system to solve.
+   * @returns The .
+   */
   template <std::size_t I, class Matrix, class Vector>
   decltype(auto) get(LinearSystem<Matrix, Vector>&& ls)
   {
@@ -920,9 +976,11 @@ namespace Rodin::Math
     else return std::move(ls.getVector());
   }
 
-  /// @brief Structured-binding accessor (const rvalue overload); see get(LinearSystem&&).
-  /// @param ls Linear system to solve.
-  /// @returns The .
+  /**
+   * @brief Structured-binding accessor (const rvalue overload); see get(LinearSystem&&).
+   * @param ls Linear system to solve.
+   * @returns The .
+   */
   template <std::size_t I, class Matrix, class Vector>
   decltype(auto) get(const LinearSystem<Matrix, Vector>&& ls)
   {

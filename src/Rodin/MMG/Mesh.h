@@ -71,20 +71,14 @@ namespace Rodin::MMG
       /// Index set of required tetrahedra in the mesh.
       using RequiredTetrahedronIndex = IndexSet;
 
-      /**
-       * @brief Class used to build MMG::Mesh instances.
-       */
+      /// @brief Class used to build MMG::Mesh instances.
       class Builder : public Parent::Builder
       {
         public:
-          /**
-           * @brief Default constructor.
-           */
+          /// @brief Default constructor.
           Builder() = default;
 
-          /**
-           * @brief Deleted copy constructor.
-           */
+          /// @brief Deleted copy constructor.
           Builder(const Builder&) = delete;
 
           /**
@@ -318,9 +312,7 @@ namespace Rodin::MMG
         return MMG::Mesh::Builder();
       }
 
-      /**
-       * @brief Constructs an empty MMG mesh.
-       */
+      /// @brief Constructs an empty MMG mesh.
       Mesh() = default;
 
       /**

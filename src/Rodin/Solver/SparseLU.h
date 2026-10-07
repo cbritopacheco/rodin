@@ -171,8 +171,10 @@ namespace Rodin::Solver
         record();
       }
 
-      /// @brief Returns the diagnostic of the most recent failure, if any.
-      /// @returns The diagnostic of the most recent failure, if any.
+      /**
+       * @brief Returns the diagnostic of the most recent failure, if any.
+       * @returns The diagnostic of the most recent failure, if any.
+       */
       std::string getLastErrorMessage() const
       {
         return m_solver.lastErrorMessage();

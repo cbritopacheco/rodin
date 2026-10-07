@@ -115,8 +115,10 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
         : Parent(other),
           m_law(other.m_law),
@@ -163,9 +165,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Sets the current polytope and assembles the element residual.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Sets the current polytope and assembles the element residual.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWorkResidual& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -237,38 +241,48 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Returns an entry of the current element residual vector.
-      /// @param te Test shape-function expression.
-      /// @returns Integral computed by the quadrature rule.
+      /**
+       * @brief Returns an entry of the current element residual vector.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t te) final override
       {
         return m_elemVec(te);
       }
 
-      /// @brief Returns the current polytope.
-      /// @returns The current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
-      /// @brief Returns the integration region.
-      /// @returns The integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Polymorphically copies this residual integrator.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Polymorphically copies this residual integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       InternalVirtualWorkResidual* copy() const noexcept final override
       {
         return new InternalVirtualWorkResidual(*this);
       }
 
-      /// @brief Returns the stored constitutive law.
-      /// @returns The stored constitutive law.
+      /**
+       * @brief Returns the stored constitutive law.
+       * @returns The stored constitutive law.
+       */
       const LawType& getLaw() const
       {
         return m_law;
@@ -362,8 +376,10 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
         : Parent(other),
           m_law(other.m_law),
@@ -424,9 +440,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Sets the current polytope and assembles the element residual.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Sets the current polytope and assembles the element residual.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWorkResidual& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -504,38 +522,48 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Returns an entry of the current element residual vector.
-      /// @param te Test shape-function expression.
-      /// @returns Integral computed by the quadrature rule.
+      /**
+       * @brief Returns an entry of the current element residual vector.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t te) final override
       {
         return m_elemVec(te);
       }
 
-      /// @brief Returns the current polytope.
-      /// @returns The current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
-      /// @brief Returns the integration region.
-      /// @returns The integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Polymorphically copies this residual integrator.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Polymorphically copies this residual integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       InternalVirtualWorkResidual* copy() const noexcept final override
       {
         return new InternalVirtualWorkResidual(*this);
       }
 
-      /// @brief Returns the stored constitutive law.
-      /// @returns The stored constitutive law.
+      /**
+       * @brief Returns the stored constitutive law.
+       * @returns The stored constitutive law.
+       */
       const LawType& getLaw() const
       {
         return m_law;
@@ -617,8 +645,10 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       InternalVirtualWorkResidualP(const InternalVirtualWorkResidualP& other)
         : Parent(other),
           m_test(other.m_test),
@@ -652,9 +682,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Sets the current polytope and assembles the element residual.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Sets the current polytope and assembles the element residual.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWorkResidualP& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -709,31 +741,39 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Returns an entry of the current element residual vector.
-      /// @param te Test shape-function expression.
-      /// @returns Integral computed by the quadrature rule.
+      /**
+       * @brief Returns an entry of the current element residual vector.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t te) final override
       {
         return m_elemVec(te);
       }
 
-      /// @brief Returns the current polytope.
-      /// @returns The current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
-      /// @brief Returns the integration region.
-      /// @returns The integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Polymorphically copies this residual integrator.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Polymorphically copies this residual integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       InternalVirtualWorkResidualP* copy() const noexcept final override
       {
         return new InternalVirtualWorkResidualP(*this);

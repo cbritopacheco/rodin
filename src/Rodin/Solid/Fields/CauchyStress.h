@@ -64,10 +64,16 @@ namespace Rodin::Solid
         : m_law(law)
       {}
 
-      /// @brief Copy constructor.
-      CauchyStress(const CauchyStress&) = default;
-      /// @brief Move constructor.
-      CauchyStress(CauchyStress&&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      CauchyStress(const CauchyStress& other) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      CauchyStress(CauchyStress&& other) = default;
 
       /**
        * @brief Computes @f$ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T @f$.
@@ -88,8 +94,10 @@ namespace Rodin::Solid
         sigma = (1.0 / J) * P * F.transpose();
       }
 
-      /// @brief Gets the constitutive law.
-      /// @returns The constitutive law.
+      /**
+       * @brief Gets the constitutive law.
+       * @returns The constitutive law.
+       */
       const LawType& getLaw() const { return m_law; }
 
     private:

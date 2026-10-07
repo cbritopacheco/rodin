@@ -48,8 +48,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Trace over a shape function: exposes the finite element
-  /// space and the shape function space.
+  /**
+   * @brief Type traits for @c Trace over a shape function: exposes the finite element
+   * space and the shape function space.
+   */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
@@ -153,9 +155,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param p Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param p Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
@@ -196,90 +200,112 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Trace<OperandType>>;
 
-      /// @brief Constructs the expression from its operand.
-      /// @param operand Operand expression.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param operand Operand expression.
+       */
       constexpr
       Trace(const OperandType& operand)
         : Parent(operand.getFiniteElementSpace()),
           m_operand(operand.copy())
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Trace(const Trace& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Trace(Trace&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
 
-      /// @brief Gets the operand function.
-      /// @returns The operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       constexpr
       const OperandType& getOperand() const
       {
         return *m_operand;
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      /// @returns The operand in the shape function expression.
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      /// @brief Returns the number of local basis functions for a polytope.
-      /// @param element Finite element used by the operation.
-      /// @returns Number of local basis functions on the selected entity.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
-      /// @returns The integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_operand->getIntegrationPoint();
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Trace& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_operand->setIntegrationPoint(ip);
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
-      /// @param local Index in the local numbering.
-      /// @returns Value of the selected local basis function at the evaluation point.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       constexpr
       auto getBasis(size_t local) const
       {
         return this->getOperand().getBasis(local).trace();
       }
 
-      /// @brief Gets the finite element space.
-      /// @returns The finite element space.
+      /**
+       * @brief Gets the finite element space.
+       * @returns The finite element space.
+       */
       const FES& getFiniteElementSpace() const
       {
         return this->getOperand().getFiniteElementSpace();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param p Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param p Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {

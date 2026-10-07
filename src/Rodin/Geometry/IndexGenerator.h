@@ -25,14 +25,10 @@
 
 namespace Rodin
 {
-  /**
-   * @brief Sentinel type for default-constructed iterators.
-   */
+  /// @brief Sentinel type for default-constructed iterators.
   struct DefaultSentinelT {};
 
-  /**
-   * @brief Default sentinel value.
-   */
+  /// @brief Default sentinel value.
   inline constexpr DefaultSentinelT DefaultSentinel;
 }
 
@@ -52,9 +48,7 @@ namespace Rodin::Geometry
   class IndexGeneratorBase : public Copyable, public Moveable
   {
     public:
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~IndexGeneratorBase() = default;
 
       /**
@@ -97,9 +91,7 @@ namespace Rodin::Geometry
   class EmptyIndexGenerator final : public IndexGeneratorBase
   {
     public:
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       constexpr EmptyIndexGenerator() = default;
 
       /**

@@ -535,11 +535,13 @@ namespace Rodin::Variational
       }
 
       template <class A1, class A2, class... As>
-      /// @brief Restricts the boundary condition to the given mesh attributes.
-      /// @param a1 Mesh attributes selecting the region.
-      /// @param a2 Mesh attributes selecting the region.
-      /// @param as Mesh attributes selecting the region.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Restricts the boundary condition to the given mesh attributes.
+       * @param a1 Mesh attributes selecting the region.
+       * @param a2 Mesh attributes selecting the region.
+       * @param as Mesh attributes selecting the region.
+       * @returns Reference to this object after the operation.
+       */
       constexpr DirichletBC& on(A1 a1, A2 a2, As... as)
       {
         return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
@@ -559,9 +561,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /**
-       * @returns Attributes over which the boundary condition is imposed.
-       */
+      /// @returns Attributes over which the boundary condition is imposed.
       constexpr
       const FlatSet<Geometry::Attribute>& getAttributes() const
       {
@@ -614,8 +614,10 @@ namespace Rodin::Variational
         return m_dofs;
       }
 
-      /// @brief Gets the assembly backend.
-      /// @returns The assembly backend.
+      /**
+       * @brief Gets the assembly backend.
+       * @returns The assembly backend.
+       */
       const Assembly::AssemblyBase<ValueDOFs, DirichletBC>& getAssembly() const
       {
         assert(m_assembly);
@@ -849,13 +851,17 @@ namespace Rodin::Variational
         public:
           virtual ~DefectBase() = default;
 
-          /// @brief Evaluates the expression at a geometric point.
-          /// @param p Point at which the operation is evaluated.
-          /// @returns Value of the expression at the supplied evaluation point.
+          /**
+           * @brief Evaluates the expression at a geometric point.
+           * @param p Point at which the operation is evaluated.
+           * @returns Value of the expression at the supplied evaluation point.
+           */
           virtual FESRangeType getValue(const Geometry::Point& p) const = 0;
 
-          /// @brief Creates a polymorphic copy.
-          /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+          /**
+           * @brief Creates a polymorphic copy.
+           * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+           */
           virtual DefectBase* copy() const noexcept = 0;
       };
 
@@ -867,28 +873,36 @@ namespace Rodin::Variational
           /// @brief Type of the prescribed value.
           using FunctionType = FunctionBase<DefectDerived>;
 
-          /// @brief Constructs the defect from the prescribed value.
-          /// @param value Function operand.
+          /**
+           * @brief Constructs the defect from the prescribed value.
+           * @param value Function operand.
+           */
           explicit Defect(const FunctionType& value)
             : m_value(value.copy())
           {}
 
-          /// @brief Copy constructor.
-          /// @param other Object to copy from.
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
           Defect(const Defect& other)
             : m_value(other.m_value->copy())
           {}
 
-          /// @brief Evaluates the expression at a geometric point.
-          /// @param p Point at which the operation is evaluated.
-          /// @returns Value of the expression at the supplied evaluation point.
+          /**
+           * @brief Evaluates the expression at a geometric point.
+           * @param p Point at which the operation is evaluated.
+           * @returns Value of the expression at the supplied evaluation point.
+           */
           FESRangeType getValue(const Geometry::Point& p) const override
           {
             return (*m_value)(p);
           }
 
-          /// @brief Creates a polymorphic copy.
-          /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+          /**
+           * @brief Creates a polymorphic copy.
+           * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+           */
           Defect* copy() const noexcept override
           {
             return new Defect(*this);
@@ -932,8 +946,10 @@ namespace Rodin::Variational
           m_defect(std::make_unique<Defect<DefectDerived>>(defect))
       {}
 
-      /// Copy constructor
-      /// @param other Object to copy from.
+      /**
+       * Copy constructor
+       * @param other Object to copy from.
+       */
       DirichletBC(const DirichletBC& other)
         : Parent(other),
           m_u(other.m_u),
@@ -945,8 +961,10 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
-      /// Move constructor
-      /// @param other Object to move from.
+      /**
+       * Move constructor
+       * @param other Object to move from.
+       */
       DirichletBC(DirichletBC&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -997,9 +1015,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /**
-       * @returns The boundary attribute set defining @f$ \Gamma_D @f$.
-       */
+      /// @returns The boundary attribute set defining @f$ \Gamma_D @f$.
       constexpr const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_essBdr;
@@ -1095,17 +1111,13 @@ namespace Rodin::Variational
         return false;
       }
 
-      /**
-       * @returns The slave trial function @f$ u @f$.
-       */
+      /// @returns The slave trial function @f$ u @f$.
       const OperandType& getOperand() const override
       {
         return m_u.get();
       }
 
-      /**
-       * @returns The right-hand-side shape-function expression @f$ A(v) @f$.
-       */
+      /// @returns The right-hand-side shape-function expression @f$ A(v) @f$.
       const ValueType& getValue() const override
       {
         assert(m_v);
@@ -1137,8 +1149,10 @@ namespace Rodin::Variational
         return m_values;
       }
 
-      /// @brief Gets the assembly backend.
-      /// @returns The assembly backend.
+      /**
+       * @brief Gets the assembly backend.
+       * @returns The assembly backend.
+       */
       const Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly() const
       {
         return m_assembly;

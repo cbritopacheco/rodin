@@ -32,9 +32,7 @@
 
 namespace Rodin
 {
-  /**
-   * @brief Specialization of Tuple for an empty parameter pack.
-   */
+  /// @brief Specialization of Tuple for an empty parameter pack.
   template <>
   class Tuple<> : public std::tuple<>
   {
@@ -55,21 +53,15 @@ namespace Rodin
       /// @brief The number of elements in the tuple (always 0).
       static constexpr size_t Size = 0;
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       constexpr
       Tuple() = default;
 
-      /**
-       * @brief Copy constructor.
-       */
+      /// @brief Copy constructor.
       constexpr
       Tuple(const Tuple&) = default;
 
-      /**
-       * @brief Move constructor.
-       */
+      /// @brief Move constructor.
       constexpr
       Tuple(Tuple&&) = default;
 

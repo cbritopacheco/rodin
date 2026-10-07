@@ -198,8 +198,10 @@ namespace Rodin::Solver
       }
 
     private:
-      /// Underlying Eigen SparseQR solver with COLAMD ordering
-      /// @brief Records the Eigen status, and returns whether it succeeded.
+      /**
+       * Underlying Eigen SparseQR solver with COLAMD ordering
+       * @brief Records the Eigen status, and returns whether it succeeded.
+       */
       Boolean record()
       {
         m_info.status = static_cast<Integer>(m_solver.info());

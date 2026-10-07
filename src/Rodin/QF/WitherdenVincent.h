@@ -31,15 +31,19 @@ namespace Rodin::QF
   class WitherdenVincent final : public QuadratureFormulaBase
   {
     public:
-      /// @brief Highest tabulated degree for @p g, or zero if unsupported.
-      /// @param g Mesh entity used by this operation.
-      /// @returns The max degree.
+      /**
+       * @brief Highest tabulated degree for @p g, or zero if unsupported.
+       * @param g Mesh entity used by this operation.
+       * @returns The max degree.
+       */
       static size_t getMaxDegree(Geometry::Polytope::Type g);
 
-      /// @brief Whether a rule of strength @p degree is tabulated for @p g.
-      /// @param degree Polynomial degree.
-      /// @param g Mesh entity used by this operation.
-      /// @returns Whether a quadrature formula of the requested strength is available for the geometry.
+      /**
+       * @brief Whether a rule of strength @p degree is tabulated for @p g.
+       * @param degree Polynomial degree.
+       * @param g Mesh entity used by this operation.
+       * @returns Whether a quadrature formula of the requested strength is available for the geometry.
+       */
       static bool isAvailable(size_t degree, Geometry::Polytope::Type g)
       {
         return degree >= 1 && degree <= getMaxDegree(g);
@@ -53,8 +57,11 @@ namespace Rodin::QF
        */
       WitherdenVincent(size_t degree, Geometry::Polytope::Type g);
 
-      /// @brief Copies a tabulated quadrature formula.
-      WitherdenVincent(const WitherdenVincent&) = default;
+      /**
+       * @brief Copies a tabulated quadrature formula.
+       * @param other Object to copy from.
+       */
+      WitherdenVincent(const WitherdenVincent& other) = default;
 
       size_t getSize() const override
       {
@@ -73,8 +80,10 @@ namespace Rodin::QF
         return m_points[i];
       }
 
-      /// @brief The element this rule is defined on.
-      /// @returns The geometry.
+      /**
+       * @brief The element this rule is defined on.
+       * @returns The geometry.
+       */
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;

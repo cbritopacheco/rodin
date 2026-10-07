@@ -65,9 +65,12 @@ express:
 - path-derived include guards
 - no `#pragma once`
 - Doxygen `@brief` coverage in headers
+- `/** ... */` for multiline Doxygen documentation; `///` for single-line
+  documentation (`///<` remains available for trailing member documentation)
 - PETSc includes only under `src/Rodin/PETSc/`
 
 ```sh
+python3 -m unittest discover -s dev -p test_style_lint.py -v
 python3 dev/style_lint.py
 python3 dev/style_lint.py src/Rodin/Variational
 python3 dev/style_lint.py --update-baseline

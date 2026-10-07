@@ -68,14 +68,10 @@ namespace Rodin::FormLanguage
   class List : public Base
   {
     public:
-      /**
-       * @brief Reference type for list elements.
-       */
+      /// @brief Reference type for list elements.
       using reference = T&;
 
-      /**
-       * @brief Const reference type for list elements.
-       */
+      /// @brief Const reference type for list elements.
       using const_reference = const T&;
 
       /**
@@ -188,9 +184,7 @@ namespace Rodin::FormLanguage
           InternalConstIterator m_it;
       };
 
-      /**
-       * @brief Default constructor creates an empty list.
-       */
+      /// @brief Default constructor creates an empty list.
       constexpr List() = default;
 
       /**
@@ -217,9 +211,7 @@ namespace Rodin::FormLanguage
           m_list(std::move(other.m_list))
       {}
 
-      /**
-       * @brief Destructor.
-       */
+      /// @brief Destructor.
       virtual ~List() = default;
 
       /**
@@ -400,9 +392,7 @@ namespace Rodin::FormLanguage
       }
 
     private:
-      /**
-       * @brief Internal storage for list elements.
-       */
+      /// @brief Internal storage for list elements.
       std::vector<std::unique_ptr<T>> m_list;
   };
 }

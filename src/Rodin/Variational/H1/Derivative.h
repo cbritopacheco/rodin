@@ -38,8 +38,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Derivative over a grid function: exposes the finite
-  /// element space, the operand type and the range type.
+  /**
+   * @brief Type traits for @c Derivative over a grid function: exposes the finite
+   * element space, the operand type and the range type.
+   */
   template <size_t K, class Scalar, class Mesh, class Data>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::H1<K, Scalar, Mesh>, Data>>>
   {
@@ -122,9 +124,11 @@ namespace Rodin::Variational
           m_i(other.m_i)
       {}
 
-      /// @brief Interpolates at an integration point.
-      /// @param out Storage for the computed result.
-      /// @param ip Integration point at which the expression is evaluated.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -242,9 +246,11 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param geom Reference geometry.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -252,8 +258,10 @@ namespace Rodin::Variational
         return (k == 0) ? 0 : (k - 1);
       }
 
-      /// @brief Creates a polymorphic copy.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Derivative* copy() const noexcept override
       {
         return new Derivative(*this);

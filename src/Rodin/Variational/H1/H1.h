@@ -36,8 +36,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c H1: exposes the mesh type, the scalar type, the range type
-  /// and the finite element type.
+  /**
+   * @brief Type traits for @c H1: exposes the mesh type, the scalar type, the range type
+   * and the finite element type.
+   */
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Scalar, Mesh>>
   {
@@ -51,8 +53,10 @@ namespace Rodin::FormLanguage
       using ElementType = Variational::H1Element<K, RangeType>;
   };
 
-  /// @brief Type traits for @c H1: exposes the mesh type, the scalar type, the range type
-  /// and the finite element type.
+  /**
+   * @brief Type traits for @c H1: exposes the mesh type, the scalar type, the range type
+   * and the finite element type.
+   */
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>>
   {
@@ -180,9 +184,7 @@ namespace Rodin::Variational
       template <Geometry::Polytope::Type G>
       class Cochain;
 
-      /**
-       * @brief Pullback for the scalar/complex H1 space.
-       */
+      /// @brief Pullback for the scalar/complex H1 space.
       template <class Callable>
       class Pullback : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
@@ -190,20 +192,27 @@ namespace Rodin::Variational
           /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
-          /// @brief Constructs the pullback of a function on a polytope.
-          /// @param polytope Mesh entity used by this operation.
-          /// @param v Function operand.
+          /**
+           * @brief Constructs the pullback of a function on a polytope.
+           * @param polytope Mesh entity used by this operation.
+           * @param v Function operand.
+           */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
-          /// @brief Copy constructor.
-          Pullback(const Pullback&) = default;
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          Pullback(const Pullback& other) = default;
 
-          /// @brief Evaluates at a point on the reference element.
-          /// @returns Value of the expression at the supplied evaluation point.
-          /// @param r Reference coordinates at which to evaluate the basis.
+          /**
+           * @brief Evaluates at a point on the reference element.
+           * @returns Value of the expression at the supplied evaluation point.
+           * @param r Reference coordinates at which to evaluate the basis.
+           */
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p = m_polytope.getDimension() == 0
@@ -219,9 +228,7 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
-      /**
-       * @brief Inverse Pullback for the scalar/complex H1 space.
-       */
+      /// @brief Inverse Pullback for the scalar/complex H1 space.
       template <class Callable>
       class Pushforward
         : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
@@ -239,12 +246,17 @@ namespace Rodin::Variational
             : m_v(std::forward<Function>(v))
           {}
 
-          /// @brief Copy constructor.
-          Pushforward(const Pushforward&) = default;
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          Pushforward(const Pushforward& other) = default;
 
-          /// @brief Evaluates at a geometric point.
-          /// @param p Point at which the operation is evaluated.
-          /// @returns Value of the expression at the supplied evaluation point.
+          /**
+           * @brief Evaluates at a geometric point.
+           * @param p Point at which the operation is evaluated.
+           * @returns Value of the expression at the supplied evaluation point.
+           */
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
@@ -635,20 +647,27 @@ namespace Rodin::Variational
           /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
-          /// @brief Constructs the pullback of a function on a polytope.
-          /// @param polytope Mesh entity used by this operation.
-          /// @param v Function operand.
+          /**
+           * @brief Constructs the pullback of a function on a polytope.
+           * @param polytope Mesh entity used by this operation.
+           * @param v Function operand.
+           */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
-          /// @brief Copy constructor.
-          Pullback(const Pullback&) = default;
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          Pullback(const Pullback& other) = default;
 
-          /// @brief Evaluates at a point on the reference element.
-          /// @param r Reference coordinates at which to evaluate the basis.
-          /// @returns Reference to the entry at the supplied indices.
+          /**
+           * @brief Evaluates at a point on the reference element.
+           * @param r Reference coordinates at which to evaluate the basis.
+           * @returns Reference to the entry at the supplied indices.
+           */
           auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p = m_polytope.getDimension() == 0
@@ -673,19 +692,26 @@ namespace Rodin::Variational
           /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
-          /// @brief Constructs the pushforward of a function.
-          /// @param v Function operand.
+          /**
+           * @brief Constructs the pushforward of a function.
+           * @param v Function operand.
+           */
           template <class Function>
           Pushforward(Function&& v)
             : m_v(std::forward<Function>(v))
           {}
 
-          /// @brief Copy constructor.
-          Pushforward(const Pushforward&) = default;
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          Pushforward(const Pushforward& other) = default;
 
-          /// @brief Evaluates at a geometric point.
-          /// @param p Point at which the operation is evaluated.
-          /// @returns Reference to the entry at the supplied indices.
+          /**
+           * @brief Evaluates at a geometric point.
+           * @param p Point at which the operation is evaluated.
+           * @returns Reference to the entry at the supplied indices.
+           */
           constexpr
           auto operator()(const Geometry::Point& p) const
           {

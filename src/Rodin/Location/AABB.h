@@ -89,8 +89,10 @@ namespace Rodin::Location
   class AABB
   {
     public:
-      /// @brief Builds a locator bound to a fixed mesh.
-      /// @param mesh Mesh on which the object is defined.
+      /**
+       * @brief Builds a locator bound to a fixed mesh.
+       * @param mesh Mesh on which the object is defined.
+       */
       explicit AABB(const MeshType& mesh)
         : m_mesh(mesh),
           m_tolerance(DefaultPhysicalTolerance),
@@ -103,16 +105,20 @@ namespace Rodin::Location
         computeScale();
       }
 
-      /// Relative physical tolerance (scaled by the mesh diagonal).
-      /// @returns The tolerance.
+      /**
+       * Relative physical tolerance (scaled by the mesh diagonal).
+       * @returns The tolerance.
+       */
       Real getTolerance() const
       {
         return m_tolerance;
       }
 
-      /// Sets the relative physical tolerance and invalidates the index.
-      /// @param tolerance Tolerance used by the operation.
-      /// @returns Reference to this object after the operation.
+      /**
+       * Sets the relative physical tolerance and invalidates the index.
+       * @param tolerance Tolerance used by the operation.
+       * @returns Reference to this object after the operation.
+       */
       AABB& setTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
@@ -123,16 +129,20 @@ namespace Rodin::Location
         return *this;
       }
 
-      /// Maximum reference-space overshoot before clipping and residual check.
-      /// @returns The reference tolerance.
+      /**
+       * Maximum reference-space overshoot before clipping and residual check.
+       * @returns The reference tolerance.
+       */
       Real getReferenceTolerance() const
       {
         return m_referenceTolerance;
       }
 
-      /// @brief Sets the maximum reference-space overshoot before clipping.
-      /// @param tolerance Tolerance used by the operation.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Sets the maximum reference-space overshoot before clipping.
+       * @param tolerance Tolerance used by the operation.
+       * @returns Reference to this object after the operation.
+       */
       AABB& setReferenceTolerance(Real tolerance)
       {
         if (!std::isfinite(tolerance) || tolerance < Real(0))
@@ -203,9 +213,11 @@ namespace Rodin::Location
         return {};
       }
 
-      /// @brief Locates a physical point on a cell of the mesh dimension.
-      /// @param x Point at which the operation is evaluated.
-      /// @returns Located mesh point, or an empty optional when the query cannot be certified.
+      /**
+       * @brief Locates a physical point on a cell of the mesh dimension.
+       * @param x Point at which the operation is evaluated.
+       * @returns Located mesh point, or an empty optional when the query cannot be certified.
+       */
       Optional<Geometry::Point> locate(const Math::SpatialPoint& x) const
       {
         return locate(m_mesh.get().getDimension(), x);
@@ -216,8 +228,10 @@ namespace Rodin::Location
       static constexpr size_t MaxSpaceDimension = 3;
       /// Leaf capacity: a policy balance between tree traversal and candidate scans.
       static constexpr size_t LeafSize = 8;
-      /// Median splits give logarithmic depth; this capacity accommodates the
-      /// supported 32-bit entry range with spare traversal slots.
+      /**
+       * Median splits give logarithmic depth; this capacity accommodates the
+       * supported 32-bit entry range with spare traversal slots.
+       */
       static constexpr int32_t StackDepth = 64;
 
       /// Default physical residual tolerance, relative to the mesh diagonal.
@@ -226,11 +240,15 @@ namespace Rodin::Location
       static constexpr Real DefaultReferenceTolerance = Real(1e-10);
       /// Work limit per Newton seed; it does not guarantee convergence.
       static constexpr size_t DefaultMaxNewtonIterations = 16;
-      /// Roundoff allowance in reference coordinates, measured in machine epsilons.
-      /// This is a numerical policy margin, not an error bound for the inverse map.
+      /**
+       * Roundoff allowance in reference coordinates, measured in machine epsilons.
+       * This is a numerical policy margin, not an error bound for the inverse map.
+       */
       static constexpr Real ReferenceRoundoffFactor = Real(16);
-      /// Divergence guard: reference cells have coordinates of order one.
-      /// The generous radius permits intermediate overshoot without accepting it.
+      /**
+       * Divergence guard: reference cells have coordinates of order one.
+       * The generous radius permits intermediate overshoot without accepting it.
+       */
       static constexpr Real MaxReferenceNorm = Real(1e3);
       /// Squared divergence radius, derived for squared-length comparisons.
       static constexpr Real MaxReferenceNormSquared = MaxReferenceNorm * MaxReferenceNorm;
@@ -240,22 +258,32 @@ namespace Rodin::Location
       static constexpr Real SeedCentroidWeight = Real(0.5);
       /// Halve a rejected step to search toward the current iterate.
       static constexpr Real BacktrackingContraction = Real(0.5);
-      /// Work limit including the full-step trial; the last scale is 2^-23.
-      /// Exhausting this budget rejects the seed, rather than certifying a miss.
+      /**
+       * Work limit including the full-step trial; the last scale is 2^-23.
+       * Exhausting this budget rejects the seed, rather than certifying a miss.
+       */
       static constexpr size_t MaxBacktrackingTrials = 24;
-      /// Require the estimated correction to fit within one quarter of the
-      /// reference accuracy before skipping another Jacobian evaluation.
-      /// This conservative policy margin is heuristic, not a convergence proof.
+      /**
+       * Require the estimated correction to fit within one quarter of the
+       * reference accuracy before skipping another Jacobian evaluation.
+       * This conservative policy margin is heuristic, not a convergence proof.
+       */
       static constexpr Real CorrectionEstimateMargin = Real(0.25);
 
-      /// Conversion roundoff allowance in machine epsilons per basis entry.
-      /// This heuristic accounts for conditioning; it is not an interval proof.
+      /**
+       * Conversion roundoff allowance in machine epsilons per basis entry.
+       * This heuristic accounts for conditioning; it is not an interval proof.
+       */
       static constexpr Real ControlRoundoffFactor = Real(32);
-      /// Cubic and higher tensor factors use line conversions. Small dense
-      /// products avoid the line-loop overhead on quadratic factors.
+      /**
+       * Cubic and higher tensor factors use line conversions. Small dense
+       * products avoid the line-loop overhead on quadratic factors.
+       */
       static constexpr size_t MinSeparableTensorDegree = 3;
-      /// Euclidean norm with the cheap squared-norm path at ordinary scales.
-      /// Scaling avoids overflow and avoids classifying nonzero tiny vectors as zero.
+      /**
+       * Euclidean norm with the cheap squared-norm path at ordinary scales.
+       * Scaling avoids overflow and avoids classifying nonzero tiny vectors as zero.
+       */
       static Real stableNorm(const Math::SpatialPoint& v)
       {
         const Real squared = v.squaredNorm();

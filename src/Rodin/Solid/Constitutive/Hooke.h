@@ -55,17 +55,27 @@ namespace Rodin::Solid
           m_mu(mu)
       {}
 
-      /// @brief Copy constructor.
-      Hooke(const Hooke&) = default;
-      /// @brief Move constructor.
-      Hooke(Hooke&&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      Hooke(const Hooke& other) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      Hooke(Hooke&& other) = default;
 
-      /// @brief Gets the first Lamé parameter.
-      /// @returns The first Lamé parameter.
+      /**
+       * @brief Gets the first Lamé parameter.
+       * @returns The first Lamé parameter.
+       */
       Real getLameFirstParameter() const { return m_lambda; }
 
-      /// @brief Gets the shear modulus.
-      /// @returns The shear modulus.
+      /**
+       * @brief Gets the shear modulus.
+       * @returns The shear modulus.
+       */
       Real getShearModulus() const { return m_mu; }
 
       /**

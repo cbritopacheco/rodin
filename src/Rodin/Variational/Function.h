@@ -84,15 +84,19 @@ namespace Rodin::Variational
       /// @brief Default constructor
       FunctionBase() = default;
 
-      /// @brief Copy constructor
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor
+       * @param other Object to copy from.
+       */
       FunctionBase(const FunctionBase& other)
         : Parent(other),
           m_traceDomain(other.m_traceDomain)
       {}
 
-      /// @brief Move constructor
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor
+       * @param other Object to move from.
+       */
       FunctionBase(FunctionBase&& other)
         : Parent(std::move(other)),
           m_traceDomain(std::move(other.m_traceDomain))
@@ -101,9 +105,11 @@ namespace Rodin::Variational
       /// @brief Virtual destructor
       virtual ~FunctionBase() = default;
 
-      /// @brief Move assignment operator.
-      /// @param other Object to move from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       FunctionBase& operator=(FunctionBase&& other)
       {
         m_traceDomain = std::move(other.m_traceDomain);
@@ -125,9 +131,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      /// @brief Evaluates the function at an integration point.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the function at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
@@ -286,9 +294,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      /// @brief Evaluates the function at an integration point.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the function at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -319,22 +329,28 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getOrder(geom);
       }
 
-      /// @brief Returns this object as the CRTP-derived type.
-      /// @returns This object as the CRTP-derived type.
+      /**
+       * @brief Returns this object as the CRTP-derived type.
+       * @returns This object as the CRTP-derived type.
+       */
       Derived& getDerived() noexcept
       {
         return static_cast<Derived&>(*this);
       }
 
-      /// @brief Returns this object as the CRTP-derived type.
-      /// @returns This object as the CRTP-derived type.
+      /**
+       * @brief Returns this object as the CRTP-derived type.
+       * @returns This object as the CRTP-derived type.
+       */
       const Derived& getDerived() const noexcept
       {
         return static_cast<const Derived&>(*this);
       }
 
-      /// @brief Polymorphically copies the derived function.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Polymorphically copies the derived function.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual FunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
@@ -344,10 +360,12 @@ namespace Rodin::Variational
       FlatSet<Geometry::Attribute> m_traceDomain;
   };
 
-  /// @brief Returns the order only when a function is elementwise constant.
-  /// @param f Function operand.
-  /// @param polytope Mesh entity used by this operation.
-  /// @returns Zero when the function is known to be elementwise constant, or an empty optional otherwise.
+  /**
+   * @brief Returns the order only when a function is elementwise constant.
+   * @param f Function operand.
+   * @param polytope Mesh entity used by this operation.
+   * @returns Zero when the function is known to be elementwise constant, or an empty optional otherwise.
+   */
   template <class Derived>
   inline Optional<size_t>
   GetOrderIfConstant(const FunctionBase<Derived>& f, const Geometry::Polytope& polytope) noexcept

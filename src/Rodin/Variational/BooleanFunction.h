@@ -65,14 +65,18 @@ namespace Rodin::Variational
       /// @brief Default constructor
       BooleanFunctionBase() = default;
 
-      /// @brief Copy constructor
-      /// @param[in] other Function to copy from
+      /**
+       * @brief Copy constructor
+       * @param[in] other Function to copy from
+       */
       BooleanFunctionBase(const BooleanFunctionBase& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor
-      /// @param[in] other Function to move from
+      /**
+       * @brief Move constructor
+       * @param[in] other Function to move from
+       */
       BooleanFunctionBase(BooleanFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -95,9 +99,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      /// @brief Evaluates the expression at an integration point.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -143,37 +149,47 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<BooleanFunction<Boolean>>;
 
-      /// @brief Constructs the constant boolean function.
-      /// @param v Constant Boolean value.
+      /**
+       * @brief Constructs the constant boolean function.
+       * @param v Constant Boolean value.
+       */
       BooleanFunction(Boolean v)
         : m_v(v)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       BooleanFunction(const BooleanFunction& other)
         : Parent(other),
           m_v(other.m_v)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       BooleanFunction(BooleanFunction&& other)
         : Parent(std::move(other)),
           m_v(other.m_v)
       {}
 
-      /// @brief Evaluates the expression at a geometric point.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at a geometric point.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       Boolean getValue(const Geometry::Point&) const
       {
         return m_v;
       }
 
-      /// @brief Restricts the trace of the expression to a mesh attribute.
-      /// @param args Arguments forwarded to the constructed object.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Restricts the trace of the expression to a mesh attribute.
+       * @param args Arguments forwarded to the constructed object.
+       * @returns Reference to this object after the operation.
+       */
       template <class ... Args>
       constexpr
       BooleanFunction& traceOf(const Args& ... args)

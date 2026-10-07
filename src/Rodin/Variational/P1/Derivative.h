@@ -33,8 +33,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Derivative over a grid function: exposes the finite
-  /// element space, the operand type and the range type.
+  /**
+   * @brief Type traits for @c Derivative over a grid function: exposes the finite
+   * element space, the operand type and the range type.
+   */
   template <class Range, class Data, class Mesh>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
@@ -48,8 +50,10 @@ namespace Rodin::FormLanguage
       using RangeType = Range;
   };
 
-  /// @brief Type traits for @c Derivative over a shape function: exposes the finite
-  /// element space, the shape function space, the operand type and the range type.
+  /**
+   * @brief Type traits for @c Derivative over a shape function: exposes the finite
+   * element space, the shape function space, the operand type and the range type.
+   */
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Derivative<
@@ -128,17 +132,21 @@ namespace Rodin::Variational
           m_i(std::move(other.m_i))
       {}
 
-      /// @brief Interpolates at an integration point.
-      /// @param out Storage for the computed result.
-      /// @param ip Integration point at which the expression is evaluated.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         interpolate(out, ip.getPoint());
       }
 
-      /// @brief Interpolates at a geometric point.
-      /// @param out Storage for the computed result.
-      /// @param p Point at which the operation is evaluated.
+      /**
+       * @brief Interpolates at a geometric point.
+       * @param out Storage for the computed result.
+       * @param p Point at which the operation is evaluated.
+       */
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -213,8 +221,10 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Creates a polymorphic copy.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Derivative* copy() const noexcept override
       {
         return new Derivative(*this);

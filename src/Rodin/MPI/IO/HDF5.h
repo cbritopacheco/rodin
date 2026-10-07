@@ -60,17 +60,11 @@ namespace Rodin::IO
     : public MeshLoaderBase<Context::MPI>
   {
     public:
-      /**
-       * @brief Distributed context type handled by this loader.
-       */
+      /// @brief Distributed context type handled by this loader.
       using ContextType = Context::MPI;
-      /**
-       * @brief Distributed mesh object type loaded by this specialization.
-       */
+      /// @brief Distributed mesh object type loaded by this specialization.
       using ObjectType = Geometry::Mesh<ContextType>;
-      /**
-       * @brief Base loader interface specialization.
-       */
+      /// @brief Base loader interface specialization.
       using Parent = MeshLoaderBase<ContextType>;
 
       /**
@@ -318,17 +312,11 @@ namespace Rodin::IO
     : public MeshPrinterBase<Context::MPI>
   {
     public:
-      /**
-       * @brief Distributed context type handled by this printer.
-       */
+      /// @brief Distributed context type handled by this printer.
       using ContextType = Context::MPI;
-      /**
-       * @brief Distributed mesh object type written by this specialization.
-       */
+      /// @brief Distributed mesh object type written by this specialization.
       using ObjectType = Geometry::Mesh<ContextType>;
-      /**
-       * @brief Base printer interface specialization.
-       */
+      /// @brief Base printer interface specialization.
       using Parent = MeshPrinterBase<ContextType>;
 
       /**
@@ -475,9 +463,7 @@ namespace Rodin::IO
         HDF5::writeVectorDataset(file, HDF5::shardStatePath(d), buf);
       }
 
-      /**
-       * @brief Writes bidirectional polytope index map for dimension `d`.
-       */
+      /// @brief Writes bidirectional polytope index map for dimension `d`.
       static void writePolytopeMap(hid_t file, const Geometry::Shard& shard, size_t d)
       {
         const auto& pmap = shard.getPolytopeMap(d);
@@ -531,9 +517,7 @@ namespace Rodin::IO
         }
       }
 
-      /**
-       * @brief Writes ghost-to-owner rank map for dimension `d`.
-       */
+      /// @brief Writes ghost-to-owner rank map for dimension `d`.
       static void writeOwner(hid_t file, const Geometry::Shard& shard, size_t d)
       {
         const auto& owner = shard.getOwner(d);

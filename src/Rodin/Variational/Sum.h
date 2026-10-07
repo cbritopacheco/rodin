@@ -28,8 +28,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Sum over a function expression: exposes the left-hand side
-  /// operand and the right-hand side operand.
+  /**
+   * @brief Type traits for @c Sum over a function expression: exposes the left-hand side
+   * operand and the right-hand side operand.
+   */
   template <class LHSDerived, class RHSDerived>
   struct Traits<
     Variational::Sum<Variational::FunctionBase<LHSDerived>, Variational::FunctionBase<RHSDerived>>>
@@ -40,9 +42,11 @@ namespace Rodin::FormLanguage
       using RHSType = Variational::FunctionBase<RHSDerived>;
   };
 
-  /// @brief Type traits for @c Sum over a shape function: exposes the finite element
-  /// space, the left-hand side operand, the right-hand side operand and the shape
-  /// function space.
+  /**
+   * @brief Type traits for @c Sum over a shape function: exposes the finite element
+   * space, the left-hand side operand, the right-hand side operand and the shape
+   * function space.
+   */
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Sum<
@@ -59,8 +63,10 @@ namespace Rodin::FormLanguage
       static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 
-  /// @brief Type traits for @c Sum over linear form integrators: exposes the left-hand
-  /// side operand, the right-hand side operand and the scalar type.
+  /**
+   * @brief Type traits for @c Sum over linear form integrators: exposes the left-hand
+   * side operand, the right-hand side operand and the scalar type.
+   */
   template <class LHSNumber, class RHSNumber>
   struct Traits<
     Variational::Sum<
@@ -141,16 +147,20 @@ namespace Rodin::Variational
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Sum(const Sum& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Sum(Sum&& other)
         : Parent(std::move(other)),
@@ -207,9 +217,11 @@ namespace Rodin::Variational
         return lhs + rhs;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param poly Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
@@ -232,9 +244,7 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /**
-   * @brief Deduction guide for function sum.
-   */
+  /// @brief Deduction guide for function sum.
   template <class LHSDerived, class RHSDerived>
   Sum(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
     -> Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
@@ -355,9 +365,11 @@ namespace Rodin::Variational
       using Parent = ShapeFunctionBase<Sum<LHSType, RHSType>, FES, Space>;
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       constexpr
       Sum(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
@@ -366,24 +378,30 @@ namespace Rodin::Variational
         assert(lhs.getLeaf().getUUID() == rhs.getLeaf().getUUID());
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Sum(const Sum& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Sum(Sum&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)), m_rhs(std::move(other.m_rhs))
       {}
 
-      /// @brief Gets the left-hand side operand.
-      /// @returns The left-hand side operand.
+      /**
+       * @brief Gets the left-hand side operand.
+       * @returns The left-hand side operand.
+       */
       constexpr
       const LHSType& getLHS() const
       {
@@ -391,8 +409,10 @@ namespace Rodin::Variational
         return *m_lhs;
       }
 
-      /// @brief Gets the right-hand side operand.
-      /// @returns The right-hand side operand.
+      /**
+       * @brief Gets the right-hand side operand.
+       * @returns The right-hand side operand.
+       */
       constexpr
       const RHSType& getRHS() const
       {
@@ -400,17 +420,21 @@ namespace Rodin::Variational
         return *m_rhs;
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      /// @returns The operand in the shape function expression.
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
       constexpr
       const auto& getLeaf() const
       {
         return getRHS().getLeaf();
       }
 
-      /// @brief Returns the number of local basis functions for a polytope.
-      /// @param element Finite element used by the operation.
-      /// @returns Number of local basis functions on the selected entity.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
@@ -418,9 +442,11 @@ namespace Rodin::Variational
         return getLHS().getDOFs(element);
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Sum& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
@@ -428,16 +454,20 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
-      /// @returns The integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_lhs->getIntegrationPoint();
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
-      /// @param local Index in the local numbering.
-      /// @returns Value of the selected local basis function at the evaluation point.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       constexpr
       auto getBasis(size_t local) const
       {
@@ -446,17 +476,21 @@ namespace Rodin::Variational
         return lhs + rhs;
       }
 
-      /// @brief Gets the finite element space.
-      /// @returns The finite element space.
+      /**
+       * @brief Gets the finite element space.
+       * @returns The finite element space.
+       */
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param poly Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       std::optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
@@ -486,10 +520,12 @@ namespace Rodin::Variational
 
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   constexpr auto
-  /// @brief Sum of two shape function expressions.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Sum of two shape function expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Sum of the operands.
+   */
   operator+(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
     const ShapeFunctionBase<RHSDerived, FES, Space>& rhs)
   {
@@ -521,23 +557,29 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
         this->add(lhs);
         this->add(rhs);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sum(const Sum& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sum(Sum&& other)
         : Parent(std::move(other))
       {}
@@ -550,10 +592,12 @@ namespace Rodin::Variational
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
-  /// @brief Sum of two linear form integrators.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Sum of two linear form integrators.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Sum of the operands.
+   */
   operator+(const LinearFormIntegratorBase<LHSNumber>& lhs,
     const LinearFormIntegratorBase<RHSNumber>& rhs)
   {
@@ -585,23 +629,29 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
         this->add(lhs);
         this->add(rhs);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sum(const Sum& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sum(Sum&& other)
         : Parent(std::move(other))
       {}
@@ -614,10 +664,12 @@ namespace Rodin::Variational
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
-  /// @brief Sum of two linear form integrators.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Sum of two linear form integrators.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Sum of the operands.
+   */
   operator+(const LinearFormIntegratorBase<LHSNumber>& lhs,
     const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& rhs)
   {
@@ -650,23 +702,29 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
         this->add(lhs);
         this->add(rhs);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sum(const Sum& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sum(Sum&& other)
         : Parent(std::move(other))
       {}
@@ -680,10 +738,12 @@ namespace Rodin::Variational
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
-  /// @brief Sum of two linear form integrators.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Sum of two linear form integrators.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Sum of the operands.
+   */
   operator+(const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& lhs,
     const LinearFormIntegratorBase<RHSNumber>& rhs)
   {
@@ -717,23 +777,29 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
         this->add(lhs);
         this->add(rhs);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sum(const Sum& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sum(Sum&& other)
         : Parent(std::move(other))
       {}
@@ -749,10 +815,12 @@ namespace Rodin::Variational
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
-  /// @brief Sum of two linear form integrators.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Sum of two linear form integrators.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Sum of the operands.
+   */
   operator+(const FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>& lhs,
     const FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>& rhs)
   {
@@ -784,31 +852,39 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
         this->add(lhs);
         this->add(rhs);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sum(const Sum& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sum(Sum&& other)
         : Parent(std::move(other))
       {}
   };
 
-  /// @brief Deduction guide for @c Sum.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
+  /**
+   * @brief Deduction guide for @c Sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSNumber, class RHSNumber>
   Sum(const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
       const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
@@ -816,10 +892,12 @@ namespace Rodin::Variational
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
-  /// @brief Sum of two bilinear form integrators.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Sum of two bilinear form integrators.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Sum of the operands.
+   */
   operator+(const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
     const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
   {
@@ -851,23 +929,29 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
         this->add(lhs);
         this->add(rhs);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sum(const Sum& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sum(Sum&& other)
         : Parent(std::move(other))
       {}
@@ -883,10 +967,12 @@ namespace Rodin::Variational
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
-  /// @brief Sum of two bilinear form integrators.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Sum of two bilinear form integrators.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Sum of the operands.
+   */
   operator+(const LocalBilinearFormIntegratorBase<LHSNumber>& lhs,
     const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
   {
@@ -919,23 +1005,29 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
         this->add(lhs);
         this->add(rhs);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sum(const Sum& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sum(Sum&& other)
         : Parent(std::move(other))
       {}
@@ -951,10 +1043,12 @@ namespace Rodin::Variational
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
-  /// @brief Sum of two bilinear form integrators.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Sum of two bilinear form integrators.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Sum of the operands.
+   */
   operator+(const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
     const LocalBilinearFormIntegratorBase<RHSNumber>& rhs)
   {
@@ -988,23 +1082,29 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
         this->add(lhs);
         this->add(rhs);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sum(const Sum& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sum(Sum&& other)
         : Parent(std::move(other))
       {}
@@ -1020,10 +1120,12 @@ namespace Rodin::Variational
 
   template <class LHSNumber, class RHSNumber>
   constexpr auto
-  /// @brief Sum of two bilinear form integrators.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Sum of two bilinear form integrators.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Sum of the operands.
+   */
   operator+(const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>& lhs,
     const FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>& rhs)
   {
@@ -1045,41 +1147,51 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FormLanguage::List<BilinearFormBase<Operator>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Sum(const LHSType& lhs, const RHSType& rhs)
       {
         this->add(lhs);
         this->add(rhs);
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sum(const Sum& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sum(Sum&& other)
         : Parent(std::move(other))
       {}
   };
 
-  /// @brief Deduction guide for @c Sum.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
+  /**
+   * @brief Deduction guide for @c Sum.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class Operator>
   Sum(const BilinearFormBase<Operator>& lhs, const BilinearFormBase<Operator>& rhs)
     -> Sum<BilinearFormBase<Operator>, BilinearFormBase<Operator>>;
 
   template <class Operator>
   constexpr auto
-  /// @brief Sum of two expressions.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Sum of the operands.
+  /**
+   * @brief Sum of two expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Sum of the operands.
+   */
   operator+(const BilinearFormBase<Operator>& lhs, const BilinearFormBase<Operator>& rhs)
   {
     return Sum(lhs, rhs);

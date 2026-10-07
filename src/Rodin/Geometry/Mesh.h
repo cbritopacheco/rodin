@@ -325,9 +325,7 @@ namespace Rodin::Geometry
   class MeshBase
   {
     public:
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~MeshBase() = default;
 
       /**
@@ -843,8 +841,10 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      /// @brief Serializes the mesh (for boost::serialization).
-      /// @param ar Serialization archive.
+      /**
+       * @brief Serializes the mesh (for boost::serialization).
+       * @param ar Serialization archive.
+       */
       template<class Archive>
       void serialize(Archive& ar, const unsigned int)
       {
@@ -881,15 +881,11 @@ namespace Rodin::Geometry
       using Parent =
         MeshBase;
 
-      /**
-       * @brief Class used to build Mesh<Context::Local> instances.
-       */
+      /// @brief Class used to build Mesh<Context::Local> instances.
       class Builder
       {
         public:
-          /**
-           * @brief Default constructor.
-           */
+          /// @brief Default constructor.
           Builder()
             : m_initialized(false),
               m_nodes(0)
@@ -897,15 +893,14 @@ namespace Rodin::Geometry
 
           virtual ~Builder() = default;
 
-          /**
-           * @brief Deleted copy constructor.
-           */
+          /// @brief Deleted copy constructor.
           Builder(const Builder&) = delete;
 
           /**
            * @brief Move constructor.
+           * @param other Object to move from.
            */
-          Builder(Builder&&) = default;
+          Builder(Builder&& other) = default;
 
           /**
            * @brief Deleted copy assignment.
@@ -1008,11 +1003,13 @@ namespace Rodin::Geometry
             return polytope(t, IndexArray({ vs }));
           }
 
-          /// @brief Adds a polytope and returns its index via @p index.
-          /// @param t Type of polytope to construct.
-          /// @param vs Vertex indices defining the polytope.
-          /// @param index Storage for the index of the added polytope.
-          /// @returns Reference to this object after the operation.
+          /**
+           * @brief Adds a polytope and returns its index via @p index.
+           * @param t Type of polytope to construct.
+           * @param vs Vertex indices defining the polytope.
+           * @param index Storage for the index of the added polytope.
+           * @returns Reference to this object after the operation.
+           */
           Builder& polytope(
             Polytope::Type t, std::initializer_list<Index> vs, Index& index)
           {
@@ -1053,63 +1050,77 @@ namespace Rodin::Geometry
            */
           Builder& polytope(Polytope::Type t, IndexArray&& vs, Index& index);
 
-          /// @brief Adds a segment from the given vertices.
-          /// @param vs Vertex indices defining the polytope.
-          /// @returns Reference to this object after the operation.
+          /**
+           * @brief Adds a segment from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& segment(T&& vs)
           {
             return polytope(Polytope::Type::Segment, std::forward<T>(vs));
           }
 
-          /// @brief Adds a quadrilateral from the given vertices.
-          /// @param vs Vertex indices defining the polytope.
-          /// @returns Reference to this object after the operation.
+          /**
+           * @brief Adds a quadrilateral from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& quadrilateral(T&& vs)
           {
             return polytope(Polytope::Type::Quadrilateral, std::forward<T>(vs));
           }
 
-          /// @brief Adds a triangle from the given vertices.
-          /// @param vs Vertex indices defining the polytope.
-          /// @returns Reference to this object after the operation.
+          /**
+           * @brief Adds a triangle from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& triangle(T&& vs)
           {
             return polytope(Polytope::Type::Triangle, std::forward<T>(vs));
           }
 
-          /// @brief Adds a tetrahedron from the given vertices.
-          /// @param vs Vertex indices defining the polytope.
-          /// @returns Reference to this object after the operation.
+          /**
+           * @brief Adds a tetrahedron from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& tetrahedron(T&& vs)
           {
             return polytope(Polytope::Type::Tetrahedron, std::forward<T>(vs));
           }
 
-          /// @brief Adds a pyramid from the given vertices.
-          /// @param vs Vertex indices defining the polytope.
-          /// @returns Reference to this object after the operation.
+          /**
+           * @brief Adds a pyramid from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& pyramid(T&& vs)
           {
             return polytope(Polytope::Type::Pyramid, std::forward<T>(vs));
           }
 
-          /// @brief Adds a hexahedron from the given vertices.
-          /// @param vs Vertex indices defining the polytope.
-          /// @returns Reference to this object after the operation.
+          /**
+           * @brief Adds a hexahedron from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& hexahedron(T&& vs)
           {
             return polytope(Polytope::Type::Hexahedron, std::forward<T>(vs));
           }
 
-          /// @brief Adds a wedge from the given vertices.
-          /// @param vs Vertex indices defining the polytope.
-          /// @returns Reference to this object after the operation.
+          /**
+           * @brief Adds a wedge from the given vertices.
+           * @param vs Vertex indices defining the polytope.
+           * @returns Reference to this object after the operation.
+           */
           template <class T>
           Builder& wedge(T&& vs)
           {
@@ -1164,15 +1175,19 @@ namespace Rodin::Geometry
            */
           Builder& setQuadratureIndex(PolytopeQuadratureIndex&& quadIndex);
 
-          /// @brief Returns the mesh connectivity (incidence relations).
-          /// @returns The mesh connectivity (incidence relations).
+          /**
+           * @brief Returns the mesh connectivity (incidence relations).
+           * @returns The mesh connectivity (incidence relations).
+           */
           Connectivity<Context>& getConnectivity()
           {
             return m_connectivity;
           }
 
-          /// @brief Returns the mesh connectivity (incidence relations).
-          /// @returns The mesh connectivity (incidence relations).
+          /**
+           * @brief Returns the mesh connectivity (incidence relations).
+           * @returns The mesh connectivity (incidence relations).
+           */
           const Connectivity<Context>& getConnectivity() const
           {
             return m_connectivity;
@@ -1192,9 +1207,7 @@ namespace Rodin::Geometry
           PolytopeQuadratureIndex m_quadratures;
       };
 
-      /**
-       * @brief Generates a Builder instance to build a Mesh object.
-       */
+      /// @brief Generates a Builder instance to build a Mesh object.
       static Builder Build()
       {
         return Builder();
@@ -1263,9 +1276,7 @@ namespace Rodin::Geometry
        */
       static Mesh Box(Polytope::Type g, const Array<size_t>& shape);
 
-      /**
-      * @brief Constructs an empty mesh with no cells.
-      */
+      /// @brief Constructs an empty mesh with no cells.
       Mesh()
         : m_sdim(0)
       {}
@@ -1280,23 +1291,17 @@ namespace Rodin::Geometry
         load(filename, fmt);
       }
 
-      /**
-      * @brief Performs a copy of another mesh.
-      */
+      /// @brief Performs a copy of another mesh.
       Mesh(const Mesh& other);
 
-      /**
-      * @brief Move constructs the mesh from another mesh.
-      */
+      /// @brief Move constructs the mesh from another mesh.
       Mesh(Mesh&& other);
 
       virtual ~Mesh() = default;
 
       Mesh& operator=(const Mesh& other) = delete;
 
-      /**
-      * @brief Move assigns the mesh from another mesh.
-      */
+      /// @brief Move assigns the mesh from another mesh.
       Mesh& operator=(Mesh&&);
 
       /**

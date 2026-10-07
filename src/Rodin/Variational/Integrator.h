@@ -55,9 +55,7 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = FormLanguage::Base;
 
-      /**
-       * @brief Enumeration of integrator types.
-       */
+      /// @brief Enumeration of integrator types.
       enum class Type
       {
         Linear,   ///< Linear form integrator (load vector)

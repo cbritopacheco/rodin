@@ -123,12 +123,16 @@ namespace Rodin::Solver
                          PetscReal dtol,
                          PetscInt  maxIt) noexcept;
 
-      /// @brief Returns the iteration count from the most recent solve.
-      /// @returns The iteration count from the most recent solve.
+      /**
+       * @brief Returns the iteration count from the most recent solve.
+       * @returns The iteration count from the most recent solve.
+       */
       std::size_t getIterationNumber() const;
 
-      /// @brief Returns the residual norm from the most recent solve.
-      /// @returns The residual norm from the most recent solve.
+      /**
+       * @brief Returns the residual norm from the most recent solve.
+       * @returns The residual norm from the most recent solve.
+       */
       Real getError() const;
 
       /**
@@ -145,16 +149,22 @@ namespace Rodin::Solver
        */
       KSP& setPrefix(const Optional<std::string>& prefix) noexcept;
 
-      /// @brief Returns a mutable reference to the underlying PETSc KSP handle.
-      /// @returns Mutable reference to the KSP handle.
+      /**
+       * @brief Returns a mutable reference to the underlying PETSc KSP handle.
+       * @returns Mutable reference to the KSP handle.
+       */
       HandleType& getHandle() noexcept override;
 
-      /// @brief Returns a read-only reference to the underlying PETSc KSP handle.
-      /// @returns Const reference to the KSP handle.
+      /**
+       * @brief Returns a read-only reference to the underlying PETSc KSP handle.
+       * @returns Const reference to the KSP handle.
+       */
       const HandleType& getHandle() const noexcept override;
 
-      /// @brief Creates a heap-allocated copy of this solver.
-      /// @returns Pointer to the cloned KSP instance.
+      /**
+       * @brief Creates a heap-allocated copy of this solver.
+       * @returns Pointer to the cloned KSP instance.
+       */
       virtual KSP* copy() const noexcept override
       {
         return new KSP(*this);
@@ -174,9 +184,7 @@ namespace Rodin::Solver
 
 namespace Rodin::PETSc::Solver
 {
-  /**
-   * @brief PETSc namespace alias to @ref Rodin::Solver::KSP.
-   */
+  /// @brief PETSc namespace alias to @ref Rodin::Solver::KSP.
   using KSP = Rodin::Solver::KSP;
 }
 

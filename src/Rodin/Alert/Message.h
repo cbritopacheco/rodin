@@ -172,9 +172,7 @@ namespace Rodin::Alert
        */
       Message(Message&& other) = default;
 
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~Message() = default;
 
       /**
@@ -294,9 +292,7 @@ namespace Rodin::Alert
       /// @brief Parent class type alias.
       using Parent = Message<Prefix>;
 
-      /**
-       * @brief Constructs a message that writes to std::cout.
-       */
+      /// @brief Constructs a message that writes to std::cout.
       PrefixedMessage()
         : Parent(std::cout, Prefix())
       {}

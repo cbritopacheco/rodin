@@ -225,9 +225,11 @@ namespace Rodin::Geometry
         std::vector<Index> left;             ///< Local shard index -> distributed index
         UnorderedMap<Index, Index> right;    ///< Distributed index -> local shard index
 
-        /// @brief Serializes the local/distributed index maps.
-        /// @param ar Serialization archive.
-        /// @param version Archive format version.
+        /**
+         * @brief Serializes the local/distributed index maps.
+         * @param ar Serialization archive.
+         * @param version Archive format version.
+         */
         template <class Archive>
         void serialize(Archive& ar, const unsigned int version)
         {
@@ -236,19 +238,13 @@ namespace Rodin::Geometry
         }
       };
 
-      /**
-       * @brief Context type (always local for shards).
-       */
+      /// @brief Context type (always local for shards).
       using ContextType = Rodin::Context::Local;
 
-      /**
-       * @brief Parent mesh type.
-       */
+      /// @brief Parent mesh type.
       using Parent = Mesh<ContextType>;
 
-      /**
-       * @brief Local state of a shard entity.
-       */
+      /// @brief Local state of a shard entity.
       enum class State : uint8_t
       {
         Shared = 0, ///< In local partition, owned remotely
@@ -282,9 +278,7 @@ namespace Rodin::Geometry
             Direct   ///< Initialize with explicit dimension and explicit contents
           };
 
-          /**
-           * @brief Default constructor.
-           */
+          /// @brief Default constructor.
           Builder();
 
           /**
@@ -455,9 +449,7 @@ namespace Rodin::Geometry
           PolytopeTransformationIndex m_transformations;
       };
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       Shard() = default;
 
       /**

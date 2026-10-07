@@ -283,9 +283,7 @@ namespace Rodin::IO::MEDIT
   class ParseEntity
   {
     public:
-      /**
-       * @brief Parsed entity data.
-       */
+      /// @brief Parsed entity data.
       struct Data
       {
         Array<Index> vertices;       ///< Vertex indices defining the entity
@@ -617,54 +615,36 @@ namespace Rodin::IO
        */
       void load(std::istream& is) override;
 
-      /**
-       * @brief Reads one logical line while tracking line numbers.
-       */
+      /// @brief Reads one logical line while tracking line numbers.
       std::istream& getline(std::istream& is, std::string& line);
-      /**
-       * @brief Skips blank lines and returns the next non-empty line.
-       */
+      /// @brief Skips blank lines and returns the next non-empty line.
       std::string skipEmptyLines(std::istream& is);
-      /**
-       * @brief Reads and validates the MEDIT version section.
-       */
+      /// @brief Reads and validates the MEDIT version section.
       void readVersion(std::istream& is);
-      /**
-       * @brief Reads and validates the MEDIT dimension section.
-       */
+      /// @brief Reads and validates the MEDIT dimension section.
       void readDimension(std::istream& is);
-      /**
-       * @brief Reads vertex and element entities from the MEDIT stream.
-       */
+      /// @brief Reads vertex and element entities from the MEDIT stream.
       void readEntities(std::istream& is);
 
-      /**
-       * @brief Returns mutable counts collected for each MEDIT keyword.
-       */
+      /// @brief Returns mutable counts collected for each MEDIT keyword.
       std::unordered_map<MEDIT::Keyword, size_t>& getCountMap()
       {
         return m_count;
       }
 
-      /**
-       * @brief Returns counts collected for each MEDIT keyword.
-       */
+      /// @brief Returns counts collected for each MEDIT keyword.
       const std::unordered_map<MEDIT::Keyword, size_t>& getCountMap() const
       {
         return m_count;
       }
 
-      /**
-       * @brief Returns mutable stream positions for parsed MEDIT sections.
-       */
+      /// @brief Returns mutable stream positions for parsed MEDIT sections.
       std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap()
       {
         return m_pos;
       }
 
-      /**
-       * @brief Returns stream positions for parsed MEDIT sections.
-       */
+      /// @brief Returns stream positions for parsed MEDIT sections.
       const std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap() const
       {
         return m_pos;
@@ -713,27 +693,35 @@ namespace Rodin::IO
         printMesh(os, true);
       }
 
-      /// @brief Prints the full MEDIT mesh body.
-      /// @param os Output stream.
-      /// @param printEnd Whether to write the mesh terminator.
+      /**
+       * @brief Prints the full MEDIT mesh body.
+       * @param os Output stream.
+       * @param printEnd Whether to write the mesh terminator.
+       */
       void printMesh(std::ostream& os, bool printEnd);
-      /// @brief Prints the MEDIT file version section.
-      /// @param os Output stream.
+      /**
+       * @brief Prints the MEDIT file version section.
+       * @param os Output stream.
+       */
       void printVersion(std::ostream& os);
-      /// @brief Prints the MEDIT dimension section.
-      /// @param os Output stream.
+      /**
+       * @brief Prints the MEDIT dimension section.
+       * @param os Output stream.
+       */
       void printDimension(std::ostream& os);
-      /// @brief Prints all supported mesh entity sections.
-      /// @param os Output stream.
+      /**
+       * @brief Prints all supported mesh entity sections.
+       * @param os Output stream.
+       */
       void printEntities(std::ostream& os);
-      /// @brief Prints the MEDIT end marker.
-      /// @param os Output stream.
+      /**
+       * @brief Prints the MEDIT end marker.
+       * @param os Output stream.
+       */
       void printEnd(std::ostream& os);
   };
 
-  /**
-   * @brief MEDIT grid-function loader for local P1 finite element spaces.
-   */
+  /// @brief MEDIT grid-function loader for local P1 finite element spaces.
   template <class Range>
     requires(!FormLanguage::IsMatrixRange<Range>::Value)
   class GridFunctionLoader<FileFormat::MEDIT,
@@ -775,19 +763,23 @@ namespace Rodin::IO
         readData(is);
       }
 
-      /// @brief Reads one input line and advances the line counter.
-      /// @param is Input stream.
-      /// @param line Input line to parse.
-      /// @returns The line.
+      /**
+       * @brief Reads one input line and advances the line counter.
+       * @param is Input stream.
+       * @param line Input line to parse.
+       * @returns The line.
+       */
       std::istream& getline(std::istream& is, std::string& line)
       {
         m_currentLineNumber++;
         return std::getline(is, line);
       }
 
-      /// @brief Skips blank lines and returns the first nonblank line.
-      /// @param is Input stream.
-      /// @returns First nonblank input line, or an empty string when the stream ends.
+      /**
+       * @brief Skips blank lines and returns the first nonblank line.
+       * @param is Input stream.
+       * @returns First nonblank input line, or an empty string when the stream ends.
+       */
       std::string skipEmptyLines(std::istream& is)
       {
         std::string line;
@@ -799,8 +791,10 @@ namespace Rodin::IO
         return line;
       }
 
-      /// @brief Reads the MEDIT solution-file version section.
-      /// @param is Input stream.
+      /**
+       * @brief Reads the MEDIT solution-file version section.
+       * @param is Input stream.
+       */
       void readVersion(std::istream& is)
       {
         auto line = skipEmptyLines(is);
@@ -821,8 +815,10 @@ namespace Rodin::IO
         }
       }
 
-      /// @brief Reads the MEDIT solution-file dimension section.
-      /// @param is Input stream.
+      /**
+       * @brief Reads the MEDIT solution-file dimension section.
+       * @param is Input stream.
+       */
       void readDimension(std::istream& is)
       {
         auto line = skipEmptyLines(is);
@@ -840,8 +836,10 @@ namespace Rodin::IO
         }
       }
 
-      /// @brief Reads the MEDIT SolAtVertices data section.
-      /// @param is Input stream.
+      /**
+       * @brief Reads the MEDIT SolAtVertices data section.
+       * @param is Input stream.
+       */
       void readData(std::istream& is)
       {
         auto& gf = this->getObject();
@@ -916,9 +914,7 @@ namespace Rodin::IO
       size_t m_currentLineNumber;
   };
 
-  /**
-   * @brief MEDIT grid-function loader for local H1 finite element spaces.
-   */
+  /// @brief MEDIT grid-function loader for local H1 finite element spaces.
   template <size_t K, class Range>
     requires(!FormLanguage::IsMatrixRange<Range>::Value)
   class GridFunctionLoader<FileFormat::MEDIT,
@@ -1447,15 +1443,19 @@ namespace Rodin::IO
         printEnd(os);
       }
 
-      /// @brief Prints the MEDIT solution-file version section.
-      /// @param os Output stream.
+      /**
+       * @brief Prints the MEDIT solution-file version section.
+       * @param os Output stream.
+       */
       void printVersion(std::ostream& os)
       {
         os << MEDIT::Keyword::MeshVersionFormatted << "\n2" << "\n\n";
       }
 
-      /// @brief Prints the MEDIT solution-file dimension section.
-      /// @param os Output stream.
+      /**
+       * @brief Prints the MEDIT solution-file dimension section.
+       * @param os Output stream.
+       */
       void printDimension(std::ostream& os)
       {
         const auto& gf = this->getObject();
@@ -1464,8 +1464,10 @@ namespace Rodin::IO
         os << MEDIT::Keyword::Dimension << '\n' << mesh.getSpaceDimension() << "\n\n";
       }
 
-      /// @brief Prints the MEDIT end marker.
-      /// @param os Output stream.
+      /**
+       * @brief Prints the MEDIT end marker.
+       * @param os Output stream.
+       */
       void printEnd(std::ostream& os)
       {
         os << '\n' << IO::MEDIT::Keyword::End;
@@ -1476,17 +1478,17 @@ namespace Rodin::IO
         return m_gf.get();
       }
 
-      /// @brief Prints the concrete grid-function coefficient data.
-      /// @param os Output stream.
+      /**
+       * @brief Prints the concrete grid-function coefficient data.
+       * @param os Output stream.
+       */
       virtual void printData(std::ostream& os) = 0;
 
     private:
       std::reference_wrapper<const ObjectType> m_gf;
   };
 
-  /**
-   * @brief MEDIT grid-function printer for vector-backed grid functions.
-   */
+  /// @brief MEDIT grid-function printer for vector-backed grid functions.
   template <class FES>
   class GridFunctionPrinter<
     FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
@@ -1514,8 +1516,10 @@ namespace Rodin::IO
 
       using Parent::Parent;
 
-      /// @brief Prints one value per mesh vertex in MEDIT solution order.
-      /// @param os Output stream.
+      /**
+       * @brief Prints one value per mesh vertex in MEDIT solution order.
+       * @param os Output stream.
+       */
       void printData(std::ostream& os)
       {
         const auto& gf = this->getObject();

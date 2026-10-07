@@ -3,7 +3,8 @@ name: Style
 # Style enforcement, layered (see CONTRIBUTING.md):
 #   Format         clang-format on CHANGED LINES only (never the whole tree)
 #   StyleLint      house rules: include guards, license blocks, @file docs,
-#                  no #pragma once, PETSc containment (dev/style_lint.py)
+#                  Doxygen comment style, no #pragma once, PETSc containment
+#                  (dev/style_lint.py)
 #   ClangTidy      identifier naming on the headers a change touches
 #   DoxygenRatchet no new documentation warnings (dev/check_doxygen_warnings.py)
 #
@@ -54,6 +55,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: false
+      - name: Test house-style linter
+        run: python3 -m unittest discover -s dev -p test_style_lint.py -v
       - name: Run house-style linter
         run: python3 dev/style_lint.py
 

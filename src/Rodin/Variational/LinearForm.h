@@ -38,8 +38,10 @@ namespace Rodin::FormLanguage
       using VectorType = Vector;
   };
 
-  /// @brief Type traits for @c LinearForm: exposes the finite element space and the
-  /// vector type.
+  /**
+   * @brief Type traits for @c LinearForm: exposes the finite element space and the
+   * vector type.
+   */
   template <class FES, class Vector>
   struct Traits<Variational::LinearForm<FES, Vector>>
   {
@@ -259,9 +261,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Replaces the integrators of the form.
-      /// @param lfis Linear form integrators.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Replaces the integrators of the form.
+       * @param lfis Linear form integrators.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       LinearFormBase& operator=(const LinearFormIntegratorBaseListType& lfis)
       {
@@ -376,8 +380,10 @@ namespace Rodin::Variational
         : m_v(v)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       LinearForm(const LinearForm& other)
         : Parent(other),
@@ -386,8 +392,10 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       LinearForm(LinearForm&& other)
         : Parent(std::move(other)),
@@ -396,9 +404,11 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
-      /// @brief Copy assignment.
-      /// @param other Object to copy from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       LinearForm& operator=(const LinearForm& other)
       {
         if (this != &other)
@@ -411,9 +421,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment.
-      /// @param other Object to move from.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       LinearForm& operator=(LinearForm&& other) noexcept
       {
         if (this != &other)
@@ -448,15 +460,19 @@ namespace Rodin::Variational
         m_assembly.execute(this->getVector(), { fes, this->getIntegrators() });
       }
 
-      /// @brief Gets the assembled vector.
-      /// @returns The assembled vector.
+      /**
+       * @brief Gets the assembled vector.
+       * @returns The assembled vector.
+       */
       VectorType& getVector() override
       {
         return m_vector;
       }
 
-      /// @brief Gets the assembled vector.
-      /// @returns The assembled vector.
+      /**
+       * @brief Gets the assembled vector.
+       * @returns The assembled vector.
+       */
       const VectorType& getVector() const override
       {
         return m_vector;

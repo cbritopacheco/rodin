@@ -141,8 +141,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Returns the current polytope.
-      /// @returns The current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const override
       {
         return m_polytope.value().get();
@@ -319,10 +321,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the current element stiffness matrix.
-      /// @param tr Trial shape-function expression.
-      /// @param te Test shape-function expression.
-      /// @returns Integral computed by the quadrature rule.
+      /**
+       * @brief Returns an entry of the current element stiffness matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) override
       {
         return m_matrix(te, tr);
@@ -383,9 +387,7 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;  ///< Local stiffness matrix
   };
 
-  /**
-   * @brief Deduction guide for LinearElasticityIntegrator.
-   */
+  /// @brief Deduction guide for LinearElasticityIntegrator.
   template <class Solution, class FES, class LambdaDerived, class MuDerived>
   LinearElasticityIntegrator(
       const TrialFunction<Solution, FES>&, const TestFunction<FES>&,
@@ -448,9 +450,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const TestFunction<FES>>  m_v;             ///< Test function
   };
 
-  /**
-   * @brief Deduction guide for LinearElasticityIntegral.
-   */
+  /// @brief Deduction guide for LinearElasticityIntegral.
   template <class Solution, class FES>
   LinearElasticityIntegral(const TrialFunction<Solution, FES>&, const TestFunction<FES>&)
     -> LinearElasticityIntegral<Solution, FES>;

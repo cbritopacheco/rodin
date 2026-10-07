@@ -39,9 +39,9 @@ namespace Rodin::Assembly
   class MPIBoundaryDOFs
   {
     public:
-      /** Scalar field type of the constrained space. */
+      /// Scalar field type of the constrained space.
       using Scalar = typename FES::ScalarType;
-      /** Whether the space has globally supported constant DOFs. */
+      /// Whether the space has globally supported constant DOFs.
       static constexpr bool Global = std::is_same_v<FES,
         Variational::P0g<typename FES::RangeType, typename FES::MeshType>>;
 
@@ -123,8 +123,10 @@ namespace Rodin::Assembly
         }
       }
 
-      /// Global DOF -> (shard-local face, face-local functional ordinal).
-      /// @returns Degrees of freedom associated with the supplied mesh entity.
+      /**
+       * Global DOF -> (shard-local face, face-local functional ordinal).
+       * @returns Degrees of freedom associated with the supplied mesh entity.
+       */
       const auto& getDOFs() const
       {
         return m_dofs;

@@ -124,9 +124,11 @@ namespace Rodin::Variational
           return lhs;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = getLHS().getOrder(polytope);
@@ -314,30 +316,38 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = Max<FunctionBase<NestedDerived>, Real>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param a Left operand.
-      /// @param b Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param a Left operand.
+       * @param b Right operand.
+       */
       constexpr
       Max(const LHSType& a, const RHSType& b)
         : Parent(b, a)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Max(const Max& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Max(Max&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Creates a polymorphic copy.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual Max* copy() const noexcept override
       {
         return new Max(*this);

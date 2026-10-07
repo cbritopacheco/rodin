@@ -147,17 +147,21 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = PeriodicBCBase<ScalarType>;
 
-      /// @brief Constructs the periodic boundary condition from an identification map.
-      /// @param adjacency Adjacency relation.
-      /// @param u Operand expression.
+      /**
+       * @brief Constructs the periodic boundary condition from an identification map.
+       * @param adjacency Adjacency relation.
+       * @param u Operand expression.
+       */
       PeriodicBC(const OperandType& u, const IndexMap<IndexSet>& adjacency)
         : m_u(u),
           m_adjacency(adjacency)
       {}
 
-      /// @brief Constructs the periodic boundary condition from an identification map.
-      /// @param adjacency Adjacency relation.
-      /// @param u Operand expression.
+      /**
+       * @brief Constructs the periodic boundary condition from an identification map.
+       * @param adjacency Adjacency relation.
+       * @param u Operand expression.
+       */
       PeriodicBC(const OperandType& u, IndexMap<IndexSet>&& adjacency)
         : m_u(u),
           m_adjacency(std::move(adjacency))
@@ -203,8 +207,10 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Gets the degree-of-freedom identification map.
-      /// @returns The degree-of-freedom identification map.
+      /**
+       * @brief Gets the degree-of-freedom identification map.
+       * @returns The degree-of-freedom identification map.
+       */
       const IndexMap<IndexSet>& getAdjacency() const
       {
         return m_adjacency;

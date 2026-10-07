@@ -28,8 +28,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Div over a grid function: exposes the finite element
-  /// space, the scalar type and the operand type.
+  /**
+   * @brief Type traits for @c Div over a grid function: exposes the finite element
+   * space, the scalar type and the operand type.
+   */
   template <class Scalar, class Data, class Mesh>
   struct Traits<Variational::Div<Variational::GridFunction<Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
@@ -41,8 +43,10 @@ namespace Rodin::FormLanguage
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
-  /// @brief Type traits for @c Div over a shape function: exposes the finite element
-  /// space, the shape function space, the scalar type and the operand type.
+  /**
+   * @brief Type traits for @c Div over a shape function: exposes the finite element
+   * space, the shape function space, the scalar type and the operand type.
+   */
   template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Div<
@@ -85,20 +89,26 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
-      /// @brief Constructs the expression from its operand.
-      /// @param u Operand expression.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       explicit Div(const OperandType& u)
         : Parent(u)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Div(const Div& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Div(Div&& other)
         : Parent(std::move(other))
       {}
@@ -112,16 +122,20 @@ namespace Rodin::Variational
         out = ScalarType(0);
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return 0;
       }
 
-      /// @brief Creates a polymorphic copy.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Div* copy() const noexcept override
       {
         return new Div(*this);
@@ -154,8 +168,10 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
 
-      /// @brief Constructs the expression from its operand.
-      /// @param u Operand expression.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       explicit Div(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
@@ -163,8 +179,10 @@ namespace Rodin::Variational
           m_zero(ScalarType(0))
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Div(const Div& other)
         : Parent(other),
           m_u(other.m_u),
@@ -172,8 +190,10 @@ namespace Rodin::Variational
           m_zero(other.m_zero)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Div(Div&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -181,25 +201,31 @@ namespace Rodin::Variational
           m_zero(std::exchange(other.m_zero, ScalarType(0)))
       {}
 
-      /// @brief Gets the operand function.
-      /// @returns The operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Returns the number of local basis functions for a polytope.
-      /// @param element Finite element used by the operation.
-      /// @returns Number of local basis functions on the selected entity.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
-      /// @returns The integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -207,9 +233,11 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Div& setIntegrationPoint(const IntegrationPoint& ip)
       {
         // keep operand aligned
@@ -232,8 +260,10 @@ namespace Rodin::Variational
         return m_zero;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {

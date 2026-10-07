@@ -317,7 +317,8 @@ Use `override` on all overrides, `= 0` for pure virtuals, `virtual` destructors 
 
 ### Doxygen documentation
 
-- Use `/** */` for multi-line documentation blocks, `///` or `///<` for inline/trailing comments.
+- Use `/** ... */` for multiline Doxygen documentation and `///` for
+  single-line documentation. Use `///<` for trailing member documentation.
 - File-level: `@file`, `@brief`.
 - Classes: `@brief`, `@tparam`.
 - Methods: `@param[in]`, `@param[out]`, `@returns`.

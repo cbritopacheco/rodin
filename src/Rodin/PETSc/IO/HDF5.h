@@ -46,9 +46,7 @@
 
 namespace Rodin::IO
 {
-  /**
-   * @brief Internal helpers for PETSc HDF5 serialization primitives.
-   */
+  /// @brief Internal helpers for PETSc HDF5 serialization primitives.
   namespace Internal
   {
     /**

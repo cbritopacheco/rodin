@@ -36,6 +36,8 @@ line, offending source, and suggested fix.
   the top; a `/** @file ... @brief ... */` documentation block; a class's
   `FormLanguage::Traits` specialization, its definition, its
   specializations, and its deduction guides live together in that header.
+- **Documentation**: Use `/** ... */` for multiline Doxygen documentation
+  and `///` for single-line documentation. Use `///<` for trailing member documentation.
 - **Boundaries**: PETSc calls only under `src/Rodin/PETSc/`
   (`assert(ierr == PETSC_SUCCESS)` after each call — no checking macros);
   third-party integrations stay in their own directories; the core never

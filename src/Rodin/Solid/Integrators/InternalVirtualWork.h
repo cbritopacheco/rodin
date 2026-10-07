@@ -111,9 +111,11 @@ namespace Rodin::Solid
           m_quadOrder(0)
       {}
 
-      /// @brief Rebinds the current displacement state.
-      /// @param displacement Displacement field.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Rebinds the current displacement state.
+       * @param displacement Displacement field.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWork& setDisplacement(const State& displacement)
       {
         m_displacement = std::cref(displacement);
@@ -235,8 +237,10 @@ namespace Rodin::Solid
         }
       }
 
-      /// @brief Gets the constitutive law.
-      /// @returns The constitutive law.
+      /**
+       * @brief Gets the constitutive law.
+       * @returns The constitutive law.
+       */
       const Law& getLaw() const
       {
         return m_law;

@@ -170,9 +170,11 @@ namespace Rodin::Adaptation
           Real max = 0;
       };
 
-      /// @brief Constructs the WNGIR solver from trial and test functions.
-      /// @param du Function operand.
-      /// @param v Function operand.
+      /**
+       * @brief Constructs the WNGIR solver from trial and test functions.
+       * @param du Function operand.
+       * @param v Function operand.
+       */
       WNGIR(TrialFunctionType& du, TestFunctionType& v)
         : m_u(&du.getSolution()),
           m_duStep(du.getFiniteElementSpace()),
@@ -184,9 +186,11 @@ namespace Rodin::Adaptation
           m_surfaceForm(m_vStep)
       {}
 
-      /// @brief Sets WNGIR runtime parameters.
-      /// @param parameters Parameters configuring the operation.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Sets WNGIR runtime parameters.
+       * @param parameters Parameters configuring the operation.
+       * @returns Reference to this object after the operation.
+       */
       WNGIR& setParameters(const WNGIRParameters& parameters)
       {
         m_parameters = parameters;
@@ -217,15 +221,19 @@ namespace Rodin::Adaptation
         return *this;
       }
 
-      /// @brief Returns the current WNGIR parameters.
-      /// @returns The current WNGIR parameters.
+      /**
+       * @brief Returns the current WNGIR parameters.
+       * @returns The current WNGIR parameters.
+       */
       const WNGIRParameters& getParameters() const
       {
         return m_parameters;
       }
 
-      /// @brief Returns diagnostics from the most recent solve.
-      /// @returns Diagnostics from the most recent solve.
+      /**
+       * @brief Returns diagnostics from the most recent solve.
+       * @returns Diagnostics from the most recent solve.
+       */
       const WNGIRReport& getReport() const
       {
         return m_report;
@@ -1674,10 +1682,12 @@ namespace Rodin::Adaptation
       StepSolverType m_stepSolver;
       BilinearFormType m_bulkForm;
       bool m_bulkFormAssembled = false;
-      /// @brief Observation metric and fitting force at the outer displacement.
-      ///
-      /// Both depend on the outer displacement only, so they are assembled once
-      /// per nonlinear iteration and reused by every barrier correction.
+      /**
+       * @brief Observation metric and fitting force at the outer displacement.
+       *
+       * Both depend on the outer displacement only, so they are assembled once
+       * per nonlinear iteration and reused by every barrier correction.
+       */
       BilinearFormType m_obsForm;
       LinearFormType m_surfaceForm;
       std::vector<Math::Vector<Real>> m_rigidModeBasis;

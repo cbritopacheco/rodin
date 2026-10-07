@@ -33,15 +33,17 @@ namespace Rodin::Adaptation::Detail
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
-      /// @brief Constructs the WNGIR observation coefficient.
-      /// @param locator Point locator used to find mesh entities.
-      /// @param parameters Parameters configuring the operation.
-      /// @param normalization Normalization factor.
-      /// @param phi Observation field.
-      /// @param grad Gradient of the observation field.
-      /// @param current Current displacement field.
-      /// @param sigma2 Variance used to scale the observation residual.
-      /// @param dimension Spatial dimension.
+      /**
+       * @brief Constructs the WNGIR observation coefficient.
+       * @param locator Point locator used to find mesh entities.
+       * @param parameters Parameters configuring the operation.
+       * @param normalization Normalization factor.
+       * @param phi Observation field.
+       * @param grad Gradient of the observation field.
+       * @param current Current displacement field.
+       * @param sigma2 Variance used to scale the observation residual.
+       * @param dimension Spatial dimension.
+       */
       WNGIRObservationCoefficient(const PhiType& phi, const GradType& grad,
         const Displacement& current, const LocatorType& locator,
         const WNGIRParameters& parameters, Real sigma2, Real normalization,
@@ -55,8 +57,10 @@ namespace Rodin::Adaptation::Detail
           m_dimension(dimension)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       WNGIRObservationCoefficient(const WNGIRObservationCoefficient& other)
         : Parent(other),
           m_phi(other.m_phi->copy()),
@@ -68,9 +72,11 @@ namespace Rodin::Adaptation::Detail
           m_dimension(other.m_dimension)
       {}
 
-      /// @brief Evaluates the coefficient at a point.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the coefficient at a point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
         const auto& params = m_parameters.get();
@@ -89,29 +95,37 @@ namespace Rodin::Adaptation::Detail
         return m;
       }
 
-      /// @brief Number of rows of the matrix value.
-      /// @returns The rows.
+      /**
+       * @brief Number of rows of the matrix value.
+       * @returns The rows.
+       */
       std::size_t getRows() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Number of columns of the matrix value.
-      /// @returns The columns.
+      /**
+       * @brief Number of columns of the matrix value.
+       * @returns The columns.
+       */
       std::size_t getColumns() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Reports no intrinsic polynomial order.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Reports no intrinsic polynomial order.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;
       }
 
-      /// @brief Clones this object.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Clones this object.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       WNGIRObservationCoefficient* copy() const noexcept override
       {
         return new WNGIRObservationCoefficient(*this);

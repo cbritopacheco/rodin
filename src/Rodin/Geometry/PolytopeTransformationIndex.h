@@ -104,14 +104,10 @@ namespace Rodin::Geometry
       std::atomic<size_t> publishedSize{0}; ///< Lock-free readable slot count
       mutable std::mutex mutex; ///< Serializes storage growth
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       Dimension() = default;
 
-      /**
-       * @brief Copy constructor (deleted).
-       */
+      /// @brief Copy constructor (deleted).
       Dimension(const Dimension&) = delete;
 
       /**
@@ -120,17 +116,13 @@ namespace Rodin::Geometry
        */
       Dimension& operator=(const Dimension& other) = delete;
 
-      /**
-       * @brief Move constructor.
-       */
+      /// @brief Move constructor.
       Dimension(Dimension&& other) noexcept
         : slots(std::move(other.slots)),
           publishedSize(other.publishedSize.load(std::memory_order_relaxed))
       {}
 
-      /**
-       * @brief Move assignment operator.
-       */
+      /// @brief Move assignment operator.
       Dimension& operator=(Dimension&& other) noexcept
       {
         slots = std::move(other.slots);
@@ -155,24 +147,16 @@ namespace Rodin::Geometry
     };
 
   public:
-    /**
-     * @brief Default constructor.
-     */
+    /// @brief Default constructor.
     PolytopeTransformationIndex() = default;
 
-    /**
-     * @brief Destructor.
-     */
+    /// @brief Destructor.
     ~PolytopeTransformationIndex() = default;
 
-    /**
-     * @brief Copy constructor (deleted).
-     */
+    /// @brief Copy constructor (deleted).
     PolytopeTransformationIndex(const PolytopeTransformationIndex&) = delete;
 
-    /**
-     * @brief Copy assignment operator (deleted).
-     */
+    /// @brief Copy assignment operator (deleted).
     PolytopeTransformationIndex& operator=(const PolytopeTransformationIndex&) = delete;
 
     /**

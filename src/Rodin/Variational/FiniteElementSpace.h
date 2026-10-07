@@ -96,39 +96,51 @@ namespace Rodin::Variational
       constexpr
       FiniteElementSpaceBase() = default;
 
-      /// @brief Copy constructor.
-      constexpr
-      FiniteElementSpaceBase(const FiniteElementSpaceBase&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpaceBase(const FiniteElementSpaceBase& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      FiniteElementSpaceBase(FiniteElementSpaceBase&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpaceBase(FiniteElementSpaceBase&& other) = default;
 
-      /// @brief Move assignment.
-      /// @returns Reference to this object after the operation.
-      /// @param other Object to move from.
+      /**
+       * @brief Move assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
       constexpr FiniteElementSpaceBase& operator=(
         FiniteElementSpaceBase&& other) = default;
 
-      /// @brief Copy assignment.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       FiniteElementSpaceBase& operator=(const FiniteElementSpaceBase&) = default;
 
       virtual ~FiniteElementSpaceBase() = default;
 
-      /// @brief Equality comparison.
-      /// @param other Other operand.
-      /// @returns Whether the operands compare equal.
+      /**
+       * @brief Equality comparison.
+       * @param other Other operand.
+       * @returns Whether the operands compare equal.
+       */
       constexpr
       bool operator==(const FiniteElementSpaceBase& other) const
       {
         return this == &other;
       }
 
-      /// @brief Inequality comparison.
-      /// @param other Other operand.
-      /// @returns Whether the operands compare unequal.
+      /**
+       * @brief Inequality comparison.
+       * @param other Other operand.
+       * @returns Whether the operands compare unequal.
+       */
       constexpr
       bool operator!=(const FiniteElementSpaceBase& other) const
       {
@@ -200,9 +212,7 @@ namespace Rodin::Variational
       }
   };
 
-  /**
-   * @brief Represernts a finite element space.
-   */
+  /// @brief Represernts a finite element space.
   template <class Mesh, class Derived>
   class FiniteElementSpace : public FiniteElementSpaceBase
   {
@@ -216,28 +226,38 @@ namespace Rodin::Variational
       constexpr
       FiniteElementSpace() = default;
 
-      /// @brief Copy constructor.
-      constexpr
-      FiniteElementSpace(const FiniteElementSpace&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpace(const FiniteElementSpace& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      FiniteElementSpace(FiniteElementSpace&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpace(FiniteElementSpace&& other) = default;
 
-      /// @brief Move assignment.
-      /// @returns Reference to this object after the operation.
-      /// @param other Object to move from.
+      /**
+       * @brief Move assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
       constexpr FiniteElementSpace& operator=(FiniteElementSpace&& other) = default;
 
-      /// @brief Copy assignment.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       FiniteElementSpace& operator=(const FiniteElementSpace&) = default;
 
       virtual ~FiniteElementSpace() = default;
 
-      /// @brief Gets the underlying mesh.
-      /// @returns The underlying mesh.
+      /**
+       * @brief Gets the underlying mesh.
+       * @returns The underlying mesh.
+       */
       const Mesh& getMesh() const override
       {
         return static_cast<const Derived&>(*this).getMesh();
@@ -345,21 +365,31 @@ namespace Rodin::Variational
       constexpr
       FiniteElementSpacePullbackBase() = default;
 
-      /// @brief Copy constructor.
-      constexpr
-      FiniteElementSpacePullbackBase(const FiniteElementSpacePullbackBase&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpacePullbackBase(
+        const FiniteElementSpacePullbackBase& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      FiniteElementSpacePullbackBase(FiniteElementSpacePullbackBase&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpacePullbackBase(
+        FiniteElementSpacePullbackBase&& other) = default;
 
-      /// @brief Move assignment.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       FiniteElementSpacePullbackBase& operator=(FiniteElementSpacePullbackBase&&) = default;
 
-      /// @brief Copy assignment.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       FiniteElementSpacePullbackBase& operator=(const FiniteElementSpacePullbackBase&) = default;
 
@@ -408,22 +438,32 @@ namespace Rodin::Variational
       constexpr
       FiniteElementSpacePushforwardBase() = default;
 
-      /// @brief Copy constructor.
-      constexpr
-      FiniteElementSpacePushforwardBase(const FiniteElementSpacePushforwardBase&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpacePushforwardBase(
+        const FiniteElementSpacePushforwardBase& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      FiniteElementSpacePushforwardBase(FiniteElementSpacePushforwardBase&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpacePushforwardBase(
+        FiniteElementSpacePushforwardBase&& other) = default;
 
-      /// @brief Move assignment.
-      /// @returns Reference to this object after the operation.
-      /// @param other Object to move from.
+      /**
+       * @brief Move assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
       constexpr FiniteElementSpacePushforwardBase& operator=(
         FiniteElementSpacePushforwardBase&& other) = default;
 
-      /// @brief Copy assignment.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Copy assignment.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       FiniteElementSpacePushforwardBase& operator=(const FiniteElementSpacePushforwardBase&) = default;
 

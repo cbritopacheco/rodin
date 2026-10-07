@@ -152,9 +152,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~LeastSquaresCG() = default;
 
       /**
@@ -274,9 +272,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~LeastSquaresCG() = default;
 
       /**

@@ -558,7 +558,7 @@ namespace Rodin::IO
   template <size_t K, class Range>
   using MFEM_H1_PETSc_MPI_Printer =
     GridFunctionPrinter<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::MPI>>, ::Vec>;
-  /** @brief Matrix PETSc fields export through the local scalar-family permutation. */
+  /// @brief Matrix PETSc fields export through the local scalar-family permutation.
   template <class FES>
     requires(
       FormLanguage::IsMatrixRange<typename FormLanguage::Traits<FES>::RangeType>::Value)

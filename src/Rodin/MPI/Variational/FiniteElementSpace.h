@@ -34,14 +34,10 @@ namespace Rodin::Variational
     : public FiniteElementSpaceBase
   {
     public:
-      /**
-       * @brief Distributed mesh type attached to this finite-element space.
-       */
+      /// @brief Distributed mesh type attached to this finite-element space.
       using MeshType = Geometry::Mesh<Context::MPI>;
 
-      /**
-       * @brief Base finite-element-space interface.
-       */
+      /// @brief Base finite-element-space interface.
       using Parent = FiniteElementSpaceBase;
 
       using Parent::getGlobalIndex;

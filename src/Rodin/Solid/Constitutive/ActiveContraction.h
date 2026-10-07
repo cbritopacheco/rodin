@@ -59,9 +59,11 @@ namespace Rodin::Solid
           size_t localIterations = 0;
       };
 
-      /// @brief Constructs the coupled active contraction law.
-      /// @param passiveLaw Passive constitutive law.
-      /// @param activeLaw Active constitutive law.
+      /**
+       * @brief Constructs the coupled active contraction law.
+       * @param passiveLaw Passive constitutive law.
+       * @param activeLaw Active constitutive law.
+       */
       ActiveContraction(
         const PassiveLaw& passiveLaw, const ActiveLaw& activeLaw = ActiveLaw())
         : m_passiveLaw(passiveLaw),
@@ -70,42 +72,52 @@ namespace Rodin::Solid
           m_localMaxIterations(DefaultLocalMaxIterations)
       {}
 
-      /// @brief Sets the convergence tolerance for the per-quadrature-point local
-      ///        Newton solve on @f$e_c@f$.
-      /// @param tol Convergence tolerance.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Sets the convergence tolerance for the per-quadrature-point local
+       *        Newton solve on @f$e_c@f$.
+       * @param tol Convergence tolerance.
+       * @returns Reference to this object after the operation.
+       */
       ActiveContraction& setLocalTolerance(Real tol)
       {
         m_localTolerance = tol;
         return *this;
       }
 
-      /// @brief Sets the maximum number of local Newton iterations on @f$e_c@f$.
-      /// @returns Reference to this object after the operation.
-      /// @param n Number of entries.
+      /**
+       * @brief Sets the maximum number of local Newton iterations on @f$e_c@f$.
+       * @returns Reference to this object after the operation.
+       * @param n Number of entries.
+       */
       ActiveContraction& setLocalMaxIterations(size_t n)
       {
         m_localMaxIterations = n;
         return *this;
       }
 
-      /// @brief Returns the passive hyperelastic law.
-      /// @returns The passive hyperelastic law.
+      /**
+       * @brief Returns the passive hyperelastic law.
+       * @returns The passive hyperelastic law.
+       */
       const PassiveLaw& getPassiveLaw() const
       {
         return m_passiveLaw;
       }
 
-      /// @brief Returns the active fiber law.
-      /// @returns The active fiber law.
+      /**
+       * @brief Returns the active fiber law.
+       * @returns The active fiber law.
+       */
       const ActiveLaw& getActiveLaw() const
       {
         return m_activeLaw;
       }
 
-      /// @brief Populates cached passive and active quantities.
-      /// @param cache Storage for the constitutive invariant cache.
-      /// @param cp Constitutive evaluation point.
+      /**
+       * @brief Populates cached passive and active quantities.
+       * @param cache Storage for the constitutive invariant cache.
+       * @param cp Constitutive evaluation point.
+       */
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         m_passiveLaw.setCache(cache.passive, cp);
@@ -180,10 +192,12 @@ namespace Rodin::Solid
         }
       }
 
-      /// @brief Returns the sum of passive and active strain-energy densities.
-      /// @param cache Constitutive invariant cache populated by setCache().
-      /// @param cp Constitutive evaluation point.
-      /// @returns The sum of passive and active strain-energy densities.
+      /**
+       * @brief Returns the sum of passive and active strain-energy densities.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cp Constitutive evaluation point.
+       * @returns The sum of passive and active strain-energy densities.
+       */
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
         const Real passiveEnergy = m_passiveLaw.getStrainEnergyDensity(cache.passive, cp);
@@ -194,10 +208,12 @@ namespace Rodin::Solid
         return passiveEnergy + activeEnergy;
       }
 
-      /// @brief Adds the active contribution to the first Piola-Kirchhoff stress.
-      /// @param P Storage for the first Piola-Kirchhoff stress.
-      /// @param cache Constitutive invariant cache populated by setCache().
-      /// @param cp Constitutive evaluation point.
+      /**
+       * @brief Adds the active contribution to the first Piola-Kirchhoff stress.
+       * @param P Storage for the first Piola-Kirchhoff stress.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cp Constitutive evaluation point.
+       */
       void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
         const ConstitutivePoint& cp) const
       {
@@ -207,11 +223,13 @@ namespace Rodin::Solid
             cache.fiber.tensor();
       }
 
-      /// @brief Adds the active contribution to the material tangent action.
-      /// @param dP Storage for the resulting stress increment.
-      /// @param cache Constitutive invariant cache populated by setCache().
-      /// @param cp Constitutive evaluation point.
-      /// @param dF Increment of the deformation gradient.
+      /**
+       * @brief Adds the active contribution to the material tangent action.
+       * @param dP Storage for the resulting stress increment.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cp Constitutive evaluation point.
+       * @param dF Increment of the deformation gradient.
+       */
       void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
         const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
       {

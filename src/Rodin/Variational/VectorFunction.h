@@ -98,14 +98,18 @@ namespace Rodin::Variational
       /// @brief Default constructor
       VectorFunctionBase() = default;
 
-      /// @brief Copy constructor
-      /// @param[in] other Vector function to copy from
+      /**
+       * @brief Copy constructor
+       * @param[in] other Vector function to copy from
+       */
       VectorFunctionBase(const VectorFunctionBase& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor
-      /// @param[in] other Vector function to move from
+      /**
+       * @brief Move constructor
+       * @param[in] other Vector function to move from
+       */
       VectorFunctionBase(VectorFunctionBase&& other)
         : Parent(std::move(other))
       {}

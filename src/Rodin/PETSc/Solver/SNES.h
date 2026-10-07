@@ -213,16 +213,22 @@ namespace Rodin::Solver
        */
       ::SNESConvergedReason getConvergedReason() const;
 
-      /// @brief Returns a mutable reference to the underlying PETSc SNES handle.
-      /// @returns Mutable reference to the SNES handle.
+      /**
+       * @brief Returns a mutable reference to the underlying PETSc SNES handle.
+       * @returns Mutable reference to the SNES handle.
+       */
       HandleType& getHandle() noexcept override;
 
-      /// @brief Returns a read-only reference to the underlying PETSc SNES handle.
-      /// @returns Const reference to the SNES handle.
+      /**
+       * @brief Returns a read-only reference to the underlying PETSc SNES handle.
+       * @returns Const reference to the SNES handle.
+       */
       const HandleType& getHandle() const noexcept override;
 
-      /// @brief Creates a heap-allocated copy of this SNES solver.
-      /// @returns Pointer to the cloned SNES instance.
+      /**
+       * @brief Creates a heap-allocated copy of this SNES solver.
+       * @returns Pointer to the cloned SNES instance.
+       */
       virtual SNES* copy() const noexcept override
       {
         return new SNES(*this);
@@ -252,9 +258,7 @@ namespace Rodin::Solver
 
 namespace Rodin::PETSc::Solver
 {
-  /**
-   * @brief PETSc namespace alias to @ref Rodin::Solver::SNES.
-   */
+  /// @brief PETSc namespace alias to @ref Rodin::Solver::SNES.
   using SNES = Rodin::Solver::SNES;
 }
 

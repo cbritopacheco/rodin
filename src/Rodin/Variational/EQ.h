@@ -64,56 +64,70 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = BooleanFunctionBase<EQ<LHSType, RHSType>>;
 
-      /// @brief Constructs the expression from its left and right operands.
-      /// @param lhs Left operand.
-      /// @param rhs Right operand.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       EQ(const LHSType& lhs, const RHSType& rhs)
         : m_lhs(lhs.copy()), m_rhs(rhs.copy())
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       EQ(const EQ& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()), m_rhs(other.m_rhs->copy())
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       EQ(EQ&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),
           m_rhs(std::move(other.m_rhs))
       {}
 
-      /// @brief Gets the left-hand side operand.
-      /// @returns The left-hand side operand.
+      /**
+       * @brief Gets the left-hand side operand.
+       * @returns The left-hand side operand.
+       */
       const auto& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      /// @brief Gets the right-hand side operand.
-      /// @returns The right-hand side operand.
+      /**
+       * @brief Gets the right-hand side operand.
+       * @returns The right-hand side operand.
+       */
       const auto& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      /// @brief Evaluates the expression at a geometric point.
-      /// @param p Point at which the operation is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at a geometric point.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return this->getLHS().getValue(p) == this->getRHS().getValue(p);
       }
 
-      /// @brief Evaluates the expression at an integration point.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -137,10 +151,12 @@ namespace Rodin::Variational
 
   template <class LHSDerived, class RHSDerived>
   constexpr auto
-  /// @brief Equality comparison of two function expressions.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Whether the operands compare equal.
+  /**
+   * @brief Equality comparison of two function expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Whether the operands compare equal.
+   */
   operator==(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return EQ(lhs, rhs);
@@ -148,10 +164,12 @@ namespace Rodin::Variational
 
   template <class RHSDerived>
   constexpr auto
-  /// @brief Equality comparison of two function expressions.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Whether the operands compare equal.
+  /**
+   * @brief Equality comparison of two function expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Whether the operands compare equal.
+   */
   operator==(Boolean lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return EQ(BooleanFunction(lhs), rhs);
@@ -159,10 +177,12 @@ namespace Rodin::Variational
 
   template <class LHSDerived>
   constexpr auto
-  /// @brief Equality comparison of two function expressions.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Whether the operands compare equal.
+  /**
+   * @brief Equality comparison of two function expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Whether the operands compare equal.
+   */
   operator==(const FunctionBase<LHSDerived>& lhs, Boolean rhs)
   {
     return EQ(lhs, BooleanFunction(rhs));
@@ -171,10 +191,12 @@ namespace Rodin::Variational
   template <class Number, class RHSDerived,
     typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   constexpr auto
-  /// @brief Equality comparison of two function expressions.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Whether the operands compare equal.
+  /**
+   * @brief Equality comparison of two function expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Whether the operands compare equal.
+   */
   operator==(Number lhs, const FunctionBase<RHSDerived>& rhs)
   {
     return EQ(RealFunction(lhs), rhs);
@@ -183,10 +205,12 @@ namespace Rodin::Variational
   template <class LHSDerived, class Number,
     typename = std::enable_if_t<std::is_arithmetic_v<Number>>>
   constexpr auto
-  /// @brief Equality comparison of two function expressions.
-  /// @param lhs Left operand.
-  /// @param rhs Right operand.
-  /// @returns Whether the operands compare equal.
+  /**
+   * @brief Equality comparison of two function expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Whether the operands compare equal.
+   */
   operator==(const FunctionBase<LHSDerived>& lhs, Number rhs)
   {
     return EQ(lhs, RealFunction(rhs));

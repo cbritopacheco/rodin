@@ -71,16 +71,22 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Gets @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$.
-      /// @returns @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$.
+      /**
+       * @brief Gets @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$.
+       * @returns @f$ I_1 = \operatorname{tr}(\mathbf{C}) @f$.
+       */
       Real getFirstInvariant() const { return m_I1; }
 
-      /// @brief Gets @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$.
-      /// @returns @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$.
+      /**
+       * @brief Gets @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$.
+       * @returns @f$ I_2 = \tfrac{1}{2}[\operatorname{tr}(\mathbf{C})^2 - \operatorname{tr}(\mathbf{C}^2)] @f$.
+       */
       Real getSecondInvariant() const { return m_I2; }
 
-      /// @brief Gets @f$ I_3 = \det(\mathbf{C}) = J^2 @f$.
-      /// @returns @f$ I_3 = \det(\mathbf{C}) = J^2 @f$.
+      /**
+       * @brief Gets @f$ I_3 = \det(\mathbf{C}) = J^2 @f$.
+       * @returns @f$ I_3 = \det(\mathbf{C}) = J^2 @f$.
+       */
       Real getThirdInvariant() const { return m_I3; }
 
     private:
@@ -117,10 +123,16 @@ namespace Rodin::Solid
         : m_a0(a0)
       {}
 
-      /// @brief Copy constructor.
-      FiberInvariants(const FiberInvariants&) = default;
-      /// @brief Move constructor.
-      FiberInvariants(FiberInvariants&&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      FiberInvariants(const FiberInvariants& other) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      FiberInvariants(FiberInvariants&& other) = default;
 
       /**
        * @brief Sets the kinematic state and computes fiber invariants.
@@ -135,12 +147,16 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Gets @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C} \, \mathbf{a}_0 @f$.
-      /// @returns @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C} \, \mathbf{a}_0 @f$.
+      /**
+       * @brief Gets @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C} \, \mathbf{a}_0 @f$.
+       * @returns @f$ I_4 = \mathbf{a}_0 \cdot \mathbf{C} \, \mathbf{a}_0 @f$.
+       */
       Real getFourthInvariant() const { return m_I4; }
 
-      /// @brief Gets @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2 \, \mathbf{a}_0 @f$.
-      /// @returns @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2 \, \mathbf{a}_0 @f$.
+      /**
+       * @brief Gets @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2 \, \mathbf{a}_0 @f$.
+       * @returns @f$ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2 \, \mathbf{a}_0 @f$.
+       */
       Real getFifthInvariant() const { return m_I5; }
 
     private:

@@ -92,14 +92,18 @@ namespace Rodin::Variational
       /// @brief Default constructor
       RealFunctionBase() = default;
 
-      /// @brief Copy constructor
-      /// @param[in] other Function to copy from
+      /**
+       * @brief Copy constructor
+       * @param[in] other Function to copy from
+       */
       RealFunctionBase(const RealFunctionBase& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor
-      /// @param[in] other Function to move from
+      /**
+       * @brief Move constructor
+       * @param[in] other Function to move from
+       */
       RealFunctionBase(RealFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -253,9 +257,7 @@ namespace Rodin::Variational
       std::unique_ptr<FunctionBase<NestedDerived>> m_nested;
   };
 
-  /**
-   * @brief CTAD for RealFunction.
-   */
+  /// @brief CTAD for RealFunction.
   template <class Derived>
   RealFunction(const RealFunctionBase<Derived>&) -> RealFunction<FunctionBase<Derived>>;
 
@@ -340,9 +342,7 @@ namespace Rodin::Variational
       const Real m_x;
   };
 
-  /**
-   * @brief CTAD for RealFunction.
-   */
+  /// @brief CTAD for RealFunction.
   RealFunction(Real) -> RealFunction<Real>;
 
   /**
@@ -526,9 +526,7 @@ namespace Rodin::Variational
       const F m_f;
   };
 
-  /**
-   * @brief CTAD for RealFunction.
-   */
+  /// @brief CTAD for RealFunction.
   template <class F, typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&>>>
   RealFunction(F) -> RealFunction<F>;
 }

@@ -83,15 +83,15 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
-      constexpr
-      PolytopeTransformation(const PolytopeTransformation&) = default;
+      constexpr PolytopeTransformation(const PolytopeTransformation& other) = default;
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
-      constexpr
-      PolytopeTransformation(PolytopeTransformation&&) = default;
+      constexpr PolytopeTransformation(PolytopeTransformation&& other) = default;
 
       /**
        * @brief Move assignment operator.
@@ -100,9 +100,7 @@ namespace Rodin::Geometry
        */
       PolytopeTransformation& operator=(PolytopeTransformation&& other) = default;
 
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~PolytopeTransformation() = default;
 
       /**

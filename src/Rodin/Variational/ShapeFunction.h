@@ -28,9 +28,11 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c ShapeFunctionBase: exposes the derived type, the finite
-  /// element space, the shape function space, the result type, the range type and the
-  /// scalar type.
+  /**
+   * @brief Type traits for @c ShapeFunctionBase: exposes the derived type, the finite
+   * element space, the shape function space, the result type, the range type and the
+   * scalar type.
+   */
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::ShapeFunctionBase<Derived, FES, Space>>
   {
@@ -54,9 +56,11 @@ namespace Rodin::FormLanguage
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 
-  /// @brief Type traits for @c ShapeFunction: exposes the derived type, the finite
-  /// element space, the shape function space, the result type, the range type and the
-  /// scalar type.
+  /**
+   * @brief Type traits for @c ShapeFunction: exposes the derived type, the finite
+   * element space, the shape function space, the result type, the range type and the
+   * scalar type.
+   */
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::ShapeFunction<Derived, FES, Space>>
   {
@@ -312,9 +316,11 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).setIntegrationPoint(ip);
       }
 
-      /// @brief Evaluates at a geometric point, outside a quadrature loop.
-      /// @param p Point at which the operation is evaluated.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Evaluates at a geometric point, outside a quadrature loop.
+       * @param p Point at which the operation is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Derived& setPoint(const Geometry::Point& p)
       {
         m_pointIntegrationPoint.emplace(p);

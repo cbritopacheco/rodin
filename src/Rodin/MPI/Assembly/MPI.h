@@ -48,9 +48,7 @@ namespace Rodin::Assembly
   class MPIIteration
   {
     public:
-      /**
-       * @brief Distributed mesh type iterated by this helper.
-       */
+      /// @brief Distributed mesh type iterated by this helper.
       using MeshType = Geometry::Mesh<Context::MPI>;
 
       /**
@@ -107,51 +105,35 @@ namespace Rodin::Assembly
                 Variational::FunctionBase<ValueDerived>>>
   {
     public:
-      /**
-       * @brief Finite-element-space type attached to the trial function.
-       */
+      /// @brief Finite-element-space type attached to the trial function.
       using FESType =
         FES;
 
-      /**
-       * @brief Trial-function type of the assembled Dirichlet term.
-       */
+      /// @brief Trial-function type of the assembled Dirichlet term.
       using TrialFunctionType =
         Variational::TrialFunction<Solution, FES>;
 
-      /**
-       * @brief Boundary value function base type.
-       */
+      /// @brief Boundary value function base type.
       using ValueType =
         Variational::FunctionBase<ValueDerived>;
 
-      /**
-       * @brief Concrete Dirichlet boundary-condition operand type.
-       */
+      /// @brief Concrete Dirichlet boundary-condition operand type.
       using DirichletBCType =
         Variational::DirichletBC<TrialFunctionType, ValueType>;
 
-      /**
-       * @brief Parent assembly base specialization.
-       */
+      /// @brief Parent assembly base specialization.
       using Parent =
         AssemblyBase<IndexMap<Scalar>, DirichletBCType>;
 
-      /**
-       * @brief Value range type induced by the finite element space.
-       */
+      /// @brief Value range type induced by the finite element space.
       using FESRangeType =
         typename FormLanguage::Traits<FESType>::RangeType;
 
-      /**
-       * @brief Input payload type consumed by execute().
-       */
+      /// @brief Input payload type consumed by execute().
       using InputType =
         typename Parent::InputType;
 
-      /**
-       * @brief Default-constructs the MPI assembler.
-       */
+      /// @brief Default-constructs the MPI assembler.
       MPI() = default;
 
       /**
@@ -234,13 +216,17 @@ namespace Rodin::Assembly
 
       /// @brief Default constructor.
       MPI() = default;
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       MPI(const MPI& other)
         : Parent(other)
       {}
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       MPI(MPI&& other)
         : Parent(std::move(other))
       {}
@@ -310,8 +296,10 @@ namespace Rodin::Assembly
         MPIBoundaryDOFs<FES1>(fes, attributes).assemble(values, function);
       }
 
-      /// @brief Creates a polymorphic copy of this assembler.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a polymorphic copy of this assembler.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       MPI* copy() const noexcept override
       {
         return new MPI(*this);

@@ -43,9 +43,7 @@ namespace Rodin::Variational
    * @see Cos, Tan, Sinh
    */
 
-  /**
-   * @ingroup SinSpecializations
-   */
+  /// @ingroup SinSpecializations
   template <class NestedDerived>
   class Sin<FunctionBase<NestedDerived>> final
     : public RealFunctionBase<Sin<FunctionBase<NestedDerived>>>
@@ -118,17 +116,21 @@ namespace Rodin::Variational
         return Math::sin(getOperand().getValue(p));
       }
 
-      /// @brief Gets the operand function.
-      /// @returns The operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       const OperandType& getOperand() const
       {
         assert(m_operand);
         return *m_operand;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param g Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param g Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& g) const
       {
         const auto o = getOperand().getOrder(g);

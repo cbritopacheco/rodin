@@ -43,9 +43,7 @@ namespace Rodin::Variational
    * @see Sin, Cos
    */
 
-  /**
-   * @ingroup TanSpecializations
-   */
+  /// @ingroup TanSpecializations
   template <class NestedDerived>
   class Tan<FunctionBase<NestedDerived>>
     : public RealFunctionBase<Tan<FunctionBase<NestedDerived>>>
@@ -121,9 +119,11 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param g Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param g Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& g) const
       {
         const auto o = getOperand().getOrder(g);
@@ -154,9 +154,11 @@ namespace Rodin::Variational
   template <class NestedDerived>
   Tan(const FunctionBase<NestedDerived>&) -> Tan<FunctionBase<NestedDerived>>;
 
-  /// @brief Builds the pointwise tangent of a function expression.
-  /// @param f Function operand.
-  /// @returns Pointwise tangent expression.
+  /**
+   * @brief Builds the pointwise tangent of a function expression.
+   * @param f Function operand.
+   * @returns Pointwise tangent expression.
+   */
   template <class NestedDerived>
   auto tan(const FunctionBase<NestedDerived>& f)
   {

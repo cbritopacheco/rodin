@@ -66,47 +66,59 @@ namespace Rodin::Adaptation
       using Parent =
         Variational::VectorFunctionBase<ScalarType, AnalyticVectorFunction<F>>;
 
-      /// @brief Constructs the adapter from a callable and vector dimension.
-      /// @param f Function operand.
-      /// @param dimension Spatial dimension.
+      /**
+       * @brief Constructs the adapter from a callable and vector dimension.
+       * @param f Function operand.
+       * @param dimension Spatial dimension.
+       */
       AnalyticVectorFunction(F f, std::size_t dimension)
         : m_f(std::move(f)),
           m_dimension(dimension)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       AnalyticVectorFunction(const AnalyticVectorFunction& other)
         : Parent(other),
           m_f(other.m_f),
           m_dimension(other.m_dimension)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       AnalyticVectorFunction(AnalyticVectorFunction&& other)
         : Parent(std::move(other)),
           m_f(std::move(other.m_f)),
           m_dimension(other.m_dimension)
       {}
 
-      /// @brief Evaluates the wrapped vector-valued callable.
-      /// @param p Point at which the operation is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the wrapped vector-valued callable.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Geometry::Point& p) const
       {
         return m_f(p);
       }
 
-      /// @brief Returns the vector dimension.
-      /// @returns The vector dimension.
+      /**
+       * @brief Returns the vector dimension.
+       * @returns The vector dimension.
+       */
       std::size_t getDimension() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Returns no intrinsic polynomial order for analytic callables.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns no intrinsic polynomial order for analytic callables.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;
@@ -145,18 +157,22 @@ namespace Rodin::Adaptation
       using Parent =
         Variational::MatrixFunctionBase<ScalarType, AnalyticMatrixFunction<F>>;
 
-      /// @brief Constructs the adapter from a callable and matrix dimensions.
-      /// @param f Function operand.
-      /// @param rows Number of rows.
-      /// @param cols Number of columns.
+      /**
+       * @brief Constructs the adapter from a callable and matrix dimensions.
+       * @param f Function operand.
+       * @param rows Number of rows.
+       * @param cols Number of columns.
+       */
       AnalyticMatrixFunction(F f, std::size_t rows, std::size_t cols)
         : m_f(std::move(f)),
           m_rows(rows),
           m_cols(cols)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       AnalyticMatrixFunction(const AnalyticMatrixFunction& other)
         : Parent(other),
           m_f(other.m_f),
@@ -164,8 +180,10 @@ namespace Rodin::Adaptation
           m_cols(other.m_cols)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       AnalyticMatrixFunction(AnalyticMatrixFunction&& other)
         : Parent(std::move(other)),
           m_f(std::move(other.m_f)),
@@ -173,36 +191,46 @@ namespace Rodin::Adaptation
           m_cols(other.m_cols)
       {}
 
-      /// @brief Evaluates the wrapped matrix-valued callable.
-      /// @param p Point at which the operation is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the wrapped matrix-valued callable.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Geometry::Point& p) const
       {
         return m_f(p);
       }
 
-      /// @brief Returns the row count.
-      /// @returns The row count.
+      /**
+       * @brief Returns the row count.
+       * @returns The row count.
+       */
       std::size_t getRows() const noexcept
       {
         return m_rows;
       }
-      /// @brief Returns the column count.
-      /// @returns The column count.
+      /**
+       * @brief Returns the column count.
+       * @returns The column count.
+       */
       std::size_t getColumns() const noexcept
       {
         return m_cols;
       }
 
-      /// @brief Returns no intrinsic polynomial order for analytic callables.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns no intrinsic polynomial order for analytic callables.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;
       }
 
-      /// @brief Clones this adapter.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Clones this adapter.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       AnalyticMatrixFunction* copy() const noexcept override
       {
         return new AnalyticMatrixFunction(*this);

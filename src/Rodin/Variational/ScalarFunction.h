@@ -21,8 +21,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c ScalarFunctionBase: exposes the scalar type and the
-  /// derived type.
+  /**
+   * @brief Type traits for @c ScalarFunctionBase: exposes the scalar type and the
+   * derived type.
+   */
   template <class Scalar, class Derived>
   struct Traits<Variational::ScalarFunctionBase<Scalar, Derived>>
   {
@@ -35,9 +37,7 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Variational
 {
-  /**
-   * @addtogroup RealFunctionSpecializations
-   */
+  /// @addtogroup RealFunctionSpecializations
 
   /**
    * @brief Base class for scalar-valued functions with templated scalar type.
@@ -80,14 +80,18 @@ namespace Rodin::Variational
       /// @brief Default constructor
       ScalarFunctionBase() = default;
 
-      /// @brief Copy constructor
-      /// @param[in] other Function to copy from
+      /**
+       * @brief Copy constructor
+       * @param[in] other Function to copy from
+       */
       ScalarFunctionBase(const ScalarFunctionBase& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor
-      /// @param[in] other Function to move from
+      /**
+       * @brief Move constructor
+       * @param[in] other Function to move from
+       */
       ScalarFunctionBase(ScalarFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -109,9 +113,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      /// @brief Evaluates the expression at an integration point.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -121,9 +127,11 @@ namespace Rodin::Variational
           return static_cast<const Derived&>(*this).getValue(ip.getPoint());
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param poly Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {

@@ -68,22 +68,34 @@ namespace Rodin::Solid
           m_mu(mu)
       {}
 
-      /// @brief Copy constructor.
-      SaintVenantKirchhoff(const SaintVenantKirchhoff&) = default;
-      /// @brief Move constructor.
-      SaintVenantKirchhoff(SaintVenantKirchhoff&&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      SaintVenantKirchhoff(const SaintVenantKirchhoff& other) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      SaintVenantKirchhoff(SaintVenantKirchhoff&& other) = default;
 
-      /// @brief Gets the first Lamé parameter.
-      /// @returns The first Lamé parameter.
+      /**
+       * @brief Gets the first Lamé parameter.
+       * @returns The first Lamé parameter.
+       */
       Real getLameFirstParameter() const { return m_lambda; }
 
-      /// @brief Gets the shear modulus.
-      /// @returns The shear modulus.
+      /**
+       * @brief Gets the shear modulus.
+       * @returns The shear modulus.
+       */
       Real getShearModulus() const { return m_mu; }
 
-      /// @brief Populates the Green-Lagrange strain and stress cache.
-      /// @param cache Storage for the constitutive invariant cache.
-      /// @param cp Constitutive evaluation point.
+      /**
+       * @brief Populates the Green-Lagrange strain and stress cache.
+       * @param cache Storage for the constitutive invariant cache.
+       * @param cp Constitutive evaluation point.
+       */
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
@@ -101,19 +113,23 @@ namespace Rodin::Solid
         cache.S = m_lambda * cache.trE * I + 2.0 * m_mu * cache.E;
       }
 
-      /// @brief Returns the stored strain-energy density.
-      /// @param cache Constitutive invariant cache populated by setCache().
-      /// @returns The stored strain-energy density.
+      /**
+       * @brief Returns the stored strain-energy density.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @returns The stored strain-energy density.
+       */
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint&) const
       {
         return 0.5 * m_lambda * cache.trE * cache.trE
              + m_mu * cache.E.dot(cache.E);
       }
 
-      /// @brief Computes the first Piola-Kirchhoff stress.
-      /// @param P Storage for the first Piola-Kirchhoff stress.
-      /// @param cache Constitutive invariant cache populated by setCache().
-      /// @param cp Constitutive evaluation point.
+      /**
+       * @brief Computes the first Piola-Kirchhoff stress.
+       * @param P Storage for the first Piola-Kirchhoff stress.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cp Constitutive evaluation point.
+       */
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
@@ -123,11 +139,13 @@ namespace Rodin::Solid
         P = cp.getKinematicState().getDeformationGradient() * cache.S;
       }
 
-      /// @brief Computes the material tangent action.
-      /// @param dP Storage for the resulting stress increment.
-      /// @param cache Constitutive invariant cache populated by setCache().
-      /// @param cp Constitutive evaluation point.
-      /// @param dF Increment of the deformation gradient.
+      /**
+       * @brief Computes the material tangent action.
+       * @param dP Storage for the resulting stress increment.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cp Constitutive evaluation point.
+       * @param dF Increment of the deformation gradient.
+       */
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,

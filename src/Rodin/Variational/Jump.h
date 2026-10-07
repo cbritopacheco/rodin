@@ -157,9 +157,11 @@ namespace Rodin::Variational
         return v1 - v2;
       }
 
-      /// @brief Evaluates the expression at an integration point.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       auto getValue(const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -189,9 +191,11 @@ namespace Rodin::Variational
         return v1 - v2;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param p Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param p Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
@@ -211,9 +215,7 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /**
-   * @brief Deduction guide for Jump with FunctionBase.
-   */
+  /// @brief Deduction guide for Jump with FunctionBase.
   template <class Derived>
   Jump(const FunctionBase<Derived>&) -> Jump<FunctionBase<Derived>>;
 
@@ -260,8 +262,10 @@ namespace Rodin::Variational
           m_ip(nullptr)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Jump(const Jump& other)
         : Parent(other),
@@ -269,8 +273,10 @@ namespace Rodin::Variational
           m_ip(nullptr)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Jump(Jump&& other)
         : Parent(std::move(other)),
@@ -381,9 +387,11 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param p Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param p Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& p) const noexcept
       {
@@ -400,9 +408,7 @@ namespace Rodin::Variational
       const IntegrationPoint* m_ip;
   };
 
-  /**
-   * @brief Deduction guide for Jump with ShapeFunctionBase.
-   */
+  /// @brief Deduction guide for Jump with ShapeFunctionBase.
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
   Jump(const ShapeFunctionBase<NestedDerived, FES, Space>&)
     -> Jump<ShapeFunctionBase<NestedDerived, FES, Space>>;

@@ -183,19 +183,13 @@ namespace Rodin::Geometry
     public:
       friend class boost::serialization::access;
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       PolytopeQuadratureIndex() = default;
 
-      /**
-       * @brief Destructor.
-       */
+      /// @brief Destructor.
       ~PolytopeQuadratureIndex() = default;
 
-      /**
-       * @brief Copy constructor (deleted).
-       */
+      /// @brief Copy constructor (deleted).
       PolytopeQuadratureIndex(const PolytopeQuadratureIndex&) = delete;
 
       /**

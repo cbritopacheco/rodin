@@ -133,21 +133,29 @@ namespace Rodin::Alert
     constexpr
     RGB() = default;
 
-    /// @brief Copy constructor.
-    constexpr
-    RGB(const RGB&) = default;
+    /**
+     * @brief Copy constructor.
+     * @param other Object to copy from.
+     */
+    constexpr RGB(const RGB& other) = default;
 
-    /// @brief Move constructor.
-    constexpr
-    RGB(RGB&&) = default;
+    /**
+     * @brief Move constructor.
+     * @param other Object to move from.
+     */
+    constexpr RGB(RGB&& other) = default;
 
-    /// @brief Copy assignment operator.
-    /// @returns Reference to this object after the operation.
-    /// @param other Object to copy from.
+    /**
+     * @brief Copy assignment operator.
+     * @returns Reference to this object after the operation.
+     * @param other Object to copy from.
+     */
     constexpr RGB& operator=(const RGB& other) = default;
 
-    /// @brief Move assignment operator.
-    /// @returns Reference to this object after the operation.
+    /**
+     * @brief Move assignment operator.
+     * @returns Reference to this object after the operation.
+     */
     constexpr
     RGB& operator=(RGB&&) = default;
 
@@ -208,13 +216,17 @@ namespace Rodin::Alert
     constexpr
     NoColorT() = default;
 
-    /// @brief Copy constructor.
-    constexpr
-    NoColorT(const NoColorT&) = default;
+    /**
+     * @brief Copy constructor.
+     * @param other Object to copy from.
+     */
+    constexpr NoColorT(const NoColorT& other) = default;
 
-    /// @brief Move constructor.
-    constexpr
-    NoColorT(NoColorT&&) = default;
+    /**
+     * @brief Move constructor.
+     * @param other Object to move from.
+     */
+    constexpr NoColorT(NoColorT&& other) = default;
   };
 
   /**
@@ -247,21 +259,29 @@ namespace Rodin::Alert
         : m_code(code)
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      Color(const Color&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr Color(const Color& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      Color(Color&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr Color(Color&& other) = default;
 
-      /// @brief Copy assignment operator.
-      /// @returns Reference to this object after the operation.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
       constexpr Color& operator=(const Color& other) = default;
 
-      /// @brief Move assignment operator.
-      /// @returns Reference to this object after the operation.
+      /**
+       * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       */
       constexpr
       Color& operator=(Color&&) = default;
 
@@ -304,14 +324,10 @@ namespace Rodin::Alert
     return os;
   }
 
-  /**
-   * @brief Tag type for red terminal color.
-   */
+  /// @brief Tag type for red terminal color.
   struct RedT {};
 
-  /**
-   * @brief Instance of RedT tag type.
-   */
+  /// @brief Instance of RedT tag type.
   static constexpr RedT Red;
 
   /**
@@ -326,14 +342,10 @@ namespace Rodin::Alert
     return os;
   }
 
-  /**
-   * @brief Tag type for green terminal color.
-   */
+  /// @brief Tag type for green terminal color.
   struct GreenT {};
 
-  /**
-   * @brief Instance of GreenT tag type.
-   */
+  /// @brief Instance of GreenT tag type.
   static constexpr GreenT Green;
 
   /**
@@ -348,14 +360,10 @@ namespace Rodin::Alert
     return os;
   }
 
-  /**
-   * @brief Tag type for blue terminal color.
-   */
+  /// @brief Tag type for blue terminal color.
   struct BlueT {};
 
-  /**
-   * @brief Instance of BlueT tag type.
-   */
+  /// @brief Instance of BlueT tag type.
   static constexpr BlueT Blue;
 
   /**
@@ -370,14 +378,10 @@ namespace Rodin::Alert
     return os;
   }
 
-  /**
-   * @brief Tag type for yellow terminal color.
-   */
+  /// @brief Tag type for yellow terminal color.
   struct YellowT {};
 
-  /**
-   * @brief Instance of YellowT tag type.
-   */
+  /// @brief Instance of YellowT tag type.
   static constexpr YellowT Yellow;
 
   /**
@@ -392,14 +396,10 @@ namespace Rodin::Alert
     return os;
   }
 
-  /**
-   * @brief Tag type for magenta terminal color.
-   */
+  /// @brief Tag type for magenta terminal color.
   struct MagentaT {};
 
-  /**
-   * @brief Instance of MagentaT tag type.
-   */
+  /// @brief Instance of MagentaT tag type.
   static constexpr MagentaT Magenta;
 
   /**
@@ -414,14 +414,10 @@ namespace Rodin::Alert
     return os;
   }
 
-  /**
-   * @brief Tag type for cyan terminal color.
-   */
+  /// @brief Tag type for cyan terminal color.
   struct CyanT {};
 
-  /**
-   * @brief Instance of CyanT tag type.
-   */
+  /// @brief Instance of CyanT tag type.
   static constexpr CyanT Cyan;
 
   /**
@@ -436,14 +432,10 @@ namespace Rodin::Alert
     return os;
   }
 
-  /**
-   * @brief Tag type for white terminal color.
-   */
+  /// @brief Tag type for white terminal color.
   struct WhiteT {};
 
-  /**
-   * @brief Instance of WhiteT tag type.
-   */
+  /// @brief Instance of WhiteT tag type.
   static constexpr WhiteT White;
 
   /**
@@ -458,14 +450,10 @@ namespace Rodin::Alert
     return os;
   }
 
-  /**
-   * @brief Tag type for gray terminal color.
-   */
+  /// @brief Tag type for gray terminal color.
   struct GrayT {};
 
-  /**
-   * @brief Instance of GrayT tag type.
-   */
+  /// @brief Instance of GrayT tag type.
   static constexpr GrayT Gray;
 
   /**
@@ -480,14 +468,10 @@ namespace Rodin::Alert
     return os;
   }
 
-  /**
-   * @brief Tag type for bright gray terminal color.
-   */
+  /// @brief Tag type for bright gray terminal color.
   struct BrightGrayT {};
 
-  /**
-   * @brief Instance of BrightGrayT tag type.
-   */
+  /// @brief Instance of BrightGrayT tag type.
   static constexpr BrightGrayT BrightGray;
 
   /**
@@ -502,14 +486,10 @@ namespace Rodin::Alert
     return os;
   }
 
-  /**
-   * @brief Tag type for bright white terminal color.
-   */
+  /// @brief Tag type for bright white terminal color.
   struct BrightWhiteT {};
 
-  /**
-   * @brief Instance of BrightWhiteT tag type.
-   */
+  /// @brief Instance of BrightWhiteT tag type.
   static constexpr BrightWhiteT BrightWhite;
 
   /**

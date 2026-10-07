@@ -39,8 +39,10 @@ namespace Rodin::Variational
       /// Total number of nodes: (K+1)(K+2)/2.
       static constexpr size_t Count = (K + 1) * (K + 2) / 2;
 
-      /// Return cached nodes as a std::array.
-      /// @returns The nodes.
+      /**
+       * Return cached nodes as a std::array.
+       * @returns The nodes.
+       */
       static const std::array<Math::SpatialPoint, Count>& getNodes()
       {
         static const std::array<Math::SpatialPoint, Count> s_nodes = compute();
@@ -109,8 +111,10 @@ namespace Rodin::Variational
       /// Total number of nodes: (K+1)(K+2)(K+3)/6.
       static constexpr size_t Count = (K + 1) * (K + 2) * (K + 3) / 6;
 
-      /// Return cached nodes as a std::array.
-      /// @returns The nodes.
+      /**
+       * Return cached nodes as a std::array.
+       * @returns The nodes.
+       */
       static const std::array<Math::SpatialPoint, Count>& getNodes()
       {
         static const std::array<Math::SpatialPoint, Count> s_nodes = compute();

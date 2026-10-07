@@ -65,9 +65,7 @@ namespace Rodin::Geometry
   class SubMesh<Context::MPI> final : public SubMeshBase, public Mesh<Context::MPI>
   {
     public:
-      /**
-       * @brief Parent mesh type.
-       */
+      /// @brief Parent mesh type.
       using Parent = Mesh<Context::MPI>;
 
       /**
@@ -89,9 +87,7 @@ namespace Rodin::Geometry
       class Builder
       {
         public:
-          /**
-           * @brief Default constructor.
-           */
+          /// @brief Default constructor.
           Builder() = default;
 
           /**

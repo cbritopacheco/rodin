@@ -45,8 +45,10 @@ namespace Rodin::Adaptation
           m_locator(locator)
       {}
 
-      /// @brief The underlying displacement field.
-      /// @returns The displacement.
+      /**
+       * @brief The underlying displacement field.
+       * @returns The displacement.
+       */
       const Displacement& getDisplacement() const
       {
         return m_u.get();

@@ -126,23 +126,17 @@ namespace Rodin::Geometry::Euclidean
     constexpr
     T operator()(const Point2D<T>& p) const;
 
-    /**
-     * @returns The \f$ a \f$ coefficient of the line.
-     */
+    /// @returns The \f$ a \f$ coefficient of the line.
     inline
     constexpr
     T a() const;
 
-    /**
-     * @returns The \f$ b \f$ coefficient of the line.
-     */
+    /// @returns The \f$ b \f$ coefficient of the line.
     inline
     constexpr
     T b() const;
 
-    /**
-     * @returns The \f$ c \f$ coefficient of the line.
-     */
+    /// @returns The \f$ c \f$ coefficient of the line.
     inline
     constexpr
     T c() const;

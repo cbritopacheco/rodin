@@ -147,14 +147,10 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FunctionBase<GridFunctionBaseReference<Derived>>;
 
-      /**
-       * @brief R-Values are not allowed.
-       */
+      /// @brief R-Values are not allowed.
       GridFunctionBaseReference(Derived&&) = delete;
 
-      /**
-       * @brief Prevent implicit copies.
-       */
+      /// @brief Prevent implicit copies.
       GridFunctionBaseReference(const Derived& ref) = delete;
 
       /**
@@ -192,70 +188,86 @@ namespace Rodin::Variational
 
       GridFunctionBaseReference& operator=(GridFunctionBaseReference&&) = delete;
 
-      /// @brief Evaluates at a geometric point.
-      /// @param p Point at which the operation is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates at a geometric point.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto operator()(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
-      /// @brief Evaluates at an integration point.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
         return m_ref.get().getValue(ip);
       }
 
-      /// @brief Evaluates the expression at a geometric point.
-      /// @param p Point at which the operation is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at a geometric point.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return m_ref.get().getValue(p);
       }
 
-      /// @brief Evaluates the expression at an integration point.
-      /// @param ip Integration point at which the expression is evaluated.
-      /// @returns Value of the expression at the supplied evaluation point.
+      /**
+       * @brief Evaluates the expression at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
         return m_ref.get().getValue(ip);
       }
 
-      /// @brief Gets the first component.
-      /// @returns The first component.
+      /**
+       * @brief Gets the first component.
+       * @returns The first component.
+       */
       constexpr
       auto x() const
       {
         return m_ref.get().x();
       }
 
-      /// @brief Gets the second component.
-      /// @returns The second component.
+      /**
+       * @brief Gets the second component.
+       * @returns The second component.
+       */
       constexpr
       auto y() const
       {
         return m_ref.get().y();
       }
 
-      /// @brief Gets the third component.
-      /// @returns The third component.
+      /**
+       * @brief Gets the third component.
+       * @returns The third component.
+       */
       constexpr
       auto z() const
       {
         return m_ref.get().z();
       }
 
-      /// @brief Sets the degree-of-freedom data.
-      /// @param data Data used by the operation.
-      /// @param offset Offset in the indexed data.
-      /// @returns Reference to this grid function after replacing its coefficient data.
+      /**
+       * @brief Sets the degree-of-freedom data.
+       * @param data Data used by the operation.
+       * @param offset Offset in the indexed data.
+       * @returns Reference to this grid function after replacing its coefficient data.
+       */
       template <class DataType>
       constexpr decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
@@ -272,32 +284,40 @@ namespace Rodin::Variational
         return m_ref.get().getData();
       }
 
-      /// @brief Gets the finite element space.
-      /// @returns The finite element space.
+      /**
+       * @brief Gets the finite element space.
+       * @returns The finite element space.
+       */
       constexpr
       const auto& getFiniteElementSpace() const
       {
         return m_ref.get().getFiniteElementSpace();
       }
 
-      /// @brief Gets the number of degrees of freedom.
-      /// @returns The number of degrees of freedom.
+      /**
+       * @brief Gets the number of degrees of freedom.
+       * @returns The number of degrees of freedom.
+       */
       constexpr
       size_t getSize() const
       {
         return m_ref.get().getSize();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param geom Reference geometry.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
         return m_ref.get().getOrder(geom);
       }
 
-      /// @brief Creates a polymorphic copy.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       GridFunctionBaseReference* copy() const noexcept final override
       {
         return new GridFunctionBaseReference(*this);
@@ -562,16 +582,20 @@ namespace Rodin::Variational
         return m_fes.get().getVectorDimension();
       }
 
-      /// @brief Returns the number of matrix rows.
-      /// @returns The number of matrix rows.
+      /**
+       * @brief Returns the number of matrix rows.
+       * @returns The number of matrix rows.
+       */
       size_t getRows() const
         requires FormLanguage::IsMatrixRange<RangeType>::Value
       {
         return m_fes.get().getRows();
       }
 
-      /// @brief Returns the number of matrix columns.
-      /// @returns The number of matrix columns.
+      /**
+       * @brief Returns the number of matrix columns.
+       * @returns The number of matrix columns.
+       */
       size_t getColumns() const
         requires FormLanguage::IsMatrixRange<RangeType>::Value
       {
@@ -1638,15 +1662,19 @@ namespace Rodin::Variational
       DataType m_data;
   };
 
-  /// @brief Deduces the default dense-vector grid function type.
-  /// @param fes Finite element space.
+  /**
+   * @brief Deduces the default dense-vector grid function type.
+   * @param fes Finite element space.
+   */
   template <class FES>
   GridFunction(const FES& fes)
     -> GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
 
-  /// @brief Deduces a grid function type from a finite element space and data object.
-  /// @param fes Finite element space.
-  /// @param data Data used by the operation.
+  /**
+   * @brief Deduces a grid function type from a finite element space and data object.
+   * @param fes Finite element space.
+   * @param data Data used by the operation.
+   */
   template <class FES, class Data>
   GridFunction(const FES& fes, Data&& data)
     -> GridFunction<FES, Data>;

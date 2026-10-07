@@ -62,8 +62,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Flow over a shape function: exposes the finite element
-  /// space, the shape function space and the operand type.
+  /**
+   * @brief Type traits for @c Flow over a shape function: exposes the finite element
+   * space, the shape function space and the operand type.
+   */
   template <
     class Derived,
     class FES,
@@ -162,9 +164,7 @@ namespace Rodin::Variational
       using Parent =
         FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy>>;
 
-      /**
-       * @brief Result of a characteristic trace.
-       */
+      /// @brief Result of a characteristic trace.
       class Trace
       {
         public:
@@ -270,8 +270,10 @@ namespace Rodin::Variational
           m_p(nullptr)
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Flow(const Flow& other)
         : Parent(other),
           m_maxZeroHops(other.m_maxZeroHops),
@@ -294,8 +296,10 @@ namespace Rodin::Variational
           m_p(other.m_p)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Flow(Flow&& other)
         : Parent(std::move(other)),
           m_maxZeroHops(std::move(other.m_maxZeroHops)),
@@ -1090,8 +1094,10 @@ namespace Rodin::Variational
         return m_operand->getValue(tr.getPoint()) + tr.getCorrection();
       }
 
-      /// @brief Gets the operand in the shape function expression.
-      /// @returns The operand in the shape function expression.
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
       constexpr
       const auto& getLeaf() const
       {
@@ -1300,8 +1306,10 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope&) const
       {
         return {};

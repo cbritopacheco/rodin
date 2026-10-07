@@ -41,9 +41,7 @@ namespace Rodin::Variational::F
       /// @brief Parent class type
       using Parent = RealFunctionBase<X>;
 
-      /**
-       * @brief Default constructor
-       */
+      /// @brief Default constructor
       X() = default;
 
       /**
@@ -72,9 +70,11 @@ namespace Rodin::Variational::F
         return p.x();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return polytope.getTransformation().getOrder();
@@ -119,9 +119,7 @@ namespace Rodin::Variational::F
       /// @brief Parent class type
       using Parent = RealFunctionBase<Y>;
 
-      /**
-       * @brief Default constructor
-       */
+      /// @brief Default constructor
       Y() = default;
 
       /**
@@ -150,9 +148,11 @@ namespace Rodin::Variational::F
         return p.y();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return polytope.getTransformation().getOrder();
@@ -197,9 +197,7 @@ namespace Rodin::Variational::F
       /// @brief Parent class type
       using Parent = RealFunctionBase<Z>;
 
-      /**
-       * @brief Default constructor
-       */
+      /// @brief Default constructor
       Z() = default;
 
       /**
@@ -228,9 +226,11 @@ namespace Rodin::Variational::F
         return p.z();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      /// @param polytope Mesh entity used by this operation.
-      /// @returns Polynomial order on the entity, or an empty optional when no order is available.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return polytope.getTransformation().getOrder();

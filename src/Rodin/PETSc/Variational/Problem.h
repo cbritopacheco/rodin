@@ -203,8 +203,10 @@ namespace Rodin::Variational
               }())
       {}
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Problem(const Problem& other)
         : Parent(other),
@@ -213,8 +215,10 @@ namespace Rodin::Variational
           m_axb(other.m_axb)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
@@ -298,9 +302,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Assembles only the requested target into the linear system.
-      /// @param[in] target Assembly target to update.
-      /// @returns Reference to this problem.
+      /**
+       * @brief Assembles only the requested target into the linear system.
+       * @param[in] target Assembly target to update.
+       * @returns Reference to this problem.
+       */
       Problem& assemble(AssemblyTarget target) override
       {
         m_assembly.execute(
@@ -328,22 +334,28 @@ namespace Rodin::Variational
         this->getTrialFunction().getSolution().setData(axb.getSolution());
       }
 
-      /// @brief Returns a mutable reference to the linear system.
-      /// @returns A mutable reference to the linear system.
+      /**
+       * @brief Returns a mutable reference to the linear system.
+       * @returns A mutable reference to the linear system.
+       */
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
-      /// @brief Returns a read-only reference to the linear system.
-      /// @returns A read-only reference to the linear system.
+      /**
+       * @brief Returns a read-only reference to the linear system.
+       * @returns A read-only reference to the linear system.
+       */
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
-      /// @brief Creates a heap-allocated copy of this problem.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a heap-allocated copy of this problem.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
@@ -554,8 +566,10 @@ namespace Rodin::Variational
         buildUUIDMaps();
       }
 
-      /// @brief Copy constructor.
-      /// @param other Object to copy from.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Problem(const Problem& other)
         : Parent(other),
           m_assembled(other.m_assembled),
@@ -572,8 +586,10 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
-      /// @brief Move constructor.
-      /// @param other Object to move from.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_assembled(std::exchange(other.m_assembled, false)),
@@ -734,9 +750,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Assembles only the requested target into the block linear system.
-      /// @param[in] target Assembly target to update.
-      /// @returns Reference to this problem.
+      /**
+       * @brief Assembles only the requested target into the block linear system.
+       * @param[in] target Assembly target to update.
+       * @returns Reference to this problem.
+       */
       Problem& assemble(AssemblyTarget target) override
       {
         computeOffsets();
@@ -779,43 +797,61 @@ namespace Rodin::Variational
       // --------------------------
       // Accessors (useful for solvers / debugging)
       // --------------------------
-      /// @brief Returns a mutable reference to the linear system.
-      /// @returns A mutable reference to the linear system.
+      /**
+       * @brief Returns a mutable reference to the linear system.
+       * @returns A mutable reference to the linear system.
+       */
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
-      /// @brief Returns a read-only reference to the linear system.
-      /// @returns A read-only reference to the linear system.
+      /**
+       * @brief Returns a read-only reference to the linear system.
+       * @returns A read-only reference to the linear system.
+       */
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
-      /// @brief Returns the DOF offset array for trial fields.
-      /// @returns The DOF offset array for trial fields.
+      /**
+       * @brief Returns the DOF offset array for trial fields.
+       * @returns The DOF offset array for trial fields.
+       */
       const auto& getTrialOffsets() const { return m_trialOffsets; }
-      /// @brief Returns the DOF offset array for test fields.
-      /// @returns The DOF offset array for test fields.
+      /**
+       * @brief Returns the DOF offset array for test fields.
+       * @returns The DOF offset array for test fields.
+       */
       const auto& getTestOffsets()  const { return m_testOffsets;  }
 
-      /// @brief Returns the total number of trial DOFs across all fields.
-      /// @returns The total number of trial DOFs across all fields.
+      /**
+       * @brief Returns the total number of trial DOFs across all fields.
+       * @returns The total number of trial DOFs across all fields.
+       */
       size_t getTotalTrialSize() const { return m_totalTrial; }
-      /// @brief Returns the total number of test DOFs across all fields.
-      /// @returns The total number of test DOFs across all fields.
+      /**
+       * @brief Returns the total number of test DOFs across all fields.
+       * @returns The total number of test DOFs across all fields.
+       */
       size_t getTotalTestSize()  const { return m_totalTest;  }
 
-      /// @brief Returns the UUID-to-index map for trial functions.
-      /// @returns The UUID-to-index map for trial functions.
+      /**
+       * @brief Returns the UUID-to-index map for trial functions.
+       * @returns The UUID-to-index map for trial functions.
+       */
       const auto& getTrialUUIDMap() const { return m_trialUUIDMap; }
-      /// @brief Returns the UUID-to-index map for test functions.
-      /// @returns The UUID-to-index map for test functions.
+      /**
+       * @brief Returns the UUID-to-index map for test functions.
+       * @returns The UUID-to-index map for test functions.
+       */
       const auto& getTestUUIDMap()  const { return m_testUUIDMap;  }
 
-      /// @brief Creates a heap-allocated copy of this problem.
-      /// @returns Pointer to a newly allocated copy; the caller owns the returned object.
+      /**
+       * @brief Creates a heap-allocated copy of this problem.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
@@ -1055,9 +1091,7 @@ namespace Rodin::Variational
 
 namespace Rodin::PETSc::Variational
 {
-  /**
-   * @brief Convenient PETSc alias for Rodin::Variational::Problem.
-   */
+  /// @brief Convenient PETSc alias for Rodin::Variational::Problem.
   template <class ... Us>
   using Problem =
     Rodin::Variational::Problem<PETSc::Math::LinearSystem, Us...>;
