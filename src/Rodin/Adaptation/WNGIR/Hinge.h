@@ -26,8 +26,9 @@ namespace Rodin::Adaptation
           return;
         m_jAction = getJacobianRow(innerGradient);
         m_qAction = getDistortionRow(innerGradient);
-        m_jSlack = deformation.getJacobian() - parameters.jSafe - m_jAction;
-        m_qSlack = parameters.qMax - deformation.getRelativeDistortion() - m_qAction;
+        m_jSlack = deformation.getJacobian() - parameters.model.jacobian - m_jAction;
+        m_qSlack =
+          parameters.model.distortion - deformation.getRelativeDistortion() - m_qAction;
         const auto coefficients = [&](Real action, Real slack, Real delta, Real weight,
                                     Real& hessian, Real& force) {
           if (weight <= Real(0) || slack >= delta)
@@ -36,33 +37,34 @@ namespace Rodin::Adaptation
           force = hessian * (action - (delta - slack));
         };
         coefficients(m_jAction, m_jSlack,
-          parameters.qualityGuard * (Real(1) - parameters.jSafe), parameters.kappaJ,
-          m_jHessian, m_jForce);
+          parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
+          parameters.model.jacobianWeight, m_jHessian, m_jForce);
         coefficients(m_qAction, m_qSlack,
-          parameters.qualityGuard * (parameters.qMax - Real(1)), parameters.kappaQ,
-          m_qHessian, m_qForce);
-        m_feasible = true;
+          parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
+          parameters.model.distortionWeight, m_qHessian, m_qForce);
       }
 
       /// @brief Affine quality energy with the construction parameters, evaluated only on demand.
       Real getEnergy(const WNGIRParameters& parameters, Real hingeCoefficient) const
       {
-        if (!m_feasible)
+        if (!isAdmissible())
           return std::numeric_limits<Real>::infinity();
         const auto energy = [&](Real slack, Real delta, Real weight) {
           const Real violation = std::max(Real(0), Real(1) - slack / delta);
           return Real(0.5) * hingeCoefficient * weight * violation * violation;
         };
-        return energy(m_jSlack, parameters.qualityGuard * (Real(1) - parameters.jSafe),
-                 parameters.kappaJ) +
-          energy(m_qSlack, parameters.qualityGuard * (parameters.qMax - Real(1)),
-            parameters.kappaQ);
+        return energy(m_jSlack,
+                 parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
+                 parameters.model.jacobianWeight) +
+          energy(m_qSlack,
+            parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
+            parameters.model.distortionWeight);
       }
 
-      /// @brief Whether feasible.
-      bool isFeasible() const
+      /// @brief Whether the frozen deformation permits evaluation; affine slacks may be negative.
+      bool isAdmissible() const
       {
-        return m_feasible;
+        return m_rowDeformation.isAdmissible();
       }
       /// Negative Jacobian differential at the frozen outer state.
       Real getJacobianRow(const Math::SpatialMatrix<Real>& gradient) const
@@ -117,7 +119,6 @@ namespace Rodin::Adaptation
 
     private:
       CellDeformation m_rowDeformation;
-      bool m_feasible = false;
       Real m_jAction = 0;
       Real m_qAction = 0;
       Real m_jSlack = 0;

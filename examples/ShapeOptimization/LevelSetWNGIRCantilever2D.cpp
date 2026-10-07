@@ -605,8 +605,9 @@ int main(int argc, char** argv)
             << "\n  domain [0," << L << "]x[0," << H << "]"
             << "  ell=" << ell << "  alpha=" << alphaReg << "  h=" << h << "  dt=" << dt
             << "  objectiveLineSearch=" << objectiveLineSearch
-            << "\n  WNGIR: kappaF=" << wp.kappaF << " kappaD=" << wp.kappaD
-            << " DinfTarget=" << wp.geometricSupTolerance << " steps=" << wp.maxIterations
+            << "\n  WNGIR: fit=" << wp.model.fit << " deviatoric=" << wp.model.distribution.deviatoric << " divergence=" << wp.model.distribution.divergence
+            << " DinfTarget=" << wp.convergence.tolerance.geometric
+            << " steps=" << wp.convergence.iterations.outer
             << "  classify=" << classifyEvery << "  redistance=" << redistanceMode << "/"
             << redistanceEvery << " transfer=" << redistanceTransfer
             << " adaptive=" << adaptiveRedistance << " eikTol=" << redistanceEikonalTol
@@ -997,14 +998,14 @@ int main(int argc, char** argv)
         maxUoverH = std::max(maxUoverH, std::sqrt(ux * ux + uy * uy) / h);
       }
       const Real levelSetMeshScale = h * rep.levelSetGradientScale;
-      const Real activeRMSOverH =
-        levelSetMeshScale > Real(0) ? rep.activeRMS / levelSetMeshScale : Real(0);
-      const Real activeSupOverH =
-        levelSetMeshScale > Real(0) ? rep.activeSup / levelSetMeshScale : Real(0);
+      const Real residualRMSOverH =
+        levelSetMeshScale > Real(0) ? rep.residualRMS / levelSetMeshScale : Real(0);
+      const Real residualSupOverH =
+        levelSetMeshScale > Real(0) ? rep.residualSup / levelSetMeshScale : Real(0);
       std::cout << "  WNGIR: it=" << rep.iterations << "  exit=" << rep.getReasonString()
-                << "  activeRMS=" << std::scientific << std::setprecision(2)
-                << rep.activeRMS << "  activeRMS/(hG)=" << activeRMSOverH
-                << "  activeSup/(hG)=" << activeSupOverH << "  Dinf=" << rep.geometricSup
+                << "  residualRMS=" << std::scientific << std::setprecision(2)
+                << rep.residualRMS << "  residualRMS/(hG)=" << residualRMSOverH
+                << "  residualSup/(hG)=" << residualSupOverH << "  Dinf=" << rep.geometricSup
                 << "  DinfTarget=" << rep.geometricSupTarget
                 << "  innerResidual=" << rep.innerResidual
                 << "  nJumpRMS=" << rep.normalJumpRMS << "  max|u|/h=" << maxUoverH

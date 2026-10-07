@@ -1,3 +1,8 @@
+add_executable(RodinAdaptationDeformationMapTest DeformationMapTest.cpp)
+target_link_libraries(RodinAdaptationDeformationMapTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationDeformationMapTest PROPERTIES LABELS unit)
+
 add_executable(RodinAdaptationCellDeformationTest CellDeformationTest.cpp)
 target_link_libraries(RodinAdaptationCellDeformationTest
   PUBLIC
@@ -33,6 +38,13 @@ gtest_discover_tests(RodinAdaptationWNGIRLossTest
 )
 
 add_executable(RodinAdaptationWNGIRSolverTest WNGIRSolverTest.cpp)
+
+if(TARGET Rodin::MMG)
+  add_executable(RodinAdaptationWNGIRExampleParametersTest WNGIRExampleParametersTest.cpp)
+  target_link_libraries(RodinAdaptationWNGIRExampleParametersTest
+    PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation Rodin::MMG)
+  gtest_discover_tests(RodinAdaptationWNGIRExampleParametersTest PROPERTIES LABELS unit)
+endif()
 
 add_executable(RodinAdaptationWNGIRRegularityMetricTest WNGIRRegularityMetricTest.cpp)
 add_executable(RodinAdaptationWNGIRDirectionalNewtonTest WNGIRDirectionalNewtonTest.cpp)

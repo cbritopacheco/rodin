@@ -33,65 +33,99 @@ namespace Rodin::Adaptation
   /// @brief Runtime parameters controlling WNGIR assembly and iteration.
   struct WNGIRParameters
   {
-      /// Affine quadratic-hinge guard widths, relative to the identity margins.
-      Real qualityGuard = Real(0.1);
-      /// Independent fitting and distribution weights; distribution scales with h.
-      Real kappaF = 1; ///< Fitting curvature weight.
-      Real kappaD = Real(1e-3); ///< Distribution (current-strain regularity) weight.
-      /// Robust directional scaling of the inner model, omitting the level-set Hessian.
-      bool directionalNewton = true;
-      Real directionalNewtonMaxStepOverH = 1; ///< Maximum predictor motion divided by h.
+      /// @brief Coefficients, reference scale and admissible geometry of the model.
+      struct Model
+      {
+          Real h = 0; ///< Fixed background reference size (required).
+          Real fit = 1; ///< @f$\kappa_F@f$, target-normal fitting stiffness.
+          /// @brief Global strain-variation weights, each assembled with h.
+          struct Distribution
+          {
+              Real deviatoric = Real(1e-4); ///< @f$\kappa_{\rm dev}@f$.
+              Real divergence = Real(1e-4); ///< @f$\kappa_{\rm div}@f$, with 1/d normalization.
+          };
+          Distribution distribution; ///< Centered current-strain distribution.
+          Real distortion = 10; ///< @f$Q_{\max}@f$, relative-distortion budget.
+          Real jacobian =
+            Real(1e-2); ///< @f$j_{\mathrm{safe}}@f$, relative Jacobian floor.
+          Real hinge = Real(100); ///< @f$\widehat\mu@f$, hinge/model-decrease ratio.
+          Real qualityGuard = Real(0.1); ///< Guard fraction of the identity margins.
+          Real jacobianWeight = 1; ///< Relative Jacobian-hinge row weight.
+          Real distortionWeight = 1; ///< Relative distortion-hinge row weight.
+          Real robustScale =
+            0; ///< Positive fixes Welsch scale; zero selects it automatically.
+      };
+
+      /// @brief Accuracy requirements and independent work budgets.
+      struct Convergence
+      {
+          /// @brief Geometric success, stationarity and best-effort exit tolerances.
+          struct Tolerance
+          {
+              Real geometric = 0; ///< Zero selects @f$h^{p+1}@f$; positive overrides it.
+              Real innerRelative =
+                Real(1e-3); ///< Stationarity residual relative to force.
+              Real innerAbsolute = Real(1e-12); ///< Absolute stationarity allowance.
+              Real linearRelative =
+                Real(1e-6); ///< Linear residual tolerance for all backends.
+              Real energy = Real(1e-8); ///< Relative energy-change stagnation threshold.
+              Real step = 0; ///< Absolute accepted-motion stagnation threshold.
+              Real stepOverH = Real(5e-4); ///< Accepted-motion/reference-size threshold.
+          };
+
+          /// @brief Independent limits for fitting, Newton, linear solves and searches.
+          struct Iterations
+          {
+              std::size_t outer = 30; ///< Maximum outer fitting iterations.
+              std::size_t inner = 15; ///< Maximum Newton corrections per outer iteration.
+              std::size_t linear = 1000; ///< Maximum iterations per CG solve only.
+              std::size_t backtracks = 32; ///< Maximum outer trial halvings.
+              std::size_t stagnation = 5; ///< Consecutive small steps or energy changes.
+          };
+
+          Tolerance tolerance; ///< Accuracy and stagnation thresholds.
+          Iterations iterations; ///< Work budgets and stagnation persistence.
+      };
+
+      /// @brief Directional scaling and actual trial acceptance.
+      struct Globalization
+      {
+          bool directionalNewton = true; ///< Scale the model without a level-set Hessian.
+          Real maxStepOverH =
+            0; ///< Positive caps predictor motion/h; zero is unrestricted.
+          Real armijo = Real(1e-4); ///< Armijo sufficient-decrease coefficient.
+      };
+
+      /// @brief Available local linear-solver backends.
       enum class LinearSolver
       {
         CG,
         SparseLU,
         MUMPS
       };
+      /// @brief Linear backend selection and thread policy.
+      struct Linear
+      {
 #ifdef RODIN_USE_MUMPS
-      LinearSolver linearSolver = LinearSolver::MUMPS;
+          LinearSolver solver = LinearSolver::MUMPS; ///< Default direct backend.
 #else
-      LinearSolver linearSolver = LinearSolver::SparseLU;
+          LinearSolver solver = LinearSolver::SparseLU; ///< Default direct backend.
 #endif
-      Index linearSolverThreads = 0;
-      /// Full-interface sampled normalized-residual target; zero selects h^(p+1).
-      Real geometricSupTolerance = 0;
-      Real robustScale =
-        0; ///< >0 fixes the robust scale in level-set units; zero selects it automatically.
-      Real h = 0; ///< reference mesh size (required).
-      Real kappaJ = 1; ///< @f$\kappa_j@f$, Jacobian hinge row weight.
-      Real kappaQ = 1; ///< @f$\kappa_Q@f$, relative-distortion hinge row weight.
-      Real jSafe = 1e-2; ///< @f$j_{\mathrm{safe}}@f$, hinge floor on normalised j.
-      Real qMax = 10; ///< @f$Q_{\max}@f$, hinge and line-search ceiling on Q.
-      std::size_t innerIterations =
-        15; ///< Maximum Newton corrections of the hinge-penalized QP.
-      Real innerRelativeTolerance =
-        Real(1e-3); ///< Relative stationarity-residual tolerance for the inner QP.
-      Real innerAbsoluteTolerance = Real(1e-12); ///< Absolute inner residual tolerance.
-      Real muHat = Real(100); ///< @f$\widehat\mu@f$, dimensionless
-        ///< hinge/model-decrease ratio.
-      Real omegaMin = 0.1; ///< @f$\omega_{\min}@f$, active-set threshold on ω.
-      size_t maxBacktracks = 32; ///< Maximum halvings of a physical trial increment.
-      Real armijoCoefficient =
-        Real(1e-4); ///< @f$c_A@f$, Armijo sufficient-decrease coefficient.
-      Real jMinRatio = 1e-8; ///< @f$j_{\min}@f$, hard inadmissibility floor.
-      /// @brief Jacobian floor ratio @f$j_{\mathrm{ls}}@f$ enforced by line
-      /// search.
-      Real jLineSearchRatio = 1e-2;
-      Real energyStagTol = 1e-8; ///< Relative energy stagnation tolerance.
-      Real stepTol = 0; ///< Absolute physical accepted-displacement tolerance.
-      Real acceptedStepOverHTol =
-        Real(5e-4); ///< >0 stops best-effort when accepted step/h is small.
-      std::size_t stagnationIterations =
-        5; ///< Consecutive small steps or energy changes.
-      Real linearRelativeTolerance =
-        1e-6; ///< @f$\tau_{\mathrm{lin}}@f$, relative residual tolerance for all backends.
-      std::size_t linearMaxIterations =
-        1000; ///< Maximum iterations for each CG linear solve.
-      std::size_t maxIterations = 30; ///< Maximum nonlinear WNGIR iterations.
-      std::size_t quadratureOrder =
-        0; ///< @f$p_{\mathrm{quad}}@f$ override; zero selects automatic orders.
-      std::size_t geometricValidationOrder =
-        0; ///< Geometric-response order; zero selects max(14, 2*(FE order) + 4).
+          Index threads = 0; ///< Zero leaves the backend thread policy unchanged.
+      };
+
+      /// @brief Integration and independent geometry-validation orders.
+      struct Quadrature
+      {
+          std::size_t order = 0; ///< Zero selects automatic integration orders.
+          std::size_t validation = 0; ///< Zero selects an independent validation order.
+      };
+
+      Model model; ///< Fitting, distribution and quality model.
+      Convergence convergence; ///< Tolerances and work budgets.
+      Globalization globalization; ///< Predictor scaling and outer acceptance.
+      Linear linear; ///< Linear backend and thread policy.
+      Quadrature quadrature; ///< Integration and validation orders.
       Optional<Geometry::Attribute> interfaceAttribute; ///< Marked facets to fit.
       bool trace = false; ///< Print diagnostics; accepted geometry is always validated.
       FlatSet<Geometry::Attribute> fixedBoundaryAttributes;

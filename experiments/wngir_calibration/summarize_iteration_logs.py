@@ -23,7 +23,7 @@ def summarize(path, coefficients, order=2, j_floor=1e-2, q_max=10):
         values = dict(PAIRS.findall(line))
         if line.strip().startswith("wngir geometry:"):
             geometry.append(values)
-        elif line.strip().startswith("barrier inner="):
+        elif line.strip().startswith(("hinge inner=", "barrier inner=")):
             inner.append(values)
     accepted = [g for g in geometry if g["phase"] in ("initial", "accepted")]
     hits = [g for g in accepted

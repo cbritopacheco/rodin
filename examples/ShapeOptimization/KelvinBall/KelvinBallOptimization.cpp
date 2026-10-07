@@ -449,26 +449,27 @@ namespace KelvinBall
         defaults.maxIterations = 30;
         auto parameters = Rodin::Examples::makeWNGIRParameters(
           argc, argv, referenceSpacing, Gamma, defaults);
+        if (!Rodin::Examples::findOption(argc, argv, "wngir-inner-iterations", nullptr))
+          parameters.convergence.iterations.inner = 15;
+        parameters.convergence.iterations.outer =
+          std::clamp(parameters.convergence.iterations.outer, size_t{1}, size_t{30});
+        parameters.convergence.iterations.inner =
+          std::min(parameters.convergence.iterations.inner, size_t{15});
         if (!Rodin::Examples::findOption(
-              argc, argv, "wngir-primal-barrier-iterations", nullptr))
-          parameters.innerIterations = 15;
-        parameters.maxIterations =
-          std::clamp(parameters.maxIterations, size_t{1}, size_t{30});
-        parameters.innerIterations = std::min(parameters.innerIterations, size_t{15});
-        if (!Rodin::Examples::findOption(argc, argv, "wngir-geometric-sup-tol", nullptr))
-          parameters.geometricSupTolerance =
+              argc, argv, "wngir-geometric-tolerance", nullptr))
+          parameters.convergence.tolerance.geometric =
             Real(0.1) * referenceSpacing * referenceSpacing;
         if (!Rodin::Examples::findOption(
-              argc, argv, "wngir-primal-barrier-relative-tol", nullptr))
-          parameters.innerRelativeTolerance = Real(1e-3);
-        if (!Rodin::Examples::findOption(argc, argv, "wngir-cg-rtol", nullptr))
-          parameters.linearRelativeTolerance = Real(1e-9);
-        parameters.linearMaxIterations =
-          std::clamp(parameters.linearMaxIterations, size_t{1}, size_t{1000});
-        if (!Rodin::Examples::findOption(argc, argv, "wngir-step-tol", nullptr))
-          parameters.stepTol = Real(1e-3) * referenceSpacing * referenceSpacing;
-        if (!Rodin::Examples::findOption(argc, argv, "wngir-step-h-tol", nullptr))
-          parameters.acceptedStepOverHTol = Real(1e-3) * referenceSpacing;
+              argc, argv, "wngir-inner-relative-tolerance", nullptr))
+          parameters.convergence.tolerance.innerRelative = Real(1e-3);
+        parameters.convergence.iterations.linear =
+          std::clamp(parameters.convergence.iterations.linear, size_t{1}, size_t{1000});
+        if (!Rodin::Examples::findOption(argc, argv, "wngir-step-tolerance", nullptr))
+          parameters.convergence.tolerance.step =
+            Real(1e-3) * referenceSpacing * referenceSpacing;
+        if (!Rodin::Examples::findOption(
+              argc, argv, "wngir-step-over-h-tolerance", nullptr))
+          parameters.convergence.tolerance.stepOverH = Real(1e-3) * referenceSpacing;
         if (!Rodin::Examples::findOption(argc, argv, "trace", nullptr) &&
           !Rodin::Examples::findOption(argc, argv, "wngir-trace", nullptr))
           parameters.trace = true;
@@ -490,24 +491,26 @@ namespace KelvinBall
           << diagnosticLabel("Background mean edge h:")
           << Alert::Notation::Number(backgroundH) << Alert::NewLine
           << diagnosticLabel("Fitting reference spacing h0:")
-          << Alert::Notation::Number(parameters.h) << Alert::NewLine
+          << Alert::Notation::Number(parameters.model.h) << Alert::NewLine
           << diagnosticLabel("Mean interface triangle size:")
           << Alert::Notation::Number(meanInterfaceSize) << Alert::NewLine
           << diagnosticLabel("Outer iteration cap:")
-          << Alert::Notation::Number(parameters.maxIterations) << Alert::NewLine
-          << diagnosticLabel("Inner correction cap:")
-          << Alert::Notation::Number(parameters.innerIterations) << Alert::NewLine
-          << diagnosticLabel("Inner cap policy:")
+          << Alert::Notation::Number(parameters.convergence.iterations.outer)
+          << Alert::NewLine << diagnosticLabel("Inner correction cap:")
+          << Alert::Notation::Number(parameters.convergence.iterations.inner)
+          << Alert::NewLine << diagnosticLabel("Inner cap policy:")
           << "Stop on an uncertified inner residual" << Alert::NewLine
           << diagnosticLabel("Inner relative residual tolerance:")
-          << Alert::Notation::Number(parameters.innerRelativeTolerance) << Alert::NewLine
-          << diagnosticLabel("Barrier model:") << "Affine quadratic quality hinges"
-          << Alert::NewLine << diagnosticLabel("Soft quality guard fraction:")
-          << Alert::Notation::Number(parameters.qualityGuard) << Alert::NewLine
-          << diagnosticLabel("Fitting / distribution:")
-          << Alert::Notation::Number(parameters.kappaF) << " / "
-          << Alert::Notation::Number(parameters.kappaD) << Alert::NewLine
-          << diagnosticLabel("Inactive hinge skips:")
+          << Alert::Notation::Number(parameters.convergence.tolerance.innerRelative)
+          << Alert::NewLine << diagnosticLabel("Barrier model:")
+          << "Affine quadratic quality hinges" << Alert::NewLine
+          << diagnosticLabel("Soft quality guard fraction:")
+          << Alert::Notation::Number(parameters.model.qualityGuard) << Alert::NewLine
+          << diagnosticLabel("Fitting / deviatoric / divergence:")
+          << Alert::Notation::Number(parameters.model.fit) << " / "
+          << Alert::Notation::Number(parameters.model.distribution.deviatoric) << " / "
+          << Alert::Notation::Number(parameters.model.distribution.divergence)
+          << Alert::NewLine << diagnosticLabel("Inactive hinge skips:")
           << Alert::Notation::Number(report.inactiveHingeSkips) << Alert::NewLine
           << diagnosticLabel("Direct symbolic analyses:")
           << Alert::Notation::Number(report.directAnalyses) << Alert::NewLine
@@ -516,17 +519,17 @@ namespace KelvinBall
           << diagnosticLabel("Inner Newton steps:")
           << "Full with fixed-inner merit backtracking" << Alert::NewLine
           << diagnosticLabel("Linear backend:")
-          << (parameters.linearSolver == Adaptation::WNGIRParameters::LinearSolver::CG
+          << (parameters.linear.solver == Adaptation::WNGIRParameters::LinearSolver::CG
                  ? "CG"
-                 : (parameters.linearSolver ==
+                 : (parameters.linear.solver ==
                          Adaptation::WNGIRParameters::LinearSolver::MUMPS
                        ? "MUMPS"
                        : "SparseLU"))
-          << Alert::NewLine << diagnosticLabel("CG relative tolerance:")
-          << Alert::Notation::Number(parameters.linearRelativeTolerance) << Alert::NewLine
-          << diagnosticLabel("CG iterations per solve:")
-          << Alert::Notation::Number(parameters.linearMaxIterations) << Alert::NewLine
-          << diagnosticLabel("Outer iterations:")
+          << Alert::NewLine << diagnosticLabel("Linear relative tolerance:")
+          << Alert::Notation::Number(parameters.convergence.tolerance.linearRelative)
+          << Alert::NewLine << diagnosticLabel("CG iterations per solve:")
+          << Alert::Notation::Number(parameters.convergence.iterations.linear)
+          << Alert::NewLine << diagnosticLabel("Outer iterations:")
           << Alert::Notation::Number(report.iterations) << Alert::NewLine
           << diagnosticLabel("Inner corrections (last):")
           << Alert::Notation::Number(report.lastInnerIterations) << Alert::NewLine
@@ -550,20 +553,17 @@ namespace KelvinBall
           << diagnosticLabel("Geometric D infinity:")
           << Alert::Notation::Number(report.geometricSup) << Alert::NewLine
           << diagnosticLabel("Geometric D infinity target:")
-          << Alert::Notation::Number(parameters.geometricSupTolerance) << Alert::NewLine
-          << diagnosticLabel("Geometric target reached:")
-          << (report.geometricSup <= parameters.geometricSupTolerance ? "Yes" : "No")
+          << Alert::Notation::Number(parameters.convergence.tolerance.geometric)
+          << Alert::NewLine << diagnosticLabel("Geometric target reached:")
+          << (report.geometricSup <= parameters.convergence.tolerance.geometric ? "Yes"
+                                                                                : "No")
           << Alert::NewLine << diagnosticLabel("Welsch residual scale:")
           << Alert::Notation::Number(report.sigma) << Alert::NewLine
-          << diagnosticLabel("Active RMS:") << Alert::Notation::Number(report.activeRMS)
-          << Alert::NewLine << diagnosticLabel("Active RMS / level-set mesh scale:")
-          << Alert::Notation::Number(report.levelSetGradientScale > 0
-                 ? report.activeRMS / (parameters.h * report.levelSetGradientScale)
-                 : 0)
-          << Alert::NewLine << diagnosticLabel("Active supremum:")
-          << Alert::Notation::Number(report.activeSup) << Alert::NewLine
-          << diagnosticLabel("Minimum Jacobian:") << Alert::Notation::Number(report.minJ)
-          << Alert::NewLine << diagnosticLabel("Maximum relative distortion:")
+          << diagnosticLabel("Geometric RMS / reference spacing:")
+          << Alert::Notation::Number(report.geometricRMS / parameters.model.h)
+          << Alert::NewLine << diagnosticLabel("Minimum Jacobian:")
+          << Alert::Notation::Number(report.minJ) << Alert::NewLine
+          << diagnosticLabel("Maximum relative distortion:")
           << Alert::Notation::Number(report.maxQRel) << Alert::NewLine
           << diagnosticLabel("Setup time:") << Alert::Notation::Number(report.tSetup)
           << " s" << Alert::NewLine << diagnosticLabel("Step assembly time:")
@@ -880,18 +880,20 @@ namespace KelvinBall
           << Alert::NewLine
           << "                              iteration trace on; --wngir-trace=0 disables;"
           << Alert::NewLine
-          << "                              also --j-safe, --j-ls, --j-min)."
-          << Alert::NewLine << Alert::Notation("--wngir-kappa-f=<value>")
+          << "                              grouped model and convergence controls)."
+          << Alert::NewLine << Alert::Notation("--wngir-fit=<value>")
           << "  Fitting curvature weight (default: 1)." << Alert::NewLine
-          << Alert::Notation("--wngir-kappa-d=<value>")
-          << "  Distribution weight (default: 0.001)." << Alert::NewLine
-          << Alert::Notation("--wngir-direct-solver=<name>")
+          << Alert::Notation("--wngir-distribution-deviatoric=<value>")
+          << "  Centered deviatoric weight (default: 0.0001)." << Alert::NewLine
+          << Alert::Notation("--wngir-distribution-divergence=<value>")
+          << "  Centered divergence weight (default: 0.0001)." << Alert::NewLine
+          << Alert::Notation("--wngir-linear-solver=<name>")
           << "  WNGIR linear backend: mumps, sparse-lu, or cg (default: MUMPS when "
              "built)."
           << Alert::NewLine << Alert::Notation("--wngir-directional-newton[=0|1]")
           << "  Scale the frozen model with directional Newton (default: 1)."
-          << Alert::NewLine << Alert::Notation("--wngir-mu-hat=<value>")
-          << "  Dimensionless quadratic-hinge weight (default: 90)." << Alert::NewLine
+          << Alert::NewLine << Alert::Notation("--wngir-hinge=<value>")
+          << "  Dimensionless quadratic-hinge weight (default: 100)." << Alert::NewLine
           << Alert::Notation("--wngir-quality-guard=<fraction>")
           << "  Soft guard fraction for that penalty (default: 0.1)." << Alert::NewLine
           << Alert::Notation("--geometry-only")
@@ -2340,7 +2342,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       sewedInterfaceBuilder.initialize(sewedDesign.getMesh());
       for (auto face =
              sewedDesign.getMesh().getPolytope(sewedDesign.getMesh().getDimension() - 1);
-           face; ++face)
+        face; ++face)
         if (face->getAttribute() == Gamma)
           sewedInterfaceBuilder.include(
             sewedDesign.getMesh().getDimension() - 1, face->getIndex());
@@ -2516,7 +2518,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
           << substageHeading("Fitted-to-background transfer") << Alert::NewLine
           << diagnosticLabel("Nodal-copy error (distance):")
           << Alert::Notation::Number((advectionDistance.getData() - distance.getData())
-                                       .lpNorm<Eigen::Infinity>())
+                 .lpNorm<Eigen::Infinity>())
           << Alert::NewLine << diagnosticLabel("Nodal-copy error (direction):")
           << Alert::Notation::Number(
                (advectionDirection.getData() - theta.getData()).lpNorm<Eigen::Infinity>())

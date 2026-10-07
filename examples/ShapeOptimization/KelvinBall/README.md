@@ -605,11 +605,11 @@ validation quadrature. It approximates distance to the target zero set; it is
 not a continuous Hausdorff certificate. Invalid or zero-gradient samples make
 validation fail rather than disappear from the maximum. Active RMS or Welsch
 energy alone cannot certify this target. The default budget is 30 outer iterations and
-15 inner barrier corrections. `--wngir-steps` is capped at 30;
-`--wngir-primal-barrier-iterations` is capped at 15.
+15 inner hinge corrections. `--wngir-outer-iterations` is capped at 30;
+`--wngir-inner-iterations` is capped at 15.
 The inner relative stationarity-residual tolerance is $10^{-3}$.
 Linear steps default to MUMPS when available, otherwise SparseLU.
-`--wngir-direct-solver=cg` selects CG at relative tolerance $10^{-9}$,
+`--wngir-linear-solver=cg` selects CG at relative tolerance $10^{-6}$,
 with at most 1000 iterations per solve. The active-residual convergence criteria are replaced
 by the full-interface supremum criterion; the absolute and accepted-step stopping
 thresholds are $10^{-3}h_0^2$. Per-iteration WNGIR diagnostics are printed by
@@ -620,8 +620,15 @@ inner Newton corrections try full steps with backtracking on the frozen
 inner merit. Directional Newton scales the predictor and frozen metric before
 the hinge solve; the outer energy/quality line search then backtracks the
 resulting physical increment.
-The fitting and distribution coefficients default to
-`--wngir-kappa-f=1` and `--wngir-kappa-d=0.001`.
+The fitting and centered distribution coefficients default to
+`--wngir-fit=1`, `--wngir-distribution-deviatoric=0.0001`, and
+`--wngir-distribution-divergence=0.0001`. The dimensionless hinge strength
+is `--wngir-hinge=100`. Directional Newton is enabled without a predictor
+motion cap (`--wngir-max-step-over-h=0`). The Jacobian floor and distortion
+budget are `--wngir-jacobian=0.01` and `--wngir-distortion=10`.
+KelvinBall retains its application-specific geometric target
+$0.1h_0^2$ and small-step thresholds $10^{-3}h_0^2$; the model coefficients
+and linear tolerance follow the shared WNGIR defaults.
 The other fitting parameters
 use the common `--wngir-*` spellings of the WNGIR examples (see
 `KelvinBall --help`).
@@ -713,21 +720,30 @@ the penalty balance.
 The frozen outer metric is $M_k=F_k+D_k$.
 $F_k$ is normalized half-squared fitting curvature, omitting the level-set
 Hessian.
-$D_k$ is pulled-back pointwise deviatoric current-strain regularity:
-$h_0\kappa_D\int j\,\operatorname{dev}\epsilon(v):\operatorname{dev}\epsilon(z)$,
-where $\epsilon(v)=\operatorname{sym}(\nabla v F^{-1})$.
-There is no global dilation correction. Local isotropic strain and
-infinitesimal rotations are unpenalized. Higher-order spaces may contain
-additional conformal kernel modes, so this term alone is not an $H^1$ norm.
-The independent dimensionless coefficients
-are $\kappa_F$ and $\kappa_D$; the volume terms retain the
-mesh factor $h_0$. No shared bulk multiplier remains.
+$D_k$ penalizes variation of current strain about its global mean:
+
+$$
+D_k[v,z]=h_0\int_{D_k}\left[
+\kappa_{\mathrm{dev}}
+(\operatorname{dev}\epsilon(v)-\overline{\operatorname{dev}\epsilon(v)}):
+(\operatorname{dev}\epsilon(z)-\overline{\operatorname{dev}\epsilon(z)})
++\frac{\kappa_{\mathrm{div}}}{d}
+(\operatorname{div}v-\overline{\operatorname{div}v})
+(\operatorname{div}z-\overline{\operatorname{div}z})\right]dy.
+$$
+
+Here $D_k$ is the current chamber and $\epsilon(v)=\operatorname{sym}\nabla_y v$.
+The overbars denote whole-domain averages, not element-wise means. Coherent
+affine motions are unpenalized; spatial variation of strain is resisted.
+The two distribution coefficients are independent, with the mesh factor $h_0$.
 
 The metric, fitting force and affine constraint rows are frozen during the
 inner quadratic-hinge solve. The fitting energy and force remain robust
 Welsch. There is no separate inertia audit. Linear residual, descent and
-actual-geometry quality checks remain active. Unresolved similarity modes are gauged only
-in the linear solve, without adding an objective term. Inner convergence uses
+actual-geometry quality checks remain active. Global centering is a low-rank
+subtraction from the sparse metric. Direct backends solve an equivalent
+augmented system; CG applies the centered operator. No gauge or mass
+stabilization is added. Inner convergence uses
 the absolute and relative residual of the frozen quadratic-hinge problem,
 not the relative correction size.
 
@@ -752,6 +768,11 @@ The old `--wngir-kappa-s`, `--wngir-kappa-bulk`, `--wngir-quality-metric*`,
 `--wngir-direct-step`, `--wngir-quadratic-penalty`,
 `--wngir-nonlinear-barrier` and `--wngir-undamped-inner` options are removed
 and rejected, rather than silently ignored.
+The former `--wngir-kappa-f`, `--wngir-kappa-d`, `--wngir-mu-hat`,
+`--wngir-direct-solver`, `--wngir-steps`, and
+`--wngir-primal-barrier-iterations` spellings are also removed. Use the
+canonical flags above; the two centered distribution weights cannot be
+represented by a single old distribution coefficient.
 
 ## Running
 

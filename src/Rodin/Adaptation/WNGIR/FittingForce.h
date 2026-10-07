@@ -58,7 +58,7 @@ namespace Rodin::Adaptation
       /// @brief Evaluates the coefficient at a point.
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
-        const WNGIRResidualState state(*m_phi, *m_grad, m_deformation, ip, m_loss, true);
+        const WNGIRResidualState state(*m_phi, *m_grad, m_deformation, ip, m_loss);
         return (-m_normalization * state.getWeight() * state.getResidual()) *
           state.getGradient();
       }

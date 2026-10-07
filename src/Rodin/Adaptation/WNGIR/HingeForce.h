@@ -52,8 +52,8 @@ namespace Rodin::Adaptation
         const auto& fes = m_z.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
-        const std::size_t order = parameters.quadratureOrder > 0
-          ? parameters.quadratureOrder
+        const std::size_t order = parameters.quadrature.order > 0
+          ? parameters.quadrature.order
           : std::max<std::size_t>(2, 2 * fe.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
@@ -75,10 +75,6 @@ namespace Rodin::Adaptation
             continue;
           const WNGIRHingeState state(
             deformation, innerJacobian.getValue(ip), parameters, m_hingeCoefficient);
-          assert(state.isFeasible());
-          if (!state.isFeasible())
-            continue;
-
           const Real coefficientJ = state.getJacobianForce();
           const Real coefficientQ = state.getDistortionForce();
           const Real weight = qf.getWeight(q) * point.getDistortion();

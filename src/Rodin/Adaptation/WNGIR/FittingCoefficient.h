@@ -60,7 +60,7 @@ namespace Rodin::Adaptation
         m.setZero();
 
         const auto g = m_grad->getValue(m_deformation.getMovedPoint(ip));
-        const Real scale = params.kappaF * m_normalization;
+        const Real scale = params.model.fit * m_normalization;
         for (std::uint8_t r = 0; r < d; ++r)
         {
           for (std::uint8_t c = 0; c < d; ++c)

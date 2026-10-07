@@ -11,10 +11,9 @@
 #include <cstddef>
 #include <cmath>
 #include <limits>
-#include <stdexcept>
+#include "Rodin/Alert.h"
 
 #include "Rodin/Math/SpatialMatrix.h"
-#include "Rodin/Math/Vector.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Types.h"
 #include "Rodin/Variational/IntegrationPoint.h"
@@ -40,27 +39,23 @@ namespace Rodin::Adaptation
   }
 
   template <class Displacement>
-  /// @brief Evaluates sampled Jacobian and relative-distortion admissibility.
-  WNGIRAdmissibilityReport evaluateWNGIRAdmissibilitySampled(Displacement& u,
-    const Math::Vector<Real>& uData, Real jMin, std::size_t quadratureOrder = 0)
+  /// @brief Evaluates sampled Jacobian and relative distortion without changing displacement.
+  WNGIRAdmissibilityReport evaluateWNGIRAdmissibilitySampled(const Displacement& u,
+    Real jacobian, std::size_t quadratureOrder = 0)
   {
     using Variational::IntegrationPoint;
     using Variational::Jacobian;
 
-    auto& uMutable = u;
-    uMutable.getData() = uData;
-
     WNGIRAdmissibilityReport rep;
-    const auto& fes = uMutable.getFiniteElementSpace();
+    const auto& fes = u.getFiniteElementSpace();
     const auto& mesh = fes.getMesh();
     const std::size_t dim = mesh.getDimension();
     const std::size_t vdim = fes.getVectorDimension();
     if (dim != vdim)
-      throw std::runtime_error(
-        "evaluateWNGIRAdmissibilitySampled: displacement dimension "
-        "must equal mesh dimension.");
+      Alert::Exception() << "WNGIR displacement dimension must equal mesh dimension."
+                         << Alert::Raise;
 
-    auto gradU = Jacobian(uMutable);
+    auto gradU = Jacobian(u);
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
     {
       const auto& cell = *cellIt;
@@ -79,7 +74,7 @@ namespace Rodin::Adaptation
         const Real j = F.determinant();
 
         rep.minJ = std::min(rep.minJ, j);
-        if (j <= jMin)
+        if (j <= jacobian)
           ++rep.inadmissibleCount;
 
         if (j > Real(0))
