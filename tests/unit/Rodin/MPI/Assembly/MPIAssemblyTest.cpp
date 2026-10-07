@@ -364,7 +364,9 @@ namespace Rodin::Tests::Unit
           {
             const auto [it, inserted] = expected.emplace(entity, indices);
             if (!inserted)
+            {
               EXPECT_EQ(it->second, indices) << "dimension=" << d << " entity=" << entity;
+            }
           }
       }
     };
@@ -389,13 +391,17 @@ namespace Rodin::Tests::Unit
         {
           EXPECT_EQ(real.getDOFs(d, entity).size(), complex.getDOFs(d, entity).size());
           if (real.getDOFs(d, entity).size() == complex.getDOFs(d, entity).size())
+          {
             EXPECT_TRUE((real.getDOFs(d, entity) == complex.getDOFs(d, entity)).all());
+          }
           EXPECT_EQ(realVector.getDOFs(d, entity).size(),
             complexVector.getDOFs(d, entity).size());
           if (realVector.getDOFs(d, entity).size() ==
             complexVector.getDOFs(d, entity).size())
+          {
             EXPECT_TRUE(
               (realVector.getDOFs(d, entity) == complexVector.getDOFs(d, entity)).all());
+          }
         }
     };
     orders.template operator()<1>();
@@ -540,9 +546,11 @@ namespace Rodin::Tests::Unit
           EXPECT_EQ(value.rows(), 2);
           EXPECT_EQ(value.cols(), 3);
           if (value.rows() == 2 && value.cols() == 3)
+          {
             for (size_t r = 0; r < 2; ++r)
               for (size_t s = 0; s < 3; ++s)
                 EXPECT_EQ(value(r, s), first + Scalar(3 * r + s));
+          }
         }
         else if constexpr (vector)
           for (size_t component = 0; component < count; ++component)
@@ -617,9 +625,11 @@ namespace Rodin::Tests::Unit
             EXPECT_EQ(actual.rows(), 2);
             EXPECT_EQ(actual.cols(), 3);
             if (actual.rows() == 2 && actual.cols() == 3)
+            {
               for (size_t r = 0; r < 2; ++r)
                 for (size_t s = 0; s < 3; ++s)
                   EXPECT_EQ(actual(r, s), expected(r, s));
+            }
           }
           else if constexpr (vector)
             for (size_t component = 0; component < count; ++component)
@@ -748,7 +758,9 @@ namespace Rodin::Tests::Unit
           const auto inverse = map.right.find(ancestor);
           EXPECT_NE(inverse, map.right.end());
           if (inverse != map.right.end())
+          {
             EXPECT_EQ(inverse->second, entity);
+          }
           const auto child = mesh.getPolytope(d, entity);
           const auto parentEntity = immediateParent.getPolytope(d, ancestor);
           const auto& childVertices = child->getVertices();
@@ -764,8 +776,10 @@ namespace Rodin::Tests::Unit
               mappedVertices(j) = vertices[childVertices(j)];
           }
           if (complete)
+          {
             EXPECT_TRUE(Polytope::Key::SymmetricEquality{}(
               mappedVertices, parentEntity->getVertices()));
+          }
         }
       // Entity ownership is a global invariant, distinct from DOF ownership.
       for (size_t d = 0; d <= subDimension; ++d)
@@ -796,7 +810,9 @@ namespace Rodin::Tests::Unit
           {
             const auto [it, inserted] = expectedAncestor.emplace(entity, ancestor);
             if (!inserted)
+            {
               EXPECT_EQ(it->second, ancestor);
+            }
             holders[entity].insert(rank);
           }
           for (const Index entity : gathered[rank].second)
@@ -831,7 +847,9 @@ namespace Rodin::Tests::Unit
             const auto ghostOwner = shard.getOwner(d).find(entity);
             EXPECT_NE(ghostOwner, shard.getOwner(d).end());
             if (ghostOwner != shard.getOwner(d).end())
+            {
               EXPECT_EQ(ghostOwner->second, owner->second);
+            }
           }
         }
       }
@@ -926,8 +944,10 @@ namespace Rodin::Tests::Unit
             {
               const auto [it, inserted] = expected.emplace(entity, indices);
               if (!inserted)
+              {
                 EXPECT_EQ(it->second, indices)
                   << "dimension=" << d << " entity=" << entity;
+              }
             }
         }
       };
@@ -951,12 +971,16 @@ namespace Rodin::Tests::Unit
             const IndexArray complexScalar = complex.getDOFs(d, entity);
             EXPECT_EQ(scalar.size(), complexScalar.size());
             if (scalar.size() == complexScalar.size())
+            {
               EXPECT_TRUE((scalar == complexScalar).all());
+            }
             const IndexArray vector = realVector.getDOFs(d, entity);
             const IndexArray complexValues = complexVector.getDOFs(d, entity);
             EXPECT_EQ(vector.size(), complexValues.size());
             if (vector.size() == complexValues.size())
+            {
               EXPECT_TRUE((vector == complexValues).all());
+            }
           }
       };
       const auto compareMatrices = [&](const auto& scalar, const auto& realMatrix,
