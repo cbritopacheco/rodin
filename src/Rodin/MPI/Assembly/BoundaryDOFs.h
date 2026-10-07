@@ -47,7 +47,8 @@ namespace Rodin::Assembly
 
       /** Selects the boundary functional source for each required DOF. */
       MPIBoundaryDOFs(const FES& fes, const FlatSet<Geometry::Attribute>& attributes)
-        : m_fes(fes)
+        : m_fes(fes),
+          m_sourceRank(-1)
       {
         const auto& mesh = fes.getMesh();
         const auto& shard = mesh.getShard();
@@ -161,7 +162,7 @@ namespace Rodin::Assembly
     private:
       const FES& m_fes;
       IndexMap<std::pair<Index, Index>> m_dofs;
-      int m_sourceRank = -1;
+      int m_sourceRank;
   };
 }
 

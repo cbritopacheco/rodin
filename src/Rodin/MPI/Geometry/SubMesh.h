@@ -92,7 +92,9 @@ namespace Rodin::Geometry
           /**
            * @brief Default constructor.
            */
-          Builder() = default;
+          Builder()
+            : m_dimension(0)
+          {}
 
           /**
            * @brief Initializes builder with parent mesh.
@@ -145,7 +147,7 @@ namespace Rodin::Geometry
           Shard::Builder m_shardBuilder;
           std::vector<SubMeshBase::PolytopeMap> m_s2ps;
           std::vector<Index> m_sidx;
-          size_t m_dimension = 0;
+          size_t m_dimension;
       };
 
       /**

@@ -134,7 +134,8 @@ namespace Rodin::Geometry
        * @param[in] context MPI context associated with the mesh.
        */
       Mesh(const Context::MPI& context)
-        : m_context(context)
+        : m_context(context),
+          m_dimension(0)
       {}
 
       /**
@@ -916,7 +917,7 @@ namespace Rodin::Geometry
       /// Rank-local shard containing geometry, topology, and ownership metadata.
       Shard m_shard;
       /// Maximum shard dimension established during collective construction.
-      size_t m_dimension = 0;
+      size_t m_dimension;
       /// Mesh-level quadrature cache whose points are attached to this MPI mesh.
       mutable PolytopeQuadratureIndex m_quadratures;
   };

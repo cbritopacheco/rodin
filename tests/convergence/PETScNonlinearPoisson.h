@@ -74,6 +74,7 @@ namespace Rodin::Tests::Convergence
           m_state(m_space),
           m_lift(m_space),
           m_liftBoundary(liftBoundary),
+          m_freeDOFs(0),
           m_du(m_space),
           m_v(m_space),
           m_problem(m_du, m_v),
@@ -303,7 +304,7 @@ namespace Rodin::Tests::Convergence
       StateType m_state;
       StateType m_lift;
       bool m_liftBoundary;
-      size_t m_freeDOFs = 0;
+      size_t m_freeDOFs;
       TrialType m_du;
       TestType m_v;
       ProblemType m_problem;
