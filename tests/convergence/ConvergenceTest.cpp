@@ -330,6 +330,102 @@ namespace Rodin::Tests::Convergence
         std::string::npos);
   }
 
+  TEST(LiftedConvergenceTest, AcceptsRepresentableFieldGeometryOrders)
+  {
+    constexpr Real PatchTolerance = 1e-9;
+    for (size_t q : {1u, 2u, 3u})
+    {
+      SCOPED_TRACE(::testing::Message() << "geometry degree=" << q);
+      LiftedConvergence study;
+      for (Real h : {0.25, 0.125, 0.0625})
+      {
+        const ErrorNorms geometry(std::pow(h, q + 1), std::pow(h, q));
+        study.appendRepresentable(
+          h, {0, 0}, {{0, 0}, geometry, geometry}, PatchTolerance);
+      }
+      study.expectGeometryRates(q);
+    }
+  }
+
+  TEST(LiftedConvergenceTest, RejectsRepresentedFieldAbovePatchBudget)
+  {
+    constexpr Real PatchTolerance = 1e-9;
+    EXPECT_NONFATAL_FAILURE(
+      LiftedConvergence::expectRepresentable(
+        {2 * PatchTolerance, 0}, {{0, 0}, {0.01, 0.1}, {0.01, 0.1}}, PatchTolerance),
+      "error.getL2()");
+  }
+
+  TEST(LiftedConvergenceTest, RejectsLiftedFieldAbovePatchBudget)
+  {
+    constexpr Real PatchTolerance = 1e-9;
+    EXPECT_NONFATAL_FAILURE(
+      LiftedConvergence::expectRepresentable(
+        {0, 0}, {{2 * PatchTolerance, 0}, {0.01, 0.1}, {0.01, 0.1}}, PatchTolerance),
+      "error.getL2()");
+  }
+
+  TEST(LiftedConvergenceTest, RejectsRepresentableBadFinalInterval)
+  {
+    constexpr Real PatchTolerance = 1e-9;
+    LiftedConvergence study;
+    for (Real h : {0.25, 0.125, 0.0625})
+    {
+      const Real scale = h == 0.0625 ? Real(0.125) : h;
+      const ErrorNorms geometry(std::pow(scale, 4), std::pow(scale, 3));
+      study.appendRepresentable(h, {0, 0}, {{0, 0}, geometry, geometry}, PatchTolerance);
+    }
+    ::testing::TestPartResultArray failures;
+    {
+      ::testing::ScopedFakeTestPartResultReporter intercept(
+        ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+        &failures);
+      study.expectGeometryRates(3);
+    }
+    ASSERT_GT(failures.size(), 0);
+    for (int i = 0; i < failures.size(); ++i)
+      EXPECT_NE(std::string(failures.GetTestPartResult(i).message()).find("interval=2"),
+        std::string::npos);
+  }
+
+  TEST(LiftedConvergenceTest, RejectsTwoLevelRepresentableStudy)
+  {
+    constexpr Real PatchTolerance = 1e-9;
+    LiftedConvergence study;
+    for (Real h : {0.25, 0.125})
+    {
+      const ErrorNorms geometry(std::pow(h, 4), std::pow(h, 3));
+      study.appendRepresentable(h, {0, 0}, {{0, 0}, geometry, geometry}, PatchTolerance);
+    }
+    ::testing::TestPartResultArray failures;
+    {
+      ::testing::ScopedFakeTestPartResultReporter intercept(
+        ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+        &failures);
+      study.expectGeometryRates(3);
+    }
+    ASSERT_EQ(failures.size(), 1);
+    EXPECT_TRUE(failures.GetTestPartResult(0).fatally_failed());
+    EXPECT_NE(
+      std::string(failures.GetTestPartResult(0).message()).find("history.getSize()"),
+      std::string::npos);
+  }
+
+  TEST(LiftedConvergenceTest, AcceptsGeometrySensitivityWithZeroField)
+  {
+    LiftedConvergence::expectGeometrySensitivity(
+      {{0, 0}, {0.01, 0.1}, {0.01, 0.1}}, {{0, 0}, {0.01, 0.1}, {0.01, 0.1}});
+  }
+
+  TEST(LiftedConvergenceTest, RejectsGeometrySensitivityContamination)
+  {
+    constexpr Real Perturbation = 2 * LiftedConvergence::SensitivityTolerance;
+    EXPECT_NONFATAL_FAILURE(
+      LiftedConvergence::expectGeometrySensitivity(
+        {{0, 0}, {1, 1}, {1, 1}}, {{0, 0}, {1 + Perturbation, 1}, {1, 1}}),
+      "std::abs");
+  }
+
   TEST(LiftedConvergenceTest, RejectsInvalidNormDecomposition)
   {
     EXPECT_NONFATAL_FAILURE(

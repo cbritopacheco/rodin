@@ -12,13 +12,20 @@
 
 namespace Rodin::Tests::Convergence
 {
-  /** @brief Shared assertions for represented and lifted scalar field studies.
+  /** @brief Shared assertions for represented and lifted field studies.
    * @par Contract
    * Separate field and geometry defects must add pointwise. The triangle and
    * reverse-triangle inequalities are checked for their norms, not equality.
    * Every adjacent interval is checked. The caller supplies independent
    * physical data and a regular geometry map; finite-resolution rate windows
    * are acceptance policies, not asymptotic theorems.
+   * @par Architecture
+   * Four histories distinguish represented-domain, lifted-field, geometry,
+   * and total errors. Ordinary approximation studies populate all histories.
+   * Representable-field studies certify the first two against a caller-owned
+   * absolute budget and populate only geometry and total histories. Both
+   * paths require three levels and check every adjacent interval; relative
+   * sensitivity is never applied to a vanishing field error.
    */
   class LiftedConvergence
   {
@@ -26,6 +33,10 @@ namespace Rodin::Tests::Convergence
       using Components = std::array<ErrorNorms, 4>;
       static constexpr Real L2Margin = 0.55, H1Margin = 0.45;
       static constexpr Real RoundoffTolerance = 1e-11, SensitivityTolerance = 1e-6;
+
+      LiftedConvergence()
+        : m_histories()
+      {}
 
       static Components components(
         const ErrorNorms& represented, const LiftedErrorNorm::Result& lifted)
@@ -63,7 +74,82 @@ namespace Rodin::Tests::Convergence
 
       void expectRates(size_t fieldDegree, size_t geometryDegree = 2) const
       {
-        for (size_t component = 0; component < m_histories.size(); ++component)
+        expectRatesFrom(0, fieldDegree, geometryDegree);
+      }
+
+      /** @brief Check a representable field independently of geometry error.
+       * The caller supplies an absolute field-error budget in the norm's units.
+       * Field norms may vanish; geometry and total norms need not vanish.
+       */
+      static void expectRepresentable(const ErrorNorms& represented,
+        const LiftedErrorNorm::Result& lifted, Real patchTolerance)
+      {
+        expectDecomposition(lifted);
+        for (const auto& error : {represented, lifted.field})
+        {
+          EXPECT_TRUE(error.isFinite());
+          EXPECT_LT(error.getL2(), patchTolerance);
+          EXPECT_LT(error.getH1Seminorm(), patchTolerance);
+        }
+        EXPECT_NEAR(lifted.total.getL2(), lifted.geometry.getL2(), patchTolerance);
+        EXPECT_NEAR(
+          lifted.total.getH1Seminorm(), lifted.geometry.getH1Seminorm(), patchTolerance);
+      }
+
+      void appendRepresentable(Real h, const ErrorNorms& represented,
+        const LiftedErrorNorm::Result& lifted, Real patchTolerance)
+      {
+        expectRepresentable(represented, lifted, patchTolerance);
+        const auto errors = components(represented, lifted);
+        for (size_t component : {2u, 3u})
+        {
+          ASSERT_TRUE(errors[component].isFinite());
+          ASSERT_GT(errors[component].getL2(), 0);
+          ASSERT_GT(errors[component].getH1Seminorm(), 0);
+          m_histories[component].append(h, errors[component]);
+        }
+      }
+
+      void expectGeometryRates(size_t geometryDegree) const
+      {
+        expectRatesFrom(2, geometryDegree, geometryDegree);
+      }
+
+      static void expectGeometrySensitivity(
+        const LiftedErrorNorm::Result& base, const LiftedErrorNorm::Result& refined)
+      {
+        for (const auto& pair :
+          {std::pair{base.geometry.getL2(), refined.geometry.getL2()},
+            std::pair{base.geometry.getH1Seminorm(), refined.geometry.getH1Seminorm()},
+            std::pair{base.total.getL2(), refined.total.getL2()},
+            std::pair{base.total.getH1Seminorm(), refined.total.getH1Seminorm()}})
+        {
+          ASSERT_GT(pair.first, 0);
+          ASSERT_TRUE(std::isfinite(pair.second));
+          EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
+        }
+      }
+      static void expectSensitivity(const Components& base, const Components& refined)
+      {
+        for (size_t component = 0; component < base.size(); ++component)
+          for (const auto& pair :
+            {std::pair{base[component].getL2(), refined[component].getL2()},
+              std::pair{
+                base[component].getH1Seminorm(), refined[component].getH1Seminorm()}})
+          {
+            SCOPED_TRACE(::testing::Message() << "component=" << component);
+            ASSERT_GT(pair.first, 0);
+            ASSERT_TRUE(std::isfinite(pair.second));
+            EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
+          }
+      }
+
+    private:
+      void expectRatesFrom(
+        size_t firstComponent, size_t fieldDegree, size_t geometryDegree) const
+      {
+        for (size_t component = firstComponent; component < m_histories.size();
+             ++component)
         {
           const auto& history = m_histories[component];
           ASSERT_GE(history.getSize(), 3);
@@ -90,22 +176,6 @@ namespace Rodin::Tests::Convergence
         }
       }
 
-      static void expectSensitivity(const Components& base, const Components& refined)
-      {
-        for (size_t component = 0; component < base.size(); ++component)
-          for (const auto& pair :
-            {std::pair{base[component].getL2(), refined[component].getL2()},
-              std::pair{
-                base[component].getH1Seminorm(), refined[component].getH1Seminorm()}})
-          {
-            SCOPED_TRACE(::testing::Message() << "component=" << component);
-            ASSERT_GT(pair.first, 0);
-            ASSERT_TRUE(std::isfinite(pair.second));
-            EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
-          }
-      }
-
-    private:
       std::array<ErrorHistory, 4> m_histories;
   };
 }
