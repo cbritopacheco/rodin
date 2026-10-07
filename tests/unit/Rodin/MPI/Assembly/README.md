@@ -92,9 +92,11 @@ boundary on all seven geometries after owned-cell-only extraction. Geometry-leve
 coverage includes proper subregions, skins, sparse/nonowner selections, and
 nested extraction; see [SubMesh verification](../Geometry/README.md).
 
-P1's global size query is collective and must occur outside rank-local loops
-whose lengths can differ. Index assertions are exact; numerical PDE errors
-and refinement rates are tested separately in
+Global space sizes are established during collective construction. Size
+queries, copies and moves are noncollective for the fixed-layout P0, P0g,
+P1 and H1 spaces; a separate bounded test queries them on rank zero alone,
+including empty shards and Point meshes. Index assertions are exact;
+numerical PDE errors and refinement rates are tested separately in
 [PETSc MPI Poisson](../../../../convergence/h/PETScMPIPoisson/README.md).
 
 ## Backend-independent build
