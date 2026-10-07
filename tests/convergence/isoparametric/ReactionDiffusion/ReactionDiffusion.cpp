@@ -61,12 +61,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
 
   /** @brief Coupled mapped workload with shared physical data and error oracles.
    * @par Architecture
-   * The mesh owns P2 maps on cells and traces: exact for the quadratic map,
+   * The mesh owns prescribed-degree maps on cells and traces: exact at P2 for
+   * the quadratic map,
    * interpolated for the sine map. Each solve builds fresh
    * scalar spaces and a two-field system. Backend policy is explicit; norms
    * integrate physical errors on owned cells before the MPI reduction.
    */
-  template <class ContextType>
+  template <class ContextType, size_t Q = 2>
   class Workload
   {
     public:
@@ -75,11 +76,12 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
       Workload(
         Polytope::Type geometry, size_t n, Map map = Map::Quadratic, bool lifted = false)
         : m_mesh(makeMesh(geometry, n)),
+          m_reference(),
           m_geometry(m_mesh, map)
       {
         if (lifted)
           m_reference.emplace(m_mesh);
-        m_geometry.template install<2>();
+        m_geometry.template install<Q>();
       }
 
       const auto& getMesh() const
@@ -205,12 +207,67 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
       CurvedGeometry<Mesh<ContextType>> m_geometry;
   };
 
-  template <class ContextType>
+  template <class ContextType, size_t Q = 2>
   class CurvedReactionDiffusionTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
       using Map = typename Workload<ContextType>::Map;
       using LiftedErrors = typename Workload<ContextType>::LiftedErrors;
+
+      void checkMatchedGeometryRates() const
+      {
+        constexpr size_t K = std::max(size_t(2), Q);
+        std::array<LiftedConvergence, 2> histories;
+        const auto levels = this->GetParam() == Polytope::Type::Segment
+          ? std::array<size_t, 3>{5, 9, 17}
+          : std::array<size_t, 3>{3, 5, 9};
+        for (size_t n : levels)
+        {
+          SCOPED_TRACE(::testing::Message() << "geometry degree=" << Q << " n=" << n);
+          Workload<ContextType, Q> problem(this->GetParam(), n, Map::Sine, true);
+          LiftedErrors lifted;
+          const auto represented = problem.template solve<K>(Data::Field::Affine, false,
+            AssemblyOrder, SolverTolerance, NormOrder, &lifted);
+          for (size_t field = 0; field < histories.size(); ++field)
+          {
+            SCOPED_TRACE(::testing::Message() << "field=" << field);
+            histories[field].appendRepresentable(
+              Real(1) / Real(n - 1), represented[field], lifted[field], PatchTolerance);
+          }
+        }
+        for (size_t field = 0; field < histories.size(); ++field)
+        {
+          SCOPED_TRACE(::testing::Message() << "field=" << field);
+          histories[field].expectGeometryRates(Q);
+        }
+      }
+
+      void checkMatchedGeometrySensitivity() const
+      {
+        constexpr size_t K = std::max(size_t(2), Q);
+        Workload<ContextType, Q> problem(this->GetParam(), 5, Map::Sine, true);
+        std::array<LiftedErrors, 4> errors;
+        for (size_t i = 0; i < errors.size(); ++i)
+        {
+          const auto represented = problem.template solve<K>(Data::Field::Affine, false,
+            i == 1 ? RefinedOrder : AssemblyOrder,
+            i == 2 ? RefinedTolerance : SolverTolerance,
+            i == 3 ? RefinedNormOrder : NormOrder, &errors[i]);
+          for (size_t field = 0; field < represented.size(); ++field)
+          {
+            SCOPED_TRACE(::testing::Message() << "control=" << i << " field=" << field);
+            LiftedConvergence::expectRepresentable(
+              represented[field], errors[i][field], PatchTolerance);
+          }
+        }
+        for (size_t i = 1; i < errors.size(); ++i)
+          for (size_t field = 0; field < errors[i].size(); ++field)
+          {
+            SCOPED_TRACE(::testing::Message() << "control=" << i << " field=" << field);
+            LiftedConvergence::expectGeometrySensitivity(
+              errors[0][field], errors[i][field]);
+          }
+      }
 
       template <size_t K>
       void checkApproximatedRates() const
@@ -393,6 +450,40 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
       }
   };
 
+  using LocalQ1Test = CurvedReactionDiffusionTest<Context::Local, 1>;
+  TEST_P(LocalQ1Test, LiftedAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(LocalQ1Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalQ1Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
+  using LocalQ3Test = CurvedReactionDiffusionTest<Context::Local, 3>;
+  TEST_P(LocalQ3Test, LiftedAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(LocalQ3Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalQ3Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
   using LocalTest = CurvedReactionDiffusionTest<Context::Local>;
   TEST_P(LocalTest, ApproximatedP1Rates)
   {
@@ -451,6 +542,40 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
     });
 
 #if defined(RODIN_CURVED_REACTION_DIFFUSION_PETSC) && defined(RODIN_USE_MPI)
+  using MPIQ1Test = CurvedReactionDiffusionTest<Context::MPI, 1>;
+  TEST_P(MPIQ1Test, LiftedAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(MPIQ1Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIQ1Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
+  using MPIQ3Test = CurvedReactionDiffusionTest<Context::MPI, 3>;
+  TEST_P(MPIQ3Test, LiftedAffineRates)
+  {
+    checkMatchedGeometryRates();
+  }
+  TEST_P(MPIQ3Test, LiftedIndependentSensitivity)
+  {
+    checkMatchedGeometrySensitivity();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIQ3Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+
   using MPITest = CurvedReactionDiffusionTest<Context::MPI>;
   TEST_P(MPITest, ApproximatedP1Rates)
   {

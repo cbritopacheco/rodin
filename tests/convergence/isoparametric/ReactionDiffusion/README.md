@@ -177,3 +177,57 @@ All seven geometries have separate `Approximated` registrations for native,
 real-PETSc local and MPI ranks one through four. Sequential/OpenMP builds
 use identical acceptance logic. These cases retain slow-test labels,
 1800-second timeouts and the shared pyramid resource lock.
+
+## Linear and cubic geometry with representable coupled fields
+
+Additional sine-map studies use geometry degree
+$q\in\lbrace 1,3\rbrace$ and field degree $p=\max(2,q)$.
+The affine physical fields are
+
+$$
+u_i(x)=(i+1)\left(1+\sum_jx_j\right),\qquad
+f_i(x)=u_i(x)+0.2u_{1-i}(x),\qquad i\in\lbrace 0,1\rbrace.
+$$
+
+Both pullbacks belong to the represented field family, whereas the exact
+sine map is not represented by any of these finite geometry degrees.
+The coupled operator, diffusion coefficients and reaction matrix remain
+unchanged. Each field must independently satisfy represented and lifted
+field errors below $10^{-9}$; its total and geometry norms must agree
+within the same absolute budget. Agreement of a combined two-field norm
+is not used as a substitute for either component check.
+
+| Geometry degree $q$ | Field degree $p$ | Grid points $n$ | Nominal geometry L2 / H1-seminorm orders |
+| --- | --- | --- | --- |
+| 1 | 2 | $3\to5\to9$; segment $5\to9\to17$ | $2/1$ |
+| 3 | 3 | $3\to5\to9$; segment $5\to9\to17$ | $4/3$ |
+
+For both geometry and total errors, each adjacent interval requires
+finite, positive, decreasing norms, with L2 rates within $0.55$ of
+$q+1$ and H1-seminorm rates within $0.45$ of $q$. The gradients
+of the chosen affine fields are nonzero in the perturbed coordinate,
+so this experiment measures a geometry defect rather than a constant-field
+null case. The finite rate windows are numerical policies, not general
+two-sided interpolation estimates.
+
+At $n=5$, assembly order $11\to16$, norm order $13\to18$ and
+CG tolerance $10^{-13}\to10^{-14}$ are varied separately.
+Field reproduction remains required at every setting. Each component's
+geometry and total norms must change by less than $10^{-6}$ relatively;
+near-zero field errors are not used as relative denominators.
+The shared representable-field path in `LiftedConvergence` owns these
+decomposition, rate and sensitivity checks; this fixture owns the coupled
+solve and analytic data. The independent omitted-coupling controls remain
+separate.
+
+The [segment regularity argument](../Helmholtz/README.md#linear-and-cubic-geometry-with-a-representable-complex-field)
+applies to these linear/cubic sine interpolants. In one dimension the
+physical interval is unchanged, and the lift compares parametrizations.
+In higher dimensions, regular represented maps remain a hypothesis of
+the geometry-rate interpretation.
+
+Degree-specific entries cover all seven positive-dimensional geometries
+in native and real-PETSc local/MPI ranks one through four, separately
+under sequential and OpenMP assembly. Slow labels, 1800-second watchdogs,
+MPI processor counts and the pyramid resource lock are retained.
+Registration alone does not certify a numerical run.
