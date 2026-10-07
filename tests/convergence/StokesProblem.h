@@ -23,7 +23,10 @@ namespace Rodin::Tests::Convergence
    * solve constructs velocity degree @f$K@f$, pressure degree @f$K-1@f$,
    * and a global pressure-mean multiplier in fresh spaces and a fresh linear
    * system. The same form is used at every degree; no DOF layout is assumed.
-   * SparseLU solves the saddle-point problem. Algebraic residual and gauge
+   * SparseLU solves the saddle-point problem with one same-precision
+   * residual correction using its retained factors. This controls the
+   * pressure forward error without changing the operator or field budgets.
+   * Algebraic residual and gauge
    * diagnostics precede independent physical-cell field-error integration.
    */
   class StokesProblem
@@ -74,6 +77,10 @@ namespace Rodin::Tests::Convergence
         problem = diffusion - pressureVelocity + incompressibility + gaugePressure +
           gaugeMean - body + DirichletBC(u, m_data.getVelocity());
         Solver::SparseLU solver(problem);
+        // One correction reduced the n9 cubic-wedge pressure H1 error from
+        // 2.61e-9 to 1.71e-12 with unchanged assembly and norm quadrature.
+        constexpr size_t RefinementSteps = 1;
+        solver.setRefinementSteps(RefinementSteps);
         solver.solve();
         EXPECT_TRUE(solver.success());
         const auto& system = problem.getLinearSystem();

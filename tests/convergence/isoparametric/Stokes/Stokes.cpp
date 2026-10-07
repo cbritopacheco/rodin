@@ -37,8 +37,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
 
   struct LiftedErrors
   {
+      LiftedErrors()
+        : velocity(),
+          pressure(),
+          divergence()
+      {}
       LiftedErrorNorm::Result velocity, pressure;
-      std::array<Real, 3> divergence{};
+      std::array<Real, 3> divergence;
   };
 
 #if defined(RODIN_CURVED_STOKES_PETSC) && defined(RODIN_USE_MPI)
@@ -49,14 +54,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
   /**
    * @brief Curved mixed workload reusing the established Stokes solver contracts.
    * @par Architecture
-   * Exact or interpolated P2 geometry is installed on a fresh grid and its traces. The
+   * Prescribed-degree geometry is installed on a fresh grid and its traces. The
    * existing native/PETSc StokesProblem owns space and system construction,
    * residual checks, pressure gauge, and physical error integration. The
    * Volume and pressure mean are independently checked; x0 is preserved.
    * Solve-scoped const observers reuse the common exact-domain lift integrator.
    * MPI ownership and halo metadata are unchanged by geometry installation.
    */
-  template <class ContextType>
+  template <class ContextType, size_t Q = 2>
   class Workload
   {
     public:
@@ -64,12 +69,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
       Workload(
         Polytope::Type geometry, size_t n, Map map = Map::Quadratic, bool lifted = false)
         : m_mesh(makeMesh(geometry, n)),
+          m_reference(),
           m_geometry(m_mesh, map),
           m_sine(map == Map::Sine)
       {
         if (lifted)
           m_reference.emplace(m_mesh);
-        m_geometry.template install<2>();
+        m_geometry.template install<Q>();
       }
 
       const auto& getMesh() const
@@ -77,6 +83,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         return m_mesh;
       }
 
+      template <size_t K = 2>
       StokesErrors solve(StokesData::Field field, Real viscosity = 1,
         size_t order = AssemblyOrder, size_t normOrder = 0,
         LiftedErrors* lifted = nullptr) const
@@ -138,9 +145,9 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         };
 #ifdef RODIN_CURVED_STOKES_PETSC
         return PETScStokesProblem(m_mesh, data, order)
-          .template solve<2>(viscosity, normOrder, observe);
+          .template solve<K>(viscosity, normOrder, observe);
 #else
-        return StokesProblem(m_mesh, data, order).solve<2>(viscosity, normOrder, observe);
+        return StokesProblem(m_mesh, data, order).solve<K>(viscosity, normOrder, observe);
 #endif
       }
 
@@ -462,6 +469,29 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
       }
   };
 
+#ifndef RODIN_CURVED_STOKES_PETSC
+  /** @brief Fixed-mesh pressure forward-error regression, not a rate study.
+   * The affine pressure is represented exactly on the q3 n5 wedge mesh.
+   * A 1e-11 dimensionless absolute H1 budget separates the corrected solve
+   * from the observed 2.47e-10 uncorrected error. The three-level rate study
+   * retains its independent 1e-9 patch budget and n9 endpoint.
+   */
+  TEST(Rodin_Convergence_CurvedStokes, NativeCubicWedgePressureForwardAccuracy)
+  {
+    using Problem = Workload<Context::Local,3>;
+    Problem problem(Polytope::Type::Wedge,5,Problem::Map::Sine,true);
+    LiftedErrors lifted;
+    const auto errors = problem.solve<3>(StokesData::Field::Affine,1,
+      AssemblyOrder,NormOrder,&lifted);
+    constexpr Real PressureForwardTolerance = 1e-11;
+    for (const auto& pressure : {errors.pressure,lifted.pressure.field,lifted.pressure.total})
+    {
+      ASSERT_TRUE(pressure.isFinite());
+      EXPECT_LT(pressure.getL2(),PressureForwardTolerance);
+      EXPECT_LT(pressure.getH1Seminorm(),PressureForwardTolerance);
+    }
+  }
+#endif
   using LocalTest = CurvedStokesTest<Context::Local>;
   TEST_P(LocalTest, ApproximatedPhysicalPressureGauge)
   {

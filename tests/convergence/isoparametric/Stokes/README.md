@@ -79,6 +79,42 @@ quantity vanish or reach roundoff before the field errors do.
 An MPI interpolation control with $u_h=x_0e_0$ independently checks
 $\Vert\mathrm{div}u_h\Vert_{L^2(\Omega)}=1$, counting owned cells once.
 
+## Algebraic accuracy and residual correction
+
+Let $A\in\mathbb R^{N\times N}$ and $b\in\mathbb R^N$ denote the
+assembled, constrained mixed system, and let $z_\star=A^{-1}b$ be its
+exact-arithmetic solution. A small coefficient residual alone does not
+bound the pressure derivative error independently of the inverse operator:
+
+$$
+z_\star-z_h=A^{-1}(b-Az_h).
+$$
+
+The native workload therefore applies one residual correction after the
+direct solve. The original LU factors are retained, and the operator,
+right-hand side, quadrature and field-error budgets remain unchanged:
+
+$$
+r_k=b-Az_k,\qquad A\delta z_k=r_k,\qquad
+z_{k+1}=z_k+\delta z_k,\qquad k=0.
+$$
+
+Residual evaluation and correction use the same scalar precision as the
+direct solve. `SparseLU::setRefinementSteps` is opt-in; its library default
+is zero. No monotonic improvement theorem is asserted for arbitrary matrices.
+This setting affects the native solver, not the PETSc solver or MPI ownership.
+
+The fixed-mesh `NativeCubicWedgePressureForwardAccuracy` regression uses
+cubic geometry, velocity degree three, pressure degree two and five grid
+points per axis. Its represented and lifted pressure L2 norms and H1
+seminorms must be below the dimensionless absolute budget $10^{-11}$.
+The observed uncorrected pressure H1 error was $2.47\times10^{-10}$,
+whereas one correction reduced it to $4.35\times10^{-13}$. This is an
+accuracy regression, not a convergence-rate study or a performance benchmark.
+On the nine-point endpoint, the same correction reduced the observed
+pressure H1 error from $2.61\times10^{-9}$ to $1.71\times10^{-12}$ without
+relaxing the separate three-level patch budget $10^{-9}$.
+
 ## Patch, negative and quadrature controls
 
 The physical-affine patch uses $u=x_1e_0$ and $p=x_0-1/2$.

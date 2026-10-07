@@ -3,6 +3,11 @@ target_link_libraries(RodinConvergenceIsoparametricStokes
   PRIVATE GTest::gtest GTest::gtest_main RodinConvergence Rodin::Solver)
 set(_RODIN_CURVED_STOKES_GEOMETRIES
   Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
+add_test(NAME RodinConvergenceIsoparametricStokes_ForwardAccuracy
+  COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricStokes>
+    "--gtest_filter=Rodin_Convergence_CurvedStokes.NativeCubicWedgePressureForwardAccuracy")
+set_tests_properties(RodinConvergenceIsoparametricStokes_ForwardAccuracy
+  PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
 foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
   add_test(NAME RodinConvergenceIsoparametricStokes_${geometry}
     COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricStokes>
