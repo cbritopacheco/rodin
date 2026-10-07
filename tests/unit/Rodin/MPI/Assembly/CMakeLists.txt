@@ -35,7 +35,7 @@ foreach(np 1 2 3 4 8)
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
             $<TARGET_FILE:RodinMPIAssemblyTest>
-            "--gtest_filter=-${_RODIN_MPI_SLOW_IDENTIFICATION_FILTER}:${_RODIN_MPI_SLOW_GEOMETRY_FILTER}:AllGeometries/MPISpaceSizeTest.*/*")
+            "--gtest_filter=-${_RODIN_MPI_SLOW_IDENTIFICATION_FILTER}:${_RODIN_MPI_SLOW_GEOMETRY_FILTER}:AllGeometries/MPISpaceSizeTest.*/*:AllGeometries/MPITraceGeometryTest.MatrixBoundaryAndIdentificationMatchLogicalTrace/*")
   set_tests_properties(RodinMPIAssemblyTest_np${np} PROPERTIES
     LABELS "unit;distributed"
     TIMEOUT 120
@@ -73,4 +73,17 @@ foreach(np 1 2 3 4 8)
     TIMEOUT 600
   )
   rodin_suppress_external_mpi_lsan_for_test(RodinMPIAssemblyIdentificationSlowTest_np${np})
+
+  # Matrix traces add real/complex 2x3 ranges through H1 degree six. Keep
+  # their logical checks separate from the legacy 120-second protocol gate.
+  foreach(geometry Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
+    add_test(NAME RodinMPIAssemblyMatrixTraceSlowTest_np${np}_${geometry}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinMPIAssemblyTest>
+        "--gtest_filter=AllGeometries/MPITraceGeometryTest.MatrixBoundaryAndIdentificationMatchLogicalTrace/${geometry}")
+    set_tests_properties(RodinMPIAssemblyMatrixTraceSlowTest_np${np}_${geometry}
+      PROPERTIES LABELS "unit;distributed;slow" TIMEOUT 600 PROCESSORS ${np})
+    rodin_suppress_external_mpi_lsan_for_test(
+      RodinMPIAssemblyMatrixTraceSlowTest_np${np}_${geometry})
+  endforeach()
 endforeach()

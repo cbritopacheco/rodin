@@ -242,11 +242,19 @@ namespace Rodin::Tests::Unit
     const auto range = [&]<class Range>() {
       constexpr bool scalar =
         std::is_same_v<Range, Real> || std::is_same_v<Range, Complex>;
+      constexpr bool matrix = std::is_same_v<Range, Math::SpatialMatrix<Real>> ||
+        std::is_same_v<Range, Math::SpatialMatrix<Complex>>;
       if constexpr (scalar)
       {
         check(P0<Range, decltype(mesh)>(mesh));
         check(P0g<Range, decltype(mesh)>(mesh));
         check(P1<Range, decltype(mesh)>(mesh));
+      }
+      else if constexpr (matrix)
+      {
+        check(P0<Range, decltype(mesh)>(mesh, 2, 3));
+        check(P0g<Range, decltype(mesh)>(mesh, 2, 3));
+        check(P1<Range, decltype(mesh)>(mesh, 2, 3));
       }
       else
       {
@@ -257,6 +265,9 @@ namespace Rodin::Tests::Unit
       const auto order = [&]<size_t K>() {
         if constexpr (scalar)
           check(H1<K, Range, decltype(mesh)>(std::integral_constant<size_t, K>{}, mesh));
+        else if constexpr (matrix)
+          check(H1<K, Range, decltype(mesh)>(
+            std::integral_constant<size_t, K>{}, mesh, 2, 3));
         else
           check(
             H1<K, Range, decltype(mesh)>(std::integral_constant<size_t, K>{}, mesh, 3));
@@ -272,6 +283,8 @@ namespace Rodin::Tests::Unit
     range.template operator()<Complex>();
     range.template operator()<Math::SpatialVector<Real>>();
     range.template operator()<Math::SpatialVector<Complex>>();
+    range.template operator()<Math::SpatialMatrix<Real>>();
+    range.template operator()<Math::SpatialMatrix<Complex>>();
   }
 
   /** Reverse indices and shared-entity numbering survive unordered ghost exchange. */
@@ -1504,6 +1517,116 @@ namespace Rodin::Tests::Unit
     orders.template operator()<4>();
     orders.template operator()<5>();
     orders.template operator()<6>();
+  }
+
+  /**
+   * Matrix traces use the same required-DOF contract as scalar/vector traces.
+   * The oracle classifies faces by their original logical parent IDs, not by
+   * the boundary iterator used by assembly or by coordinate comparisons.
+   * P0g is globally supported, including on empty shards: its prescribed
+   * payload is collectively selected once and retained on every holder.
+   * Other spaces use the owned-DOF/owned-cell required set. The index oracle
+   * itself introduces no exchange beyond the initial parent-ID broadcast.
+   */
+  TEST_P(MPITraceGeometryTest, MatrixBoundaryAndIdentificationMatchLogicalTrace)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    std::vector<Index> parentBoundary;
+    const size_t D = Polytope::Traits(GetParam()).getDimension();
+    // A bounded grid exercises cell/face/edge/vertex DOFs through degree six
+    // without retaining the large legacy tetrahedral ownership workload.
+    auto mesh = D == 1 ? distributeFromRoot(ctx, GetParam(), {3}, &parentBoundary)
+      : D == 2         ? distributeFromRoot(ctx, GetParam(), {3, 3}, &parentBoundary)
+                       : distributeFromRoot(ctx, GetParam(), {3, 3, 3}, &parentBoundary);
+    const std::set<Index> physical(parentBoundary.begin(), parentBoundary.end());
+    const auto probe = [&](const auto& fes) {
+      using Space = std::remove_cvref_t<decltype(fes)>;
+      using Scalar = typename Space::ScalarType;
+      SCOPED_TRACE(typeid(Space).name());
+      const auto required = requiredDOFs(fes);
+      std::set<Index> expected;
+      for (auto face = mesh.getFace(); face; ++face)
+        if (physical.contains(
+              mesh.getShard().getPolytopeMap(D - 1).left.at(face->getIndex())))
+          for (Index dof : fes.getDOFs(D - 1, face->getIndex()))
+            if (required.contains(dof))
+              expected.insert(dof);
+      if constexpr (std::is_same_v<typename Space::ElementType,
+                      P0gElement<typename Space::RangeType>>)
+      {
+        // The global constant basis is not attached to a local entity.
+        // Even an empty shard holds its components and receives global data.
+        ASSERT_FALSE(physical.empty());
+        expected.clear();
+        for (Index dof = 0; dof < fes.getSize(); ++dof)
+          expected.insert(dof);
+      }
+      Math::SpatialMatrix<Scalar> prescribed(2, 3);
+      for (size_t r = 0; r < 2; ++r)
+        for (size_t c = 0; c < 3; ++c)
+        {
+          prescribed(r, c) = Scalar(1 + 3 * r + c);
+          if constexpr (std::is_same_v<Scalar, Complex>)
+            prescribed(r, c) += Complex(0, 1 + r + c);
+        }
+      TrialFunction u(fes);
+      TrialFunction v(fes);
+      auto value = DirichletBC(u, MatrixFunction(prescribed));
+      auto affine = DirichletBC(u, -v, MatrixFunction(prescribed));
+      if constexpr (!std::is_same_v<typename Space::ElementType,
+                      P0gElement<typename Space::RangeType>>)
+      {
+        // Construct fields collectively above, then assemble on one rank
+        // only. The barrier is a test-protocol rendezvous, not reconciliation.
+        if (g_world->rank() == 0)
+        {
+          value.assemble();
+          affine.assemble();
+        }
+        g_world->barrier();
+      }
+      value.assemble();
+      affine.assemble();
+      const auto& values = std::get<IndexMap<Scalar>>(value.getDOFs());
+      const auto& rows =
+        std::get<typename DirichletBCBase<Scalar>::IdentifiedDOFs>(affine.getDOFs());
+      const auto& offsets = affine.getIdentificationValues();
+      EXPECT_EQ(values.size(), expected.size());
+      EXPECT_EQ(rows.size(), expected.size());
+      EXPECT_EQ(offsets.size(), expected.size());
+      for (Index dof : expected)
+      {
+        EXPECT_TRUE(values.contains(dof));
+        EXPECT_TRUE(offsets.contains(dof));
+        const auto row = rows.find(dof);
+        ASSERT_NE(row, rows.end());
+        EXPECT_EQ(row->second.first.size(), row->second.second.size());
+        bool matchingMaster = false;
+        for (Index i = 0; i < static_cast<Index>(row->second.first.size()); ++i)
+          matchingMaster |= row->second.first[i] == dof;
+        EXPECT_TRUE(matchingMaster);
+      }
+    };
+    const auto ranges = [&]<class Scalar>(std::type_identity<Scalar>) {
+      using Range = Math::SpatialMatrix<Scalar>;
+      P0g<Range, Mesh<Context::MPI>> p0g(mesh, 2, 3);
+      probe(p0g);
+      P1<Range, Mesh<Context::MPI>> p1(mesh, 2, 3);
+      probe(p1);
+      const auto order = [&]<size_t K>(std::integral_constant<size_t, K>) {
+        H1<K, Range, Mesh<Context::MPI>> fes(
+          std::integral_constant<size_t, K>{}, mesh, 2, 3);
+        probe(fes);
+      };
+      order(std::integral_constant<size_t, 1>{});
+      order(std::integral_constant<size_t, 2>{});
+      order(std::integral_constant<size_t, 3>{});
+      order(std::integral_constant<size_t, 4>{});
+      order(std::integral_constant<size_t, 5>{});
+      order(std::integral_constant<size_t, 6>{});
+    };
+    ranges(std::type_identity<Real>{});
+    ranges(std::type_identity<Complex>{});
   }
 
   /** Certifies the mesh metadata independently of constraint assembly. */
