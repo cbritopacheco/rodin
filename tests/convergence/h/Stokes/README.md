@@ -47,3 +47,79 @@ L2 convergence theorem.
 Triangle, quadrilateral, tetrahedron, pyramid, hexahedron, and wedge grids
 are covered. Segment is excluded because incompressible Stokes has no
 non-degenerate velocity-pressure formulation in one spatial dimension.
+
+## Independent finite-mesh pressure stability
+
+The separate `RodinConvergenceHStokesStability` target checks pressure modes
+without solving a manufactured saddle-point system. Let $V_h^0$ be the
+vector degree-two space with homogeneous essential trace and let $Q_h^0$
+be the zero-mean subspace of the scalar degree-one pressure space. With
+velocity energy $a(v,v)=\int_\Omega Dv:Dv\thinspace\mathrm{d}x$ and
+pressure norm $\lVert p\rVert_{L^2(\Omega)}$, define
+
+$$
+\beta_h=\inf_{p\in Q_h^0\setminus\lbrace0\rbrace}
+\sup_{v\in V_h^0\setminus\lbrace0\rbrace}
+\frac{\int_\Omega p\,\operatorname{div}v\thinspace\mathrm{d}x}
+{\lVert p\rVert_{L^2(\Omega)}\sqrt{a(v,v)}}.
+$$
+
+The real velocity energy matrix $A$, divergence matrix $B$, and pressure mass
+matrix $M$ are assembled independently. Essential velocity DOFs are removed
+using the actual logical boundary-index map, not an assumed nodal ordering.
+With $n_v=\dim V_h^0$ and $n_p=\dim Q_h$, their dimensions are
+$A\in\mathbb R^{n_v\times n_v}$, $B\in\mathbb R^{n_p\times n_v}$
+and $M\in\mathbb R^{n_p\times n_p}$, where $Q_h$ is the full pressure space.
+For coefficients $c$ of the independently interpolated pressure constant,
+the mean functional is $m=Mc$. For a pressure coefficient vector
+$\boldsymbol p\in\mathbb R^{n_p}$, a basis matrix
+$T\in\mathbb R^{n_p\times(n_p-1)}$ for $m^\mathsf{T}\boldsymbol p=0$
+uses columns $e_i-(m_i/m_r)e_r$, where $r$ selects a nonzero mean entry.
+The pressure basis therefore removes only the mean constraint. It does not
+discard modes through a numerical rank threshold.
+
+The finite inf-sup quantity is obtained from
+
+$$
+S_0=T^\mathsf{T}BA^{-1}B^\mathsf{T}T,\qquad
+M_0=T^\mathsf{T}MT,\qquad
+S_0z=\lambda M_0z,\qquad \beta_h^2=\lambda_{\min}.
+$$
+
+The shared `MixedStability` measurement uses sparse LDLT for this Schur
+route. Independently, factorizations $PAP^\mathsf{T}=LL^\mathsf{T}$ and
+$M_0=CC^\mathsf{T}$ give the whitened divergence
+
+$$
+W=C^{-1}T^\mathsf{T}BP^\mathsf{T}L^{-\mathsf{T}},\qquad
+\lambda_j(S_0,M_0)=\sigma_j(W)^2.
+$$
+
+All eigenvalues are compared with the squared singular-value spectrum,
+including zeros required by rectangular dimensions. The normalized
+eigenproblem, velocity-solve, mean-basis and spectral-comparison defects
+must be below the dimensionless algebraic budget $10^{-10}$. Resolved
+positivity requires $\lambda_{\min}>10^{-10}\max_j|\lambda_j|$;
+this separates the positive finite spectrum from its algebraic consistency
+scale, not from an independently proved mesh-uniform stability bound.
+A synthetic unequal-mass example has the independent value
+$\beta_h^2=4/3$ and checks logical constraint elimination and mean reduction.
+
+All six applicable geometries use $n=2,3,5$ on affine and exact quadratic
+maps. Assembly orders $16$ and $20$ are compared independently; each positive
+minimum eigenvalue must change relatively by less than $10^{-8}$.
+At $n=2$, every family except Pyramid has fewer free velocity DOFs than
+zero-mean pressure DOFs. This exact dimension obstruction is checked
+separately: $\operatorname{rank}B\le\dim V_h^0<\dim Q_h^0$ implies
+additional pressure null modes even after fixing the mean. Pyramid at
+$n=2$ and all families at $n=3,5$ require resolved positive spectra.
+Omitting the divergence operator on the curved $n=3$ mesh must give an
+exactly zero spectrum and fail the positivity predicate with unchanged
+space dimensions.
+
+Sequential and OpenMP native assembly are separate execution gates. This
+target does not certify PETSc/MPI operator spectra or a mesh-uniform
+inf-sup theorem. Geometry-specific registrations retain both tests, slow
+labels and 1800-second watchdogs. Each dense velocity/pressure workspace
+is bounded by 96 MiB before allocation; this is not a bound on all
+simultaneously live matrices or factorization storage.
