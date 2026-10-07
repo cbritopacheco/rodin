@@ -244,8 +244,11 @@ $$
 $$
 
 The implemented geometry-limited studies solve both equations with the
-physical affine field $u(x)=1+\sum_jx_j$, field degree $p=2$ and geometry
-degrees $q=1,2$. Its pullback is representable, so $E_{i,F}<10^{-9}$ and
+physical affine field $u(x)=1+\sum_jx_j$, geometry degrees $q=1,2,3$ and
+field degree $p=\max(2,q)$. An affine physical field pulls back to degree
+$q$ on each represented cell, so the cubic geometry case uses a cubic
+field rather than attributing an under-resolved field defect to geometry.
+Its pullback is representable, so $E_{i,F}<10^{-9}$ and
 $|E_{i,T}-E_{i,G}|<10^{-9}$. The geometry defects must be positive,
 decrease at both adjacent intervals and satisfy the same rate windows with
 $q+1$ for the L2 norm and $q$ for the gradient seminorm. Levels are
@@ -287,6 +290,13 @@ and only then takes square roots. This is scalar real-field coverage on all
 seven positive-dimensional geometries, native/real-PETSc local and MPI
 ranks 1–4, with sequential/OpenMP assembly. The new `LiftedDiffusion`
 registrations retain the slow label, timeout and pyramid lock above.
+The cubic affine-rate and sensitivity cases have separate
+`LiftedDiffusion_Q3` registrations with the same 1800-second budget,
+so adding geometry degree three does not consume the older cases' budget.
+Their seven local and seven real-PETSc local registrations are supplemented
+by twenty-eight MPI registrations per assembly configuration. Each
+registration runs both cubic cases on its selected geometry; MPI uses
+ranks 1–4. The existing lifted-diffusion CI filter selects both groups.
 
 ### Smooth-field lifted convergence and independent controls
 

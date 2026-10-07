@@ -212,6 +212,9 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
       template <size_t Q>
       void liftedAffineRates() const
       {
+        // A physical affine field pulls back to geometry degree Q. Keep the
+        // field degree at least Q so this study isolates geometry error.
+        constexpr size_t K = std::max(size_t(2), Q);
         std::array<ErrorHistory, 2> histories;
         const auto levels = this->GetParam() == Polytope::Type::Segment
           ? std::initializer_list<size_t>{5, 9, 17}
@@ -241,7 +244,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           for (bool poisson : {true, false})
           {
             LiftedErrorNorm::Result e;
-            problem.template solve<2>(poisson, Data::Field::Affine, false, AssemblyOrder,
+            problem.template solve<K>(poisson, Data::Field::Affine, false, AssemblyOrder,
               SolverTolerance, NormOrder, &e);
             decomposition(e);
             EXPECT_LT(e.field.getL2(), PatchTolerance);
@@ -622,6 +625,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
   {
     liftedAffineRates<2>();
   }
+  TEST_P(LocalTest, LiftedP3Q3AffineRates)
+  {
+    liftedAffineRates<3>();
+  }
   TEST_P(LocalTest, LiftedAnalyticMetricOracle)
   {
     liftedAnalyticOracle();
@@ -633,6 +640,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
   TEST_P(LocalTest, LiftedQ2Sensitivity)
   {
     liftedSensitivity<2>();
+  }
+  TEST_P(LocalTest, LiftedQ3Sensitivity)
+  {
+    liftedSensitivity<3, 3>();
   }
   TEST_P(LocalTest, P1Rates)
   {
@@ -735,6 +746,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
   {
     liftedAffineRates<2>();
   }
+  TEST_P(MPITest, LiftedP3Q3AffineRates)
+  {
+    liftedAffineRates<3>();
+  }
   TEST_P(MPITest, LiftedAnalyticMetricOracle)
   {
     liftedAnalyticOracle();
@@ -746,6 +761,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
   TEST_P(MPITest, LiftedQ2Sensitivity)
   {
     liftedSensitivity<2>();
+  }
+  TEST_P(MPITest, LiftedQ3Sensitivity)
+  {
+    liftedSensitivity<3, 3>();
   }
   TEST_P(MPITest, P1Rates)
   {

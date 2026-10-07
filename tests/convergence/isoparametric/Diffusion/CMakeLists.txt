@@ -12,19 +12,24 @@ foreach(geometry IN LISTS _RODIN_CURVED_DIFFUSION_GEOMETRIES)
       "--gtest_filter=AllGeometries/LocalTest.Sine*/${geometry}")
   add_test(NAME RodinConvergenceIsoparametricLiftedDiffusion_${geometry}
     COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricDiffusion>
-      "--gtest_filter=AllGeometries/LocalTest.Lifted*/${geometry}-*LiftedSmooth*")
+      "--gtest_filter=AllGeometries/LocalTest.Lifted*/${geometry}-*LiftedSmooth*:*Q3*")
+  add_test(NAME RodinConvergenceIsoparametricLiftedDiffusion_Q3_${geometry}
+    COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricDiffusion>
+      "--gtest_filter=AllGeometries/LocalTest.LiftedP3Q3AffineRates/${geometry}:AllGeometries/LocalTest.LiftedQ3Sensitivity/${geometry}")
   add_test(NAME RodinConvergenceIsoparametricSmoothLiftedDiffusion_${geometry}
     COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricDiffusion>
       "--gtest_filter=AllGeometries/LocalTest.LiftedSmooth*/${geometry}")
   set_tests_properties(RodinConvergenceIsoparametricDiffusion_${geometry}
     RodinConvergenceIsoparametricApproximatedDiffusion_${geometry}
     RodinConvergenceIsoparametricLiftedDiffusion_${geometry}
+    RodinConvergenceIsoparametricLiftedDiffusion_Q3_${geometry}
     RodinConvergenceIsoparametricSmoothLiftedDiffusion_${geometry}
     PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
   if (geometry STREQUAL "Pyramid")
     set_tests_properties(RodinConvergenceIsoparametricDiffusion_${geometry}
       RodinConvergenceIsoparametricApproximatedDiffusion_${geometry}
       RodinConvergenceIsoparametricLiftedDiffusion_${geometry}
+      RodinConvergenceIsoparametricLiftedDiffusion_Q3_${geometry}
       RodinConvergenceIsoparametricSmoothLiftedDiffusion_${geometry}
       PROPERTIES RESOURCE_LOCK curved_diffusion_pyramid)
   endif()
@@ -45,19 +50,24 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
         "--gtest_filter=AllGeometries/LocalTest.Sine*/${geometry}")
     add_test(NAME RodinConvergenceIsoparametricPETScLiftedDiffusion_${geometry}
       COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScDiffusion>
-        "--gtest_filter=AllGeometries/LocalTest.Lifted*/${geometry}-*LiftedSmooth*")
+        "--gtest_filter=AllGeometries/LocalTest.Lifted*/${geometry}-*LiftedSmooth*:*Q3*")
+    add_test(NAME RodinConvergenceIsoparametricPETScLiftedDiffusion_Q3_${geometry}
+      COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScDiffusion>
+        "--gtest_filter=AllGeometries/LocalTest.LiftedP3Q3AffineRates/${geometry}:AllGeometries/LocalTest.LiftedQ3Sensitivity/${geometry}")
     add_test(NAME RodinConvergenceIsoparametricPETScSmoothLiftedDiffusion_${geometry}
       COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScDiffusion>
         "--gtest_filter=AllGeometries/LocalTest.LiftedSmooth*/${geometry}")
     set_tests_properties(RodinConvergenceIsoparametricPETScDiffusion_${geometry}
       RodinConvergenceIsoparametricPETScApproximatedDiffusion_${geometry}
       RodinConvergenceIsoparametricPETScLiftedDiffusion_${geometry}
+      RodinConvergenceIsoparametricPETScLiftedDiffusion_Q3_${geometry}
       RodinConvergenceIsoparametricPETScSmoothLiftedDiffusion_${geometry}
       PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
     if (geometry STREQUAL "Pyramid")
       set_tests_properties(RodinConvergenceIsoparametricPETScDiffusion_${geometry}
         RodinConvergenceIsoparametricPETScApproximatedDiffusion_${geometry}
         RodinConvergenceIsoparametricPETScLiftedDiffusion_${geometry}
+        RodinConvergenceIsoparametricPETScLiftedDiffusion_Q3_${geometry}
         RodinConvergenceIsoparametricPETScSmoothLiftedDiffusion_${geometry}
         PROPERTIES RESOURCE_LOCK curved_diffusion_pyramid)
     endif()
@@ -67,6 +77,8 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
       RodinConvergenceIsoparametricPETScApproximatedDiffusion_${geometry})
     rodin_suppress_external_mpi_lsan_for_test(
       RodinConvergenceIsoparametricPETScLiftedDiffusion_${geometry})
+    rodin_suppress_external_mpi_lsan_for_test(
+      RodinConvergenceIsoparametricPETScLiftedDiffusion_Q3_${geometry})
     rodin_suppress_external_mpi_lsan_for_test(
       RodinConvergenceIsoparametricPETScSmoothLiftedDiffusion_${geometry})
   endforeach()
@@ -94,7 +106,12 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
           COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
             $<TARGET_FILE:RodinConvergenceIsoparametricPETScDiffusion>
-            "--gtest_filter=AllGeometries/MPITest.Lifted*/${geometry}-*LiftedSmooth*")
+            "--gtest_filter=AllGeometries/MPITest.Lifted*/${geometry}-*LiftedSmooth*:*Q3*")
+        add_test(NAME RodinConvergenceIsoparametricPETScMPILiftedDiffusion_Q3_np${np}_${geometry}
+          COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinConvergenceIsoparametricPETScDiffusion>
+            "--gtest_filter=AllGeometries/MPITest.LiftedP3Q3AffineRates/${geometry}:AllGeometries/MPITest.LiftedQ3Sensitivity/${geometry}")
         add_test(NAME RodinConvergenceIsoparametricPETScMPISmoothLiftedDiffusion_np${np}_${geometry}
           COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
@@ -104,6 +121,7 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
           RodinConvergenceIsoparametricPETScMPIDiffusion_np${np}_${geometry}
           RodinConvergenceIsoparametricPETScMPIApproximatedDiffusion_np${np}_${geometry}
           RodinConvergenceIsoparametricPETScMPILiftedDiffusion_np${np}_${geometry}
+          RodinConvergenceIsoparametricPETScMPILiftedDiffusion_Q3_np${np}_${geometry}
           RodinConvergenceIsoparametricPETScMPISmoothLiftedDiffusion_np${np}_${geometry}
           PROPERTIES LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
         if (geometry STREQUAL "Pyramid")
@@ -111,6 +129,7 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
             RodinConvergenceIsoparametricPETScMPIDiffusion_np${np}_${geometry}
             RodinConvergenceIsoparametricPETScMPIApproximatedDiffusion_np${np}_${geometry}
             RodinConvergenceIsoparametricPETScMPILiftedDiffusion_np${np}_${geometry}
+            RodinConvergenceIsoparametricPETScMPILiftedDiffusion_Q3_np${np}_${geometry}
             RodinConvergenceIsoparametricPETScMPISmoothLiftedDiffusion_np${np}_${geometry}
             PROPERTIES RESOURCE_LOCK curved_diffusion_pyramid)
         endif()
@@ -120,6 +139,8 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
           RodinConvergenceIsoparametricPETScMPIApproximatedDiffusion_np${np}_${geometry})
         rodin_suppress_external_mpi_lsan_for_test(
           RodinConvergenceIsoparametricPETScMPILiftedDiffusion_np${np}_${geometry})
+        rodin_suppress_external_mpi_lsan_for_test(
+          RodinConvergenceIsoparametricPETScMPILiftedDiffusion_Q3_np${np}_${geometry})
         rodin_suppress_external_mpi_lsan_for_test(
           RodinConvergenceIsoparametricPETScMPISmoothLiftedDiffusion_np${np}_${geometry})
       endforeach()
