@@ -506,8 +506,10 @@ acceptance and separates the large vector and mixed direct solves.
 Curved real-PETSc bulk execution is split into scalar, linear-elasticity and
 Stokes workloads, each with light, tetrahedral and pyramidal geometry
 partitions. The light partition contains segment, triangle, quadrilateral,
-hexahedron and wedge cases. Each job retains local and MPI ranks one through
-four, runs one CTest process at a time, and has a four-hour job budget. These
+hexahedron and wedge cases. Stokes pyramid execution is additionally split
+into local and individual MPI-rank-count jobs; the remaining partitions
+retain local and MPI ranks one through four together. Every job runs one
+CTest process at a time and has a four-hour job budget. These
 partitions preserve the complete registered matrix; they do not alter its
 refinement levels, quadrature settings, solvers or numerical assertions.
 A separate real-PETSc sequential/OpenMP matrix checks local-context and

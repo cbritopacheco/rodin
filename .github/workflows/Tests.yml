@@ -393,6 +393,23 @@ jobs:
         multithreaded: [ON, OFF]
         suite: [scalar, linear_elasticity, stokes]
         geometry: [light, tetrahedron, pyramid]
+        selection: [all]
+        # Retain all contexts without summing five costly Stokes pyramid
+        # hierarchies and their independent quadrature controls into one job.
+        exclude:
+          - suite: stokes
+            geometry: pyramid
+        include:
+          - {multithreaded: ON, suite: stokes, geometry: pyramid, selection: local}
+          - {multithreaded: ON, suite: stokes, geometry: pyramid, selection: np1}
+          - {multithreaded: ON, suite: stokes, geometry: pyramid, selection: np2}
+          - {multithreaded: ON, suite: stokes, geometry: pyramid, selection: np3}
+          - {multithreaded: ON, suite: stokes, geometry: pyramid, selection: np4}
+          - {multithreaded: OFF, suite: stokes, geometry: pyramid, selection: local}
+          - {multithreaded: OFF, suite: stokes, geometry: pyramid, selection: np1}
+          - {multithreaded: OFF, suite: stokes, geometry: pyramid, selection: np2}
+          - {multithreaded: OFF, suite: stokes, geometry: pyramid, selection: np3}
+          - {multithreaded: OFF, suite: stokes, geometry: pyramid, selection: np4}
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -461,8 +478,14 @@ jobs:
             light) geometry_pattern='(Segment|Triangle|Quadrilateral|Hexahedron|Wedge)' ;;
             *) exit 1 ;;
           esac
+          case "${{ matrix.selection }}" in
+            all) context_pattern='(MPI)?'; rank_pattern='.*' ;;
+            local) context_pattern=''; rank_pattern='.*' ;;
+            np1|np2|np3|np4) context_pattern='MPI'; rank_pattern=".*${{ matrix.selection }}_" ;;
+            *) exit 1 ;;
+          esac
           ctest --test-dir build/tests \
-            -R "^RodinConvergenceIsoparametricPETSc(MPI)?${physics_pattern}_.*${geometry_pattern}$" \
+            -R "^RodinConvergenceIsoparametricPETSc${context_pattern}${physics_pattern}_${rank_pattern}.*${geometry_pattern}$" \
             --output-on-failure --no-tests=error -j 1
 
   PETScComplexConvergence:
