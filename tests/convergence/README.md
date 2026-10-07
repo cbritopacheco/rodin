@@ -451,6 +451,16 @@ axis, $h=1/(n-1)$, and field degree $p$:
   field/geometry/total errors, with P2 Segment using `n=5→9→17→33`.
   Assembly, norm quadrature and nonlinear stopping tolerances are varied
   independently below the field-error budget.
+  Additional affine-field studies on linear and cubic approximated geometry
+  use three levels: `n=3→5→9`, except Segment (`n=5→9→17`).
+  Geometry and total L2 errors require orders two and four, respectively;
+  their H1-seminorm errors require orders one and three. Represented and
+  lifted field reproduction, independent quadrature/nonlinear sensitivity,
+  and residual/tangent consistency are checked separately. The finite
+  matched-degree matrix is locally verified on all seven geometries in
+  sequential/OpenMP native and real-PETSc local/MPI configurations, with
+  MPI ranks 1–4. This is not a hosted-CI certification or a claim for
+  arbitrary geometry degrees or nonlinear regimes.
   Curved P0 projection uses `n=5→9→17` on all seven geometries; its
   [suite specification](isoparametric/P0Projection/README.md) describes
   physical cell moments, interpolation rejection and analytic P0g means.
@@ -634,7 +644,7 @@ refinement path, and backend, rather than by the presence of a directory.
 | --- | --- | --- |
 | 1 | PETSc local and MPI PDE coverage: remaining boundary/refinement variants of Poisson, Helmholtz, conductivity, linear elasticity, Stokes, coupled reaction–diffusion, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
 | 2 | Curved Poisson, conductivity, Helmholtz, linear-elasticity, Stokes, reaction–diffusion and nonlinear Poisson boundary/degree extensions | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
-| 3 | Exact-domain comparisons and further degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches. At geometry degree 2, Poisson, conductivity, complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson have represented-domain and lifted P1/P2 studies; Taylor–Hood Stokes has the P2/P1 study. Poisson/conductivity additionally have lifted affine studies at geometry degrees 1–3, with field degree $p=\max(2,q)$. Complex Helmholtz, linear elasticity and coupled reaction–diffusion additionally have matched affine studies at geometry degrees 1 and 3. Further field/geometry degree combinations remain |
+| 3 | Exact-domain comparisons and further degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches. At geometry degree 2, Poisson, conductivity, complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson have represented-domain and lifted P1/P2 studies; Taylor–Hood Stokes has the P2/P1 study. Poisson/conductivity additionally have lifted affine studies at geometry degrees 1–3, with field degree $p=\max(2,q)$. Complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson additionally have matched affine studies at geometry degrees 1 and 3. Further field/geometry degree combinations remain |
 | 4 | Maintain the implemented real/complex scalar/vector/matrix structural matrix for P0, P0g, P1 and H1 degrees one through six | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction; native and PETSc storage gates have separately stated scopes |
 | Last | Independent NAFEMS benchmarks, after the convergence/structural/backend batches | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |
 | Separate PR | Assembly performance across existing physical contexts, geometries, spaces, and backends ([PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Isolated stage timings, reproducible workload metadata, verified assembled operators, and controlled thread/rank scaling in `tests/benchmarks`; tracked independently from convergence certification |

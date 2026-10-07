@@ -34,11 +34,11 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
 #endif
   /** @brief Mapped semilinear workload with physical data and homogeneous corrections.
    * @par Architecture
-   * Exact P2 maps are installed before fields are constructed. Shared native
+   * Prescribed-degree maps are installed before fields are constructed. Shared native
    * Newton/PETSc SNES workloads supply the solve and derivative oracles.
    * A reference bubble supplies homogeneous perturbations on curved traces.
    */
-  template <class ContextType>
+  template <class ContextType, size_t Q = 2>
   class Workload
   {
     public:
@@ -46,11 +46,12 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
       Workload(
         Polytope::Type geometry, size_t n, Map map = Map::Quadratic, bool lifted = false)
         : m_mesh(makeMesh(geometry, n)),
+          m_reference(),
           m_geometry(m_mesh, map)
       {
         if (lifted)
           m_reference.emplace(m_mesh);
-        m_geometry.template install<2>();
+        m_geometry.template install<Q>();
       }
       template <size_t K>
       ErrorNorms solve(Data::Field field = Data::Field::Sine, bool omitCubic = false,
@@ -110,11 +111,64 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
       Optional<Mesh<ContextType>> m_reference;
       CurvedGeometry<Mesh<ContextType>> m_geometry;
   };
-  template <class ContextType>
+  template <class ContextType, size_t Q = 2>
   class CurvedTest : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
       using Map = typename Workload<ContextType>::Map;
+
+      /** @brief Isolate the geometry defect with a physically affine solution.
+       * Its pullback has degree Q and is represented at K=max(2,Q).
+       * Zero field errors have an absolute budget; only geometry and total
+       * errors are fitted, over three levels and both adjacent intervals.
+       */
+      void liftedAffineRates() const
+      {
+        constexpr size_t K = std::max(size_t(2), Q);
+        LiftedConvergence history;
+        const auto levels = this->GetParam() == Polytope::Type::Segment
+          ? std::initializer_list<size_t>{5, 9, 17}
+          : std::initializer_list<size_t>{3, 5, 9};
+        for (size_t n : levels)
+        {
+          SCOPED_TRACE(::testing::Message()
+            << "geometry degree=" << Q << " field degree=" << K << " n=" << n);
+          Workload<ContextType, Q> problem(this->GetParam(), n, Map::Sine, true);
+          LiftedErrorNorm::Result lifted;
+          const auto represented = problem.template solve<K>(Data::Field::Affine,
+            false, AssemblyOrder, SolveTolerance, true, NormOrder, &lifted);
+          history.appendRepresentable(
+            Real(1) / Real(n - 1), represented, lifted, PatchTolerance);
+        }
+        history.expectGeometryRates(Q);
+      }
+
+      void liftedIndependentSensitivity() const
+      {
+        constexpr size_t K = std::max(size_t(2), Q);
+        Workload<ContextType, Q> problem(this->GetParam(), 5, Map::Sine, true);
+        std::array<LiftedErrorNorm::Result, 4> errors;
+        for (size_t i = 0; i < errors.size(); ++i)
+        {
+          SCOPED_TRACE(::testing::Message() << "geometry degree=" << Q
+            << " field degree=" << K << " control=" << i);
+          const auto represented = problem.template solve<K>(Data::Field::Affine,
+            false, i == 1 ? RefinedOrder : AssemblyOrder,
+            i == 2 ? RefinedTolerance : SolveTolerance, true,
+            i == 3 ? RefinedNormOrder : NormOrder, &errors[i]);
+          LiftedConvergence::expectRepresentable(represented, errors[i], PatchTolerance);
+        }
+        for (size_t i = 1; i < errors.size(); ++i)
+          LiftedConvergence::expectGeometrySensitivity(errors[0], errors[i]);
+      }
+
+      void liftedResidualTangentConsistency() const
+      {
+        constexpr size_t K = std::max(size_t(2), Q);
+        Workload<ContextType, Q> problem(this->GetParam(), 3, Map::Sine);
+        EXPECT_LT(problem.template tangent<K>(), TangentTolerance);
+        EXPECT_GT(problem.template tangent<K>(true), WrongTangentMinimum);
+      }
 
       template <size_t K>
       void approximatedRates() const
@@ -266,6 +320,34 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
         EXPECT_GT(boundary.getH1Seminorm(), ControlH1);
       }
   };
+  using LocalQ1Test = CurvedTest<Context::Local, 1>;
+  using LocalQ3Test = CurvedTest<Context::Local, 3>;
+  TEST_P(LocalQ1Test, LiftedAffineRates) { liftedAffineRates(); }
+  TEST_P(LocalQ1Test, LiftedIndependentSensitivity) { liftedIndependentSensitivity(); }
+  TEST_P(LocalQ1Test, LiftedResidualTangentConsistency)
+  {
+    liftedResidualTangentConsistency();
+  }
+  TEST_P(LocalQ3Test, LiftedAffineRates) { liftedAffineRates(); }
+  TEST_P(LocalQ3Test, LiftedIndependentSensitivity) { liftedIndependentSensitivity(); }
+  TEST_P(LocalQ3Test, LiftedResidualTangentConsistency)
+  {
+    liftedResidualTangentConsistency();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalQ1Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalQ3Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
   using LocalTest = CurvedTest<Context::Local>;
   TEST_P(LocalTest, ApproximatedResidualTangentConsistency)
   {
@@ -331,6 +413,34 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
       return std::string(UniformGrid::getGeometryName(info.param));
     });
 #if defined(RODIN_CURVED_NONLINEAR_POISSON_PETSC) && defined(RODIN_USE_MPI)
+  using MPIQ1Test = CurvedTest<Context::MPI, 1>;
+  using MPIQ3Test = CurvedTest<Context::MPI, 3>;
+  TEST_P(MPIQ1Test, LiftedAffineRates) { liftedAffineRates(); }
+  TEST_P(MPIQ1Test, LiftedIndependentSensitivity) { liftedIndependentSensitivity(); }
+  TEST_P(MPIQ1Test, LiftedResidualTangentConsistency)
+  {
+    liftedResidualTangentConsistency();
+  }
+  TEST_P(MPIQ3Test, LiftedAffineRates) { liftedAffineRates(); }
+  TEST_P(MPIQ3Test, LiftedIndependentSensitivity) { liftedIndependentSensitivity(); }
+  TEST_P(MPIQ3Test, LiftedResidualTangentConsistency)
+  {
+    liftedResidualTangentConsistency();
+  }
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIQ1Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIQ3Test,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
   using MPITest = CurvedTest<Context::MPI>;
   TEST_P(MPITest, ApproximatedResidualTangentConsistency)
   {

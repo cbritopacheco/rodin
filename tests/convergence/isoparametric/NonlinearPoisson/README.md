@@ -169,3 +169,64 @@ native and real-PETSc local/MPI configurations, including ranks one through
 four and sequential/OpenMP builds. Slow labels, timeouts and pyramid locking
 are retained. These checks concern the stated finite hierarchies, not a
 uniform asymptotic result for arbitrary curved meshes.
+
+## Linear and cubic geometry: representable-field studies
+
+The `LocalQ1Test`, `LocalQ3Test`, `MPIQ1Test` and `MPIQ3Test` suites
+interpolate the same sine map with geometry degree $q\in\lbrace1,3\rbrace$.
+For field degree $k=\max(2,q)$, the physical affine solution
+
+$$
+u_\ast(x)=1+\sum_{j=0}^{d-1}x_j,\qquad
+f(x)=u_\ast(x)+u_\ast(x)^3,\qquad g=u_\ast\rvert_{\partial\Omega_h}
+$$
+
+is represented on the discrete geometry: $u_\ast\rvert_{\Omega_h}\in V_h$.
+Equivalently, $u_\ast\circ\Phi_h\in\widehat V_{h,k}$, where
+$\widehat V_{h,k}$ denotes the field space on the original unit-box mesh.
+Consequently, the represented-domain and lifted-field defects vanish in
+exact arithmetic, whereas
+
+$$
+e_G(\Phi(\xi))=\sum_{j=0}^{d-1}
+\left(\Phi_{h,j}(\xi)-\Phi_j(\xi)\right),\qquad e_T=e_F+e_G
+$$
+
+isolates the map interpolation defect. The same physical problem is used
+at every level. The shared `LiftedConvergence` representable-field path
+requires both field norms below the dimensionless absolute budget $10^{-9}$,
+checks the triangle inequalities, and compares total and geometry norms
+within this budget. Field errors are not assigned a logarithmic rate.
+
+| Geometry degree $q$ | Field degree $k$ | Segment grid points | Other geometry grid points |
+| --- | --- | --- | --- |
+| $1$ | $2$ | $5,9,17$ | $3,5,9$ |
+| $3$ | $3$ | $5,9,17$ | $3,5,9$ |
+
+For $h=(n-1)^{-1}$, the geometry and total defects have expected orders
+$q+1$ in $L^2$ and $q$ in the $H^1$ seminorm under the stated map
+regularity and nonvanishing-leading-defect hypotheses. Both adjacent
+intervals require finite, positive, decreasing errors and the same
+$0.55$ and $0.45$ rate windows. The linear/cubic map regularity argument
+and the distinction between changing domains and one-dimensional
+parametrization comparisons are given in the
+[Helmholtz specification](../Helmholtz/README.md).
+
+At $n=5$, assembly order $12\to16$, norm order $14\to18$ and
+nonlinear tolerance $10^{-11}\to10^{-12}$ are varied independently.
+Every solve retains the field-error budgets; each positive geometry and
+total norm changes by less than $10^{-6}$ relatively.
+
+An exactly represented affine field can satisfy the discrete residual at
+the initial iterate, without a Newton correction. A separate case at
+$n=3$ therefore exercises the actual residual and tangent at field degree
+$k$, with a homogeneous reference-coordinate bubble direction. The
+central-difference defect must be below $10^{-6}$, while replacing
+$3u_h^2$ by $u_h^2$ must produce a defect above $10^{-3}$. This is a
+derivative consistency check, not a claim about Newton iteration counts.
+
+All seven positive-dimensional geometries are registered for native local
+and real-PETSc local/MPI configurations, with ranks one through four.
+Sequential/OpenMP remains a build choice. These are finite hierarchy
+certificates; arbitrary map degrees and arbitrary curved meshes are not
+certified by these cases.
