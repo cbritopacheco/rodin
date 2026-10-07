@@ -744,6 +744,16 @@ vector P0/P0g spaces; these are assembly workloads, not additional PDE rate
 claims. H1 workloads begin with P1/P2 and extend through the orders already
 covered by the convergence suites, using stable mixed pairs for Stokes.
 
+Performance or resource issues exposed by convergence studies are handed to
+that workstream with the exact test selection, refinement hierarchy, backend,
+build and thread/rank settings, observed timings or memory, and available
+stage evidence. End-to-end time and peak memory do not identify an assembly
+hotspot without stage-isolated measurements. Investigation and fixes may
+occur alongside convergence work, but benchmark implementation, benchmark
+correctness checks and performance regression gates remain in the separate
+workstream. A resource-interrupted convergence run remains unverified;
+neither successful smaller cases nor a different backend certify that run.
+
 Every meaningful formulation is to be exercised on segment, triangle,
 quadrilateral, tetrahedron, pyramid, hexahedron, and wedge geometries.
 Point/0D assembly is included only where a discrete form is meaningful;
