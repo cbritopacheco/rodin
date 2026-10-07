@@ -603,12 +603,12 @@ Their PETSc [p](p/PETScStokes/README.md) and
 acceptance bounds, globally reduced owned-cell norms, and ranks 1–4.
 The p suite also checks known P4/P3 norm values on sparse/empty partitions.
 
-## Remaining verification work
+## Verification workplan and remaining work
 
 The coverage above includes the baseline merged in PR #333 and subsequent
-suite additions. The following extensions
-are planned; their presence in this workplan does not imply an implemented or
-passing test. Completion is assessed per formulation, space, geometry,
+suite additions. The following priorities include implemented structural gates
+and unfinished PDE extensions; an entry in the workplan does not itself imply
+a passing test. Completion is assessed per formulation, space, geometry,
 refinement path, and backend, rather than by the presence of a directory.
 
 | Priority | Extension | Required evidence |
@@ -616,7 +616,7 @@ refinement path, and backend, rather than by the presence of a directory.
 | 1 | PETSc local and MPI PDE coverage: remaining boundary/refinement variants of Poisson, Helmholtz, conductivity, linear elasticity, Stokes, coupled reaction–diffusion, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
 | 2 | Curved Poisson, conductivity, Helmholtz, linear-elasticity, Stokes, reaction–diffusion and nonlinear Poisson boundary/degree extensions | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
 | 3 | Exact-domain comparisons and further degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches. At geometry degree 2, Poisson, conductivity, complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson have represented-domain and lifted P1/P2 studies; Taylor–Hood Stokes has the P2/P1 study. Poisson/conductivity additionally have lifted affine studies at geometry degrees 1–3, with field degree $p=\max(2,q)$. Complex Helmholtz additionally has matched affine studies at geometry degrees 1 and 3. Further field/geometry degree combinations remain |
-| 4 | Remaining complex-vector and high-order structural combinations supported by the library | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction across geometries and rank counts |
+| 4 | Maintain the implemented real/complex scalar/vector/matrix structural matrix for P0, P0g, P1 and H1 degrees one through six | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction; native and PETSc storage gates have separately stated scopes |
 | Last | Independent NAFEMS benchmarks, after the convergence/structural/backend batches | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |
 | Separate PR | Assembly performance across existing physical contexts, geometries, spaces, and backends ([PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Isolated stage timings, reproducible workload metadata, verified assembled operators, and controlled thread/rank scaling in `tests/benchmarks`; tracked independently from convergence certification |
 
@@ -693,6 +693,17 @@ MPI regressions for a space do not establish PDE convergence for that space.
 The existing structural rank matrix is 1, 2, 3, 4, and 8; distributed PDE
 studies currently use 1–4 ranks. Extensions must state their own rank matrix,
 including empty-rank or sparse-selection cases where relevant.
+Priority 4 now has the finite structural matrix described in the coverage
+section. Its native metadata, Point, selection and boundary/identification
+gates are independent of PETSc. H1 restriction additionally checks affine
+and exact quadratic parents with native and real/complex PETSc coefficient
+storage. Scalar, three-component vector and non-square matrix representatives
+are exercised; this does not certify arbitrary component counts, every
+matrix shape, unbounded polynomial orders or every mesh partition. These
+fixed-mesh logical and reproduction gates are retained alongside the PDE
+studies, not substituted for refinement-rate evidence. The unfinished
+curved boundary and matched field/geometry-degree PDE matrices remain
+priorities 2 and 3; hosted CI evidence remains distinct from local verification.
 For mixed spaces, pressure-nullspace and inf-sup verification remain
 distinct from convergence of selected manufactured fields. The Stokes
 coarse-space rank regression establishes an obstruction, not stability of
