@@ -176,7 +176,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
         LiftedConvergence history;
         const auto levels = K == 1 ? std::initializer_list<size_t>{5, 9, 17}
           : this->GetParam() == Polytope::Type::Segment
-          ? std::initializer_list<size_t>{5, 9, 17, 33}
+          ? (K == 2 ? std::initializer_list<size_t>{5, 9, 17, 33}
+                    : std::initializer_list<size_t>{5, 9, 17})
           : std::initializer_list<size_t>{3, 5, 9};
         for (size_t n : levels)
         {
@@ -187,7 +188,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
             AssemblyOrder, SolveTolerance, true, NormOrder, &lifted);
           history.append(Real(1) / Real(n - 1), represented, lifted);
         }
-        history.expectRates(K);
+        if constexpr (K > 2)
+          history.expectMixedRates(K, 2);
+        else
+          history.expectRates(K);
       }
 
       template <size_t K>
@@ -212,13 +216,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
         }
       }
 
+      template <size_t K = 2>
       void approximatedPatchAndControl() const
       {
         Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
         LiftedErrorNorm::Result base, wrong;
-        const auto patch = problem.template solve<2>(Data::Field::Affine, false,
+        const auto patch = problem.template solve<K>(Data::Field::Affine, false,
           AssemblyOrder, SolveTolerance, true, NormOrder, &base);
-        const auto incorrect = problem.template solve<2>(Data::Field::Affine, true,
+        const auto incorrect = problem.template solve<K>(Data::Field::Affine, true,
           AssemblyOrder, SolveTolerance, true, NormOrder, &wrong);
         LiftedConvergence::expectDecomposition(base);
         LiftedConvergence::expectDecomposition(wrong);
@@ -237,6 +242,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
         constexpr Real ControlRatio = 2;
         EXPECT_GT(wrong.total.getL2(), ControlRatio * base.total.getL2());
         EXPECT_GT(wrong.total.getH1Seminorm(), ControlRatio * base.total.getH1Seminorm());
+      }
+
+      void approximatedHigherOrderTangent() const
+      {
+        Workload<ContextType> problem(this->GetParam(), 3, Map::Sine);
+        EXPECT_LT(problem.template tangent<3>(), TangentTolerance);
+        EXPECT_GT(problem.template tangent<3>(true), WrongTangentMinimum);
       }
 
       template <size_t K>
@@ -375,6 +387,22 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
   {
     approximatedRates<2>();
   }
+  TEST_P(LocalTest, ApproximatedP3Q2Rates)
+  {
+    approximatedRates<3>();
+  }
+  TEST_P(LocalTest, ApproximatedP3Q2Sensitivity)
+  {
+    approximatedSensitivity<3>();
+  }
+  TEST_P(LocalTest, ApproximatedP3Q2PatchRejectsOmittedCubic)
+  {
+    approximatedPatchAndControl<3>();
+  }
+  TEST_P(LocalTest, ApproximatedP3Q2ResidualTangentConsistency)
+  {
+    approximatedHigherOrderTangent();
+  }
   TEST_P(LocalTest, ApproximatedP1Sensitivity)
   {
     approximatedSensitivity<1>();
@@ -479,6 +507,22 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
   TEST_P(MPITest, ApproximatedP2Rates)
   {
     approximatedRates<2>();
+  }
+  TEST_P(MPITest, ApproximatedP3Q2Rates)
+  {
+    approximatedRates<3>();
+  }
+  TEST_P(MPITest, ApproximatedP3Q2Sensitivity)
+  {
+    approximatedSensitivity<3>();
+  }
+  TEST_P(MPITest, ApproximatedP3Q2PatchRejectsOmittedCubic)
+  {
+    approximatedPatchAndControl<3>();
+  }
+  TEST_P(MPITest, ApproximatedP3Q2ResidualTangentConsistency)
+  {
+    approximatedHigherOrderTangent();
   }
   TEST_P(MPITest, ApproximatedP1Sensitivity)
   {
