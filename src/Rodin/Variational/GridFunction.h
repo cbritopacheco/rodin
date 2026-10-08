@@ -166,10 +166,9 @@ namespace Rodin::Variational
        * the data-full object.
        * @param ref Reference to the wrapped grid function.
        */
-      explicit
-      constexpr
-      GridFunctionBaseReference(std::reference_wrapper<const Derived> ref)
-        : m_ref(ref)
+      explicit constexpr GridFunctionBaseReference(
+        std::reference_wrapper<const Derived> ref)
+        : m_ref(std::cref(static_cast<const GridFunctionBaseReference&>(ref.get())))
       {}
 
       /**
@@ -213,7 +212,7 @@ namespace Rodin::Variational
       constexpr
       auto operator()(const Geometry::Point& p) const
       {
-        return m_ref.get().getValue(p);
+        return getReferencedGridFunction().getValue(p);
       }
 
       /**
@@ -224,7 +223,7 @@ namespace Rodin::Variational
       constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
-        return m_ref.get().getValue(ip);
+        return getReferencedGridFunction().getValue(ip);
       }
 
       /**
@@ -235,7 +234,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return m_ref.get().getValue(p);
+        return getReferencedGridFunction().getValue(p);
       }
 
       /**
@@ -246,7 +245,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
-        return m_ref.get().getValue(ip);
+        return getReferencedGridFunction().getValue(ip);
       }
 
       /**
@@ -256,7 +255,7 @@ namespace Rodin::Variational
       constexpr
       auto x() const
       {
-        return m_ref.get().x();
+        return getReferencedGridFunction().x();
       }
 
       /**
@@ -266,7 +265,7 @@ namespace Rodin::Variational
       constexpr
       auto y() const
       {
-        return m_ref.get().y();
+        return getReferencedGridFunction().y();
       }
 
       /**
@@ -276,7 +275,7 @@ namespace Rodin::Variational
       constexpr
       auto z() const
       {
-        return m_ref.get().z();
+        return getReferencedGridFunction().z();
       }
 
       /**
@@ -288,7 +287,7 @@ namespace Rodin::Variational
       template <class DataType>
       constexpr decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
-        return m_ref.get().setData(data, offset);
+        return getReferencedGridFunction().setData(data, offset);
       }
 
       /**
@@ -298,7 +297,7 @@ namespace Rodin::Variational
       constexpr
       const auto& getData()
       {
-        return m_ref.get().getData();
+        return getReferencedGridFunction().getData();
       }
 
       /**
@@ -308,7 +307,7 @@ namespace Rodin::Variational
       constexpr
       const auto& getFiniteElementSpace() const
       {
-        return m_ref.get().getFiniteElementSpace();
+        return getReferencedGridFunction().getFiniteElementSpace();
       }
 
       /**
@@ -318,7 +317,7 @@ namespace Rodin::Variational
       constexpr
       size_t getSize() const
       {
-        return m_ref.get().getSize();
+        return getReferencedGridFunction().getSize();
       }
 
       /**
@@ -328,7 +327,7 @@ namespace Rodin::Variational
        */
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
-        return m_ref.get().getOrder(geom);
+        return getReferencedGridFunction().getOrder(geom);
       }
 
       /**
@@ -340,8 +339,28 @@ namespace Rodin::Variational
         return new GridFunctionBaseReference(*this);
       }
 
+    protected:
+      /**
+       * @brief Binds the reference to the grid function under construction.
+       *
+       * Store the base subobject without downcasting during construction.
+       * Evaluation resolves the derived object after construction finishes.
+       */
+      GridFunctionBaseReference()
+        : m_ref(std::cref(*this))
+      {}
+
     private:
-      std::reference_wrapper<const Derived> m_ref;
+      /**
+       * @brief Resolves the fully constructed grid function being referenced.
+       * @returns Reference to the bound grid function.
+       */
+      constexpr const Derived& getReferencedGridFunction() const
+      {
+        return static_cast<const Derived&>(m_ref.get());
+      }
+
+      std::reference_wrapper<const GridFunctionBaseReference> m_ref;
   };
 
   /**
@@ -427,7 +446,7 @@ namespace Rodin::Variational
        * vector is sized according to the space dimension.
        */
       GridFunctionBase(const FES& fes)
-        : Parent(std::cref(static_cast<const Derived&>(*this))),
+        : Parent(),
           m_fes(std::cref(fes)),
           m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
@@ -437,7 +456,7 @@ namespace Rodin::Variational
        * @param[in] other Grid function to copy
        */
       GridFunctionBase(const GridFunctionBase& other)
-        : Parent(std::cref(static_cast<const Derived&>(*this))),
+        : Parent(),
           m_name(other.m_name),
           m_fes(other.m_fes),
           m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
@@ -448,7 +467,7 @@ namespace Rodin::Variational
        * @param[in] other Grid function to move from
        */
       GridFunctionBase(GridFunctionBase&& other)
-        : Parent(std::cref(static_cast<const Derived&>(*this))),
+        : Parent(),
           m_name(std::move(other.m_name)),
           m_fes(std::move(other.m_fes)),
           m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))

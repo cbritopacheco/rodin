@@ -147,6 +147,27 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
   }
 
+  /// @brief Expression clones follow their field through construction, copy and move.
+  TEST(Rodin_Variational_Real_P1_GridFunction, ExpressionBindingAfterCopyAndMove)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh);
+    GridFunction original(fes);
+    original = RealFunction(2.);
+    GridFunction copied(original);
+    GridFunction moved(std::move(copied));
+    using Reference = GridFunctionBaseReference<decltype(original)>;
+    const auto& originalBase = static_cast<const Reference&>(original);
+    const auto& movedBase = static_cast<const Reference&>(moved);
+    std::unique_ptr<Reference> originalExpression(originalBase.copy());
+    std::unique_ptr<Reference> movedExpression(movedBase.copy());
+    original = RealFunction(3.);
+    moved = RealFunction(7.);
+    const Point p(*mesh.getCell(0), Math::SpatialPoint{0.2, 0.3});
+    EXPECT_NEAR((*originalExpression)(p), 3., 1e-14);
+    EXPECT_NEAR((*movedExpression)(p), 7., 1e-14);
+  }
+
   /// @brief Verifies assignment from real function for variational real P1 grid function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentFromRealFunction)
   {
