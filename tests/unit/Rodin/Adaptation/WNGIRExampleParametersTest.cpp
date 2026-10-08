@@ -11,6 +11,19 @@
 
 using namespace Rodin;
 
+TEST(Rodin_Adaptation_WNGIRExampleParameters, CalibratedDefaultsAreInherited)
+{
+  std::string name = "example";
+  char* argv[] = {name.data()};
+  const auto p = Examples::makeWNGIRParameters(1, argv, Real(0.1), 10);
+  EXPECT_EQ(p.model.fit, Real(1));
+  EXPECT_EQ(p.model.distribution.deviatoric, Real(1e-4));
+  EXPECT_EQ(p.model.distribution.divergence, Real(1e-2));
+  EXPECT_EQ(p.model.hinge, Real(10));
+  EXPECT_EQ(p.convergence.iterations.outer, 30u);
+  EXPECT_EQ(p.convergence.iterations.inner, 15u);
+}
+
 TEST(Rodin_Adaptation_WNGIRExampleParameters, CanonicalNamesMapToHierarchicalParameters)
 {
   std::vector<std::string> arguments = {"example", "--wngir-fit=2",
