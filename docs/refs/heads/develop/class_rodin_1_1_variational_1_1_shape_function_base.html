@@ -83,8 +83,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md496">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md497">Usage</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md496">Mathematical Foundation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md497">Usage</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -97,10 +107,9 @@
             </li>
           </ul>
         </nav>
-<p>Base class for shape functions in finite element spaces.</p><p>ShapeFunctionBase provides the foundation for representing finite element basis functions (shape functions) in both trial and test spaces. Shape functions are the building blocks of finite element approximations.</p><section id="autotoc_md496"><h3><a href="#autotoc_md496">Mathematical Foundation</a></h3><p>In the finite element method, functions are approximated using a linear combination of basis functions (shape functions):</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
+<p>Base class for shape functions in finite element spaces.</p><p>ShapeFunctionBase provides the foundation for representing finite element basis functions (shape functions) in both trial and test spaces. Shape functions are the building blocks of finite element approximations.</p><section id="autotoc_md496_1s1"><section id="autotoc_md496"><h3><a href="#autotoc_md496">Mathematical Foundation</a></h3><p>In the finite element method, functions are approximated using a linear combination of basis functions (shape functions):</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
 <title>
-\[
-  u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
+\[  u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
 \]
 </title>
 <defs>
@@ -266,7 +275,7 @@ $ \phi_i(x_j) = \delta_{ij} $
 <use x='51.379235' y='1.793263' xlink:href='#eq9-g0-105'/>
 <use x='54.262375' y='1.793263' xlink:href='#eq9-g0-106'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md497"><h3><a href="#autotoc_md497">Usage</a></h3><p>ShapeFunctionBase is a CRTP base class. Derived classes include:</p><ul><li>TrialFunction: Represents <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg></li></ul></section></section><section id="autotoc_md497_1s1"><section id="autotoc_md497"><h3><a href="#autotoc_md497">Usage</a></h3><p>ShapeFunctionBase is a CRTP base class. Derived classes include:</p><ul><li>TrialFunction: Represents <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -286,7 +295,7 @@ $ v $
 <g id='eq11-page1'>
 <use x='0' y='0' xlink:href='#eq11-g0-118'/>
 </g>
-</svg> in the test space</li><li>Various operators: Grad, Div, Curl, etc.</li></ul><aside class="m-note m-default"><h4>See also</h4><p>TrialFunction, TestFunction</p></aside></section>
+</svg> in the test space</li><li>Various operators: Grad, Div, Curl, etc.</li></ul><aside class="m-note m-default"><h4>See also</h4><p>TrialFunction, TestFunction</p></aside></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -303,12 +312,12 @@ $ v $
               using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
             </dt>
             <dd>Finite element space type.</dd>
-            <dt id="acdf431ab4381f783f82b9086cc8b6752">
-              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
+            <dt id="afea02c334df4db66272d9f9de375b522">
+              using <a href="#afea02c334df4db66272d9f9de375b522" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar type from the finite element space.</dd>
-            <dt id="a02f58f805c9cd09c1326a38fcb96f441">
-              using <a href="#a02f58f805c9cd09c1326a38fcb96f441" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>
+            <dt id="a61d793c57772f1f413780dc70f9a12cb">
+              using <a href="#a61d793c57772f1f413780dc70f9a12cb" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -378,8 +387,8 @@ $ v $
               <span class="m-doc-wrap-bumper">auto <a href="#a6d5956759cd2c1a262ef25d3927ac3d2" class="m-doc">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sets the current integration point.</dd>
-            <dt id="a1515051b5ab120ca4827293920a77eb3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1515051b5ab120ca4827293920a77eb3" class="m-doc-self">setPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) -&gt; Derived&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1515051b5ab120ca4827293920a77eb3" class="m-doc">setPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) -&gt; Derived&amp;</span>
             </dt>
             <dd>Evaluates at a geometric point, outside a quadrature loop.</dd>
             <dt>
@@ -567,6 +576,14 @@ $ v $
               <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the operand in the shape function expression.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The operand in the shape function expression.</td>
+                </tr>
+              </tfoot>
+            </table>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in the Derived class.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a41b3cd864cb7e194caa422ca3b66070f"><div>
@@ -622,7 +639,50 @@ $ v $
               <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6d5956759cd2c1a262ef25d3927ac3d2" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Sets the current integration point.</p>
-<p>This is the preferred path while integrating: it carries both the geometric point and its quadrature metadata so shape functions can reuse tabulations and cache entries tied to the active quadrature rule. For pointwise evaluations outside a quadrature loop, construct an <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a> from a <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a> (which sets a <code>nullptr</code> quadrature formula) and pass it here.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This is the preferred path while integrating: it carries both the geometric point and its quadrature metadata so shape functions can reuse tabulations and cache entries tied to the active quadrature rule. For pointwise evaluations outside a quadrature loop, construct an <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a> from a <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> (which sets a <code>nullptr</code> quadrature formula) and pass it here.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1515051b5ab120ca4827293920a77eb3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> SpaceType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />ShapeFunctionBase&lt;Derived, FES, SpaceType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1515051b5ab120ca4827293920a77eb3" class="m-doc-self">setPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span></span>
+            </h3>
+            <p>Evaluates at a geometric point, outside a quadrature loop.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="ac10ed89d40af768f3a1bb4be01f67a3f"><div>
             <h3>
@@ -818,7 +878,7 @@ $ v $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

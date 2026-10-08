@@ -109,8 +109,8 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="aa5ea57e5f061d84d30beb04af6dab6c9">
-              <span class="m-doc-wrap-bumper"><a href="#aa5ea57e5f061d84d30beb04af6dab6c9" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a312f58afdcdb00133f0463ae3a16416d" class="m-doc">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -118,16 +118,85 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ad7d62e6aff8f37a9eff65903e4c99020">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad7d62e6aff8f37a9eff65903e4c99020" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;) const -&gt; <a href="#a9abc3543721cf3e4eac4d431904e6ec9" class="m-doc">ReturnType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac2b25ebcd615e91a54584d0109676fe1" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; xi) const -&gt; <a href="#a9abc3543721cf3e4eac4d431904e6ec9" class="m-doc">ReturnType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates at a point on the reference element.</dd>
-            <dt id="aff5a96143e4f3ed1a629b7078610f941">
+            <dt>
               <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aff5a96143e4f3ed1a629b7078610f941" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&lt;Order&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7ad1030cb9df4bbbc8ce9a9831415c72" class="m-doc">getDerivative</a>(</span><span class="m-doc-wrap">size_t direction) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&lt;Order&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the derivative of the basis function.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a312f58afdcdb00133f0463ae3a16416d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0gElement::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a312f58afdcdb00133f0463ae3a16416d" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac2b25ebcd615e91a54584d0109676fe1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a9abc3543721cf3e4eac4d431904e6ec9" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />P0gElement::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2b25ebcd615e91a54584d0109676fe1" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; xi) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates at a point on the reference element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">xi</td>
+                  <td>Reference coordinates; the constant result is independent of this argument.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7ad1030cb9df4bbbc8ce9a9831415c72"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&lt;Order&gt; Rodin::<wbr />Variational::<wbr />P0gElement::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7ad1030cb9df4bbbc8ce9a9831415c72" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t direction) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the derivative of the basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">direction</td>
+                  <td>Reference-coordinate direction; the constant basis has zero derivative in every direction.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference-coordinate derivative function for the basis.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -173,7 +242,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

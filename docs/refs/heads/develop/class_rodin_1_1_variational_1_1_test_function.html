@@ -94,8 +94,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md502">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md503">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md502">Mathematical Foundation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md503">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -137,7 +147,7 @@ $ v \in V_h $
 <use x='20.700016' y='0' xlink:href='#eq2-g2-86'/>
 <use x='27.524366' y='1.793263' xlink:href='#eq2-g1-104'/>
 </g>
-</svg> is chosen from this space.</p><section id="autotoc_md502"><h3><a href="#autotoc_md502">Mathematical Foundation</a></h3><p>The weak formulation seeks <svg class="m-math" style="width: 3.553em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 34.104401 9.962629">
+</svg> is chosen from this space.</p><section id="autotoc_md502_1s1"><section id="autotoc_md502"><h3><a href="#autotoc_md502">Mathematical Foundation</a></h3><p>The weak formulation seeks <svg class="m-math" style="width: 3.553em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 34.104401 9.962629">
 <title>
 $ u \in U_h $
 </title>
@@ -155,8 +165,7 @@ $ u \in U_h $
 </g>
 </svg> such that:</p><div class="m-math"><svg style="width: 12.389em; height: 1.245em;" viewBox="134.555141 -11.955168 118.934626 11.955168">
 <title>
-\[
-  a(u, v) = l(v) \quad \forall v \in V_h
+\[       a(u, v) = l(v) \quad \forall v \in V_h
 \]
 </title>
 <defs>
@@ -260,12 +269,12 @@ $ U_h $
 <use x='0' y='0' xlink:href='#eq9-g1-85'/>
 <use x='7.950255' y='1.793263' xlink:href='#eq9-g0-104'/>
 </g>
-</svg>)</li></ul></section><section id="autotoc_md503"><h3><a href="#autotoc_md503">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">                    </span><span class="c1">// Define finite element space</span>
+</svg>)</li></ul></section></section><section id="autotoc_md503_1s1"><section id="autotoc_md503"><h3><a href="#autotoc_md503">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">                    </span><span class="c1">// Define finite element space</span>
 <span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w">              </span><span class="c1">// Define test function</span>
 
 <span class="c1">// Use in variational formulation</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">bilinearForm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">linearForm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>TrialFunction, ShapeFunction</p></aside></section>
+<span class="k">auto</span><span class="w"> </span><span class="n">linearForm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>TrialFunction, ShapeFunction</p></aside></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -328,12 +337,12 @@ $ U_h $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="abaef323bb8483405d756d19350c9ac26">
-              <span class="m-doc-wrap-bumper">void <a href="#abaef323bb8483405d756d19350c9ac26" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a3dc8d937f4f5b212dcce79088c477dbd" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copy assignment is deleted.</dd>
-            <dt id="ac9cd733132eabbe434c4915d9517ac18">
-              <span class="m-doc-wrap-bumper">void <a href="#ac9cd733132eabbe434c4915d9517ac18" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp;&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#abbc41d44a982dc230b0871ee658a0354" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp;&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Move assignment is deleted.</dd>
             <dt>
@@ -416,6 +425,46 @@ $ U_h $
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Test function to move</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3dc8d937f4f5b212dcce79088c477dbd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />TestFunction&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3dc8d937f4f5b212dcce79088c477dbd" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Copy assignment is deleted.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abbc41d44a982dc230b0871ee658a0354"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />TestFunction&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abbc41d44a982dc230b0871ee658a0354" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&amp;&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Move assignment is deleted.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
                 </tr>
               </tbody>
             </table>
@@ -586,7 +635,7 @@ $ v_z $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

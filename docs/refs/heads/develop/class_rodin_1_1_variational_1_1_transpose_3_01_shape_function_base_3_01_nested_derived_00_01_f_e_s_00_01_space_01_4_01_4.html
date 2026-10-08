@@ -148,12 +148,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a1032485f0f34b54e357cfdf7618951ed" class="m-doc">Transpose</a>(</span><span class="m-doc-wrap">const <a href="#a7797ebdd40f654e65250ae45425e04d2" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the transpose of a ShapeFunction.</dd>
-            <dt id="ac95a67f4dee00dd4f8df9cb2c0bfdccf">
-              <span class="m-doc-wrap-bumper"><a href="#ac95a67f4dee00dd4f8df9cb2c0bfdccf" class="m-doc-self">Transpose</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac95a67f4dee00dd4f8df9cb2c0bfdccf" class="m-doc">Transpose</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a1ea678b3456b95e119cfce47fee79b9c">
-              <span class="m-doc-wrap-bumper"><a href="#a1ea678b3456b95e119cfce47fee79b9c" class="m-doc-self">Transpose</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1ea678b3456b95e119cfce47fee79b9c" class="m-doc">Transpose</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -177,8 +177,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a5634f938127c5224007acbd338b54e99" class="m-doc">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp;</span>
             </dt>
             <dd>Gets the current evaluation point.</dd>
-            <dt id="af3e22714079f369b209f9bb5dc04a850">
-              <span class="m-doc-wrap-bumper">auto <a href="#af3e22714079f369b209f9bb5dc04a850" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af3e22714079f369b209f9bb5dc04a850" class="m-doc">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp;</span>
             </dt>
             <dd>Sets the integration point the expression is evaluated at.</dd>
             <dt>
@@ -189,8 +189,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a4758cdb6b0d7f09e6719a7bfa884e86e" class="m-doc">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const -&gt; const FES&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the finite element space.</dd>
-            <dt id="a350edea67dfa070881b66ed34db4c27c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -217,6 +217,46 @@
                 <tr>
                   <td style="width: 1%">op</td>
                   <td>Shape function to transpose</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac95a67f4dee00dd4f8df9cb2c0bfdccf"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Transpose&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac95a67f4dee00dd4f8df9cb2c0bfdccf" class="m-doc-self">Transpose</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1ea678b3456b95e119cfce47fee79b9c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Transpose&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ea678b3456b95e119cfce47fee79b9c" class="m-doc-self">Transpose</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
                 </tr>
               </tbody>
             </table>
@@ -298,6 +338,32 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="af3e22714079f369b209f9bb5dc04a850"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp; Rodin::<wbr />Variational::<wbr />Transpose&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af3e22714079f369b209f9bb5dc04a850" class="m-doc-self">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip)</span></span>
+            </h3>
+            <p>Sets the integration point the expression is evaluated at.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a4f47a104973d43f1c328e9c411af0286"><div>
             <h3>
               <div class="m-doc-template">
@@ -337,6 +403,32 @@
                 <tr>
                   <th style="width: 1%">Returns</th>
                   <td>Reference to the FE space</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a350edea67dfa070881b66ed34db4c27c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Transpose&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const</span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
                 </tr>
               </tfoot>
             </table>
@@ -403,7 +495,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

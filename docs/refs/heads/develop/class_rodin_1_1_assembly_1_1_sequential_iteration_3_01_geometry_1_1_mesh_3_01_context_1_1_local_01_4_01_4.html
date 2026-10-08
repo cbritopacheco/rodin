@@ -106,8 +106,8 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a5d68bf09fc0a41ee6da82b960b794a00" class="m-doc">SequentialIteration</a>(</span><span class="m-doc-wrap">const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; mesh,
-              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp;)</span>
+              <span class="m-doc-wrap-bumper"><a href="#afd2356dbcd5efec677446ebc31bb093e" class="m-doc">SequentialIteration</a>(</span><span class="m-doc-wrap">const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; mesh,
+              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region)</span>
             </dt>
             <dd>Constructs sequential iteration over a mesh region.</dd>
           </dl>
@@ -123,29 +123,29 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a450448797e541d4a25c88ea69c3540e7" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a></span>
             </dt>
             <dd>Gets a polytope value for an indexed assembly iteration.</dd>
-            <dt id="acfab02634131e313692a9c39c73b8976">
-              <span class="m-doc-wrap-bumper">auto <a href="#acfab02634131e313692a9c39c73b8976" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acfab02634131e313692a9c39c73b8976" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Gets the topological dimension of the iteration.</dd>
-            <dt id="a636b1ea8f7b2b1920d81e6046be03eda">
-              <span class="m-doc-wrap-bumper">auto <a href="#a636b1ea8f7b2b1920d81e6046be03eda" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a636b1ea8f7b2b1920d81e6046be03eda" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Gets the number of candidate polytopes.</dd>
-            <dt id="a20dce3e37ebd07a2de80556d605f3cc4">
-              <span class="m-doc-wrap-bumper">auto <a href="#a20dce3e37ebd07a2de80556d605f3cc4" class="m-doc-self">filter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; bool</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a20dce3e37ebd07a2de80556d605f3cc4" class="m-doc">filter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; bool</span>
             </dt>
             <dd>Tests whether a candidate belongs to the iteration region.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a5d68bf09fc0a41ee6da82b960b794a00"><div>
+          <section class="m-doc-details" id="afd2356dbcd5efec677446ebc31bb093e"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />SequentialIteration&lt;Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d68bf09fc0a41ee6da82b960b794a00" class="m-doc-self">SequentialIteration</a>(</span><span class="m-doc-wrap">const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; mesh,
-              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp;)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />SequentialIteration&lt;Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd2356dbcd5efec677446ebc31bb093e" class="m-doc-self">SequentialIteration</a>(</span><span class="m-doc-wrap">const <a href="#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">MeshType</a>&amp; mesh,
+              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region)</span></span>
             </h3>
             <p>Constructs sequential iteration over a mesh region.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -156,6 +156,10 @@
                 <tr>
                   <td style="width: 1%">mesh</td>
                   <td>Mesh to iterate over</td>
+                </tr>
+                <tr>
+                  <td>region</td>
+                  <td>Mesh region selected for iteration.</td>
                 </tr>
               </tbody>
             </table>
@@ -199,6 +203,66 @@
                 <tr>
                   <th>Returns</th>
                   <td>Non-owning polytope descriptor</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acfab02634131e313692a9c39c73b8976"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Assembly::<wbr />SequentialIteration&lt;Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfab02634131e313692a9c39c73b8976" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the topological dimension of the iteration.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The topological dimension of the iteration.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a636b1ea8f7b2b1920d81e6046be03eda"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Assembly::<wbr />SequentialIteration&lt;Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a636b1ea8f7b2b1920d81e6046be03eda" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the number of candidate polytopes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of candidate polytopes.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a20dce3e37ebd07a2de80556d605f3cc4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Assembly::<wbr />SequentialIteration&lt;Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20dce3e37ebd07a2de80556d605f3cc4" class="m-doc-self">filter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <p>Tests whether a candidate belongs to the iteration region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether the candidate belongs to the integration region.</td>
                 </tr>
               </tfoot>
             </table>
@@ -248,7 +312,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

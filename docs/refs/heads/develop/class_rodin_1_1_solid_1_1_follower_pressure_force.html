@@ -171,14 +171,14 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a5643927256f4d7e042ec6e2626924ff7">
-              <span class="m-doc-wrap-bumper"><a href="#a5643927256f4d7e042ec6e2626924ff7" class="m-doc-self">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; pressure,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5643927256f4d7e042ec6e2626924ff7" class="m-doc">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; pressure,
               const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
               const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span>
             </dt>
-            <dd>Pressure captured BY REFERENCE: all copies follow the variable.</dd>
-            <dt id="aa577b6b9e487c36fd5c03a3772d58d5f">
-              <span class="m-doc-wrap-bumper"><a href="#aa577b6b9e487c36fd5c03a3772d58d5f" class="m-doc-self">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2cd37d03d783265ad4d9ba471c52a8ad" class="m-doc">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -186,27 +186,183 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a11bdb4002f3e88b7b26e9d567e275ffb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a11bdb4002f3e88b7b26e9d567e275ffb" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face) -&gt; <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a11bdb4002f3e88b7b26e9d567e275ffb" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face) -&gt; <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Sets the current face and assembles the element residual.</dd>
-            <dt id="a804c6a07f8876572c654f955d09a107c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns an entry of the current element residual vector.</dd>
-            <dt id="a07a0ed42183d01cb7d7a5e5edf3caba3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the current face polytope.</dd>
-            <dt id="aba6371885ea424dd84df03d85fcb0706">
-              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the integration region.</dd>
-            <dt id="a916763c0422b35c28489f08228c2ec8e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a916763c0422b35c28489f08228c2ec8e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a916763c0422b35c28489f08228c2ec8e" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies this follower-pressure residual.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a5643927256f4d7e042ec6e2626924ff7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />FollowerPressureForce&lt;TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5643927256f4d7e042ec6e2626924ff7" class="m-doc-self">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; pressure,
+              const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
+              const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pressure</td>
+                  <td>Pressure applied on the surface.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>Displacement field.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Pressure captured BY REFERENCE: all copies follow the variable.</p>
+          </div></section>
+          <section class="m-doc-details" id="a2cd37d03d783265ad4d9ba471c52a8ad"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />FollowerPressureForce&lt;TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2cd37d03d783265ad4d9ba471c52a8ad" class="m-doc-self">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a11bdb4002f3e88b7b26e9d567e275ffb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>&amp; Rodin::<wbr />Solid::<wbr />FollowerPressureForce&lt;TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11bdb4002f3e88b7b26e9d567e275ffb" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Sets the current face and assembles the element residual.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">face</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a804c6a07f8876572c654f955d09a107c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> Rodin::<wbr />Solid::<wbr />FollowerPressureForce&lt;TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t te) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns an entry of the current element residual vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">te</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Integral computed by the quadrature rule.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a07a0ed42183d01cb7d7a5e5edf3caba3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Solid::<wbr />FollowerPressureForce&lt;TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the current face polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The current face polytope.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aba6371885ea424dd84df03d85fcb0706"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Solid::<wbr />FollowerPressureForce&lt;TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the integration region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration region.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a916763c0422b35c28489f08228c2ec8e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_follower_pressure_force.html" class="m-doc">FollowerPressureForce</a>* Rodin::<wbr />Solid::<wbr />FollowerPressureForce&lt;TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a916763c0422b35c28489f08228c2ec8e" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polymorphically copies this follower-pressure residual.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -252,7 +408,7 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

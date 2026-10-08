@@ -119,8 +119,7 @@
         </nav>
 <p>Represents the inner product in a bilinear form:</p><div class="m-math"><svg style="width: 10.401em; height: 1.245em;" viewBox="144.344603 -11.955168 99.853785 11.955168">
 <title>
-\[
-   (u, v) \mapsto u(x) : v(x)
+\[   (u, v) \mapsto u(x) : v(x)
 \]
 </title>
 <defs>
@@ -226,17 +225,17 @@ $ a(u, v) $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="aa30605a78683afeabc4ff8128ffe0b63">
-              <span class="m-doc-wrap-bumper"><a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc">Dot</a>(</span><span class="m-doc-wrap">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
               const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the expression from its left and right operands.</dd>
-            <dt id="a870b081053865d3cfcb309952451a411">
-              <span class="m-doc-wrap-bumper"><a href="#a870b081053865d3cfcb309952451a411" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a870b081053865d3cfcb309952451a411" class="m-doc">Dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a8ea0b01546962a7618446316f478c041">
-              <span class="m-doc-wrap-bumper"><a href="#a8ea0b01546962a7618446316f478c041" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8ea0b01546962a7618446316f478c041" class="m-doc">Dot</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -244,29 +243,29 @@ $ a(u, v) $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a27d508dbc60ed5fe35334634980355ea">
-              <span class="m-doc-wrap-bumper">auto <a href="#a27d508dbc60ed5fe35334634980355ea" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a27d508dbc60ed5fe35334634980355ea" class="m-doc">getLHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the left-hand side operand.</dd>
-            <dt id="a0dba62dd79cbb7ce209fc7718fe12843">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0dba62dd79cbb7ce209fc7718fe12843" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0dba62dd79cbb7ce209fc7718fe12843" class="m-doc">getRHS</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the right-hand side operand.</dd>
-            <dt id="a5634f938127c5224007acbd338b54e99">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5634f938127c5224007acbd338b54e99" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5634f938127c5224007acbd338b54e99" class="m-doc">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp;</span>
             </dt>
             <dd>Gets the integration point the expression is evaluated at.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a7b027169fc2aef097c2528026c1e0cdd" class="m-doc">setIntegrationPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) -&gt; <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp;</span>
             </dt>
             <dd>Sets the integration point the expression is evaluated at.</dd>
-            <dt id="afff7a6689a01f69f38c4ab00ebb97955">
-              <span class="m-doc-wrap-bumper">auto <a href="#afff7a6689a01f69f38c4ab00ebb97955" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t tr,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afff7a6689a01f69f38c4ab00ebb97955" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t tr,
               size_t te) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns an entry of the element matrix.</dd>
-            <dt id="a9a1cb09f4677024a3b681cdb49fe4a25">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -277,6 +276,122 @@ $ a(u, v) $
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa30605a78683afeabc4ff8128ffe0b63"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa30605a78683afeabc4ff8128ffe0b63" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs the expression from its left and right operands.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>Left operand.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>Right operand.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a870b081053865d3cfcb309952451a411"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a870b081053865d3cfcb309952451a411" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8ea0b01546962a7618446316f478c041"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ea0b01546962a7618446316f478c041" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a27d508dbc60ed5fe35334634980355ea"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#ae5b1950ddf04107632612563727b81aa" class="m-doc">LHSType</a>&amp; Rodin::<wbr />Variational::<wbr />Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a27d508dbc60ed5fe35334634980355ea" class="m-doc-self">getLHS</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the left-hand side operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The left-hand side operand.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0dba62dd79cbb7ce209fc7718fe12843"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; Rodin::<wbr />Variational::<wbr />Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0dba62dd79cbb7ce209fc7718fe12843" class="m-doc-self">getRHS</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the right-hand side operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The right-hand side operand.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5634f938127c5224007acbd338b54e99"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; Rodin::<wbr />Variational::<wbr />Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5634f938127c5224007acbd338b54e99" class="m-doc-self">getIntegrationPoint</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the integration point the expression is evaluated at.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration point the expression is evaluated at.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a7b027169fc2aef097c2528026c1e0cdd"><div>
             <h3>
               <div class="m-doc-template">
@@ -291,14 +406,71 @@ $ a(u, v) $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">ip&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Point defining the current evaluation binding.</td>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>This expression.</td>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afff7a6689a01f69f38c4ab00ebb97955"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afff7a6689a01f69f38c4ab00ebb97955" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns an entry of the element matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tr</td>
+                  <td>Trial shape-function expression.</td>
+                </tr>
+                <tr>
+                  <td>te</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Expression for the selected component.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9a1cb09f4677024a3b681cdb49fe4a25"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&lt;LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">poly</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
                 </tr>
               </tfoot>
             </table>
@@ -366,7 +538,7 @@ $ a(u, v) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

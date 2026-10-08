@@ -139,8 +139,8 @@
               using <a href="#a56808c86c123d70341266761d0bc71d4" class="m-doc-self">RangeType</a> = <a href="#a4b4601a49c4eb2b5fab2fce8bbfae779" class="m-doc">ScalarType</a>
             </dt>
             <dd>Range (evaluation value) type.</dd>
-            <dt id="affff0d7818d49a59776e8374ee21b90c">
-              using <a href="#affff0d7818d49a59776e8374ee21b90c" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="#a3ae53bf3bbae7ce243cc5e27231bbd45" class="m-doc">OperandType</a>&gt;&gt;
+            <dt id="a1d7f06eca19e46b29766cd62529c478a">
+              using <a href="#a1d7f06eca19e46b29766cd62529c478a" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="#a3ae53bf3bbae7ce243cc5e27231bbd45" class="m-doc">OperandType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -153,12 +153,12 @@
               size_t component) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs component extractor for GridFunction.</dd>
-            <dt id="a8aa1c71f650a21c496b953333cf29faa">
-              <span class="m-doc-wrap-bumper"><a href="#a8aa1c71f650a21c496b953333cf29faa" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8aa1c71f650a21c496b953333cf29faa" class="m-doc">Component</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a947125c9063b7fefd2776d43acffce42">
-              <span class="m-doc-wrap-bumper"><a href="#a947125c9063b7fefd2776d43acffce42" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a947125c9063b7fefd2776d43acffce42" class="m-doc">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -179,8 +179,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the component at a point.</dd>
-            <dt id="a2db2949e727b5e6fecadb8cc5645b4d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -212,6 +212,46 @@
                 <tr>
                   <td>component</td>
                   <td>Zero-based component index</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8aa1c71f650a21c496b953333cf29faa"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Component&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8aa1c71f650a21c496b953333cf29faa" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a947125c9063b7fefd2776d43acffce42"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Component&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a947125c9063b7fefd2776d43acffce42" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
                 </tr>
               </tbody>
             </table>
@@ -273,6 +313,32 @@
                 <tr>
                   <th>Returns</th>
                   <td>Scalar value of the component</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2db2949e727b5e6fecadb8cc5645b4d3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Component&lt;GridFunction&lt;FES, Data&gt;&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geom</td>
+                  <td>Reference geometry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
                 </tr>
               </tfoot>
             </table>
@@ -339,7 +405,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

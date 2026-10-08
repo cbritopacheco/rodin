@@ -125,8 +125,7 @@ $ L^2 $
 </g>
 </svg> projection, assemble the mass problem:</p><div class="m-math"><svg style="width: 19.637em; height: 2.819em;" viewBox="100.014229 -27.065451 188.514586 27.065451">
 <title>
-\[
-  \int_\Omega u_h v_h\,dx = \int_\Omega f v_h\,dx
+\[  \int_\Omega u_h v_h\,dx = \int_\Omega f v_h\,dx
   \qquad \forall v_h \in V_h.
 \]
 </title>
@@ -179,8 +178,7 @@ $ L^2 $
 
 <span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">uh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">getSolution</span><span class="p">();</span></pre><p>Use this route for optimal-order transfer of rough data, conservative projection workflows, or whenever the variational definition of the projection matters.</p></section></section><section id="guides-numerical-contracts-signs"><h2><a href="#guides-numerical-contracts-signs">Problem Sign Convention</a></h2><p>A <code>Problem</code> assignment writes the residual equation with all terms on the left-hand side. The Poisson weak form</p><div class="m-math"><svg style="width: 7.197em; height: 1.245em;" viewBox="159.723653 -11.955168 69.0957 11.955168">
 <title>
-\[
-  a(u,v) = \ell(v)
+\[  a(u,v) = \ell(v)
 \]
 </title>
 <defs>
@@ -231,8 +229,7 @@ $ b $
 </g>
 </svg> with the sign implied by the residual equation. For nonlinear Newton problems, assemble the tangent and residual so the linearized system is</p><div class="m-math"><svg style="width: 11.065em; height: 1.402em;" viewBox="141.157762 -13.45978 106.227463 13.45978">
 <title>
-\[
-  J(x^k)\,\delta x^k = -F(x^k).
+\[  J(x^k)\,\delta x^k = -F(x^k).
 \]
 </title>
 <defs>
@@ -299,8 +296,7 @@ $ J(x) $
 </g>
 </svg>, the check is:</p><div class="m-math"><svg style="width: 18.241em; height: 2.631em;" viewBox="106.714749 -25.254797 175.113481 25.254797">
 <title>
-\[
-  J(x)w \approx
+\[  J(x)w \approx
   \frac{R(x+\varepsilon w)-R(x-\varepsilon w)}{2\varepsilon}.
 \]
 </title>
@@ -391,7 +387,7 @@ $ J(x) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

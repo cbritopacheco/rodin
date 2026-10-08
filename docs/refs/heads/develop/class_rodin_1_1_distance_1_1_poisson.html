@@ -82,8 +82,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md26">Mathematical Background</a></li>
-            <li><a href="#autotoc_md27">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md26">Mathematical Background</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md27">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,8 +104,7 @@
         </nav>
 <p>This class computes an approximation to the distance function by solving a Poisson equation with appropriate boundary conditions. The method solves:</p><div class="m-math"><svg style="width: 8.335em; height: 0.956em;" viewBox="154.264176 -9.17282 80.01462 9.172828">
 <title>
-\[
-  -\Delta u = 1 \quad \text{in } \Omega
+\[       -\Delta u = 1 \quad \text{in } \Omega
 \]
 </title>
 <defs>
@@ -120,8 +129,7 @@
 </g>
 </svg></div><div class="m-math"><svg style="width: 7.338em; height: 0.878em;" viewBox="159.048967 -8.433687 70.445056 8.427251">
 <title>
-\[
-  u = 0 \quad \text{on } \partial\Omega
+\[       u = 0 \quad \text{on } \partial\Omega
 \]
 </title>
 <defs>
@@ -152,9 +160,9 @@ $ u $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-117'/>
 </g>
-</svg> approximates the distance to the boundary.</p><section id="autotoc_md26"><h3><a href="#autotoc_md26">Mathematical Background</a></h3><p>Unlike the Eikonal equation which gives exact distances, the Poisson approach provides a smooth approximation that can be computed more efficiently for certain applications.</p></section><section id="autotoc_md27"><h3><a href="#autotoc_md27">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg> approximates the distance to the boundary.</p><section id="autotoc_md26_1s1"><section id="autotoc_md26"><h3><a href="#autotoc_md26">Mathematical Background</a></h3><p>Unlike the Eikonal equation which gives exact distances, the Poisson approach provides a smooth approximation that can be computed more efficiently for certain applications.</p></section></section><section id="autotoc_md27_1s1"><section id="autotoc_md27"><h3><a href="#autotoc_md27">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">Poisson</span><span class="w"> </span><span class="n">poissonDist</span><span class="p">;</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poissonDist</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span></pre></section>
+<span class="k">auto</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poissonDist</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span></pre></section></section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -247,7 +255,7 @@ $ u $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

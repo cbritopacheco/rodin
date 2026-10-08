@@ -194,20 +194,20 @@
               <span class="m-doc-wrap-bumper">auto <a href="#adae52d2754eb847f1bbf68be8294ccbb" class="m-doc">step</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> dt) -&gt; <a href="#aeffab38c5301ed4c68087273ed91685e" class="m-doc">Report</a></span>
             </dt>
             <dd>Advances the model by one time step.</dd>
-            <dt id="a0232fd0aa65a7156bd7ebd07c5c86e87">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0232fd0aa65a7156bd7ebd07c5c86e87" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aef3f85a21f55c15144ac0ff3e4f982d8" class="m-doc">State</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0232fd0aa65a7156bd7ebd07c5c86e87" class="m-doc">getState</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aef3f85a21f55c15144ac0ff3e4f982d8" class="m-doc">State</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the current state.</dd>
-            <dt id="a0febbfb9a7f151b2e2beeae7e36e562d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0febbfb9a7f151b2e2beeae7e36e562d" class="m-doc-self">getHistory</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc">History</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0febbfb9a7f151b2e2beeae7e36e562d" class="m-doc">getHistory</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc">History</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the stored time history.</dd>
-            <dt id="a66ae5398a8ac737f37f1595fcec9aa09">
-              <span class="m-doc-wrap-bumper">auto <a href="#a66ae5398a8ac737f37f1595fcec9aa09" class="m-doc-self">getReport</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aeffab38c5301ed4c68087273ed91685e" class="m-doc">Report</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a66ae5398a8ac737f37f1595fcec9aa09" class="m-doc">getReport</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aeffab38c5301ed4c68087273ed91685e" class="m-doc">Report</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the most recent nonlinear solve report.</dd>
-            <dt id="a2e5b25ea166241e0eeaeb6de4531243f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2e5b25ea166241e0eeaeb6de4531243f" class="m-doc-self">getUnknowns</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2e5b25ea166241e0eeaeb6de4531243f" class="m-doc">getUnknowns</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the packed unknown vector.</dd>
             <dt>
@@ -417,6 +417,74 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a0232fd0aa65a7156bd7ebd07c5c86e87"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#aef3f85a21f55c15144ac0ff3e4f982d8" class="m-doc">State</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0232fd0aa65a7156bd7ebd07c5c86e87" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the current state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The current state.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0febbfb9a7f151b2e2beeae7e36e562d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc">History</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0febbfb9a7f151b2e2beeae7e36e562d" class="m-doc-self">getHistory</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the stored time history.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The stored time history.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a66ae5398a8ac737f37f1595fcec9aa09"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#aeffab38c5301ed4c68087273ed91685e" class="m-doc">Report</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a66ae5398a8ac737f37f1595fcec9aa09" class="m-doc-self">getReport</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the most recent nonlinear solve report.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The most recent nonlinear solve report.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2e5b25ea166241e0eeaeb6de4531243f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2e5b25ea166241e0eeaeb6de4531243f" class="m-doc-self">getUnknowns</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the packed unknown vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The packed unknown vector.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="aeb237bfbc5fe02cfdfd0b8e52897190e"><div>
             <h3>
               <div class="m-doc-template">
@@ -497,7 +565,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

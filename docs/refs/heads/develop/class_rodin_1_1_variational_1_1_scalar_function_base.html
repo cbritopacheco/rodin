@@ -112,8 +112,7 @@
         </nav>
 <p>ScalarFunctionBase extends FunctionBase to represent functions mapping points in the domain to scalar values:</p><div class="m-math"><svg style="width: 5.343em; height: 1.107em;" viewBox="168.62305 -10.626787 51.296891 10.626798">
 <title>
-\[
-   f: \Omega \to \mathbb{F}
+\[   f: \Omega \to \mathbb{F}
 \]
 </title>
 <defs>
@@ -318,8 +317,8 @@ $ \mathbb{F} $
               using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
             </dt>
             <dd>Type of scalar values returned by this function.</dd>
-            <dt id="a1121e59f8f8b4fa41e65ed5656d2fce3">
-              using <a href="#a1121e59f8f8b4fa41e65ed5656d2fce3" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>, Derived&gt;&gt;
+            <dt id="aedcb1487bc99ebc35768fa1942ed148d">
+              using <a href="#aedcb1487bc99ebc35768fa1942ed148d" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>, Derived&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -352,33 +351,49 @@ $ \mathbb{F} $
               <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the scalar function at a point.</dd>
-            <dt id="aa249459e67c36e2343e940d08970970a">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the expression at an integration point.</dd>
-            <dt id="a9a1cb09f4677024a3b681cdb49fe4a25">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aac1e0e8d7fa21bb245a7ea2908036eb7" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy of the function.</dd>
-            <dt id="ac1f4fe7c4fef5a9e347524ae1c5e0ee1">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac1f4fe7c4fef5a9e347524ae1c5e0ee1" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac1f4fe7c4fef5a9e347524ae1c5e0ee1" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Import traceOf methods from parent.</dd>
-            <dt id="ad722433deff18a068eb7bd27da532d45">
-              <div class="m-doc-template">template&lt;class A1, class A2, class ... As&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad722433deff18a068eb7bd27da532d45" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+            <dd>Sets a single attribute as the trace domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a44ff9fe9f91406694a76cb99d4d2338f" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
               const A2&amp; a2,
               const As&amp;... as) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Import traceOf methods from parent.</dd>
-            <dt id="aba5919eddb1f90f8ca65bbd25d065d60">
-              <span class="m-doc-wrap-bumper">auto <a href="#aba5919eddb1f90f8ca65bbd25d065d60" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dd>Sets multiple attributes as the trace domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba5919eddb1f90f8ca65bbd25d065d60" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Import traceOf methods from parent.</dd>
+            <dd>Sets a set of attributes as the trace domain.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function on a Point belonging to the mesh.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function at an integration point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad7584a02ad39a4e93816d166a02c170c" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; auto</span>
+            </dt>
+            <dd>Extracts the i-th component of the function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afd564b09b05a55499d7576b85f69a01e" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const -&gt; auto</span>
+            </dt>
+            <dd>Extracts the (i,j)-th component of a matrix function.</dd>
           </dl>
         </section>
         <section>
@@ -450,6 +465,58 @@ $ \mathbb{F} $
             </table>
 <p>CRTP method that delegates to the derived class&#x27;s implementation.</p>
           </div></section>
+          <section class="m-doc-details" id="aa249459e67c36e2343e940d08970970a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the expression at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9a1cb09f4677024a3b681cdb49fe4a25"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a1cb09f4677024a3b681cdb49fe4a25" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">poly</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="aac1e0e8d7fa21bb245a7ea2908036eb7"><div>
             <h3>
               <div class="m-doc-template">
@@ -467,6 +534,209 @@ $ \mathbb{F} $
               </tfoot>
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>Caller is responsible for managing the returned pointer</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac1f4fe7c4fef5a9e347524ae1c5e0ee1" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets a single attribute as the trace domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Mesh attribute defining the trace domain</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Convenience function to call traceOf(FlatSet&lt;int&gt;) with only one attribute. The trace operation restricts function evaluation to the specified boundary or interface regions.</p><aside class="m-note m-default"><h4>See also</h4><p>getTraceDomain()</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a44ff9fe9f91406694a76cb99d4d2338f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44ff9fe9f91406694a76cb99d4d2338f" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              const A2&amp; a2,
+              const As&amp;... as) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets multiple attributes as the trace domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">a1</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+                <tr>
+                  <td>a2</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+                <tr>
+                  <td>as</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The attributes are collected into the trace domain of the function.</p>
+          </div></section>
+          <section class="m-doc-details" id="aba5919eddb1f90f8ca65bbd25d065d60"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba5919eddb1f90f8ca65bbd25d065d60" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attr) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets a set of attributes as the trace domain.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Set of mesh attributes defining the trace domain</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to self (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The trace domain specifies regions (typically boundaries or interfaces) where the function should be evaluated via continuous extension from adjacent elements.</p><aside class="m-note m-default"><h4>See also</h4><p>getTraceDomain()</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a7c866cf8be951c464aceeb788579b29a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the function on a Point belonging to the mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Point at which to evaluate the function</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Function value at the given point</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>This operator provides convenient function call syntax for evaluation. Delegates to the derived class&#x27;s getValue() method via CRTP.</p>
+          </div></section>
+          <section class="m-doc-details" id="a15eb99a5cecce266b59c5e7c1a9b2f4d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the function at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad7584a02ad39a4e93816d166a02c170c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7584a02ad39a4e93816d166a02c170c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+            </h3>
+            <p>Extracts the i-th component of the function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Component index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Component function object</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For vector or matrix-valued functions, this returns a scalar function representing the specified component.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_component_8h.html">Component</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="afd564b09b05a55499d7576b85f69a01e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />ScalarFunctionBase&lt;Scalar, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afd564b09b05a55499d7576b85f69a01e" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const</span></span>
+            </h3>
+            <p>Extracts the (i,j)-th component of a matrix function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Row index</td>
+                </tr>
+                <tr>
+                  <td>j&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Column index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Component function object</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="_component_8h.html">Component</a></p></aside>
           </div></section>
         </section>
       </div>
@@ -513,7 +783,7 @@ $ \mathbb{F} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

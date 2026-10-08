@@ -118,7 +118,7 @@
             <li><a href="#guides-io-xdmf-see-also">See Also</a></li>
           </ul>
         </nav>
-<section id="guides-io-xdmf-intro"><h2><a href="#guides-io-xdmf-intro">Introduction</a></h2><p>The eXtensible Data Model and Format (XDMF) is a data format designed for scientific computing. It uses a split-file architecture:</p><ul><li>An <strong>XML file</strong> (<code>.xdmf</code>) that describes the structure of the data</li><li>One or more <strong>HDF5 files</strong> (<code>.h5</code>) that store the actual numerical data</li></ul><p>This design combines human-readable metadata with efficient binary storage, making it ideal for large-scale simulations. XDMF files can be directly opened in <a href="https://www.paraview.org/">ParaView</a> for visualization.</p></section><section id="guides-io-xdmf-class"><h2><a href="#guides-io-xdmf-class">The XDMF Class</a></h2><p>The <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">Rodin::<wbr />IO::<wbr />XDMF</a> class provides a high-level interface for writing XDMF files. It follows a grid-based approach where you:</p><ol><li>Create an XDMF writer</li><li>Associate a mesh with a named grid</li><li>Add fields (scalar, vector, tensor) to the grid</li><li>Write snapshots, optionally with time stamps</li></ol><section id="guides-io-xdmf-class-basic"><h3><a href="#guides-io-xdmf-class-basic">Basic Usage</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<section id="guides-io-xdmf-intro"><h2><a href="#guides-io-xdmf-intro">Introduction</a></h2><p>The eXtensible Data Model and Format (XDMF) is a data format designed for scientific computing. It uses a split-file architecture:</p><ul><li>An <strong>XML file</strong> (<code>.xdmf</code>) that describes the structure of the data</li><li>One or more <strong>HDF5 files</strong> (<code>.h5</code>) that store the actual numerical data</li></ul><p>This design combines human-readable metadata with efficient binary storage, making it ideal for large-scale simulations. XDMF files can be directly opened in <a href="https://www.paraview.org/">ParaView</a> for visualization.</p></section><section id="guides-io-xdmf-class"><h2><a href="#guides-io-xdmf-class">The XDMF Class</a></h2><p>The <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> class provides a high-level interface for writing XDMF files. It follows a grid-based approach where you:</p><ol><li>Create an XDMF writer</li><li>Associate a mesh with a named grid</li><li>Add fields (scalar, vector, tensor) to the grid</li><li>Write snapshots, optionally with time stamps</li></ol><section id="guides-io-xdmf-class-basic"><h3><a href="#guides-io-xdmf-class-basic">Basic Usage</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
 
@@ -263,7 +263,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

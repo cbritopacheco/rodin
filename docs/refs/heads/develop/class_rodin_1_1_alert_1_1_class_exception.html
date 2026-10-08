@@ -116,21 +116,32 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a3e06f0a7f19de22d45c05de6f8649dbf" class="m-doc">ClassException</a>(</span><span class="m-doc-wrap">const T&amp;)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a47eef52bb78ddec84b6737d0d917f58f" class="m-doc">ClassException</a>(</span><span class="m-doc-wrap">const T&amp; instance)</span>
             </dt>
             <dd>Constructs a ClassException for the given class instance.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a3e06f0a7f19de22d45c05de6f8649dbf"><div>
+          <section class="m-doc-details" id="a47eef52bb78ddec84b6737d0d917f58f"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />ClassException&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e06f0a7f19de22d45c05de6f8649dbf" class="m-doc-self">ClassException</a>(</span><span class="m-doc-wrap">const T&amp;)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />ClassException&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a47eef52bb78ddec84b6737d0d917f58f" class="m-doc-self">ClassException</a>(</span><span class="m-doc-wrap">const T&amp; instance)</span></span>
             </h3>
             <p>Constructs a ClassException for the given class instance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">instance</td>
+                  <td>Class instance used to deduce the class type; its value is unused.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Automatically extracts the class name using Boost.TypeIndex and prepends it to the exception message with appropriate formatting.</p>
           </div></section>
         </section>
@@ -178,7 +189,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

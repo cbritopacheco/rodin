@@ -81,7 +81,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md183">HDF5 File Layout</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md183">HDF5 File Layout</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -91,19 +96,19 @@
             </li>
           </ul>
         </nav>
-<p>Provides <code>GridFunctionPrinter</code> and <code>GridFunctionLoader</code> specializations that serialise the locally-owned portion of a PETSc <code>Vec</code> to/from HDF5 files. This enables checkpoint/restart workflows and post-processing with external HDF5-compatible tools.</p><section id="autotoc_md183"><h3><a href="#autotoc_md183">HDF5 File Layout</a></h3><pre class="m-code"><span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span>
+<p>Provides <code>GridFunctionPrinter</code> and <code>GridFunctionLoader</code> specializations that serialise the locally-owned portion of a PETSc <code>Vec</code> to/from HDF5 files. This enables checkpoint/restart workflows and post-processing with external HDF5-compatible tools.</p><section id="autotoc_md183_1s1"><section id="autotoc_md183"><h3><a href="#autotoc_md183">HDF5 File Layout</a></h3><pre class="m-code"><span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span>
 <span class="err">├──</span><span class="w"> </span><span class="n">Meta</span><span class="o">/</span>
 <span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="n">Size</span><span class="w">       </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="err">—</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">local</span><span class="w"> </span><span class="n">DOFs</span><span class="p">)</span>
 <span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="n">Dimension</span><span class="w">  </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="err">—</span><span class="w"> </span><span class="n">vector</span><span class="w"> </span><span class="n">dimension</span><span class="p">)</span>
 <span class="err">└──</span><span class="w"> </span><span class="n">Values</span><span class="o">/</span>
-<span class="w">    </span><span class="err">└──</span><span class="w"> </span><span class="n">Data</span><span class="w">       </span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">D</span><span class="w"> </span><span class="n">array</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="err">—</span><span class="w"> </span><span class="n">DOF</span><span class="w"> </span><span class="n">coefficients</span><span class="p">)</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">Rodin::<wbr />IO::<wbr />GridFunctionPrinter</a></p><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">Rodin::<wbr />IO::<wbr />GridFunctionLoader</a></p><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />GridFunction</a></p></aside></section>
+<span class="w">    </span><span class="err">└──</span><span class="w"> </span><span class="n">Data</span><span class="w">       </span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">D</span><span class="w"> </span><span class="n">array</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="err">—</span><span class="w"> </span><span class="n">DOF</span><span class="w"> </span><span class="n">coefficients</span><span class="p">)</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">Rodin::<wbr />IO::<wbr />GridFunctionPrinter</a></p><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">Rodin::<wbr />IO::<wbr />GridFunctionLoader</a></p><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />GridFunction</a></p></aside></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::IO</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::<wbr />IO</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">IO</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_i_o_1_1_internal.html" class="m-doc">Rodin::IO::Internal</a></dt>
             <dd>Internal helpers for PETSc HDF5 serialization primitives.</dd>
           </dl>
@@ -167,7 +172,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

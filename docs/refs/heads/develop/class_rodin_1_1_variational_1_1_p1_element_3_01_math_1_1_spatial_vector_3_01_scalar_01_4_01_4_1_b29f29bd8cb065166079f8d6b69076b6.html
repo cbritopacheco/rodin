@@ -77,7 +77,7 @@
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_element_8h.html">&lt;Rodin/Variational/P1/P1Element.h&gt;</a></div>
           <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html">P1Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html">BasisFunction</a>::<wbr/></span>DerivativeFunction <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html">Rodin::Variational::P1Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::BasisFunction</a>::<wbr/></span>DerivativeFunction <span class="m-thin">class</span>
         </h1>
         <p>Represents a derivative function of a P1 vector element.</p>
         <table class="m-table m-fullwidth m-flat">
@@ -114,8 +114,8 @@
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a derivative function for the P1 element.</dd>
-            <dt id="ac7ce97e868790a844a1b5a88b3051db4">
-              <span class="m-doc-wrap-bumper"><a href="#ac7ce97e868790a844a1b5a88b3051db4" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap">const DerivativeFunction&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2f543d3665d56fa8db45a6360e96bc9b" class="m-doc">DerivativeFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_b29f29bd8cb065166079f8d6b69076b6.html" class="m-doc">DerivativeFunction</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -123,13 +123,13 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a646f97b4bba2f826b5474b4890a78592">
-              <span class="m-doc-wrap-bumper">void <a href="#a646f97b4bba2f826b5474b4890a78592" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">Scalar&amp; out,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a646f97b4bba2f826b5474b4890a78592" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">Scalar&amp; out,
               const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates into the output argument at a reference point.</dd>
-            <dt id="a5d57b6e58aee82a6e242883e45bca01b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5d57b6e58aee82a6e242883e45bca01b" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; Scalar <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5d57b6e58aee82a6e242883e45bca01b" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; Scalar <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates at a point on the reference element.</dd>
           </dl>
@@ -174,6 +174,77 @@
                   <td>Geometry type of the polytope</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2f543d3665d56fa8db45a6360e96bc9b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P1Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f543d3665d56fa8db45a6360e96bc9b" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_b29f29bd8cb065166079f8d6b69076b6.html" class="m-doc">DerivativeFunction</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a646f97b4bba2f826b5474b4890a78592"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />P1Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a646f97b4bba2f826b5474b4890a78592" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">Scalar&amp; out,
+              const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates into the output argument at a reference point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">out</td>
+                  <td>Storage for the computed result.</td>
+                </tr>
+                <tr>
+                  <td>r</td>
+                  <td>Reference coordinates at which to evaluate the basis.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5d57b6e58aee82a6e242883e45bca01b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Scalar Rodin::<wbr />Variational::<wbr />P1Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d57b6e58aee82a6e242883e45bca01b" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates at a point on the reference element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rc</td>
+                  <td>Coordinates in the reference element.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Basis or reference-coordinate derivative value at the supplied reference point.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
         </section>
@@ -221,7 +292,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

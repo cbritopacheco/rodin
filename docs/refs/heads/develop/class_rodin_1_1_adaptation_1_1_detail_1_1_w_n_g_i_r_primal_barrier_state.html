@@ -93,8 +93,8 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a3966c9165827956e07bad2884203d0d0">
-              <span class="m-doc-wrap-bumper"><a href="#a3966c9165827956e07bad2884203d0d0" class="m-doc-self">WNGIRPrimalBarrierState</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_cell_deformation.html" class="m-doc">CellDeformation</a>&amp; deformation,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3966c9165827956e07bad2884203d0d0" class="m-doc">WNGIRPrimalBarrierState</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_cell_deformation.html" class="m-doc">CellDeformation</a>&amp; deformation,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; innerGradient,
               const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; parameters,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> barrierCoefficient)</span>
@@ -105,43 +105,204 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a760c145fab507385195d172d03f7ef37">
-              <span class="m-doc-wrap-bumper">auto <a href="#a760c145fab507385195d172d03f7ef37" class="m-doc-self">isFeasible</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a760c145fab507385195d172d03f7ef37" class="m-doc">isFeasible</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
             <dd>Whether feasible.</dd>
-            <dt id="abf1d7816af48e8104f9283bda4705aa2">
-              <span class="m-doc-wrap-bumper">auto <a href="#abf1d7816af48e8104f9283bda4705aa2" class="m-doc-self">getJacobianAction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abf1d7816af48e8104f9283bda4705aa2" class="m-doc">getJacobianAction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>The jacobian action.</dd>
-            <dt id="aa0b7b7958b9089e5f008ddcd8dd0fa89">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa0b7b7958b9089e5f008ddcd8dd0fa89" class="m-doc-self">getDistortionAction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa0b7b7958b9089e5f008ddcd8dd0fa89" class="m-doc">getDistortionAction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>The distortion action.</dd>
-            <dt id="a125bec12c32f8b8dd129b073ab9ec9f4">
-              <span class="m-doc-wrap-bumper">auto <a href="#a125bec12c32f8b8dd129b073ab9ec9f4" class="m-doc-self">getJacobianSlack</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a125bec12c32f8b8dd129b073ab9ec9f4" class="m-doc">getJacobianSlack</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>The jacobian slack.</dd>
-            <dt id="a37e68359b98ff38e41a8bf11f1f2a21b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a37e68359b98ff38e41a8bf11f1f2a21b" class="m-doc-self">getDistortionSlack</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a37e68359b98ff38e41a8bf11f1f2a21b" class="m-doc">getDistortionSlack</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>The distortion slack.</dd>
-            <dt id="a8767c598ee4f399a340be291ea3ec279">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8767c598ee4f399a340be291ea3ec279" class="m-doc-self">getJacobianHessian</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8767c598ee4f399a340be291ea3ec279" class="m-doc">getJacobianHessian</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>The jacobian hessian.</dd>
-            <dt id="a15e149333dc05038a774f4c9f6a67844">
-              <span class="m-doc-wrap-bumper">auto <a href="#a15e149333dc05038a774f4c9f6a67844" class="m-doc-self">getDistortionHessian</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a15e149333dc05038a774f4c9f6a67844" class="m-doc">getDistortionHessian</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>The distortion hessian.</dd>
-            <dt id="aeada8d7a764e0eecae1f7dcf068d7e68">
-              <span class="m-doc-wrap-bumper">auto <a href="#aeada8d7a764e0eecae1f7dcf068d7e68" class="m-doc-self">getJacobianForce</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aeada8d7a764e0eecae1f7dcf068d7e68" class="m-doc">getJacobianForce</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>The jacobian force.</dd>
-            <dt id="a51ddde3a0603e3f46a04634e65cd40df">
-              <span class="m-doc-wrap-bumper">auto <a href="#a51ddde3a0603e3f46a04634e65cd40df" class="m-doc-self">getDistortionForce</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a51ddde3a0603e3f46a04634e65cd40df" class="m-doc">getDistortionForce</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>The distortion force.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a3966c9165827956e07bad2884203d0d0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3966c9165827956e07bad2884203d0d0" class="m-doc-self">WNGIRPrimalBarrierState</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_cell_deformation.html" class="m-doc">CellDeformation</a>&amp; deformation,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; innerGradient,
+              const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; parameters,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> barrierCoefficient)</span></span>
+            </h3>
+            <p>Constructs the w n g i r primal barrier state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">deformation</td>
+                  <td>Deformation data.</td>
+                </tr>
+                <tr>
+                  <td>innerGradient</td>
+                  <td>Gradient of the inner displacement field.</td>
+                </tr>
+                <tr>
+                  <td>parameters</td>
+                  <td>Parameters configuring the operation.</td>
+                </tr>
+                <tr>
+                  <td>barrierCoefficient</td>
+                  <td>Coefficient multiplying the determinant barrier.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a760c145fab507385195d172d03f7ef37"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a760c145fab507385195d172d03f7ef37" class="m-doc-self">isFeasible</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Whether feasible.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Whether the sampled determinant satisfies the barrier admissibility condition.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abf1d7816af48e8104f9283bda4705aa2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf1d7816af48e8104f9283bda4705aa2" class="m-doc-self">getJacobianAction</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The jacobian action.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The jacobian action.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa0b7b7958b9089e5f008ddcd8dd0fa89"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa0b7b7958b9089e5f008ddcd8dd0fa89" class="m-doc-self">getDistortionAction</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The distortion action.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The distortion action.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a125bec12c32f8b8dd129b073ab9ec9f4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a125bec12c32f8b8dd129b073ab9ec9f4" class="m-doc-self">getJacobianSlack</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The jacobian slack.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The jacobian slack.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a37e68359b98ff38e41a8bf11f1f2a21b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37e68359b98ff38e41a8bf11f1f2a21b" class="m-doc-self">getDistortionSlack</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The distortion slack.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The distortion slack.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8767c598ee4f399a340be291ea3ec279"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8767c598ee4f399a340be291ea3ec279" class="m-doc-self">getJacobianHessian</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The jacobian hessian.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The jacobian hessian.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a15e149333dc05038a774f4c9f6a67844"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e149333dc05038a774f4c9f6a67844" class="m-doc-self">getDistortionHessian</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The distortion hessian.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The distortion hessian.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aeada8d7a764e0eecae1f7dcf068d7e68"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeada8d7a764e0eecae1f7dcf068d7e68" class="m-doc-self">getJacobianForce</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The jacobian force.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The jacobian force.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a51ddde3a0603e3f46a04634e65cd40df"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierState::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51ddde3a0603e3f46a04634e65cd40df" class="m-doc-self">getDistortionForce</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The distortion force.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The distortion force.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -187,7 +348,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

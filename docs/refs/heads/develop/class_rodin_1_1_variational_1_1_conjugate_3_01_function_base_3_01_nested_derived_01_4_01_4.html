@@ -157,8 +157,7 @@ $ f(x) = u(x) + iv(x) $
 </g>
 </svg>, the conjugate is:</p><div class="m-math"><svg style="width: 10.564em; height: 1.375em;" viewBox="143.56206 -13.203721 101.418877 13.203721">
 <title>
-\[
-   \overline{f}(x) = u(x) - iv(x)
+\[   \overline{f}(x) = u(x) - iv(x)
 \]
 </title>
 <defs>
@@ -208,8 +207,8 @@ $ f(x) = u(x) + iv(x) $
               using <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;
             </dt>
             <dd>Operand type.</dd>
-            <dt id="a77098c5cbcea2c238f46fb4bf74a9a55">
-              using <a href="#a77098c5cbcea2c238f46fb4bf74a9a55" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>&lt;<a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&gt;&gt;
+            <dt id="ac75bf451a13fff0ad63a52ab554fbfb1">
+              using <a href="#ac75bf451a13fff0ad63a52ab554fbfb1" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>&lt;<a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -243,12 +242,12 @@ $ f(x) = u(x) + iv(x) $
               <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp;</span>
             </dt>
             <dd>Gets the operand function.</dd>
-            <dt id="a2dfc5d11269410a3ff535d016cd71634">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2dfc5d11269410a3ff535d016cd71634" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geometry) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2dfc5d11269410a3ff535d016cd71634" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geometry) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
-            <dt id="a413b650672a12875acd4e5215bbc266f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a413b650672a12875acd4e5215bbc266f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a413b650672a12875acd4e5215bbc266f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies the derived function.</dd>
           </dl>
@@ -376,6 +375,49 @@ $ \overline{f(p)} $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a2dfc5d11269410a3ff535d016cd71634"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Conjugate&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2dfc5d11269410a3ff535d016cd71634" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geometry) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geometry</td>
+                  <td>Reference geometry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a413b650672a12875acd4e5215bbc266f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>* Rodin::<wbr />Variational::<wbr />Conjugate&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a413b650672a12875acd4e5215bbc266f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polymorphically copies the derived function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -421,7 +463,7 @@ $ \overline{f(p)} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

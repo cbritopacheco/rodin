@@ -81,12 +81,42 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md542">Kinematics</a></li>
-            <li><a href="#autotoc_md543">Constitutive Point and Input Injection</a></li>
-            <li><a href="#autotoc_md544">Constitutive Laws</a></li>
-            <li><a href="#autotoc_md545">Integrators</a></li>
-            <li><a href="#autotoc_md546">Derived Fields</a></li>
-            <li><a href="#autotoc_md547">Typical Usage</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md542">Kinematics</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md543">Constitutive Point and Input Injection</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md544">Constitutive Laws</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md545">Integrators</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md546">Derived Fields</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md547">Typical Usage</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -98,7 +128,7 @@
             </li>
           </ul>
         </nav>
-<p>The Solid module provides a layered framework for finite-strain hyperelasticity. It is organized into four sub-layers:</p><section id="autotoc_md542"><h3><a href="#autotoc_md542">Kinematics</a></h3><p><a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a> encapsulates all finite-strain kinematic quantities at a quadrature point. Set the displacement gradient with <code>setDisplacementGradient(H)</code> and query derived tensors:</p><table class="m-table"><thead><tr><th>Getter</th><th>Returns</th><th>Definition</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">getDisplacementGradient()</a></td><td><svg class="m-math" style="width: 1.816em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 17.434651 8.169354">
+<p>The Solid module provides a layered framework for finite-strain hyperelasticity. It is organized into four sub-layers:</p><section id="autotoc_md542_1s1"><section id="autotoc_md542"><h3><a href="#autotoc_md542">Kinematics</a></h3><p><a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a> encapsulates all finite-strain kinematic quantities at a quadrature point. Set the displacement gradient with <code>setDisplacementGradient(H)</code> and query derived tensors:</p><table class="m-table"><thead><tr><th>Getter</th><th>Returns</th><th>Definition</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">getDisplacementGradient()</a></td><td><svg class="m-math" style="width: 1.816em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 17.434651 8.169354">
 <title>
 $ \nabla\mathbf{u} $
 </title>
@@ -388,9 +418,9 @@ $ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2\mathbf{a}_0 $
 <use x='59.99193' y='0' xlink:href='#eq17-g0-97'/>
 <use x='66.529913' y='1.793263' xlink:href='#eq17-g3-48'/>
 </g>
-</svg> (for anisotropic materials; constructed with a fiber direction vector)</li></ul></section><section id="autotoc_md543"><h3><a href="#autotoc_md543">Constitutive Point and Input Injection</a></h3><p><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a> bundles a <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a> with an optional <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a> (for spatial location) and a tag-based auxiliary data store. Auxiliary data (fiber directions, activation values, etc.) is injected via typed tags:</p><pre class="m-code"><span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">FiberDirection</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fiberVec</span><span class="p">);</span>
+</svg> (for anisotropic materials; constructed with a fiber direction vector)</li></ul></section></section><section id="autotoc_md543_1s1"><section id="autotoc_md543"><h3><a href="#autotoc_md543">Constitutive Point and Input Injection</a></h3><p><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a> bundles a <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a> with an optional <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a> (for spatial location) and a tag-based auxiliary data store. Auxiliary data (fiber directions, activation values, etc.) is injected via typed tags:</p><pre class="m-code"><span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">FiberDirection</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fiberVec</span><span class="p">);</span>
 <span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">FiberDirection</span><span class="o">&gt;</span><span class="p">();</span>
-<span class="kt">bool</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp</span><span class="p">.</span><span class="n">has</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">Activation</span><span class="o">&gt;</span><span class="p">();</span></pre><p>The <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input&lt;Derived&gt;</a> CRTP base and <a href="#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> callable allow the user to inject auxiliary data at each quadrature point during assembly. Integrators accept input via <code>setInput()</code>.</p></section><section id="autotoc_md544"><h3><a href="#autotoc_md544">Constitutive Laws</a></h3><p>Each law derives from <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw&lt;Derived&gt;</a> (CRTP base) and provides:</p><ul><li>A <code>Cache</code> struct for precomputed invariant data</li><li><code>setCache(cache, cp)</code> — populate the cache from a <code>ConstitutivePoint</code></li><li><code>getFirstPiolaKirchhoffStress(P, cache, cp)</code> — <svg class="m-math" style="width: 6.696em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 64.277902 11.955168">
+<span class="kt">bool</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp</span><span class="p">.</span><span class="n">has</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">Activation</span><span class="o">&gt;</span><span class="p">();</span></pre><p>The <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input&lt;Derived&gt;</a> CRTP base and <a href="#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> callable allow the user to inject auxiliary data at each quadrature point during assembly. Integrators accept input via <code>setInput()</code>.</p></section></section><section id="autotoc_md544_1s1"><section id="autotoc_md544"><h3><a href="#autotoc_md544">Constitutive Laws</a></h3><p>Each law derives from <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw&lt;Derived&gt;</a> (CRTP base) and provides:</p><ul><li>A <code>Cache</code> struct for precomputed invariant data</li><li><code>setCache(cache, cp)</code> — populate the cache from a <code>ConstitutivePoint</code></li><li><code>getFirstPiolaKirchhoffStress(P, cache, cp)</code> — <svg class="m-math" style="width: 6.696em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 64.277902 11.955168">
 <title>
 $ \mathbf{P} = \partial W / \partial \mathbf{F} $
 </title>
@@ -726,8 +756,7 @@ $ \nu $
 </g>
 </svg>:</p><div class="m-math"><svg style="width: 19.353em; height: 2.859em;" viewBox="100.778529 -27.446579 185.790404 27.446579">
 <title>
-\[
-  \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
+\[  \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
   \mu = \frac{E}{2(1+\nu)}
 \]
 </title>
@@ -774,7 +803,7 @@ $ \nu $
 <use x='275.478674' y='-2.988792' xlink:href='#eq33-g1-23'/>
 <use x='282.016607' y='-2.988792' xlink:href='#eq33-g2-41'/>
 </g>
-</svg></div></section><section id="autotoc_md545"><h3><a href="#autotoc_md545">Integrators</a></h3><p>Both integrators use <code>setDisplacement()</code> to set the linearization point and <code>setInput()</code> for auxiliary data injection. Quadrature order is auto-selected (2× FE order) unless overridden with <code>setQuadratureOrder()</code>.</p><table class="m-table"><thead><tr><th>Integrator</th><th>Form type</th><th>Assembles</th><th>Mathematical expression</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalForce&lt;Law, FES&gt;</a></td><td>Linear (residual)</td><td>Internal force vector</td><td><svg class="m-math" style="width: 10.456em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 100.373295 13.781784">
+</svg></div></section></section><section id="autotoc_md545_1s1"><section id="autotoc_md545"><h3><a href="#autotoc_md545">Integrators</a></h3><p>Both integrators use <code>setDisplacement()</code> to set the linearization point and <code>setInput()</code> for auxiliary data injection. Quadrature order is auto-selected (2× FE order) unless overridden with <code>setQuadratureOrder()</code>.</p><table class="m-table"><thead><tr><th>Integrator</th><th>Form type</th><th>Assembles</th><th>Mathematical expression</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalForce&lt;Law, FES&gt;</a></td><td>Linear (residual)</td><td>Internal force vector</td><td><svg class="m-math" style="width: 10.456em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 100.373295 13.781784">
 <title>
 $ R_i = \int_\Omega \mathbf{P} : \nabla\phi_i \, dX $
 </title>
@@ -851,7 +880,7 @@ $ K_{ij} = \int_\Omega D\mathbf{P}[\nabla\phi_j] : \nabla\phi_i \, dX $
 <span class="n">residual</span><span class="p">.</span><span class="n">setDisplacement</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">                  </span><span class="c1">// set linearization point</span>
 
 <span class="n">Solid</span><span class="o">::</span><span class="n">MaterialTangent</span><span class="w"> </span><span class="nf">tangent</span><span class="p">(</span><span class="n">law</span><span class="p">,</span><span class="w"> </span><span class="n">du</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w">  </span><span class="c1">// (law, TrialFunction, TestFunction)</span>
-<span class="n">tangent</span><span class="p">.</span><span class="n">setDisplacement</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">                   </span><span class="c1">// set linearization point</span></pre></section><section id="autotoc_md546"><h3><a href="#autotoc_md546">Derived Fields</a></h3><ul><li><a href="class_rodin_1_1_solid_1_1_first_piola_kirchhoff_stress.html" class="m-doc">FirstPiolaKirchhoffStress&lt;Law&gt;</a> — Post-process <svg class="m-math" style="width: 0.957em; height: 0.854em; vertical-align: -0.000em;" viewBox="0 -8.202578 9.187779 8.202578">
+<span class="n">tangent</span><span class="p">.</span><span class="n">setDisplacement</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">                   </span><span class="c1">// set linearization point</span></pre></section></section><section id="autotoc_md546_1s1"><section id="autotoc_md546"><h3><a href="#autotoc_md546">Derived Fields</a></h3><ul><li><a href="class_rodin_1_1_solid_1_1_first_piola_kirchhoff_stress.html" class="m-doc">FirstPiolaKirchhoffStress&lt;Law&gt;</a> — Post-process <svg class="m-math" style="width: 0.957em; height: 0.854em; vertical-align: -0.000em;" viewBox="0 -8.202578 9.187779 8.202578">
 <title>
 $ \mathbf{P} $
 </title>
@@ -912,7 +941,7 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
 <use x='60.077254' y='0' xlink:href='#eq38-g0-73'/>
 <use x='65.08626' y='0' xlink:href='#eq38-g3-41'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md547"><h3><a href="#autotoc_md547">Typical Usage</a></h3><p>A quasi-static hyperelastic block under gravity using <code>NeoHookean</code> (from <code>examples/Solid/BlockGravity.cpp</code>):</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solid.h&gt;</span>
+</svg></li></ul></section></section><section id="autotoc_md547_1s1"><section id="autotoc_md547"><h3><a href="#autotoc_md547">Typical Usage</a></h3><p>A quasi-static hyperelastic block under gravity using <code>NeoHookean</code> (from <code>examples/Solid/BlockGravity.cpp</code>):</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solid.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver/NewtonSolver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver/SparseLU.h&gt;</span>
 
@@ -947,7 +976,7 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
 <span class="n">solver</span><span class="p">.</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
 <span class="w">      </span><span class="p">.</span><span class="n">setAbsoluteTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">)</span>
 <span class="w">      </span><span class="p">.</span><span class="n">setRelativeTolerance</span><span class="p">(</span><span class="mf">1e-8</span><span class="p">);</span>
-<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">u</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>The module is header-only (<code>Rodin::Solid</code> INTERFACE library).</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_elasticity.html" class="m-doc">Linear elasticity</a> for small-deformation problems.</p></aside></section>
+<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">u</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>The module is header-only (<code>Rodin::Solid</code> INTERFACE library).</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_elasticity.html" class="m-doc">Linear elasticity</a> for small-deformation problems.</p></aside></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -1033,7 +1062,7 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
               <div class="m-doc-template">template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
               class <a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">FollowerPressureTangent</a>
             </dt>
-            <dd>Bilinear-form integrator: the EXACT load stiffness of the follower pressure,  <svg class="m-math" style="width: 17.205em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 165.169536 13.283652">
+            <dd>Bilinear-form integrator: the EXACT load stiffness of the follower pressure,   <svg class="m-math" style="width: 17.205em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 165.169536 13.283652">
 <title>
 $ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
    + \mathbf{x}_{,\xi} \times \delta\mathbf{d}_{,\eta})
@@ -1265,77 +1294,77 @@ $ K_{up} $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class TestFunctionType, class DisplacementType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a6ce9ae8251e3c50c1a2a08551f4c6a63" class="m-doc">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; FollowerPressureForce&lt; std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a2758d78e49c22d1b36ac6cf5d8479553" class="m-doc">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; pressure,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement) -&gt; FollowerPressureForce&lt; std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
             </dt>
             <dd>CTAD guide for the follower-pressure residual.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a606bf657a16f5047ecaa3098eb91bfb5" class="m-doc">FollowerPressureTangent</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp;,
-              const TrialFunctionType&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; FollowerPressureTangent&lt; std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#acc87ce00834f1e4ed5ffbf0dd8eab836" class="m-doc">FollowerPressureTangent</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; pressure,
+              const TrialFunctionType&amp; u,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement) -&gt; FollowerPressureTangent&lt; std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
             </dt>
             <dd>CTAD guide for the follower-pressure tangent.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Law, class State&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a8083a685a3eb3b0424434b77c344c18d" class="m-doc">InternalVirtualWork</a>(</span><span class="m-doc-wrap">const Law&amp;,
-              const State&amp;) -&gt; InternalVirtualWork&lt; std::decay_t&lt; Law &gt;, std::decay_t&lt; State &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a4760c5c757c450866bf5dc7a58d62561" class="m-doc">InternalVirtualWork</a>(</span><span class="m-doc-wrap">const Law&amp; law,
+              const State&amp; displacement) -&gt; InternalVirtualWork&lt; std::decay_t&lt; Law &gt;, std::decay_t&lt; State &gt; &gt;</span>
             </dt>
-            <dd>CTAD deduction guide for InternalVirtualWork.</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#aed0ae81f0b28537ca4505aff46b6ce02" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalVirtualWorkResidual&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#af8ae3c763514164e776b03cd0bc07386" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement) -&gt; InternalVirtualWorkResidual&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
             </dt>
-            <dd>CTAD deduction guide for the displacement-only residual.</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#af49f6cdc39e15e635e1175c4c64cfa6c" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;,
-              const PressureType&amp;) -&gt; InternalVirtualWorkResidual&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt;, std::decay_t&lt; PressureType &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#aba4b03a6dd1521dbcf0d88dbab262f3f" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement,
+              const PressureType&amp; pressure) -&gt; InternalVirtualWorkResidual&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt;, std::decay_t&lt; PressureType &gt; &gt;</span>
             </dt>
-            <dd>CTAD deduction guide for the mixed u-p momentum residual.</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;class TestPressFunctionType, class DisplacementType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#abe6f818fd35a9019ab981f23d9d8723f" class="m-doc">InternalVirtualWorkResidualP</a>(</span><span class="m-doc-wrap">const TestPressFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalVirtualWorkResidualP&lt; std::decay_t&lt; TestPressFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#ad3c2ee6bec4bb9a29e9b38f2f37dcf3e" class="m-doc">InternalVirtualWorkResidualP</a>(</span><span class="m-doc-wrap">const TestPressFunctionType&amp; q,
+              const DisplacementType&amp; displacement) -&gt; InternalVirtualWorkResidualP&lt; std::decay_t&lt; TestPressFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
             </dt>
-            <dd>CTAD deduction guide for the incompressibility constraint residual.</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a0d5a4150d2684d8fd4c59b0cc7029d66" class="m-doc">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const TrialFunctionType&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalVirtualWorkTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a3e00d4410fc532749ea5f482b32b8242" class="m-doc">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              const TrialFunctionType&amp; u,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement) -&gt; InternalVirtualWorkTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
             </dt>
-            <dd>CTAD deduction guide for the displacement-only tangent.</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType, class PressureType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a3a5c6fc9797d8767b065d695e5b9a2c6" class="m-doc">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const TrialFunctionType&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;,
-              const PressureType&amp;) -&gt; InternalVirtualWorkTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt;, std::decay_t&lt; PressureType &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a38ebd8527987596bef6cc588f534eda9" class="m-doc">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              const TrialFunctionType&amp; u,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement,
+              const PressureType&amp; pressure) -&gt; InternalVirtualWorkTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt;, std::decay_t&lt; PressureType &gt; &gt;</span>
             </dt>
-            <dd>CTAD deduction guide for the mixed u-p displacement block.</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialPressFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a1bbee567cc7bb0321eb3d04177f0fd30" class="m-doc">InternalVirtualWorkTangentUP</a>(</span><span class="m-doc-wrap">const TrialPressFunctionType&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalVirtualWorkTangentUP&lt; std::decay_t&lt; TrialPressFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a3260d26b5faac769a47756cd07ee1340" class="m-doc">InternalVirtualWorkTangentUP</a>(</span><span class="m-doc-wrap">const TrialPressFunctionType&amp; p,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement) -&gt; InternalVirtualWorkTangentUP&lt; std::decay_t&lt; TrialPressFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
             </dt>
-            <dd>CTAD deduction guide for the K_up block.</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;class TrialFunctionType, class TestPressFunctionType, class DisplacementType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a38a55fb3b5402afd7381a79ade3cd09f" class="m-doc">InternalVirtualWorkTangentPU</a>(</span><span class="m-doc-wrap">const TrialFunctionType&amp;,
-              const TestPressFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalVirtualWorkTangentPU&lt; std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestPressFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#abf84678346d967fab44dee84979d3ebd" class="m-doc">InternalVirtualWorkTangentPU</a>(</span><span class="m-doc-wrap">const TrialFunctionType&amp; u,
+              const TestPressFunctionType&amp; q,
+              const DisplacementType&amp; displacement) -&gt; InternalVirtualWorkTangentPU&lt; std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestPressFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
             </dt>
-            <dd>CTAD deduction guide for the K_pu block.</dd>
+            <dd></dd>
           </dl>
         </section>
         <section>
@@ -1371,128 +1400,330 @@ $ K_{up} $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a6ce9ae8251e3c50c1a2a08551f4c6a63"><div>
+          <section class="m-doc-details" id="a2758d78e49c22d1b36ac6cf5d8479553"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_follower_pressure_8h.html">&lt;Rodin/Solid/Integrators/FollowerPressure.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ce9ae8251e3c50c1a2a08551f4c6a63" class="m-doc-self">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; FollowerPressureForce&lt; std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2758d78e49c22d1b36ac6cf5d8479553" class="m-doc-self">FollowerPressureForce</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; pressure,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement) -&gt; FollowerPressureForce&lt; std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
             <p>CTAD guide for the follower-pressure residual.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pressure</td>
+                  <td>Pressure applied on the surface.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>Displacement field.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
-          <section class="m-doc-details" id="a606bf657a16f5047ecaa3098eb91bfb5"><div>
+          <section class="m-doc-details" id="acc87ce00834f1e4ed5ffbf0dd8eab836"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_follower_pressure_8h.html">&lt;Rodin/Solid/Integrators/FollowerPressure.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a606bf657a16f5047ecaa3098eb91bfb5" class="m-doc-self">FollowerPressureTangent</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp;,
-              const TrialFunctionType&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; FollowerPressureTangent&lt; std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc87ce00834f1e4ed5ffbf0dd8eab836" class="m-doc-self">FollowerPressureTangent</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; pressure,
+              const TrialFunctionType&amp; u,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement) -&gt; FollowerPressureTangent&lt; std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
             <p>CTAD guide for the follower-pressure tangent.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">pressure</td>
+                  <td>The applied pressure, captured by reference</td>
+                </tr>
+                <tr>
+                  <td>u</td>
+                  <td>The trial displacement function</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>The test displacement function</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>The current displacement state</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
-          <section class="m-doc-details" id="a8083a685a3eb3b0424434b77c344c18d"><div>
+          <section class="m-doc-details" id="a4760c5c757c450866bf5dc7a58d62561"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWork.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class Law, class State&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8083a685a3eb3b0424434b77c344c18d" class="m-doc-self">InternalVirtualWork</a>(</span><span class="m-doc-wrap">const Law&amp;,
-              const State&amp;) -&gt; InternalVirtualWork&lt; std::decay_t&lt; Law &gt;, std::decay_t&lt; State &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4760c5c757c450866bf5dc7a58d62561" class="m-doc-self">InternalVirtualWork</a>(</span><span class="m-doc-wrap">const Law&amp; law,
+              const State&amp; displacement) -&gt; InternalVirtualWork&lt; std::decay_t&lt; Law &gt;, std::decay_t&lt; State &gt; &gt;</span></span>
             </h3>
-            <p>CTAD deduction guide for InternalVirtualWork.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">law</td>
+                  <td>The constitutive law (stored by value)</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>The current displacement (stored by reference)</td>
+                </tr>
+              </tbody>
+            </table>
+<p>CTAD deduction guide for InternalVirtualWork</p>
           </div></section>
-          <section class="m-doc-details" id="aed0ae81f0b28537ca4505aff46b6ce02"><div>
+          <section class="m-doc-details" id="af8ae3c763514164e776b03cd0bc07386"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_residual_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkResidual.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed0ae81f0b28537ca4505aff46b6ce02" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalVirtualWorkResidual&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af8ae3c763514164e776b03cd0bc07386" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement) -&gt; InternalVirtualWorkResidual&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
-            <p>CTAD deduction guide for the displacement-only residual.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">law</td>
+                  <td>The constitutive law</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>The displacement test function</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>The current displacement state</td>
+                </tr>
+              </tbody>
+            </table>
+<p>CTAD deduction guide for the displacement-only residual</p>
           </div></section>
-          <section class="m-doc-details" id="af49f6cdc39e15e635e1175c4c64cfa6c"><div>
+          <section class="m-doc-details" id="aba4b03a6dd1521dbcf0d88dbab262f3f"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_residual_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkResidual.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TestFunctionType, class DisplacementType, class PressureType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af49f6cdc39e15e635e1175c4c64cfa6c" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;,
-              const PressureType&amp;) -&gt; InternalVirtualWorkResidual&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt;, std::decay_t&lt; PressureType &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba4b03a6dd1521dbcf0d88dbab262f3f" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement,
+              const PressureType&amp; pressure) -&gt; InternalVirtualWorkResidual&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt;, std::decay_t&lt; PressureType &gt; &gt;</span></span>
             </h3>
-            <p>CTAD deduction guide for the mixed u-p momentum residual.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">law</td>
+                  <td>The isochoric constitutive law</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>The displacement test function</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>The current displacement state</td>
+                </tr>
+                <tr>
+                  <td>pressure</td>
+                  <td>The current pressure state</td>
+                </tr>
+              </tbody>
+            </table>
+<p>CTAD deduction guide for the mixed u-p momentum residual</p>
           </div></section>
-          <section class="m-doc-details" id="abe6f818fd35a9019ab981f23d9d8723f"><div>
+          <section class="m-doc-details" id="ad3c2ee6bec4bb9a29e9b38f2f37dcf3e"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_residual_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkResidual.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class TestPressFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abe6f818fd35a9019ab981f23d9d8723f" class="m-doc-self">InternalVirtualWorkResidualP</a>(</span><span class="m-doc-wrap">const TestPressFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalVirtualWorkResidualP&lt; std::decay_t&lt; TestPressFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad3c2ee6bec4bb9a29e9b38f2f37dcf3e" class="m-doc-self">InternalVirtualWorkResidualP</a>(</span><span class="m-doc-wrap">const TestPressFunctionType&amp; q,
+              const DisplacementType&amp; displacement) -&gt; InternalVirtualWorkResidualP&lt; std::decay_t&lt; TestPressFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
-            <p>CTAD deduction guide for the incompressibility constraint residual.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">q</td>
+                  <td>The pressure test function</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>The current displacement state</td>
+                </tr>
+              </tbody>
+            </table>
+<p>CTAD deduction guide for the incompressibility constraint residual</p>
           </div></section>
-          <section class="m-doc-details" id="a0d5a4150d2684d8fd4c59b0cc7029d66"><div>
+          <section class="m-doc-details" id="a3e00d4410fc532749ea5f482b32b8242"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_tangent_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkTangent.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d5a4150d2684d8fd4c59b0cc7029d66" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const TrialFunctionType&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalVirtualWorkTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e00d4410fc532749ea5f482b32b8242" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              const TrialFunctionType&amp; u,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement) -&gt; InternalVirtualWorkTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
-            <p>CTAD deduction guide for the displacement-only tangent.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">law</td>
+                  <td>The constitutive law</td>
+                </tr>
+                <tr>
+                  <td>u</td>
+                  <td>The trial displacement function</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>The test displacement function</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>The current displacement state</td>
+                </tr>
+              </tbody>
+            </table>
+<p>CTAD deduction guide for the displacement-only tangent</p>
           </div></section>
-          <section class="m-doc-details" id="a3a5c6fc9797d8767b065d695e5b9a2c6"><div>
+          <section class="m-doc-details" id="a38ebd8527987596bef6cc588f534eda9"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_tangent_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkTangent.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType, class PressureType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a5c6fc9797d8767b065d695e5b9a2c6" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const TrialFunctionType&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;,
-              const PressureType&amp;) -&gt; InternalVirtualWorkTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt;, std::decay_t&lt; PressureType &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38ebd8527987596bef6cc588f534eda9" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              const TrialFunctionType&amp; u,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement,
+              const PressureType&amp; pressure) -&gt; InternalVirtualWorkTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt;, std::decay_t&lt; PressureType &gt; &gt;</span></span>
             </h3>
-            <p>CTAD deduction guide for the mixed u-p displacement block.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">law</td>
+                  <td>The isochoric constitutive law</td>
+                </tr>
+                <tr>
+                  <td>u</td>
+                  <td>The trial displacement function</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>The test displacement function</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>The current displacement state</td>
+                </tr>
+                <tr>
+                  <td>pressure</td>
+                  <td>The current pressure state</td>
+                </tr>
+              </tbody>
+            </table>
+<p>CTAD deduction guide for the mixed u-p displacement block</p>
           </div></section>
-          <section class="m-doc-details" id="a1bbee567cc7bb0321eb3d04177f0fd30"><div>
+          <section class="m-doc-details" id="a3260d26b5faac769a47756cd07ee1340"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_tangent_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkTangent.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class TrialPressFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1bbee567cc7bb0321eb3d04177f0fd30" class="m-doc-self">InternalVirtualWorkTangentUP</a>(</span><span class="m-doc-wrap">const TrialPressFunctionType&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalVirtualWorkTangentUP&lt; std::decay_t&lt; TrialPressFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3260d26b5faac769a47756cd07ee1340" class="m-doc-self">InternalVirtualWorkTangentUP</a>(</span><span class="m-doc-wrap">const TrialPressFunctionType&amp; p,
+              const TestFunctionType&amp; v,
+              const DisplacementType&amp; displacement) -&gt; InternalVirtualWorkTangentUP&lt; std::decay_t&lt; TrialPressFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
-            <p>CTAD deduction guide for the K_up block.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>The trial pressure function</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>The test displacement function</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>The current displacement state</td>
+                </tr>
+              </tbody>
+            </table>
+<p>CTAD deduction guide for the K_up block</p>
           </div></section>
-          <section class="m-doc-details" id="a38a55fb3b5402afd7381a79ade3cd09f"><div>
+          <section class="m-doc-details" id="abf84678346d967fab44dee84979d3ebd"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_tangent_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkTangent.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class TrialFunctionType, class TestPressFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38a55fb3b5402afd7381a79ade3cd09f" class="m-doc-self">InternalVirtualWorkTangentPU</a>(</span><span class="m-doc-wrap">const TrialFunctionType&amp;,
-              const TestPressFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalVirtualWorkTangentPU&lt; std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestPressFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf84678346d967fab44dee84979d3ebd" class="m-doc-self">InternalVirtualWorkTangentPU</a>(</span><span class="m-doc-wrap">const TrialFunctionType&amp; u,
+              const TestPressFunctionType&amp; q,
+              const DisplacementType&amp; displacement) -&gt; InternalVirtualWorkTangentPU&lt; std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestPressFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
-            <p>CTAD deduction guide for the K_pu block.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>The trial displacement function</td>
+                </tr>
+                <tr>
+                  <td>q</td>
+                  <td>The test pressure function</td>
+                </tr>
+                <tr>
+                  <td>displacement</td>
+                  <td>The current displacement state</td>
+                </tr>
+              </tbody>
+            </table>
+<p>CTAD deduction guide for the K_pu block</p>
           </div></section>
         </section>
       </div>
@@ -1539,7 +1770,7 @@ $ K_{up} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

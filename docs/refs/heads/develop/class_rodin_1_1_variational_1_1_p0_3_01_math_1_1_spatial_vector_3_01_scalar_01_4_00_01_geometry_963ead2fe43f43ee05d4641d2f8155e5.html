@@ -78,6 +78,7 @@
           <div class="m-doc-template">template&lt;class Callable&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_geometry_528a191f4fdcc1b235c37cf6ac806724.html">P0&lt;Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>::<wbr/></span>Pushforward <span class="m-thin">class</span>
         </h1>
+        <p>Pushes a reference vector field forward to a physical cell.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -91,7 +92,6 @@
             </li>
           </ul>
         </nav>
-<p>Pushes a reference vector field forward to a physical cell.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -131,6 +131,17 @@
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr />Pushforward&lt;Callable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1553e8f4adb8569e86fee7b75c2373f4" class="m-doc-self">Pushforward</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp;&amp; function) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">function</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Binds a reference-domain callable.</p>
           </div></section>
           <section class="m-doc-details" id="a4148cfd70157a29f68877089d1c45e9b"><div>
@@ -140,6 +151,23 @@
               </div>
               <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P0&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr />Pushforward&lt;Callable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4148cfd70157a29f68877089d1c45e9b" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; point) const</span></span>
             </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">point</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Transformed field value at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Evaluates the reference field at a physical point&#x27;s chart coordinate.</p>
           </div></section>
         </section>
@@ -187,7 +215,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

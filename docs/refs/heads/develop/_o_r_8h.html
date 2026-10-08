@@ -81,9 +81,24 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md440">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md441">Applications</a></li>
-            <li><a href="#autotoc_md442">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md440">Mathematical Foundation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md441">Applications</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md442">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -93,7 +108,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the OR class, which implements the logical OR operation between boolean-valued functions. This operator is used for combining logical conditions in variational formulations.</p><section id="autotoc_md440"><h3><a href="#autotoc_md440">Mathematical Foundation</a></h3><p>For boolean functions <svg class="m-math" style="width: 8.603em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 82.588312 11.955168">
+<p>This file defines the OR class, which implements the logical OR operation between boolean-valued functions. This operator is used for combining logical conditions in variational formulations.</p><section id="autotoc_md440_1s1"><section id="autotoc_md440"><h3><a href="#autotoc_md440">Mathematical Foundation</a></h3><p>For boolean functions <svg class="m-math" style="width: 8.603em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 82.588312 11.955168">
 <title>
 $ p, q : \Omega \to \{0,1\} $
 </title>
@@ -124,8 +139,7 @@ $ p, q : \Omega \to \{0,1\} $
 </g>
 </svg>, the OR operator:</p><div class="m-math"><svg style="width: 21.381em; height: 3.736em;" viewBox="91.043611 -35.865862 205.260246 35.865869">
 <title>
-\[
-  (p \lor q)(x) = \begin{cases} 1 &amp; \text{if } p(x) = 1 \text{ or } q(x) = 1 \\ 0 &amp; \text{otherwise} \end{cases}
+\[     (p \lor q)(x) = \begin{cases} 1 &amp; \text{if } p(x) = 1 \text{ or } q(x) = 1 \\ 0 &amp; \text{otherwise} \end{cases}
 \]
 </title>
 <defs>
@@ -188,16 +202,16 @@ $ p, q : \Omega \to \{0,1\} $
 <use x='220.629989' y='-5.798537' xlink:href='#eq2-g5-115'/>
 <use x='225.280549' y='-5.798537' xlink:href='#eq2-g5-101'/>
 </g>
-</svg></div></section><section id="autotoc_md441"><h3><a href="#autotoc_md441">Applications</a></h3><ul><li>Combining region indicators</li><li>Logical conditions for adaptive methods</li><li>Piecewise function definitions based on multiple criteria</li></ul></section><section id="autotoc_md442"><h3><a href="#autotoc_md442">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">      </span><span class="c1">// Boolean condition</span>
+</svg></div></section></section><section id="autotoc_md441_1s1"><section id="autotoc_md441"><h3><a href="#autotoc_md441">Applications</a></h3><ul><li>Combining region indicators</li><li>Logical conditions for adaptive methods</li><li>Piecewise function definitions based on multiple criteria</li></ul></section></section><section id="autotoc_md442_1s1"><section id="autotoc_md442"><h3><a href="#autotoc_md442">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">      </span><span class="c1">// Boolean condition</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">      </span><span class="c1">// Another condition</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">combined</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">q</span><span class="p">;</span><span class="w">  </span><span class="c1">// True if either condition holds</span></pre></section>
+<span class="k">auto</span><span class="w"> </span><span class="n">combined</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">q</span><span class="p">;</span><span class="w">  </span><span class="c1">// True if either condition holds</span></pre></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -254,7 +268,7 @@ $ p, q : \Omega \to \{0,1\} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

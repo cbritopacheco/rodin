@@ -83,7 +83,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md137">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md137">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -95,9 +100,9 @@
             </li>
           </ul>
         </nav>
-<p>Serializes a complete Geometry::Mesh to an HDF5 file including:</p><ul><li>Vertex geometry (<code>/Mesh/Geometry/Vertices</code>)</li><li>Full connectivity (entity CSR per dimension, incidence CSR, state)</li><li>Polytope attributes and transformations</li></ul><p>This printer is strictly for canonical Rodin mesh persistence. It does not write any XDMF-specific datasets. The XDMF visualization path (IO::XDMF) handles its own derived topology generation separately.</p><p>Stream-based printing is not supported; only file-path printing is available.</p><section id="autotoc_md137"><h3><a href="#autotoc_md137">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<p>Serializes a complete Geometry::Mesh to an HDF5 file including:</p><ul><li>Vertex geometry (<code>/Mesh/Geometry/Vertices</code>)</li><li>Full connectivity (entity CSR per dimension, incidence CSR, state)</li><li>Polytope attributes and transformations</li></ul><p>This printer is strictly for canonical Rodin mesh persistence. It does not write any XDMF-specific datasets. The XDMF visualization path (IO::XDMF) handles its own derived topology generation separately.</p><p>Stream-based printing is not supported; only file-path printing is available.</p><section id="autotoc_md137_1s1"><section id="autotoc_md137"><h3><a href="#autotoc_md137">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
 <span class="n">IO</span><span class="o">::</span><span class="n">MeshPrinter</span><span class="o">&lt;</span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">HDF5</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"output.h5"</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p><p><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html">IO::<wbr />XDMF</a></p></aside></section>
+<span class="w">  </span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"output.h5"</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html">MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p><p><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html">IO::<wbr />XDMF</a></p></aside></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -177,6 +182,17 @@
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Stream-based printing is not supported for HDF5.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Always raises an exception. Use the file-path overload instead.</p>
           </div></section>
           <section class="m-doc-details" id="ad71af491000e3f2eccd987fe9ad1a999"><div>
@@ -245,7 +261,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -83,7 +83,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md422">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md422">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -95,8 +100,8 @@
             </li>
           </ul>
         </nav>
-<p>Computes the jump of shape (trial or test) functions across element interfaces in finite element formulations. This is used in DG bilinear and linear form assembly.</p><section id="autotoc_md422"><h3><a href="#autotoc_md422">Usage Example</a></h3><pre class="m-code"><span class="c1">// DG interior penalty term</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">penalty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InterfaceIntegral</span><span class="p">(</span><span class="n">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span></pre></section>
+<p>Computes the jump of shape (trial or test) functions across element interfaces in finite element formulations. This is used in DG bilinear and linear form assembly.</p><section id="autotoc_md422_1s1"><section id="autotoc_md422"><h3><a href="#autotoc_md422">Usage Example</a></h3><pre class="m-code"><span class="c1">// DG interior penalty term</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">penalty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InterfaceIntegral</span><span class="p">(</span><span class="n">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span></pre></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -131,12 +136,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a1ed2f2b035ce4b6c731b8ff7bbba4f92" class="m-doc">Jump</a>(</span><span class="m-doc-wrap">const <a href="#a7797ebdd40f654e65250ae45425e04d2" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the jump of a shape function.</dd>
-            <dt id="a5293ff47ee54e64cffae9e91abcaa531">
-              <span class="m-doc-wrap-bumper"><a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc">Jump</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="ac55433d8d1237b1238d48f4a76489317">
-              <span class="m-doc-wrap-bumper"><a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc">Jump</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -172,8 +177,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a4758cdb6b0d7f09e6719a7bfa884e86e" class="m-doc">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const -&gt; const FES&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the finite element space.</dd>
-            <dt id="a9fa1cc25cfbf42375a55404252133298">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -200,6 +205,46 @@
                 <tr>
                   <td style="width: 1%">op&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Shape function to compute the jump of</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5293ff47ee54e64cffae9e91abcaa531"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jump&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5293ff47ee54e64cffae9e91abcaa531" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac55433d8d1237b1238d48f4a76489317"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Jump&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac55433d8d1237b1238d48f4a76489317" class="m-doc-self">Jump</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
                 </tr>
               </tbody>
             </table>
@@ -377,6 +422,32 @@ $ \phi^+(p) - \phi^-(p) $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a9fa1cc25cfbf42375a55404252133298"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Jump&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a959056b7544a77015a9059227c19f33b"><div>
             <h3>
               <div class="m-doc-template">
@@ -439,7 +510,7 @@ $ \phi^+(p) - \phi^-(p) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

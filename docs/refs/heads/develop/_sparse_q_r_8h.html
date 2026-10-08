@@ -81,9 +81,24 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md280">Algorithm</a></li>
-            <li><a href="#autotoc_md281">Applicability</a></li>
-            <li><a href="#autotoc_md282">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md280">Algorithm</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md281">Applicability</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md282">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -93,10 +108,9 @@
             </li>
           </ul>
         </nav>
-<p>This header provides the SparseQR solver class, which implements QR decomposition with numerical column pivoting for sparse matrices.</p><section id="autotoc_md280"><h3><a href="#autotoc_md280">Algorithm</a></h3><p>The solver computes:</p><div class="m-math"><svg style="width: 5.414em; height: 1.093em;" viewBox="168.285236 -10.493961 51.972519 10.493973">
+<p>This header provides the SparseQR solver class, which implements QR decomposition with numerical column pivoting for sparse matrices.</p><section id="autotoc_md280_1s1"><section id="autotoc_md280"><h3><a href="#autotoc_md280">Algorithm</a></h3><p>The solver computes:</p><div class="m-math"><svg style="width: 5.414em; height: 1.093em;" viewBox="168.285236 -10.493961 51.972519 10.493973">
 <title>
-\[
-  AP = QR
+\[     AP = QR
 \]
 </title>
 <defs>
@@ -143,20 +157,20 @@ $ R $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-82'/>
 </g>
-</svg> is upper triangular. The left-looking algorithm proceeds column by column.</p></section><section id="autotoc_md281"><h3><a href="#autotoc_md281">Applicability</a></h3><ul><li>General sparse matrices (no symmetry required)</li><li>Rank-deficient systems</li><li>Least-squares problems</li><li>Overdetermined systems</li><li>Systems where LU factorization is numerically unstable</li></ul></section><section id="autotoc_md282"><h3><a href="#autotoc_md282">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> is upper triangular. The left-looking algorithm proceeds column by column.</p></section></section><section id="autotoc_md281_1s1"><section id="autotoc_md281"><h3><a href="#autotoc_md281">Applicability</a></h3><ul><li>General sparse matrices (no symmetry required)</li><li>Rank-deficient systems</li><li>Least-squares problems</li><li>Overdetermined systems</li><li>Systems where LU factorization is numerically unstable</li></ul></section></section><section id="autotoc_md282_1s1"><section id="autotoc_md282"><h3><a href="#autotoc_md282">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">SparseQR</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
-<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solver_1_1_sparse_q_r.html">SparseQR</a> for the solver implementation</p></aside></section>
+<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solver_1_1_sparse_q_r.html">SparseQR</a> for the solver implementation</p></aside></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::Solver</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -218,7 +232,7 @@ $ R $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

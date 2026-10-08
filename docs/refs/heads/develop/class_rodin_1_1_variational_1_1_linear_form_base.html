@@ -94,9 +94,24 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md426">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md427">Discrete Representation</a></li>
-            <li><a href="#autotoc_md428">Common Examples</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md426">Mathematical Foundation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md427">Discrete Representation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md428">Common Examples</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -132,7 +147,7 @@ $ l(v) : V \to \mathbb{K} $
 <use x='41.582507' y='0' xlink:href='#eq1-g1-33'/>
 <use x='56.858539' y='0' xlink:href='#eq1-g0-75'/>
 </g>
-</svg> in finite element computations. Over the reals this is a linear functional. Over the complex numbers Rodin follows the test-function convention and the form is conjugate-linear in <svg class="m-math" style="width: 0.634em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.088223 5.147373">
+</svg> in finite element computations. Over the reals this is a linear functional. Over the complex numbers Rodin follows the test-function convention and the form is conjugate-linear in  <svg class="m-math" style="width: 0.634em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.088223 5.147373">
 <title>
 $ v
 $
@@ -143,7 +158,7 @@ $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-118'/>
 </g>
-</svg>. Such forms typically represent loads, sources, or boundary data in variational formulations.</p><section id="autotoc_md426"><h3><a href="#autotoc_md426">Mathematical Foundation</a></h3><p>A real linear form <svg class="m-math" style="width: 1.973em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 18.942679 11.955168">
+</svg>. Such forms typically represent loads, sources, or boundary data in variational formulations.</p><section id="autotoc_md426_1s1"><section id="autotoc_md426"><h3><a href="#autotoc_md426">Mathematical Foundation</a></h3><p>A real linear form <svg class="m-math" style="width: 1.973em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 18.942679 11.955168">
 <title>
 $ l(v) $
 </title>
@@ -240,7 +255,7 @@ $ C $
 <g id='eq6-page1'>
 <use x='0' y='0' xlink:href='#eq6-g0-67'/>
 </g>
-</svg></li></ul><p>For complex scalars, the first identity instead carries conjugated coefficients.</p></section><section id="autotoc_md427"><h3><a href="#autotoc_md427">Discrete Representation</a></h3><p>The discrete vector representation satisfies <svg class="m-math" style="width: 4.995em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 47.950686 11.955168">
+</svg></li></ul><p>For complex scalars, the first identity instead carries conjugated coefficients.</p></section></section><section id="autotoc_md427_1s1"><section id="autotoc_md427"><h3><a href="#autotoc_md427">Discrete Representation</a></h3><p>The discrete vector representation satisfies <svg class="m-math" style="width: 4.995em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 47.950686 11.955168">
 <title>
 $ b_i = l(\psi_i) $
 </title>
@@ -275,7 +290,7 @@ $ \psi_i $
 <use x='0' y='0' xlink:href='#eq8-g1-32'/>
 <use x='7.610267' y='1.793263' xlink:href='#eq8-g0-105'/>
 </g>
-</svg> are test basis functions.</p></section><section id="autotoc_md428"><h3><a href="#autotoc_md428">Common Examples</a></h3><ul><li><strong>Load vector</strong>: <svg class="m-math" style="width: 8.900em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 85.437312 13.781784">
+</svg> are test basis functions.</p></section></section><section id="autotoc_md428_1s1"><section id="autotoc_md428"><h3><a href="#autotoc_md428">Common Examples</a></h3><ul><li><strong>Load vector</strong>: <svg class="m-math" style="width: 8.900em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 85.437312 13.781784">
 <title>
 $ l(v) = \int_\Omega f \cdot v \, dx $
 </title>
@@ -370,7 +385,7 @@ $ l(v) = \sum_k f_k v(x_k) $
 <use x='82.602981' y='1.793263' xlink:href='#eq11-g1-107'/>
 <use x='87.722729' y='0' xlink:href='#eq11-g3-41'/>
 </g>
-</svg></li></ul></section>
+</svg></li></ul></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -461,24 +476,24 @@ $ l(v) = \sum_k f_k v(x_k) $
               <span class="m-doc-wrap-bumper">auto <a href="#a7a174b64238c5fbf4944c1128dc89744" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#af4e0c01589f1880fe277a801c8889922" class="m-doc">LinearFormIntegratorBaseType</a>&amp; lfi) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Assigns an integrator to this linear form.</dd>
-            <dt id="ac912720da21668a88284d586f82dbdf0">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac912720da21668a88284d586f82dbdf0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac912720da21668a88284d586f82dbdf0" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Replaces the integrators of the form.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Assembles the linear form.</dd>
-            <dt id="a937626315d7128d17b9d3666db934af6">
-              <span class="m-doc-wrap-bumper">auto <a href="#a937626315d7128d17b9d3666db934af6" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a937626315d7128d17b9d3666db934af6" class="m-doc">getVector</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the reference to the (local) associated vector to the LinearForm.</dd>
-            <dt id="ad4f8d8b20faee9b6cb69f612b41a9006">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad4f8d8b20faee9b6cb69f612b41a9006" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad4f8d8b20faee9b6cb69f612b41a9006" class="m-doc">getVector</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the reference to the (local) associated vector to the LinearForm.</dd>
-            <dt id="a3baa34c2dcc5e7ab4b1403d051a41b16">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3baa34c2dcc5e7ab4b1403d051a41b16" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3baa34c2dcc5e7ab4b1403d051a41b16" class="m-doc">getTestFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets the test function argument associated to this linear form.</dd>
             <dt>
@@ -912,6 +927,32 @@ $ l(v) = l(v) - l_i(v) $
             </table>
 <p>Replaces all existing integrators with a single new integrator.</p>
           </div></section>
+          <section class="m-doc-details" id="ac912720da21668a88284d586f82dbdf0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Vector&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac912720da21668a88284d586f82dbdf0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a>&amp; lfis) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Replaces the integrators of the form.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lfis</td>
+                  <td>Linear form integrators.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="aedef9817f0ecb43ca5cf9f5d10f6bcc3"><div>
             <h3>
               <div class="m-doc-template">
@@ -921,6 +962,57 @@ $ l(v) = l(v) - l_i(v) $
             </h3>
             <p>Assembles the linear form.</p>
 <p>This method will assemble the underlying vector associated the linear form.</p><aside class="m-note m-default"><h4>See also</h4><p>getVector()</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a937626315d7128d17b9d3666db934af6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Vector&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a937626315d7128d17b9d3666db934af6" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Gets the reference to the (local) associated vector to the LinearForm.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The reference to the (local) associated vector to the LinearForm.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad4f8d8b20faee9b6cb69f612b41a9006"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Vector&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4f8d8b20faee9b6cb69f612b41a9006" class="m-doc-self">getVector</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Gets the reference to the (local) associated vector to the LinearForm.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The reference to the (local) associated vector to the LinearForm.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3baa34c2dcc5e7ab4b1403d051a41b16"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Vector&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>&amp; Rodin::<wbr />Variational::<wbr />LinearFormBase&lt;Vector&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3baa34c2dcc5e7ab4b1403d051a41b16" class="m-doc-self">getTestFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Gets the test function argument associated to this linear form.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The test function argument associated to this linear form.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="abe270ffe700c1474914d8c9ecdeb6733"><div>
             <h3>
@@ -985,7 +1077,7 @@ $ l(v) = l(v) - l_i(v) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -81,8 +81,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md254">Notes</a></li>
-            <li><a href="#autotoc_md255">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md254">Notes</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md255">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,8 +104,7 @@
         </nav>
 <p>This header provides the IDRS(s) (Induced Dimension Reduction) solver class, an iterative method for solving linear systems:</p><div class="m-math"><svg style="width: 3.766em; height: 0.865em;" viewBox="176.196076 -8.302191 36.150849 8.302191">
 <title>
-\[
-  Ax = b
+\[     Ax = b
 \]
 </title>
 <defs>
@@ -110,17 +119,17 @@
 <use x='194.944339' y='0' xlink:href='#eq1-g1-61'/>
 <use x='207.36982' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>IDR(s) is typically competitive with BiCGSTAB/GMRES for certain nonsymmetric problems, with short recurrences and modest memory footprint.</p><section id="autotoc_md254"><h3><a href="#autotoc_md254">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported IDRS.</li></ul></section><section id="autotoc_md255"><h3><a href="#autotoc_md255">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">IDRS</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
-<span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">).</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">).</span><span class="n">setS</span><span class="p">(</span><span class="mi">8</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></section>
+</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>IDR(s) is typically competitive with BiCGSTAB/GMRES for certain nonsymmetric problems, with short recurrences and modest memory footprint.</p><section id="autotoc_md254_1s1"><section id="autotoc_md254"><h3><a href="#autotoc_md254">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported IDRS.</li></ul></section></section><section id="autotoc_md255_1s1"><section id="autotoc_md255"><h3><a href="#autotoc_md255">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">IDRS</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+<span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">).</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">).</span><span class="n">setS</span><span class="p">(</span><span class="mi">8</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::Solver</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -187,7 +196,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

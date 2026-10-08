@@ -77,14 +77,34 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Assembly <span class="m-thin">namespace</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::<wbr />Assembly</a>.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md521">Assembly Strategies</a></li>
-            <li><a href="#autotoc_md522">What Gets Assembled</a></li>
-            <li><a href="#autotoc_md523">Assembly Pipeline</a></li>
-            <li><a href="#autotoc_md524">Multi-Field Assembly</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md521">Assembly Strategies</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md522">What Gets Assembled</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md523">Assembly Pipeline</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md524">Multi-Field Assembly</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,7 +114,7 @@
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Assembly</p><p>Module for performing the assembly of linear algebra objects from variational expressions.</p><p>The Assembly module provides the core infrastructure for assembling finite element matrices and vectors from variational forms. It supports both sequential and parallel assembly strategies, with specializations for different operator types and finite element spaces.</p><section id="autotoc_md521"><h3><a href="#autotoc_md521">Assembly Strategies</a></h3><table class="m-table"><thead><tr><th>Strategy</th><th>Class</th><th>Description</th></tr></thead><tbody><tr><td><strong>Sequential</strong></td><td><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Assembly::<wbr />Sequential</a></td><td>Single-threaded assembly. Iterates over mesh cells, evaluates local element matrices/vectors, and accumulates into the global system. Deterministic and reproducible.</td></tr><tr><td><strong>OpenMP</strong></td><td><a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly::<wbr />OpenMP</a></td><td>Shared-memory parallel assembly using OpenMP. Each thread processes a subset of cells and accumulates contributions using thread-safe operations. Requires compilation with <code>RODIN_USE_OPENMP=ON</code>.</td></tr><tr><td><strong>Default</strong></td><td><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a></td><td>Compile-time policy selector. Maps to <a href="namespace_rodin_1_1_assembly.html" class="m-doc">OpenMP</a> when OpenMP is available, otherwise falls back to <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>. Users rarely need to specify this directly.</td></tr></tbody></table></section><section id="autotoc_md522"><h3><a href="#autotoc_md522">What Gets Assembled</a></h3><ul><li><strong>Bilinear Form</strong> <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
+<p>Directory src/Rodin/Assembly</p><p>Module for performing the assembly of linear algebra objects from variational expressions.</p><p>The Assembly module provides the core infrastructure for assembling finite element matrices and vectors from variational forms. It supports both sequential and parallel assembly strategies, with specializations for different operator types and finite element spaces.</p><section id="autotoc_md521_1s1"><section id="autotoc_md521"><h3><a href="#autotoc_md521">Assembly Strategies</a></h3><table class="m-table"><thead><tr><th>Strategy</th><th>Class</th><th>Description</th></tr></thead><tbody><tr><td><strong>Sequential</strong></td><td><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Assembly::<wbr />Sequential</a></td><td>Single-threaded assembly. Iterates over mesh cells, evaluates local element matrices/vectors, and accumulates into the global system. Deterministic and reproducible.</td></tr><tr><td><strong>OpenMP</strong></td><td><a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly::<wbr />OpenMP</a></td><td>Shared-memory parallel assembly using OpenMP. Each thread processes a subset of cells and accumulates contributions using thread-safe operations. Requires compilation with <code>RODIN_USE_OPENMP=ON</code>.</td></tr><tr><td><strong>Default</strong></td><td><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a></td><td>Compile-time policy selector. Maps to <a href="namespace_rodin_1_1_assembly.html" class="m-doc">OpenMP</a> when OpenMP is available, otherwise falls back to <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>. Users rarely need to specify this directly.</td></tr></tbody></table></section></section><section id="autotoc_md522_1s1"><section id="autotoc_md522"><h3><a href="#autotoc_md522">What Gets Assembled</a></h3><ul><li><strong>Bilinear Form</strong> <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
 <title>
 $ a(u,v) $
 </title>
@@ -207,7 +227,7 @@ $ b_i = \ell(\psi_i) $
 <use x='41.179386' y='1.793263' xlink:href='#eq6-g0-105'/>
 <use x='44.560658' y='0' xlink:href='#eq6-g2-41'/>
 </g>
-</svg>.</li><li><strong>Dirichlet BC</strong>: Assembles into an <code>IndexMap</code> mapping constrained DOFs to their prescribed values.</li><li><strong>Problem</strong>: Orchestrates the full assembly pipeline — bilinear form, linear form(s), Dirichlet elimination — into a complete <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>.</li></ul></section><section id="autotoc_md523"><h3><a href="#autotoc_md523">Assembly Pipeline</a></h3><p>Assembly is normally triggered automatically when <code>Problem::solve()</code> is called. The pipeline is:</p><ol><li>Assemble the bilinear form into a sparse matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+</svg>.</li><li><strong>Dirichlet BC</strong>: Assembles into an <code>IndexMap</code> mapping constrained DOFs to their prescribed values.</li><li><strong>Problem</strong>: Orchestrates the full assembly pipeline — bilinear form, linear form(s), Dirichlet elimination — into a complete <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>.</li></ul></section></section><section id="autotoc_md523_1s1"><section id="autotoc_md523"><h3><a href="#autotoc_md523">Assembly Pipeline</a></h3><p>Assembly is normally triggered automatically when <code>Problem::solve()</code> is called. The pipeline is:</p><ol><li>Assemble the bilinear form into a sparse matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
 $ A $
 </title>
@@ -227,7 +247,7 @@ $ b $
 <g id='eq8-page1'>
 <use x='0' y='0' xlink:href='#eq8-g0-98'/>
 </g>
-</svg></li><li>Apply Dirichlet boundary conditions (row/column elimination)</li><li>Package into a <code>LinearSystem</code> and pass to the solver</li></ol><p>Users can also trigger assembly manually by calling <code>BilinearForm::assemble()</code> or <code>LinearForm::assemble()</code>.</p></section><section id="autotoc_md524"><h3><a href="#autotoc_md524">Multi-Field Assembly</a></h3><p>For saddle-point problems (e.g. Stokes), the Assembly module supports block-structured systems via <code>Tuple&lt;BilinearForm...&gt;</code> and <code>Tuple&lt;LinearForm...&gt;</code>, which assemble into block matrices and vectors. This is used by multi-field <code>Problem</code> objects with multiple trial/test function pairs.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-variational.html" class="m-doc">Variational Formulations Guide</a></p></aside></section>
+</svg></li><li>Apply Dirichlet boundary conditions (row/column elimination)</li><li>Package into a <code>LinearSystem</code> and pass to the solver</li></ol><p>Users can also trigger assembly manually by calling <code>BilinearForm::assemble()</code> or <code>LinearForm::assemble()</code>.</p></section></section><section id="autotoc_md524_1s1"><section id="autotoc_md524"><h3><a href="#autotoc_md524">Multi-Field Assembly</a></h3><p>For saddle-point problems (e.g. Stokes), the Assembly module supports block-structured systems via <code>Tuple&lt;BilinearForm...&gt;</code> and <code>Tuple&lt;LinearForm...&gt;</code>, which assemble into block matrices and vectors. This is used by multi-field <code>Problem</code> objects with multiple trial/test function pairs.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-variational.html" class="m-doc">Variational Formulations Guide</a></p></aside></section></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -336,6 +356,21 @@ $ b $
               class <a href="class_rodin_1_1_assembly_1_1_linear_form_tuple_assembly_input.html" class="m-doc">LinearFormTupleAssemblyInput</a>
             </dt>
             <dd>Input data for tuple of linear forms assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_m_p_i.html" class="m-doc">MPI</a>
+            </dt>
+            <dd>Primary template declaration of the MPI assembly executor.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Solution, class FES, class ValueDerived&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_m_p_i_3_01_index_map_3_01_scalar_01_4_00_01_variational_1_1_dirichl3e87952469f576813f4b68ba692aaae5.html" class="m-doc">MPI&lt;IndexMap&lt;Scalar&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Solution, FES&gt;, Variational::FunctionBase&lt;ValueDerived&gt;&gt;&gt;</a>
+            </dt>
+            <dd>MPI assembler for scalar-valued Dirichlet boundary data.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_m_p_i_3_01_index_map_3_01std_1_1pair_3_01_index_array_00_01_math_1_35842e9c4c52242c7a80050e4c5ded33.html" class="m-doc">MPI&lt;IndexMap&lt;std::pair&lt;IndexArray, Math::Vector&lt;Scalar&gt;&gt;&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Sol1, FES1&gt;, Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;</a>
+            </dt>
+            <dd>MPI assembler for the identification Dirichlet BC <code>u = A(v)</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class U, class V&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_m_p_i_3_01_rodin_1_1_p_e_t_sc_1_1_math_1_1_linear_system_00_01_rodi673e6e13222aecc8dbfe1f222e7bad63.html" class="m-doc">MPI&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U, V&gt;&gt;</a>
@@ -451,6 +486,51 @@ $ b $
             </dt>
             <dd>Sequential (single-threaded) assembly implementation.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Solution, class FES, class ValueDerived&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_index_map_3_01_scalar_01_4_00_01_variational_1_1_dic6df602b1ea78d58931f2aab6827be85.html" class="m-doc">Sequential&lt;IndexMap&lt;Scalar&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Solution, FES&gt;, Variational::FunctionBase&lt;ValueDerived&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Sequential value Dirichlet boundary condition assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_index_map_3_01std_1_1pair_3_01_index_array_00_01_ma39085a032fff6410ec365ea69b48d009.html" class="m-doc">Sequential&lt;IndexMap&lt;std::pair&lt;IndexArray, Math::Vector&lt;Scalar&gt;&gt;&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Sol1, FES1&gt;, Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Sequential assembler for the identification Dirichlet BC <code>u = A(v)</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class TrialFunction, class TestFunction&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_linear_system_00_01_variational_1_1_problem_3_01_li1705f22458b722650e9d64f3cf90b8d7.html" class="m-doc">Sequential&lt;LinearSystem, Variational::Problem&lt;LinearSystem, TrialFunction, TestFunction&gt;&gt;</a>
+            </dt>
+            <dd>Sequential single-field problem assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class U1, class U2, class U3, class... Us&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_linear_system_00_01_variational_1_1_problem_3_01_li8286c00d01ce702faea0ab07a7ae4209.html" class="m-doc">Sequential&lt;LinearSystem, Variational::Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;</a>
+            </dt>
+            <dd>Sequential mixed problem assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_math_1_1_matrix_3_01typename_01_form_language_1_1_d31eaf868277ebcb98275d3e823fc88b1.html" class="m-doc">Sequential&lt;Math::Matrix&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, Math::Matrix&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Sequential assembly of the Math::SparseMatrix associated to a BilinearFormBase object.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Solution, class ... TrialFES, class ... TestFES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_math_1_1_sparse_matrix_3_01_real_01_4_00_01_tuple_3c21c31c6e5603c79af15fc02f29806db.html" class="m-doc">Sequential&lt;Math::SparseMatrix&lt;Real&gt;, Tuple&lt;Variational::BilinearForm&lt;Solution, TrialFES, TestFES, Math::SparseMatrix&lt;Real&gt;&gt;...&gt;&gt;</a>
+            </dt>
+            <dd>Sequential block bilinear form assembly into a sparse matrix.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_math_1_1_sparse_matrix_3_01typename_01_form_languag332dd02cdacb642d6b4ec6de2099bdc2.html" class="m-doc">Sequential&lt;Math::SparseMatrix&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, Math::SparseMatrix&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Sequential assembly of the Math::SparseMatrix associated to a BilinearFormBase object.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class... FES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_math_1_1_vector_3_01_real_01_4_00_01_tuple_3_01_var0a40bc412f4f3e7628051b930efb7d89.html" class="m-doc">Sequential&lt;Math::Vector&lt;Real&gt;, Tuple&lt;Variational::LinearForm&lt;FES, Math::Vector&lt;Real&gt;&gt;...&gt;&gt;</a>
+            </dt>
+            <dd>Sequential block linear form assembly into a vector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_math_1_1_vector_3_01typename_01_form_language_1_1_t868577ed4ae09c197e6cb8681627352f.html" class="m-doc">Sequential&lt;Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;, Variational::LinearForm&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Sequential assembly implementation for linear forms.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class U, class V&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_rodin_1_1_p_e_t_sc_1_1_math_1_1_linear_system_00_016cee3deb2716cb08ae9993188cb53631.html" class="m-doc">Sequential&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U, V&gt;&gt;</a>
             </dt>
@@ -460,6 +540,16 @@ $ b $
               class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01_rodin_1_1_p_e_t_sc_1_1_math_1_1_linear_system_00_010cd6cdea79ec32747fef951da6a6c01f.html" class="m-doc">Sequential&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...&gt;&gt;</a>
             </dt>
             <dd>Sequential assembly of a multi-variable PETSc problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class... Solution, class... TrialFES, class... TestFES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01std_1_1vector_3_01_math_1_1_sparse_triplet_3_01_real85659eb6f0f0fb79cc8c9a271fb86c07.html" class="m-doc">Sequential&lt;std::vector&lt;Math::SparseTriplet&lt;Real&gt;&gt;, Tuple&lt;Variational::BilinearForm&lt;Solution, TrialFES, TestFES, std::vector&lt;Math::SparseTriplet&lt;Real&gt;&gt;&gt;...&gt;&gt;</a>
+            </dt>
+            <dd>Sequential block bilinear form assembly into Eigen triplets.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_sequential_3_01std_1_1vector_3_01_math_1_1_sparse_triplet_3_01typen8b5cdcce01d2e776f2d9155646c1e2af.html" class="m-doc">Sequential&lt;std::vector&lt;Math::SparseTriplet&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, std::vector&lt;Math::SparseTriplet&lt;typename FormLanguage::Dot&lt;typename FormLanguage::Traits&lt;TrialFES&gt;::ScalarType, typename FormLanguage::Traits&lt;TestFES&gt;::ScalarType&gt;::Type&gt;&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Sequential bilinear form assembly into Eigen triplets.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_sequential_3_1_1_mat_00_01_variational_1_1_bilinear_form_3_01_solutd052515a70673841841a5be8fc4567c9.html" class="m-doc">Sequential&lt;::Mat, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, ::Mat&gt;&gt;</a>
@@ -487,42 +577,109 @@ $ b $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class TrialFES, class TestFES&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a933637521ce9bf627bf7cd437fdb2689" class="m-doc">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const TrialFES&amp;,
-              const TestFES&amp;,
+              <span class="m-doc-wrap-bumper"><a href="#ad95c81ffab98c05ad6a3a7351458d3ac" class="m-doc">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const TrialFES&amp; trialFES,
+              const TestFES&amp; testFES,
               <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;decltype(std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType&gt;()*std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;())&gt;,
-              &amp;,
+              &amp; lbfis,
               <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;decltype(std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType&gt;()*std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;())&gt;,
-              &amp;) -&gt; BilinearFormAssemblyInput&lt; TrialFES, TestFES &gt;</span>
+              &amp; gbfis) -&gt; BilinearFormAssemblyInput&lt; TrialFES, TestFES &gt;</span>
             </dt>
             <dd>Template argument deduction guide for BilinearFormAssemblyInput.</dd>
-            <dt id="ab16fdb26e75372beeac0e5e57aee22eb">
-              <span class="m-doc-wrap-bumper"><a href="#ab16fdb26e75372beeac0e5e57aee22eb" class="m-doc-self">OpenMPIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
-              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp;) -&gt; OpenMPIteration&lt; Geometry::Mesh&lt; Context::Local &gt; &gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3632a10a191d8aa2f40645a0eb1a0d06" class="m-doc">OpenMPIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
+              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region) -&gt; OpenMPIteration&lt; Geometry::Mesh&lt; Context::Local &gt; &gt;</span>
             </dt>
             <dd>Template argument deduction guide for OpenMPIteration.</dd>
-            <dt id="a77c2bc28c24b9508913a8970c18b641e">
-              <span class="m-doc-wrap-bumper"><a href="#a77c2bc28c24b9508913a8970c18b641e" class="m-doc-self">SequentialIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
-              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp;) -&gt; SequentialIteration&lt; Geometry::Mesh&lt; Context::Local &gt; &gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a394801fc26b61465d94e8970925f741d" class="m-doc">SequentialIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
+              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region) -&gt; SequentialIteration&lt; Geometry::Mesh&lt; Context::Local &gt; &gt;</span>
             </dt>
             <dd>Template argument deduction guide for SequentialIteration.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a933637521ce9bf627bf7cd437fdb2689"><div>
+          <section class="m-doc-details" id="ad95c81ffab98c05ad6a3a7351458d3ac"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_assembly_2_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class TrialFES, class TestFES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a933637521ce9bf627bf7cd437fdb2689" class="m-doc-self">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const TrialFES&amp;,
-              const TestFES&amp;,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad95c81ffab98c05ad6a3a7351458d3ac" class="m-doc-self">BilinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const TrialFES&amp; trialFES,
+              const TestFES&amp; testFES,
               <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;decltype(std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType&gt;()*std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;())&gt;,
-              &amp;,
+              &amp; lbfis,
               <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;decltype(std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType&gt;()*std::declval&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;())&gt;,
-              &amp;) -&gt; BilinearFormAssemblyInput&lt; TrialFES, TestFES &gt;</span></span>
+              &amp; gbfis) -&gt; BilinearFormAssemblyInput&lt; TrialFES, TestFES &gt;</span></span>
             </h3>
             <p>Template argument deduction guide for BilinearFormAssemblyInput.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">trialFES</td>
+                  <td>Trial finite element space</td>
+                </tr>
+                <tr>
+                  <td>testFES</td>
+                  <td>Test finite element space</td>
+                </tr>
+                <tr>
+                  <td>lbfis</td>
+                  <td>List of local bilinear form integrators</td>
+                </tr>
+                <tr>
+                  <td>gbfis</td>
+                  <td>List of global bilinear form integrators</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3632a10a191d8aa2f40645a0eb1a0d06"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3632a10a191d8aa2f40645a0eb1a0d06" class="m-doc-self">OpenMPIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
+              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region) -&gt; OpenMPIteration&lt; Geometry::Mesh&lt; Context::Local &gt; &gt;</span></span>
+            </h3>
+            <p>Template argument deduction guide for OpenMPIteration.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Mesh on which the object is defined.</td>
+                </tr>
+                <tr>
+                  <td>region</td>
+                  <td>Geometric region defining the iteration domain</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a394801fc26b61465d94e8970925f741d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a394801fc26b61465d94e8970925f741d" class="m-doc-self">SequentialIteration</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
+              const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region) -&gt; SequentialIteration&lt; Geometry::Mesh&lt; Context::Local &gt; &gt;</span></span>
+            </h3>
+            <p>Template argument deduction guide for SequentialIteration.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Mesh on which the object is defined.</td>
+                </tr>
+                <tr>
+                  <td>region</td>
+                  <td>Mesh region selected for iteration.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
         </section>
       </div>
@@ -569,7 +726,7 @@ $ b $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

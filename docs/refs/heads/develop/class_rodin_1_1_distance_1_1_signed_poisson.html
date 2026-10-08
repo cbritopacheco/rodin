@@ -82,8 +82,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md31">Variants</a></li>
-            <li><a href="#autotoc_md32">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md31">Variants</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md32">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,8 +104,7 @@
         </nav>
 <p>This class computes an approximation to the signed distance function by solving a Poisson equation with different forcing terms in interior and exterior regions:</p><div class="m-math"><svg style="width: 8.459em; height: 1.107em;" viewBox="153.66746 -10.626787 81.208066 10.626798">
 <title>
-\[
-  -\Delta u = f \quad \text{in } \Omega
+\[       -\Delta u = f \quad \text{in } \Omega
 \]
 </title>
 <defs>
@@ -120,8 +129,7 @@
 </g>
 </svg></div><div class="m-math"><svg style="width: 6.508em; height: 0.864em;" viewBox="163.033963 -8.300861 62.475042 8.294425">
 <title>
-\[
-  u = 0 \quad \text{on } \Gamma
+\[       u = 0 \quad \text{on } \Gamma
 \]
 </title>
 <defs>
@@ -160,10 +168,10 @@ $ \Gamma $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-0'/>
 </g>
-</svg> is the interface.</p><section id="autotoc_md31"><h3><a href="#autotoc_md31">Variants</a></h3><p>This class provides two operator() overloads:</p><ol><li>Unsigned distance (full domain)</li><li>Signed distance (with specified interior/interface regions)</li></ol></section><section id="autotoc_md32"><h3><a href="#autotoc_md32">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg> is the interface.</p><section id="autotoc_md31_1s1"><section id="autotoc_md31"><h3><a href="#autotoc_md31">Variants</a></h3><p>This class provides two operator() overloads:</p><ol><li>Unsigned distance (full domain)</li><li>Signed distance (with specified interior/interface regions)</li></ol></section></section><section id="autotoc_md32_1s1"><section id="autotoc_md32"><h3><a href="#autotoc_md32">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">fes</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">SignedPoisson</span><span class="w"> </span><span class="n">signedDist</span><span class="p">;</span>
 <span class="c1">// Signed distance with regions:</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">signedDist</span><span class="p">(</span><span class="n">interfaceAttr</span><span class="p">,</span><span class="w"> </span><span class="n">interiorAttr</span><span class="p">,</span><span class="w"> </span><span class="n">fes</span><span class="p">);</span></pre></section>
+<span class="k">auto</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">signedDist</span><span class="p">(</span><span class="n">interfaceAttr</span><span class="p">,</span><span class="w"> </span><span class="n">interiorAttr</span><span class="p">,</span><span class="w"> </span><span class="n">fes</span><span class="p">);</span></pre></section></section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -363,7 +371,7 @@ $ \Gamma $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

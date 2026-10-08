@@ -75,7 +75,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4.html">P0Element&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;</a>::<wbr/></span>BasisFunction <span class="m-thin">class</span>
+          Rodin::Variational::P0Element&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;::BasisFunction <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0_element_8h.html">&lt;Rodin/Variational/P0/P0Element.h&gt;</a></div>
         </h1>
         <p>Matrix basis with one nonzero entry.</p>
@@ -85,17 +85,27 @@
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_basis_function.html#a9abc3543721cf3e4eac4d431904e6ec9" class="m-doc">ReturnType</a> = Scalar
+            </dt>
+            <dd>Scalar return type.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="aab3888efb7efb69cb32e0e3a0940d5ef">
-              <span class="m-doc-wrap-bumper"><a href="#aab3888efb7efb69cb32e0e3a0940d5ef" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">ScalarBasis basis,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aab3888efb7efb69cb32e0e3a0940d5ef" class="m-doc">BasisFunction</a>(</span><span class="m-doc-wrap">ScalarBasis basis,
               size_t rows,
               size_t cols,
               size_t component)</span>
@@ -106,16 +116,100 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a10813a28d655392708217a6bc75e7d41">
-              <span class="m-doc-wrap-bumper">auto <a href="#a10813a28d655392708217a6bc75e7d41" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; point) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">RangeType</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a10813a28d655392708217a6bc75e7d41" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; point) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">RangeType</a></span>
             </dt>
             <dd>Evaluates the selected matrix basis or its component nodal functional.</dd>
-            <dt id="a9aeefdf4a4c7207f2ce592eea6d1d5ae">
+            <dt>
               <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9aeefdf4a4c7207f2ce592eea6d1d5ae" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t direction) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9aeefdf4a4c7207f2ce592eea6d1d5ae" class="m-doc">getDerivative</a>(</span><span class="m-doc-wrap">size_t direction) const -&gt; auto</span>
             </dt>
             <dd>Returns a reference-coordinate derivative of the basis.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aab3888efb7efb69cb32e0e3a0940d5ef"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialMatrix&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aab3888efb7efb69cb32e0e3a0940d5ef" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">ScalarBasis basis,
+              size_t rows,
+              size_t cols,
+              size_t component)</span></span>
+            </h3>
+            <p>Selects a matrix unit multiplied by a scalar basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">basis</td>
+                  <td>Basis used by the operation.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Number of columns.</td>
+                </tr>
+                <tr>
+                  <td>component</td>
+                  <td>Component of the value range.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a10813a28d655392708217a6bc75e7d41"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialMatrix&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10813a28d655392708217a6bc75e7d41" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; point) const</span></span>
+            </h3>
+            <p>Evaluates the selected matrix basis or its component nodal functional.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">point</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Matrix basis value with only the selected component nonzero.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9aeefdf4a4c7207f2ce592eea6d1d5ae"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P0Element&lt;Math::<wbr />SpatialMatrix&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9aeefdf4a4c7207f2ce592eea6d1d5ae" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t direction) const</span></span>
+            </h3>
+            <p>Returns a reference-coordinate derivative of the basis.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">direction</td>
+                  <td>Direction in which the derivative is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference-coordinate derivative function for the basis.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -161,7 +255,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

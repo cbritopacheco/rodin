@@ -96,7 +96,7 @@
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::Assembly</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Rodin::<wbr />Assembly</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -106,6 +106,16 @@
               class <a href="class_rodin_1_1_assembly_1_1_m_p_i_iteration.html" class="m-doc">Rodin::Assembly::MPIIteration</a>
             </dt>
             <dd>Iteration helper over a region of an MPI mesh shard.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Solution, class FES, class ValueDerived&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_m_p_i_3_01_index_map_3_01_scalar_01_4_00_01_variational_1_1_dirichl3e87952469f576813f4b68ba692aaae5.html" class="m-doc">Rodin::Assembly::MPI&lt;IndexMap&lt;Scalar&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Solution, FES&gt;, Variational::FunctionBase&lt;ValueDerived&gt;&gt;&gt;</a>
+            </dt>
+            <dd>MPI assembler for scalar-valued Dirichlet boundary data.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_m_p_i_3_01_index_map_3_01std_1_1pair_3_01_index_array_00_01_math_1_35842e9c4c52242c7a80050e4c5ded33.html" class="m-doc">Rodin::Assembly::MPI&lt;IndexMap&lt;std::pair&lt;IndexArray, Math::Vector&lt;Scalar&gt;&gt;&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Sol1, FES1&gt;, Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;</a>
+            </dt>
+            <dd>MPI assembler for the identification Dirichlet BC <code>u = A(v)</code>.</dd>
           </dl>
         </section>
       </div>
@@ -152,7 +162,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

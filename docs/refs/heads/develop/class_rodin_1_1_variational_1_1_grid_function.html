@@ -98,6 +98,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#derived-classes">Derived classes</a></li>
               </ul>
             </li>
           </ul>
@@ -145,7 +146,7 @@ $ \{ K, P_K, \Sigma_K  \}_{K \in \mathcal{T}_h } $
 <use x='78.365918' y='1.793263' xlink:href='#eq2-g0-84'/>
 <use x='83.038946' y='3.199109' xlink:href='#eq2-g2-104'/>
 </g>
-</svg>. More precisely, it defines the global interpolation operator <svg class="m-math" style="width: 8.658em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 83.1192 11.955168">
+</svg>. More precisely, it defines the global interpolation operator  <svg class="m-math" style="width: 8.658em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 83.1192 11.955168">
 <title>
 $ \mathcal{I}_h :
 D(\mathcal{I}_h) \rightarrow V_h $
@@ -175,8 +176,7 @@ D(\mathcal{I}_h) \rightarrow V_h $
 </g>
 </svg>, where:</p><div class="m-math"><svg style="width: 25.244em; height: 1.245em;" viewBox="73.099306 -11.955168 242.344496 11.955168">
 <title>
-\[
- D(\mathcal{I}_h) := \{ v \in V(\mathcal{T}_h) : \forall K \in
+\[ D(\mathcal{I}_h) := \{ v \in V(\mathcal{T}_h) : \forall K \in
  \mathcal{T}_h, \: v|_K \in V(K) \} \: .
 \]
 </title>
@@ -236,6 +236,16 @@ D(\mathcal{I}_h) \rightarrow V_h $
 <use x='312.192141' y='-2.988792' xlink:href='#eq4-g2-58'/>
 </g>
 </svg></div><aside class="m-note m-info"><h4>Note</h4><p>For an overview of all the possible specializations of the GridFunction class, please see <a href="group___grid_function_specializations.html" class="m-doc">GridFunction Template Specializations</a>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p>GridFunctionBase</p><p>GridFunctionSpecializations</p></aside></section>
+        <section id="derived-classes">
+          <h2><a href="#derived-classes">Derived classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::PETSc::Variational::GridFunction</a>
+            </dt>
+            <dd>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>
@@ -280,7 +290,7 @@ D(\mathcal{I}_h) \rightarrow V_h $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

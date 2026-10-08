@@ -94,24 +94,130 @@
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt id="ab148a09ad59f75eef1ead152132218c9">
-              <span class="m-doc-wrap-bumper">static auto <a href="#ab148a09ad59f75eef1ead152132218c9" class="m-doc-self">getBinomial</a>(</span><span class="m-doc-wrap">size_t n,
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#ab148a09ad59f75eef1ead152132218c9" class="m-doc">getBinomial</a>(</span><span class="m-doc-wrap">size_t n,
               size_t k) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets a binomial coefficient.</dd>
-            <dt id="a1635c4f648354d0776fcc19bdd5400e3">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a1635c4f648354d0776fcc19bdd5400e3" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t n,
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a1635c4f648354d0776fcc19bdd5400e3" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t n,
               size_t i,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets the basis function of a local degree of freedom.</dd>
-            <dt id="adb0742fff279d7ae4bc5db291c79581d">
-              <span class="m-doc-wrap-bumper">static auto <a href="#adb0742fff279d7ae4bc5db291c79581d" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t n,
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#adb0742fff279d7ae4bc5db291c79581d" class="m-doc">getDerivative</a>(</span><span class="m-doc-wrap">size_t n,
               size_t i,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets the derivative of the basis function.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ab148a09ad59f75eef1ead152132218c9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />BernsteinPyramid&lt;K&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab148a09ad59f75eef1ead152132218c9" class="m-doc-self">getBinomial</a>(</span><span class="m-doc-wrap">size_t n,
+              size_t k)</span></span>
+            </h3>
+            <p>Gets a binomial coefficient.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">n</td>
+                  <td>Nonnegative upper argument of the binomial coefficient.</td>
+                </tr>
+                <tr>
+                  <td>k</td>
+                  <td>Lower argument of the binomial coefficient.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A binomial coefficient.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1635c4f648354d0776fcc19bdd5400e3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />BernsteinPyramid&lt;K&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1635c4f648354d0776fcc19bdd5400e3" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t n,
+              size_t i,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x)</span></span>
+            </h3>
+            <p>Gets the basis function of a local degree of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">n</td>
+                  <td>Basis or lattice index in the reference element.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Local basis-function index.</td>
+                </tr>
+                <tr>
+                  <td>x</td>
+                  <td>Reference-coordinate component at which the basis is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the selected local basis function at the evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adb0742fff279d7ae4bc5db291c79581d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />BernsteinPyramid&lt;K&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb0742fff279d7ae4bc5db291c79581d" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t n,
+              size_t i,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x)</span></span>
+            </h3>
+            <p>Gets the derivative of the basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">n</td>
+                  <td>Basis or lattice index in the reference element.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>x</td>
+                  <td>Reference-coordinate component at which the basis is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Derivative evaluated at the supplied point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -157,7 +263,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

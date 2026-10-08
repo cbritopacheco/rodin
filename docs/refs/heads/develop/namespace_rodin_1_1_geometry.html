@@ -77,13 +77,28 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Geometry <span class="m-thin">namespace</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a>.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md518">Mesh Creation</a></li>
-            <li><a href="#autotoc_md519">Mesh Operations</a></li>
-            <li><a href="#autotoc_md520">Polytope Types</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md518">Mesh Creation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md519">Mesh Operations</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md520">Polytope Types</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -96,7 +111,7 @@
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Geometry</p><p>Module for dealing with meshes, polytopes, and geometric operations.</p><p>The Geometry module provides the core data structures for finite element meshes. Key classes include:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> — The primary mesh class supporting triangular, quadrilateral, tetrahedral, and hexahedral meshes</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> — Geometric entities (vertices, edges, faces, cells) with type enumeration</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> — Incidence relations between polytopes of different dimensions</li><li><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> — Evaluation point for grid functions, bundling reference coordinates, physical coordinates, Jacobian data, and the owning polytope</li></ul><section id="autotoc_md518"><h3><a href="#autotoc_md518">Mesh Creation</a></h3><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />UniformGrid(type, shape)</a></td><td>Structured grid on the unit hypercube</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />Box(faceType, shape)</a></td><td>Surface mesh (boundary of unit box)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />Build()</a></td><td>Programmatic construction via Builder pattern</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">mesh.load(file, format)</a></td><td>Load from MFEM, MEDIT, or HDF5</td></tr></tbody></table></section><section id="autotoc_md519"><h3><a href="#autotoc_md519">Mesh Operations</a></h3><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">getConnectivity().compute(d1, d2)</a></td><td>Compute incidence relation <svg class="m-math" style="width: 4.138em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 39.728745 10.095454">
+<p>Directory src/Rodin/Geometry</p><p>Module for dealing with meshes, polytopes, and geometric operations.</p><p>The Geometry module provides the core data structures for finite element meshes. Key classes include:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> — The primary mesh class supporting triangular, quadrilateral, tetrahedral, and hexahedral meshes</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> — Geometric entities (vertices, edges, faces, cells) with type enumeration</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> — Incidence relations between polytopes of different dimensions</li><li><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> — Evaluation point for grid functions, bundling reference coordinates, physical coordinates, Jacobian data, and the owning polytope</li></ul><section id="autotoc_md518_1s1"><section id="autotoc_md518"><h3><a href="#autotoc_md518">Mesh Creation</a></h3><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />UniformGrid(type, shape)</a></td><td>Structured grid on the unit hypercube</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />Box(faceType, shape)</a></td><td>Surface mesh (boundary of unit box)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />Build()</a></td><td>Programmatic construction via Builder pattern</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">mesh.load(file, format)</a></td><td>Load from MFEM, MEDIT, or HDF5</td></tr></tbody></table></section></section><section id="autotoc_md519_1s1"><section id="autotoc_md519"><h3><a href="#autotoc_md519">Mesh Operations</a></h3><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">getConnectivity().compute(d1, d2)</a></td><td>Compute incidence relation <svg class="m-math" style="width: 4.138em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 39.728745 10.095454">
 <title>
 $ d_1 \to d_2 $
 </title>
@@ -113,14 +128,14 @@ $ d_1 \to d_2 $
 <use x='29.411869' y='0' xlink:href='#eq1-g1-100'/>
 <use x='35.494562' y='1.793263' xlink:href='#eq1-g2-50'/>
 </g>
-</svg></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">scale(factor)</a></td><td>Scale all vertex coordinates by a scalar factor</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">displace(vectorFunction)</a></td><td>Apply a displacement field to all vertices</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">skin()</a></td><td>Extract the boundary surface mesh</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getDimension()</a></td><td>Topological dimension (2 for triangles, 3 for tetrahedra)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getSpaceDimension()</a></td><td>Ambient space dimension (&gt;= topological dimension)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertexCount()</a></td><td>Number of vertices</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getCellCount()</a></td><td>Number of cells</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVolume()</a></td><td>Total volume (or area) of the domain</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getPerimeter()</a></td><td>Total perimeter (or surface area) of the domain boundary</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertex() / getCell() / getBoundary()</a></td><td>Polytope iterators</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertexCoordinates(idx)</a></td><td>Get coordinates of a vertex</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">setAttribute({dim, idx}, attr)</a></td><td>Set attribute of a polytope (for BC labeling)</td></tr></tbody></table></section><section id="autotoc_md520"><h3><a href="#autotoc_md520">Polytope Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Dimension</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Point</a></td><td>0</td><td>Vertex</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Segment</a></td><td>1</td><td>Edge</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Triangle</a></td><td>2</td><td>3-vertex face/cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Quadrilateral</a></td><td>2</td><td>4-vertex face/cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Tetrahedron</a></td><td>3</td><td>4-vertex cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Hexahedron</a></td><td>3</td><td>8-vertex cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Wedge</a></td><td>3</td><td>Triangular prism (6 vertices)</td></tr></tbody></table><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+</svg></td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">scale(factor)</a></td><td>Scale all vertex coordinates by a scalar factor</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">displace(vectorFunction)</a></td><td>Apply a displacement field to all vertices</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">skin()</a></td><td>Extract the boundary surface mesh</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getDimension()</a></td><td>Topological dimension (2 for triangles, 3 for tetrahedra)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getSpaceDimension()</a></td><td>Ambient space dimension (&gt;= topological dimension)</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertexCount()</a></td><td>Number of vertices</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getCellCount()</a></td><td>Number of cells</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVolume()</a></td><td>Total volume (or area) of the domain</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getPerimeter()</a></td><td>Total perimeter (or surface area) of the domain boundary</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertex() / getCell() / getBoundary()</a></td><td>Polytope iterators</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">getVertexCoordinates(idx)</a></td><td>Get coordinates of a vertex</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">setAttribute({dim, idx}, attr)</a></td><td>Set attribute of a polytope (for BC labeling)</td></tr></tbody></table></section></section><section id="autotoc_md520_1s1"><section id="autotoc_md520"><h3><a href="#autotoc_md520">Polytope Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Dimension</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Point</a></td><td>0</td><td>Vertex</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Segment</a></td><td>1</td><td>Edge</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Triangle</a></td><td>2</td><td>3-vertex face/cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Quadrilateral</a></td><td>2</td><td>4-vertex face/cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Tetrahedron</a></td><td>3</td><td>4-vertex cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Hexahedron</a></td><td>3</td><td>8-vertex cell</td></tr><tr><td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Wedge</a></td><td>3</td><td>Triangular prism (6 vertices)</td></tr></tbody></table><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"> </span><span class="c1">// Compute face-to-cell connectivity</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-meshes.html" class="m-doc">Meshes Guide</a></p><p><a href="guides-polytopes.html" class="m-doc">Polytopes Guide</a></p><p><a href="guides-connectivity.html" class="m-doc">Connectivity Guide</a></p></aside></section>
+<span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w"> </span><span class="c1">// Compute face-to-cell connectivity</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-meshes.html" class="m-doc">Meshes Guide</a></p><p><a href="guides-polytopes.html" class="m-doc">Polytopes Guide</a></p><p><a href="guides-connectivity.html" class="m-doc">Connectivity Guide</a></p></aside></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Euclidean</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -155,11 +170,6 @@ $ d_1 \to d_2 $
               class <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a>
             </dt>
             <dd>Template for connectivity information.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html" class="m-doc">Connectivity&lt;Context::Local&gt;</a>
-            </dt>
-            <dd>Mesh connectivity for sequential (local) meshes.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>
             </dt>
@@ -208,16 +218,6 @@ $ d_1 \to d_2 $
               class <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>
             </dt>
             <dd>Represents a polyhedral complex.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::Local&gt;</a>
-            </dt>
-            <dd>Represents the subdivision of some domain into faces of (possibly) different geometries.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Mesh&lt;Context::MPI&gt;</a>
-            </dt>
-            <dd>Distributed mesh specialization for MPI contexts.</dd>
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>
             </dt>
@@ -290,11 +290,6 @@ $ d_1 \to d_2 $
             </dt>
             <dd>Interface for mesh sharding algorithms.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_sharder_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Sharder&lt;Context::MPI&gt;</a>
-            </dt>
-            <dd>Utility for distributing a global mesh across MPI ranks by splitting into per-rank shards, scattering them from a root, and gathering the local mesh on each rank.</dd>
-            <dt>
               <div class="m-doc-template">template&lt;class Context&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_sharder_base.html" class="m-doc">SharderBase</a>
             </dt>
@@ -361,7 +356,7 @@ $ d_1 \to d_2 $
             </dt>
             <dd>Type alias for sequential (non-distributed) connectivity.</dd>
             <dt>
-              using <a href="#a2e85a5056404a8833600ced8a9fc603f" class="m-doc">LocalMesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
+              using <a href="#ab1b621e6309bf504efb4c71078ca52af" class="m-doc">LocalMesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
             </dt>
             <dd>Type alias for Mesh&lt;Context::Local&gt;</dd>
             <dt>
@@ -369,7 +364,7 @@ $ d_1 \to d_2 $
             </dt>
             <dd>Standard type for representing material attributes in a mesh.</dd>
             <dt>
-              using <a href="#a1109e2bdd7327848ac57e234becf132f" class="m-doc">Incidence</a> = std::vector&lt;std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
+              using <a href="#ad512fb59b831d724819b15e21142baa6" class="m-doc">Incidence</a> = std::vector&lt;std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
             </dt>
             <dd>Represents the incidence relation between polytopes.</dd>
             <dt>
@@ -449,40 +444,40 @@ $ d_1 \to d_2 $
               const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&amp; v) -&gt; auto</span>
             </dt>
             <dd>Subtracts a spatial vector from a point&#x27;s coordinates.</dd>
-            <dt id="adc4573d2ad0a493e8be42c244c19c692">
-              <span class="m-doc-wrap-bumper">auto <a href="#adc4573d2ad0a493e8be42c244c19c692" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; s,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adc4573d2ad0a493e8be42c244c19c692" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; s,
               const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a></span>
             </dt>
             <dd>Scalar-times-point-cloud (scales the active coordinates).</dd>
-            <dt id="aa2953a16eb531bff4e2b44553825d490">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa2953a16eb531bff4e2b44553825d490" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa2953a16eb531bff4e2b44553825d490" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
               const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; s) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a></span>
             </dt>
             <dd>Point-cloud-times-scalar (scales the active coordinates).</dd>
-            <dt id="a25ebb3954df3daa52d46752b63ada033">
-              <span class="m-doc-wrap-bumper">auto <a href="#a25ebb3954df3daa52d46752b63ada033" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a25ebb3954df3daa52d46752b63ada033" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
               const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; B) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a></span>
             </dt>
             <dd>Componentwise sum of two point clouds&#x27; active coordinates.</dd>
-            <dt id="a52ab5ec901fe2424fe186d22ad02e5b8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a52ab5ec901fe2424fe186d22ad02e5b8" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a52ab5ec901fe2424fe186d22ad02e5b8" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
               const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; B) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a></span>
             </dt>
             <dd>Componentwise difference of two point clouds&#x27; active coordinates.</dd>
-            <dt id="a3fbe9b2c68792e197b434837582073bb">
+            <dt>
               <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3fbe9b2c68792e197b434837582073bb" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
+              <span class="m-doc-wrap-bumper">auto <a href="#a3fbe9b2c68792e197b434837582073bb" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
               const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; B) -&gt; auto</span>
             </dt>
             <dd>Product of the active-coordinate matrix and an Eigen matrix.</dd>
-            <dt id="aff31e63276fc04efde9360ed01fefa8e">
+            <dt>
               <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aff31e63276fc04efde9360ed01fefa8e" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; A,
+              <span class="m-doc-wrap-bumper">auto <a href="#aff31e63276fc04efde9360ed01fefa8e" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; A,
               const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; B) -&gt; auto</span>
             </dt>
             <dd>Product of an Eigen matrix and the active-coordinate matrix.</dd>
-            <dt id="ae98783def2d368bc4043e7905c7091ee">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae98783def2d368bc4043e7905c7091ee" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae98783def2d368bc4043e7905c7091ee" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; P) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Streams the active-coordinate matrix to an output stream.</dd>
@@ -556,9 +551,9 @@ $ d_1 \to d_2 $
             </h3>
             <p>Type alias for sequential (non-distributed) connectivity.</p>
           </div></section>
-          <section class="m-doc-details" id="a2e85a5056404a8833600ced8a9fc603f"><div>
+          <section class="m-doc-details" id="ab1b621e6309bf504efb4c71078ca52af"><div>
             <h3>
-              using Rodin::<wbr />Geometry::<wbr /><a href="#a2e85a5056404a8833600ced8a9fc603f" class="m-doc-self">LocalMesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
+              using Rodin::<wbr />Geometry::<wbr /><a href="#ab1b621e6309bf504efb4c71078ca52af" class="m-doc-self">LocalMesh</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_2_mesh_8h.html">&lt;Rodin/Geometry/Mesh.h&gt;</a></div>
             </h3>
             <p>Type alias for Mesh&lt;Context::Local&gt;</p>
@@ -571,9 +566,9 @@ $ d_1 \to d_2 $
             <p>Standard type for representing material attributes in a mesh.</p>
 <p>Attributes are used to mark different regions or materials in a mesh. For example, in a multi-material problem, each material region would have a distinct attribute value.</p>
           </div></section>
-          <section class="m-doc-details" id="a1109e2bdd7327848ac57e234becf132f"><div>
+          <section class="m-doc-details" id="ad512fb59b831d724819b15e21142baa6"><div>
             <h3>
-              using Rodin::<wbr />Geometry::<wbr /><a href="#a1109e2bdd7327848ac57e234becf132f" class="m-doc-self">Incidence</a> = std::vector&lt;std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
+              using Rodin::<wbr />Geometry::<wbr /><a href="#ad512fb59b831d724819b15e21142baa6" class="m-doc-self">Incidence</a> = std::vector&lt;std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&gt;
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_geometry_2_types_8h.html">&lt;Rodin/Geometry/Types.h&gt;</a></div>
             </h3>
             <p>Represents the incidence relation between polytopes.</p>
@@ -918,6 +913,27 @@ $ d&#x27; $
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span></span>
             </h3>
             <p>Adds a spatial vector to a point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v</td>
+                  <td>Vector operand.</td>
+                </tr>
+                <tr>
+                  <td>p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Sum of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a1d6da8768cabf446490f6a0849f83b1d"><div>
             <h3>
@@ -929,6 +945,27 @@ $ d&#x27; $
               const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&amp; v)</span></span>
             </h3>
             <p>Adds a point to a spatial vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Vector operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Sum of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="ab3a13c94c756e0a77cd29dcb690c6bfc"><div>
             <h3>
@@ -940,6 +977,27 @@ $ d&#x27; $
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p)</span></span>
             </h3>
             <p>Subtracts a point&#x27;s coordinates from a spatial vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v</td>
+                  <td>Vector operand.</td>
+                </tr>
+                <tr>
+                  <td>p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Difference of the operands, or the negated operand for the unary overload.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a2f9fe3c5926088e429cdd10afe3039d3"><div>
             <h3>
@@ -951,6 +1009,229 @@ $ d&#x27; $
               const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&amp; v)</span></span>
             </h3>
             <p>Subtracts a spatial vector from a point&#x27;s coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Vector operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Difference of the operands, or the negated operand for the unary overload.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adc4573d2ad0a493e8be42c244c19c692"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a> Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adc4573d2ad0a493e8be42c244c19c692" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; s,
+              const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A)</span></span>
+            </h3>
+            <p>Scalar-times-point-cloud (scales the active coordinates).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">s</td>
+                  <td>Scalar factor.</td>
+                </tr>
+                <tr>
+                  <td>A</td>
+                  <td>System matrix.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Product of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa2953a16eb531bff4e2b44553825d490"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a> Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa2953a16eb531bff4e2b44553825d490" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
+              const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; s)</span></span>
+            </h3>
+            <p>Point-cloud-times-scalar (scales the active coordinates).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">A</td>
+                  <td>System matrix.</td>
+                </tr>
+                <tr>
+                  <td>s</td>
+                  <td>Scalar factor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Product of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a25ebb3954df3daa52d46752b63ada033"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a> Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a25ebb3954df3daa52d46752b63ada033" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
+              const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; B)</span></span>
+            </h3>
+            <p>Componentwise sum of two point clouds&#x27; active coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">A</td>
+                  <td>System matrix.</td>
+                </tr>
+                <tr>
+                  <td>B</td>
+                  <td>Second matrix operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Sum of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a52ab5ec901fe2424fe186d22ad02e5b8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a> Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52ab5ec901fe2424fe186d22ad02e5b8" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
+              const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; B)</span></span>
+            </h3>
+            <p>Componentwise difference of two point clouds&#x27; active coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">A</td>
+                  <td>System matrix.</td>
+                </tr>
+                <tr>
+                  <td>B</td>
+                  <td>Second matrix operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Difference of the operands, or the negated operand for the unary overload.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3fbe9b2c68792e197b434837582073bb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3fbe9b2c68792e197b434837582073bb" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; A,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; B)</span></span>
+            </h3>
+            <p>Product of the active-coordinate matrix and an Eigen matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">A</td>
+                  <td>System matrix.</td>
+                </tr>
+                <tr>
+                  <td>B</td>
+                  <td>Second matrix operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Product of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aff31e63276fc04efde9360ed01fefa8e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff31e63276fc04efde9360ed01fefa8e" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; A,
+              const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; B)</span></span>
+            </h3>
+            <p>Product of an Eigen matrix and the active-coordinate matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">A</td>
+                  <td>System matrix.</td>
+                </tr>
+                <tr>
+                  <td>B</td>
+                  <td>Second matrix operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Product of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae98783def2d368bc4043e7905c7091ee"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae98783def2d368bc4043e7905c7091ee" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; P)</span></span>
+            </h3>
+            <p>Streams the active-coordinate matrix to an output stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>P</td>
+                  <td>Storage for the first Piola-Kirchhoff stress.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a80fa59a2cf1bd92ab3263ec2d8bae01e"><div>
             <h3>
@@ -1102,7 +1383,7 @@ $ d&#x27; $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -100,20 +100,20 @@
               using <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc-self">Scalar</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
             </dt>
             <dd>The coordinate scalar type.</dd>
-            <dt id="a0e125bbc8424ae32822ba1787a3d725b">
-              using <a href="#a0e125bbc8424ae32822ba1787a3d725b" class="m-doc-self">Data</a> = std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;
+            <dt id="a88a3bc04bc237f420c59f828c023f6c9">
+              using <a href="#a88a3bc04bc237f420c59f828c023f6c9" class="m-doc-self">Data</a> = std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;
             </dt>
             <dd>Underlying packed storage (three coordinates per point).</dd>
             <dt id="ab27b212bf090244c3ff7179078c31aea">
               using <a href="#ab27b212bf090244c3ff7179078c31aea" class="m-doc-self">StrideType</a> = Eigen::Stride&lt;Eigen::Dynamic, Eigen::Dynamic&gt;
             </dt>
             <dd>Eigen stride mapping the packed storage to a column-major view.</dd>
-            <dt id="a13f85093133fe304ad3fa1e0023217fa">
-              using <a href="#a13f85093133fe304ad3fa1e0023217fa" class="m-doc-self">MapType3xN</a> = Eigen::Map&lt;Eigen::Matrix&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor&gt;, 0, <a href="#ab27b212bf090244c3ff7179078c31aea" class="m-doc">StrideType</a>&gt;
+            <dt id="ab7ba607d323d533edd10c09e81db9a5c">
+              using <a href="#ab7ba607d323d533edd10c09e81db9a5c" class="m-doc-self">MapType3xN</a> = Eigen::Map&lt;Eigen::Matrix&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor&gt;, 0, <a href="#ab27b212bf090244c3ff7179078c31aea" class="m-doc">StrideType</a>&gt;
             </dt>
             <dd>Mutable Eigen map of the packed storage as a 3-by-N matrix.</dd>
-            <dt id="ad7cb3b2f4f83837f30dea6150f085211">
-              using <a href="#ad7cb3b2f4f83837f30dea6150f085211" class="m-doc-self">ConstMapType3xN</a> = Eigen::Map&lt;const Eigen::Matrix&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor&gt;, 0, <a href="#ab27b212bf090244c3ff7179078c31aea" class="m-doc">StrideType</a>&gt;
+            <dt id="aea94119037367fc22a550b1560321b91">
+              using <a href="#aea94119037367fc22a550b1560321b91" class="m-doc-self">ConstMapType3xN</a> = Eigen::Map&lt;const Eigen::Matrix&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor&gt;, 0, <a href="#ab27b212bf090244c3ff7179078c31aea" class="m-doc">StrideType</a>&gt;
             </dt>
             <dd>Const Eigen map of the packed storage as a 3-by-N matrix.</dd>
           </dl>
@@ -134,17 +134,17 @@
               <span class="m-doc-wrap-bumper"><a href="#ab53814a183cd4cb99597ad996fdbf079" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Constructs an empty point cloud (dimension 0, no points).</dd>
-            <dt id="ab987767ecca85bcc69377cb8902200ac">
-              <span class="m-doc-wrap-bumper"><a href="#ab987767ecca85bcc69377cb8902200ac" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab987767ecca85bcc69377cb8902200ac" class="m-doc">PointCloud</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
               size_t n) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs <code>n</code> zero-initialized points in <code>rows</code> dimensions.</dd>
-            <dt id="a185df295eeaa0d5c13f08f46c97d1260">
-              <span class="m-doc-wrap-bumper"><a href="#a185df295eeaa0d5c13f08f46c97d1260" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a0efc1105b3eca288199ed555fa02cccf" class="m-doc">PointCloud</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a29a2c10105d498d01a1f4dd48d4846ed">
-              <span class="m-doc-wrap-bumper"><a href="#a29a2c10105d498d01a1f4dd48d4846ed" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac550b4c6b9a30e3d8dddf102c2bd84e6" class="m-doc">PointCloud</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -152,154 +152,790 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a2dfb7da11de3254e7ab2a76f0eadcad2">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2dfb7da11de3254e7ab2a76f0eadcad2" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9c7ea7c807392ed6200b4816cf355390" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
-            <dt id="a07b94c89ce768d3758e001a2a6dec67e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a07b94c89ce768d3758e001a2a6dec67e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae9b461bc8afc82e90d41271616dac8ba" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
-            <dt id="a6438d172a6a815c6f200878822d94233">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6438d172a6a815c6f200878822d94233" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6438d172a6a815c6f200878822d94233" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the active spatial dimension (0..3).</dd>
-            <dt id="acd4c9cd1521fac64a31fa24229c2a202">
-              <span class="m-doc-wrap-bumper">auto <a href="#acd4c9cd1521fac64a31fa24229c2a202" class="m-doc-self">rows</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acd4c9cd1521fac64a31fa24229c2a202" class="m-doc">rows</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the active spatial dimension (Eigen-style row count).</dd>
-            <dt id="addadaa3fe39c2bc4170b0653b69bfd3d">
-              <span class="m-doc-wrap-bumper">auto <a href="#addadaa3fe39c2bc4170b0653b69bfd3d" class="m-doc-self">cols</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#addadaa3fe39c2bc4170b0653b69bfd3d" class="m-doc">cols</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the number of points (Eigen-style column count).</dd>
-            <dt id="ab7d1a399cb20152208d36e0f076a7dbb">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7d1a399cb20152208d36e0f076a7dbb" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7d1a399cb20152208d36e0f076a7dbb" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the number of points.</dd>
-            <dt id="a9e50bda91733f7f779137ea558a89489">
-              <span class="m-doc-wrap-bumper">void <a href="#a9e50bda91733f7f779137ea558a89489" class="m-doc-self">setDimension</a>(</span><span class="m-doc-wrap">std::uint8_t r) <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a9e50bda91733f7f779137ea558a89489" class="m-doc">setDimension</a>(</span><span class="m-doc-wrap">std::uint8_t r) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets the active spatial dimension (must not exceed MaxRows).</dd>
-            <dt id="a1ef2d4435fb795664c2d63a69ac40482">
-              <span class="m-doc-wrap-bumper">void <a href="#a1ef2d4435fb795664c2d63a69ac40482" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">std::uint8_t r,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a1ef2d4435fb795664c2d63a69ac40482" class="m-doc">resize</a>(</span><span class="m-doc-wrap">std::uint8_t r,
               size_t n)</span>
             </dt>
             <dd>Resizes to <code>n</code> points in <code>r</code> dimensions.</dd>
-            <dt id="af45d30f307f301b9d43fcdf52897bbce">
-              <span class="m-doc-wrap-bumper">void <a href="#af45d30f307f301b9d43fcdf52897bbce" class="m-doc-self">reserve</a>(</span><span class="m-doc-wrap">size_t n)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af45d30f307f301b9d43fcdf52897bbce" class="m-doc">reserve</a>(</span><span class="m-doc-wrap">size_t n)</span>
             </dt>
             <dd>Reserves storage for <code>n</code> points.</dd>
             <dt id="a03bfacfaaba9195e4498375659f43531">
               <span class="m-doc-wrap-bumper">void <a href="#a03bfacfaaba9195e4498375659f43531" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes all points.</dd>
-            <dt id="a49b8da64fb90f785f3a00ba79b1feaae">
-              <span class="m-doc-wrap-bumper">void <a href="#a49b8da64fb90f785f3a00ba79b1feaae" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 1&gt;&amp; p)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a49b8da64fb90f785f3a00ba79b1feaae" class="m-doc">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 1&gt;&amp; p)</span>
             </dt>
             <dd>Appends a 1D point (requires active dimension 1).</dd>
-            <dt id="a5dc6a1a2e42000c65f5de0fd23495e72">
-              <span class="m-doc-wrap-bumper">void <a href="#a5dc6a1a2e42000c65f5de0fd23495e72" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, 2&gt;&amp; p)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a5dc6a1a2e42000c65f5de0fd23495e72" class="m-doc">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, 2&gt;&amp; p)</span>
             </dt>
             <dd>Appends a 2D point (requires active dimension 2).</dd>
-            <dt id="a1bd13919e5cc86b7407bba53e7e8cc2b">
-              <span class="m-doc-wrap-bumper">void <a href="#a1bd13919e5cc86b7407bba53e7e8cc2b" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; p)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a1bd13919e5cc86b7407bba53e7e8cc2b" class="m-doc">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; p)</span>
             </dt>
             <dd>Appends a 3D point (requires active dimension 3).</dd>
-            <dt id="a4df9605dbbbc885f367048bde4bb6cd4">
-              <span class="m-doc-wrap-bumper">void <a href="#a4df9605dbbbc885f367048bde4bb6cd4" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; p)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a4df9605dbbbc885f367048bde4bb6cd4" class="m-doc">push_back</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; p)</span>
             </dt>
             <dd>Appends a spatial point, zero-padding unused coordinates.</dd>
-            <dt id="ab3e821c8f094080e606d3903669f0ad3">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab3e821c8f094080e606d3903669f0ad3" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab3e821c8f094080e606d3903669f0ad3" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
               size_t j) -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a reference to coordinate <code>i</code> of point <code>j</code>.</dd>
-            <dt id="a263653c1b5ce2b9571cc27d5d528bb97">
-              <span class="m-doc-wrap-bumper">auto <a href="#a263653c1b5ce2b9571cc27d5d528bb97" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a263653c1b5ce2b9571cc27d5d528bb97" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
               size_t j) const -&gt; const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const reference to coordinate <code>i</code> of point <code>j</code>.</dd>
-            <dt id="a431a9dd7ada22436fc53024c3c99c537">
-              <span class="m-doc-wrap-bumper">auto <a href="#a431a9dd7ada22436fc53024c3c99c537" class="m-doc-self">point3</a>(</span><span class="m-doc-wrap">size_t j) -&gt; std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a431a9dd7ada22436fc53024c3c99c537" class="m-doc">point3</a>(</span><span class="m-doc-wrap">size_t j) -&gt; std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a reference to the packed 3-coordinate storage of point <code>j</code>.</dd>
-            <dt id="ab09e89cd847a87de859b5fec24f7df9f">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab09e89cd847a87de859b5fec24f7df9f" class="m-doc-self">point3</a>(</span><span class="m-doc-wrap">size_t j) const -&gt; const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab09e89cd847a87de859b5fec24f7df9f" class="m-doc">point3</a>(</span><span class="m-doc-wrap">size_t j) const -&gt; const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const reference to the packed 3-coordinate storage of point <code>j</code>.</dd>
-            <dt id="a0e88d158053084b116cc2edc1e6f7960">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0e88d158053084b116cc2edc1e6f7960" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t j) const -&gt; <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e88d158053084b116cc2edc1e6f7960" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap">size_t j) const -&gt; <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns point <code>j</code> as a SpatialPoint of the active dimension.</dd>
-            <dt id="a97c8eb6b42cc019b05412e667d170d8f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a97c8eb6b42cc019b05412e667d170d8f" class="m-doc-self">col</a>(</span><span class="m-doc-wrap">size_t j) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a97c8eb6b42cc019b05412e667d170d8f" class="m-doc">col</a>(</span><span class="m-doc-wrap">size_t j) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns point <code>j</code> as a SpatialPoint (Eigen-style column accessor).</dd>
             <dt id="af991da5f6b74d1fa19aa206c9f8367f9">
               <span class="m-doc-wrap-bumper">void <a href="#af991da5f6b74d1fa19aa206c9f8367f9" class="m-doc-self">setZero</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets the active coordinates of all points to zero.</dd>
-            <dt id="a0deb49315b381bd264f6a11c6f6aa691">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0deb49315b381bd264f6a11c6f6aa691" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a (rows x N) matrix view of the active coordinates.</dd>
-            <dt id="ac8c6ab65815022b535858d6fe156c565">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac8c6ab65815022b535858d6fe156c565" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0deb49315b381bd264f6a11c6f6aa691" class="m-doc">getMatrix</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a (rows x N) matrix view of the active coordinates.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2c36c280b7f1868b329a837548803667" class="m-doc">getPackedMatrix</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a13f85093133fe304ad3fa1e0023217fa" class="m-doc">MapType3xN</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac8c6ab65815022b535858d6fe156c565" class="m-doc">getMatrix</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a (rows x N) matrix view of the active coordinates.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2c36c280b7f1868b329a837548803667" class="m-doc">getPackedMatrix</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ab7ba607d323d533edd10c09e81db9a5c" class="m-doc">MapType3xN</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a (3 x N) matrix view of the underlying packed storage.</dd>
-            <dt id="ad6cb45c9b034bc2d9f61c3d02312f4e1">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad6cb45c9b034bc2d9f61c3d02312f4e1" class="m-doc-self">getPackedMatrix</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#ad7cb3b2f4f83837f30dea6150f085211" class="m-doc">ConstMapType3xN</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad6cb45c9b034bc2d9f61c3d02312f4e1" class="m-doc">getPackedMatrix</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#aea94119037367fc22a550b1560321b91" class="m-doc">ConstMapType3xN</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a (3 x N) matrix view of the underlying packed storage.</dd>
-            <dt id="aca18453191a0cfd5d9b3ab8f1f7993f6">
-              <span class="m-doc-wrap-bumper">auto <a href="#aca18453191a0cfd5d9b3ab8f1f7993f6" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) const -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aca18453191a0cfd5d9b3ab8f1f7993f6" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) const -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the Frobenius inner product of the active coordinates with another point cloud.</dd>
-            <dt id="a65cd32e8aba1747e54c4f49eae2f4fd6">
+            <dt>
               <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a65cd32e8aba1747e54c4f49eae2f4fd6" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a65cd32e8aba1747e54c4f49eae2f4fd6" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the Frobenius inner product of the active coordinates with an Eigen matrix.</dd>
-            <dt id="a9b0169291d0effd4d9cbe0e98b8e8242">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9b0169291d0effd4d9cbe0e98b8e8242" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9b0169291d0effd4d9cbe0e98b8e8242" class="m-doc">squaredNorm</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the squared Frobenius norm of the active coordinates.</dd>
-            <dt id="ab6b9364c8f346d08e82e363374db9b77">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab6b9364c8f346d08e82e363374db9b77" class="m-doc-self">getPoints</a>(</span><span class="m-doc-wrap">) -&gt; std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab6b9364c8f346d08e82e363374db9b77" class="m-doc">getPoints</a>(</span><span class="m-doc-wrap">) -&gt; std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a reference to the underlying packed point storage.</dd>
-            <dt id="a6392dc4058f8f36b32f3379b0cf053f8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6392dc4058f8f36b32f3379b0cf053f8" class="m-doc-self">getPoints</a>(</span><span class="m-doc-wrap">) const -&gt; const std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6392dc4058f8f36b32f3379b0cf053f8" class="m-doc">getPoints</a>(</span><span class="m-doc-wrap">) const -&gt; const std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const reference to the underlying packed point storage.</dd>
-            <dt id="a64358518906db4895c2540dd0489b664">
-              <span class="m-doc-wrap-bumper">void <a href="#a64358518906db4895c2540dd0489b664" class="m-doc-self">setConstant</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; v) <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a64358518906db4895c2540dd0489b664" class="m-doc">setConstant</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; v) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets the active coordinates of all points to <code>v</code>.</dd>
-            <dt id="a55e89bb179acfa812992af41747fc70d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a55e89bb179acfa812992af41747fc70d" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; s) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a55e89bb179acfa812992af41747fc70d" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; s) -&gt; <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Scales the active coordinates of all points by <code>s</code> in place.</dd>
-            <dt id="af0dd9205158ccf7bcfcd8ff81f79c927">
+            <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serializes the point cloud (for boost::serialization).</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ab987767ecca85bcc69377cb8902200ac"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab987767ecca85bcc69377cb8902200ac" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
+              size_t n) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs <code>n</code> zero-initialized points in <code>rows</code> dimensions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rows</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>n</td>
+                  <td>Number of entries.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0efc1105b3eca288199ed555fa02cccf"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0efc1105b3eca288199ed555fa02cccf" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac550b4c6b9a30e3d8dddf102c2bd84e6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac550b4c6b9a30e3d8dddf102c2bd84e6" class="m-doc-self">PointCloud</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9c7ea7c807392ed6200b4816cf355390"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c7ea7c807392ed6200b4816cf355390" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae9b461bc8afc82e90d41271616dac8ba"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9b461bc8afc82e90d41271616dac8ba" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6438d172a6a815c6f200878822d94233"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::uint8_t Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6438d172a6a815c6f200878822d94233" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the active spatial dimension (0..3).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The active spatial dimension (0..3).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acd4c9cd1521fac64a31fa24229c2a202"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::uint8_t Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd4c9cd1521fac64a31fa24229c2a202" class="m-doc-self">rows</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the active spatial dimension (Eigen-style row count).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The active spatial dimension (Eigen-style row count).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="addadaa3fe39c2bc4170b0653b69bfd3d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#addadaa3fe39c2bc4170b0653b69bfd3d" class="m-doc-self">cols</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the number of points (Eigen-style column count).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of points (Eigen-style column count).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab7d1a399cb20152208d36e0f076a7dbb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7d1a399cb20152208d36e0f076a7dbb" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the number of points.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of points.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9e50bda91733f7f779137ea558a89489"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9e50bda91733f7f779137ea558a89489" class="m-doc-self">setDimension</a>(</span><span class="m-doc-wrap">std::uint8_t r) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Sets the active spatial dimension (must not exceed MaxRows).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">r</td>
+                  <td>Number of rows.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1ef2d4435fb795664c2d63a69ac40482"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ef2d4435fb795664c2d63a69ac40482" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">std::uint8_t r,
+              size_t n)</span></span>
+            </h3>
+            <p>Resizes to <code>n</code> points in <code>r</code> dimensions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">r</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>n</td>
+                  <td>Number of entries.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af45d30f307f301b9d43fcdf52897bbce"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af45d30f307f301b9d43fcdf52897bbce" class="m-doc-self">reserve</a>(</span><span class="m-doc-wrap">size_t n)</span></span>
+            </h3>
+            <p>Reserves storage for <code>n</code> points.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">n</td>
+                  <td>Number of entries.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a49b8da64fb90f785f3a00ba79b1feaae"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49b8da64fb90f785f3a00ba79b1feaae" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 1&gt;&amp; p)</span></span>
+            </h3>
+            <p>Appends a 1D point (requires active dimension 1).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point coordinates.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5dc6a1a2e42000c65f5de0fd23495e72"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5dc6a1a2e42000c65f5de0fd23495e72" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, 2&gt;&amp; p)</span></span>
+            </h3>
+            <p>Appends a 2D point (requires active dimension 2).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point coordinates.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1bd13919e5cc86b7407bba53e7e8cc2b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1bd13919e5cc86b7407bba53e7e8cc2b" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; p)</span></span>
+            </h3>
+            <p>Appends a 3D point (requires active dimension 3).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point coordinates.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4df9605dbbbc885f367048bde4bb6cd4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4df9605dbbbc885f367048bde4bb6cd4" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; p)</span></span>
+            </h3>
+            <p>Appends a spatial point, zero-padding unused coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab3e821c8f094080e606d3903669f0ad3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3e821c8f094080e606d3903669f0ad3" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
+              size_t j) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to coordinate <code>i</code> of point <code>j</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a263653c1b5ce2b9571cc27d5d528bb97"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a263653c1b5ce2b9571cc27d5d528bb97" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
+              size_t j) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a const reference to coordinate <code>i</code> of point <code>j</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a431a9dd7ada22436fc53024c3c99c537"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a431a9dd7ada22436fc53024c3c99c537" class="m-doc-self">point3</a>(</span><span class="m-doc-wrap">size_t j) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the packed 3-coordinate storage of point <code>j</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A reference to the packed 3-coordinate storage of point <code>j</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab09e89cd847a87de859b5fec24f7df9f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab09e89cd847a87de859b5fec24f7df9f" class="m-doc-self">point3</a>(</span><span class="m-doc-wrap">size_t j) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a const reference to the packed 3-coordinate storage of point <code>j</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A const reference to the packed 3-coordinate storage of point <code>j</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0e88d158053084b116cc2edc1e6f7960"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e88d158053084b116cc2edc1e6f7960" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t j) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns point <code>j</code> as a SpatialPoint of the active dimension.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Entry at the supplied index.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a97c8eb6b42cc019b05412e667d170d8f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97c8eb6b42cc019b05412e667d170d8f" class="m-doc-self">col</a>(</span><span class="m-doc-wrap">size_t j) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns point <code>j</code> as a SpatialPoint (Eigen-style column accessor).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Point <code>j</code> as a SpatialPoint (Eigen-style column accessor).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0deb49315b381bd264f6a11c6f6aa691"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0deb49315b381bd264f6a11c6f6aa691" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a (rows x N) matrix view of the active coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A (rows x N) matrix view of the active coordinates.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac8c6ab65815022b535858d6fe156c565"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8c6ab65815022b535858d6fe156c565" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a (rows x N) matrix view of the active coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A (rows x N) matrix view of the active coordinates.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a2c36c280b7f1868b329a837548803667"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="#a13f85093133fe304ad3fa1e0023217fa" class="m-doc">MapType3xN</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c36c280b7f1868b329a837548803667" class="m-doc-self">getPackedMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab7ba607d323d533edd10c09e81db9a5c" class="m-doc">MapType3xN</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c36c280b7f1868b329a837548803667" class="m-doc-self">getPackedMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a (3 x N) matrix view of the underlying packed storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A (3 x N) matrix view of the underlying packed storage.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Naming rationale: this is the raw, packed, always-3D storage view.</p>
+          </div></section>
+          <section class="m-doc-details" id="ad6cb45c9b034bc2d9f61c3d02312f4e1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#aea94119037367fc22a550b1560321b91" class="m-doc">ConstMapType3xN</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6cb45c9b034bc2d9f61c3d02312f4e1" class="m-doc-self">getPackedMatrix</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a (3 x N) matrix view of the underlying packed storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A (3 x N) matrix view of the underlying packed storage.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aca18453191a0cfd5d9b3ab8f1f7993f6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca18453191a0cfd5d9b3ab8f1f7993f6" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; other) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the Frobenius inner product of the active coordinates with another point cloud.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The Frobenius inner product of the active coordinates with another point cloud.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a65cd32e8aba1747e54c4f49eae2f4fd6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a65cd32e8aba1747e54c4f49eae2f4fd6" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the Frobenius inner product of the active coordinates with an Eigen matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The Frobenius inner product of the active coordinates with an Eigen matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9b0169291d0effd4d9cbe0e98b8e8242"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b0169291d0effd4d9cbe0e98b8e8242" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the squared Frobenius norm of the active coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The squared Frobenius norm of the active coordinates.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab6b9364c8f346d08e82e363374db9b77"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab6b9364c8f346d08e82e363374db9b77" class="m-doc-self">getPoints</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying packed point storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A reference to the underlying packed point storage.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6392dc4058f8f36b32f3379b0cf053f8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const std::vector&lt;std::array&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, 3&gt;&gt;&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6392dc4058f8f36b32f3379b0cf053f8" class="m-doc-self">getPoints</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a const reference to the underlying packed point storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A const reference to the underlying packed point storage.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a64358518906db4895c2540dd0489b664"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64358518906db4895c2540dd0489b664" class="m-doc-self">setConstant</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; v) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Sets the active coordinates of all points to <code>v</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v</td>
+                  <td>Value to assign.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a55e89bb179acfa812992af41747fc70d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_point_cloud.html" class="m-doc">PointCloud</a>&amp; Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55e89bb179acfa812992af41747fc70d" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&amp; s) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Scales the active coordinates of all points by <code>s</code> in place.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">s</td>
+                  <td>Scalar factor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Archive&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PointCloud::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
+            </h3>
+            <p>Serializes the point cloud (for boost::serialization).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ar</td>
+                  <td>Serialization archive.</td>
+                </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Boost.Serialization class version; unused by this implementation.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
         </section>
       </div>
@@ -346,7 +982,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

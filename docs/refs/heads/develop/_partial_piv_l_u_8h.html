@@ -81,9 +81,24 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md268">Algorithm</a></li>
-            <li><a href="#autotoc_md269">Applicability</a></li>
-            <li><a href="#autotoc_md270">Notes</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md268">Algorithm</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md269">Applicability</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md270">Notes</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -93,10 +108,9 @@
             </li>
           </ul>
         </nav>
-<p>This header provides the PartialPivLU solver class, which implements dense LU factorization for general square matrices using Eigen&#x27;s PartialPivLU solver.</p><section id="autotoc_md268"><h3><a href="#autotoc_md268">Algorithm</a></h3><p>The solver computes</p><div class="m-math"><svg style="width: 6.477em; height: 1.049em;" viewBox="163.183928 -10.072488 62.175138 10.072488">
+<p>This header provides the PartialPivLU solver class, which implements dense LU factorization for general square matrices using Eigen&#x27;s PartialPivLU solver.</p><section id="autotoc_md268_1s1"><section id="autotoc_md268"><h3><a href="#autotoc_md268">Algorithm</a></h3><p>The solver computes</p><div class="m-math"><svg style="width: 6.477em; height: 1.049em;" viewBox="163.183928 -10.072488 62.175138 10.072488">
 <title>
-\[
-  A = P^{-1} L U
+\[  A = P^{-1} L U
 \]
 </title>
 <defs>
@@ -119,8 +133,7 @@
 </g>
 </svg></div><p>or equivalently</p><div class="m-math"><svg style="width: 5.298em; height: 0.851em;" viewBox="168.843339 -8.169366 50.856316 8.169366">
 <title>
-\[
-  P A = L U
+\[  P A = L U
 \]
 </title>
 <defs>
@@ -167,16 +180,16 @@ $ U $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-85'/>
 </g>
-</svg> is upper triangular.</p></section><section id="autotoc_md269"><h3><a href="#autotoc_md269">Applicability</a></h3><ul><li>General dense square matrices</li><li>Non-symmetric systems</li><li>Newton systems with dense Jacobians</li></ul></section><section id="autotoc_md270"><h3><a href="#autotoc_md270">Notes</a></h3><ul><li>This solver does not assume symmetry.</li><li>Eigen&#x27;s PartialPivLU assumes the matrix is square and invertible.</li><li>If rank deficiency is possible and must be handled robustly, FullPivLU is safer.</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="https://eigen.tuxfamily.org/dox/classEigen_1_1PartialPivLU.html">Eigen::<wbr />PartialPivLU</a></p></aside></section>
+</svg> is upper triangular.</p></section></section><section id="autotoc_md269_1s1"><section id="autotoc_md269"><h3><a href="#autotoc_md269">Applicability</a></h3><ul><li>General dense square matrices</li><li>Non-symmetric systems</li><li>Newton systems with dense Jacobians</li></ul></section></section><section id="autotoc_md270_1s1"><section id="autotoc_md270"><h3><a href="#autotoc_md270">Notes</a></h3><ul><li>This solver does not assume symmetry.</li><li>Eigen&#x27;s PartialPivLU assumes the matrix is square and invertible.</li><li>If rank deficiency is possible and must be handled robustly, FullPivLU is safer.</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="https://eigen.tuxfamily.org/dox/classEigen_1_1PartialPivLU.html">Eigen::<wbr />PartialPivLU</a></p></aside></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::Solver</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -238,7 +251,7 @@ $ U $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

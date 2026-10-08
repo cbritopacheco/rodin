@@ -104,15 +104,55 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="add4a80710ddb5dad55fdb96cef7f4211">
-              <span class="m-doc-wrap-bumper">auto <a href="#add4a80710ddb5dad55fdb96cef7f4211" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s1_01_2b29f934879eff017b68e15e11bcb832.html#affb7470c501da201aae700d4bca138f5" class="m-doc">FESRangeType</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#add4a80710ddb5dad55fdb96cef7f4211" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s1_01_2b29f934879eff017b68e15e11bcb832.html#affb7470c501da201aae700d4bca138f5" class="m-doc">FESRangeType</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Evaluates the expression at a geometric point.</dd>
-            <dt id="aa23b79217b4158bacda6739b75e59d2f">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa23b79217b4158bacda6739b75e59d2f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; DefectBase* <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa23b79217b4158bacda6739b75e59d2f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s1_01_f45dc4dfb873f57a1c8c722c1114c5e4.html" class="m-doc">DefectBase</a>* <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="add4a80710ddb5dad55fdb96cef7f4211"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s1_01_2b29f934879eff017b68e15e11bcb832.html#affb7470c501da201aae700d4bca138f5" class="m-doc">FESRangeType</a> Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;::<wbr />DefectBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add4a80710ddb5dad55fdb96cef7f4211" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Evaluates the expression at a geometric point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa23b79217b4158bacda6739b75e59d2f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s1_01_f45dc4dfb873f57a1c8c722c1114c5e4.html" class="m-doc">DefectBase</a>* Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;::<wbr />DefectBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa23b79217b4158bacda6739b75e59d2f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -158,7 +198,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

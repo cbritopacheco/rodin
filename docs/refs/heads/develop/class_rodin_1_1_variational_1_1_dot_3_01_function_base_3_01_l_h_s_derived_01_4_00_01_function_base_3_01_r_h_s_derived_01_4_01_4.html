@@ -111,8 +111,7 @@
         </nav>
 <p>Represents the inner product:</p><div class="m-math"><svg style="width: 12.037em; height: 1.245em;" viewBox="136.495983 -11.955168 115.550998 11.955168">
 <title>
-\[
-   (f \cdot g)(x) = f(x) \cdot g(x)
+\[   (f \cdot g)(x) = f(x) \cdot g(x)
 \]
 </title>
 <defs>
@@ -244,8 +243,8 @@ $ A : B = \sum_{ij} A_{ij} B_{ij} $
               using <a href="#a56808c86c123d70341266761d0bc71d4" class="m-doc-self">RangeType</a> = <a href="#a82882cbe9ee5c3d6f29334057293ac54" class="m-doc">ScalarType</a>
             </dt>
             <dd>Range (evaluation value) type.</dd>
-            <dt id="a1cef8c689d0b76f71d4296fe90467f28">
-              using <a href="#a1cef8c689d0b76f71d4296fe90467f28" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="#a0aec3a766f588e1204ae9a566695f373" class="m-doc">LHSType</a>, <a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc">RHSType</a>&gt;&gt;
+            <dt id="a480405a92199266c580d612f59b0e1aa">
+              using <a href="#a480405a92199266c580d612f59b0e1aa" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="#a0aec3a766f588e1204ae9a566695f373" class="m-doc">LHSType</a>, <a href="#a0bfdbbbc23626e1ff4450c7d872d8b98" class="m-doc">RHSType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -289,8 +288,8 @@ $ A : B = \sum_{ij} A_{ij} B_{ij} $
               <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates dot product at a point.</dd>
-            <dt id="a2532f832dc5ac505f73a265838563f15">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2532f832dc5ac505f73a265838563f15" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; std::optional&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2532f832dc5ac505f73a265838563f15" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; std::optional&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -477,6 +476,32 @@ $ f(p) \cdot g(p) $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a2532f832dc5ac505f73a265838563f15"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::optional&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Dot&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2532f832dc5ac505f73a265838563f15" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">poly</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a2563d918b3ff1468fe21c8878662b999"><div>
             <h3>
               <div class="m-doc-template">
@@ -539,7 +564,7 @@ $ f(p) \cdot g(p) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

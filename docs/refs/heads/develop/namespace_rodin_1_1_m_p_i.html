@@ -81,9 +81,24 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md567">Key Components</a></li>
-            <li><a href="#autotoc_md568">Typical Workflow</a></li>
-            <li><a href="#autotoc_md569">Submodules</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md567">Key Components</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md568">Typical Workflow</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md569">Submodules</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -92,7 +107,7 @@
             </li>
           </ul>
         </nav>
-<p>The MPI module enables distributed finite element computations across multiple processes using the Message Passing Interface (MPI) via Boost.MPI.</p><section id="autotoc_md567"><h3><a href="#autotoc_md567">Key Components</a></h3><ul><li><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> — Wraps a <code>boost::mpi::environment</code> and <code>boost::mpi::communicator</code> to provide a uniform execution context.</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> — Distributed mesh storing a rank-local <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> with ownership, ghost, and distributed index metadata. Geometric queries (<code>getPolytopeCount</code>, <code>getVolume</code>, <code>getPerimeter</code>, etc.) perform MPI reductions automatically.</li><li><a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> — Distributes a global mesh across MPI ranks in three steps: <code>shard()</code>, <code>scatter()</code>, <code>gather()</code>. Also available as one-step <code>distribute()</code>.</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> — Rank-local view of a partitioned mesh. Classifies every polytope as <strong>Owned</strong>, <strong>Shared</strong>, or <strong>Ghost</strong> and maintains bidirectional local↔distributed index maps.</li><li><code>reconcile(d)</code> — After local connectivity discovery, reconciles entities of dimension <code>d</code> across ranks so that shared entities have consistent distributed IDs and ownership.</li></ul></section><section id="autotoc_md568"><h3><a href="#autotoc_md568">Typical Workflow</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MPI.h&gt;</span>
+<p>The MPI module enables distributed finite element computations across multiple processes using the Message Passing Interface (MPI) via Boost.MPI.</p><section id="autotoc_md567_1s1"><section id="autotoc_md567"><h3><a href="#autotoc_md567">Key Components</a></h3><ul><li><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a> — Wraps a <code>boost::mpi::environment</code> and <code>boost::mpi::communicator</code> to provide a uniform execution context.</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a> — Distributed mesh storing a rank-local <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> with ownership, ghost, and distributed index metadata. Geometric queries (<code>getPolytopeCount</code>, <code>getVolume</code>, <code>getPerimeter</code>, etc.) perform MPI reductions automatically.</li><li><a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a> — Distributes a global mesh across MPI ranks in three steps: <code>shard()</code>, <code>scatter()</code>, <code>gather()</code>. Also available as one-step <code>distribute()</code>.</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> — Rank-local view of a partitioned mesh. Classifies every polytope as <strong>Owned</strong>, <strong>Shared</strong>, or <strong>Ghost</strong> and maintains bidirectional local↔distributed index maps.</li><li><code>reconcile(d)</code> — After local connectivity discovery, reconciles entities of dimension <code>d</code> across ranks so that shared entities have consistent distributed IDs and ownership.</li></ul></section></section><section id="autotoc_md568_1s1"><section id="autotoc_md568"><h3><a href="#autotoc_md568">Typical Workflow</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/MPI.h&gt;</span>
 
 <span class="n">boost</span><span class="o">::</span><span class="n">mpi</span><span class="o">::</span><span class="n">environment</span><span class="w"> </span><span class="nf">env</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
 <span class="n">boost</span><span class="o">::</span><span class="n">mpi</span><span class="o">::</span><span class="n">communicator</span><span class="w"> </span><span class="n">world</span><span class="p">;</span>
@@ -117,7 +132,7 @@
 
 <span class="c1">// Compute distributed connectivity and reconcile shared entities</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
-<span class="n">mesh</span><span class="p">.</span><span class="n">reconcile</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre></section><section id="autotoc_md569"><h3><a href="#autotoc_md569">Submodules</a></h3><ul><li><strong>Assembly</strong> — MPI-parallel assembly strategies for PETSc-backed forms</li><li><strong>Context</strong> — <code>Context::MPI</code> execution context</li><li><strong>Geometry</strong> — Distributed mesh and sharder</li><li><strong>IO</strong> — HDF5 and MFEM IO specializations for distributed meshes</li><li><strong>Variational</strong> — Distributed FE spaces (P1 on MPI mesh)</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Requires MPI to be available and Rodin configured with <code>RODIN_USE_MPI=ON</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Shard</a></p></aside></section>
+<span class="n">mesh</span><span class="p">.</span><span class="n">reconcile</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre></section></section><section id="autotoc_md569_1s1"><section id="autotoc_md569"><h3><a href="#autotoc_md569">Submodules</a></h3><ul><li><strong>Assembly</strong> — MPI-parallel assembly strategies for PETSc-backed forms</li><li><strong>Context</strong> — <code>Context::MPI</code> execution context</li><li><strong>Geometry</strong> — Distributed mesh and sharder</li><li><strong>IO</strong> — HDF5 and MFEM IO specializations for distributed meshes</li><li><strong>Variational</strong> — Distributed FE spaces (P1 on MPI mesh)</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Requires MPI to be available and Rodin configured with <code>RODIN_USE_MPI=ON</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></p></aside></section></section>
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
@@ -127,28 +142,28 @@
             <dd>Convenience alias for the MPI mesh sharder specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K&gt;</div>
-              using <a href="#a2cfffefbc648f9033b188eb2b14af16f" class="m-doc">H1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Variational::<wbr />H1</a>&lt;K, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using <a href="#a4387a1c7fbc6961bc6c1444e380b03a3" class="m-doc">H1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Variational::<wbr />H1</a>&lt;K, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
             </dt>
             <dd>Convenience alias for the default distributed scalar H1 space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K&gt;</div>
-              using <a href="#a1e51563705d046109bbba0723a3384d0" class="m-doc">VectorH1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Variational::<wbr />H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using <a href="#ac1c2e6666ed47a488007c16c9abb8b7a" class="m-doc">VectorH1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Variational::<wbr />H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
             </dt>
             <dd>Convenience alias for the default distributed vector H1 space.</dd>
             <dt>
-              using <a href="#a93cf670c63d7cb90749989f12125bbdc" class="m-doc">P0</a> = <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">Variational::<wbr />P0</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using <a href="#a9adff8d1679e8b7dcfe61958c6dad8df" class="m-doc">P0</a> = <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">Variational::<wbr />P0</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
             </dt>
             <dd>Convenience alias for the default distributed scalar P0 space.</dd>
             <dt>
-              using <a href="#af068a23cd7a18f0c00d21dbaa6190c87" class="m-doc">P0g</a> = <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">Variational::<wbr />P0g</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using <a href="#a3d4625409d587e783ff46d4150afb66d" class="m-doc">P0g</a> = <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">Variational::<wbr />P0g</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
             </dt>
             <dd>Convenience alias for the default distributed scalar P0g space.</dd>
             <dt>
-              using <a href="#a40f8c9745d67f6d28b79cf7b1a75ac09" class="m-doc">VectorP0g</a> = <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">Variational::<wbr />P0g</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using <a href="#a5e4adb3461926adcc60bd6bcba92bfda" class="m-doc">VectorP0g</a> = <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">Variational::<wbr />P0g</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
             </dt>
             <dd>Convenience alias for the default distributed vector P0g space.</dd>
             <dt>
-              using <a href="#a99e3a9f179b9b07d57397a92c0ef36a3" class="m-doc">P1</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using <a href="#ac5dbd0fa5c6b1e6d2aef0f41999e75b9" class="m-doc">P1</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
             </dt>
             <dd>Convenience alias for the default distributed scalar P1 space.</dd>
           </dl>
@@ -162,13 +177,13 @@
             </h3>
             <p>Convenience alias for the MPI mesh sharder specialization.</p>
           </div></section>
-          <section class="m-doc-details" id="a2cfffefbc648f9033b188eb2b14af16f"><div>
+          <section class="m-doc-details" id="a4387a1c7fbc6961bc6c1444e380b03a3"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_variational_2_h1_2_h1_8h.html">&lt;Rodin/MPI/Variational/H1/H1.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;size_t K&gt;
               </div>
-              using Rodin::<wbr />MPI::<wbr /><a href="#a2cfffefbc648f9033b188eb2b14af16f" class="m-doc-self">H1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Variational::<wbr />H1</a>&lt;K, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using Rodin::<wbr />MPI::<wbr /><a href="#a4387a1c7fbc6961bc6c1444e380b03a3" class="m-doc-self">H1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Variational::<wbr />H1</a>&lt;K, <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
             </h3>
             <p>Convenience alias for the default distributed scalar H1 space.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -183,13 +198,13 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a1e51563705d046109bbba0723a3384d0"><div>
+          <section class="m-doc-details" id="ac1c2e6666ed47a488007c16c9abb8b7a"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_variational_2_h1_2_h1_8h.html">&lt;Rodin/MPI/Variational/H1/H1.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;size_t K&gt;
               </div>
-              using Rodin::<wbr />MPI::<wbr /><a href="#a1e51563705d046109bbba0723a3384d0" class="m-doc-self">VectorH1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Variational::<wbr />H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using Rodin::<wbr />MPI::<wbr /><a href="#ac1c2e6666ed47a488007c16c9abb8b7a" class="m-doc-self">VectorH1</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">Variational::<wbr />H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
             </h3>
             <p>Convenience alias for the default distributed vector H1 space.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -204,30 +219,30 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a93cf670c63d7cb90749989f12125bbdc"><div>
+          <section class="m-doc-details" id="a9adff8d1679e8b7dcfe61958c6dad8df"><div>
             <h3>
-              using Rodin::<wbr />MPI::<wbr /><a href="#a93cf670c63d7cb90749989f12125bbdc" class="m-doc-self">P0</a> = <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">Variational::<wbr />P0</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using Rodin::<wbr />MPI::<wbr /><a href="#a9adff8d1679e8b7dcfe61958c6dad8df" class="m-doc-self">P0</a> = <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">Variational::<wbr />P0</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_variational_2_p0_2_p0_8h.html">&lt;Rodin/MPI/Variational/P0/P0.h&gt;</a></div>
             </h3>
             <p>Convenience alias for the default distributed scalar P0 space.</p>
           </div></section>
-          <section class="m-doc-details" id="af068a23cd7a18f0c00d21dbaa6190c87"><div>
+          <section class="m-doc-details" id="a3d4625409d587e783ff46d4150afb66d"><div>
             <h3>
-              using Rodin::<wbr />MPI::<wbr /><a href="#af068a23cd7a18f0c00d21dbaa6190c87" class="m-doc-self">P0g</a> = <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">Variational::<wbr />P0g</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using Rodin::<wbr />MPI::<wbr /><a href="#a3d4625409d587e783ff46d4150afb66d" class="m-doc-self">P0g</a> = <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">Variational::<wbr />P0g</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_variational_2_p0g_2_p0g_8h.html">&lt;Rodin/MPI/Variational/P0g/P0g.h&gt;</a></div>
             </h3>
             <p>Convenience alias for the default distributed scalar P0g space.</p>
           </div></section>
-          <section class="m-doc-details" id="a40f8c9745d67f6d28b79cf7b1a75ac09"><div>
+          <section class="m-doc-details" id="a5e4adb3461926adcc60bd6bcba92bfda"><div>
             <h3>
-              using Rodin::<wbr />MPI::<wbr /><a href="#a40f8c9745d67f6d28b79cf7b1a75ac09" class="m-doc-self">VectorP0g</a> = <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">Variational::<wbr />P0g</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using Rodin::<wbr />MPI::<wbr /><a href="#a5e4adb3461926adcc60bd6bcba92bfda" class="m-doc-self">VectorP0g</a> = <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">Variational::<wbr />P0g</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_variational_2_p0g_2_p0g_8h.html">&lt;Rodin/MPI/Variational/P0g/P0g.h&gt;</a></div>
             </h3>
             <p>Convenience alias for the default distributed vector P0g space.</p>
           </div></section>
-          <section class="m-doc-details" id="a99e3a9f179b9b07d57397a92c0ef36a3"><div>
+          <section class="m-doc-details" id="ac5dbd0fa5c6b1e6d2aef0f41999e75b9"><div>
             <h3>
-              using Rodin::<wbr />MPI::<wbr /><a href="#a99e3a9f179b9b07d57397a92c0ef36a3" class="m-doc-self">P1</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+              using Rodin::<wbr />MPI::<wbr /><a href="#ac5dbd0fa5c6b1e6d2aef0f41999e75b9" class="m-doc-self">P1</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_variational_2_p1_2_p1_8h.html">&lt;Rodin/MPI/Variational/P1/P1.h&gt;</a></div>
             </h3>
             <p>Convenience alias for the default distributed scalar P1 space.</p>
@@ -277,7 +292,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

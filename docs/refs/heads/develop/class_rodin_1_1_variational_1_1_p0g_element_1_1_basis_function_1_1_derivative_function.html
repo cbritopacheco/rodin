@@ -95,8 +95,8 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ac7ce97e868790a844a1b5a88b3051db4">
-              <span class="m-doc-wrap-bumper"><a href="#ac7ce97e868790a844a1b5a88b3051db4" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2f543d3665d56fa8db45a6360e96bc9b" class="m-doc">DerivativeFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -104,11 +104,60 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ad7d62e6aff8f37a9eff65903e4c99020">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad7d62e6aff8f37a9eff65903e4c99020" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function.html#a9abc3543721cf3e4eac4d431904e6ec9" class="m-doc">ReturnType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac2b25ebcd615e91a54584d0109676fe1" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; xi) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function.html#a9abc3543721cf3e4eac4d431904e6ec9" class="m-doc">ReturnType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates at a point on the reference element.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a2f543d3665d56fa8db45a6360e96bc9b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0gElement::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f543d3665d56fa8db45a6360e96bc9b" class="m-doc-self">DerivativeFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac2b25ebcd615e91a54584d0109676fe1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_p0g_element_1_1_basis_function.html#a9abc3543721cf3e4eac4d431904e6ec9" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />P0gElement::<wbr />BasisFunction::<wbr />DerivativeFunction&lt;Order&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2b25ebcd615e91a54584d0109676fe1" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; xi) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates at a point on the reference element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">xi</td>
+                  <td>Reference coordinates; the constant result is independent of this argument.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -154,7 +203,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -97,7 +97,7 @@
             <li><a href="#notation-integral-eq">Notation regarding integral equations</a></li>
           </ul>
         </nav>
-<p>Most of the notation follows the same principles as that of <a href="citelist.html#CITEREF_guermond2021finiteI" class="m-doc">[6]</a>.</p><section id="notation-geometry"><h2><a href="#notation-geometry">Notation regarding geometry</a></h2><p>Please see the table below for a description of the symbols used for geometric objects:</p><table class="m-table"><thead><tr><th>Notation</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
+<p>Most of the notation follows the same principles as that of <a href="citelist.html#CITEREF_guermond2021finitei" class="m-doc">[6]</a>.</p><section id="notation-geometry"><h2><a href="#notation-geometry">Notation regarding geometry</a></h2><p>Please see the table below for a description of the symbols used for geometric objects:</p><table class="m-table"><thead><tr><th>Notation</th><th>Description</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
 <title>
 $ \Omega $
 </title>
@@ -792,9 +792,8 @@ $ g $
 </g>
 </svg></td><td>A boundary data function (Dirichlet or Neumann data).</td></tr></tbody></table><section id="notation-complex-forms"><h3><a href="#notation-complex-forms">Real and complex form convention</a></h3><p>Rodin writes form arguments in <strong>trial-first, test-second</strong> order. Its scalar product conjugates the right-hand operand:</p><div class="m-math"><svg style="width: 10.565em; height: 2.749em;" viewBox="143.557697 -27.585401 101.427596 26.389888">
 <title>
-\[
-    \operatorname{dot}(x,y) = \sum_i x_i \overline{y_i}.
-  \]
+\[    \operatorname{dot}(x,y) = \sum_i x_i \overline{y_i}.
+\]
 </title>
 <defs>
 <path id='eq57-g1-105' d='M2.375093-4.97335C2.375093-5.148692 2.247572-5.276214 2.064259-5.276214C1.857036-5.276214 1.625903-5.084932 1.625903-4.845828C1.625903-4.670486 1.753425-4.542964 1.936737-4.542964C2.14396-4.542964 2.375093-4.734247 2.375093-4.97335ZM1.211457-2.048319L.781071-.948443C.74122-.828892 .70137-.73325 .70137-.597758C.70137-.207223 1.004234 .079701 1.42665 .079701C2.199751 .079701 2.526526-1.036115 2.526526-1.139726C2.526526-1.219427 2.462765-1.243337 2.406974-1.243337C2.311333-1.243337 2.295392-1.187547 2.271482-1.107846C2.088169-.470237 1.761395-.143462 1.44259-.143462C1.346949-.143462 1.251308-.183313 1.251308-.398506C1.251308-.589788 1.307098-.73325 1.41071-.980324C1.490411-1.195517 1.570112-1.41071 1.657783-1.625903L1.904857-2.271482C1.976588-2.454795 2.072229-2.701868 2.072229-2.83736C2.072229-3.235866 1.753425-3.514819 1.346949-3.514819C.573848-3.514819 .239103-2.399004 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.239601 .494147-2.319303C.71731-3.076463 1.083935-3.291656 1.323039-3.291656C1.43462-3.291656 1.514321-3.251806 1.514321-3.028643C1.514321-2.948941 1.506351-2.83736 1.42665-2.598257L1.211457-2.048319Z'/>
@@ -831,12 +830,11 @@ $ g $
 </g>
 </svg></div><p>This is the convention implemented by <code>Math::dot(lhs, rhs)</code>. Consequently, over complex-valued spaces a <code>LinearForm</code> is a conjugate-linear test functional,</p><div class="m-math"><svg style="width: 25.991em; height: 1.375em;" viewBox="69.513129 -13.203721 249.516781 13.203721">
 <title>
-\[
-    \ell(v) = \mathbf{v}^* \mathbf{b},
+\[    \ell(v) = \mathbf{v}^* \mathbf{b},
     \qquad
     \ell(\alpha v_1 + \beta v_2)
       = \overline{\alpha}\,\ell(v_1) + \overline{\beta}\,\ell(v_2),
-  \]
+\]
 </title>
 <defs>
 <path id='eq58-g3-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
@@ -894,9 +892,8 @@ $ g $
 </g>
 </svg></div><p>and a <code>BilinearForm</code> is sesquilinear: linear in its trial argument and conjugate-linear in its test argument,</p><div class="m-math"><svg style="width: 8.386em; height: 1.245em;" viewBox="154.017892 -11.955168 80.507207 11.955168">
 <title>
-\[
-    a(u,v) = \mathbf{v}^* A \mathbf{u},
-  \]
+\[    a(u,v) = \mathbf{v}^* A \mathbf{u},
+\]
 </title>
 <defs>
 <path id='eq59-g1-3' d='M3.291656-1.052055C3.363387-1.004234 3.387298-1.004234 3.427148-1.004234C3.55467-1.004234 3.666252-1.107846 3.666252-1.251308C3.666252-1.40274 3.58655-1.43462 3.466999-1.490411C2.933001-1.737484 2.741719-1.825156 2.351183-1.984558L3.283686-2.406974C3.347447-2.430884 3.498879-2.502615 3.56264-2.526526C3.642341-2.574346 3.666252-2.654047 3.666252-2.725778C3.666252-2.82142 3.618431-2.972852 3.379328-2.972852L2.231631-2.191781L2.343213-3.371357C2.359153-3.506849 2.343213-3.706102 2.11208-3.706102C1.968618-3.706102 1.857036-3.58655 1.880946-3.474969V-3.379328L1.992528-2.191781L.932503-2.925031C.860772-2.972852 .836862-2.972852 .797011-2.972852C.669489-2.972852 .557908-2.86924 .557908-2.725778C.557908-2.574346 .637609-2.542466 .757161-2.486675C1.291158-2.239601 1.482441-2.15193 1.872976-1.992528L.940473-1.570112C.876712-1.546202 .72528-1.474471 .661519-1.45056C.581818-1.40274 .557908-1.323039 .557908-1.251308C.557908-1.107846 .669489-1.004234 .797011-1.004234C.860772-1.004234 .876712-1.004234 1.075965-1.147696L1.992528-1.785305L1.872976-.502117C1.872976-.342715 2.008468-.270984 2.11208-.270984S2.351183-.342715 2.351183-.502117C2.351183-.581818 2.319303-.836862 2.311333-.932503C2.279452-1.203487 2.255542-1.506351 2.231631-1.785305L3.291656-1.052055Z'/>
@@ -927,10 +924,9 @@ $ g $
 </g>
 </svg></div><div class="m-math"><svg style="width: 21.119em; height: 1.245em;" viewBox="92.89908 -11.955168 202.744857 11.955168">
 <title>
-\[
-    a(\alpha u_1 + \beta u_2,v)
+\[    a(\alpha u_1 + \beta u_2,v)
       = \alpha a(u_1,v) + \beta a(u_2,v),
-  \]
+\]
 </title>
 <defs>
 <path id='eq60-g1-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
@@ -981,10 +977,9 @@ $ g $
 </g>
 </svg></div><div class="m-math"><svg style="width: 21.296em; height: 1.375em;" viewBox="92.051596 -13.203721 204.439833 13.203721">
 <title>
-\[
-    a(u,\alpha v_1 + \beta v_2)
+\[    a(u,\alpha v_1 + \beta v_2)
       = \overline{\alpha}\,a(u,v_1) + \overline{\beta}\,a(u,v_2).
-  \]
+\]
 </title>
 <defs>
 <path id='eq61-g1-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
@@ -1062,11 +1057,10 @@ $ \psi_i $
 </g>
 </svg>, assembly therefore stores</p><div class="m-math"><svg style="width: 16.261em; height: 1.282em;" viewBox="116.220697 -12.309385 156.101646 12.309385">
 <title>
-\[
-    b_i = \ell(\psi_i),
+\[    b_i = \ell(\psi_i),
     \qquad
     A_{ij} = a(\phi_j,\psi_i).
-  \]
+\]
 </title>
 <defs>
 <path id='eq64-g2-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
@@ -2238,7 +2232,7 @@ $ K $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

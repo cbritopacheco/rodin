@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;class Callable&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html">P0&lt;Scalar, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>::<wbr/></span>Pullback <span class="m-thin">class</span>
+          Rodin::Variational::P0&lt;Scalar, Geometry::Mesh&lt;Context::Local&gt;&gt;::Pullback <span class="m-thin">class</span>
         </h1>
         <p>Pullback of a P0 function to the reference element.</p>
         <nav class="m-block m-default">
@@ -115,14 +115,14 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a643fd0f55b729ad94f17ce76d3421a5d">
+            <dt>
               <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a643fd0f55b729ad94f17ce76d3421a5d" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope,
+              <span class="m-doc-wrap-bumper"><a href="#a643fd0f55b729ad94f17ce76d3421a5d" class="m-doc">Pullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope,
               <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp;&amp; v)</span>
             </dt>
             <dd>Constructs the pullback of a function on a polytope.</dd>
-            <dt id="a30b641c729f814959c3902ff1e1466be">
-              <span class="m-doc-wrap-bumper"><a href="#a30b641c729f814959c3902ff1e1466be" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap">const Pullback&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2021b803f5a5522e10c0f49c66f618d1" class="m-doc">Pullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -130,11 +130,86 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a8804c2e0ff07d4fd91270b8c6f33578a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a8804c2e0ff07d4fd91270b8c6f33578a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; auto</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8804c2e0ff07d4fd91270b8c6f33578a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; auto</span>
             </dt>
             <dd>Evaluates at a point on the reference element.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a643fd0f55b729ad94f17ce76d3421a5d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Callable&gt;
+                template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0&lt;Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr />Pullback&lt;Callable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a643fd0f55b729ad94f17ce76d3421a5d" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope,
+              <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp;&amp; v)</span></span>
+            </h3>
+            <p>Constructs the pullback of a function on a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Function operand.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2021b803f5a5522e10c0f49c66f618d1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Callable&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0&lt;Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr />Pullback&lt;Callable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2021b803f5a5522e10c0f49c66f618d1" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8804c2e0ff07d4fd91270b8c6f33578a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Callable&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P0&lt;Scalar, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr />Pullback&lt;Callable&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8804c2e0ff07d4fd91270b8c6f33578a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const</span></span>
+            </h3>
+            <p>Evaluates at a point on the reference element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">r</td>
+                  <td>Reference coordinates at which to evaluate the basis.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -180,7 +255,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -94,12 +94,12 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a692039ecb1167c966bf7059ac4c6f738">
-              <span class="m-doc-wrap-bumper"><a href="#a692039ecb1167c966bf7059ac4c6f738" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a692039ecb1167c966bf7059ac4c6f738" class="m-doc">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the LinearForm from the given arguments.</dd>
-            <dt id="abff57c111c258aea79c4f23d6f2f7c79">
-              <span class="m-doc-wrap-bumper"><a href="#abff57c111c258aea79c4f23d6f2f7c79" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2672f8a06236573e25b6efb0ede5d1be" class="m-doc">LinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -107,12 +107,75 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="aacfb55719082f5b972bdbc96be74980a">
+            <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aacfb55719082f5b972bdbc96be74980a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const T&amp; v) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0_element.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aacfb55719082f5b972bdbc96be74980a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const T&amp; v) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0_element.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a></span>
             </dt>
             <dd>Applies the functional to a callable.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a692039ecb1167c966bf7059ac4c6f738"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0Element::<wbr />LinearForm::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a692039ecb1167c966bf7059ac4c6f738" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs the LinearForm from the given arguments.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2672f8a06236573e25b6efb0ede5d1be"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0Element::<wbr />LinearForm::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2672f8a06236573e25b6efb0ede5d1be" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_linear_form.html" class="m-doc">LinearForm</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aacfb55719082f5b972bdbc96be74980a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_p0_element.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />P0Element::<wbr />LinearForm::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aacfb55719082f5b972bdbc96be74980a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const T&amp; v) const</span></span>
+            </h3>
+            <p>Applies the functional to a callable.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v</td>
+                  <td>Callable evaluated at the degree-of-freedom node, with the selected value component used for vector ranges.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -158,7 +221,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

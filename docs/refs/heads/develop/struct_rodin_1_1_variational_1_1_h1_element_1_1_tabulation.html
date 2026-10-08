@@ -94,20 +94,20 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="af003fbb62840505b57ffdf2274f848e7">
-              <span class="m-doc-wrap-bumper">auto <a href="#af003fbb62840505b57ffdf2274f848e7" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t qp,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af003fbb62840505b57ffdf2274f848e7" class="m-doc">getBasis</a>(</span><span class="m-doc-wrap">size_t qp,
               size_t a) const -&gt; const Scalar&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the basis function of a local degree of freedom.</dd>
-            <dt id="a4b0dbe4087b83479edbe6daa30e79420">
+            <dt>
               <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4b0dbe4087b83479edbe6daa30e79420" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t qp,
+              <span class="m-doc-wrap-bumper">auto <a href="#a4b0dbe4087b83479edbe6daa30e79420" class="m-doc">getDerivative</a>(</span><span class="m-doc-wrap">size_t qp,
               size_t a,
               size_t i) const -&gt; const Scalar&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the derivative of the basis function.</dd>
-            <dt id="a45b5636a7cabb4431d77a20490baea28">
-              <span class="m-doc-wrap-bumper">auto <a href="#a45b5636a7cabb4431d77a20490baea28" class="m-doc-self">getGradient</a>(</span><span class="m-doc-wrap">size_t qp,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a45b5636a7cabb4431d77a20490baea28" class="m-doc">getGradient</a>(</span><span class="m-doc-wrap">size_t qp,
               size_t a) const -&gt; std::span&lt;const Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the gradient of the basis function.</dd>
@@ -137,6 +137,101 @@
             </dt>
             <dd>Tabulated basis derivatives.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="af003fbb62840505b57ffdf2274f848e7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const Scalar&amp; Rodin::<wbr />Variational::<wbr />H1Element::<wbr />Tabulation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af003fbb62840505b57ffdf2274f848e7" class="m-doc-self">getBasis</a>(</span><span class="m-doc-wrap">size_t qp,
+              size_t a) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets the basis function of a local degree of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">qp</td>
+                  <td>Quadrature-point index.</td>
+                </tr>
+                <tr>
+                  <td>a</td>
+                  <td>Local basis-function index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the selected local basis function at the evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4b0dbe4087b83479edbe6daa30e79420"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const Scalar&amp; Rodin::<wbr />Variational::<wbr />H1Element::<wbr />Tabulation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4b0dbe4087b83479edbe6daa30e79420" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t qp,
+              size_t a,
+              size_t i) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets the derivative of the basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">qp</td>
+                  <td>Quadrature-point index.</td>
+                </tr>
+                <tr>
+                  <td>a</td>
+                  <td>Basis or lattice index in the reference element.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Derivative evaluated at the supplied point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a45b5636a7cabb4431d77a20490baea28"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::span&lt;const Scalar&gt; Rodin::<wbr />Variational::<wbr />H1Element::<wbr />Tabulation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45b5636a7cabb4431d77a20490baea28" class="m-doc-self">getGradient</a>(</span><span class="m-doc-wrap">size_t qp,
+              size_t a) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets the gradient of the basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">qp</td>
+                  <td>Quadrature-point index.</td>
+                </tr>
+                <tr>
+                  <td>a</td>
+                  <td>Coordinate at which the basis is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Derivative evaluated at the supplied point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -182,7 +277,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

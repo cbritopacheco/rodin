@@ -95,8 +95,7 @@
         </nav>
 <p>Encodes the essential constraint</p><div class="m-math"><svg style="width: 18.237em; height: 1.107em;" viewBox="106.482952 -10.626787 175.078943 10.626798">
 <title>
-\[
-  \mathrm{Operand} \;=\; \mathrm{Value}
+\[  \mathrm{Operand} \;=\; \mathrm{Value}
   \quad\text{on}\quad
   \Gamma_D \subset \mathcal{B}_h
 \]
@@ -167,8 +166,7 @@ $ \Gamma_D $
 </g>
 </svg> the assembled object encodes a row of the form</p><div class="m-math"><svg style="width: 13.866em; height: 1.245em;" viewBox="127.716498 -11.955168 133.109984 11.955168">
 <title>
-\[
-  \ell_s^u(\text{Operand}) \;=\; \ell_s^u(\text{Value}),
+\[  \ell_s^u(\text{Operand}) \;=\; \ell_s^u(\text{Value}),
 \]
 </title>
 <defs>
@@ -424,7 +422,7 @@ $ v $
             </dt>
             <dd>DOF map for the value-based Dirichlet condition <code>u = g</code>.</dd>
             <dt>
-              using <a href="#af39b693c6c459b4722a0080122bfb789" class="m-doc">IdentifiedDOFs</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;&gt;&gt;
+              using <a href="#a0505649ed6bb40978ddb157d41482017" class="m-doc">IdentifiedDOFs</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;&gt;&gt;
             </dt>
             <dd>DOF map for the identification-based Dirichlet condition <code>u = A(v)</code>.</dd>
             <dt>
@@ -432,7 +430,7 @@ $ v $
             </dt>
             <dd>Optional defects for affine identification rows.</dd>
             <dt>
-              using <a href="#ab2a613baef734f447c08acbde518997e" class="m-doc">DOFs</a> = std::variant&lt;<a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc">ValueDOFs</a>, <a href="#af39b693c6c459b4722a0080122bfb789" class="m-doc">IdentifiedDOFs</a>&gt;
+              using <a href="#ab2a613baef734f447c08acbde518997e" class="m-doc">DOFs</a> = std::variant&lt;<a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc">ValueDOFs</a>, <a href="#a0505649ed6bb40978ddb157d41482017" class="m-doc">IdentifiedDOFs</a>&gt;
             </dt>
             <dd>Variant DOF type covering both Dirichlet semantics.</dd>
           </dl>
@@ -514,12 +512,12 @@ $ g(x_i) $
 </g>
 </svg>.</p>
           </div></section>
-          <section class="m-doc-details" id="af39b693c6c459b4722a0080122bfb789"><div>
+          <section class="m-doc-details" id="a0505649ed6bb40978ddb157d41482017"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /><a href="#af39b693c6c459b4722a0080122bfb789" class="m-doc-self">IdentifiedDOFs</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;&gt;&gt;
+              using Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /><a href="#a0505649ed6bb40978ddb157d41482017" class="m-doc-self">IdentifiedDOFs</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;&gt;&gt;
             </h3>
             <p>DOF map for the identification-based Dirichlet condition <code>u = A(v)</code>.</p>
 <p>Maps each slave DOF (in <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
@@ -615,8 +613,7 @@ $ u_s = \sum_j C_{sj}\, v_j $
             <p>Optional defects for affine identification rows.</p>
 <p>For an affine identification constraint</p><div class="m-math"><svg style="width: 10.725em; height: 2.910em;" viewBox="142.79282 -29.135147 102.957343 27.939633">
 <title>
-\[
-  u_s = \sum_j C_{sj}\,v_j + d_s,
+\[  u_s = \sum_j C_{sj}\,v_j + d_s,
 \]
 </title>
 <defs>
@@ -659,7 +656,7 @@ $ d_s $
 <use x='0' y='0' xlink:href='#eq19-g1-100'/>
 <use x='6.082693' y='1.793263' xlink:href='#eq19-g0-115'/>
 </g>
-</svg> using the same slave DOF numbering as <a href="#af39b693c6c459b4722a0080122bfb789" class="m-doc">IdentifiedDOFs</a>. Missing entries mean <svg class="m-math" style="width: 3.343em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 32.096044 10.095454">
+</svg> using the same slave DOF numbering as <a href="#a0505649ed6bb40978ddb157d41482017" class="m-doc">IdentifiedDOFs</a>. Missing entries mean <svg class="m-math" style="width: 3.343em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 32.096044 10.095454">
 <title>
 $ d_s = 0 $
 </title>
@@ -682,10 +679,10 @@ $ d_s = 0 $
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /><a href="#ab2a613baef734f447c08acbde518997e" class="m-doc-self">DOFs</a> = std::variant&lt;<a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc">ValueDOFs</a>, <a href="#af39b693c6c459b4722a0080122bfb789" class="m-doc">IdentifiedDOFs</a>&gt;
+              using Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /><a href="#ab2a613baef734f447c08acbde518997e" class="m-doc-self">DOFs</a> = std::variant&lt;<a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc">ValueDOFs</a>, <a href="#a0505649ed6bb40978ddb157d41482017" class="m-doc">IdentifiedDOFs</a>&gt;
             </h3>
             <p>Variant DOF type covering both Dirichlet semantics.</p>
-<p>The active alternative depends on which subclass produced it: a value-prescribing BC writes the <a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc">ValueDOFs</a> alternative, an identification BC writes the <a href="#af39b693c6c459b4722a0080122bfb789" class="m-doc">IdentifiedDOFs</a> alternative.</p>
+<p>The active alternative depends on which subclass produced it: a value-prescribing BC writes the <a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc">ValueDOFs</a> alternative, an identification BC writes the <a href="#a0505649ed6bb40978ddb157d41482017" class="m-doc">IdentifiedDOFs</a> alternative.</p>
           </div></section>
         </section>
         <section>
@@ -698,7 +695,7 @@ $ d_s = 0 $
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedef9817f0ecb43ca5cf9f5d10f6bcc3" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Assembles the Dirichlet boundary condition.</p>
-<p>Either fills the <a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc">ValueDOFs</a> alternative (for value-prescribing BCs) or the <a href="#af39b693c6c459b4722a0080122bfb789" class="m-doc">IdentifiedDOFs</a> alternative (for identification BCs).</p>
+<p>Either fills the <a href="#af23bb45dde010a1e6dd411dcbcd847d3" class="m-doc">ValueDOFs</a> alternative (for value-prescribing BCs) or the <a href="#a0505649ed6bb40978ddb157d41482017" class="m-doc">IdentifiedDOFs</a> alternative (for identification BCs).</p>
           </div></section>
           <section class="m-doc-details" id="a2b01263c63728dde2f8acc22444e59c7"><div>
             <h3>
@@ -786,6 +783,24 @@ $ v $
 <use x='0' y='0' xlink:href='#eq21-g0-118'/>
 </g>
 </svg>&#x27;s leaf trial function for an identification BC, or <code>nullopt</code> for a value-prescribing BC.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The UUID of <svg class="m-math" style="width: 0.634em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.088223 5.147373">
+<title>
+$ v $
+</title>
+<defs>
+<path id='eq23-g0-118' d='M5.463512-4.471233C5.463512-5.224408 5.080946-5.272229 4.985305-5.272229C4.698381-5.272229 4.435367-4.985305 4.435367-4.746202C4.435367-4.60274 4.519054-4.519054 4.566874-4.471233C4.686426-4.363636 4.99726-4.040847 4.99726-3.419178C4.99726-2.917061 4.27995-.119552 2.84533-.119552C2.116065-.119552 1.972603-.729265 1.972603-1.171606C1.972603-1.769365 2.247572-2.606227 2.570361-3.466999C2.761644-3.957161 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.578829 1.374844-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.255293-1.996513 1.255293-1.625903 1.255293-1.338979C1.255293-1.075965 1.291158-.585803 1.661768-.251059C2.092154 .119552 2.689913 .119552 2.797509 .119552C4.782067 .119552 5.463512-3.789788 5.463512-4.471233Z'/>
+</defs>
+<g id='eq23-page1'>
+<use x='0' y='0' xlink:href='#eq23-g0-118'/>
+</g>
+</svg>&#x27;s leaf trial function for an identification BC, or nullopt for a value-prescribing BC.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Consumer assemblies use this to locate <svg class="m-math" style="width: 0.634em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.088223 5.147373">
 <title>
 $ v $
@@ -806,6 +821,14 @@ $ v $
               <span class="m-doc-wrap-bumper">const <a href="#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">IdentificationValues</a>&amp; Rodin::<wbr />Variational::<wbr />DirichletBCBase&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f3f1cd4254acb1296162d9a4443ef5b" class="m-doc-self">getIdentificationValues</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Returns optional defects for affine identification BCs.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Optional defects for affine identification BCs.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Value-prescribing BCs and homogeneous identification BCs return an empty map. Affine identification BCs override this to provide the known additive defect value for each slave row.</p>
           </div></section>
           <section class="m-doc-details" id="a00c956a9ff24f89c4e3894319a47f70f"><div>
@@ -870,7 +893,7 @@ $ v $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

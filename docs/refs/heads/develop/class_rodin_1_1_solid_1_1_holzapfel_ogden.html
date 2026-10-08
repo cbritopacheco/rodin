@@ -95,8 +95,7 @@
         </nav>
 <p>The stored energy density is</p><div class="m-math"><svg style="width: 40.473em; height: 1.520em;" viewBox="0 -14.589985 388.543021 14.589985">
 <title>
-\[
-  W = \mu_1(\bar I_1 - 3) + \mu_2(\bar I_2 - 3)
+\[  W = \mu_1(\bar I_1 - 3) + \mu_2(\bar I_2 - 3)
     + C_0 e^{C_1(\bar I_1 - 3)^2}
     + C_2 e^{C_3(\bar I_4 - 1)^2}
     + \kappa(J - 1 - \log J),
@@ -328,12 +327,12 @@ $I_3=J^2$
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a77bf67e88cb4f099351a47d82977e6d9">
-              <span class="m-doc-wrap-bumper"><a href="#a77bf67e88cb4f099351a47d82977e6d9" class="m-doc-self">HolzapfelOgden</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_parameters.html" class="m-doc">Parameters</a>&amp; params) <span class="m-label m-flat m-info">explicit</span> </span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a77bf67e88cb4f099351a47d82977e6d9" class="m-doc">HolzapfelOgden</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_parameters.html" class="m-doc">Parameters</a>&amp; params) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs the law from a parameter object.</dd>
-            <dt id="acdc1124f61bfe3c07ab7c0ac88a090a2">
-              <span class="m-doc-wrap-bumper"><a href="#acdc1124f61bfe3c07ab7c0ac88a090a2" class="m-doc-self">HolzapfelOgden</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu1,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#acdc1124f61bfe3c07ab7c0ac88a090a2" class="m-doc">HolzapfelOgden</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu1,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu2,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> C0,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> C1,
@@ -347,34 +346,224 @@ $I_3=J^2$
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a6637e48887cd69c114ea87ae902553fe">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6637e48887cd69c114ea87ae902553fe" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_parameters.html" class="m-doc">Parameters</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6637e48887cd69c114ea87ae902553fe" class="m-doc">getParameters</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_parameters.html" class="m-doc">Parameters</a>&amp;</span>
             </dt>
             <dd>Returns the material parameters.</dd>
-            <dt id="a7c3f4a25b01ac9b17fa90d43921b2dfb">
-              <span class="m-doc-wrap-bumper">void <a href="#a7c3f4a25b01ac9b17fa90d43921b2dfb" class="m-doc-self">setCache</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7c3f4a25b01ac9b17fa90d43921b2dfb" class="m-doc">setCache</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
               const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
             </dt>
             <dd>Populates invariant caches at a constitutive point.</dd>
-            <dt id="a51fb0657e6874256177b2e95478fded8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a51fb0657e6874256177b2e95478fded8" class="m-doc-self">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
-              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp;) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad6e34e0670dc260c3510a097ab9bd352" class="m-doc">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Returns the stored strain-energy density.</dd>
-            <dt id="aa875e5dbc449421b1cc4fdb7471aa946">
-              <span class="m-doc-wrap-bumper">void <a href="#aa875e5dbc449421b1cc4fdb7471aa946" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aa875e5dbc449421b1cc4fdb7471aa946" class="m-doc">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
               const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
               const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
             </dt>
             <dd>Computes the first Piola-Kirchhoff stress.</dd>
-            <dt id="adbcae15abc4f9d19395789c881e27e7d">
-              <span class="m-doc-wrap-bumper">void <a href="#adbcae15abc4f9d19395789c881e27e7d" class="m-doc-self">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#adbcae15abc4f9d19395789c881e27e7d" class="m-doc">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
               const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
               const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dF) const</span>
             </dt>
             <dd>Computes the material tangent action by directional differencing.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a77bf67e88cb4f099351a47d82977e6d9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />HolzapfelOgden::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77bf67e88cb4f099351a47d82977e6d9" class="m-doc-self">HolzapfelOgden</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_parameters.html" class="m-doc">Parameters</a>&amp; params) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs the law from a parameter object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">params</td>
+                  <td>Material parameters configuring the law.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acdc1124f61bfe3c07ab7c0ac88a090a2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />HolzapfelOgden::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acdc1124f61bfe3c07ab7c0ac88a090a2" class="m-doc-self">HolzapfelOgden</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> C0,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> C1,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> C2,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> C3,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> kappa)</span></span>
+            </h3>
+            <p>Constructs the law from scalar material parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mu1</td>
+                  <td>Isochoric first-invariant coefficient.</td>
+                </tr>
+                <tr>
+                  <td>mu2</td>
+                  <td>Isochoric second-invariant coefficient.</td>
+                </tr>
+                <tr>
+                  <td>C0</td>
+                  <td>Exponential first-invariant scale.</td>
+                </tr>
+                <tr>
+                  <td>C1</td>
+                  <td>Exponential first-invariant stiffness.</td>
+                </tr>
+                <tr>
+                  <td>C2</td>
+                  <td>Fiber exponential scale.</td>
+                </tr>
+                <tr>
+                  <td>C3</td>
+                  <td>Fiber exponential stiffness.</td>
+                </tr>
+                <tr>
+                  <td>kappa</td>
+                  <td>Volumetric penalty coefficient.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6637e48887cd69c114ea87ae902553fe"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_parameters.html" class="m-doc">Parameters</a>&amp; Rodin::<wbr />Solid::<wbr />HolzapfelOgden::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6637e48887cd69c114ea87ae902553fe" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the material parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The material parameters.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7c3f4a25b01ac9b17fa90d43921b2dfb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />HolzapfelOgden::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c3f4a25b01ac9b17fa90d43921b2dfb" class="m-doc-self">setCache</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+            </h3>
+            <p>Populates invariant caches at a constitutive point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">cache</td>
+                  <td>Storage for the constitutive invariant cache.</td>
+                </tr>
+                <tr>
+                  <td>cp</td>
+                  <td>Constitutive evaluation point.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad6e34e0670dc260c3510a097ab9bd352"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solid::<wbr />HolzapfelOgden::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6e34e0670dc260c3510a097ab9bd352" class="m-doc-self">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+            </h3>
+            <p>Returns the stored strain-energy density.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">cache</td>
+                  <td>Constitutive invariant cache populated by setCache().</td>
+                </tr>
+                <tr>
+                  <td>cp</td>
+                  <td>Constitutive point required by the material-law interface; unused because the energy is obtained from the cache.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The stored strain-energy density.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa875e5dbc449421b1cc4fdb7471aa946"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />HolzapfelOgden::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa875e5dbc449421b1cc4fdb7471aa946" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
+              const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
+            </h3>
+            <p>Computes the first Piola-Kirchhoff stress.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">P</td>
+                  <td>Storage for the first Piola-Kirchhoff stress.</td>
+                </tr>
+                <tr>
+                  <td>cache</td>
+                  <td>Constitutive invariant cache populated by setCache().</td>
+                </tr>
+                <tr>
+                  <td>cp</td>
+                  <td>Constitutive evaluation point.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adbcae15abc4f9d19395789c881e27e7d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />HolzapfelOgden::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adbcae15abc4f9d19395789c881e27e7d" class="m-doc-self">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
+              const <a href="struct_rodin_1_1_solid_1_1_holzapfel_ogden_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dF) const</span></span>
+            </h3>
+            <p>Computes the material tangent action by directional differencing.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dP</td>
+                  <td>Storage for the resulting stress increment.</td>
+                </tr>
+                <tr>
+                  <td>cache</td>
+                  <td>Constitutive invariant cache populated by setCache().</td>
+                </tr>
+                <tr>
+                  <td>cp</td>
+                  <td>Constitutive evaluation point.</td>
+                </tr>
+                <tr>
+                  <td>dF</td>
+                  <td>Increment of the deformation gradient.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -420,7 +609,7 @@ $I_3=J^2$
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

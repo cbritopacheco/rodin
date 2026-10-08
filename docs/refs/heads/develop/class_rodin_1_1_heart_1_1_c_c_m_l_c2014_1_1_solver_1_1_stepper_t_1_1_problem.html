@@ -112,7 +112,7 @@
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a3f2ebebbd7f1b5c84c32748c1ef66c1d">
-              using <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc-self">ProblemBodyType</a> = typename <a href="class_rodin_1_1_variational_1_1_problem_base.html#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">Parent::<wbr />ProblemBodyType</a>
+              using <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc-self">ProblemBodyType</a> = typename <a href="class_rodin_1_1_variational_1_1_problem_base.html#a9ae05bc3f1920558cc1867c93ea9d4cf" class="m-doc">Parent::<wbr />ProblemBodyType</a>
             </dt>
             <dd>Problem body type accepted by the variational interface.</dd>
           </dl>
@@ -129,28 +129,28 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ad9c4b08e63e3e94e4e8c252ac40ca95b">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad9c4b08e63e3e94e4e8c252ac40ca95b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc">ProblemBodyType</a>&amp;) -&gt; <a href="#aab10e799acaa1bbb330a87aff20ec5bb" class="m-doc">Parent</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac582b4b3f0d419b5a0c66572e081076d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc">ProblemBodyType</a>&amp; other) -&gt; <a href="#aab10e799acaa1bbb330a87aff20ec5bb" class="m-doc">Parent</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Problem bodies are not assigned into this specialized problem.</dd>
-            <dt id="ade273f2556fd4951a4e7b8dad8006d5f">
-              <span class="m-doc-wrap-bumper">auto <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the dense linear system for one step.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#af6ec3bed9497b40a1611c0d8126a6ecc" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">::<wbr />Rodin::<wbr />Solver::<wbr />LinearSolverBase</a>&lt;<a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;&amp; solver) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the assembled dense linear system.</dd>
-            <dt id="a08a1b9524ed4988504ef7c9f088eed97">
-              <span class="m-doc-wrap-bumper">auto <a href="#a08a1b9524ed4988504ef7c9f088eed97" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a08a1b9524ed4988504ef7c9f088eed97" class="m-doc">getLinearSystem</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the mutable linear system.</dd>
-            <dt id="a713567d6c4922035c98041fd5e25d4a8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a713567d6c4922035c98041fd5e25d4a8" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a713567d6c4922035c98041fd5e25d4a8" class="m-doc">getLinearSystem</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the linear system.</dd>
-            <dt id="ad2429ffd7600bef5051f4fab1a8eb0a5">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t_1_1_problem.html" class="m-doc">Problem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t_1_1_problem.html" class="m-doc">Problem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies this stepper problem.</dd>
             <dt>
@@ -184,6 +184,43 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ac582b4b3f0d419b5a0c66572e081076d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#aab10e799acaa1bbb330a87aff20ec5bb" class="m-doc">Parent</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac582b4b3f0d419b5a0c66572e081076d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a3f2ebebbd7f1b5c84c32748c1ef66c1d" class="m-doc">ProblemBodyType</a>&amp; other) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Problem bodies are not assigned into this specialized problem.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ade273f2556fd4951a4e7b8dad8006d5f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Assembles the dense linear system for one step.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="af6ec3bed9497b40a1611c0d8126a6ecc"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6ec3bed9497b40a1611c0d8126a6ecc" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">::<wbr />Rodin::<wbr />Solver::<wbr />LinearSolverBase</a>&lt;<a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;&amp; solver) <span class="m-label m-warning">override</span></span></span>
@@ -199,6 +236,48 @@
                   <td>Linear solver used for the Newton correction.</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a08a1b9524ed4988504ef7c9f088eed97"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a08a1b9524ed4988504ef7c9f088eed97" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the mutable linear system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The mutable linear system.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a713567d6c4922035c98041fd5e25d4a8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a713567d6c4922035c98041fd5e25d4a8" class="m-doc-self">getLinearSystem</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the linear system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The linear system.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad2429ffd7600bef5051f4fab1a8eb0a5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t_1_1_problem.html" class="m-doc">Problem</a>* Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT::<wbr />Problem::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polymorphically copies this stepper problem.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="a95739f2c6cb22f55e613c9ddef784dd3"><div>
@@ -290,7 +369,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

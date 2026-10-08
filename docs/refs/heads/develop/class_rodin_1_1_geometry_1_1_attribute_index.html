@@ -82,11 +82,36 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md53">Data layout</a></li>
-            <li><a href="#autotoc_md54">Thread-Safety Model</a></li>
-            <li><a href="#autotoc_md55">Structural Immutability</a></li>
-            <li><a href="#autotoc_md56">Copy and Move Semantics</a></li>
-            <li><a href="#autotoc_md57">Usage Contract</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md53">Data layout</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md54">Thread-Safety Model</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md55">Structural Immutability</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md56">Copy and Move Semantics</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md57">Usage Contract</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -96,7 +121,7 @@
             </li>
           </ul>
         </nav>
-<p>This class stores, for each topological dimension <code>d</code>, an array of optional attributes indexed by polytope index. Attributes are typically used as material-region ids, boundary markers, or any other user-defined tags.</p><section id="autotoc_md53"><h3><a href="#autotoc_md53">Data layout</a></h3><p>The storage is organized by dimension:</p><ul><li>For each <code>d</code> in [0, meshDim], a <code>Dimension</code> stores:<ul><li><code>slots:</code> stable attribute slots indexed by polytope index.</li><li><code>mutex:</code> a mutex protecting storage growth.</li></ul></li></ul></section><section id="autotoc_md54"><h3><a href="#autotoc_md54">Thread-Safety Model</a></h3><p>This class provides fine-grained thread-safety at the level of individual dimensions. Slot values and the published storage extent are atomic, so repeated reads require no lock. Storage growth and writes are serialized per dimension.</p><p>After initialization, concurrent calls to the following methods are safe w.r.t. each other (subject to each method&#x27;s preconditions):</p><ul><li><a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc">resize(size_<wbr />t,size_<wbr />t)</a></li><li><code>set(const std::pair&lt;size_t,Index&gt;&amp;, Attribute)</code></li><li><code>set(const std::pair&lt;size_t,Index&gt;&amp;, size_t, Attribute)</code></li><li><a href="#a286c6601a055b29be8fc642881c8ba9c" class="m-doc">unset(const std::<wbr />pair&lt;size_t,Index&gt;&amp;,size_t)</a></li><li><a href="#a7b1d700027d13dd3c0d01ba92e45ec1f" class="m-doc">get(const std::<wbr />pair&lt;size_t,Index&gt;&amp;,size_t) const</a></li><li><a href="#a57cb0d488137c714837aef2837441e9f" class="m-doc">getAttributes(size_<wbr />t) const</a></li></ul></section><section id="autotoc_md55"><h3><a href="#autotoc_md55">Structural Immutability</a></h3><p>After <a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize()</a> completes, the number of stored dimensions (i.e. <code>m_dimensions.size()</code>) is immutable for the lifetime of the object. This avoids requiring a global lock on the dimension vector itself.</p><p>Therefore:</p><ul><li><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize()</a> must be called before any concurrent access.</li><li><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize()</a> is not thread-safe and must not be called concurrently.</li><li>The mesh dimension must remain constant for the lifetime of the object.</li></ul></section><section id="autotoc_md56"><h3><a href="#autotoc_md56">Copy and Move Semantics</a></h3><p>Copy construction:</p><ul><li>Copies per-dimension storage while serializing source storage growth.</li></ul><p>Copy assignment:</p><ul><li>Requires both objects to be initialized with the same number of dimensions.</li><li>Copies per dimension while serializing storage growth.</li><li>Is NOT an atomic snapshot across all dimensions: a concurrent reader may observe a mix of old and new dimension contents while assignment is in progress.</li></ul><p>Move construction / move assignment:</p><ul><li>Transfer ownership of the internal dimension vector.</li><li>Require external synchronization: no other thread may access either object concurrently with the move.</li></ul></section><section id="autotoc_md57"><h3><a href="#autotoc_md57">Usage Contract</a></h3><ol><li>Call initialize() exactly once (or idempotently with the same value) before any concurrent use.</li><li>Do not change the mesh dimension after initialization.</li><li>Ensure storage exists (via <a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc">resize()</a> or via <a href="#ae2c5ae1e43c31e7358688d2c41c3fd0e" class="m-doc">set()</a>) before relying on reads returning non-null values.</li><li>Provide external synchronization around move operations.</li></ol></section>
+<p>This class stores, for each topological dimension <code>d</code>, an array of optional attributes indexed by polytope index. Attributes are typically used as material-region ids, boundary markers, or any other user-defined tags.</p><section id="autotoc_md53_1s1"><section id="autotoc_md53"><h3><a href="#autotoc_md53">Data layout</a></h3><p>The storage is organized by dimension:</p><ul><li>For each <code>d</code> in [0, meshDim], a <code>Dimension</code> stores:<ul><li><code>slots:</code> stable attribute slots indexed by polytope index.</li><li><code>mutex:</code> a mutex protecting storage growth.</li></ul></li></ul></section></section><section id="autotoc_md54_1s1"><section id="autotoc_md54"><h3><a href="#autotoc_md54">Thread-Safety Model</a></h3><p>This class provides fine-grained thread-safety at the level of individual dimensions. Slot values and the published storage extent are atomic, so repeated reads require no lock. Storage growth and writes are serialized per dimension.</p><p>After initialization, concurrent calls to the following methods are safe w.r.t. each other (subject to each method&#x27;s preconditions):</p><ul><li><a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc">resize(size_<wbr />t,size_<wbr />t)</a></li><li><code>set(const std::pair&lt;size_t,Index&gt;&amp;, Attribute)</code></li><li><code>set(const std::pair&lt;size_t,Index&gt;&amp;, size_t, Attribute)</code></li><li><a href="#a286c6601a055b29be8fc642881c8ba9c" class="m-doc">pair&lt;size_<wbr />t,Index&gt;&amp;,size_<wbr />t)</a></li><li><a href="#a7b1d700027d13dd3c0d01ba92e45ec1f" class="m-doc">pair&lt;size_<wbr />t,Index&gt;&amp;,size_<wbr />t) const</a></li><li><a href="#a57cb0d488137c714837aef2837441e9f" class="m-doc">getAttributes(size_<wbr />t) const</a></li></ul></section></section><section id="autotoc_md55_1s1"><section id="autotoc_md55"><h3><a href="#autotoc_md55">Structural Immutability</a></h3><p>After <a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize()</a> completes, the number of stored dimensions (i.e. <code>m_dimensions.size()</code>) is immutable for the lifetime of the object. This avoids requiring a global lock on the dimension vector itself.</p><p>Therefore:</p><ul><li><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize()</a> must be called before any concurrent access.</li><li><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc">initialize()</a> is not thread-safe and must not be called concurrently.</li><li>The mesh dimension must remain constant for the lifetime of the object.</li></ul></section></section><section id="autotoc_md56_1s1"><section id="autotoc_md56"><h3><a href="#autotoc_md56">Copy and Move Semantics</a></h3><p>Copy construction:</p><ul><li>Copies per-dimension storage while serializing source storage growth.</li></ul><p>Copy assignment:</p><ul><li>Requires both objects to be initialized with the same number of dimensions.</li><li>Copies per dimension while serializing storage growth.</li><li>Is NOT an atomic snapshot across all dimensions: a concurrent reader may observe a mix of old and new dimension contents while assignment is in progress.</li></ul><p>Move construction / move assignment:</p><ul><li>Transfer ownership of the internal dimension vector.</li><li>Require external synchronization: no other thread may access either object concurrently with the move.</li></ul></section></section><section id="autotoc_md57_1s1"><section id="autotoc_md57"><h3><a href="#autotoc_md57">Usage Contract</a></h3><ol><li>Call initialize() exactly once (or idempotently with the same value) before any concurrent use.</li><li>Do not change the mesh dimension after initialization.</li><li>Ensure storage exists (via <a href="#aacead788d9511da9aac886f19c4b966f" class="m-doc">resize()</a> or via <a href="#ae2c5ae1e43c31e7358688d2c41c3fd0e" class="m-doc">set()</a>) before relying on reads returning non-null values.</li><li>Provide external synchronization around move operations.</li></ol></section></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -165,8 +190,8 @@
             <dd>Returns the set of all attributes present in dimension <code>d</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serialization method for Boost.Serialization.</dd>
           </dl>
@@ -185,6 +210,17 @@
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac4c61f9bb45928113140158ee50ce612" class="m-doc-self">AttributeIndex</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Copies all dimensions from <code>other</code>.</p><p>Thread-safety:</p><ul><li>Safe if <code>other</code> is not being moved concurrently.</li><li>Copy is not a globally atomic snapshot across dimensions.</li></ul>
           </div></section>
           <section class="m-doc-details" id="a70350396ca1f778d966cf61522a257fb"><div>
@@ -192,6 +228,17 @@
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70350396ca1f778d966cf61522a257fb" class="m-doc-self">AttributeIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Transfers internal dimension storage from <code>other</code>.</p><p>Thread-safety:</p><ul><li>Requires external synchronization: no concurrent access to either object.</li></ul>
           </div></section>
           <section class="m-doc-details" id="a4f749c4cf8d1c63e403bf5b8897240d5"><div>
@@ -199,6 +246,23 @@
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f749c4cf8d1c63e403bf5b8897240d5" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Copies all dimensions from <code>other</code> into <code>*this</code>.</p><p>Preconditions:</p><ul><li>Both objects must already be initialized with the same mesh dimension (i.e. same <code>m_dimensions.size()</code>).</li></ul><p>Thread-safety:</p><ul><li>Serializes storage growth per dimension; slot snapshots are atomic.</li><li>Not an atomic snapshot across dimensions.</li></ul>
           </div></section>
           <section class="m-doc-details" id="a81d3450255206ec86309d1d64a233391"><div>
@@ -206,6 +270,23 @@
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp; Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a81d3450255206ec86309d1d64a233391" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_attribute_index.html" class="m-doc">AttributeIndex</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Transfers internal dimension storage from <code>other</code> into <code>*this</code>.</p><p>Thread-safety:</p><ul><li>Requires external synchronization: no concurrent access to either object.</li></ul>
           </div></section>
           <section class="m-doc-details" id="a77a1d55dead131c3707395c06f7b0b2b"><div>
@@ -376,13 +457,13 @@
             </table>
 <p>Iterates over all slots in dimension <code>d</code> and collects all engaged attributes.</p><p>Thread-safety:</p><ul><li>Thread-safe; each published slot is read atomically.</li></ul>
           </div></section>
-          <section class="m-doc-details" id="af0dd9205158ccf7bcfcd8ff81f79c927"><div>
+          <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />AttributeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
             </h3>
             <p>Serialization method for Boost.Serialization.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -393,6 +474,10 @@
                 <tr>
                   <td style="width: 1%">ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
                   <td>Archive object</td>
+                </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Boost.Serialization class version; unused by this implementation.</td>
                 </tr>
               </tbody>
             </table>
@@ -442,7 +527,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

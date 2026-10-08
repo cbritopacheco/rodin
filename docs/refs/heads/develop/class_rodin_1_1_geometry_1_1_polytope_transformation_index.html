@@ -103,12 +103,12 @@
               <span class="m-doc-wrap-bumper"><a href="#ae03e7a2eebec90350994fbe016f99b0c" class="m-doc-self">~PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Destructor.</dd>
-            <dt id="aa7f6560ca3895cd92332bc76f6edabab">
-              <span class="m-doc-wrap-bumper"><a href="#aa7f6560ca3895cd92332bc76f6edabab" class="m-doc-self">PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a6be67fcc449ffa42b705b1b0ec1a05e4" class="m-doc">PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copy constructor (deleted).</dd>
-            <dt id="ae84188065786b4016608f8ffba7519b0">
-              <span class="m-doc-wrap-bumper"><a href="#ae84188065786b4016608f8ffba7519b0" class="m-doc-self">PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae84188065786b4016608f8ffba7519b0" class="m-doc">PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -116,12 +116,12 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a4becc3f68881df9499e2fd842369c764">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4becc3f68881df9499e2fd842369c764" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad0a0f0a3794fe5fdb51600f4785a98b6" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
             </dt>
             <dd>Copy assignment operator (deleted).</dd>
-            <dt id="a4fdffff95b2b86b9803857d6bf3531f6">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4fdffff95b2b86b9803857d6bf3531f6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4fdffff95b2b86b9803857d6bf3531f6" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -166,20 +166,94 @@
             <dd>Gets the number of dimensions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#aa29aecdf903bb335cb999c7306ecfc48" class="m-doc">save</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int) const</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a5888613434d5f36b8bd71f54206d7c8b" class="m-doc">save</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version) const</span>
             </dt>
             <dd>Serialization save method.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a483eb490a8f4a63c6133ace3c8d8452f" class="m-doc">load</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a68dbd347886624cd725b8a26e5242ee2" class="m-doc">load</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serialization load method.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a6be67fcc449ffa42b705b1b0ec1a05e4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6be67fcc449ffa42b705b1b0ec1a05e4" class="m-doc-self">PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Copy constructor (deleted).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object whose copying or moving is disabled.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae84188065786b4016608f8ffba7519b0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae84188065786b4016608f8ffba7519b0" class="m-doc-self">PolytopeTransformationIndex</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad0a0f0a3794fe5fdb51600f4785a98b6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0a0f0a3794fe5fdb51600f4785a98b6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Copy assignment operator (deleted).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4fdffff95b2b86b9803857d6bf3531f6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fdffff95b2b86b9803857d6bf3531f6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation_index.html" class="m-doc">PolytopeTransformationIndex</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a77a1d55dead131c3707395c06f7b0b2b"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77a1d55dead131c3707395c06f7b0b2b" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">size_t meshDim)</span></span>
@@ -279,10 +353,23 @@
             </h3>
             <p>Returns an already attached/cached transformation without creating one.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Topological dimension of the indexed entity.</td>
+                </tr>
+                <tr>
+                  <td>idx</td>
+                  <td>Local entity index within that dimension.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Null if the dimension or slot is absent or has no transformation.</td>
+                  <th>Returns</th>
+                  <td>Borrowed pointer to the attached transformation, or nullptr if the dimension, slot, or transformation is absent.</td>
                 </tr>
               </tfoot>
             </table>
@@ -355,13 +442,13 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aa29aecdf903bb335cb999c7306ecfc48"><div>
+          <section class="m-doc-details" id="a5888613434d5f36b8bd71f54206d7c8b"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa29aecdf903bb335cb999c7306ecfc48" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int) const</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5888613434d5f36b8bd71f54206d7c8b" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version) const</span></span>
             </h3>
             <p>Serialization save method.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -373,16 +460,20 @@
                   <td style="width: 1%">ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
                   <td>Archive object</td>
                 </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Boost.Serialization class version; unused by this implementation.</td>
+                </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a483eb490a8f4a63c6133ace3c8d8452f"><div>
+          <section class="m-doc-details" id="a68dbd347886624cd725b8a26e5242ee2"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a483eb490a8f4a63c6133ace3c8d8452f" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68dbd347886624cd725b8a26e5242ee2" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
             </h3>
             <p>Serialization load method.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -393,6 +484,10 @@
                 <tr>
                   <td style="width: 1%">ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
                   <td>Archive object</td>
+                </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Boost.Serialization class version; unused by this implementation.</td>
                 </tr>
               </tbody>
             </table>
@@ -443,7 +538,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

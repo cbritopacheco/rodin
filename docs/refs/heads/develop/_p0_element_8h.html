@@ -81,8 +81,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md449">Supported Specializations</a></li>
-            <li><a href="#autotoc_md450">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md449">Supported Specializations</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md450">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -128,7 +138,7 @@ $ \nabla \phi = 0 $
 <use x='20.211602' y='0' xlink:href='#eq2-g2-61'/>
 <use x='32.637083' y='0' xlink:href='#eq2-g2-48'/>
 </g>
-</svg></li></ul><section id="autotoc_md449"><h3><a href="#autotoc_md449">Supported Specializations</a></h3><p><strong>Scalar P0Element&lt;Scalar&gt;:</strong></p><ul><li>Works with Real and Complex scalar types</li><li>Single DOF at element barycenter</li><li>Constant value throughout element</li></ul><p><strong>Vector P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;:</strong></p><ul><li>Component-wise constant vector fields</li><li><svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+</svg></li></ul><section id="autotoc_md449_1s1"><section id="autotoc_md449"><h3><a href="#autotoc_md449">Supported Specializations</a></h3><p><strong>Scalar P0Element&lt;Scalar&gt;:</strong></p><ul><li>Works with Real and Complex scalar types</li><li>Single DOF at element barycenter</li><li>Constant value throughout element</li></ul><p><strong>Vector P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;:</strong></p><ul><li>Component-wise constant vector fields</li><li><svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
@@ -178,23 +188,23 @@ $ j = i \mod d $
 <use x='49.158369' y='0' xlink:href='#eq5-g1-100'/>
 <use x='59.646686' y='0' xlink:href='#eq5-g0-100'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md450"><h3><a href="#autotoc_md450">Usage Example</a></h3><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+</svg></li></ul></section></section><section id="autotoc_md450_1s1"><section id="autotoc_md450"><h3><a href="#autotoc_md450">Usage Example</a></h3><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
 
 <span class="c1">// Scalar P0 element (real or complex)</span>
 <span class="n">RealP0Element</span><span class="w"> </span><span class="nf">p0_real</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
 <span class="n">ComplexP0Element</span><span class="w"> </span><span class="nf">p0_complex</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
 
 <span class="c1">// Vector P0 element (2D)</span>
-<span class="n">VectorP0Element</span><span class="w"> </span><span class="nf">p0_vec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span><span class="w">  </span><span class="c1">// 2 DOFs</span></pre><p>P0 elements are commonly used in discontinuous Galerkin (DG) methods, mixed finite element formulations, and as test spaces for finite volume schemes.</p></section>
+<span class="n">VectorP0Element</span><span class="w"> </span><span class="nf">p0_vec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span><span class="w">  </span><span class="c1">// 2 DOFs</span></pre><p>P0 elements are commonly used in discontinuous Galerkin (DG) methods, mixed finite element formulations, and as test spaces for finite volume schemes.</p></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -223,11 +233,6 @@ $ j = i \mod d $
               class <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">Rodin::Variational::P0Element::BasisFunction::DerivativeFunction</a>
             </dt>
             <dd>Represents a derivative of the P0 basis function (always zero).</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::Variational::P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Piecewise constant (degree 0) vector Lagrange element.</dd>
             <dt>
               class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_linear_form.html" class="m-doc">Rodin::Variational::P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::LinearForm</a>
             </dt>
@@ -295,7 +300,7 @@ $ j = i \mod d $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

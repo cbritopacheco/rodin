@@ -119,16 +119,16 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a3de7cc2d6eddd29e2f667c4148d78961">
-              <span class="m-doc-wrap-bumper"><a href="#a3de7cc2d6eddd29e2f667c4148d78961" class="m-doc-self">WNGIRPrimalBarrierForce</a>(</span><span class="m-doc-wrap">const TestFunction&amp; z,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3de7cc2d6eddd29e2f667c4148d78961" class="m-doc">WNGIRPrimalBarrierForce</a>(</span><span class="m-doc-wrap">const TestFunction&amp; z,
               const Displacement&amp; current,
               const Displacement&amp; inner,
               const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; parameters,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> barrierCoefficient)</span>
             </dt>
             <dd>Constructs the w n g i r primal barrier force.</dd>
-            <dt id="a5e95088e2526ca85bbbf15872675d7f9">
-              <span class="m-doc-wrap-bumper"><a href="#a5e95088e2526ca85bbbf15872675d7f9" class="m-doc-self">WNGIRPrimalBarrierForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_force.html" class="m-doc">WNGIRPrimalBarrierForce</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#acc40a0502b7da4e81d6fbbeb4ddb6aa4" class="m-doc">WNGIRPrimalBarrierForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_force.html" class="m-doc">WNGIRPrimalBarrierForce</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -136,27 +136,193 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a07a0ed42183d01cb7d7a5e5edf3caba3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the current polytope.</dd>
-            <dt id="a47dd377342df6085d73860e4c9e02b33">
-              <span class="m-doc-wrap-bumper">auto <a href="#a47dd377342df6085d73860e4c9e02b33" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_force.html" class="m-doc">WNGIRPrimalBarrierForce</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a47dd377342df6085d73860e4c9e02b33" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_force.html" class="m-doc">WNGIRPrimalBarrierForce</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Binds to a polytope and assembles the local system.</dd>
-            <dt id="ad02a55ad5d67f11ac55a049c8a0e6baf">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad02a55ad5d67f11ac55a049c8a0e6baf" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">std::size_t local) -&gt; <a href="#ada32025f6754e15e87b32d9aed396d47" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad02a55ad5d67f11ac55a049c8a0e6baf" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">std::size_t local) -&gt; <a href="#ada32025f6754e15e87b32d9aed396d47" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns an entry of the assembled local system.</dd>
-            <dt id="aba6371885ea424dd84df03d85fcb0706">
-              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the integration region.</dd>
-            <dt id="ab95bff0775955e7cc1da6920d901db12">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab95bff0775955e7cc1da6920d901db12" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_force.html" class="m-doc">WNGIRPrimalBarrierForce</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab95bff0775955e7cc1da6920d901db12" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_force.html" class="m-doc">WNGIRPrimalBarrierForce</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Clones this object.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a3de7cc2d6eddd29e2f667c4148d78961"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunction, class Displacement&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3de7cc2d6eddd29e2f667c4148d78961" class="m-doc-self">WNGIRPrimalBarrierForce</a>(</span><span class="m-doc-wrap">const TestFunction&amp; z,
+              const Displacement&amp; current,
+              const Displacement&amp; inner,
+              const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; parameters,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> barrierCoefficient)</span></span>
+            </h3>
+            <p>Constructs the w n g i r primal barrier force.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">z</td>
+                  <td>Function operand.</td>
+                </tr>
+                <tr>
+                  <td>current</td>
+                  <td>Current displacement field.</td>
+                </tr>
+                <tr>
+                  <td>inner</td>
+                  <td>Inner displacement field.</td>
+                </tr>
+                <tr>
+                  <td>parameters</td>
+                  <td>Parameters configuring the operation.</td>
+                </tr>
+                <tr>
+                  <td>barrierCoefficient</td>
+                  <td>Coefficient multiplying the determinant barrier.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acc40a0502b7da4e81d6fbbeb4ddb6aa4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunction, class Displacement&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc40a0502b7da4e81d6fbbeb4ddb6aa4" class="m-doc-self">WNGIRPrimalBarrierForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_force.html" class="m-doc">WNGIRPrimalBarrierForce</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a07a0ed42183d01cb7d7a5e5edf3caba3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunction, class Displacement&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the current polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The current polytope.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a47dd377342df6085d73860e4c9e02b33"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunction, class Displacement&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_force.html" class="m-doc">WNGIRPrimalBarrierForce</a>&amp; Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a47dd377342df6085d73860e4c9e02b33" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Binds to a polytope and assembles the local system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad02a55ad5d67f11ac55a049c8a0e6baf"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunction, class Displacement&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#ada32025f6754e15e87b32d9aed396d47" class="m-doc">ScalarType</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad02a55ad5d67f11ac55a049c8a0e6baf" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">std::size_t local) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns an entry of the assembled local system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">local</td>
+                  <td>Index in the local numbering.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Integral computed by the quadrature rule.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aba6371885ea424dd84df03d85fcb0706"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunction, class Displacement&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the integration region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration region.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab95bff0775955e7cc1da6920d901db12"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TestFunction, class Displacement&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_force.html" class="m-doc">WNGIRPrimalBarrierForce</a>* Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab95bff0775955e7cc1da6920d901db12" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Clones this object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -202,7 +368,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

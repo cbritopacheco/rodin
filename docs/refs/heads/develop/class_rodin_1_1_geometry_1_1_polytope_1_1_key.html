@@ -138,12 +138,12 @@
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt id="a542233acc96a6a742beb57c73583b20c">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a542233acc96a6a742beb57c73583b20c" class="m-doc-self">sm64</a>(</span><span class="m-doc-wrap">std::uint64_t x) -&gt; std::uint64_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a542233acc96a6a742beb57c73583b20c" class="m-doc">sm64</a>(</span><span class="m-doc-wrap">std::uint64_t x) -&gt; std::uint64_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>SplitMix64 bit-mixing hash of a 64-bit value.</dd>
-            <dt id="aeecc8f7fa5ff390b5e63f6807fce2b4b">
-              <span class="m-doc-wrap-bumper">static void <a href="#aeecc8f7fa5ff390b5e63f6807fce2b4b" class="m-doc-self">cswap</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; a,
+            <dt>
+              <span class="m-doc-wrap-bumper">static void <a href="#aeecc8f7fa5ff390b5e63f6807fce2b4b" class="m-doc">cswap</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; a,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; b) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sorts <code>a</code> and <code>b</code> into non-decreasing order.</dd>
@@ -156,12 +156,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a864f3bdec0a6b38a9582783f3dcc16bb" class="m-doc-self">Key</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd>Constructs an empty key (zero vertices).</dd>
-            <dt id="a6f94f4f7f790693b25c2f5f78fb91e41">
-              <span class="m-doc-wrap-bumper"><a href="#a6f94f4f7f790693b25c2f5f78fb91e41" class="m-doc-self">Key</a>(</span><span class="m-doc-wrap">std::uint8_t n)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a6f94f4f7f790693b25c2f5f78fb91e41" class="m-doc">Key</a>(</span><span class="m-doc-wrap">std::uint8_t n)</span>
             </dt>
             <dd>Constructs a key with <code>n</code> uninitialized vertices.</dd>
-            <dt id="a5c8506495db233d8e277b0c0e25fec63">
-              <span class="m-doc-wrap-bumper"><a href="#a5c8506495db233d8e277b0c0e25fec63" class="m-doc-self">Key</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; vertices)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5c8506495db233d8e277b0c0e25fec63" class="m-doc">Key</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; vertices)</span>
             </dt>
             <dd>Constructs a key from a list of vertex indices.</dd>
           </dl>
@@ -169,57 +169,363 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="add5bf95f14914c57925bff61538572c6">
-              <span class="m-doc-wrap-bumper">auto <a href="#add5bf95f14914c57925bff61538572c6" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#add5bf95f14914c57925bff61538572c6" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
             </dt>
             <dd>Returns a reference to vertex index <code>i</code>.</dd>
-            <dt id="aff3425bd8555bfc431e5074b110862ab">
-              <span class="m-doc-wrap-bumper">auto <a href="#aff3425bd8555bfc431e5074b110862ab" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aff3425bd8555bfc431e5074b110862ab" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
             </dt>
             <dd>Returns a const reference to vertex index <code>i</code>.</dd>
-            <dt id="aa46eb493b87ce51e45db964d605addfb">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa46eb493b87ce51e45db964d605addfb" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa46eb493b87ce51e45db964d605addfb" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
             </dt>
             <dd>Returns a reference to vertex index <code>i</code>.</dd>
-            <dt id="a89d22b7341e63a2b6e52bcd5198ef53d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a89d22b7341e63a2b6e52bcd5198ef53d" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a89d22b7341e63a2b6e52bcd5198ef53d" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
             </dt>
             <dd>Returns a const reference to vertex index <code>i</code>.</dd>
-            <dt id="a4943ca670cbf2546197e947970db156c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4943ca670cbf2546197e947970db156c" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">std::uint8_t n) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Key</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4943ca670cbf2546197e947970db156c" class="m-doc">resize</a>(</span><span class="m-doc-wrap">std::uint8_t n) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Key</a>&amp;</span>
             </dt>
             <dd>Sets the number of vertices; returns a reference to this key.</dd>
-            <dt id="a2eed92447eb853cffcba8314e9780ef2">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2eed92447eb853cffcba8314e9780ef2" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2eed92447eb853cffcba8314e9780ef2" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t</span>
             </dt>
             <dd>Returns the number of vertices.</dd>
-            <dt id="afba173cbbb64c077ff36edbff38b4e7f">
-              <span class="m-doc-wrap-bumper">auto <a href="#afba173cbbb64c077ff36edbff38b4e7f" class="m-doc-self">getVertices</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a31342426503cebfeb90c5e73457556a5" class="m-doc">Vertices</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afba173cbbb64c077ff36edbff38b4e7f" class="m-doc">getVertices</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a31342426503cebfeb90c5e73457556a5" class="m-doc">Vertices</a>&amp;</span>
             </dt>
             <dd>Returns the underlying fixed-capacity vertex array.</dd>
-            <dt id="a0a75fa91f74431a633d5801c541716b9">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0a75fa91f74431a633d5801c541716b9" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) -&gt; Vertices::iterator</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0a75fa91f74431a633d5801c541716b9" class="m-doc">begin</a>(</span><span class="m-doc-wrap">) -&gt; Vertices::iterator</span>
             </dt>
             <dd>Returns an iterator to the first vertex index.</dd>
-            <dt id="ad0798fb4f19165b337af66ac52f76808">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad0798fb4f19165b337af66ac52f76808" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) -&gt; Vertices::iterator</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad0798fb4f19165b337af66ac52f76808" class="m-doc">end</a>(</span><span class="m-doc-wrap">) -&gt; Vertices::iterator</span>
             </dt>
             <dd>Returns an iterator past the last vertex index.</dd>
-            <dt id="a19e7d327d764510125bdb8654f684ae4">
-              <span class="m-doc-wrap-bumper">auto <a href="#a19e7d327d764510125bdb8654f684ae4" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) const -&gt; Vertices::const_iterator</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a19e7d327d764510125bdb8654f684ae4" class="m-doc">begin</a>(</span><span class="m-doc-wrap">) const -&gt; Vertices::const_iterator</span>
             </dt>
             <dd>Returns a const iterator to the first vertex index.</dd>
-            <dt id="ab47faa4ef83b87387951790d26394899">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab47faa4ef83b87387951790d26394899" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const -&gt; Vertices::const_iterator</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab47faa4ef83b87387951790d26394899" class="m-doc">end</a>(</span><span class="m-doc-wrap">) const -&gt; Vertices::const_iterator</span>
             </dt>
             <dd>Returns a const iterator past the last vertex index.</dd>
-            <dt id="af0dd9205158ccf7bcfcd8ff81f79c927">
+            <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serializes the key (for boost::serialization).</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a542233acc96a6a742beb57c73583b20c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static std::uint64_t Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a542233acc96a6a742beb57c73583b20c" class="m-doc-self">sm64</a>(</span><span class="m-doc-wrap">std::uint64_t x) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>SplitMix64 bit-mixing hash of a 64-bit value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">x</td>
+                  <td>Integer state to mix.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Mixed 64-bit hash value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aeecc8f7fa5ff390b5e63f6807fce2b4b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeecc8f7fa5ff390b5e63f6807fce2b4b" class="m-doc-self">cswap</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; a,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; b) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sorts <code>a</code> and <code>b</code> into non-decreasing order.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">a</td>
+                  <td>Index updated by the conditional swap.</td>
+                </tr>
+                <tr>
+                  <td>b</td>
+                  <td>Index updated by the conditional swap.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6f94f4f7f790693b25c2f5f78fb91e41"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f94f4f7f790693b25c2f5f78fb91e41" class="m-doc-self">Key</a>(</span><span class="m-doc-wrap">std::uint8_t n)</span></span>
+            </h3>
+            <p>Constructs a key with <code>n</code> uninitialized vertices.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">n</td>
+                  <td>Number of entries.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5c8506495db233d8e277b0c0e25fec63"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c8506495db233d8e277b0c0e25fec63" class="m-doc-self">Key</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; vertices)</span></span>
+            </h3>
+            <p>Constructs a key from a list of vertex indices.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vertices</td>
+                  <td>Vertex indices defining the key.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="add5bf95f14914c57925bff61538572c6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add5bf95f14914c57925bff61538572c6" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i)</span></span>
+            </h3>
+            <p>Returns a reference to vertex index <code>i</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aff3425bd8555bfc431e5074b110862ab"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff3425bd8555bfc431e5074b110862ab" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) const</span></span>
+            </h3>
+            <p>Returns a const reference to vertex index <code>i</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa46eb493b87ce51e45db964d605addfb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa46eb493b87ce51e45db964d605addfb" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i)</span></span>
+            </h3>
+            <p>Returns a reference to vertex index <code>i</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Entry at the supplied index.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a89d22b7341e63a2b6e52bcd5198ef53d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a89d22b7341e63a2b6e52bcd5198ef53d" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) const</span></span>
+            </h3>
+            <p>Returns a const reference to vertex index <code>i</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Entry at the supplied index.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4943ca670cbf2546197e947970db156c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Key</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4943ca670cbf2546197e947970db156c" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">std::uint8_t n)</span></span>
+            </h3>
+            <p>Sets the number of vertices; returns a reference to this key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">n</td>
+                  <td>Number of entries.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this key after changing the vertex count.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2eed92447eb853cffcba8314e9780ef2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::uint8_t Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2eed92447eb853cffcba8314e9780ef2" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the number of vertices.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of vertices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afba173cbbb64c077ff36edbff38b4e7f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="#a31342426503cebfeb90c5e73457556a5" class="m-doc">Vertices</a>&amp; Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afba173cbbb64c077ff36edbff38b4e7f" class="m-doc-self">getVertices</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the underlying fixed-capacity vertex array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The underlying fixed-capacity vertex array.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0a75fa91f74431a633d5801c541716b9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Vertices::iterator Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a75fa91f74431a633d5801c541716b9" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Returns an iterator to the first vertex index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iterator to the first entry.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad0798fb4f19165b337af66ac52f76808"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Vertices::iterator Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0798fb4f19165b337af66ac52f76808" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Returns an iterator past the last vertex index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iterator past the last entry.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a19e7d327d764510125bdb8654f684ae4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Vertices::const_iterator Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19e7d327d764510125bdb8654f684ae4" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns a const iterator to the first vertex index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iterator to the first entry.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab47faa4ef83b87387951790d26394899"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">Vertices::const_iterator Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab47faa4ef83b87387951790d26394899" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns a const iterator past the last vertex index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Iterator past the last entry.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Archive&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Polytope::<wbr />Key::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
+            </h3>
+            <p>Serializes the key (for boost::serialization).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ar</td>
+                  <td>Serialization archive.</td>
+                </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Boost.Serialization class version; unused by this implementation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -265,7 +571,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

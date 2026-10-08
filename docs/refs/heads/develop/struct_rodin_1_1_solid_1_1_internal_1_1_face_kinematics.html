@@ -95,23 +95,23 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ab2b9697f8b55c6f6be37985858f3a1b8">
-              <span class="m-doc-wrap-bumper">void <a href="#ab2b9697f8b55c6f6be37985858f3a1b8" class="m-doc-self">setFace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab2b9697f8b55c6f6be37985858f3a1b8" class="m-doc">setFace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face)</span>
             </dt>
             <dd>Initializes the geometric data associated with a boundary face.</dd>
-            <dt id="a420ce22afc0e34c21d43a8b999a0f313">
-              <span class="m-doc-wrap-bumper">auto <a href="#a420ce22afc0e34c21d43a8b999a0f313" class="m-doc-self">nodal</a>(</span><span class="m-doc-wrap">const StateFES&amp; fes,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a420ce22afc0e34c21d43a8b999a0f313" class="m-doc">nodal</a>(</span><span class="m-doc-wrap">const StateFES&amp; fes,
               const State&amp; d,
               size_t a,
               size_t c) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Nodal displacement of face vertex a, component c.</dd>
-            <dt id="a14faedf7588e5ed2436072bc3eb76f81">
-              <span class="m-doc-wrap-bumper">void <a href="#a14faedf7588e5ed2436072bc3eb76f81" class="m-doc-self">deformedTangents</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; xjac,
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a14faedf7588e5ed2436072bc3eb76f81" class="m-doc">deformedTangents</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; xjac,
               const StateFES&amp; fes,
               const State&amp; d) const</span>
             </dt>
-            <dd>Deformed tangents at this face (P1: constant over the face).</dd>
+            <dd></dd>
           </dl>
         </section>
         <section id="pub-attribs">
@@ -142,6 +142,100 @@
             </dt>
             <dd>+-1: makes the cross point OUTWARD</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ab2b9697f8b55c6f6be37985858f3a1b8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class StateFES, class State&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />Internal::<wbr />FaceKinematics&lt;StateFES, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2b9697f8b55c6f6be37985858f3a1b8" class="m-doc-self">setFace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face)</span></span>
+            </h3>
+            <p>Initializes the geometric data associated with a boundary face.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">face</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a420ce22afc0e34c21d43a8b999a0f313"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class StateFES, class State&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Solid::<wbr />Internal::<wbr />FaceKinematics&lt;StateFES, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a420ce22afc0e34c21d43a8b999a0f313" class="m-doc-self">nodal</a>(</span><span class="m-doc-wrap">const StateFES&amp; fes,
+              const State&amp; d,
+              size_t a,
+              size_t c) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fes</td>
+                  <td>Finite element space.</td>
+                </tr>
+                <tr>
+                  <td>d</td>
+                  <td>Surface kinematic state.</td>
+                </tr>
+                <tr>
+                  <td>a</td>
+                  <td>Surface node index.</td>
+                </tr>
+                <tr>
+                  <td>c</td>
+                  <td>Displacement component index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Displacement component at the specified surface node.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Nodal displacement of face vertex a, component c.</p>
+          </div></section>
+          <section class="m-doc-details" id="a14faedf7588e5ed2436072bc3eb76f81"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class StateFES, class State&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />Internal::<wbr />FaceKinematics&lt;StateFES, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a14faedf7588e5ed2436072bc3eb76f81" class="m-doc-self">deformedTangents</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; xjac,
+              const StateFES&amp; fes,
+              const State&amp; d) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">xjac</td>
+                  <td>Storage for the deformed tangent matrix.</td>
+                </tr>
+                <tr>
+                  <td>fes</td>
+                  <td>Finite element space.</td>
+                </tr>
+                <tr>
+                  <td>d</td>
+                  <td>Surface kinematic state.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Deformed tangents at this face (P1: constant over the face).</p>
+          </div></section>
         </section>
       </div>
     </div>
@@ -187,7 +281,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

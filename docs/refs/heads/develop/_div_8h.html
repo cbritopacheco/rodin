@@ -81,8 +81,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md323">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md324">Applications</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md323">Mathematical Foundation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md324">Applications</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -92,7 +102,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Div class, which computes the divergence of vector-valued functions in variational formulations. The divergence is a fundamental differential operator that measures the &quot;outflow&quot; of a vector field.</p><section id="autotoc_md323"><h3><a href="#autotoc_md323">Mathematical Foundation</a></h3><p>For a vector field <svg class="m-math" style="width: 9.046em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 86.838027 10.340659">
+<p>This file defines the Div class, which computes the divergence of vector-valued functions in variational formulations. The divergence is a fundamental differential operator that measures the &quot;outflow&quot; of a vector field.</p><section id="autotoc_md323_1s1"><section id="autotoc_md323"><h3><a href="#autotoc_md323">Mathematical Foundation</a></h3><p>For a vector field <svg class="m-math" style="width: 9.046em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 86.838027 10.340659">
 <title>
 $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^d $
 </title>
@@ -118,8 +128,7 @@ $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^d $
 </g>
 </svg>, the divergence is defined as:</p><div class="m-math"><svg style="width: 8.244em; height: 3.575em;" viewBox="154.101046 -35.511227 79.145374 34.315713">
 <title>
-\[
-  \nabla \cdot \mathbf{u} = \sum_{i=1}^d \frac{\partial u_i}{\partial x_i}
+\[  \nabla \cdot \mathbf{u} = \sum_{i=1}^d \frac{\partial u_i}{\partial x_i}
 \]
 </title>
 <defs>
@@ -154,7 +163,7 @@ $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^d $
 <use x='223.207904' y='-6.831742' xlink:href='#eq2-g4-120'/>
 <use x='229.859991' y='-5.038479' xlink:href='#eq2-g3-105'/>
 </g>
-</svg></div></section><section id="autotoc_md324"><h3><a href="#autotoc_md324">Applications</a></h3><ul><li>Incompressibility constraint: <svg class="m-math" style="width: 4.965em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 47.668168 8.169354">
+</svg></div></section></section><section id="autotoc_md324_1s1"><section id="autotoc_md324"><h3><a href="#autotoc_md324">Applications</a></h3><ul><li>Incompressibility constraint: <svg class="m-math" style="width: 4.965em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 47.668168 8.169354">
 <title>
 $ \nabla \cdot \mathbf{u} = 0 $
 </title>
@@ -190,16 +199,16 @@ $ \nabla \cdot \mathbf{F} = 0 $
 <use x='30.372127' y='0' xlink:href='#eq4-g2-61'/>
 <use x='42.797608' y='0' xlink:href='#eq4-g2-48'/>
 </g>
-</svg></li><li>Mixed formulations for elliptic problems</li></ul></section>
+</svg></li><li>Mixed formulations for elliptic problems</li></ul></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -210,6 +219,16 @@ $ \nabla \cdot \mathbf{F} = 0 $
               class <a href="class_rodin_1_1_variational_1_1_div_base_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_00_01_derived_01_4.html" class="m-doc">Rodin::Variational::DivBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a>
             </dt>
             <dd>Divergence of a P1 GridFunction.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_grid_fun78dec6e5a05cedc76d4bc9af84398fd2.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::Div&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_shape_fu0deb40e2e51d55e1150f07ab8c6e40ab.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::Div&lt;Variational::ShapeFunction&lt;Derived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_div_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_01_4.html" class="m-doc">Rodin::Variational::Div&lt;GridFunction&lt;FES, Data&gt;&gt;</a>
@@ -334,7 +353,7 @@ $ (\operatorname{div}A)_i=\sum_j\partial_j A_{ij} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

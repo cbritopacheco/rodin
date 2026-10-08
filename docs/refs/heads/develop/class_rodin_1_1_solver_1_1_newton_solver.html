@@ -116,8 +116,7 @@ $ k $
 </g>
 </svg>, the solver reassembles the current tangential problem and solves the linear system</p><div class="m-math"><svg style="width: 11.065em; height: 1.402em;" viewBox="141.157762 -13.45978 106.227463 13.45978">
 <title>
-\[
-  J(x^k)\,\delta x^k = -F(x^k),
+\[  J(x^k)\,\delta x^k = -F(x^k),
 \]
 </title>
 <defs>
@@ -152,8 +151,7 @@ $ k $
 </g>
 </svg></div><p>then updates the nonlinear state according to</p><div class="m-math"><svg style="width: 9.865em; height: 1.333em;" viewBox="146.921837 -12.795583 94.699321 12.795595">
 <title>
-\[
-  x^{k+1} = x^k + \alpha\,\delta x^k,
+\[  x^{k+1} = x^k + \alpha\,\delta x^k,
 \]
 </title>
 <defs>
@@ -212,8 +210,7 @@ $ \alpha &lt; 1 $
 </g>
 </svg> trades convergence speed for robustness and can stabilize mildly nonconvex problems, but it is not a substitute for a line search.</li></ul></aside><p>The nonlinear state vector passed to <code>solve()</code> is updated in place and is used both as the initial guess and as the storage for the final iterate.</p><aside class="m-note m-default"><h4>Associated tangential problem</h4><p>The solver obtains the tangential <a href="_variational_2_problem_8h.html">Variational::<wbr />ProblemBase</a> from the supplied linear solver through <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase::<wbr />getProblem()</a>. At each Newton iteration:</p><ul><li>the tangential problem is reassembled by calling <code>assemble()</code>,</li><li>the assembled linear system is accessed through <a href="_variational_2_problem_8h.html">ProblemBase::<wbr />getLinearSystem()</a>,</li><li>the linear correction is computed by the associated linear solver.</li></ul></aside><aside class="m-note m-default"><h4>Contract</h4><p>This solver assumes that the associated problem is already assembled in Newton form:</p><div class="m-math"><svg style="width: 9.465em; height: 1.245em;" viewBox="148.837383 -11.955168 90.868221 11.955168">
 <title>
-\[
-  J(x)\,\delta x = -F(x).
+\[  J(x)\,\delta x = -F(x).
 \]
 </title>
 <defs>
@@ -244,8 +241,7 @@ $ \alpha &lt; 1 $
 </g>
 </svg></div><p>Consequently:</p><ul><li>the norm of the assembled right-hand side is interpreted as the nonlinear residual norm,</li><li>the solution of the assembled linear system is interpreted as the Newton correction,</li><li>the nonlinear state object passed to <code>solve(x)</code> must be the same state observed by the state-dependent integrators used to define the tangential problem.</li></ul></aside><p>In typical Rodin usage, state-dependent integrators store a reference to the nonlinear state object, so that reassembly automatically reflects the updated iterate after each Newton step.</p><aside class="m-note m-default"><h4>Convergence criteria</h4><p>Residual convergence is declared when either</p><div class="m-math"><svg style="width: 8.071em; height: 1.402em;" viewBox="155.528782 -13.45978 77.485438 13.45978">
 <title>
-\[
-  \|F(x^k)\| \le \mathrm{atol}
+\[  \|F(x^k)\| \le \mathrm{atol}
 \]
 </title>
 <defs>
@@ -277,8 +273,7 @@ $ \alpha &lt; 1 $
 </g>
 </svg></div><p>or</p><div class="m-math"><svg style="width: 12.820em; height: 1.402em;" viewBox="132.733101 -13.45978 123.076815 13.45978">
 <title>
-\[
-  \|F(x^k)\| \le \mathrm{rtol}\,\|F(x^0)\|.
+\[  \|F(x^k)\| \le \mathrm{rtol}\,\|F(x^0)\|.
 \]
 </title>
 <defs>
@@ -320,8 +315,7 @@ $ \alpha &lt; 1 $
 </g>
 </svg></div></aside><p>An optional step criterion may also be enabled. When the step tolerance is positive, convergence is additionally declared if</p><div class="m-math"><svg style="width: 7.952em; height: 1.402em;" viewBox="156.101311 -13.45978 76.340379 13.45978">
 <title>
-\[
-  \alpha\,\|\delta x^k\| \le \mathrm{stol}.
+\[  \alpha\,\|\delta x^k\| \le \mathrm{stol}.
 \]
 </title>
 <defs>
@@ -442,8 +436,8 @@ $ u $
               using <a href="#a88c5ec3f403517358042a339d5296216" class="m-doc-self">LinearSolverType</a> = LinearSolver
             </dt>
             <dd>Linear solver type used by this Newton solver.</dd>
-            <dt id="a0aee0d8bed7019d9b1fdecdb2d1a6b5c">
-              using <a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc-self">StepPolicy</a> = std::function&lt;<a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_step_result.html" class="m-doc">StepResult</a>(<a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp;, <a href="#acc4336a31f05d8852517f8940c7a0a86" class="m-doc">LinearSystemType</a>&amp;, <a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_report.html" class="m-doc">Report</a>&amp;)&gt;
+            <dt id="afdbf088ca14bef4c4fcffb0daae47075">
+              using <a href="#afdbf088ca14bef4c4fcffb0daae47075" class="m-doc-self">StepPolicy</a> = std::function&lt;<a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_step_result.html" class="m-doc">StepResult</a>(<a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp;, <a href="#acc4336a31f05d8852517f8940c7a0a86" class="m-doc">LinearSystemType</a>&amp;, <a href="struct_rodin_1_1_solver_1_1_newton_solver_1_1_report.html" class="m-doc">Report</a>&amp;)&gt;
             </dt>
             <dd>Callback type for custom Newton step acceptance and updates.</dd>
           </dl>
@@ -513,11 +507,11 @@ $ u $
             </dt>
             <dd>Gets the optional iteration monitor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5f2dd7838d77e697f14a20a84454a150" class="m-doc">setStepPolicy</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc">StepPolicy</a>&gt; policy) -&gt; <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5f2dd7838d77e697f14a20a84454a150" class="m-doc">setStepPolicy</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#afdbf088ca14bef4c4fcffb0daae47075" class="m-doc">StepPolicy</a>&gt; policy) -&gt; <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp;</span>
             </dt>
             <dd>Sets the optional custom step policy.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0e07de0956f90da15501b44f819cfbfa" class="m-doc">getStepPolicy</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc">StepPolicy</a>&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e07de0956f90da15501b44f819cfbfa" class="m-doc">getStepPolicy</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#afdbf088ca14bef4c4fcffb0daae47075" class="m-doc">StepPolicy</a>&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the optional custom step policy.</dd>
             <dt>
@@ -532,10 +526,6 @@ $ u $
               <span class="m-doc-wrap-bumper">void <a href="#a2fe35f38ff66536b7a056d638cfca0e2" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Solves the nonlinear problem starting from <code>x</code>.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Solve a nonlinear system starting from the initial guess stored in <code>x</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class GridFunctionType, class = std::enable_if_t&lt;         std::is_same_v&lt;           typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            <a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&gt;&gt;&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#af5a89e139d4f7ceddba01f8ed8a7e837" class="m-doc">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf)</span>
@@ -932,7 +922,7 @@ $ u $
               <div class="m-doc-template">
                 template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f2dd7838d77e697f14a20a84454a150" class="m-doc-self">setStepPolicy</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc">StepPolicy</a>&gt; policy)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f2dd7838d77e697f14a20a84454a150" class="m-doc-self">setStepPolicy</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#afdbf088ca14bef4c4fcffb0daae47075" class="m-doc">StepPolicy</a>&gt; policy)</span></span>
             </h3>
             <p>Sets the optional custom step policy.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -958,7 +948,7 @@ $ u $
               <div class="m-doc-template">
                 template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#a0aee0d8bed7019d9b1fdecdb2d1a6b5c" class="m-doc">StepPolicy</a>&gt;&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e07de0956f90da15501b44f819cfbfa" class="m-doc-self">getStepPolicy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="#afdbf088ca14bef4c4fcffb0daae47075" class="m-doc">StepPolicy</a>&gt;&amp; Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e07de0956f90da15501b44f819cfbfa" class="m-doc-self">getStepPolicy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the optional custom step policy.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1033,26 +1023,6 @@ $ u $
               </tbody>
             </table>
 <p>The vector <code>x</code> is used both as the initial guess and as the storage for the final nonlinear iterate. The associated tangential problem is reassembled at each Newton iteration.</p><p>The solve proceeds as follows:</p><ul><li>assemble the tangential problem,</li><li>compute the residual norm from the assembled right-hand side,</li><li>test convergence,</li><li>solve the tangential linear system,</li><li>compute the damped step norm,</li><li>test the optional step criterion,</li><li>update <code>x</code> with the damped Newton correction.</li></ul><p>The internal report is reset at the beginning of the solve.</p>
-          </div></section>
-          <section class="m-doc-details" id="a3e02db55cedf48a5ba1545bc84dfceea"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class LinearSolver&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />NewtonSolver&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a72e0ce4f951eac4c298095f6f982d48b" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Solve a nonlinear system starting from the initial guess stored in <code>x</code>.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">x&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>On entry: initial guess. On exit: final Newton iterate.</td>
-                </tr>
-              </tbody>
-            </table>
           </div></section>
           <section class="m-doc-details" id="af5a89e139d4f7ceddba01f8ed8a7e837"><div>
             <h3>
@@ -1130,7 +1100,7 @@ $ u $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -140,8 +140,7 @@ $ \hat K $
 </g>
 </svg> by</p><div class="m-math"><svg style="width: 8.171em; height: 1.245em;" viewBox="155.049181 -11.955168 78.444614 11.955168">
 <title>
-\[
-  \hat v(\hat x) = v(x(\hat x)),
+\[  \hat v(\hat x) = v(x(\hat x)),
 \]
 </title>
 <defs>
@@ -238,8 +237,8 @@ $ \hat x $
               const <a href="#a523c8ed17752789a081dfaadebdafa07" class="m-doc">FunctionType</a>&amp; v)</span>
             </dt>
             <dd>Constructs a pullback on a given physical polytope.</dd>
-            <dt id="a30b641c729f814959c3902ff1e1466be">
-              <span class="m-doc-wrap-bumper"><a href="#a30b641c729f814959c3902ff1e1466be" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap">const Pullback&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2021b803f5a5522e10c0f49c66f618d1" class="m-doc">Pullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -257,8 +256,8 @@ $ \hat x $
               const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const -&gt; auto</span>
             </dt>
             <dd>Evaluates the pulled-back function into a preallocated result.</dd>
-            <dt id="aea1c5e2d0d543eba9bd667cbe83645fb">
-              <span class="m-doc-wrap-bumper">auto <a href="#aea1c5e2d0d543eba9bd667cbe83645fb" class="m-doc-self">getFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a523c8ed17752789a081dfaadebdafa07" class="m-doc">FunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aea1c5e2d0d543eba9bd667cbe83645fb" class="m-doc">getFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a523c8ed17752789a081dfaadebdafa07" class="m-doc">FunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the wrapped physical function.</dd>
           </dl>
@@ -290,6 +289,26 @@ $ \hat x $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a2021b803f5a5522e10c0f49c66f618d1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FunctionDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pullback&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2021b803f5a5522e10c0f49c66f618d1" class="m-doc-self">Pullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="afbebcdb38df25a4beba150033fcdea5f"><div>
             <h3>
               <div class="m-doc-template">
@@ -305,7 +324,7 @@ $ \hat x $
               <tbody>
                 <tr>
                   <td style="width: 1%">r&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Reference coordinates.</td>
+                  <td>Reference coordinates at which to evaluate the basis.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -346,13 +365,30 @@ $ \hat x $
                 </tr>
                 <tr>
                   <td>r&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Reference coordinates.</td>
+                  <td>Reference coordinates at which to evaluate the basis.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
                   <td>Value returned by the wrapped function call.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aea1c5e2d0d543eba9bd667cbe83645fb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FunctionDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a523c8ed17752789a081dfaadebdafa07" class="m-doc">FunctionType</a>&amp; Rodin::<wbr />Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pullback&lt;FunctionDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea1c5e2d0d543eba9bd667cbe83645fb" class="m-doc-self">getFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the wrapped physical function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The wrapped physical function.</td>
                 </tr>
               </tfoot>
             </table>
@@ -402,7 +438,7 @@ $ \hat x $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

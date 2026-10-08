@@ -305,8 +305,7 @@ $ (\mathcal C A)_{ij}=\sum_{kl}\mathcal C_{ijkl}A_{kl} $
 </g>
 </svg>. TensorFunction wraps constant or callable tensor coefficients. Tensor rank is a compile-time parameter; extents are runtime values with stack storage. Tensor-valued solution spaces are not introduced by this matrix-range API. A linear form must have a scalar integrand. Bare <code>Integral(v)</code> is therefore rejected for vector- and matrix-valued test functions; <code>Integral(F,v)</code> contracts a matching coefficient with the test function to form a scalar.</p><p>Matrix Jacobians have rank three. The vector-only P1 Jacobian handlers and the weighted, rank-one and advection H1 handlers are restricted to their supported ranges. Matrix expressions use the existing generic quadrature rule for these forms; the componentwise unweighted H1 Jacobian handler supports matrix ranges directly. An explicit quadrature order remains appropriate for rational pyramid bases and curved mappings.</p></section><section id="spatial-matrix-nonlocal"><h2><a href="#spatial-matrix-nonlocal">Nonlocal P1 forms</a></h2><p>The existing P1 potential quadrature handler accepts matrix trial and test functions. A kernel returning a scalar multiplies every component. A kernel filling a <code>SpatialMatrix</code> acts on rows, while a kernel filling a <code>SpatialTensor&lt;Scalar,4&gt;</code> couples all entries:</p><div class="m-math"><svg style="width: 21.037em; height: 3.164em;" viewBox="93.294798 -31.570712 201.953448 30.375198">
 <title>
-\[
-  (K A)_{ij}(x)=\int_\Omega
+\[  (K A)_{ij}(x)=\int_\Omega
      \sum_{kl}\mathcal K_{ijkl}(x,y)A_{kl}(y)\,dy.
 \]
 </title>
@@ -414,7 +413,7 @@ $ (\mathcal C A)_{ij}=\sum_{kl}\mathcal C_{ijkl}A_{kl} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -94,7 +94,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md487">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md487">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -123,11 +128,11 @@ $ Au = b $
 <use x='18.758616' y='0' xlink:href='#eq1-g1-61'/>
 <use x='31.184096' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg> arising from the weak formulation of PDEs and provides a unified interface for assembly and solution operations.</p><section id="autotoc_md487"><h3><a href="#autotoc_md487">Usage Example</a></h3><pre class="m-code"><span class="c1">// Define a problem and solve</span>
+</svg> arising from the weak formulation of PDEs and provides a unified interface for assembly and solution operations.</p><section id="autotoc_md487_1s1"><section id="autotoc_md487"><h3><a href="#autotoc_md487">Usage Example</a></h3><pre class="m-code"><span class="c1">// Define a problem and solve</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Problem</span><span class="p">(</span><span class="n">trialSpace</span><span class="p">,</span><span class="w"> </span><span class="n">testSpace</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bilinearForm</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">linearForm</span><span class="p">;</span>
 <span class="n">problem</span><span class="p">.</span><span class="n">assemble</span><span class="p">();</span>
-<span class="n">problem</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="p">);</span></pre></section>
+<span class="n">problem</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="p">);</span></pre></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -170,20 +175,20 @@ $ Au = b $
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="aee5a4327c58e97b0101be6de1a91eb88">
-              using <a href="#aee5a4327c58e97b0101be6de1a91eb88" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::OperatorType
+            <dt id="abd35723cce1f5ea1caded60d08551db2">
+              using <a href="#abd35723cce1f5ea1caded60d08551db2" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::OperatorType
             </dt>
             <dd>Matrix operator type from linear system traits.</dd>
-            <dt id="ae8be2197728bd066c5c0ea45fca4e9e8">
-              using <a href="#ae8be2197728bd066c5c0ea45fca4e9e8" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::VectorType
+            <dt id="afc6dc6223ab9bf6b1dc6f8437e727b19">
+              using <a href="#afc6dc6223ab9bf6b1dc6f8437e727b19" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::VectorType
             </dt>
             <dd>Vector type from linear system traits.</dd>
-            <dt id="ad7f4cd2e2ba5d742d7cdde80ad2d1928">
-              using <a href="#ad7f4cd2e2ba5d742d7cdde80ad2d1928" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::ScalarType
+            <dt id="a4e046f7b54b28ebb5d73513310e8a6ea">
+              using <a href="#a4e046f7b54b28ebb5d73513310e8a6ea" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSystem&gt;::ScalarType
             </dt>
-            <dd>Scalar type from linear system traits<br /></dd>
-            <dt id="a8459167869c8f59ee2695e0852f0b72d">
-              using <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc-self">ProblemBodyType</a> = <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&lt;<a href="#aee5a4327c58e97b0101be6de1a91eb88" class="m-doc">OperatorType</a>, <a href="#ae8be2197728bd066c5c0ea45fca4e9e8" class="m-doc">VectorType</a>, <a href="#ad7f4cd2e2ba5d742d7cdde80ad2d1928" class="m-doc">ScalarType</a>&gt;
+            <dd>Scalar type from linear system traits.</dd>
+            <dt id="a9ae05bc3f1920558cc1867c93ea9d4cf">
+              using <a href="#a9ae05bc3f1920558cc1867c93ea9d4cf" class="m-doc-self">ProblemBodyType</a> = <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&lt;<a href="#abd35723cce1f5ea1caded60d08551db2" class="m-doc">OperatorType</a>, <a href="#afc6dc6223ab9bf6b1dc6f8437e727b19" class="m-doc">VectorType</a>, <a href="#a4e046f7b54b28ebb5d73513310e8a6ea" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Problem body type containing bilinear and linear forms.</dd>
           </dl>
@@ -195,12 +200,12 @@ $ Au = b $
               <span class="m-doc-wrap-bumper"><a href="#ac18adaf4a5ec02d17698a79b219b21b2" class="m-doc-self">ProblemBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Default constructor.</dd>
-            <dt id="a98edf8cf5929cc58dbe4cca3db55064d">
-              <span class="m-doc-wrap-bumper"><a href="#a98edf8cf5929cc58dbe4cca3db55064d" class="m-doc-self">ProblemBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a98edf8cf5929cc58dbe4cca3db55064d" class="m-doc">ProblemBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
-            <dt id="ac3f8a6789259245cabfd5f7e53e1b3b7">
-              <span class="m-doc-wrap-bumper"><a href="#ac3f8a6789259245cabfd5f7e53e1b3b7" class="m-doc-self">ProblemBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac3f8a6789259245cabfd5f7e53e1b3b7" class="m-doc">ProblemBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -209,11 +214,11 @@ $ Au = b $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acfdc6278cd6c14abafb2838f551ac03c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acfdc6278cd6c14abafb2838f551ac03c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a9ae05bc3f1920558cc1867c93ea9d4cf" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Assigns a problem body to this problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2c7601e857e4b5de9c02ccaf2dc9d39e" class="m-doc">getBody</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2c7601e857e4b5de9c02ccaf2dc9d39e" class="m-doc">getBody</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a9ae05bc3f1920558cc1867c93ea9d4cf" class="m-doc">ProblemBodyType</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Returns the current formulation without exposing mutable assembly state.</dd>
             <dt>
@@ -234,8 +239,8 @@ $ Au = b $
               <span class="m-doc-wrap-bumper">auto <a href="#aa726049d7cc0816d213f0d30a05d1ff6" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Assembles the underlying linear system to solve.</dd>
-            <dt id="acd6257285579f3bb0b22f81b7d51595f">
-              <span class="m-doc-wrap-bumper">auto <a href="#acd6257285579f3bb0b22f81b7d51595f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">AssemblyTarget</a>) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a776d79a2e627ff7c2978ab26fdb51335" class="m-doc">assemble</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">AssemblyTarget</a> target) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Assembles only the requested target of the linear system.</dd>
             <dt>
@@ -254,12 +259,52 @@ $ Au = b $
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a98edf8cf5929cc58dbe4cca3db55064d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98edf8cf5929cc58dbe4cca3db55064d" class="m-doc-self">ProblemBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac3f8a6789259245cabfd5f7e53e1b3b7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac3f8a6789259245cabfd5f7e53e1b3b7" class="m-doc-self">ProblemBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="acfdc6278cd6c14abafb2838f551ac03c"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class LinearSystem&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfdc6278cd6c14abafb2838f551ac03c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfdc6278cd6c14abafb2838f551ac03c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a9ae05bc3f1920558cc1867c93ea9d4cf" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Assigns a problem body to this problem.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -322,16 +367,22 @@ $ l(v) $
               <div class="m-doc-template">
                 template&lt;class LinearSystem&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c7601e857e4b5de9c02ccaf2dc9d39e" class="m-doc-self">getBody</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a9ae05bc3f1920558cc1867c93ea9d4cf" class="m-doc">ProblemBodyType</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c7601e857e4b5de9c02ccaf2dc9d39e" class="m-doc-self">getBody</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Returns the current formulation without exposing mutable assembly state.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The current formulation without exposing mutable assembly state.</td>
+                </tr>
+              </thead>
               <thead>
                 <tr><th colspan="2">Exceptions</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">Alert::Exception</td>
+                  <td>Alert::Exception</td>
                   <td>For adapters without a variational body.</td>
                 </tr>
               </tbody>
@@ -347,7 +398,26 @@ $ l(v) $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5205aa8df7a3730c86d1afceeb47f586" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const Term&amp; term)</span></span>
             </h3>
             <p>Appends a term using problem-body addition and invalidates assembly.</p>
-<p>Supports exactly the additions defined by the problem-body algebra, including integrators, preassembled forms and boundary conditions. Terms are owned through the existing clone-on-build semantics. Successful virtual body assignment sets the concrete problem&#x27;s assembly flag to false. The next solve() reassembles; merely reading getLinearSystem() does not refresh the stored system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">term</td>
+                  <td>Term to append to the problem body.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this problem after invalidating assembly.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Supports exactly the additions defined by the problem-body algebra, including integrators, preassembled forms and boundary conditions. Terms are owned through the existing clone-on-build semantics. 
+
+Successful virtual body assignment sets the concrete problem&#x27;s assembly flag to false. The next solve() reassembles; merely reading getLinearSystem() does not refresh the stored system.</p>
           </div></section>
           <section class="m-doc-details" id="a90311b262b80f9812fb973c3c44e1eac"><div>
             <h3>
@@ -358,6 +428,23 @@ $ l(v) $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a90311b262b80f9812fb973c3c44e1eac" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const Term&amp; term)</span></span>
             </h3>
             <p>Appends a negative form contribution and invalidates assembly.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">term</td>
+                  <td>Form contribution to subtract from the problem body.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this problem after invalidating assembly.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>This is algebraic subtraction, not removal by identity. Boundary conditions cannot be subtracted because the body algebra does not define their negation. Existing residual/load sign conventions apply.</p>
           </div></section>
           <section class="m-doc-details" id="a5ba14a75d5ef9a77c71307f9ee4430b2"><div>
@@ -450,6 +537,32 @@ $ Au = b $
 <use x='31.184096' y='0' xlink:href='#eq7-g0-98'/>
 </g>
 </svg>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a776d79a2e627ff7c2978ab26fdb51335"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">ProblemBase</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBase&lt;LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a776d79a2e627ff7c2978ab26fdb51335" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58e" class="m-doc">AssemblyTarget</a> target) <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Assembles only the requested target of the linear system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">target</td>
+                  <td>Requested assembly target; the default implementation reports unsupported targeted assembly.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="acc296912cd0f61d1d0bf336bc399a7b2"><div>
             <h3>
@@ -600,7 +713,7 @@ $ Au = b $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

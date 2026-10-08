@@ -81,17 +81,21 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md201">Mathematical Background</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md201">Mathematical Background</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Provides the partial specialization of <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />LinearForm</a> that assembles linear-form contributions into a PETSc <code>Vec</code>. The resulting vector represents the right-hand side <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
+<p>Provides the partial specialization of <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">LinearForm</a> that assembles linear-form contributions into a PETSc <code>Vec</code>. The resulting vector represents the right-hand side <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
 <title>
 $ \mathbf{b} $
 </title>
@@ -117,7 +121,7 @@ $ A\mathbf{x} = \mathbf{b} $
 <use x='19.194557' y='0' xlink:href='#eq2-g2-61'/>
 <use x='31.620038' y='0' xlink:href='#eq2-g0-98'/>
 </g>
-</svg>.</p><section id="autotoc_md201"><h3><a href="#autotoc_md201">Mathematical Background</a></h3><p>A form <svg class="m-math" style="width: 6.037em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 57.955575 10.029041">
+</svg>.</p><section id="autotoc_md201_1s1"><section id="autotoc_md201"><h3><a href="#autotoc_md201">Mathematical Background</a></h3><p>A form <svg class="m-math" style="width: 6.037em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 57.955575 10.029041">
 <title>
 $ L : V_h \to \mathbb{K} $
 </title>
@@ -137,7 +141,7 @@ $ L : V_h \to \mathbb{K} $
 <use x='33.381047' y='0' xlink:href='#eq3-g1-33'/>
 <use x='48.657078' y='0' xlink:href='#eq3-g0-75'/>
 </g>
-</svg> takes a test function <svg class="m-math" style="width: 3.375em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 32.404275 9.962629">
+</svg> takes a test function  <svg class="m-math" style="width: 3.375em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 32.404275 9.962629">
 <title>
 $ v \in V_h
 $
@@ -166,8 +170,7 @@ $ L $
 </g>
 </svg> on the basis functions yields a load vector:</p><div class="m-math"><svg style="width: 13.658em; height: 1.245em;" viewBox="128.712154 -11.955168 131.118687 11.955168">
 <title>
-\[
-  b_i = L(\phi_i), \quad i = 1,\ldots,N
+\[  b_i = L(\phi_i), \quad i = 1,\ldots,N
 \]
 </title>
 <defs>
@@ -240,28 +243,18 @@ $ L(u_h) = \mathbf{u}^* \mathbf{b} $
 <use x='52.327929' y='-4.338437' xlink:href='#eq8-g1-3'/>
 <use x='57.060244' y='0' xlink:href='#eq8-g0-98'/>
 </g>
-</svg> via <code>VecDot</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TestFunction</a></p><p><a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_00_01_1_1_mat_01_4.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />BilinearForm</a></p><p><a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u_00_01_v_01_4.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />Problem</a></p></aside></section>
+</svg> via <code>VecDot</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TestFunction</a></p><p><a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_00_01_1_1_mat_01_4.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />BilinearForm</a></p><p><a href="class_rodin_1_1_variational_1_1_problem_3_01_p_e_t_sc_1_1_math_1_1_linear_system_00_01_u_00_01_v_01_4.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />Problem</a></p></aside></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">Rodin::PETSc</a></dt>
             <dd>PETSc integration module for Rodin.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc_1_1_variational.html" class="m-doc">Rodin::PETSc::Variational</a></dt>
             <dd>PETSc-backed variational form adapters.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">Rodin::Variational::LinearForm&lt;FES, ::Vec&gt;</a>
-            </dt>
-            <dd>Linear form specialization that assembles into a PETSc vector.</dd>
           </dl>
         </section>
       </div>
@@ -308,7 +301,7 @@ $ L(u_h) = \mathbf{u}^* \mathbf{b} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -144,8 +144,8 @@ $ \nabla u|_K = 0 $
               using <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="#a600bee7eb8e0715c1bd4fb5c583692a5" class="m-doc">FESType</a>, Data&gt;
             </dt>
             <dd>Operand type.</dd>
-            <dt id="a13473fbccac67b11bfc9e60da89db714">
-              using <a href="#a13473fbccac67b11bfc9e60da89db714" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&gt;&gt;
+            <dt id="a6015a8c48d7d9eb8942c86dca1855bb2">
+              using <a href="#a6015a8c48d7d9eb8942c86dca1855bb2" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -180,13 +180,13 @@ $ u $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a3d55c8bef0ccde7bd7ff9b26550405a8">
-              <span class="m-doc-wrap-bumper">void <a href="#a3d55c8bef0ccde7bd7ff9b26550405a8" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; out,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a3d55c8bef0ccde7bd7ff9b26550405a8" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; out,
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
             </dt>
             <dd>Interpolates at a geometric point.</dd>
-            <dt id="a0380397dae890f140ce0a08f95bf5e75">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0380397dae890f140ce0a08f95bf5e75" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0380397dae890f140ce0a08f95bf5e75" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy.</dd>
           </dl>
@@ -264,6 +264,48 @@ $ u $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a3d55c8bef0ccde7bd7ff9b26550405a8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;Range, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d55c8bef0ccde7bd7ff9b26550405a8" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+            </h3>
+            <p>Interpolates at a geometric point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">out</td>
+                  <td>Storage for the computed result.</td>
+                </tr>
+                <tr>
+                  <td>p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0380397dae890f140ce0a08f95bf5e75"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grad.html" class="m-doc">Grad</a>* Rodin::<wbr />Variational::<wbr />Grad&lt;GridFunction&lt;P0&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;Range, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0380397dae890f140ce0a08f95bf5e75" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -309,7 +351,7 @@ $ u $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

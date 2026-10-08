@@ -119,8 +119,8 @@
               using <a href="#a3ae53bf3bbae7ce243cc5e27231bbd45" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, Data&gt;
             </dt>
             <dd>Operand type.</dd>
-            <dt id="a4082062979c8203e126ac17b9a4eae1e">
-              using <a href="#a4082062979c8203e126ac17b9a4eae1e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&lt;<a href="#a3ae53bf3bbae7ce243cc5e27231bbd45" class="m-doc">OperandType</a>, Derived&gt;&gt;
+            <dt id="a9f08c613dfeba7a0b5d7ca26c4f1ed3b">
+              using <a href="#a9f08c613dfeba7a0b5d7ca26c4f1ed3b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&lt;<a href="#a3ae53bf3bbae7ce243cc5e27231bbd45" class="m-doc">OperandType</a>, Derived&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -143,7 +143,7 @@ $ \mathbb{P}_1 $
 <use x='0' y='0' xlink:href='#eq1-g0-80'/>
 <use x='7.305954' y='1.793263' xlink:href='#eq1-g1-49'/>
 </g>
-</svg> function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg> function  <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u
 $
@@ -155,12 +155,12 @@ $
 <use x='0' y='0' xlink:href='#eq2-g0-117'/>
 </g>
 </svg>.</dd>
-            <dt id="abafdf317d58a2f37bc45630ea53a8aee">
-              <span class="m-doc-wrap-bumper"><a href="#abafdf317d58a2f37bc45630ea53a8aee" class="m-doc-self">DivBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#abafdf317d58a2f37bc45630ea53a8aee" class="m-doc">DivBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a8a4c90ff110197fd3b33b5b5d1870e5c">
-              <span class="m-doc-wrap-bumper"><a href="#a8a4c90ff110197fd3b33b5b5d1870e5c" class="m-doc-self">DivBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8a4c90ff110197fd3b33b5b5d1870e5c" class="m-doc">DivBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -185,17 +185,17 @@ $
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Interpolates the divergence at a point (to be overridden in derived class).</dd>
-            <dt id="a9b04c83a619b910e4ea79ce3801c7fda">
-              <span class="m-doc-wrap-bumper">void <a href="#a9b04c83a619b910e4ea79ce3801c7fda" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a9b04c83a619b910e4ea79ce3801c7fda" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
               const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Interpolates at an integration point.</dd>
-            <dt id="a943384230ba4ced03cc801fcda4cff6a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a943384230ba4ced03cc801fcda4cff6a" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a943384230ba4ced03cc801fcda4cff6a" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
-            <dt id="ab93083c990e9b99e7e9e6da87adda5ce">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab93083c990e9b99e7e9e6da87adda5ce" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab93083c990e9b99e7e9e6da87adda5ce" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Copy function to be overriden in Derived type.</dd>
           </dl>
@@ -221,7 +221,7 @@ $ \mathbb{P}_1 $
 <use x='0' y='0' xlink:href='#eq1-g0-80'/>
 <use x='7.305954' y='1.793263' xlink:href='#eq1-g1-49'/>
 </g>
-</svg> function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg> function  <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u
 $
@@ -245,6 +245,46 @@ $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="abafdf317d58a2f37bc45630ea53a8aee"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DivBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abafdf317d58a2f37bc45630ea53a8aee" class="m-doc-self">DivBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8a4c90ff110197fd3b33b5b5d1870e5c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />DivBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a4c90ff110197fd3b33b5b5d1870e5c" class="m-doc-self">DivBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a8b7e7b0de076d1c300d1f0552b999d6b"><div>
             <h3>
               <div class="m-doc-template">
@@ -253,6 +293,23 @@ $
               <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />DivBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b7e7b0de076d1c300d1f0552b999d6b" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Evaluates the divergence at a Point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Resolves mesh ownership and dispatches to the derived class&#x27;s <code>interpolate</code>. Falls back to inclusion / submesh restriction when the polytope&#x27;s mesh is not the FES mesh.</p>
           </div></section>
           <section class="m-doc-details" id="aed7929571aa78424456b8d9208dfc79c"><div>
@@ -263,6 +320,23 @@ $
               <span class="m-doc-wrap-bumper"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />DivBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed7929571aa78424456b8d9208dfc79c" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
             </h3>
             <p>Evaluates the divergence at an IntegrationPoint.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>If the polytope is owned by the FES mesh, dispatches to <code>interpolate(out, ip)</code>. Otherwise falls back to inclusion / submesh restriction.</p>
           </div></section>
           <section class="m-doc-details" id="a1ffbdba2b29eb6f63414bd575f12f63a"><div>
@@ -307,6 +381,74 @@ $
               </tbody>
             </table>
 <p>This virtual function is overridden in derived classes (e.g., P1::Div) to provide finite element-specific divergence computation.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9b04c83a619b910e4ea79ce3801c7fda"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />DivBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b04c83a619b910e4ea79ce3801c7fda" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+              const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Interpolates at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">out</td>
+                  <td>Storage for the computed result.</td>
+                </tr>
+                <tr>
+                  <td>ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a943384230ba4ced03cc801fcda4cff6a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />DivBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a943384230ba4ced03cc801fcda4cff6a" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; poly) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">poly</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab93083c990e9b99e7e9e6da87adda5ce"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>* Rodin::<wbr />Variational::<wbr />DivBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab93083c990e9b99e7e9e6da87adda5ce" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copy function to be overriden in Derived type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
@@ -353,7 +495,7 @@ $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

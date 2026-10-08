@@ -83,8 +83,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md361">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md362">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md361">Mathematical Foundation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md362">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -98,8 +108,7 @@
         </nav>
 <p>Computes the spatial gradient of a scalar grid function:</p><div class="m-math"><svg style="width: 15.571em; height: 3.228em;" viewBox="119.281181 -30.984075 149.482471 30.984083">
 <title>
-\[
-  \nabla u = \left(\frac{\partial u}{\partial x_1}, \frac{\partial u}{\partial x_2}, \ldots, \frac{\partial u}{\partial x_d}\right)^T
+\[       \nabla u = \left(\frac{\partial u}{\partial x_1}, \frac{\partial u}{\partial x_2}, \ldots, \frac{\partial u}{\partial x_d}\right)^T
 \]
 </title>
 <defs>
@@ -169,7 +178,7 @@ $ d $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-100'/>
 </g>
-</svg> is the spatial dimension.</p><section id="autotoc_md361"><h3><a href="#autotoc_md361">Mathematical Foundation</a></h3><p>For a scalar function <svg class="m-math" style="width: 8.507em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 81.671169 10.340659">
+</svg> is the spatial dimension.</p><section id="autotoc_md361_1s1"><section id="autotoc_md361"><h3><a href="#autotoc_md361">Mathematical Foundation</a></h3><p>For a scalar function <svg class="m-math" style="width: 8.507em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 81.671169 10.340659">
 <title>
 $ u : \Omega \subset \mathbb{R}^d \to \mathbb{R} $
 </title>
@@ -194,8 +203,7 @@ $ u : \Omega \subset \mathbb{R}^d \to \mathbb{R} $
 </g>
 </svg>, the gradient is a vector field:</p><div class="m-math"><svg style="width: 6.933em; height: 1.091em;" viewBox="160.741807 -10.470988 66.56124 10.470988">
 <title>
-\[
-  \nabla u : \Omega \to \mathbb{R}^d
+\[       \nabla u : \Omega \to \mathbb{R}^d
 \]
 </title>
 <defs>
@@ -241,8 +249,7 @@ $ u_h = \sum_i u_i \phi_i $
 </g>
 </svg>:</p><div class="m-math"><svg style="width: 9.045em; height: 2.749em;" viewBox="150.60833 -27.585401 86.828199 26.389888">
 <title>
-\[
-  \nabla u_h = \sum_i u_i \nabla \phi_i
+\[       \nabla u_h = \sum_i u_i \nabla \phi_i
 \]
 </title>
 <defs>
@@ -267,8 +274,8 @@ $ u_h = \sum_i u_i \phi_i $
 <use x='227.625287' y='-15.032404' xlink:href='#eq7-g3-30'/>
 <use x='234.553389' y='-13.239141' xlink:href='#eq7-g2-105'/>
 </g>
-</svg></div></section><section id="autotoc_md362"><h3><a href="#autotoc_md362">Usage Example</a></h3><pre class="m-code"><span class="c1">// In a variational formulation</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span><span class="w">  </span><span class="c1">// Laplacian term</span></pre></section>
+</svg></div></section></section><section id="autotoc_md362_1s1"><section id="autotoc_md362"><h3><a href="#autotoc_md362">Usage Example</a></h3><pre class="m-code"><span class="c1">// In a variational formulation</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span><span class="w">  </span><span class="c1">// Laplacian term</span></pre></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -302,8 +309,8 @@ $ u_h = \sum_i u_i \phi_i $
               using <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, Data&gt;
             </dt>
             <dd>Type of the operand (grid function)</dd>
-            <dt id="a5aebcdb34a7273ec5648a3570a3cf387">
-              using <a href="#a5aebcdb34a7273ec5648a3570a3cf387" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, Derived&gt;&gt;
+            <dt id="a3fa3be8ccca666f32e0e8650cd40a22e">
+              using <a href="#a3fa3be8ccca666f32e0e8650cd40a22e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, Derived&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -315,12 +322,12 @@ $ u_h = \sum_i u_i \phi_i $
               <span class="m-doc-wrap-bumper"><a href="#a7cf7b0c71702a67dc64cebf6d848787e" class="m-doc">GradBase</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u)</span>
             </dt>
             <dd>Constructs the gradient operator for a grid function.</dd>
-            <dt id="a71792a7e938a0aaeb329c790c4fcc78e">
-              <span class="m-doc-wrap-bumper"><a href="#a71792a7e938a0aaeb329c790c4fcc78e" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a71792a7e938a0aaeb329c790c4fcc78e" class="m-doc">GradBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="aebe31933f205e813f0c27741c4ffd8cd">
-              <span class="m-doc-wrap-bumper"><a href="#aebe31933f205e813f0c27741c4ffd8cd" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aebe31933f205e813f0c27741c4ffd8cd" class="m-doc">GradBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -345,8 +352,8 @@ $ u_h = \sum_i u_i \phi_i $
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Interpolates the gradient at a point (to be overridden in derived class).</dd>
-            <dt id="a366837fed872f0a5f04ddfe745ee5268">
-              <span class="m-doc-wrap-bumper">void <a href="#a366837fed872f0a5f04ddfe745ee5268" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a366837fed872f0a5f04ddfe745ee5268" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
               const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Interpolates at an integration point.</dd>
@@ -354,12 +361,12 @@ $ u_h = \sum_i u_i \phi_i $
               <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the operand grid function.</dd>
-            <dt id="a4349bdb4e5088cb0ef3b17f34f72958c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
-            <dt id="a7e1bd519c3b0d0970378343f0fa5d10c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7e1bd519c3b0d0970378343f0fa5d10c" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7e1bd519c3b0d0970378343f0fa5d10c" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Copy function to be overriden in Derived type.</dd>
           </dl>
@@ -386,6 +393,46 @@ $ u_h = \sum_i u_i \phi_i $
               </tbody>
             </table>
 <aside class="m-note m-success"><h4>Precondition</h4><p>The grid function must be scalar-valued (vector dimension = 1)</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a71792a7e938a0aaeb329c790c4fcc78e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a71792a7e938a0aaeb329c790c4fcc78e" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aebe31933f205e813f0c27741c4ffd8cd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebe31933f205e813f0c27741c4ffd8cd" class="m-doc-self">GradBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="aad8f738241426a32d95c3696395698d3"><div>
             <h3>
@@ -441,6 +488,23 @@ $ \nabla u \in \mathbb{R}^d $
               <span class="m-doc-wrap-bumper"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a675b2ccd03bcb79217afc5d1c82becaa" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Evaluates the gradient at a Point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Resolves mesh ownership and dispatches to the derived class&#x27;s <code>interpolate</code>. Falls back to inclusion / submesh restriction when the polytope&#x27;s mesh is not the FES mesh.</p>
           </div></section>
           <section class="m-doc-details" id="ab6be6544d9c0013a4c9fa68f31ac83a6"><div>
@@ -451,6 +515,23 @@ $ \nabla u \in \mathbb{R}^d $
               <span class="m-doc-wrap-bumper"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab6be6544d9c0013a4c9fa68f31ac83a6" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
             </h3>
             <p>Evaluates the gradient at an IntegrationPoint.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>If the polytope is owned by the FES mesh, dispatches to <code>interpolate(out, ip)</code>. Otherwise falls back to inclusion / submesh restriction.</p>
           </div></section>
           <section class="m-doc-details" id="ab37332aeb50920470a90d892d6a7e7e2"><div>
@@ -479,6 +560,31 @@ $ \nabla u \in \mathbb{R}^d $
             </table>
 <p>This virtual function is overridden in derived classes (e.g., P1::Grad) to provide finite element-specific gradient interpolation.</p>
           </div></section>
+          <section class="m-doc-details" id="a366837fed872f0a5f04ddfe745ee5268"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a366837fed872f0a5f04ddfe745ee5268" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>&amp; out,
+              const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Interpolates at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">out</td>
+                  <td>Storage for the computed result.</td>
+                </tr>
+                <tr>
+                  <td>ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a1ffbdba2b29eb6f63414bd575f12f63a"><div>
             <h3>
               <div class="m-doc-template">
@@ -492,6 +598,49 @@ $ \nabla u \in \mathbb{R}^d $
                 <tr>
                   <th style="width: 1%">Returns</th>
                   <td>Reference to the grid function being differentiated</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4349bdb4e5088cb0ef3b17f34f72958c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7e1bd519c3b0d0970378343f0fa5d10c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grad_base.html" class="m-doc">GradBase</a>* Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e1bd519c3b0d0970378343f0fa5d10c" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Copy function to be overriden in Derived type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
                 </tr>
               </tfoot>
             </table>
@@ -541,7 +690,7 @@ $ \nabla u \in \mathbb{R}^d $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

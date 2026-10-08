@@ -77,26 +77,45 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Variational <span class="m-thin">namespace</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md527">Finite Element Spaces</a></li>
-            <li><a href="#autotoc_md528">Functions</a></li>
-            <li><a href="#autotoc_md529">Variational Forms</a></li>
-            <li><a href="#autotoc_md530">Problem</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md527">Finite Element Spaces</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md528">Functions</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md529">Variational Forms</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md530">Problem</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
                 <li><a href="#typedef-members">Typedefs</a></li>
-                <li><a href="#var-members">Variables</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Variational</p><p>Module which provides the necessary tools for constructing and solving variational problems.</p><p>The Variational module is the core of the Rodin finite element framework. It provides classes for defining finite element spaces, trial and test functions, variational forms, boundary conditions, and problems.</p><section id="autotoc_md527"><h3><a href="#autotoc_md527">Finite Element Spaces</a></h3><ul><li><code>P0</code> — Piecewise constant (discontinuous) finite element space</li><li><code>P0g</code> — Global constant space (1 DOF for scalar, vdim for vector)</li><li><code>P1</code> — Piecewise linear (continuous) finite element space</li><li><code>H1</code> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+<p>Directory src/Rodin/Variational</p><p>Module which provides the necessary tools for constructing and solving variational problems.</p><p>The Variational module is the core of the Rodin finite element framework. It provides classes for defining finite element spaces, trial and test functions, variational forms, boundary conditions, and problems.</p><section id="autotoc_md527_1s1"><section id="autotoc_md527"><h3><a href="#autotoc_md527">Finite Element Spaces</a></h3><ul><li><code>P0</code> — Piecewise constant (discontinuous) finite element space</li><li><code>P0g</code> — Global constant space (1 DOF for scalar, vdim for vector)</li><li><code>P1</code> — Piecewise linear (continuous) finite element space</li><li><code>H1</code> — Higher-order <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -108,7 +127,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq1-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq1-g1-49'/>
 </g>
-</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section><section id="autotoc_md528"><h3><a href="#autotoc_md528">Functions</a></h3><ul><li><code>TrialFunction</code> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg>-conforming finite element space (arbitrary polynomial order)</li></ul></section></section><section id="autotoc_md528_1s1"><section id="autotoc_md528"><h3><a href="#autotoc_md528">Functions</a></h3><ul><li><code>TrialFunction</code> — Represents the unknown solution <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -128,10 +147,9 @@ $ v $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-118'/>
 </g>
-</svg></li><li><code>GridFunction</code> — A concrete function storing DOF values in a finite element space</li></ul></section><section id="autotoc_md529"><h3><a href="#autotoc_md529">Variational Forms</a></h3><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
+</svg></li><li><code>GridFunction</code> — A concrete function storing DOF values in a finite element space</li></ul></section></section><section id="autotoc_md529_1s1"><section id="autotoc_md529"><h3><a href="#autotoc_md529">Variational Forms</a></h3><p>The module supports building variational problems of the form:</p><div class="m-math"><svg style="width: 24.319em; height: 1.245em;" viewBox="77.53888 -11.955168 233.465314 11.955168">
 <title>
-\[
-  \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
+\[  \text{Find} \quad u \in U \quad \text{ s.t. } \quad \forall v \in V \quad
   a(u, v) = b(v) \ ,
 \]
 </title>
@@ -185,7 +203,7 @@ $ v $
 <use x='300.211415' y='-2.988792' xlink:href='#eq4-g5-41'/>
 <use x='307.752533' y='-2.988792' xlink:href='#eq4-g1-59'/>
 </g>
-</svg></div><p>which are translated into linear algebra problems <svg class="m-math" style="width: 4.216em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 40.473039 8.302191">
+</svg></div><p>which are translated into linear algebra problems  <svg class="m-math" style="width: 4.216em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 40.473039 8.302191">
 <title>
 $ \mathbf{A}\mathbf{x}
 = \mathbf{b} $
@@ -355,7 +373,7 @@ $ u|_{\partial\Omega} $
 <use x='9.98333' y='1.793263' xlink:href='#eq13-g1-64'/>
 <use x='14.914894' y='1.793263' xlink:href='#eq13-g3-10'/>
 </g>
-</svg></li><li><code>LinearElasticityIntegral(u, v)(lambda, mu)</code> — Hooke elasticity bilinear form</li></ul></section><section id="autotoc_md530"><h3><a href="#autotoc_md530">Problem</a></h3><p>The <code>Problem</code> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></li><li><code>LinearElasticityIntegral(u, v)(lambda, mu)</code> — Hooke elasticity bilinear form</li></ul></section></section><section id="autotoc_md530_1s1"><section id="autotoc_md530"><h3><a href="#autotoc_md530">Problem</a></h3><p>The <code>Problem</code> class assembles all forms and boundary conditions into a solvable linear system.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
@@ -364,7 +382,7 @@ $ u|_{\partial\Omega} $
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
 <span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
 
-<span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-variational.html" class="m-doc">Variational Formulations Guide</a></p></aside></section>
+<span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="guides-variational.html" class="m-doc">Variational Formulations Guide</a></p></aside></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -415,11 +433,6 @@ $ u|_{\partial\Omega} $
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>
             </dt>
             <dd>Represents a bilinear form on a trial and test space.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_00_01_1_1_mat_01_4.html" class="m-doc">BilinearForm&lt;Solution, TrialFES, TestFES, ::Mat&gt;</a>
-            </dt>
-            <dd>Bilinear form specialization that assembles into a PETSc matrix.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_0fe8fb405df58001aebd9c045d37f9107.html" class="m-doc">BilinearForm&lt;Solution, TrialFES, TestFES, Math::Matrix&lt;Scalar&gt;&gt;</a>
@@ -524,6 +537,11 @@ $ u|_{\partial\Omega} $
             </dt>
             <dd>Base class for complex-valued scalar functions.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_component_3_01_function_base_3_01_derived_01_4_00_01size__t_00_01size__t_00_01size__t_01_4.html" class="m-doc">Component&lt;FunctionBase&lt;Derived&gt;, size_t, size_t, size_t&gt;</a>
+            </dt>
+            <dd>One entry of a rank-three tensor-valued function.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class OperandDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_component_3_01_function_base_3_01_operand_derived_01_4_00_01size__t_01_4.html" class="m-doc">Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;</a>
             </dt>
@@ -539,10 +557,20 @@ $ u|_{\partial\Omega} $
             </dt>
             <dd>Extracts a component from a vector-valued GridFunction.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_component_3_01_shape_function_base_3_01_derived_00_01_f_e_s_00_01c107a79356f0594b89abe0534c88282.html" class="m-doc">Component&lt;ShapeFunctionBase&lt;Derived, FES, Space&gt;, size_t, size_t, size_t&gt;</a>
+            </dt>
+            <dd>One entry of a tensor-valued trial or test basis.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class OperandDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_component_3_01_shape_function_base_3_01_operand_derived_00_01_f_e_s_00_01_space_01_4_01_4.html" class="m-doc">Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;&gt;</a>
             </dt>
             <dd>Extracts a component from a vector-valued ShapeFunction.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class OperandDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_component_3_01_shape_function_base_3_01_operand_derived_00_01_f_892dd08cf5d2fb87fa0e29115bc4ae8d.html" class="m-doc">Component&lt;ShapeFunctionBase&lt;OperandDerived, FES, Space&gt;, size_t, size_t&gt;</a>
+            </dt>
+            <dd>Matrix-range finite element or expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58ea8cbc0fb889c6cc21e0be26227a2b468b" class="m-doc">LHS</a>, class <a href="namespace_rodin_1_1_variational.html#a9a049ab813424bb601cce5f6b610d58eae80302656805aeec44dc5d789d653c6b" class="m-doc">RHS</a>&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_composition.html" class="m-doc">Composition</a>
@@ -1172,11 +1200,6 @@ $ u $
             <dd>Represents a grid function belonging to some finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">GridFunction&lt;FES, ::Vec&gt;</a>
-            </dt>
-            <dd>Grid function specialization storing DOF coefficients in a PETSc vector (<code>Vec</code>).</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_math_1_1_vector_3_01typename_01_fa803fb5fcea8b5a006f6ebef83f58418.html" class="m-doc">GridFunction&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
             </dt>
             <dd>Grid function storing its degrees of freedom in a dense Math::Vector over the space&#x27;s scalar type (the standard local backend).</dd>
@@ -1207,29 +1230,14 @@ $ u $
             <dd>Degree K H1-conforming Lagrange finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_g41842979e8eb89a388ee64a565a685ac.html" class="m-doc">H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_ga9de870463b3443e11254839747e55e4.html" class="m-doc">H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
             </dt>
-            <dd>Matrix-valued finite element space with component-wise scalar basis replication.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g0a47e13b731fd39ea7df5f39f21365b1.html" class="m-doc">H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
-            </dt>
-            <dd>Vector-valued continuous piecewise polynomial (degree K) Lagrange finite element space.</dd>
+            <dd>Matrix-range finite element or expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g81bac0b4db4b0ddd8bd3c1859864d005.html" class="m-doc">H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
             </dt>
             <dd>Distributed vector-valued H1 finite element space for MPI meshes.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html" class="m-doc">H1&lt;K, Scalar, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
-            </dt>
-            <dd>Degree K H1-conforming Lagrange finite element space.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html" class="m-doc">H1&lt;K, Scalar, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
-            </dt>
-            <dd>Distributed H1 finite element space for MPI meshes (scalar range).</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>
@@ -1583,11 +1591,6 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             <dd>Represents a linear form on some finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">LinearForm&lt;FES, ::Vec&gt;</a>
-            </dt>
-            <dd>Linear form specialization that assembles into a PETSc vector.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_math_1_1_vector_3_01typename_01_for992eb632d5e4aa362a84619eb6f52119.html" class="m-doc">LinearForm&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
             </dt>
             <dd>Represents a linear form defined over some finite element space.</dd>
@@ -1627,6 +1630,11 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             </dt>
             <dd>Matrix-valued constant function.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_matrix_function_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4.html" class="m-doc">MatrixFunction&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Matrix-range finite element or expression specialization.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>
             </dt>
@@ -1638,11 +1646,6 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             <dd>Represents the maximum operation between two functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_max_3_01_function_base_3_01_nested_derived_01_4_00_01_real_01_4.html" class="m-doc">Max&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;</a>
-            </dt>
-            <dd>Pointwise maximum of a function expression and a real.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_max_3_01_real_00_01_function_base_3_01_nested_derived_01_4_01_4.html" class="m-doc">Max&lt;Real, FunctionBase&lt;NestedDerived&gt;&gt;</a>
             </dt>
             <dd>Pointwise maximum of a function expression.</dd>
@@ -1651,11 +1654,6 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
               class <a href="class_rodin_1_1_variational_1_1_min_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_function_base_3_01_r_h_s_derived_01_4_01_4.html" class="m-doc">Min&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
             </dt>
             <dd>Represents the minimum operation between two functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_min_3_01_function_base_3_01_nested_derived_01_4_00_01_real_01_4.html" class="m-doc">Min&lt;FunctionBase&lt;NestedDerived&gt;, Real&gt;</a>
-            </dt>
-            <dd>Pointwise minimum of a function expression.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class NestedDerived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_min_3_01_real_00_01_function_base_3_01_nested_derived_01_4_01_4.html" class="m-doc">Min&lt;Real, FunctionBase&lt;NestedDerived&gt;&gt;</a>
@@ -1723,9 +1721,9 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             <dd>Degree 0 Lagrange finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometry_a847fd93bb51df33c1df95191b75498c.html" class="m-doc">P0&lt;Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometry_02b1019a22387996cd0b086e33d44f55.html" class="m-doc">P0&lt;Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
             </dt>
-            <dd>Matrix-valued finite element space with component-wise scalar basis replication.</dd>
+            <dd>Matrix-range finite element or expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_geometry_528a191f4fdcc1b235c37cf6ac806724.html" class="m-doc">P0&lt;Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
@@ -1738,19 +1736,9 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             <dd>Distributed P0 finite element space for MPI meshes.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html" class="m-doc">P0&lt;Scalar, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
-            </dt>
-            <dd>Scalar-valued piecewise constant (P0) Lagrange finite element space.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>
             </dt>
             <dd>Degree 0 Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Piecewise constant (degree 0) vector Lagrange element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Range, class Mesh&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0g.html" class="m-doc">P0g</a>
@@ -1758,14 +1746,9 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             <dd>Forward declaration of global constant finite element spaces.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0g_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometryf9c6ed1095c467b6ba791e92727d9263.html" class="m-doc">P0g&lt;Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_p0g_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometryc1d341c34b590b50dcdeb93a520dc880.html" class="m-doc">P0g&lt;Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
             </dt>
             <dd>Matrix-range finite element or expression specialization.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0g_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_geometry40cadfdef1fe14073b058a288f23b151.html" class="m-doc">P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
-            </dt>
-            <dd>Cellwise-constant vector-valued finite element space with a global basis.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0g_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_geometry72a1b6b2614d2f6edd7b879e18e85526.html" class="m-doc">P0g&lt;Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
@@ -1773,24 +1756,9 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             <dd>Distributed vector P0g finite element space for MPI meshes.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0g_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html" class="m-doc">P0g&lt;Scalar, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
-            </dt>
-            <dd>Cellwise-constant scalar finite element space with a global basis.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0g_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html" class="m-doc">P0g&lt;Scalar, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
-            </dt>
-            <dd>Distributed scalar P0g finite element space for MPI meshes.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0g_element.html" class="m-doc">P0gElement</a>
             </dt>
             <dd>Forward declaration of global P0 finite elements.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4.html" class="m-doc">P0gElement&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Matrix-valued reference element built from scalar nodal functionals.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">P0gElement&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
@@ -1803,9 +1771,9 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             <dd>Degree 1 Lagrange finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometry_6cccf0dd4502ed1f0deefd3b8b4823a8.html" class="m-doc">P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometry_097e610aeab31a26415113c68d8a45b0.html" class="m-doc">P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
             </dt>
-            <dd>Matrix-valued finite element space with component-wise scalar basis replication.</dd>
+            <dd>Matrix-range finite element or expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p1_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_geometry_32df6fb491d5709390b8422bf560fc73.html" class="m-doc">P1&lt;Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
@@ -1818,19 +1786,9 @@ $ H^1(\mathcal{T}_h)^d \subset L^2 (\Omega) $
             <dd>Distributed P1 finite element space for MPI meshes.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_3_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_local_01_4_01_4.html" class="m-doc">P1&lt;Scalar, Geometry::Mesh&lt;Context::Local&gt;&gt;</a>
-            </dt>
-            <dd>Real valued Lagrange finite element space.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>
             </dt>
             <dd>Degree 1 Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">P1Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Continuous piecewise linear (degree 1) vector Lagrange element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s_01_4_2a9e6d75de7ed6b1898c3fa8d377abc3.html" class="m-doc">PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;</a>
@@ -2755,7 +2713,7 @@ $ A^T $
 <use x='0' y='0' xlink:href='#eq25-g1-65'/>
 <use x='8.775347' y='-4.338437' xlink:href='#eq25-g0-84'/>
 </g>
-</svg> of some matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+</svg> of some matrix  <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
 $ A
 $
@@ -2903,11 +2861,6 @@ $
             <dd>Computes 3D warp-blend shift for a tetrahedral face.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_zero_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Zero&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Vector zero function.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_zero_3_01_scalar_01_4.html" class="m-doc">Zero&lt;Scalar&gt;</a>
             </dt>
             <dd>Scalar zero function.</dd>
@@ -2918,7 +2871,7 @@ $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              using <a href="#ab9a83f620bec3f8ed0a69e776fc4f9e4" class="m-doc">EssentialBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>&lt;Scalar&gt;&gt;
+              using <a href="#a236b731ca42edb409041600283b8eb3b" class="m-doc">EssentialBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>&lt;Scalar&gt;&gt;
             </dt>
             <dd>Alias for a list of Dirichlet boundary conditions.</dd>
             <dt>
@@ -2933,12 +2886,12 @@ $
             <dd>Convenience alias for complex-valued H1 element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K&gt;</div>
-              using <a href="#a179d51fb8d5bac852955762dac0d6879" class="m-doc">VectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
+              using <a href="#aef0103a018f16e4b1ed3ded20680f9c3" class="m-doc">VectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </dt>
             <dd>Convenience alias for real vector-valued H1 element.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K&gt;</div>
-              using <a href="#a7f22a048750deb7fae45adff57c03b42" class="m-doc">ComplexVectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;&gt;
+              using <a href="#af8332d752ab9e5ceaa58d3941af3f4b8" class="m-doc">ComplexVectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;&gt;
             </dt>
             <dd>Convenience alias for complex vector-valued H1 element.</dd>
             <dt id="a6f93620390a59b9215ea0ffaa75e0697">
@@ -2969,17 +2922,17 @@ $
               using <a href="#a0ad9f41fd8c43be6c80e8fad07f8f88b" class="m-doc-self">ComplexP0Element</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;
             </dt>
             <dd>Alias for P0Element&lt;Complex&gt;</dd>
-            <dt id="a08f180ffd5659bfea0431ad97cb47b95">
+            <dt id="adc0d2867187e6224cc3e9c1e93427e57">
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              using <a href="#a08f180ffd5659bfea0431ad97cb47b95" class="m-doc-self">VectorP0Element</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;
+              using <a href="#adc0d2867187e6224cc3e9c1e93427e57" class="m-doc-self">VectorP0Element</a> = <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">P0Element</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;
             </dt>
             <dd>Alias for P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</dd>
             <dt id="a106ae8e0635207251eb33068439b37bb">
-              using <a href="#a106ae8e0635207251eb33068439b37bb" class="m-doc-self">RealVectorP0Element</a> = <a href="#a08f180ffd5659bfea0431ad97cb47b95" class="m-doc">VectorP0Element</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
+              using <a href="#a106ae8e0635207251eb33068439b37bb" class="m-doc-self">RealVectorP0Element</a> = <a href="#adc0d2867187e6224cc3e9c1e93427e57" class="m-doc">VectorP0Element</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
             <dd>Alias for real vector P0Element.</dd>
             <dt id="a5dc31ddd4e23a90e1dc351d9df336a60">
-              using <a href="#a5dc31ddd4e23a90e1dc351d9df336a60" class="m-doc-self">ComplexVectorP0Element</a> = <a href="#a08f180ffd5659bfea0431ad97cb47b95" class="m-doc">VectorP0Element</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;
+              using <a href="#a5dc31ddd4e23a90e1dc351d9df336a60" class="m-doc-self">ComplexVectorP0Element</a> = <a href="#adc0d2867187e6224cc3e9c1e93427e57" class="m-doc">VectorP0Element</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;
             </dt>
             <dd>Alias for complex vector P0Element.</dd>
             <dt id="a5600353cb39abaa29c6dcac7bb18e23a">
@@ -3027,11 +2980,11 @@ $
             <dd>Alias for P1Element&lt;Complex&gt;</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              using <a href="#ab8eb573c31babd39b75b8baa32d46e30" class="m-doc">VectorP1Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;
+              using <a href="#a000359ae8bacd2eeee6ac9157d6790b0" class="m-doc">VectorP1Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;
             </dt>
             <dd>Alias for P1Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</dd>
-            <dt id="ae19bd514395614ebe0f247feb86778f8">
-              using <a href="#ae19bd514395614ebe0f247feb86778f8" class="m-doc-self">RealVectorP1Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
+            <dt id="a484dbfced3ae6c5475812c85d58d0130">
+              using <a href="#a484dbfced3ae6c5475812c85d58d0130" class="m-doc-self">RealVectorP1Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </dt>
             <dd>Alias for real vector P1Element.</dd>
             <dt id="a038e517bc2e284293b3f399115180d54">
@@ -3056,88 +3009,35 @@ $
             <dd>Matrix-valued continuous linear finite element space.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh&gt;</div>
-              using <a href="#ad37981622881bf8e45760c00d32dca11" class="m-doc">P1DivTrialIntegrand</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, LHSMesh&gt;, TrialSpace&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, RHSMesh&gt;, TestSpace&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, RHSMesh&gt;, TestSpace&gt;&gt;
+              using <a href="#afece42dc68ea273c929d6c03f2ccc544" class="m-doc">P1DivTrialIntegrand</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, LHSMesh&gt;, TrialSpace&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, RHSMesh&gt;, TestSpace&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, RHSMesh&gt;, TestSpace&gt;&gt;
             </dt>
             <dd>Integrand type of the P1 divergence trial term.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh&gt;</div>
-              using <a href="#a4fe74fc1a0f835c90caf592ef1b97038" class="m-doc">P1DivTestIntegrand</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, RHSMesh&gt;, TestSpace&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, RHSMesh&gt;, TestSpace&gt;&gt;
+              using <a href="#a73a519b0b02bfd2dd82caae6b9051f76" class="m-doc">P1DivTestIntegrand</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, RHSMesh&gt;, TestSpace&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, RHSMesh&gt;, TestSpace&gt;&gt;
             </dt>
             <dd>Integrand type of the P1 divergence test term.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              using <a href="#ae96ff4011e48301bbd1da1a6f9b08c36" class="m-doc">PeriodicBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>&lt;Scalar&gt;&gt;
+              using <a href="#ac5c4c2f1f74372fb79b2cf5f7150b6da" class="m-doc">PeriodicBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>&lt;Scalar&gt;&gt;
             </dt>
             <dd>Alias for a list of peridodic boundary conditions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              using <a href="#a4ab878a7c6209e2c13e272c70bc1e30d" class="m-doc">VectorZero</a> = <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;
+              using <a href="#a04309d9d3ef8f219d9d5c7bb6e5504f3" class="m-doc">VectorZero</a> = <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;
             </dt>
             <dd>Convenience typedef for vector zero function.</dd>
           </dl>
         </section>
-        <section id="var-members">
-          <h2><a href="#var-members">Variables</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-               <a href="#a5d03d6adff2149127fbd3177f985d457" class="m-doc">AND< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > ></a>
-            </dt>
-            <dd>Deduction guide for AND.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-               <a href="#a6db87c2c3b07943758d3dfd9db0c393b" class="m-doc">EQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </dt>
-            <dd>Deduction guide for <code>EQ</code>.</dd>
-            <dt>
-              static const <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> <a href="#a030d3c8c0c0cc18e553b5e219be7b21c" class="m-doc">TrialSpace</a> <span class="m-label m-flat m-primary">constexpr</span>
-            </dt>
-            <dd>Shorthand variable for ShapeFunctionSpaceType::Trial.</dd>
-            <dt>
-              static const <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> <a href="#a80f6132df198231600f60a8fd0a6298a" class="m-doc">TestSpace</a> <span class="m-label m-flat m-primary">constexpr</span>
-            </dt>
-            <dd>Shorthand variable for ShapeFunctionSpaceType::Test.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-               <a href="#a66f4bcf97a130fd2d8f4a79272d91949" class="m-doc">GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </dt>
-            <dd>CTAD for GEQ.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-               <a href="#ab59b2ea05105752573dcd50e81be3c31" class="m-doc">GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </dt>
-            <dd>CTAD for GT.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-               <a href="#abf15cc53a8a44a87c6bb3a7d117f5e9c" class="m-doc">LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </dt>
-            <dd>Deduction guide for <code>LEQ</code>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-               <a href="#a0aef371a8fde0b84d945e319dfdfa858" class="m-doc">LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </dt>
-            <dd>CTAD for LT.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-               <a href="#a8f1ebc1422422099ad79be32266c9b5a" class="m-doc">NEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </dt>
-            <dd>Deduction guide for <code>NEQ</code>.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-               <a href="#abb7ea916a1fcde301a8130d3506072e1" class="m-doc">OR< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > ></a>
-            </dt>
-            <dd>Deduction guide for <code>OR</code>.</dd>
-          </dl>
-        </section>
         <section>
           <h2>Typedef documentation</h2>
-          <section class="m-doc-details" id="ab9a83f620bec3f8ed0a69e776fc4f9e4"><div>
+          <section class="m-doc-details" id="a236b731ca42edb409041600283b8eb3b"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_8h.html">&lt;Rodin/Variational/DirichletBC.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr /><a href="#ab9a83f620bec3f8ed0a69e776fc4f9e4" class="m-doc-self">EssentialBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>&lt;Scalar&gt;&gt;
+              using Rodin::<wbr />Variational::<wbr /><a href="#a236b731ca42edb409041600283b8eb3b" class="m-doc-self">EssentialBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">DirichletBCBase</a>&lt;Scalar&gt;&gt;
             </h3>
             <p>Alias for a list of Dirichlet boundary conditions.</p>
           </div></section>
@@ -3185,13 +3085,13 @@ $
             </table>
 <p>Equivalent to <code>H1Element&lt;K, Complex&gt;</code>. Used for complex-valued problems such as wave equations in frequency domain.</p>
           </div></section>
-          <section class="m-doc-details" id="a179d51fb8d5bac852955762dac0d6879"><div>
+          <section class="m-doc-details" id="aef0103a018f16e4b1ed3ded20680f9c3"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_h1_2_forward_decls_8h.html">&lt;Rodin/Variational/H1/ForwardDecls.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;size_t K&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr /><a href="#a179d51fb8d5bac852955762dac0d6879" class="m-doc-self">VectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
+              using Rodin::<wbr />Variational::<wbr /><a href="#aef0103a018f16e4b1ed3ded20680f9c3" class="m-doc-self">VectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </h3>
             <p>Convenience alias for real vector-valued H1 element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -3207,13 +3107,13 @@ $
             </table>
 <p>Equivalent to <code>H1Element&lt;K, Math::SpatialVector&lt;Real&gt;&gt;</code>. Used for vector-valued problems such as linear elasticity or fluid mechanics.</p>
           </div></section>
-          <section class="m-doc-details" id="a7f22a048750deb7fae45adff57c03b42"><div>
+          <section class="m-doc-details" id="af8332d752ab9e5ceaa58d3941af3f4b8"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_h1_2_forward_decls_8h.html">&lt;Rodin/Variational/H1/ForwardDecls.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;size_t K&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr /><a href="#a7f22a048750deb7fae45adff57c03b42" class="m-doc-self">ComplexVectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;&gt;
+              using Rodin::<wbr />Variational::<wbr /><a href="#af8332d752ab9e5ceaa58d3941af3f4b8" class="m-doc-self">ComplexVectorH1Element</a> = <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">H1Element</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a12f84f428d2b3ff138c176f003ef716c" class="m-doc">Complex</a>&gt;&gt;
             </h3>
             <p>Convenience alias for complex vector-valued H1 element.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -3229,12 +3129,12 @@ $
             </table>
 <p>Equivalent to <code>H1Element&lt;K, Math::SpatialVector&lt;Complex&gt;&gt;</code>. Used for complex vector-valued problems such as electromagnetic wave propagation.</p>
           </div></section>
-          <section class="m-doc-details" id="ab8eb573c31babd39b75b8baa32d46e30"><div>
+          <section class="m-doc-details" id="a000359ae8bacd2eeee6ac9157d6790b0"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr /><a href="#ab8eb573c31babd39b75b8baa32d46e30" class="m-doc-self">VectorP1Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;
+              using Rodin::<wbr />Variational::<wbr /><a href="#a000359ae8bacd2eeee6ac9157d6790b0" class="m-doc-self">VectorP1Element</a> = <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">P1Element</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;
             </h3>
             <p>Alias for P1Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</p>
             <table class="m-table m-fullwidth m-flat">
@@ -3249,43 +3149,43 @@ $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ad37981622881bf8e45760c00d32dca11"><div>
+          <section class="m-doc-details" id="afece42dc68ea273c929d6c03f2ccc544"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_quadrature_rule_8h.html">&lt;Rodin/Variational/P1/QuadratureRule.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr /><a href="#ad37981622881bf8e45760c00d32dca11" class="m-doc-self">P1DivTrialIntegrand</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, LHSMesh&gt;, TrialSpace&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, RHSMesh&gt;, TestSpace&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, RHSMesh&gt;, TestSpace&gt;&gt;
+              using Rodin::<wbr />Variational::<wbr /><a href="#afece42dc68ea273c929d6c03f2ccc544" class="m-doc-self">P1DivTrialIntegrand</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, LHSMesh&gt;, TrialSpace&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, RHSMesh&gt;, TestSpace&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, RHSMesh&gt;, TestSpace&gt;&gt;
             </h3>
             <p>Integrand type of the P1 divergence trial term.</p>
           </div></section>
-          <section class="m-doc-details" id="a4fe74fc1a0f835c90caf592ef1b97038"><div>
+          <section class="m-doc-details" id="a73a519b0b02bfd2dd82caae6b9051f76"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_quadrature_rule_8h.html">&lt;Rodin/Variational/P1/QuadratureRule.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr /><a href="#a4fe74fc1a0f835c90caf592ef1b97038" class="m-doc-self">P1DivTestIntegrand</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, RHSMesh&gt;, TestSpace&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, RHSMesh&gt;, TestSpace&gt;&gt;
+              using Rodin::<wbr />Variational::<wbr /><a href="#a73a519b0b02bfd2dd82caae6b9051f76" class="m-doc-self">P1DivTestIntegrand</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, LHSMesh&gt;, TrialSpace&gt;, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, RHSMesh&gt;, TestSpace&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;, RHSMesh&gt;, TestSpace&gt;&gt;
             </h3>
             <p>Integrand type of the P1 divergence test term.</p>
           </div></section>
-          <section class="m-doc-details" id="ae96ff4011e48301bbd1da1a6f9b08c36"><div>
+          <section class="m-doc-details" id="ac5c4c2f1f74372fb79b2cf5f7150b6da"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_periodic_b_c_8h.html">&lt;Rodin/Variational/PeriodicBC.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr /><a href="#ae96ff4011e48301bbd1da1a6f9b08c36" class="m-doc-self">PeriodicBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>&lt;Scalar&gt;&gt;
+              using Rodin::<wbr />Variational::<wbr /><a href="#ac5c4c2f1f74372fb79b2cf5f7150b6da" class="m-doc-self">PeriodicBoundary</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">PeriodicBCBase</a>&lt;Scalar&gt;&gt;
             </h3>
             <p>Alias for a list of peridodic boundary conditions.</p>
           </div></section>
-          <section class="m-doc-details" id="a4ab878a7c6209e2c13e272c70bc1e30d"><div>
+          <section class="m-doc-details" id="a04309d9d3ef8f219d9d5c7bb6e5504f3"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_zero_8h.html">&lt;Rodin/Variational/Zero.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
               </div>
-              using Rodin::<wbr />Variational::<wbr /><a href="#a4ab878a7c6209e2c13e272c70bc1e30d" class="m-doc-self">VectorZero</a> = <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;
+              using Rodin::<wbr />Variational::<wbr /><a href="#a04309d9d3ef8f219d9d5c7bb6e5504f3" class="m-doc-self">VectorZero</a> = <a href="class_rodin_1_1_variational_1_1_zero.html" class="m-doc">Zero</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;&gt;
             </h3>
             <p>Convenience typedef for vector zero function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -3299,103 +3199,6 @@ $
                 </tr>
               </tbody>
             </table>
-          </div></section>
-        </section>
-        <section>
-          <h2>Variable documentation</h2>
-          <section class="m-doc-details" id="a5d03d6adff2149127fbd3177f985d457"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_a_n_d_8h.html">&lt;Rodin/Variational/AND.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class RHSDerived&gt;
-              </div>
-               Rodin::<wbr />Variational::<wbr /><a href="#a5d03d6adff2149127fbd3177f985d457" class="m-doc-self">AND< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > ></a>
-            </h3>
-            <p>Deduction guide for AND.</p>
-          </div></section>
-          <section class="m-doc-details" id="a6db87c2c3b07943758d3dfd9db0c393b"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_e_q_8h.html">&lt;Rodin/Variational/EQ.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class RHSDerived&gt;
-              </div>
-               Rodin::<wbr />Variational::<wbr /><a href="#a6db87c2c3b07943758d3dfd9db0c393b" class="m-doc-self">EQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </h3>
-            <p>Deduction guide for <code>EQ</code>.</p>
-          </div></section>
-          <section class="m-doc-details" id="a030d3c8c0c0cc18e553b5e219be7b21c"><div>
-            <h3>
-              static const <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Rodin::<wbr />Variational::<wbr /><a href="#a030d3c8c0c0cc18e553b5e219be7b21c" class="m-doc-self">TrialSpace</a> <span class="m-label m-primary">constexpr</span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_forward_decls_8h.html">&lt;Rodin/Variational/ForwardDecls.h&gt;</a></div>
-            </h3>
-            <p>Shorthand variable for ShapeFunctionSpaceType::Trial.</p>
-          </div></section>
-          <section class="m-doc-details" id="a80f6132df198231600f60a8fd0a6298a"><div>
-            <h3>
-              static const <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Rodin::<wbr />Variational::<wbr /><a href="#a80f6132df198231600f60a8fd0a6298a" class="m-doc-self">TestSpace</a> <span class="m-label m-primary">constexpr</span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_variational_2_forward_decls_8h.html">&lt;Rodin/Variational/ForwardDecls.h&gt;</a></div>
-            </h3>
-            <p>Shorthand variable for ShapeFunctionSpaceType::Test.</p>
-          </div></section>
-          <section class="m-doc-details" id="a66f4bcf97a130fd2d8f4a79272d91949"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_g_e_q_8h.html">&lt;Rodin/Variational/GEQ.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class RHSDerived&gt;
-              </div>
-               Rodin::<wbr />Variational::<wbr /><a href="#a66f4bcf97a130fd2d8f4a79272d91949" class="m-doc-self">GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </h3>
-            <p>CTAD for GEQ.</p>
-          </div></section>
-          <section class="m-doc-details" id="ab59b2ea05105752573dcd50e81be3c31"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_g_t_8h.html">&lt;Rodin/Variational/GT.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class RHSDerived&gt;
-              </div>
-               Rodin::<wbr />Variational::<wbr /><a href="#ab59b2ea05105752573dcd50e81be3c31" class="m-doc-self">GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </h3>
-            <p>CTAD for GT.</p>
-          </div></section>
-          <section class="m-doc-details" id="abf15cc53a8a44a87c6bb3a7d117f5e9c"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_l_e_q_8h.html">&lt;Rodin/Variational/LEQ.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class RHSDerived&gt;
-              </div>
-               Rodin::<wbr />Variational::<wbr /><a href="#abf15cc53a8a44a87c6bb3a7d117f5e9c" class="m-doc-self">LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </h3>
-            <p>Deduction guide for <code>LEQ</code>.</p>
-          </div></section>
-          <section class="m-doc-details" id="a0aef371a8fde0b84d945e319dfdfa858"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_l_t_8h.html">&lt;Rodin/Variational/LT.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class RHSDerived&gt;
-              </div>
-               Rodin::<wbr />Variational::<wbr /><a href="#a0aef371a8fde0b84d945e319dfdfa858" class="m-doc-self">LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </h3>
-            <p>CTAD for LT.</p>
-          </div></section>
-          <section class="m-doc-details" id="a8f1ebc1422422099ad79be32266c9b5a"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_n_e_q_8h.html">&lt;Rodin/Variational/NEQ.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class RHSDerived&gt;
-              </div>
-               Rodin::<wbr />Variational::<wbr /><a href="#a8f1ebc1422422099ad79be32266c9b5a" class="m-doc-self">NEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > ></a>
-            </h3>
-            <p>Deduction guide for <code>NEQ</code>.</p>
-          </div></section>
-          <section class="m-doc-details" id="abb7ea916a1fcde301a8130d3506072e1"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_o_r_8h.html">&lt;Rodin/Variational/OR.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;class LHSDerived, class RHSDerived&gt;
-              </div>
-               Rodin::<wbr />Variational::<wbr /><a href="#abb7ea916a1fcde301a8130d3506072e1" class="m-doc-self">OR< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > ></a>
-            </h3>
-            <p>Deduction guide for <code>OR</code>.</p>
           </div></section>
         </section>
       </div>
@@ -3442,7 +3245,7 @@ $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

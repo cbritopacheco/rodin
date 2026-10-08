@@ -82,7 +82,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md140">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md140">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -92,12 +97,12 @@
             </li>
           </ul>
         </nav>
-<p>Manages the lifetime of an HDF5 <code>hid_t</code> identifier by calling the appropriate close function (e.g. <code>H5Fclose</code>, <code>H5Gclose</code>, <code>H5Dclose</code>, <code>H5Sclose</code>) on destruction or reset. Move-only; copying is disabled.</p><p>Use the factory functions File(), Group(), DataSet(), and Space() to construct handles with the correct close function.</p><section id="autotoc_md140"><h3><a href="#autotoc_md140">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HDF5</span><span class="o">::</span><span class="n">File</span><span class="p">(</span><span class="n">H5Fcreate</span><span class="p">(</span><span class="s">"out.h5"</span><span class="p">,</span><span class="w"> </span><span class="n">H5F_ACC_TRUNC</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">));</span>
+<p>Manages the lifetime of an HDF5 <code>hid_t</code> identifier by calling the appropriate close function (e.g. <code>H5Fclose</code>, <code>H5Gclose</code>, <code>H5Dclose</code>, <code>H5Sclose</code>) on destruction or reset. Move-only; copying is disabled.</p><p>Use the factory functions File(), Group(), DataSet(), and Space() to construct handles with the correct close function.</p><section id="autotoc_md140_1s1"><section id="autotoc_md140"><h3><a href="#autotoc_md140">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HDF5</span><span class="o">::</span><span class="n">File</span><span class="p">(</span><span class="n">H5Fcreate</span><span class="p">(</span><span class="s">"out.h5"</span><span class="p">,</span><span class="w"> </span><span class="n">H5F_ACC_TRUNC</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">));</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">file</span><span class="p">)</span>
 <span class="w">  </span><span class="c1">// handle error ...</span>
 
 <span class="k">auto</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HDF5</span><span class="o">::</span><span class="n">Group</span><span class="p">(</span><span class="n">H5Gcreate2</span><span class="p">(</span><span class="n">file</span><span class="p">.</span><span class="n">get</span><span class="p">(),</span><span class="w"> </span><span class="s">"/Data"</span><span class="p">,</span><span class="w"> </span><span class="p">...));</span>
-<span class="c1">// group is automatically closed when it goes out of scope.</span></pre></section>
+<span class="c1">// group is automatically closed when it goes out of scope.</span></pre></section></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -111,6 +116,10 @@
             </dt>
             <dd>Constructs a handle wrapping the given HDF5 identifier.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a516c96ec7e46a17a3507e6003cf76f61" class="m-doc">Handle</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp; other) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Disables copying or moving this object.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper"><a href="#a15e77759b885d064556fe692201faad3" class="m-doc">Handle</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move constructor.</dd>
@@ -123,6 +132,10 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa7628691df7c168a112bcfba59b661e9" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp; other) -&gt; <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd>Assigns the state of another object.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a2949121a75ff680d21714161c1bd2bac" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -161,6 +174,23 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a516c96ec7e46a17a3507e6003cf76f61"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a516c96ec7e46a17a3507e6003cf76f61" class="m-doc-self">Handle</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Disables copying or moving this object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object whose copying or moving is disabled.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a15e77759b885d064556fe692201faad3"><div>
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e77759b885d064556fe692201faad3" class="m-doc-self">Handle</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
@@ -190,6 +220,23 @@
                   <td><code>true</code> if the identifier is non-negative (valid).</td>
                 </tr>
               </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa7628691df7c168a112bcfba59b661e9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp; Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa7628691df7c168a112bcfba59b661e9" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp; other) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+            <p>Assigns the state of another object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
             </table>
           </div></section>
           <section class="m-doc-details" id="a2949121a75ff680d21714161c1bd2bac"><div>
@@ -274,7 +321,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -95,22 +95,31 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9b5c682c4f8a0bc6c588aefa9fb81fd7" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">BoundaryHit</a>&amp;) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab44dffbfaf7f60bf04399aebfa78d1f5" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">BoundaryHit</a>&amp; hit) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Called when a traced trajectory reaches a boundary.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a9b5c682c4f8a0bc6c588aefa9fb81fd7"><div>
+          <section class="m-doc-details" id="ab44dffbfaf7f60bf04399aebfa78d1f5"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Variational::<wbr />DefaultBoundaryPolicy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b5c682c4f8a0bc6c588aefa9fb81fd7" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">BoundaryHit</a>&amp;) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Variational::<wbr />DefaultBoundaryPolicy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab44dffbfaf7f60bf04399aebfa78d1f5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">BoundaryHit</a>&amp; hit) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Called when a traced trajectory reaches a boundary.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hit</td>
+                  <td>Boundary-hit data; this stopping policy leaves it unchanged.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>false, indicating that the trace should stop.</td>
                 </tr>
               </tfoot>
@@ -161,7 +170,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

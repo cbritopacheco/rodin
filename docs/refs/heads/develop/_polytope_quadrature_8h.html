@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature</a>, which stores the mapped quadrature points associated with a specific quadrature formula on a specific polytope.</li><li><a href="class_rodin_1_1_geometry_1_1_polytope_quadrature_index.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeQuadratureIndex</a>, a mesh-owned, thread-safe cache indexed by polytope dimension, polytope index, and quadrature formula identity.</li></ul><section id="autotoc_md109"><h2><a href="#autotoc_md109">Purpose</a></h2><p>Reference quadrature formulas belong to the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a> module and live on reference polytopes. In contrast, this file provides a geometry-side cache of their realization on concrete mesh polytopes.</p><p>For a polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
+<p>This file defines:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>, which stores the mapped quadrature points associated with a specific quadrature formula on a specific polytope.</li><li><a href="class_rodin_1_1_geometry_1_1_polytope_quadrature_index.html" class="m-doc">PolytopeQuadratureIndex</a>, a mesh-owned, thread-safe cache indexed by polytope dimension, polytope index, and quadrature formula identity.</li></ul><section id="autotoc_md109"><h2><a href="#autotoc_md109">Purpose</a></h2><p>Reference quadrature formulas belong to the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a> module and live on reference polytopes. In contrast, this file provides a geometry-side cache of their realization on concrete mesh polytopes.</p><p>For a polytope <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
 <title>
 $ \tau $
 </title>
@@ -141,8 +141,7 @@ $ \{ (\hat x_q, w_q) \}_{q=1}^{n_q} $
 </g>
 </svg>, the realized quadrature consists of the mapped geometric points:</p><div class="m-math"><svg style="width: 16.222em; height: 1.282em;" viewBox="116.404274 -12.309385 155.73442 12.309385">
 <title>
-\[
-  p_q = x_\tau(\hat x_q), \qquad q = 1, \dots, n_q,
+\[  p_q = x_\tau(\hat x_q), \qquad q = 1, \dots, n_q,
 \]
 </title>
 <defs>
@@ -198,8 +197,7 @@ $ x_\tau $
 </g>
 </svg> is the polytope transformation.</p></section><section id="autotoc_md110"><h2><a href="#autotoc_md110">Cache organization</a></h2><p>The cache is organized as:</p><div class="m-math"><svg style="width: 7.488em; height: 1.282em;" viewBox="158.079276 -12.309385 71.886303 12.309385">
 <title>
-\[
-  (d, i) \mapsto \text{Slot}_{d,i}
+\[  (d, i) \mapsto \text{Slot}_{d,i}
 \]
 </title>
 <defs>
@@ -256,8 +254,7 @@ $ i $
 </g>
 </svg> is the polytope index within that dimension.</li></ul><p>Each slot stores:</p><ul><li>one hot entry for the fastest repeated-hit access path,</li><li>one small bounded ring buffer of owned cached quadratures.</li></ul><p>Lookup order is:</p><ul><li>hot entry,</li><li>bounded per-slot cache,</li><li>lazy construction on miss.</li></ul><p>Hits in the bounded cache are promoted to the hot slot. Misses are inserted into the bounded cache in round-robin order and then promoted to the hot slot.</p></section><section id="autotoc_md111"><h2><a href="#autotoc_md111">Key</a></h2><p>The cache key is the address of the quadrature formula object:</p><div class="m-math"><svg style="width: 20.922em; height: 1.002em;" viewBox="93.848264 -9.617921 200.846671 9.617928">
 <title>
-\[
-  \texttt{const QF::QuadratureFormulaBase*}
+\[  \texttt{const QF::QuadratureFormulaBase*}
 \]
 </title>
 <defs>
@@ -312,14 +309,14 @@ $ i $
 <use x='282.142018' y='-1.625891' xlink:href='#eq8-g0-101'/>
 <use x='288.418476' y='-1.625891' xlink:href='#eq8-g0-42'/>
 </g>
-</svg></div><p>This design assumes that callers obtain quadrature formulas from a canonical source such as <a href="class_rodin_1_1_q_f_1_1_polytope_quadrature_formula.html" class="m-doc">Rodin::<wbr />QF::<wbr />PolytopeQuadratureFormula</a>, so that the same logical formula has a stable object identity.</p></section>
+</svg></div><p>This design assumes that callers obtain quadrature formulas from a canonical source such as <a href="class_rodin_1_1_q_f_1_1_polytope_quadrature_formula.html" class="m-doc">PolytopeQuadratureFormula</a>, so that the same logical formula has a stable object identity.</p></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::Geometry</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::<wbr />Geometry</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -379,7 +376,7 @@ $ i $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

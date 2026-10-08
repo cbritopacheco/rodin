@@ -83,7 +83,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md220">Usage</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md220">Usage</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,7 +99,7 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md220"><h3><a href="#autotoc_md220">Usage</a></h3><pre class="m-code"><span class="n">NeoHookean</span><span class="w"> </span><span class="nf">law</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span>
+<section id="autotoc_md220_1s1"><section id="autotoc_md220"><h3><a href="#autotoc_md220">Usage</a></h3><pre class="m-code"><span class="n">NeoHookean</span><span class="w"> </span><span class="nf">law</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span>
 <span class="n">NeoHookean</span><span class="o">::</span><span class="n">Cache</span><span class="w"> </span><span class="n">cache</span><span class="p">;</span>
 <span class="n">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
 <span class="n">state</span><span class="p">.</span><span class="n">setDisplacementGradient</span><span class="p">(</span><span class="n">gradU</span><span class="p">);</span>
@@ -102,7 +107,7 @@
 
 <span class="n">CauchyStress</span><span class="o">&lt;</span><span class="n">NeoHookean</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cauchy</span><span class="p">(</span><span class="n">law</span><span class="p">);</span>
 <span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">SpatialMatrix</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sigma</span><span class="p">;</span>
-<span class="n">cauchy</span><span class="p">.</span><span class="n">getCauchyStress</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span><span class="w"> </span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">);</span></pre></section>
+<span class="n">cauchy</span><span class="p">.</span><span class="n">getCauchyStress</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span><span class="w"> </span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">);</span></pre></section></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -123,12 +128,12 @@
               <span class="m-doc-wrap-bumper"><a href="#ac12334c779cf3c82f411512644d85211" class="m-doc">CauchyStress</a>(</span><span class="m-doc-wrap">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span>
             </dt>
             <dd>Constructs the Cauchy stress evaluator.</dd>
-            <dt id="ab32b81861b7874571cda2c1fb3a45752">
-              <span class="m-doc-wrap-bumper"><a href="#ab32b81861b7874571cda2c1fb3a45752" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a37eea37b91fe2dfc01b0d1e881ab29ff" class="m-doc">CauchyStress</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="ae28c50b611faadb0a28abe1878742015">
-              <span class="m-doc-wrap-bumper"><a href="#ae28c50b611faadb0a28abe1878742015" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5b50b8c6a95defbb8d5d032b371e2300" class="m-doc">CauchyStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -165,8 +170,8 @@ $ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T $
 <use x='49.796422' y='-4.338437' xlink:href='#eq1-g2-84'/>
 </g>
 </svg>.</dd>
-            <dt id="ae6c4e20b7089a8517ed5c9a8cef7cb33">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
             </dt>
             <dd>Gets the constitutive law.</dd>
           </dl>
@@ -189,6 +194,46 @@ $ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T $
                 <tr>
                   <td style="width: 1%">law</td>
                   <td>Reference to the constitutive law</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a37eea37b91fe2dfc01b0d1e881ab29ff"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LawDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />CauchyStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37eea37b91fe2dfc01b0d1e881ab29ff" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5b50b8c6a95defbb8d5d032b371e2300"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LawDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />CauchyStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5b50b8c6a95defbb8d5d032b371e2300" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
                 </tr>
               </tbody>
             </table>
@@ -246,6 +291,23 @@ $ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ae6c4e20b7089a8517ed5c9a8cef7cb33"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LawDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; Rodin::<wbr />Solid::<wbr />CauchyStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the constitutive law.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The constitutive law.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -291,7 +353,7 @@ $ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

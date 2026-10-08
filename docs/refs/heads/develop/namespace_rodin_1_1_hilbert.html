@@ -77,11 +77,16 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Hilbert <span class="m-thin">namespace</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_hilbert.html" class="m-doc">Rodin::<wbr />Hilbert</a>.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_hilbert.html" class="m-doc">Hilbert</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md535">API</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md535">API</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -104,8 +109,7 @@ $ H^1 $
 </g>
 </svg>-based extension-regularization operators used in shape and topology optimization. The primary class <a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a</a> solves the regularized extension problem:</p><div class="m-math"><svg style="width: 19.627em; height: 2.819em;" viewBox="100.060777 -27.065451 188.421456 27.065451">
 <title>
-\[
-  \alpha^2 \int_\Omega \nabla u : \nabla v \, dx + \int_\Omega u \cdot v \, dx = \ell(v)
+\[  \alpha^2 \int_\Omega \nabla u : \nabla v \, dx + \int_\Omega u \cdot v \, dx = \ell(v)
 \]
 </title>
 <defs>
@@ -172,7 +176,7 @@ $ \alpha $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-11'/>
 </g>
-</svg> = smoother).</p><p>This is used, for example, to extend and regularize a shape derivative (defined only on the boundary) to a smooth descent direction in the full computational domain.</p><section id="autotoc_md535"><h3><a href="#autotoc_md535">API</a></h3><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a(fes)</a></td><td>Constructor: creates the extension operator on a finite element space</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">setAlpha(alpha)</a></td><td>Sets <svg class="m-math" style="width: 0.784em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.521724 5.147373">
+</svg> = smoother).</p><p>This is used, for example, to extend and regularize a shape derivative (defined only on the boundary) to a smooth descent direction in the full computational domain.</p><section id="autotoc_md535_1s1"><section id="autotoc_md535"><h3><a href="#autotoc_md535">API</a></h3><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a(fes)</a></td><td>Constructor: creates the extension operator on a finite element space</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">setAlpha(alpha)</a></td><td>Sets <svg class="m-math" style="width: 0.784em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.521724 5.147373">
 <title>
 $ \alpha $
 </title>
@@ -192,7 +196,7 @@ $ h $
 <g id='eq6-page1'>
 <use x='0' y='0' xlink:href='#eq6-g0-104'/>
 </g>
-</svg>)</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">operator()(lf)</a></td><td>Applies extension to a linear form (differential)</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">operator+=(DirichletBC)</a></td><td>Adds boundary conditions to the extension problem</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">getProblem()</a></td><td>Access the underlying <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> object</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">getTrialFunction() / getTestFunction()</a></td><td>Access trial/test functions</td></tr></tbody></table><p>For vector-valued problems, <a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a</a> uses <code>Jacobian()</code> instead of <code>Grad()</code>. The internal solver is <code>Solver::CG</code>.</p></section>
+</svg>)</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">operator()(lf)</a></td><td>Applies extension to a linear form (differential)</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">operator+=(DirichletBC)</a></td><td>Adds boundary conditions to the extension problem</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">getProblem()</a></td><td>Access the underlying <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> object</td></tr><tr><td><a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">getTrialFunction() / getTestFunction()</a></td><td>Access trial/test functions</td></tr></tbody></table><p>For vector-valued problems, <a href="class_rodin_1_1_hilbert_1_1_h1a.html" class="m-doc">H1a</a> uses <code>Jacobian()</code> instead of <code>Grad()</code>. The internal solver is <code>Solver::CG</code>.</p></section></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -259,7 +263,7 @@ $ H^1 $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

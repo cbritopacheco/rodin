@@ -152,8 +152,8 @@ $ J = \frac{\partial \mathbf{f}}{\partial \mathbf{x}} $
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt id="af24d41cd41c3ba4eac7eb5e4a2a7d713">
-              <span class="m-doc-wrap-bumper">static auto <a href="#af24d41cd41c3ba4eac7eb5e4a2a7d713" class="m-doc-self">Identity</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#af24d41cd41c3ba4eac7eb5e4a2a7d713" class="m-doc">Identity</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
               std::uint8_t cols) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns an identity matrix of the given dimensions.</dd>
@@ -166,26 +166,26 @@ $ J = \frac{\partial \mathbf{f}}{\partial \mathbf{x}} $
               <span class="m-doc-wrap-bumper"><a href="#adaef5eeb072d7d791f1eb81ec3be5f34" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Constructs an empty (0-by-0) spatial matrix.</dd>
-            <dt id="a03c187c6d7eecdc2e65b7d53998769bc">
-              <span class="m-doc-wrap-bumper"><a href="#a03c187c6d7eecdc2e65b7d53998769bc" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a03c187c6d7eecdc2e65b7d53998769bc" class="m-doc">SpatialMatrix</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
               std::uint8_t cols) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a zero-initialized spatial matrix of the given dimensions.</dd>
-            <dt id="aca2679dd4c41583affee70373e8d7b8c">
-              <span class="m-doc-wrap-bumper"><a href="#aca2679dd4c41583affee70373e8d7b8c" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;<a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&gt;&amp; vec) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aca2679dd4c41583affee70373e8d7b8c" class="m-doc">SpatialMatrix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;<a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&gt;&amp; vec) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a single-column matrix from a spatial vector.</dd>
-            <dt id="a46964d4af96f1d7cf818839622ebf48a">
-              <span class="m-doc-wrap-bumper"><a href="#a46964d4af96f1d7cf818839622ebf48a" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a74a78a606a2335f68098f7c23d0b2f26" class="m-doc">SpatialMatrix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a2954d1824b3987a4d3052a20f84a4d8a">
-              <span class="m-doc-wrap-bumper"><a href="#a2954d1824b3987a4d3052a20f84a4d8a" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a9fd70a373e937965b5477b04ebc05cbc" class="m-doc">SpatialMatrix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
-            <dt id="a01466584f5f1c6f32dec6035a81081db">
+            <dt>
               <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a01466584f5f1c6f32dec6035a81081db" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a01466584f5f1c6f32dec6035a81081db" class="m-doc">SpatialMatrix</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a spatial matrix from an Eigen matrix expression.</dd>
           </dl>
@@ -193,48 +193,48 @@ $ J = \frac{\partial \mathbf{f}}{\partial \mathbf{x}} $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a44d3814d0bd502a9929a270f6c98e9bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a44d3814d0bd502a9929a270f6c98e9bb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp;) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a59cff5d1599b864d37851fe4760a6377" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
-            <dt id="aaee78f0cb163aba6b92f8ccaaa8c72f6">
-              <span class="m-doc-wrap-bumper">auto <a href="#aaee78f0cb163aba6b92f8ccaaa8c72f6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2e37dfc09b301db20c6fd279270269fa" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
-            <dt id="a0687d8fe0008f3b26ef40ff2781095c6">
+            <dt>
               <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0687d8fe0008f3b26ef40ff2781095c6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Eigen::ArrayBase&lt;EigenDerived&gt;&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0687d8fe0008f3b26ef40ff2781095c6" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const Eigen::ArrayBase&lt;EigenDerived&gt;&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Assigns from an Eigen array expression, resizing to match.</dd>
-            <dt id="a5eab70503c5357b85a1e2939dcfd858b">
+            <dt>
               <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5eab70503c5357b85a1e2939dcfd858b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5eab70503c5357b85a1e2939dcfd858b" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Assigns from an Eigen matrix expression, resizing to match.</dd>
-            <dt id="abc687b85c534ddddce4a1d36c44a4e72">
-              <span class="m-doc-wrap-bumper">auto <a href="#abc687b85c534ddddce4a1d36c44a4e72" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abc687b85c534ddddce4a1d36c44a4e72" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Adds another spatial matrix componentwise in place.</dd>
-            <dt id="acd4c9cd1521fac64a31fa24229c2a202">
-              <span class="m-doc-wrap-bumper">auto <a href="#acd4c9cd1521fac64a31fa24229c2a202" class="m-doc-self">rows</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acd4c9cd1521fac64a31fa24229c2a202" class="m-doc">rows</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the number of rows.</dd>
-            <dt id="a75630fa70baec311688d01bad006fa5b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a75630fa70baec311688d01bad006fa5b" class="m-doc-self">cols</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a75630fa70baec311688d01bad006fa5b" class="m-doc">cols</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the number of columns.</dd>
-            <dt id="a84d322609e6d9a6c2cae9255011ed8e6">
-              <span class="m-doc-wrap-bumper">void <a href="#a84d322609e6d9a6c2cae9255011ed8e6" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">std::uint8_t r,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a84d322609e6d9a6c2cae9255011ed8e6" class="m-doc">resize</a>(</span><span class="m-doc-wrap">std::uint8_t r,
               std::uint8_t c) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sets the logical dimensions (each must not exceed MaxSize).</dd>
-            <dt id="a06b33744b23d321c2b6eba92458d0ad3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a06b33744b23d321c2b6eba92458d0ad3" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a06b33744b23d321c2b6eba92458d0ad3" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
               std::uint8_t j) -&gt; ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a reference to entry (i, j).</dd>
-            <dt id="a698d5039b08e604a9e998e872c9d9f75">
-              <span class="m-doc-wrap-bumper">auto <a href="#a698d5039b08e604a9e998e872c9d9f75" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a698d5039b08e604a9e998e872c9d9f75" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
               std::uint8_t j) const -&gt; const ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns a const reference to entry (i, j).</dd>
@@ -242,49 +242,49 @@ $ J = \frac{\partial \mathbf{f}}{\partial \mathbf{x}} $
               <span class="m-doc-wrap-bumper">void <a href="#a971011d1a86f609271893f8e259bd042" class="m-doc-self">setZero</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets all entries to zero.</dd>
-            <dt id="af32588573f3368a5c3bb3605d9508d4e">
-              <span class="m-doc-wrap-bumper">void <a href="#af32588573f3368a5c3bb3605d9508d4e" class="m-doc-self">setConstant</a>(</span><span class="m-doc-wrap">const ScalarType&amp; value) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af32588573f3368a5c3bb3605d9508d4e" class="m-doc">setConstant</a>(</span><span class="m-doc-wrap">const ScalarType&amp; value) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets all entries to the given value.</dd>
             <dt id="a594248dd78e5f34b441ff22c628ceb88">
               <span class="m-doc-wrap-bumper">void <a href="#a594248dd78e5f34b441ff22c628ceb88" class="m-doc-self">setIdentity</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Sets this matrix to the identity.</dd>
-            <dt id="a3a2993586526412de33f2df4544d3096">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3a2993586526412de33f2df4544d3096" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const -&gt; Eigen::NumTraits&lt;ScalarType&gt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">::<wbr />Real</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3a2993586526412de33f2df4544d3096" class="m-doc">squaredNorm</a>(</span><span class="m-doc-wrap">) const -&gt; Eigen::NumTraits&lt;ScalarType&gt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">::<wbr />Real</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the squared Frobenius norm.</dd>
-            <dt id="a932e1bab0af25af691571d3eb14e90d4">
-              <span class="m-doc-wrap-bumper">auto <a href="#a932e1bab0af25af691571d3eb14e90d4" class="m-doc-self">norm</a>(</span><span class="m-doc-wrap">) const -&gt; Eigen::NumTraits&lt;ScalarType&gt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">::<wbr />Real</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a932e1bab0af25af691571d3eb14e90d4" class="m-doc">norm</a>(</span><span class="m-doc-wrap">) const -&gt; Eigen::NumTraits&lt;ScalarType&gt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">::<wbr />Real</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the Frobenius norm.</dd>
-            <dt id="a97c6c5d13f08d8d4152708f7985e4018">
-              <span class="m-doc-wrap-bumper">auto <a href="#a97c6c5d13f08d8d4152708f7985e4018" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; other) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a97c6c5d13f08d8d4152708f7985e4018" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; other) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the Frobenius inner product with another spatial matrix.</dd>
-            <dt id="a10b84b624ec403d42e6fdad3076ed0f3">
+            <dt>
               <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a10b84b624ec403d42e6fdad3076ed0f3" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a10b84b624ec403d42e6fdad3076ed0f3" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the Frobenius inner product with an Eigen matrix expression.</dd>
-            <dt id="a46d95c59a38764c588cca0882f939542">
-              <span class="m-doc-wrap-bumper">auto <a href="#a46d95c59a38764c588cca0882f939542" class="m-doc-self">transpose</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a46d95c59a38764c588cca0882f939542" class="m-doc">transpose</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the transpose.</dd>
-            <dt id="a9f32e4e786c3a3deabe89d8d60e5ef25">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9f32e4e786c3a3deabe89d8d60e5ef25" class="m-doc-self">conjugate</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9f32e4e786c3a3deabe89d8d60e5ef25" class="m-doc">conjugate</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the elementwise complex conjugate.</dd>
-            <dt id="abe0da9cd162ade72bb59462514d6a63f">
-              <span class="m-doc-wrap-bumper">auto <a href="#abe0da9cd162ade72bb59462514d6a63f" class="m-doc-self">adjoint</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abe0da9cd162ade72bb59462514d6a63f" class="m-doc">adjoint</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the conjugate transpose (adjoint).</dd>
-            <dt id="a1d9fa5356b9b2ad1fade021e6b9d1174">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1d9fa5356b9b2ad1fade021e6b9d1174" class="m-doc-self">trace</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1d9fa5356b9b2ad1fade021e6b9d1174" class="m-doc">trace</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the trace (sum of the diagonal entries; requires a square matrix).</dd>
-            <dt id="a495ca320061244858a6666631cc912d8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a495ca320061244858a6666631cc912d8" class="m-doc-self">value</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a495ca320061244858a6666631cc912d8" class="m-doc">value</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the (0, 0) entry (for 1-by-1 matrices used as scalars).</dd>
             <dt>
@@ -307,12 +307,12 @@ $ Ax = b $
 <use x='31.173744' y='0' xlink:href='#eq2-g0-98'/>
 </g>
 </svg>.</dd>
-            <dt id="ab512217ad21f560d87d92968f391c1f1">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab512217ad21f560d87d92968f391c1f1" class="m-doc-self">determinant</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab512217ad21f560d87d92968f391c1f1" class="m-doc">determinant</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the determinant (specialized for 1x1, 2x2 and 3x3).</dd>
-            <dt id="a612e92fc1fd00b7c822df77537edee5b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a612e92fc1fd00b7c822df77537edee5b" class="m-doc-self">inverse</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a612e92fc1fd00b7c822df77537edee5b" class="m-doc">inverse</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the matrix inverse (specialized for 1x1, 2x2 and 3x3).</dd>
             <dt>
@@ -351,26 +351,608 @@ $ j $
               <span class="m-doc-wrap-bumper">auto <a href="#a59a70c1096ff72efd4b67ddb98792104" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; s) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Scales all elements by a scalar.</dd>
-            <dt id="ada8c402fe760f61b9393d474d6e8f79e">
-              <span class="m-doc-wrap-bumper">auto <a href="#ada8c402fe760f61b9393d474d6e8f79e" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ada8c402fe760f61b9393d474d6e8f79e" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the componentwise additive inverse of this matrix.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af1fce9b994eac1992a4de473c8d07b1e" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>In-place matrix multiplication.</dd>
-            <dt id="a236ef63d8d51a065c17fd39bcef9542a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a236ef63d8d51a065c17fd39bcef9542a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a236ef63d8d51a065c17fd39bcef9542a" class="m-doc">getData</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a reference to the underlying Eigen storage.</dd>
-            <dt id="abbd06608f9a50ea28325d064d4e13e19">
-              <span class="m-doc-wrap-bumper">auto <a href="#abbd06608f9a50ea28325d064d4e13e19" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abbd06608f9a50ea28325d064d4e13e19" class="m-doc">getData</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const reference to the underlying Eigen storage.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="af24d41cd41c3ba4eac7eb5e4a2a7d713"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af24d41cd41c3ba4eac7eb5e4a2a7d713" class="m-doc-self">Identity</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
+              std::uint8_t cols) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns an identity matrix of the given dimensions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rows</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Number of columns.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>An identity matrix of the given dimensions.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a03c187c6d7eecdc2e65b7d53998769bc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03c187c6d7eecdc2e65b7d53998769bc" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap">std::uint8_t rows,
+              std::uint8_t cols) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs a zero-initialized spatial matrix of the given dimensions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rows</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Number of columns.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aca2679dd4c41583affee70373e8d7b8c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca2679dd4c41583affee70373e8d7b8c" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;<a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&gt;&amp; vec) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs a single-column matrix from a spatial vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vec</td>
+                  <td>Vector used to initialize the matrix.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a74a78a606a2335f68098f7c23d0b2f26"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74a78a606a2335f68098f7c23d0b2f26" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9fd70a373e937965b5477b04ebc05cbc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fd70a373e937965b5477b04ebc05cbc" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a01466584f5f1c6f32dec6035a81081db"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a01466584f5f1c6f32dec6035a81081db" class="m-doc-self">SpatialMatrix</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs a spatial matrix from an Eigen matrix expression.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a59cff5d1599b864d37851fe4760a6377"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a59cff5d1599b864d37851fe4760a6377" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2e37dfc09b301db20c6fd279270269fa"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2e37dfc09b301db20c6fd279270269fa" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0687d8fe0008f3b26ef40ff2781095c6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0687d8fe0008f3b26ef40ff2781095c6" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Eigen::ArrayBase&lt;EigenDerived&gt;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Assigns from an Eigen array expression, resizing to match.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5eab70503c5357b85a1e2939dcfd858b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5eab70503c5357b85a1e2939dcfd858b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Assigns from an Eigen matrix expression, resizing to match.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abc687b85c534ddddce4a1d36c44a4e72"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc687b85c534ddddce4a1d36c44a4e72" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Adds another spatial matrix componentwise in place.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acd4c9cd1521fac64a31fa24229c2a202"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::uint8_t Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd4c9cd1521fac64a31fa24229c2a202" class="m-doc-self">rows</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the number of rows.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of rows.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a75630fa70baec311688d01bad006fa5b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::uint8_t Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75630fa70baec311688d01bad006fa5b" class="m-doc-self">cols</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the number of columns.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of columns.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a84d322609e6d9a6c2cae9255011ed8e6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a84d322609e6d9a6c2cae9255011ed8e6" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">std::uint8_t r,
+              std::uint8_t c) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Sets the logical dimensions (each must not exceed MaxSize).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">r</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>c</td>
+                  <td>Number of columns.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a06b33744b23d321c2b6eba92458d0ad3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">ScalarType&amp; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06b33744b23d321c2b6eba92458d0ad3" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
+              std::uint8_t j) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns a reference to entry (i, j).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the entry at the supplied indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a698d5039b08e604a9e998e872c9d9f75"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const ScalarType&amp; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a698d5039b08e604a9e998e872c9d9f75" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i,
+              std::uint8_t j) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns a const reference to entry (i, j).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the entry at the supplied indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af32588573f3368a5c3bb3605d9508d4e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af32588573f3368a5c3bb3605d9508d4e" class="m-doc-self">setConstant</a>(</span><span class="m-doc-wrap">const ScalarType&amp; value) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Sets all entries to the given value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3a2993586526412de33f2df4544d3096"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Eigen::NumTraits&lt;ScalarType&gt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">::<wbr />Real</a> Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a2993586526412de33f2df4544d3096" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the squared Frobenius norm.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The squared Frobenius norm.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a932e1bab0af25af691571d3eb14e90d4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Eigen::NumTraits&lt;ScalarType&gt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">::<wbr />Real</a> Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a932e1bab0af25af691571d3eb14e90d4" class="m-doc-self">norm</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the Frobenius norm.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The Frobenius norm.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a97c6c5d13f08d8d4152708f7985e4018"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">ScalarType Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97c6c5d13f08d8d4152708f7985e4018" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&amp; other) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the Frobenius inner product with another spatial matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The Frobenius inner product with another spatial matrix.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a10b84b624ec403d42e6fdad3076ed0f3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+                template&lt;class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">ScalarType Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10b84b624ec403d42e6fdad3076ed0f3" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the Frobenius inner product with an Eigen matrix expression.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The Frobenius inner product with an Eigen matrix expression.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a46d95c59a38764c588cca0882f939542"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a46d95c59a38764c588cca0882f939542" class="m-doc-self">transpose</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the transpose.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The transpose.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9f32e4e786c3a3deabe89d8d60e5ef25"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9f32e4e786c3a3deabe89d8d60e5ef25" class="m-doc-self">conjugate</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the elementwise complex conjugate.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The elementwise complex conjugate.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abe0da9cd162ade72bb59462514d6a63f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abe0da9cd162ade72bb59462514d6a63f" class="m-doc-self">adjoint</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the conjugate transpose (adjoint).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The conjugate transpose (adjoint).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1d9fa5356b9b2ad1fade021e6b9d1174"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">ScalarType Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d9fa5356b9b2ad1fade021e6b9d1174" class="m-doc-self">trace</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the trace (sum of the diagonal entries; requires a square matrix).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The trace (sum of the diagonal entries; requires a square matrix).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a495ca320061244858a6666631cc912d8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">ScalarType Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a495ca320061244858a6666631cc912d8" class="m-doc-self">value</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the (0, 0) entry (for 1-by-1 matrices used as scalars).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The (0, 0) entry (for 1-by-1 matrices used as scalars).</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="af8e66ffe376de099666fa8c2c8f214de"><div>
             <h3>
               <div class="m-doc-template">
@@ -433,6 +1015,42 @@ $ x = A^{-1} b $
               </tfoot>
             </table>
 <p>Uses Cramer&#x27;s rule for small systems (1×1, 2×2, 3×3). The matrix must be square and non-singular.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab512217ad21f560d87d92968f391c1f1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">ScalarType Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab512217ad21f560d87d92968f391c1f1" class="m-doc-self">determinant</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the determinant (specialized for 1x1, 2x2 and 3x3).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The determinant (specialized for 1x1, 2x2 and 3x3).</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Small matrices use specialized formulas; larger matrices use a generic fallback.</p>
+          </div></section>
+          <section class="m-doc-details" id="a612e92fc1fd00b7c822df77537edee5b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;ScalarType&gt; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a612e92fc1fd00b7c822df77537edee5b" class="m-doc-self">inverse</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the matrix inverse (specialized for 1x1, 2x2 and 3x3).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The matrix inverse (specialized for 1x1, 2x2 and 3x3).</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Small matrices use specialized formulas; larger matrices use a generic fallback. The returned matrix has the same runtime dimensions.</p>
           </div></section>
           <section class="m-doc-details" id="a3430c4f89add32d87db8313566dc0841"><div>
             <h3>
@@ -664,6 +1282,23 @@ $ *this $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ada8c402fe760f61b9393d474d6e8f79e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada8c402fe760f61b9393d474d6e8f79e" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the componentwise additive inverse of this matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Difference of the operands, or the negated operand for the unary overload.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="af1fce9b994eac1992a4de473c8d07b1e"><div>
             <h3>
               <div class="m-doc-template">
@@ -755,6 +1390,40 @@ $ (*this) \cdot rhs $
 </g>
 </svg>. Requires cols() == rhs.rows(). Handles self-multiplication safely.</p>
           </div></section>
+          <section class="m-doc-details" id="a236ef63d8d51a065c17fd39bcef9542a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto&amp; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a236ef63d8d51a065c17fd39bcef9542a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying Eigen storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A reference to the underlying Eigen storage.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abbd06608f9a50ea28325d064d4e13e19"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Math::<wbr />SpatialMatrix&lt;ScalarType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abbd06608f9a50ea28325d064d4e13e19" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a const reference to the underlying Eigen storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A const reference to the underlying Eigen storage.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -800,7 +1469,7 @@ $ (*this) \cdot rhs $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

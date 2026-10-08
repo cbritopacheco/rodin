@@ -323,7 +323,7 @@
             <dd>Executes a function N times with compile-time index access.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T, std::size_t = sizeof(T)&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ga587f3c5aae55bafdc1bfb919f2460b72" class="m-doc">IsCompleteTypeImpl</a>(</span><span class="m-doc-wrap">T*) -&gt; std::true_type</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ga41cc0fa9bf3ec2a6e0f0f61905c25b8f" class="m-doc">IsCompleteTypeImpl</a>(</span><span class="m-doc-wrap">T* value) -&gt; std::true_type</span>
             </dt>
             <dd>Helper function for IsCompleteType detection (complete type case).</dd>
             <dt>
@@ -332,7 +332,7 @@
             <dd>Helper function for IsCompleteType detection (incomplete type case).</dd>
             <dt>
               <div class="m-doc-template">template&lt;class... Ts&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ga210e41a5c31edb45b12dd3d31f4a9a9e" class="m-doc">Overloaded</a>(</span><span class="m-doc-wrap">Ts...) -&gt; Overloaded&lt; Ts... &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#gad8d40ce96121ac09aa6ba5187fd0b082" class="m-doc">Overloaded</a>(</span><span class="m-doc-wrap">Ts... callables) -&gt; Overloaded&lt; Ts... &gt;</span>
             </dt>
             <dd>Deduction guide for Overloaded.</dd>
           </dl>
@@ -457,15 +457,32 @@
 <span class="w">  </span><span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="k">auto</span><span class="w"> </span><span class="n">i</span><span class="p">){</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
 <span class="c1">// Output: 0 1 2 3 4</span></pre>
           </div></section>
-          <section class="m-doc-details" id="ga587f3c5aae55bafdc1bfb919f2460b72"><div>
+          <section class="m-doc-details" id="ga41cc0fa9bf3ec2a6e0f0f61905c25b8f"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_is_complete_type_8h.html">&lt;Rodin/Utility/IsCompleteType.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class T, std::size_t = sizeof(T)&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::true_type </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga587f3c5aae55bafdc1bfb919f2460b72" class="m-doc-self">IsCompleteTypeImpl</a>(</span><span class="m-doc-wrap">T*)</span></span>
+              <span class="m-doc-wrap-bumper">std::true_type </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga41cc0fa9bf3ec2a6e0f0f61905c25b8f" class="m-doc-self">IsCompleteTypeImpl</a>(</span><span class="m-doc-wrap">T* value)</span></span>
             </h3>
             <p>Helper function for IsCompleteType detection (complete type case).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Pointer used only for overload selection in the completeness test.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Type marker indicating that the template argument is complete.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>This overload is selected when sizeof(T) is valid, indicating T is complete.</p>
           </div></section>
           <section class="m-doc-details" id="ga6610b3bd9182e9cd6a293e724c24f5c7"><div>
@@ -474,15 +491,23 @@
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_is_complete_type_8h.html">&lt;Rodin/Utility/IsCompleteType.h&gt;</a></div>
             </h3>
             <p>Helper function for IsCompleteType detection (incomplete type case).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Type marker indicating that the template argument is complete.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>This fallback overload is selected when sizeof(T) is not valid.</p>
           </div></section>
-          <section class="m-doc-details" id="ga210e41a5c31edb45b12dd3d31f4a9a9e"><div>
+          <section class="m-doc-details" id="gad8d40ce96121ac09aa6ba5187fd0b082"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_overloaded_8h.html">&lt;Rodin/Utility/Overloaded.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class... Ts&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ga210e41a5c31edb45b12dd3d31f4a9a9e" class="m-doc-self">Overloaded</a>(</span><span class="m-doc-wrap">Ts...) -&gt; Overloaded&lt; Ts... &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#gad8d40ce96121ac09aa6ba5187fd0b082" class="m-doc-self">Overloaded</a>(</span><span class="m-doc-wrap">Ts... callables) -&gt; Overloaded&lt; Ts... &gt;</span></span>
             </h3>
             <p>Deduction guide for Overloaded.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -493,6 +518,15 @@
                 <tr>
                   <td style="width: 1%">Ts</td>
                   <td>The types of the callable objects.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>callables</td>
+                  <td>Callable objects whose overloads are combined.</td>
                 </tr>
               </tbody>
             </table>
@@ -567,7 +601,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

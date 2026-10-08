@@ -87,7 +87,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#derived-classes">Derived classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -95,21 +94,6 @@
           </ul>
         </nav>
 <p>MeshBase provides the common interface for all mesh types in Rodin, defining fundamental operations such as:</p><ul><li>Point inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li>Polytope access through iterators</li><li>Mesh I/O operations</li><li>Connectivity queries</li></ul><section id="autotoc_md89"><h2><a href="#autotoc_md89">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html">Mesh&lt;Context::<wbr />Local&gt;</a>: Sequential (non-distributed) meshes</li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html">SubMesh&lt;Context::<wbr />Local&gt;</a>: Submeshes representing subregions</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md90"><h2><a href="#autotoc_md90">Thread Safety</a></h2><p>MeshBase and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh.html">Mesh</a></p><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html">SubMesh</a></p><p><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a></p></aside></section>
-        <section id="derived-classes">
-          <h2><a href="#derived-classes">Derived classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::Local&gt;</a>
-            </dt>
-            <dd>Represents the subdivision of some domain into faces of (possibly) different geometries.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Mesh&lt;Context::MPI&gt;</a>
-            </dt>
-            <dd>Distributed mesh specialization for MPI contexts.</dd>
-          </dl>
-        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -316,8 +300,8 @@
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets polytope transformation.</dd>
-            <dt id="ab80f38c32509cafa1f70a4fd2e670a52">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab80f38c32509cafa1f70a4fd2e670a52" class="m-doc-self">getQuadrature</a>(</span><span class="m-doc-wrap">size_t dimension,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab80f38c32509cafa1f70a4fd2e670a52" class="m-doc">getQuadrature</a>(</span><span class="m-doc-wrap">size_t dimension,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
               const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -341,8 +325,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a1dd5d9f85e33803b0632be6f76e3118e" class="m-doc">getConnectivity</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets reference to mesh connectivity.</dd>
-            <dt id="a83faa4b376f3bad6a1a21865a4044dc1">
-              <span class="m-doc-wrap-bumper">auto <a href="#a83faa4b376f3bad6a1a21865a4044dc1" class="m-doc-self">getConnectivity</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a83faa4b376f3bad6a1a21865a4044dc1" class="m-doc">getConnectivity</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Gets a constant reference to the mesh connectivity.</dd>
             <dt>
@@ -377,10 +361,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ad5193c20d0320dd32fd0c8df5460b883" class="m-doc">setName</a>(</span><span class="m-doc-wrap">const std::string&amp; name) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
             </dt>
             <dd>Sets a human-readable name for the mesh.</dd>
-            <dt id="af0dd9205158ccf7bcfcd8ff81f79c927">
+            <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serializes the mesh (for boost::serialization).</dd>
           </dl>
@@ -438,6 +422,23 @@
               <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3203ac272db4d8b0a23eef0ed605341f" class="m-doc-self">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Checks whether a point is already expressed in this mesh&#x27;s local indexing convention.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether the point belongs to this mesh and uses its local entity numbering.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Ordinary meshes accept only points attached directly to themselves. Distributed meshes override this to also accept points attached to their rank-local shard.</p>
           </div></section>
           <section class="m-doc-details" id="acc802e09e1a41bb47fc3fa6394184885"><div>
@@ -1367,6 +1368,39 @@ $ x: K \rightarrow \tau $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ab80f38c32509cafa1f70a4fd2e670a52"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab80f38c32509cafa1f70a4fd2e670a52" class="m-doc-self">getQuadrature</a>(</span><span class="m-doc-wrap">size_t dimension,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QF::<wbr />QuadratureFormulaBase</a>&amp; qf) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Gets cached quadrature for a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dimension</td>
+                  <td>Spatial dimension.</td>
+                </tr>
+                <tr>
+                  <td>idx</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>qf</td>
+                  <td>Quadrature formula defining the evaluation points.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Cached quadrature for a polytope.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a268f4579b564cfb506eccd16866a278f"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a268f4579b564cfb506eccd16866a278f" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">size_t dimension,
@@ -1465,6 +1499,20 @@ $ x: K \rightarrow \tau $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a83faa4b376f3bad6a1a21865a4044dc1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_connectivity_base.html" class="m-doc">ConnectivityBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a83faa4b376f3bad6a1a21865a4044dc1" class="m-doc-self">getConnectivity</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Gets a constant reference to the mesh connectivity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A constant reference to the mesh connectivity.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ac794625a89ebaf41c81ae8cbfeb45156"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a> Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac794625a89ebaf41c81ae8cbfeb45156" class="m-doc-self">getVertexCoordinates</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const <span class="m-label m-warning">pure virtual</span></span></span>
@@ -1480,6 +1528,12 @@ $ x: K \rightarrow \tau $
                   <td>Vertex index</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The space coordinates of the vertex at the given index.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="abc4f6aa1245409482513cab4b70efac6"><div>
@@ -1507,6 +1561,12 @@ $ x: K \rightarrow \tau $
                   <td>Coordinate index</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mesh after updating the coordinate.</td>
+                </tr>
+              </tfoot>
             </table>
 <p>For example, the following code sets the coordinates of the 0-vertex to <svg class="m-math" style="width: 4.480em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 43.00493 11.955168">
 <title>
@@ -1556,6 +1616,12 @@ $ (0, 5, 10) $
                   <td>New coordinates</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mesh after updating the coordinates.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="a11834e52a91313eb6d2d3b44810e0ea1"><div>
@@ -1639,6 +1705,31 @@ $ (0, 5, 10) $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Archive&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
+            </h3>
+            <p>Serializes the mesh (for boost::serialization).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ar</td>
+                  <td>Serialization archive.</td>
+                </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Boost.Serialization class version; unused by this implementation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -1684,7 +1775,7 @@ $ (0, 5, 10) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

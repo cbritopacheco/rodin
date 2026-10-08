@@ -106,12 +106,12 @@
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt id="ac7fecde2b592aa9b992f28f82c792ba4">
-              <span class="m-doc-wrap-bumper">static auto <a href="#ac7fecde2b592aa9b992f28f82c792ba4" class="m-doc-self">getMaxDegree</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; size_t</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#ac7fecde2b592aa9b992f28f82c792ba4" class="m-doc">getMaxDegree</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; size_t</span>
             </dt>
             <dd>Highest tabulated degree for <code>g</code>, or zero if unsupported.</dd>
-            <dt id="adf40e030823b66cb6cba5818d6b96e25">
-              <span class="m-doc-wrap-bumper">static auto <a href="#adf40e030823b66cb6cba5818d6b96e25" class="m-doc-self">isAvailable</a>(</span><span class="m-doc-wrap">size_t degree,
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#adf40e030823b66cb6cba5818d6b96e25" class="m-doc">isAvailable</a>(</span><span class="m-doc-wrap">size_t degree,
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; bool</span>
             </dt>
             <dd>Whether a rule of strength <code>degree</code> is tabulated for <code>g</code>.</dd>
@@ -125,8 +125,8 @@
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span>
             </dt>
             <dd>Constructs the rule of strength <code>degree</code> on <code>g</code>.</dd>
-            <dt id="ad5a375e94284d0104e7b9c805ea48b26">
-              <span class="m-doc-wrap-bumper"><a href="#ad5a375e94284d0104e7b9c805ea48b26" class="m-doc-self">WitherdenVincent</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_witherden_vincent.html" class="m-doc">WitherdenVincent</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a398f459e9f4439829c23a54b579d851a" class="m-doc">WitherdenVincent</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_witherden_vincent.html" class="m-doc">WitherdenVincent</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copies a tabulated quadrature formula.</dd>
           </dl>
@@ -146,8 +146,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the coordinates of the i-th quadrature point.</dd>
-            <dt id="aaef10ae0396553a4843747b73f44ff78">
-              <span class="m-doc-wrap-bumper">auto <a href="#aaef10ae0396553a4843747b73f44ff78" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaef10ae0396553a4843747b73f44ff78" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a></span>
             </dt>
             <dd>The element this rule is defined on.</dd>
             <dt>
@@ -158,13 +158,96 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ac7fecde2b592aa9b992f28f82c792ba4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static size_t Rodin::<wbr />QF::<wbr />WitherdenVincent::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7fecde2b592aa9b992f28f82c792ba4" class="m-doc-self">getMaxDegree</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
+            </h3>
+            <p>Highest tabulated degree for <code>g</code>, or zero if unsupported.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The max degree.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adf40e030823b66cb6cba5818d6b96e25"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static bool Rodin::<wbr />QF::<wbr />WitherdenVincent::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf40e030823b66cb6cba5818d6b96e25" class="m-doc-self">isAvailable</a>(</span><span class="m-doc-wrap">size_t degree,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
+            </h3>
+            <p>Whether a rule of strength <code>degree</code> is tabulated for <code>g</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">degree</td>
+                  <td>Polynomial degree.</td>
+                </tr>
+                <tr>
+                  <td>g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether a quadrature formula of the requested strength is available for the geometry.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="aa637aa897b51f8c49198aae39b19b1de"><div>
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />WitherdenVincent::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa637aa897b51f8c49198aae39b19b1de" class="m-doc-self">WitherdenVincent</a>(</span><span class="m-doc-wrap">size_t degree,
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
             </h3>
             <p>Constructs the rule of strength <code>degree</code> on <code>g</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">degree</td>
+                  <td>Polynomial degree.</td>
+                </tr>
+                <tr>
+                  <td>g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+            </table>
 <aside class="m-note m-success"><h4>Precondition</h4><p>isAvailable(degree, g)</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a398f459e9f4439829c23a54b579d851a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />WitherdenVincent::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a398f459e9f4439829c23a54b579d851a" class="m-doc-self">WitherdenVincent</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_witherden_vincent.html" class="m-doc">WitherdenVincent</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copies a tabulated quadrature formula.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a23e73ba10e16901b2326d8212936b72b"><div>
             <h3>
@@ -251,6 +334,20 @@ $ x_i $
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>The returned reference must remain valid for the lifetime of the quadrature formula object.</p></aside>
           </div></section>
+          <section class="m-doc-details" id="aaef10ae0396553a4843747b73f44ff78"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> Rodin::<wbr />QF::<wbr />WitherdenVincent::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaef10ae0396553a4843747b73f44ff78" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>The element this rule is defined on.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The geometry.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a2aaef185858370b3e5156e0f560d83f8"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_q_f_1_1_witherden_vincent.html" class="m-doc">WitherdenVincent</a>* Rodin::<wbr />QF::<wbr />WitherdenVincent::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2aaef185858370b3e5156e0f560d83f8" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
@@ -311,7 +408,7 @@ $ x_i $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -214,8 +214,7 @@ $ (0,0,0), (1,0,0), (0,1,0), (0,0,1) $
 </g>
 </svg>.</p><p>The basis uses a Duffy-type collapse and is constructed as:</p><div class="m-math"><svg style="width: 40.421em; height: 3.162em;" viewBox="0 -30.353156 388.044896 30.353163">
 <title>
-\[
-  \psi_{p,q,r}(a,b,c) = P_p^{(0,0)}(a) \cdot P_q^{(2p+1,0)}(b)
+\[  \psi_{p,q,r}(a,b,c) = P_p^{(0,0)}(a) \cdot P_q^{(2p+1,0)}(b)
     \cdot P_r^{(2p+2q+2,0)}(c) \cdot \left(\frac{1-b}{2}\right)^p
     \cdot \left(\frac{1-c}{2}\right)^{p+q}
 \]
@@ -368,9 +367,9 @@ $ \psi_{P,Q,R}(a,b,c) $
 <use x='62.705794' y='0' xlink:href='#eq5-g2-41'/>
 </g>
 </svg>.</dd>
-            <dt id="a298535f5ec738fc74c2f49b00a08ccbd">
+            <dt>
               <div class="m-doc-template">template&lt;size_t P, size_t Q, size_t R&gt;</div>
-              <span class="m-doc-wrap-bumper">static void <a href="#a298535f5ec738fc74c2f49b00a08ccbd" class="m-doc-self">getGradient</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dpsi_da,
+              <span class="m-doc-wrap-bumper">static void <a href="#a298535f5ec738fc74c2f49b00a08ccbd" class="m-doc">getGradient</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dpsi_da,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dpsi_db,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dpsi_dc,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> a,
@@ -438,8 +437,8 @@ $\psi_{P,Q,R}$
 <use x='24.579621' y='1.793263' xlink:href='#eq10-g0-82'/>
 </g>
 </svg> from precomputed collapsed coordinates.</dd>
-            <dt id="a9ed6f0b4412334816b14c8fdbb99eebc">
-              <span class="m-doc-wrap-bumper">static void <a href="#a9ed6f0b4412334816b14c8fdbb99eebc" class="m-doc-self">getCollapsed</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; a,
+            <dt>
+              <span class="m-doc-wrap-bumper">static void <a href="#a9ed6f0b4412334816b14c8fdbb99eebc" class="m-doc">getCollapsed</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; a,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; b,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; c,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x,
@@ -532,6 +531,52 @@ $ \psi_{P,Q,R}(a,b,c) $
                 <tr>
                   <td>c</td>
                   <td>Third collapsed coordinate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a298535f5ec738fc74c2f49b00a08ccbd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+                template&lt;size_t P, size_t Q, size_t R&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />Variational::<wbr />DubinerTetrahedron&lt;K&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a298535f5ec738fc74c2f49b00a08ccbd" class="m-doc-self">getGradient</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dpsi_da,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dpsi_db,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; dpsi_dc,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> a,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> b,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the gradient of the basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dpsi_da</td>
+                  <td>Storage for the derivative in the first collapsed coordinate.</td>
+                </tr>
+                <tr>
+                  <td>dpsi_db</td>
+                  <td>Storage for the derivative in the second collapsed coordinate.</td>
+                </tr>
+                <tr>
+                  <td>dpsi_dc</td>
+                  <td>Storage for the derivative in the third collapsed coordinate.</td>
+                </tr>
+                <tr>
+                  <td>a</td>
+                  <td>Coordinate at which the basis is evaluated.</td>
+                </tr>
+                <tr>
+                  <td>b</td>
+                  <td>Coordinate at which the basis is evaluated.</td>
+                </tr>
+                <tr>
+                  <td>c</td>
+                  <td>Coordinate at which the basis is evaluated.</td>
                 </tr>
               </tbody>
             </table>
@@ -786,6 +831,51 @@ $1-z$
             </table>
 <p>This overload avoids repeated Duffy-coordinate transformations while tabulating all modes at the same reference point.</p>
           </div></section>
+          <section class="m-doc-details" id="a9ed6f0b4412334816b14c8fdbb99eebc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static void Rodin::<wbr />Variational::<wbr />DubinerTetrahedron&lt;K&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ed6f0b4412334816b14c8fdbb99eebc" class="m-doc-self">getCollapsed</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; a,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; b,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; c,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> x,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> y,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> z) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Maps reference coordinates to collapsed coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">a</td>
+                  <td>Storage for the first collapsed coordinate.</td>
+                </tr>
+                <tr>
+                  <td>b</td>
+                  <td>Storage for the second collapsed coordinate.</td>
+                </tr>
+                <tr>
+                  <td>c</td>
+                  <td>Storage for the third collapsed coordinate.</td>
+                </tr>
+                <tr>
+                  <td>x</td>
+                  <td>Coordinate at which the basis is evaluated.</td>
+                </tr>
+                <tr>
+                  <td>y</td>
+                  <td>Coordinate at which the basis is evaluated.</td>
+                </tr>
+                <tr>
+                  <td>z</td>
+                  <td>Coordinate at which the basis is evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -831,7 +921,7 @@ $1-z$
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

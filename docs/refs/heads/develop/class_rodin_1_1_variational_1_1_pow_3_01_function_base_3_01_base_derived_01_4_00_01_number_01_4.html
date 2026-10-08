@@ -111,8 +111,7 @@
         </nav>
 <p>This class represents the exponentiation operation applied to a function:</p><div class="m-math"><svg style="width: 11.013em; height: 1.245em;" viewBox="141.1584 -11.955168 105.728035 11.955168">
 <title>
-\[
- \text{Pow}(f, p)(x) = f(x)^p
+\[ \text{Pow}(f, p)(x) = f(x)^p
 \]
 </title>
 <defs>
@@ -217,8 +216,8 @@ $ p = 3 $
               using <a href="#ad30dda3a109288e1c7269f76ed919890" class="m-doc-self">ExponentType</a> = Number
             </dt>
             <dd>Type of exponent.</dd>
-            <dt id="a1f2270a772c04ac55fce6143cf4c863f">
-              using <a href="#a1f2270a772c04ac55fce6143cf4c863f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;BaseDerived&gt;, Number&gt;&gt;
+            <dt id="adc59590b697d9ca370b186daca3a713d">
+              using <a href="#adc59590b697d9ca370b186daca3a713d" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_pow.html" class="m-doc">Pow</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;BaseDerived&gt;, Number&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -254,16 +253,16 @@ $ p = 3 $
               <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates power at a point.</dd>
-            <dt id="ac169e137dace382ec4a56a68c4b1177c">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
-            <dt id="ab8ae1edc875140f56558f9eb7358dc2e">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab8ae1edc875140f56558f9eb7358dc2e" class="m-doc-self">getBase</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a1d47c4f7731287aacf2f44c3eba18790" class="m-doc">BaseType</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab8ae1edc875140f56558f9eb7358dc2e" class="m-doc">getBase</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a1d47c4f7731287aacf2f44c3eba18790" class="m-doc">BaseType</a>&amp;</span>
             </dt>
             <dd>Gets the base of the power.</dd>
-            <dt id="a0c3391b4fa6ecfd87a595b98f10bd48b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0c3391b4fa6ecfd87a595b98f10bd48b" class="m-doc-self">getExponent</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ad30dda3a109288e1c7269f76ed919890" class="m-doc">ExponentType</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0c3391b4fa6ecfd87a595b98f10bd48b" class="m-doc">getExponent</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ad30dda3a109288e1c7269f76ed919890" class="m-doc">ExponentType</a>&amp;</span>
             </dt>
             <dd>Gets the exponent of the power.</dd>
             <dt>
@@ -443,6 +442,66 @@ $ f(p)^{\text{exponent}} $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ac169e137dace382ec4a56a68c4b1177c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class BaseDerived, class Number&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Pow&lt;FunctionBase&lt;BaseDerived&gt;, Number&gt;&lt;BaseDerived, Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab8ae1edc875140f56558f9eb7358dc2e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class BaseDerived, class Number&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a1d47c4f7731287aacf2f44c3eba18790" class="m-doc">BaseType</a>&amp; Rodin::<wbr />Variational::<wbr />Pow&lt;FunctionBase&lt;BaseDerived&gt;, Number&gt;&lt;BaseDerived, Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8ae1edc875140f56558f9eb7358dc2e" class="m-doc-self">getBase</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the base of the power.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The base of the power.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0c3391b4fa6ecfd87a595b98f10bd48b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class BaseDerived, class Number&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#ad30dda3a109288e1c7269f76ed919890" class="m-doc">ExponentType</a>&amp; Rodin::<wbr />Variational::<wbr />Pow&lt;FunctionBase&lt;BaseDerived&gt;, Number&gt;&lt;BaseDerived, Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0c3391b4fa6ecfd87a595b98f10bd48b" class="m-doc-self">getExponent</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the exponent of the power.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The exponent of the power.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ac935f976ee9add6c3b9c182e01faae3d"><div>
             <h3>
               <div class="m-doc-template">
@@ -505,7 +564,7 @@ $ f(p)^{\text{exponent}} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

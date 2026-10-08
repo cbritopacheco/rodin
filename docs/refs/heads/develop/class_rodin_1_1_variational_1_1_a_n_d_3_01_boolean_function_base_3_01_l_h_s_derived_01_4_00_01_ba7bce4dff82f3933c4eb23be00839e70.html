@@ -111,8 +111,7 @@
         </nav>
 <p>Returns a boolean function that evaluates to the logical conjunction:</p><div class="m-math"><svg style="width: 14.797em; height: 1.245em;" viewBox="123.244118 -11.955168 142.054754 11.955168">
 <title>
-\[
-   \text{AND}(f, g)(x) = f(x) \land g(x)
+\[   \text{AND}(f, g)(x) = f(x) \land g(x)
 \]
 </title>
 <defs>
@@ -173,8 +172,8 @@
               using <a href="#a75a4f30fc0daf7eb596df1df82e84a2f" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>&lt;RHSDerived&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
-            <dt id="a9d32cfb4b65710b0399fc8d4c0813323">
-              using <a href="#a9d32cfb4b65710b0399fc8d4c0813323" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_a_n_d.html" class="m-doc">AND</a>&lt;<a href="#a7c3eb6c1002ff803ad258c6d13f23f4b" class="m-doc">LHSType</a>, <a href="#a75a4f30fc0daf7eb596df1df82e84a2f" class="m-doc">RHSType</a>&gt;&gt;
+            <dt id="a2d4ad2a6097c81e93e9dd8530fc6d0f9">
+              using <a href="#a2d4ad2a6097c81e93e9dd8530fc6d0f9" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_a_n_d.html" class="m-doc">AND</a>&lt;<a href="#a7c3eb6c1002ff803ad258c6d13f23f4b" class="m-doc">LHSType</a>, <a href="#a75a4f30fc0daf7eb596df1df82e84a2f" class="m-doc">RHSType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -212,8 +211,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the logical AND at a point.</dd>
-            <dt id="aa249459e67c36e2343e940d08970970a">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the expression at an integration point.</dd>
             <dt>
@@ -221,8 +220,7 @@
             </dt>
             <dd>Copies the AND object.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class ... Args&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1b80f06a428d3badf45e18059ef1b25b" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4d5cbb78566798311c1c04ec2bd8f64a" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) -&gt; <a href="class_rodin_1_1_variational_1_1_a_n_d.html" class="m-doc">AND</a>&lt;<a href="#a7c3eb6c1002ff803ad258c6d13f23f4b" class="m-doc">LHSType</a>, <a href="#a75a4f30fc0daf7eb596df1df82e84a2f" class="m-doc">RHSType</a>&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sets the trace domain for the function.</dd>
           </dl>
@@ -354,6 +352,32 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="aa249459e67c36e2343e940d08970970a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />AND&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the expression at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a0c1c21e882ff0668bc9fdd390ae5321f"><div>
             <h3>
               <div class="m-doc-template">
@@ -371,23 +395,22 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a1b80f06a428d3badf45e18059ef1b25b"><div>
+          <section class="m-doc-details" id="a4d5cbb78566798311c1c04ec2bd8f64a"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class LHSDerived, class RHSDerived&gt;
-                template&lt;class ... Args&gt;
               </div>
-              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />AND&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b80f06a428d3badf45e18059ef1b25b" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_a_n_d.html" class="m-doc">AND</a>&lt;<a href="#a7c3eb6c1002ff803ad258c6d13f23f4b" class="m-doc">LHSType</a>, <a href="#a75a4f30fc0daf7eb596df1df82e84a2f" class="m-doc">RHSType</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />AND&lt;BooleanFunctionBase&lt;LHSDerived&gt;, BooleanFunctionBase&lt;RHSDerived&gt;&gt;&lt;LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d5cbb78566798311c1c04ec2bd8f64a" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Sets the trace domain for the function.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
+                <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">Args</td>
-                  <td>Variadic template for trace domain specification</td>
+                  <td style="width: 1%">args</td>
+                  <td>Arguments forwarded to the constructed object.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -444,7 +467,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

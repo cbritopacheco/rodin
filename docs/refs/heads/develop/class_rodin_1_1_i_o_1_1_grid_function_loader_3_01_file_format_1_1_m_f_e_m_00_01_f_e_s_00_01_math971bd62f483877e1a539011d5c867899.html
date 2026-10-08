@@ -87,7 +87,9 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pro-methods">Protected functions</a></li>
               </ul>
             </li>
           </ul>
@@ -95,6 +97,11 @@
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader&lt;Variational::GridFunction&lt;FES, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Base template for loading objects from files or streams.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase&lt;FES, Math::Vector&lt;Scalar&gt;&gt;</a>
@@ -105,10 +112,23 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a4204adb7a0acb113173899a665c14aeb">
-              using <a href="#a4204adb7a0acb113173899a665c14aeb" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase</a>&lt;FES, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;
+            <dt id="ad01f6896cada96f8a48e75768a0e8c61">
+              using <a href="#ad01f6896cada96f8a48e75768a0e8c61" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase</a>&lt;FES, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;
             </dt>
             <dd>CRTP or finite element base class.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;
+            </dt>
+            <dd>Grid function type being loaded.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html#ae7b902ee10ffb33450ac1ca58df202f6" class="m-doc">GridFunctionLoader</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; gf)</span>
+            </dt>
+            <dd>Constructs a fallback grid function loader.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -118,6 +138,15 @@
               <span class="m-doc-wrap-bumper">void <a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Loads object from an input stream.</dd>
+          </dl>
+        </section>
+        <section id="pro-methods">
+          <h2><a href="#pro-methods">Protected functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html#a6c83de099561717325b0b3a729cfeb1f" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets a reference to the object being loaded.</dd>
           </dl>
         </section>
         <section>
@@ -188,7 +217,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

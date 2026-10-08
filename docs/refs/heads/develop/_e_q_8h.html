@@ -81,10 +81,30 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md325">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md326">Numerical Considerations</a></li>
-            <li><a href="#autotoc_md327">Applications</a></li>
-            <li><a href="#autotoc_md328">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md325">Mathematical Foundation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md326">Numerical Considerations</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md327">Applications</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md328">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,7 +114,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the EQ class, which implements the equality comparison operation between functions. This operator tests whether two function values are equal at each point in the domain.</p><section id="autotoc_md325"><h3><a href="#autotoc_md325">Mathematical Foundation</a></h3><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
+<p>This file defines the EQ class, which implements the equality comparison operation between functions. This operator tests whether two function values are equal at each point in the domain.</p><section id="autotoc_md325_1s1"><section id="autotoc_md325"><h3><a href="#autotoc_md325">Mathematical Foundation</a></h3><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
 <title>
 $ f, g : \Omega \to \mathbb{R} $
 </title>
@@ -118,8 +138,7 @@ $ f, g : \Omega \to \mathbb{R} $
 </g>
 </svg>, the equality operator:</p><div class="m-math"><svg style="width: 17.449em; height: 3.736em;" viewBox="109.92006 -35.865862 167.507346 35.865869">
 <title>
-\[
-  (f = g)(x) = \begin{cases} 1 &amp; \text{if } f(x) = g(x) \\ 0 &amp; \text{otherwise} \end{cases}
+\[     (f = g)(x) = \begin{cases} 1 &amp; \text{if } f(x) = g(x) \\ 0 &amp; \text{otherwise} \end{cases}
 \]
 </title>
 <defs>
@@ -176,14 +195,14 @@ $ f, g : \Omega \to \mathbb{R} $
 <use x='243.555676' y='-5.798537' xlink:href='#eq2-g4-115'/>
 <use x='248.206235' y='-5.798537' xlink:href='#eq2-g4-101'/>
 </g>
-</svg></div></section><section id="autotoc_md326"><h3><a href="#autotoc_md326">Numerical Considerations</a></h3><p>For floating-point comparisons, consider using approximate equality with a tolerance due to numerical precision limitations.</p></section><section id="autotoc_md327"><h3><a href="#autotoc_md327">Applications</a></h3><ul><li>Indicator functions for specific values</li><li>Level set definitions</li><li>Region identification based on function values</li></ul></section><section id="autotoc_md328"><h3><a href="#autotoc_md328">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">is_zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean function, true where u equals zero</span></pre></section>
+</svg></div></section></section><section id="autotoc_md326_1s1"><section id="autotoc_md326"><h3><a href="#autotoc_md326">Numerical Considerations</a></h3><p>For floating-point comparisons, consider using approximate equality with a tolerance due to numerical precision limitations.</p></section></section><section id="autotoc_md327_1s1"><section id="autotoc_md327"><h3><a href="#autotoc_md327">Applications</a></h3><ul><li>Indicator functions for specific values</li><li>Level set definitions</li><li>Region identification based on function values</li></ul></section></section><section id="autotoc_md328_1s1"><section id="autotoc_md328"><h3><a href="#autotoc_md328">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">is_zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean function, true where u equals zero</span></pre></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -240,7 +259,7 @@ $ f, g : \Omega \to \mathbb{R} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

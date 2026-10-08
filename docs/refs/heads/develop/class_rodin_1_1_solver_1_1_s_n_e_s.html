@@ -114,7 +114,7 @@ $ F(x) = 0 $
 <use x='28.281183' y='0' xlink:href='#eq1-g1-61'/>
 <use x='40.706664' y='0' xlink:href='#eq1-g1-48'/>
 </g>
-</svg> using Newton-type methods. Inherits <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">Rodin::<wbr />Solver::<wbr />NewtonSolverBase&lt;KSP&gt;</a> so that the linear sub-problems arising at each Newton step are solved by the associated <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a> solver, and <a href="class_rodin_1_1_p_e_t_sc_1_1_object.html" class="m-doc">Rodin::<wbr />PETSc::<wbr />Object&lt;::<wbr />SNES&gt;</a> for automatic handle cleanup.</p><p>Supports both programmatic configuration (<code>setType</code>, <code>setTolerances</code>) and PETSc command-line overrides (<code>-snes_type</code>, <code>-snes_rtol</code>, …).</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::<wbr />Solver::<wbr />KSP</a></p><p><a href="class_rodin_1_1_solver_1_1_newton_solver_base.html">Rodin::<wbr />Solver::<wbr />NewtonSolverBase</a></p><p><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a></p></aside>
+</svg> using Newton-type methods. Inherits <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">NewtonSolverBase&lt;KSP&gt;</a> so that the linear sub-problems arising at each Newton step are solved by the associated <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> solver, and <a href="class_rodin_1_1_p_e_t_sc_1_1_object.html" class="m-doc">Object&lt;::<wbr />SNES&gt;</a> for automatic handle cleanup.</p><p>Supports both programmatic configuration (<code>setType</code>, <code>setTolerances</code>) and PETSc command-line overrides (<code>-snes_type</code>, <code>-snes_rtol</code>, …).</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::<wbr />Solver::<wbr />KSP</a></p><p><a href="class_rodin_1_1_solver_1_1_newton_solver_base.html">Rodin::<wbr />Solver::<wbr />NewtonSolverBase</a></p><p><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a></p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -291,13 +291,21 @@ $ F(x) = 0 $
             </dt>
             <dd>Returns a mutable reference to the underlying PETSc SNES handle.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad4f4c6d41b1bb245426b426da552f6ca" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a841eb58f9348ab22d8665866f6429771" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a read-only reference to the underlying PETSc SNES handle.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a5bbd3c81d09b40cbec90d3d4d7ae7358" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a heap-allocated copy of this SNES solver.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_newton_solver_base.html#a2d2a461e5d422bb001e02df7233fb434" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Solve a nonlinear system starting from the initial guess stored in <code>x</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aab59f804cb40f7b46f61ad55de0a3ef4" class="m-doc">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf)</span>
+            </dt>
+            <dd>Solve a nonlinear system using a GridFunction as the solution container.</dd>
           </dl>
         </section>
         <section>
@@ -307,7 +315,7 @@ $ F(x) = 0 $
               using Rodin::<wbr />Solver::<wbr />SNES::<wbr /><a href="#aab2697409b7c024ecd30f6ab0be52159" class="m-doc-self">StateUpdate</a> = std::function&lt;void(const <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">PETSc::<wbr />Math::<wbr />Vector</a>&amp;)&gt;
             </h3>
             <p>Callback invoked before residual/Jacobian assembly to synchronize state-dependent Rodin fields from the current SNES iterate.</p>
-<p>The argument is the current iterate expressed as a Rodin <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />Vector</a> (a PETSc <code>Vec</code>). Typical usage:</p><pre class="m-code"><span class="n">snes</span><span class="p">.</span><span class="n">setStateUpdate</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<p>The argument is the current iterate expressed as a Rodin <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">Vector</a> (a PETSc <code>Vec</code>). Typical usage:</p><pre class="m-code"><span class="n">snes</span><span class="p">.</span><span class="n">setStateUpdate</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="n">uState</span><span class="p">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
 <span class="w">  </span><span class="n">pState</span><span class="p">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">uh</span><span class="p">.</span><span class="n">getSize</span><span class="p">());</span>
 <span class="p">});</span></pre>
@@ -420,7 +428,7 @@ $ F(x) = 0 $
                 </tr>
               </tfoot>
             </table>
-<p>The callback receives the current SNES iterate as a Rodin <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">PETSc::<wbr />Math::<wbr />Vector</a>. It is responsible for copying the relevant sub-vectors back into the GridFunctions that appear in the nonlinear variational form.</p><pre class="m-code"><span class="n">snes</span><span class="p">.</span><span class="n">setStateUpdate</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<p>The callback receives the current SNES iterate as a Rodin <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#a69736e172223988c0132229aa2bc04c2" class="m-doc">Vector</a>. It is responsible for copying the relevant sub-vectors back into the GridFunctions that appear in the nonlinear variational form.</p><pre class="m-code"><span class="n">snes</span><span class="p">.</span><span class="n">setStateUpdate</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">PETSc</span><span class="o">::</span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="n">uState</span><span class="p">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
 <span class="w">  </span><span class="n">pState</span><span class="p">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">uh</span><span class="p">.</span><span class="n">getSize</span><span class="p">());</span>
 <span class="p">});</span></pre>
@@ -526,9 +534,9 @@ $ F(x) = 0 $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ad4f4c6d41b1bb245426b426da552f6ca"><div>
+          <section class="m-doc-details" id="a841eb58f9348ab22d8665866f6429771"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad4f4c6d41b1bb245426b426da552f6ca" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a4a28cc1c3b15a047bb0cd8f1eec33b09" class="m-doc">HandleType</a>&amp; Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a841eb58f9348ab22d8665866f6429771" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a read-only reference to the underlying PETSc SNES handle.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -553,6 +561,41 @@ $ F(x) = 0 $
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a3e02db55cedf48a5ba1545bc84dfceea"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_newton_solver_base.html#a2d2a461e5d422bb001e02df7233fb434" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Solve a nonlinear system starting from the initial guess stored in <code>x</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">x&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>On entry: initial guess. On exit: final Newton iterate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aab59f804cb40f7b46f61ad55de0a3ef4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aab59f804cb40f7b46f61ad55de0a3ef4" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf)</span></span>
+            </h3>
+            <p>Solve a nonlinear system using a GridFunction as the solution container.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">gf&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>GridFunction holding the initial guess / final solution.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The GridFunction&#x27;s internal data vector is used both as the initial guess and as the storage for the converged solution. The backend data type is inferred from <code>FormLanguage::Traits&lt;GridFunctionType&gt;::DataType</code> and must match the solver&#x27;s <code>SolutionType</code>.</p><p>This is equivalent to calling <code>solve</code>(gf.getData()).</p>
           </div></section>
         </section>
       </div>
@@ -599,7 +642,7 @@ $ F(x) = 0 $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

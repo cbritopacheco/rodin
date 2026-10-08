@@ -119,12 +119,12 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a3f4d7e708462a726b5f66981ddbe9dc9">
-              <span class="m-doc-wrap-bumper"><a href="#a3f4d7e708462a726b5f66981ddbe9dc9" class="m-doc-self">FiniteElementSpace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a605ec1c50f461c6486870dd619fbc8bc" class="m-doc">FiniteElementSpace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a889936229914213d14795e1980b9f78d">
-              <span class="m-doc-wrap-bumper"><a href="#a889936229914213d14795e1980b9f78d" class="m-doc-self">FiniteElementSpace</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a79ba6de66c850632dc0478ca5b488069" class="m-doc">FiniteElementSpace</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -132,16 +132,16 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a3ecf37186dc9877d049e12fad3032cf7">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3ecf37186dc9877d049e12fad3032cf7" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aae9a656e9a7baf0394cc62f9c5f90cf7" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment.</dd>
-            <dt id="a6e48bab3aa075b6b996a6ae52da02b54">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6e48bab3aa075b6b996a6ae52da02b54" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp;) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a428c08ae0ba12e8bff49312f700ee0f4" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment.</dd>
-            <dt id="a454a2020aefbc34d41040472431bf9bc">
-              <span class="m-doc-wrap-bumper">auto <a href="#a454a2020aefbc34d41040472431bf9bc" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const Mesh&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a454a2020aefbc34d41040472431bf9bc" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const Mesh&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the underlying mesh.</dd>
             <dt>
@@ -173,6 +173,115 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a605ec1c50f461c6486870dd619fbc8bc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Mesh, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a605ec1c50f461c6486870dd619fbc8bc" class="m-doc-self">FiniteElementSpace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a79ba6de66c850632dc0478ca5b488069"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Mesh, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a79ba6de66c850632dc0478ca5b488069" class="m-doc-self">FiniteElementSpace</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aae9a656e9a7baf0394cc62f9c5f90cf7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Mesh, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp; Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae9a656e9a7baf0394cc62f9c5f90cf7" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move assignment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a428c08ae0ba12e8bff49312f700ee0f4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Mesh, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp; Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a428c08ae0ba12e8bff49312f700ee0f4" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy assignment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a454a2020aefbc34d41040472431bf9bc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Mesh, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const Mesh&amp; Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a454a2020aefbc34d41040472431bf9bc" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Gets the underlying mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The underlying mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ac818e610ec48e1a2ad03ffdf958fb9e8"><div>
             <h3>
               <div class="m-doc-template">
@@ -181,6 +290,27 @@
               <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac818e610ec48e1a2ad03ffdf958fb9e8" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
             </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Topological dimension of the entity.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The finite element.</td>
+                </tr>
+              </tfoot>
+            </table>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a29f703c87fa4c46752435c503899a263"><div>
@@ -207,6 +337,12 @@
                   <td>Function defined on an element of the mesh</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The mapping of the function from the physical element to the reference element.</td>
+                </tr>
+              </tfoot>
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
@@ -219,6 +355,27 @@
               <span class="m-doc-wrap-bumper">decltype(auto) Rodin::<wbr />Variational::<wbr />FiniteElementSpace&lt;Mesh, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16d569dadaf0ee93d7f0bd19fdd7766f" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
               const CallableType&amp; v) const</span></span>
             </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Operand expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The pushforward.</td>
+                </tr>
+              </tfoot>
+            </table>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ac5cb3a6828b2753ceb0b469738d4ded7"><div>
@@ -271,8 +428,7 @@
             </table>
 <p>The reference expansion is evaluated first and the finite element space pushforward is then applied to the complete function:</p><div class="m-math"><svg style="width: 14.954em; height: 3.736em;" viewBox="122.494473 -35.954123 143.55403 35.865869">
 <title>
-\[
-  u_h(x)
+\[  u_h(x)
   =
   \psi_K^{-1}
   \left(
@@ -414,7 +570,7 @@ $ H(\mathrm{curl}) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

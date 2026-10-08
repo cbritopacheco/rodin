@@ -79,7 +79,7 @@
           <div class="m-doc-template">template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>FollowerPressureTangent <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Bilinear-form integrator: the EXACT load stiffness of the follower pressure,  <svg class="m-math" style="width: 17.205em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 165.169536 13.283652">
+        <p>Bilinear-form integrator: the EXACT load stiffness of the follower pressure,   <svg class="m-math" style="width: 17.205em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 165.169536 13.283652">
 <title>
 $ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
    + \mathbf{x}_{,\xi} \times \delta\mathbf{d}_{,\eta})
@@ -199,8 +199,8 @@ $ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
               const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span>
             </dt>
             <dd>Constructs the follower-pressure tangent integrator.</dd>
-            <dt id="a07a04e6e12eed46a47df0e6cde68e4ef">
-              <span class="m-doc-wrap-bumper"><a href="#a07a04e6e12eed46a47df0e6cde68e4ef" class="m-doc-self">FollowerPressureTangent</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">FollowerPressureTangent</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a21e44e254d0ffda79526b3247d4c6977" class="m-doc">FollowerPressureTangent</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">FollowerPressureTangent</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -208,25 +208,25 @@ $ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a4c43500fcc13713ea8d4cba6f15b8583">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4c43500fcc13713ea8d4cba6f15b8583" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face) -&gt; <a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">FollowerPressureTangent</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4c43500fcc13713ea8d4cba6f15b8583" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face) -&gt; <a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">FollowerPressureTangent</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Sets the current face and assembles the element tangent.</dd>
-            <dt id="af65301ad831f65b88eab3086cd8187cb">
-              <span class="m-doc-wrap-bumper">auto <a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
               size_t te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns an entry of the current element tangent matrix.</dd>
-            <dt id="a07a0ed42183d01cb7d7a5e5edf3caba3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the current face polytope.</dd>
-            <dt id="aba6371885ea424dd84df03d85fcb0706">
-              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the integration region.</dd>
-            <dt id="a49f1ae8c9b7179fa9a6edf4833e20347">
-              <span class="m-doc-wrap-bumper">auto <a href="#a49f1ae8c9b7179fa9a6edf4833e20347" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">FollowerPressureTangent</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a49f1ae8c9b7179fa9a6edf4833e20347" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">FollowerPressureTangent</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies this follower-pressure tangent.</dd>
           </dl>
@@ -266,6 +266,134 @@ $ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
                   <td>The current displacement state</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a21e44e254d0ffda79526b3247d4c6977"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />FollowerPressureTangent&lt;TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a21e44e254d0ffda79526b3247d4c6977" class="m-doc-self">FollowerPressureTangent</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">FollowerPressureTangent</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4c43500fcc13713ea8d4cba6f15b8583"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">FollowerPressureTangent</a>&amp; Rodin::<wbr />Solid::<wbr />FollowerPressureTangent&lt;TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4c43500fcc13713ea8d4cba6f15b8583" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; face) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Sets the current face and assembles the element tangent.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">face</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af65301ad831f65b88eab3086cd8187cb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> Rodin::<wbr />Solid::<wbr />FollowerPressureTangent&lt;TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns an entry of the current element tangent matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tr</td>
+                  <td>Trial shape-function expression.</td>
+                </tr>
+                <tr>
+                  <td>te</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Integral computed by the quadrature rule.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a07a0ed42183d01cb7d7a5e5edf3caba3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Solid::<wbr />FollowerPressureTangent&lt;TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the current face polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The current face polytope.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aba6371885ea424dd84df03d85fcb0706"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Solid::<wbr />FollowerPressureTangent&lt;TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the integration region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration region.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a49f1ae8c9b7179fa9a6edf4833e20347"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">FollowerPressureTangent</a>* Rodin::<wbr />Solid::<wbr />FollowerPressureTangent&lt;TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49f1ae8c9b7179fa9a6edf4833e20347" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polymorphically copies this follower-pressure tangent.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
         </section>
@@ -313,7 +441,7 @@ $ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -90,14 +90,14 @@
             </li>
           </ul>
         </nav>
-<p>This file provides the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">Rodin::<wbr />Variational::<wbr />P0</a> specialization for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />MPI&gt;</a>. The implementation builds a rank-local P0 space on each shard and maintains local/global degree-of- freedom mappings consistent across ownership and ghost layers.</p><p>P0 degrees of freedom are associated with mesh cells: each cell carries one DOF per field component. Cells are partitioned across ranks; owned cells receive contiguous global indices, and ghost cells synchronize their global DOF index from the owning rank via a direct owner-push exchange.</p>
+<p>This file provides the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> specialization for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Rodin::<wbr />Context::<wbr />MPI&gt;</a>. The implementation builds a rank-local P0 space on each shard and maintains local/global degree-of- freedom mappings consistent across ownership and ghost layers.</p><p>P0 degrees of freedom are associated with mesh cells: each cell carries one DOF per field component. Cells are partitioned across ranks; owned cells receive contiguous global indices, and ghost cells synchronize their global DOF index from the owning rank via a direct owner-push exchange.</p>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">Rodin::MPI</a></dt>
             <dd>Distributed-memory parallel extensions using MPI.</dd>
           </dl>
@@ -124,6 +124,11 @@
               class <a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Rodin::Variational::P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;::Pushforward</a>
             </dt>
             <dd>Pushforward of a function from the reference polytope.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_p0_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_geometry_02b1019a22387996cd0b086e33d44f55.html" class="m-doc">Rodin::Variational::P0&lt;Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
+            </dt>
+            <dd>Matrix-range finite element or expression specialization.</dd>
           </dl>
         </section>
       </div>
@@ -170,7 +175,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -113,18 +113,18 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a4e77a19275d340fde4cf5b708a9bc216">
-              <span class="m-doc-wrap-bumper"><a href="#a4e77a19275d340fde4cf5b708a9bc216" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">size_t vdim,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a4e77a19275d340fde4cf5b708a9bc216" class="m-doc">BasisFunction</a>(</span><span class="m-doc-wrap">size_t vdim,
               size_t local,
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the basis function of a local degree of freedom.</dd>
-            <dt id="aa5ea57e5f061d84d30beb04af6dab6c9">
-              <span class="m-doc-wrap-bumper"><a href="#aa5ea57e5f061d84d30beb04af6dab6c9" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">const BasisFunction&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a312f58afdcdb00133f0463ae3a16416d" class="m-doc">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a72c077af70f43babcdb92df6f1f8bafc">
-              <span class="m-doc-wrap-bumper"><a href="#a72c077af70f43babcdb92df6f1f8bafc" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">BasisFunction&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a73db251bc3b25288a1df80073322c54d" class="m-doc">BasisFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -132,21 +132,157 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a3f0ae4ada14082e09f32a09ac829e62c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3f0ae4ada14082e09f32a09ac829e62c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; <a href="#ae1179642a17e478e0b94b33f97e05ca9" class="m-doc">ReturnType</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f0ae4ada14082e09f32a09ac829e62c" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const -&gt; <a href="#ae1179642a17e478e0b94b33f97e05ca9" class="m-doc">ReturnType</a></span>
             </dt>
             <dd>Evaluates at a point on the reference element.</dd>
-            <dt id="ab2522d6a00e6a7df9e7aacf532ce42b0">
+            <dt>
               <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab2522d6a00e6a7df9e7aacf532ce42b0" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t i,
-              size_t j) const -&gt; DerivativeFunction&lt;Order&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab2522d6a00e6a7df9e7aacf532ce42b0" class="m-doc">getDerivative</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const -&gt; <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_42d934b7daffec7ba220fb785105ab17e.html" class="m-doc">DerivativeFunction</a>&lt;Order&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the derivative of the basis function.</dd>
-            <dt id="aea77e62adbe53092e04f048a1a6ca65d">
-              <span class="m-doc-wrap-bumper">auto <a href="#aea77e62adbe53092e04f048a1a6ca65d" class="m-doc-self">getJacobian</a>(</span><span class="m-doc-wrap">) const -&gt; const JacobianFunction&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aea77e62adbe53092e04f048a1a6ca65d" class="m-doc">getJacobian</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_472859d894cb368fd691e03634143ef0b.html" class="m-doc">JacobianFunction</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the Jacobian of the basis function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html#af57906d7e45bd8a8e55f720ebf0335d1" class="m-doc">getGradient</a>(</span><span class="m-doc-wrap">) const -&gt; GradientFunction <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the gradient function.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a4e77a19275d340fde4cf5b708a9bc216"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e77a19275d340fde4cf5b708a9bc216" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">size_t vdim,
+              size_t local,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs the basis function of a local degree of freedom.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vdim</td>
+                  <td>Number of components in the value range.</td>
+                </tr>
+                <tr>
+                  <td>local</td>
+                  <td>Index in the local numbering.</td>
+                </tr>
+                <tr>
+                  <td>g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a312f58afdcdb00133f0463ae3a16416d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a312f58afdcdb00133f0463ae3a16416d" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a73db251bc3b25288a1df80073322c54d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73db251bc3b25288a1df80073322c54d" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3f0ae4ada14082e09f32a09ac829e62c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#ae1179642a17e478e0b94b33f97e05ca9" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f0ae4ada14082e09f32a09ac829e62c" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; rc) const</span></span>
+            </h3>
+            <p>Evaluates at a point on the reference element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rc</td>
+                  <td>Coordinates in the reference element.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Basis or reference-coordinate derivative value at the supplied reference point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab2522d6a00e6a7df9e7aacf532ce42b0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_42d934b7daffec7ba220fb785105ab17e.html" class="m-doc">DerivativeFunction</a>&lt;Order&gt; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab2522d6a00e6a7df9e7aacf532ce42b0" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t i,
+              size_t j) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the derivative of the basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+                <tr>
+                  <td>j</td>
+                  <td>Index of the second coordinate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference-coordinate derivative function for the basis.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aea77e62adbe53092e04f048a1a6ca65d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_472859d894cb368fd691e03634143ef0b.html" class="m-doc">JacobianFunction</a>&amp; Rodin::<wbr />Variational::<wbr />H1Element&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea77e62adbe53092e04f048a1a6ca65d" class="m-doc-self">getJacobian</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the Jacobian of the basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Derivative evaluated at the supplied point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -192,7 +328,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

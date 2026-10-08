@@ -128,8 +128,7 @@ $ x_i \in [-1, 1] $
 </g>
 </svg>, this class provides the corresponding mapped nodes</p><div class="m-math"><svg style="width: 12.161em; height: 2.499em;" viewBox="135.900453 -23.992863 116.742084 23.992863">
 <title>
-\[
-  \hat{x}_i = \frac{1}{2}\,(x_i + 1) \in [0, 1],
+\[  \hat{x}_i = \frac{1}{2}\,(x_i + 1) \in [0, 1],
 \]
 </title>
 <defs>
@@ -174,19 +173,82 @@ $ x_i \in [-1, 1] $
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt id="a036a155b0688a65db12b793061f95f12">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a036a155b0688a65db12b793061f95f12" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a036a155b0688a65db12b793061f95f12" class="m-doc">getCount</a>(</span><span class="m-doc-wrap">) -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Number of GLL nodes (K + 1).</dd>
-            <dt id="a17b33fa0273c8138ad3f272aebe376b0">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a17b33fa0273c8138ad3f272aebe376b0" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">size_t i) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a17b33fa0273c8138ad3f272aebe376b0" class="m-doc">getNode</a>(</span><span class="m-doc-wrap">size_t i) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>i-th mapped GLL node in [0, 1], 0 &lt;= i &lt;= K.</dd>
-            <dt id="a235138b599a2d78dbd3edbbfec574514">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a235138b599a2d78dbd3edbbfec574514" class="m-doc-self">getNodes</a>(</span><span class="m-doc-wrap">) -&gt; const std::array&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, K+1&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a235138b599a2d78dbd3edbbfec574514" class="m-doc">getNodes</a>(</span><span class="m-doc-wrap">) -&gt; const std::array&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, K+1&gt;&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Full array of mapped GLL nodes in ascending order.</dd>
+            <dd></dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a036a155b0688a65db12b793061f95f12"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static size_t Rodin::<wbr />Variational::<wbr />GLL01&lt;K&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a036a155b0688a65db12b793061f95f12" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The count.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Number of GLL nodes (K + 1).</p>
+          </div></section>
+          <section class="m-doc-details" id="a17b33fa0273c8138ad3f272aebe376b0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />GLL01&lt;K&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17b33fa0273c8138ad3f272aebe376b0" class="m-doc-self">getNode</a>(</span><span class="m-doc-wrap">size_t i) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The node.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>i-th mapped GLL node in [0, 1], 0 &lt;= i &lt;= K.</p>
+          </div></section>
+          <section class="m-doc-details" id="a235138b599a2d78dbd3edbbfec574514"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static const std::array&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, K+1&gt;&amp; Rodin::<wbr />Variational::<wbr />GLL01&lt;K&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a235138b599a2d78dbd3edbbfec574514" class="m-doc-self">getNodes</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The nodes.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Full array of mapped GLL nodes in ascending order.</p>
+          </div></section>
         </section>
       </div>
     </div>
@@ -232,7 +294,7 @@ $ x_i \in [-1, 1] $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

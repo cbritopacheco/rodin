@@ -119,8 +119,8 @@
               using <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="#ae010161758a756d5d5a84ca8e5893392" class="m-doc">FESType</a>, Data&gt;
             </dt>
             <dd>Operand type.</dd>
-            <dt id="a182b698b77475ba0ec45cee4823f7d1c">
-              using <a href="#a182b698b77475ba0ec45cee4823f7d1c" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&gt;&gt;
+            <dt id="af35c7606aa4779386efcd218de6c90c1">
+              using <a href="#af35c7606aa4779386efcd218de6c90c1" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_div_base.html" class="m-doc">DivBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -128,16 +128,16 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a251401874f3126eec1cec22547303fb6">
-              <span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u) <span class="m-label m-flat m-info">explicit</span> </span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs the expression from its operand.</dd>
-            <dt id="abca2166abd7e47734012c3c2e52f6fa7">
-              <span class="m-doc-wrap-bumper"><a href="#abca2166abd7e47734012c3c2e52f6fa7" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#abca2166abd7e47734012c3c2e52f6fa7" class="m-doc">Div</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a5df8eb87e191a7662eabc19e7d7fd6b8">
-              <span class="m-doc-wrap-bumper"><a href="#a5df8eb87e191a7662eabc19e7d7fd6b8" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5df8eb87e191a7662eabc19e7d7fd6b8" class="m-doc">Div</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -145,20 +145,151 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a6a0e03e3045fccc67be3e1b4cd6b7e16">
-              <span class="m-doc-wrap-bumper">void <a href="#a6a0e03e3045fccc67be3e1b4cd6b7e16" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
-              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) const</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a3d0c937417f25c50f426010b5682ac32" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; point) const</span>
             </dt>
             <dd>Interpolates div(u) at point p (always zero for P0g).</dd>
-            <dt id="a050a84d717e56cf813ce6be3e4ae8aa7">
-              <span class="m-doc-wrap-bumper">auto <a href="#a050a84d717e56cf813ce6be3e4ae8aa7" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
-            <dt id="a0e071453b9d576fa6557bdc5600ae87c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0e071453b9d576fa6557bdc5600ae87c" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e071453b9d576fa6557bdc5600ae87c" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a251401874f3126eec1cec22547303fb6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Div&lt;GridFunction&lt;P0g&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a251401874f3126eec1cec22547303fb6" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&amp; u) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs the expression from its operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>Operand expression.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abca2166abd7e47734012c3c2e52f6fa7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Div&lt;GridFunction&lt;P0g&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abca2166abd7e47734012c3c2e52f6fa7" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5df8eb87e191a7662eabc19e7d7fd6b8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Div&lt;GridFunction&lt;P0g&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5df8eb87e191a7662eabc19e7d7fd6b8" class="m-doc-self">Div</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3d0c937417f25c50f426010b5682ac32"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Div&lt;GridFunction&lt;P0g&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3d0c937417f25c50f426010b5682ac32" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; point) const</span></span>
+            </h3>
+            <p>Interpolates div(u) at point p (always zero for P0g).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">out</td>
+                  <td>Storage for the computed result.</td>
+                </tr>
+                <tr>
+                  <td>point</td>
+                  <td>Evaluation point; the result is independent of this argument.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4349bdb4e5088cb0ef3b17f34f72958c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Div&lt;GridFunction&lt;P0g&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4349bdb4e5088cb0ef3b17f34f72958c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity; the reported order is independent of this argument.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0e071453b9d576fa6557bdc5600ae87c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_div.html" class="m-doc">Div</a>* Rodin::<wbr />Variational::<wbr />Div&lt;GridFunction&lt;P0g&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&lt;Scalar, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e071453b9d576fa6557bdc5600ae87c" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -204,7 +335,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

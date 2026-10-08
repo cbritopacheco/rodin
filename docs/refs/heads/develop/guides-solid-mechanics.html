@@ -415,8 +415,7 @@ $ I_{4f} $
 </svg></td><td>Anisotropic soft tissue, one fiber family</td></tr><tr><td><code>ActiveFiberLaw</code></td><td>1D fiber element with internal state</td><td>Active (muscle) contraction</td></tr><tr><td><code>ActiveContraction&lt;Passive, Active&gt;</code></td><td>passive law + active fiber law</td><td>Composition wrapper</td></tr></tbody></table><p>Constructing a law and the internal virtual work form (from <a href="https://github.com/cbritopacheco/rodin/blob/develop/examples/Solid/BlockGravity.cpp">BlockGravity.cpp</a>):</p><pre class="m-code"><span class="n">Solid</span><span class="o">::</span><span class="n">NeoHookean</span><span class="w"> </span><span class="nf">law</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">ivw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">InternalVirtualWork</span><span class="p">(</span><span class="n">law</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">);</span><span class="w">   </span><span class="c1">// u: current displacement GridFunction</span></pre></section><section id="guides-solid-newton"><h2><a href="#guides-solid-newton">The weak form and Newton&#x27;s method</a></h2><p>Static equilibrium in weak form is</p><div class="m-math"><svg style="width: 23.400em; height: 2.935em;" viewBox="81.951395 -28.172399 224.640246 28.172399">
 <title>
-\[
-  R(u; v) = \int_{\Omega_0} P(F) : \nabla_X v \; dX - \ell_{ext}(v) = 0 ,
+\[  R(u; v) = \int_{\Omega_0} P(F) : \nabla_X v \; dX - \ell_{ext}(v) = 0 ,
 \]
 </title>
 <defs>
@@ -697,7 +696,7 @@ $ E $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

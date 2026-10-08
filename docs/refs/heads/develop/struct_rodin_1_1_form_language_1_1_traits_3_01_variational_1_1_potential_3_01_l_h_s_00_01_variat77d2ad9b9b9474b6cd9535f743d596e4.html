@@ -107,8 +107,8 @@
               using <a href="#a30a18d37c383eb23729bd8bfe40f0d13" class="m-doc-self">LHSType</a> = LHS
             </dt>
             <dd>Left-hand side operand type.</dd>
-            <dt id="acfe87c9ee205467a5df1491438ef215b">
-              using <a href="#acfe87c9ee205467a5df1491438ef215b" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Variational::<wbr />ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">Variational::<wbr />ShapeFunction</a>&lt;RHSDerived, FES, Space&gt;, FES, Space&gt;
+            <dt id="a7418dc97d5fd23fca90e04d9542f7247">
+              using <a href="#a7418dc97d5fd23fca90e04d9542f7247" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">Variational::<wbr />ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">Variational::<wbr />ShapeFunction</a>&lt;RHSDerived, FES, Space&gt;, FES, Space&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="ac15cfdf7f2ea6a1515977666f3b5f8a1">
@@ -116,15 +116,15 @@
             </dt>
             <dd>Cell kernel type.</dd>
             <dt id="ae010240968103862bcf4fa765c1dccfa">
-              using <a href="#ae010240968103862bcf4fa765c1dccfa" class="m-doc-self">OperandType</a> = <a href="#acfe87c9ee205467a5df1491438ef215b" class="m-doc">RHSType</a>
+              using <a href="#ae010240968103862bcf4fa765c1dccfa" class="m-doc-self">OperandType</a> = <a href="#a7418dc97d5fd23fca90e04d9542f7247" class="m-doc">RHSType</a>
             </dt>
             <dd>Operand type.</dd>
             <dt id="a8fe84c6e4dc3369f5a70b4214f9d5920">
-              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#acfe87c9ee205467a5df1491438ef215b" class="m-doc">RHSType</a>&gt;<a href="#a619f58004de344eb0130ac4d87542b99" class="m-doc">::<wbr />RangeType</a>
+              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a7418dc97d5fd23fca90e04d9542f7247" class="m-doc">RHSType</a>&gt;<a href="#a619f58004de344eb0130ac4d87542b99" class="m-doc">::<wbr />RangeType</a>
             </dt>
             <dd>Range type of the right-hand side operand.</dd>
-            <dt id="a47a34114f689485b99e0beef4243fca1">
-              using <a href="#a47a34114f689485b99e0beef4243fca1" class="m-doc-self">LHSRangeType</a> = typename decltype([] { if constexpr(std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a>&gt;||std::is_invocable_v&lt;const <a href="#ac15cfdf7f2ea6a1515977666f3b5f8a1" class="m-doc">KernelType</a>&amp;, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;&gt;) return std::type_identity&lt;<a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a>&gt;{}
+            <dt id="a60614b6d86a1b9ce6e24c8a0fbf1230d">
+              using <a href="#a60614b6d86a1b9ce6e24c8a0fbf1230d" class="m-doc-self">LHSRangeType</a> = typename decltype([] { if constexpr(std::is_same_v&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>, <a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a>&gt;|| std::is_invocable_v&lt;const <a href="#ac15cfdf7f2ea6a1515977666f3b5f8a1" class="m-doc">KernelType</a>&amp;, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;&gt;) return std::type_identity&lt;<a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a>&gt;{}; else if constexpr(<a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">FormLanguage::<wbr />IsMatrixRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value&amp;&amp; std::is_invocable_v&lt;const <a href="#ac15cfdf7f2ea6a1515977666f3b5f8a1" class="m-doc">KernelType</a>&amp;, <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">Math::<wbr />SpatialTensor</a>&lt;<a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a>, 4&gt;&amp;, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;&gt;) return std::type_identity&lt;<a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">Math::<wbr />SpatialTensor</a>&lt;<a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a>, 4&gt;&gt;{}; else if constexpr(<a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">FormLanguage::<wbr />IsMatrixRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value) return std::type_identity&lt;<a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a>&gt;&gt;{}; else if constexpr(<a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">FormLanguage::<wbr />IsVectorRange</a>&lt;<a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc">RHSRangeType</a>&gt;::Value) return std::type_identity&lt;<a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a>&gt;&gt;{}; else return std::type_identity&lt;void&gt;{}; }())::type
             </dt>
             <dd>Range type of the left-hand side operand.</dd>
             <dt id="a619f58004de344eb0130ac4d87542b99">
@@ -186,7 +186,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

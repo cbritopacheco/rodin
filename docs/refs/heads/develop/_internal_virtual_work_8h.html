@@ -104,8 +104,7 @@
 <span class="n">Problem</span><span class="w"> </span><span class="nf">newton</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">newton</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ivw</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">).</span><span class="n">on</span><span class="p">(</span><span class="n">bc</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>Sign convention with Problem and NewtonSolver</h4><p><code>Residual(v)</code> returns the internal virtual work with its physical sign,</p><div class="m-math"><svg style="width: 15.857em; height: 2.935em;" viewBox="118.156583 -28.172399 152.229816 28.172399">
 <title>
-\[
-  R(\mathbf{u}; \mathbf{v})
+\[  R(\mathbf{u}; \mathbf{v})
     = \int_{\Omega_0} \mathbf{P}(\mathbf{u}) : \nabla_0\mathbf{v}\,dX.
 \]
 </title>
@@ -170,8 +169,7 @@ $K = DR$
 </svg>. When a <code>Problem</code> assembles a <code>ProblemBody</code> into a linear system, linear form contributions are moved to the right-hand side with a minus sign. Therefore</p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">newton</span><span class="p">(</span><span class="n">du</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">newton</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ivw</span><span class="p">(</span><span class="n">du</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">du</span><span class="p">,</span><span class="w"> </span><span class="n">zero</span><span class="p">);</span></pre><p>assembles the Newton system</p><div class="m-math"><svg style="width: 11.535em; height: 1.402em;" viewBox="138.904052 -13.45978 110.734883 13.45978">
 <title>
-\[
-  K(\mathbf{u}^k)\,\Delta\mathbf{u} = -R(\mathbf{u}^k),
+\[  K(\mathbf{u}^k)\,\Delta\mathbf{u} = -R(\mathbf{u}^k),
 \]
 </title>
 <defs>
@@ -203,7 +201,7 @@ $K = DR$
 <use x='241.834948' y='-2.988792' xlink:href='#eq3-g4-41'/>
 <use x='246.387274' y='-2.988792' xlink:href='#eq3-g3-59'/>
 </g>
-</svg></div><p>and <code>NewtonSolver</code> then applies <svg class="m-math" style="width: 8.687em; height: 1.124em; vertical-align: -0.095em;" viewBox="0 -9.873238 83.395397 10.78644">
+</svg></div><p>and <code>NewtonSolver</code> then applies  <svg class="m-math" style="width: 8.687em; height: 1.124em; vertical-align: -0.095em;" viewBox="0 -9.873238 83.395397 10.78644">
 <title>
 $\mathbf{u}^{k+1}
 = \mathbf{u}^k + \Delta\mathbf{u}$
@@ -313,7 +311,7 @@ $K\Delta\mathbf{u}=+R$
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

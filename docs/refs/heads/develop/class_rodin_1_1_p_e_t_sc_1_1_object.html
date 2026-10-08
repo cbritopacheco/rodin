@@ -110,12 +110,12 @@
               <span class="m-doc-wrap-bumper">void <a href="#a597f494c9f2a629c325206267b259244" class="m-doc">getComm</a>(</span><span class="m-doc-wrap">MPI_Comm* comm) const</span>
             </dt>
             <dd>Retrieves the MPI communicator associated with the handle.</dd>
-            <dt id="a2ca94cbf71295ef7cb3e573b68d0452e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ca94cbf71295ef7cb3e573b68d0452e" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) const -&gt; const Handle&amp; <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ca94cbf71295ef7cb3e573b68d0452e" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) const -&gt; const Handle&amp; <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a read-only reference to the underlying PETSc handle.</dd>
-            <dt id="a13aed78369fcbb7ed26d8898127c796a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a13aed78369fcbb7ed26d8898127c796a" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) -&gt; Handle&amp; <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a13aed78369fcbb7ed26d8898127c796a" class="m-doc">getHandle</a>(</span><span class="m-doc-wrap">) -&gt; Handle&amp; <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a mutable reference to the underlying PETSc handle.</dd>
           </dl>
@@ -140,6 +140,40 @@
                   <td>Pointer to the output communicator.</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2ca94cbf71295ef7cb3e573b68d0452e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Handle&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const Handle&amp; Rodin::<wbr />PETSc::<wbr />Object&lt;Handle&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ca94cbf71295ef7cb3e573b68d0452e" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a read-only reference to the underlying PETSc handle.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A read-only reference to the underlying PETSc handle.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a13aed78369fcbb7ed26d8898127c796a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Handle&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Handle&amp; Rodin::<wbr />PETSc::<wbr />Object&lt;Handle&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13aed78369fcbb7ed26d8898127c796a" class="m-doc-self">getHandle</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a mutable reference to the underlying PETSc handle.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A mutable reference to the underlying PETSc handle.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
         </section>
@@ -187,7 +221,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

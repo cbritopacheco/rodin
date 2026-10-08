@@ -115,9 +115,9 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="aa85e1d670c583e2f999526d02ff58195">
+            <dt>
               <div class="m-doc-template">template&lt;class Iterator&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#aa85e1d670c583e2f999526d02ff58195" class="m-doc-self">UndeterminedTraceDomainException</a>(</span><span class="m-doc-wrap">const T&amp; cls,
+              <span class="m-doc-wrap-bumper"><a href="#aa85e1d670c583e2f999526d02ff58195" class="m-doc">UndeterminedTraceDomainException</a>(</span><span class="m-doc-wrap">const T&amp; cls,
               const FuncName&amp; funcName,
               const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               Iterator begin,
@@ -125,6 +125,50 @@
             </dt>
             <dd>Constructs the exception for the offending call site.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aa85e1d670c583e2f999526d02ff58195"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class T, class FuncName&gt;
+                template&lt;class Iterator&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />UndeterminedTraceDomainException&lt;T, FuncName&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa85e1d670c583e2f999526d02ff58195" class="m-doc-self">UndeterminedTraceDomainException</a>(</span><span class="m-doc-wrap">const T&amp; cls,
+              const FuncName&amp; funcName,
+              const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              Iterator begin,
+              Iterator end)</span></span>
+            </h3>
+            <p>Constructs the exception for the offending call site.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">cls</td>
+                  <td>Object whose trace domain could not be determined.</td>
+                </tr>
+                <tr>
+                  <td>funcName</td>
+                  <td>Name of the function reporting the error.</td>
+                </tr>
+                <tr>
+                  <td>p</td>
+                  <td>Entity identified by its dimension and local index.</td>
+                </tr>
+                <tr>
+                  <td>begin</td>
+                  <td>Iterator to the first entry.</td>
+                </tr>
+                <tr>
+                  <td>end</td>
+                  <td>Iterator past the last entry.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -170,7 +214,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

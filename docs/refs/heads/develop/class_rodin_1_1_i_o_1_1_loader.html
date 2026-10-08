@@ -93,7 +93,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md141">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md141">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -105,7 +110,7 @@
             </li>
           </ul>
         </nav>
-<p>Abstract base class template for loading objects from streams or files.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_loader.html">Loader</a></p></aside><p>The Loader class provides a common interface for reading objects of type <code>T</code> from input streams or files. This class serves as the foundation for specialized loaders that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li>load(std::istream&amp;) - Load object from an input stream</li><li>getObject() - Access the object being loaded</li></ul><section id="autotoc_md141"><h3><a href="#autotoc_md141">Usage Example</a></h3><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectLoader</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Loader</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
+<p>Abstract base class template for loading objects from streams or files.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_loader.html">Loader</a></p></aside><p>The Loader class provides a common interface for reading objects of type <code>T</code> from input streams or files. This class serves as the foundation for specialized loaders that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li>load(std::istream&amp;) - Load object from an input stream</li><li>getObject() - Access the object being loaded</li></ul><section id="autotoc_md141_1s1"><section id="autotoc_md141"><h3><a href="#autotoc_md141">Usage Example</a></h3><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectLoader</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Loader</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
 <span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">istream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">is</span><span class="p">)</span><span class="w"> </span><span class="k">override</span>
@@ -122,15 +127,50 @@
 
 <span class="k">private</span><span class="o">:</span>
 <span class="w">  </span><span class="n">MyObject</span><span class="w"> </span><span class="n">m_object</span><span class="p">;</span>
-<span class="p">};</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">MeshLoader</a></p><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">GridFunctionLoader</a></p></aside></section>
+<span class="p">};</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_loader.html">MeshLoader</a></p><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">GridFunctionLoader</a></p></aside></section></section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase</a>
+              <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_h_d_f5_00_01_f_e_s_00_01_math_dc6de039808d71549c96625799a50b75.html" class="m-doc">GridFunctionLoader&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
-            <dd>Base class for concrete grid function loaders.</dd>
+            <dd>HDF5 grid function loader for local grid functions backed by <code>Math::Vector&lt;Scalar&gt;</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_f_e_s_00_01_mabbc9a86cabea2ab6e77ea469f5feace1.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MEDIT, FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Reads matrix entries stored as independent MEDIT scalar vertex fields. Higher-order spaces interpolate the vertex field, as required by SolAtVertices.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_variational_1_94a7998c5e4a0c8f11c7e3140bb5d154.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MEDIT, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>MEDIT grid-function loader for local H1 finite element spaces.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_e_d_i_t_00_01_variational_1_759081d00011f35269f7550058d038c7.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MEDIT, Variational::P1&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>MEDIT grid-function loader for local P1 finite element spaces.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_f_e_s_00_01_math971bd62f483877e1a539011d5c867899.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Loads each MFEM component through the scalar family&#x27;s node mapping.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_e25ce5570c0c5790351369eb032d2a12.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, Variational::H1&lt;K, Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for loading H1 grid functions from MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_6ee8254a956b51895920e0e48fe4c901.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, Variational::P0&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Loader for P0 (piecewise constant) grid functions in MFEM format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Range&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_m_f_e_m_00_01_variational_1_1_f56c2f78720844daa893ee3a38efa37e.html" class="m-doc">GridFunctionLoader&lt;FileFormat::MFEM, Variational::P1&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;typename FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Specialization for loading P1 grid functions from MFEM format.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase</a>
@@ -152,10 +192,10 @@
             </dt>
             <dd>Base class for concrete grid function loaders.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase</a>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase</a>
             </dt>
-            <dd>Base class for concrete grid function loaders.</dd>
+            <dd>Base class for loading meshes from files or streams.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -296,7 +336,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

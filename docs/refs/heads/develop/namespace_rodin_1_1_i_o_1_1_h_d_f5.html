@@ -583,6 +583,14 @@
               <span class="m-doc-wrap-bumper">hid_t Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26cd4fa4eff3f1eea96e14639215fa6b" class="m-doc-self">getNativeType&lt;U64&gt;</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Returns the native HDF5 type for unsigned 64-bit integers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The native HDF5 type for unsigned 64-bit integers.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="ab81e3c93b9a217d6dde1be858e42234a"><div>
             <h3>
@@ -593,6 +601,14 @@
               <span class="m-doc-wrap-bumper">hid_t Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab81e3c93b9a217d6dde1be858e42234a" class="m-doc-self">getNativeType&lt;I32&gt;</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Returns the native HDF5 type for signed 32-bit integers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The native HDF5 type for signed 32-bit integers.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="aaf5ff13c117eb2727654ce1b45dc74e0"><div>
             <h3>
@@ -603,6 +619,14 @@
               <span class="m-doc-wrap-bumper">hid_t Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf5ff13c117eb2727654ce1b45dc74e0" class="m-doc-self">getNativeType&lt;F64&gt;</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Returns the native HDF5 type for 64-bit floating point values.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The native HDF5 type for 64-bit floating point values.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a2b6c96d4327cf42bbdcc8d5409b87ecf"><div>
             <h3>
@@ -613,6 +637,14 @@
               <span class="m-doc-wrap-bumper">hid_t Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b6c96d4327cf42bbdcc8d5409b87ecf" class="m-doc-self">getNativeType&lt;U8&gt;</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Returns the native HDF5 type for unsigned 8-bit integers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The native HDF5 type for unsigned 8-bit integers.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a4e821cc5909d152f34aa7b963d89bdf9"><div>
             <h3>
@@ -1070,7 +1102,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">t&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Polytope geometry type.</td>
+                  <td>Type of polytope to construct.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -1095,7 +1127,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">t&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Polytope geometry type.</td>
+                  <td>Type of polytope to construct.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -1120,7 +1152,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">t&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Polytope geometry type.</td>
+                  <td>Type of polytope to construct.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -1162,6 +1194,27 @@
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
             </h3>
             <p>Reference nodes used by the XDMF topology for a cell.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">t</td>
+                  <td>Type of polytope to construct.</td>
+                </tr>
+                <tr>
+                  <td>order</td>
+                  <td>Polynomial order.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The x d m f reference nodes.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>If order &lt;= 1, the linear XDMF nodes are returned. If order &gt; 1, the transformation is sampled at XDMF&#x27;s quadratic node locations. This keeps visualization independent of Rodin&#x27;s internal finite-element node layout while intentionally approximating higher-order geometry by quadratic XDMF.</p>
           </div></section>
           <section class="m-doc-details" id="a4e3237db1f13417ffb870798534a6433"><div>
@@ -1194,6 +1247,23 @@
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
             </h3>
             <p>Returns a non-null <code>Shard*</code> iff <code>mesh</code> is a partition shard.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Mesh on which the object is defined.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A non-null <code>Shard*</code> iff <code>mesh</code> is a partition shard.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>The per-rank XDMF writers must filter out non-owned cells so that stitched visualization in ParaView does not show the same cell twice (once from the owning rank, once from each rank carrying it as a ghost). For a plain <code>Mesh&lt;Context::Local&gt;</code> this returns nullptr and the writers iterate every cell.</p>
           </div></section>
           <section class="m-doc-details" id="a475db8b5e5873ed05d701ec8cfde3ecf"><div>
@@ -1204,6 +1274,31 @@
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
             </h3>
             <p>True iff cell <code>i</code> should appear in the per-rank XDMF stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">shard</td>
+                  <td>Mesh shard, or a null pointer for a local mesh.</td>
+                </tr>
+                <tr>
+                  <td>D</td>
+                  <td>Topological dimension of the cells.</td>
+                </tr>
+                <tr>
+                  <td>i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Whether the cell is owned by this rank and should be written.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>On a <code>Shard</code> this means <code>isOwned(D, i)</code>. On a non-shard local mesh the predicate is identically true.</p>
           </div></section>
           <section class="m-doc-details" id="a915630ac3e2381776164f3a7dcde3282"><div>
@@ -1212,6 +1307,23 @@
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
             </h3>
             <p>Number of cells the per-rank XDMF stream renders.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Mesh on which the object is defined.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The x d m f rendered cell count.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Equals the shard&#x27;s owned-cell count when <code>mesh</code> is a <code>Shard</code>, otherwise <code>mesh.getCellCount()</code>.</p>
           </div></section>
           <section class="m-doc-details" id="aa03e1ef88bdbc0fa57c2f76df43bd51b"><div>
@@ -1911,7 +2023,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

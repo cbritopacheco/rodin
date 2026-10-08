@@ -101,8 +101,7 @@
         </nav>
 <section id="examples-pdes-surface-intro"><h2><a href="#examples-pdes-surface-intro">Introduction</a></h2><p>Rodin can solve PDEs not only on 2D planar domains or 3D volumes, but also on <strong>surface meshes</strong> — 2D manifolds embedded in 3D space. This is useful for modeling phenomena on shells, biological membranes, or curved interfaces.</p><p>This example solves a <strong>reaction-diffusion</strong> steady-state problem on a surface mesh:</p><div class="m-math"><svg style="width: 11.934em; height: 1.494em;" viewBox="136.388506 -14.396065 114.570441 14.346348">
 <title>
-\[
-  \left\{
+\[  \left\{
   \begin{aligned}
     -\Delta_\Gamma u + u &amp;= f &amp;&amp; \text{on } \Gamma \\
   \end{aligned}
@@ -172,8 +171,7 @@ $ \mathbb{R}^3 $
 </g>
 </svg>.</p><p>The weak formulation is identical to the planar case — Rodin handles the surface geometry automatically through the mesh metric:</p><div class="m-math"><svg style="width: 20.515em; height: 2.819em;" viewBox="95.797118 -27.065451 196.948789 27.065451">
 <title>
-\[
-  \int_\Gamma \nabla_\Gamma u \cdot \nabla_\Gamma v \, ds
+\[  \int_\Gamma \nabla_\Gamma u \cdot \nabla_\Gamma v \, ds
   + \int_\Gamma u \, v \, ds
   = \int_\Gamma f \, v \, ds
 \]
@@ -367,7 +365,7 @@ $ dx $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

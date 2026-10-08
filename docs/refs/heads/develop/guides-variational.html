@@ -124,8 +124,7 @@
         </nav>
 <section id="guides-variational-intro"><h2><a href="#guides-variational-intro">Introduction</a></h2><p>The finite element method works by converting a partial differential equation (PDE) from its <strong>strong form</strong> into a <strong>weak (variational) form</strong>. Rodin&#x27;s <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module provides a form language that lets you express these variational formulations in C++ code that closely mirrors the mathematical notation.</p><p>The cross-module rules behind these examples are summarized in <a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a>, including the <code>Problem</code> sign convention and the distinction between interpolation and <code>L2</code> projection.</p></section><section id="guides-variational-weak"><h2><a href="#guides-variational-weak">From Strong to Weak Form</a></h2><p>Consider a generic second-order PDE in its strong form:</p><div class="m-math"><svg style="width: 7.333em; height: 1.107em;" viewBox="159.071314 -10.626787 70.400363 10.626798">
 <title>
-\[
-  \mathcal{L} u = f \quad \text{in } \Omega
+\[  \mathcal{L} u = f \quad \text{in } \Omega
 \]
 </title>
 <defs>
@@ -190,8 +189,7 @@ $ u $
 </g>
 </svg></li><li><strong>Apply boundary conditions</strong></li></ol><p>This produces a variational problem of the form:</p><div class="m-math"><svg style="width: 20.604em; height: 1.245em;" viewBox="95.370054 -11.955168 197.80294 11.955168">
 <title>
-\[
-  \text{Find } u \in V \text{ s.t. } \forall v \in V, \quad
+\[  \text{Find } u \in V \text{ s.t. } \forall v \in V, \quad
   a(u, v) = \ell(v)
 \]
 </title>
@@ -326,8 +324,7 @@ $ \partial\Omega $
 </g>
 </svg> has the weak form:</p><div class="m-math"><svg style="width: 13.557em; height: 2.819em;" viewBox="129.200176 -27.065451 130.142641 27.065451">
 <title>
-\[
-  \int_\Omega \nabla u \cdot \nabla v \, dx = \int_\Omega f v \, dx
+\[  \int_\Omega \nabla u \cdot \nabla v \, dx = \int_\Omega f v \, dx
 \]
 </title>
 <defs>
@@ -464,8 +461,7 @@ $ A\mathbf{x} = \mathbf{b} $
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w">                </span><span class="c1">// linear form   → goes into b</span>
 <span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span><span class="w">       </span><span class="c1">// modifies both A and b</span></pre><p>Sign convention explained:</p><p>The mathematical variational problem is:</p><div class="m-math"><svg style="width: 7.197em; height: 1.245em;" viewBox="159.723653 -11.955168 69.0957 11.955168">
 <title>
-\[
-  a(u, v) = \ell(v)
+\[  a(u, v) = \ell(v)
 \]
 </title>
 <defs>
@@ -493,8 +489,7 @@ $ A\mathbf{x} = \mathbf{b} $
 </g>
 </svg></div><p>Rodin moves everything to the left-hand side, giving:</p><div class="m-math"><svg style="width: 9.329em; height: 1.245em;" viewBox="149.491242 -11.955168 89.560514 11.955168">
 <title>
-\[
-  a(u, v) - \ell(v) = 0
+\[  a(u, v) - \ell(v) = 0
 \]
 </title>
 <defs>
@@ -944,8 +939,7 @@ $ \mathcal{F}_h^i $
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">SparseLU</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><p>For higher-order DG methods, the symmetric interior penalty (SIP) formulation uses explicit jump and average operators:</p><div class="m-math"><svg style="width: 41.431em; height: 3.155em;" viewBox="0 -31.482146 397.737732 30.286633">
 <title>
-\[
-  \sum_K \int_K \nabla u \cdot \nabla v \, dx
+\[  \sum_K \int_K \nabla u \cdot \nabla v \, dx
   - \int_{\mathcal{F}_h^i} \{\nabla u\} \cdot [v] \, ds
   - \int_{\mathcal{F}_h^i} [u] \cdot \{\nabla v\} \, ds
   + \frac{\sigma}{h} \int_{\mathcal{F}_h^i} [u] \cdot [v] \, ds
@@ -1099,7 +1093,7 @@ $ \mathcal{F}_h^i $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

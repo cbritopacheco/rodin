@@ -87,7 +87,7 @@
             <li><a href="#ordering-assembly">Consequences for assembly</a></li>
           </ul>
         </nav>
-<p>Matrix storage, tensor storage and finite-element coefficient numbering describe different representations. Storage order determines the position of an entry in an object&#x27;s memory. Component numbering determines the association between a coefficient and a basis function. Mathematical indexing remains independent of both representations.</p><section id="ordering-matrix"><h2><a href="#ordering-matrix">Matrix storage</a></h2><p><a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Rodin::<wbr />Math::<wbr />Matrix</a> and <a href="namespace_rodin_1_1_math.html#afaeeb1e6cfa0510216443b17a4eff9e3" class="m-doc">Rodin::<wbr />Math::<wbr />FixedSizeMatrix</a> use Eigen&#x27;s default column-major storage. For a dense matrix with <svg class="m-math" style="width: 1.067em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 10.239267 5.147373">
+<p>Matrix storage, tensor storage and finite-element coefficient numbering describe different representations. Storage order determines the position of an entry in an object&#x27;s memory. Component numbering determines the association between a coefficient and a basis function. Mathematical indexing remains independent of both representations.</p><section id="ordering-matrix"><h2><a href="#ordering-matrix">Matrix storage</a></h2><p><a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Matrix</a> and <a href="namespace_rodin_1_1_math.html#afaeeb1e6cfa0510216443b17a4eff9e3" class="m-doc">FixedSizeMatrix</a> use Eigen&#x27;s default column-major storage. For a dense matrix with <svg class="m-math" style="width: 1.067em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 10.239267 5.147373">
 <title>
 $m$
 </title>
@@ -127,7 +127,7 @@ $i+mj$
 <use x='18.411411' y='0' xlink:href='#eq3-g0-109'/>
 <use x='28.650678' y='0' xlink:href='#eq3-g0-106'/>
 </g>
-</svg>, with zero-based indices. Rows vary fastest within each column. <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">Rodin::<wbr />Math::<wbr />SparseMatrix</a> explicitly uses column-major compressed sparse storage; its entries are not a contiguous dense array.</p><p><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Rodin::<wbr />Math::<wbr />SpatialMatrix</a> also uses column-major storage, in a fixed three-by-three backing matrix. Its runtime dimensions select an active upper-left block. Consequently, its backing-storage offset is <svg class="m-math" style="width: 3.102em; height: 1.059em; vertical-align: -0.243em;" viewBox="0 -7.837689 29.7799 10.162297">
+</svg>, with zero-based indices. Rows vary fastest within each column. <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">SparseMatrix</a> explicitly uses column-major compressed sparse storage; its entries are not a contiguous dense array.</p><p><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> also uses column-major storage, in a fixed three-by-three backing matrix. Its runtime dimensions select an active upper-left block. Consequently, its backing-storage offset is <svg class="m-math" style="width: 3.102em; height: 1.059em; vertical-align: -0.243em;" viewBox="0 -7.837689 29.7799 10.162297">
 <title>
 $i+3j$
 </title>
@@ -187,8 +187,7 @@ $(i,j)$
 </g>
 </svg>, the coefficient index is</p><div class="m-math"><svg style="width: 16.328em; height: 1.245em;" viewBox="115.895227 -11.955168 156.752537 11.955168">
 <title>
-\[
-  q=a(mn)+c,\qquad c=in+j.
+\[  q=a(mn)+c,\qquad c=in+j.
 \]
 </title>
 <defs>
@@ -259,8 +258,7 @@ $E_{ij}$
 </g>
 </svg> is the matrix unit with a single nonzero entry. For a two-by-three range, the component sequence at each scalar basis index is</p><div class="m-math"><svg style="width: 20.911em; height: 1.245em;" viewBox="93.898901 -11.955168 200.745161 11.955168">
 <title>
-\[
-  (0,0),\ (0,1),\ (0,2),\ (1,0),\ (1,1),\ (1,2).
+\[  (0,0),\ (0,1),\ (0,2),\ (1,0),\ (1,1),\ (1,2).
 \]
 </title>
 <defs>
@@ -372,7 +370,7 @@ $H(\mathrm{curl})$
 <use x='31.433242' y='0' xlink:href='#eq14-g1-108'/>
 <use x='34.684904' y='0' xlink:href='#eq14-g1-41'/>
 </g>
-</svg> spaces, may have different basis functions, mappings and DOF distributions.</p></section><section id="ordering-tensor"><h2><a href="#ordering-tensor">Spatial tensor storage and index meaning</a></h2><p><a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">Rodin::<wbr />Math::<wbr />SpatialTensor</a> uses a fixed-capacity stack array with runtime extents. Active entries occupy a contiguous prefix, with the last index varying fastest. For rank <svg class="m-math" style="width: 0.938em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.008515 8.169366">
+</svg> spaces, may have different basis functions, mappings and DOF distributions.</p></section><section id="ordering-tensor"><h2><a href="#ordering-tensor">Spatial tensor storage and index meaning</a></h2><p><a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a> uses a fixed-capacity stack array with runtime extents. Active entries occupy a contiguous prefix, with the last index varying fastest. For rank <svg class="m-math" style="width: 0.938em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.008515 8.169366">
 <title>
 $R$
 </title>
@@ -436,8 +434,7 @@ $i_0,\ldots,i_{R-1}$
 </g>
 </svg>, the storage offset is</p><div class="m-math"><svg style="width: 9.640em; height: 3.643em;" viewBox="147.999567 -36.164554 92.543837 34.96904">
 <title>
-\[
-  p=\sum_{r=0}^{R-1} i_r\prod_{s=r+1}^{R-1}d_s.
+\[  p=\sum_{r=0}^{R-1} i_r\prod_{s=r+1}^{R-1}d_s.
 \]
 </title>
 <defs>
@@ -482,7 +479,7 @@ $i_0,\ldots,i_{R-1}$
 <use x='232.877693' y='-13.981034' xlink:href='#eq18-g2-115'/>
 <use x='237.291743' y='-15.774297' xlink:href='#eq18-g3-58'/>
 </g>
-</svg></div><p>The empty product equals one. An extent of zero makes the active tensor empty. This is the tensor analogue of row-major storage and differs from the column-major backing storage of <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Rodin::<wbr />Math::<wbr />SpatialMatrix</a>.</p><p>Index roles are specified by each mathematical operation. In particular, the gradient of a matrix field has entries <svg class="m-math" style="width: 6.636em; height: 1.213em; vertical-align: -0.350em;" viewBox="0 -8.302191 63.708641 11.6452">
+</svg></div><p>The empty product equals one. An extent of zero makes the active tensor empty. This is the tensor analogue of row-major storage and differs from the column-major backing storage of <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>.</p><p>Index roles are specified by each mathematical operation. In particular, the gradient of a matrix field has entries <svg class="m-math" style="width: 6.636em; height: 1.213em; vertical-align: -0.350em;" viewBox="0 -8.302191 63.708641 11.6452">
 <title>
 $G_{ijk}=\partial_k A_{ij}$
 </title>
@@ -669,7 +666,7 @@ $mnN^2$
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

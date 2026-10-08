@@ -143,16 +143,16 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a11c4ca84d818b4c96f829e779509de85">
-              <span class="m-doc-wrap-bumper">auto <a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the grid function bound to this printer.</dd>
-            <dt id="a7c84cfa9805fac76a8f3f3600270724b">
-              <span class="m-doc-wrap-bumper">void <a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp;) <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Rejects formats without a concrete finite element collection.</dd>
-            <dt id="a1faf93c7c3860d09c7323b22895bd99b">
-              <span class="m-doc-wrap-bumper">void <a href="#a1faf93c7c3860d09c7323b22895bd99b" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp;) <span class="m-label m-flat m-warning">virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ac5865d8a77b5ecc449edea059026067d" class="m-doc">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Hook for format-specific coefficient printers.</dd>
           </dl>
@@ -175,6 +175,63 @@
                 <tr>
                   <td style="width: 1%">gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Grid function to print.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a11c4ca84d818b4c96f829e779509de85"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a6b46c2004e4319d85ca4169e54478d4b" class="m-doc">ObjectType</a>&amp; Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the grid function bound to this printer.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The grid function bound to this printer.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2504fad917ab72c2e27e762f99fa6583"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Rejects formats without a concrete finite element collection.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream required by the printer interface; unused by this implementation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac5865d8a77b5ecc449edea059026067d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;Fmt, FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5865d8a77b5ecc449edea059026067d" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">virtual</span></span></span>
+            </h3>
+            <p>Hook for format-specific coefficient printers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream required by the printer interface; unused by this implementation.</td>
                 </tr>
               </tbody>
             </table>
@@ -224,7 +281,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

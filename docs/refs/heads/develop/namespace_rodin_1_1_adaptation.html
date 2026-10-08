@@ -77,12 +77,22 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Adaptation <span class="m-thin">namespace</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_tests_1_1_benchmarks.html" class="m-doc">Rodin::<wbr />Tests::<wbr />Benchmarks</a>.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_tests_1_1_benchmarks.html" class="m-doc">Benchmarks</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md573">Design</a></li>
-            <li><a href="#autotoc_md574">Key classes</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md573">Design</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md574">Key classes</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -92,7 +102,7 @@
             </li>
           </ul>
         </nav>
-<p>Directory Rodin/tests/benchmarks Directory src/Rodin/Adaptation</p><p>Namespace <a href="namespace_rodin_1_1_adaptation.html" class="m-doc">Rodin::<wbr />Adaptation</a></p><p>Module for moving-interface mesh adaptation.</p><p>The Adaptation module provides tools for fitting and adapting meshes to moving interfaces described by level set functions. Its centerpiece is WNGIR (Welsch natural-gradient interface registration): a variational method that displaces mesh vertices so that a discrete interface tracks the zero set of a level set function <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
+<p>Directory Rodin/tests/benchmarks Directory src/Rodin/Adaptation</p><p>Namespace <a href="namespace_rodin_1_1_adaptation.html" class="m-doc">Adaptation</a></p><p>Module for moving-interface mesh adaptation.</p><p>The Adaptation module provides tools for fitting and adapting meshes to moving interfaces described by level set functions. Its centerpiece is WNGIR (Welsch natural-gradient interface registration): a variational method that displaces mesh vertices so that a discrete interface tracks the zero set of a level set function <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
 <title>
 $ \phi $
 </title>
@@ -102,7 +112,7 @@ $ \phi $
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-30'/>
 </g>
-</svg>, while preserving element quality.</p><section id="autotoc_md573"><h3><a href="#autotoc_md573">Design</a></h3><p>The module follows a strict separation of concerns:</p><ul><li>The <strong>level set</strong> <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
+</svg>, while preserving element quality.</p><section id="autotoc_md573_1s1"><section id="autotoc_md573"><h3><a href="#autotoc_md573">Design</a></h3><p>The module follows a strict separation of concerns:</p><ul><li>The <strong>level set</strong> <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
 <title>
 $ \phi $
 </title>
@@ -150,7 +160,7 @@ $ \phi $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-30'/>
 </g>
-</svg> into discrete cell attributes (see <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> utilities such as the min s-t cut classifier).</li><li><strong>Geometry fitting</strong> (WNGIR) moves and curves the mesh. It never decides topology.</li></ul><p>The WNGIR step solves a metric-preconditioned (natural-gradient) problem built entirely in the variational form language: a surface force (the Welsch first variation, assembled on interface facets) balanced against bulk, observation, and admissibility metrics. Hard admissibility (element validity) is enforced by a nonlinear line search.</p></section><section id="autotoc_md574"><h3><a href="#autotoc_md574">Key classes</a></h3><ul><li>WNGIRParameters — solve configuration (budgets, tolerances, weights)</li><li>WNGIRReport — per-solve diagnostics</li><li>WNGIRSolver — backend-independent solver driver</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Interface-fitting constraints are formulated as smooth penalties; the module deliberately avoids hard geometric projections inside the solve, which break line-search continuity.</p></aside></section>
+</svg> into discrete cell attributes (see <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> utilities such as the min s-t cut classifier).</li><li><strong>Geometry fitting</strong> (WNGIR) moves and curves the mesh. It never decides topology.</li></ul><p>The WNGIR step solves a metric-preconditioned (natural-gradient) problem built entirely in the variational form language: a surface force (the Welsch first variation, assembled on interface facets) balanced against bulk, observation, and admissibility metrics. Hard admissibility (element validity) is enforced by a nonlinear line search.</p></section></section><section id="autotoc_md574_1s1"><section id="autotoc_md574"><h3><a href="#autotoc_md574">Key classes</a></h3><ul><li>WNGIRParameters — solve configuration (budgets, tolerances, weights)</li><li>WNGIRReport — per-solve diagnostics</li><li>WNGIRSolver — backend-independent solver driver</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Interface-fitting constraints are formulated as smooth penalties; the module deliberately avoids hard geometric projections inside the solve, which break line-search continuity.</p></aside></section></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -231,28 +241,28 @@ $\Phi(x)=x+u(x)$
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class F&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a6297cd9aa70f41a3b4e9a0ade0cc9411" class="m-doc">AnalyticVectorFunction</a>(</span><span class="m-doc-wrap">F,
-              std::size_t) -&gt; AnalyticVectorFunction&lt; F &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a383661463e5f09f525e8404c2f8a1586" class="m-doc">AnalyticVectorFunction</a>(</span><span class="m-doc-wrap">F f,
+              std::size_t dimension) -&gt; AnalyticVectorFunction&lt; F &gt;</span>
             </dt>
             <dd>Deduction guide for analytic vector functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class F&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a6cc514881fe7af577c50890ee03ce1ce" class="m-doc">AnalyticMatrixFunction</a>(</span><span class="m-doc-wrap">F,
-              std::size_t,
-              std::size_t) -&gt; AnalyticMatrixFunction&lt; F &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a79d713c28171ecd10c4407f1c87f9059" class="m-doc">AnalyticMatrixFunction</a>(</span><span class="m-doc-wrap">F f,
+              std::size_t rows,
+              std::size_t cols) -&gt; AnalyticMatrixFunction&lt; F &gt;</span>
             </dt>
             <dd>Deduction guide for analytic matrix functions.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a913379be076c1f4ec6d9f75b73152513" class="m-doc">precomputeCellGeometry</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>&gt;&amp; mesh) -&gt; std::pair&lt;std::vector&lt;<a href="struct_rodin_1_1_adaptation_1_1_cell_geom_cache.html" class="m-doc">CellGeomCache</a>&gt;, std::unordered_map&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, size_t&gt;&gt;</span>
             </dt>
             <dd>Build a <code>CellGeomCache</code> per cell, in mesh-iteration order.</dd>
-            <dt id="a05f2fd24666d48403d8c80b6cddd9d43">
-              <span class="m-doc-wrap-bumper">auto <a href="#a05f2fd24666d48403d8c80b6cddd9d43" class="m-doc-self">wngirAdmissibilityQuadratureOrder</a>(</span><span class="m-doc-wrap">std::size_t feOrder) -&gt; std::size_t</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a05f2fd24666d48403d8c80b6cddd9d43" class="m-doc">wngirAdmissibilityQuadratureOrder</a>(</span><span class="m-doc-wrap">std::size_t feOrder) -&gt; std::size_t</span>
             </dt>
             <dd>Returns the sampled admissibility quadrature order for FE order.</dd>
-            <dt id="aa13bd664148aadea6062570b22a7d9c5">
+            <dt>
               <div class="m-doc-template">template&lt;class Displacement&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa13bd664148aadea6062570b22a7d9c5" class="m-doc-self">evaluateWNGIRAdmissibilitySampled</a>(</span><span class="m-doc-wrap">Displacement&amp; u,
+              <span class="m-doc-wrap-bumper">auto <a href="#aa13bd664148aadea6062570b22a7d9c5" class="m-doc">evaluateWNGIRAdmissibilitySampled</a>(</span><span class="m-doc-wrap">Displacement&amp; u,
               const <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; uData,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> jMin,
               std::size_t quadratureOrder = 0) -&gt; <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_admissibility_report.html" class="m-doc">WNGIRAdmissibilityReport</a></span>
@@ -262,28 +272,62 @@ $\Phi(x)=x+u(x)$
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a6297cd9aa70f41a3b4e9a0ade0cc9411"><div>
+          <section class="m-doc-details" id="a383661463e5f09f525e8404c2f8a1586"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_analytic_function_adapters_8h.html">&lt;Rodin/Adaptation/AnalyticFunctionAdapters.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6297cd9aa70f41a3b4e9a0ade0cc9411" class="m-doc-self">AnalyticVectorFunction</a>(</span><span class="m-doc-wrap">F,
-              std::size_t) -&gt; AnalyticVectorFunction&lt; F &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a383661463e5f09f525e8404c2f8a1586" class="m-doc-self">AnalyticVectorFunction</a>(</span><span class="m-doc-wrap">F f,
+              std::size_t dimension) -&gt; AnalyticVectorFunction&lt; F &gt;</span></span>
             </h3>
             <p>Deduction guide for analytic vector functions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">f</td>
+                  <td>Function operand.</td>
+                </tr>
+                <tr>
+                  <td>dimension</td>
+                  <td>Spatial dimension.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
-          <section class="m-doc-details" id="a6cc514881fe7af577c50890ee03ce1ce"><div>
+          <section class="m-doc-details" id="a79d713c28171ecd10c4407f1c87f9059"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_analytic_function_adapters_8h.html">&lt;Rodin/Adaptation/AnalyticFunctionAdapters.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class F&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6cc514881fe7af577c50890ee03ce1ce" class="m-doc-self">AnalyticMatrixFunction</a>(</span><span class="m-doc-wrap">F,
-              std::size_t,
-              std::size_t) -&gt; AnalyticMatrixFunction&lt; F &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a79d713c28171ecd10c4407f1c87f9059" class="m-doc-self">AnalyticMatrixFunction</a>(</span><span class="m-doc-wrap">F f,
+              std::size_t rows,
+              std::size_t cols) -&gt; AnalyticMatrixFunction&lt; F &gt;</span></span>
             </h3>
             <p>Deduction guide for analytic matrix functions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">f</td>
+                  <td>Function operand.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Number of columns.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a913379be076c1f4ec6d9f75b73152513"><div>
             <h3>
@@ -291,7 +335,88 @@ $\Phi(x)=x+u(x)$
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_cell_geom_cache_8h.html">&lt;Rodin/Adaptation/CellGeomCache.h&gt;</a></div>
             </h3>
             <p>Build a <code>CellGeomCache</code> per cell, in mesh-iteration order.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Mesh on which the object is defined.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Cell geometry caches and the map from cell indices to cache positions.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>The returned vector is indexed by LOCAL iteration order — not by mesh cell index. The cache entry <code>.index</code> records the parent mesh&#x27;s cell index; the second returned map gives the parent-index -&gt; local-index translation for use by the rest of the pipeline.</p><p>Throws if A_K(xhat_q) is singular at any quadrature point, or if the branch sign sigma_K(xhat_q) is inconsistent across quadrature points (which would mean a curved or inverted element; this 2D affine prototype rejects them).</p>
+          </div></section>
+          <section class="m-doc-details" id="a05f2fd24666d48403d8c80b6cddd9d43"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::size_t Rodin::<wbr />Adaptation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a05f2fd24666d48403d8c80b6cddd9d43" class="m-doc-self">wngirAdmissibilityQuadratureOrder</a>(</span><span class="m-doc-wrap">std::size_t feOrder)</span></span>
+            </h3>
+            <p>Returns the sampled admissibility quadrature order for FE order.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">feOrder</td>
+                  <td>Polynomial order of the displacement finite element.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Maximum of two and twice the finite element order.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa13bd664148aadea6062570b22a7d9c5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Displacement&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_admissibility_report.html" class="m-doc">WNGIRAdmissibilityReport</a> Rodin::<wbr />Adaptation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa13bd664148aadea6062570b22a7d9c5" class="m-doc-self">evaluateWNGIRAdmissibilitySampled</a>(</span><span class="m-doc-wrap">Displacement&amp; u,
+              const <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; uData,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> jMin,
+              std::size_t quadratureOrder = 0)</span></span>
+            </h3>
+            <p>Evaluates sampled Jacobian and relative-distortion admissibility.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>Displacement field whose coefficients are replaced with the candidate data.</td>
+                </tr>
+                <tr>
+                  <td>uData</td>
+                  <td>Displacement coefficients assigned before sampling.</td>
+                </tr>
+                <tr>
+                  <td>jMin</td>
+                  <td>Lower admissible Jacobian-determinant bound.</td>
+                </tr>
+                <tr>
+                  <td>quadratureOrder</td>
+                  <td>Sampling quadrature order; zero selects the order from the finite element.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Minimum sampled Jacobian determinant, inadmissible sample count, and maximum relative distortion.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
@@ -338,7 +463,7 @@ $\Phi(x)=x+u(x)$
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

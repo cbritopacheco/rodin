@@ -81,10 +81,30 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md406">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md407">Bilinear Form Integrals</a></li>
-            <li><a href="#autotoc_md408">Linear Form Integrals</a></li>
-            <li><a href="#autotoc_md409">Usage Examples</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md406">Mathematical Foundation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md407">Bilinear Form Integrals</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md408">Linear Form Integrals</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md409">Usage Examples</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,10 +114,9 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Integral classes which represent domain integrals in finite element formulations. These integrals form the basis for defining bilinear and linear forms in the weak formulation.</p><section id="autotoc_md406"><h3><a href="#autotoc_md406">Mathematical Foundation</a></h3><p>Domain integrals compute:</p><div class="m-math"><svg style="width: 5.498em; height: 2.819em;" viewBox="167.882039 -27.065451 52.778905 27.065451">
+<p>This file defines the Integral classes which represent domain integrals in finite element formulations. These integrals form the basis for defining bilinear and linear forms in the weak formulation.</p><section id="autotoc_md406_1s1"><section id="autotoc_md406"><h3><a href="#autotoc_md406">Mathematical Foundation</a></h3><p>Domain integrals compute:</p><div class="m-math"><svg style="width: 5.498em; height: 2.819em;" viewBox="167.882039 -27.065451 52.778905 27.065451">
 <title>
-\[
-  \int_\Omega f(x) \, dx
+\[     \int_\Omega f(x) \, dx
 \]
 </title>
 <defs>
@@ -139,7 +158,7 @@ $ f $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-102'/>
 </g>
-</svg> is the integrand.</p></section><section id="autotoc_md407"><h3><a href="#autotoc_md407">Bilinear Form Integrals</a></h3><p>For bilinear forms <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
+</svg> is the integrand.</p></section></section><section id="autotoc_md407_1s1"><section id="autotoc_md407"><h3><a href="#autotoc_md407">Bilinear Form Integrals</a></h3><p>For bilinear forms <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
 <title>
 $ a(u,v) $
 </title>
@@ -161,8 +180,7 @@ $ a(u,v) $
 </g>
 </svg>:</p><div class="m-math"><svg style="width: 14.385em; height: 2.819em;" viewBox="125.225838 -27.065451 138.091342 27.065451">
 <title>
-\[
-  a(u,v) = \int_\Omega A(u) : B(v) \, dx
+\[     a(u,v) = \int_\Omega A(u) : B(v) \, dx
 \]
 </title>
 <defs>
@@ -223,7 +241,7 @@ $ B $
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-66'/>
 </g>
-</svg> are operators on trial and test functions.</p></section><section id="autotoc_md408"><h3><a href="#autotoc_md408">Linear Form Integrals</a></h3><p>For linear forms <svg class="m-math" style="width: 1.973em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 18.942679 11.955168">
+</svg> are operators on trial and test functions.</p></section></section><section id="autotoc_md408_1s1"><section id="autotoc_md408"><h3><a href="#autotoc_md408">Linear Form Integrals</a></h3><p>For linear forms <svg class="m-math" style="width: 1.973em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 18.942679 11.955168">
 <title>
 $ l(v) $
 </title>
@@ -241,8 +259,7 @@ $ l(v) $
 </g>
 </svg>:</p><div class="m-math"><svg style="width: 9.003em; height: 2.819em;" viewBox="151.0547 -27.065451 86.433591 27.065451">
 <title>
-\[
-  l(v) = \int_\Omega f \cdot v \, dx
+\[     l(v) = \int_\Omega f \cdot v \, dx
 \]
 </title>
 <defs>
@@ -272,21 +289,21 @@ $ l(v) $
 <use x='224.753511' y='-10.793007' xlink:href='#eq9-g2-100'/>
 <use x='230.836204' y='-10.793007' xlink:href='#eq9-g2-120'/>
 </g>
-</svg></div></section><section id="autotoc_md409"><h3><a href="#autotoc_md409">Usage Examples</a></h3><pre class="m-code"><span class="c1">// Stiffness matrix: \int \nabla u\cdot\nabla v dx</span>
+</svg></div></section></section><section id="autotoc_md409_1s1"><section id="autotoc_md409"><h3><a href="#autotoc_md409">Usage Examples</a></h3><pre class="m-code"><span class="c1">// Stiffness matrix: \int \nabla u\cdot\nabla v dx</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
 
 <span class="c1">// Mass matrix: \int u\cdot v dx</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">mass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="c1">// Load vector: \int f\cdot v dx</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span></pre></section>
+<span class="k">auto</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span></pre></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -353,7 +370,7 @@ $ l(v) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

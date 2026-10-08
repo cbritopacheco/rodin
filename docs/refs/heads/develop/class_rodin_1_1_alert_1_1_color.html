@@ -120,12 +120,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a96c386434759ce077ab1b38021f2d22a" class="m-doc">Color</a>(</span><span class="m-doc-wrap">const <a href="#a90b3c5f24e369485849045f2f7cf342a" class="m-doc">Code</a>&amp; code = <a href="#a90b3c5f24e369485849045f2f7cf342a" class="m-doc">Code</a>()) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a Color with the given code.</dd>
-            <dt id="a69fcdcb2c023ca80a857289f72836c7a">
-              <span class="m-doc-wrap-bumper"><a href="#a69fcdcb2c023ca80a857289f72836c7a" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2f2fe93598649047e362e2021d860497" class="m-doc">Color</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="adfd5be86cbbdfac14c249b9ec1a56f23">
-              <span class="m-doc-wrap-bumper"><a href="#adfd5be86cbbdfac14c249b9ec1a56f23" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a024908262de7d2f42f8c0c2e472bd36f" class="m-doc">Color</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -133,12 +133,12 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a444756602b7fcc7d3b21aaa0c61cf440">
-              <span class="m-doc-wrap-bumper">auto <a href="#a444756602b7fcc7d3b21aaa0c61cf440" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;) -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae5c5f1178e010b72d413e43d50fb6b96" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; other) -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy assignment operator.</dd>
-            <dt id="a4420d21fbd73c0de4774436a64b240c4">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4420d21fbd73c0de4774436a64b240c4" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4e1f25cd695804901969638f64188158" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -167,6 +167,98 @@
                   <td>The RGB color code (defaults to default-constructed Code).</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2f2fe93598649047e362e2021d860497"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CodeT&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Color&lt;CodeT&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2f2fe93598649047e362e2021d860497" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a024908262de7d2f42f8c0c2e472bd36f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CodeT&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Color&lt;CodeT&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a024908262de7d2f42f8c0c2e472bd36f" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae5c5f1178e010b72d413e43d50fb6b96"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CodeT&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; Rodin::<wbr />Alert::<wbr />Color&lt;CodeT&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5c5f1178e010b72d413e43d50fb6b96" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4e1f25cd695804901969638f64188158"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CodeT&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; Rodin::<wbr />Alert::<wbr />Color&lt;CodeT&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e1f25cd695804901969638f64188158" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="a2e077fba7182a843195d00097825ae28"><div>
@@ -231,7 +323,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

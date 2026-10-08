@@ -81,8 +81,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md464">Quadrature Strategies</a></li>
-            <li><a href="#autotoc_md465">Supported Integrands</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md464">Quadrature Strategies</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md465">Supported Integrands</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -92,7 +102,7 @@
             </li>
           </ul>
         </nav>
-<p>This file provides specialized quadrature rules for P1 spaces that exploit the constant gradient property of P1 basis functions to achieve exact integration with minimal quadrature points.</p><section id="autotoc_md464"><h3><a href="#autotoc_md464">Quadrature Strategies</a></h3><ul><li><strong>Centroid quadrature</strong>: Uses single point at element barycenter</li><li><strong>Exact for P1 bilinear forms</strong>: <svg class="m-math" style="width: 6.213em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 59.643684 13.283652">
+<p>This file provides specialized quadrature rules for P1 spaces that exploit the constant gradient property of P1 basis functions to achieve exact integration with minimal quadrature points.</p><section id="autotoc_md464_1s1"><section id="autotoc_md464"><h3><a href="#autotoc_md464">Quadrature Strategies</a></h3><ul><li><strong>Centroid quadrature</strong>: Uses single point at element barycenter</li><li><strong>Exact for P1 bilinear forms</strong>: <svg class="m-math" style="width: 6.213em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 59.643684 13.283652">
 <title>
 $ \int \nabla \phi_i \cdot \nabla \phi_j $
 </title>
@@ -114,7 +124,7 @@ $ \int \nabla \phi_i \cdot \nabla \phi_j $
 <use x='48.831557' y='0' xlink:href='#eq1-g3-30'/>
 <use x='55.759659' y='1.793263' xlink:href='#eq1-g2-106'/>
 </g>
-</svg></li><li><strong>Reduced integration</strong>: Enables efficient assembly</li></ul></section><section id="autotoc_md465"><h3><a href="#autotoc_md465">Supported Integrands</a></h3><ul><li>Scalar P1 shape functions: <svg class="m-math" style="width: 3.206em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 30.778121 13.283652">
+</svg></li><li><strong>Reduced integration</strong>: Enables efficient assembly</li></ul></section></section><section id="autotoc_md465_1s1"><section id="autotoc_md465"><h3><a href="#autotoc_md465">Supported Integrands</a></h3><ul><li>Scalar P1 shape functions: <svg class="m-math" style="width: 3.206em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 30.778121 13.283652">
 <title>
 $ \int v \, dx $
 </title>
@@ -251,14 +261,14 @@ $ \int \mathbf{J}u : \mathbf{J}v \, dx $
 <use x='48.49147' y='0' xlink:href='#eq7-g2-100'/>
 <use x='54.574163' y='0' xlink:href='#eq7-g2-120'/>
 </g>
-</svg></li><li>Potential operators for boundary elements</li></ul><p>These specializations mirror the generic quadrature rules in <code>Rodin/Variational/QuadratureRule.h</code> but collapse to a single centroid evaluation when possible. Mixed trial/test P1 spaces are supported for the mass, stiffness, and Jacobian forms.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_p1.html">P1</a></p><p><a href="_quadrature_formula_8h.html">QuadratureFormula</a></p><p><a href="_integral_8h.html">Integral</a></p></aside></section>
+</svg></li><li>Potential operators for boundary elements</li></ul><p>These specializations mirror the generic quadrature rules in <code>Rodin/Variational/QuadratureRule.h</code> but collapse to a single centroid evaluation when possible. Mixed trial/test P1 spaces are supported for the mass, stiffness, and Jacobian forms.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_p1.html">P1</a></p><p><a href="_quadrature_formula_8h.html">QuadratureFormula</a></p><p><a href="_integral_8h.html">Integral</a></p></aside></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -505,7 +515,7 @@ $\int \mathcal{K}(u) \cdot v$
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

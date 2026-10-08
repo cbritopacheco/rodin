@@ -78,7 +78,7 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>MeshLoader <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_mesh_loader_8h.html">&lt;Rodin/MMG/MeshLoader.h&gt;</a></div>
         </h1>
-        <p>Loads an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Rodin::<wbr />MMG::<wbr />Mesh</a> from the MEDIT format.</p>
+        <p>Loads an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> from the MEDIT format.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -93,15 +93,15 @@
             </li>
           </ul>
         </nav>
-<p>Extends the base MEDIT loader by additionally parsing MMG-specific sections (corners, ridges, required vertices, required edges, required triangles, and required tetrahedra) and storing them in the associated <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> metadata sets.</p>
+<p>Extends the base MEDIT loader by additionally parsing MMG-specific sections (corners, ridges, required vertices, required edges, required triangles, and required tetrahedra) and storing them in the associated <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> metadata sets.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_i_o_1_1_file_format_1_1_m_e_d_i_t_00_01_context_1_1_local_01_4.html" class="m-doc">MeshLoader&lt;IO::FileFormat::MEDIT, Context::Local&gt;</a>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class Trait&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_loader.html" class="m-doc">Rodin::IO::MeshLoader&lt;IO::FileFormat::MEDIT, Context::Local&gt;</a>
             </dt>
-            <dd>Specialization for loading Sequential meshes in the MEDIT file format.</dd>
+            <dd>Loader template for meshes with specific file format and context.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -230,7 +230,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

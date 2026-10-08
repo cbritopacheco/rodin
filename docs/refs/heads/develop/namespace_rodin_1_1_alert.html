@@ -77,12 +77,22 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Alert <span class="m-thin">namespace</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_alert.html" class="m-doc">Rodin::<wbr />Alert</a>.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md516">Alert Types</a></li>
-            <li><a href="#autotoc_md517">Usage Pattern</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md516">Alert Types</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md517">Usage Pattern</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -96,7 +106,7 @@
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Alert</p><p>Module to handle alerts, exceptions, and diagnostic messages.</p><p>The Alert module provides a stream-based system for handling exceptions, warnings, informational messages, and success notifications with colored terminal output. Rodin uses this system <strong>instead of raw <code>throw</code> statements</strong>.</p><section id="autotoc_md516"><h3><a href="#autotoc_md516">Alert Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Color</th><th>Behavior</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_info.html" class="m-doc">Alert::<wbr />Info</a></td><td>Blue</td><td>Informational message (non-fatal)</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Alert::<wbr />Warning</a></td><td>Yellow</td><td>Warning message (non-fatal)</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Alert::<wbr />Success</a></td><td>Green</td><td>Success notification (non-fatal)</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Alert::<wbr />Exception</a></td><td>Red</td><td>Throws an exception (fatal)</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">Alert::<wbr />MemberFunctionException</a></td><td>Red</td><td>Exception with class/method context</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_member_function_warning.html" class="m-doc">Alert::<wbr />MemberFunctionWarning</a></td><td>Yellow</td><td>Warning with class/method context</td></tr></tbody></table></section><section id="autotoc_md517"><h3><a href="#autotoc_md517">Usage Pattern</a></h3><p>All alerts use the stream insertion operator <code>&lt;&lt;</code> and terminate with <code>Alert::Raise</code>:</p><pre class="m-code"><span class="c1">// Informational message</span>
+<p>Directory src/Rodin/Alert</p><p>Module to handle alerts, exceptions, and diagnostic messages.</p><p>The Alert module provides a stream-based system for handling exceptions, warnings, informational messages, and success notifications with colored terminal output. Rodin uses this system <strong>instead of raw <code>throw</code> statements</strong>.</p><section id="autotoc_md516_1s1"><section id="autotoc_md516"><h3><a href="#autotoc_md516">Alert Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Color</th><th>Behavior</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_alert_1_1_info.html" class="m-doc">Alert::<wbr />Info</a></td><td>Blue</td><td>Informational message (non-fatal)</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Alert::<wbr />Warning</a></td><td>Yellow</td><td>Warning message (non-fatal)</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Alert::<wbr />Success</a></td><td>Green</td><td>Success notification (non-fatal)</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Alert::<wbr />Exception</a></td><td>Red</td><td>Throws an exception (fatal)</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">Alert::<wbr />MemberFunctionException</a></td><td>Red</td><td>Exception with class/method context</td></tr><tr><td><a href="class_rodin_1_1_alert_1_1_member_function_warning.html" class="m-doc">Alert::<wbr />MemberFunctionWarning</a></td><td>Yellow</td><td>Warning with class/method context</td></tr></tbody></table></section></section><section id="autotoc_md517_1s1"><section id="autotoc_md517"><h3><a href="#autotoc_md517">Usage Pattern</a></h3><p>All alerts use the stream insertion operator <code>&lt;&lt;</code> and terminate with <code>Alert::Raise</code>:</p><pre class="m-code"><span class="c1">// Informational message</span>
 <span class="n">Alert</span><span class="o">::</span><span class="n">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Assembling the system..."</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span>
 
 <span class="c1">// Warning</span>
@@ -105,7 +115,7 @@
 <span class="c1">// Fatal exception (replaces throw)</span>
 <span class="n">Alert</span><span class="o">::</span><span class="n">MemberFunctionException</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">__func__</span><span class="p">)</span>
 <span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Incidence "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" -&gt; "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">dp</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">" has not been computed."</span>
-<span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span></pre><aside class="m-note m-danger"><h4>Warning</h4><p>Never use raw <code>throw</code> in Rodin code. Always use the Alert stream pattern with <code>&lt;&lt; Alert::Raise</code>.</p></aside></section>
+<span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span></pre><aside class="m-note m-danger"><h4>Warning</h4><p>Never use raw <code>throw</code> in Rodin code. Always use the Alert stream pattern with <code>&lt;&lt; Alert::Raise</code>.</p></aside></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -320,78 +330,78 @@
             <dd>Stream insertion operator for Color16.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Code&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a98bef331b3c83c69ca39de22cf1fece0" class="m-doc">Color</a>(</span><span class="m-doc-wrap">const Code&amp;) -&gt; Color&lt; Code &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a316fc56b907e20f17d91ef35ceed82c7" class="m-doc">Color</a>(</span><span class="m-doc-wrap">const Code&amp; code) -&gt; Color&lt; Code &gt;</span>
             </dt>
             <dd>Deduction guide for Color.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Code&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a39226fadc0951c5356018a2fbb172b2a" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&lt;Code&gt;&amp;) -&gt; std::ostream&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6500c5b66dc863c6e49372527502f18f" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&lt;Code&gt;&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for custom RGB colors.</dd>
-            <dt id="ab50a35ef2b205f9bd9bb2ad85e93a388">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab50a35ef2b205f9bd9bb2ad85e93a388" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a>&amp;) -&gt; std::ostream&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0de113d7f30fe0d16a8b3fccac32bb1a" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for red color.</dd>
-            <dt id="ae2898b384a41857d6ea94c19bbc9cd8f">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae2898b384a41857d6ea94c19bbc9cd8f" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_green_t.html" class="m-doc">GreenT</a>&amp;) -&gt; std::ostream&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8c96b9cc78b2ec885b986da7e823a84e" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_green_t.html" class="m-doc">GreenT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for green color.</dd>
-            <dt id="aa8cfdca9387371583a4657f8d25f9f84">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa8cfdca9387371583a4657f8d25f9f84" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_blue_t.html" class="m-doc">BlueT</a>&amp;) -&gt; std::ostream&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad1f5b3c4fae1dec2eb7c1be7f3e27fda" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_blue_t.html" class="m-doc">BlueT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for blue color.</dd>
-            <dt id="a7b50125ed8c3c959a4fe3717847bcf54">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7b50125ed8c3c959a4fe3717847bcf54" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_yellow_t.html" class="m-doc">YellowT</a>&amp;) -&gt; std::ostream&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af9140329a9f5a897fa3ae1ce1defcba0" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_yellow_t.html" class="m-doc">YellowT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for yellow color.</dd>
-            <dt id="ab5dcd44b582e98fc1c7228487efe5650">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab5dcd44b582e98fc1c7228487efe5650" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a>&amp;) -&gt; std::ostream&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a722c140ebe0e9a072cbe6788c2c3fbf4" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for magenta color.</dd>
-            <dt id="ac4fcfb127fbf4b5713814e8db5a4d498">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac4fcfb127fbf4b5713814e8db5a4d498" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a>&amp;) -&gt; std::ostream&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3127ce3d0984d9b57b93ce2db6e3b778" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for cyan color.</dd>
-            <dt id="a28baa7280e5ffc536e6855c5b905274c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a28baa7280e5ffc536e6855c5b905274c" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_white_t.html" class="m-doc">WhiteT</a>&amp;) -&gt; std::ostream&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af0da46e44466a91716a2fc4095e263d3" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_white_t.html" class="m-doc">WhiteT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for white color.</dd>
-            <dt id="ad5b4d3a2c4d16efa8a3fe8f836ac6101">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad5b4d3a2c4d16efa8a3fe8f836ac6101" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_gray_t.html" class="m-doc">GrayT</a>&amp;) -&gt; std::ostream&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab62e9aa189bfd0065416098622cf2e75" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_gray_t.html" class="m-doc">GrayT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for gray color.</dd>
-            <dt id="af78f02bd95ae8535349fb3065ad04272">
-              <span class="m-doc-wrap-bumper">auto <a href="#af78f02bd95ae8535349fb3065ad04272" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_bright_gray_t.html" class="m-doc">BrightGrayT</a>&amp;) -&gt; std::ostream&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5a2458f422337773a2fbe48323ddde4a" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_bright_gray_t.html" class="m-doc">BrightGrayT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for bright gray color.</dd>
-            <dt id="a7c55c547f0ab8947aee7e74f0727f33c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7c55c547f0ab8947aee7e74f0727f33c" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a>&amp;) -&gt; std::ostream&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3c96ce1d55a602d2cb5eb03afb265160" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for bright white color.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aabdf8ad5380cda9eeb370e5da5e9a0e6" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp;) -&gt; std::ostream&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4ffdff661a9ff51bb8c0e1c928cd4baf" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for NewLineT.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a10a7213329e4231f1e2581c7340066cb" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp;) -&gt; std::ostream&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8f74b0458403d3fb6d2b67060a23431f" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for ResetT.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0d49473ee9f6757a0a6c6732a99f1593" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>&amp;) -&gt; std::ostream&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a357c0af4772f7683a27ea34f1b554072" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>&amp; tag) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for StylizeT.</dd>
             <dt>
@@ -492,6 +502,11 @@
               static <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a> <a href="#a34326b1a98fedf399fc8fb3b329e5a09" class="m-doc-self">BrightWhite</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Instance of BrightWhiteT tag type.</dd>
+            <dt id="ad6e161aeb33bcc9912383d8999775d74">
+              <div class="m-doc-template">template&lt;class Prefix&gt;</div>
+              thread_local std::string <a href="#ad6e161aeb33bcc9912383d8999775d74" class="m-doc-self">Message< Prefix >::s_what</a>
+            </dt>
+            <dd>Thread-local storage initialization for Message::s_what.</dd>
             <dt>
               static <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> <a href="#a9fa27b1c1233610a89519358019f0852" class="m-doc">NewLine</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
@@ -608,7 +623,7 @@
                 <tr>
                   <td><a href="#a15b1b83081915ae5239f81050ae0f550a1d874710ccdcd46b95397049d2e7500c" class="m-doc-self" id="a15b1b83081915ae5239f81050ae0f550a1d874710ccdcd46b95397049d2e7500c">Italic</a></td>
                   <td>
-                  <p>Italic text formatting<br /></p>
+                  <p>Italic text formatting.</p>
                   </td>
                 </tr>
                 <tr>
@@ -686,12 +701,12 @@
             </table>
 <p>Applies the specified 16-color terminal color to the output stream using the termcolor library.</p>
           </div></section>
-          <section class="m-doc-details" id="a98bef331b3c83c69ca39de22cf1fece0"><div>
+          <section class="m-doc-details" id="a316fc56b907e20f17d91ef35ceed82c7"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Code&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98bef331b3c83c69ca39de22cf1fece0" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap">const Code&amp;) -&gt; Color&lt; Code &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a316fc56b907e20f17d91ef35ceed82c7" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap">const Code&amp; code) -&gt; Color&lt; Code &gt;</span></span>
             </h3>
             <p>Deduction guide for Color.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -704,15 +719,24 @@
                   <td>The color code type.</td>
                 </tr>
               </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>code</td>
+                  <td>The RGB color code (defaults to default-constructed Code).</td>
+                </tr>
+              </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a39226fadc0951c5356018a2fbb172b2a"><div>
+          <section class="m-doc-details" id="a6500c5b66dc863c6e49372527502f18f"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Code&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39226fadc0951c5356018a2fbb172b2a" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&lt;Code&gt;&amp;)</span></span>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6500c5b66dc863c6e49372527502f18f" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&lt;Code&gt;&amp; tag)</span></span>
             </h3>
             <p>Stream insertion operator for custom RGB colors.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -733,6 +757,10 @@
                   <td>os</td>
                   <td>Output stream to write to.</td>
                 </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
               </tbody>
               <tfoot>
                 <tr>
@@ -743,10 +771,290 @@
             </table>
 <p>Applies a custom RGB color to the output stream using the termcolor library&#x27;s color template.</p>
           </div></section>
-          <section class="m-doc-details" id="aabdf8ad5380cda9eeb370e5da5e9a0e6"><div>
+          <section class="m-doc-details" id="a0de113d7f30fe0d16a8b3fccac32bb1a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aabdf8ad5380cda9eeb370e5da5e9a0e6" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp;)</span></span>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0de113d7f30fe0d16a8b3fccac32bb1a" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a>&amp; tag)</span></span>
+            </h3>
+            <p>Stream insertion operator for red color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8c96b9cc78b2ec885b986da7e823a84e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c96b9cc78b2ec885b986da7e823a84e" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_green_t.html" class="m-doc">GreenT</a>&amp; tag)</span></span>
+            </h3>
+            <p>Stream insertion operator for green color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad1f5b3c4fae1dec2eb7c1be7f3e27fda"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad1f5b3c4fae1dec2eb7c1be7f3e27fda" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_blue_t.html" class="m-doc">BlueT</a>&amp; tag)</span></span>
+            </h3>
+            <p>Stream insertion operator for blue color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af9140329a9f5a897fa3ae1ce1defcba0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af9140329a9f5a897fa3ae1ce1defcba0" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_yellow_t.html" class="m-doc">YellowT</a>&amp; tag)</span></span>
+            </h3>
+            <p>Stream insertion operator for yellow color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a722c140ebe0e9a072cbe6788c2c3fbf4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a722c140ebe0e9a072cbe6788c2c3fbf4" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a>&amp; tag)</span></span>
+            </h3>
+            <p>Stream insertion operator for magenta color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3127ce3d0984d9b57b93ce2db6e3b778"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3127ce3d0984d9b57b93ce2db6e3b778" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a>&amp; tag)</span></span>
+            </h3>
+            <p>Stream insertion operator for cyan color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af0da46e44466a91716a2fc4095e263d3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0da46e44466a91716a2fc4095e263d3" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_white_t.html" class="m-doc">WhiteT</a>&amp; tag)</span></span>
+            </h3>
+            <p>Stream insertion operator for white color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab62e9aa189bfd0065416098622cf2e75"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab62e9aa189bfd0065416098622cf2e75" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_gray_t.html" class="m-doc">GrayT</a>&amp; tag)</span></span>
+            </h3>
+            <p>Stream insertion operator for gray color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5a2458f422337773a2fbe48323ddde4a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a2458f422337773a2fbe48323ddde4a" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_bright_gray_t.html" class="m-doc">BrightGrayT</a>&amp; tag)</span></span>
+            </h3>
+            <p>Stream insertion operator for bright gray color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3c96ce1d55a602d2cb5eb03afb265160"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c96ce1d55a602d2cb5eb03afb265160" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a>&amp; tag)</span></span>
+            </h3>
+            <p>Stream insertion operator for bright white color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Output stream after writing the object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4ffdff661a9ff51bb8c0e1c928cd4baf"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4ffdff661a9ff51bb8c0e1c928cd4baf" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp; tag)</span></span>
             </h3>
             <p>Stream insertion operator for NewLineT.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -758,6 +1066,10 @@
                   <td style="width: 1%">os</td>
                   <td>The output stream to write to.</td>
                 </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
               </tbody>
               <tfoot>
                 <tr>
@@ -768,10 +1080,10 @@
             </table>
 <p>Inserts a newline character into the output stream.</p>
           </div></section>
-          <section class="m-doc-details" id="a10a7213329e4231f1e2581c7340066cb"><div>
+          <section class="m-doc-details" id="a8f74b0458403d3fb6d2b67060a23431f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10a7213329e4231f1e2581c7340066cb" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp;)</span></span>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8f74b0458403d3fb6d2b67060a23431f" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp; tag)</span></span>
             </h3>
             <p>Stream insertion operator for ResetT.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -783,6 +1095,10 @@
                   <td style="width: 1%">os</td>
                   <td>The output stream to write to.</td>
                 </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
+                </tr>
               </tbody>
               <tfoot>
                 <tr>
@@ -793,10 +1109,10 @@
             </table>
 <p>Resets all terminal formatting and colors to default using the termcolor library.</p>
           </div></section>
-          <section class="m-doc-details" id="a0d49473ee9f6757a0a6c6732a99f1593"><div>
+          <section class="m-doc-details" id="a357c0af4772f7683a27ea34f1b554072"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d49473ee9f6757a0a6c6732a99f1593" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>&amp;)</span></span>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a357c0af4772f7683a27ea34f1b554072" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>&amp; tag)</span></span>
             </h3>
             <p>Stream insertion operator for StylizeT.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -807,6 +1123,10 @@
                 <tr>
                   <td style="width: 1%">os</td>
                   <td>The output stream to write to.</td>
+                </tr>
+                <tr>
+                  <td>tag</td>
+                  <td>Formatting or action tag selected through its type.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -1183,7 +1503,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

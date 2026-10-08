@@ -81,10 +81,30 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md498">Sparse Matrix Storage</a></li>
-            <li><a href="#autotoc_md499">Sparsity Pattern</a></li>
-            <li><a href="#autotoc_md500">Advantages</a></li>
-            <li><a href="#autotoc_md501">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md498">Sparse Matrix Storage</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md499">Sparsity Pattern</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md500">Advantages</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md501">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,7 +114,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the SparseProblem class, a specialization of the Problem class that uses sparse matrix storage for efficient handling of large-scale finite element systems. Sparse storage is the standard choice for most FEM problems as system matrices are typically very sparse.</p><section id="autotoc_md498"><h3><a href="#autotoc_md498">Sparse Matrix Storage</a></h3><p>For a typical FEM problem with <svg class="m-math" style="width: 1.107em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.622614 8.169366">
+<p>This file defines the SparseProblem class, a specialization of the Problem class that uses sparse matrix storage for efficient handling of large-scale finite element systems. Sparse storage is the standard choice for most FEM problems as system matrices are typically very sparse.</p><section id="autotoc_md498_1s1"><section id="autotoc_md498"><h3><a href="#autotoc_md498">Sparse Matrix Storage</a></h3><p>For a typical FEM problem with <svg class="m-math" style="width: 1.107em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.622614 8.169366">
 <title>
 $ N $
 </title>
@@ -138,10 +158,9 @@ $ O(N) $
 <use x='13.823574' y='0' xlink:href='#eq3-g0-78'/>
 <use x='24.446184' y='0' xlink:href='#eq3-g1-41'/>
 </g>
-</svg> memory (for 2D/3D problems)</li></ul></section><section id="autotoc_md499"><h3><a href="#autotoc_md499">Sparsity Pattern</a></h3><p>The sparsity pattern is determined by the mesh connectivity:</p><div class="m-math"><svg style="width: 22.965em; height: 1.213em;" viewBox="84.037414 -11.645211 220.467669 11.645211">
+</svg> memory (for 2D/3D problems)</li></ul></section></section><section id="autotoc_md499_1s1"><section id="autotoc_md499"><h3><a href="#autotoc_md499">Sparsity Pattern</a></h3><p>The sparsity pattern is determined by the mesh connectivity:</p><div class="m-math"><svg style="width: 22.965em; height: 1.213em;" viewBox="84.037414 -11.645211 220.467669 11.645211">
 <title>
-\[
-  A_{ij} \neq 0 \iff \text{DOFs } i \text{ and } j \text{ share an element}
+\[     A_{ij} \neq 0 \iff \text{DOFs } i \text{ and } j \text{ share an element}
 \]
 </title>
 <defs>
@@ -202,21 +221,21 @@ $ O(N) $
 <use x='295.204465' y='-3.343009' xlink:href='#eq4-g5-110'/>
 <use x='301.182049' y='-3.343009' xlink:href='#eq4-g5-116'/>
 </g>
-</svg></div></section><section id="autotoc_md500"><h3><a href="#autotoc_md500">Advantages</a></h3><ul><li>Memory efficient for large problems</li><li>Faster matrix-vector products</li><li>Enables iterative solvers (CG, GMRES, etc.)</li><li>Essential for 3D problems</li></ul></section><section id="autotoc_md501"><h3><a href="#autotoc_md501">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></div></section></section><section id="autotoc_md500_1s1"><section id="autotoc_md500"><h3><a href="#autotoc_md500">Advantages</a></h3><ul><li>Memory efficient for large problems</li><li>Faster matrix-vector products</li><li>Enables iterative solvers (CG, GMRES, etc.)</li><li>Essential for 3D problems</li></ul></section></section><section id="autotoc_md501_1s1"><section id="autotoc_md501"><h3><a href="#autotoc_md501">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
 <span class="c1">// Explicitly uses sparse storage</span>
 <span class="n">SparseProblem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="n">problem</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="p">);</span></pre></section>
+<span class="n">problem</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="p">);</span></pre></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -273,7 +292,7 @@ $ O(N) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

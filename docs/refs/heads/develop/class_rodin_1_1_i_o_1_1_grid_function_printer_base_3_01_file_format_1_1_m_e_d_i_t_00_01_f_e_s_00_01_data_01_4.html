@@ -103,6 +103,11 @@
               class <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;</a>
             </dt>
             <dd>Base template for printing objects to streams.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;</a>
+            </dt>
+            <dd>Base template for printing objects to streams.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -159,24 +164,24 @@
               <span class="m-doc-wrap-bumper">void <a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Prints object to an output stream.</dd>
-            <dt id="ab9ee43de699e00d10e6d6f9fc80d7f94">
-              <span class="m-doc-wrap-bumper">void <a href="#ab9ee43de699e00d10e6d6f9fc80d7f94" class="m-doc-self">printVersion</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab9ee43de699e00d10e6d6f9fc80d7f94" class="m-doc">printVersion</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
             </dt>
             <dd>Prints the MEDIT solution-file version section.</dd>
-            <dt id="aa7b872c4d77be4df20c0ed3ed6d2c798">
-              <span class="m-doc-wrap-bumper">void <a href="#aa7b872c4d77be4df20c0ed3ed6d2c798" class="m-doc-self">printDimension</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aa7b872c4d77be4df20c0ed3ed6d2c798" class="m-doc">printDimension</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
             </dt>
             <dd>Prints the MEDIT solution-file dimension section.</dd>
-            <dt id="ad489b63a84be0b036c655daeccc07e6a">
-              <span class="m-doc-wrap-bumper">void <a href="#ad489b63a84be0b036c655daeccc07e6a" class="m-doc-self">printEnd</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ad489b63a84be0b036c655daeccc07e6a" class="m-doc">printEnd</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
             </dt>
             <dd>Prints the MEDIT end marker.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets a const reference to the object being printed.</dd>
-            <dt id="a7352c9bf8ed7dd250b174accac617cdc">
-              <span class="m-doc-wrap-bumper">void <a href="#a7352c9bf8ed7dd250b174accac617cdc" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7352c9bf8ed7dd250b174accac617cdc" class="m-doc">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Prints the concrete grid-function coefficient data.</dd>
           </dl>
@@ -224,6 +229,66 @@
             </table>
 <p>This pure virtual method must be implemented by derived classes to write the object data to the provided stream.</p>
           </div></section>
+          <section class="m-doc-details" id="ab9ee43de699e00d10e6d6f9fc80d7f94"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;FileFormat::<wbr />MEDIT, FES, Data&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9ee43de699e00d10e6d6f9fc80d7f94" class="m-doc-self">printVersion</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Prints the MEDIT solution-file version section.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa7b872c4d77be4df20c0ed3ed6d2c798"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;FileFormat::<wbr />MEDIT, FES, Data&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa7b872c4d77be4df20c0ed3ed6d2c798" class="m-doc-self">printDimension</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Prints the MEDIT solution-file dimension section.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad489b63a84be0b036c655daeccc07e6a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;FileFormat::<wbr />MEDIT, FES, Data&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad489b63a84be0b036c655daeccc07e6a" class="m-doc-self">printEnd</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Prints the MEDIT end marker.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a11c4ca84d818b4c96f829e779509de85"><div>
             <h3>
               <div class="m-doc-template">
@@ -241,6 +306,26 @@
               </tfoot>
             </table>
 <p>This method provides read-only access to the object being written. Derived classes must implement this to return their internal object reference.</p>
+          </div></section>
+          <section class="m-doc-details" id="a7352c9bf8ed7dd250b174accac617cdc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES, class Data&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;FileFormat::<wbr />MEDIT, FES, Data&gt;&lt;FES, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7352c9bf8ed7dd250b174accac617cdc" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Prints the concrete grid-function coefficient data.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
         </section>
       </div>
@@ -287,7 +372,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

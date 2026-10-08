@@ -82,8 +82,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md410">Integrator Types</a></li>
-            <li><a href="#autotoc_md411">Role in Assembly</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md410">Integrator Types</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md411">Role in Assembly</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -96,7 +106,7 @@
             </li>
           </ul>
         </nav>
-<p>The Integrator class provides a common interface for all types of integrators used in finite element assembly. Integrators compute local (element-level) contributions that are then assembled into global matrices and vectors.</p><section id="autotoc_md410"><h3><a href="#autotoc_md410">Integrator Types</a></h3><p>There are two main types of integrators:</p><ul><li><strong>Linear Integrators</strong>: Compute contributions to the load vector (RHS)<ul><li>Example: <svg class="m-math" style="width: 7.574em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 72.710608 13.781784">
+<p>The Integrator class provides a common interface for all types of integrators used in finite element assembly. Integrators compute local (element-level) contributions that are then assembled into global matrices and vectors.</p><section id="autotoc_md410_1s1"><section id="autotoc_md410"><h3><a href="#autotoc_md410">Integrator Types</a></h3><p>There are two main types of integrators:</p><ul><li><strong>Linear Integrators</strong>: Compute contributions to the load vector (RHS)<ul><li>Example: <svg class="m-math" style="width: 7.574em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 72.710608 13.781784">
 <title>
 $ b_i = \int_K f \psi_i \, dx $
 </title>
@@ -158,7 +168,7 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
 <use x='100.481475' y='0' xlink:href='#eq2-g3-100'/>
 <use x='106.564168' y='0' xlink:href='#eq2-g3-120'/>
 </g>
-</svg></li></ul></li></ul></section><section id="autotoc_md411"><h3><a href="#autotoc_md411">Role in Assembly</a></h3><p>During the assembly process:</p><ol><li>Integrators are iterated over mesh elements</li><li>Local contributions are computed using numerical quadrature</li><li>Local contributions are mapped to global indices</li><li>Global matrix/vector is updated with local contributions</li></ol><aside class="m-note m-default"><h4>See also</h4><p><a href="_linear_form_integrator_8h.html">LinearFormIntegratorBase</a></p><p><a href="_bilinear_form_integrator_8h.html">BilinearFormIntegratorBase</a></p></aside></section>
+</svg></li></ul></li></ul></section></section><section id="autotoc_md411_1s1"><section id="autotoc_md411"><h3><a href="#autotoc_md411">Role in Assembly</a></h3><p>During the assembly process:</p><ol><li>Integrators are iterated over mesh elements</li><li>Local contributions are computed using numerical quadrature</li><li>Local contributions are mapped to global indices</li><li>Global matrix/vector is updated with local contributions</li></ol><aside class="m-note m-default"><h4>See also</h4><p><a href="_linear_form_integrator_8h.html">LinearFormIntegratorBase</a></p><p><a href="_bilinear_form_integrator_8h.html">BilinearFormIntegratorBase</a></p></aside></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -312,6 +322,51 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
             </dt>
             <dd>Abstract base class for bilinear form integrators.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Number, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>
+            </dt>
+            <dd>Abstract base class for bilinear form integrators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>
+            </dt>
+            <dd>Abstract base class for bilinear form integrators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for linear form integrators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for linear form integrators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for linear form integrators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for linear form integrators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for linear form integrators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for linear form integrators.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
+            </dt>
+            <dd>Base class for linear form integrators.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Number&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>
             </dt>
@@ -407,7 +462,7 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a954904358be9bf90ec5d9fb9f907784d" class="m-doc">setOrder</a>(</span><span class="m-doc-wrap">std::nullopt_t) -&gt; <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a779c5028c546fddc461a6d6b10dcb299" class="m-doc">setOrder</a>(</span><span class="m-doc-wrap">std::nullopt_t automatic) -&gt; <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp;</span>
             </dt>
             <dd>Restores order inference from the integrand.</dd>
             <dt>
@@ -504,11 +559,28 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a954904358be9bf90ec5d9fb9f907784d"><div>
+          <section class="m-doc-details" id="a779c5028c546fddc461a6d6b10dcb299"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp; Rodin::<wbr />Variational::<wbr />Integrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a954904358be9bf90ec5d9fb9f907784d" class="m-doc-self">setOrder</a>(</span><span class="m-doc-wrap">std::nullopt_t)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp; Rodin::<wbr />Variational::<wbr />Integrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a779c5028c546fddc461a6d6b10dcb299" class="m-doc-self">setOrder</a>(</span><span class="m-doc-wrap">std::nullopt_t automatic)</span></span>
             </h3>
             <p>Restores order inference from the integrand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">automatic</td>
+                  <td>Tag selecting automatic quadrature-order inference.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>This is the default: the order is derived per polytope from the polynomial degrees of the finite elements living on it, and is therefore right exactly when the integrand&#x27;s degree is the sum of those degrees &mdash; when nothing else in the expression contributes any.</p><p>A coefficient does contribute. Where it can report its degree that is accounted for; where it cannot, inference undercounts and the form is under-integrated, and this happens whether or not the integrand is polynomial. A mass form weighted by a lambda returning <svg class="m-math" style="width: 2.834em; height: 0.960em; vertical-align: -0.243em;" viewBox="0 -6.890786 27.206721 9.215393">
 <title>
 $ x + y $
@@ -540,6 +612,12 @@ $ x + y $
                   <td>Integration order to use on every polytope</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
             </table>
 <p>The order is the degree the quadrature rule must integrate exactly, so this is how a caller says what its integrand actually needs: the degree of a polynomial integrand that inference cannot see in full, or, for an integrand that is not polynomial at all, the accuracy being asked for.</p><p>Note that the inferred order is a function of the polytope, so a constant is only equivalent to inference on a mesh whose elements all share one degree; prefer <a href="#a503b6171d3423d1daad5ac38b42b55bc" class="m-doc">setOrder(OrderType)</a> otherwise.</p>
           </div></section>
@@ -558,6 +636,12 @@ $ x + y $
                   <td>Rule invoked with the polytope being integrated</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
             </table>
 <p>On an integrator the order is the degree of the quadrature rule, not the polynomial degree of an expression. Set it whenever the degree inference can see is not the degree the integrand has: a coefficient that reports no degree undercounts a polynomial integrand, and one that is not polynomial at all &mdash; a level set composed with a mesh lookup, say &mdash; has no degree to infer, so the inferred order is meaningless and typically too low in both cases.</p>
           </div></section>
@@ -657,7 +741,7 @@ $ x + y $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

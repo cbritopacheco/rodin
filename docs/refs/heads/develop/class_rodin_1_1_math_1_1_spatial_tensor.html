@@ -151,7 +151,7 @@ $ (Gv)_{ij}=\sum_k G_{ijk}v_k $
 <use x='88.290261' y='0' xlink:href='#eq2-g2-118'/>
 <use x='93.949531' y='1.793263' xlink:href='#eq2-g1-107'/>
 </g>
-</svg>. Inner products conjugate the second operand, as in <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::<wbr />Math</a>. Tensor actions on vectors and matrices use ordinary linear contractions.</p><aside class="m-note m-default"><h4>Architecture</h4><p>Runtime extents determine the active contiguous prefix of a fixed-size array. Indexing checks every axis; arithmetic checks matching extents. No heap allocation or implicit flattening into a spatial vector occurs.</p></aside>
+</svg>. Inner products conjugate the second operand, as in <a href="namespace_rodin_1_1_math.html" class="m-doc">Math</a>. Tensor actions on vectors and matrices use ordinary linear contractions.</p><aside class="m-note m-default"><h4>Architecture</h4><p>Runtime extents determine the active contiguous prefix of a fixed-size array. Indexing checks every axis; arithmetic checks matching extents. No heap allocation or implicit flattening into a spatial vector occurs.</p></aside>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -181,13 +181,13 @@ $ (Gv)_{ij}=\sum_k G_{ijk}v_k $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ae214bbecf4a3f82a94f201f5aaccefb0">
-              <span class="m-doc-wrap-bumper"><a href="#ae214bbecf4a3f82a94f201f5aaccefb0" class="m-doc-self">SpatialTensor</a>(</span><span class="m-doc-wrap">const <a href="#a501377dc333c9e044761631c9dc12973" class="m-doc">Extents</a>&amp; extents) <span class="m-label m-flat m-info">explicit</span> </span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae214bbecf4a3f82a94f201f5aaccefb0" class="m-doc">SpatialTensor</a>(</span><span class="m-doc-wrap">const <a href="#a501377dc333c9e044761631c9dc12973" class="m-doc">Extents</a>&amp; extents) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs tensor storage with explicit runtime extents.</dd>
-            <dt id="a54fa02b33d5c5b9e1dc8ab031a352d72">
+            <dt>
               <div class="m-doc-template">template&lt;class... Sizes&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a54fa02b33d5c5b9e1dc8ab031a352d72" class="m-doc-self">SpatialTensor</a>(</span><span class="m-doc-wrap">Sizes... sizes) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a54fa02b33d5c5b9e1dc8ab031a352d72" class="m-doc">SpatialTensor</a>(</span><span class="m-doc-wrap">Sizes... sizes) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs tensor storage with explicit runtime extents.</dd>
           </dl>
@@ -195,105 +195,105 @@ $ (Gv)_{ij}=\sum_k G_{ijk}v_k $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a28c013f2740e950223f1c1c9dc46cdfb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a28c013f2740e950223f1c1c9dc46cdfb" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">const <a href="#a501377dc333c9e044761631c9dc12973" class="m-doc">Extents</a>&amp; extents) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a28c013f2740e950223f1c1c9dc46cdfb" class="m-doc">resize</a>(</span><span class="m-doc-wrap">const <a href="#a501377dc333c9e044761631c9dc12973" class="m-doc">Extents</a>&amp; extents) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp;</span>
             </dt>
             <dd>Sets active extents, rejecting axes larger than spatial capacity.</dd>
-            <dt id="ab48a6b95a5751a361c1eca938ed33af5">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab48a6b95a5751a361c1eca938ed33af5" class="m-doc-self">getExtents</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a501377dc333c9e044761631c9dc12973" class="m-doc">Extents</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab48a6b95a5751a361c1eca938ed33af5" class="m-doc">getExtents</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a501377dc333c9e044761631c9dc12973" class="m-doc">Extents</a>&amp;</span>
             </dt>
             <dd>Returns all active tensor axis extents.</dd>
-            <dt id="a5411c468ce55ce1429cb9f07774142e5">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5411c468ce55ce1429cb9f07774142e5" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">size_t axis) const -&gt; size_t</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5411c468ce55ce1429cb9f07774142e5" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">size_t axis) const -&gt; size_t</span>
             </dt>
             <dd>Returns the active extent of the selected tensor axis.</dd>
-            <dt id="a259cb5a711406a8c3e5d937eb9350cca">
-              <span class="m-doc-wrap-bumper">auto <a href="#a259cb5a711406a8c3e5d937eb9350cca" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a259cb5a711406a8c3e5d937eb9350cca" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Returns the number of active tensor entries.</dd>
-            <dt id="a283629f8017c06ce7ffcf82fbc7319d1">
-              <span class="m-doc-wrap-bumper">auto <a href="#a283629f8017c06ce7ffcf82fbc7319d1" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t i) -&gt; <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a283629f8017c06ce7ffcf82fbc7319d1" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap">size_t i) -&gt; <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp;</span>
             </dt>
             <dd>Accesses an active tensor entry with bounds assertions.</dd>
-            <dt id="a4dab05cb781f9401ef76f21ef90884f1">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4dab05cb781f9401ef76f21ef90884f1" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4dab05cb781f9401ef76f21ef90884f1" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp;</span>
             </dt>
             <dd>Accesses an active tensor entry with bounds assertions.</dd>
-            <dt id="a27b956b6dd61422ae4dafcbadde35d72">
+            <dt>
               <div class="m-doc-template">template&lt;class... Indices&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a27b956b6dd61422ae4dafcbadde35d72" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">Indices... indices) -&gt; <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a27b956b6dd61422ae4dafcbadde35d72" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">Indices... indices) -&gt; <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp;</span>
             </dt>
             <dd>Accesses an active tensor entry with bounds assertions.</dd>
-            <dt id="ad5c0dd4705e7a09e3b65e937d3c02f72">
+            <dt>
               <div class="m-doc-template">template&lt;class... Indices&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad5c0dd4705e7a09e3b65e937d3c02f72" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">Indices... indices) const -&gt; const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad5c0dd4705e7a09e3b65e937d3c02f72" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">Indices... indices) const -&gt; const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp;</span>
             </dt>
             <dd>Accesses an active tensor entry with bounds assertions.</dd>
-            <dt id="ac824db0e4b74509049fb93b536b04f1c">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac824db0e4b74509049fb93b536b04f1c" class="m-doc-self">setZero</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac824db0e4b74509049fb93b536b04f1c" class="m-doc">setZero</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp;</span>
             </dt>
             <dd>Sets every active entry to zero.</dd>
-            <dt id="acdc2fdc39177e3d30a84907fee9d9e24">
-              <span class="m-doc-wrap-bumper">auto <a href="#acdc2fdc39177e3d30a84907fee9d9e24" class="m-doc-self">setConstant</a>(</span><span class="m-doc-wrap">const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; value) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acdc2fdc39177e3d30a84907fee9d9e24" class="m-doc">setConstant</a>(</span><span class="m-doc-wrap">const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; value) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp;</span>
             </dt>
             <dd>Sets every active entry to the supplied constant.</dd>
-            <dt id="abf3da37f6621d899a4ec942c3a1d94a2">
-              <span class="m-doc-wrap-bumper">auto <a href="#abf3da37f6621d899a4ec942c3a1d94a2" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abf3da37f6621d899a4ec942c3a1d94a2" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp;</span>
             </dt>
             <dd>Adds matching active entries after checking extents.</dd>
-            <dt id="a0b6635156ed559d957babfb56fa796e2">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0b6635156ed559d957babfb56fa796e2" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0b6635156ed559d957babfb56fa796e2" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp;</span>
             </dt>
             <dd>Subtracts matching entries, or negates active entries.</dd>
-            <dt id="a75621550524ac3085b1b0fbcbaaf7fd8">
+            <dt>
               <div class="m-doc-template">template&lt;class OtherScalar&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a75621550524ac3085b1b0fbcbaaf7fd8" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&lt;OtherScalar, Rank&gt;&amp; other) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a75621550524ac3085b1b0fbcbaaf7fd8" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&lt;OtherScalar, Rank&gt;&amp; other) const -&gt; auto</span>
             </dt>
             <dd>Contracts matching entries and conjugates the second operand.</dd>
-            <dt id="aba8c8c6fb9bb94e98109cf14993f3daf">
-              <span class="m-doc-wrap-bumper">auto <a href="#aba8c8c6fb9bb94e98109cf14993f3daf" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const -&gt; auto</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba8c8c6fb9bb94e98109cf14993f3daf" class="m-doc">squaredNorm</a>(</span><span class="m-doc-wrap">) const -&gt; auto</span>
             </dt>
             <dd>Returns the squared Frobenius norm of active entries.</dd>
-            <dt id="ad27050c4a6f81c616a0f4e47c8e0bd48">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad27050c4a6f81c616a0f4e47c8e0bd48" class="m-doc-self">norm</a>(</span><span class="m-doc-wrap">) const -&gt; auto</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad27050c4a6f81c616a0f4e47c8e0bd48" class="m-doc">norm</a>(</span><span class="m-doc-wrap">) const -&gt; auto</span>
             </dt>
             <dd>Returns the Frobenius norm of active entries.</dd>
-            <dt id="a70e67c4672abbc196fb08b585160eb0e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a70e67c4672abbc196fb08b585160eb0e" class="m-doc-self">conjugate</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a70e67c4672abbc196fb08b585160eb0e" class="m-doc">conjugate</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a></span>
             </dt>
             <dd>Returns entrywise complex conjugation.</dd>
-            <dt id="a8a0a05203c49bb3fafffada2668355de">
+            <dt>
               <div class="m-doc-template">template&lt;class OtherScalar&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8a0a05203c49bb3fafffada2668355de" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&lt;OtherScalar, Rank&gt;&amp; other) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8a0a05203c49bb3fafffada2668355de" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&lt;OtherScalar, Rank&gt;&amp; other) const -&gt; auto</span>
             </dt>
             <dd>Adds matching active entries after checking extents.</dd>
-            <dt id="a68a8f45bd2e82bd1426bf6623bc737f1">
+            <dt>
               <div class="m-doc-template">template&lt;class OtherScalar&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a68a8f45bd2e82bd1426bf6623bc737f1" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&lt;OtherScalar, Rank&gt;&amp; other) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a68a8f45bd2e82bd1426bf6623bc737f1" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&lt;OtherScalar, Rank&gt;&amp; other) const -&gt; auto</span>
             </dt>
             <dd>Subtracts matching entries, or negates active entries.</dd>
-            <dt id="a3dd7c0622bd08e7ed9089923d854875a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3dd7c0622bd08e7ed9089923d854875a" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">) const -&gt; auto</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3dd7c0622bd08e7ed9089923d854875a" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">) const -&gt; auto</span>
             </dt>
             <dd>Subtracts matching entries, or negates active entries.</dd>
-            <dt id="ab99f17788b6f4ff62f83ccf17e9325f9">
+            <dt>
               <div class="m-doc-template">template&lt;class Value&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab99f17788b6f4ff62f83ccf17e9325f9" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const Value&amp; factor) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab99f17788b6f4ff62f83ccf17e9325f9" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const Value&amp; factor) const -&gt; auto</span>
             </dt>
             <dd>Scales every active tensor entry with scalar type promotion.</dd>
-            <dt id="aa678aeb876ebca98961a767371d9e136">
+            <dt>
               <div class="m-doc-template">template&lt;class Value&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa678aeb876ebca98961a767371d9e136" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap">const Value&amp; divisor) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa678aeb876ebca98961a767371d9e136" class="m-doc">operator/</a>(</span><span class="m-doc-wrap">const Value&amp; divisor) const -&gt; auto</span>
             </dt>
             <dd>Scales every active tensor entry with scalar type promotion.</dd>
-            <dt id="ac5e1c2ec2819db4e28b8f2010808ff22">
+            <dt>
               <div class="m-doc-template">template&lt;class OtherScalar&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac5e1c2ec2819db4e28b8f2010808ff22" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;OtherScalar&gt;&amp; vector) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac5e1c2ec2819db4e28b8f2010808ff22" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;OtherScalar&gt;&amp; vector) const -&gt; auto</span>
             </dt>
             <dd>Contracts the last tensor axis with a vector.</dd>
-            <dt id="a1db0b01c4d82267269e53729cb1042c2">
+            <dt>
               <div class="m-doc-template">template&lt;class OtherScalar&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1db0b01c4d82267269e53729cb1042c2" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;OtherScalar&gt;&amp; matrix) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1db0b01c4d82267269e53729cb1042c2" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;OtherScalar&gt;&amp; matrix) const -&gt; auto</span>
             </dt>
             <dd>Rank-four contraction <svg class="m-math" style="width: 11.602em; height: 1.297em; vertical-align: -0.365em;" viewBox="0 -8.966452 111.382137 12.453452">
 <title>
@@ -333,6 +333,630 @@ $ (CA)_{ij}=\sum_{kl}C_{ijkl}A_{kl} $
 </g>
 </svg>.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae214bbecf4a3f82a94f201f5aaccefb0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae214bbecf4a3f82a94f201f5aaccefb0" class="m-doc-self">SpatialTensor</a>(</span><span class="m-doc-wrap">const <a href="#a501377dc333c9e044761631c9dc12973" class="m-doc">Extents</a>&amp; extents) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs tensor storage with explicit runtime extents.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">extents</td>
+                  <td>Extent of each tensor axis.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a54fa02b33d5c5b9e1dc8ab031a352d72"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+                template&lt;class... Sizes&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a54fa02b33d5c5b9e1dc8ab031a352d72" class="m-doc-self">SpatialTensor</a>(</span><span class="m-doc-wrap">Sizes... sizes) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs tensor storage with explicit runtime extents.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">sizes</td>
+                  <td>Extents of the tensor axes.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a28c013f2740e950223f1c1c9dc46cdfb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28c013f2740e950223f1c1c9dc46cdfb" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">const <a href="#a501377dc333c9e044761631c9dc12973" class="m-doc">Extents</a>&amp; extents)</span></span>
+            </h3>
+            <p>Sets active extents, rejecting axes larger than spatial capacity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">extents</td>
+                  <td>Extent of each tensor axis.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab48a6b95a5751a361c1eca938ed33af5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a501377dc333c9e044761631c9dc12973" class="m-doc">Extents</a>&amp; Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab48a6b95a5751a361c1eca938ed33af5" class="m-doc-self">getExtents</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns all active tensor axis extents.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>All active tensor axis extents.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a5411c468ce55ce1429cb9f07774142e5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5411c468ce55ce1429cb9f07774142e5" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">size_t axis) const</span></span>
+            </h3>
+            <p>Returns the active extent of the selected tensor axis.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">axis</td>
+                  <td>Tensor axis whose extent is requested.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The active extent of the selected tensor axis.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a259cb5a711406a8c3e5d937eb9350cca"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a259cb5a711406a8c3e5d937eb9350cca" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the number of active tensor entries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of active tensor entries.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a283629f8017c06ce7ffcf82fbc7319d1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a283629f8017c06ce7ffcf82fbc7319d1" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t i)</span></span>
+            </h3>
+            <p>Accesses an active tensor entry with bounds assertions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Entry at the supplied index.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4dab05cb781f9401ef76f21ef90884f1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4dab05cb781f9401ef76f21ef90884f1" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">size_t i) const</span></span>
+            </h3>
+            <p>Accesses an active tensor entry with bounds assertions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Entry at the supplied index.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a27b956b6dd61422ae4dafcbadde35d72"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+                template&lt;class... Indices&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a27b956b6dd61422ae4dafcbadde35d72" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">Indices... indices)</span></span>
+            </h3>
+            <p>Accesses an active tensor entry with bounds assertions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">indices</td>
+                  <td>Index along each tensor axis.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the entry at the supplied indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad5c0dd4705e7a09e3b65e937d3c02f72"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+                template&lt;class... Indices&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad5c0dd4705e7a09e3b65e937d3c02f72" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">Indices... indices) const</span></span>
+            </h3>
+            <p>Accesses an active tensor entry with bounds assertions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">indices</td>
+                  <td>Index along each tensor axis.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the entry at the supplied indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac824db0e4b74509049fb93b536b04f1c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac824db0e4b74509049fb93b536b04f1c" class="m-doc-self">setZero</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Sets every active entry to zero.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acdc2fdc39177e3d30a84907fee9d9e24"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acdc2fdc39177e3d30a84907fee9d9e24" class="m-doc-self">setConstant</a>(</span><span class="m-doc-wrap">const <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&amp; value)</span></span>
+            </h3>
+            <p>Sets every active entry to the supplied constant.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abf3da37f6621d899a4ec942c3a1d94a2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abf3da37f6621d899a4ec942c3a1d94a2" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; other)</span></span>
+            </h3>
+            <p>Adds matching active entries after checking extents.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0b6635156ed559d957babfb56fa796e2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b6635156ed559d957babfb56fa796e2" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&amp; other)</span></span>
+            </h3>
+            <p>Subtracts matching entries, or negates active entries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a75621550524ac3085b1b0fbcbaaf7fd8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+                template&lt;class OtherScalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75621550524ac3085b1b0fbcbaaf7fd8" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&lt;OtherScalar, Rank&gt;&amp; other) const</span></span>
+            </h3>
+            <p>Contracts matching entries and conjugates the second operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Scalar Frobenius contraction with the supplied tensor.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aba8c8c6fb9bb94e98109cf14993f3daf"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba8c8c6fb9bb94e98109cf14993f3daf" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the squared Frobenius norm of active entries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The squared Frobenius norm of active entries.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad27050c4a6f81c616a0f4e47c8e0bd48"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad27050c4a6f81c616a0f4e47c8e0bd48" class="m-doc-self">norm</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the Frobenius norm of active entries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The Frobenius norm of active entries.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a70e67c4672abbc196fb08b585160eb0e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a> Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70e67c4672abbc196fb08b585160eb0e" class="m-doc-self">conjugate</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns entrywise complex conjugation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Entrywise complex conjugation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8a0a05203c49bb3fafffada2668355de"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+                template&lt;class OtherScalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a0a05203c49bb3fafffada2668355de" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&lt;OtherScalar, Rank&gt;&amp; other) const</span></span>
+            </h3>
+            <p>Adds matching active entries after checking extents.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Sum of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a68a8f45bd2e82bd1426bf6623bc737f1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+                template&lt;class OtherScalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68a8f45bd2e82bd1426bf6623bc737f1" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">SpatialTensor</a>&lt;OtherScalar, Rank&gt;&amp; other) const</span></span>
+            </h3>
+            <p>Subtracts matching entries, or negates active entries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Other operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Difference of the operands, or the negated operand for the unary overload.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3dd7c0622bd08e7ed9089923d854875a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3dd7c0622bd08e7ed9089923d854875a" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Subtracts matching entries, or negates active entries.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Difference of the operands, or the negated operand for the unary overload.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab99f17788b6f4ff62f83ccf17e9325f9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+                template&lt;class Value&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab99f17788b6f4ff62f83ccf17e9325f9" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const Value&amp; factor) const</span></span>
+            </h3>
+            <p>Scales every active tensor entry with scalar type promotion.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">factor</td>
+                  <td>Scalar multiplier.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Product of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa678aeb876ebca98961a767371d9e136"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+                template&lt;class Value&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa678aeb876ebca98961a767371d9e136" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap">const Value&amp; divisor) const</span></span>
+            </h3>
+            <p>Scales every active tensor entry with scalar type promotion.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">divisor</td>
+                  <td>Scalar divisor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Quotient of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac5e1c2ec2819db4e28b8f2010808ff22"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+                template&lt;class OtherScalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5e1c2ec2819db4e28b8f2010808ff22" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;OtherScalar&gt;&amp; vector) const</span></span>
+            </h3>
+            <p>Contracts the last tensor axis with a vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vector</td>
+                  <td>Vector operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Product of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1db0b01c4d82267269e53729cb1042c2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class ScalarType, size_t Rank&gt;
+                template&lt;class OtherScalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr />SpatialTensor&lt;ScalarType, Rank&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1db0b01c4d82267269e53729cb1042c2" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;OtherScalar&gt;&amp; matrix) const</span></span>
+            </h3>
+            <p>Rank-four contraction <svg class="m-math" style="width: 11.602em; height: 1.297em; vertical-align: -0.365em;" viewBox="0 -8.966452 111.382137 12.453452">
+<title>
+$ (CA)_{ij}=\sum_{kl}C_{ijkl}A_{kl} $
+</title>
+<defs>
+<path id='eq3-g0-80' d='M5.033126 6.38406L.789041 11.632379C.6934 11.75193 .681445 11.775841 .681445 11.823661C.681445 11.955168 .789041 11.955168 1.004234 11.955168H10.915068L11.943213 8.978331H11.644334C11.345455 9.874969 10.544458 10.604234 9.528269 10.950934C9.336986 11.01071 8.51208 11.297634 6.75467 11.297634H1.673724L5.822167 6.168867C5.905853 6.06127 5.929763 6.025405 5.929763 5.977584S5.917808 5.917808 5.846077 5.810212L1.960648 .478207H6.694894C8.057783 .478207 10.807472 .561893 11.644334 2.797509H11.943213L10.915068 0H1.004234C.681445 0 .669489 .011955 .669489 .382565L5.033126 6.38406Z'/>
+<path id='eq3-g1-105' d='M2.375093-4.97335C2.375093-5.148692 2.247572-5.276214 2.064259-5.276214C1.857036-5.276214 1.625903-5.084932 1.625903-4.845828C1.625903-4.670486 1.753425-4.542964 1.936737-4.542964C2.14396-4.542964 2.375093-4.734247 2.375093-4.97335ZM1.211457-2.048319L.781071-.948443C.74122-.828892 .70137-.73325 .70137-.597758C.70137-.207223 1.004234 .079701 1.42665 .079701C2.199751 .079701 2.526526-1.036115 2.526526-1.139726C2.526526-1.219427 2.462765-1.243337 2.406974-1.243337C2.311333-1.243337 2.295392-1.187547 2.271482-1.107846C2.088169-.470237 1.761395-.143462 1.44259-.143462C1.346949-.143462 1.251308-.183313 1.251308-.398506C1.251308-.589788 1.307098-.73325 1.41071-.980324C1.490411-1.195517 1.570112-1.41071 1.657783-1.625903L1.904857-2.271482C1.976588-2.454795 2.072229-2.701868 2.072229-2.83736C2.072229-3.235866 1.753425-3.514819 1.346949-3.514819C.573848-3.514819 .239103-2.399004 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.239601 .494147-2.319303C.71731-3.076463 1.083935-3.291656 1.323039-3.291656C1.43462-3.291656 1.514321-3.251806 1.514321-3.028643C1.514321-2.948941 1.506351-2.83736 1.42665-2.598257L1.211457-2.048319Z'/>
+<path id='eq3-g1-106' d='M3.291656-4.97335C3.291656-5.124782 3.172105-5.276214 2.980822-5.276214C2.741719-5.276214 2.534496-5.053051 2.534496-4.845828C2.534496-4.694396 2.654047-4.542964 2.84533-4.542964C3.084433-4.542964 3.291656-4.766127 3.291656-4.97335ZM1.625903 .398506C1.506351 .884682 1.115816 1.40274 .629639 1.40274C.502117 1.40274 .382565 1.370859 .366625 1.362889C.613699 1.243337 .645579 1.028144 .645579 .956413C.645579 .765131 .502117 .661519 .334745 .661519C.103611 .661519-.111582 .860772-.111582 1.123786C-.111582 1.42665 .183313 1.625903 .637609 1.625903C1.123786 1.625903 2.000498 1.323039 2.239601 .366625L2.956912-2.486675C2.980822-2.582316 2.996762-2.646077 2.996762-2.765629C2.996762-3.203985 2.646077-3.514819 2.183811-3.514819C1.338979-3.514819 .844832-2.399004 .844832-2.295392C.844832-2.223661 .900623-2.191781 .964384-2.191781C1.052055-2.191781 1.060025-2.215691 1.115816-2.335243C1.354919-2.885181 1.761395-3.291656 2.1599-3.291656C2.327273-3.291656 2.422914-3.180075 2.422914-2.917061C2.422914-2.805479 2.399004-2.693898 2.375093-2.582316L1.625903 .398506Z'/>
+<path id='eq3-g1-107' d='M2.327273-5.292154C2.335243-5.308095 2.359153-5.411706 2.359153-5.419676C2.359153-5.459527 2.327273-5.531258 2.231631-5.531258C2.199751-5.531258 1.952677-5.507347 1.769365-5.491407L1.323039-5.459527C1.147696-5.443587 1.067995-5.435616 1.067995-5.292154C1.067995-5.180573 1.179577-5.180573 1.275218-5.180573C1.657783-5.180573 1.657783-5.132752 1.657783-5.061021C1.657783-5.037111 1.657783-5.021171 1.617933-4.877709L.486177-.342715C.454296-.223163 .454296-.175342 .454296-.167372C.454296-.03188 .565878 .079701 .71731 .079701C.988294 .079701 1.052055-.175342 1.083935-.286924C1.163636-.621669 1.370859-1.466501 1.458531-1.801245C1.896887-1.753425 2.430884-1.601993 2.430884-1.147696C2.430884-1.107846 2.430884-1.067995 2.414944-.988294C2.391034-.884682 2.375093-.773101 2.375093-.73325C2.375093-.263014 2.725778 .079701 3.188045 .079701C3.52279 .079701 3.730012-.167372 3.833624-.318804C4.024907-.613699 4.152428-1.091905 4.152428-1.139726C4.152428-1.219427 4.088667-1.243337 4.032877-1.243337C3.937235-1.243337 3.921295-1.195517 3.889415-1.052055C3.785803-.67746 3.57858-.143462 3.203985-.143462C2.996762-.143462 2.948941-.318804 2.948941-.533998C2.948941-.637609 2.956912-.73325 2.996762-.916563C3.004732-.948443 3.036613-1.075965 3.036613-1.163636C3.036613-1.817186 2.215691-1.960648 1.809215-2.016438C2.10411-2.191781 2.375093-2.462765 2.470735-2.566376C2.909091-2.996762 3.267746-3.291656 3.650311-3.291656C3.753923-3.291656 3.849564-3.267746 3.913325-3.188045C3.482939-3.132254 3.482939-2.757659 3.482939-2.749689C3.482939-2.574346 3.618431-2.454795 3.793773-2.454795C4.008966-2.454795 4.24807-2.630137 4.24807-2.956912C4.24807-3.227895 4.056787-3.514819 3.658281-3.514819C3.196015-3.514819 2.781569-3.164134 2.327273-2.709838C1.865006-2.255542 1.665753-2.16787 1.538232-2.11208L2.327273-5.292154Z'/>
+<path id='eq3-g1-108' d='M2.088169-5.292154C2.096139-5.308095 2.12005-5.411706 2.12005-5.419676C2.12005-5.459527 2.088169-5.531258 1.992528-5.531258L1.187547-5.467497C.892653-5.443587 .828892-5.435616 .828892-5.292154C.828892-5.180573 .940473-5.180573 1.036115-5.180573C1.41868-5.180573 1.41868-5.132752 1.41868-5.061021C1.41868-5.037111 1.41868-5.021171 1.378829-4.877709L.390535-.924533C.358655-.797011 .358655-.67746 .358655-.669489C.358655-.175342 .765131 .079701 1.163636 .079701C1.506351 .079701 1.689664-.191283 1.777335-.366625C1.920797-.629639 2.040349-1.099875 2.040349-1.139726C2.040349-1.187547 2.016438-1.243337 1.912827-1.243337C1.841096-1.243337 1.817186-1.203487 1.817186-1.195517C1.801245-1.171606 1.761395-1.028144 1.737484-.940473C1.617933-.478207 1.466501-.143462 1.179577-.143462C.988294-.143462 .932503-.326775 .932503-.518057C.932503-.669489 .956413-.757161 .980324-.860772L2.088169-5.292154Z'/>
+<path id='eq3-g2-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq3-g2-67' d='M8.930511-8.308842C8.930511-8.416438 8.846824-8.416438 8.822914-8.416438S8.751183-8.416438 8.655542-8.296887L7.830635-7.292653C7.412204-8.009963 6.75467-8.416438 5.858032-8.416438C3.275716-8.416438 .597758-5.798257 .597758-2.988792C.597758-.992279 1.996513 .251059 3.741968 .251059C4.698381 .251059 5.535243-.155417 6.228643-.74122C7.268742-1.613948 7.579577-2.773599 7.579577-2.86924C7.579577-2.976837 7.483935-2.976837 7.44807-2.976837C7.340473-2.976837 7.328518-2.905106 7.304608-2.857285C6.75467-.992279 5.140722-.095641 3.945205-.095641C2.677958-.095641 1.578082-.908593 1.578082-2.606227C1.578082-2.988792 1.697634-5.068991 3.048568-6.635118C3.706102-7.400249 4.829888-8.069738 5.965629-8.069738C7.280697-8.069738 7.866501-6.981818 7.866501-5.762391C7.866501-5.451557 7.830635-5.188543 7.830635-5.140722C7.830635-5.033126 7.950187-5.033126 7.986052-5.033126C8.117559-5.033126 8.129514-5.045081 8.177335-5.260274L8.930511-8.308842Z'/>
+<path id='eq3-g3-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
+<path id='eq3-g3-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
+<path id='eq3-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g3-40'/>
+<use x='4.552326' y='0' xlink:href='#eq3-g2-67'/>
+<use x='13.785938' y='0' xlink:href='#eq3-g2-65'/>
+<use x='22.561284' y='0' xlink:href='#eq3-g3-41'/>
+<use x='27.11361' y='1.793263' xlink:href='#eq3-g1-105'/>
+<use x='29.99675' y='1.793263' xlink:href='#eq3-g1-106'/>
+<use x='37.699736' y='0' xlink:href='#eq3-g3-61'/>
+<use x='50.125217' y='-8.966452' xlink:href='#eq3-g0-80'/>
+<use x='62.744597' y='3.487' xlink:href='#eq3-g1-107'/>
+<use x='67.366212' y='3.487' xlink:href='#eq3-g1-108'/>
+<use x='72.478967' y='0' xlink:href='#eq3-g2-67'/>
+<use x='80.854013' y='1.793263' xlink:href='#eq3-g1-105'/>
+<use x='83.737152' y='1.793263' xlink:href='#eq3-g1-106'/>
+<use x='87.621177' y='1.793263' xlink:href='#eq3-g1-107'/>
+<use x='92.242793' y='1.793263' xlink:href='#eq3-g1-108'/>
+<use x='95.36305' y='0' xlink:href='#eq3-g2-65'/>
+<use x='104.138396' y='1.793263' xlink:href='#eq3-g1-107'/>
+<use x='108.760012' y='1.793263' xlink:href='#eq3-g1-108'/>
+</g>
+</svg>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">matrix</td>
+                  <td>Matrix operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Product of the operands.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -378,7 +1002,7 @@ $ (CA)_{ij}=\sum_{kl}C_{ijkl}A_{kl} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

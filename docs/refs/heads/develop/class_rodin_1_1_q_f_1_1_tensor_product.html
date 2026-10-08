@@ -104,21 +104,21 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ac42e4b1e5e915d6bed8684ba4f20e462">
-              <span class="m-doc-wrap-bumper"><a href="#ac42e4b1e5e915d6bed8684ba4f20e462" class="m-doc-self">TensorProduct</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac42e4b1e5e915d6bed8684ba4f20e462" class="m-doc">TensorProduct</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g,
               const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; left,
               const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; right)</span>
             </dt>
             <dd>Constructs the Cartesian product of two quadrature formulae.</dd>
-            <dt id="a70039b6b2ac6c3ec8797d41f4d463851">
-              <span class="m-doc-wrap-bumper"><a href="#a70039b6b2ac6c3ec8797d41f4d463851" class="m-doc-self">TensorProduct</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a70039b6b2ac6c3ec8797d41f4d463851" class="m-doc">TensorProduct</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g,
               const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; first,
               const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; second,
               const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; third)</span>
             </dt>
             <dd>Constructs the Cartesian product of three quadrature formulae.</dd>
-            <dt id="a28c143243c8213682444ce41f1225cd2">
-              <span class="m-doc-wrap-bumper"><a href="#a28c143243c8213682444ce41f1225cd2" class="m-doc-self">TensorProduct</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_tensor_product.html" class="m-doc">TensorProduct</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ad7519acf23563e5a10042ae35008e44b" class="m-doc">TensorProduct</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_tensor_product.html" class="m-doc">TensorProduct</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copies a tensor-product quadrature formula.</dd>
           </dl>
@@ -138,8 +138,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a3d9ae6d6960698e83f7b4f81ad9c40e3" class="m-doc">getPoint</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the coordinates of the i-th quadrature point.</dd>
-            <dt id="aaef10ae0396553a4843747b73f44ff78">
-              <span class="m-doc-wrap-bumper">auto <a href="#aaef10ae0396553a4843747b73f44ff78" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaef10ae0396553a4843747b73f44ff78" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a></span>
             </dt>
             <dd>Returns the reference element associated with the product rule.</dd>
             <dt>
@@ -150,6 +150,82 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ac42e4b1e5e915d6bed8684ba4f20e462"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac42e4b1e5e915d6bed8684ba4f20e462" class="m-doc-self">TensorProduct</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; left,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; right)</span></span>
+            </h3>
+            <p>Constructs the Cartesian product of two quadrature formulae.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+                <tr>
+                  <td>left</td>
+                  <td>Quadrature formula for the first tensor-product factor.</td>
+                </tr>
+                <tr>
+                  <td>right</td>
+                  <td>Quadrature formula for the second tensor-product factor.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a70039b6b2ac6c3ec8797d41f4d463851"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70039b6b2ac6c3ec8797d41f4d463851" class="m-doc-self">TensorProduct</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; first,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; second,
+              const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; third)</span></span>
+            </h3>
+            <p>Constructs the Cartesian product of three quadrature formulae.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+                <tr>
+                  <td>first</td>
+                  <td>Quadrature formula for the first tensor-product factor.</td>
+                </tr>
+                <tr>
+                  <td>second</td>
+                  <td>Quadrature formula for the second tensor-product factor.</td>
+                </tr>
+                <tr>
+                  <td>third</td>
+                  <td>Quadrature formula for the third tensor-product factor.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad7519acf23563e5a10042ae35008e44b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7519acf23563e5a10042ae35008e44b" class="m-doc-self">TensorProduct</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_q_f_1_1_tensor_product.html" class="m-doc">TensorProduct</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Copies a tensor-product quadrature formula.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a23e73ba10e16901b2326d8212936b72b"><div>
             <h3>
               <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc-self">getSize</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
@@ -235,6 +311,20 @@ $ x_i $
             </table>
 <aside class="m-note m-info"><h4>Note</h4><p>The returned reference must remain valid for the lifetime of the quadrature formula object.</p></aside>
           </div></section>
+          <section class="m-doc-details" id="aaef10ae0396553a4843747b73f44ff78"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaef10ae0396553a4843747b73f44ff78" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the reference element associated with the product rule.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The reference element associated with the product rule.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="acab16045d3c20a80ff961d6fa860c879"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_q_f_1_1_tensor_product.html" class="m-doc">TensorProduct</a>* Rodin::<wbr />QF::<wbr />TensorProduct::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acab16045d3c20a80ff961d6fa860c879" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
@@ -295,7 +385,7 @@ $ x_i $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

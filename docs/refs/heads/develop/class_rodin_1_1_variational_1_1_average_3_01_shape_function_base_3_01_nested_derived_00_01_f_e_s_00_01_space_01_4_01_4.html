@@ -83,7 +83,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md292">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md292">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -95,8 +100,8 @@
             </li>
           </ul>
         </nav>
-<p>Computes the average of shape (trial or test) functions across element interfaces in finite element formulations. This is used in DG bilinear and linear form assembly.</p><section id="autotoc_md292"><h3><a href="#autotoc_md292">Usage Example</a></h3><pre class="m-code"><span class="c1">// DG consistency term</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">consistency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InterfaceIntegral</span><span class="p">(</span><span class="n">Average</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span></pre></section>
+<p>Computes the average of shape (trial or test) functions across element interfaces in finite element formulations. This is used in DG bilinear and linear form assembly.</p><section id="autotoc_md292_1s1"><section id="autotoc_md292"><h3><a href="#autotoc_md292">Usage Example</a></h3><pre class="m-code"><span class="c1">// DG consistency term</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">consistency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InterfaceIntegral</span><span class="p">(</span><span class="n">Average</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">v</span><span class="p">));</span></pre></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -131,12 +136,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a01e544a064c3f67bcb5754cbdb25c976" class="m-doc">Average</a>(</span><span class="m-doc-wrap">const <a href="#a7797ebdd40f654e65250ae45425e04d2" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the average of a shape function.</dd>
-            <dt id="a343b1764282dc34877aeae3457e09b75">
-              <span class="m-doc-wrap-bumper"><a href="#a343b1764282dc34877aeae3457e09b75" class="m-doc-self">Average</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a343b1764282dc34877aeae3457e09b75" class="m-doc">Average</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a7d291159217a9c238d8b70a4f7005ae3">
-              <span class="m-doc-wrap-bumper"><a href="#a7d291159217a9c238d8b70a4f7005ae3" class="m-doc-self">Average</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a7d291159217a9c238d8b70a4f7005ae3" class="m-doc">Average</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -172,8 +177,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a4758cdb6b0d7f09e6719a7bfa884e86e" class="m-doc">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const -&gt; const FES&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the finite element space.</dd>
-            <dt id="a9fa1cc25cfbf42375a55404252133298">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -200,6 +205,46 @@
                 <tr>
                   <td style="width: 1%">op&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Shape function to average</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a343b1764282dc34877aeae3457e09b75"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Average&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a343b1764282dc34877aeae3457e09b75" class="m-doc-self">Average</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7d291159217a9c238d8b70a4f7005ae3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Average&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d291159217a9c238d8b70a4f7005ae3" class="m-doc-self">Average</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
                 </tr>
               </tbody>
             </table>
@@ -384,6 +429,32 @@ $ \frac{1}{2}(\phi^+(p) + \phi^-(p)) $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a9fa1cc25cfbf42375a55404252133298"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Average&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9fa1cc25cfbf42375a55404252133298" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; p) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a7cd5c508f2e627c4f1fe55e0dad5d83a"><div>
             <h3>
               <div class="m-doc-template">
@@ -446,7 +517,7 @@ $ \frac{1}{2}(\phi^+(p) + \phi^-(p)) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

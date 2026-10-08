@@ -102,6 +102,11 @@
               class <a href="class_rodin_1_1_variational_1_1_problem_body_base.html" class="m-doc">ProblemBodyBase&lt;Scalar&gt;</a>
             </dt>
             <dd>Base class representing the body of a variational problem.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_problem_body_base.html" class="m-doc">ProblemBodyBase&lt;Scalar&gt;</a>
+            </dt>
+            <dd>Base class representing the body of a variational problem.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -127,6 +132,50 @@
               using <a href="#a6016b520b500f24ade29370db1b5aac1" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_problem_body_base.html" class="m-doc">ProblemBodyBase</a>&lt;Scalar&gt;
             </dt>
             <dd>Parent class type.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a> = void
+            </dt>
+            <dd>Vector type of the linear system.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#a6abb6e89c2c8f28532aaea55e7e1bdaf" class="m-doc">VectorScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::remove_reference_t&lt;<a href="class_rodin_1_1_variational_1_1_problem_body.html#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&gt;&gt;<a href="#a867f717a0cd50cd2265d843075f1cc70" class="m-doc">::<wbr />ScalarType</a>
+            </dt>
+            <dd>Scalar value type of the vector.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#a5ef5c990ae5ec4c275245598bd367393" class="m-doc">OperatorScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::remove_reference_t&lt;<a href="#a87b353c8b857eb96ad6f07a3c63bceb9" class="m-doc">OperatorType</a>&gt;&gt;<a href="#a867f717a0cd50cd2265d843075f1cc70" class="m-doc">::<wbr />ScalarType</a>
+            </dt>
+            <dd>Scalar value type of the operator.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#a936f463c6d35805bf4b3158e18fdb591" class="m-doc">LinearFormBaseType</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_base.html" class="m-doc">LinearFormBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_problem_body.html#a88ac812816e59f801e2b761a9868266a" class="m-doc">VectorType</a>&gt;
+            </dt>
+            <dd>Linear form base type.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#a4a682b8446fe17a83b9462e1f7dd45c3" class="m-doc">LinearFormBaseListType</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_problem_body.html#a936f463c6d35805bf4b3158e18fdb591" class="m-doc">LinearFormBaseType</a>&gt;
+            </dt>
+            <dd>List type of linear forms.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#ac032ce9ce583f9e4412c500abb12b284" class="m-doc">LinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_problem_body.html#a6abb6e89c2c8f28532aaea55e7e1bdaf" class="m-doc">VectorScalarType</a>&gt;
+            </dt>
+            <dd>Linear form integrator base type.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#a9bdc8a89acc36b35300b74dc84eb9f52" class="m-doc">LocalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_problem_body.html#a5ef5c990ae5ec4c275245598bd367393" class="m-doc">OperatorScalarType</a>&gt;
+            </dt>
+            <dd>Local bilinear form integrator base type.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#a0d64a57cbedad8f050d5abd0c0fc4416" class="m-doc">GlobalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">GlobalBilinearFormIntegratorBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_problem_body.html#a5ef5c990ae5ec4c275245598bd367393" class="m-doc">OperatorScalarType</a>&gt;
+            </dt>
+            <dd>Global bilinear form integrator base type.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#aa4ea3b8acc2c9d15b61de074bf392be0" class="m-doc">LinearFormIntegratorBaseListType</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_problem_body.html#ac032ce9ce583f9e4412c500abb12b284" class="m-doc">LinearFormIntegratorBaseType</a>&gt;
+            </dt>
+            <dd>List type of linear form integrators.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#ad2dc4e1413cf38bdd451405b67782566" class="m-doc">LocalBilinearFormIntegratorBaseListType</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_problem_body.html#a9bdc8a89acc36b35300b74dc84eb9f52" class="m-doc">LocalBilinearFormIntegratorBaseType</a>&gt;
+            </dt>
+            <dd>List type of local bilinear form integrators.</dd>
+            <dt>
+              using <a href="class_rodin_1_1_variational_1_1_problem_body.html#ad4f06355ceae3b303c6af033b93d257c" class="m-doc">GlobalBilinearFormIntegratorBaseListType</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_problem_body.html#a0d64a57cbedad8f050d5abd0c0fc4416" class="m-doc">GlobalBilinearFormIntegratorBaseType</a>&gt;
+            </dt>
+            <dd>List type of global bilinear form integrators.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -136,12 +185,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a842a97bd9d4da070674e0f467533718c" class="m-doc-self">ProblemBody</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Default constructor.</dd>
-            <dt id="a87788f27f2e8e31f5670cf902b12be02">
-              <span class="m-doc-wrap-bumper"><a href="#a87788f27f2e8e31f5670cf902b12be02" class="m-doc-self">ProblemBody</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a87788f27f2e8e31f5670cf902b12be02" class="m-doc">ProblemBody</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a13ace72d2d0325cd9b42d27f77927497">
-              <span class="m-doc-wrap-bumper"><a href="#a13ace72d2d0325cd9b42d27f77927497" class="m-doc-self">ProblemBody</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a13ace72d2d0325cd9b42d27f77927497" class="m-doc">ProblemBody</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -149,27 +198,177 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="aaa9f3d51e83acedebaf26a7bcbed2019">
-              <span class="m-doc-wrap-bumper">auto <a href="#aaa9f3d51e83acedebaf26a7bcbed2019" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaa9f3d51e83acedebaf26a7bcbed2019" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
-            <dt id="a2823b82525b2af39fdbf39b7df9c1b88">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2823b82525b2af39fdbf39b7df9c1b88" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2823b82525b2af39fdbf39b7df9c1b88" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;</span>
             </dt>
             <dd>Move assignment operator.</dd>
-            <dt id="ae08da4367b615aa233b2a5abd11c9f76">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae08da4367b615aa233b2a5abd11c9f76" class="m-doc-self">getBFs</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#aa480309586ff46a6694e06b4c2c1e432" class="m-doc">BilinearFormBaseListType</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae08da4367b615aa233b2a5abd11c9f76" class="m-doc">getBFs</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#aa480309586ff46a6694e06b4c2c1e432" class="m-doc">BilinearFormBaseListType</a>&amp;</span>
             </dt>
             <dd>Returns bilinear forms.</dd>
-            <dt id="ad6e949508e9ad253bb618c68bebe0838">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad6e949508e9ad253bb618c68bebe0838" class="m-doc-self">getBFs</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aa480309586ff46a6694e06b4c2c1e432" class="m-doc">BilinearFormBaseListType</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad6e949508e9ad253bb618c68bebe0838" class="m-doc">getBFs</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aa480309586ff46a6694e06b4c2c1e432" class="m-doc">BilinearFormBaseListType</a>&amp;</span>
             </dt>
             <dd>Returns bilinear forms.</dd>
-            <dt id="ab7ae128e05b47c88bf2a569023cf3f77">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7ae128e05b47c88bf2a569023cf3f77" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7ae128e05b47c88bf2a569023cf3f77" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies this problem body.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_variational_1_1_problem_body.html#a75cd89a373eff85ec885b80847bcc3bd" class="m-doc">getLFs</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_problem_body.html#a4a682b8446fe17a83b9462e1f7dd45c3" class="m-doc">LinearFormBaseListType</a>&amp;</span>
+            </dt>
+            <dd>Gets the linear forms of the problem.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a87788f27f2e8e31f5670cf902b12be02"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Operator, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ProblemBody&lt;Operator, void, Scalar&gt;&lt;Operator, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87788f27f2e8e31f5670cf902b12be02" class="m-doc-self">ProblemBody</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a13ace72d2d0325cd9b42d27f77927497"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Operator, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />ProblemBody&lt;Operator, void, Scalar&gt;&lt;Operator, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13ace72d2d0325cd9b42d27f77927497" class="m-doc-self">ProblemBody</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaa9f3d51e83acedebaf26a7bcbed2019"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Operator, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBody&lt;Operator, void, Scalar&gt;&lt;Operator, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaa9f3d51e83acedebaf26a7bcbed2019" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2823b82525b2af39fdbf39b7df9c1b88"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Operator, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBody&lt;Operator, void, Scalar&gt;&lt;Operator, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2823b82525b2af39fdbf39b7df9c1b88" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae08da4367b615aa233b2a5abd11c9f76"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Operator, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#aa480309586ff46a6694e06b4c2c1e432" class="m-doc">BilinearFormBaseListType</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBody&lt;Operator, void, Scalar&gt;&lt;Operator, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae08da4367b615aa233b2a5abd11c9f76" class="m-doc-self">getBFs</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Returns bilinear forms.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Bilinear forms.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad6e949508e9ad253bb618c68bebe0838"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Operator, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#aa480309586ff46a6694e06b4c2c1e432" class="m-doc">BilinearFormBaseListType</a>&amp; Rodin::<wbr />Variational::<wbr />ProblemBody&lt;Operator, void, Scalar&gt;&lt;Operator, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6e949508e9ad253bb618c68bebe0838" class="m-doc-self">getBFs</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns bilinear forms.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Bilinear forms.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab7ae128e05b47c88bf2a569023cf3f77"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Operator, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>* Rodin::<wbr />Variational::<wbr />ProblemBody&lt;Operator, void, Scalar&gt;&lt;Operator, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7ae128e05b47c88bf2a569023cf3f77" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polymorphically copies this problem body.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -215,7 +414,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

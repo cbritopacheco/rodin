@@ -123,36 +123,36 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="aeb764ef99b9fe43949b7e3d34f279e53">
-              using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
+            <dt id="aeaf4c743c89ae9e0b9ebd1758affe271">
+              using <a href="#aeaf4c743c89ae9e0b9ebd1758affe271" class="m-doc-self">FESType</a> = FES
             </dt>
             <dd>Finite element space type.</dd>
-            <dt id="aee60825459fdaf14377eb17bc437a934">
-              using <a href="#aee60825459fdaf14377eb17bc437a934" class="m-doc-self">DataType</a> = Data
+            <dt id="aa71232b0d2fcfbe28ed46fbbbc301e82">
+              using <a href="#aa71232b0d2fcfbe28ed46fbbbc301e82" class="m-doc-self">DataType</a> = Data
             </dt>
             <dd>Data storage type for grid function.</dd>
-            <dt id="ab37eb92e9df0ee9444118e329f8343be">
-              using <a href="#ab37eb92e9df0ee9444118e329f8343be" class="m-doc-self">InitialType</a> = Initial
+            <dt id="aadca824f3fcfaceeda23046b8d40f6dd">
+              using <a href="#aadca824f3fcfaceeda23046b8d40f6dd" class="m-doc-self">InitialType</a> = Initial
             </dt>
             <dd>Type of the initial condition.</dd>
-            <dt id="a944fcfd398d1e05c4ccb478c8d2b8813">
-              using <a href="#a944fcfd398d1e05c4ccb478c8d2b8813" class="m-doc-self">VectorFieldType</a> = VectorField
+            <dt id="a6d1e679566ee6608ddf554be5e4895e1">
+              using <a href="#a6d1e679566ee6608ddf554be5e4895e1" class="m-doc-self">VectorFieldType</a> = VectorField
             </dt>
             <dd>Type of the velocity field.</dd>
-            <dt id="af64c5a2aace3ee109b0b08713933ec73">
-              using <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc-self">StepType</a> = Step
+            <dt id="a06cf0081e177ab22db97bd661d39d7b6">
+              using <a href="#a06cf0081e177ab22db97bd661d39d7b6" class="m-doc-self">StepType</a> = Step
             </dt>
             <dd>Type of the time-stepping scheme.</dd>
-            <dt id="a8861b08a5b1de525582a3f26705c9ad8">
-              using <a href="#a8861b08a5b1de525582a3f26705c9ad8" class="m-doc-self">SolutionType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;
+            <dt id="a632a84db89c3a610897859eca3c44641">
+              using <a href="#a632a84db89c3a610897859eca3c44641" class="m-doc-self">SolutionType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;
             </dt>
             <dd>Solution type: grid function holding the advected field.</dd>
-            <dt id="a93f1359d04cd3f2b35b3277350a4a2aa">
-              using <a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc-self">TrialFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;
+            <dt id="aade331c5471d932ba26df956db8bd122">
+              using <a href="#aade331c5471d932ba26df956db8bd122" class="m-doc-self">TrialFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;
             </dt>
             <dd>Trial function type for variational formulation.</dd>
-            <dt id="a473b98a93bed175048946215edcc6a61">
-              using <a href="#a473b98a93bed175048946215edcc6a61" class="m-doc-self">TestFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;
+            <dt id="a5ebd9201ccfc2b3af2a42afea9c5b0dc">
+              using <a href="#a5ebd9201ccfc2b3af2a42afea9c5b0dc" class="m-doc-self">TestFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;
             </dt>
             <dd>Test function type for variational formulation.</dd>
           </dl>
@@ -161,9 +161,9 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class U0, class VVel, class S = <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc">StepType</a>&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a796f39d712dc8b329cde9c0abbee057c" class="m-doc">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc">TrialFunctionType</a>&amp; u,
-              <a href="#a473b98a93bed175048946215edcc6a61" class="m-doc">TestFunctionType</a>&amp; v,
+              <div class="m-doc-template">template&lt;class U0, class VVel, class S = <a href="#a06cf0081e177ab22db97bd661d39d7b6" class="m-doc">StepType</a>&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a796f39d712dc8b329cde9c0abbee057c" class="m-doc">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="#aade331c5471d932ba26df956db8bd122" class="m-doc">TrialFunctionType</a>&amp; u,
+              <a href="#a5ebd9201ccfc2b3af2a42afea9c5b0dc" class="m-doc">TestFunctionType</a>&amp; v,
               U0&amp;&amp; u0,
               VVel&amp;&amp; vel,
               S&amp;&amp; st = S{})</span>
@@ -186,10 +186,10 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES, class Data, class Initial, class VectorField, class Step&gt;
-                template&lt;class U0, class VVel, class S = <a href="#af64c5a2aace3ee109b0b08713933ec73" class="m-doc">StepType</a>&gt;
+                template&lt;class U0, class VVel, class S = <a href="#a06cf0081e177ab22db97bd661d39d7b6" class="m-doc">StepType</a>&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />Lagrangian&lt;Variational::<wbr />TrialFunction&lt;Variational::<wbr />GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::<wbr />TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;&lt;FES, Data, Initial, VectorField, Step&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a796f39d712dc8b329cde9c0abbee057c" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc">TrialFunctionType</a>&amp; u,
-              <a href="#a473b98a93bed175048946215edcc6a61" class="m-doc">TestFunctionType</a>&amp; v,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />Lagrangian&lt;Variational::<wbr />TrialFunction&lt;Variational::<wbr />GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::<wbr />TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt;&lt;FES, Data, Initial, VectorField, Step&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a796f39d712dc8b329cde9c0abbee057c" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="#aade331c5471d932ba26df956db8bd122" class="m-doc">TrialFunctionType</a>&amp; u,
+              <a href="#a5ebd9201ccfc2b3af2a42afea9c5b0dc" class="m-doc">TestFunctionType</a>&amp; v,
               U0&amp;&amp; u0,
               VVel&amp;&amp; vel,
               S&amp;&amp; st = S{})</span></span>
@@ -332,7 +332,7 @@ $ t = 0 $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

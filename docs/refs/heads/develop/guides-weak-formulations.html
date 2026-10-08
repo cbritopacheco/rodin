@@ -133,8 +133,7 @@ $ \Omega $
 </g>
 </svg>:</p><div class="m-math"><svg style="width: 7.333em; height: 1.107em;" viewBox="159.071314 -10.626787 70.400363 10.626798">
 <title>
-\[
-  \mathcal{L} u = f \quad \text{in } \Omega
+\[  \mathcal{L} u = f \quad \text{in } \Omega
 \]
 </title>
 <defs>
@@ -232,8 +231,7 @@ $ v $
 </g>
 </svg></li><li><strong>Apply boundary conditions</strong> (essential or natural)</li></ol></section><section id="guides-weak-poisson"><h2><a href="#guides-weak-poisson">Example: The Poisson Equation</a></h2><section id="guides-weak-poisson-strong"><h3><a href="#guides-weak-poisson-strong">Strong Form</a></h3><p>The Poisson equation with homogeneous Dirichlet boundary conditions:</p><div class="m-math"><svg style="width: 10.243em; height: 3.736em;" viewBox="144.508706 -35.865862 98.33005 35.865869">
 <title>
-\[
-  \left\{
+\[  \left\{
   \begin{aligned}
     -\Delta u &amp;= f &amp;&amp; \text{in } \Omega \\
     u &amp;= 0 &amp;&amp; \text{on } \partial\Omega
@@ -299,8 +297,7 @@ $ v \in H^1_0(\Omega) $
 </g>
 </svg> and integrate:</p><div class="m-math"><svg style="width: 13.189em; height: 2.819em;" viewBox="130.96448 -27.065451 126.614057 27.065451">
 <title>
-\[
-  -\int_\Omega \Delta u \, v \, dx = \int_\Omega f \, v \, dx
+\[  -\int_\Omega \Delta u \, v \, dx = \int_\Omega f \, v \, dx
 \]
 </title>
 <defs>
@@ -334,8 +331,7 @@ $ v \in H^1_0(\Omega) $
 </g>
 </svg></div><p>Apply Green&#x27;s formula (integration by parts):</p><div class="m-math"><svg style="width: 23.137em; height: 4.641em;" viewBox="83.215758 -45.753287 222.111502 44.557773">
 <title>
-\[
-  \int_\Omega \nabla u \cdot \nabla v \, dx
+\[  \int_\Omega \nabla u \cdot \nabla v \, dx
   - \underbrace{\int_{\partial\Omega} \frac{\partial u}{\partial n} v \, ds}_{= 0 \text{ (since } v = 0 \text{ on } \partial\Omega)}
   = \int_\Omega f \, v \, dx
 \]
@@ -474,8 +470,7 @@ $ v \in H^1_0(\Omega) $
 </g>
 </svg>:</p><div class="m-math"><svg style="width: 13.764em; height: 2.819em;" viewBox="128.203928 -27.065451 132.135139 27.065451">
 <title>
-\[
-  \int_\Omega \nabla u \cdot \nabla v \, dx = \int_\Omega f \, v \, dx
+\[  \int_\Omega \nabla u \cdot \nabla v \, dx = \int_\Omega f \, v \, dx
 \]
 </title>
 <defs>
@@ -536,7 +531,7 @@ $ v \in H^1_0(\Omega) $
 <span class="w">  </span><span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">poisson</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section></section><section id="guides-weak-elasticity"><h2><a href="#guides-weak-elasticity">Example: Linearized Elasticity</a></h2><section id="guides-weak-elasticity-strong"><h3><a href="#guides-weak-elasticity-strong">Strong Form</a></h3><p>The linearized elasticity system governs the displacement <svg class="m-math" style="width: 5.980em; height: 1.028em; vertical-align: -0.000em;" viewBox="0 -9.873238 57.40811 9.873238">
+<span class="p">}</span></pre></section></section><section id="guides-weak-elasticity"><h2><a href="#guides-weak-elasticity">Example: Linearized Elasticity</a></h2><section id="guides-weak-elasticity-strong"><h3><a href="#guides-weak-elasticity-strong">Strong Form</a></h3><p>The linearized elasticity system governs the displacement  <svg class="m-math" style="width: 5.980em; height: 1.028em; vertical-align: -0.000em;" viewBox="0 -9.873238 57.40811 9.873238">
 <title>
 $ \mathbf{u}
 : \Omega \to \mathbb{R}^d $
@@ -559,8 +554,7 @@ $ \mathbf{u}
 </g>
 </svg> of an elastic body:</p><div class="m-math"><svg style="width: 13.145em; height: 5.230em;" viewBox="130.329486 -50.212217 126.190364 50.212217">
 <title>
-\[
-  \left\{
+\[  \left\{
   \begin{aligned}
     -\nabla \cdot \boldsymbol{\sigma}(\mathbf{u}) &amp;= \mathbf{f} &amp;&amp; \text{in } \Omega \\
     \mathbf{u} &amp;= \mathbf{0} &amp;&amp; \text{on } \Gamma_D \\
@@ -631,7 +625,7 @@ $ \mathbf{u}
 <use x='241.635371' y='-4.782374' xlink:href='#eq16-g8-0'/>
 <use x='248.949545' y='-2.989111' xlink:href='#eq16-g4-78'/>
 </g>
-</svg></div><p>where <svg class="m-math" style="width: 15.636em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 150.101187 11.955168">
+</svg></div><p>where  <svg class="m-math" style="width: 15.636em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 150.101187 11.955168">
 <title>
 $ \boldsymbol{\sigma}(\mathbf{u}) = 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u})
 + \lambda \, \mathrm{tr}(\boldsymbol{\varepsilon}(\mathbf{u})) \, \mathbf{I} $
@@ -752,8 +746,7 @@ $ \nu $
 </g>
 </svg> by:</p><div class="m-math"><svg style="width: 19.353em; height: 2.859em;" viewBox="100.778529 -27.446579 185.790404 27.446579">
 <title>
-\[
-  \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
+\[  \lambda = \frac{E\nu}{(1+\nu)(1-2\nu)}, \quad
   \mu = \frac{E}{2(1+\nu)}
 \]
 </title>
@@ -878,8 +871,7 @@ $ \Gamma_N $
 </g>
 </svg> produces the traction term:</p><div class="m-math"><svg style="width: 23.642em; height: 2.959em;" viewBox="80.792031 -28.40488 226.958928 28.40488">
 <title>
-\[
-  \int_\Omega \boldsymbol{\sigma}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v}) \, dx
+\[  \int_\Omega \boldsymbol{\sigma}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v}) \, dx
   = \int_\Omega \mathbf{f} \cdot \mathbf{v} \, dx
   + \int_{\Gamma_N} \mathbf{g} \cdot \mathbf{v} \, ds
 \]
@@ -939,8 +931,7 @@ $ \Gamma_N $
 </g>
 </svg></div><p>Expanding Hooke&#x27;s law, the bilinear form becomes:</p><div class="m-math"><svg style="width: 26.119em; height: 2.819em;" viewBox="68.900346 -27.065451 250.74228 27.065451">
 <title>
-\[
-  a(\mathbf{u}, \mathbf{v}) = \int_\Omega \bigl[
+\[  a(\mathbf{u}, \mathbf{v}) = \int_\Omega \bigl[
   \lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v})
   + 2\mu \, \boldsymbol{\varepsilon}(\mathbf{u}) : \boldsymbol{\varepsilon}(\mathbf{v})
   \bigr] \, dx
@@ -1055,8 +1046,7 @@ $ \mathbf{u}^k $
 </g>
 </svg> solves:</p><div class="m-math"><svg style="width: 15.748em; height: 1.402em;" viewBox="118.429683 -13.45978 151.185484 13.45978">
 <title>
-\[
-  K(\mathbf{u}^k) \, \delta\mathbf{u}^k = -F_{\mathrm{int}}(\mathbf{u}^k) + F_{\mathrm{ext}}
+\[  K(\mathbf{u}^k) \, \delta\mathbf{u}^k = -F_{\mathrm{int}}(\mathbf{u}^k) + F_{\mathrm{ext}}
 \]
 </title>
 <defs>
@@ -1150,8 +1140,7 @@ $ F_{\mathrm{int}} $
 <span class="n">NewtonSolver</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">linearSolver</span><span class="p">);</span>
 <span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// updates u in place</span></pre><p>See <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid module</a> for the full API, and <a href="guides-numerical-contracts.html" class="m-doc">Numerical contracts</a> for residual/tangent consistency checks.</p></section></section><section id="guides-weak-general"><h2><a href="#guides-weak-general">General Structure</a></h2><p>Most weak formulations in Rodin follow this pattern:</p><div class="m-math"><svg style="width: 21.292em; height: 1.245em;" viewBox="92.069975 -11.955168 204.403097 11.955168">
 <title>
-\[
-  \text{Find } u \in V \text{ s.t. } \forall v \in V: \quad
+\[  \text{Find } u \in V \text{ s.t. } \forall v \in V: \quad
   a(u, v) = \ell(v)
 \]
 </title>
@@ -1617,7 +1606,7 @@ $ V $
 <g id='eq58-page1'>
 <use x='0' y='0' xlink:href='#eq58-g0-86'/>
 </g>
-</svg></li></ul><p>For the Poisson equation, the bilinear form <svg class="m-math" style="width: 12.425em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 119.28039 13.781784">
+</svg></li></ul><p>For the Poisson equation, the bilinear form  <svg class="m-math" style="width: 12.425em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 119.28039 13.781784">
 <title>
 $ a(u, v) = \int_\Omega
 \nabla u \cdot \nabla v \, dx $
@@ -1721,7 +1710,7 @@ $ H^1_0(\Omega) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

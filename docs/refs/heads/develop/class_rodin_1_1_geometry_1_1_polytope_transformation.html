@@ -130,8 +130,7 @@ $ K $
 </g>
 </svg>. This class represents the transformation:</p><div class="m-math"><svg style="width: 11.517em; height: 1.139em;" viewBox="138.740693 -10.938397 110.563491 10.938408">
 <title>
-\[
-   x : K \subset \mathbb{R}^k \rightarrow \tau \subset \mathbb{R}^s
+\[   x : K \subset \mathbb{R}^k \rightarrow \tau \subset \mathbb{R}^s
 \]
 </title>
 <defs>
@@ -188,8 +187,7 @@ $ p \in \tau $
 </g>
 </svg>:</p><div class="m-math"><svg style="width: 4.477em; height: 1.245em;" viewBox="172.782151 -11.955168 42.978665 11.955168">
 <title>
-\[
-   p = x(r)
+\[   p = x(r)
 \]
 </title>
 <defs>
@@ -319,12 +317,12 @@ $ x(r) = r $
               size_t pdim) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a transformation with given dimensions.</dd>
-            <dt id="a8fbabbb5ec3b1fb71a4c5cc056ea9f1a">
-              <span class="m-doc-wrap-bumper"><a href="#a8fbabbb5ec3b1fb71a4c5cc056ea9f1a" class="m-doc-self">PolytopeTransformation</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a9f666d6199113053e83470998cfb0c95" class="m-doc">PolytopeTransformation</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="aa7f6670c5ec1635ee3f417f4a751660b">
-              <span class="m-doc-wrap-bumper"><a href="#aa7f6670c5ec1635ee3f417f4a751660b" class="m-doc-self">PolytopeTransformation</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac2434d1230898ceee372b31528400562" class="m-doc">PolytopeTransformation</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
             <dt id="a965843115b9330740f48e6c8b5cf4934">
@@ -336,8 +334,8 @@ $ x(r) = r $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ac7c78e4d0fa0251c9211d1eed9c26ee1">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac7c78e4d0fa0251c9211d1eed9c26ee1" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad6b318c86c7430b2707ab0c20d28ff1c" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
@@ -393,8 +391,8 @@ $ s $
             <dd>Computes the reference coordinates from physical coordinates.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serialization method for Boost.Serialization.</dd>
             <dt>
@@ -445,6 +443,63 @@ $ s $
 </svg></td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9f666d6199113053e83470998cfb0c95"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9f666d6199113053e83470998cfb0c95" class="m-doc-self">PolytopeTransformation</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac2434d1230898ceee372b31528400562"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2434d1230898ceee372b31528400562" class="m-doc-self">PolytopeTransformation</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad6b318c86c7430b2707ab0c20d28ff1c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp; Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad6b318c86c7430b2707ab0c20d28ff1c" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="a8cd9039394e63ae5b2a04accd2b6b2c8"><div>
@@ -515,6 +570,14 @@ $ s $
               <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a220d50baa65da35e4d4936848c27dc7c" class="m-doc-self">getFactorOrder</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Conservative degree in each factor of the control-point basis.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The factor order.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Defaults to the total polynomial order, which bounds every individual factor degree. Isotropic tensor and collapsed-coordinate elements may override this with their known factor degree. A total degree alone must not be divided by the number of factors for an arbitrary transformation.</p>
           </div></section>
           <section class="m-doc-details" id="a1cebe38715f95dd2bcca579a27e476bb"><div>
@@ -564,8 +627,7 @@ $ r \in K $
             </table>
 <p>Computes:</p><div class="m-math"><svg style="width: 5.527em; height: 1.245em;" viewBox="167.744174 -11.955168 53.054642 11.955168">
 <title>
-\[
-   pc = x(rc)
+\[   pc = x(rc)
 \]
 </title>
 <defs>
@@ -648,8 +710,7 @@ $ r \in K $
             </table>
 <p>Computes the Jacobian matrix:</p><div class="m-math"><svg style="width: 13.904em; height: 7.527em;" viewBox="127.532115 -72.256683 133.478749 72.256683">
 <title>
-\[
- \mathbf{J}_x (r) = \begin{bmatrix}
+\[ \mathbf{J}_x (r) = \begin{bmatrix}
 \dfrac{\partial x_1}{\partial r_1} &amp; \ldots &amp; \dfrac{\partial x_1}{\partial r_k}\\
 \vdots &amp; \ddots &amp; \vdots\\
 \dfrac{\partial x_s}{\partial r_1} &amp; \ldots &amp; \dfrac{\partial x_s}{\partial r_k}
@@ -841,8 +902,7 @@ $ p \in \tau $
             </table>
 <p>Computes the inverse transformation:</p><div class="m-math"><svg style="width: 6.706em; height: 1.361em;" viewBox="162.084763 -13.06128 64.373464 13.06128">
 <title>
-\[
-   rc = x^{-1}(pc)
+\[   rc = x^{-1}(pc)
 \]
 </title>
 <defs>
@@ -870,13 +930,13 @@ $ p \in \tau $
 </g>
 </svg></div><aside class="m-note m-info"><h4>Note</h4><p>Default implementation assumes the reference element has origin at 0. Override for more complex inverse transformations.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="af0dd9205158ccf7bcfcd8ff81f79c927"><div>
+          <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
             </h3>
             <p>Serialization method for Boost.Serialization.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -887,6 +947,10 @@ $ p \in \tau $
                 <tr>
                   <td style="width: 1%">ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
                   <td>Archive object</td>
+                </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Boost.Serialization class version; unused by this implementation.</td>
                 </tr>
               </tbody>
             </table>
@@ -951,7 +1015,7 @@ $ p \in \tau $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

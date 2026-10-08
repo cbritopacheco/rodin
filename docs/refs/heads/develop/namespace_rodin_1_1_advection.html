@@ -77,13 +77,28 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Advection <span class="m-thin">namespace</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_advection.html" class="m-doc">Rodin::<wbr />Advection</a>.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md536">Algorithm</a></li>
-            <li><a href="#autotoc_md537">Time Stepping and Boundary Policies</a></li>
-            <li><a href="#autotoc_md538">Typical Usage</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md536">Algorithm</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md537">Time Stepping and Boundary Policies</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md538">Typical Usage</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -95,8 +110,7 @@
         </nav>
 <p>Directory src/Rodin/Advection</p><p>Module which provides models for the resolution of unsteady advection equations.</p><p>The Advection module implements semi-Lagrangian (characteristic-based) transport of scalar fields on unstructured meshes. The primary class is <a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a>, which solves the advection equation:</p><div class="m-math"><svg style="width: 8.727em; height: 2.562em;" viewBox="152.978789 -24.590612 83.780911 24.590612">
 <title>
-\[
-  \frac{\partial \phi}{\partial t} + \mathbf{v} \cdot \nabla \phi = 0
+\[  \frac{\partial \phi}{\partial t} + \mathbf{v} \cdot \nabla \phi = 0
 \]
 </title>
 <defs>
@@ -124,7 +138,7 @@
 <use x='218.481229' y='-8.200662' xlink:href='#eq1-g3-61'/>
 <use x='230.90671' y='-8.200662' xlink:href='#eq1-g3-48'/>
 </g>
-</svg></div><section id="autotoc_md536"><h3><a href="#autotoc_md536">Algorithm</a></h3><p>At each time step, the Lagrangian method:</p><ol><li><strong>Traces characteristics</strong> backward from each mesh vertex along the velocity field <svg class="m-math" style="width: 0.759em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.285181 5.313399">
+</svg></div><section id="autotoc_md536_1s1"><section id="autotoc_md536"><h3><a href="#autotoc_md536">Algorithm</a></h3><p>At each time step, the Lagrangian method:</p><ol><li><strong>Traces characteristics</strong> backward from each mesh vertex along the velocity field <svg class="m-math" style="width: 0.759em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.285181 5.313399">
 <title>
 $ \mathbf{v} $
 </title>
@@ -160,8 +174,7 @@ $ L^2 $
 </g>
 </svg> projection (mass-matrix solve using CG)</li></ol><p>The variational formulation at each step is:</p><div class="m-math"><svg style="width: 15.057em; height: 2.819em;" viewBox="121.99853 -27.065451 144.545962 27.065451">
 <title>
-\[
-  \int_\Omega u^{n+1} v \, dx = \int_\Omega u^n(\mathbf{X}) \, v \, dx
+\[  \int_\Omega u^{n+1} v \, dx = \int_\Omega u^n(\mathbf{X}) \, v \, dx
 \]
 </title>
 <defs>
@@ -221,7 +234,7 @@ $ \mathbf{v} $
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-118'/>
 </g>
-</svg>.</p></section><section id="autotoc_md537"><h3><a href="#autotoc_md537">Time Stepping and Boundary Policies</a></h3><p>The characteristic tracing uses configurable time-stepping schemes. The default is Runge-Kutta 4 (<code>Math::RungeKutta::RK4</code>); custom steppers can be passed as the fifth constructor argument.</p><p>Two boundary policies handle characteristics that hit the domain boundary:</p><table class="m-table"><thead><tr><th>Policy</th><th>Behavior</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_advection_1_1_stop_inside_boundary_policy.html" class="m-doc">StopInsideBoundaryPolicy</a></td><td>Clamps the departure point to an interior point with a small inward offset (<code>eps_in_phys</code>, default <svg class="m-math" style="width: 2.788em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 26.760853 9.474739">
+</svg>.</p></section></section><section id="autotoc_md537_1s1"><section id="autotoc_md537"><h3><a href="#autotoc_md537">Time Stepping and Boundary Policies</a></h3><p>The characteristic tracing uses configurable time-stepping schemes. The default is Runge-Kutta 4 (<code>Math::RungeKutta::RK4</code>); custom steppers can be passed as the fifth constructor argument.</p><p>Two boundary policies handle characteristics that hit the domain boundary:</p><table class="m-table"><thead><tr><th>Policy</th><th>Behavior</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_advection_1_1_stop_inside_boundary_policy.html" class="m-doc">StopInsideBoundaryPolicy</a></td><td>Clamps the departure point to an interior point with a small inward offset (<code>eps_in_phys</code>, default <svg class="m-math" style="width: 2.788em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 26.760853 9.474739">
 <title>
 $ 10^{-12} $
 </title>
@@ -257,7 +270,7 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
 <use x='25.52499' y='0' xlink:href='#eq9-g2-14'/>
 <use x='31.157946' y='0' xlink:href='#eq9-g0-120'/>
 </g>
-</svg>. Used automatically for <strong>subsequent steps</strong> (from the current solution).</td></tr></tbody></table><p>The <code>Lagrangian</code> class tracks time internally (<code>m_t</code>) and switches between the initial condition (first step) and the current solution (later steps).</p></section><section id="autotoc_md538"><h3><a href="#autotoc_md538">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg>. Used automatically for <strong>subsequent steps</strong> (from the current solution).</td></tr></tbody></table><p>The <code>Lagrangian</code> class tracks time internally (<code>m_t</code>) and switches between the initial condition (first step) and the current solution (later steps).</p></section></section><section id="autotoc_md538_1s1"><section id="autotoc_md538"><h3><a href="#autotoc_md538">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
@@ -271,7 +284,7 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
 
 <span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span><span class="p">;</span>
 <span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">step</span><span class="p">)</span>
-<span class="w">  </span><span class="n">advection</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>The module is header-only (<code>Rodin::Advection</code> INTERFACE library).</p></aside><aside class="m-note m-default"><h4>See also</h4><p><code>Flow</code> for the characteristic tracer.</p></aside></section>
+<span class="w">  </span><span class="n">advection</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">dt</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>The module is header-only (<code>Rodin::Advection</code> INTERFACE library).</p></aside><aside class="m-note m-default"><h4>See also</h4><p><code>Flow</code> for the characteristic tracer.</p></aside></section></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -301,52 +314,102 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data, class Initial, class VVel&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#af92d1df078b3f681f17d8f4c54a8667a" class="m-doc">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp;,
-              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp;,
-              Initial&amp;&amp;,
-              VVel&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, Math::RungeKutta::RK4 &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a0b340dcc74064d75c7a9d80983c362c4" class="m-doc">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp; trial,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp; test,
+              Initial&amp;&amp; initial,
+              VVel&amp;&amp; velocity) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, Math::RungeKutta::RK4 &gt;</span>
             </dt>
             <dd>Deduction guide for Lagrangian with default RK4 stepper.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data, class Initial, class VVel, class SStep&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a33656188db35e8c971f9773cfe937298" class="m-doc">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp;,
-              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp;,
-              Initial&amp;&amp;,
-              VVel&amp;&amp;,
-              SStep&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, SStep &gt;</span>
+              <span class="m-doc-wrap-bumper"><a href="#a9e27b25e0af305f2f131f63310a768cb" class="m-doc">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp; v,
+              Initial&amp;&amp; u0,
+              VVel&amp;&amp; vel,
+              SStep&amp;&amp; st) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, SStep &gt;</span>
             </dt>
             <dd>Deduction guide for Lagrangian with custom stepper.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="af92d1df078b3f681f17d8f4c54a8667a"><div>
+          <section class="m-doc-details" id="a0b340dcc74064d75c7a9d80983c362c4"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_lagrangian_8h.html">&lt;Rodin/Advection/Lagrangian.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class FES, class Data, class Initial, class VVel&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af92d1df078b3f681f17d8f4c54a8667a" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp;,
-              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp;,
-              Initial&amp;&amp;,
-              VVel&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, Math::RungeKutta::RK4 &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b340dcc74064d75c7a9d80983c362c4" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp; trial,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp; test,
+              Initial&amp;&amp; initial,
+              VVel&amp;&amp; velocity) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, Math::RungeKutta::RK4 &gt;</span></span>
             </h3>
             <p>Deduction guide for Lagrangian with default RK4 stepper.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">trial</td>
+                  <td>Trial function storing the advected field.</td>
+                </tr>
+                <tr>
+                  <td>test</td>
+                  <td>Test function for the transport problem.</td>
+                </tr>
+                <tr>
+                  <td>initial</td>
+                  <td>Initial field.</td>
+                </tr>
+                <tr>
+                  <td>velocity</td>
+                  <td>Velocity field.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Allows construction without explicitly specifying the Step template parameter.</p>
           </div></section>
-          <section class="m-doc-details" id="a33656188db35e8c971f9773cfe937298"><div>
+          <section class="m-doc-details" id="a9e27b25e0af305f2f131f63310a768cb"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_lagrangian_8h.html">&lt;Rodin/Advection/Lagrangian.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class FES, class Data, class Initial, class VVel, class SStep&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33656188db35e8c971f9773cfe937298" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp;,
-              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp;,
-              Initial&amp;&amp;,
-              VVel&amp;&amp;,
-              SStep&amp;&amp;) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, SStep &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9e27b25e0af305f2f131f63310a768cb" class="m-doc-self">Lagrangian</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;&amp; u,
+              <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;&amp; v,
+              Initial&amp;&amp; u0,
+              VVel&amp;&amp; vel,
+              SStep&amp;&amp; st) -&gt; Lagrangian&lt; Variational::TrialFunction&lt; Variational::GridFunction&lt; FES, Data &gt;, FES &gt;, Variational::TestFunction&lt; FES &gt;, Initial, VVel, SStep &gt;</span></span>
             </h3>
             <p>Deduction guide for Lagrangian with custom stepper.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>Trial function holding the solution</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Test function for variational formulation</td>
+                </tr>
+                <tr>
+                  <td>u0</td>
+                  <td>Initial condition</td>
+                </tr>
+                <tr>
+                  <td>vel</td>
+                  <td>Velocity field</td>
+                </tr>
+                <tr>
+                  <td>st</td>
+                  <td>Time-stepping scheme (default: RK4)</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Allows construction with explicit time-stepping scheme specification.</p>
           </div></section>
         </section>
@@ -394,7 +457,7 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

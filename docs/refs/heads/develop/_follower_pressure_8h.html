@@ -102,8 +102,7 @@ $ p $
 </g>
 </svg> acting on the CURRENT configuration of a boundary surface contributes the external virtual work</p><div class="m-math"><svg style="width: 28.502em; height: 3.027em;" viewBox="57.461886 -29.057979 273.61926 29.057979">
 <title>
-\[
-  \delta W_{\text{ext}}
+\[  \delta W_{\text{ext}}
     = -p \int_{\Gamma(t)} \mathbf{n} \cdot \mathbf{w} \, da
     = -p \int_{\hat{K}}
         (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta}) \cdot \mathbf{w}
@@ -219,8 +218,7 @@ $ \mathbf{x}(\xi,\eta) = \mathbf{X}(\xi,\eta) + \mathbf{d} $
 </g>
 </svg> is the deformed surface and the cross product carries BOTH the outward normal direction and the current area element (Nanson). In residual convention (R = internal - external), the load term and its EXACT linearization are</p><div class="m-math"><svg style="width: 40.765em; height: 2.819em;" viewBox="0 -27.065451 391.347225 27.065451">
 <title>
-\[
-  R_p(\mathbf{w}) = +p \int_{\hat{K}}
+\[  R_p(\mathbf{w}) = +p \int_{\hat{K}}
       (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta}) \cdot \mathbf{w} ,
   \qquad
   K_p(\delta\mathbf{d}, \mathbf{w}) = +p \int_{\hat{K}}
@@ -367,7 +365,7 @@ $ +p \int_{\Gamma_0} \mathbf{N} \cdot \mathbf{w} \, dA $
 <use x='65.591271' y='0' xlink:href='#eq7-g3-100'/>
 <use x='71.673964' y='0' xlink:href='#eq7-g3-65'/>
 </g>
-</svg> (the classic <code>BoundaryIntegral(p * Dot(w, N))</code> term), which both fixes the sign convention (positive p pushes AGAINST the outward normal of the solid, as a pressure must; for a lumen pressure on an inner wall, whose outward normal points INTO the lumen, this pushes the wall outward) and gives a built-in verification limit.</p><p>Both integrators support the standard .over(attribute) restriction. Supported spaces: vector P1 (the local basis is evaluated analytically with the framework&#x27;s <svg class="m-math" style="width: 16.197em; height: 1.134em; vertical-align: -0.270em;" viewBox="0 -8.302191 155.495874 10.886771">
+</svg> (the classic <code>BoundaryIntegral(p * Dot(w, N))</code> term), which both fixes the sign convention (positive p pushes AGAINST the outward normal of the solid, as a pressure must; for a lumen pressure on an inner wall, whose outward normal points INTO the lumen, this pushes the wall outward) and gives a built-in verification limit.</p><p>Both integrators support the standard .over(attribute) restriction. Supported spaces: vector P1 (the local basis is evaluated analytically with the framework&#x27;s  <svg class="m-math" style="width: 16.197em; height: 1.134em; vertical-align: -0.270em;" viewBox="0 -8.302191 155.495874 10.886771">
 <title>
 $ \text{local} = \text{vertex} \cdot d_v +
 \text{component} $
@@ -485,7 +483,7 @@ $ +p \int (\mathbf{x}_{,\xi} \times \mathbf{x}_{,\eta})
               <div class="m-doc-template">template&lt;class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
               class <a href="class_rodin_1_1_solid_1_1_follower_pressure_tangent.html" class="m-doc">Rodin::Solid::FollowerPressureTangent</a>
             </dt>
-            <dd>Bilinear-form integrator: the EXACT load stiffness of the follower pressure,  <svg class="m-math" style="width: 17.205em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 165.169536 13.283652">
+            <dd>Bilinear-form integrator: the EXACT load stiffness of the follower pressure,   <svg class="m-math" style="width: 17.205em; height: 1.384em; vertical-align: -0.382em;" viewBox="0 -9.630618 165.169536 13.283652">
 <title>
 $ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
    + \mathbf{x}_{,\xi} \times \delta\mathbf{d}_{,\eta})
@@ -580,7 +578,7 @@ $ +p \int (\delta\mathbf{d}_{,\xi} \times \mathbf{x}_{,\eta}
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -148,8 +148,8 @@
               const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the linear form into a distributed PETSc vector.</dd>
-            <dt id="a17227756ce7234f252e0f0612ed7b2e8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a17227756ce7234f252e0f0612ed7b2e8" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; MPI* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a17227756ce7234f252e0f0612ed7b2e8" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_assembly_1_1_m_p_i.html" class="m-doc">MPI</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a heap-allocated copy of this assembly backend.</dd>
           </dl>
@@ -179,6 +179,23 @@
                   <td>Linear-form assembly input.</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a17227756ce7234f252e0f0612ed7b2e8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_assembly_1_1_m_p_i.html" class="m-doc">MPI</a>* Rodin::<wbr />Assembly::<wbr />MPI&lt;::<wbr />Vec, Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17227756ce7234f252e0f0612ed7b2e8" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a heap-allocated copy of this assembly backend.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
         </section>
@@ -226,7 +243,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

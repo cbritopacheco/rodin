@@ -335,8 +335,7 @@ $ V_h $
 </g>
 </svg> by requiring the <strong>residual</strong> to be orthogonal to all test functions:</p><div class="m-math"><svg style="width: 26.514em; height: 1.245em;" viewBox="66.753337 -11.955168 254.538257 11.955168">
 <title>
-\[
-  \text{Find } u_h \in V_h \text{ such that } a(u_h, v_h) = \ell(v_h)
+\[  \text{Find } u_h \in V_h \text{ such that } a(u_h, v_h) = \ell(v_h)
   \quad \forall\, v_h \in V_h
 \]
 </title>
@@ -451,7 +450,7 @@ $ V_h $
 <use x='0' y='0' xlink:href='#eq13-g1-86'/>
 <use x='6.82435' y='1.793263' xlink:href='#eq13-g0-104'/>
 </g>
-</svg> produces one equation <svg class="m-math" style="width: 8.637em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 82.916051 11.955168">
+</svg> produces one equation  <svg class="m-math" style="width: 8.637em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 82.916051 11.955168">
 <title>
 $ a(u_h, \phi_i)
   = \ell(\phi_i) $
@@ -484,7 +483,7 @@ $ a(u_h, \phi_i)
 <use x='74.982453' y='1.793263' xlink:href='#eq14-g0-105'/>
 <use x='78.363725' y='0' xlink:href='#eq14-g2-41'/>
 </g>
-</svg>, yielding the linear system <svg class="m-math" style="width: 4.072em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 39.092018 8.302191">
+</svg>, yielding the linear system  <svg class="m-math" style="width: 4.072em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 39.092018 8.302191">
 <title>
 $ A\mathbf{x}
   = \mathbf{b} $
@@ -1339,8 +1338,7 @@ $ \mathbf{v} $
 </g>
 </svg>:</p><div class="m-math"><svg style="width: 20.098em; height: 2.562em;" viewBox="98.398477 -24.590612 192.941524 24.590612">
 <title>
-\[
-  \frac{d\Phi}{dt}(\mathbf{x}, t) = \mathbf{v}(\Phi(\mathbf{x}, t), t), \quad
+\[  \frac{d\Phi}{dt}(\mathbf{x}, t) = \mathbf{v}(\Phi(\mathbf{x}, t), t), \quad
   \Phi(\mathbf{x}, 0) = \mathbf{x}
 \]
 </title>
@@ -1392,8 +1390,7 @@ $ \mathbf{v} $
 </svg></div><p><code>Flow</code> traces characteristics backward in time and evaluates the function at the departure point. It is the core mechanism behind the semi-Lagrangian advection in the <a href="namespace_rodin_1_1_advection.html" class="m-doc">Advection module</a>. The tracing uses robust cell-by-cell intersection with adaptive substepping and configurable boundary policies.</p><pre class="m-code"><span class="n">VectorFunction</span><span class="w"> </span><span class="n">velocity</span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">departure</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Flow</span><span class="p">(</span><span class="o">-</span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="n">velocity</span><span class="p">);</span><span class="w">  </span><span class="c1">// backward trace</span></pre></section><section id="guides-getting-started-core-concepts-potential"><h3><a href="#guides-getting-started-core-concepts-potential">Potential Operator</a></h3><p>The <code>Potential</code> operator computes integral convolutions of the form:</p><div class="m-math"><svg style="width: 13.979em; height: 2.819em;" viewBox="127.171772 -27.065451 134.199423 27.065451">
 <title>
-\[
-  u(\mathbf{x}) = \int_\Omega K(\mathbf{x}, \mathbf{y}) \, f(\mathbf{y}) \, d\mathbf{y}
+\[  u(\mathbf{x}) = \int_\Omega K(\mathbf{x}, \mathbf{y}) \, f(\mathbf{y}) \, d\mathbf{y}
 \]
 </title>
 <defs>
@@ -1612,7 +1609,7 @@ $ H^{1/2}(\partial\Omega) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

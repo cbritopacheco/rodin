@@ -82,7 +82,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md462">Properties</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md462">Properties</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -119,7 +124,7 @@ $ \phi_i(x_j) = \delta_{ij} $
 <use x='51.379235' y='1.793263' xlink:href='#eq1-g0-105'/>
 <use x='54.262375' y='1.793263' xlink:href='#eq1-g0-106'/>
 </g>
-</svg> where x_j are the vertices of the element.</p><section id="autotoc_md462"><h3><a href="#autotoc_md462">Properties</a></h3><ul><li><strong>Lagrange property</strong>: φ_i = 1 at vertex i, φ_i = 0 at other vertices</li><li><strong>Linear</strong>: Each basis function is a linear combination of coordinates</li><li><strong>Gradient</strong>: <svg class="m-math" style="width: 2.060em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 19.773912 10.626798">
+</svg> where x_j are the vertices of the element.</p><section id="autotoc_md462_1s1"><section id="autotoc_md462"><h3><a href="#autotoc_md462">Properties</a></h3><ul><li><strong>Lagrange property</strong>: φ_i = 1 at vertex i, φ_i = 0 at other vertices</li><li><strong>Linear</strong>: Each basis function is a linear combination of coordinates</li><li><strong>Gradient</strong>: <svg class="m-math" style="width: 2.060em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 19.773912 10.626798">
 <title>
 $ \nabla \phi_i $
 </title>
@@ -204,7 +209,7 @@ $ \phi_1(x) = x $
 <use x='30.737985' y='0' xlink:href='#eq5-g2-61'/>
 <use x='43.163466' y='0' xlink:href='#eq5-g0-120'/>
 </g>
-</svg>. In 2D on a triangle, basis functions use barycentric coordinates.</p></section>
+</svg>. In 2D on a triangle, basis functions use barycentric coordinates.</p></section></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -226,13 +231,13 @@ $ \phi_1(x) = x $
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a130581ef988bf72558fa2f144906d821">
-              <span class="m-doc-wrap-bumper"><a href="#a130581ef988bf72558fa2f144906d821" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">size_t local,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a130581ef988bf72558fa2f144906d821" class="m-doc">BasisFunction</a>(</span><span class="m-doc-wrap">size_t local,
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the BasisFunction from the given arguments.</dd>
-            <dt id="a052b163b51123819dd37ee395ec60db8">
-              <span class="m-doc-wrap-bumper"><a href="#a052b163b51123819dd37ee395ec60db8" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a052b163b51123819dd37ee395ec60db8" class="m-doc">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -240,20 +245,125 @@ $ \phi_1(x) = x $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a26023d44a910ce6ff9f5307eff8efee5">
-              <span class="m-doc-wrap-bumper">auto <a href="#a26023d44a910ce6ff9f5307eff8efee5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; <a href="#a3ecb01c9ff447e63e2d15066ada3dcd7" class="m-doc">ReturnType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a26023d44a910ce6ff9f5307eff8efee5" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; <a href="#a3ecb01c9ff447e63e2d15066ada3dcd7" class="m-doc">ReturnType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates at a point on the reference element.</dd>
-            <dt id="ad0e40a354e18b81155bc45e1898a747d">
+            <dt>
               <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad0e40a354e18b81155bc45e1898a747d" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&lt;Order&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad0e40a354e18b81155bc45e1898a747d" class="m-doc">getDerivative</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&lt;Order&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the derivative of the basis function.</dd>
-            <dt id="af57906d7e45bd8a8e55f720ebf0335d1">
-              <span class="m-doc-wrap-bumper">auto <a href="#af57906d7e45bd8a8e55f720ebf0335d1" class="m-doc-self">getGradient</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">GradientFunction</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af57906d7e45bd8a8e55f720ebf0335d1" class="m-doc">getGradient</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">GradientFunction</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the gradient of the basis function.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a130581ef988bf72558fa2f144906d821"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P1Element::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a130581ef988bf72558fa2f144906d821" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">size_t local,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs the BasisFunction from the given arguments.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">local</td>
+                  <td>Index in the local numbering.</td>
+                </tr>
+                <tr>
+                  <td>g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a052b163b51123819dd37ee395ec60db8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P1Element::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a052b163b51123819dd37ee395ec60db8" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a26023d44a910ce6ff9f5307eff8efee5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a3ecb01c9ff447e63e2d15066ada3dcd7" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />P1Element::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26023d44a910ce6ff9f5307eff8efee5" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates at a point on the reference element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">r</td>
+                  <td>Reference coordinates at which to evaluate the basis.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad0e40a354e18b81155bc45e1898a747d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t Order&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">DerivativeFunction</a>&lt;Order&gt; Rodin::<wbr />Variational::<wbr />P1Element::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0e40a354e18b81155bc45e1898a747d" class="m-doc-self">getDerivative</a>(</span><span class="m-doc-wrap">size_t i) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the derivative of the basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Index of the requested entry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference-coordinate derivative function for the basis.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af57906d7e45bd8a8e55f720ebf0335d1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">GradientFunction</a> Rodin::<wbr />Variational::<wbr />P1Element::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af57906d7e45bd8a8e55f720ebf0335d1" class="m-doc-self">getGradient</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the gradient of the basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Derivative evaluated at the supplied point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -299,7 +409,7 @@ $ \phi_1(x) = x $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

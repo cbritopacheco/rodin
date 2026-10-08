@@ -137,8 +137,7 @@ $ i $
 </g>
 </svg> such that:</p><div class="m-math"><svg style="width: 14.154em; height: 1.245em;" viewBox="126.330369 -11.955168 135.882226 11.955168">
 <title>
-\[
-   \text{Component}(\mathbf{f}, i)(x) = f_i(x)
+\[   \text{Component}(\mathbf{f}, i)(x) = f_i(x)
 \]
 </title>
 <defs>
@@ -214,8 +213,8 @@ $ i $
               using <a href="#a56808c86c123d70341266761d0bc71d4" class="m-doc-self">RangeType</a> = <a href="#a4b4601a49c4eb2b5fab2fce8bbfae779" class="m-doc">ScalarType</a>
             </dt>
             <dd>Range (evaluation value) type.</dd>
-            <dt id="a69843443f0747b0159af4a958f70359f">
-              using <a href="#a69843443f0747b0159af4a958f70359f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;OperandDerived&gt;, size_t&gt;&gt;
+            <dt id="a552e3dfb8ee1b40f3e71f31ebf072665">
+              using <a href="#a552e3dfb8ee1b40f3e71f31ebf072665" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;OperandDerived&gt;, size_t&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -228,12 +227,12 @@ $ i $
               size_t component) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs component extractor for vector function.</dd>
-            <dt id="a8aa1c71f650a21c496b953333cf29faa">
-              <span class="m-doc-wrap-bumper"><a href="#a8aa1c71f650a21c496b953333cf29faa" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8aa1c71f650a21c496b953333cf29faa" class="m-doc">Component</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a947125c9063b7fefd2776d43acffce42">
-              <span class="m-doc-wrap-bumper"><a href="#a947125c9063b7fefd2776d43acffce42" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a947125c9063b7fefd2776d43acffce42" class="m-doc">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -254,8 +253,8 @@ $ i $
               <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the component at a point.</dd>
-            <dt id="a2db2949e727b5e6fecadb8cc5645b4d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -297,6 +296,46 @@ $ i $
 <use x='0' y='0' xlink:href='#eq4-g0-105'/>
 </g>
 </svg></td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8aa1c71f650a21c496b953333cf29faa"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;OperandDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8aa1c71f650a21c496b953333cf29faa" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a947125c9063b7fefd2776d43acffce42"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;OperandDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a947125c9063b7fefd2776d43acffce42" class="m-doc-self">Component</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
                 </tr>
               </tbody>
             </table>
@@ -390,6 +429,32 @@ $ f_i(p) $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a2db2949e727b5e6fecadb8cc5645b4d3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class OperandDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Component&lt;FunctionBase&lt;OperandDerived&gt;, size_t&gt;&lt;OperandDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geom</td>
+                  <td>Reference geometry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a35c2f7b7677fadde216975422ee6755e"><div>
             <h3>
               <div class="m-doc-template">
@@ -452,7 +517,7 @@ $ f_i(p) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

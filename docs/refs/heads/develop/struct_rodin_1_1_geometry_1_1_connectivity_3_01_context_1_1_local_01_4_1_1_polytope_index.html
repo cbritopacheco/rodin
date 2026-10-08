@@ -77,7 +77,7 @@
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_connectivity_8h.html">&lt;Rodin/Geometry/Connectivity.h&gt;</a></div>
           <div class="m-doc-template">template&lt;&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_connectivity_3_01_context_1_1_local_01_4.html">Connectivity&lt;Context::Local&gt;</a>::<wbr/></span>PolytopeIndex <span class="m-thin">struct</span>
+          Rodin::Geometry::Connectivity&lt;Context::Local&gt;::PolytopeIndex <span class="m-thin">struct</span>
         </h1>
         <p>Bidirectional index mapping for polytope identification.</p>
         <nav class="m-block m-default">
@@ -98,14 +98,14 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#aa29aecdf903bb335cb999c7306ecfc48" class="m-doc">save</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int) const</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a5888613434d5f36b8bd71f54206d7c8b" class="m-doc">save</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version) const</span>
             </dt>
             <dd>Serialization save method.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Archive&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a483eb490a8f4a63c6133ace3c8d8452f" class="m-doc">load</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a68dbd347886624cd725b8a26e5242ee2" class="m-doc">load</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
             </dt>
             <dd>Serialization load method.</dd>
           </dl>
@@ -125,14 +125,14 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aa29aecdf903bb335cb999c7306ecfc48"><div>
+          <section class="m-doc-details" id="a5888613434d5f36b8bd71f54206d7c8b"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr />PolytopeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa29aecdf903bb335cb999c7306ecfc48" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int) const</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr />PolytopeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5888613434d5f36b8bd71f54206d7c8b" class="m-doc-self">save</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version) const</span></span>
             </h3>
             <p>Serialization save method.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -144,17 +144,21 @@
                   <td style="width: 1%">ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
                   <td>Archive object</td>
                 </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Boost.Serialization class version; unused by this implementation.</td>
+                </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a483eb490a8f4a63c6133ace3c8d8452f"><div>
+          <section class="m-doc-details" id="a68dbd347886624cd725b8a26e5242ee2"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;&gt;
                 template&lt;class Archive&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr />PolytopeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a483eb490a8f4a63c6133ace3c8d8452f" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
-              const unsigned int)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />Connectivity&lt;Context::<wbr />Local&gt;::<wbr />PolytopeIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68dbd347886624cd725b8a26e5242ee2" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
             </h3>
             <p>Serialization load method.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -165,6 +169,10 @@
                 <tr>
                   <td style="width: 1%">ar&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
                   <td>Archive object</td>
+                </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Boost.Serialization class version; unused by this implementation.</td>
                 </tr>
               </tbody>
             </table>
@@ -214,7 +222,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

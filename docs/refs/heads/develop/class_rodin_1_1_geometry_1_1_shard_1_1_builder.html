@@ -117,7 +117,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af4efb42e1379b9ffa1f5ee13008668a8" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a60060cb372908b6172a8a9c07a4120be" class="m-doc">Context</a>&gt;&amp; parent,
+              <span class="m-doc-wrap-bumper">auto <a href="#af4efb42e1379b9ffa1f5ee13008668a8" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;Context&gt;&amp; parent,
               size_t dimension = 0) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
             </dt>
             <dd>Initializes the builder from a parent mesh.</dd>
@@ -228,7 +228,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="af4efb42e1379b9ffa1f5ee13008668a8"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af4efb42e1379b9ffa1f5ee13008668a8" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a60060cb372908b6172a8a9c07a4120be" class="m-doc">Context</a>&gt;&amp; parent,
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af4efb42e1379b9ffa1f5ee13008668a8" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;Context&gt;&amp; parent,
               size_t dimension = 0)</span></span>
             </h3>
             <p>Initializes the builder from a parent mesh.</p>
@@ -300,7 +300,7 @@
                 </tr>
                 <tr>
                   <td>x&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Vertex coordinates.</td>
+                  <td>Coordinates of the vertex.</td>
                 </tr>
                 <tr>
                   <td>state&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -343,7 +343,7 @@
                 </tr>
                 <tr>
                   <td>vs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Local shard vertex indices.</td>
+                  <td>Vertex indices defining the polytope.</td>
                 </tr>
                 <tr>
                   <td>state&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -441,7 +441,7 @@
                 </tr>
                 <tr>
                   <td>attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Optional attribute.</td>
+                  <td>Attribute to assign, or an empty optional to remove the attribute.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -546,10 +546,26 @@
               <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a057fe5fa1699c82af689c438ad1b83" class="m-doc-self">getOwner</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Returns the owner map for dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Topological dimension of the entity.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The owner map for dimension d.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>The map stores:</p><div class="m-math"><svg style="width: 18.860em; height: 0.868em;" viewBox="103.76159 -8.343928 181.057025 8.33735">
 <title>
-\[
-  \text{local non-owned index} \mapsto \text{owner rank}
+\[  \text{local non-owned index} \mapsto \text{owner rank}
 \]
 </title>
 <defs>
@@ -608,10 +624,26 @@
               <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>&gt;&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8526f79e1b614d4a4bd0d659c92ed104" class="m-doc-self">getHalo</a>(</span><span class="m-doc-wrap">size_t d)</span></span>
             </h3>
             <p>Returns the halo map for owned entities of dimension <code>d</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>Topological dimension of the entity.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The halo map for owned entities of dimension d.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>The map stores:</p><div class="m-math"><svg style="width: 32.114em; height: 1.245em;" viewBox="40.124208 -11.955168 308.294568 11.955168">
 <title>
-\[
-  \text{owned local index} \mapsto \{\text{remote ranks containing the same entity}\}
+\[  \text{owned local index} \mapsto \{\text{remote ranks containing the same entity}\}
 \]
 </title>
 <defs>
@@ -786,7 +818,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

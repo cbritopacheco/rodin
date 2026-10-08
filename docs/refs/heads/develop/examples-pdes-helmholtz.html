@@ -104,8 +104,7 @@
         </nav>
 <img class="m-image" src="Helmholtz_placeholder.png" alt="Image" style="width: 410px;" /><section id="examples-pdes-helmholtz-intro"><h2><a href="#examples-pdes-helmholtz-intro">Introduction</a></h2><p>The Helmholtz equation models time-harmonic wave phenomena in acoustics, electromagnetics, and vibration analysis. In this example we solve the complex-valued Helmholtz equation with Dirichlet boundary conditions:</p><div class="m-math"><svg style="width: 14.539em; height: 3.736em;" viewBox="123.886469 -35.865862 139.574538 35.865869">
 <title>
-\[
-\left\{
+\[\left\{
   \begin{aligned}
     -\Delta u - k^2 u &amp;= f &amp;&amp; \mathrm{in} \ \Omega \\
     u &amp;= u_{\mathrm{ex}} &amp;&amp; \mathrm{on} \ \partial \Omega
@@ -210,8 +209,7 @@ $ u_{\mathrm{ex}} $
 </g>
 </svg> is a known exact solution imposed on the boundary.</p><p>This example demonstrates several important Rodin features:</p><ul><li><strong>Complex-valued</strong> finite element spaces (<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1&lt;Complex&gt;</a>)</li><li>Extracting <strong>real and imaginary parts</strong> of complex <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> objects</li><li>The Helmholtz bilinear form combining stiffness and mass terms</li></ul></section><section id="examples-pdes-helmholtz-weak"><h2><a href="#examples-pdes-helmholtz-weak">Weak Formulation</a></h2><p>The weak formulation of the Helmholtz equation is:</p><div class="m-math"><svg style="width: 40.136em; height: 2.819em;" viewBox="1.619674 -27.065451 385.303719 27.065451">
 <title>
-\[
-\text{Find } u \in H^1(\Omega) \text{ s.t. }
+\[\text{Find } u \in H^1(\Omega) \text{ s.t. }
 \forall v \in H^1_0(\Omega), \quad
    \int_{\Omega} \nabla u \cdot \nabla v \ dx
    - k^2 \int_{\Omega} u \, v \ dx
@@ -533,7 +531,7 @@ $ k^2 \int_\Omega u v \, dx $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

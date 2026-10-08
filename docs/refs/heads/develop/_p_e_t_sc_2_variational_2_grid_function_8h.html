@@ -81,10 +81,30 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md189">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md190">Ghost-Vector Management</a></li>
-            <li><a href="#autotoc_md191">Key Features</a></li>
-            <li><a href="#autotoc_md192">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md189">Mathematical Foundation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md190">Ghost-Vector Management</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md191">Key Features</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md192">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,7 +114,7 @@
             </li>
           </ul>
         </nav>
-<p>This file provides the partial specialization of <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction</a> for the PETSc vector backend (<code>Vec</code>). It enables the Rodin finite element framework to store degrees of freedom inside PETSc distributed vectors, supporting both purely local (sequential) and MPI-parallel computations.</p><section id="autotoc_md189"><h3><a href="#autotoc_md189">Mathematical Foundation</a></h3><p>A grid function represents a discrete finite element approximation <svg class="m-math" style="width: 3.995em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 38.356537 9.962629">
+<p>This file provides the partial specialization of <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> for the PETSc vector backend (<code>Vec</code>). It enables the Rodin finite element framework to store degrees of freedom inside PETSc distributed vectors, supporting both purely local (sequential) and MPI-parallel computations.</p><section id="autotoc_md189_1s1"><section id="autotoc_md189"><h3><a href="#autotoc_md189">Mathematical Foundation</a></h3><p>A grid function represents a discrete finite element approximation <svg class="m-math" style="width: 3.995em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 38.356537 9.962629">
 <title>
 $ u_h \in V_h $
 </title>
@@ -113,8 +133,7 @@ $ u_h \in V_h $
 </g>
 </svg> defined by its expansion in the finite element basis:</p><div class="m-math"><svg style="width: 10.511em; height: 3.565em;" viewBox="143.818013 -35.422661 100.906965 34.227147">
 <title>
-\[
-  u_h(x) = \sum_{i=1}^{N} u_i \,\phi_i(x)
+\[     u_h(x) = \sum_{i=1}^{N} u_i \,\phi_i(x)
 \]
 </title>
 <defs>
@@ -185,10 +204,10 @@ $ N $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-78'/>
 </g>
-</svg> is the total number of DOFs in the finite element space</li></ul><p>In the PETSc specialization the coefficient vector <svg class="m-math" style="width: 8.820em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.669367 11.955168">
+</svg> is the total number of DOFs in the finite element space</li></ul><p>In the PETSc specialization the coefficient vector  <svg class="m-math" style="width: 8.820em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.669367 11.955168">
 <title>
 $ \mathbf{u} =
-(u_1, \ldots, u_N) $
+   (u_1, \ldots, u_N) $
 </title>
 <defs>
 <path id='eq6-g1-78' d='M6.312329-4.574844C6.40797-4.96538 6.583313-5.156663 7.157161-5.180573C7.236862-5.180573 7.300623-5.228394 7.300623-5.332005C7.300623-5.379826 7.260772-5.443587 7.181071-5.443587C7.12528-5.443587 6.973848-5.419676 6.38406-5.419676C5.746451-5.419676 5.642839-5.443587 5.571108-5.443587C5.443587-5.443587 5.419676-5.355915 5.419676-5.292154C5.419676-5.188543 5.523288-5.180573 5.595019-5.180573C6.081196-5.164633 6.081196-4.94944 6.081196-4.837858C6.081196-4.798007 6.081196-4.758157 6.049315-4.630635L5.172603-1.139726L3.251806-5.300125C3.188045-5.443587 3.172105-5.443587 2.980822-5.443587H1.944707C1.801245-5.443587 1.697634-5.443587 1.697634-5.292154C1.697634-5.180573 1.793275-5.180573 1.960648-5.180573C2.024408-5.180573 2.263512-5.180573 2.446824-5.132752L1.378829-.852802C1.283188-.454296 1.075965-.278954 .541968-.263014C.494147-.263014 .398506-.255044 .398506-.111582C.398506-.063761 .438356 0 .518057 0C.549938 0 .73325-.02391 1.307098-.02391C1.936737-.02391 2.056289 0 2.12802 0C2.1599 0 2.279452 0 2.279452-.151432C2.279452-.247073 2.191781-.263014 2.13599-.263014C1.849066-.270984 1.609963-.318804 1.609963-.597758C1.609963-.637609 1.633873-.749191 1.633873-.757161L2.677958-4.917559H2.685928L4.901619-.143462C4.95741-.01594 4.96538 0 5.053051 0C5.164633 0 5.172603-.03188 5.204483-.167372L6.312329-4.574844Z'/>
@@ -216,10 +235,10 @@ $ \mathbf{u} =
 <use x='72.048604' y='1.793263' xlink:href='#eq6-g1-78'/>
 <use x='80.117042' y='0' xlink:href='#eq6-g4-41'/>
 </g>
-</svg> is stored in a PETSc <code>Vec</code> object. In MPI mode this vector is partitioned across MPI ranks and augmented with a ghost layer so that every rank can read DOFs shared with adjacent mesh partitions without explicit point-to-point communication.</p></section><section id="autotoc_md190"><h3><a href="#autotoc_md190">Ghost-Vector Management</a></h3><p>In MPI mode the PETSc vector is created with <code>VecMPISetGhost()</code>. The ghost indices are computed from the shard&#x27;s local DOFs that map to global indices outside the local ownership range <svg class="m-math" style="width: 5.925em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 56.875797 11.955168">
+</svg> is stored in a PETSc <code>Vec</code> object. In MPI mode this vector is partitioned across MPI ranks and augmented with a ghost layer so that every rank can read DOFs shared with adjacent mesh partitions without explicit point-to-point communication.</p></section></section><section id="autotoc_md190_1s1"><section id="autotoc_md190"><h3><a href="#autotoc_md190">Ghost-Vector Management</a></h3><p>In MPI mode the PETSc vector is created with <code>VecMPISetGhost()</code>. The ghost indices are computed from the shard&#x27;s local DOFs that map to global indices outside the local ownership range  <svg class="m-math" style="width: 5.925em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 56.875797 11.955168">
 <title>
 $ [\text{begin},
-\text{end}) $
+   \text{end}) $
 </title>
 <defs>
 <path id='eq7-g0-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
@@ -245,7 +264,7 @@ $ [\text{begin},
 <use x='46.345887' y='0' xlink:href='#eq7-g3-100'/>
 <use x='52.323471' y='0' xlink:href='#eq7-g4-41'/>
 </g>
-</svg>. Two synchronization patterns are used:</p><table class="m-table"><thead><tr><th>Direction</th><th>PETSc call</th><th>Purpose</th></tr></thead><tbody><tr><td>owner → ghost</td><td><code>VecGhostUpdateBegin/End(INSERT, FORWARD)</code></td><td>Refresh ghost DOFs after collective data updates</td></tr><tr><td>ghost → owner</td><td><code>VecGhostUpdateBegin/End(INSERT, REVERSE)</code></td><td>Scatter locally-modified ghost values back to owners</td></tr></tbody></table><p>The <code>acquire()</code> / <code>flush()</code> / <code>sync()</code> / <code>release()</code> methods encapsulate these patterns.</p></section><section id="autotoc_md191"><h3><a href="#autotoc_md191">Key Features</a></h3><ul><li><strong>Dual context support</strong>: Compiles for both <code>Context::Local</code> (sequential <code>PETSC_COMM_SELF</code>) and <code>Context::MPI</code> (distributed) meshes.</li><li><strong>Ghost DOF mapping</strong>: A bidirectional map (<code>GhostBimap</code>) translates between global ghost DOF indices and their local offsets in the ghosted vector.</li><li><strong>Lazy array access</strong>: The <code>operator[]</code> methods lazily <code>acquire()</code> the PETSc array on first use. Element access itself does not perform collective ghost communication.</li><li><strong>Arithmetic operations</strong>: Overloaded <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code> for both scalar and grid-function operands, delegating to optimized PETSc routines (<code>VecShift</code>, <code>VecScale</code>, <code>VecAXPY</code>, <code>VecPointwiseMult</code>, …), plus the fused <code>axpy()</code> <svg class="m-math" style="width: 6.101em; height: 0.813em; vertical-align: -0.095em;" viewBox="0 -6.890786 58.572886 7.803987">
+</svg>. Two synchronization patterns are used:</p><table class="m-table"><thead><tr><th>Direction</th><th>PETSc call</th><th>Purpose</th></tr></thead><tbody><tr><td>owner → ghost</td><td><code>VecGhostUpdateBegin/End(INSERT, FORWARD)</code></td><td>Refresh ghost DOFs after collective data updates</td></tr><tr><td>ghost → owner</td><td><code>VecGhostUpdateBegin/End(INSERT, REVERSE)</code></td><td>Scatter locally-modified ghost values back to owners</td></tr></tbody></table><p>The <code>acquire()</code> / <code>flush()</code> / <code>sync()</code> / <code>release()</code> methods encapsulate these patterns.</p></section></section><section id="autotoc_md191_1s1"><section id="autotoc_md191"><h3><a href="#autotoc_md191">Key Features</a></h3><ul><li><strong>Dual context support</strong>: Compiles for both <code>Context::Local</code> (sequential <code>PETSC_COMM_SELF</code>) and <code>Context::MPI</code> (distributed) meshes.</li><li><strong>Ghost DOF mapping</strong>: A bidirectional map (<code>GhostBimap</code>) translates between global ghost DOF indices and their local offsets in the ghosted vector.</li><li><strong>Lazy array access</strong>: The <code>operator[]</code> methods lazily <code>acquire()</code> the PETSc array on first use. Element access itself does not perform collective ghost communication.</li><li><strong>Arithmetic operations</strong>: Overloaded <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code> for both scalar and grid-function operands, delegating to optimized PETSc routines (<code>VecShift</code>, <code>VecScale</code>, <code>VecAXPY</code>, <code>VecPointwiseMult</code>, …), plus the fused <code>axpy()</code> <svg class="m-math" style="width: 6.101em; height: 0.813em; vertical-align: -0.095em;" viewBox="0 -6.890786 58.572886 7.803987">
 <title>
 $ u \leftarrow u + a v $
 </title>
@@ -276,7 +295,7 @@ $ u_h $
 <use x='0' y='0' xlink:href='#eq9-g1-117'/>
 <use x='6.66244' y='1.793263' xlink:href='#eq9-g0-104'/>
 </g>
-</svg> at arbitrary geometric points using the finite element interpolation machinery, with MPI-aware shard lookup.</li><li><strong>Sub-vector import</strong>: <code>setData()</code> copies a contiguous slice from another PETSc vector into this grid function, useful for extracting sub-solutions from block linear systems. It is also the way to copy a raw <code>Vec</code> into an existing grid function; copy assignment does the same for another grid function, reusing this instance&#x27;s vector.</li><li><strong>Projection</strong>: <code>project()</code> assigns DOF values by evaluating a user-supplied function over a filtered mesh region.</li></ul></section><section id="autotoc_md192"><h3><a href="#autotoc_md192">Usage Example</a></h3><pre class="m-code"><span class="c1">// Sequential usage</span>
+</svg> at arbitrary geometric points using the finite element interpolation machinery, with MPI-aware shard lookup.</li><li><strong>Sub-vector import</strong>: <code>setData()</code> copies a contiguous slice from another PETSc vector into this grid function, useful for extracting sub-solutions from block linear systems. It is also the way to copy a raw <code>Vec</code> into an existing grid function; copy assignment does the same for another grid function, reusing this instance&#x27;s vector.</li><li><strong>Projection</strong>: <code>project()</code> assigns DOF values by evaluating a user-supplied function over a filtered mesh region.</li></ul></section></section><section id="autotoc_md192_1s1"><section id="autotoc_md192"><h3><a href="#autotoc_md192">Usage Example</a></h3><pre class="m-code"><span class="c1">// Sequential usage</span>
 <span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
 <span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
@@ -290,30 +309,25 @@ $ u_h $
 
 <span class="c1">// Evaluate at a point</span>
 <span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="w"> </span><span class="n">pt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
-<span class="n">PetscScalar</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">pt</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_grid_function_base.html">Rodin::<wbr />Variational::<wbr />GridFunctionBase</a></p><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_trial_function.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TrialFunction</a></p><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TestFunction</a></p><p><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a></p></aside></section>
+<span class="n">PetscScalar</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">pt</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_grid_function_base.html">Rodin::<wbr />Variational::<wbr />GridFunctionBase</a></p><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_trial_function.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TrialFunction</a></p><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TestFunction</a></p><p><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a></p></aside></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">Rodin::PETSc</a></dt>
             <dd>PETSc integration module for Rodin.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc_1_1_variational.html" class="m-doc">Rodin::PETSc::Variational</a></dt>
             <dd>PETSc-backed variational form adapters.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">Rodin::Variational::GridFunction&lt;FES, ::Vec&gt;</a>
-            </dt>
-            <dd>Grid function specialization storing DOF coefficients in a PETSc vector (<code>Vec</code>).</dd>
             <dt>
               struct <a href="struct_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4_1_1_ghost_bimap.html" class="m-doc">Rodin::Variational::GridFunction&lt;FES, ::Vec&gt;::GhostBimap</a>
             </dt>
@@ -330,7 +344,7 @@ $ u_h $
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::PETSc::Variational::GridFunction</a>
             </dt>
-            <dd>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</dd>
+            <dd>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_p_e_t_sc_1_1_variational_1_1_grid_function_3_01_f_e_s_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;PETSc::Variational::GridFunction&lt;FES&gt;&gt;</a>
@@ -382,7 +396,7 @@ $ u_h $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

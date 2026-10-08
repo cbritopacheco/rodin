@@ -127,23 +127,19 @@
               using <a href="#afb17357d3a7cf0bf0b429b46d8761b92" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form_integrator_base.html" class="m-doc">BilinearFormIntegratorBase</a>&lt;<a href="#ab34dc093116842cc6f9fa80d9fd0a558" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
-            <dt id="a7c03f13cf0d83f880c52331108498d99">
-              using <a href="#a7c03f13cf0d83f880c52331108498d99" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>
-            </dt>
-            <dd>Parent class type.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a0835e4ca92d742d82dd8fd480e3cce6a">
+            <dt>
               <div class="m-doc-template">template&lt;class OtherNumber&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a0835e4ca92d742d82dd8fd480e3cce6a" class="m-doc-self">LocalBilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&lt;OtherNumber&gt;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a0835e4ca92d742d82dd8fd480e3cce6a" class="m-doc">LocalBilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&lt;OtherNumber&gt;&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a00e88ee9015a4bff8eabcb98b19b272f">
+            <dt>
               <div class="m-doc-template">template&lt;class OtherNumber&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a00e88ee9015a4bff8eabcb98b19b272f" class="m-doc-self">LocalBilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&lt;OtherNumber&gt;&amp;&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a00e88ee9015a4bff8eabcb98b19b272f" class="m-doc">LocalBilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&lt;OtherNumber&gt;&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -151,17 +147,17 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ac76cd4c95442baa6361dfa9a0e9ba4a9">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac76cd4c95442baa6361dfa9a0e9ba4a9" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac76cd4c95442baa6361dfa9a0e9ba4a9" class="m-doc">getAttributes</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp;</span>
             </dt>
             <dd>Gets the attributes of the elements being integrated.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a4bfd2df9744d5bfd92b05d1e6cea7a4a" class="m-doc">over</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp;</span>
             </dt>
             <dd>Specifies the material reference over which to integrate.</dd>
-            <dt id="a89650b7866af2cab1e420d1dfa8a20e7">
+            <dt>
               <div class="m-doc-template">template&lt;class A1, class A2, class ... As&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a89650b7866af2cab1e420d1dfa8a20e7" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              <span class="m-doc-wrap-bumper">auto <a href="#a89650b7866af2cab1e420d1dfa8a20e7" class="m-doc">over</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
               const A2&amp; a2,
               const As&amp;... attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp;</span>
             </dt>
@@ -170,21 +166,21 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ade49d4b5b292fd965b226bf083140927" class="m-doc">over</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp;</span>
             </dt>
             <dd>Specifies the material references over which to integrate.</dd>
-            <dt id="a3e2cc56a785ee8329807d7407fd76401">
-              <span class="m-doc-wrap-bumper">auto <a href="#a3e2cc56a785ee8329807d7407fd76401" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3e2cc56a785ee8329807d7407fd76401" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Returns the polytope the expression is bound to.</dd>
-            <dt id="adb84c7c3536a6c1534fb26e9cef0c2d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#adb84c7c3536a6c1534fb26e9cef0c2d3" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adb84c7c3536a6c1534fb26e9cef0c2d3" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Binds the expression to a polytope.</dd>
-            <dt id="a97c55b694574be6740d557e27aff8ba2">
-              <span class="m-doc-wrap-bumper">auto <a href="#a97c55b694574be6740d557e27aff8ba2" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a97c55b694574be6740d557e27aff8ba2" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
               size_t te) -&gt; <a href="#ab34dc093116842cc6f9fa80d9fd0a558" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Returns an entry of the element matrix.</dd>
-            <dt id="ac16226cca266745ac414468db3235c17">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac16226cca266745ac414468db3235c17" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac16226cca266745ac414468db3235c17" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Returns the integration region.</dd>
             <dt>
@@ -195,6 +191,65 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0835e4ca92d742d82dd8fd480e3cce6a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Number&gt;
+                template&lt;class OtherNumber&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LocalBilinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0835e4ca92d742d82dd8fd480e3cce6a" class="m-doc-self">LocalBilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&lt;OtherNumber&gt;&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a00e88ee9015a4bff8eabcb98b19b272f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Number&gt;
+                template&lt;class OtherNumber&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LocalBilinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a00e88ee9015a4bff8eabcb98b19b272f" class="m-doc-self">LocalBilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&lt;OtherNumber&gt;&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac76cd4c95442baa6361dfa9a0e9ba4a9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Number&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />LocalBilinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac76cd4c95442baa6361dfa9a0e9ba4a9" class="m-doc-self">getAttributes</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the attributes of the elements being integrated.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The attributes of the elements being integrated.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a4bfd2df9744d5bfd92b05d1e6cea7a4a"><div>
             <h3>
               <div class="m-doc-template">
@@ -204,14 +259,60 @@
             </h3>
             <p>Specifies the material reference over which to integrate.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attr</td>
+                  <td>Mesh attribute selecting the region.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to self (for method chaining)</td>
                 </tr>
               </tfoot>
             </table>
 <p>Specifies the material reference over which the integration should take place.</p>
+          </div></section>
+          <section class="m-doc-details" id="a89650b7866af2cab1e420d1dfa8a20e7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Number&gt;
+                template&lt;class A1, class A2, class ... As&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LocalBilinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a89650b7866af2cab1e420d1dfa8a20e7" class="m-doc-self">over</a>(</span><span class="m-doc-wrap">const A1&amp; a1,
+              const A2&amp; a2,
+              const As&amp;... attrs)</span></span>
+            </h3>
+            <p>Restricts integration to the given mesh attributes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">a1</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+                <tr>
+                  <td>a2</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+                <tr>
+                  <td>attrs</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="ade49d4b5b292fd965b226bf083140927"><div>
             <h3>
@@ -222,14 +323,114 @@
             </h3>
             <p>Specifies the material references over which to integrate.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attrs</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+              </tbody>
               <tfoot>
                 <tr>
-                  <th style="width: 1%">Returns</th>
+                  <th>Returns</th>
                   <td>Reference to self (for method chaining)</td>
                 </tr>
               </tfoot>
             </table>
 <p>Specifies the material references over which the integration should take place.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3e2cc56a785ee8329807d7407fd76401"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Number&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Variational::<wbr />LocalBilinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e2cc56a785ee8329807d7407fd76401" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Returns the polytope the expression is bound to.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The polytope the expression is bound to.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adb84c7c3536a6c1534fb26e9cef0c2d3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Number&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&amp; Rodin::<wbr />Variational::<wbr />LocalBilinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb84c7c3536a6c1534fb26e9cef0c2d3" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Binds the expression to a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a97c55b694574be6740d557e27aff8ba2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Number&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#ab34dc093116842cc6f9fa80d9fd0a558" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />LocalBilinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97c55b694574be6740d557e27aff8ba2" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Returns an entry of the element matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tr</td>
+                  <td>Trial shape-function expression.</td>
+                </tr>
+                <tr>
+                  <td>te</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Integral computed by the quadrature rule.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac16226cca266745ac414468db3235c17"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Number&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />LocalBilinearFormIntegratorBase&lt;Number&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac16226cca266745ac414468db3235c17" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Returns the integration region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration region.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="abd9e0b9a24c05710580eb93b237a21f9"><div>
             <h3>
@@ -293,7 +494,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

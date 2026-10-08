@@ -131,16 +131,16 @@
               using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
             </dt>
             <dd>Finite element space type.</dd>
-            <dt id="a7797ebdd40f654e65250ae45425e04d2">
-              using <a href="#a7797ebdd40f654e65250ae45425e04d2" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;NestedDerived, FES, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3" class="m-doc">Space</a>&gt;
+            <dt id="a769c3aebe65ee30f573bec7723901575">
+              using <a href="#a769c3aebe65ee30f573bec7723901575" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;NestedDerived, FES, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3" class="m-doc">Space</a>&gt;
             </dt>
             <dd>Operand type.</dd>
-            <dt id="aca5f889a43b141458b9072e7c1af1bf2">
-              using <a href="#aca5f889a43b141458b9072e7c1af1bf2" class="m-doc-self">RangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a7797ebdd40f654e65250ae45425e04d2" class="m-doc">OperandType</a>&gt;::RangeType
+            <dt id="a5f9131bfb5a2393f6687eba6009b9a7c">
+              using <a href="#a5f9131bfb5a2393f6687eba6009b9a7c" class="m-doc-self">RangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a769c3aebe65ee30f573bec7723901575" class="m-doc">OperandType</a>&gt;::RangeType
             </dt>
             <dd>Range (evaluation value) type.</dd>
-            <dt id="a20a098dd24da113544eb71b8fb7d1880">
-              using <a href="#a20a098dd24da113544eb71b8fb7d1880" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;NestedDerived, FES, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3" class="m-doc">Space</a>&gt;&gt;&gt;
+            <dt id="ab1f1d1bc70b5a9180290045fa5071523">
+              using <a href="#ab1f1d1bc70b5a9180290045fa5071523" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;NestedDerived, FES, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#afcf8d604d4a7332984f336178bc218c3" class="m-doc">Space</a>&gt;&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -158,15 +158,15 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a43a39670c0678433659ca2a7838e139b" class="m-doc">Conjugate</a>(</span><span class="m-doc-wrap">const <a href="#a7797ebdd40f654e65250ae45425e04d2" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a43a39670c0678433659ca2a7838e139b" class="m-doc">Conjugate</a>(</span><span class="m-doc-wrap">const <a href="#a769c3aebe65ee30f573bec7723901575" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs conjugate of a shape function.</dd>
-            <dt id="a3bcf746c87540a15c9fb6bcd973d0e03">
-              <span class="m-doc-wrap-bumper"><a href="#a3bcf746c87540a15c9fb6bcd973d0e03" class="m-doc-self">Conjugate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3bcf746c87540a15c9fb6bcd973d0e03" class="m-doc">Conjugate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a8ab8700d68d8b5d38b584d5ad92fe0be">
-              <span class="m-doc-wrap-bumper"><a href="#a8ab8700d68d8b5d38b584d5ad92fe0be" class="m-doc-self">Conjugate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8ab8700d68d8b5d38b584d5ad92fe0be" class="m-doc">Conjugate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -175,7 +175,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a7797ebdd40f654e65250ae45425e04d2" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a769c3aebe65ee30f573bec7723901575" class="m-doc">OperandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the operand shape function.</dd>
             <dt>
@@ -202,8 +202,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#af56185a903e521bae3b6c5b7db161575" class="m-doc">getFiniteElementSpace</a>(</span><span class="m-doc-wrap">) const -&gt; const FES&amp;</span>
             </dt>
             <dd>Gets the finite element space.</dd>
-            <dt id="a2dfc5d11269410a3ff535d016cd71634">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2dfc5d11269410a3ff535d016cd71634" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geometry) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2dfc5d11269410a3ff535d016cd71634" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geometry) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
             <dt>
@@ -219,7 +219,7 @@
               <div class="m-doc-template">
                 template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Conjugate&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a43a39670c0678433659ca2a7838e139b" class="m-doc-self">Conjugate</a>(</span><span class="m-doc-wrap">const <a href="#a7797ebdd40f654e65250ae45425e04d2" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Conjugate&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a43a39670c0678433659ca2a7838e139b" class="m-doc-self">Conjugate</a>(</span><span class="m-doc-wrap">const <a href="#a769c3aebe65ee30f573bec7723901575" class="m-doc">OperandType</a>&amp; op) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Constructs conjugate of a shape function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -234,12 +234,52 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a3bcf746c87540a15c9fb6bcd973d0e03"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Conjugate&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3bcf746c87540a15c9fb6bcd973d0e03" class="m-doc-self">Conjugate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8ab8700d68d8b5d38b584d5ad92fe0be"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Conjugate&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ab8700d68d8b5d38b584d5ad92fe0be" class="m-doc-self">Conjugate</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_conjugate.html" class="m-doc">Conjugate</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a1ffbdba2b29eb6f63414bd575f12f63a"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a7797ebdd40f654e65250ae45425e04d2" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Conjugate&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a769c3aebe65ee30f573bec7723901575" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Variational::<wbr />Conjugate&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ffbdba2b29eb6f63414bd575f12f63a" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the operand shape function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -380,6 +420,32 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a2dfc5d11269410a3ff535d016cd71634"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Space&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Conjugate&lt;ShapeFunctionBase&lt;NestedDerived, FES, Space&gt;&gt;&lt;NestedDerived, FES, Space&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2dfc5d11269410a3ff535d016cd71634" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geometry) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geometry</td>
+                  <td>Reference geometry.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a413b650672a12875acd4e5215bbc266f"><div>
             <h3>
               <div class="m-doc-template">
@@ -442,7 +508,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

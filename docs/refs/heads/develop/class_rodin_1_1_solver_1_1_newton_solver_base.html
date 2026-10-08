@@ -108,8 +108,7 @@
         </nav>
 <p>Base interface for Newton-type nonlinear solvers.</p><p>Newton solver class for solving nonlinear systems through a <a href="_variational_2_problem_8h.html">Variational::<wbr />ProblemBase</a> that assembles the tangent system at each iterate:</p><div class="m-math"><svg style="width: 22.643em; height: 1.402em;" viewBox="85.582751 -13.45978 217.377511 13.45978">
 <title>
-\[
-J(u^k)\,\delta u^k = -F(u^k), \qquad
+\[J(u^k)\,\delta u^k = -F(u^k), \qquad
 u^{k + 1} = u^k + \delta u^k.
 \]
 </title>
@@ -177,16 +176,6 @@ u^{k + 1} = u^k + \delta u^k.
               class <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>Newton solver for state-dependent tangential problems.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LinearSolver&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a> <span class="m-label m-flat m-warning">final</span>
-            </dt>
-            <dd>Newton solver for state-dependent tangential problems.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LinearSolver&gt;</div>
-              class <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a> <span class="m-label m-flat m-warning">final</span>
-            </dt>
-            <dd>Newton solver for state-dependent tangential problems.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -226,12 +215,12 @@ u^{k + 1} = u^k + \delta u^k.
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ae87797834b0427fbfedc7a95513e6f9f">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae87797834b0427fbfedc7a95513e6f9f" class="m-doc-self">getLinearSolver</a>(</span><span class="m-doc-wrap">) const -&gt; const LinearSolver&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae87797834b0427fbfedc7a95513e6f9f" class="m-doc">getLinearSolver</a>(</span><span class="m-doc-wrap">) const -&gt; const LinearSolver&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the associated linear solver.</dd>
-            <dt id="ae636bc3bf22b2312c4d2630ce403a306">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae636bc3bf22b2312c4d2630ce403a306" class="m-doc-self">getLinearSolver</a>(</span><span class="m-doc-wrap">) -&gt; LinearSolver&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae636bc3bf22b2312c4d2630ce403a306" class="m-doc">getLinearSolver</a>(</span><span class="m-doc-wrap">) -&gt; LinearSolver&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the associated linear solver.</dd>
             <dt>
@@ -278,6 +267,40 @@ u^{k + 1} = u^k + \delta u^k.
                   <td>The linear solver whose associated ProblemBase will be used for tangent assembly at each Newton iteration.</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae87797834b0427fbfedc7a95513e6f9f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSolver&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const LinearSolver&amp; Rodin::<wbr />Solver::<wbr />NewtonSolverBase&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae87797834b0427fbfedc7a95513e6f9f" class="m-doc-self">getLinearSolver</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the associated linear solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The associated linear solver.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae636bc3bf22b2312c4d2630ce403a306"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSolver&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">LinearSolver&amp; Rodin::<wbr />Solver::<wbr />NewtonSolverBase&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae636bc3bf22b2312c4d2630ce403a306" class="m-doc-self">getLinearSolver</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the associated linear solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The associated linear solver.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="a3e02db55cedf48a5ba1545bc84dfceea"><div>
@@ -410,7 +433,7 @@ u^{k + 1} = u^k + \delta u^k.
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

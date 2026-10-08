@@ -102,7 +102,7 @@ $\phi$
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-30'/>
 </g>
-</svg> by repeatedly solving a regularized first-derivative metric problem and line-searching the resulting displacement on the true geometry.</p><p>Constructed from backend-matched trial and test functions, the symmetric metric path uses the ordinary Rodin form-language deduction path for <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a>, <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />BilinearForm</a>, and <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">Rodin::<wbr />Solver::<wbr />CG</a>.</p>
+</svg> by repeatedly solving a regularized first-derivative metric problem and line-searching the resulting displacement on the true geometry.</p><p>Constructed from backend-matched trial and test functions, the symmetric metric path uses the ordinary Rodin form-language deduction path for <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>, <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a>, and <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -127,8 +127,8 @@ $\phi$
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a2096478ca6b9d9a82586f0b90acb3b97">
-              <span class="m-doc-wrap-bumper"><a href="#a2096478ca6b9d9a82586f0b90acb3b97" class="m-doc-self">WNGIR</a>(</span><span class="m-doc-wrap">TrialFunctionType&amp; du,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a2096478ca6b9d9a82586f0b90acb3b97" class="m-doc">WNGIR</a>(</span><span class="m-doc-wrap">TrialFunctionType&amp; du,
               TestFunctionType&amp; v)</span>
             </dt>
             <dd>Constructs the WNGIR solver from trial and test functions.</dd>
@@ -137,16 +137,16 @@ $\phi$
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a4fcec58401f58a56aadc9a371b0d78d8">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4fcec58401f58a56aadc9a371b0d78d8" class="m-doc-self">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; parameters) -&gt; <a href="class_rodin_1_1_adaptation_1_1_w_n_g_i_r.html" class="m-doc">WNGIR</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4fcec58401f58a56aadc9a371b0d78d8" class="m-doc">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; parameters) -&gt; <a href="class_rodin_1_1_adaptation_1_1_w_n_g_i_r.html" class="m-doc">WNGIR</a>&amp;</span>
             </dt>
             <dd>Sets WNGIR runtime parameters.</dd>
-            <dt id="a06bf1c04ab953a51fa7a07a11365e4c5">
-              <span class="m-doc-wrap-bumper">auto <a href="#a06bf1c04ab953a51fa7a07a11365e4c5" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a06bf1c04ab953a51fa7a07a11365e4c5" class="m-doc">getParameters</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp;</span>
             </dt>
             <dd>Returns the current WNGIR parameters.</dd>
-            <dt id="aefc36b1f796cc7a9be11a844e31f98a7">
-              <span class="m-doc-wrap-bumper">auto <a href="#aefc36b1f796cc7a9be11a844e31f98a7" class="m-doc-self">getReport</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_report.html" class="m-doc">WNGIRReport</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aefc36b1f796cc7a9be11a844e31f98a7" class="m-doc">getReport</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_report.html" class="m-doc">WNGIRReport</a>&amp;</span>
             </dt>
             <dd>Returns diagnostics from the most recent solve.</dd>
             <dt>
@@ -161,6 +161,91 @@ $\phi$
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a2096478ca6b9d9a82586f0b90acb3b97"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />WNGIR&lt;TrialFunctionType, TestFunctionType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2096478ca6b9d9a82586f0b90acb3b97" class="m-doc-self">WNGIR</a>(</span><span class="m-doc-wrap">TrialFunctionType&amp; du,
+              TestFunctionType&amp; v)</span></span>
+            </h3>
+            <p>Constructs the WNGIR solver from trial and test functions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">du</td>
+                  <td>Function operand.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Function operand.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4fcec58401f58a56aadc9a371b0d78d8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_w_n_g_i_r.html" class="m-doc">WNGIR</a>&amp; Rodin::<wbr />Adaptation::<wbr />WNGIR&lt;TrialFunctionType, TestFunctionType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fcec58401f58a56aadc9a371b0d78d8" class="m-doc-self">setParameters</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; parameters)</span></span>
+            </h3>
+            <p>Sets WNGIR runtime parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">parameters</td>
+                  <td>Parameters configuring the operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a06bf1c04ab953a51fa7a07a11365e4c5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; Rodin::<wbr />Adaptation::<wbr />WNGIR&lt;TrialFunctionType, TestFunctionType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06bf1c04ab953a51fa7a07a11365e4c5" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the current WNGIR parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The current WNGIR parameters.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aefc36b1f796cc7a9be11a844e31f98a7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class TrialFunctionType, class TestFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_report.html" class="m-doc">WNGIRReport</a>&amp; Rodin::<wbr />Adaptation::<wbr />WNGIR&lt;TrialFunctionType, TestFunctionType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aefc36b1f796cc7a9be11a844e31f98a7" class="m-doc-self">getReport</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns diagnostics from the most recent solve.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Diagnostics from the most recent solve.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a3f4074a481b535c0ca8785433fcf4e4f"><div>
             <h3>
               <div class="m-doc-template">
@@ -173,6 +258,35 @@ $\phi$
               const <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, GradDerived&gt;&amp; grad)</span></span>
             </h3>
             <p>Solves the WNGIR fitting problem on marked interface facets.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh</td>
+                  <td>Mesh on which the object is defined.</td>
+                </tr>
+                <tr>
+                  <td>interfaceFacets</td>
+                  <td>Facets used to impose the interface constraints.</td>
+                </tr>
+                <tr>
+                  <td>phi</td>
+                  <td>Function operand.</td>
+                </tr>
+                <tr>
+                  <td>grad</td>
+                  <td>Function operand.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Fitting diagnostics, including convergence and geometric admissibility.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>The supplied sensitivity <code>grad</code> must equal the derivative of <code>phi</code> at the moved quadrature points for the assembled force to be the exact first variation of the line-search energy. An independently supplied sensitivity is supported, but then defines a pseudo-gradient.</p>
           </div></section>
         </section>
@@ -220,7 +334,7 @@ $\phi$
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

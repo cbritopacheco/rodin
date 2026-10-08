@@ -75,7 +75,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html">P1Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html">BasisFunction</a>::<wbr/></span>JacobianFunction <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html">Rodin::Variational::P1Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::BasisFunction</a>::<wbr/></span>JacobianFunction <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_element_8h.html">&lt;Rodin/Variational/P1/P1Element.h&gt;</a></div>
         </h1>
         <p>Jacobian of a vector-valued P1 basis function.</p>
@@ -96,7 +96,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="aad9b387a166118050fc1755fd8cb0096">
-              using <a href="#aad9b387a166118050fc1755fd8cb0096" class="m-doc-self">ReturnType</a> = <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+              using <a href="#aad9b387a166118050fc1755fd8cb0096" class="m-doc-self">ReturnType</a> = <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="class_rodin_1_1_variational_1_1_finite_element_base.html#a5af7351b2dbf910b0d7f78fbfbec5d6d" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Type returned by the callable.</dd>
           </dl>
@@ -104,18 +104,18 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="afdb95372e1eb911148ca8b19df882dcc">
-              <span class="m-doc-wrap-bumper"><a href="#afdb95372e1eb911148ca8b19df882dcc" class="m-doc-self">JacobianFunction</a>(</span><span class="m-doc-wrap">size_t vdim,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#afdb95372e1eb911148ca8b19df882dcc" class="m-doc">JacobianFunction</a>(</span><span class="m-doc-wrap">size_t vdim,
               size_t local,
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the Jacobian of a local basis function.</dd>
-            <dt id="a6b7d3c7d0023ba924b132f2f4c782c3c">
-              <span class="m-doc-wrap-bumper"><a href="#a6b7d3c7d0023ba924b132f2f4c782c3c" class="m-doc-self">JacobianFunction</a>(</span><span class="m-doc-wrap">const JacobianFunction&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a23d7aa63a7cd8ec8a1b8e64a1646016c" class="m-doc">JacobianFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_98f2545375cfa515839805ea61b9a246.html" class="m-doc">JacobianFunction</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a9ac6ccea95f55b54c7499999e54187f8">
-              <span class="m-doc-wrap-bumper"><a href="#a9ac6ccea95f55b54c7499999e54187f8" class="m-doc-self">JacobianFunction</a>(</span><span class="m-doc-wrap">JacobianFunction&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a831223b3630599cbffc80e742847708f" class="m-doc">JacobianFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_98f2545375cfa515839805ea61b9a246.html" class="m-doc">JacobianFunction</a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -123,11 +123,98 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a710d2d9e4418a9110096ed95161fbc59">
-              <span class="m-doc-wrap-bumper">auto <a href="#a710d2d9e4418a9110096ed95161fbc59" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; <a href="#aad9b387a166118050fc1755fd8cb0096" class="m-doc">ReturnType</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a710d2d9e4418a9110096ed95161fbc59" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const -&gt; <a href="#aad9b387a166118050fc1755fd8cb0096" class="m-doc">ReturnType</a></span>
             </dt>
             <dd>Evaluates at a point on the reference element.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="afdb95372e1eb911148ca8b19df882dcc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P1Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />JacobianFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afdb95372e1eb911148ca8b19df882dcc" class="m-doc-self">JacobianFunction</a>(</span><span class="m-doc-wrap">size_t vdim,
+              size_t local,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs the Jacobian of a local basis function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">vdim</td>
+                  <td>Number of components in the value range.</td>
+                </tr>
+                <tr>
+                  <td>local</td>
+                  <td>Index in the local numbering.</td>
+                </tr>
+                <tr>
+                  <td>g</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a23d7aa63a7cd8ec8a1b8e64a1646016c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P1Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />JacobianFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23d7aa63a7cd8ec8a1b8e64a1646016c" class="m-doc-self">JacobianFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_98f2545375cfa515839805ea61b9a246.html" class="m-doc">JacobianFunction</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a831223b3630599cbffc80e742847708f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P1Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />JacobianFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a831223b3630599cbffc80e742847708f" class="m-doc-self">JacobianFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_98f2545375cfa515839805ea61b9a246.html" class="m-doc">JacobianFunction</a>&amp;&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a710d2d9e4418a9110096ed95161fbc59"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#aad9b387a166118050fc1755fd8cb0096" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />P1Element&lt;Math::<wbr />SpatialVector&lt;Scalar&gt;&gt;::<wbr />BasisFunction::<wbr />JacobianFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a710d2d9e4418a9110096ed95161fbc59" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const</span></span>
+            </h3>
+            <p>Evaluates at a point on the reference element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">r</td>
+                  <td>Reference coordinates at which to evaluate the basis.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Basis or reference-coordinate derivative value at the supplied reference point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -173,7 +260,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

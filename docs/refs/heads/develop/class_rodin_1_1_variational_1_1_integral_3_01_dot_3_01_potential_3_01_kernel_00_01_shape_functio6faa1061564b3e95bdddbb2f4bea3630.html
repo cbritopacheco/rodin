@@ -111,8 +111,8 @@
               using <a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc-self">KernelType</a> = Kernel
             </dt>
             <dd>Cell kernel type.</dd>
-            <dt id="a27cd0f359cd406e2725eba6db0ece11c">
-              using <a href="#a27cd0f359cd406e2725eba6db0ece11c" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&lt;<a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;
+            <dt id="a631bbbcdb696735b65dd67ff4354a6eb">
+              using <a href="#a631bbbcdb696735b65dd67ff4354a6eb" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&lt;<a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;
             </dt>
             <dd>Left-hand side operand type.</dd>
             <dt id="a9ae414697d3a4986c49f3b31e5b4c114">
@@ -120,7 +120,7 @@
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="a5d9e9a57f44320b12e097a42ea683752">
-              using <a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc-self">LHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a27cd0f359cd406e2725eba6db0ece11c" class="m-doc">LHSType</a>&gt;::RangeType
+              using <a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc-self">LHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a631bbbcdb696735b65dd67ff4354a6eb" class="m-doc">LHSType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the left-hand side operand.</dd>
             <dt id="a8fe84c6e4dc3369f5a70b4214f9d5920">
@@ -128,11 +128,11 @@
             </dt>
             <dd>Range type of the right-hand side operand.</dd>
             <dt id="a17f4c13495b1edea562f9b757bc3ff76">
-              using <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="#a27cd0f359cd406e2725eba6db0ece11c" class="m-doc">LHSType</a>, <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&gt;
+              using <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="#a631bbbcdb696735b65dd67ff4354a6eb" class="m-doc">LHSType</a>, <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&gt;
             </dt>
             <dd>Integrand expression type.</dd>
-            <dt id="ad320febc98ce9deb03fd1b611d437ae4">
-              using <a href="#ad320febc98ce9deb03fd1b611d437ae4" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&lt;<a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&lt;<a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;
+            <dt id="a87e1f551ff891036923ad41a95f31f82">
+              using <a href="#a87e1f551ff891036923ad41a95f31f82" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&lt;<a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&lt;<a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -140,21 +140,21 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a1c7d36abac12cb4eb98e2aa51f5a27f0">
-              <span class="m-doc-wrap-bumper"><a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="#a27cd0f359cd406e2725eba6db0ece11c" class="m-doc">LHSType</a>&amp; lhs,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc">Integral</a>(</span><span class="m-doc-wrap">const <a href="#a631bbbcdb696735b65dd67ff4354a6eb" class="m-doc">LHSType</a>&amp; lhs,
               const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs)</span>
             </dt>
             <dd>Constructs the expression from its left and right operands.</dd>
-            <dt id="a3127660b08ee4e9eea28660e7b0586b2">
-              <span class="m-doc-wrap-bumper"><a href="#a3127660b08ee4e9eea28660e7b0586b2" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3127660b08ee4e9eea28660e7b0586b2" class="m-doc">Integral</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand)</span>
             </dt>
             <dd>Constructs the integrator for the given integrand.</dd>
-            <dt id="afe615834f41161ec55dbbaae0ecc21b5">
-              <span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc">Integral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a15976049dc2524abebbe923a9c82badb">
-              <span class="m-doc-wrap-bumper"><a href="#a15976049dc2524abebbe923a9c82badb" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a15976049dc2524abebbe923a9c82badb" class="m-doc">Integral</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -162,15 +162,137 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="aed9b05c62fba5d2caad83d949fa3fa97">
-              <span class="m-doc-wrap-bumper">auto <a href="#aed9b05c62fba5d2caad83d949fa3fa97" class="m-doc-self">getTestRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aed9b05c62fba5d2caad83d949fa3fa97" class="m-doc">getTestRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the region the test function is integrated over.</dd>
-            <dt id="a4a70b1d9fada649341a2a2cf97479b4f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4a70b1d9fada649341a2a2cf97479b4f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4a70b1d9fada649341a2a2cf97479b4f" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a1c7d36abac12cb4eb98e2aa51f5a27f0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;Kernel, LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c7d36abac12cb4eb98e2aa51f5a27f0" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="#a631bbbcdb696735b65dd67ff4354a6eb" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a9ae414697d3a4986c49f3b31e5b4c114" class="m-doc">RHSType</a>&amp; rhs)</span></span>
+            </h3>
+            <p>Constructs the expression from its left and right operands.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>Left operand.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>Right operand.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3127660b08ee4e9eea28660e7b0586b2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;Kernel, LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3127660b08ee4e9eea28660e7b0586b2" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand)</span></span>
+            </h3>
+            <p>Constructs the integrator for the given integrand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">integrand</td>
+                  <td>Expression to integrate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afe615834f41161ec55dbbaae0ecc21b5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;Kernel, LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afe615834f41161ec55dbbaae0ecc21b5" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a15976049dc2524abebbe923a9c82badb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;Kernel, LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15976049dc2524abebbe923a9c82badb" class="m-doc-self">Integral</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aed9b05c62fba5d2caad83d949fa3fa97"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;Kernel, LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed9b05c62fba5d2caad83d949fa3fa97" class="m-doc-self">getTestRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the region the test function is integrated over.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The region the test function is integrated over.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4a70b1d9fada649341a2a2cf97479b4f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integral.html" class="m-doc">Integral</a>* Rodin::<wbr />Variational::<wbr />Integral&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;&lt;Kernel, LHSDerived, TrialFES, RHSDerived, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4a70b1d9fada649341a2a2cf97479b4f" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -216,7 +338,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

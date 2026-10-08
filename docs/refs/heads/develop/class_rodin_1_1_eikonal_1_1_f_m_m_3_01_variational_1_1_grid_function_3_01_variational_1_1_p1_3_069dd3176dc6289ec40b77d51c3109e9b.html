@@ -134,8 +134,8 @@
               using <a href="#aa4004319189a3b8631174afc2901a486" class="m-doc-self">FES</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="#abcc8463dd31a437948ed9c8d7268156b" class="m-doc">Mesh</a>&gt;
             </dt>
             <dd>Finite element space type (P1)</dd>
-            <dt id="a74ae29eb8b79f954ffb79cd860e6211b">
-              using <a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc-self">SolutionType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#aa4004319189a3b8631174afc2901a486" class="m-doc">FES</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;&gt;
+            <dt id="a03dcfc66b4706bd4114ae3ba4a91c2ec">
+              using <a href="#a03dcfc66b4706bd4114ae3ba4a91c2ec" class="m-doc-self">SolutionType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#aa4004319189a3b8631174afc2901a486" class="m-doc">FES</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;&gt;
             </dt>
             <dd>Solution type: grid function storing arrival times.</dd>
             <dt id="a0f9a347a53d2169da74827130e17e6ff">
@@ -149,7 +149,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc">FMM</a>(</span><span class="m-doc-wrap"><a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc">SolutionType</a>&amp; u,
+              <span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc">FMM</a>(</span><span class="m-doc-wrap"><a href="#a03dcfc66b4706bd4114ae3ba4a91c2ec" class="m-doc">SolutionType</a>&amp; u,
               Callable&amp;&amp; speed)</span>
             </dt>
             <dd>Constructs a Fast Marching Method solver.</dd>
@@ -213,7 +213,7 @@
                 template&lt;class Data, class SpeedFunction&gt;
                 template&lt;class Callable&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap"><a href="#a74ae29eb8b79f954ffb79cd860e6211b" class="m-doc">SolutionType</a>&amp; u,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr />FMM&lt;Variational::<wbr />GridFunction&lt;Variational::<wbr />P1&lt;Real, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Data&gt;, SpeedFunction&gt;&lt;Data, SpeedFunction&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73d89b63b13fdd0797eef84d05c3a1e9" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap"><a href="#a03dcfc66b4706bd4114ae3ba4a91c2ec" class="m-doc">SolutionType</a>&amp; u,
               Callable&amp;&amp; speed)</span></span>
             </h3>
             <p>Constructs a Fast Marching Method solver.</p>
@@ -350,7 +350,7 @@ $ F(x) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

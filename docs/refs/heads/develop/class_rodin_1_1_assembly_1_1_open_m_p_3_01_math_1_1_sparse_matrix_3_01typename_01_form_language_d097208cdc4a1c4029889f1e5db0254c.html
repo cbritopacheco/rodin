@@ -106,12 +106,12 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="abfb0f9c041b41e1c71231f8bab5e3bfc">
-              using <a href="#abfb0f9c041b41e1c71231f8bab5e3bfc" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">FormLanguage::<wbr />Dot</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType, typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;::Type
+            <dt id="a4e8522b5aa871a98adbbff1a1a60c75b">
+              using <a href="#a4e8522b5aa871a98adbbff1a1a60c75b" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">FormLanguage::<wbr />Dot</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType, typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;::Type
             </dt>
             <dd>Scalar value type.</dd>
             <dt id="ab63ab6eaeaaa03f9e1f192bccb16d69e">
-              using <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;<a href="#abfb0f9c041b41e1c71231f8bab5e3bfc" class="m-doc">ScalarType</a>&gt;
+              using <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a1e9568d1308feaaa6f2f6a695857876f" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;<a href="#a4e8522b5aa871a98adbbff1a1a60c75b" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Assembled operator type.</dd>
             <dt id="a2585442b962060e46edfeb15e5aac87a">
@@ -139,12 +139,12 @@
               <span class="m-doc-wrap-bumper"><a href="#a5c027fae62271a225830a7713e7ff28d" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">size_t threadCount)</span>
             </dt>
             <dd>Constructs an assembler with an explicit thread count.</dd>
-            <dt id="ae9ff110dd307a2e8d181728439fc88b0">
-              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="ab629819992d852fd6c2647d00eee90e6">
-              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -152,8 +152,8 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ad7224a3ca1dc16a2d63578186884071a">
-              <span class="m-doc-wrap-bumper">void <a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>&amp; res,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>&amp; res,
               const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Executes the assembly and returns the linear operator associated to the bilinear form.</dd>
@@ -189,6 +189,71 @@
                 <tr>
                   <td style="width: 1%">threadCount</td>
                   <td>Number of OpenMP threads to use.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae9ff110dd307a2e8d181728439fc88b0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab629819992d852fd6c2647d00eee90e6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad7224a3ca1dc16a2d63578186884071a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, Math::<wbr />SparseMatrix&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Executes the assembly and returns the linear operator associated to the bilinear form.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">res</td>
+                  <td>Storage for the assembled operator.</td>
+                </tr>
+                <tr>
+                  <td>input</td>
+                  <td>Input data.</td>
                 </tr>
               </tbody>
             </table>
@@ -298,7 +363,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

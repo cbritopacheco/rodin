@@ -98,7 +98,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md139">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md139">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -112,12 +117,17 @@
         </nav>
 <p>Serializes a grid function to a standalone HDF5 field file (one file per grid function, no mesh or FES embedding). The output layout is:</p><pre class="m-code"><span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span><span class="n">Meta</span><span class="o">/</span><span class="n">Size</span><span class="w">        </span><span class="err">—</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">DOFs</span>
 <span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span><span class="n">Meta</span><span class="o">/</span><span class="n">Dimension</span><span class="w">   </span><span class="err">—</span><span class="w"> </span><span class="n">vector</span><span class="w"> </span><span class="n">dimension</span>
-<span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span><span class="n">Values</span><span class="o">/</span><span class="n">Data</span><span class="w">      </span><span class="err">—</span><span class="w"> </span><span class="n">raw</span><span class="w"> </span><span class="n">DOF</span><span class="w"> </span><span class="n">vector</span></pre><p>This printer is strictly for canonical Rodin grid function persistence. It writes the raw DOF vector only. The XDMF visualization path (IO::XDMF) handles evaluation at vertices/cells separately using <code>HDF5::writeXDMFNodeAttribute</code> / <code>HDF5::writeXDMFCellAttribute</code>.</p><p>Stream-based printing is not supported; only file-path printing is available.</p><section id="autotoc_md139"><h3><a href="#autotoc_md139">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">GridFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span><span class="n">Values</span><span class="o">/</span><span class="n">Data</span><span class="w">      </span><span class="err">—</span><span class="w"> </span><span class="n">raw</span><span class="w"> </span><span class="n">DOF</span><span class="w"> </span><span class="n">vector</span></pre><p>This printer is strictly for canonical Rodin grid function persistence. It writes the raw DOF vector only. The XDMF visualization path (IO::XDMF) handles evaluation at vertices/cells separately using <code>HDF5::writeXDMFNodeAttribute</code> / <code>HDF5::writeXDMFCellAttribute</code>.</p><p>Stream-based printing is not supported; only file-path printing is available.</p><section id="autotoc_md139_1s1"><section id="autotoc_md139"><h3><a href="#autotoc_md139">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">GridFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
 <span class="n">IO</span><span class="o">::</span><span class="n">GridFunctionPrinter</span><span class="o">&lt;</span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">HDF5</span><span class="p">,</span><span class="w"> </span><span class="n">P1</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"field.h5"</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">GridFunctionLoader&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;</a></p></aside></section>
+<span class="w">  </span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"field.h5"</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html">GridFunctionLoader&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;</a></p></aside></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer&lt;Variational::GridFunction&lt;FES, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Base template for printing objects to streams.</dd>
             <dt>
               <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
@@ -162,6 +172,10 @@
               <span class="m-doc-wrap-bumper">void <a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Writes the grid function to a standalone HDF5 field file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html#a11c4ca84d818b4c96f829e779509de85" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Gets a const reference to the object being printed.</dd>
           </dl>
         </section>
         <section>
@@ -194,6 +208,17 @@
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;FES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Stream-based printing is not supported for HDF5.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Always raises an exception. Use the file-path overload instead.</p>
           </div></section>
           <section class="m-doc-details" id="ad71af491000e3f2eccd987fe9ad1a999"><div>
@@ -262,7 +287,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

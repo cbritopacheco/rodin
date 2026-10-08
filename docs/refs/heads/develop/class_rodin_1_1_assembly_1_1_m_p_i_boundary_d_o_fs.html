@@ -97,19 +97,19 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt>
-              using <a href="#a6a01b0c115add5605adec188b573b7ba" class="m-doc">Scalar</a> = typename FES::ScalarType
+            <dt id="a6a01b0c115add5605adec188b573b7ba">
+              using <a href="#a6a01b0c115add5605adec188b573b7ba" class="m-doc-self">Scalar</a> = typename FES::ScalarType
             </dt>
-            <dd></dd>
+            <dd>Scalar field type of the constrained space.</dd>
           </dl>
         </section>
         <section id="pub-static-attribs">
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
-            <dt>
-              static bool <a href="#a70da2fd28158076490a21857a9bdd39a" class="m-doc">Global</a> <span class="m-label m-flat m-primary">constexpr</span>
+            <dt id="a70da2fd28158076490a21857a9bdd39a">
+              static bool <a href="#a70da2fd28158076490a21857a9bdd39a" class="m-doc-self">Global</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd></dd>
+            <dd>Whether the space has globally supported constant DOFs.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -125,10 +125,10 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a467467c4d08188ca410ae5988ad9a643">
-              <span class="m-doc-wrap-bumper">auto <a href="#a467467c4d08188ca410ae5988ad9a643" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a467467c4d08188ca410ae5988ad9a643" class="m-doc">getDOFs</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
-            <dd>Global DOF -&gt; (shard-local face, face-local functional ordinal).</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;class Payload&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#a1466a62b52f9878a1e4efe51999cd50e" class="m-doc">synchronize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;Payload&gt;&amp; values) const</span>
@@ -143,18 +143,6 @@
           </dl>
         </section>
         <section>
-          <h2>Typedef documentation</h2>
-          <section class="m-doc-details" id="a6a01b0c115add5605adec188b573b7ba"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              using Rodin::<wbr />Assembly::<wbr />MPIBoundaryDOFs&lt;FES&gt;::<wbr /><a href="#a6a01b0c115add5605adec188b573b7ba" class="m-doc-self">Scalar</a> = typename FES::ScalarType
-            </h3>
-<p>Scalar field type of the constrained space.</p>
-          </div></section>
-        </section>
-        <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="add97e522ab119b827a5d78fa30034b44"><div>
             <h3>
@@ -164,7 +152,39 @@
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />MPIBoundaryDOFs&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add97e522ab119b827a5d78fa30034b44" class="m-doc-self">MPIBoundaryDOFs</a>(</span><span class="m-doc-wrap">const FES&amp; fes,
               const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attributes)</span></span>
             </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">fes</td>
+                  <td>Finite element space.</td>
+                </tr>
+                <tr>
+                  <td>attributes</td>
+                  <td>Mesh attributes selecting the region.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Selects the boundary functional source for each required DOF.</p>
+          </div></section>
+          <section class="m-doc-details" id="a467467c4d08188ca410ae5988ad9a643"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Assembly::<wbr />MPIBoundaryDOFs&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a467467c4d08188ca410ae5988ad9a643" class="m-doc-self">getDOFs</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Degrees of freedom associated with the supplied mesh entity.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Global DOF -&gt; (shard-local face, face-local functional ordinal).</p>
           </div></section>
           <section class="m-doc-details" id="a1466a62b52f9878a1e4efe51999cd50e"><div>
             <h3>
@@ -174,6 +194,17 @@
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />MPIBoundaryDOFs&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1466a62b52f9878a1e4efe51999cd50e" class="m-doc-self">synchronize</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;Payload&gt;&amp; values) const</span></span>
             </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">values</td>
+                  <td>Values used by the operation.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Broadcasts only the globally supported P0g payload; otherwise a no-op.</p>
           </div></section>
           <section class="m-doc-details" id="a0eef4236e2359409d7a163c0c403674f"><div>
@@ -185,19 +216,22 @@
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />MPIBoundaryDOFs&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0eef4236e2359409d7a163c0c403674f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap"><a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;<a href="#a6a01b0c115add5605adec188b573b7ba" class="m-doc">Scalar</a>&gt;&amp; values,
               const Function&amp; function) const</span></span>
             </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">values</td>
+                  <td>Values used by the operation.</td>
+                </tr>
+                <tr>
+                  <td>function</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Evaluates prescribed values or affine offsets at the selected functionals.</p>
-          </div></section>
-        </section>
-        <section>
-          <h2>Variable documentation</h2>
-          <section class="m-doc-details" id="a70da2fd28158076490a21857a9bdd39a"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class FES&gt;
-              </div>
-              static bool Rodin::<wbr />Assembly::<wbr />MPIBoundaryDOFs&lt;FES&gt;::<wbr /><a href="#a70da2fd28158076490a21857a9bdd39a" class="m-doc-self">Global</a> <span class="m-label m-primary">constexpr</span>
-            </h3>
-<p>Whether the space has globally supported constant DOFs.</p>
           </div></section>
         </section>
       </div>
@@ -244,7 +278,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -101,7 +101,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md6">Parallel Assembly Algorithm</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md6">Parallel Assembly Algorithm</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -133,7 +138,7 @@ $ a(u,v) $
 <use x='22.603868' y='0' xlink:href='#eq1-g0-118'/>
 <use x='28.692087' y='0' xlink:href='#eq1-g1-41'/>
 </g>
-</svg> using OpenMP parallelization. The assembly process distributes element computations across multiple threads and uses sparse matrix triplets for thread-safe accumulation.</p><section id="autotoc_md6"><h3><a href="#autotoc_md6">Parallel Assembly Algorithm</a></h3><ol><li><strong>Element Distribution</strong>: Distribute elements across OpenMP threads</li><li><strong>Local Assembly</strong>: Each thread computes local element matrices independently</li><li><strong>Triplet Accumulation</strong>: Store contributions as Eigen triplets for thread safety</li><li><strong>Global Assembly</strong>: Combine triplets into final sparse matrix</li></ol><p>This approach minimizes synchronization overhead while ensuring correctness.</p></section>
+</svg> using OpenMP parallelization. The assembly process distributes element computations across multiple threads and uses sparse matrix triplets for thread-safe accumulation.</p><section id="autotoc_md6_1s1"><section id="autotoc_md6"><h3><a href="#autotoc_md6">Parallel Assembly Algorithm</a></h3><ol><li><strong>Element Distribution</strong>: Distribute elements across OpenMP threads</li><li><strong>Local Assembly</strong>: Each thread computes local element matrices independently</li><li><strong>Triplet Accumulation</strong>: Store contributions as Eigen triplets for thread safety</li><li><strong>Global Assembly</strong>: Combine triplets into final sparse matrix</li></ol><p>This approach minimizes synchronization overhead while ensuring correctness.</p></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -147,28 +152,28 @@ $ a(u,v) $
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="abfb0f9c041b41e1c71231f8bab5e3bfc">
-              using <a href="#abfb0f9c041b41e1c71231f8bab5e3bfc" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">FormLanguage::<wbr />Dot</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType, typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;::Type
+            <dt id="a4e8522b5aa871a98adbbff1a1a60c75b">
+              using <a href="#a4e8522b5aa871a98adbbff1a1a60c75b" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_dot.html" class="m-doc">FormLanguage::<wbr />Dot</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TrialFES&gt;::ScalarType, typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;TestFES&gt;::ScalarType&gt;::Type
             </dt>
             <dd>Scalar value type.</dd>
-            <dt id="af9b5db8e5dad24f03f0f989009e44aa5">
-              using <a href="#af9b5db8e5dad24f03f0f989009e44aa5" class="m-doc-self">OperatorType</a> = std::vector&lt;<a href="namespace_rodin_1_1_math.html#aad7715489debc7072630c6f58b5ee6eb" class="m-doc">Math::<wbr />SparseTriplet</a>&lt;<a href="#abfb0f9c041b41e1c71231f8bab5e3bfc" class="m-doc">ScalarType</a>&gt;&gt;
+            <dt id="aa86550a542e8fe47393f7aa9829ce43d">
+              using <a href="#aa86550a542e8fe47393f7aa9829ce43d" class="m-doc-self">OperatorType</a> = std::vector&lt;<a href="namespace_rodin_1_1_math.html#aad7715489debc7072630c6f58b5ee6eb" class="m-doc">Math::<wbr />SparseTriplet</a>&lt;<a href="#a4e8522b5aa871a98adbbff1a1a60c75b" class="m-doc">ScalarType</a>&gt;&gt;
             </dt>
             <dd>Assembled operator type.</dd>
-            <dt id="a2585442b962060e46edfeb15e5aac87a">
-              using <a href="#a2585442b962060e46edfeb15e5aac87a" class="m-doc-self">BilinearFormType</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Variational::<wbr />BilinearForm</a>&lt;Solution, TrialFES, TestFES, <a href="#af9b5db8e5dad24f03f0f989009e44aa5" class="m-doc">OperatorType</a>&gt;
+            <dt id="a38ea75cf139a7dbee6dda5dae059c052">
+              using <a href="#a38ea75cf139a7dbee6dda5dae059c052" class="m-doc-self">BilinearFormType</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Variational::<wbr />BilinearForm</a>&lt;Solution, TrialFES, TestFES, <a href="#aa86550a542e8fe47393f7aa9829ce43d" class="m-doc">OperatorType</a>&gt;
             </dt>
             <dd>Bilinear form type assembled by this backend.</dd>
-            <dt id="a41367851d8caefe154f8d74e18cce12a">
-              using <a href="#a41367851d8caefe154f8d74e18cce12a" class="m-doc-self">LocalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;<a href="#abfb0f9c041b41e1c71231f8bab5e3bfc" class="m-doc">ScalarType</a>&gt;
+            <dt id="aaab168dfc96be3528995d614493a3c2a">
+              using <a href="#aaab168dfc96be3528995d614493a3c2a" class="m-doc-self">LocalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;<a href="#a4e8522b5aa871a98adbbff1a1a60c75b" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Local bilinear form integrator base type.</dd>
-            <dt id="a47ee43e37dc1bfd025361456958ff949">
-              using <a href="#a47ee43e37dc1bfd025361456958ff949" class="m-doc-self">GlobalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;<a href="#abfb0f9c041b41e1c71231f8bab5e3bfc" class="m-doc">ScalarType</a>&gt;
+            <dt id="a4a3feaf1bafabf93272f176bbe8c32af">
+              using <a href="#a4a3feaf1bafabf93272f176bbe8c32af" class="m-doc-self">GlobalBilinearFormIntegratorBaseType</a> = <a href="class_rodin_1_1_variational_1_1_global_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />GlobalBilinearFormIntegratorBase</a>&lt;<a href="#a4e8522b5aa871a98adbbff1a1a60c75b" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Global bilinear form integrator base type.</dd>
             <dt id="aac3bcbd70e6befccb25e723b6e3217af">
-              using <a href="#aac3bcbd70e6befccb25e723b6e3217af" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&lt;<a href="#af9b5db8e5dad24f03f0f989009e44aa5" class="m-doc">OperatorType</a>, <a href="#a2585442b962060e46edfeb15e5aac87a" class="m-doc">BilinearFormType</a>&gt;
+              using <a href="#aac3bcbd70e6befccb25e723b6e3217af" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&lt;<a href="#aa86550a542e8fe47393f7aa9829ce43d" class="m-doc">OperatorType</a>, <a href="#a38ea75cf139a7dbee6dda5dae059c052" class="m-doc">BilinearFormType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a0619bd014adbfe7e508b058eefb69dab">
@@ -188,12 +193,12 @@ $ a(u,v) $
               <span class="m-doc-wrap-bumper"><a href="#a5c027fae62271a225830a7713e7ff28d" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">size_t threadCount) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs an assembler with an explicit thread count.</dd>
-            <dt id="ae9ff110dd307a2e8d181728439fc88b0">
-              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="ab629819992d852fd6c2647d00eee90e6">
-              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -201,8 +206,8 @@ $ a(u,v) $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ad7224a3ca1dc16a2d63578186884071a">
-              <span class="m-doc-wrap-bumper">void <a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#af9b5db8e5dad24f03f0f989009e44aa5" class="m-doc">OperatorType</a>&amp; res,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#aa86550a542e8fe47393f7aa9829ce43d" class="m-doc">OperatorType</a>&amp; res,
               const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Executes the assembly and returns the linear operator associated to the bilinear form.</dd>
@@ -238,6 +243,71 @@ $ a(u,v) $
                 <tr>
                   <td style="width: 1%">threadCount</td>
                   <td>Number of OpenMP threads to use.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae9ff110dd307a2e8d181728439fc88b0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />OpenMP&lt;std::<wbr />vector&lt;Math::<wbr />SparseTriplet&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, std::<wbr />vector&lt;Math::<wbr />SparseTriplet&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab629819992d852fd6c2647d00eee90e6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />OpenMP&lt;std::<wbr />vector&lt;Math::<wbr />SparseTriplet&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, std::<wbr />vector&lt;Math::<wbr />SparseTriplet&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad7224a3ca1dc16a2d63578186884071a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;std::<wbr />vector&lt;Math::<wbr />SparseTriplet&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, std::<wbr />vector&lt;Math::<wbr />SparseTriplet&lt;typename FormLanguage::<wbr />Dot&lt;typename FormLanguage::<wbr />Traits&lt;TrialFES&gt;::<wbr />ScalarType, typename FormLanguage::<wbr />Traits&lt;TestFES&gt;::<wbr />ScalarType&gt;::<wbr />Type&gt;&gt;&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#aa86550a542e8fe47393f7aa9829ce43d" class="m-doc">OperatorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Executes the assembly and returns the linear operator associated to the bilinear form.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">res</td>
+                  <td>Storage for the assembled operator.</td>
+                </tr>
+                <tr>
+                  <td>input</td>
+                  <td>Input data.</td>
                 </tr>
               </tbody>
             </table>
@@ -347,7 +417,7 @@ $ a(u,v) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -105,8 +105,8 @@
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt id="a822d9beb92dd4a41520b30e043d8e1fb">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a822d9beb92dd4a41520b30e043d8e1fb" class="m-doc-self">apply</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> La,
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a822d9beb92dd4a41520b30e043d8e1fb" class="m-doc">apply</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> La,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Lb,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Lc,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Ld,
@@ -114,6 +114,55 @@
             </dt>
             <dd>Applies the warp to the given barycentric coordinates.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a822d9beb92dd4a41520b30e043d8e1fb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t K&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">static std::array&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>, 2&gt; Rodin::<wbr />Variational::<wbr />WarpShiftFace3D&lt;K&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a822d9beb92dd4a41520b30e043d8e1fb" class="m-doc-self">apply</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> La,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Lb,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Lc,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Ld,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> alpha)</span></span>
+            </h3>
+            <p>Applies the warp to the given barycentric coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">La</td>
+                  <td>Barycentric coordinate of the node.</td>
+                </tr>
+                <tr>
+                  <td>Lb</td>
+                  <td>Barycentric coordinate of the node.</td>
+                </tr>
+                <tr>
+                  <td>Lc</td>
+                  <td>Barycentric coordinate of the node.</td>
+                </tr>
+                <tr>
+                  <td>Ld</td>
+                  <td>Barycentric coordinate of the node.</td>
+                </tr>
+                <tr>
+                  <td>alpha</td>
+                  <td>Warp blending parameter.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Warp displacement in the reference coordinates.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -159,7 +208,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -147,7 +147,7 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aad9ee4039ed7654d55704f93a00159cd" class="m-doc">MemberFunctionException</a>(</span><span class="m-doc-wrap">const T&amp;,
+              <span class="m-doc-wrap-bumper"><a href="#a7f4056f562790bdc4bf03d57eeeb920f" class="m-doc">MemberFunctionException</a>(</span><span class="m-doc-wrap">const T&amp; instance,
               const FuncName&amp; funcName)</span>
             </dt>
             <dd>Constructs a MemberFunctionException.</dd>
@@ -164,12 +164,12 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aad9ee4039ed7654d55704f93a00159cd"><div>
+          <section class="m-doc-details" id="a7f4056f562790bdc4bf03d57eeeb920f"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class T, class FuncName&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />MemberFunctionException&lt;T, FuncName&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad9ee4039ed7654d55704f93a00159cd" class="m-doc-self">MemberFunctionException</a>(</span><span class="m-doc-wrap">const T&amp;,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />MemberFunctionException&lt;T, FuncName&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f4056f562790bdc4bf03d57eeeb920f" class="m-doc-self">MemberFunctionException</a>(</span><span class="m-doc-wrap">const T&amp; instance,
               const FuncName&amp; funcName)</span></span>
             </h3>
             <p>Constructs a MemberFunctionException.</p>
@@ -179,7 +179,11 @@
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">funcName</td>
+                  <td style="width: 1%">instance</td>
+                  <td>Class instance used to deduce the class type; its value is unused.</td>
+                </tr>
+                <tr>
+                  <td>funcName</td>
                   <td>The name of the member function in which the error occurred.</td>
                 </tr>
               </tbody>
@@ -241,7 +245,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

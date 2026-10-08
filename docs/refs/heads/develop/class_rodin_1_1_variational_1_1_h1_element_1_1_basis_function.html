@@ -82,8 +82,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md391">Evaluation Methods</a></li>
-            <li><a href="#autotoc_md392">Implementation</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md391">Evaluation Methods</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md392">Implementation</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -145,7 +155,7 @@ $ \sum_i \phi_i(x) = 1 $
 <use x='47.380091' y='0' xlink:href='#eq2-g3-61'/>
 <use x='59.805571' y='0' xlink:href='#eq2-g3-49'/>
 </g>
-</svg>.</p><section id="autotoc_md391"><h3><a href="#autotoc_md391">Evaluation Methods</a></h3><ul><li><code>operator()(point)</code>: Evaluates the basis function at a spatial point</li><li><code>getDerivative&lt;Order&gt;(i)</code>: Gets the partial derivative of order <code>Order</code> w.r.t. coordinate i</li><li><code>getGradient()</code>: Gets the gradient function (vector of first-order partial derivatives)</li></ul></section><section id="autotoc_md392"><h3><a href="#autotoc_md392">Implementation</a></h3><p>The basis functions are constructed using:</p><ul><li><strong>Segments</strong>: Classical Lagrange interpolation</li><li><strong>Triangles/Tetrahedra</strong>: Barycentric Lagrange polynomials</li><li><strong>Quadrilaterals/Wedges</strong>: Tensor product of lower-dimensional bases</li></ul></section>
+</svg>.</p><section id="autotoc_md391_1s1"><section id="autotoc_md391"><h3><a href="#autotoc_md391">Evaluation Methods</a></h3><ul><li><code>operator()(point)</code>: Evaluates the basis function at a spatial point</li><li><code>getDerivative&lt;Order&gt;(i)</code>: Gets the partial derivative of order <code>Order</code> w.r.t. coordinate i</li><li><code>getGradient()</code>: Gets the gradient function (vector of first-order partial derivatives)</li></ul></section></section><section id="autotoc_md392_1s1"><section id="autotoc_md392"><h3><a href="#autotoc_md392">Implementation</a></h3><p>The basis functions are constructed using:</p><ul><li><strong>Segments</strong>: Classical Lagrange interpolation</li><li><strong>Triangles/Tetrahedra</strong>: Barycentric Lagrange polynomials</li><li><strong>Quadrilaterals/Wedges</strong>: Tensor product of lower-dimensional bases</li></ul></section></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -172,8 +182,8 @@ $ \sum_i \phi_i(x) = 1 $
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a basis function.</dd>
-            <dt id="aa5ea57e5f061d84d30beb04af6dab6c9">
-              <span class="m-doc-wrap-bumper"><a href="#aa5ea57e5f061d84d30beb04af6dab6c9" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a312f58afdcdb00133f0463ae3a16416d" class="m-doc">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -220,6 +230,23 @@ $ \sum_i \phi_i(x) = 1 $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a312f58afdcdb00133f0463ae3a16416d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a312f58afdcdb00133f0463ae3a16416d" class="m-doc-self">BasisFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">BasisFunction</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a95145f82cd6cf95bdbd17a06e5438d6f"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="#a3ecb01c9ff447e63e2d15066ada3dcd7" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />H1Element::<wbr />BasisFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95145f82cd6cf95bdbd17a06e5438d6f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const</span></span>
@@ -232,7 +259,7 @@ $ \sum_i \phi_i(x) = 1 $
               <tbody>
                 <tr>
                   <td style="width: 1%">r</td>
-                  <td>Reference point in the element (typically in [0,1]^d)</td>
+                  <td>Reference coordinates at which to evaluate the basis.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -337,7 +364,7 @@ $ \sum_i \phi_i(x) = 1 $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

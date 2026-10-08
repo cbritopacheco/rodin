@@ -151,8 +151,8 @@ $ \nabla \phi = \left( \frac{\partial \phi}{\partial x}, \frac{\partial \phi}{\p
               <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a gradient function.</dd>
-            <dt id="afbe34b7dff9e43a00804d8313151ae06">
-              <span class="m-doc-wrap-bumper"><a href="#afbe34b7dff9e43a00804d8313151ae06" class="m-doc-self">GradientFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">GradientFunction</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#af816e2995b6f1d03fae6a1050514781f" class="m-doc">GradientFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">GradientFunction</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -190,6 +190,23 @@ $ \nabla \phi = \left( \frac{\partial \phi}{\partial x}, \frac{\partial \phi}{\p
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="af816e2995b6f1d03fae6a1050514781f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1Element::<wbr />BasisFunction::<wbr />GradientFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af816e2995b6f1d03fae6a1050514781f" class="m-doc-self">GradientFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">GradientFunction</a>&amp; other) <span class="m-label m-info">defaulted</span> <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a710d2d9e4418a9110096ed95161fbc59"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="#ae1179642a17e478e0b94b33f97e05ca9" class="m-doc">ReturnType</a> Rodin::<wbr />Variational::<wbr />H1Element::<wbr />BasisFunction::<wbr />GradientFunction::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a710d2d9e4418a9110096ed95161fbc59" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&amp; r) const</span></span>
@@ -202,7 +219,7 @@ $ \nabla \phi = \left( \frac{\partial \phi}{\partial x}, \frac{\partial \phi}{\p
               <tbody>
                 <tr>
                   <td style="width: 1%">r</td>
-                  <td>Reference point in the element</td>
+                  <td>Reference coordinates at which to evaluate the basis.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -258,7 +275,7 @@ $ \nabla \phi = \left( \frac{\partial \phi}{\partial x}, \frac{\partial \phi}{\p
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

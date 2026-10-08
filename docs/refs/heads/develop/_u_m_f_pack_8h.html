@@ -81,15 +81,29 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md286">Algorithm</a></li>
-            <li><a href="#autotoc_md287">Applicability</a></li>
-            <li><a href="#autotoc_md288">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md286">Algorithm</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md287">Applicability</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md288">Usage Example</a></li>
+              </ul>
+            </li>
           </ul>
         </nav>
-<p>This header provides a wrapper for the UMFPACK solver from SuiteSparse, a high-performance direct solver for general sparse matrices using multifrontal LU factorization.</p><section id="autotoc_md286"><h3><a href="#autotoc_md286">Algorithm</a></h3><p>UMFPACK computes:</p><div class="m-math"><svg style="width: 6.263em; height: 1.093em;" viewBox="164.207723 -10.493961 60.127564 10.493973">
+<p>This header provides a wrapper for the UMFPACK solver from SuiteSparse, a high-performance direct solver for general sparse matrices using multifrontal LU factorization.</p><section id="autotoc_md286_1s1"><section id="autotoc_md286"><h3><a href="#autotoc_md286">Algorithm</a></h3><p>UMFPACK computes:</p><div class="m-math"><svg style="width: 6.263em; height: 1.093em;" viewBox="164.207723 -10.493961 60.127564 10.493973">
 <title>
-\[
-  PAQ = LU
+\[     PAQ = LU
 \]
 </title>
 <defs>
@@ -148,11 +162,11 @@ $ U $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-85'/>
 </g>
-</svg> is upper triangular. The multifrontal method processes the matrix using an assembly tree for efficiency.</p></section><section id="autotoc_md287"><h3><a href="#autotoc_md287">Applicability</a></h3><ul><li>General sparse matrices (non-symmetric, non-positive definite)</li><li>Large-scale problems</li><li>Circuit simulation</li><li>Structural analysis</li><li>Computational fluid dynamics</li></ul></section><section id="autotoc_md288"><h3><a href="#autotoc_md288">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg> is upper triangular. The multifrontal method processes the matrix using an assembly tree for efficiency.</p></section></section><section id="autotoc_md287_1s1"><section id="autotoc_md287"><h3><a href="#autotoc_md287">Applicability</a></h3><ul><li>General sparse matrices (non-symmetric, non-positive definite)</li><li>Large-scale problems</li><li>Circuit simulation</li><li>Structural analysis</li><li>Computational fluid dynamics</li></ul></section></section><section id="autotoc_md288_1s1"><section id="autotoc_md288"><h3><a href="#autotoc_md288">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">UMFPack</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
-<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-info"><h4>Note</h4><p>This solver requires UMFPACK from SuiteSparse to be installed and RODIN_USE_UMFPACK to be defined at compile time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="_u_m_f_pack_8h.html">UMFPack</a> for the solver implementation</p></aside></section>
+<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-info"><h4>Note</h4><p>This solver requires UMFPACK from SuiteSparse to be installed and RODIN_USE_UMFPACK to be defined at compile time.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="_u_m_f_pack_8h.html">UMFPack</a> for the solver implementation</p></aside></section></section>
       </div>
     </div>
   </div>
@@ -197,7 +211,7 @@ $ U $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

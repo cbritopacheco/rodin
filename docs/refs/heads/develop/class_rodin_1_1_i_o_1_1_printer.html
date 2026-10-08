@@ -93,7 +93,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md154">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md154">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -104,7 +109,7 @@
             </li>
           </ul>
         </nav>
-<p>Abstract base class template for printing objects to streams.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_printer.html">Printer</a></p></aside><p>The Printer class provides a common interface for writing objects of type <code>T</code> to output streams. This class serves as the foundation for specialized printers that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li>print(std::ostream&amp;) - Write object to an output stream</li><li>getObject() - Access the object being printed</li></ul><section id="autotoc_md154"><h3><a href="#autotoc_md154">Usage Example</a></h3><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectPrinter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Printer</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
+<p>Abstract base class template for printing objects to streams.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_printer.html">Printer</a></p></aside><p>The Printer class provides a common interface for writing objects of type <code>T</code> to output streams. This class serves as the foundation for specialized printers that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li>print(std::ostream&amp;) - Write object to an output stream</li><li>getObject() - Access the object being printed</li></ul><section id="autotoc_md154_1s1"><section id="autotoc_md154"><h3><a href="#autotoc_md154">Usage Example</a></h3><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectPrinter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Printer</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
 <span class="w">  </span><span class="n">MyObjectPrinter</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">MyObject</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">m_object</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
@@ -127,15 +132,25 @@
 <span class="c1">// Usage</span>
 <span class="n">MyObject</span><span class="w"> </span><span class="n">obj</span><span class="p">;</span>
 <span class="n">MyObjectPrinter</span><span class="w"> </span><span class="nf">printer</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
-<span class="n">printer</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">MeshPrinter</a></p><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a></p></aside></section>
+<span class="n">printer</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html">MeshPrinter</a></p><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html">GridFunctionPrinter</a></p></aside></section></section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a>
             </dt>
-            <dd>Base class for concrete grid function printers.</dd>
+            <dd>Printer template for grid functions with specific file format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a>
+            </dt>
+            <dd>Printer template for grid functions with specific file format.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_m_e_d_i_t_00_01_f_e_s_00_01_m0a53ca4f721c080cdcb0de309d8d05d7.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::MEDIT, FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>MEDIT grid-function printer for vector-backed grid functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>
@@ -162,25 +177,10 @@
             </dt>
             <dd>Base class for concrete grid function printers.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>
+              <div class="m-doc-template">template&lt;class Context&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" class="m-doc">MeshPrinterBase</a>
             </dt>
-            <dd>Base class for concrete grid function printers.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>
-            </dt>
-            <dd>Base class for concrete grid function printers.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>
-            </dt>
-            <dd>Base class for concrete grid function printers.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>
-            </dt>
-            <dd>Base class for concrete grid function printers.</dd>
+            <dd>Base class for printing meshes to streams or files.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -315,7 +315,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -130,13 +130,13 @@
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt id="a14d7750cc48190a88348dc75cc676007">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a14d7750cc48190a88348dc75cc676007" class="m-doc-self">getInsideCost</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> volume,
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a14d7750cc48190a88348dc75cc676007" class="m-doc">getInsideCost</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> volume,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> moment) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the unary cost of labeling a cell Inside, given its volume and signed moment.</dd>
-            <dt id="a84123c7894ce2b5f80bddbd3414c3102">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a84123c7894ce2b5f80bddbd3414c3102" class="m-doc-self">getOutsideCost</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> volume,
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a84123c7894ce2b5f80bddbd3414c3102" class="m-doc">getOutsideCost</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> volume,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> moment) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the unary cost of labeling a cell Outside, given its volume and signed moment.</dd>
@@ -145,26 +145,189 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a0d6afd9b185bf28a03e6d497f1303d4d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0d6afd9b185bf28a03e6d497f1303d4d" class="m-doc-self">classify</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; volumes,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0d6afd9b185bf28a03e6d497f1303d4d" class="m-doc">classify</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; volumes,
               const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; moments,
               const std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges) const -&gt; <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a></span>
             </dt>
             <dd>Classifies cells into Inside/Outside via a Potts min s-t cut built from per-cell volumes and moments.</dd>
-            <dt id="ab97533f395564ba639f92ce3e5b599eb">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab97533f395564ba639f92ce3e5b599eb" class="m-doc-self">classify</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; volumes,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab97533f395564ba639f92ce3e5b599eb" class="m-doc">classify</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; volumes,
               const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; moments,
               const std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges,
               const <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_options.html" class="m-doc">Options</a>&amp; options) const -&gt; <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a></span>
             </dt>
             <dd>Classifies cells with additional <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_options.html" class="m-doc">Options</a> (narrow-band restriction, far-field pinning, per-edge weighting).</dd>
-            <dt id="a82cb7900dfa397b390ceec6ee20e85d2">
-              <span class="m-doc-wrap-bumper">auto <a href="#a82cb7900dfa397b390ceec6ee20e85d2" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; insideCosts,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a82cb7900dfa397b390ceec6ee20e85d2" class="m-doc">solve</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; insideCosts,
               const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; outsideCosts,
               const std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges) const -&gt; <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a></span>
             </dt>
             <dd>Solves the s-t min cut directly from precomputed unary costs and edges.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a14d7750cc48190a88348dc75cc676007"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MinSTCut::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a14d7750cc48190a88348dc75cc676007" class="m-doc-self">getInsideCost</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> volume,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> moment) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the unary cost of labeling a cell Inside, given its volume and signed moment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">volume</td>
+                  <td>Cell volume.</td>
+                </tr>
+                <tr>
+                  <td>moment</td>
+                  <td>Integral of the field over the cell.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The unary cost of labeling a cell Inside, given its volume and signed moment.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a84123c7894ce2b5f80bddbd3414c3102"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MinSTCut::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a84123c7894ce2b5f80bddbd3414c3102" class="m-doc-self">getOutsideCost</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> volume,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> moment) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the unary cost of labeling a cell Outside, given its volume and signed moment.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">volume</td>
+                  <td>Cell volume.</td>
+                </tr>
+                <tr>
+                  <td>moment</td>
+                  <td>Integral of the field over the cell.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The unary cost of labeling a cell Outside, given its volume and signed moment.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0d6afd9b185bf28a03e6d497f1303d4d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a> Rodin::<wbr />Geometry::<wbr />MinSTCut::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d6afd9b185bf28a03e6d497f1303d4d" class="m-doc-self">classify</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; volumes,
+              const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; moments,
+              const std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges) const</span></span>
+            </h3>
+            <p>Classifies cells into Inside/Outside via a Potts min s-t cut built from per-cell volumes and moments.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">volumes</td>
+                  <td>Cell volumes.</td>
+                </tr>
+                <tr>
+                  <td>moments</td>
+                  <td>Cell integrals of the field.</td>
+                </tr>
+                <tr>
+                  <td>edges</td>
+                  <td>Edges carrying the interface penalty.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Cell labels and the value of the minimum-cut objective.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab97533f395564ba639f92ce3e5b599eb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a> Rodin::<wbr />Geometry::<wbr />MinSTCut::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab97533f395564ba639f92ce3e5b599eb" class="m-doc-self">classify</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; volumes,
+              const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; moments,
+              const std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges,
+              const <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_options.html" class="m-doc">Options</a>&amp; options) const</span></span>
+            </h3>
+            <p>Classifies cells with additional <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_options.html" class="m-doc">Options</a> (narrow-band restriction, far-field pinning, per-edge weighting).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">volumes</td>
+                  <td>Cell volumes.</td>
+                </tr>
+                <tr>
+                  <td>moments</td>
+                  <td>Cell integrals of the field.</td>
+                </tr>
+                <tr>
+                  <td>edges</td>
+                  <td>Edges carrying the interface penalty.</td>
+                </tr>
+                <tr>
+                  <td>options</td>
+                  <td>Options controlling the classification.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Cell labels and the value of the minimum-cut objective.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a82cb7900dfa397b390ceec6ee20e85d2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_result.html" class="m-doc">Result</a> Rodin::<wbr />Geometry::<wbr />MinSTCut::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82cb7900dfa397b390ceec6ee20e85d2" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; insideCosts,
+              const std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; outsideCosts,
+              const std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt;&amp; edges) const</span></span>
+            </h3>
+            <p>Solves the s-t min cut directly from precomputed unary costs and edges.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">insideCosts</td>
+                  <td>Costs of assigning each cell to the inside region.</td>
+                </tr>
+                <tr>
+                  <td>outsideCosts</td>
+                  <td>Costs of assigning each cell to the outside region.</td>
+                </tr>
+                <tr>
+                  <td>edges</td>
+                  <td>Edges carrying the interface penalty.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Cell labels and the value of the minimum-cut objective.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -210,7 +373,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -105,7 +105,12 @@ $\int \mathcal{K}(u) \cdot v$
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md477">Judgement</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md477">Judgement</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -120,8 +125,7 @@ $\int \mathcal{K}(u) \cdot v$
         </nav>
 <p>This class represents the CTAD for the expression:</p><div class="m-math"><svg style="width: 6.211em; height: 2.767em;" viewBox="164.457746 -26.567319 59.627486 26.567327">
 <title>
-\[
-\int \mathcal{K}(u) \cdot v \: ,
+\[\int \mathcal{K}(u) \cdot v \: ,
 \]
 </title>
 <defs>
@@ -174,10 +178,9 @@ $\mathcal{K}$
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-75'/>
 </g>
-</svg> is a potential kernel operator.</p><section id="autotoc_md477"><h3><a href="#autotoc_md477">Judgement</a></h3><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 16.471em; height: 2.966em;" viewBox="115.209246 -28.471357 158.124615 28.471369">
+</svg> is a potential kernel operator.</p><section id="autotoc_md477_1s1"><section id="autotoc_md477"><h3><a href="#autotoc_md477">Judgement</a></h3><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 16.471em; height: 2.966em;" viewBox="115.209246 -28.471357 158.124615 28.471369">
 <title>
-\[
-\dfrac
+\[\dfrac
 {\vdash \int \mathcal{K}(u) \cdot v : \texttt{QuadratureRule}}
 {\vdash u, v : \mathbb{P}_1}
 \]
@@ -238,7 +241,7 @@ $\mathcal{K}$
 <use x='207.509836' y='-2.324596' xlink:href='#eq5-g1-80'/>
 <use x='214.81579' y='-.531333' xlink:href='#eq5-g5-49'/>
 </g>
-</svg></div><p>When the trial and test polytopes coincide, triangles use the optimized six-point construction; all other geometries fall back to a single centroid pairing consistent with the generic QuadratureRule.</p></section>
+</svg></div><p>When the trial and test polytopes coincide, triangles use the optimized six-point construction; all other geometries fall back to a single centroid pairing consistent with the generic QuadratureRule.</p></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -260,8 +263,8 @@ $\mathcal{K}$
               using <a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc-self">KernelType</a> = Kernel
             </dt>
             <dd>Cell kernel type.</dd>
-            <dt id="a28c129cbe884a221266c35d770ce99c9">
-              using <a href="#a28c129cbe884a221266c35d770ce99c9" class="m-doc-self">KernelValue</a> = std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">FormLanguage::<wbr />IsMatrixRange</a>&lt;Range&gt;::Value &amp;&amp; std::is_invocable_v&lt;const <a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>&amp;, <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">Math::<wbr />SpatialTensor</a>&lt;<a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc">ScalarType</a>, 4&gt;&amp;, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;&gt;, <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">Math::<wbr />SpatialTensor</a>&lt;<a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc">ScalarType</a>, 4&gt;, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc">ScalarType</a>&gt;&gt;
+            <dt id="a6c7834b8500e37f2b8b570945b4d7d8c">
+              using <a href="#a6c7834b8500e37f2b8b570945b4d7d8c" class="m-doc-self">KernelValue</a> = std::conditional_t&lt;<a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">FormLanguage::<wbr />IsMatrixRange</a>&lt;Range&gt;::Value&amp;&amp; std::is_invocable_v&lt;const <a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>&amp;, <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">Math::<wbr />SpatialTensor</a>&lt;<a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc">ScalarType</a>, 4&gt;&amp;, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;&gt;, <a href="class_rodin_1_1_math_1_1_spatial_tensor.html" class="m-doc">Math::<wbr />SpatialTensor</a>&lt;<a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc">ScalarType</a>, 4&gt;, <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc">ScalarType</a>&gt;&gt;
             </dt>
             <dd>Kernel action on a matrix range, or the existing vector action.</dd>
             <dt id="ac060140aba010795ae30894af4e7eced">
@@ -272,24 +275,24 @@ $\mathcal{K}$
               using <a href="#a0bb311e1e3d6a358af42786b77fa32e0" class="m-doc-self">TestFESType</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;Range, Mesh&gt;
             </dt>
             <dd>Test finite element space type.</dd>
-            <dt id="ab9db08fd2df253bd5648196f9d80741f">
-              using <a href="#ab9db08fd2df253bd5648196f9d80741f" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&lt;<a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;LHSDerived, <a href="#ac060140aba010795ae30894af4e7eced" class="m-doc">TrialFESType</a>, TrialSpace&gt;&gt;
+            <dt id="acff7f2fb5a49f2d199a4a917a1ae286d">
+              using <a href="#acff7f2fb5a49f2d199a4a917a1ae286d" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_potential.html" class="m-doc">Potential</a>&lt;<a href="#aa00f8f49ea4864c669c09e7da212b3f3" class="m-doc">KernelType</a>, <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;LHSDerived, <a href="#ac060140aba010795ae30894af4e7eced" class="m-doc">TrialFESType</a>, TrialSpace&gt;&gt;
             </dt>
             <dd>Left-hand side operand type.</dd>
-            <dt id="a8ddc10edec00aaecc796bd9c16b5a05c">
-              using <a href="#a8ddc10edec00aaecc796bd9c16b5a05c" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, <a href="#a0bb311e1e3d6a358af42786b77fa32e0" class="m-doc">TestFESType</a>, TestSpace&gt;
+            <dt id="a439c8911a58644b0b65fa7f8bef0feea">
+              using <a href="#a439c8911a58644b0b65fa7f8bef0feea" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;RHSDerived, <a href="#a0bb311e1e3d6a358af42786b77fa32e0" class="m-doc">TestFESType</a>, TestSpace&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="a5d9e9a57f44320b12e097a42ea683752">
-              using <a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc-self">LHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ab9db08fd2df253bd5648196f9d80741f" class="m-doc">LHSType</a>&gt;::RangeType
+              using <a href="#a5d9e9a57f44320b12e097a42ea683752" class="m-doc-self">LHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#acff7f2fb5a49f2d199a4a917a1ae286d" class="m-doc">LHSType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the left-hand side operand.</dd>
             <dt id="a8fe84c6e4dc3369f5a70b4214f9d5920">
-              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a8ddc10edec00aaecc796bd9c16b5a05c" class="m-doc">RHSType</a>&gt;::RangeType
+              using <a href="#a8fe84c6e4dc3369f5a70b4214f9d5920" class="m-doc-self">RHSRangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a439c8911a58644b0b65fa7f8bef0feea" class="m-doc">RHSType</a>&gt;::RangeType
             </dt>
             <dd>Range type of the right-hand side operand.</dd>
             <dt id="a17f4c13495b1edea562f9b757bc3ff76">
-              using <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="#ab9db08fd2df253bd5648196f9d80741f" class="m-doc">LHSType</a>, <a href="#a8ddc10edec00aaecc796bd9c16b5a05c" class="m-doc">RHSType</a>&gt;
+              using <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="#acff7f2fb5a49f2d199a4a917a1ae286d" class="m-doc">LHSType</a>, <a href="#a439c8911a58644b0b65fa7f8bef0feea" class="m-doc">RHSType</a>&gt;
             </dt>
             <dd>Integrand expression type.</dd>
             <dt id="ae930febad2ce23e773482a361f8f3714">
@@ -310,21 +313,21 @@ $\mathcal{K}$
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a675d43cd86898184013f11d60ac91e13">
-              <span class="m-doc-wrap-bumper"><a href="#a675d43cd86898184013f11d60ac91e13" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#ab9db08fd2df253bd5648196f9d80741f" class="m-doc">LHSType</a>&amp; lhs,
-              const <a href="#a8ddc10edec00aaecc796bd9c16b5a05c" class="m-doc">RHSType</a>&amp; rhs) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a675d43cd86898184013f11d60ac91e13" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#acff7f2fb5a49f2d199a4a917a1ae286d" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a439c8911a58644b0b65fa7f8bef0feea" class="m-doc">RHSType</a>&amp; rhs) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the expression from its left and right operands.</dd>
-            <dt id="ad9eb933f006615fb74f46030211d24bd">
-              <span class="m-doc-wrap-bumper"><a href="#ad9eb933f006615fb74f46030211d24bd" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ad9eb933f006615fb74f46030211d24bd" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the integrator for the given integrand.</dd>
-            <dt id="a1987408abf27604ac74b03633ac5b752">
-              <span class="m-doc-wrap-bumper"><a href="#a1987408abf27604ac74b03633ac5b752" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1987408abf27604ac74b03633ac5b752" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a8e3f616f94ee3bbe59ea848cb2652657">
-              <span class="m-doc-wrap-bumper"><a href="#a8e3f616f94ee3bbe59ea848cb2652657" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8e3f616f94ee3bbe59ea848cb2652657" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -332,26 +335,26 @@ $\mathcal{K}$
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a48340e1460d6b8b6eb354b431923fd3e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a48340e1460d6b8b6eb354b431923fd3e" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a48340e1460d6b8b6eb354b431923fd3e" class="m-doc">getIntegrand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the integrand.</dd>
-            <dt id="a9469dbb4f83b99b954c74065edbff986">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9469dbb4f83b99b954c74065edbff986" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; trp,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9469dbb4f83b99b954c74065edbff986" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; trp,
               const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; tep) -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Binds the integrator to a polytope and tabulates the quadrature on it.</dd>
-            <dt id="a6c0d10cae5d2dba713631afd1af6b991">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6c0d10cae5d2dba713631afd1af6b991" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6c0d10cae5d2dba713631afd1af6b991" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
               size_t te) -&gt; <a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns an entry of the element matrix.</dd>
-            <dt id="ae82f4088353f48d49784c0d81ded22ad">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae82f4088353f48d49784c0d81ded22ad" class="m-doc-self">getTrialRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae82f4088353f48d49784c0d81ded22ad" class="m-doc">getTrialRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the region the trial function is integrated over.</dd>
-            <dt id="a97e3d2940bce24b0912910e2bf7208ec">
-              <span class="m-doc-wrap-bumper">auto <a href="#a97e3d2940bce24b0912910e2bf7208ec" class="m-doc-self">getTestRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a97e3d2940bce24b0912910e2bf7208ec" class="m-doc">getTestRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the region the test function is integrated over.</dd>
             <dt>
@@ -362,6 +365,204 @@ $\mathcal{K}$
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a675d43cd86898184013f11d60ac91e13"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, P1&lt;Range, Mesh&gt;, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;Kernel, Range, Mesh, LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a675d43cd86898184013f11d60ac91e13" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#acff7f2fb5a49f2d199a4a917a1ae286d" class="m-doc">LHSType</a>&amp; lhs,
+              const <a href="#a439c8911a58644b0b65fa7f8bef0feea" class="m-doc">RHSType</a>&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs the expression from its left and right operands.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>Left operand.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>Right operand.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad9eb933f006615fb74f46030211d24bd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, P1&lt;Range, Mesh&gt;, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;Kernel, Range, Mesh, LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9eb933f006615fb74f46030211d24bd" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Constructs the integrator for the given integrand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">integrand</td>
+                  <td>Expression to integrate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1987408abf27604ac74b03633ac5b752"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, P1&lt;Range, Mesh&gt;, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;Kernel, Range, Mesh, LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1987408abf27604ac74b03633ac5b752" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8e3f616f94ee3bbe59ea848cb2652657"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, P1&lt;Range, Mesh&gt;, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;Kernel, Range, Mesh, LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e3f616f94ee3bbe59ea848cb2652657" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a48340e1460d6b8b6eb354b431923fd3e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, P1&lt;Range, Mesh&gt;, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;Kernel, Range, Mesh, LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a48340e1460d6b8b6eb354b431923fd3e" class="m-doc-self">getIntegrand</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the integrand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integrand.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9469dbb4f83b99b954c74065edbff986"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, P1&lt;Range, Mesh&gt;, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;Kernel, Range, Mesh, LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9469dbb4f83b99b954c74065edbff986" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; trp,
+              const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; tep) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Binds the integrator to a polytope and tabulates the quadrature on it.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">trp</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+                <tr>
+                  <td>tep</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6c0d10cae5d2dba713631afd1af6b991"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, P1&lt;Range, Mesh&gt;, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;Kernel, Range, Mesh, LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c0d10cae5d2dba713631afd1af6b991" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns an entry of the element matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tr</td>
+                  <td>Trial shape-function expression.</td>
+                </tr>
+                <tr>
+                  <td>te</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Integral computed by the quadrature rule.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae82f4088353f48d49784c0d81ded22ad"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, P1&lt;Range, Mesh&gt;, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;Kernel, Range, Mesh, LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae82f4088353f48d49784c0d81ded22ad" class="m-doc-self">getTrialRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the region the trial function is integrated over.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The region the trial function is integrated over.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a97e3d2940bce24b0912910e2bf7208ec"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Kernel, class Range, class Mesh, class LHSDerived, class RHSDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;Potential&lt;Kernel, ShapeFunctionBase&lt;LHSDerived, P1&lt;Range, Mesh&gt;, TrialSpace&gt;&gt;, ShapeFunctionBase&lt;RHSDerived, P1&lt;Range, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;Kernel, Range, Mesh, LHSDerived, RHSDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a97e3d2940bce24b0912910e2bf7208ec" class="m-doc-self">getTestRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the region the test function is integrated over.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The region the test function is integrated over.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a97e8bbec3df10545ba877130c3be5b93"><div>
             <h3>
               <div class="m-doc-template">
@@ -424,7 +625,7 @@ $\mathcal{K}$
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -90,14 +90,14 @@
             </li>
           </ul>
         </nav>
-<p>Provides <code>Rodin::Variational::H1</code> specializations for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Rodin::<wbr />Context::<wbr />MPI&gt;</a> for both scalar and vector-valued ranges. Each specialization wraps a rank-local H1 space on the mesh shard and maintains local/global degree-of-freedom mappings consistent across ownership and ghost layers for every mesh entity dimension (vertices, edges, faces, cells).</p>
+<p>Provides <code>Rodin::Variational::H1</code> specializations for <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh&lt;Rodin::<wbr />Context::<wbr />MPI&gt;</a> for both scalar and vector-valued ranges. Each specialization wraps a rank-local H1 space on the mesh shard and maintains local/global degree-of-freedom mappings consistent across ownership and ghost layers for every mesh entity dimension (vertices, edges, faces, cells).</p>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">Rodin::MPI</a></dt>
             <dd>Distributed-memory parallel extensions using MPI.</dd>
           </dl>
@@ -105,11 +105,6 @@
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html" class="m-doc">Rodin::Variational::H1&lt;K, Scalar, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
-            </dt>
-            <dd>Distributed H1 finite element space for MPI meshes (scalar range).</dd>
             <dt>
               struct <a href="struct_rodin_1_1_variational_1_1_h1_3_01_k_00_01_scalar_00_01_geometry_1_1_mesh_3_01_context_1_1256acef08d341d30f0c6ea7e6e7d6eeb.html" class="m-doc">Rodin::Variational::H1&lt;K, Scalar, Geometry::Mesh&lt;Context::MPI&gt;&gt;::IndexBimap</a>
             </dt>
@@ -143,6 +138,11 @@
               class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_ge7638f650fa348ea64a34c8ca101e4e3.html" class="m-doc">Rodin::Variational::H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;::Pushforward</a>
             </dt>
             <dd>Pushforward of a function from the reference polytope.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_matrix_3_01_scalar_01_4_00_01_ga9de870463b3443e11254839747e55e4.html" class="m-doc">Rodin::Variational::H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>
+            </dt>
+            <dd>Matrix-range finite element or expression specialization.</dd>
           </dl>
         </section>
       </div>
@@ -189,7 +189,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

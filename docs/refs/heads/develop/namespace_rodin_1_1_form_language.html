@@ -77,13 +77,28 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>FormLanguage <span class="m-thin">namespace</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md551">Key Classes</a></li>
-            <li><a href="#autotoc_md552">Expression Template Pattern</a></li>
-            <li><a href="#autotoc_md553">Object Lifetime</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md551">Key Classes</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md552">Expression Template Pattern</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md553">Object Lifetime</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,10 +109,10 @@
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/FormLanguage</p><p>Module for writing high level abstract expressions.</p><p>The FormLanguage module provides the expression template infrastructure underlying Rodin&#x27;s variational form language. It enables composing mathematical expressions that are lazily evaluated during assembly.</p><section id="autotoc_md551"><h3><a href="#autotoc_md551">Key Classes</a></h3><ul><li><code>FormLanguage::Base</code> — Root base class for all form language objects. Provides unique identification (UUID), object lifetime management via shared ownership, and polymorphic <code>copy()</code>. <strong>Not thread-safe</strong>: use <code>thread_local</code> caching for per-thread output in evaluation methods.</li><li><code>FormLanguage::Traits&lt;T&gt;</code> — Type trait template. Each form language type provides a specialization defining associated types (<code>ScalarType</code>, <code>RangeType</code>, <code>FESType</code>, etc.). Always specialize <code>Traits</code> for new types.</li><li><code>FormLanguage::List</code> — Container for variational form components (integrals, boundary conditions) that makes up the body of a <code>Problem</code>.</li></ul></section><section id="autotoc_md552"><h3><a href="#autotoc_md552">Expression Template Pattern</a></h3><p>Operators like <code>Grad</code>, <code>Div</code>, <code>Dot</code> are CRTP-based expression templates:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span><span class="w"> </span><span class="c1">// expression, not yet evaluated</span>
+<p>Directory src/Rodin/FormLanguage</p><p>Module for writing high level abstract expressions.</p><p>The FormLanguage module provides the expression template infrastructure underlying Rodin&#x27;s variational form language. It enables composing mathematical expressions that are lazily evaluated during assembly.</p><section id="autotoc_md551_1s1"><section id="autotoc_md551"><h3><a href="#autotoc_md551">Key Classes</a></h3><ul><li><code>FormLanguage::Base</code> — Root base class for all form language objects. Provides unique identification (UUID), object lifetime management via shared ownership, and polymorphic <code>copy()</code>. <strong>Not thread-safe</strong>: use <code>thread_local</code> caching for per-thread output in evaluation methods.</li><li><code>FormLanguage::Traits&lt;T&gt;</code> — Type trait template. Each form language type provides a specialization defining associated types (<code>ScalarType</code>, <code>RangeType</code>, <code>FESType</code>, etc.). Always specialize <code>Traits</code> for new types.</li><li><code>FormLanguage::List</code> — Container for variational form components (integrals, boundary conditions) that makes up the body of a <code>Problem</code>.</li></ul></section></section><section id="autotoc_md552_1s1"><section id="autotoc_md552"><h3><a href="#autotoc_md552">Expression Template Pattern</a></h3><p>Operators like <code>Grad</code>, <code>Div</code>, <code>Dot</code> are CRTP-based expression templates:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">));</span><span class="w"> </span><span class="c1">// expression, not yet evaluated</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w">                   </span><span class="c1">// another expression</span>
 <span class="n">Problem</span><span class="w"> </span><span class="nf">p</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span><span class="w"> </span><span class="c1">// combined expression</span></pre><p>Expressions store operands via <code>std::reference_wrapper</code> (non-owning) or <code>std::unique_ptr</code> (owning, for temporaries). No computation occurs until assembly iterates over mesh cells and evaluates the expression at quadrature points.</p></section><section id="autotoc_md553"><h3><a href="#autotoc_md553">Object Lifetime</a></h3><p>The <code>Base::object()</code> helpers manage temporary object lifetimes. When an expression captures a temporary (e.g. a lambda-constructed <code>RealFunction</code>), the temporary is stored in a <code>shared_ptr</code> table within the expression, ensuring it lives as long as the expression does.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational module</a> for the user-facing form language.</p></aside></section>
+<span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stiffness</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span><span class="w"> </span><span class="c1">// combined expression</span></pre><p>Expressions store operands via <code>std::reference_wrapper</code> (non-owning) or <code>std::unique_ptr</code> (owning, for temporaries). No computation occurs until assembly iterates over mesh cells and evaluates the expression at quadrature points.</p></section></section><section id="autotoc_md553_1s1"><section id="autotoc_md553"><h3><a href="#autotoc_md553">Object Lifetime</a></h3><p>The <code>Base::object()</code> helpers manage temporary object lifetimes. When an expression captures a temporary (e.g. a lambda-constructed <code>RealFunction</code>), the temporary is stored in a <code>shared_ptr</code> table within the expression, ensuring it lives as long as the expression does.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational module</a> for the user-facing form language.</p></aside></section></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -342,6 +357,21 @@
             <dd>Type traits for a Math::SparseMatrix: exposes the scalar type.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Number&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_math_1_1_spatial_matrix_3_01_number_01_4_01_4.html" class="m-doc">Traits&lt;Math::SpatialMatrix&lt;Number&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for a Math::SpatialMatrix: exposes the scalar type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, size_t Rank&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_math_1_1_spatial_tensor_3_01_scalar_00_01_rank_01_4_01_4.html" class="m-doc">Traits&lt;Math::SpatialTensor&lt;Scalar, Rank&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_math_1_1_spatial_vector_3_01_number_01_4_01_4.html" class="m-doc">Traits&lt;Math::SpatialVector&lt;Number&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for a Math::SpatialVector: exposes the scalar type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Number&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_math_1_1_vector_3_01_number_01_4_01_4.html" class="m-doc">Traits&lt;Math::Vector&lt;Number&gt;&gt;</a>
             </dt>
             <dd>Type traits for a dynamic Math::Vector: exposes the scalar type.</dd>
@@ -365,6 +395,11 @@
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_real_01_4.html" class="m-doc">Traits&lt;Real&gt;</a>
             </dt>
             <dd>Traits specialization for Real type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_rodin_1_1_geometry_1_1_point_cloud_01_4.html" class="m-doc">Traits&lt;Rodin::Geometry::PointCloud&gt;</a>
+            </dt>
+            <dd>Type traits for a Geometry::PointCloud: exposes the scalar type.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_solver_1_1_bi_c_g_s_t_a_b_3_01_linear_system_01_4_01_4.html" class="m-doc">Traits&lt;Solver::BiCGSTAB&lt;LinearSystem&gt;&gt;</a>
@@ -471,6 +506,11 @@
             </dt>
             <dd>Type traits for <code>Conjugate</code> over a shape function: exposes the finite element space and the shape function space.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_gdcc38f6b9e73f9b3aa6c0f23561e57b0.html" class="m-doc">Traits&lt;Variational::Derivative&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh, class Data&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_gf068d3a561b377ec6d962ad704aa7d81.html" class="m-doc">Traits&lt;Variational::Derivative&lt;Variational::GridFunction&lt;Variational::H1&lt;K, Scalar, Mesh&gt;, Data&gt;&gt;&gt;</a>
             </dt>
@@ -481,6 +521,11 @@
             </dt>
             <dd>Type traits for <code>Derivative</code> over a grid function: exposes the finite element space, the operand type and the range type.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_s028868beffcdaf8bd38e988b633395fb.html" class="m-doc">Traits&lt;Variational::Derivative&lt;Variational::ShapeFunction&lt;Derived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class NestedDerived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_s98f2f1cd18655ae7082fabf76755976b.html" class="m-doc">Traits&lt;Variational::Derivative&lt;Variational::ShapeFunction&lt;NestedDerived, FES, Space&gt;&gt;&gt;</a>
             </dt>
@@ -490,6 +535,11 @@
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_derivative_3_01_variational_1_1_s53db84c5ae17aa797eac64fe386d992e.html" class="m-doc">Traits&lt;Variational::Derivative&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::P1&lt;Range, Mesh&gt;, Space&gt;&gt;&gt;</a>
             </dt>
             <dd>Type traits for <code>Derivative</code> over a shape function: exposes the finite element space, the shape function space, the operand type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_grid_fun78dec6e5a05cedc76d4bc9af84398fd2.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar, class Data, class Mesh&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_grid_fundbf696e04de1b0e503c3df67a51c928b.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::GridFunction&lt;Variational::H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
@@ -505,6 +555,11 @@
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_grid_funbed33fb9b3941f9cf19b1a80b18cee6f.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::GridFunction&lt;Variational::P1&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
             </dt>
             <dd>Type traits for <code>Div</code> over a grid function: exposes the finite element space, the scalar type and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_shape_fu0deb40e2e51d55e1150f07ab8c6e40ab.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::ShapeFunction&lt;Derived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class NestedDerived, class Scalar, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_div_3_01_variational_1_1_shape_fubf96c33b90993c114e74bbf685e48f4a.html" class="m-doc">Traits&lt;Variational::Div&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
@@ -561,10 +616,20 @@
             </dt>
             <dd>Rank-three physical gradient range for the matrix H1 solution.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_grid_fuf33711d02f9d13296f67f64ae20405c7.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::GridFunction&lt;Variational::P0&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Rank-three physical gradient range for the matrix P0 solution.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Range, class Data, class Mesh&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_grid_fu2c7c4f7dc52d3793f7248205e6fb6475.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::GridFunction&lt;Variational::P0&lt;Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
             </dt>
             <dd>Type traits for <code>Grad</code> over a grid function: exposes the finite element space and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_grid_fuc175da488503279d6687ba2bf76d24eb.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::GridFunction&lt;Variational::P0g&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Rank-three physical gradient range for the matrix P0g solution.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Data&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_grid_fu71be67ee3a8ca53e4c620fd328af8f2a.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::GridFunction&lt;Variational::P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Data&gt;&gt;&gt;</a>
@@ -575,6 +640,16 @@
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_shape_f07d8e222ad8c887d8db37c72db6f2065.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::ShapeFunction&lt;Derived, Variational::H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
             </dt>
             <dd>Rank-three physical gradient range for matrix H1 shape functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_shape_f6f634e1359b47c16a37d4e59702ef26c.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::ShapeFunction&lt;Derived, Variational::P0&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Rank-three physical gradient range for matrix P0 shape functions.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_shape_fa7d5a1380f9ece5d71dfbbe7a50995e4.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::ShapeFunction&lt;Derived, Variational::P0g&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Rank-three physical gradient range for matrix P0g shape functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Mesh, class Derived, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grad_3_01_variational_1_1_shape_f678239a6df157d04031c0ce9f83bd467.html" class="m-doc">Traits&lt;Variational::Grad&lt;Variational::ShapeFunction&lt;Derived, Variational::P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;, Space&gt;&gt;&gt;</a>
@@ -602,6 +677,11 @@
             <dd>Traits for GridFunctionBase: exposes the space and data types.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_d6a600fa2ecbc36e8d73b97ec533c88a.html" class="m-doc">Traits&lt;Variational::H1&lt;K, Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;size_t K, class Scalar, class Mesh&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_e1d1edf46f813663f3ef3ecd75d5fa55.html" class="m-doc">Traits&lt;Variational::H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;&gt;</a>
             </dt>
             <dd>Type traits for <code>H1:</code> exposes the mesh type, the scalar type, the range type and the finite element type.</dd>
@@ -615,6 +695,11 @@
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_h1_element_3_01_k_00_01_range_01_4_01_4.html" class="m-doc">Traits&lt;Variational::H1Element&lt;K, Range&gt;&gt;</a>
             </dt>
             <dd>Type traits for <code>H1Element:</code> exposes the scalar type and the range type of the element.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_grie481f511ab53392c93ffa18469da602f.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class Range, class Data, class Mesh&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_grid4f6dd6a5d90dfda496719f8f1fe4440.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::GridFunction&lt;Variational::H1&lt;K, Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
@@ -630,6 +715,11 @@
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_gri7fec67193840093d825c29ff94f719f5.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::GridFunction&lt;Variational::P1&lt;Range, Mesh&gt;, Data&gt;&gt;&gt;</a>
             </dt>
             <dd>Type traits for <code>Jacobian</code> over a grid function: exposes the finite element space and the operand type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_shaa0d9f432d71da8e779738fc543060ea9.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::ShapeFunction&lt;Derived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;size_t K, class NestedDerived, class Range, class Mesh, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_sha4de08458a9c46b92610911f68efa8525.html" class="m-doc">Traits&lt;Variational::Jacobian&lt;Variational::ShapeFunction&lt;NestedDerived, Variational::H1&lt;K, Range, Mesh&gt;, Space&gt;&gt;&gt;</a>
@@ -671,6 +761,11 @@
             </dt>
             <dd>Type traits for <code>Mult</code> over a shape function: exposes the finite element space and the shape function space.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0_3_01_math_1_1_spatial_matrix_3cc8141eacca93269e09bd0e0f7a328dc.html" class="m-doc">Traits&lt;Variational::P0&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0_3_01_math_1_1_spatial_vector_307be38e2a0bcdf2f3c3e0f36d859da14.html" class="m-doc">Traits&lt;Variational::P0&lt;Math::SpatialVector&lt;Number&gt;, Mesh&gt;&gt;</a>
             </dt>
@@ -686,6 +781,11 @@
             </dt>
             <dd>Type traits for <code>P0Element:</code> exposes the scalar type and the range type of the element.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0g_3_01_math_1_1_spatial_matrix_02299f8c303e29e7a5ab89ab09e2543a.html" class="m-doc">Traits&lt;Variational::P0g&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Number, class Mesh&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0g_3_01_math_1_1_spatial_vector_c85613108c90bf910c52e266f28161e3.html" class="m-doc">Traits&lt;Variational::P0g&lt;Math::SpatialVector&lt;Number&gt;, Mesh&gt;&gt;</a>
             </dt>
@@ -700,6 +800,11 @@
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p0g_element_3_01_range_01_4_01_4.html" class="m-doc">Traits&lt;Variational::P0gElement&lt;Range&gt;&gt;</a>
             </dt>
             <dd>Type traits for <code>P0gElement:</code> exposes the scalar type and the range type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Mesh&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p1_3_01_math_1_1_spatial_matrix_382fe01f35db112f14f8da01aa7cee00a.html" class="m-doc">Traits&lt;Variational::P1&lt;Math::SpatialMatrix&lt;Scalar&gt;, Mesh&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Mesh&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_p1_3_01_math_1_1_spatial_vector_3f9933c0ffde86d71ce67f842cfbb9e76.html" class="m-doc">Traits&lt;Variational::P1&lt;Math::SpatialVector&lt;Scalar&gt;, Mesh&gt;&gt;</a>
@@ -926,7 +1031,7 @@ $ \text{LHS} + \text{RHS} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

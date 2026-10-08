@@ -108,16 +108,16 @@
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a2a2657480d729405f0f89363dc949f66">
-              using <a href="#a2a2657480d729405f0f89363dc949f66" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::invoke_result_t&lt;F, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;&gt;&gt;::ScalarType
+            <dt id="a33e9c12f93d7c734b1be6af7d70fac5b">
+              using <a href="#a33e9c12f93d7c734b1be6af7d70fac5b" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::invoke_result_t&lt;F, const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;&gt;&gt;::ScalarType
             </dt>
             <dd>Scalar type of matrix or tensor entries.</dd>
             <dt id="a9e6ed8cbf80765f7c226d640bf45c15c">
-              using <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#a2a2657480d729405f0f89363dc949f66" class="m-doc">ScalarType</a>&gt;
+              using <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="#a33e9c12f93d7c734b1be6af7d70fac5b" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Evaluated matrix, tensor, or scalar range type.</dd>
             <dt id="af4ed3bc2c99d0d54d4fc54d4494551ab">
-              using <a href="#af4ed3bc2c99d0d54d4fc54d4494551ab" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>&lt;<a href="#a2a2657480d729405f0f89363dc949f66" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&gt;
+              using <a href="#af4ed3bc2c99d0d54d4fc54d4494551ab" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>&lt;<a href="#a33e9c12f93d7c734b1be6af7d70fac5b" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&gt;
             </dt>
             <dd>CRTP or finite element base class.</dd>
           </dl>
@@ -125,18 +125,18 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a3a6e29f6aaebf89e2a7cc450b5358cd4">
-              <span class="m-doc-wrap-bumper"><a href="#a3a6e29f6aaebf89e2a7cc450b5358cd4" class="m-doc-self">MatrixFunction</a>(</span><span class="m-doc-wrap">size_t rows,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3a6e29f6aaebf89e2a7cc450b5358cd4" class="m-doc">MatrixFunction</a>(</span><span class="m-doc-wrap">size_t rows,
               size_t columns,
               F function)</span>
             </dt>
             <dd>Constructs a constant or callable matrix coefficient, or copies its value.</dd>
-            <dt id="a646e7c6f2b2ba84ea156810981f505a0">
-              <span class="m-doc-wrap-bumper"><a href="#a646e7c6f2b2ba84ea156810981f505a0" class="m-doc-self">MatrixFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a646e7c6f2b2ba84ea156810981f505a0" class="m-doc">MatrixFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp; other)</span>
             </dt>
             <dd>Constructs a constant or callable matrix coefficient, or copies its value.</dd>
-            <dt id="a534148e77bdf7e3dbf5c199369a31f91">
-              <span class="m-doc-wrap-bumper"><a href="#a534148e77bdf7e3dbf5c199369a31f91" class="m-doc-self">MatrixFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a534148e77bdf7e3dbf5c199369a31f91" class="m-doc">MatrixFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp;&amp; other)</span>
             </dt>
             <dd>Constructs a constant or callable matrix coefficient, or copies its value.</dd>
           </dl>
@@ -144,28 +144,28 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="afba2c6fb1fbc0ff189962dbe92bdf6ef">
-              <span class="m-doc-wrap-bumper">auto <a href="#afba2c6fb1fbc0ff189962dbe92bdf6ef" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; point) const -&gt; <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afba2c6fb1fbc0ff189962dbe92bdf6ef" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; point) const -&gt; <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a></span>
             </dt>
             <dd>Evaluates the expression at the supplied physical or integration point.</dd>
-            <dt id="a39ccf182b0ac2cfd4ec380a576423244">
-              <span class="m-doc-wrap-bumper">auto <a href="#a39ccf182b0ac2cfd4ec380a576423244" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; point) const -&gt; <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a39ccf182b0ac2cfd4ec380a576423244" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; point) const -&gt; <a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a></span>
             </dt>
             <dd>Evaluates the expression at the supplied physical or integration point.</dd>
-            <dt id="a0af0bdf821ec4bd24b0e14e7722f5f37">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0af0bdf821ec4bd24b0e14e7722f5f37" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0af0bdf821ec4bd24b0e14e7722f5f37" class="m-doc">getRows</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Returns the number of matrix rows.</dd>
-            <dt id="af31837cc835e05a7dce74d5dbdfecac1">
-              <span class="m-doc-wrap-bumper">auto <a href="#af31837cc835e05a7dce74d5dbdfecac1" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af31837cc835e05a7dce74d5dbdfecac1" class="m-doc">getColumns</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
             </dt>
             <dd>Returns the number of matrix columns.</dd>
-            <dt id="a00fd1c1ae2f833b52937d82074273c5f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a00fd1c1ae2f833b52937d82074273c5f" class="m-doc-self">setOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a00fd1c1ae2f833b52937d82074273c5f" class="m-doc">setOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp;</span>
             </dt>
             <dd>Declares polynomial order for coefficient quadrature selection.</dd>
-            <dt id="a80851815acd28e8401863a16cd094118">
-              <span class="m-doc-wrap-bumper">auto <a href="#a80851815acd28e8401863a16cd094118" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the polynomial order when it is known.</dd>
             <dt>
@@ -176,6 +176,214 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a3a6e29f6aaebf89e2a7cc450b5358cd4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />MatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a6e29f6aaebf89e2a7cc450b5358cd4" class="m-doc-self">MatrixFunction</a>(</span><span class="m-doc-wrap">size_t rows,
+              size_t columns,
+              F function)</span></span>
+            </h3>
+            <p>Constructs a constant or callable matrix coefficient, or copies its value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rows</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>columns</td>
+                  <td>Number of matrix columns.</td>
+                </tr>
+                <tr>
+                  <td>function</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a646e7c6f2b2ba84ea156810981f505a0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />MatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a646e7c6f2b2ba84ea156810981f505a0" class="m-doc-self">MatrixFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp; other)</span></span>
+            </h3>
+            <p>Constructs a constant or callable matrix coefficient, or copies its value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a534148e77bdf7e3dbf5c199369a31f91"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />MatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a534148e77bdf7e3dbf5c199369a31f91" class="m-doc-self">MatrixFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Constructs a constant or callable matrix coefficient, or copies its value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afba2c6fb1fbc0ff189962dbe92bdf6ef"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />MatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afba2c6fb1fbc0ff189962dbe92bdf6ef" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; point) const</span></span>
+            </h3>
+            <p>Evaluates the expression at the supplied physical or integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">point</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a39ccf182b0ac2cfd4ec380a576423244"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a9e6ed8cbf80765f7c226d640bf45c15c" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />MatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39ccf182b0ac2cfd4ec380a576423244" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; point) const</span></span>
+            </h3>
+            <p>Evaluates the expression at the supplied physical or integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">point</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0af0bdf821ec4bd24b0e14e7722f5f37"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />MatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0af0bdf821ec4bd24b0e14e7722f5f37" class="m-doc-self">getRows</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the number of matrix rows.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of matrix rows.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af31837cc835e05a7dce74d5dbdfecac1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />MatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af31837cc835e05a7dce74d5dbdfecac1" class="m-doc-self">getColumns</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the number of matrix columns.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The number of matrix columns.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a00fd1c1ae2f833b52937d82074273c5f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_matrix_function.html" class="m-doc">MatrixFunction</a>&amp; Rodin::<wbr />Variational::<wbr />MatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a00fd1c1ae2f833b52937d82074273c5f" class="m-doc-self">setOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
+            </h3>
+            <p>Declares polynomial order for coefficient quadrature selection.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">order</td>
+                  <td>Polynomial order.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac169e137dace382ec4a56a68c4b1177c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />MatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac169e137dace382ec4a56a68c4b1177c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order when it is known.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity; the reported order is independent of this argument.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a0996b2c9704d23cabe7292e7969c6a0e"><div>
             <h3>
               <div class="m-doc-template">
@@ -238,7 +446,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

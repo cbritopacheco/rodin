@@ -205,8 +205,8 @@ $ \mathbf{v} $
               using <a href="#aa88ade43a69ae7643eb80a965cf0b50f" class="m-doc-self">BoundaryPolicyType</a> = BoundaryPolicy
             </dt>
             <dd>Boundary policy type.</dd>
-            <dt id="a2110b220b542a416a742d26ebcd4bb5a">
-              using <a href="#a2110b220b542a416a742d26ebcd4bb5a" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&gt;
+            <dt id="a23c93d14b21ea23b7832b6d4b1707a97">
+              using <a href="#a23c93d14b21ea23b7832b6d4b1707a97" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&lt;<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -223,12 +223,12 @@ $ \mathbf{v} $
               B&amp;&amp; bp = B{})</span>
             </dt>
             <dd>Constructs a flow operator.</dd>
-            <dt id="a1663c992df7cacd8ed05da3db321a678">
-              <span class="m-doc-wrap-bumper"><a href="#a1663c992df7cacd8ed05da3db321a678" class="m-doc-self">Flow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1663c992df7cacd8ed05da3db321a678" class="m-doc">Flow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a9996e84ce9b614a3b9acbf661c256df3">
-              <span class="m-doc-wrap-bumper"><a href="#a9996e84ce9b614a3b9acbf661c256df3" class="m-doc-self">Flow</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a9996e84ce9b614a3b9acbf661c256df3" class="m-doc">Flow</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -237,31 +237,31 @@ $ \mathbf{v} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a68881cd41fa694ef3eb98dca7ad90958" class="m-doc">trace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a68881cd41fa694ef3eb98dca7ad90958" class="m-doc">trace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="class_rodin_1_1_variational_1_1_flow_3_01_function_base_3_01_derived_01_4_00_01_vector_field_00_783a973c979ff18bfae34562f8910583.html" class="m-doc">Trace</a></span>
             </dt>
             <dd>Traces the characteristic starting at <code>p</code>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the flowed function at a point.</dd>
-            <dt id="ac5287464c39ed377af81f8543e4ff376">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc">getLeaf</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Gets the operand in the shape function expression.</dd>
-            <dt id="a37f33013a5aa5afec8659481f014d52f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a37f33013a5aa5afec8659481f014d52f" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a37f33013a5aa5afec8659481f014d52f" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Returns the operand function.</dd>
-            <dt id="aea556e87bdc544abd509156483a63dbd">
-              <span class="m-doc-wrap-bumper">auto <a href="#aea556e87bdc544abd509156483a63dbd" class="m-doc-self">getVelocity</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aea556e87bdc544abd509156483a63dbd" class="m-doc">getVelocity</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Returns the velocity field.</dd>
-            <dt id="ae4b73381b6809da140a9b3a2f6ac7b4e">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae4b73381b6809da140a9b3a2f6ac7b4e" class="m-doc-self">getStep</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae4b73381b6809da140a9b3a2f6ac7b4e" class="m-doc">getStep</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Returns the time integrator.</dd>
-            <dt id="a4fa0d4a28df8f83681df0ee341596c9d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4fa0d4a28df8f83681df0ee341596c9d" class="m-doc-self">getBoundaryPolicy</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4fa0d4a28df8f83681df0ee341596c9d" class="m-doc">getBoundaryPolicy</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp;</span>
             </dt>
             <dd>Returns the boundary policy.</dd>
             <dt>
@@ -325,12 +325,12 @@ $ \sqrt{\varepsilon} $
               <span class="m-doc-wrap-bumper">auto <a href="#a24fc2532b36945ecba08716527db22ae" class="m-doc">setClampFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value) -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;</span>
             </dt>
             <dd>Sets the factor controlling when a point is considered far enough outside a cell to be clamped back inside.</dd>
-            <dt id="ad816b9060d50f486e5e88cb8f8238bea">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad816b9060d50f486e5e88cb8f8238bea" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
-            <dt id="a9cbedfa50f978f7c4362783ce540f542">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9cbedfa50f978f7c4362783ce540f542" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9cbedfa50f978f7c4362783ce540f542" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies the derived function.</dd>
           </dl>
@@ -379,12 +379,52 @@ $ \sqrt{\varepsilon} $
             </table>
 <p>Default tracing parameters:</p><ul><li>max zero hops: 128</li><li>max bisections: 16</li><li>max subdivisions: 8</li><li>max outer iterations: 100000</li><li>max stagnations: 512</li><li>face trials: 6</li><li>bracket growth: 2.0</li><li>max bracket expansions: 3</li><li>step safety: 0.5</li><li>min step factor: 10</li><li>tolerance factor: 50</li><li>clamp factor: 10</li></ul>
           </div></section>
+          <section class="m-doc-details" id="a1663c992df7cacd8ed05da3db321a678"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1663c992df7cacd8ed05da3db321a678" class="m-doc-self">Flow</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9996e84ce9b614a3b9acbf661c256df3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9996e84ce9b614a3b9acbf661c256df3" class="m-doc-self">Flow</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a68881cd41fa694ef3eb98dca7ad90958"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a> Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68881cd41fa694ef3eb98dca7ad90958" class="m-doc-self">trace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow_3_01_function_base_3_01_derived_01_4_00_01_vector_field_00_783a973c979ff18bfae34562f8910583.html" class="m-doc">Trace</a> Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68881cd41fa694ef3eb98dca7ad90958" class="m-doc-self">trace</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Traces the characteristic starting at <code>p</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -437,7 +477,109 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Evaluates the flowed function at a point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the expression at the supplied evaluation point.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>If tracing exits or aborts before completion, this default implementation returns zero.</p>
+          </div></section>
+          <section class="m-doc-details" id="ac5287464c39ed377af81f8543e4ff376"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac5287464c39ed377af81f8543e4ff376" class="m-doc-self">getLeaf</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the operand in the shape function expression.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The operand in the shape function expression.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a37f33013a5aa5afec8659481f014d52f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37f33013a5aa5afec8659481f014d52f" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the operand function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The operand function.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aea556e87bdc544abd509156483a63dbd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea556e87bdc544abd509156483a63dbd" class="m-doc-self">getVelocity</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the velocity field.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The velocity field.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae4b73381b6809da140a9b3a2f6ac7b4e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4b73381b6809da140a9b3a2f6ac7b4e" class="m-doc-self">getStep</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the time integrator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The time integrator.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4fa0d4a28df8f83681df0ee341596c9d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const auto&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fa0d4a28df8f83681df0ee341596c9d" class="m-doc-self">getBoundaryPolicy</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Returns the boundary policy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The boundary policy.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="abc8a9c6e29b90341b2c9a49f3dd74369"><div>
             <h3>
@@ -447,6 +589,23 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc8a9c6e29b90341b2c9a49f3dd74369" class="m-doc-self">setMaxZeroHops</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
             </h3>
             <p>Sets the maximum number of zero-time face hops.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 128.</p>
           </div></section>
           <section class="m-doc-details" id="a23e8c2aca0c26a6107731b5558687ebd"><div>
@@ -457,6 +616,23 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e8c2aca0c26a6107731b5558687ebd" class="m-doc-self">setMaxBisections</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
             </h3>
             <p>Sets the maximum number of bisection iterations used to refine a face hit time.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 16.</p>
           </div></section>
           <section class="m-doc-details" id="a319cfbccaf994415468eaa66441d24fa"><div>
@@ -467,6 +643,23 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a319cfbccaf994415468eaa66441d24fa" class="m-doc-self">setMaxSubdivisions</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
             </h3>
             <p>Sets the maximum number of adaptive subdivisions used when bracketing fails.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 8.</p>
           </div></section>
           <section class="m-doc-details" id="a5b3e628efb6191b784336befd260f46a"><div>
@@ -477,6 +670,23 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5b3e628efb6191b784336befd260f46a" class="m-doc-self">setMaxOuterIterations</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
             </h3>
             <p>Sets the maximum number of outer trace loop iterations.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 100000.</p>
           </div></section>
           <section class="m-doc-details" id="a6b4b65f61aba7564a964617d46e27d21"><div>
@@ -487,6 +697,23 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b4b65f61aba7564a964617d46e27d21" class="m-doc-self">setMaxStagnations</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
             </h3>
             <p>Sets the maximum number of consecutive stagnating iterations tolerated before aborting.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 512.</p>
           </div></section>
           <section class="m-doc-details" id="a8d2c5bf8ce426ca027e2a94055dd5b51"><div>
@@ -497,6 +724,23 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8d2c5bf8ce426ca027e2a94055dd5b51" class="m-doc-self">setFaceTrials</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
             </h3>
             <p>Sets how many candidate faces are tried first after sorting by predicted hit time.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 6.</p>
           </div></section>
           <section class="m-doc-details" id="acf7967b94a896efec9f7076811f57d50"><div>
@@ -507,6 +751,23 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acf7967b94a896efec9f7076811f57d50" class="m-doc-self">setBracketGrowth</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value)</span></span>
             </h3>
             <p>Sets the multiplicative growth factor used when expanding a face hit bracket.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 2.0.</p>
           </div></section>
           <section class="m-doc-details" id="a878f391f049fb1b3d12aa0caba8bb672"><div>
@@ -517,6 +778,23 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a878f391f049fb1b3d12aa0caba8bb672" class="m-doc-self">setMaxBracketExpansions</a>(</span><span class="m-doc-wrap">size_t value)</span></span>
             </h3>
             <p>Sets the maximum number of bracket expansion attempts per face.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 3.</p>
           </div></section>
           <section class="m-doc-details" id="a61da3ac9801270f1edb8bb523ae4ce86"><div>
@@ -527,6 +805,23 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a61da3ac9801270f1edb8bb523ae4ce86" class="m-doc-self">setStepSafety</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value)</span></span>
             </h3>
             <p>Sets the safety factor used in the local per-cell time-step cap.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Smaller values are more conservative.</p><p>Default value: 0.5.</p>
           </div></section>
           <section class="m-doc-details" id="a1c15dd95b88283f692a56b041aa749c4"><div>
@@ -537,6 +832,23 @@ $ n_{\text{ref}}\cdot v_{\text{ref}} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c15dd95b88283f692a56b041aa749c4" class="m-doc-self">setMinStepFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value)</span></span>
             </h3>
             <p>Sets the factor used to define the minimum admissible substep.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 10.</p>
           </div></section>
           <section class="m-doc-details" id="a2d94906f1996d3cae00f297b0d2ca088"><div>
@@ -560,6 +872,23 @@ $ \sqrt{\varepsilon} $
 <use x='9.962671' y='0' xlink:href='#eq7-g1-34'/>
 </g>
 </svg> in the geometric and directional tolerances.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 50.</p>
           </div></section>
           <section class="m-doc-details" id="a24fc2532b36945ecba08716527db22ae"><div>
@@ -570,7 +899,67 @@ $ \sqrt{\varepsilon} $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>&amp; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24fc2532b36945ecba08716527db22ae" class="m-doc-self">setClampFactor</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> value)</span></span>
             </h3>
             <p>Sets the factor controlling when a point is considered far enough outside a cell to be clamped back inside.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">value</td>
+                  <td>Value to store or assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
 <p>Default value: 10.</p>
+          </div></section>
+          <section class="m-doc-details" id="a350edea67dfa070881b66ed34db4c27c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const</span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity; the reported order is independent of this argument.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9cbedfa50f978f7c4362783ce540f542"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a>* Rodin::<wbr />Variational::<wbr />Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;&lt;Derived, VectorField, Step, BoundaryPolicy&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9cbedfa50f978f7c4362783ce540f542" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polymorphically copies the derived function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
@@ -617,7 +1006,7 @@ $ \sqrt{\varepsilon} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

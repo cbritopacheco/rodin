@@ -81,10 +81,30 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md416">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md417">Special Cases</a></li>
-            <li><a href="#autotoc_md418">Applications</a></li>
-            <li><a href="#autotoc_md419">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md416">Mathematical Foundation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md417">Special Cases</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md418">Applications</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md419">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -94,7 +114,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Jacobian class, which computes the Jacobian matrix (matrix of all first-order partial derivatives) of vector-valued functions in variational formulations.</p><section id="autotoc_md416"><h3><a href="#autotoc_md416">Mathematical Foundation</a></h3><p>For a vector-valued function <svg class="m-math" style="width: 9.127em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 87.618912 10.340659">
+<p>This file defines the Jacobian class, which computes the Jacobian matrix (matrix of all first-order partial derivatives) of vector-valued functions in variational formulations.</p><section id="autotoc_md416_1s1"><section id="autotoc_md416"><h3><a href="#autotoc_md416">Mathematical Foundation</a></h3><p>For a vector-valued function <svg class="m-math" style="width: 9.127em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 87.618912 10.340659">
 <title>
 $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^n $
 </title>
@@ -121,8 +141,7 @@ $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^n $
 </g>
 </svg>, the Jacobian matrix is defined as:</p><div class="m-math"><svg style="width: 5.056em; height: 2.910em;" viewBox="169.403038 -27.933621 48.541378 27.933621">
 <title>
-\[
-  J_{ij} = \frac{\partial u_i}{\partial x_j}
+\[     J_{ij} = \frac{\partial u_i}{\partial x_j}
 \]
 </title>
 <defs>
@@ -161,7 +180,7 @@ $ n \times d $
 <use x='9.644269' y='0' xlink:href='#eq3-g0-2'/>
 <use x='21.59943' y='0' xlink:href='#eq3-g1-100'/>
 </g>
-</svg> matrix.</p></section><section id="autotoc_md417"><h3><a href="#autotoc_md417">Special Cases</a></h3><ul><li>When <svg class="m-math" style="width: 3.002em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 28.816609 8.302191">
+</svg> matrix.</p></section></section><section id="autotoc_md417_1s1"><section id="autotoc_md417"><h3><a href="#autotoc_md417">Special Cases</a></h3><ul><li>When <svg class="m-math" style="width: 3.002em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 28.816609 8.302191">
 <title>
 $ n = d $
 </title>
@@ -228,19 +247,19 @@ $ J^T $
 <use x='0' y='0' xlink:href='#eq7-g1-74'/>
 <use x='7.577119' y='-4.338437' xlink:href='#eq7-g0-84'/>
 </g>
-</svg> gives the gradient of components</li></ul></section><section id="autotoc_md418"><h3><a href="#autotoc_md418">Applications</a></h3><ul><li>Nonlinear elasticity: deformation gradient tensor</li><li>Fluid dynamics: velocity gradient tensor</li><li>Differential geometry: metric tensor computations</li><li>Coordinate transformations</li></ul></section><section id="autotoc_md419"><h3><a href="#autotoc_md419">Usage Example</a></h3><pre class="m-code"><span class="c1">// Displacement gradient for elasticity</span>
+</svg> gives the gradient of components</li></ul></section></section><section id="autotoc_md418_1s1"><section id="autotoc_md418"><h3><a href="#autotoc_md418">Applications</a></h3><ul><li>Nonlinear elasticity: deformation gradient tensor</li><li>Fluid dynamics: velocity gradient tensor</li><li>Differential geometry: metric tensor computations</li><li>Coordinate transformations</li></ul></section></section><section id="autotoc_md419_1s1"><section id="autotoc_md419"><h3><a href="#autotoc_md419">Usage Example</a></h3><pre class="m-code"><span class="c1">// Displacement gradient for elasticity</span>
 <span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">());</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// Deformation gradient F = \nabla u</span></pre></section>
+<span class="k">auto</span><span class="w"> </span><span class="n">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// Deformation gradient F = \nabla u</span></pre></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
             <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -251,6 +270,16 @@ $ J^T $
               class <a href="class_rodin_1_1_variational_1_1_jacobian_base_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_00_01_derived_01_4.html" class="m-doc">Rodin::Variational::JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a>
             </dt>
             <dd>Jacobian of a P1 GridFunction.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_grie481f511ab53392c93ffa18469da602f.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::Jacobian&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Space&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_jacobian_3_01_variational_1_1_shaa0d9f432d71da8e779738fc543060ea9.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::Jacobian&lt;Variational::ShapeFunction&lt;Derived, FES, Space&gt;&gt;&gt;</a>
+            </dt>
+            <dd>Type traits for the matrix or tensor expression specialization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_jacobian_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_01_4.html" class="m-doc">Rodin::Variational::Jacobian&lt;GridFunction&lt;FES, Data&gt;&gt;</a>
@@ -357,7 +386,7 @@ $ J_{ijk}=\partial_k A_{ij} $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

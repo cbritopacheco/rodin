@@ -131,8 +131,7 @@ $ A: \Omega \to \mathbb{R}^{m \times n} $
 </g>
 </svg>, computes its transpose:</p><div class="m-math"><svg style="width: 13.498em; height: 1.393em;" viewBox="129.229714 -13.371214 129.585458 13.371214">
 <title>
-\[
-   A^T(x) = (A(x))^T \in \mathbb{R}^{n \times m}
+\[   A^T(x) = (A(x))^T \in \mathbb{R}^{n \times m}
 \]
 </title>
 <defs>
@@ -186,8 +185,8 @@ $ A: \Omega \to \mathbb{R}^{m \times n} $
               using <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;NestedDerived&gt;
             </dt>
             <dd>Operand type.</dd>
-            <dt id="a88b6822796a570a3ace4586ff336edc1">
-              using <a href="#a88b6822796a570a3ace4586ff336edc1" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&lt;<a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&gt;&gt;
+            <dt id="aa3c7d9d2d912d588ad185605e18d302d">
+              using <a href="#aa3c7d9d2d912d588ad185605e18d302d" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&lt;<a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a8bad4b2131344f91a9d97c61c25dbac4">
@@ -203,12 +202,12 @@ $ A: \Omega \to \mathbb{R}^{m \times n} $
               <span class="m-doc-wrap-bumper"><a href="#ac67f27852a6a55c64a06a7769d6eb365" class="m-doc">Transpose</a>(</span><span class="m-doc-wrap">const <a href="#a16dc6738796f53f21660115e0d857df0" class="m-doc">OperandType</a>&amp; m) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs the transpose of a matrix function.</dd>
-            <dt id="ac95a67f4dee00dd4f8df9cb2c0bfdccf">
-              <span class="m-doc-wrap-bumper"><a href="#ac95a67f4dee00dd4f8df9cb2c0bfdccf" class="m-doc-self">Transpose</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ac95a67f4dee00dd4f8df9cb2c0bfdccf" class="m-doc">Transpose</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a1ea678b3456b95e119cfce47fee79b9c">
-              <span class="m-doc-wrap-bumper"><a href="#a1ea678b3456b95e119cfce47fee79b9c" class="m-doc-self">Transpose</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1ea678b3456b95e119cfce47fee79b9c" class="m-doc">Transpose</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -225,12 +224,12 @@ $ A: \Omega \to \mathbb{R}^{m \times n} $
               <span class="m-doc-wrap-bumper">auto <a href="#a3ea66bc47d99e4bdba4fbfde47a7ad0f" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const Point&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the transpose at a point.</dd>
-            <dt id="a350edea67dfa070881b66ed34db4c27c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
             </dt>
             <dd>Returns the polynomial order used on a mesh entity.</dd>
-            <dt id="a32c6d438af1e29cc498402016293aa4b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a32c6d438af1e29cc498402016293aa4b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a32c6d438af1e29cc498402016293aa4b" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies the derived function.</dd>
           </dl>
@@ -253,6 +252,46 @@ $ A: \Omega \to \mathbb{R}^{m \times n} $
                 <tr>
                   <td style="width: 1%">m</td>
                   <td>Matrix function to transpose</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac95a67f4dee00dd4f8df9cb2c0bfdccf"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Transpose&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac95a67f4dee00dd4f8df9cb2c0bfdccf" class="m-doc-self">Transpose</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1ea678b3456b95e119cfce47fee79b9c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Transpose&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ea678b3456b95e119cfce47fee79b9c" class="m-doc-self">Transpose</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>&amp;&amp; other) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
                 </tr>
               </tbody>
             </table>
@@ -319,6 +358,49 @@ $ A^T(p) $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a350edea67dfa070881b66ed34db4c27c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Transpose&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const</span></span>
+            </h3>
+            <p>Returns the polynomial order used on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order on the entity, or an empty optional when no order is available.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a32c6d438af1e29cc498402016293aa4b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class NestedDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a>* Rodin::<wbr />Variational::<wbr />Transpose&lt;FunctionBase&lt;NestedDerived&gt;&gt;&lt;NestedDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a32c6d438af1e29cc498402016293aa4b" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polymorphically copies the derived function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -364,7 +446,7 @@ $ A^T(p) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

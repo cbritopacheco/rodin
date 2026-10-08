@@ -111,7 +111,12 @@ $\int (\mathbf{J}\,u \cdot f) \cdot v \ dx$
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md405">Judgement</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md405">Judgement</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -126,8 +131,7 @@ $\int (\mathbf{J}\,u \cdot f) \cdot v \ dx$
         </nav>
 <p>This class represents the CTAD for the expression:</p><div class="m-math"><svg style="width: 9.308em; height: 2.767em;" viewBox="149.591437 -26.567319 89.360124 26.567327">
 <title>
-\[
-\int (\mathbf{J} \: u \cdot f) \cdot v \ dx \: ,
+\[\int (\mathbf{J} \: u \cdot f) \cdot v \ dx \: ,
 \]
 </title>
 <defs>
@@ -187,10 +191,9 @@ $f$
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-102'/>
 </g>
-</svg> is a coefficient function (typically a vector-valued GridFunction).</p><section id="autotoc_md405"><h3><a href="#autotoc_md405">Judgement</a></h3><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 20.168em; height: 2.966em;" viewBox="97.466258 -28.471357 193.610474 28.471369">
+</svg> is a coefficient function (typically a vector-valued GridFunction).</p><section id="autotoc_md405_1s1"><section id="autotoc_md405"><h3><a href="#autotoc_md405">Judgement</a></h3><p>The following judgement specifies that the expression is a well formed type of QuadratureRule.</p><div class="m-math"><svg style="width: 20.168em; height: 2.966em;" viewBox="97.466258 -28.471357 193.610474 28.471369">
 <title>
-\[
-\dfrac
+\[\dfrac
 {\vdash \int (\mathbf{J} \: u \cdot f) \cdot v \ dx :
 \texttt{QuadratureRule}}
 {\vdash u : \texttt{H1}&lt;K_{\mathrm{trial}}&gt;, \ \vdash v : \texttt{H1}&lt;K_{\mathrm{test}}&gt;}
@@ -288,7 +291,7 @@ $f$
 <use x='274.859866' y='-.531333' xlink:href='#eq6-g5-116'/>
 <use x='281.972081' y='-2.324596' xlink:href='#eq6-g4-62'/>
 </g>
-</svg></div><p>Implements the linearized convection term for Navier-Stokes using multi-point quadrature appropriate for the polynomial degree.</p></section>
+</svg></div><p>Implements the linearized convection term for Navier-Stokes using multi-point quadrature appropriate for the polynomial degree.</p></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -310,24 +313,24 @@ $f$
               using <a href="#a194667bff687d8093e9a0384f9edad79" class="m-doc-self">TestFESType</a> = <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a>&lt;KTest, Scalar, Mesh&gt;
             </dt>
             <dd>Test finite element space type.</dd>
-            <dt id="ad4f013589855de1339ed32cfdeba17af">
-              using <a href="#ad4f013589855de1339ed32cfdeba17af" class="m-doc-self">TrialSFType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="#a780691a720aef854553cb4e29788454e" class="m-doc">TrialFESType</a>, TrialSpace&gt;&gt;, <a href="#a780691a720aef854553cb4e29788454e" class="m-doc">TrialFESType</a>, TrialSpace&gt;
+            <dt id="ab9c6df82c9dc627aec9861989e67f0b0">
+              using <a href="#ab9c6df82c9dc627aec9861989e67f0b0" class="m-doc-self">TrialSFType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;LHSDerived, <a href="#a780691a720aef854553cb4e29788454e" class="m-doc">TrialFESType</a>, TrialSpace&gt;&gt;, <a href="#a780691a720aef854553cb4e29788454e" class="m-doc">TrialFESType</a>, TrialSpace&gt;
             </dt>
             <dd>Trial shape function type.</dd>
             <dt id="a8ac3d345bbc754d44339deb8af73d4af">
               using <a href="#a8ac3d345bbc754d44339deb8af73d4af" class="m-doc-self">CoefficientType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;CoefficientDerived&gt;
             </dt>
             <dd>Coefficient type appearing in the integrand.</dd>
-            <dt id="a570305967d31711001770baffdbfeb58">
-              using <a href="#a570305967d31711001770baffdbfeb58" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>&lt;<a href="#ad4f013589855de1339ed32cfdeba17af" class="m-doc">TrialSFType</a>, <a href="#a8ac3d345bbc754d44339deb8af73d4af" class="m-doc">CoefficientType</a>&gt;, <a href="#a780691a720aef854553cb4e29788454e" class="m-doc">TrialFESType</a>, TrialSpace&gt;
+            <dt id="a67495d48a2b9146987e861c1b10b9493">
+              using <a href="#a67495d48a2b9146987e861c1b10b9493" class="m-doc-self">LHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_mult.html" class="m-doc">Mult</a>&lt;<a href="#ab9c6df82c9dc627aec9861989e67f0b0" class="m-doc">TrialSFType</a>, <a href="#a8ac3d345bbc754d44339deb8af73d4af" class="m-doc">CoefficientType</a>&gt;, <a href="#a780691a720aef854553cb4e29788454e" class="m-doc">TrialFESType</a>, TrialSpace&gt;
             </dt>
             <dd>Left-hand side operand type.</dd>
-            <dt id="ac66fe4a3e46eca9dd6e5cd79b18784e3">
-              using <a href="#ac66fe4a3e46eca9dd6e5cd79b18784e3" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="#a194667bff687d8093e9a0384f9edad79" class="m-doc">TestFESType</a>, TestSpace&gt;, <a href="#a194667bff687d8093e9a0384f9edad79" class="m-doc">TestFESType</a>, TestSpace&gt;
+            <dt id="af79ee4d37f0fcb57cd047c3b4af4bc20">
+              using <a href="#af79ee4d37f0fcb57cd047c3b4af4bc20" class="m-doc-self">RHSType</a> = <a href="class_rodin_1_1_variational_1_1_shape_function_base.html" class="m-doc">ShapeFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a>&lt;RHSDerived, <a href="#a194667bff687d8093e9a0384f9edad79" class="m-doc">TestFESType</a>, TestSpace&gt;, <a href="#a194667bff687d8093e9a0384f9edad79" class="m-doc">TestFESType</a>, TestSpace&gt;
             </dt>
             <dd>Right-hand side operand type.</dd>
             <dt id="a17f4c13495b1edea562f9b757bc3ff76">
-              using <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="#a570305967d31711001770baffdbfeb58" class="m-doc">LHSType</a>, <a href="#ac66fe4a3e46eca9dd6e5cd79b18784e3" class="m-doc">RHSType</a>&gt;
+              using <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc-self">IntegrandType</a> = <a href="class_rodin_1_1_variational_1_1_dot.html" class="m-doc">Dot</a>&lt;<a href="#a67495d48a2b9146987e861c1b10b9493" class="m-doc">LHSType</a>, <a href="#af79ee4d37f0fcb57cd047c3b4af4bc20" class="m-doc">RHSType</a>&gt;
             </dt>
             <dd>Integrand expression type.</dd>
             <dt id="ad1801848c78c6463c513626ff578a564">
@@ -352,16 +355,16 @@ $f$
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ab41e10cbaede3e2da1428110e36094a4">
-              <span class="m-doc-wrap-bumper"><a href="#ab41e10cbaede3e2da1428110e36094a4" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab41e10cbaede3e2da1428110e36094a4" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand)</span>
             </dt>
             <dd>Constructs the integrator for the given integrand.</dd>
-            <dt id="a52e4d5082ffb29cb85f65b361289fd32">
-              <span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a93b375d25b4866b567393c99eb40e7a2">
-              <span class="m-doc-wrap-bumper"><a href="#a93b375d25b4866b567393c99eb40e7a2" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a93b375d25b4866b567393c99eb40e7a2" class="m-doc">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -369,21 +372,21 @@ $f$
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a07a0ed42183d01cb7d7a5e5edf3caba3">
-              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns the polytope the integrator is bound to.</dd>
-            <dt id="ac590a72fff84d2498983cdfc71eb38d3">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac590a72fff84d2498983cdfc71eb38d3" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac590a72fff84d2498983cdfc71eb38d3" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Binds the integrator to a polytope and tabulates the quadrature on it.</dd>
-            <dt id="af65301ad831f65b88eab3086cd8187cb">
-              <span class="m-doc-wrap-bumper">auto <a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
               size_t te) -&gt; <a href="#ad1801848c78c6463c513626ff578a564" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns an entry of the element matrix.</dd>
-            <dt id="a237ca71ce9684827200e02f7ddb22d3d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a237ca71ce9684827200e02f7ddb22d3d" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a237ca71ce9684827200e02f7ddb22d3d" class="m-doc">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the integration region.</dd>
             <dt>
@@ -394,6 +397,157 @@ $f$
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ab41e10cbaede3e2da1428110e36094a4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived, class RHSDerived, class Scalar, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, FunctionBase&lt;CoefficientDerived&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;KTrial, KTest, CoefficientDerived, LHSDerived, RHSDerived, Scalar, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab41e10cbaede3e2da1428110e36094a4" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="#a17f4c13495b1edea562f9b757bc3ff76" class="m-doc">IntegrandType</a>&amp; integrand)</span></span>
+            </h3>
+            <p>Constructs the integrator for the given integrand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">integrand</td>
+                  <td>Expression to integrate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a52e4d5082ffb29cb85f65b361289fd32"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived, class RHSDerived, class Scalar, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, FunctionBase&lt;CoefficientDerived&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;KTrial, KTest, CoefficientDerived, LHSDerived, RHSDerived, Scalar, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52e4d5082ffb29cb85f65b361289fd32" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a93b375d25b4866b567393c99eb40e7a2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived, class RHSDerived, class Scalar, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, FunctionBase&lt;CoefficientDerived&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;KTrial, KTest, CoefficientDerived, LHSDerived, RHSDerived, Scalar, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93b375d25b4866b567393c99eb40e7a2" class="m-doc-self">QuadratureRule</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a07a0ed42183d01cb7d7a5e5edf3caba3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived, class RHSDerived, class Scalar, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, FunctionBase&lt;CoefficientDerived&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;KTrial, KTest, CoefficientDerived, LHSDerived, RHSDerived, Scalar, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns the polytope the integrator is bound to.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The polytope the integrator is bound to.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ac590a72fff84d2498983cdfc71eb38d3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived, class RHSDerived, class Scalar, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">QuadratureRule</a>&amp; Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, FunctionBase&lt;CoefficientDerived&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;KTrial, KTest, CoefficientDerived, LHSDerived, RHSDerived, Scalar, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac590a72fff84d2498983cdfc71eb38d3" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Binds the integrator to a polytope and tabulates the quadrature on it.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope</td>
+                  <td>Mesh entity used by this operation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this object after the operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af65301ad831f65b88eab3086cd8187cb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived, class RHSDerived, class Scalar, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#ad1801848c78c6463c513626ff578a564" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, FunctionBase&lt;CoefficientDerived&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;KTrial, KTest, CoefficientDerived, LHSDerived, RHSDerived, Scalar, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) <span class="m-label m-warning">final</span></span></span>
+            </h3>
+            <p>Returns an entry of the element matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tr</td>
+                  <td>Trial shape-function expression.</td>
+                </tr>
+                <tr>
+                  <td>te</td>
+                  <td>Test shape-function expression.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Integral computed by the quadrature rule.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a237ca71ce9684827200e02f7ddb22d3d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;size_t KTrial, size_t KTest, class CoefficientDerived, class LHSDerived, class RHSDerived, class Scalar, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;Mult&lt;ShapeFunctionBase&lt;Jacobian&lt;ShapeFunction&lt;LHSDerived, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, FunctionBase&lt;CoefficientDerived&gt;&gt;, H1&lt;KTrial, Scalar, Mesh&gt;, TrialSpace&gt;, ShapeFunctionBase&lt;ShapeFunction&lt;RHSDerived, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;, H1&lt;KTest, Scalar, Mesh&gt;, TestSpace&gt;&gt;&gt;&lt;KTrial, KTest, CoefficientDerived, LHSDerived, RHSDerived, Scalar, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a237ca71ce9684827200e02f7ddb22d3d" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Returns the integration region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The integration region.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a97e8bbec3df10545ba877130c3be5b93"><div>
             <h3>
               <div class="m-doc-template">
@@ -456,7 +610,7 @@ $f$
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

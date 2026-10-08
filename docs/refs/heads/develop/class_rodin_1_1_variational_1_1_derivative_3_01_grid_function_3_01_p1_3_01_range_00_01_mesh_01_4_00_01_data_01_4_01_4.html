@@ -127,8 +127,8 @@
               using <a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc-self">OperandType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="#a21e3a3ac37400a5757c9cad815fc250a" class="m-doc">FESType</a>, Data&gt;
             </dt>
             <dd>Operand type.</dd>
-            <dt id="a1d000ea02619302f48476abffdb63132">
-              using <a href="#a1d000ea02619302f48476abffdb63132" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_derivative_base.html" class="m-doc">DerivativeBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&gt;&gt;
+            <dt id="adf3d322beb3670dcd7dda3c7b5f06499">
+              using <a href="#adf3d322beb3670dcd7dda3c7b5f06499" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_derivative_base.html" class="m-doc">DerivativeBase</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>, <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>&lt;<a href="#a895f54368ff1f93e8b1fcafad3e4cd52" class="m-doc">OperandType</a>&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -163,12 +163,12 @@ $ u $
 <use x='0' y='0' xlink:href='#eq2-g0-117'/>
 </g>
 </svg>.</dd>
-            <dt id="add052e41e354dda16d4d0492003d0c97">
-              <span class="m-doc-wrap-bumper"><a href="#add052e41e354dda16d4d0492003d0c97" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#add052e41e354dda16d4d0492003d0c97" class="m-doc">Derivative</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
-            <dt id="a354b635290749d985652aed71708b24d">
-              <span class="m-doc-wrap-bumper"><a href="#a354b635290749d985652aed71708b24d" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>&amp;&amp; other)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a354b635290749d985652aed71708b24d" class="m-doc">Derivative</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -176,18 +176,18 @@ $ u $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="ae5ac80fba1f7da67cb9f0da562648ae0">
-              <span class="m-doc-wrap-bumper">void <a href="#ae5ac80fba1f7da67cb9f0da562648ae0" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ae5ac80fba1f7da67cb9f0da562648ae0" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
               const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span>
             </dt>
             <dd>Interpolates at an integration point.</dd>
-            <dt id="aa796d78a8d783df57f79a9770b251d54">
-              <span class="m-doc-wrap-bumper">void <a href="#aa796d78a8d783df57f79a9770b251d54" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aa796d78a8d783df57f79a9770b251d54" class="m-doc">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
               const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
             </dt>
             <dd>Interpolates at a geometric point.</dd>
-            <dt id="ad3ee0037987358de6b132ae4ea4f932d">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad3ee0037987358de6b132ae4ea4f932d" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad3ee0037987358de6b132ae4ea4f932d" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy.</dd>
           </dl>
@@ -241,6 +241,113 @@ $ u $
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="add052e41e354dda16d4d0492003d0c97"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Derivative&lt;GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;Range, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add052e41e354dda16d4d0492003d0c97" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to copy from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a354b635290749d985652aed71708b24d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />Derivative&lt;GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;Range, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a354b635290749d985652aed71708b24d" class="m-doc-self">Derivative</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object to move from.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae5ac80fba1f7da67cb9f0da562648ae0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Derivative&lt;GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;Range, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5ac80fba1f7da67cb9f0da562648ae0" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+              const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
+            </h3>
+            <p>Interpolates at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">out</td>
+                  <td>Storage for the computed result.</td>
+                </tr>
+                <tr>
+                  <td>ip</td>
+                  <td>Integration point at which the expression is evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa796d78a8d783df57f79a9770b251d54"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />Derivative&lt;GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;Range, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa796d78a8d783df57f79a9770b251d54" class="m-doc-self">interpolate</a>(</span><span class="m-doc-wrap"><a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&amp; out,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+            </h3>
+            <p>Interpolates at a geometric point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">out</td>
+                  <td>Storage for the computed result.</td>
+                </tr>
+                <tr>
+                  <td>p</td>
+                  <td>Point at which the operation is evaluated.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad3ee0037987358de6b132ae4ea4f932d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range, class Data, class Mesh&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_derivative.html" class="m-doc">Derivative</a>* Rodin::<wbr />Variational::<wbr />Derivative&lt;GridFunction&lt;P1&lt;Range, Mesh&gt;, Data&gt;&gt;&lt;Range, Data, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad3ee0037987358de6b132ae4ea4f932d" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -286,7 +393,7 @@ $ u $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

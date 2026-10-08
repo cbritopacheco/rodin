@@ -75,7 +75,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4.html">P0gElement&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;</a>::<wbr/></span>LinearForm <span class="m-thin">class</span>
+          Rodin::Variational::P0gElement&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;::LinearForm <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p0g_element_8h.html">&lt;Rodin/Variational/P0g/P0gElement.h&gt;</a></div>
         </h1>
         <p>Matrix-range finite element or expression specialization.</p>
@@ -94,8 +94,8 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a5b864df2ff28343ac27c324366149050">
-              <span class="m-doc-wrap-bumper"><a href="#a5b864df2ff28343ac27c324366149050" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4.html#a6a250adc2c454198727dac6f06022c93" class="m-doc">ScalarLinearForm</a> form,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5b864df2ff28343ac27c324366149050" class="m-doc">LinearForm</a>(</span><span class="m-doc-wrap">ScalarLinearForm form,
               size_t rows,
               size_t cols,
               size_t component)</span>
@@ -106,12 +106,73 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a8bbcace2528ed8fed834011f9fd00142">
+            <dt>
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8bbcace2528ed8fed834011f9fd00142" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const Callable&amp; function) const -&gt; <a href="class_rodin_1_1_variational_1_1_p0g_element_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4.html#af759db74e135e3aaed19340727a253f5" class="m-doc">ScalarType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8bbcace2528ed8fed834011f9fd00142" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const Callable&amp; function) const -&gt; ScalarType</span>
             </dt>
             <dd>Evaluates the selected matrix basis or its component nodal functional.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a5b864df2ff28343ac27c324366149050"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0gElement&lt;Math::<wbr />SpatialMatrix&lt;Scalar&gt;&gt;::<wbr />LinearForm::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5b864df2ff28343ac27c324366149050" class="m-doc-self">LinearForm</a>(</span><span class="m-doc-wrap">ScalarLinearForm form,
+              size_t rows,
+              size_t cols,
+              size_t component)</span></span>
+            </h3>
+            <p>Selects a matrix entry for the scalar nodal functional.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">form</td>
+                  <td>Scalar linear form used to construct the component form.</td>
+                </tr>
+                <tr>
+                  <td>rows</td>
+                  <td>Number of rows.</td>
+                </tr>
+                <tr>
+                  <td>cols</td>
+                  <td>Number of columns.</td>
+                </tr>
+                <tr>
+                  <td>component</td>
+                  <td>Component of the value range.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8bbcace2528ed8fed834011f9fd00142"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Callable&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">ScalarType Rodin::<wbr />Variational::<wbr />P0gElement&lt;Math::<wbr />SpatialMatrix&lt;Scalar&gt;&gt;::<wbr />LinearForm::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8bbcace2528ed8fed834011f9fd00142" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const Callable&amp; function) const</span></span>
+            </h3>
+            <p>Evaluates the selected matrix basis or its component nodal functional.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">function</td>
+                  <td>Function to evaluate.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value of the nodal functional applied to the selected component of the callable.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -157,7 +218,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

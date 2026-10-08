@@ -94,8 +94,7 @@
         </nav>
 <img class="m-image" src="NavierStokes_placeholder.png" alt="Image" style="width: 410px;" /><section id="examples-pdes-navierstokes-intro"><h2><a href="#examples-pdes-navierstokes-intro">Introduction</a></h2><p>The incompressible Navier-Stokes equations describe viscous flow with a nonlinear convective term. The PETSc example solves a transient lid-driven cavity problem on the unit square:</p><div class="m-math"><svg style="width: 24.230em; height: 5.230em;" viewBox="77.36751 -50.212217 232.612441 50.212217">
 <title>
-\[
-\left\{
+\[\left\{
   \begin{aligned}
     \rho\partial_t\mathbf{u}
     + \rho(\mathbf{u}\cdot\nabla)\mathbf{u}
@@ -188,8 +187,7 @@
 </g>
 </svg></div><p>The top boundary moves with a prescribed horizontal lid velocity and the remaining walls use no-slip boundary conditions. Velocity is discretized with quadratic H1 elements and pressure with linear H1 elements, giving the Taylor-Hood pair.</p></section><section id="examples-pdes-navierstokes-weak"><h2><a href="#examples-pdes-navierstokes-weak">Weak Formulation</a></h2><p>Backward Euler gives the nonlinear residual at every time step:</p><div class="m-math"><svg style="width: 63.381em; height: 2.819em;" viewBox="0 -27.065451 608.45761 27.065451">
 <title>
-\[
-  R(\mathbf{u}, p; \mathbf{v}, q)
+\[  R(\mathbf{u}, p; \mathbf{v}, q)
   = { \rho \over \Delta t }
     \int_\Omega (\mathbf{u}^{n+1} - \mathbf{u}^n)\cdot\mathbf{v}\,dx
   + \rho\int_\Omega ((\mathbf{u}^{n+1}\cdot\nabla)\mathbf{u}^{n+1})\cdot\mathbf{v}\,dx
@@ -341,8 +339,7 @@ $ \epsilon(p,q) $
 </g>
 </svg> fixes the pressure nullspace for the standalone example. The nonlinear state is initialized with the previous time step before each SNES solve.</p></section><section id="examples-pdes-navierstokes-snes"><h2><a href="#examples-pdes-navierstokes-snes">PETSc SNES</a></h2><p>PETSc SNES drives the nonlinear solve. The example assembles the Newton Jacobian explicitly, including both convective derivative terms:</p><div class="m-math"><svg style="width: 20.835em; height: 2.819em;" viewBox="94.262406 -27.065451 200.018159 27.065451">
 <title>
-\[
-  \rho\int_\Omega
+\[  \rho\int_\Omega
     \left(((\mathbf{u}\cdot\nabla)\delta\mathbf{u})
     + ((\delta\mathbf{u}\cdot\nabla)\mathbf{u}))\right)
     \cdot\mathbf{v}\,dx.
@@ -465,7 +462,7 @@ $ \epsilon(p,q) $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

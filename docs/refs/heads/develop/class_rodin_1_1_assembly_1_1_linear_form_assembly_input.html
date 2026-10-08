@@ -94,7 +94,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md4">Usage Example</a></li>
+            <li>
+              <a href="#"></a>
+              <ul>
+                <li><a href="#autotoc_md4">Usage Example</a></li>
+              </ul>
+            </li>
             <li>
               Reference
               <ul>
@@ -163,9 +168,9 @@ $ K $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-75'/>
 </g>
-</svg>.</p><section id="autotoc_md4"><h3><a href="#autotoc_md4">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg>.</p><section id="autotoc_md4_1s1"><section id="autotoc_md4"><h3><a href="#autotoc_md4">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">lfis</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="c1">// list of linear form integrators</span>
-<span class="n">LinearFormAssemblyInput</span><span class="w"> </span><span class="n">input</span><span class="p">(</span><span class="n">Vh</span><span class="p">,</span><span class="w"> </span><span class="n">lfis</span><span class="p">);</span></pre></section>
+<span class="n">LinearFormAssemblyInput</span><span class="w"> </span><span class="n">input</span><span class="p">(</span><span class="n">Vh</span><span class="p">,</span><span class="w"> </span><span class="n">lfis</span><span class="p">);</span></pre></section></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -177,8 +182,8 @@ $ K $
               using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
             </dt>
             <dd>Scalar type for the space.</dd>
-            <dt id="a9278d43f7f81717c84b52e9a666486bb">
-              using <a href="#a9278d43f7f81717c84b52e9a666486bb" class="m-doc-self">LinearFormIntegratorBaseList</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">Variational::<wbr />LinearFormIntegratorBase</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;&gt;
+            <dt id="ae566802123922b4e1b9046df9f852911">
+              using <a href="#ae566802123922b4e1b9046df9f852911" class="m-doc-self">LinearFormIntegratorBaseList</a> = <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">FormLanguage::<wbr />List</a>&lt;<a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">Variational::<wbr />LinearFormIntegratorBase</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;&gt;
             </dt>
             <dd>List type for linear form integrators.</dd>
           </dl>
@@ -188,7 +193,7 @@ $ K $
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#af1fdae427f3f96c05c4ea80b99cd93aa" class="m-doc">LinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const FES&amp; fes,
-              <a href="#a9278d43f7f81717c84b52e9a666486bb" class="m-doc">LinearFormIntegratorBaseList</a>&amp; lfis)</span>
+              <a href="#ae566802123922b4e1b9046df9f852911" class="m-doc">LinearFormIntegratorBaseList</a>&amp; lfis)</span>
             </dt>
             <dd>Constructs linear form assembly input.</dd>
           </dl>
@@ -201,7 +206,7 @@ $ K $
             </dt>
             <dd>Gets the finite element space.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aba0afb8f1a74f2c952e97bef47edea75" class="m-doc">getLFIs</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a9278d43f7f81717c84b52e9a666486bb" class="m-doc">LinearFormIntegratorBaseList</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aba0afb8f1a74f2c952e97bef47edea75" class="m-doc">getLFIs</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#ae566802123922b4e1b9046df9f852911" class="m-doc">LinearFormIntegratorBaseList</a>&amp;</span>
             </dt>
             <dd>Gets the list of linear form integrators.</dd>
           </dl>
@@ -214,7 +219,7 @@ $ K $
                 template&lt;class FES&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />LinearFormAssemblyInput&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af1fdae427f3f96c05c4ea80b99cd93aa" class="m-doc-self">LinearFormAssemblyInput</a>(</span><span class="m-doc-wrap">const FES&amp; fes,
-              <a href="#a9278d43f7f81717c84b52e9a666486bb" class="m-doc">LinearFormIntegratorBaseList</a>&amp; lfis)</span></span>
+              <a href="#ae566802123922b4e1b9046df9f852911" class="m-doc">LinearFormIntegratorBaseList</a>&amp; lfis)</span></span>
             </h3>
             <p>Constructs linear form assembly input.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -255,7 +260,7 @@ $ K $
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a9278d43f7f81717c84b52e9a666486bb" class="m-doc">LinearFormIntegratorBaseList</a>&amp; Rodin::<wbr />Assembly::<wbr />LinearFormAssemblyInput&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba0afb8f1a74f2c952e97bef47edea75" class="m-doc-self">getLFIs</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ae566802123922b4e1b9046df9f852911" class="m-doc">LinearFormIntegratorBaseList</a>&amp; Rodin::<wbr />Assembly::<wbr />LinearFormAssemblyInput&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba0afb8f1a74f2c952e97bef47edea75" class="m-doc-self">getLFIs</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the list of linear form integrators.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -312,7 +317,7 @@ $ K $
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>

@@ -137,16 +137,16 @@
               using <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc-self">SpatialVectorType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Small spatial vector value type.</dd>
-            <dt id="a401b157b229584d55bf5257dcb1352f7">
-              using <a href="#a401b157b229584d55bf5257dcb1352f7" class="m-doc-self">RangeType</a> = std::conditional_t&lt;<a href="#ad3ebab2934e8453b1f426b0fa21e6517" class="m-doc">Dimension</a>&lt;=<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;::MaxSize, <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>, <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&gt;
+            <dt id="a5eaa1caf3cf261ab095d04e243abae5b">
+              using <a href="#a5eaa1caf3cf261ab095d04e243abae5b" class="m-doc-self">RangeType</a> = std::conditional_t&lt;<a href="#ad3ebab2934e8453b1f426b0fa21e6517" class="m-doc">Dimension</a>&lt;=<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;::MaxSize, <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>, <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&gt;
             </dt>
             <dd>Range (evaluation value) type.</dd>
             <dt id="a0d9d2c25a633ac292fe01d5c75b8ff57">
               using <a href="#a0d9d2c25a633ac292fe01d5c75b8ff57" class="m-doc-self">FixedSizeVectorType</a> = <a href="namespace_rodin_1_1_math.html#a2b1553b74430bb0e4efbe35ce1cd9566" class="m-doc">Math::<wbr />FixedSizeVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="#ad3ebab2934e8453b1f426b0fa21e6517" class="m-doc">Dimension</a>&gt;
             </dt>
             <dd>Fixed-size vector type used for storage decisions.</dd>
-            <dt id="aa07b23fa600877c8f33d704c7befa453">
-              using <a href="#aa07b23fa600877c8f33d704c7befa453" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&lt;V, Values...&gt;&gt;
+            <dt id="adcb38629d6e247ed06000fe90803b0df">
+              using <a href="#adcb38629d6e247ed06000fe90803b0df" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>&lt;V, Values...&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -182,11 +182,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a401b157b229584d55bf5257dcb1352f7" class="m-doc">RangeType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a5eaa1caf3cf261ab095d04e243abae5b" class="m-doc">RangeType</a></span>
             </dt>
             <dd>Evaluates all component functions at a point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a03a97cd8c47198116ac3c86617f4f00b" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="#a401b157b229584d55bf5257dcb1352f7" class="m-doc">RangeType</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a03a97cd8c47198116ac3c86617f4f00b" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const -&gt; <a href="#a5eaa1caf3cf261ab095d04e243abae5b" class="m-doc">RangeType</a></span>
             </dt>
             <dd>Evaluates all component functions at an integration point.</dd>
             <dt>
@@ -202,8 +202,8 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the maximum known component order on a mesh entity.</dd>
-            <dt id="ae03b33b8e074615727fb7838f0262314">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae03b33b8e074615727fb7838f0262314" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae03b33b8e074615727fb7838f0262314" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Polymorphically copies the derived function.</dd>
           </dl>
@@ -281,7 +281,7 @@
               <div class="m-doc-template">
                 template&lt;class V, class ... Values&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a401b157b229584d55bf5257dcb1352f7" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5eaa1caf3cf261ab095d04e243abae5b" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
             </h3>
             <p>Evaluates all component functions at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -307,7 +307,7 @@
               <div class="m-doc-template">
                 template&lt;class V, class ... Values&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a401b157b229584d55bf5257dcb1352f7" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03a97cd8c47198116ac3c86617f4f00b" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5eaa1caf3cf261ab095d04e243abae5b" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03a97cd8c47198116ac3c86617f4f00b" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
             </h3>
             <p>Evaluates all component functions at an integration point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -398,6 +398,23 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ae03b33b8e074615727fb7838f0262314"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class V, class ... Values&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>* Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae03b33b8e074615727fb7838f0262314" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Polymorphically copies the derived function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>
@@ -443,7 +460,7 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.14.0 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
       </div>
     </div>
   </div>
