@@ -283,5 +283,20 @@ and OpenMP assembly selected at configuration time. Point and segment are
 excluded for the same incompressibility reason as the baseline suite.
 Registrations carry `slow` labels and a 1800-second budget. Run
 `ctest --test-dir build/tests -R '^RodinConvergenceHPETScStokesBoundary_' --output-on-failure -j 1`.
+The two complete rate hierarchies run in distinct fresh processes; the four
+patch, pressure-level and sensitivity controls form a third process group.
+The shared `RATE_CASES` registration option names the isolated cases and
+assigns their exact complement to controls. Thus every case is selected once,
+without changing meshes, degrees, quadrature, solvers or acceptance criteria.
+This bounds process lifetime between separate studies; it is not a repair of
+library allocation behavior or a continuous peak-memory guarantee. The default
+registration of other suites is unchanged.
+The finite flat-traction matrix is locally verified: 180 registrations,
+360 configurations and 792 participant reports cover six geometries,
+Local/MPI ranks one through four, and sequential/OpenMP assembly. Historical
+full-matrix results are qualified by an exact formatting-only transformation
+of the shared field-data header; a fresh Triangle Local/MPI-2 subset verifies
+24 configurations and 36 reports against the formatted header. This is not
+a second complete matrix run or hosted-CI certification.
 Registration and the mathematical specification do not by themselves certify
 passing rates; backend/geometry validation is required separately.
