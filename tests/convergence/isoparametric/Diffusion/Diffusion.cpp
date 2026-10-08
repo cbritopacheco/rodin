@@ -257,6 +257,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           }
         }
         for (const auto& history : histories)
+        {
           for (size_t i = 1; i < history.getSize(); ++i)
           {
             const auto rate = history.getAlgebraicRates(i);
@@ -272,6 +273,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
             EXPECT_GT(rate.getH1Seminorm(), Q - H1Margin);
             EXPECT_LT(rate.getH1Seminorm(), Q + H1Margin);
           }
+        }
       }
       void liftedAnalyticOracle() const
       {
@@ -327,6 +329,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
             const std::array after{e.field, e.geometry, e.total};
             for (size_t component = field == Data::Field::Affine ? 1 : 0;
                  component < before.size(); ++component)
+            {
               for (const auto& pair :
                 {std::pair{before[component].getL2(), after[component].getL2()},
                   std::pair{
@@ -337,6 +340,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
                 ASSERT_GT(pair.first, 0);
                 EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
               }
+            }
           }
         }
       }
@@ -370,6 +374,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           }
         }
         for (size_t physics = 0; physics < histories.size(); ++physics)
+        {
           for (size_t component = 0; component < histories[physics].size(); ++component)
           {
             const auto& history = histories[physics][component];
@@ -396,6 +401,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
               EXPECT_LT(rate.getH1Seminorm(), degree + H1Margin);
             }
           }
+        }
       }
       void liftedHigherOrderRates() const
       {
@@ -407,27 +413,29 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           : std::initializer_list<size_t>{3, 5, 9};
         for (size_t n : levels)
         {
-          SCOPED_TRACE(::testing::Message() << "field degree=3 geometry degree=2 n=" << n);
+          SCOPED_TRACE(
+            ::testing::Message() << "field degree=3 geometry degree=2 n=" << n);
           Workload<ContextType> problem(this->GetParam(), n, Map::Sine, true);
           for (bool poisson : {true, false})
           {
             SCOPED_TRACE(poisson ? "Poisson" : "Conductivity");
             LiftedErrorNorm::Result lifted;
-            const auto represented = problem.template solve<3>(
-              poisson, Data::Field::Smooth, false, AssemblyOrder,
-              SolverTolerance, NormOrder, &lifted);
+            const auto represented =
+              problem.template solve<3>(poisson, Data::Field::Smooth, false,
+                AssemblyOrder, SolverTolerance, NormOrder, &lifted);
             ASSERT_FALSE(::testing::Test::HasFatalFailure());
             ::testing::Message quantities;
             quantities << "R=(" << represented.getL2() << ","
-              << represented.getH1Seminorm() << ") F=(" << lifted.field.getL2()
-              << "," << lifted.field.getH1Seminorm() << ") G=("
-              << lifted.geometry.getL2() << "," << lifted.geometry.getH1Seminorm()
-              << ") T=(" << lifted.total.getL2() << ","
-              << lifted.total.getH1Seminorm() << ")";
-            RecordProperty(std::string(poisson ? "Poisson_n" : "Conductivity_n")
-              + std::to_string(n), quantities.GetString());
-            histories[poisson ? 0 : 1].append(
-              Real(1) / Real(n - 1), represented, lifted);
+                       << represented.getH1Seminorm() << ") F=(" << lifted.field.getL2()
+                       << "," << lifted.field.getH1Seminorm() << ") G=("
+                       << lifted.geometry.getL2() << ","
+                       << lifted.geometry.getH1Seminorm() << ") T=("
+                       << lifted.total.getL2() << "," << lifted.total.getH1Seminorm()
+                       << ")";
+            RecordProperty(
+              std::string(poisson ? "Poisson_n" : "Conductivity_n") + std::to_string(n),
+              quantities.GetString());
+            histories[poisson ? 0 : 1].append(Real(1) / Real(n - 1), represented, lifted);
           }
         }
         for (size_t physics = 0; physics < histories.size(); ++physics)
@@ -488,6 +496,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           }
         }
         for (size_t physics = 0; physics < 2; ++physics)
+        {
           for (size_t i = 1; i < histories[physics].getSize(); ++i)
           {
             const auto& coarse = histories[physics].getSample(i - 1).error;
@@ -509,6 +518,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
             EXPECT_GT(rate.getH1Seminorm(), K - H1Margin);
             EXPECT_LT(rate.getH1Seminorm(), K + H1Margin);
           }
+        }
       }
       template <size_t K>
       void patch(Map map = Map::Quadratic) const
@@ -561,6 +571,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
           const auto norm = problem.template solve<K>(poisson, Data::Field::Smooth, false,
             AssemblyOrder, SolverTolerance, RefinedNormOrder);
           for (const auto& e : {quad, solver, norm})
+          {
             for (const auto& pair : {std::pair{base.getL2(), e.getL2()},
                    std::pair{base.getH1Seminorm(), e.getH1Seminorm()}})
             {
@@ -569,6 +580,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
               ASSERT_GT(pair.first, 0);
               EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
             }
+          }
         }
       }
       void norm(Map map = Map::Quadratic) const
@@ -578,6 +590,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
         const size_t dim = problem.getDimension();
         if (map == Map::Sine)
           for (size_t d = 1; d <= dim; ++d)
+          {
             for (auto polytope = mesh.getPolytope(d); polytope; ++polytope)
             {
               const RealH1Element<2> element(polytope->getGeometry());
@@ -594,6 +607,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
                   (point.getPhysicalCoordinates() - expected).norm(), MapTolerance);
               }
             }
+          }
         H1<2, Real, Mesh<ContextType>> space(std::integral_constant<size_t, 2>{}, mesh);
 #ifdef RODIN_CURVED_DIFFUSION_PETSC
         PETSc::Variational::GridFunction u(space);
@@ -617,6 +631,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
         const size_t dim = problem.getDimension();
         constexpr size_t GeometryCheckOrder = 4;
         for (size_t d = 1; d <= dim; ++d)
+        {
           for (auto polytope = mesh.getPolytope(d); polytope; ++polytope)
           {
             const RealH1Element<2> element(polytope->getGeometry());
@@ -634,6 +649,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
               EXPECT_GT(point.getDistortion(), 0);
             }
           }
+        }
         EXPECT_NEAR(mesh.getMeasure(dim), dim == 1 ? 1.1 : 1, VolumeTolerance);
       }
   };

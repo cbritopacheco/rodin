@@ -73,8 +73,10 @@ namespace
       local.getConnectivity().compute(dimension, dimension);
       if (completeIncidences)
         for (size_t d = 0; d <= dimension; ++d)
+        {
           for (size_t dp = 0; dp <= dimension; ++dp)
             local.getConnectivity().compute(d, dp);
+        }
       EmptyRootPartitioner partitioner(local);
       partitioner.partition(world->size(), dimension);
       sharder.shard(partitioner);

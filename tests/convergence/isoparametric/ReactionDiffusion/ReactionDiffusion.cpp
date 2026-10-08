@@ -261,12 +261,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
           }
         }
         for (size_t i = 1; i < errors.size(); ++i)
+        {
           for (size_t field = 0; field < errors[i].size(); ++field)
           {
             SCOPED_TRACE(::testing::Message() << "control=" << i << " field=" << field);
             LiftedConvergence::expectGeometrySensitivity(
               errors[0][field], errors[i][field]);
           }
+        }
       }
 
       template <size_t K>
@@ -322,6 +324,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
             LiftedConvergence::components(represented[1], lifted[1])});
         }
         for (size_t i = 1; i < errors.size(); ++i)
+        {
           for (size_t component = 0; component < 2; ++component)
           {
             SCOPED_TRACE(
@@ -329,6 +332,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
             LiftedConvergence::expectSensitivity(
               errors[0][component], errors[i][component]);
           }
+        }
       }
 
       template <size_t K = 2>
@@ -382,6 +386,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
         // Finite-resolution policy windows around the theoretical orders.
         constexpr Real L2Margin = 0.55, H1Margin = 0.45;
         for (size_t component = 0; component < 2; ++component)
+        {
           for (size_t i = 1; i < histories[component].getSize(); ++i)
           {
             const auto& coarse = histories[component].getSample(i - 1).error;
@@ -401,6 +406,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
             EXPECT_GT(rate.getH1Seminorm(), K - H1Margin);
             EXPECT_LT(rate.getH1Seminorm(), K + H1Margin);
           }
+        }
       }
 
       template <size_t K>
@@ -441,7 +447,9 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
         const auto solver = problem.template solve<K>(
           Data::Field::Smooth, false, AssemblyOrder, RefinedTolerance);
         for (const auto& refined : {quadrature, solver})
+        {
           for (size_t component = 0; component < 2; ++component)
+          {
             for (const auto& pair :
               {std::pair{baseline[component].getL2(), refined[component].getL2()},
                 std::pair{baseline[component].getH1Seminorm(),
@@ -452,6 +460,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
               ASSERT_GT(pair.first, 0);
               EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
             }
+          }
+        }
       }
   };
 

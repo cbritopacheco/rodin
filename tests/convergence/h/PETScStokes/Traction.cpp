@@ -105,6 +105,7 @@ namespace Rodin::Tests::Convergence::StokesTractionTests
         const auto reference = base.template solve<2>();
         for (const auto& varied :
           {higher.template solve<2>(), base.template solve<2>(20)})
+        {
           for (const auto& pair :
             {std::pair{reference.fields.velocity, varied.fields.velocity},
               std::pair{reference.fields.pressure, varied.fields.pressure}})
@@ -117,6 +118,7 @@ namespace Rodin::Tests::Convergence::StokesTractionTests
               std::abs(pair.second.getH1Seminorm() / pair.first.getH1Seminorm() - 1),
               SensitivityBudget);
           }
+        }
       }
 
     private:

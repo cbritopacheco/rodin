@@ -127,6 +127,7 @@ namespace Rodin::Tests::Convergence::ReactionDiffusionBoundaryTests
         const auto reference = base.solve(false, 1e-13, 18);
         for (const auto& varied : {higher.solve(false, 1e-13, 18),
                base.solve(false, 1e-13, 20), base.solve(false, 1e-14, 18)})
+        {
           for (size_t component = 0; component < 2; ++component)
           {
             SCOPED_TRACE(::testing::Message() << "component=" << component);
@@ -140,6 +141,7 @@ namespace Rodin::Tests::Convergence::ReactionDiffusionBoundaryTests
                         1),
               Real(1e-6));
           }
+        }
       }
   };
 

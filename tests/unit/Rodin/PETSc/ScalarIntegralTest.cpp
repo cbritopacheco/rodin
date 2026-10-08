@@ -28,8 +28,10 @@ namespace
     const size_t dim = Polytope::Traits(geometry).getDimension();
     auto mesh = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dim, 2));
     for (size_t d = 0; d <= dim; ++d)
+    {
       for (size_t dp = 0; dp <= dim; ++dp)
         mesh.getConnectivity().compute(d, dp);
+    }
     return mesh;
   }
 
@@ -64,8 +66,10 @@ namespace
       auto mesh = sharder.gather(0);
       // Incidence discovery and distributed ownership are separate operations.
       for (size_t d = 0; d <= mesh.getDimension(); ++d)
+      {
         for (size_t dp = 0; dp <= mesh.getDimension(); ++dp)
           mesh.getConnectivity().compute(d, dp);
+      }
       for (size_t d = 1; d < mesh.getDimension(); ++d)
         mesh.reconcile(d);
       Tests::Unit::ScalarIntegral::check(mesh);

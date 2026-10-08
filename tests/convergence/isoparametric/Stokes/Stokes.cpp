@@ -137,8 +137,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
 #ifdef RODIN_USE_MPI
           if constexpr (requires { m_mesh.getShard(); })
             for (Real& value : squared)
+            {
               value = boost::mpi::all_reduce(
                 m_mesh.getContext().getCommunicator(), value, std::plus<Real>());
+            }
 #endif
           for (size_t component = 0; component < squared.size(); ++component)
             lifted->divergence[component] = std::sqrt(squared[component]);
@@ -186,8 +188,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         checkLifted(lifted);
         LiftedConvergence::expectRepresentable(
           represented.velocity, lifted.velocity, PatchTolerance);
-        for (const auto& error : {represented.pressure, lifted.pressure.field,
-               lifted.pressure.total})
+        for (const auto& error :
+          {represented.pressure, lifted.pressure.field, lifted.pressure.total})
         {
           EXPECT_TRUE(error.isFinite());
           EXPECT_LT(error.getL2(), PatchTolerance);
@@ -208,8 +210,9 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         LiftedConvergence velocity;
         for (size_t n : {3u, 5u, 9u})
         {
-          SCOPED_TRACE(::testing::Message() << "geometry degree=" << Q
-            << " velocity degree=" << K << " pressure degree=" << K - 1 << " n=" << n);
+          SCOPED_TRACE(::testing::Message()
+            << "geometry degree=" << Q << " velocity degree=" << K
+            << " pressure degree=" << K - 1 << " n=" << n);
           Workload<ContextType, Q> problem(this->GetParam(), n, Map::Sine, true);
           LiftedErrors lifted;
           const auto represented = problem.template solve<K>(
@@ -228,18 +231,22 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         std::array<LiftedErrors, 3> errors;
         for (size_t i = 0; i < errors.size(); ++i)
         {
-          SCOPED_TRACE(::testing::Message() << "geometry degree=" << Q << " control=" << i);
-          const auto represented = problem.template solve<K>(StokesData::Field::Affine,
-            1, i == 1 ? RefinedOrder : AssemblyOrder,
-            i == 2 ? RefinedNormOrder : NormOrder, &errors[i]);
+          SCOPED_TRACE(
+            ::testing::Message() << "geometry degree=" << Q << " control=" << i);
+          const auto represented = problem.template solve<K>(StokesData::Field::Affine, 1,
+            i == 1 ? RefinedOrder : AssemblyOrder, i == 2 ? RefinedNormOrder : NormOrder,
+            &errors[i]);
           checkRepresentable(represented, errors[i]);
         }
         for (size_t i = 1; i < errors.size(); ++i)
         {
-          LiftedConvergence::expectGeometrySensitivity(errors[0].velocity, errors[i].velocity);
+          LiftedConvergence::expectGeometrySensitivity(
+            errors[0].velocity, errors[i].velocity);
           for (size_t component : {1u, 2u})
-            EXPECT_NEAR(errors[0].divergence[component],
-              errors[i].divergence[component], PatchTolerance);
+          {
+            EXPECT_NEAR(errors[0].divergence[component], errors[i].divergence[component],
+              PatchTolerance);
+          }
         }
       }
 
@@ -303,6 +310,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         }
         velocity.expectRates(2, 2);
         for (size_t component = 0; component < pressure.size(); ++component)
+        {
           for (size_t i = 1; i < pressure[component].getSize(); ++i)
           {
             SCOPED_TRACE(::testing::Message()
@@ -321,6 +329,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
             EXPECT_GT(rate.getH1Seminorm(), 1 - DerivativeMargin);
             EXPECT_LT(rate.getH1Seminorm(), 1 + DerivativeMargin);
           }
+        }
       }
 
       void checkApproximatedSensitivity() const
@@ -345,6 +354,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
           LiftedConvergence::expectSensitivity(velocity[0], velocity[i]);
           // Geometry-pressure norms are analytically zero: no relative comparison.
           for (size_t component : {0u, 1u, 3u})
+          {
             for (const auto& pair :
               {std::pair{pressure[0][component].getL2(), pressure[i][component].getL2()},
                 std::pair{pressure[0][component].getH1Seminorm(),
@@ -354,6 +364,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
               ASSERT_TRUE(std::isfinite(pair.second));
               EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
             }
+          }
         }
       }
 
@@ -491,6 +502,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         const auto refined = problem.solve(StokesData::Field::Cubic, 1, RefinedOrder);
         for (const auto& pair : {std::pair{baseline.velocity, refined.velocity},
                std::pair{baseline.pressure, refined.pressure}})
+        {
           for (const auto& norms : {std::pair{pair.first.getL2(), pair.second.getL2()},
                  std::pair{pair.first.getH1Seminorm(), pair.second.getH1Seminorm()}})
           {
@@ -499,6 +511,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
             ASSERT_GT(norms.first, 0);
             EXPECT_LT(std::abs(norms.second / norms.first - 1), SensitivityTolerance);
           }
+        }
       }
 
       void checkGauge(Map map = Map::Quadratic) const
@@ -586,17 +599,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
    */
   TEST(Rodin_Convergence_CurvedStokes, NativeCubicWedgePressureForwardAccuracy)
   {
-    using Problem = Workload<Context::Local,3>;
-    Problem problem(Polytope::Type::Wedge,5,Problem::Map::Sine,true);
+    using Problem = Workload<Context::Local, 3>;
+    Problem problem(Polytope::Type::Wedge, 5, Problem::Map::Sine, true);
     LiftedErrors lifted;
-    const auto errors = problem.solve<3>(StokesData::Field::Affine,1,
-      AssemblyOrder,NormOrder,&lifted);
+    const auto errors =
+      problem.solve<3>(StokesData::Field::Affine, 1, AssemblyOrder, NormOrder, &lifted);
     constexpr Real PressureForwardTolerance = 1e-11;
-    for (const auto& pressure : {errors.pressure,lifted.pressure.field,lifted.pressure.total})
+    for (const auto& pressure :
+      {errors.pressure, lifted.pressure.field, lifted.pressure.total})
     {
       ASSERT_TRUE(pressure.isFinite());
-      EXPECT_LT(pressure.getL2(),PressureForwardTolerance);
-      EXPECT_LT(pressure.getH1Seminorm(),PressureForwardTolerance);
+      EXPECT_LT(pressure.getL2(), PressureForwardTolerance);
+      EXPECT_LT(pressure.getH1Seminorm(), PressureForwardTolerance);
     }
   }
 #endif

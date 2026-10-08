@@ -69,6 +69,7 @@ namespace Rodin::Tests::Convergence::H::PETScStokes
       pressure.append(1 / Real(n - 1), errors.pressure);
     }
     for (size_t i = 1; i < 3; ++i)
+    {
       for (bool isVelocity : {true, false})
       {
         const auto& history = isVelocity ? velocity : pressure;
@@ -91,6 +92,7 @@ namespace Rodin::Tests::Convergence::H::PETScStokes
         EXPECT_GT(rate.getH1Seminorm(), isVelocity ? 1.55 : 0.55);
         EXPECT_LT(rate.getH1Seminorm(), isVelocity ? 2.45 : 1.45);
       }
+    }
   }
 
   template <class ContextType>

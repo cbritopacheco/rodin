@@ -51,8 +51,8 @@ namespace Rodin::Tests::Convergence::H::Stokes
       static constexpr Real QuadratureTolerance = 1e-8;
 
       template <size_t K = 2>
-      void measure(MixedStability::Result& result, size_t n, bool curved,
-        size_t order, bool omitDivergence = false) const
+      void measure(MixedStability::Result& result, size_t n, bool curved, size_t order,
+        bool omitDivergence = false) const
       {
         auto mesh = UniformGrid(GetParam()).makeMesh(n);
         if (curved)
@@ -94,6 +94,7 @@ namespace Rodin::Tests::Convergence::H::Stokes
   TEST_P(StokesStabilityTest, PressureSpectrumAcrossRefinementLevels)
   {
     for (bool curved : {false, true})
+    {
       for (size_t n : {2u, 3u, 5u})
       {
         SCOPED_TRACE(::testing::Message() << "curved=" << curved << " n=" << n);
@@ -110,8 +111,8 @@ namespace Rodin::Tests::Convergence::H::Stokes
             << "minimumEigenvalue=" << measurements[i].eigenvalues.minCoeff());
           const bool obstructed = n == 2 && GetParam() != Polytope::Type::Pyramid;
           EXPECT_EQ(measurements[i].isDimensionObstructed(), obstructed);
-          EXPECT_EQ(MixedStability::hasResolvedPositiveSpectrum(measurements[i]),
-            !obstructed);
+          EXPECT_EQ(
+            MixedStability::hasResolvedPositiveSpectrum(measurements[i]), !obstructed);
         }
         ASSERT_EQ(measurements[0].freeVelocity, measurements[1].freeVelocity);
         ASSERT_EQ(measurements[0].zeroMeanPressure, measurements[1].zeroMeanPressure);
@@ -119,9 +120,12 @@ namespace Rodin::Tests::Convergence::H::Stokes
         {
           ASSERT_GT(measurements[0].eigenvalues.minCoeff(), 0);
           EXPECT_LT(std::abs(measurements[1].eigenvalues.minCoeff() /
-              measurements[0].eigenvalues.minCoeff() - 1), QuadratureTolerance);
+                        measurements[0].eigenvalues.minCoeff() -
+                      1),
+            QuadratureTolerance);
         }
       }
+    }
   }
 
   TEST_P(StokesStabilityTest, MissingDivergenceRejected)
@@ -149,15 +153,18 @@ namespace Rodin::Tests::Convergence::H::Stokes
     // rank obstruction. The pressure constant is interpolated in its actual
     // basis; its higher-order coefficients are not assumed to be ones.
     for (bool curved : {false, true})
+    {
       for (size_t n : {3u, 4u, 5u})
       {
-        SCOPED_TRACE(::testing::Message() << "velocity degree=3 curved=" << curved << " n=" << n);
+        SCOPED_TRACE(
+          ::testing::Message() << "velocity degree=3 curved=" << curved << " n=" << n);
         std::array<MixedStability::Result, 2> measurements;
         for (size_t i = 0; i < measurements.size(); ++i)
         {
           measure<3>(measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
           ASSERT_FALSE(::testing::Test::HasFatalFailure());
-          SCOPED_TRACE(::testing::Message() << "freeVelocity=" << measurements[i].freeVelocity
+          SCOPED_TRACE(::testing::Message()
+            << "freeVelocity=" << measurements[i].freeVelocity
             << " zeroMeanPressure=" << measurements[i].zeroMeanPressure
             << " minimumEigenvalue=" << measurements[i].eigenvalues.minCoeff());
           MixedStability::expectConsistent(measurements[i]);
@@ -168,8 +175,11 @@ namespace Rodin::Tests::Convergence::H::Stokes
         ASSERT_EQ(measurements[0].zeroMeanPressure, measurements[1].zeroMeanPressure);
         ASSERT_GT(measurements[0].eigenvalues.minCoeff(), 0);
         EXPECT_LT(std::abs(measurements[1].eigenvalues.minCoeff() /
-          measurements[0].eigenvalues.minCoeff() - 1), QuadratureTolerance);
+                      measurements[0].eigenvalues.minCoeff() -
+                    1),
+          QuadratureTolerance);
       }
+    }
   }
 
   TEST_P(StokesStabilityTest, P3P2MissingDivergenceRejected)
@@ -190,8 +200,8 @@ namespace Rodin::Tests::Convergence::H::Stokes
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, StokesStabilityTest,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
     [](const auto& info) {
       return std::string(UniformGrid::getGeometryName(info.param));
     });

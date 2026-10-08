@@ -161,8 +161,10 @@ namespace Rodin::Tests::Unit
           const Mesh<Context::MPI>& mesh = sub;
           size_t localOwned = 0;
           for (auto cell = mesh.getCell(); cell; ++cell)
+          {
             if (mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
               ++localOwned;
+          }
         // This is a global coverage assertion, not a local evaluation query.
           EXPECT_GT(boost::mpi::all_reduce(world, localOwned, std::plus<size_t>()), 0u);
           const auto range = [&]<size_t K, class Range>() {
@@ -219,8 +221,10 @@ namespace Rodin::Tests::Unit
                 return MatrixFunction(size_t{2}, size_t{3}, [scalar](const Point& point) {
                   Math::SpatialMatrix<Scalar> value(2, 3);
                   for (size_t row = 0; row < 2; ++row)
+                  {
                     for (size_t column = 0; column < 3; ++column)
                       value(row, column) = scalar(point, 3 * row + column);
+                  }
                   return value;
                 });
               else if constexpr (vector)
@@ -251,6 +255,7 @@ namespace Rodin::Tests::Unit
                 EXPECT_EQ(actual.rows(), 2);
                 EXPECT_EQ(actual.cols(), 3);
                 for (size_t row = 0; row < 2; ++row)
+                {
                   for (size_t column = 0; column < 3; ++column)
                   {
                     EXPECT_LT(std::abs(actual(row, column) - expected(row, column)),
@@ -258,6 +263,7 @@ namespace Rodin::Tests::Unit
                     EXPECT_GT(std::abs(wrong(row, column) - expected(row, column)),
                       PolynomialTolerance);
                   }
+                }
               }
               else if constexpr (vector)
               {
@@ -286,9 +292,11 @@ namespace Rodin::Tests::Unit
                 const IndexArray dofs =
                   targetSpace.getDOFs(mesh.getDimension(), cell->getIndex());
                 for (Index local = 0; local < static_cast<size_t>(dofs.size()); ++local)
+                {
                   EXPECT_LT(std::abs(std::as_const(restricted)[dofs(local)] -
                               std::as_const(oracle)[dofs(local)]),
                     PolynomialTolerance);
+                }
                 const Polytope::Traits traits(cell->getGeometry());
                 checkValue(Point(*cell, traits.getCentroid()));
               }
@@ -339,8 +347,10 @@ namespace Rodin::Tests::Unit
               };
               sample(traits.getCentroid());
               for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+              {
                 sample(Math::SpatialPoint(
                   (traits.getCentroid() + traits.getVertex(vertex)) / 2));
+              }
             }
           };
           const auto order = [&]<size_t K>() {
@@ -362,9 +372,11 @@ namespace Rodin::Tests::Unit
         SubMesh<Context::MPI>::Builder builder;
         builder.initialize(parent);
         for (auto cell = parent.getCell(); cell; ++cell)
+        {
           if (parent.getShard().isOwned(dimension, cell->getIndex()) &&
             parent.getGlobalIndex(dimension, cell->getIndex()) % 2 == 0)
             builder.include(dimension, cell->getIndex());
+        }
         const auto sparse = builder.finalize();
         check(sparse);
         const auto nested = makeCellSubMesh(sparse);

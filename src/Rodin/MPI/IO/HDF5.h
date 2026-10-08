@@ -119,6 +119,7 @@ namespace Rodin::IO
       /**
        * @brief Loads a local mesh and its shard metadata.
        * @param filename Path of the mesh shard file.
+       * @param context Distributed context used to reconstruct shard ownership.
        * @returns Mesh shard reconstructed from the HDF5 file.
        */
 

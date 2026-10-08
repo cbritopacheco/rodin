@@ -173,6 +173,8 @@ namespace Rodin::Solver
        * The matrix and right-hand side are unchanged and no additional
        * factorization is performed. The default is zero; no residual-based
        * stopping tolerance or higher-precision arithmetic is introduced.
+       * @param steps Number of residual-correction solves after factorization.
+       * @returns Reference to this solver after updating the correction count.
        */
       SparseLU& setRefinementSteps(size_t steps)
       {
@@ -180,7 +182,10 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /// @brief Get the configured number of residual-correction solves.
+      /**
+       * @brief Get the configured number of residual-correction solves.
+       * @returns Number of corrections applied after the initial direct solve.
+       */
       size_t getRefinementSteps() const
       {
         return m_refinementSteps;

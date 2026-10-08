@@ -98,6 +98,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
           }
         }
         for (const auto& history : histories)
+        {
           for (size_t i = 1; i < history.getSize(); ++i)
           {
             const auto& coarse = history.getSample(i - 1).error;
@@ -113,6 +114,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
             EXPECT_GT(rate.getH1Seminorm(), Q - H1Margin);
             EXPECT_LT(rate.getH1Seminorm(), Q + H1Margin);
           }
+        }
       }
 
       void checkMatchedGeometrySensitivity() const
@@ -138,6 +140,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
           const std::array base{errors[0].geometry, errors[0].total};
           const std::array refined{errors[i].geometry, errors[i].total};
           for (size_t component = 0; component < base.size(); ++component)
+          {
             for (const auto& pair :
               {std::pair{base[component].getL2(), refined[component].getL2()},
                 std::pair{
@@ -147,6 +150,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
               ASSERT_TRUE(std::isfinite(pair.second));
               EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
             }
+          }
         }
       }
 
@@ -176,6 +180,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
           }
         }
         for (size_t component = 0; component < histories.size(); ++component)
+        {
           for (size_t i = 1; i < histories[component].getSize(); ++i)
           {
             const auto& history = histories[component];
@@ -197,6 +202,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
             EXPECT_GT(rate.getH1Seminorm(), degree - H1Margin);
             EXPECT_LT(rate.getH1Seminorm(), degree + H1Margin);
           }
+        }
       }
 
       template <size_t K>
@@ -220,6 +226,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
           const std::array refined{
             represented[i], errors[i].field, errors[i].geometry, errors[i].total};
           for (size_t component = 0; component < base.size(); ++component)
+          {
             for (const auto& pair :
               {std::pair{base[component].getL2(), refined[component].getL2()},
                 std::pair{
@@ -229,6 +236,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
               ASSERT_TRUE(std::isfinite(pair.second));
               EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
             }
+          }
         }
       }
 
@@ -241,7 +249,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
         LiftedConvergence history;
         for (size_t n : levels)
         {
-          SCOPED_TRACE(::testing::Message() << "field degree=3 geometry degree=2 n=" << n);
+          SCOPED_TRACE(
+            ::testing::Message() << "field degree=3 geometry degree=2 n=" << n);
           Workload problem(this->GetParam(), n, Map::Sine, true);
           LiftedErrorNorm::Result lifted;
           const auto represented = problem.template solve<3>(HelmholtzData::Field::Smooth,

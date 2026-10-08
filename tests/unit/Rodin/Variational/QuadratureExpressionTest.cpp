@@ -77,9 +77,13 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(&ip->getPoint().getPolytope().getMesh(), &cell.getMesh());
       }
       for (Eigen::Index te = 0; te < expected.rows(); ++te)
+      {
         for (Eigen::Index tr = 0; tr < expected.cols(); ++tr)
+        {
           EXPECT_EQ(integral.integrate(tr, te), expected(te, tr))
             << "cell " << cell.getIndex() << ", entry " << te << ',' << tr;
+        }
+      }
     }
 
     template <class F, class U, class V, class I>
@@ -95,8 +99,10 @@ namespace Rodin::Tests::Unit
         const auto local = reference(integral, *cell, 6);
         const auto& dofs = space.getDOFs(d, cell->getIndex());
         for (Eigen::Index te = 0; te < local.rows(); ++te)
+        {
           for (Eigen::Index tr = 0; tr < local.cols(); ++tr)
             expected(dofs(te), dofs(tr)) += local(te, tr);
+        }
       }
       BilinearForm form(u, v);
       integral.setOrder(6);
@@ -140,10 +146,14 @@ namespace Rodin::Tests::Unit
           const size_t count =
             space.getDOFs(cell->getDimension(), cell->getIndex()).size();
           for (size_t te = 0; te < count; ++te)
+          {
             for (size_t tr = 0; tr < count; ++tr)
+            {
               EXPECT_LE(std::abs(phased.integrate(tr, te) -
                           a * std::conj(b) * unscaled.integrate(tr, te)),
                 1e-12);
+            }
+          }
         }
         if constexpr (!FormLanguage::IsVectorRange<
                         typename FormLanguage::Traits<F>::RangeType>::Value)
@@ -406,8 +416,10 @@ namespace Rodin::Tests::Unit
           EXPECT_EQ(calls, nq);
           const auto expected = reference(integral, *cell, 6);
           for (Eigen::Index te = 0; te < expected.rows(); ++te)
+          {
             for (Eigen::Index tr = 0; tr < expected.cols(); ++tr)
               EXPECT_EQ(integral.integrate(tr, te), expected(te, tr));
+          }
         }
       }
     }

@@ -113,10 +113,14 @@ namespace Rodin::Tests::Convergence
               for (size_t i = 0; i < gradient.rows(); ++i)
                 trace += gradient(i, i);
               for (size_t i = 0; i < gradient.rows(); ++i)
+              {
                 for (size_t j = 0; j < gradient.cols(); ++j)
+                {
                   value(i, j) = stress ? data.getLambda() * trace * (i == j) +
                       data.getMu() * (gradient(i, j) + gradient(j, i))
                                        : (gradient(i, j) + gradient(j, i)) / 2;
+                }
+              }
               return value;
             };
             const auto strain = [&](const Variational::IntegrationPoint& ip) {

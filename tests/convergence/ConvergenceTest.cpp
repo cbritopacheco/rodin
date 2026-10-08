@@ -80,6 +80,7 @@ namespace Rodin::Tests::Convergence
       const size_t dim = mesh.getDimension();
       for (const auto field :
         {Field::Affine, Field::Quadratic, Field::Cubic, Field::Quartic, Field::Smooth})
+      {
         for (size_t axis = 1; axis < dim; ++axis)
         {
           const StokesData original(dim, field, axis);
@@ -118,6 +119,7 @@ namespace Rodin::Tests::Convergence
             }
           }
         }
+      }
     }
   }
 
@@ -217,9 +219,11 @@ namespace Rodin::Tests::Convergence
       scalar.append(h, {ErrorNorms(h * h, h)});
     }
     for (Real p : {1, 3, 4})
+    {
       exponential.append(p,
         {ErrorNorms(std::exp(-2 * p), std::exp(-p)),
           ErrorNorms(std::exp(-3 * p), std::exp(-2 * p))});
+    }
     algebraic.expectAlgebraicFloor({1.9, 0.9});
     exponential.expectExponentialFloor({1.9, 0.9});
     scalar.expectAlgebraicFloor({1.9, 0.9});
@@ -245,9 +249,11 @@ namespace Rodin::Tests::Convergence
     }
     ASSERT_EQ(failures.size(), 4);
     for (int i = 0; i < failures.size(); ++i)
+    {
       EXPECT_NE(
         std::string(failures.GetTestPartResult(i).message()).find("field=1 interval=2"),
         std::string::npos);
+    }
   }
 
   TEST(FieldConvergenceTest, RejectsTwoLevelStudy)
@@ -314,8 +320,9 @@ namespace Rodin::Tests::Convergence
     constexpr Real FieldConstant = 256;
     for (Real h : {0.25, 0.125, 0.0625})
     {
-      const ErrorNorms field(FieldConstant * std::pow(h, 4),
-        FieldConstant * std::pow(h, 3)), geometry(std::pow(h, 3), h * h);
+      const ErrorNorms field(
+        FieldConstant * std::pow(h, 4), FieldConstant * std::pow(h, 3)),
+        geometry(std::pow(h, 3), h * h);
       const ErrorNorms total(field.getL2() + geometry.getL2(),
         field.getH1Seminorm() + geometry.getH1Seminorm());
       study.append(h, field, {field, geometry, total});
@@ -329,8 +336,10 @@ namespace Rodin::Tests::Convergence
     }
     ASSERT_GT(failures.size(), 0);
     for (int i = 0; i < failures.size(); ++i)
+    {
       EXPECT_NE(std::string(failures.GetTestPartResult(i).message()).find("component=3"),
         std::string::npos);
+    }
     study.expectMixedRates(3, 2);
   }
 
@@ -355,8 +364,10 @@ namespace Rodin::Tests::Convergence
     }
     ASSERT_GT(failures.size(), 0);
     for (int i = 0; i < failures.size(); ++i)
+    {
       EXPECT_NE(std::string(failures.GetTestPartResult(i).message()).find("interval=2"),
         std::string::npos);
+    }
   }
 
   TEST(LiftedConvergenceTest, MixedOrdersRejectIncreasingTotalAfterCancellation)
@@ -367,8 +378,9 @@ namespace Rodin::Tests::Convergence
     constexpr Real FieldConstant = 3.9;
     for (Real h : {0.25, 0.125, 0.0625})
     {
-      const ErrorNorms field(FieldConstant * std::pow(h, 4),
-        FieldConstant * std::pow(h, 3)), geometry(std::pow(h, 3), h * h);
+      const ErrorNorms field(
+        FieldConstant * std::pow(h, 4), FieldConstant * std::pow(h, 3)),
+        geometry(std::pow(h, 3), h * h);
       const Real sign = h == 0.25 ? Real(-1) : Real(1);
       const ErrorNorms total(std::abs(field.getL2() + sign * geometry.getL2()),
         std::abs(field.getH1Seminorm() + sign * geometry.getH1Seminorm()));
@@ -383,8 +395,11 @@ namespace Rodin::Tests::Convergence
     }
     ASSERT_EQ(failures.size(), 2);
     for (int i = 0; i < failures.size(); ++i)
+    {
       EXPECT_NE(std::string(failures.GetTestPartResult(i).message())
-          .find("mixed total interval=1"), std::string::npos);
+                  .find("mixed total interval=1"),
+        std::string::npos);
+    }
   }
 
   TEST(LiftedConvergenceTest, RejectsBadFinalInterval)
@@ -407,8 +422,10 @@ namespace Rodin::Tests::Convergence
     }
     ASSERT_GT(failures.size(), 0);
     for (int i = 0; i < failures.size(); ++i)
+    {
       EXPECT_NE(std::string(failures.GetTestPartResult(i).message()).find("interval=2"),
         std::string::npos);
+    }
   }
 
   TEST(LiftedConvergenceTest, AcceptsRepresentableFieldGeometryOrders)
@@ -465,8 +482,10 @@ namespace Rodin::Tests::Convergence
     }
     ASSERT_GT(failures.size(), 0);
     for (int i = 0; i < failures.size(); ++i)
+    {
       EXPECT_NE(std::string(failures.GetTestPartResult(i).message()).find("interval=2"),
         std::string::npos);
+    }
   }
 
   TEST(LiftedConvergenceTest, RejectsTwoLevelRepresentableStudy)

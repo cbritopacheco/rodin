@@ -59,6 +59,7 @@ namespace Rodin::Tests::Convergence
       {
         ASSERT_GE(m_histories[0].getSize(), 3u);
         for (size_t field = 0; field < Fields; ++field)
+        {
           for (size_t i = 1; i < m_histories[field].getSize(); ++i)
           {
             SCOPED_TRACE(::testing::Message() << "field=" << field << " interval=" << i);
@@ -94,6 +95,7 @@ namespace Rodin::Tests::Convergence
             EXPECT_GT(rate.getL2(), floor.getL2());
             EXPECT_GT(rate.getH1Seminorm(), floor.getH1Seminorm());
           }
+        }
       }
 
       std::array<ErrorHistory, Fields> m_histories;

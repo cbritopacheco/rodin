@@ -28,9 +28,11 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
       SCOPED_TRACE(::testing::Message() << "non-nodal constant=" << nonNodalConstant);
       std::array<Mat, 3> operators{nullptr, nullptr, nullptr};
       for (auto& op : operators)
+      {
         ASSERT_EQ(MatCreateAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, 2, 2, 2,
                     nullptr, 2, nullptr, &op),
           PETSC_SUCCESS);
+      }
       std::array<std::array<Real, 4>, 3> values{
         {{4, 0, 0, 9}, {2, 7, -2, -7}, {1, 0, 0, 3}}};
       if (nonNodalConstant)
@@ -59,8 +61,10 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
       PetscInt first = 0, last = 0;
       EXPECT_EQ(VecGetOwnershipRange(constant, &first, &last), PETSC_SUCCESS);
       for (PetscInt row = first; row < last; ++row)
+      {
         EXPECT_EQ(VecSetValues(constant, 1, &row, &coefficients[row], INSERT_VALUES),
           PETSC_SUCCESS);
+      }
       EXPECT_EQ(VecAssemblyBegin(constant), PETSC_SUCCESS);
       EXPECT_EQ(VecAssemblyEnd(constant), PETSC_SUCCESS);
       MixedStability::Result result;
@@ -110,7 +114,8 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
           }
 #ifdef RODIN_USE_MPI
           else
-            return DistributedUniformGrid(Context::MPI(*environment, *world), this->GetParam())
+            return DistributedUniformGrid(
+              Context::MPI(*environment, *world), this->GetParam())
               .makeMesh(n, initialize);
 #endif
         }();
@@ -141,12 +146,14 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
         constant = RealFunction(Real(1));
         constant.sync();
         PETScMixedStability::compute(result, a.getOperator(), b.getOperator(),
-          mass.getOperator(), std::get<IndexMap<Real>>(boundary.getDOFs()), constant.getData());
+          mass.getOperator(), std::get<IndexMap<Real>>(boundary.getDOFs()),
+          constant.getData());
       }
 
       void checkHierarchy() const
       {
         for (bool curved : {false, true})
+        {
           for (size_t n : {2u, 3u, 5u})
           {
             SCOPED_TRACE(::testing::Message() << "curved=" << curved << " n=" << n);
@@ -156,10 +163,13 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
               measure(measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
               ASSERT_FALSE(::testing::Test::HasFatalFailure());
               MixedStability::expectConsistent(measurements[i]);
-              const bool obstructed = n == 2 && this->GetParam() != Polytope::Type::Pyramid;
+              const bool obstructed =
+                n == 2 && this->GetParam() != Polytope::Type::Pyramid;
               EXPECT_EQ(measurements[i].isDimensionObstructed(), obstructed);
-              EXPECT_EQ(MixedStability::hasResolvedPositiveSpectrum(measurements[i]), !obstructed);
-              SCOPED_TRACE(::testing::Message() << "free velocity=" << measurements[i].freeVelocity
+              EXPECT_EQ(MixedStability::hasResolvedPositiveSpectrum(measurements[i]),
+                !obstructed);
+              SCOPED_TRACE(::testing::Message()
+                << "free velocity=" << measurements[i].freeVelocity
                 << "zero-mean pressure=" << measurements[i].zeroMeanPressure
                 << "smallest eigenvalue=" << measurements[i].eigenvalues.minCoeff());
             }
@@ -169,9 +179,12 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
             {
               ASSERT_GT(measurements[0].eigenvalues.minCoeff(), 0);
               EXPECT_LT(std::abs(measurements[1].eigenvalues.minCoeff() /
-                measurements[0].eigenvalues.minCoeff() - 1), QuadratureTolerance);
+                            measurements[0].eigenvalues.minCoeff() -
+                          1),
+                QuadratureTolerance);
             }
           }
+        }
       }
 
       void checkMissingDivergence() const
@@ -192,15 +205,19 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
       void checkHigherOrderHierarchy() const
       {
         for (bool curved : {false, true})
+        {
           for (size_t n : {3u, 4u, 5u})
           {
-            SCOPED_TRACE(::testing::Message() << "velocity degree=3 curved=" << curved << " n=" << n);
+            SCOPED_TRACE(::testing::Message()
+              << "velocity degree=3 curved=" << curved << " n=" << n);
             std::array<MixedStability::Result, 2> measurements;
             for (size_t i = 0; i < measurements.size(); ++i)
             {
-              measure<3>(measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
+              measure<3>(
+                measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
               ASSERT_FALSE(::testing::Test::HasFatalFailure());
-              SCOPED_TRACE(::testing::Message() << "freeVelocity=" << measurements[i].freeVelocity
+              SCOPED_TRACE(::testing::Message()
+                << "freeVelocity=" << measurements[i].freeVelocity
                 << " zeroMeanPressure=" << measurements[i].zeroMeanPressure
                 << " minimumEigenvalue=" << measurements[i].eigenvalues.minCoeff());
               MixedStability::expectConsistent(measurements[i]);
@@ -211,8 +228,11 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
             ASSERT_EQ(measurements[0].zeroMeanPressure, measurements[1].zeroMeanPressure);
             ASSERT_GT(measurements[0].eigenvalues.minCoeff(), 0);
             EXPECT_LT(std::abs(measurements[1].eigenvalues.minCoeff() /
-              measurements[0].eigenvalues.minCoeff() - 1), QuadratureTolerance);
+                          measurements[0].eigenvalues.minCoeff() -
+                        1),
+              QuadratureTolerance);
           }
+        }
       }
 
       void checkHigherOrderMissingDivergence() const
@@ -233,32 +253,61 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
   };
 
   using LocalStabilityTest = StabilityTest<Context::Local>;
-  TEST_P(LocalStabilityTest, PressureSpectrumAcrossRefinementLevels) { checkHierarchy(); }
-  TEST_P(LocalStabilityTest, MissingDivergenceRejected) { checkMissingDivergence(); }
-  TEST_P(LocalStabilityTest, P3P2PressureSpectrumAcrossRefinementLevels) { checkHigherOrderHierarchy(); }
-  TEST_P(LocalStabilityTest, P3P2MissingDivergenceRejected) { checkHigherOrderMissingDivergence(); }
+  TEST_P(LocalStabilityTest, PressureSpectrumAcrossRefinementLevels)
+  {
+    checkHierarchy();
+  }
+  TEST_P(LocalStabilityTest, MissingDivergenceRejected)
+  {
+    checkMissingDivergence();
+  }
+  TEST_P(LocalStabilityTest, P3P2PressureSpectrumAcrossRefinementLevels)
+  {
+    checkHigherOrderHierarchy();
+  }
+  TEST_P(LocalStabilityTest, P3P2MissingDivergenceRejected)
+  {
+    checkHigherOrderMissingDivergence();
+  }
   INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalStabilityTest,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
       Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
       Polytope::Type::Wedge),
-    [](const auto& info) { return std::string(UniformGrid::getGeometryName(info.param)); });
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
 #ifdef RODIN_USE_MPI
   using MPIStabilityTest = StabilityTest<Context::MPI>;
-  TEST_P(MPIStabilityTest, PressureSpectrumAcrossRefinementLevels) { checkHierarchy(); }
-  TEST_P(MPIStabilityTest, MissingDivergenceRejected) { checkMissingDivergence(); }
-  TEST_P(MPIStabilityTest, P3P2PressureSpectrumAcrossRefinementLevels) { checkHigherOrderHierarchy(); }
-  TEST_P(MPIStabilityTest, P3P2MissingDivergenceRejected) { checkHigherOrderMissingDivergence(); }
+  TEST_P(MPIStabilityTest, PressureSpectrumAcrossRefinementLevels)
+  {
+    checkHierarchy();
+  }
+  TEST_P(MPIStabilityTest, MissingDivergenceRejected)
+  {
+    checkMissingDivergence();
+  }
+  TEST_P(MPIStabilityTest, P3P2PressureSpectrumAcrossRefinementLevels)
+  {
+    checkHigherOrderHierarchy();
+  }
+  TEST_P(MPIStabilityTest, P3P2MissingDivergenceRejected)
+  {
+    checkHigherOrderMissingDivergence();
+  }
   INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIStabilityTest,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
       Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
       Polytope::Type::Wedge),
-    [](const auto& info) { return std::string(UniformGrid::getGeometryName(info.param)); });
+    [](const auto& info) {
+      return std::string(UniformGrid::getGeometryName(info.param));
+    });
 #endif
 }
 
 int main(int argc, char** argv)
 {
-  if (PetscInitialize(&argc, &argv, nullptr, nullptr) != PETSC_SUCCESS) return 1;
+  if (PetscInitialize(&argc, &argv, nullptr, nullptr) != PETSC_SUCCESS)
+    return 1;
   int result;
   {
 #ifdef RODIN_USE_MPI
@@ -270,6 +319,7 @@ int main(int argc, char** argv)
     ::testing::InitGoogleTest(&argc, argv);
     result = RUN_ALL_TESTS();
   }
-  if (PetscFinalize() != PETSC_SUCCESS) return 1;
+  if (PetscFinalize() != PETSC_SUCCESS)
+    return 1;
   return result;
 }

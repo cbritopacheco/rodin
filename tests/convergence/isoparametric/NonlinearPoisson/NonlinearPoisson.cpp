@@ -135,8 +135,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
             << "geometry degree=" << Q << " field degree=" << K << " n=" << n);
           Workload<ContextType, Q> problem(this->GetParam(), n, Map::Sine, true);
           LiftedErrorNorm::Result lifted;
-          const auto represented = problem.template solve<K>(Data::Field::Affine,
-            false, AssemblyOrder, SolveTolerance, true, NormOrder, &lifted);
+          const auto represented = problem.template solve<K>(Data::Field::Affine, false,
+            AssemblyOrder, SolveTolerance, true, NormOrder, &lifted);
           history.appendRepresentable(
             Real(1) / Real(n - 1), represented, lifted, PatchTolerance);
         }
@@ -150,10 +150,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
         std::array<LiftedErrorNorm::Result, 4> errors;
         for (size_t i = 0; i < errors.size(); ++i)
         {
-          SCOPED_TRACE(::testing::Message() << "geometry degree=" << Q
-            << " field degree=" << K << " control=" << i);
-          const auto represented = problem.template solve<K>(Data::Field::Affine,
-            false, i == 1 ? RefinedOrder : AssemblyOrder,
+          SCOPED_TRACE(::testing::Message()
+            << "geometry degree=" << Q << " field degree=" << K << " control=" << i);
+          const auto represented = problem.template solve<K>(Data::Field::Affine, false,
+            i == 1 ? RefinedOrder : AssemblyOrder,
             i == 2 ? RefinedTolerance : SolveTolerance, true,
             i == 3 ? RefinedNormOrder : NormOrder, &errors[i]);
           LiftedConvergence::expectRepresentable(represented, errors[i], PatchTolerance);
@@ -290,6 +290,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
         const auto solver = problem.template solve<K>(
           Data::Field::Sine, false, AssemblyOrder, RefinedTolerance);
         for (const auto& e : {quad, solver})
+        {
           for (const auto& pair : {std::pair{base.getL2(), e.getL2()},
                  std::pair{base.getH1Seminorm(), e.getH1Seminorm()}})
           {
@@ -298,6 +299,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
             ASSERT_GT(pair.first, 0);
             EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
           }
+        }
       }
       void tangent(Map map = Map::Quadratic) const
       {
@@ -322,14 +324,26 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
   };
   using LocalQ1Test = CurvedTest<Context::Local, 1>;
   using LocalQ3Test = CurvedTest<Context::Local, 3>;
-  TEST_P(LocalQ1Test, LiftedAffineRates) { liftedAffineRates(); }
-  TEST_P(LocalQ1Test, LiftedIndependentSensitivity) { liftedIndependentSensitivity(); }
+  TEST_P(LocalQ1Test, LiftedAffineRates)
+  {
+    liftedAffineRates();
+  }
+  TEST_P(LocalQ1Test, LiftedIndependentSensitivity)
+  {
+    liftedIndependentSensitivity();
+  }
   TEST_P(LocalQ1Test, LiftedResidualTangentConsistency)
   {
     liftedResidualTangentConsistency();
   }
-  TEST_P(LocalQ3Test, LiftedAffineRates) { liftedAffineRates(); }
-  TEST_P(LocalQ3Test, LiftedIndependentSensitivity) { liftedIndependentSensitivity(); }
+  TEST_P(LocalQ3Test, LiftedAffineRates)
+  {
+    liftedAffineRates();
+  }
+  TEST_P(LocalQ3Test, LiftedIndependentSensitivity)
+  {
+    liftedIndependentSensitivity();
+  }
   TEST_P(LocalQ3Test, LiftedResidualTangentConsistency)
   {
     liftedResidualTangentConsistency();
@@ -415,14 +429,26 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
 #if defined(RODIN_CURVED_NONLINEAR_POISSON_PETSC) && defined(RODIN_USE_MPI)
   using MPIQ1Test = CurvedTest<Context::MPI, 1>;
   using MPIQ3Test = CurvedTest<Context::MPI, 3>;
-  TEST_P(MPIQ1Test, LiftedAffineRates) { liftedAffineRates(); }
-  TEST_P(MPIQ1Test, LiftedIndependentSensitivity) { liftedIndependentSensitivity(); }
+  TEST_P(MPIQ1Test, LiftedAffineRates)
+  {
+    liftedAffineRates();
+  }
+  TEST_P(MPIQ1Test, LiftedIndependentSensitivity)
+  {
+    liftedIndependentSensitivity();
+  }
   TEST_P(MPIQ1Test, LiftedResidualTangentConsistency)
   {
     liftedResidualTangentConsistency();
   }
-  TEST_P(MPIQ3Test, LiftedAffineRates) { liftedAffineRates(); }
-  TEST_P(MPIQ3Test, LiftedIndependentSensitivity) { liftedIndependentSensitivity(); }
+  TEST_P(MPIQ3Test, LiftedAffineRates)
+  {
+    liftedAffineRates();
+  }
+  TEST_P(MPIQ3Test, LiftedIndependentSensitivity)
+  {
+    liftedIndependentSensitivity();
+  }
   TEST_P(MPIQ3Test, LiftedResidualTangentConsistency)
   {
     liftedResidualTangentConsistency();
