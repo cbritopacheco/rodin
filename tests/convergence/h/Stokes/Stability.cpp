@@ -50,6 +50,7 @@ namespace Rodin::Tests::Convergence::H::Stokes
       // smallest eigenvalue, not an inferred uniform stability constant.
       static constexpr Real QuadratureTolerance = 1e-8;
 
+      template <size_t K = 2>
       void measure(MixedStability::Result& result, size_t n, bool curved,
         size_t order, bool omitDivergence = false) const
       {
@@ -57,10 +58,10 @@ namespace Rodin::Tests::Convergence::H::Stokes
         if (curved)
         {
           CurvedGeometry mapping(mesh);
-          mapping.install<2>();
+          mapping.template install<2>();
         }
-        H1 velocitySpace(std::integral_constant<size_t, 2>{}, mesh, mesh.getDimension());
-        H1 pressureSpace(std::integral_constant<size_t, 1>{}, mesh);
+        H1 velocitySpace(std::integral_constant<size_t, K>{}, mesh, mesh.getDimension());
+        H1 pressureSpace(std::integral_constant<size_t, K - 1>{}, mesh);
         TrialFunction u(velocitySpace);
         TrialFunction p(pressureSpace);
         TestFunction v(velocitySpace);
@@ -139,6 +140,51 @@ namespace Rodin::Tests::Convergence::H::Stokes
     EXPECT_EQ(correct.zeroMeanPressure, wrong.zeroMeanPressure);
     // An explicitly zero divergence matrix has exactly zero pressure spectrum;
     // no numerical rank threshold is used to establish this negative control.
+    EXPECT_TRUE(wrong.eigenvalues.isZero(0));
+  }
+
+  TEST_P(StokesStabilityTest, P3P2PressureSpectrumAcrossRefinementLevels)
+  {
+    // Three resolved levels are independent of the degree-two coarse-grid
+    // rank obstruction. The pressure constant is interpolated in its actual
+    // basis; its higher-order coefficients are not assumed to be ones.
+    for (bool curved : {false, true})
+      for (size_t n : {3u, 4u, 5u})
+      {
+        SCOPED_TRACE(::testing::Message() << "velocity degree=3 curved=" << curved << " n=" << n);
+        std::array<MixedStability::Result, 2> measurements;
+        for (size_t i = 0; i < measurements.size(); ++i)
+        {
+          measure<3>(measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
+          ASSERT_FALSE(::testing::Test::HasFatalFailure());
+          SCOPED_TRACE(::testing::Message() << "freeVelocity=" << measurements[i].freeVelocity
+            << " zeroMeanPressure=" << measurements[i].zeroMeanPressure
+            << " minimumEigenvalue=" << measurements[i].eigenvalues.minCoeff());
+          MixedStability::expectConsistent(measurements[i]);
+          EXPECT_FALSE(measurements[i].isDimensionObstructed());
+          EXPECT_TRUE(MixedStability::hasResolvedPositiveSpectrum(measurements[i]));
+        }
+        ASSERT_EQ(measurements[0].freeVelocity, measurements[1].freeVelocity);
+        ASSERT_EQ(measurements[0].zeroMeanPressure, measurements[1].zeroMeanPressure);
+        ASSERT_GT(measurements[0].eigenvalues.minCoeff(), 0);
+        EXPECT_LT(std::abs(measurements[1].eigenvalues.minCoeff() /
+          measurements[0].eigenvalues.minCoeff() - 1), QuadratureTolerance);
+      }
+  }
+
+  TEST_P(StokesStabilityTest, P3P2MissingDivergenceRejected)
+  {
+    MixedStability::Result correct, wrong;
+    measure<3>(correct, 3, true, AssemblyOrder);
+    ASSERT_FALSE(::testing::Test::HasFatalFailure());
+    measure<3>(wrong, 3, true, AssemblyOrder, true);
+    ASSERT_FALSE(::testing::Test::HasFatalFailure());
+    MixedStability::expectConsistent(correct);
+    MixedStability::expectConsistent(wrong);
+    EXPECT_TRUE(MixedStability::hasResolvedPositiveSpectrum(correct));
+    EXPECT_FALSE(MixedStability::hasResolvedPositiveSpectrum(wrong));
+    EXPECT_EQ(correct.freeVelocity, wrong.freeVelocity);
+    EXPECT_EQ(correct.zeroMeanPressure, wrong.zeroMeanPressure);
     EXPECT_TRUE(wrong.eigenvalues.isZero(0));
   }
 

@@ -55,9 +55,11 @@ non-degenerate velocity-pressure formulation in one spatial dimension.
 ## Independent finite-mesh pressure stability
 
 The separate `RodinConvergenceHStokesStability` target checks pressure modes
-without solving a manufactured saddle-point system. Let $V_h^0$ be the
-vector degree-two space with homogeneous essential trace and let $Q_h^0$
-be the zero-mean subspace of the scalar degree-one pressure space. With
+without solving a manufactured saddle-point system. For a velocity degree
+$k\ge2$, let $V_h^0$ be the vector degree-$k$ space with homogeneous
+essential trace and let $Q_h^0$ be the zero-mean subspace of the scalar
+degree-$(k-1)$ pressure space. The pair-specific mesh sequences and
+verification status are stated below. With
 velocity energy $a(v,v)=\int_\Omega Dv:Dv\thinspace\mathrm{d}x$ and
 pressure norm $\lVert p\rVert_{L^2(\Omega)}$, define
 
@@ -109,7 +111,7 @@ scale, not from an independently proved mesh-uniform stability bound.
 A synthetic unequal-mass example has the independent value
 $\beta_h^2=4/3$ and checks logical constraint elimination and mean reduction.
 
-All six applicable geometries use $n=2,3,5$ on affine and exact quadratic
+For $k=2$, all six applicable geometries use $n=2,3,5$ on affine and exact quadratic
 maps. Assembly orders $16$ and $20$ are compared independently; each positive
 minimum eigenvalue must change relatively by less than $10^{-8}$.
 At $n=2$, every family except Pyramid has fewer free velocity DOFs than
@@ -121,9 +123,22 @@ Omitting the divergence operator on the curved $n=3$ mesh must give an
 exactly zero spectrum and fail the positivity predicate with unchanged
 space dimensions.
 
+The $P_3/P_2$ extension is locally verified in sequential and OpenMP builds.
+It retains all
+six applicable geometries, affine and exact quadratic maps, and independent
+assembly orders $16$ and $20$. Its three levels are $n=3,4,5$; every level
+requires resolved positivity and both algebraic spectral routes to agree.
+The smallest positive eigenvalue has the same $10^{-8}$ relative quadrature
+contamination budget. A missing-divergence control on the curved $n=3$
+mesh retains the dimensions and requires an exactly zero spectrum. The
+pressure constant is obtained by interpolation in the actual degree-two
+basis, not by assigning one to every coefficient. These tests do not assert
+a power-law rate for $\beta_h$, a uniform lower bound, or behavior on the
+unexamined single-interval $n=2$ higher-order mesh.
+
 Sequential and OpenMP native assembly are separate execution gates. This
 target does not certify PETSc/MPI operator spectra or a mesh-uniform
-inf-sup theorem. Geometry-specific registrations retain both tests, slow
+inf-sup theorem. Geometry-specific registrations retain all pair-specific tests, slow
 labels and 1800-second watchdogs. Each dense velocity/pressure workspace
 is bounded by 96 MiB before allocation; this is not a bound on all
 simultaneously live matrices or factorization storage.

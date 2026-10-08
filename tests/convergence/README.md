@@ -756,8 +756,13 @@ $P_2/P_1$ pair, six geometries, maps and levels in local contexts and at MPI
 ranks one through four, independently in both thread configurations. Its
 explicitly global oracle collects complete operators and integer boundary
 indices; it introduces no collectives into mesh queries or field evaluation.
-The finite matrix is locally verified, not hosted-CI certified. These gates
-do not establish mesh-uniform stability or stability of higher-order pairs;
+The finite matrix is locally verified, not hosted-CI certified.
+The native gate also locally verifies the $P_3/P_2$ pair on affine and
+quadratic maps at grid levels $3,4,5$ in both thread configurations,
+with the same independent spectra and missing-divergence control.
+The corresponding higher-order PETSc matrix remains under verification.
+These finite gates do not establish mesh-uniform stability or stability of
+the full higher-order family;
 a uniform stability argument for the pyramid/wedge families remains unresolved.
 
 Each new suite must document its continuous problem, derived data, discrete
