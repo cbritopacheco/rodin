@@ -622,8 +622,8 @@ the hinge solve; the outer energy/quality line search then backtracks the
 resulting physical increment.
 The fitting and centered distribution coefficients default to
 `--wngir-fit=1`, `--wngir-distribution-deviatoric=0.0001`, and
-`--wngir-distribution-divergence=0.0001`. The dimensionless hinge strength
-is `--wngir-hinge=100`. Directional Newton is enabled without a predictor
+`--wngir-distribution-divergence=0.01`. The dimensionless hinge strength
+is `--wngir-hinge=10`. Directional Newton is enabled without a predictor
 motion cap (`--wngir-max-step-over-h=0`). The Jacobian floor and distortion
 budget are `--wngir-jacobian=0.01` and `--wngir-distortion=10`.
 KelvinBall retains its application-specific geometric target

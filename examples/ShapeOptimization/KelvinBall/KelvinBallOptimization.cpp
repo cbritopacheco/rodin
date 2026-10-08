@@ -886,14 +886,14 @@ namespace KelvinBall
           << Alert::Notation("--wngir-distribution-deviatoric=<value>")
           << "  Centered deviatoric weight (default: 0.0001)." << Alert::NewLine
           << Alert::Notation("--wngir-distribution-divergence=<value>")
-          << "  Centered divergence weight (default: 0.0001)." << Alert::NewLine
+          << "  Centered divergence weight (default: 0.01)." << Alert::NewLine
           << Alert::Notation("--wngir-linear-solver=<name>")
           << "  WNGIR linear backend: mumps, sparse-lu, or cg (default: MUMPS when "
              "built)."
           << Alert::NewLine << Alert::Notation("--wngir-directional-newton[=0|1]")
           << "  Scale the frozen model with directional Newton (default: 1)."
           << Alert::NewLine << Alert::Notation("--wngir-hinge=<value>")
-          << "  Dimensionless quadratic-hinge weight (default: 100)." << Alert::NewLine
+          << "  Dimensionless quadratic-hinge weight (default: 10)." << Alert::NewLine
           << Alert::Notation("--wngir-quality-guard=<fraction>")
           << "  Soft guard fraction for that penalty (default: 0.1)." << Alert::NewLine
           << Alert::Notation("--geometry-only")
