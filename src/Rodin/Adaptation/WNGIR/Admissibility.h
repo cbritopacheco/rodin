@@ -32,14 +32,24 @@ namespace Rodin::Adaptation
       Real maxQRel = Real(0);
   };
 
-  /// @brief Returns the sampled admissibility quadrature order for FE order.
+  /**
+   * @brief Returns the sampled admissibility quadrature order for FE order.
+   * @param feOrder Polynomial order of the displacement finite element.
+   * @returns Maximum of two and twice the finite element order.
+   */
   inline std::size_t wngirAdmissibilityQuadratureOrder(std::size_t feOrder)
   {
     return std::max<std::size_t>(2, 2 * feOrder);
   }
 
   template <class Displacement>
-  /// @brief Evaluates sampled Jacobian and relative distortion without changing displacement.
+  /**
+   * @brief Evaluates sampled admissibility without changing the displacement.
+   * @param u Displacement field to sample.
+   * @param jacobian Lower admissible relative Jacobian bound.
+   * @param quadratureOrder Sampling order; zero selects the finite-element rule.
+   * @returns Sampled Jacobian, relative distortion and invalid-sample count.
+   */
   WNGIRAdmissibilityReport evaluateWNGIRAdmissibilitySampled(const Displacement& u,
     Real jacobian, std::size_t quadratureOrder = 0)
   {

@@ -30,7 +30,15 @@ namespace Rodin::Adaptation
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
-      /// @brief Constructs the WNGIR observation coefficient.
+      /**
+       * @brief Constructs the fitting metric coefficient.
+       * @param grad Gradient of the target level set.
+       * @param current Current displacement field.
+       * @param locator Locator for deformed evaluation points.
+       * @param parameters Model coefficients retained by reference.
+       * @param normalization Fixed gradient-scale normalization.
+       * @param dimension Spatial dimension.
+       */
       WNGIRFittingCoefficient(const GradType& grad, const Displacement& current,
         const LocatorType& locator, const WNGIRParameters& parameters, Real normalization,
         std::size_t dimension)
@@ -41,7 +49,10 @@ namespace Rodin::Adaptation
           m_dimension(dimension)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Coefficient to copy, cloning its target gradient.
+       */
       WNGIRFittingCoefficient(const WNGIRFittingCoefficient& other)
         : Parent(other),
           m_grad(other.m_grad->copy()),
@@ -51,7 +62,11 @@ namespace Rodin::Adaptation
           m_dimension(other.m_dimension)
       {}
 
-      /// @brief Evaluates the coefficient at a point.
+      /**
+       * @brief Evaluates the coefficient at a point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
         const auto& params = m_parameters.get();
@@ -69,25 +84,39 @@ namespace Rodin::Adaptation
         return m;
       }
 
-      /// @brief Number of rows of the matrix value.
+      /**
+       * @brief Number of rows of the matrix value.
+       * @returns The rows.
+       */
       std::size_t getRows() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Number of columns of the matrix value.
+      /**
+       * @brief Number of columns of the matrix value.
+       * @returns The columns.
+       */
       std::size_t getColumns() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Reports no intrinsic polynomial order.
-      Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Reports no intrinsic polynomial order.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      Optional<std::size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
 
-      /// @brief Clones this object.
+      /**
+       * @brief Clones this coefficient.
+       * @returns Newly allocated copy owned by the caller.
+       */
       WNGIRFittingCoefficient* copy() const noexcept override
       {
         return new WNGIRFittingCoefficient(*this);
@@ -100,11 +129,21 @@ namespace Rodin::Adaptation
       Real m_normalization;
       std::size_t m_dimension;
   };
+  /**
+   * @brief Deduction guide for WNGIRFittingCoefficient.
+   * @param grad Gradient of the observation field.
+   * @param current Current displacement field.
+   * @param locator Point locator used to find mesh entities.
+   * @param parameters Parameters configuring the operation.
+   * @param normalization Normalization factor.
+   * @param dimension Spatial dimension.
+   */
 
   template <class GradDerived, class Displacement, class LocatorType>
-  WNGIRFittingCoefficient(const Variational::VectorFunctionBase<Real, GradDerived>&,
-    const Displacement&, const LocatorType&, const WNGIRParameters&, Real,
-    std::size_t) -> WNGIRFittingCoefficient<GradDerived, Displacement, LocatorType>;
+  WNGIRFittingCoefficient(const Variational::VectorFunctionBase<Real, GradDerived>& grad,
+    const Displacement& current, const LocatorType& locator,
+    const WNGIRParameters& parameters, Real normalization,
+    std::size_t dimension) -> WNGIRFittingCoefficient<GradDerived, Displacement, LocatorType>;
 }
 
 #endif

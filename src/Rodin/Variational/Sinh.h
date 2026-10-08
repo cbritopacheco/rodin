@@ -43,9 +43,7 @@ namespace Rodin::Variational
    * @see Cosh, Sin
    */
 
-  /**
-   * @ingroup SinhSpecializations
-   */
+  /// @ingroup SinhSpecializations
   template <class NestedDerived>
   class Sinh<FunctionBase<NestedDerived>> final
     : public RealFunctionBase<Sinh<FunctionBase<NestedDerived>>>
@@ -128,7 +126,11 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param g Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& g) const
       {
         const auto o = getOperand().getOrder(g);
@@ -154,12 +156,17 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for @c Sinh.
+  /**
+   * @brief Deduction guide for @c Sinh.
+   * @param v Function to apply sinh to
+   */
   template <class NestedDerived>
-  Sinh(const FunctionBase<NestedDerived>&) -> Sinh<FunctionBase<NestedDerived>>;
+  Sinh(const FunctionBase<NestedDerived>& v) -> Sinh<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Helper function to construct objects of type Sinh.
+   * @param f Function operand.
+   * @returns Pointwise hyperbolic-sine expression.
    */
   template <class NestedDerived>
   auto sinh(const FunctionBase<NestedDerived>& f)

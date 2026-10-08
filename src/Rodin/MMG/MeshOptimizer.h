@@ -36,9 +36,7 @@ namespace Rodin::MMG
   class Optimizer : public MMG5
   {
     public:
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       Optimizer() = default;
 
       /**

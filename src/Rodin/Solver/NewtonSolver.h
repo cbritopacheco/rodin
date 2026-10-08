@@ -73,6 +73,7 @@ namespace Rodin::Solver
 
       /**
        * @brief Returns the associated linear solver.
+       * @returns The associated linear solver.
        */
       const LinearSolver& getLinearSolver() const noexcept
       {
@@ -81,6 +82,7 @@ namespace Rodin::Solver
 
       /**
        * @brief Returns the associated linear solver.
+       * @returns The associated linear solver.
        */
       LinearSolver& getLinearSolver() noexcept
       {
@@ -281,29 +283,19 @@ namespace Rodin::Solver
       static constexpr Real DefaultRelativeTolerance = 1e-8;
 
     public:
-      /**
-       * @brief Reason why the most recent solve terminated.
-       */
+      /// @brief Reason why the most recent solve terminated.
       enum class ConvergedReason
       {
-        /**
-         * @brief The absolute residual tolerance was satisfied.
-         */
+        /// @brief The absolute residual tolerance was satisfied.
         AbsoluteTolerance,
 
-        /**
-         * @brief The relative residual tolerance was satisfied.
-         */
+        /// @brief The relative residual tolerance was satisfied.
         RelativeTolerance,
 
-        /**
-         * @brief The step tolerance was satisfied.
-         */
+        /// @brief The step tolerance was satisfied.
         StepTolerance,
 
-        /**
-         * @brief The maximum number of Newton iterations was reached.
-         */
+        /// @brief The maximum number of Newton iterations was reached.
         MaxIterations,
 
         ResidualNormIsNotFinite,
@@ -332,14 +324,10 @@ namespace Rodin::Solver
          */
         size_t iterations = 0;
 
-        /**
-         * @brief Residual norm at the initial iterate.
-         */
+        /// @brief Residual norm at the initial iterate.
         Real initialResidual = 0.0;
 
-        /**
-         * @brief Residual norm of the last assembled tangential system.
-         */
+        /// @brief Residual norm of the last assembled tangential system.
         Real finalResidual = 0.0;
 
         /**
@@ -353,9 +341,7 @@ namespace Rodin::Solver
          */
         Real finalStepNorm = 0.0;
 
-        /**
-         * @brief Damping factor used during the solve.
-         */
+        /// @brief Damping factor used during the solve.
         Real dampingFactor = 1.0;
 
         /**
@@ -366,9 +352,7 @@ namespace Rodin::Solver
          */
         ConvergedReason reason = ConvergedReason::MaxIterations;
 
-        /**
-         * @brief Whether the solve terminated by a convergence criterion.
-         */
+        /// @brief Whether the solve terminated by a convergence criterion.
         bool converged = false;
       };
 
@@ -392,9 +376,7 @@ namespace Rodin::Solver
       /// @brief Linear solver type used by this Newton solver.
       using LinearSolverType = LinearSolver;
 
-      /**
-       * @brief Outcome of a single Newton step.
-       */
+      /// @brief Outcome of a single Newton step.
       struct StepResult
       {
           /// @brief Whether the step was accepted by the policy.
@@ -821,9 +803,7 @@ namespace Rodin::Solver
       }
 
     private:
-      /**
-       * @brief Invokes the optional monitor with the current report.
-       */
+      /// @brief Invokes the optional monitor with the current report.
       void notify() const
       {
         if (m_monitor)
@@ -876,9 +856,7 @@ namespace Rodin::Solver
       /// @brief Optional custom step policy.
       Optional<StepPolicy> m_stepPolicy;
 
-      /**
-       * @brief Diagnostic report of the most recent solve.
-       */
+      /// @brief Diagnostic report of the most recent solve.
       Report m_report;
   };
 
@@ -891,9 +869,10 @@ namespace Rodin::Solver
    * SparseLU solver(tangent);
    * NewtonSolver newton(solver);
    * @endcode
+   * @param solver Linear solver used for each tangential solve.
    */
   template <class LS>
-  NewtonSolver(LS&) -> NewtonSolver<LS>;
+  NewtonSolver(LS& solver) -> NewtonSolver<LS>;
 }
 
 #endif

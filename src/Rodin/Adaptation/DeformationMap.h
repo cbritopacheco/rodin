@@ -47,7 +47,10 @@ namespace Rodin::Adaptation
           m_locator(locator)
       {}
 
-      /// @brief The underlying displacement field.
+      /**
+       * @brief The underlying displacement field.
+       * @returns The displacement.
+       */
       const Displacement& getDisplacement() const
       {
         return m_u.get();
@@ -56,6 +59,9 @@ namespace Rodin::Adaptation
       /**
        * @brief The displacement @f$u(x)@f$ at an integration point, as a
        * spatial vector.
+       * @param pt Point at which the operation is evaluated.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns The displacement value.
        */
       Math::SpatialVector<Real> getDisplacementValue(
         const Geometry::Point& pt, const Variational::IntegrationPoint& ip) const
@@ -78,6 +84,7 @@ namespace Rodin::Adaptation
        *
        * @param ip Integration point on the reference configuration; its
        * polytope, quadrature formula and quadrature index form the cache key.
+       * @returns Located point in the deformed configuration.
        */
       const Geometry::Point& getMovedPoint(const Variational::IntegrationPoint& ip) const
       {
@@ -104,6 +111,13 @@ namespace Rodin::Adaptation
       }
 
     private:
+      /**
+       * @brief Resolves a point at moved physical coordinates.
+       * @param source Source point retaining the reference cell and coordinates.
+       * @param physical Moved physical coordinates.
+       * @param locator Locator used to resolve the moved point.
+       * @returns Located moved point, or an inverse-mapped point in the source volume cell or an adjacent volume cell when location fails.
+       */
       static Geometry::Point makeMovedPoint(const Geometry::Point& source,
         const Math::SpatialVector<Real>& physical, const LocatorType& locator)
       {
@@ -138,6 +152,11 @@ namespace Rodin::Adaptation
           Index index;
           const QF::QuadratureFormulaBase* quadrature;
           std::size_t qp;
+          /**
+           * @brief Compares the operands for equality.
+           * @param other Object compared with this object.
+           * @returns True when the operands compare equal.
+           */
 
           bool operator==(const Key& other) const
           {

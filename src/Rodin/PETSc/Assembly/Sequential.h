@@ -118,7 +118,10 @@ namespace Rodin::Assembly
         (void)ierr;
       }
 
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -260,7 +263,10 @@ namespace Rodin::Assembly
         (void)ierr;
       }
 
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -347,6 +353,12 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+      /**
+       * @brief Assembles the requested operator and vector contributions.
+       * @param axb Linear system receiving the assembled operator and vector.
+       * @param input Assembly input containing spaces and form integrators.
+       * @param mode Requested assembly mode.
+       */
 
       void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
       {
@@ -798,7 +810,10 @@ namespace Rodin::Assembly
       }
 
     public:
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -882,6 +897,12 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+      /**
+       * @brief Assembles the requested operator and vector contributions.
+       * @param axb Linear system receiving the assembled operator and vector.
+       * @param input Assembly input containing spaces and form integrators.
+       * @param mode Requested assembly mode.
+       */
 
       void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
       {
@@ -1475,7 +1496,10 @@ namespace Rodin::Assembly
       }
 
     public:
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);

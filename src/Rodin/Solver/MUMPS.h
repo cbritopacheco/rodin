@@ -132,22 +132,24 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      /** @brief Factorization stage, shared by the factorization solvers. */
+      /// @brief Factorization stage, shared by the factorization solvers.
       using Factorization = Rodin::Solver::Factorization;
 
-      /** @brief Matrix symmetry declared to MUMPS. */
+      /// @brief Matrix symmetry declared to MUMPS.
       enum class Symmetry : int
       {
         /// @brief No symmetry; the whole matrix is factorized as @f$ LU @f$.
         Unsymmetric = 0,
-        /// @brief Symmetric positive definite; factorized as @f$ LDL^T @f$
-        /// without pivoting.
+        /**
+         * @brief Symmetric positive definite; factorized as @f$ LDL^T @f$
+         * without pivoting.
+         */
         PositiveDefinite = 1,
         /// @brief Symmetric, possibly indefinite; factorized as @f$ LDL^T @f$.
         General = 2
       };
 
-      /** @brief Fill-reducing ordering used during symbolic analysis. */
+      /// @brief Fill-reducing ordering used during symbolic analysis.
       enum class Ordering : int
       {
         AMD = 0,
@@ -160,7 +162,7 @@ namespace Rodin::Solver
         Automatic = 7
       };
 
-      /** @brief Factorization stages retained between solves. */
+      /// @brief Factorization stages retained between solves.
       struct Resources
       {
           Resources() = default;
@@ -248,7 +250,7 @@ namespace Rodin::Solver
           }
       };
 
-      /** @brief Constructs a MUMPS solver for the given problem. */
+      /// @brief Constructs a MUMPS solver for the given problem.
       MUMPS(ProblemBaseType& pb)
         : Parent(pb)
       {}
@@ -293,7 +295,7 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /** @brief Returns the declared symmetry of the system matrix. */
+      /// @brief Returns the declared symmetry of the system matrix.
       Symmetry getSymmetric() const noexcept
       {
         return m_symmetry;
@@ -316,7 +318,7 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /** @brief Returns the configured maximum thread count. */
+      /// @brief Returns the configured maximum thread count.
       Index getMaxThreads() const noexcept
       {
         return m_maxThreads;
@@ -338,7 +340,7 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /** @brief Returns the configured fill-reducing ordering. */
+      /// @brief Returns the configured fill-reducing ordering.
       Ordering getOrdering() const noexcept
       {
         return m_ordering;
@@ -361,7 +363,7 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /** @brief Returns the configured working space percentage. */
+      /// @brief Returns the configured working space percentage.
       Integer getWorkspacePercentage() const noexcept
       {
         return m_workspacePercentage;
@@ -630,9 +632,7 @@ namespace Rodin::Solver
         }
       }
 
-      /**
-       * @brief Copies the lower triangle values in the order of @ref buildIndices.
-       */
+      /// @brief Copies the lower triangle values in the order of @ref buildIndices.
       void copyLowerTriangle(const OperatorType& matrix)
       {
         const auto* outer = matrix.outerIndexPtr();

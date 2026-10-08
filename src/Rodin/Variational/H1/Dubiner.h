@@ -53,7 +53,7 @@ namespace Rodin::Variational
        * @tparam P First modal index (0 ≤ P).
        * @tparam Q Second modal index (0 ≤ Q, P + Q ≤ K).
        * @param[out] basis The computed basis function value.
-       * @param a First collapsed coordinate in [-1,1].
+       * @param a Local basis-function index.
        * @param b Second collapsed coordinate in [-1,1].
        *
        * @note Inputs (a,b) are the *collapsed coordinates*.
@@ -273,7 +273,10 @@ namespace Rodin::Variational
         return s_vandermonde;
       }
 
-      /// @brief Gets the inverse of the matrix.
+      /**
+       * @brief Gets the inverse of the matrix.
+       * @returns The inverse of the matrix.
+       */
       static const Math::Matrix<Real>& getInverse()
       {
         static const Math::Matrix<Real> s_inv = [] {
@@ -353,7 +356,15 @@ namespace Rodin::Variational
         basis = pA * pB * pC * scaleB * scaleC;
       }
 
-      /// @brief Gets the gradient of the basis function.
+      /**
+       * @brief Gets the gradient of the basis function.
+       * @param dpsi_da Storage for the derivative in the first collapsed coordinate.
+       * @param dpsi_db Storage for the derivative in the second collapsed coordinate.
+       * @param dpsi_dc Storage for the derivative in the third collapsed coordinate.
+       * @param a Coordinate at which the basis is evaluated.
+       * @param b Coordinate at which the basis is evaluated.
+       * @param c Coordinate at which the basis is evaluated.
+       */
       template <size_t P, size_t Q, size_t R>
       static constexpr void getGradient(Real& dpsi_da,
                                         Real& dpsi_db,
@@ -487,7 +498,15 @@ namespace Rodin::Variational
       //   b = 2 y / (1 - z) - 1          if z != 1
       //   a = 2 x / (1 - y - z) - 1      if y + z != 1
       //
-      /// @brief Maps reference coordinates to collapsed coordinates.
+      /**
+       * @brief Maps reference coordinates to collapsed coordinates.
+       * @param a Storage for the first collapsed coordinate.
+       * @param b Storage for the second collapsed coordinate.
+       * @param c Storage for the third collapsed coordinate.
+       * @param x Coordinate at which the basis is evaluated.
+       * @param y Coordinate at which the basis is evaluated.
+       * @param z Coordinate at which the basis is evaluated.
+       */
       static constexpr void getCollapsed(Real& a,
                                          Real& b,
                                          Real& c,
@@ -522,7 +541,10 @@ namespace Rodin::Variational
   class VandermondeTetrahedron
   {
     public:
-      /// @brief Gets the underlying matrix.
+      /**
+       * @brief Gets the underlying matrix.
+       * @returns The underlying matrix.
+       */
       static const Math::Matrix<Real>& getMatrix()
       {
         static const Math::Matrix<Real> s_vandermonde = [] {
@@ -556,7 +578,10 @@ namespace Rodin::Variational
         return s_vandermonde;
       }
 
-      /// @brief Gets the inverse of the matrix.
+      /**
+       * @brief Gets the inverse of the matrix.
+       * @returns The inverse of the matrix.
+       */
       static const Math::Matrix<Real>& getInverse()
       {
         static const Math::Matrix<Real> s_inv = [] {

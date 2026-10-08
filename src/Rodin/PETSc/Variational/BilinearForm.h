@@ -75,13 +75,17 @@ namespace Rodin::Variational
     using TestFESMeshType =
       typename FormLanguage::Traits<TestFES>::MeshType;
 
-    /// @brief Context type (either @ref Rodin::Context::Local or
-    ///        @ref Rodin::Context::MPI) for the trial mesh.
+    /**
+     * @brief Context type (either @ref Rodin::Context::Local or
+     *        @ref Rodin::Context::MPI) for the trial mesh.
+     */
     using TrialFESMeshContextType =
       typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
 
-    /// @brief Context type (either @ref Rodin::Context::Local or
-    ///        @ref Rodin::Context::MPI) for the test mesh.
+    /**
+     * @brief Context type (either @ref Rodin::Context::Local or
+     *        @ref Rodin::Context::MPI) for the test mesh.
+     */
     using TestFESMeshContextType =
       typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
@@ -90,28 +94,38 @@ namespace Rodin::Variational
       using ScalarType =
         PetscScalar;
 
-      /// @brief Template alias mapping a finite element space to its
-      ///        PETSc grid function type.
+      /**
+       * @brief Template alias mapping a finite element space to its
+       *        PETSc grid function type.
+       */
       template <class FES>
       using GridFunctionType =
         PETSc::Variational::GridFunction<FES>;
 
-      /// @brief Solution (grid function) type associated with the trial
-      ///        function.
+      /**
+       * @brief Solution (grid function) type associated with the trial
+       *        function.
+       */
       using SolutionType = Solution;
 
-      /// @brief PETSc matrix type (@c Mat) used to store the system
-      ///        matrix @f$ A @f$.
+      /**
+       * @brief PETSc matrix type (@c Mat) used to store the system
+       *        matrix @f$ A @f$.
+       */
       using OperatorType = ::Mat;
 
-      /// @brief Default assembly strategy deduced from the trial and test
-      ///        mesh context types.
+      /**
+       * @brief Default assembly strategy deduced from the trial and test
+       *        mesh context types.
+       */
       using DefaultAssembly =
         typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
           ::template Type<OperatorType, BilinearForm>;
 
-      /// @brief Parent class providing the generic `BilinearFormBase<Mat>`
-      ///        interface.
+      /**
+       * @brief Parent class providing the generic `BilinearFormBase<Mat>`
+       *        interface.
+       */
       using Parent = BilinearFormBase<OperatorType>;
 
       using Parent::operator=;
@@ -280,8 +294,10 @@ namespace Rodin::Variational
         return m_operator;
       }
 
-      /// @brief Assembles the bilinear form into the PETSc matrix using the
-      ///        @ref DefaultAssembly strategy with both local and global integrators.
+      /**
+       * @brief Assembles the bilinear form into the PETSc matrix using the
+       *        @ref DefaultAssembly strategy with both local and global integrators.
+       */
       void assemble() override
       {
         const auto& trialFES = getTrialFunction().getFiniteElementSpace();
@@ -360,6 +376,8 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for PETSc-backed BilinearForm.
+   * @param u Function operand.
+   * @param v Function operand.
    */
   template <class Solution, class TrialFES, class TestFES>
   BilinearForm(
@@ -370,9 +388,7 @@ namespace Rodin::Variational
 
 namespace Rodin::PETSc::Variational
 {
-  /**
-   * @brief Convenient PETSc alias for Rodin::Variational::BilinearForm.
-   */
+  /// @brief Convenient PETSc alias for Rodin::Variational::BilinearForm.
   template <class Solution, class TrialFES, class TestFES>
   using BilinearForm =
     Rodin::Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>;

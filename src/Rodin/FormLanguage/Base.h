@@ -41,13 +41,12 @@ namespace Rodin::FormLanguage
   class Base : public Copyable, public Identifiable
   {
     public:
-      /**
-       * @brief Constructor.
-       */
+      /// @brief Constructor.
       Base() = default;
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Base(const Base& other)
         : Copyable(other),
@@ -56,26 +55,27 @@ namespace Rodin::FormLanguage
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Base(Base&& other)
         : Copyable(std::move(other)),
           Identifiable(std::move(other))
       {}
 
-      /**
-       * @brief Destructor.
-       */
+      /// @brief Destructor.
       virtual ~Base() = default;
 
       /**
        * @brief Copy assignment is not allowed.
+       * @param other Object to copy from.
        */
-      Base& operator=(const Base&) = delete;
+      Base& operator=(const Base& other) = delete;
 
       /**
        * @brief Move assignment is not allowed.
+       * @param other Object to move from.
        */
-      Base& operator=(Base&&) = delete;
+      Base& operator=(Base&& other) = delete;
 
       /**
        * @brief Gets the human-readable name of this object.

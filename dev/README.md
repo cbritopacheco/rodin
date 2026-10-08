@@ -25,8 +25,18 @@ discuss why the rule should change.
 
 ### Doxygen Warnings
 
-`check_doxygen_warnings.py` runs Doxygen in warning-only mode and compares the
-normalized warning set against `doxygen_warnings.baseline`.
+`check_doxygen_warnings.py` collects Doxygen warnings and audits generated XML
+for parameter and return coverage, then compares the combined findings against the
+normalized entries in `doxygen_warnings.baseline`.
+
+The normal pass preserves Doxygen's warning policy. A separate XML pass enables
+full extraction, including private and static helpers, and requires descriptions
+for every function parameter and non-void return. This catches unnamed inputs,
+deduction-guide parameters, and documentation hidden by `@internal`. Constructors,
+destructors, deleted functions' return types, and unnamed variadic ellipses do not
+require return or parameter descriptions where no such value exists. `@retval`
+descriptions also satisfy return coverage. The `--log` option checks an existing
+warning log only; run Doxygen through the script for the complete XML audit.
 
 ```sh
 python3 dev/check_doxygen_warnings.py
@@ -65,9 +75,12 @@ express:
 - path-derived include guards
 - no `#pragma once`
 - Doxygen `@brief` coverage in headers
+- `/** ... */` for multiline Doxygen documentation; `///` for single-line
+  documentation (`///<` remains available for trailing member documentation)
 - PETSc includes only under `src/Rodin/PETSc/`
 
 ```sh
+python3 -m unittest discover -s dev -p test_style_lint.py -v
 python3 dev/style_lint.py
 python3 dev/style_lint.py src/Rodin/Variational
 python3 dev/style_lint.py --update-baseline

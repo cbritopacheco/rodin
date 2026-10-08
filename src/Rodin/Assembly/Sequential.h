@@ -57,8 +57,9 @@ namespace Rodin::Assembly
        * @brief Constructs sequential iteration over a mesh region.
        *
        * @param mesh Mesh to iterate over
+       * @param region Mesh region selected for iteration.
        */
-      SequentialIteration(const MeshType& mesh, const Geometry::Region&);
+      SequentialIteration(const MeshType& mesh, const Geometry::Region& region);
 
       /**
        * @brief Gets an iterator over the selected region.
@@ -73,13 +74,23 @@ namespace Rodin::Assembly
        */
       Geometry::Polytope getPolytope(Index i) const;
 
-      /// @brief Gets the topological dimension of the iteration.
+      /**
+       * @brief Gets the topological dimension of the iteration.
+       * @returns The topological dimension of the iteration.
+       */
       size_t getDimension() const;
 
-      /// @brief Gets the number of candidate polytopes.
+      /**
+       * @brief Gets the number of candidate polytopes.
+       * @returns The number of candidate polytopes.
+       */
       size_t getCount() const;
 
-      /// @brief Tests whether a candidate belongs to the iteration region.
+      /**
+       * @brief Tests whether a candidate belongs to the iteration region.
+       * @param i Index of the requested entry.
+       * @returns Whether the candidate belongs to the integration region.
+       */
       bool filter(Index i) const;
 
     private:
@@ -87,9 +98,13 @@ namespace Rodin::Assembly
       Geometry::Region m_region;                      ///< Region to iterate over
   };
 
-  /// @brief Template argument deduction guide for SequentialIteration
+  /**
+   * @brief Template argument deduction guide for SequentialIteration
+   * @param mesh Mesh on which the object is defined.
+   * @param region Mesh region selected for iteration.
+   */
   SequentialIteration(
-      const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
+    const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region& region)
     -> SequentialIteration<Geometry::Mesh<Context::Local>>;
 }
 
@@ -144,12 +159,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       Sequential() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -157,6 +178,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the vector associated to the
        * linear form.
+       * @param input Input data.
+       * @param res Storage for the computed values.
        */
       void execute(VectorType& res, const InputType& input) const override
       {
@@ -254,12 +277,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       Sequential() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -267,6 +296,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
@@ -401,12 +432,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       Sequential() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -414,6 +451,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
@@ -439,9 +478,7 @@ namespace Rodin::Assembly
       }
   };
 
-  /**
-   * @brief Sequential bilinear form assembly into Eigen triplets.
-   */
+  /// @brief Sequential bilinear form assembly into Eigen triplets.
   template <class Solution, class TrialFES, class TestFES>
   class Sequential<std::vector<Math::SparseTriplet<typename FormLanguage::Dot<
                      typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -490,12 +527,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       Sequential() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -503,6 +546,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
       void execute(OperatorType& res, const InputType& input) const override
       {
@@ -600,9 +645,7 @@ namespace Rodin::Assembly
       }
   };
 
-  /**
-   * @brief Sequential block bilinear form assembly into Eigen triplets.
-   */
+  /// @brief Sequential block bilinear form assembly into Eigen triplets.
   template <class... Solution, class... TrialFES, class... TestFES>
   class Sequential<std::vector<Math::SparseTriplet<Real>>,
     Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES,
@@ -640,12 +683,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       Sequential() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -703,9 +752,7 @@ namespace Rodin::Assembly
       }
   };
 
-  /**
-   * @brief Sequential block bilinear form assembly into a sparse matrix.
-   */
+  /// @brief Sequential block bilinear form assembly into a sparse matrix.
   template <class ... Solution, class ... TrialFES, class ... TestFES>
   class Sequential<
     Math::SparseMatrix<Real>,
@@ -730,12 +777,18 @@ namespace Rodin::Assembly
         /// @brief Default constructor.
         Sequential() = default;
 
-        /// @brief Copy constructor.
+        /**
+         * @brief Copy constructor.
+         * @param other Object to copy from.
+         */
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
-        /// @brief Move constructor.
+        /**
+         * @brief Move constructor.
+         * @param other Object to move from.
+         */
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
@@ -767,9 +820,7 @@ namespace Rodin::Assembly
         }
     };
 
-    /**
-   * @brief Sequential block linear form assembly into a vector.
-   */
+    /// @brief Sequential block linear form assembly into a vector.
     template <class... FES>
     class Sequential<Math::Vector<Real>,
       Tuple<Variational::LinearForm<FES, Math::Vector<Real>>...>>
@@ -792,12 +843,18 @@ namespace Rodin::Assembly
         /// @brief Default constructor.
         Sequential() = default;
 
-        /// @brief Copy constructor.
+        /**
+         * @brief Copy constructor.
+         * @param other Object to copy from.
+         */
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
-        /// @brief Move constructor.
+        /**
+         * @brief Move constructor.
+         * @param other Object to move from.
+         */
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
@@ -843,9 +900,7 @@ namespace Rodin::Assembly
         }
     };
 
-    /**
-   * @brief Sequential mixed problem assembly.
-   */
+    /// @brief Sequential mixed problem assembly.
     template <class LinearSystem, class U1, class U2, class U3, class... Us>
     class Sequential<LinearSystem, Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
       final : public AssemblyBase<LinearSystem,
@@ -1364,16 +1419,17 @@ namespace Rodin::Assembly
           }
         }
 
-        // Targeted (LHS-only / RHS-only) assembly for the block Eigen backend:
-        // assemble the full system into a scratch object and expose only the
-        // requested side, leaving the other operand untouched (the targeted
-        // contract). Keeps the block BC-elimination logic in one code path.
         /**
-       * @brief Executes targeted mixed problem assembly.
-       * @param axb Output linear system.
-       * @param input Mixed problem input.
-       * @param target Side of the system to assemble.
-       */
+         * @brief Executes targeted mixed problem assembly.
+         *
+         * The full system is assembled into temporary storage. Only the requested
+         * side is transferred to the output system; the other side is preserved.
+         * This uses the same boundary-condition elimination as full assembly.
+         *
+         * @param axb Output linear system.
+         * @param input Mixed problem input.
+         * @param target Side of the system to assemble.
+         */
         void execute(LinearSystemType& axb, const InputType& input,
           Rodin::Variational::AssemblyTarget target) const
         {
@@ -1395,9 +1451,7 @@ namespace Rodin::Assembly
         }
     };
 
-    /**
-   * @brief Sequential single-field problem assembly.
-   */
+    /// @brief Sequential single-field problem assembly.
     template <class LinearSystem, class TrialFunction, class TestFunction>
     class Sequential<LinearSystem,
       Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
@@ -1473,6 +1527,12 @@ namespace Rodin::Assembly
           LHS,
           RHS
         };
+        /**
+         * @brief Assembles the requested operator and vector contributions.
+         * @param axb Linear system receiving the assembled operator and vector.
+         * @param input Assembly input containing spaces and form integrators.
+         * @param mode Requested assembly mode.
+         */
 
         void execute(
           LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
@@ -1925,9 +1985,7 @@ namespace Rodin::Assembly
         }
     };
 
-    /**
-   * @brief Sequential value Dirichlet boundary condition assembly.
-   */
+    /// @brief Sequential value Dirichlet boundary condition assembly.
     template <class Scalar, class Solution, class FES, class ValueDerived>
     class Sequential<IndexMap<Scalar>,
       Variational::DirichletBC<Variational::TrialFunction<Solution, FES>,
@@ -1961,12 +2019,18 @@ namespace Rodin::Assembly
         /// @brief Default constructor.
         Sequential() = default;
 
-        /// @brief Copy constructor.
+        /**
+         * @brief Copy constructor.
+         * @param other Object to copy from.
+         */
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
-        /// @brief Move constructor.
+        /**
+         * @brief Move constructor.
+         * @param other Object to move from.
+         */
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
@@ -2068,12 +2132,18 @@ namespace Rodin::Assembly
         /// @brief Default constructor.
         Sequential() = default;
 
-        /// @brief Copy constructor.
+        /**
+         * @brief Copy constructor.
+         * @param other Object to copy from.
+         */
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
-        /// @brief Move constructor.
+        /**
+         * @brief Move constructor.
+         * @param other Object to move from.
+         */
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}

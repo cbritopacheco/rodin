@@ -32,7 +32,16 @@ namespace Rodin::Adaptation
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
-      /// @brief Constructs the WNGIR surface force coefficient.
+      /**
+       * @brief Constructs the robust fitting force coefficient.
+       * @param phi Target level set.
+       * @param grad Gradient of the target level set.
+       * @param current Current displacement field.
+       * @param locator Locator for deformed evaluation points.
+       * @param loss Robust residual loss.
+       * @param normalization Fixed gradient-scale normalization.
+       * @param dimension Spatial dimension.
+       */
       WNGIRFittingForce(const PhiType& phi, const GradType& grad,
         const Displacement& current, const LocatorType& locator, const WNGIRLoss& loss,
         Real normalization, std::size_t dimension)
@@ -44,7 +53,10 @@ namespace Rodin::Adaptation
           m_dimension(dimension)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Coefficient to copy, cloning its target expressions.
+       */
       WNGIRFittingForce(const WNGIRFittingForce& other)
         : Parent(other),
           m_phi(other.m_phi->copy()),
@@ -55,7 +67,11 @@ namespace Rodin::Adaptation
           m_dimension(other.m_dimension)
       {}
 
-      /// @brief Evaluates the coefficient at a point.
+      /**
+       * @brief Evaluates the coefficient at a point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
         const WNGIRResidualState state(*m_phi, *m_grad, m_deformation, ip, m_loss);
@@ -63,18 +79,30 @@ namespace Rodin::Adaptation
           state.getGradient();
       }
 
-      /// @brief Dimension of the vector value.
+      /**
+       * @brief Dimension of the vector value.
+       * @returns The dimension.
+       */
       std::size_t getDimension() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Reports no intrinsic polynomial order.
-      Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Reports no intrinsic polynomial order.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      Optional<std::size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
 
+      /**
+       * @brief Clones this coefficient.
+       * @returns Newly allocated copy owned by the caller.
+       */
       WNGIRFittingForce* copy() const noexcept override
       {
         return new WNGIRFittingForce(*this);
@@ -88,12 +116,23 @@ namespace Rodin::Adaptation
       Real m_normalization;
       std::size_t m_dimension;
   };
+  /**
+   * @brief Deduction guide for WNGIRFittingForce.
+   * @param phi Observation field.
+   * @param grad Gradient of the observation field.
+   * @param current Current displacement field.
+   * @param locator Point locator used to find mesh entities.
+   * @param loss Robust residual loss.
+   * @param normalization Normalization factor.
+   * @param dimension Spatial dimension.
+   */
 
   template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
-  WNGIRFittingForce(const Variational::RealFunctionBase<PhiDerived>&,
-    const Variational::VectorFunctionBase<Real, GradDerived>&, const Displacement&,
-    const LocatorType&, const WNGIRLoss&, Real,
-    std::size_t) -> WNGIRFittingForce<PhiDerived, GradDerived, Displacement, LocatorType>;
+  WNGIRFittingForce(const Variational::RealFunctionBase<PhiDerived>& phi,
+    const Variational::VectorFunctionBase<Real, GradDerived>& grad,
+    const Displacement& current, const LocatorType& locator, const WNGIRLoss& loss,
+    Real normalization, std::size_t dimension)
+    -> WNGIRFittingForce<PhiDerived, GradDerived, Displacement, LocatorType>;
 }
 
 #endif

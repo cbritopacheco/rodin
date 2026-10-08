@@ -45,9 +45,7 @@ namespace Rodin::Variational
    * @see Sinh, Cos
    */
 
-  /**
-   * @ingroup CoshSpecializations
-   */
+  /// @ingroup CoshSpecializations
   template <class NestedDerived>
   class Cosh<FunctionBase<NestedDerived>> final
     : public RealFunctionBase<Cosh<FunctionBase<NestedDerived>>>
@@ -118,7 +116,11 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param g Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& g) const
       {
         const auto o = getOperand().getOrder(g);
@@ -144,12 +146,17 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for @c Cosh.
+  /**
+   * @brief Deduction guide for @c Cosh.
+   * @param v Function to apply cosh to
+   */
   template <class NestedDerived>
-  Cosh(const FunctionBase<NestedDerived>&) -> Cosh<FunctionBase<NestedDerived>>;
+  Cosh(const FunctionBase<NestedDerived>& v) -> Cosh<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Helper function to construct objects of type Cosh.
+   * @param f Function operand.
+   * @returns Pointwise hyperbolic-cosine expression.
    */
   template <class NestedDerived>
   auto cosh(const FunctionBase<NestedDerived>& f)

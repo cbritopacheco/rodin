@@ -74,24 +74,16 @@ namespace Rodin::IO
   class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES, Data>>
   {
     public:
-      /**
-       * @brief Finite element space type.
-       */
+      /// @brief Finite element space type.
       using FESType = FES;
 
-      /**
-       * @brief Data storage type.
-       */
+      /// @brief Data storage type.
       using DataType = Data;
 
-      /**
-       * @brief Type of grid function object being loaded.
-       */
+      /// @brief Type of grid function object being loaded.
       using ObjectType = Variational::GridFunction<FESType, Data>;
 
-      /**
-       * @brief Parent Loader class type.
-       */
+      /// @brief Parent Loader class type.
       using Parent = IO::Loader<ObjectType>;
 
       /**

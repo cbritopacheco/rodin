@@ -58,9 +58,7 @@ namespace Rodin::QF
       constexpr
       QuadratureFormulaBase(const QuadratureFormulaBase& other) = default;
 
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~QuadratureFormulaBase() = default;
 
       /**

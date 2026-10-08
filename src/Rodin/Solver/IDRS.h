@@ -69,9 +69,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for IDRS
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  IDRS(Variational::ProblemBase<LinearSystem>&) -> IDRS<LinearSystem>;
+  IDRS(Variational::ProblemBase<LinearSystem>& pb) -> IDRS<LinearSystem>;
 
   /**
    * @ingroup IDRSSpecializations
@@ -99,17 +100,26 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      /// @brief Constructs the solver from the problem to be solved.
+      /**
+       * @brief Constructs the solver from the problem to be solved.
+       * @param pb Variational problem to operate on.
+       */
       IDRS(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       IDRS(const IDRS& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       IDRS(IDRS&& other)
         : Parent(std::move(other)),
           m_solver(std::move(other.m_solver))
@@ -118,14 +128,22 @@ namespace Rodin::Solver
       /// @brief Destructor.
       ~IDRS() = default;
 
-      /// @brief Sets the convergence tolerance; returns a reference to this solver.
+      /**
+       * @brief Sets the convergence tolerance; returns a reference to this solver.
+       * @param tol Convergence tolerance.
+       * @returns Reference to this object after the operation.
+       */
       IDRS& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
-      /// @brief Sets the maximum number of iterations; returns a reference to this solver.
+      /**
+       * @brief Sets the maximum number of iterations; returns a reference to this solver.
+       * @param maxIt Maximum number of solver iterations.
+       * @returns Reference to this object after the operation.
+       */
       IDRS& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
@@ -138,15 +156,22 @@ namespace Rodin::Solver
        * Typical values: 4, 8, 16. Larger s can improve robustness but increases
        * work per iteration.
        */
-      /// @brief Sets the IDR(s) shadow-space dimension; returns a reference to this solver.
-      /// @brief Sets the IDR(s) shadow-space dimension; returns a reference to this solver.
+      /**
+       * @brief Sets the IDR(s) shadow-space dimension; returns a reference to this solver.
+       * @brief Sets the IDR(s) shadow-space dimension; returns a reference to this solver.
+       * @param s Scalar factor.
+       * @returns Reference to this object after the operation.
+       */
       IDRS& setS(size_t s)
       {
         m_solver.setS(s);
         return *this;
       }
 
-      /// @brief Solves the assembled linear system.
+      /**
+       * @brief Solves the assembled linear system.
+       * @param axb Variational expression defining the problem.
+       */
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
@@ -156,13 +181,19 @@ namespace Rodin::Solver
           axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      /// @brief Returns whether the most recent solve converged successfully.
+      /**
+       * @brief Returns whether the most recent solve converged successfully.
+       * @returns Whether the operation completed successfully.
+       */
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
-      /// @brief Returns a polymorphic copy of this solver.
+      /**
+       * @brief Returns a polymorphic copy of this solver.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       IDRS* copy() const noexcept override
       {
         return new IDRS(*this);
@@ -198,18 +229,27 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      /// @brief Constructs the solver from the problem to be solved.
+      /**
+       * @brief Constructs the solver from the problem to be solved.
+       * @param pb Variational problem to operate on.
+       */
       IDRS(ProblemType& pb)
         : Parent(pb)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       IDRS(const IDRS& other)
         : Parent(other),
           m_solver(other.m_solver)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       IDRS(IDRS&& other)
         : Parent(std::move(other)),
           m_solver(std::move(other.m_solver))
@@ -218,28 +258,43 @@ namespace Rodin::Solver
       /// @brief Destructor.
       ~IDRS() = default;
 
-      /// @brief Sets the convergence tolerance; returns a reference to this solver.
+      /**
+       * @brief Sets the convergence tolerance; returns a reference to this solver.
+       * @param tol Convergence tolerance.
+       * @returns Reference to this object after the operation.
+       */
       IDRS& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
-      /// @brief Sets the maximum number of iterations; returns a reference to this solver.
+      /**
+       * @brief Sets the maximum number of iterations; returns a reference to this solver.
+       * @param maxIt Maximum number of solver iterations.
+       * @returns Reference to this object after the operation.
+       */
       IDRS& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
 
-      /// @brief Sets the IDR(s) shadow-space dimension; returns a reference to this solver.
+      /**
+       * @brief Sets the IDR(s) shadow-space dimension; returns a reference to this solver.
+       * @param s Scalar factor.
+       * @returns Reference to this object after the operation.
+       */
       IDRS& setS(size_t s)
       {
         m_solver.setS(s);
         return *this;
       }
 
-      /// @brief Solves the assembled linear system.
+      /**
+       * @brief Solves the assembled linear system.
+       * @param axb Variational expression defining the problem.
+       */
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
@@ -249,13 +304,19 @@ namespace Rodin::Solver
           axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      /// @brief Returns whether the most recent solve converged successfully.
+      /**
+       * @brief Returns whether the most recent solve converged successfully.
+       * @returns Whether the operation completed successfully.
+       */
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
-      /// @brief Returns a polymorphic copy of this solver.
+      /**
+       * @brief Returns a polymorphic copy of this solver.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       IDRS* copy() const noexcept override
       {
         return new IDRS(*this);

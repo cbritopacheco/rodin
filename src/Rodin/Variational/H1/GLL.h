@@ -44,25 +44,40 @@ namespace Rodin::Variational
       /// @brief Number of entries.
       static constexpr size_t Count = K + 1;
 
-      /// Number of GLL nodes (K + 1).
+      /**
+       * Number of GLL nodes (K + 1).
+       * @returns The count.
+       */
       static constexpr size_t getCount()
       {
         return Count;
       }
 
-      /// i-th GLL node in [-1, 1], 0 <= i <= K.
+      /**
+       * i-th GLL node in [-1, 1], 0 <= i <= K.
+       * @param i Index of the requested entry.
+       * @returns The node.
+       */
       static constexpr Real getNode(size_t i)
       {
         return s_nodes[i];
       }
 
-      /// Full array of GLL nodes in ascending order.
+      /**
+       * Full array of GLL nodes in ascending order.
+       * @returns The nodes.
+       */
       static constexpr const std::array<Real, K + 1>& getNodes()
       {
         return s_nodes;
       }
 
     private:
+      /**
+       * @brief Approximates cosine during constant evaluation.
+       * @param x Scalar evaluation argument.
+       * @returns Cosine approximation obtained from the implemented Taylor series.
+       */
       static constexpr Real constexprCos(Real x)
       {
         constexpr Real pi = Math::Constants::pi();
@@ -87,6 +102,10 @@ namespace Rodin::Variational
 
         return sum;
       }
+      /**
+       * @brief Constructs the reference interpolation nodes.
+       * @returns Array of Gauss-Lobatto-Legendre nodes on the reference interval.
+       */
 
       static constexpr std::array<Real, K + 1> compute()
       {
@@ -158,25 +177,39 @@ namespace Rodin::Variational
   class GLL01
   {
     public:
-      /// Number of GLL nodes (K + 1).
+      /**
+       * Number of GLL nodes (K + 1).
+       * @returns The count.
+       */
       static constexpr size_t getCount()
       {
         return K + 1;
       }
 
-      /// i-th mapped GLL node in [0, 1], 0 <= i <= K.
+      /**
+       * i-th mapped GLL node in [0, 1], 0 <= i <= K.
+       * @param i Index of the requested entry.
+       * @returns The node.
+       */
       static constexpr Real getNode(size_t i)
       {
         return s_nodes[i];
       }
 
-      /// Full array of mapped GLL nodes in ascending order.
+      /**
+       * Full array of mapped GLL nodes in ascending order.
+       * @returns The nodes.
+       */
       static constexpr const std::array<Real, K + 1>& getNodes()
       {
         return s_nodes;
       }
 
     private:
+      /**
+       * @brief Constructs the reference interpolation nodes.
+       * @returns Array of Gauss-Lobatto-Legendre nodes on the reference interval.
+       */
       static constexpr std::array<Real, K + 1> compute()
       {
         std::array<Real, K + 1> nodes{};

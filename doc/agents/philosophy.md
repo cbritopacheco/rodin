@@ -215,6 +215,14 @@ rather than extended:
 - Leaf specializations are `final`. Constructors: default/copy/move spelled
   out (copy ctor deep-copies children via `copy()`); copy assignment
   deleted or omitted.
+- Use `/** ... */` for multiline Doxygen documentation and `///` for
+  single-line documentation. Use `///<` for trailing member documentation.
+  Integrate API contracts and explanatory prose into the relevant Doxygen block;
+  remove redundant ordinary comments beside it.
+  Document every parameter, including intentionally unused inputs and deduction
+  guides, and every non-void return. Give unused inputs names and explain why
+  they are unused; `[[maybe_unused]]` preserves compiler warning cleanliness.
+  The Doxygen check audits full-extraction XML as well as ordinary warnings.
 - Doxygen with real mathematics: `@f$ ... @f$` formulas, a "Mathematical
   Foundation"/usage section, `@defgroup <Name>Specializations` per
   specialization family. When a class page documents a family with multiple

@@ -67,9 +67,10 @@ namespace Rodin::Geometry
        * @param[in,out] ar Archive object
        *
        * The serialization version argument is ignored.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
       template <class Archive>
-      void save(Archive& ar, const unsigned int) const
+      void save(Archive& ar, [[maybe_unused]] const unsigned int version) const
       {
         ar & owner; // polymorphic unique_ptr
       }
@@ -80,9 +81,10 @@ namespace Rodin::Geometry
        *
        * Restores both the unique_ptr and synchronizes the atomic pointer. The
        * serialization version argument is ignored.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
       template <class Archive>
-      void load(Archive& ar, const unsigned int)
+      void load(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & owner;
         ptr.store(owner.get(), std::memory_order_relaxed);
@@ -104,23 +106,24 @@ namespace Rodin::Geometry
       std::atomic<size_t> publishedSize{0}; ///< Lock-free readable slot count
       mutable std::mutex mutex; ///< Serializes storage growth
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       Dimension() = default;
 
       /**
        * @brief Copy constructor (deleted).
+       * @param other Object whose copying or moving is disabled.
        */
-      Dimension(const Dimension&) = delete;
+      Dimension(const Dimension& other) = delete;
 
       /**
        * @brief Copy assignment operator (deleted).
+       * @param other Object to copy from.
        */
-      Dimension& operator=(const Dimension&) = delete;
+      Dimension& operator=(const Dimension& other) = delete;
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Dimension(Dimension&& other) noexcept
         : slots(std::move(other.slots)),
@@ -129,6 +132,8 @@ namespace Rodin::Geometry
 
       /**
        * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after assignment.
        */
       Dimension& operator=(Dimension&& other) noexcept
       {
@@ -145,37 +150,38 @@ namespace Rodin::Geometry
        * The serialization version argument is ignored.
        *
        * @note The mutex is not serialized.
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
       template <class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & slots; // mutex is not serialized
       }
     };
 
   public:
-    /**
-     * @brief Default constructor.
-     */
+    /// @brief Default constructor.
     PolytopeTransformationIndex() = default;
 
-    /**
-     * @brief Destructor.
-     */
+    /// @brief Destructor.
     ~PolytopeTransformationIndex() = default;
 
     /**
      * @brief Copy constructor (deleted).
+     * @param other Object whose copying or moving is disabled.
      */
-    PolytopeTransformationIndex(const PolytopeTransformationIndex&) = delete;
+    PolytopeTransformationIndex(const PolytopeTransformationIndex& other) = delete;
 
     /**
      * @brief Copy assignment operator (deleted).
+     * @param other Object to copy from.
      */
-    PolytopeTransformationIndex& operator=(const PolytopeTransformationIndex&) = delete;
+    PolytopeTransformationIndex& operator=(
+      const PolytopeTransformationIndex& other) = delete;
 
     /**
      * @brief Move constructor.
+     * @param other Object to move from.
      */
     PolytopeTransformationIndex(PolytopeTransformationIndex&& other) noexcept
       : m_dimensions(std::move(other.m_dimensions))
@@ -183,6 +189,8 @@ namespace Rodin::Geometry
 
     /**
      * @brief Move assignment operator.
+     * @param other Object to move from.
+     * @returns Reference to this object after the operation.
      */
     PolytopeTransformationIndex& operator=(PolytopeTransformationIndex&& other) noexcept
     {
@@ -286,6 +294,25 @@ namespace Rodin::Geometry
     }
 
     /**
+     * @brief Returns an already attached/cached transformation without creating one.
+     * @param d Topological dimension of the indexed entity.
+     * @param idx Local entity index within that dimension.
+     * @returns Borrowed pointer to the attached transformation, or nullptr if the dimension, slot, or transformation is absent.
+     *
+     * Used when rebuilding a mesh to preserve attached geometry while leaving
+     * default charts lazy. As with get(), clear()/set() must not overlap use.
+     */
+    const PolytopeTransformation* find(size_t d, Index idx) const
+    {
+      if (d >= m_dimensions.size())
+        return nullptr;
+      const auto& dim = m_dimensions[d];
+      if (idx >= dim.publishedSize.load(std::memory_order_acquire))
+        return nullptr;
+      return dim.slots[idx].ptr.load(std::memory_order_acquire);
+    }
+
+    /**
      * @brief Gets or creates a transformation using a factory.
      * @tparam Factory Callable type that creates transformations
      * @param[in] p Pair of (dimension, index) identifying the polytope
@@ -375,9 +402,10 @@ namespace Rodin::Geometry
     /**
      * @brief Serialization save method.
      * @param[in,out] ar Archive object
+     * @param version Boost.Serialization class version; unused by this implementation.
      */
     template <class Archive>
-    void save(Archive& ar, const unsigned int) const
+    void save(Archive& ar, [[maybe_unused]] const unsigned int version) const
     {
       ar & m_dimensions;
     }
@@ -387,9 +415,10 @@ namespace Rodin::Geometry
      * @param[in,out] ar Archive object
      *
      * Clears existing data before loading.
+     * @param version Boost.Serialization class version; unused by this implementation.
      */
     template <class Archive>
-    void load(Archive& ar, const unsigned int)
+    void load(Archive& ar, [[maybe_unused]] const unsigned int version)
     {
       clear();
       ar & m_dimensions;

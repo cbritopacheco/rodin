@@ -25,7 +25,10 @@ namespace Rodin::Adaptation
   class WNGIRLoss
   {
     public:
-      /// @brief Constructs a Welsch loss with positive scale.
+      /**
+       * @brief Constructs a Welsch loss with positive scale.
+       * @param scale Scale controlling the loss function.
+       */
       explicit WNGIRLoss(Real scale)
         : m_scale2(scale * scale)
       {
@@ -52,7 +55,11 @@ namespace Rodin::Adaptation
         return std::exp(-s2);
       }
 
-      /// @brief Evaluates the influence @f$\rho'(r)@f$.
+      /**
+       * @brief Evaluates the influence @f$\rho'(r)@f$.
+       * @param residual Residual to evaluate.
+       * @returns The influence.
+       */
       Real getInfluence(Real residual) const
       {
         return getWeight(residual) * residual;

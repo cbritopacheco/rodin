@@ -56,8 +56,10 @@ namespace Rodin::Utility
    * This deduction guide allows the compiler to automatically deduce the
    * template parameters when constructing an Overloaded object from a set
    * of callable objects.
+   * @param callables Callable objects whose overloads are combined.
    */
-  template<class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;
+  template <class... Ts>
+  Overloaded(Ts... callables) -> Overloaded<Ts...>;
 }
 
 #endif

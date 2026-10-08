@@ -73,9 +73,11 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for LeastSquaresCG
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  LeastSquaresCG(Variational::ProblemBase<LinearSystem>&) -> LeastSquaresCG<LinearSystem>;
+  LeastSquaresCG(
+    Variational::ProblemBase<LinearSystem>& pb) -> LeastSquaresCG<LinearSystem>;
 
   /**
    * @ingroup LeastSquaresCGSpecializations
@@ -152,9 +154,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~LeastSquaresCG() = default;
 
       /**
@@ -274,9 +274,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~LeastSquaresCG() = default;
 
       /**

@@ -165,15 +165,26 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for @c InterfaceIntegral.
+  /**
+   * @brief Deduction guide for @c InterfaceIntegral.
+   * @param integrand Test operator to integrate
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  InterfaceIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
-    -> InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+  InterfaceIntegral(const Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+    ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>& integrand)
+    -> InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
-  /// @brief Deduction guide for @c InterfaceIntegral.
+  /**
+   * @brief Deduction guide for @c InterfaceIntegral.
+   * @param lhs Function operator (left-hand side)
+   * @param rhs Test operator (right-hand side)
+   */
   template <class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
-  InterfaceIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>&, const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
-    -> InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>, ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+  InterfaceIntegral(const ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>& lhs,
+    const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>& rhs)
+    -> InterfaceIntegral<Dot<ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
   /**
    * @ingroup InterfaceIntegralSpecializations
@@ -258,20 +269,25 @@ namespace Rodin::Variational
       }
   };
 
-  /// @brief Deduction guide for @c InterfaceIntegral.
+  /**
+   * @brief Deduction guide for @c InterfaceIntegral.
+   * @param integrand Test operator to integrate
+   */
   template <class NestedDerived, class FES>
-  InterfaceIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>&)
+  InterfaceIntegral(const ShapeFunctionBase<NestedDerived, FES, TestSpace>& integrand)
     -> InterfaceIntegral<ShapeFunctionBase<NestedDerived, FES, TestSpace>>;
 
-  /// @brief Deduction guide for @c InterfaceIntegral.
+  /**
+   * @brief Deduction guide for @c InterfaceIntegral.
+   * @param lhs Function operator (left-hand side)
+   * @param rhs Test operator (right-hand side)
+   */
   template <class LHSDerived, class RHSDerived, class FES>
-  InterfaceIntegral(
-      const FunctionBase<LHSDerived>&,
-      const ShapeFunctionBase<RHSDerived, FES, TestSpace>&)
-    -> InterfaceIntegral<
-        ShapeFunctionBase<Dot<
-          FunctionBase<LHSDerived>,
-          ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
+  InterfaceIntegral(const FunctionBase<LHSDerived>& lhs,
+    const ShapeFunctionBase<RHSDerived, FES, TestSpace>& rhs)
+    -> InterfaceIntegral<ShapeFunctionBase<
+      Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES,
+      TestSpace>>;
 }
 
 #endif

@@ -37,7 +37,10 @@ namespace Rodin::Adaptation
       /// @brief Copy constructor.
       WNGIRHingeMetric(const WNGIRHingeMetric&) = default;
 
-      /// @brief Returns the current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
@@ -128,14 +131,22 @@ namespace Rodin::Adaptation
         return *this;
       }
 
-      /// @brief Returns an entry of the assembled local system.
+      /**
+       * @brief Returns an entry of the assembled local system.
+       * @returns Integral computed by the quadrature rule.
+       * @param trial Local trial basis index.
+       * @param test Local test basis index.
+       */
       ScalarType integrate(std::size_t trial, std::size_t test) final override
       {
         return m_matrix(
           static_cast<Eigen::Index>(test), static_cast<Eigen::Index>(trial));
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;

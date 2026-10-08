@@ -105,7 +105,10 @@ namespace Rodin::Variational
   class TriangleBlend
   {
     public:
-      /// @brief Gets the alpha parameter.
+      /**
+       * @brief Gets the alpha parameter.
+       * @returns The alpha parameter.
+       */
       static constexpr Real getAlpha()
       {
         if constexpr (K <= 2)
@@ -153,7 +156,10 @@ namespace Rodin::Variational
   class TetrahedronBlend
   {
     public:
-      /// @brief Gets the alpha parameter.
+      /**
+       * @brief Gets the alpha parameter.
+       * @returns The alpha parameter.
+       */
       static constexpr Real getAlpha()
       {
         if constexpr (K <= 3)
@@ -200,7 +206,14 @@ namespace Rodin::Variational
   class WarpShiftFace2D
   {
     public:
-      /// @brief Applies the warp to the given barycentric coordinates.
+      /**
+       * @brief Applies the warp to the given barycentric coordinates.
+       * @param L1 Barycentric coordinate of the node.
+       * @param L2 Barycentric coordinate of the node.
+       * @param L3 Barycentric coordinate of the node.
+       * @param alpha Warp blending parameter.
+       * @returns Warp displacement in the reference coordinates.
+       */
       static std::array<Real, 2> apply(Real L1, Real L2, Real L3, Real alpha)
       {
         if constexpr (K <= 1)
@@ -258,7 +271,15 @@ namespace Rodin::Variational
   class WarpShiftFace3D
   {
     public:
-      /// @brief Applies the warp to the given barycentric coordinates.
+      /**
+       * @brief Applies the warp to the given barycentric coordinates.
+       * @param La Barycentric coordinate of the node.
+       * @param Lb Barycentric coordinate of the node.
+       * @param Lc Barycentric coordinate of the node.
+       * @param Ld Barycentric coordinate of the node.
+       * @param alpha Warp blending parameter.
+       * @returns Warp displacement in the reference coordinates.
+       */
       static std::array<Real, 2> apply(Real La, Real Lb, Real Lc, Real Ld, Real alpha)
       {
         (void) La;
@@ -287,7 +308,10 @@ namespace Rodin::Variational
   class WarpBlendTriangle
   {
     public:
-      /// @brief Applies the transformation to the reference nodes.
+      /**
+       * @brief Applies the transformation to the reference nodes.
+       * @param nodes Interpolation nodes.
+       */
       template <size_t N>
       static void apply(std::array<Math::SpatialPoint, N>& nodes)
       {
@@ -488,10 +512,11 @@ namespace Rodin::Variational
   class WarpBlendTetrahedron
   {
     private:
-      // -------------------------------------------------------------------
-      // Helper: index mapping (i,j,k) -> flat idx (no lambdas; avoids ASan
-      // stack-use-after-scope reports from short-lifetime closure objects).
-      // -------------------------------------------------------------------
+      /**
+       * @brief Locates a tetrahedral lattice layer in flattened storage.
+       * @param kk Layer index in the tetrahedral node lattice.
+       * @returns Number of nodes in the preceding layers.
+       */
       static constexpr size_t layerOffset(size_t kk)
       {
         size_t off = 0;
@@ -502,6 +527,12 @@ namespace Rodin::Variational
         }
         return off;
       }
+      /**
+       * @brief Locates a row within a tetrahedral lattice layer.
+       * @param kk Layer index in the tetrahedral node lattice.
+       * @param jj Row index within the tetrahedral layer.
+       * @returns Number of nodes in the preceding rows of the layer.
+       */
 
       static constexpr size_t rowOffsetWithinLayer(size_t kk, size_t jj)
       {
@@ -511,11 +542,25 @@ namespace Rodin::Variational
           off += (n + 1 - r);
         return off;
       }
+      /**
+       * @brief Flattens a tetrahedral lattice coordinate.
+       * @param i Integer lattice coordinate of the tetrahedral node.
+       * @param j Integer lattice coordinate of the tetrahedral node.
+       * @param k Integer lattice coordinate of the tetrahedral node.
+       * @returns Node index for the specified integer lattice coordinates.
+       */
 
       static constexpr size_t idxOf(size_t i, size_t j, size_t k)
       {
         return layerOffset(k) + rowOffsetWithinLayer(k, j) + i;
       }
+      /**
+       * @brief Assigns reference coordinates from barycentric coordinates.
+       * @param p Vertex being updated or physical point being assigned.
+       * @param L2 Second barycentric coordinate.
+       * @param L3 Third barycentric coordinate.
+       * @param L4 Fourth barycentric coordinate.
+       */
 
       static inline void setFromBary(Math::SpatialPoint& p, Real L2, Real L3, Real L4)
       {
@@ -526,7 +571,10 @@ namespace Rodin::Variational
       }
 
     public:
-      /// @brief Applies the transformation to the reference nodes.
+      /**
+       * @brief Applies the transformation to the reference nodes.
+       * @param nodes Interpolation nodes.
+       */
       template <size_t N>
       static void apply(std::array<Math::SpatialPoint, N>& nodes)
       {

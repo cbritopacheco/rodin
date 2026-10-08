@@ -577,36 +577,32 @@ namespace Rodin::Advection
    * @brief Deduction guide for Lagrangian with default RK4 stepper.
    *
    * Allows construction without explicitly specifying the Step template parameter.
+   * @param trial Trial function storing the advected field.
+   * @param test Test function for the transport problem.
+   * @param initial Initial field.
+   * @param velocity Velocity field.
    */
   template <class FES, class Data, class Initial, class VVel>
-  Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>&,
-             Variational::TestFunction<FES>&,
-             Initial&&,
-             VVel&&)
-  -> Lagrangian<
-       Variational::TrialFunction<Variational::GridFunction<FES,Data>,FES>,
-       Variational::TestFunction<FES>,
-       Initial,
-       VVel,
-       Math::RungeKutta::RK4>;
+  Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>& trial,
+    Variational::TestFunction<FES>& test, Initial&& initial, VVel&& velocity)
+    -> Lagrangian<Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
+      Variational::TestFunction<FES>, Initial, VVel, Math::RungeKutta::RK4>;
 
   /**
    * @brief Deduction guide for Lagrangian with custom stepper.
    *
    * Allows construction with explicit time-stepping scheme specification.
+   * @param u Trial function holding the solution
+   * @param v Test function for variational formulation
+   * @param u0 Initial condition
+   * @param vel Velocity field
+   * @param st Time-stepping scheme (default: RK4)
    */
   template <class FES, class Data, class Initial, class VVel, class SStep>
-  Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>,FES>&,
-             Variational::TestFunction<FES>&,
-             Initial&&,
-             VVel&&,
-             SStep&&)
-  -> Lagrangian<
-       Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
-       Variational::TestFunction<FES>,
-       Initial,
-       VVel,
-       SStep>;
+  Lagrangian(Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>& u,
+    Variational::TestFunction<FES>& v, Initial&& u0, VVel&& vel, SStep&& st)
+    -> Lagrangian<Variational::TrialFunction<Variational::GridFunction<FES, Data>, FES>,
+      Variational::TestFunction<FES>, Initial, VVel, SStep>;
 }
 
 #endif
