@@ -148,9 +148,7 @@ namespace Rodin::Solver::CHOLMOD
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~SupernodalLLT() = default;
 
       /**
@@ -205,8 +203,10 @@ namespace Rodin::Solver::CHOLMOD
       }
 
     private:
-      /// Underlying Eigen CHOLMOD supernodal LLT solver
-      /// @brief Records the Eigen status, and returns whether it succeeded.
+      /**
+       * Underlying Eigen CHOLMOD supernodal LLT solver
+       * @brief Records the Eigen status, and returns whether it succeeded.
+       */
       Boolean record()
       {
         m_info.status = static_cast<Integer>(m_solver.info());

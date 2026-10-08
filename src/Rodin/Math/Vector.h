@@ -144,8 +144,10 @@ namespace Rodin::FormLanguage
       using ScalarType = Number;
   };
 
-  /// @brief Type traits for a Math::FixedSizeVector: exposes the scalar type
-  /// and the compile-time size.
+  /**
+   * @brief Type traits for a Math::FixedSizeVector: exposes the scalar type
+   * and the compile-time size.
+   */
   template <class Number, size_t S>
   struct Traits<Math::FixedSizeVector<Number, S>>
   {

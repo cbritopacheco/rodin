@@ -69,9 +69,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for DGMRES
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  DGMRES(Variational::ProblemBase<LinearSystem>&) -> DGMRES<LinearSystem>;
+  DGMRES(Variational::ProblemBase<LinearSystem>& pb) -> DGMRES<LinearSystem>;
 
   /**
    * @ingroup DGMRESSpecializations
@@ -99,17 +100,26 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      /// @brief Constructs the solver from the problem to be solved.
+      /**
+       * @brief Constructs the solver from the problem to be solved.
+       * @param pb Variational problem to operate on.
+       */
       DGMRES(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       DGMRES(const DGMRES& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       DGMRES(DGMRES&& other)
         : Parent(std::move(other)),
           m_solver(std::move(other.m_solver))
@@ -118,14 +128,22 @@ namespace Rodin::Solver
       /// @brief Destructor.
       ~DGMRES() = default;
 
-      /// @brief Sets the convergence tolerance; returns a reference to this solver.
+      /**
+       * @brief Sets the convergence tolerance; returns a reference to this solver.
+       * @param tol Convergence tolerance.
+       * @returns Reference to this object after the operation.
+       */
       DGMRES& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
-      /// @brief Sets the maximum number of iterations; returns a reference to this solver.
+      /**
+       * @brief Sets the maximum number of iterations; returns a reference to this solver.
+       * @param maxIt Maximum number of solver iterations.
+       * @returns Reference to this object after the operation.
+       */
       DGMRES& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
@@ -134,6 +152,8 @@ namespace Rodin::Solver
 
       /**
        * @brief Sets the restart parameter (dimension of Krylov subspace before restart).
+       * @param restart Number of iterations between solver restarts.
+       * @returns Reference to this object after the operation.
        */
       DGMRES& setRestart(size_t restart)
       {
@@ -145,6 +165,8 @@ namespace Rodin::Solver
        * @brief Sets the number of vectors used for deflation (Eigen calls this "d").
        *
        * Larger values may improve convergence but increase overhead.
+       * @returns Reference to this object after the operation.
+       * @param d Number of vectors used by the solver.
        */
       DGMRES& setEigenv(size_t d)
       {
@@ -152,7 +174,10 @@ namespace Rodin::Solver
         return *this;
       }
 
-      /// @brief Solves the assembled linear system.
+      /**
+       * @brief Solves the assembled linear system.
+       * @param axb Variational expression defining the problem.
+       */
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
@@ -162,13 +187,19 @@ namespace Rodin::Solver
           axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      /// @brief Returns whether the most recent solve converged successfully.
+      /**
+       * @brief Returns whether the most recent solve converged successfully.
+       * @returns Whether the operation completed successfully.
+       */
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
-      /// @brief Returns a polymorphic copy of this solver.
+      /**
+       * @brief Returns a polymorphic copy of this solver.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       DGMRES* copy() const noexcept override
       {
         return new DGMRES(*this);
@@ -204,18 +235,27 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      /// @brief Constructs the solver from the problem to be solved.
+      /**
+       * @brief Constructs the solver from the problem to be solved.
+       * @param pb Variational problem to operate on.
+       */
       DGMRES(ProblemType& pb)
         : Parent(pb)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       DGMRES(const DGMRES& other)
         : Parent(other),
           m_solver(other.m_solver)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       DGMRES(DGMRES&& other)
         : Parent(std::move(other)),
           m_solver(std::move(other.m_solver))
@@ -224,35 +264,54 @@ namespace Rodin::Solver
       /// @brief Destructor.
       ~DGMRES() = default;
 
-      /// @brief Sets the convergence tolerance; returns a reference to this solver.
+      /**
+       * @brief Sets the convergence tolerance; returns a reference to this solver.
+       * @param tol Convergence tolerance.
+       * @returns Reference to this object after the operation.
+       */
       DGMRES& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
-      /// @brief Sets the maximum number of iterations; returns a reference to this solver.
+      /**
+       * @brief Sets the maximum number of iterations; returns a reference to this solver.
+       * @param maxIt Maximum number of solver iterations.
+       * @returns Reference to this object after the operation.
+       */
       DGMRES& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
 
-      /// @brief Sets the Krylov restart dimension; returns a reference to this solver.
+      /**
+       * @brief Sets the Krylov restart dimension; returns a reference to this solver.
+       * @param restart Number of iterations between solver restarts.
+       * @returns Reference to this object after the operation.
+       */
       DGMRES& setRestart(size_t restart)
       {
         m_solver.set_restart(restart);
         return *this;
       }
 
-      /// @brief Sets the number of deflation vectors; returns a reference to this solver.
+      /**
+       * @brief Sets the number of deflation vectors; returns a reference to this solver.
+       * @returns Reference to this object after the operation.
+       * @param d Number of vectors used by the solver.
+       */
       DGMRES& setDeflationSize(size_t d)
       {
         m_solver.set_d(d);
         return *this;
       }
 
-      /// @brief Solves the assembled linear system.
+      /**
+       * @brief Solves the assembled linear system.
+       * @param axb Variational expression defining the problem.
+       */
       void solve(LinearSystemType& axb) override
       {
         m_solver.compute(axb.getOperator());
@@ -262,13 +321,19 @@ namespace Rodin::Solver
           axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
-      /// @brief Returns whether the most recent solve converged successfully.
+      /**
+       * @brief Returns whether the most recent solve converged successfully.
+       * @returns Whether the operation completed successfully.
+       */
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
-      /// @brief Returns a polymorphic copy of this solver.
+      /**
+       * @brief Returns a polymorphic copy of this solver.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       DGMRES* copy() const noexcept override
       {
         return new DGMRES(*this);

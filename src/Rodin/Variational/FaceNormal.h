@@ -160,26 +160,39 @@ namespace Rodin::Variational
         assert(m_sdim > 0);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       FaceNormal(const FaceNormal& other)
         : Parent(other),
           m_sdim(other.m_sdim)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       FaceNormal(FaceNormal&& other)
         : Parent(std::move(other)),
           m_sdim(std::move(other.m_sdim))
       {}
 
-      /// @brief Gets the topological dimension.
+      /**
+       * @brief Gets the topological dimension.
+       * @returns The topological dimension.
+       */
       constexpr
       size_t getDimension() const
       {
         return m_sdim;
       }
 
-      /// @brief Evaluates the expression at a geometric point.
+      /**
+       * @brief Evaluates the expression at a geometric point.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -335,9 +348,13 @@ namespace Rodin::Variational
         return res;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }

@@ -44,9 +44,7 @@ namespace Rodin::Geometry::Euclidean
   class Base
   {
     public:
-      /**
-       * @brief Virtual destructor for polymorphic behavior.
-       */
+      /// @brief Virtual destructor for polymorphic behavior.
       virtual ~Base() = default;
   };
 }

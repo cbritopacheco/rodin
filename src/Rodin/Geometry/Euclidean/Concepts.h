@@ -31,9 +31,7 @@ namespace Rodin::Geometry::Euclidean
   template<class T, class OtherGeometry, class = void>
   struct has_intersect_method : std::false_type{};
 
-  /**
-   * @brief Specialization when intersect method exists.
-   */
+  /// @brief Specialization when intersect method exists.
   template<class T, class OtherGeometry>
   struct has_intersect_method<T, OtherGeometry,
    std::void_t<decltype(std::declval<T>().intersect(
@@ -54,9 +52,7 @@ namespace Rodin::Geometry::Euclidean
   template<class T, class OtherGeometry, class = void>
   struct has_distance_method : std::false_type{};
 
-  /**
-   * @brief Specialization when distance method exists.
-   */
+  /// @brief Specialization when distance method exists.
   template<class T, class OtherGeometry>
   struct has_distance_method<T, OtherGeometry,
    std::void_t<decltype(std::declval<T>().distance(
@@ -77,9 +73,7 @@ namespace Rodin::Geometry::Euclidean
   template<class T, class OtherGeometry, class = void>
   struct has_connect_method : std::false_type{};
 
-  /**
-   * @brief Specialization when connect method exists.
-   */
+  /// @brief Specialization when connect method exists.
   template<class T, class OtherGeometry>
   struct has_connect_method<T, OtherGeometry,
    std::void_t<decltype(std::declval<T>().connect(

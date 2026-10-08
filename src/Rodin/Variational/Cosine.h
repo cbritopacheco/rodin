@@ -44,9 +44,7 @@ namespace Rodin::Variational
    * @see Sin, Tan, Cosh
    */
 
-  /**
-   * @ingroup CosSpecializations
-   */
+  /// @ingroup CosSpecializations
   template <class NestedDerived>
   class Cos<FunctionBase<NestedDerived>> final
     : public RealFunctionBase<Cos<FunctionBase<NestedDerived>>>
@@ -118,7 +116,11 @@ namespace Rodin::Variational
         return *m_operand;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param g Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& g) const
       {
         const auto o = getOperand().getOrder(g);
@@ -144,12 +146,17 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_operand;
   };
 
-  /// @brief Deduction guide for @c Cos.
+  /**
+   * @brief Deduction guide for @c Cos.
+   * @param v Function to apply cosine to
+   */
   template <class NestedDerived>
-  Cos(const FunctionBase<NestedDerived>&) -> Cos<FunctionBase<NestedDerived>>;
+  Cos(const FunctionBase<NestedDerived>& v) -> Cos<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Helper function to construct objects of type Cos.
+   * @param f Function operand.
+   * @returns Pointwise cosine expression.
    */
   template <class NestedDerived>
   auto cos(const FunctionBase<NestedDerived>& f)

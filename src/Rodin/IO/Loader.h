@@ -58,9 +58,7 @@ namespace Rodin::IO
   class Loader
   {
     public:
-      /**
-       * @brief Type of object being loaded.
-       */
+      /// @brief Type of object being loaded.
       using ObjectType = T;
 
       /**

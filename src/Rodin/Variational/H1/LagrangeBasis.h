@@ -38,7 +38,7 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the i-th Lagrange basis function at x.
        *
-       * @param i Node index (0 ≤ i ≤ K).
+       * @param i Local basis-function index.
        * @param x Evaluation point.
        * @param nodes Array of K+1 nodes.
        * @return Value of L_i(x).
@@ -115,13 +115,19 @@ namespace Rodin::Variational
   class LagrangeBasisPoint
   {
     public:
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       static constexpr Real getBasis()
       {
         return 1.0;
       }
 
-      /// @brief Gets the derivative of the basis function.
+      /**
+       * @brief Gets the derivative of the basis function.
+       * @returns Derivative evaluated at the supplied point.
+       */
       static constexpr Real getDerivative()
       {
         return 0.0;
@@ -149,8 +155,16 @@ namespace Rodin::Variational
   class LagrangeBasisSegment
   {
     public:
-      // Node index i, 0 <= i <= K, x in [0,1]
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       *
+       * The node index satisfies @f$ 0 \le i \le K @f$, and the reference coordinate
+       * lies in @f$ [0,1] @f$.
+       *
+       * @param i Local basis-function index.
+       * @returns Value of the selected local basis function at the evaluation point.
+       * @param x Reference-coordinate component at which the basis is evaluated.
+       */
       static constexpr Real getBasis(size_t i, Real x)
       {
         const auto& nodes = GLL01<K>::getNodes();
@@ -169,7 +183,12 @@ namespace Rodin::Variational
         return result;
       }
 
-      /// @brief Gets the derivative of the basis function.
+      /**
+       * @brief Gets the derivative of the basis function.
+       * @param i Index of the requested entry.
+       * @returns Derivative evaluated at the supplied point.
+       * @param x Reference-coordinate component at which the basis is evaluated.
+       */
       static constexpr Real getDerivative(size_t i, Real x)
       {
         const auto& nodes = GLL01<K>::getNodes();
@@ -215,8 +234,17 @@ namespace Rodin::Variational
   class LagrangeBasisTriangle
   {
     public:
-      // Node identified by (i,j) with i+j <= K.
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       *
+       * The node is identified by @f$ (i,j) @f$ with @f$ i+j \le K @f$.
+       *
+       * @param i Local basis-function index.
+       * @param j Index of the second coordinate.
+       * @returns Value of the selected local basis function at the evaluation point.
+       * @param x Reference-coordinate component at which the basis is evaluated.
+       * @param y Reference-coordinate component at which the basis is evaluated.
+       */
       static constexpr Real getBasis(size_t i, size_t j, Real x, Real y)
       {
         // Barycentric coordinates: λ0 = 1 - x - y, λ1 = x, λ2 = y
@@ -246,7 +274,15 @@ namespace Rodin::Variational
 
       // deriv_dim = 0 -> \partial/\partialx, deriv_dim = 1 -> \partial/\partialy
       static constexpr
-      /// @brief Gets the derivative of the basis function.
+        /**
+         * @brief Gets the derivative of the basis function.
+         * @param i Index of the requested entry.
+         * @param j Index of the second coordinate.
+         * @param deriv_dim Coordinate direction of differentiation.
+         * @returns Derivative evaluated at the supplied point.
+         * @param x Reference-coordinate component at which the basis is evaluated.
+         * @param y Reference-coordinate component at which the basis is evaluated.
+         */
         Real
         getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y)
       {
@@ -332,8 +368,19 @@ namespace Rodin::Variational
   class LagrangeBasisTetrahedron
   {
     public:
-      // Node (i,j,k) with i+j+k <= K.
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       *
+       * The node is identified by @f$ (i,j,k) @f$ with @f$ i+j+k \le K @f$.
+       *
+       * @param i Local basis-function index.
+       * @param j Index of the second coordinate.
+       * @returns Value of the selected local basis function at the evaluation point.
+       * @param k Basis or lattice index in the reference element.
+       * @param x Reference-coordinate component at which the basis is evaluated.
+       * @param y Reference-coordinate component at which the basis is evaluated.
+       * @param z Reference-coordinate component at which the basis is evaluated.
+       */
       static constexpr Real getBasis(
         size_t i, size_t j, size_t k, Real x, Real y, Real z)
       {
@@ -361,8 +408,21 @@ namespace Rodin::Variational
         return result;
       }
 
-      // deriv_dim = 0 -> \partial/\partialx, 1 -> \partial/\partialy, 2 -> \partial/\partialz
-      /// @brief Gets the derivative of the basis function.
+      /**
+       * @brief Gets the derivative of the basis function.
+       *
+       * The differentiation direction is selected by @p deriv_dim: 0 for @f$ x @f$, 1
+       * for @f$ y @f$, and 2 for @f$ z @f$.
+       *
+       * @param i Index of the requested entry.
+       * @param j Index of the second coordinate.
+       * @param deriv_dim Coordinate direction of differentiation.
+       * @returns Derivative evaluated at the supplied point.
+       * @param k Basis or lattice index in the reference element.
+       * @param x Reference-coordinate component at which the basis is evaluated.
+       * @param y Reference-coordinate component at which the basis is evaluated.
+       * @param z Reference-coordinate component at which the basis is evaluated.
+       */
       static constexpr Real getDerivative(
         size_t i, size_t j, size_t k, size_t deriv_dim,
         Real x, Real y, Real z)
@@ -462,8 +522,18 @@ namespace Rodin::Variational
   class LagrangeBasisQuadrilateral
   {
     public:
-      // Node (i,j), 0 ≤ i,j ≤ K, φ_{i,j}(x,y) = L_i^K(x) L_j^K(y)
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       *
+       * The tensor-product basis is @f$ \phi_{i,j}(x,y) = L_i^K(x)L_j^K(y) @f$, with
+       * @f$ 0 \le i,j \le K @f$.
+       *
+       * @param i Local basis-function index.
+       * @param j Index of the second coordinate.
+       * @returns Value of the selected local basis function at the evaluation point.
+       * @param x Reference-coordinate component at which the basis is evaluated.
+       * @param y Reference-coordinate component at which the basis is evaluated.
+       */
       static constexpr Real getBasis(size_t i, size_t j, Real x, Real y)
       {
         const auto& nodes = GLL01<K>::getNodes();
@@ -495,8 +565,19 @@ namespace Rodin::Variational
         return Lix * Ljy;
       }
 
-      // deriv_dim = 0 -> \partial/\partialx, deriv_dim = 1 -> \partial/\partialy
-      /// @brief Gets the derivative of the basis function.
+      /**
+       * @brief Gets the derivative of the basis function.
+       *
+       * The differentiation direction is selected by @p deriv_dim: 0 for @f$ x @f$, 1
+       * for @f$ y @f$.
+       *
+       * @param i Index of the requested entry.
+       * @param j Index of the second coordinate.
+       * @param deriv_dim Coordinate direction of differentiation.
+       * @returns Derivative evaluated at the supplied point.
+       * @param x Reference-coordinate component at which the basis is evaluated.
+       * @param y Reference-coordinate component at which the basis is evaluated.
+       */
       static constexpr Real getDerivative(
           size_t i, size_t j, size_t deriv_dim, Real x, Real y)
       {
@@ -612,8 +693,20 @@ namespace Rodin::Variational
   class LagrangeBasisWedge
   {
     public:
-      // Node (i,j,k): triangle indices (i,j) with i+j ≤ K, segment index k.
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       *
+       * The node has triangle indices @f$ (i,j) @f$ with @f$ i+j \le K @f$ and segment
+       * index @f$ k @f$.
+       *
+       * @param i Local basis-function index.
+       * @param j Index of the second coordinate.
+       * @returns Value of the selected local basis function at the evaluation point.
+       * @param k Basis or lattice index in the reference element.
+       * @param x Reference-coordinate component at which the basis is evaluated.
+       * @param y Reference-coordinate component at which the basis is evaluated.
+       * @param z Reference-coordinate component at which the basis is evaluated.
+       */
       static constexpr Real getBasis(
         size_t i, size_t j, size_t k,
         Real x, Real y, Real z)
@@ -655,8 +748,21 @@ namespace Rodin::Variational
         return triVal * segVal;
       }
 
-      // deriv_dim = 0 -> \partial/\partialx, 1 -> \partial/\partialy, 2 -> \partial/\partialz
-      /// @brief Gets the derivative of the basis function.
+      /**
+       * @brief Gets the derivative of the basis function.
+       *
+       * The differentiation direction is selected by @p deriv_dim: 0 for @f$ x @f$, 1
+       * for @f$ y @f$, and 2 for @f$ z @f$.
+       *
+       * @param i Index of the requested entry.
+       * @param j Index of the second coordinate.
+       * @param deriv_dim Coordinate direction of differentiation.
+       * @returns Derivative evaluated at the supplied point.
+       * @param k Basis or lattice index in the reference element.
+       * @param x Reference-coordinate component at which the basis is evaluated.
+       * @param y Reference-coordinate component at which the basis is evaluated.
+       * @param z Reference-coordinate component at which the basis is evaluated.
+       */
       static constexpr Real getDerivative(
         size_t i, size_t j, size_t k, size_t deriv_dim,
         Real x, Real y, Real z)

@@ -92,20 +92,24 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = FunctionBase<VectorFunctionBase<Scalar, Derived>>;
 
-      /// @brief Import operator() from parent
+      // Import operator() from parent.
       using Parent::operator();
 
       /// @brief Default constructor
       VectorFunctionBase() = default;
 
-      /// @brief Copy constructor
-      /// @param[in] other Vector function to copy from
+      /**
+       * @brief Copy constructor
+       * @param[in] other Vector function to copy from
+       */
       VectorFunctionBase(const VectorFunctionBase& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor
-      /// @param[in] other Vector function to move from
+      /**
+       * @brief Move constructor
+       * @param[in] other Vector function to move from
+       */
       VectorFunctionBase(VectorFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -270,8 +274,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the constant vector at a point.
        * @returns Stored vector value
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      SpatialVectorType getValue(const Geometry::Point&) const
+      SpatialVectorType getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return SpatialVectorType(m_vector.get());
       }
@@ -289,6 +294,7 @@ namespace Rodin::Variational
       /**
        * @brief Leaves constant vectors unchanged on trace domains.
        * @returns Reference to this function
+       * @param attr Mesh attribute selecting the region.
        */
       constexpr
       VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
@@ -299,9 +305,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order of a constant vector.
        * @returns Zero polynomial order
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return size_t(0);
       }
@@ -315,9 +322,12 @@ namespace Rodin::Variational
       std::reference_wrapper<const VectorType> m_vector;
   };
 
-  /// @brief CTAD for dense-vector constants.
+  /**
+   * @brief CTAD for dense-vector constants.
+   * @param v The vector values
+   */
   template <class Scalar>
-  VectorFunction(const Math::Vector<Scalar>&) -> VectorFunction<Math::Vector<Scalar>>;
+  VectorFunction(const Math::Vector<Scalar>& v) -> VectorFunction<Math::Vector<Scalar>>;
 
   /**
    * @ingroup VectorFunctionSpecializations
@@ -516,9 +526,13 @@ namespace Rodin::Variational
       std::tuple<RealFunction<V>, RealFunction<Values>...> m_fs;
   };
 
-  /// @brief CTAD for component-wise vector functions.
-  template <class V, class ... Values>
-  VectorFunction(const V&, const Values&...) -> VectorFunction<V, Values...>;
+  /**
+   * @brief CTAD for component-wise vector functions.
+   * @param v First component source
+   * @param values Parameter pack of values
+   */
+  template <class V, class... Values>
+  VectorFunction(const V& v, const Values&... values) -> VectorFunction<V, Values...>;
 
   /**
    * @ingroup VectorFunctionSpecializations
@@ -599,6 +613,7 @@ namespace Rodin::Variational
       /**
        * @brief Leaves callable vector functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param attr Mesh attribute selecting the region.
        */
       constexpr
       VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
@@ -609,9 +624,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order of the callable.
        * @returns std::nullopt because arbitrary callables have unknown order
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -626,9 +642,14 @@ namespace Rodin::Variational
       const F m_f;
   };
 
-  /// @brief CTAD for callable vector functions.
-  template <class F, typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&>>>
-  VectorFunction(size_t, F) -> VectorFunction<F>;
+  /**
+   * @brief CTAD for callable vector functions.
+   * @param vdim Vector dimension
+   * @param f Callable returning a vector value
+   */
+  template <class F,
+    typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&>>>
+  VectorFunction(size_t vdim, F f) -> VectorFunction<F>;
 }
 
 #endif

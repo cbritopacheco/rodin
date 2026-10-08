@@ -6,6 +6,7 @@ Checks the rules that clang-format and clang-tidy cannot express:
   guard      include guard must be RODIN_<PATH>_H derived from the file path
   license    every source file starts with the Boost Software License block
   filedoc    every header under src/Rodin carries Doxygen @brief documentation
+  docstyle   multiline Doxygen uses /** ... */; one-line Doxygen uses ///
   pragma     include guards, never #pragma once
   petsc      PETSc headers are only included under src/Rodin/PETSc/
 
@@ -85,10 +86,70 @@ def expected_guard(relpath):
     return "RODIN_" + "_".join(p.upper() for p in parts) + suffix
 
 
+CPP_COMMENTS = re.compile(
+    r'R"(?P<delimiter>[^ ()\\\t\r\n]{0,16})\(.*?\)(?P=delimiter)"'
+    r'|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\''
+    r'|(?P<comment>//[^\n]*|/\*.*?\*/)', re.DOTALL)
+
+
+def doxygen_style_edits(text):
+    """Yield standalone comment replacements, ignoring strings and trailing docs."""
+    comments = []
+    for match in CPP_COMMENTS.finditer(text):
+        comment = match.group("comment")
+        if comment is None:
+            continue
+        start, end = match.span()
+        line_start = text.rfind("\n", 0, start) + 1
+        line_end = text.find("\n", end)
+        if line_end < 0:
+            line_end = len(text)
+        indent = text[line_start:start]
+        if indent.strip() or text[end:line_end].strip():
+            continue
+        if comment.startswith("///") and not comment.startswith(("///<", "////")):
+            content = comment[3:]
+            if content.startswith(" "):
+                content = content[1:]
+            comments.append((line_start, end, indent, content))
+        elif comment.startswith("/**") and not comment.startswith(("/**<", "/***")):
+            content = [re.sub(r"^\s*\* ?", "", line).strip()
+                       for line in comment[3:-2].splitlines()]
+            content = [line for line in content if line]
+            if len(content) == 1:
+                yield line_start, end, indent + "/// " + content[0]
+    group = []
+    for entry in comments:
+        if group and (text[group[-1][1]:entry[0]] != "\n"
+                      or group[-1][2] != entry[2]):
+            if len(group) > 1:
+                yield _block_edit(group)
+            group = []
+        group.append(entry)
+    if len(group) > 1:
+        yield _block_edit(group)
+
+
+def _block_edit(group):
+    indent = group[0][2]
+    body = "\n".join(indent + " *" + (" " + entry[3] if entry[3] else "")
+                     for entry in group)
+    return group[0][0], group[-1][1], indent + "/**\n" + body + "\n" + indent + " */"
+
+
 def check_file(relpath, lines):
     findings = []
     text = "\n".join(lines)
     is_header = relpath.endswith((".h", ".hpp"))
+
+    for start, end, replacement in doxygen_style_edits(text):
+        line = text.count("\n", 0, start) + 1
+        findings.append(Finding(
+            "docstyle", relpath, line,
+            "use /** ... */ for multiline Doxygen documentation and /// for "
+            "single-line documentation",
+            source=lines[line - 1],
+            suggestion="replace this comment with " + replacement.splitlines()[0].strip()))
 
     # license: the Boost license block must appear near the top.
     head = "\n".join(lines[:10])

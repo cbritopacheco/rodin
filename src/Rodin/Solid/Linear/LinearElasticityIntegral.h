@@ -141,7 +141,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Returns the current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const override
       {
         return m_polytope.value().get();
@@ -318,7 +321,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the current element stiffness matrix.
+      /**
+       * @brief Returns an entry of the current element stiffness matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) override
       {
         return m_matrix(te, tr);
@@ -381,11 +389,15 @@ namespace Rodin::Variational
 
   /**
    * @brief Deduction guide for LinearElasticityIntegrator.
+   * @param u Trial function (displacement)
+   * @param v Test function
+   * @param lambda First Lamé parameter function
+   * @param mu Second Lamé parameter (shear modulus) function
    */
   template <class Solution, class FES, class LambdaDerived, class MuDerived>
-  LinearElasticityIntegrator(
-      const TrialFunction<Solution, FES>&, const TestFunction<FES>&,
-      const FunctionBase<LambdaDerived>&, const FunctionBase<MuDerived>&)
+  LinearElasticityIntegrator(const TrialFunction<Solution, FES>& u,
+    const TestFunction<FES>& v, const FunctionBase<LambdaDerived>& lambda,
+    const FunctionBase<MuDerived>& mu)
     -> LinearElasticityIntegrator<Solution, FES, LambdaDerived, MuDerived>;
 
   /**
@@ -446,10 +458,12 @@ namespace Rodin::Variational
 
   /**
    * @brief Deduction guide for LinearElasticityIntegral.
+   * @param u Trial function (displacement)
+   * @param v Test function
    */
   template <class Solution, class FES>
-  LinearElasticityIntegral(const TrialFunction<Solution, FES>&, const TestFunction<FES>&)
-    -> LinearElasticityIntegral<Solution, FES>;
+  LinearElasticityIntegral(const TrialFunction<Solution, FES>& u,
+    const TestFunction<FES>& v) -> LinearElasticityIntegral<Solution, FES>;
 }
 
 #endif

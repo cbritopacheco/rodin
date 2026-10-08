@@ -113,9 +113,6 @@ namespace Rodin::IO
       }
   };
 
-  // --------------------------------------------------------------------------
-  // P1 MFEM printer for PETSc Vec
-  // --------------------------------------------------------------------------
   /**
    * @brief MFEM printer for PETSc-backed P1 grid functions.
    *
@@ -195,17 +192,14 @@ namespace Rodin::IO
       }
   };
 
-  // --------------------------------------------------------------------------
-  // H1<K> MFEM printer for PETSc Vec (Context::Local and Context::MPI)
-  // Matches the Math::Vector version, but reads coefficients from Vec.
-  // Base prints Ordering: VectorDimension (1) for H1, so we emit components
-  // per MFEM scalar node in MFEM node order.
-  // --------------------------------------------------------------------------
   /**
    * @brief MFEM printer for PETSc-backed H1 (order @f$ K @f$) grid functions.
    *
    * Handles the Rodin-to-MFEM node reordering using Vandermonde change-of-basis
    * matrices, for both simplex and non-simplex element geometries.
+   *
+   * Coefficients are read from the PETSc vector. Components are emitted per MFEM scalar
+   * node in MFEM node order, using VectorDimension ordering.
    *
    * @tparam K     Polynomial order.
    * @tparam Range Scalar or vector range type.
@@ -558,7 +552,7 @@ namespace Rodin::IO
   template <size_t K, class Range>
   using MFEM_H1_PETSc_MPI_Printer =
     GridFunctionPrinter<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::MPI>>, ::Vec>;
-  /** @brief Matrix PETSc fields export through the local scalar-family permutation. */
+  /// @brief Matrix PETSc fields export through the local scalar-family permutation.
   template <class FES>
     requires(
       FormLanguage::IsMatrixRange<typename FormLanguage::Traits<FES>::RangeType>::Value)
@@ -597,7 +591,11 @@ namespace Rodin::IO
           localField)
           .print(os);
       }
-      void printData(std::ostream&) override {}
+      /**
+       * @brief Provides the format-specific data-printer interface.
+       * @param os Output stream required by the printer interface; unused by this implementation.
+       */
+      void printData([[maybe_unused]] std::ostream& os) override {}
   };
 }
 

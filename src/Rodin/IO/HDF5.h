@@ -246,9 +246,17 @@ namespace Rodin::IO
           : m_id(id),
             m_close(closeFn)
         {}
+        /**
+         * @brief Disables copying or moving this object.
+         * @param other Object whose copying or moving is disabled.
+         */
 
-        Handle(const Handle&) = delete;
-        Handle& operator=(const Handle&) = delete;
+        Handle(const Handle& other) = delete;
+        /**
+         * @brief Assigns the state of another object.
+         * @param other Object to copy from.
+         */
+        Handle& operator=(const Handle& other) = delete;
 
         /**
          * @brief Move constructor.
@@ -365,28 +373,40 @@ namespace Rodin::IO
     template <class T>
     hid_t getNativeType();
 
-    /// @brief Returns the native HDF5 type for unsigned 64-bit integers.
+    /**
+     * @brief Returns the native HDF5 type for unsigned 64-bit integers.
+     * @returns The native HDF5 type for unsigned 64-bit integers.
+     */
     template <>
     inline hid_t getNativeType<U64>()
     {
       return H5T_NATIVE_ULLONG;
     }
 
-    /// @brief Returns the native HDF5 type for signed 32-bit integers.
+    /**
+     * @brief Returns the native HDF5 type for signed 32-bit integers.
+     * @returns The native HDF5 type for signed 32-bit integers.
+     */
     template <>
     inline hid_t getNativeType<I32>()
     {
       return H5T_NATIVE_INT;
     }
 
-    /// @brief Returns the native HDF5 type for 64-bit floating point values.
+    /**
+     * @brief Returns the native HDF5 type for 64-bit floating point values.
+     * @returns The native HDF5 type for 64-bit floating point values.
+     */
     template <>
     inline hid_t getNativeType<F64>()
     {
       return H5T_NATIVE_DOUBLE;
     }
 
-    /// @brief Returns the native HDF5 type for unsigned 8-bit integers.
+    /**
+     * @brief Returns the native HDF5 type for unsigned 8-bit integers.
+     * @returns The native HDF5 type for unsigned 8-bit integers.
+     */
     template <>
     inline hid_t getNativeType<U8>()
     {
@@ -600,7 +620,7 @@ namespace Rodin::IO
 
     /**
      * @brief Maps a Rodin polytope type to its XDMF mixed-topology type id.
-     * @param[in] t  Polytope geometry type.
+     * @param[in] t  Type of polytope to construct.
      * @returns XDMF type id (e.g. Triangle=4, Quadrilateral=5, Tetrahedron=6).
      *
      * @see <a href="https://www.xdmf.org/index.php/XDMF_Model_and_Format">
@@ -632,7 +652,7 @@ namespace Rodin::IO
 
     /**
      * @brief Maps a Rodin polytope type to its quadratic XDMF mixed-topology id.
-     * @param[in] t Polytope geometry type.
+     * @param[in] t Type of polytope to construct.
      * @returns XDMF quadratic topology id for order-2 visualization.
      *
      * Only XDMF-supported quadratic topologies are returned. The coordinates
@@ -671,7 +691,7 @@ namespace Rodin::IO
 
     /**
      * @brief Returns the XDMF uniform topology name for a quadratic cell type.
-     * @param[in] t Polytope geometry type.
+     * @param[in] t Type of polytope to construct.
      * @returns XDMF topology name string.
      */
     inline const char* getXDMFQuadraticTopologyName(Geometry::Polytope::Type t)
@@ -745,6 +765,9 @@ namespace Rodin::IO
      * transformation is sampled at XDMF's quadratic node locations. This keeps
      * visualization independent of Rodin's internal finite-element node layout
      * while intentionally approximating higher-order geometry by quadratic XDMF.
+     * @param t Type of polytope to construct.
+     * @param order Polynomial order.
+     * @returns The x d m f reference nodes.
      */
     inline std::vector<Math::SpatialPoint> getXDMFReferenceNodes(
       Geometry::Polytope::Type t, size_t order)
@@ -870,6 +893,8 @@ namespace Rodin::IO
      * twice (once from the owning rank, once from each rank carrying it
      * as a ghost). For a plain `Mesh<Context::Local>` this returns
      * nullptr and the writers iterate every cell.
+     * @param mesh Mesh on which the object is defined.
+     * @returns A non-null `Shard*` iff `mesh` is a partition shard.
      */
     inline const Geometry::Shard* asShard(const Geometry::MeshBase& mesh)
     {
@@ -881,6 +906,10 @@ namespace Rodin::IO
      *
      * On a `Shard` this means `isOwned(D, i)`. On a non-shard local mesh
      * the predicate is identically true.
+     * @param i Index of the requested entry.
+     * @param shard Mesh shard, or a null pointer for a local mesh.
+     * @param D Topological dimension of the cells.
+     * @returns Whether the cell is owned by this rank and should be written.
      */
     inline bool isXDMFOwnedCell(const Geometry::Shard* shard, std::size_t D, Index i)
     {
@@ -892,6 +921,8 @@ namespace Rodin::IO
      *
      * Equals the shard's owned-cell count when `mesh` is a `Shard`,
      * otherwise `mesh.getCellCount()`.
+     * @param mesh Mesh on which the object is defined.
+     * @returns The x d m f rendered cell count.
      */
     inline std::size_t getXDMFRenderedCellCount(const Geometry::MeshBase& mesh)
     {
@@ -2168,8 +2199,9 @@ namespace Rodin::IO
        * @brief Stream-based loading is not supported for HDF5.
        *
        * Always raises an exception. Use the file-path overload instead.
+       * @param is Input stream; stream-based loading is unsupported by this format.
        */
-      void load(std::istream&) override
+      void load([[maybe_unused]] std::istream& is) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 mesh loading requires file-path based loading."
@@ -2219,6 +2251,11 @@ namespace Rodin::IO
       }
 
     private:
+      /**
+       * @brief Reads mesh coordinates from an HDF5 file.
+       * @param file Open HDF5 file handle.
+       * @returns Point cloud reconstructed from the stored vertices.
+       */
       Geometry::PointCloud readVertices(hid_t file) const
       {
         const auto [nv, sdim] = HDF5::readMatrixShape(file, HDF5::Path::MeshGeometryVertices);
@@ -2238,6 +2275,11 @@ namespace Rodin::IO
         }
         return vertices;
       }
+      /**
+       * @brief Reads mesh connectivity from an HDF5 file.
+       * @param file Open HDF5 file handle.
+       * @returns Mesh connectivity reconstructed from the stored entities and incidence data.
+       */
 
       Geometry::Connectivity<ContextType> readConnectivity(hid_t file) const
       {
@@ -2364,6 +2406,12 @@ namespace Rodin::IO
 
         return connectivity;
       }
+      /**
+       * @brief Reads mesh attributes from an HDF5 file.
+       * @param file Open HDF5 file handle.
+       * @param connectivity Mesh connectivity corresponding to the stored attributes.
+       * @returns Attribute index reconstructed for the supplied connectivity.
+       */
 
       Geometry::AttributeIndex readAttributes(
           hid_t file,
@@ -2458,6 +2506,7 @@ namespace Rodin::IO
        * @brief Stream-based printing is not supported for HDF5.
        *
        * Always raises an exception. Use the file-path overload instead.
+       * @param os Output stream.
        */
       void print(std::ostream& os) override
       {
@@ -2500,6 +2549,10 @@ namespace Rodin::IO
       }
 
     private:
+      /**
+       * @brief Creates the mesh groups in the HDF5 file.
+       * @param file Open HDF5 file handle.
+       */
       void createBaseGroups(hid_t file) const
       {
         {
@@ -2559,6 +2612,10 @@ namespace Rodin::IO
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Transformations group." << Alert::Raise; }
         }
       }
+      /**
+       * @brief Writes point coordinates to the HDF5 file.
+       * @param file Open HDF5 file handle.
+       */
 
       void writeVertices(hid_t file) const
       {
@@ -2581,6 +2638,10 @@ namespace Rodin::IO
             static_cast<hsize_t>(nv),
             static_cast<hsize_t>(sdim));
       }
+      /**
+       * @brief Writes entity connectivity to the HDF5 file.
+       * @param file Open HDF5 file handle.
+       */
 
       void writeConnectivity(hid_t file) const
       {
@@ -2704,6 +2765,10 @@ namespace Rodin::IO
           }
         }
       }
+      /**
+       * @brief Writes mesh attributes to the HDF5 file.
+       * @param file Open HDF5 file handle.
+       */
 
       void writeAttributes(hid_t file) const
       {
@@ -2722,6 +2787,10 @@ namespace Rodin::IO
           HDF5::writeVectorDataset(file, HDF5::attributePath(d), attrs);
         }
       }
+      /**
+       * @brief Writes geometric transformations to the HDF5 file.
+       * @param file Open HDF5 file handle.
+       */
 
       void writeTransformations(hid_t file) const
       {
@@ -2801,8 +2870,9 @@ namespace Rodin::IO
        * @brief Stream-based loading is not supported for HDF5.
        *
        * Always raises an exception. Use the file-path overload instead.
+       * @param is Input stream; stream-based loading is unsupported by this format.
        */
-      void load(std::istream&) override
+      void load([[maybe_unused]] std::istream& is) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 GridFunction loading is file-path based."
@@ -2947,6 +3017,7 @@ namespace Rodin::IO
        * @brief Stream-based printing is not supported for HDF5.
        *
        * Always raises an exception. Use the file-path overload instead.
+       * @param os Output stream.
        */
       void print(std::ostream& os) override
       {

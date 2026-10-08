@@ -13,29 +13,19 @@
 
 namespace Rodin::MMG
 {
-  /**
-   * @brief Base wrapper for MMG configuration and low-level mesh/solution conversion.
-   */
+  /// @brief Base wrapper for MMG configuration and low-level mesh/solution conversion.
   class MMG5;
 
-  /**
-   * @brief MMG-aware mesh type extending @ref Rodin::Geometry::Mesh.
-   */
+  /// @brief MMG-aware mesh type extending @ref Rodin::Geometry::Mesh.
   class Mesh;
 
-  /**
-   * @brief Metric-driven remeshing operator.
-   */
+  /// @brief Metric-driven remeshing operator.
   class Adapt;
 
-  /**
-   * @brief Mesh-quality optimization operator.
-   */
+  /// @brief Mesh-quality optimization operator.
   class Optimizer;
 
-  /**
-   * @brief Level-set based implicit-domain discretization operator.
-   */
+  /// @brief Level-set based implicit-domain discretization operator.
   class LevelSetDiscretizer;
 }
 

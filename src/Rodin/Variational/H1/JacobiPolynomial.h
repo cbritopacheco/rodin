@@ -67,6 +67,14 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Evaluates a Jacobi polynomial.
+       * @param k Jacobi polynomial degree.
+       * @param alpha First Jacobi weight parameter.
+       * @param beta Second Jacobi weight parameter.
+       * @param x Scalar evaluation argument.
+       * @returns Value of the degree-k Jacobi polynomial with the specified weight parameters at x.
+       */
       static constexpr Real getValue(size_t k, Real alpha, Real beta, Real x)
       {
         if (k == 0)

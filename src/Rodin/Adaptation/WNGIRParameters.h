@@ -45,29 +45,41 @@ namespace Rodin::Adaptation
       Real directionNormFactor =
         Real(10); ///< Maximum coefficient norm relative to the predictor.
       Real jMinRatio = 1e-8; ///< @f$j_{\min}@f$, hard inadmissibility floor.
-      /// @brief Jacobian floor ratio @f$j_{\mathrm{ls}}@f$ enforced by line
-      /// search.
+      /**
+       * @brief Jacobian floor ratio @f$j_{\mathrm{ls}}@f$ enforced by line
+       * search.
+       */
       Real jLineSearchRatio = 1e-2;
-      /// @brief Absolute RMS tolerance @f$\tau_{\mathrm{rms}}@f$; zero selects
-      /// four times the level-set mesh scale.
+      /**
+       * @brief Absolute RMS tolerance @f$\tau_{\mathrm{rms}}@f$; zero selects
+       * four times the level-set mesh scale.
+       */
       Real tauRms = 1e-12;
 
-      /// @brief Absolute supremum tolerance @f$\tau_\infty@f$; zero selects ten
-      /// times the level-set mesh scale.
+      /**
+       * @brief Absolute supremum tolerance @f$\tau_\infty@f$; zero selects ten
+       * times the level-set mesh scale.
+       */
       Real tauInf = 1e-12;
 
-      /// @brief Lower bound on the scale-aware tolerance
-      /// @f$\tau_{\mathrm{rms},h}@f$.
+      /**
+       * @brief Lower bound on the scale-aware tolerance
+       * @f$\tau_{\mathrm{rms},h}@f$.
+       */
       Real tauRmsHFloor = Real(0.005);
 
       /// @brief Lower bound on the scale-aware tolerance @f$\tau_{\infty,h}@f$.
       Real tauInfHFloor = 0;
-      /// @brief Factor @f$\tau^{\mathrm{rms}}_{\mathrm{jump}}@f$ multiplying the
-      /// normal-jump estimate in @f$\tau_{\mathrm{rms},h}@f$.
+      /**
+       * @brief Factor @f$\tau^{\mathrm{rms}}_{\mathrm{jump}}@f$ multiplying the
+       * normal-jump estimate in @f$\tau_{\mathrm{rms},h}@f$.
+       */
       Real tauJumpRms = 0;
 
-      /// @brief Factor @f$\tau^{\infty}_{\mathrm{jump}}@f$ multiplying the
-      /// normal-jump estimate in @f$\tau_{\infty,h}@f$.
+      /**
+       * @brief Factor @f$\tau^{\infty}_{\mathrm{jump}}@f$ multiplying the
+       * normal-jump estimate in @f$\tau_{\infty,h}@f$.
+       */
       Real tauJumpInf = 0;
       Real energyStagTol = 1e-8; ///< Relative energy stagnation tolerance.
       Real stepTol = 0; ///< ≤0 ⇒ 1e-4·h.
@@ -86,11 +98,13 @@ namespace Rodin::Adaptation
       Geometry::Attribute interfaceAttribute =
         0; ///< Mesh attribute identifying interface facets.
       bool trace = false; ///< Print per-iteration diagnostics when true.
-      /// @brief Compute the rigid-observation coercivity diagnostics.
-      ///
-      /// The initial and final rigid-mode states are reported but never read
-      /// by the solve, and they cost a generalized eigenproblem each. Set to
-      /// false to skip them when the report fields are not needed.
+      /**
+       * @brief Compute the rigid-observation coercivity diagnostics.
+       *
+       * The initial and final rigid-mode states are reported but never read
+       * by the solve, and they cost a generalized eigenproblem each. Set to
+       * false to skip them when the report fields are not needed.
+       */
       bool rigidDiagnostics = true;
   };
 }

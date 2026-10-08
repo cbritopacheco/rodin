@@ -170,7 +170,11 @@ namespace Rodin::Adaptation
           Real max = 0;
       };
 
-      /// @brief Constructs the WNGIR solver from trial and test functions.
+      /**
+       * @brief Constructs the WNGIR solver from trial and test functions.
+       * @param du Function operand.
+       * @param v Function operand.
+       */
       WNGIR(TrialFunctionType& du, TestFunctionType& v)
         : m_u(&du.getSolution()),
           m_duStep(du.getFiniteElementSpace()),
@@ -182,7 +186,11 @@ namespace Rodin::Adaptation
           m_surfaceForm(m_vStep)
       {}
 
-      /// @brief Sets WNGIR runtime parameters.
+      /**
+       * @brief Sets WNGIR runtime parameters.
+       * @param parameters Parameters configuring the operation.
+       * @returns Reference to this object after the operation.
+       */
       WNGIR& setParameters(const WNGIRParameters& parameters)
       {
         m_parameters = parameters;
@@ -213,13 +221,19 @@ namespace Rodin::Adaptation
         return *this;
       }
 
-      /// @brief Returns the current WNGIR parameters.
+      /**
+       * @brief Returns the current WNGIR parameters.
+       * @returns The current WNGIR parameters.
+       */
       const WNGIRParameters& getParameters() const
       {
         return m_parameters;
       }
 
-      /// @brief Returns diagnostics from the most recent solve.
+      /**
+       * @brief Returns diagnostics from the most recent solve.
+       * @returns Diagnostics from the most recent solve.
+       */
       const WNGIRReport& getReport() const
       {
         return m_report;
@@ -232,6 +246,11 @@ namespace Rodin::Adaptation
        * at the moved quadrature points for the assembled force to be the exact
        * first variation of the line-search energy. An independently supplied
        * sensitivity is supported, but then defines a pseudo-gradient.
+       * @param mesh Mesh on which the object is defined.
+       * @param phi Function operand.
+       * @param grad Function operand.
+       * @param interfaceFacets Facets used to impose the interface constraints.
+       * @returns Fitting diagnostics, including convergence and geometric admissibility.
        */
       template <class Mesh, class PhiDerived, class GradDerived>
       WNGIRReport solve(const Mesh& mesh,
@@ -806,6 +825,9 @@ namespace Rodin::Adaptation
        * order is pinned in the parameters. Serves cells and interface facets
        * alike: the polytope carries its own dimension, so the element degree
        * follows from it.
+       * @param polytope Cell or interface facet on which quadrature is needed.
+       * @param fes Finite element space for the displacement.
+       * @returns Quadrature formula for the polytope, using the configured order or the required shape-function product order.
        */
       template <class FES>
       const QF::QuadratureFormulaBase& getQuadrature(
@@ -819,7 +841,13 @@ namespace Rodin::Adaptation
         return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
       }
 
-      /// @brief Measure of the fixed background domain used to normalize the QP.
+      /**
+       * @brief Measure of the fixed background domain used to normalize the QP.
+       * @param mesh Fixed background mesh.
+       * @param fes Finite element space for the displacement.
+       * @param validationCells Cell indices used to validate the deformed mesh.
+       * @returns Background-domain measure, accumulated globally for a sharded mesh and over the validation cells for a local mesh.
+       */
       template <class Mesh, class FES>
       Real getDomainMeasure(
         const Mesh& mesh, const FES& fes, const std::vector<Index>& validationCells) const
@@ -843,7 +871,21 @@ namespace Rodin::Adaptation
         }
       }
 
-      /// @brief Action of the negative robust-energy first variation on a direction.
+      /**
+       * @brief Action of the negative robust-energy first variation on a direction.
+       * @param mesh Fixed background mesh.
+       * @param fes Finite element space for the displacement.
+       * @param current Current displacement.
+       * @param direction Displacement direction on which the force acts.
+       * @param phi Target level-set function.
+       * @param grad Gradient of the target level-set function.
+       * @param interfaceFacets Indices of the discrete interface facets.
+       * @param sigma2 Squared robust residual scale.
+       * @param normalization Measure used to normalize the observation terms.
+       * @param dimension Physical coordinate dimension.
+       * @param locator Locator for evaluation at deformed physical points.
+       * @returns Negative robust-energy first variation evaluated on the supplied direction.
+       */
       template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
       Real getSurfaceForceAction(const Mesh& mesh, const FES& fes,
         const Displacement& current, const Displacement& direction, const PhiType& phi,
@@ -897,6 +939,17 @@ namespace Rodin::Adaptation
        * from the analytical model. No essential boundary condition is imposed,
        * so the rigid kernel is always present and the diagnostic is never
        * vacuous.
+       * @param mesh Fixed background mesh.
+       * @param fes Finite element space for the displacement.
+       * @param current Current displacement.
+       * @param phi Target level-set function.
+       * @param grad Gradient of the target level-set function.
+       * @param interfaceFacets Indices of the discrete interface facets.
+       * @param sigma2 Squared robust residual scale.
+       * @param normalization Measure used to normalize the observation terms.
+       * @param dimension Physical coordinate dimension.
+       * @param locator Locator for evaluation at deformed physical points.
+       * @returns Sampled rigid-mode observation and bulk diagnostics.
        */
       template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
       RigidModeState getRigidModeState(const Mesh& mesh, const FES& fes,
@@ -1003,7 +1056,17 @@ namespace Rodin::Adaptation
         return {minimum, ratio, count};
       }
 
-      /// @brief Fraction-to-boundary factor for a primal barrier Newton update.
+      /**
+       * @brief Fraction-to-boundary factor for a primal barrier Newton update.
+       * @param mesh Fixed background mesh.
+       * @param fes Finite element space for the displacement.
+       * @param validationCells Cell indices used to validate the deformed mesh.
+       * @param current Current displacement.
+       * @param inner Current displacement increment in the inner Newton solve.
+       * @param increment Proposed Newton update of the inner displacement.
+       * @param dimension Physical coordinate dimension.
+       * @returns Step scale limiting the Newton update to the admissible barrier domain.
+       */
       template <class Mesh, class FES>
       Real getBarrierStepScale(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& validationCells, const Displacement& current,
@@ -1080,6 +1143,12 @@ namespace Rodin::Adaptation
        * a trial step is acceptable. Only @f$j@f$ is needed at most points, so
        * the deformation is evaluated lazily, and the distortion is read only
        * where the cell is not inverted, since it is undefined otherwise.
+       * @param mesh Fixed background mesh.
+       * @param fes Finite element space for the displacement.
+       * @param validationCells Cell indices used to validate the deformed mesh.
+       * @param u Displacement whose geometry or interface fit is evaluated.
+       * @param dimension Physical coordinate dimension.
+       * @returns Extremal deformation and mesh-quality diagnostics over the validation cells.
        */
       template <class Mesh, class FES>
       AdmissibilityState getAdmissibilityState(const Mesh& mesh, const FES& fes,
@@ -1134,6 +1203,16 @@ namespace Rodin::Adaptation
        * they are the ones the robust weighting has already rejected as
        * outliers, and including them would let a distant feature dominate an
        * otherwise converged fit.
+       * @param mesh Fixed background mesh.
+       * @param fes Finite element space for the displacement.
+       * @param u Displacement whose geometry or interface fit is evaluated.
+       * @param phi Target level-set function.
+       * @param interfaceFacets Indices of the discrete interface facets.
+       * @param loss Robust loss and weight evaluator.
+       * @param normalization Measure used to normalize the observation terms.
+       * @param dimension Physical coordinate dimension.
+       * @param locator Locator for evaluation at deformed physical points.
+       * @returns Robust interface-fit and residual diagnostics for the supplied displacement.
        */
       template <class Mesh, class FES, class PhiType, class LocatorType>
       SurfaceState getSurfaceState(const Mesh& mesh, const FES& fes,
@@ -1210,6 +1289,11 @@ namespace Rodin::Adaptation
        * normals weighted by the mean of the two facet measures. Normals are
        * compared up to sign, since facet orientation is not consistent across
        * the interface.
+       * @param mesh Fixed background mesh.
+       * @param fes Finite element space for the displacement.
+       * @param interfaceFacets Indices of the discrete interface facets.
+       * @param dimension Physical coordinate dimension.
+       * @returns Weighted angular-jump statistics for adjacent interface-facet normals.
        */
       template <class Mesh, class FES>
       NormalJump getNormalJump(const Mesh& mesh, const FES& fes,
@@ -1352,6 +1436,16 @@ namespace Rodin::Adaptation
           /// @brief Maximum sampled target-gradient norm.
           Real gradientScale = 0;
       };
+      /**
+       * @brief Estimates the robust residual scale on the interface.
+       * @param mesh Fixed background mesh.
+       * @param fes Finite element space for the displacement.
+       * @param phi Target level-set function.
+       * @param grad Gradient of the target level-set function.
+       * @param interfaceFacets Indices of the discrete interface facets.
+       * @param h Mesh-length scale used to bound the estimated robust scale.
+       * @returns Estimated robust scale and its sampling diagnostics.
+       */
 
       template <class Mesh, class FES, class PhiType, class GradType>
       RobustScale getRobustScale(const Mesh& mesh, const FES& fes, const PhiType& phi,
@@ -1384,6 +1478,10 @@ namespace Rodin::Adaptation
         sigma = std::max(sigma, std::sqrt(std::numeric_limits<Real>::min()));
         return {sigma, gradientScale};
       }
+      /**
+       * @brief Builds an orthonormal basis of discrete rigid motions.
+       * @param dimension Physical coordinate dimension.
+       */
 
       void ensureRigidModeBasis(std::size_t dimension)
       {
@@ -1432,7 +1530,11 @@ namespace Rodin::Adaptation
         }
       }
 
-      /// @brief Fractions of @p vector carried by translation and by rotation.
+      /**
+       * @brief Fractions of @p vector carried by translation and by rotation.
+       * @param vector Vector whose rigid-motion content is measured.
+       * @returns Fractions carried by translation and rotation, respectively.
+       */
       std::pair<Real, Real> rigidContent(const Math::Vector<Real>& vector) const
       {
         const Real norm = vector.norm();
@@ -1464,6 +1566,8 @@ namespace Rodin::Adaptation
        * subspace, diagonalised there, and every weak rigid eigenmode is lifted
        * to a fixed fraction @f$\rho@f$ of the stiffest one. This avoids a
        * basis-dependent diagonal correction while retaining all rigid modes.
+       * @param A Assembled sparse metric matrix.
+       * @returns Rigid-mode spectral correction for the assembled metric.
        */
       RigidStabilisation getRigidStabilisation(const Math::SparseMatrix<Real>& A) const
       {
@@ -1519,6 +1623,13 @@ namespace Rodin::Adaptation
         }
         return result;
       }
+      /**
+       * @brief Applies the metric and its rigid-mode spectral correction.
+       * @param A Assembled sparse metric matrix.
+       * @param stabilisation Rigid-mode spectral correction.
+       * @param x Solution or input vector; updated when passed by mutable reference.
+       * @param y Output of the stabilised matrix-vector action.
+       */
 
       void applyStabilised(const Math::SparseMatrix<Real>& A,
         const RigidStabilisation& stabilisation, const Math::Vector<Real>& x,
@@ -1554,6 +1665,18 @@ namespace Rodin::Adaptation
           y += stabilisation.weights[k] * stabilisation.modes[k].dot(x) *
             stabilisation.modes[k];
       }
+      /**
+       * @brief Solves the linear system with rigid-mode-stabilised conjugate gradients.
+       * @param A Assembled sparse metric matrix.
+       * @param stabilisation Rigid-mode spectral correction.
+       * @param b Right-hand side of the linear system.
+       * @param x Solution or input vector; updated when passed by mutable reference.
+       * @param maxIterations Maximum number of conjugate-gradient iterations.
+       * @param relativeTolerance Requested relative residual tolerance.
+       * @param iterations Output number of linear iterations performed.
+       * @param error Output relative linear residual.
+       * @returns True when the final finite relative residual meets the accepted tolerance.
+       */
 
       bool stabilisedConjugateGradient(const Math::SparseMatrix<Real>& A,
         const RigidStabilisation& stabilisation, const Math::Vector<Real>& b,
@@ -1603,8 +1726,18 @@ namespace Rodin::Adaptation
           error <= std::max(relativeTolerance, LinearSolveAcceptanceFloor);
       }
 
-      // Solves the currently-assembled step problem with CG and copies the
-      // backend-matched solution GridFunction into @p out.
+      /**
+       * @brief Solves the assembled step problem and stores the displacement.
+       *
+       * The conjugate-gradient solver computes the solution of the assembled step
+       * problem. The solution grid function uses the same backend and is copied
+       * into @p out.
+       *
+       * @param out Displacement receiving the computed solution.
+       * @param iterations Output number of linear iterations performed.
+       * @param error Output relative linear residual.
+       * @returns True if the backend linear solve meets its success criterion.
+       */
       bool solveStep(Displacement& out, std::size_t& iterations, Real& error)
       {
         auto& axb = m_stepProblem.getLinearSystem();
@@ -1663,10 +1796,12 @@ namespace Rodin::Adaptation
       StepSolverType m_stepSolver;
       BilinearFormType m_bulkForm;
       bool m_bulkFormAssembled = false;
-      /// @brief Observation metric and fitting force at the outer displacement.
-      ///
-      /// Both depend on the outer displacement only, so they are assembled once
-      /// per nonlinear iteration and reused by every barrier correction.
+      /**
+       * @brief Observation metric and fitting force at the outer displacement.
+       *
+       * Both depend on the outer displacement only, so they are assembled once
+       * per nonlinear iteration and reused by every barrier correction.
+       */
       BilinearFormType m_obsForm;
       LinearFormType m_surfaceForm;
       std::vector<Math::Vector<Real>> m_rigidModeBasis;

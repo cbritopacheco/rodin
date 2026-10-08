@@ -17,14 +17,15 @@ namespace Rodin::PETSc::Assembly
    * @brief Sets up a PETSc vector for assembly while reusing compatible
    *        existing structure.
    *
-   * The @c Vec counterpart of @c MatrixSetup. A @c LinearSystem is bound to
-   * fixed finite element spaces, so its right-hand side @f$ \mathbf{b} @f$ and
-   * solution @f$ \mathbf{x} @f$ keep their sizes for the whole lifetime. The
-   * first call lays the vector out (sizes, type, options); subsequent calls
-   * reuse it. PETSc has no in-place resize for a vector whose layout is set, so
-   * if @c prepare ever observes a typed vector whose size differs from the
-   * requested one, which is only possible if a @c LinearSystem is illegally
-   * reused across different spaces, it fails the debug assertion.
+   * A @c LinearSystem is associated with fixed finite element spaces. Its
+   * right-hand side @f$ \mathbf{b} @f$ and solution @f$ \mathbf{x} @f$ therefore
+   * retain their global sizes throughout its lifetime. The first call
+   * establishes the vector layout; subsequent calls reuse that layout.
+   *
+   * @note PETSc does not support resizing a vector after its layout has been
+   * established. Reuse requires the existing global size to match the requested
+   * size; this precondition is checked by a debug assertion. A change of finite
+   * element space or mesh requires a new @c LinearSystem.
    *
    * ## Zeroing
    *
@@ -70,9 +71,9 @@ namespace Rodin::PETSc::Assembly
       /**
        * @brief Prepares the vector for use by assembly or a solver.
        *
-       * Virgin vectors receive their sizes, optional type, and optional command
-       * line options. Reused vectors keep their structure and are zeroed only
-       * when requested by @ref Options::zeroOnReuse.
+       * Vectors without a PETSc type receive their initial sizes, optional type,
+       * and optional command line options. Reused vectors retain their structure
+       * and are zeroed only when requested by @ref Options::zeroOnReuse.
        *
        * @param[in] options Requested layout and reuse policy.
        * @returns PETSc error code from zeroing, or @c PETSC_SUCCESS when no
@@ -113,10 +114,17 @@ namespace Rodin::PETSc::Assembly
       }
 
     private:
-      // A vector with no type yet is virgin and must be laid out. A typed
-      // vector whose size matches is reused. A typed vector whose size differs
-      // violates the constant-space contract and cannot be resized in place, so
-      // it fails the debug assertion.
+      /**
+       * @brief Determines whether the vector needs structural setup.
+       *
+       * @note Structural setup is required only when the vector has no PETSc
+       * type. Otherwise, the existing global size must equal the requested size.
+       * A debug assertion checks this precondition; the vector is not resized.
+       *
+       * @param[in] options Requested vector layout.
+       * @param[out] needsSetup True when the vector has no PETSc type yet.
+       * @returns @c PETSC_SUCCESS after checking the existing layout.
+       */
       PetscErrorCode needsStructuralSetup(const Options& options, bool& needsSetup) const
       {
         VecType curType = nullptr;

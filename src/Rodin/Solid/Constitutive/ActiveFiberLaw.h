@@ -65,7 +65,10 @@ namespace Rodin::Solid
           /// @brief Stress-like internal variable.
           Real beta = 0.0;
 
-          /// @brief Returns the active stress @f$\gamma\beta@f$.
+          /**
+           * @brief Returns the active stress @f$\gamma\beta@f$.
+           * @returns The active stress @f$\gamma\beta@f$.
+           */
           Real activeStress() const
           {
             return gamma * beta;
@@ -96,18 +99,27 @@ namespace Rodin::Solid
         : m_parameters()
       {}
 
-      /// @brief Constructs the active law from parameters.
+      /**
+       * @brief Constructs the active law from parameters.
+       * @param parameters Parameters configuring the operation.
+       */
       explicit ActiveFiberLaw(const Parameters& parameters)
         : m_parameters(parameters)
       {}
 
-      /// @brief Returns the material parameters.
+      /**
+       * @brief Returns the material parameters.
+       * @returns The material parameters.
+       */
       const Parameters& getParameters() const
       {
         return m_parameters;
       }
 
-      /// @brief Builds the initial internal active-fiber state.
+      /**
+       * @brief Builds the initial internal active-fiber state.
+       * @returns Initial active-fiber internal state.
+       */
       State initialState() const
       {
         State state;
@@ -116,21 +128,35 @@ namespace Rodin::Solid
         return state;
       }
 
-      /// @brief Evaluates active stress at fiber strain @p e and extension @p c.
+      /**
+       * @brief Evaluates active stress at fiber strain @p e and extension @p c.
+       * @param e Muscle strain.
+       * @param c Contractile state.
+       * @returns Active stress at the supplied strain and extension.
+       */
       Real stress(Real e, Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
         return m_parameters.stiffness * (e - c) / (denom * denom);
       }
 
-      /// @brief Evaluates @f$\partial\sigma/\partial e@f$ at fixed extension.
+      /**
+       * @brief Evaluates @f$\partial\sigma/\partial e@f$ at fixed extension.
+       * @param c Contractile state.
+       * @returns Derivative of active stress with respect to strain at fixed extension.
+       */
       Real dStressDe(Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
         return m_parameters.stiffness / (denom * denom);
       }
 
-      /// @brief Evaluates @f$\partial\sigma/\partial c@f$ at fixed fiber strain.
+      /**
+       * @brief Evaluates @f$\partial\sigma/\partial c@f$ at fixed fiber strain.
+       * @param e Muscle strain.
+       * @param c Contractile state.
+       * @returns Derivative of active stress with respect to extension at fixed strain.
+       */
       Real dStressDc(Real e, Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
@@ -138,7 +164,12 @@ namespace Rodin::Solid
           (denom * denom * denom);
       }
 
-      /// @brief Evaluates the static active response.
+      /**
+       * @brief Evaluates the static active response.
+       * @param e Muscle strain.
+       * @param c Contractile state.
+       * @returns Static active stress and tangent response.
+       */
       Response evaluateStatic(Real e, Real c) const
       {
         Response response;
@@ -154,7 +185,15 @@ namespace Rodin::Solid
         return response;
       }
 
-      /// @brief Advances the internal active-fiber state.
+      /**
+       * @brief Advances the internal active-fiber state.
+       * @param dt Time-step size.
+       * @param oldState State at the previous time step.
+       * @param previousActiveExtension Active extension at the previous time step.
+       * @param activeExtension Active extension field.
+       * @param activation Activation at the current time step.
+       * @returns Updated active-fiber internal state.
+       */
       State update(Real dt, const State& oldState, Real previousActiveExtension,
         Real activeExtension, Real activation) const
       {
@@ -187,23 +226,26 @@ namespace Rodin::Solid
         return state;
       }
 
-      /// @brief Evaluates the dynamic active response and condensed tangent.
-      ///
-      /// @param dt Time step @f$\Delta t@f$.
-      /// @param oldState Previous internal state @f$(\gamma^n, \beta^n)@f$.
-      /// @param newState Updated internal state @f$(\gamma^{n+1}, \beta^{n+1})@f$.
-      /// @param e Fiber strain at which the series law is evaluated. For the
-      ///   compatible discretization this is the midpoint strain
-      ///   @f$e_{1D}^{n+\frac{1}{2}}@f$.
-      /// @param previousActiveExtension Previous active extension @f$e_c^n@f$.
-      /// @param activeExtension Current active extension @f$e_c^{n+1}@f$.
-      /// @param activation Electrical activation @f$u_1@f$.
-      /// @param strainFactor Derivative @f$\partial e/\partial e_{1D}^{n+1}@f$
-      ///   of the evaluation strain with respect to the current fiber strain.
-      ///   It is @f$\frac{1}{2}@f$ for the midpoint strain and @f$1@f$ when
-      ///   @p e is the current strain. Only the condensed tangent depends on
-      ///   it, since the global tangent differentiates with respect to
-      ///   @f$e_{1D}^{n+1}@f$.
+      /**
+       * @brief Evaluates the dynamic active response and condensed tangent.
+       *
+       * @param dt Time step @f$\Delta t@f$.
+       * @param oldState Previous internal state @f$(\gamma^n, \beta^n)@f$.
+       * @param newState Updated internal state @f$(\gamma^{n+1}, \beta^{n+1})@f$.
+       * @param e Fiber strain at which the series law is evaluated. For the
+       *   compatible discretization this is the midpoint strain
+       *   @f$e_{1D}^{n+\frac{1}{2}}@f$.
+       * @param previousActiveExtension Previous active extension @f$e_c^n@f$.
+       * @param activeExtension Current active extension @f$e_c^{n+1}@f$.
+       * @param activation Electrical activation @f$u_1@f$.
+       * @param strainFactor Derivative @f$\partial e/\partial e_{1D}^{n+1}@f$
+       *   of the evaluation strain with respect to the current fiber strain.
+       *   It is @f$\frac{1}{2}@f$ for the midpoint strain and @f$1@f$ when
+       *   @p e is the current strain. Only the condensed tangent depends on
+       *   it, since the global tangent differentiates with respect to
+       *   @f$e_{1D}^{n+1}@f$.
+       * @returns Dynamic active stress and condensed tangent response.
+       */
       Response evaluateDynamic(Real dt, const State& oldState, const State& newState,
         Real e, Real previousActiveExtension, Real activeExtension, Real activation,
         Real strainFactor = 1.0) const
@@ -240,7 +282,15 @@ namespace Rodin::Solid
         return response;
       }
 
-      /// @brief Evaluates the derivative of active stress with respect to extension.
+      /**
+       * @brief Evaluates the derivative of active stress with respect to extension.
+       * @param dt Time-step size.
+       * @param oldState State at the previous time step.
+       * @param activation Activation at the current time step.
+       * @param previousActiveExtension Active extension at the previous time step.
+       * @param activeExtension Active extension field.
+       * @returns Derivative of active stress with respect to the active extension.
+       */
       Real dActiveStressDc(Real dt, const State& oldState, Real activation,
         Real previousActiveExtension, Real activeExtension) const
       {
@@ -282,7 +332,11 @@ namespace Rodin::Solid
         return dGamma * (Nb / Db) + gamma * dBeta;
       }
 
-      /// @brief Evaluates the length-dependent Starling activation factor.
+      /**
+       * @brief Evaluates the length-dependent Starling activation factor.
+       * @param activeExtension Active extension field.
+       * @returns Length-dependent activation factor.
+       */
       static Real starling(Real activeExtension)
       {
         const Real x1 = -0.4;

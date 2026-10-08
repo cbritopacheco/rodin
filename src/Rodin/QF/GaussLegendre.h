@@ -238,14 +238,10 @@ namespace Rodin::QF
       }
 
     private:
-      /**
-       * @brief Builds the quadrature rule for the selected geometry.
-       */
+      /// @brief Builds the quadrature rule for the selected geometry.
       void build();
 
-      /**
-       * @brief Builds quadrature for a point (0D).
-       */
+      /// @brief Builds quadrature for a point (0D).
       void buildPoint();
 
       /**

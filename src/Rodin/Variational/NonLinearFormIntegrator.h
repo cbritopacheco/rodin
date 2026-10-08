@@ -51,6 +51,9 @@ namespace Rodin::Variational
        * @brief Returns both residual and tangent contributions as a ProblemBody.
        *
        * Equivalent to `Tangent(u, v) + Residual(v)`.
+       * @returns Integrator defined by the supplied trial or test expressions.
+       * @param u Trial shape-function expression.
+       * @param v Test shape-function expression.
        */
       template <class Trial, class Test>
       auto operator()(const Trial& u, const Test& v) const

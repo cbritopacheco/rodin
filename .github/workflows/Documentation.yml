@@ -35,12 +35,18 @@ jobs:
       - name: Install dependencies
         run: >-
           sudo apt-get update && sudo apt-get install -y
-          doxygen
           dvisvgm
           texlive-base
           texlive-latex-extra
           texlive-fonts-extra
           texlive-fonts-recommended
+      - name: Install pinned Doxygen
+        # Use the same parser as the Style warning check.
+        run: |
+          curl -fsSL -o doxygen.tar.gz \
+            https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
+          tar -xzf doxygen.tar.gz
+          echo "$PWD/doxygen-1.14.0/bin" >> "$GITHUB_PATH"
       - name: Configure CMake
         run: >
           cmake

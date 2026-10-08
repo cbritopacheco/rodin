@@ -23,8 +23,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c P1: exposes the mesh type, the scalar type, the range type
-  /// and the finite element type.
+  /**
+   * @brief Type traits for @c P1: exposes the mesh type, the scalar type, the range type
+   * and the finite element type.
+   */
   template <class Scalar, class Mesh>
   struct Traits<Variational::P1<Scalar, Mesh>>
   {
@@ -38,8 +40,10 @@ namespace Rodin::FormLanguage
       using ElementType = Variational::P1Element<RangeType>;
   };
 
-  /// @brief Type traits for @c P1: exposes the mesh type, the scalar type, the range type
-  /// and the finite element type.
+  /**
+   * @brief Type traits for @c P1: exposes the mesh type, the scalar type, the range type
+   * and the finite element type.
+   */
   template <class Scalar, class Mesh>
   struct Traits<Variational::P1<Math::SpatialVector<Scalar>, Mesh>>
   {
@@ -110,9 +114,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpace<MeshType, P1<RangeType, MeshType>>;
 
-      /**
-       * @brief Pullback for the scalar/complex P1 space.
-       */
+      /// @brief Pullback for the scalar/complex P1 space.
       template <class Callable>
       class Pullback : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
@@ -120,16 +122,27 @@ namespace Rodin::Variational
           /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
-          /// @brief Constructs the pullback of a function on a polytope.
+          /**
+           * @brief Constructs the pullback of a function on a polytope.
+           * @param polytope Mesh entity used by this operation.
+           * @param v Function operand.
+           */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
-          /// @brief Copy constructor.
-          Pullback(const Pullback&) = default;
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          Pullback(const Pullback& other) = default;
 
-          /// @brief Evaluates at a point on the reference element.
+          /**
+           * @brief Evaluates at a point on the reference element.
+           * @returns Value of the expression at the supplied evaluation point.
+           * @param r Reference coordinates at which to evaluate the basis.
+           */
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p = m_polytope.getDimension() == 0
@@ -145,9 +158,7 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
-      /**
-       * @brief Inverse Pullback for the scalar/complex P1 space.
-       */
+      /// @brief Inverse Pullback for the scalar/complex P1 space.
       template <class Callable>
       class Pushforward
         : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
@@ -165,10 +176,17 @@ namespace Rodin::Variational
             : m_v(std::forward<Function>(v))
           {}
 
-          /// @brief Copy constructor.
-          Pushforward(const Pushforward&) = default;
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          Pushforward(const Pushforward& other) = default;
 
-          /// @brief Evaluates at a geometric point.
+          /**
+           * @brief Evaluates at a geometric point.
+           * @param p Point at which the operation is evaluated.
+           * @returns Value of the expression at the supplied evaluation point.
+           */
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
@@ -427,9 +445,10 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for P1 from mesh - deduces to RealP1
+   * @param mesh Mesh supporting the finite element space.
    */
   template <class Context>
-  P1(const Geometry::Mesh<Context>&) -> P1<Real, Geometry::Mesh<Context>>;
+  P1(const Geometry::Mesh<Context>& mesh) -> P1<Real, Geometry::Mesh<Context>>;
 
   /// Alias for a scalar real-valued P1 finite element space
   template <class Mesh>
@@ -512,16 +531,27 @@ namespace Rodin::Variational
           /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
-          /// @brief Constructs the pullback of a function on a polytope.
+          /**
+           * @brief Constructs the pullback of a function on a polytope.
+           * @param polytope Mesh entity used by this operation.
+           * @param v Function operand.
+           */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
-          /// @brief Copy constructor.
-          Pullback(const Pullback&) = default;
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          Pullback(const Pullback& other) = default;
 
-          /// @brief Evaluates at a point on the reference element.
+          /**
+           * @brief Evaluates at a point on the reference element.
+           * @param r Reference coordinates at which to evaluate the basis.
+           * @returns Transformed field value at the supplied evaluation point.
+           */
           auto operator()(const Math::SpatialPoint& r) const
           {
             const Geometry::Point p = m_polytope.getDimension() == 0
@@ -555,10 +585,17 @@ namespace Rodin::Variational
             : m_v(std::forward<Function>(v))
           {}
 
-          /// @brief Copy constructor.
-          Pushforward(const Pushforward&) = default;
+          /**
+           * @brief Copy constructor.
+           * @param other Object to copy from.
+           */
+          Pushforward(const Pushforward& other) = default;
 
-          /// @brief Evaluates at a geometric point.
+          /**
+           * @brief Evaluates at a geometric point.
+           * @param p Point at which the operation is evaluated.
+           * @returns Transformed field value at the supplied evaluation point.
+           */
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
@@ -569,7 +606,11 @@ namespace Rodin::Variational
           CallableType m_v;
       };
 
-      /// @brief Constructs the P1 from the given arguments.
+      /**
+       * @brief Constructs the P1 from the given arguments.
+       * @param mesh Mesh on which the object is defined.
+       * @param vdim Number of components in the value range.
+       */
       P1(const Geometry::Mesh<ContextType>& mesh, size_t vdim)
         : m_mesh(mesh), m_vdim(vdim)
       {
@@ -595,7 +636,10 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       P1(const P1& other)
         : Parent(other),
           m_mesh(other.m_mesh),
@@ -603,7 +647,10 @@ namespace Rodin::Variational
           m_dofs(other.m_dofs)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       P1(P1&& other)
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
@@ -613,7 +660,11 @@ namespace Rodin::Variational
 
       virtual ~P1() = default;
 
-      /// @brief Move assignment.
+      /**
+       * @brief Move assignment.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       P1& operator=(P1&& other)
       {
         if (this != &other)
@@ -626,7 +677,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Copy assignment.
+      /**
+       * @brief Copy assignment.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       P1& operator=(const P1& other)
       {
         if (this != &other)
@@ -639,7 +694,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the finite element attached to a polytope.
+      /**
+       * @brief Gets the finite element attached to a polytope.
+       * @param i Index of the requested entry.
+       * @returns The finite element attached to a polytope.
+       * @param d Topological dimension of the entity.
+       */
       const ElementType& getFiniteElement(size_t d, Index i) const
       {
         const auto& g = getMesh().getGeometry(d, i);
@@ -753,7 +813,12 @@ namespace Rodin::Variational
         return p(q) + r * m_mesh.get().getVertexCount();
       }
 
-      /// @brief Gets the pullback of a callable on a polytope.
+      /**
+       * @brief Gets the pullback of a callable on a polytope.
+       * @param idx Index of the requested entry.
+       * @returns The pullback of a callable on a polytope.
+       * @param v Operand expression.
+       */
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& idx, Callable&& v) const
       {
@@ -762,9 +827,15 @@ namespace Rodin::Variational
         return Pullback<Callable>(*mesh.getPolytope(d, i), std::forward<Callable>(v));
       }
 
-      /// @brief Gets the pushforward of a callable on a polytope.
+      /**
+       * @brief Gets the pushforward of a callable on a polytope.
+       * @returns The pushforward of a callable on a polytope.
+       * @param v Operand expression.
+       * @param entity Mesh entity; this pushforward does not require entity-dependent data.
+       */
       template <class Callable>
-      auto getPushforward(const std::pair<size_t, Index>&, Callable&& v) const
+      auto getPushforward(
+        [[maybe_unused]] const std::pair<size_t, Index>& entity, Callable&& v) const
       {
         return Pushforward<Callable>(std::forward<Callable>(v));
       }
@@ -774,6 +845,10 @@ namespace Rodin::Variational
        *
        * Vector P1 uses a componentwise Lagrange map and therefore requires no
        * range transformation after the structured local contraction.
+       * @param out Storage for the computed result.
+       * @param idx Index of the requested entry.
+       * @param coefficient Coefficient multiplying the expression.
+       * @param p Point at which the operation is evaluated.
        */
       template <class Coefficient>
       constexpr void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
@@ -954,10 +1029,15 @@ namespace Rodin::Variational
       std::map<Geometry::Polytope::Type, ElementType> m_elements;
   };
 
-  /// @brief Deduces a matrix range from explicit rows and columns.
+  /**
+   * @brief Deduces a matrix range from explicit rows and columns.
+   * @param mesh Mesh supporting the finite element space.
+   * @param rows Number of rows in the value range.
+   * @param cols Number of columns in the value range.
+   */
   template <class Context>
-  P1(const Geometry::Mesh<Context>&, size_t,
-    size_t) -> P1<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
+  P1(const Geometry::Mesh<Context>& mesh, size_t rows,
+    size_t cols) -> P1<Math::SpatialMatrix<Real>, Geometry::Mesh<Context>>;
 
   /// @brief Matrix-valued continuous linear finite element space.
   template <class Mesh>

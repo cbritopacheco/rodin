@@ -144,10 +144,16 @@ namespace Rodin::Variational
       /// @brief Default constructor
       ProblemBase() = default;
 
-      /// @brief Move constructor
+      /**
+       * @brief Move constructor
+       * @param other Object to move from.
+       */
       ProblemBase(ProblemBase&& other) = default;
 
-      /// @brief Copy constructor
+      /**
+       * @brief Copy constructor
+       * @param other Object to copy from.
+       */
       ProblemBase(const ProblemBase& other) = default;
 
       /**
@@ -168,6 +174,7 @@ namespace Rodin::Variational
        *
        * The default keeps non-variational problem adapters source-compatible;
        * concrete variational problems override this accessor.
+       * @returns The current formulation without exposing mutable assembly state.
        */
       virtual const ProblemBodyType& getBody() const
       {
@@ -182,6 +189,9 @@ namespace Rodin::Variational
        * Supports exactly the additions defined by the problem-body algebra,
        * including integrators, preassembled forms and boundary conditions.
        * Terms are owned through the existing clone-on-build semantics.
+       * @param term Term to append to the problem body.
+       * @returns Reference to this problem after invalidating assembly.
+       *
        * Successful virtual body assignment sets the concrete problem's
        * assembly flag to false. The next solve() reassembles; merely reading
        * getLinearSystem() does not refresh the stored system.
@@ -200,6 +210,8 @@ namespace Rodin::Variational
        * This is algebraic subtraction, not removal by identity. Boundary
        * conditions cannot be subtracted because the body algebra does not
        * define their negation. Existing residual/load sign conventions apply.
+       * @param term Form contribution to subtract from the problem body.
+       * @returns Reference to this problem after invalidating assembly.
        */
       template <class Term>
         requires requires(ProblemBase& problem, const ProblemBodyType& body,
@@ -235,8 +247,12 @@ namespace Rodin::Variational
        */
       virtual ProblemBase& assemble() = 0;
 
-      /// @brief Assembles only the requested target of the linear system.
-      virtual ProblemBase& assemble(AssemblyTarget)
+      /**
+       * @brief Assembles only the requested target of the linear system.
+       * @returns Reference to this object after the operation.
+       * @param target Requested assembly target; the default implementation reports unsupported targeted assembly.
+       */
+      virtual ProblemBase& assemble([[maybe_unused]] AssemblyTarget target)
       {
         Alert::MemberFunctionException(*this, __func__)
           << "Targeted assembly is not implemented for this problem." << Alert::Raise;
@@ -334,27 +350,41 @@ namespace Rodin::Variational
       using Parent =
         ProblemBase<LinearSystemType>;
 
-      /// @brief Constructs a problem base from trial and test functions.
+      /**
+       * @brief Constructs a problem base from trial and test functions.
+       * @param u Trial shape function.
+       * @param v Test shape function.
+       */
       constexpr
       ProblemUVBase(U& u, V& v)
         : m_trialFunction(u), m_testFunction(v)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemUVBase(const ProblemUVBase& other)
         : Parent(other),
           m_trialFunction(other.m_trialFunction),
           m_testFunction(other.m_testFunction)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemUVBase(ProblemUVBase&& other)
         : Parent(std::move(other)),
           m_trialFunction(std::move(other.m_trialFunction)),
           m_testFunction(std::move(other.m_testFunction))
       {}
 
-      /// @brief Copy assignment operator.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemUVBase& operator=(const ProblemUVBase& other)
       {
         if (this != &other)
@@ -365,7 +395,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment operator.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemUVBase& operator=(ProblemUVBase&& other) noexcept
       {
         if (this != &other)
@@ -376,28 +410,40 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns the trial function.
+      /**
+       * @brief Returns the trial function.
+       * @returns The trial function.
+       */
       constexpr
       TrialFunctionType& getTrialFunction()
       {
         return m_trialFunction;
       }
 
-      /// @brief Returns the test function.
+      /**
+       * @brief Returns the test function.
+       * @returns The test function.
+       */
       constexpr
       TestFunctionType& getTestFunction()
       {
         return m_testFunction;
       }
 
-      /// @brief Returns the trial function.
+      /**
+       * @brief Returns the trial function.
+       * @returns The trial function.
+       */
       constexpr
       const TrialFunctionType& getTrialFunction() const
       {
         return m_trialFunction.get();
       }
 
-      /// @brief Returns the test function.
+      /**
+       * @brief Returns the test function.
+       * @returns The test function.
+       */
       constexpr
       const TestFunctionType& getTestFunction() const
       {
@@ -406,7 +452,10 @@ namespace Rodin::Variational
 
       virtual ProblemUVBase& assemble() override = 0;
 
-      /// @brief Solves the assembled problem with the given solver.
+      /**
+       * @brief Solves the assembled problem with the given solver.
+       * @param solver Solver used for the linear system.
+       */
       virtual void solve(SolverBaseType& solver) override = 0;
 
       virtual ProblemUVBase& operator=(const ProblemBodyType& rhs) override = 0;
@@ -483,14 +532,21 @@ namespace Rodin::Variational
       using Parent =
         ProblemUVBase<LinearSystem, TrialFunction, TestFunction>;
 
-      /// @brief Constructs a two-field problem from trial and test functions.
+      /**
+       * @brief Constructs a two-field problem from trial and test functions.
+       * @param u Function operand.
+       * @param v Function operand.
+       */
       constexpr
       Problem(TrialFunction& u, TestFunction& v)
         : Parent(u, v),
           m_assembled(false)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Problem(const Problem& other)
         : Parent(other),
@@ -499,7 +555,10 @@ namespace Rodin::Variational
           m_axb(other.m_axb)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
@@ -509,7 +568,11 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
-      /// @brief Copy assignment operator.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       Problem& operator=(const Problem& other)
       {
         if (this != &other)
@@ -523,7 +586,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment operator.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       Problem& operator=(Problem&& other) noexcept
       {
         if (this != &other)
@@ -545,6 +612,7 @@ namespace Rodin::Variational
        * function data as the initial guess: on entry to a linear solver the
        * solution vector is the guess, on exit it is the solution. Trial
        * functions are zero-initialized, so the guess is zero unless set.
+       * @returns Reference to this object after the operation.
        */
       Problem& assemble() override
       {
@@ -554,7 +622,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Assembles only the requested target of the linear system.
+      /**
+       * @brief Assembles only the requested target of the linear system.
+       * @param target Target data for the operation.
+       * @returns Reference to this object after the operation.
+       */
       Problem& assemble(AssemblyTarget target) override
       {
         m_assembly.execute(
@@ -570,6 +642,7 @@ namespace Rodin::Variational
        * Assigning a new problem body with operator=() marks the current
        * assembly stale. If that happens, or if assemble() has not been called
        * yet, this function calls assemble() before invoking the linear solver.
+       * @param solver Solver used for the linear system.
        */
       void solve(SolverBaseType& solver) override
       {
@@ -580,7 +653,11 @@ namespace Rodin::Variational
          this->getTrialFunction().getSolution().setData(axb.getSolution());
       }
 
-      /// @brief Assigns a problem body and marks the assembly stale.
+      /**
+       * @brief Assigns a problem body and marks the assembly stale.
+       * @param rhs Right operand.
+       * @returns Reference to this object after the operation.
+       */
       Problem& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
@@ -593,19 +670,28 @@ namespace Rodin::Variational
         return m_pb;
       }
 
-      /// @brief Returns the assembled linear system.
+      /**
+       * @brief Returns the assembled linear system.
+       * @returns The assembled linear system.
+       */
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
-      /// @brief Returns the assembled linear system.
+      /**
+       * @brief Returns the assembled linear system.
+       * @returns The assembled linear system.
+       */
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
-      /// @brief Polymorphically copies this problem.
+      /**
+       * @brief Polymorphically copies this problem.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
@@ -618,10 +704,12 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
+  /// @ingroup RodinCTAD
   /**
-   * @ingroup RodinCTAD
+   * @brief Deduction guide for a two-field sparse variational problem.
+   * @param u Trial shape function.
+   * @param v Test shape function.
    */
-  /// @brief Deduction guide for a two-field sparse variational problem.
   template <class U, class V>
   Problem(U& u, V& v)
     -> Problem<
@@ -798,7 +886,13 @@ namespace Rodin::Variational
         Assembly::Sequential<VectorType, LinearFormTuple>;
 
     public:
-      /// @brief Constructs a mixed problem from trial and test functions.
+      /**
+       * @brief Constructs a mixed problem from trial and test functions.
+       * @param u1 Trial shape functions defining the unknowns.
+       * @param u2 Trial shape functions defining the unknowns.
+       * @param u3 Trial shape functions defining the unknowns.
+       * @param us Trial shape functions defining the unknowns.
+       */
       ProblemUsBase(U1& u1, U2& u2, U3& u3, Us&... us)
         : m_assembled(false),
           m_us(
@@ -828,7 +922,10 @@ namespace Rodin::Variational
             { m_testUUIDMap.right.insert({ i, v.get().getUUID() }); });
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemUsBase(const ProblemUsBase& other)
         : Parent(other),
           m_assembled(other.m_assembled),
@@ -845,7 +942,10 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemUsBase(ProblemUsBase&& other) noexcept
         : Parent(std::move(other)),
           m_assembled(std::exchange(other.m_assembled, false)),
@@ -862,7 +962,11 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
-      /// @brief Copy assignment operator.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemUsBase& operator=(const ProblemUsBase& other)
       {
         if (this != &other)
@@ -883,7 +987,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment operator.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemUsBase& operator=(ProblemUsBase&& other)
       {
         if (this != &other)
@@ -904,7 +1012,10 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Assembles the whole mixed linear system.
+      /**
+       * @brief Assembles the whole mixed linear system.
+       * @returns Reference to this object after the operation.
+       */
       virtual ProblemUsBase& assemble() override
       {
         auto& axb = getLinearSystem();
@@ -968,7 +1079,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Assembles the requested part of the linear system.
+      /**
+       * @brief Assembles the requested part of the linear system.
+       * @param target Target data for the operation.
+       * @returns Reference to this object after the operation.
+       */
       virtual ProblemUsBase& assemble(AssemblyTarget target) override
       {
         auto& axb = getLinearSystem();
@@ -1025,6 +1140,7 @@ namespace Rodin::Variational
        * Assigning a new problem body with operator=() marks the current
        * assembly stale. If that happens, or if assemble() has not been called
        * yet, this function calls assemble() before invoking the linear solver.
+       * @param solver Solver used for the linear system.
        */
       void solve(Solver::LinearSolverBase<LinearSystemType>& solver) override
       {
@@ -1039,7 +1155,11 @@ namespace Rodin::Variational
             });
       }
 
-      /// @brief Copy assignment.
+      /**
+       * @brief Copy assignment.
+       * @param rhs Right operand.
+       * @returns Reference to this object after the operation.
+       */
       ProblemUsBase& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
@@ -1052,13 +1172,19 @@ namespace Rodin::Variational
         return m_pb;
       }
 
-      /// @brief Gets the offsets of the trial degrees of freedom.
+      /**
+       * @brief Gets the offsets of the trial degrees of freedom.
+       * @returns The offsets of the trial degrees of freedom.
+       */
       const auto& getTrialOffsets() const
       {
         return m_trialOffsets;
       }
 
-      /// @brief Gets the offsets of the test degrees of freedom.
+      /**
+       * @brief Gets the offsets of the test degrees of freedom.
+       * @returns The offsets of the test degrees of freedom.
+       */
       const auto& getTestOffsets() const
       {
         return m_testOffsets;
@@ -1120,24 +1246,40 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ProblemUsBase<LinearSystem, U1, U2, U3, Us...>;
 
-      /// @brief Constructs the problem over the given unknown fields.
+      /**
+       * @brief Constructs the problem over the given unknown fields.
+       * @param u1 Trial shape functions defining the unknowns.
+       * @param u2 Trial shape functions defining the unknowns.
+       * @param u3 Trial shape functions defining the unknowns.
+       * @param us Trial shape functions defining the unknowns.
+       */
       Problem(U1& u1, U2& u2, U3& u3, Us&... us)
         : Parent(u1, u2, u3, us...)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Problem(const Problem& other)
         : Parent(other),
           m_axb(other.m_axb)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_axb(std::move(other.m_axb))
       {}
 
-      /// @brief Copy assignment.
+      /**
+       * @brief Copy assignment.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       Problem& operator=(const Problem& other)
       {
         if (this != &other)
@@ -1148,7 +1290,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment.
+      /**
+       * @brief Move assignment.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       Problem& operator=(Problem&& other) noexcept
       {
         if (this != &other)
@@ -1184,7 +1330,13 @@ namespace Rodin::Variational
       LinearSystemType m_axb;
   };
 
-  /// @brief Deduction guide for @c Problem.
+  /**
+   * @brief Deduction guide for @c Problem.
+   * @param u1 Trial shape functions defining the unknowns.
+   * @param u2 Trial shape functions defining the unknowns.
+   * @param u3 Trial shape functions defining the unknowns.
+   * @param us Trial shape functions defining the unknowns.
+   */
   template <class U1, class U2, class U3, class ... Us>
   Problem(U1& u1, U2& u2, U3& u3, Us&... us)
     -> Problem<

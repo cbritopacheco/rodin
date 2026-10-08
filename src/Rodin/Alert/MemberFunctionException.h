@@ -45,8 +45,10 @@ namespace Rodin::Alert
        *
        * @param funcName The name of the member function in which the error
        * occurred.
+       * @param instance Class instance used to deduce the class type; its value is unused.
        */
-      MemberFunctionException(const T&, const FuncName& funcName)
+      MemberFunctionException(
+        [[maybe_unused]] const T& instance, const FuncName& funcName)
       {
         const auto& className = boost::typeindex::type_id_with_cvr<T>().pretty_name();
         *this << "In member function " << Identifier::Function(funcName)
