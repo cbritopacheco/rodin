@@ -68,14 +68,10 @@ namespace Rodin::FormLanguage
   class List : public Base
   {
     public:
-      /**
-       * @brief Reference type for list elements.
-       */
+      /// @brief Reference type for list elements.
       using reference = T&;
 
-      /**
-       * @brief Const reference type for list elements.
-       */
+      /// @brief Const reference type for list elements.
       using const_reference = const T&;
 
       /**
@@ -107,8 +103,14 @@ namespace Rodin::FormLanguage
           /**
            * @brief Post-increment operator.
            * @return Copy of iterator before increment
+           * @param postfix Unused integer tag distinguishing postfix from prefix increment.
            */
-          constexpr Iterator operator++(int) { Iterator r = *this; ++(*this); return r; }
+          constexpr Iterator operator++([[maybe_unused]] int postfix)
+          {
+            Iterator r = *this;
+            ++(*this);
+            return r;
+          }
 
           /**
            * @brief Equality comparison operator.
@@ -162,8 +164,14 @@ namespace Rodin::FormLanguage
           /**
            * @brief Post-increment operator.
            * @return Copy of iterator before increment
+           * @param postfix Unused integer tag distinguishing postfix from prefix increment.
            */
-          constexpr ConstIterator operator++(int) { ConstIterator r = *this; ++(*this); return r; }
+          constexpr ConstIterator operator++([[maybe_unused]] int postfix)
+          {
+            ConstIterator r = *this;
+            ++(*this);
+            return r;
+          }
 
           /**
            * @brief Equality comparison operator.
@@ -188,9 +196,7 @@ namespace Rodin::FormLanguage
           InternalConstIterator m_it;
       };
 
-      /**
-       * @brief Default constructor creates an empty list.
-       */
+      /// @brief Default constructor creates an empty list.
       constexpr List() = default;
 
       /**
@@ -217,9 +223,7 @@ namespace Rodin::FormLanguage
           m_list(std::move(other.m_list))
       {}
 
-      /**
-       * @brief Destructor.
-       */
+      /// @brief Destructor.
       virtual ~List() = default;
 
       /**
@@ -400,9 +404,7 @@ namespace Rodin::FormLanguage
       }
 
     private:
-      /**
-       * @brief Internal storage for list elements.
-       */
+      /// @brief Internal storage for list elements.
       std::vector<std::unique_ptr<T>> m_list;
   };
 }

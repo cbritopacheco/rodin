@@ -60,14 +60,10 @@ namespace Rodin::Variational
   template <class Range, class Mesh>
   class P1;
 
-  /**
-   * @brief Alias for P1Element<Real>
-   */
+  /// @brief Alias for P1Element<Real>
   using RealP1Element = P1Element<Real>;
 
-  /**
-   * @brief Alias for P1Element<Complex>
-   */
+  /// @brief Alias for P1Element<Complex>
   using ComplexP1Element = P1Element<Complex>;
 
   /**
@@ -77,9 +73,7 @@ namespace Rodin::Variational
   template <class Scalar>
   using VectorP1Element = P1Element<Math::SpatialVector<Scalar>>;
 
-  /**
-   * @brief Alias for real vector P1Element
-   */
+  /// @brief Alias for real vector P1Element
   using RealVectorP1Element = P1Element<Math::SpatialVector<Real>>;
 }
 

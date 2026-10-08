@@ -44,11 +44,17 @@ namespace Rodin::Assembly
       /// @brief Default constructor
       AssemblyBase() = default;
 
-      /// @brief Copy constructor
-      AssemblyBase(const AssemblyBase&) = default;
+      /**
+       * @brief Copy constructor
+       * @param other Object to copy from.
+       */
+      AssemblyBase(const AssemblyBase& other) = default;
 
-      /// @brief Move constructor  
-      AssemblyBase(AssemblyBase&&) = default;
+      /**
+       * @brief Move constructor
+       * @param other Object to move from.
+       */
+      AssemblyBase(AssemblyBase&& other) = default;
 
       /// @brief Virtual destructor
       virtual ~AssemblyBase() = default;
@@ -129,11 +135,17 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       AssemblyBase() = default;
 
-      /// @brief Copy constructor.
-      AssemblyBase(const AssemblyBase&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      AssemblyBase(const AssemblyBase& other) = default;
 
-      /// @brief Move constructor.
-      AssemblyBase(AssemblyBase&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      AssemblyBase(AssemblyBase&& other) = default;
 
       /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
@@ -174,11 +186,17 @@ namespace Rodin::Assembly
       /// @brief Default constructor
       AssemblyBase() = default;
 
-      /// @brief Copy constructor
-      AssemblyBase(const AssemblyBase&) = default;
+      /**
+       * @brief Copy constructor
+       * @param other Object to copy from.
+       */
+      AssemblyBase(const AssemblyBase& other) = default;
 
-      /// @brief Move constructor
-      AssemblyBase(AssemblyBase&&) = default;
+      /**
+       * @brief Move constructor
+       * @param other Object to move from.
+       */
+      AssemblyBase(AssemblyBase&& other) = default;
 
       /// @brief Virtual destructor
       virtual ~AssemblyBase() = default;
@@ -222,11 +240,17 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       AssemblyBase() = default;
 
-      /// @brief Copy constructor.
-      AssemblyBase(const AssemblyBase&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      AssemblyBase(const AssemblyBase& other) = default;
 
-      /// @brief Move constructor.
-      AssemblyBase(AssemblyBase&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      AssemblyBase(AssemblyBase&& other) = default;
 
       /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
@@ -271,11 +295,17 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       AssemblyBase() = default;
 
-      /// @brief Copy constructor.
-      AssemblyBase(const AssemblyBase&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      AssemblyBase(const AssemblyBase& other) = default;
 
-      /// @brief Move constructor.
-      AssemblyBase(AssemblyBase&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      AssemblyBase(AssemblyBase&& other) = default;
 
       /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
@@ -324,11 +354,17 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       AssemblyBase() = default;
 
-      /// @brief Copy constructor.
-      AssemblyBase(const AssemblyBase&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      AssemblyBase(const AssemblyBase& other) = default;
 
-      /// @brief Move constructor.
-      AssemblyBase(AssemblyBase&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      AssemblyBase(AssemblyBase&& other) = default;
 
       /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
@@ -347,9 +383,7 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  /**
-   * @brief Base class for complete single-field problem assembly.
-   */
+  /// @brief Base class for complete single-field problem assembly.
   template <class LinearSystem, class TrialFunction, class TestFunction>
   class AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
     : public FormLanguage::Base
@@ -382,12 +416,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       AssemblyBase() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       AssemblyBase(const AssemblyBase& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       AssemblyBase(AssemblyBase&& other)
         : Parent(std::move(other))
       {}
@@ -409,9 +449,7 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
-  /**
-   * @brief Base class for complete mixed problem assembly.
-   */
+  /// @brief Base class for complete mixed problem assembly.
   template <class LinearSystem, class U1, class U2, class U3, class... Us>
   class AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
     : public FormLanguage::Base
@@ -444,12 +482,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       AssemblyBase() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       AssemblyBase(const AssemblyBase& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       AssemblyBase(AssemblyBase&& other)
         : Parent(std::move(other))
       {}

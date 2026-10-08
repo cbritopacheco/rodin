@@ -669,8 +669,10 @@ namespace Rodin::Tests::Unit
       const Real expected = point.x() + 10 * point.y();
       // Repeat the evaluation to cover both invalidation and a cache hit.
       for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
         EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &*qf, 0)), expected, 1e-12)
           << "quadrature order " << order;
+      }
       previousFormula = &*qf;
       previousCoordinates = point.getReferenceCoordinates();
     }
@@ -711,8 +713,10 @@ namespace Rodin::Tests::Unit
       const Point point(cell, qf.getPoint(0));
       const Real expected = point.x() + 10 * point.y();
       for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
         EXPECT_NEAR(gf->getValue(IntegrationPoint(point, &qf, 0)), expected, 1e-12)
           << "mesh resolution " << resolution;
+      }
       previousFunction = &*gf;
       previousSpace = &*fes;
       previousElement = &element;
@@ -734,8 +738,10 @@ namespace Rodin::Tests::Unit
       qf = QF::GaussLegendre(cell.getGeometry(), order);
       const Point point(cell, qf.getPoint(0));
       for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
         EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &qf, 0)),
           point.x() + 10 * point.y(), 1e-12);
+      }
     }
   }
 

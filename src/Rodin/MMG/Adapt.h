@@ -36,9 +36,7 @@ namespace Rodin::MMG
   class Adapt : public MMG5
   {
     public:
-      /**
-       * @brief Constructs an adaptation operator with default MMG settings.
-       */
+      /// @brief Constructs an adaptation operator with default MMG settings.
       Adapt() = default;
 
       /**

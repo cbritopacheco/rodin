@@ -120,8 +120,10 @@ namespace Rodin::Tests::Convergence::H::Helmholtz
 
     ErrorHistory history;
     for (const size_t level : hierarchy.getLevels())
+    {
       history.append(hierarchy.getMeshSize(level),
         solve<K>(hierarchy, level, exact, forcing, exactGradient));
+    }
     expectRates(history, minimumL2Rate, maximumL2Rate, minimumH1Rate, maximumH1Rate);
   }
 

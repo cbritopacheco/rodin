@@ -60,7 +60,11 @@ namespace Rodin::QF
         : Copyable(other)
       {}
 
-      /// @brief Assignment invalidates caches of the previous rule contents.
+      /**
+       * @brief Assignment invalidates caches of the previous rule contents.
+       * @param other Rule assigned to this formula.
+       * @returns Reference to this formula.
+       */
       QuadratureFormulaBase& operator=(const QuadratureFormulaBase& other)
       {
         if (this != &other)
@@ -74,15 +78,14 @@ namespace Rodin::QF
        * Construction, copying, and assignment receive a fresh identity, even
        * when object storage is reused. Reading the identity requires no atomic
        * operation. Nodes must remain fixed between these operations.
+       * @returns Unique lifetime and assignment identity of the rule.
        */
       size_t getCacheIdentity() const noexcept
       {
         return m_identity;
       }
 
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~QuadratureFormulaBase() = default;
 
       /**

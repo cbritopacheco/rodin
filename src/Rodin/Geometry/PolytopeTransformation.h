@@ -83,24 +83,24 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
-      constexpr
-      PolytopeTransformation(const PolytopeTransformation&) = default;
+      constexpr PolytopeTransformation(const PolytopeTransformation& other) = default;
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
-      constexpr
-      PolytopeTransformation(PolytopeTransformation&&) = default;
+      constexpr PolytopeTransformation(PolytopeTransformation&& other) = default;
 
       /**
        * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
        */
-      PolytopeTransformation& operator=(PolytopeTransformation&&) = default;
+      PolytopeTransformation& operator=(PolytopeTransformation&& other) = default;
 
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~PolytopeTransformation() = default;
 
       /**
@@ -139,6 +139,7 @@ namespace Rodin::Geometry
        * factor degree. Isotropic tensor and collapsed-coordinate elements may
        * override this with their known factor degree. A total degree alone must
        * not be divided by the number of factors for an arbitrary transformation.
+       * @returns The factor order.
        */
       virtual size_t getFactorOrder() const
       {
@@ -196,9 +197,10 @@ namespace Rodin::Geometry
       /**
        * @brief Serialization method for Boost.Serialization.
        * @param[in,out] ar Archive object
+       * @param version Boost.Serialization class version; unused by this implementation.
        */
-      template<class Archive>
-      void serialize(Archive & ar, const unsigned int)
+      template <class Archive>
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar & m_rdim;
         ar & m_pdim;

@@ -56,14 +56,10 @@ namespace Rodin::Variational
     RHS  ///< Assemble the right-hand-side vector only.
   };
 
-  /**
-   * @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
-   */
+  /// @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
   static constexpr const ShapeFunctionSpaceType TrialSpace = ShapeFunctionSpaceType::Trial;
 
-  /**
-   * @brief Shorthand variable for ShapeFunctionSpaceType::Test.
-   */
+  /// @brief Shorthand variable for ShapeFunctionSpaceType::Test.
   static constexpr const ShapeFunctionSpaceType TestSpace  = ShapeFunctionSpaceType::Test;
 
   /**
@@ -114,9 +110,7 @@ namespace Rodin::Variational
   template <class ... Values>
   class Function;
 
-  /**
-   * @brief Base class for objects representing boolean functions.
-   */
+  /// @brief Base class for objects representing boolean functions.
   template <class Derived>
   class BooleanFunctionBase;
 
@@ -129,9 +123,7 @@ namespace Rodin::Variational
   template <class T>
   class BooleanFunction;
 
-  /**
-   * @brief Base class for objects representing integer functions.
-   */
+  /// @brief Base class for objects representing integer functions.
   template <class Derived>
   class IntegerFunctionBase;
 
@@ -148,9 +140,7 @@ namespace Rodin::Variational
   template <class ... Values>
   class ScalarFunction;
 
-  /**
-   * @brief Base class for real-valued functions defined on a mesh.
-   */
+  /// @brief Base class for real-valued functions defined on a mesh.
   template <class Derived>
   class RealFunctionBase;
 
@@ -163,9 +153,7 @@ namespace Rodin::Variational
   template <class ... Values>
   class RealFunction;
 
-  /**
-   * @brief Base class for scalar-valued functions defined on a mesh.
-   */
+  /// @brief Base class for scalar-valued functions defined on a mesh.
   template <class Derived>
   class ComplexFunctionBase;
 
@@ -196,9 +184,7 @@ namespace Rodin::Variational
   template <class ... Values>
   class VectorFunction;
 
-  /**
-   * @brief Base class for matrix-valued functions defined on a mesh.
-   */
+  /// @brief Base class for matrix-valued functions defined on a mesh.
   template <class Scalar, class Derived>
   class MatrixFunctionBase;
 
@@ -211,9 +197,7 @@ namespace Rodin::Variational
   template <class T>
   class MatrixFunction;
 
-  /**
-   * @brief Base class for grid function objects.
-   */
+  /// @brief Base class for grid function objects.
   template <class Derived, class FES, class Data>
   class GridFunctionBase;
 
@@ -319,9 +303,7 @@ namespace Rodin::Variational
     class DiffusionDerived, class MassDerived>
   class HelmholtzForm;
 
-  /**
-   * @brief Base class for bilinear form integrators.
-   */
+  /// @brief Base class for bilinear form integrators.
   template <class Number, class Derived>
   class BilinearFormIntegratorBase;
 
@@ -339,9 +321,7 @@ namespace Rodin::Variational
   template <class FESType>
   class FiniteElement;
 
-  /**
-   * @brief Base class for finite element spaces.
-   */
+  /// @brief Base class for finite element spaces.
   class FiniteElementSpaceBase;
 
   /**
@@ -1098,8 +1078,10 @@ namespace Rodin::Variational
   template <class Operand, class ... Parameters>
   class PeriodicBC;
 
-  /// @brief Accumulated bilinear forms, linear forms and boundary conditions of a
-  /// Problem.
+  /**
+   * @brief Accumulated bilinear forms, linear forms and boundary conditions of a
+   * Problem.
+   */
   template <class Operator, class Vector, class Scalar>
   class ProblemBody;
 
@@ -1118,9 +1100,7 @@ namespace Rodin::Variational
   template <class ... Parameters>
   class Problem;
 
-  /**
-   * @brief Base class for variational problem objects.
-   */
+  /// @brief Base class for variational problem objects.
   template <class LinearSystem>
   class ProblemBase;
 

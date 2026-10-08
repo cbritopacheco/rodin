@@ -43,8 +43,10 @@ namespace Rodin::Tests::Unit
       {
         bool onInterface = true;
         for (const Index vertex : face->getVertices())
+        {
           onInterface &=
             std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+        }
         if (onInterface)
         {
           interfaceFacets.push_back(face->getIndex());

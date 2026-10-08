@@ -32,9 +32,7 @@
 
 namespace Rodin
 {
-  /**
-   * @brief Specialization of Tuple for an empty parameter pack.
-   */
+  /// @brief Specialization of Tuple for an empty parameter pack.
   template <>
   class Tuple<> : public std::tuple<>
   {
@@ -55,21 +53,15 @@ namespace Rodin
       /// @brief The number of elements in the tuple (always 0).
       static constexpr size_t Size = 0;
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       constexpr
       Tuple() = default;
 
-      /**
-       * @brief Copy constructor.
-       */
+      /// @brief Copy constructor.
       constexpr
       Tuple(const Tuple&) = default;
 
-      /**
-       * @brief Move constructor.
-       */
+      /// @brief Move constructor.
       constexpr
       Tuple(Tuple&&) = default;
 
@@ -481,59 +473,102 @@ namespace Rodin
       }
 
     private:
-      template <class Archive, std::size_t ... Indices>
-      void serializeImpl(Archive& ar, const unsigned int version, std::index_sequence<Indices...>)
+      /**
+       * @brief Serializes the tuple entries selected by an index sequence.
+       * @param ar Archive storing or restoring the tuple entries.
+       * @param version Serialization version forwarded to the tuple entries.
+       * @param indices Compile-time indices used to instantiate the callable invocations.
+       */
+      template <class Archive, std::size_t... Indices>
+      void serializeImpl(Archive& ar, const unsigned int version,
+        [[maybe_unused]] std::index_sequence<Indices...> indices)
       {
         (ar & ... & std::get<Indices>(*this));
       }
+      /**
+       * @brief Invokes a callable on the selected tuple entries.
+       * @param func Callable applied to the selected tuple entries.
+       * @param indices Compile-time indices used to instantiate the callable invocations.
+       */
 
-      template <class Function, std::size_t ... Indices>
-      constexpr
-      void applyImpl(Function&& func, std::index_sequence<Indices...>)
+      template <class Function, std::size_t... Indices>
+      constexpr void applyImpl(
+        Function&& func, [[maybe_unused]] std::index_sequence<Indices...> indices)
       {
         (func(get<Indices>()), ...);
       }
+      /**
+       * @brief Invokes a callable on the selected tuple entries.
+       * @param func Callable applied to the selected tuple entries.
+       * @param indices Compile-time indices used to instantiate the callable invocations.
+       */
 
-      template <class Function, std::size_t ... Indices>
-      constexpr
-      void applyImpl(Function&& func, std::index_sequence<Indices...>) const
+      template <class Function, std::size_t... Indices>
+      constexpr void applyImpl(
+        Function&& func, [[maybe_unused]] std::index_sequence<Indices...> indices) const
       {
         (func(get<Indices>()), ...);
       }
+      /**
+       * @brief Invokes a callable with each tuple entry and its compile-time index.
+       * @param func Callable applied to the selected tuple entries.
+       * @param indices Compile-time indices used to instantiate the callable invocations.
+       */
 
-      template <class Function, std::size_t ... Indices>
-      constexpr
-      void iapplyImpl(Function&& func, std::index_sequence<Indices...>)
+      template <class Function, std::size_t... Indices>
+      constexpr void iapplyImpl(
+        Function&& func, [[maybe_unused]] std::index_sequence<Indices...> indices)
       {
         (func(Indices, get<Indices>()), ...);
       }
+      /**
+       * @brief Maps a callable over selected tuple entries.
+       * @param indices Compile-time indices used to instantiate the callable invocations.
+       * @param func Callable applied to the selected tuple entries.
+       * @returns Tuple containing the callable results for the selected indices.
+       */
 
-      template <std::size_t ... Is, typename Func>
-      constexpr
-      auto mapImpl(std::index_sequence<Is...>, Func&& func) const
+      template <std::size_t... Is, typename Func>
+      constexpr auto mapImpl(
+        [[maybe_unused]] std::index_sequence<Is...> indices, Func&& func) const
       {
         return Utility::Make<Tuple<decltype(func(get<Is>()))...>>()(
             func(std::get<Is>(*this))...);
       }
+      /**
+       * @brief Maps a callable over selected tuple entries.
+       * @param indices Compile-time indices used to instantiate the callable invocations.
+       * @param func Callable applied to the selected tuple entries.
+       * @returns Tuple containing the callable results for the selected indices.
+       */
 
-      template <std::size_t ... Is, typename Func>
-      constexpr
-      auto mapImpl(std::index_sequence<Is...>, Func&& func)
+      template <std::size_t... Is, typename Func>
+      constexpr auto mapImpl(
+        [[maybe_unused]] std::index_sequence<Is...> indices, Func&& func)
       {
         return Utility::Make<Tuple<decltype(func(get<Is>()))...>>()(
             func(std::get<Is>(*this))...);
       }
+      /**
+       * @brief Concatenates two tuples using their index sequences.
+       * @param other Tuple or tuples combined with, copied into, or moved into this tuple.
+       * @param indices Compile-time indices used to instantiate the callable invocations.
+       * @param indices3 Compile-time indices used to instantiate the callable invocations.
+       * @returns Tuple containing this tuple followed by the other tuple.
+       */
 
-      template <typename ... Gs, std::size_t... Indices1, std::size_t... Indices2>
-      constexpr
-      Tuple<T, Ts..., Gs...> concatenateImpl(
-          const Tuple<Gs...>& other,
-          std::index_sequence<Indices1...>,
-          std::index_sequence<Indices2...>) const
+      template <typename... Gs, std::size_t... Indices1, std::size_t... Indices2>
+      constexpr Tuple<T, Ts..., Gs...> concatenateImpl(const Tuple<Gs...>& other,
+        [[maybe_unused]] std::index_sequence<Indices1...> indices,
+        [[maybe_unused]] std::index_sequence<Indices2...> indices3) const
       {
         return Utility::Make<Tuple<T, Ts..., Gs...>>()(
             get<Indices1>()..., other.template get<Indices2>()...);
       }
+      /**
+       * @brief Filters tuple entries with a compile-time predicate.
+       * @returns Tuple containing entries whose types satisfy the predicate.
+       */
 
       template <std::size_t Index, template <class> class Predicate>
       constexpr
@@ -553,6 +588,12 @@ namespace Rodin
           return filterImpl<Index + 1, Predicate>();
         }
       }
+      /**
+       * @brief Combines corresponding entries of one or more tuples.
+       * @param func Callable applied to the selected tuple entries.
+       * @param other Tuple or tuples combined with, copied into, or moved into this tuple.
+       * @returns Tuple of the callable results at corresponding tuple positions.
+       */
 
       template <std::size_t Index, class Function, class ... Os>
       constexpr
@@ -569,6 +610,12 @@ namespace Rodin
               ).concatenate(zipImpl<Index + 1, Function, Os...>(std::forward<Function>(func), other...));
         }
       }
+      /**
+       * @brief Forms the callable Cartesian product of two tuples.
+       * @param func Callable applied to the selected tuple entries.
+       * @param other Tuple or tuples combined with, copied into, or moved into this tuple.
+       * @returns Tuple of callable results over all pairs of entries.
+       */
 
       template <std::size_t Index, std::size_t OtherIndex, class Function, class G, class ... Gs>
       constexpr
@@ -595,6 +642,11 @@ namespace Rodin
             .concatenate(productImpl<Index, OtherIndex + 1, Function, G, Gs...>(std::forward<Function>(func), other));
         }
       }
+      /**
+       * @brief Reduces tuple entries using a callable.
+       * @param func Callable applied to the selected tuple entries.
+       * @returns Result of the recursive reduction over the tuple entries.
+       */
 
       template <std::size_t Index, typename Function>
       constexpr
@@ -609,6 +661,10 @@ namespace Rodin
           return func(get<Index>(), reduceImpl<Index + 1, Function>(std::forward<Function>(func)));
         }
       }
+      /**
+       * @brief Copies the corresponding tuple entries.
+       * @param other Tuple or tuples combined with, copied into, or moved into this tuple.
+       */
 
       template <std::size_t Index>
       constexpr
@@ -620,6 +676,10 @@ namespace Rodin
           copyImpl<Index + 1>(other);
         }
       }
+      /**
+       * @brief Moves the corresponding tuple entries.
+       * @param other Tuple or tuples combined with, copied into, or moved into this tuple.
+       */
 
       template <std::size_t Index>
       constexpr

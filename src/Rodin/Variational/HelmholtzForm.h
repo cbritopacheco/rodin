@@ -214,8 +214,11 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
-      /// @brief Move constructor.
-      HelmholtzForm(HelmholtzForm&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Form whose storage is moved.
+       */
+      HelmholtzForm(HelmholtzForm&& other) = default;
 
       OperatorType& getOperator() override
       {
@@ -242,25 +245,37 @@ namespace Rodin::Variational
         return m_v.get();
       }
 
-      /// @brief Gets the diffusion coefficient.
+      /**
+       * @brief Gets the diffusion coefficient.
+       * @returns The diffusion coefficient function.
+       */
       const DiffusionCoefficientType& getDiffusionCoefficient() const
       {
         return *m_diffusionCoefficient;
       }
 
-      /// @brief Gets the mass coefficient.
+      /**
+       * @brief Gets the mass coefficient.
+       * @returns The mass coefficient function.
+       */
       const MassCoefficientType& getMassCoefficient() const
       {
         return *m_massCoefficient;
       }
 
-      /// @brief Gets the region the form integrates over.
+      /**
+       * @brief Gets the region the form integrates over.
+       * @returns The cell integration region.
+       */
       Geometry::Region getRegion() const
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Gets the attributes the form is restricted to, empty for all.
+      /**
+       * @brief Gets the attributes the form is restricted to, empty for all.
+       * @returns Selected cell attributes, or empty for all.
+       */
       const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_attributes;
@@ -313,6 +328,8 @@ namespace Rodin::Variational
       /**
        * @brief Copies @p value as a coefficient, lifting a non-function to a
        * RealFunction.
+       * @param value Function, constant or callable to copy.
+       * @returns Independent function representing the supplied coefficient.
        */
       template <class Derived, class Value>
       static std::unique_ptr<FunctionBase<Derived>> lift(const Value& value)
@@ -340,46 +357,71 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
-  /// @brief Deduction guide for two function coefficients.
+  /**
+   * @brief Deduction guide for two function coefficients.
+   * @param a Diffusion coefficient.
+   * @param c Mass coefficient.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class DiffusionDerived, class MassDerived, class Solution, class TrialFES,
     class TestFES>
-  HelmholtzForm(const FunctionBase<DiffusionDerived>&, const FunctionBase<MassDerived>&,
-    const TrialFunction<Solution, TrialFES>&, const TestFunction<TestFES>&)
+  HelmholtzForm(const FunctionBase<DiffusionDerived>& a,
+    const FunctionBase<MassDerived>& c, const TrialFunction<Solution, TrialFES>& u,
+    const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
       Math::SparseMatrix<
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
       DiffusionDerived, MassDerived>;
 
-  /// @brief Deduction guide for a function diffusion and a lifted mass coefficient.
+  /**
+   * @brief Deduction guide for a function diffusion and a lifted mass coefficient.
+   * @param a Diffusion coefficient.
+   * @param c Mass coefficient.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class DiffusionDerived, class C, class Solution, class TrialFES,
     class TestFES>
     requires(!std::is_base_of_v<FormLanguage::Base, C>)
-  HelmholtzForm(const FunctionBase<DiffusionDerived>&, const C&,
-    const TrialFunction<Solution, TrialFES>&, const TestFunction<TestFES>&)
+  HelmholtzForm(const FunctionBase<DiffusionDerived>& a, const C& c,
+    const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
       Math::SparseMatrix<
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
       DiffusionDerived, typename FormLanguage::FunctionDerived<RealFunction<C>>::Type>;
 
-  /// @brief Deduction guide for a lifted diffusion and a function mass coefficient.
+  /**
+   * @brief Deduction guide for a lifted diffusion and a function mass coefficient.
+   * @param a Diffusion coefficient.
+   * @param c Mass coefficient.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class A, class MassDerived, class Solution, class TrialFES, class TestFES>
     requires(!std::is_base_of_v<FormLanguage::Base, A>)
-  HelmholtzForm(const A&, const FunctionBase<MassDerived>&,
-    const TrialFunction<Solution, TrialFES>&, const TestFunction<TestFES>&)
+  HelmholtzForm(const A& a, const FunctionBase<MassDerived>& c,
+    const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
       Math::SparseMatrix<
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
       typename FormLanguage::FunctionDerived<RealFunction<A>>::Type, MassDerived>;
 
-  /// @brief Deduction guide for two lifted coefficients.
+  /**
+   * @brief Deduction guide for two lifted coefficients.
+   * @param a Diffusion coefficient.
+   * @param c Mass coefficient.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class A, class C, class Solution, class TrialFES, class TestFES>
     requires(!std::is_base_of_v<FormLanguage::Base, A> &&
               !std::is_base_of_v<FormLanguage::Base, C>)
-  HelmholtzForm(const A&, const C&, const TrialFunction<Solution, TrialFES>&,
-    const TestFunction<TestFES>&)
+  HelmholtzForm(const A& a, const C& c, const TrialFunction<Solution, TrialFES>& u,
+    const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
       Math::SparseMatrix<
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,

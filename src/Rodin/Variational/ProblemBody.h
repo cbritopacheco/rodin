@@ -97,7 +97,10 @@ namespace Rodin::Variational
       /// @brief Default constructor.
       ProblemBodyBase() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemBodyBase(const ProblemBodyBase& other)
         : Parent(other),
           m_lfis(other.m_lfis),
@@ -107,7 +110,11 @@ namespace Rodin::Variational
           m_periodicBdr(other.m_periodicBdr)
       {}
 
-      /// @brief Copy assignment operator.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBodyBase& operator=(const ProblemBodyBase& other)
       {
         if (this != &other)
@@ -121,7 +128,10 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemBodyBase(ProblemBodyBase&& other)
         : Parent(std::move(other)),
           m_lfis(std::move(other.m_lfis)),
@@ -131,7 +141,11 @@ namespace Rodin::Variational
           m_periodicBdr(std::move(other.m_periodicBdr))
       {}
 
-      /// @brief Move assignment operator.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBodyBase& operator=(ProblemBodyBase&& other)
       {
         m_lfis = std::move(other.m_lfis);
@@ -142,67 +156,100 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns periodic boundary conditions.
+      /**
+       * @brief Returns periodic boundary conditions.
+       * @returns Periodic boundary conditions.
+       */
       PeriodicBoundaryType& getPBCs()
       {
         return m_periodicBdr;
       }
 
-      /// @brief Returns essential boundary conditions.
+      /**
+       * @brief Returns essential boundary conditions.
+       * @returns Essential boundary conditions.
+       */
       EssentialBoundaryType& getDBCs()
       {
         return m_essBdr;
       }
 
-      /// @brief Returns local bilinear form integrators.
+      /**
+       * @brief Returns local bilinear form integrators.
+       * @returns Local bilinear form integrators.
+       */
       LocalBilinearFormIntegratorBaseListType& getLocalBFIs()
       {
         return m_lbfis;
       }
 
-      /// @brief Returns global bilinear form integrators.
+      /**
+       * @brief Returns global bilinear form integrators.
+       * @returns Global bilinear form integrators.
+       */
       GlobalBilinearFormIntegratorBaseListType& getGlobalBFIs()
       {
         return m_gbfis;
       }
 
-      /// @brief Returns linear form integrators.
+      /**
+       * @brief Returns linear form integrators.
+       * @returns Linear form integrators.
+       */
       LinearFormIntegratorBaseListType& getLFIs()
       {
         return m_lfis;
       }
 
-      /// @brief Returns periodic boundary conditions.
+      /**
+       * @brief Returns periodic boundary conditions.
+       * @returns Periodic boundary conditions.
+       */
       const PeriodicBoundaryType& getPBCs() const
       {
         return m_periodicBdr;
       }
 
-      /// @brief Returns essential boundary conditions.
+      /**
+       * @brief Returns essential boundary conditions.
+       * @returns Essential boundary conditions.
+       */
       const EssentialBoundaryType& getDBCs() const
       {
         return m_essBdr;
       }
 
-      /// @brief Returns linear form integrators.
+      /**
+       * @brief Returns linear form integrators.
+       * @returns Linear form integrators.
+       */
       const LinearFormIntegratorBaseListType& getLFIs() const
       {
         return m_lfis;
       }
 
-      /// @brief Returns local bilinear form integrators.
+      /**
+       * @brief Returns local bilinear form integrators.
+       * @returns Local bilinear form integrators.
+       */
       const LocalBilinearFormIntegratorBaseListType& getLocalBFIs() const
       {
         return m_lbfis;
       }
 
-      /// @brief Returns global bilinear form integrators.
+      /**
+       * @brief Returns global bilinear form integrators.
+       * @returns Global bilinear form integrators.
+       */
       const GlobalBilinearFormIntegratorBaseListType& getGlobalBFIs() const
       {
         return m_gbfis;
       }
 
-      /// @brief Polymorphically copies this problem body base.
+      /**
+       * @brief Polymorphically copies this problem body base.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual ProblemBodyBase* copy() const noexcept override
       {
         return new ProblemBodyBase(*this);
@@ -229,17 +276,27 @@ namespace Rodin::Variational
       /// @brief Default constructor.
       ProblemBody() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemBody(const ProblemBody& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Copy assignment operator.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -249,7 +306,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment operator.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -259,7 +320,10 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Polymorphically copies this problem body.
+      /**
+       * @brief Polymorphically copies this problem body.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual ProblemBody* copy() const noexcept override
       {
         return new ProblemBody(*this);
@@ -290,19 +354,29 @@ namespace Rodin::Variational
       /// @brief Default constructor.
       ProblemBody() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemBody(const ProblemBody& other)
         : Parent(other),
           m_bfs(other.m_bfs)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other)),
           m_bfs(std::move(other.m_bfs))
       {}
 
-      /// @brief Copy assignment operator.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -313,7 +387,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment operator.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -324,19 +402,28 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns bilinear forms.
+      /**
+       * @brief Returns bilinear forms.
+       * @returns Bilinear forms.
+       */
       BilinearFormBaseListType& getBFs()
       {
         return m_bfs;
       }
 
-      /// @brief Returns bilinear forms.
+      /**
+       * @brief Returns bilinear forms.
+       * @returns Bilinear forms.
+       */
       const BilinearFormBaseListType& getBFs() const
       {
         return m_bfs;
       }
 
-      /// @brief Polymorphically copies this problem body.
+      /**
+       * @brief Polymorphically copies this problem body.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual ProblemBody* copy() const noexcept override
       {
         return new ProblemBody(*this);
@@ -366,24 +453,37 @@ namespace Rodin::Variational
       /// @brief Default constructor.
       ProblemBody() = default;
 
-      /// @brief Retains inline integrators when introducing a preassembled vector.
+      /**
+       * @brief Retains inline integrators when introducing a preassembled vector.
+       * @param other Object to copy from.
+       */
       ProblemBody(const ProblemBody<void, void, Scalar>& other)
         : Parent(other)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemBody(const ProblemBody& other)
         : Parent(other),
           m_lfs(other.m_lfs)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other)),
           m_lfs(std::move(other.m_lfs))
       {}
 
-      /// @brief Copy assignment operator.
+      /**
+       * @brief Copy assignment operator.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -394,7 +494,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment operator.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -405,13 +509,19 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns linear forms.
+      /**
+       * @brief Returns linear forms.
+       * @returns Linear forms.
+       */
       LinearFormBaseListType& getLFs()
       {
         return m_lfs;
       }
 
-      /// @brief Gets the linear forms of the problem.
+      /**
+       * @brief Gets the linear forms of the problem.
+       * @returns The linear forms of the problem.
+       */
       const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
@@ -426,8 +536,10 @@ namespace Rodin::Variational
       LinearFormBaseListType m_lfs;
   };
 
-  /// @brief Accumulated bilinear forms, linear forms and boundary conditions of a
-  /// Problem.
+  /**
+   * @brief Accumulated bilinear forms, linear forms and boundary conditions of a
+   * Problem.
+   */
   template <class Operator, class Vector, class Scalar>
   class ProblemBody : public ProblemBodyBase<Scalar>
   {
@@ -483,70 +595,104 @@ namespace Rodin::Variational
 
       ProblemBody() = default;
 
-      /// @brief Constructs the ProblemBody from the given arguments.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param bfi Bilinear form integrator.
+       */
       ProblemBody(const LocalBilinearFormIntegratorBaseType& bfi)
       {
         this->getLocalBFIs().add(bfi);
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param bfi Bilinear form integrator.
+       */
       ProblemBody(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
         this->getGlobalBFIs().add(bfi);
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param bfis Bilinear form integrators.
+       */
       ProblemBody(const LocalBilinearFormIntegratorBaseListType& bfis)
       {
         this->getLocalBFIs().add(bfis);
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param bfis Bilinear form integrators.
+       */
       ProblemBody(const GlobalBilinearFormIntegratorBaseListType& bfis)
       {
         this->getGlobalBFIs().add(bfis);
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param pbo Problem body supplying the operator terms.
+       */
       ProblemBody(const ProblemBody<OperatorType, void, Scalar>& pbo)
         : Parent(pbo)
       {
         m_bfs.add(pbo.getBFs());
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param bf Bilinear form.
+       */
       ProblemBody(const BilinearFormBaseType& bf)
       {
         m_bfs.add(bf);
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param pbv Problem body supplying the vector terms.
+       */
       ProblemBody(const ProblemBody<void, VectorType, Scalar>& pbv)
         : Parent(pbv)
       {
         m_lfs.add(pbv.getLFs());
       }
 
-      /// @brief Constructs the ProblemBody from the given arguments.
+      /**
+       * @brief Constructs the ProblemBody from the given arguments.
+       * @param parent Problem body supplying the boundary conditions.
+       */
       ProblemBody(const ProblemBody<void, void, Scalar>& parent)
         : Parent(parent)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ProblemBody(const ProblemBody& other)
         : Parent(other),
           m_lfs(other.m_lfs),
           m_bfs(other.m_bfs)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other)),
           m_lfs(std::move(other.m_lfs)),
           m_bfs(std::move(other.m_bfs))
       {}
 
-      /// @brief Copy assignment.
+      /**
+       * @brief Copy assignment.
+       * @param other Object to copy from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -558,7 +704,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Move assignment.
+      /**
+       * @brief Move assignment.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -570,25 +720,37 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the linear forms of the problem.
+      /**
+       * @brief Gets the linear forms of the problem.
+       * @returns The linear forms of the problem.
+       */
       LinearFormBaseListType& getLFs()
       {
         return m_lfs;
       }
 
-      /// @brief Gets the bilinear forms of the problem.
+      /**
+       * @brief Gets the bilinear forms of the problem.
+       * @returns The bilinear forms of the problem.
+       */
       BilinearFormBaseListType& getBFs()
       {
         return m_bfs;
       }
 
-      /// @brief Gets the linear forms of the problem.
+      /**
+       * @brief Gets the linear forms of the problem.
+       * @returns The linear forms of the problem.
+       */
       const LinearFormBaseListType& getLFs() const
       {
         return m_lfs;
       }
 
-      /// @brief Gets the bilinear forms of the problem.
+      /**
+       * @brief Gets the bilinear forms of the problem.
+       * @returns The bilinear forms of the problem.
+       */
       const BilinearFormBaseListType& getBFs() const
       {
         return m_bfs;
@@ -604,11 +766,20 @@ namespace Rodin::Variational
       BilinearFormBaseListType m_bfs;
   };
 
-  /// @brief Deduction guide for @c ProblemBody.
+  /**
+   * @brief Deduction guide for @c ProblemBody.
+   * @param pbo Problem body supplying the operator terms.
+   */
   template <class Scalar>
-  ProblemBody(const LocalBilinearFormIntegratorBase<Scalar>&)
+  ProblemBody(const LocalBilinearFormIntegratorBase<Scalar>& pbo)
     -> ProblemBody<void, void, Scalar>;
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param bfi Bilinear form integrator.
+   * @param lfi Linear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto
   operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const LinearFormIntegratorBase<RHSScalar>& lfi)
@@ -621,6 +792,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param lfi Linear form integrator.
+   * @param bfi Bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto
   operator+(const LinearFormIntegratorBase<LHSScalar>& lfi, const LocalBilinearFormIntegratorBase<RHSScalar>& bfi)
@@ -633,6 +810,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param bfi Bilinear form integrator.
+   * @param lfi Linear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto
   operator-(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const LinearFormIntegratorBase<RHSScalar>& lfi)
@@ -645,6 +828,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param bfi Bilinear form integrator.
+   * @param lfi Linear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto
   operator-(const GlobalBilinearFormIntegratorBase<LHSScalar>& bfi, const LinearFormIntegratorBase<RHSScalar>& lfi)
@@ -657,6 +846,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param bfi Bilinear form integrator.
+   * @param lfis Linear form integrators.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto
   operator-(
@@ -671,6 +866,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param lfi Linear form integrator.
+   * @param bfi Bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator-(
     const LinearFormIntegratorBase<LHSScalar>& lfi, const LocalBilinearFormIntegratorBase<RHSScalar>& bfi)
@@ -683,6 +884,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param bfis Bilinear form integrators.
+   * @param lfi Linear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator+(
     const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis,
@@ -696,6 +903,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param lbfis Local bilinear form integrators.
+   * @param gbfi Global bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator+(
       const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& lbfis,
@@ -709,6 +922,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param lbfis Local bilinear form integrators.
+   * @param gbfis Global bilinear form integrators.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator+(
       const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& lbfis,
@@ -722,6 +941,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param lbfi Local bilinear form integrator.
+   * @param gbfis Global bilinear form integrators.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator+(
       const LocalBilinearFormIntegratorBase<LHSScalar>& lbfi,
@@ -735,6 +960,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param lbfi Local bilinear form integrator.
+   * @param gbfi Global bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator+(
       const LocalBilinearFormIntegratorBase<LHSScalar>& lbfi,
@@ -748,6 +979,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param bfis Bilinear form integrators.
+   * @param lfi Linear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator-(
       const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis,
@@ -761,6 +998,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param bfi Bilinear form integrator.
+   * @param dbc Dirichlet boundary condition.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto
   operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const DirichletBCBase<RHSScalar>& dbc)
@@ -773,6 +1016,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param bfi Bilinear form integrator.
+   * @param dbcs Dirichlet boundary conditions.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto
   operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const FormLanguage::List<DirichletBCBase<RHSScalar>>& dbcs)
@@ -785,6 +1034,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param bfi Bilinear form integrator.
+   * @param pbc Periodic boundary condition.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator+(
       const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const PeriodicBCBase<RHSScalar>& pbc)
@@ -797,6 +1052,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param bfi Bilinear form integrator.
+   * @param pbcs Periodic boundary conditions.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto
   operator+(const LocalBilinearFormIntegratorBase<LHSScalar>& bfi, const FormLanguage::List<PeriodicBCBase<RHSScalar>>& pbcs)
@@ -809,6 +1070,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param bfis Bilinear form integrators.
+   * @param dbc Dirichlet boundary condition.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator+(
     const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis, const DirichletBCBase<RHSScalar>& dbc)
@@ -821,6 +1088,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param bfis Bilinear form integrators.
+   * @param dbcs Dirichlet boundary conditions.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto
   operator+(
@@ -835,6 +1108,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param bfis Bilinear form integrators.
+   * @param pbcs Periodic boundary conditions.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator+(
       const FormLanguage::List<LocalBilinearFormIntegratorBase<LHSScalar>>& bfis,
@@ -848,6 +1127,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param lfi Linear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class Operator, class Vector, class LHSScalar, class RHSScalar>
   auto operator+(
       const ProblemBody<Operator, Vector, LHSScalar>& pb,
@@ -860,6 +1145,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param lbfi Local bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class Operator, class Vector, class LHSScalar, class RHSScalar>
   auto operator+(
       const ProblemBody<Operator, Vector, LHSScalar>& pb,
@@ -872,6 +1163,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param lbfi Local bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class Operator, class Vector, class LHSScalar, class RHSScalar>
   auto operator-(
       const ProblemBody<Operator, Vector, LHSScalar>& pb,
@@ -884,6 +1181,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param gbfi Global bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class Operator, class Vector, class LHSScalar, class RHSScalar>
   auto
   operator+(
@@ -897,6 +1200,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param lfis Linear form integrators.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator+(
@@ -910,6 +1219,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param lfi Linear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator-(
@@ -923,6 +1238,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param lfis Linear form integrators.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator-(
@@ -936,6 +1257,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param dbc Dirichlet boundary condition.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator+(
@@ -948,6 +1275,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param dbcs Dirichlet boundary conditions.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator+(
@@ -960,6 +1293,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param pbc Periodic boundary condition.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator+(
@@ -973,6 +1312,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param bf Preassembled bilinear form.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class OperatorType, class VectorType, class LHSScalar>
   auto
   operator+(
@@ -987,6 +1332,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param pbcs Periodic boundary conditions.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class OperatorType, class VectorType, class LHSScalar, class RHSScalar>
   auto
   operator+(
@@ -1000,6 +1351,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param bfi Bilinear form integrator.
+   * @param bf Preassembled bilinear form.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class OperatorType, class LHSScalar>
   auto
   operator+(
@@ -1016,6 +1373,9 @@ namespace Rodin::Variational
 
   /**
    * @brief Combines a bilinear form and a local bilinear form integrator.
+   * @param bf Assembled bilinear form.
+   * @param bfi Local bilinear form integrator.
+   * @returns Problem body containing both terms.
    */
   template <class OperatorType, class RHSScalar>
   auto operator+(const BilinearFormBase<OperatorType>& bf,
@@ -1040,6 +1400,9 @@ namespace Rodin::Variational
    * @endcode
    * where the BilinearForm has already been assembled and the Dirichlet
    * boundary condition is added to constrain the problem.
+    * @param bf Bilinear form.
+    * @param dbc Dirichlet boundary condition.
+    * @returns Sum of the operands.
    */
   template <class OperatorType, class RHSScalar>
   auto
@@ -1054,6 +1417,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts a linear integrator from a preassembled bilinear form.
+   * @param bf Preassembled bilinear form.
+   * @param lfi Linear integrator whose negated expression is appended.
+   * @returns Problem body owning copies of the supplied terms.
+   */
   template <class OperatorType, class RHSScalar>
   auto
   operator-(
@@ -1068,6 +1437,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts a linear integrator from preassembled bilinear forms.
+   * @param bfs Preassembled bilinear forms.
+   * @param lfi Linear integrator whose negated expression is appended.
+   * @returns Problem body owning copies of the supplied terms.
+   */
   template <class OperatorType, class RHSScalar>
   auto
   operator-(
@@ -1083,6 +1458,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Combines a local bilinear integrator with preassembled bilinear forms.
+   * @param bfi Local bilinear integrator.
+   * @param bfs Preassembled bilinear forms.
+   * @returns Problem body owning copies of the supplied terms.
+   */
   template <class LHSScalar, class OperatorType>
   auto
   operator+(
@@ -1108,6 +1489,9 @@ namespace Rodin::Variational
    * @endcode
    * where the first two Integral terms produce a List<LocalBFI> (via Sum)
    * and the preassembled BilinearForm is added afterwards.
+    * @param lbfis Local bilinear form integrators.
+    * @param bf Bilinear form.
+    * @returns Sum of the operands.
    */
   template <class LHSScalar, class OperatorType>
   auto
@@ -1135,6 +1519,9 @@ namespace Rodin::Variational
    * @endcode
    * where a single Integral term (LocalBFI) is combined with a preassembled
    * LinearForm.
+    * @param bfi Bilinear form integrator.
+    * @param lf Linear form.
+    * @returns Difference of the operands, or the negated operand for the unary overload.
    */
   template <class LHSScalar, class VectorType>
   auto
@@ -1162,6 +1549,9 @@ namespace Rodin::Variational
    * @endcode
    * where the Integral terms produce a List<LocalBFI> and the preassembled
    * LinearForm is subtracted afterwards.
+    * @param lbfis Local bilinear form integrators.
+    * @param lf Linear form.
+    * @returns Difference of the operands, or the negated operand for the unary overload.
    */
   template <class LHSScalar, class VectorType>
   auto
@@ -1189,6 +1579,9 @@ namespace Rodin::Variational
    * @endcode
    * where the chain first produces ProblemBody<Op, void, S> (after adding
    * the preassembled BF) and then the LinearForm introduces the VectorType.
+    * @param pb Variational problem to operate on.
+    * @param lf Linear form.
+    * @returns Difference of the operands, or the negated operand for the unary overload.
    */
   template <class OperatorType, class LHSScalar, class VectorType>
   auto
@@ -1216,6 +1609,9 @@ namespace Rodin::Variational
    * @code
    *   problem = preassembledBF + Integral(u, v) - Integral(f, v) - preassembledLF;
    * @endcode
+    * @param pb Variational problem to operate on.
+    * @param lf Linear form.
+    * @returns Difference of the operands, or the negated operand for the unary overload.
    */
   template <class OperatorType, class VectorType, class LHSScalar>
   auto operator-(const ProblemBody<OperatorType, VectorType, LHSScalar>& pb,
@@ -1230,7 +1626,12 @@ namespace Rodin::Variational
     return res;
   }
 
-  /** @brief Subtracts an owned snapshot of a preassembled bilinear form. */
+  /**
+   * @brief Subtracts an owned snapshot of a preassembled bilinear form.
+   * @param pb Problem body to extend.
+   * @param bf Preassembled bilinear form whose negated snapshot is appended.
+   * @returns Extended problem body owning the negated bilinear form.
+   */
   template <class Operator, class Vector, class Scalar>
     requires requires(Operator& op) { op *= -1; }
   auto operator-(
@@ -1243,7 +1644,12 @@ namespace Rodin::Variational
     return res;
   }
 
-  /** @brief Adds a preassembled linear form to the residual, hence negates its load. */
+  /**
+   * @brief Adds a preassembled linear form to the residual, hence negates its load.
+   * @param pb Problem body to extend.
+   * @param lf Preassembled linear form whose negated load snapshot is appended.
+   * @returns Extended problem body owning the negated load.
+   */
   template <class Operator, class Vector, class Scalar>
     requires requires(Vector& vec) { vec *= -1; }
   auto operator+(
@@ -1256,6 +1662,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Combines linear integrators with a local bilinear integrator.
+   * @param lfis Linear integrators.
+   * @param bfi Local bilinear integrator.
+   * @returns Problem body owning copies of the supplied terms.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator+(
       const FormLanguage::List<LinearFormIntegratorBase<LHSScalar>>& lfis,
@@ -1270,6 +1682,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param lfis Linear form integrators.
+   * @param bfi Bilinear form integrator.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class LHSScalar, class RHSScalar>
   auto operator-(
       const FormLanguage::List<LinearFormIntegratorBase<LHSScalar>>& lfis,
@@ -1284,6 +1702,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Adds variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param bfis Bilinear form integrators.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class Operator, class Vector, class LHSScalar, class RHSScalar>
   auto operator+(
       const ProblemBody<Operator, Vector, LHSScalar>& pb,
@@ -1297,6 +1721,12 @@ namespace Rodin::Variational
     return res;
   }
 
+  /**
+   * @brief Subtracts variational terms to construct a problem body.
+   * @param pb Problem body to extend.
+   * @param bfis Bilinear form integrators.
+   * @returns Problem body owning the supplied terms with their algebraic signs.
+   */
   template <class Operator, class Vector, class LHSScalar, class RHSScalar>
   auto operator-(
       const ProblemBody<Operator, Vector, LHSScalar>& pb,

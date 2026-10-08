@@ -26,6 +26,7 @@ namespace
       typename FormLanguage::Traits<FES>::RangeType value(
         fes.getRows(), fes.getColumns());
       for (size_t r = 0; r < fes.getRows(); ++r)
+      {
         for (size_t c = 0; c < fes.getColumns(); ++c)
         {
           using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
@@ -33,6 +34,7 @@ namespace
           if constexpr (std::is_same_v<Scalar, Complex>)
             value(r, c) += Complex(0, 2 + r - Real(c));
         }
+      }
       return value;
     };
     const std::string filename = "/tmp/rodin_matrix_field.h5";
@@ -49,8 +51,10 @@ namespace
     field = [&](const Point& p) {
       Math::SpatialMatrix<Real> value(fes.getRows(), fes.getColumns());
       for (size_t r = 0; r < fes.getRows(); ++r)
+      {
         for (size_t c = 0; c < fes.getColumns(); ++c)
           value(r, c) = 1 + 7 * r + c + p.x();
+      }
       return value;
     };
     std::stringstream stream;
@@ -112,8 +116,10 @@ TEST(SpatialMatrixIO, MFEMUsesScalarNodePermutations)
       : D == 2         ? LocalMesh::UniformGrid(geometry, {2, 2})
                        : LocalMesh::UniformGrid(geometry, {2, 2, 2});
     for (size_t d = 1; d <= D; ++d)
+    {
       for (size_t lower = 0; lower < d; ++lower)
         mesh.getConnectivity().compute(d, lower);
+    }
     checkVertexFormat(P0(mesh, 2, 3), FileFormat::MFEM);
     checkVertexFormat(P1(mesh, 2, 3), FileFormat::MFEM);
     checkVertexFormat(
@@ -135,8 +141,10 @@ TEST(SpatialMatrixIO, XDMFShapeAndNonsymmetricEntries)
     GridFunction field(fes);
     Math::SpatialMatrix<Real> value(r, c);
     for (size_t i = 0; i < r; ++i)
+    {
       for (size_t j = 0; j < c; ++j)
         value(i, j) = 1 + 7 * i + j;
+    }
     field = value;
     const boost::filesystem::path dir = "/tmp/rodin_matrix_xdmf";
     boost::filesystem::remove_all(dir);

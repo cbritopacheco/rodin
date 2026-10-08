@@ -54,11 +54,13 @@ namespace Rodin::PETSc
 
       /**
        * @brief Returns a read-only reference to the underlying PETSc handle.
+       * @returns A read-only reference to the underlying PETSc handle.
        */
       virtual const Handle& getHandle() const noexcept = 0;
 
       /**
        * @brief Returns a mutable reference to the underlying PETSc handle.
+       * @returns A mutable reference to the underlying PETSc handle.
        */
       virtual Handle& getHandle() noexcept = 0;
   };

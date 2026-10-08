@@ -122,7 +122,11 @@ namespace Rodin::Variational
         return *m_v;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);
@@ -143,9 +147,11 @@ namespace Rodin::Variational
 
   /**
    * @brief Deduction guide for Frobenius norm.
+   * @param v Function to compute the norm of
    */
   template <class NestedDerived>
-  Frobenius(const FunctionBase<NestedDerived>&) -> Frobenius<FunctionBase<NestedDerived>>;
+  Frobenius(
+    const FunctionBase<NestedDerived>& v) -> Frobenius<FunctionBase<NestedDerived>>;
 }
 
 #endif

@@ -62,8 +62,10 @@ namespace Rodin::Tests::Convergence::LinearElasticity
             }
             Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
             for (size_t i = 0; i < dim; ++i)
+            {
               value(i) = -std::exp(exponent) *
                 (mu * Real(dim) * Real(i + 1) + (lambda + mu) * coefficientSum);
+            }
             return value;
           })
       {}
@@ -76,8 +78,10 @@ namespace Rodin::Tests::Convergence::LinearElasticity
         Math::SpatialMatrix<Real> value(
           static_cast<std::uint8_t>(m_dim), static_cast<std::uint8_t>(m_dim));
         for (size_t i = 0; i < m_dim; ++i)
+        {
           for (size_t j = 0; j < m_dim; ++j)
             value(i, j) = Real(i + 1) * std::exp(exponent);
+        }
         return value;
       }
 

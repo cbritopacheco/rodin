@@ -104,7 +104,11 @@ namespace Rodin::Variational
         return Math::sqrt(this->getOperand().getValue(p));
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);
@@ -133,12 +137,17 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
-  /// @brief Deduction guide for @c Sqrt.
+  /**
+   * @brief Deduction guide for @c Sqrt.
+   * @param v Function to take square root of (must be non-negative)
+   */
   template <class NestedDerived>
-  Sqrt(const FunctionBase<NestedDerived>&) -> Sqrt<FunctionBase<NestedDerived>>;
+  Sqrt(const FunctionBase<NestedDerived>& v) -> Sqrt<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Helper function to construct objects of type Sqrt.
+   * @param f Function operand.
+   * @returns Pointwise square-root expression.
    */
   template <class NestedDerived>
   auto sqrt(const FunctionBase<NestedDerived>& f)

@@ -33,7 +33,17 @@ namespace Rodin::Adaptation::Detail
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
-      /// @brief Constructs the WNGIR observation coefficient.
+      /**
+       * @brief Constructs the WNGIR observation coefficient.
+       * @param locator Point locator used to find mesh entities.
+       * @param parameters Parameters configuring the operation.
+       * @param normalization Normalization factor.
+       * @param phi Observation field.
+       * @param grad Gradient of the observation field.
+       * @param current Current displacement field.
+       * @param sigma2 Variance used to scale the observation residual.
+       * @param dimension Spatial dimension.
+       */
       WNGIRObservationCoefficient(const PhiType& phi, const GradType& grad,
         const Displacement& current, const LocatorType& locator,
         const WNGIRParameters& parameters, Real sigma2, Real normalization,
@@ -47,7 +57,10 @@ namespace Rodin::Adaptation::Detail
           m_dimension(dimension)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       WNGIRObservationCoefficient(const WNGIRObservationCoefficient& other)
         : Parent(other),
           m_phi(other.m_phi->copy()),
@@ -59,7 +72,11 @@ namespace Rodin::Adaptation::Detail
           m_dimension(other.m_dimension)
       {}
 
-      /// @brief Evaluates the coefficient at a point.
+      /**
+       * @brief Evaluates the coefficient at a point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
         const auto& params = m_parameters.get();
@@ -78,25 +95,39 @@ namespace Rodin::Adaptation::Detail
         return m;
       }
 
-      /// @brief Number of rows of the matrix value.
+      /**
+       * @brief Number of rows of the matrix value.
+       * @returns The rows.
+       */
       std::size_t getRows() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Number of columns of the matrix value.
+      /**
+       * @brief Number of columns of the matrix value.
+       * @returns The columns.
+       */
       std::size_t getColumns() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Reports no intrinsic polynomial order.
-      Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Reports no intrinsic polynomial order.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      Optional<std::size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
 
-      /// @brief Clones this object.
+      /**
+       * @brief Clones this object.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       WNGIRObservationCoefficient* copy() const noexcept override
       {
         return new WNGIRObservationCoefficient(*this);
@@ -111,11 +142,24 @@ namespace Rodin::Adaptation::Detail
       Real m_normalization;
       std::size_t m_dimension;
   };
+  /**
+   * @brief Deduction guide for WNGIRObservationCoefficient.
+   * @param phi Observation field.
+   * @param grad Gradient of the observation field.
+   * @param current Current displacement field.
+   * @param locator Point locator used to find mesh entities.
+   * @param parameters Parameters configuring the operation.
+   * @param sigma2 Variance used to scale the observation residual.
+   * @param normalization Normalization factor.
+   * @param dimension Spatial dimension.
+   */
 
   template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
-  WNGIRObservationCoefficient(const Variational::RealFunctionBase<PhiDerived>&,
-    const Variational::VectorFunctionBase<Real, GradDerived>&, const Displacement&,
-    const LocatorType&, const WNGIRParameters&, Real, Real, std::size_t)
+  WNGIRObservationCoefficient(const Variational::RealFunctionBase<PhiDerived>& phi,
+    const Variational::VectorFunctionBase<Real, GradDerived>& grad,
+    const Displacement& current, const LocatorType& locator,
+    const WNGIRParameters& parameters, Real sigma2, Real normalization,
+    std::size_t dimension)
     -> WNGIRObservationCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>;
 }
 

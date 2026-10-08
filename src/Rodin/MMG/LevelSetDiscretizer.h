@@ -56,9 +56,7 @@ namespace Rodin::MMG
   class LevelSetDiscretizer : public MMG5
   {
     public:
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       LevelSetDiscretizer()
         : m_ls(0.0),
           m_meshTheSurface(false)

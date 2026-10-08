@@ -154,7 +154,9 @@ namespace Rodin::Tests::Benchmarks
   {
     const char* kinds[] = {"Mass", "Diffusion", "Helmholtz", "VectorMass", "Elasticity"};
     for (size_t coefficient = 0; coefficient < 2; ++coefficient)
+    {
       for (size_t first = 0; first < 2; ++first)
+      {
         for (size_t integral = 0; integral < 2; ++integral)
         {
           const std::string name = "NamedEvaluation/P" + std::to_string(Order) + "/" +
@@ -170,6 +172,8 @@ namespace Rodin::Tests::Benchmarks
             ->ArgNames({"dimension", "first", "integral"})
             ->Unit(benchmark::kMillisecond);
         }
+      }
+    }
   }
 
   const bool registeredEvaluation = [] {

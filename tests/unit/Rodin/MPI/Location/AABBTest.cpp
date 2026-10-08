@@ -129,8 +129,10 @@ namespace
       Point sample(*parent.getPolytope(d, 0), rc);
       expected = sample.getPhysicalCoordinates();
       for (size_t j = 0; j < d; ++j)
+      {
         for (size_t i = 0; i < parent.getSpaceDimension(); ++i)
           expectedJacobian.push_back(sample.getJacobian()(i, j));
+      }
       if (d == 0)
       {
         // The cell sharder requires positive-dimensional cells. Distribute
@@ -180,9 +182,13 @@ namespace
       {
         EXPECT_LT((sample.getPhysicalCoordinates() - expected).norm(), 1e-12);
         for (size_t j = 0; j < d; ++j)
+        {
           for (size_t i = 0; i < mesh.getSpaceDimension(); ++i)
+          {
             EXPECT_NEAR(sample.getJacobian()(i, j),
               expectedJacobian[j * mesh.getSpaceDimension() + i], 1e-12);
+          }
+        }
       }
       // Field evaluation must accept the lifted point and use local entity IDs.
       Variational::P0<Real, MPIMesh> space(mesh);
@@ -284,8 +290,10 @@ TEST(MPI_Location_AABB, SharedBoundaryAndDimensionSpecificOwnership)
       builder.setOwner(0, i, owner);
     else
       for (int r = 0; r < world->size(); ++r)
+      {
         if (r != owner)
           builder.halo(0, i, r);
+      }
   }
   for (Index c = 0; c < 2; ++c)
   {
@@ -296,8 +304,10 @@ TEST(MPI_Location_AABB, SharedBoundaryAndDimensionSpecificOwnership)
       builder.setOwner(1, i, owner);
     else
       for (int r = 0; r < world->size(); ++r)
+      {
         if (r != owner)
           builder.halo(1, i, r);
+      }
   }
   auto mesh = MPIMesh::Builder(context).initialize(builder.finalize()).finalize();
   Location::AABB locator(mesh);

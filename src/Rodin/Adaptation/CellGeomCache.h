@@ -83,6 +83,8 @@ namespace Rodin::Adaptation
    * branch sign sigma_K(xhat_q) is inconsistent across quadrature points
    * (which would mean a curved or inverted element; this 2D affine
    * prototype rejects them).
+   * @param mesh Mesh on which the object is defined.
+   * @returns Cell geometry caches and the map from cell indices to cache positions.
    */
   inline std::pair<std::vector<CellGeomCache>, std::unordered_map<Index, size_t>>
   precomputeCellGeometry(const Geometry::Mesh<Rodin::Context::Local>& mesh)

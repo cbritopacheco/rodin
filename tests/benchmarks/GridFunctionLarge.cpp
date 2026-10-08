@@ -85,8 +85,10 @@ namespace Rodin::Tests::Benchmarks
               m_setupError = std::max(m_setupError, std::abs(value - analytic(p)));
             else
               for (size_t d = 0; d < m_dimension; ++d)
+              {
                 m_setupError =
                   std::max(m_setupError, std::abs(value(d) - (d + 1) * analytic(p)));
+              }
           }
         }
       }
@@ -232,6 +234,7 @@ namespace Rodin::Tests::Benchmarks
   const bool registeredLargeInterpolation = [] {
     const char* workloads[] = {"SlowSweep", "Mixed75", "FastBlocks", "PureHit"};
     for (size_t workload = 0; workload < 4; ++workload)
+    {
       for (size_t alternative = 0; alternative < 2; ++alternative)
       {
         const std::string suffix = std::string(workloads[workload]) +
@@ -255,6 +258,7 @@ namespace Rodin::Tests::Benchmarks
           benchmark::RegisterBenchmark(("LargeInterpolation/P2Vector/" + suffix).c_str(),
             &largeInterpolation<2, true>));
       }
+    }
     return true;
   }();
   /// @endcond

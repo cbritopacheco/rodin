@@ -96,32 +96,52 @@ namespace Rodin::Variational
       constexpr
       FiniteElementSpaceBase() = default;
 
-      /// @brief Copy constructor.
-      constexpr
-      FiniteElementSpaceBase(const FiniteElementSpaceBase&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpaceBase(const FiniteElementSpaceBase& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      FiniteElementSpaceBase(FiniteElementSpaceBase&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpaceBase(FiniteElementSpaceBase&& other) = default;
 
-      /// @brief Move assignment.
-      constexpr
-      FiniteElementSpaceBase& operator=(FiniteElementSpaceBase&&) = default;
+      /**
+       * @brief Move assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpaceBase& operator=(
+        FiniteElementSpaceBase&& other) = default;
 
-      /// @brief Copy assignment.
-      constexpr
-      FiniteElementSpaceBase& operator=(const FiniteElementSpaceBase&) = default;
+      /**
+       * @brief Copy assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpaceBase& operator=(
+        const FiniteElementSpaceBase& other) = default;
 
       virtual ~FiniteElementSpaceBase() = default;
 
-      /// @brief Equality comparison.
+      /**
+       * @brief Equality comparison.
+       * @param other Other operand.
+       * @returns Whether the operands compare equal.
+       */
       constexpr
       bool operator==(const FiniteElementSpaceBase& other) const
       {
         return this == &other;
       }
 
-      /// @brief Inequality comparison.
+      /**
+       * @brief Inequality comparison.
+       * @param other Other operand.
+       * @returns Whether the operands compare unequal.
+       */
       constexpr
       bool operator!=(const FiniteElementSpaceBase& other) const
       {
@@ -184,6 +204,7 @@ namespace Rodin::Variational
        * @f$ (d, i) @f$-polytope.
        * @param[in] idx Pair representing the @f$ (d, i) @f$-polytope.
        * @param[in] local Local degree of freedom index.
+       * @returns The global index for the local degree of freedom on the @f$ (d, i) @f$-polytope.
        */
       virtual Index getGlobalIndex(const std::pair<size_t, Index>& idx, Index local) const
       {
@@ -192,9 +213,7 @@ namespace Rodin::Variational
       }
   };
 
-  /**
-   * @brief Represernts a finite element space.
-   */
+  /// @brief Represernts a finite element space.
   template <class Mesh, class Derived>
   class FiniteElementSpace : public FiniteElementSpaceBase
   {
@@ -208,25 +227,38 @@ namespace Rodin::Variational
       constexpr
       FiniteElementSpace() = default;
 
-      /// @brief Copy constructor.
-      constexpr
-      FiniteElementSpace(const FiniteElementSpace&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpace(const FiniteElementSpace& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      FiniteElementSpace(FiniteElementSpace&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpace(FiniteElementSpace&& other) = default;
 
-      /// @brief Move assignment.
-      constexpr
-      FiniteElementSpace& operator=(FiniteElementSpace&&) = default;
+      /**
+       * @brief Move assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpace& operator=(FiniteElementSpace&& other) = default;
 
-      /// @brief Copy assignment.
-      constexpr
-      FiniteElementSpace& operator=(const FiniteElementSpace&) = default;
+      /**
+       * @brief Copy assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpace& operator=(const FiniteElementSpace& other) = default;
 
       virtual ~FiniteElementSpace() = default;
 
-      /// @brief Gets the underlying mesh.
+      /**
+       * @brief Gets the underlying mesh.
+       * @returns The underlying mesh.
+       */
       const Mesh& getMesh() const override
       {
         return static_cast<const Derived&>(*this).getMesh();
@@ -234,6 +266,9 @@ namespace Rodin::Variational
 
       /**
        * @note CRTP function to be overriden in Derived class.
+       * @param i Index of the requested entry.
+       * @returns The finite element.
+       * @param d Topological dimension of the entity.
        */
       decltype(auto) getFiniteElement(size_t d, Index i) const
       {
@@ -248,6 +283,7 @@ namespace Rodin::Variational
        * @param[in] v Function defined on an element of the mesh
        *
        * @note CRTP function to be overriden in Derived class.
+       * @returns The mapping of the function from the physical element to the reference element.
        */
       template <class Callable>
       decltype(auto) getPullback(const std::pair<size_t, Index>& p, const Callable& v) const
@@ -257,6 +293,9 @@ namespace Rodin::Variational
 
       /**
        * @note CRTP function to be overriden in Derived class.
+       * @param idx Index of the requested entry.
+       * @returns The pushforward.
+       * @param v Operand expression.
        */
       template <class CallableType>
       decltype(auto) getPushforward(const std::pair<size_t, Index>& idx, const CallableType& v) const
@@ -327,21 +366,35 @@ namespace Rodin::Variational
       constexpr
       FiniteElementSpacePullbackBase() = default;
 
-      /// @brief Copy constructor.
-      constexpr
-      FiniteElementSpacePullbackBase(const FiniteElementSpacePullbackBase&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpacePullbackBase(
+        const FiniteElementSpacePullbackBase& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      FiniteElementSpacePullbackBase(FiniteElementSpacePullbackBase&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpacePullbackBase(
+        FiniteElementSpacePullbackBase&& other) = default;
 
-      /// @brief Move assignment.
-      constexpr
-      FiniteElementSpacePullbackBase& operator=(FiniteElementSpacePullbackBase&&) = default;
+      /**
+       * @brief Move assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpacePullbackBase& operator=(
+        FiniteElementSpacePullbackBase&& other) = default;
 
-      /// @brief Copy assignment.
-      constexpr
-      FiniteElementSpacePullbackBase& operator=(const FiniteElementSpacePullbackBase&) = default;
+      /**
+       * @brief Copy assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpacePullbackBase& operator=(
+        const FiniteElementSpacePullbackBase& other) = default;
 
       virtual ~FiniteElementSpacePullbackBase() = default;
 
@@ -356,6 +409,8 @@ namespace Rodin::Variational
        * on the reference coordinates @f$ r \in K @f$.
        *
        * @note CRTP function to be overriden in Derived class.
+       * @returns Value of the expression at the supplied evaluation point.
+       * @param r Reference coordinates at which to evaluate the basis.
        */
       auto operator()(const Math::SpatialVector<Real>& r) const
       {
@@ -386,21 +441,35 @@ namespace Rodin::Variational
       constexpr
       FiniteElementSpacePushforwardBase() = default;
 
-      /// @brief Copy constructor.
-      constexpr
-      FiniteElementSpacePushforwardBase(const FiniteElementSpacePushforwardBase&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpacePushforwardBase(
+        const FiniteElementSpacePushforwardBase& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      FiniteElementSpacePushforwardBase(FiniteElementSpacePushforwardBase&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpacePushforwardBase(
+        FiniteElementSpacePushforwardBase&& other) = default;
 
-      /// @brief Move assignment.
-      constexpr
-      FiniteElementSpacePushforwardBase& operator=(FiniteElementSpacePushforwardBase&&) = default;
+      /**
+       * @brief Move assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      constexpr FiniteElementSpacePushforwardBase& operator=(
+        FiniteElementSpacePushforwardBase&& other) = default;
 
-      /// @brief Copy assignment.
-      constexpr
-      FiniteElementSpacePushforwardBase& operator=(const FiniteElementSpacePushforwardBase&) = default;
+      /**
+       * @brief Copy assignment.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      constexpr FiniteElementSpacePushforwardBase& operator=(
+        const FiniteElementSpacePushforwardBase& other) = default;
 
       virtual ~FiniteElementSpacePushforwardBase() = default;
 
@@ -415,6 +484,8 @@ namespace Rodin::Variational
        * on the physical coordinates @f$ p \in \tau @f$.
        *
        * @note CRTP function to be overriden in Derived class.
+       * @param pc Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       auto operator()(const Geometry::Point& pc) const
       {

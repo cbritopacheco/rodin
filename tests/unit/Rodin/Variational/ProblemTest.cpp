@@ -84,9 +84,13 @@ TEST(Rodin_Variational_Problem, PreassembledFormSignsP1P2P3SparseAndDense)
   const auto check = []<size_t Order, class Matrix>() {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
     for (size_t from = 0; from <= 2; ++from)
+    {
       for (size_t to = 0; to <= 2; ++to)
+      {
         if (from != to)
           mesh.getConnectivity().compute(from, to);
+      }
+    }
     H1 fes(std::integral_constant<size_t, Order>{}, mesh);
     TrialFunction u(fes);
     TestFunction v(fes);
@@ -166,9 +170,13 @@ TEST(Rodin_Variational_Problem, CompoundAssignmentMatchesBodyP1P2P3)
   const auto check = []<size_t Order>() {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
     for (size_t from = 0; from <= 2; ++from)
+    {
       for (size_t to = 0; to <= 2; ++to)
+      {
         if (from != to)
           mesh.getConnectivity().compute(from, to);
+      }
+    }
     H1 fes(std::integral_constant<size_t, Order>{}, mesh);
     TrialFunction u(fes);
     TestFunction v(fes);

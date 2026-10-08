@@ -95,9 +95,7 @@ namespace Rodin::Geometry
       virtual const IndexVector& getIncidence(const std::pair<size_t, size_t> p, Index idx) const = 0;
   };
 
-  /**
-   * @brief Type alias for sequential (non-distributed) connectivity.
-   */
+  /// @brief Type alias for sequential (non-distributed) connectivity.
   using SequentialConnectivity = Connectivity<Context::Local>;
 
   /**
@@ -292,9 +290,11 @@ namespace Rodin::Geometry
           /**
            * @brief Serialization save method.
            * @param[in,out] ar Archive object
+           * @param version Boost.Serialization class version; unused by this implementation.
            */
           template <class Archive>
-          void save(Archive& ar, const unsigned int /*version*/) const
+          void save(
+            Archive& ar, [[maybe_unused]] const unsigned int /*version*/ version) const
           {
             ar & right;
             std::vector<Polytope::Key> leftKeys;
@@ -307,9 +307,10 @@ namespace Rodin::Geometry
           /**
            * @brief Serialization load method.
            * @param[in,out] ar Archive object
+           * @param version Boost.Serialization class version; unused by this implementation.
            */
           template <class Archive>
-          void load(Archive& ar, const unsigned int /*version*/)
+          void load(Archive& ar, [[maybe_unused]] const unsigned int /*version*/ version)
           {
             ar & right;
             std::vector<Polytope::Key> leftKeys;
@@ -327,18 +328,14 @@ namespace Rodin::Geometry
           BOOST_SERIALIZATION_SPLIT_MEMBER()
       };
 
-      /**
-       * @brief Represents a sub-polytope (lower-dimensional face).
-       */
+      /// @brief Represents a sub-polytope (lower-dimensional face).
       struct SubPolytope
       {
         Polytope::Type geometry;  ///< Geometry type of the sub-polytope
         Polytope::Key vertices;    ///< Vertex indices defining the sub-polytope
       };
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       Connectivity();
 
       /**
@@ -393,9 +390,7 @@ namespace Rodin::Geometry
         return *this;
       }
 
-      /**
-       * @brief Move assignment operator.
-       */
+      /// @brief Move assignment operator.
       Connectivity& operator=(Connectivity&&) = default;
 
       /**
@@ -706,9 +701,7 @@ namespace Rodin::Geometry
        */
       Connectivity& setDirty(size_t d, size_t dp, bool dirty = true);
 
-      /**
-       * @brief Returns the maximal polytope dimension present in this connectivity.
-       */
+      /// @brief Returns the maximal polytope dimension present in this connectivity.
       size_t getMaximalDimension() const;
 
       /**

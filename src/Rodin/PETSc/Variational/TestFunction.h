@@ -58,6 +58,7 @@ namespace Rodin::PETSc::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for PETSc::Variational::TestFunction.
+   * @param fes Finite element space.
    */
   template <class FES>
   TestFunction(const FES& fes) -> TestFunction<FES>;

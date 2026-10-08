@@ -26,9 +26,7 @@ namespace Rodin::Heart
     Scalar J4 = Scalar(0); ///< Fiber reduced invariant.
   };
 
-  /**
-   * @brief First derivatives of passive-energy density with respect to reduced invariants.
-   */
+  /// @brief First derivatives of passive-energy density with respect to reduced invariants.
   template <class Scalar>
   struct ReducedInvariantGradient
   {
@@ -37,9 +35,7 @@ namespace Rodin::Heart
     Scalar dW_dJ4 = Scalar(0); ///< @f$ \partial W / \partial J_4 @f$.
   };
 
-  /**
-   * @brief Second derivatives of passive-energy density with respect to reduced invariants.
-   */
+  /// @brief Second derivatives of passive-energy density with respect to reduced invariants.
   template <class Scalar>
   struct ReducedInvariantHessian
   {
@@ -51,9 +47,7 @@ namespace Rodin::Heart
     Scalar d2W_dJ4dJ4 = Scalar(0); ///< @f$ \partial^2 W / \partial J_4^2 @f$.
   };
 
-  /**
-   * @brief Bundle of gradient and Hessian for passive-energy derivatives.
-   */
+  /// @brief Bundle of gradient and Hessian for passive-energy derivatives.
   template <class Scalar>
   struct PassiveEnergyDerivatives
   {

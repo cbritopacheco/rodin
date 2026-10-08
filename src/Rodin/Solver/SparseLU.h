@@ -72,9 +72,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD (Class Template Argument Deduction) guide for SparseLU
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  SparseLU(Variational::ProblemBase<LinearSystem>&) -> SparseLU<LinearSystem>;
+  SparseLU(Variational::ProblemBase<LinearSystem>& pb) -> SparseLU<LinearSystem>;
 
   /**
    * @ingroup SparseLUSpecializations
@@ -171,7 +172,10 @@ namespace Rodin::Solver
         record();
       }
 
-      /// @brief Returns the diagnostic of the most recent failure, if any.
+      /**
+       * @brief Returns the diagnostic of the most recent failure, if any.
+       * @returns The diagnostic of the most recent failure, if any.
+       */
       std::string getLastErrorMessage() const
       {
         return m_solver.lastErrorMessage();
@@ -182,6 +186,7 @@ namespace Rodin::Solver
        *
        * Updated by every factorization and every solve, so a caller reads it
        * after the call it wants to check.
+       * @returns The outcome of the most recent operation.
        */
       const Info& getInfo() const noexcept
       {
@@ -207,7 +212,10 @@ namespace Rodin::Solver
       }
 
     private:
-      /// @brief Records the Eigen status, and returns whether it succeeded.
+      /**
+       * @brief Records the Eigen status, and returns whether it succeeded.
+       * @returns True if the Eigen solver reports success; false otherwise.
+       */
       Boolean record()
       {
         m_info.status = static_cast<Integer>(m_solver.info());

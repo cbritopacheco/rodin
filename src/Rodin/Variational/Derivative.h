@@ -49,8 +49,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Derivative over a shape function: exposes the shape
-  /// function space, the finite element space, the scalar type and the operand type.
+  /**
+   * @brief Type traits for @c Derivative over a shape function: exposes the shape
+   * function space, the finite element space, the scalar type and the operand type.
+   */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::Derivative<Variational::ShapeFunction<NestedDerived, FES, Space>>>
   {
@@ -115,7 +117,10 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ScalarFunctionBase<ScalarType, DerivativeBase<OperandType, Derived>>;
 
-      /// @brief Constructs the expression from its operand.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       DerivativeBase(const OperandType& u)
         : m_u(u)
       {
@@ -124,6 +129,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor
+       * @param other Object to copy from.
        */
       DerivativeBase(const DerivativeBase& other)
         : Parent(other),
@@ -132,13 +138,17 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor
+       * @param other Object to move from.
        */
       DerivativeBase(DerivativeBase&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u))
       {}
 
-      /// @brief Gets the topological dimension.
+      /**
+       * @brief Gets the topological dimension.
+       * @returns The topological dimension.
+       */
       constexpr
       size_t getDimension() const
       {
@@ -152,6 +162,8 @@ namespace Rodin::Variational
        * Resolves mesh ownership and dispatches to the derived class's
        * @c interpolate. Falls back to inclusion / submesh restriction
        * when the polytope's mesh is not the FES mesh.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       ScalarType getValue(const Geometry::Point& p) const
       {
@@ -186,6 +198,8 @@ namespace Rodin::Variational
        * If the polytope is owned by the FES mesh, dispatches to
        * @c interpolate(out, ip). Otherwise falls back to inclusion / submesh
        * restriction.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       ScalarType getValue(const IntegrationPoint& ip) const
       {
@@ -220,6 +234,8 @@ namespace Rodin::Variational
 
       /**
        * @brief Interpolation function to be overriden in Derived type.
+       * @param out Storage for the computed result.
+       * @param p Point at which the operation is evaluated.
        */
       constexpr
       void interpolate(ScalarType& out, const Geometry::Point& p) const
@@ -227,7 +243,11 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
-      /// @brief Interpolates at an integration point.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       constexpr
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
@@ -237,7 +257,10 @@ namespace Rodin::Variational
           static_cast<const Derived&>(*this).interpolate(out, ip.getPoint());
       }
 
-      /// @brief Gets the operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       constexpr
       const OperandType& getOperand() const
       {
@@ -246,6 +269,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy function to be overriden in Derived type.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
       DerivativeBase* copy() const noexcept override
       {
@@ -278,49 +302,72 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = ShapeFunctionBase<Derivative<OperandType>, FESType, Space>;
 
-      /// @brief Constructs the partial derivative of an operand along a direction.
+      /**
+       * @brief Constructs the partial derivative of an operand along a direction.
+       * @param i Index of the requested entry.
+       * @param u Operand expression.
+       */
       Derivative(size_t i, const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_i(i),
           m_u(u)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Derivative(const Derivative& other)
         : Parent(other),
           m_i(other.m_i),
           m_u(other.m_u)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Derivative(Derivative&& other)
         : Parent(std::move(other)),
           m_i(other.m_i),
           m_u(std::move(other.m_u))
       {}
 
-      /// @brief Gets the operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Gets the operand in the shape function expression.
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
@@ -343,7 +390,11 @@ namespace Rodin::Variational
       //   return *this;
       // }
 
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       decltype(auto) getBasis(size_t local) const
       {
         return m_gradients[local](m_i);
@@ -363,7 +414,11 @@ namespace Rodin::Variational
       std::vector<Math::SpatialVector<Real>> m_gradients;
   };
 
-  /// @brief Deduction guide for @c Derivative.
+  /**
+   * @brief Deduction guide for @c Derivative.
+   * @param i Index of the requested entry.
+   * @param u Shape-function operand.
+   */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType SpaceType>
   Derivative(size_t i, const ShapeFunction<NestedDerived, FES, SpaceType>& u)
     -> Derivative<ShapeFunction<NestedDerived, FES, SpaceType>>;
@@ -377,6 +432,7 @@ namespace Rodin::Variational
    * @f$
    *   \dfrac{\partial u}{\partial x}
    * @f$
+   * @returns Expression for the derivative in the first coordinate direction.
    */
   template <class Operand>
   auto Dx(const Operand& u)
@@ -393,6 +449,7 @@ namespace Rodin::Variational
    * @f$
    *   \dfrac{\partial u}{\partial y}
    * @f$
+   * @returns Expression for the derivative in the second coordinate direction.
    */
   template <class Operand>
   auto Dy(const Operand& u)
@@ -409,6 +466,7 @@ namespace Rodin::Variational
    * @f$
    *   \dfrac{\partial u}{\partial z}
    * @f$
+   * @returns Expression for the derivative in the third coordinate direction.
    */
   template <class Operand>
   auto Dz(const Operand& u)
@@ -467,29 +525,46 @@ namespace Rodin::Variational
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
-      /// @brief Constructs a derivative along the selected ambient coordinate.
+      /**
+       * @brief Constructs a derivative along the selected ambient coordinate.
+       * @param direction Direction in which the derivative is evaluated.
+       * @param operand Operand expression.
+       */
       Derivative(size_t direction, const OperandType& operand)
         : m_gradient(operand),
           m_direction(direction)
       {}
-      /// @brief Constructs a derivative along the selected ambient coordinate.
+      /**
+       * @brief Constructs a derivative along the selected ambient coordinate.
+       * @param other Object to copy from.
+       */
       Derivative(const Derivative& other)
         : Parent(other),
           m_gradient(other.m_gradient),
           m_direction(other.m_direction)
       {}
-      /// @brief Constructs a derivative along the selected ambient coordinate.
+      /**
+       * @brief Constructs a derivative along the selected ambient coordinate.
+       * @param other Object to move from.
+       */
       Derivative(Derivative&& other)
         : Parent(std::move(other)),
           m_gradient(std::move(other.m_gradient)),
           m_direction(other.m_direction)
       {}
-      /// @brief Returns the differentiated or indexed operand.
+      /**
+       * @brief Returns the differentiated or indexed operand.
+       * @returns The differentiated or indexed operand.
+       */
       const OperandType& getOperand() const
       {
         return m_gradient.getOperand();
       }
-      /// @brief Evaluates the expression at the supplied physical or integration point.
+      /**
+       * @brief Evaluates the expression at the supplied physical or integration point.
+       * @param point Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       template <class Point>
       RangeType getValue(const Point& point) const
       {
@@ -502,11 +577,17 @@ namespace Rodin::Variational
             << Alert::Raise;
         RangeType value(gradient.getDimension(0), gradient.getDimension(1));
         for (size_t row = 0; row < value.rows(); ++row)
+        {
           for (size_t col = 0; col < value.cols(); ++col)
             value(row, col) = gradient(row, col, m_direction);
+        }
         return value;
       }
-      /// @brief Returns the polynomial order when it is known.
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return m_gradient.getOrder(poly);
@@ -540,51 +621,82 @@ namespace Rodin::Variational
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
-      /// @brief Constructs a derivative along the selected ambient coordinate.
+      /**
+       * @brief Constructs a derivative along the selected ambient coordinate.
+       * @param direction Direction in which the derivative is evaluated.
+       * @param operand Operand expression.
+       */
       Derivative(size_t direction, const OperandType& operand)
         : Parent(operand.getFiniteElementSpace()),
           m_gradient(operand),
           m_direction(direction)
       {}
-      /// @brief Constructs a derivative along the selected ambient coordinate.
+      /**
+       * @brief Constructs a derivative along the selected ambient coordinate.
+       * @param other Object to copy from.
+       */
       Derivative(const Derivative& other)
         : Parent(other),
           m_gradient(other.m_gradient),
           m_direction(other.m_direction)
       {}
-      /// @brief Constructs a derivative along the selected ambient coordinate.
+      /**
+       * @brief Constructs a derivative along the selected ambient coordinate.
+       * @param other Object to move from.
+       */
       Derivative(Derivative&& other)
         : Parent(std::move(other)),
           m_gradient(std::move(other.m_gradient)),
           m_direction(other.m_direction)
       {}
-      /// @brief Returns the differentiated or indexed operand.
+      /**
+       * @brief Returns the differentiated or indexed operand.
+       * @returns The differentiated or indexed operand.
+       */
       const OperandType& getOperand() const
       {
         return m_gradient.getOperand();
       }
-      /// @brief Returns the leaf shape function used for assembly.
+      /**
+       * @brief Returns the leaf shape function used for assembly.
+       * @returns The leaf shape function used for assembly.
+       */
       const auto& getLeaf() const
       {
         return m_gradient.getLeaf();
       }
-      /// @brief Returns the local basis count for the selected polytope.
+      /**
+       * @brief Returns the local basis count for the selected polytope.
+       * @param poly Mesh entity used by this operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       size_t getDOFs(const Geometry::Polytope& poly) const
       {
         return m_gradient.getDOFs(poly);
       }
-      /// @brief Returns the currently bound integration point.
+      /**
+       * @brief Returns the currently bound integration point.
+       * @returns The currently bound integration point.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_gradient.getIntegrationPoint();
       }
-      /// @brief Binds the integration point and prepares local basis values.
+      /**
+       * @brief Binds the integration point and prepares local basis values.
+       * @param point Point at which the operation is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Derivative& setIntegrationPoint(const IntegrationPoint& point)
       {
         m_gradient.setIntegrationPoint(point);
         return *this;
       }
-      /// @brief Returns a basis value at the bound integration point.
+      /**
+       * @brief Returns a basis value at the bound integration point.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       RangeType getBasis(size_t local) const
       {
         const auto gradient = m_gradient.getBasis(local);
@@ -594,11 +706,17 @@ namespace Rodin::Variational
             << Alert::Raise;
         RangeType value(gradient.getDimension(0), gradient.getDimension(1));
         for (size_t row = 0; row < value.rows(); ++row)
+        {
           for (size_t col = 0; col < value.cols(); ++col)
             value(row, col) = gradient(row, col, m_direction);
+        }
         return value;
       }
-      /// @brief Returns the polynomial order when it is known.
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         return m_gradient.getOrder(poly);
@@ -612,17 +730,25 @@ namespace Rodin::Variational
       Grad<OperandType> m_gradient;
       size_t m_direction;
   };
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param direction Direction in which the derivative is evaluated.
+   * @param operand Operand expression.
+   */
   template <class FES, class Data>
     requires FormLanguage::IsMatrixRange<
                typename FormLanguage::Traits<FES>::RangeType>::Value
-  Derivative(
-    size_t, const GridFunction<FES, Data>&) -> Derivative<GridFunction<FES, Data>>;
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  Derivative(size_t direction,
+    const GridFunction<FES, Data>& operand) -> Derivative<GridFunction<FES, Data>>;
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param direction Direction in which the derivative is evaluated.
+   * @param operand Operand expression.
+   */
   template <class Derived, class FES, ShapeFunctionSpaceType Space>
     requires FormLanguage::IsMatrixRange<
                typename FormLanguage::Traits<FES>::RangeType>::Value
-  Derivative(size_t, const ShapeFunction<Derived, FES, Space>&)
+  Derivative(size_t direction, const ShapeFunction<Derived, FES, Space>& operand)
     -> Derivative<ShapeFunction<Derived, FES, Space>>;
 }
 

@@ -160,9 +160,13 @@ namespace Rodin::Assembly
       Geometry::Region m_region;                      ///< Region to iterate over
   };
 
-  /// @brief Template argument deduction guide for OpenMPIteration
-  OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
-    -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
+  /**
+   * @brief Template argument deduction guide for OpenMPIteration
+   * @param mesh Mesh on which the object is defined.
+   * @param region Geometric region defining the iteration domain
+   */
+  OpenMPIteration(const Geometry::Mesh<Context::Local>& mesh,
+    const Geometry::Region& region) -> OpenMPIteration<Geometry::Mesh<Context::Local>>;
 
   /**
    * @brief OpenMP-based parallel assembly for bilinear forms.
@@ -242,13 +246,19 @@ namespace Rodin::Assembly
         assert(threadCount > 0);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -257,6 +267,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
       void execute(OperatorType& res, const InputType& input) override
       {
@@ -425,13 +437,19 @@ namespace Rodin::Assembly
         assert(threadCount > 0);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_assembly(other.m_assembly)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_assembly(std::move(other.m_assembly))
@@ -440,6 +458,8 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
       void execute(OperatorType& res, const InputType& input) override
       {
@@ -487,9 +507,7 @@ namespace Rodin::Assembly
         m_assembly;
   };
 
-  /**
-   * @brief OpenMP bilinear form assembly into a dense matrix.
-   */
+  /// @brief OpenMP bilinear form assembly into a dense matrix.
   template <class Solution, class TrialFES, class TestFES>
   class OpenMP<
     Math::Matrix<
@@ -544,13 +562,19 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -604,8 +628,10 @@ namespace Rodin::Assembly
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
               for (Eigen::Index r = 0; r < rows.size(); ++r)
+              {
                 for (Eigen::Index c = 0; c < cols.size(); ++c)
                   local(rows(r), cols(c)) += lbfi->integrate(c, r);
+              }
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -668,8 +694,10 @@ namespace Rodin::Assembly
                 const auto& rows = input.getTestFES().getDOFs(d, i);
                 const auto& cols = input.getTrialFES().getDOFs(rd, tr);
                 for (Eigen::Index r = 0; r < rows.size(); ++r)
+                {
                   for (Eigen::Index c = 0; c < cols.size(); ++c)
                     local(rows(r), cols(c)) += gbfi->integrate(c, r);
+                }
               }
             }
 
@@ -742,13 +770,19 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -857,9 +891,7 @@ namespace Rodin::Assembly
       Optional<size_t> m_threadCount;
   };
 
-  /**
-   * @brief OpenMP value Dirichlet boundary condition assembly.
-   */
+  /// @brief OpenMP value Dirichlet boundary condition assembly.
   template <class Scalar, class Solution, class FES, class ValueDerived>
   class OpenMP<
     IndexMap<Scalar>,
@@ -895,13 +927,19 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -999,9 +1037,7 @@ namespace Rodin::Assembly
       Optional<size_t> m_threadCount;
   };
 
-  /**
-   * @brief OpenMP single-field problem assembly.
-   */
+  /// @brief OpenMP single-field problem assembly.
   template <class LinearSystem, class TrialFunction, class TestFunction>
   class OpenMP<
     LinearSystem,
@@ -1050,13 +1086,19 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)), m_threadCount(other.m_threadCount)
       {}
@@ -1168,8 +1210,10 @@ namespace Rodin::Assembly
               if (colValue != ScalarType(0))
                 localRhs.emplace_back(r.index, -r.coefficient * val * colValue);
               for (const auto& c : constraints.expand(col))
+              {
                 localT.emplace_back(
                   r.index, c.index, r.coefficient * val * c.coefficient);
+              }
             }
           };
 
@@ -1298,8 +1342,10 @@ namespace Rodin::Assembly
           {
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
+            {
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
                 sparseEntry(tchunks[0], rhsChunks[0], it.row(), it.col(), it.value());
+            }
           }
 
           // ---------------- LFIs ----------------
@@ -1346,8 +1392,10 @@ namespace Rodin::Assembly
           {
             const auto& vec = lf.getVector();
             for (Eigen::Index i = 0; i < vec.size(); ++i)
+            {
               vectorEntry(rhsChunks[0], static_cast<Index>(i),
                 static_cast<ScalarType>(vec.coeff(i)));
+            }
           }
 
           // ---------------- Reduce RHS chunks into b ----------------
@@ -1561,8 +1609,10 @@ namespace Rodin::Assembly
                             localRhs[static_cast<size_t>(r.index)] -=
                               r.coefficient * val * colValue;
                           for (const auto& c : constraints.expand(J))
+                          {
                             Alocal(r.index, c.index) +=
                               r.coefficient * val * c.coefficient;
+                          }
                         }
                       }
                     }
@@ -1579,6 +1629,7 @@ namespace Rodin::Assembly
             const auto opRows = op.rows();
             const auto opCols = op.cols();
             for (Eigen::Index i = 0; i < opRows; ++i)
+            {
               for (Eigen::Index j = 0; j < opCols; ++j)
               {
                 const auto val = op(i, j);
@@ -1597,6 +1648,7 @@ namespace Rodin::Assembly
                   }
                 }
               }
+            }
           }
 
           // Reduce dense matrices
@@ -1702,13 +1754,13 @@ namespace Rodin::Assembly
         }
       }
 
-      // Targeted (LHS-only / RHS-only) assembly. The parallel Eigen backend
-      // assembles the full system into a scratch object and exposes only the
-      // requested side, leaving the other operand untouched (the targeted
-      // contract). This keeps the intricate parallel BC-elimination logic in a
-      // single code path instead of duplicating a gated variant.
       /**
        * @brief Executes targeted problem assembly.
+       *
+       * The full system is assembled into temporary storage. Only the requested
+       * side is transferred to the output system; the other side is preserved.
+       * This uses the same boundary-condition elimination as full assembly.
+       *
        * @param axb Output linear system.
        * @param input Problem assembly input.
        * @param target Side of the system to assemble.
@@ -1734,9 +1786,7 @@ namespace Rodin::Assembly
       Optional<size_t> m_threadCount;
   };
 
-  /**
-   * @brief OpenMP mixed problem assembly.
-   */
+  /// @brief OpenMP mixed problem assembly.
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class OpenMP<
     LinearSystem,
@@ -1785,13 +1835,19 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(other.m_threadCount)
@@ -1955,8 +2011,10 @@ namespace Rodin::Assembly
               rhsChunks[static_cast<size_t>(tid)].emplace_back(
                 r.index, -r.coefficient * val * colValue);
             for (const auto& c : constraints.expand(col))
+            {
               tchunks[static_cast<size_t>(tid)].emplace_back(
                 r.index, c.index, r.coefficient * val * c.coefficient);
+            }
           }
         };
 
@@ -2037,8 +2095,10 @@ namespace Rodin::Assembly
                             rhsChunks[static_cast<size_t>(tid)].emplace_back(
                               r.index, -r.coefficient * val * colValue);
                           for (const auto& c : constraints.expand(J))
+                          {
                             (*Alocal)(r.index, c.index) +=
                               r.coefficient * val * c.coefficient;
+                          }
                         }
                       }
                     }
@@ -2144,8 +2204,10 @@ namespace Rodin::Assembly
                               rhsChunks[static_cast<size_t>(tid)].emplace_back(
                                 r.index, -r.coefficient * val * colValue);
                             for (const auto& c : constraints.expand(J))
+                            {
                               (*Alocal)(r.index, c.index) +=
                                 r.coefficient * val * c.coefficient;
+                            }
                           }
                         }
                       }
@@ -2258,9 +2320,13 @@ namespace Rodin::Assembly
 
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
+            {
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+              {
                 sparseEntry(0, static_cast<Index>(vOff) + it.row(),
                   static_cast<Index>(uOff) + it.col(), it.value());
+              }
+            }
           }
 
           for (int tid = 0; tid < tc; ++tid)
@@ -2355,6 +2421,7 @@ namespace Rodin::Assembly
             const auto opRows = op.rows();
             const auto opCols = op.cols();
             for (Eigen::Index i = 0; i < opRows; ++i)
+            {
               for (Eigen::Index j = 0; j < opCols; ++j)
               {
                 const auto val = op(i, j);
@@ -2374,6 +2441,7 @@ namespace Rodin::Assembly
                   }
                 }
               }
+            }
           }
 
           for (const Index gs : constraints.getIdentifiedRows())
@@ -2414,12 +2482,13 @@ namespace Rodin::Assembly
         }
       }
 
-      // Targeted (LHS-only / RHS-only) assembly for the parallel block Eigen
-      // backend: assemble the full system into a scratch object and expose only
-      // the requested side, leaving the other operand untouched (the targeted
-      // contract). Keeps the parallel block BC-elimination logic in one path.
       /**
        * @brief Executes targeted mixed problem assembly.
+       *
+       * The full system is assembled into temporary storage. Only the requested
+       * side is transferred to the output system; the other side is preserved.
+       * This uses the same boundary-condition elimination as full assembly.
+       *
        * @param axb Output linear system.
        * @param input Mixed problem input.
        * @param target Side of the system to assemble.
@@ -2486,12 +2555,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other))
       {}

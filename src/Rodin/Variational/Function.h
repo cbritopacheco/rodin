@@ -90,13 +90,19 @@ namespace Rodin::Variational
       /// @brief Default constructor
       FunctionBase() = default;
 
-      /// @brief Copy constructor
+      /**
+       * @brief Copy constructor
+       * @param other Object to copy from.
+       */
       FunctionBase(const FunctionBase& other)
         : Parent(other),
           m_traceDomain(other.m_traceDomain)
       {}
 
-      /// @brief Move constructor
+      /**
+       * @brief Move constructor
+       * @param other Object to move from.
+       */
       FunctionBase(FunctionBase&& other)
         : Parent(std::move(other)),
           m_traceDomain(std::move(other.m_traceDomain))
@@ -105,7 +111,11 @@ namespace Rodin::Variational
       /// @brief Virtual destructor
       virtual ~FunctionBase() = default;
 
-      /// @brief Move assignment operator.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       FunctionBase& operator=(FunctionBase&& other)
       {
         m_traceDomain = std::move(other.m_traceDomain);
@@ -127,7 +137,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      /// @brief Evaluates the function at an integration point.
+      /**
+       * @brief Evaluates the function at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
@@ -229,6 +243,9 @@ namespace Rodin::Variational
        * The attributes are collected into the trace domain of the function.
        *
        * @returns Reference to self (for method chaining)
+       * @param a1 Mesh attributes selecting the region.
+       * @param a2 Mesh attributes selecting the region.
+       * @param as Mesh attributes selecting the region.
        */
       template <class A1, class A2, class ... As>
       constexpr
@@ -263,6 +280,7 @@ namespace Rodin::Variational
        * shall be a continuous extension from values to the interior
        * boundaries. If the trace domain is empty, then this has the
        * semantic value that it has not been specified yet.
+       * @returns The set of attributes which will be interpreted as the domains to "trace".
        */
       constexpr
       const TraceDomain& getTraceDomain() const
@@ -273,6 +291,8 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the function on a Point belonging to the mesh.
        * @note CRTP function to be overriden in Derived class.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       constexpr
       auto getValue(const Geometry::Point& p) const
@@ -280,7 +300,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      /// @brief Evaluates the function at an integration point.
+      /**
+       * @brief Evaluates the function at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -437,19 +461,28 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getOrder(geom);
       }
 
-      /// @brief Returns this object as the CRTP-derived type.
+      /**
+       * @brief Returns this object as the CRTP-derived type.
+       * @returns This object as the CRTP-derived type.
+       */
       Derived& getDerived() noexcept
       {
         return static_cast<Derived&>(*this);
       }
 
-      /// @brief Returns this object as the CRTP-derived type.
+      /**
+       * @brief Returns this object as the CRTP-derived type.
+       * @returns This object as the CRTP-derived type.
+       */
       const Derived& getDerived() const noexcept
       {
         return static_cast<const Derived&>(*this);
       }
 
-      /// @brief Polymorphically copies the derived function.
+      /**
+       * @brief Polymorphically copies the derived function.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual FunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
@@ -459,7 +492,12 @@ namespace Rodin::Variational
       FlatSet<Geometry::Attribute> m_traceDomain;
   };
 
-  /// @brief Returns the order only when a function is elementwise constant.
+  /**
+   * @brief Returns the order only when a function is elementwise constant.
+   * @param f Function operand.
+   * @param polytope Mesh entity used by this operation.
+   * @returns Zero when the function is known to be elementwise constant, or an empty optional otherwise.
+   */
   template <class Derived>
   inline Optional<size_t>
   GetOrderIfConstant(const FunctionBase<Derived>& f, const Geometry::Polytope& polytope) noexcept

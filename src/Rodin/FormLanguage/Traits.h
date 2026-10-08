@@ -97,8 +97,13 @@ namespace Rodin::FormLanguage
   struct FunctionDerived
   {
     private:
+      /**
+       * @brief Deduces the derived parameter of a function base.
+       * @param function Function whose base parameter is deduced.
+       * @returns The deduced derived type; used only in an unevaluated expression.
+       */
       template <class D>
-      static D deduce(const Variational::FunctionBase<D>&);
+      static D deduce(const Variational::FunctionBase<D>& function);
 
     public:
       /// @brief The FunctionBase parameter of @c T.

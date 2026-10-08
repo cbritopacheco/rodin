@@ -247,6 +247,10 @@ namespace Rodin::Variational
           /**
            * @brief Evaluates the reference Jacobian of every basis function of
            * @p fe at @p reference.
+           * @param fe Finite element whose basis is evaluated.
+           * @param reference Reference evaluation point.
+           * @param d Spatial dimension.
+           * @returns Reference derivative matrix of every local basis function.
            */
           template <class FiniteElement, class Point>
           static std::vector<Math::SpatialMatrix<ScalarType>> getReferenceDerivatives(
@@ -259,8 +263,10 @@ namespace Rodin::Variational
               auto& derivative = derivatives[b];
               derivative.resize(d, d);
               for (size_t r = 0; r < d; ++r)
+              {
                 for (size_t c = 0; c < d; ++c)
                   derivative(r, c) = basis.template getDerivative<1>(r, c)(reference);
+              }
             }
             return derivatives;
           }
@@ -329,8 +335,11 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
-      /// @brief Move constructor.
-      LinearElasticityForm(LinearElasticityForm&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Form whose storage is moved.
+       */
+      LinearElasticityForm(LinearElasticityForm&& other) = default;
 
       OperatorType& getOperator() override
       {
@@ -357,25 +366,37 @@ namespace Rodin::Variational
         return m_v.get();
       }
 
-      /// @brief Gets the first Lamé parameter.
+      /**
+       * @brief Gets the first Lamé parameter.
+       * @returns The first Lamé parameter function.
+       */
       const LambdaType& getLameFirstParameter() const
       {
         return *m_lambda;
       }
 
-      /// @brief Gets the shear modulus.
+      /**
+       * @brief Gets the shear modulus.
+       * @returns The shear modulus function.
+       */
       const MuType& getShearModulus() const
       {
         return *m_mu;
       }
 
-      /// @brief Gets the region the form integrates over.
+      /**
+       * @brief Gets the region the form integrates over.
+       * @returns The cell integration region.
+       */
       Geometry::Region getRegion() const
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Gets the attributes the form is restricted to, empty for all.
+      /**
+       * @brief Gets the attributes the form is restricted to, empty for all.
+       * @returns Selected cell attributes, or empty for all.
+       */
       const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_attributes;
@@ -427,6 +448,8 @@ namespace Rodin::Variational
       /**
        * @brief Copies @p value as a Lamé parameter, lifting a non-function to
        * a RealFunction.
+       * @param value Function, constant or callable to copy.
+       * @returns Independent function representing the supplied coefficient.
        */
       template <class Derived, class Value>
       static std::unique_ptr<FunctionBase<Derived>> lift(const Value& value)
@@ -454,38 +477,63 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
-  /// @brief Deduction guide for two function Lamé parameters.
+  /**
+   * @brief Deduction guide for two function Lamé parameters.
+   * @param lambda First Lamé parameter.
+   * @param mu Shear modulus.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class LambdaDerived, class MuDerived, class Solution, class FES>
-  LinearElasticityForm(const FunctionBase<LambdaDerived>&, const FunctionBase<MuDerived>&,
-    const TrialFunction<Solution, FES>&, const TestFunction<FES>&)
+  LinearElasticityForm(const FunctionBase<LambdaDerived>& lambda,
+    const FunctionBase<MuDerived>& mu, const TrialFunction<Solution, FES>& u,
+    const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
       Math::SparseMatrix<typename FormLanguage::Traits<FES>::ScalarType>, LambdaDerived,
       MuDerived>;
 
-  /// @brief Deduction guide for a function first parameter and a lifted shear modulus.
+  /**
+   * @brief Deduction guide for a function first parameter and a lifted shear modulus.
+   * @param lambda First Lamé parameter.
+   * @param mu Shear modulus.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class LambdaDerived, class M, class Solution, class FES>
     requires(!std::is_base_of_v<FormLanguage::Base, M>)
-  LinearElasticityForm(const FunctionBase<LambdaDerived>&, const M&,
-    const TrialFunction<Solution, FES>&, const TestFunction<FES>&)
+  LinearElasticityForm(const FunctionBase<LambdaDerived>& lambda, const M& mu,
+    const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
       Math::SparseMatrix<typename FormLanguage::Traits<FES>::ScalarType>, LambdaDerived,
       typename FormLanguage::FunctionDerived<RealFunction<M>>::Type>;
 
-  /// @brief Deduction guide for a lifted first parameter and a function shear modulus.
+  /**
+   * @brief Deduction guide for a lifted first parameter and a function shear modulus.
+   * @param lambda First Lamé parameter.
+   * @param mu Shear modulus.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class L, class MuDerived, class Solution, class FES>
     requires(!std::is_base_of_v<FormLanguage::Base, L>)
-  LinearElasticityForm(const L&, const FunctionBase<MuDerived>&,
-    const TrialFunction<Solution, FES>&, const TestFunction<FES>&)
+  LinearElasticityForm(const L& lambda, const FunctionBase<MuDerived>& mu,
+    const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
       Math::SparseMatrix<typename FormLanguage::Traits<FES>::ScalarType>,
       typename FormLanguage::FunctionDerived<RealFunction<L>>::Type, MuDerived>;
 
-  /// @brief Deduction guide for two lifted Lamé parameters.
+  /**
+   * @brief Deduction guide for two lifted Lamé parameters.
+   * @param lambda First Lamé parameter.
+   * @param mu Shear modulus.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class L, class M, class Solution, class FES>
     requires(!std::is_base_of_v<FormLanguage::Base, L> &&
               !std::is_base_of_v<FormLanguage::Base, M>)
-  LinearElasticityForm(
-    const L&, const M&, const TrialFunction<Solution, FES>&, const TestFunction<FES>&)
+  LinearElasticityForm(const L& lambda, const M& mu,
+    const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
       Math::SparseMatrix<typename FormLanguage::Traits<FES>::ScalarType>,
       typename FormLanguage::FunctionDerived<RealFunction<L>>::Type,

@@ -129,8 +129,10 @@ namespace Rodin::Assembly
               break;
             }
             for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
+            {
               for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                 values[m_indices[k++]] += Math::conj(local(r, c));
+            }
           }
           if (!stale && fingerprint == m_fingerprint)
             return;
@@ -260,8 +262,10 @@ namespace Rodin::Assembly
         std::vector<Eigen::Triplet<ScalarType>> triplets;
         triplets.reserve(capacity);
         for (auto& chunk : chunks)
+        {
           triplets.insert(triplets.end(), std::make_move_iterator(chunk.begin()),
             std::make_move_iterator(chunk.end()));
+        }
         setFromTriplets(out, triplets, trialFES, testFES);
         build(out, trialFES, testFES, d, count, fingerprint);
       }
@@ -299,6 +303,12 @@ namespace Rodin::Assembly
        *
        * The iteration decides membership in the region; a non-empty
        * @p attributes further restricts to polytopes carrying one of them.
+       * @param seq Region iteration.
+       * @param mesh Mesh containing the candidates.
+       * @param attributes Selected attributes, or empty for all.
+       * @param d Polytope dimension.
+       * @param i Candidate index.
+       * @returns Whether the candidate belongs to the selected region.
        */
       template <class IterationType, class MeshType>
       static bool isVisited(const IterationType& seq, const MeshType& mesh,
@@ -312,6 +322,12 @@ namespace Rodin::Assembly
         return attribute && attributes.count(*attribute);
       }
 
+      /**
+       * @brief Estimates the initial triplet capacity.
+       * @param trialFES Trial finite element space.
+       * @param testFES Test finite element space.
+       * @returns Estimated triplet count.
+       */
       template <class TrialFES, class TestFES>
       static size_t getCapacity(const TrialFES& trialFES, const TestFES& testFES)
       {
@@ -321,6 +337,12 @@ namespace Rodin::Assembly
       /**
        * @brief Appends the entries of one local matrix to @p triplets.
        * @returns The polytope's contribution to the fingerprint.
+       * @param triplets Triplets receiving the local entries.
+       * @param local Local matrix, test rows by trial columns.
+       * @param trialFES Trial finite element space.
+       * @param testFES Test finite element space.
+       * @param d Polytope dimension.
+       * @param i Candidate index.
        */
       template <class TrialFES, class TestFES>
       static size_t emplace(std::vector<Eigen::Triplet<ScalarType>>& triplets,
@@ -330,11 +352,20 @@ namespace Rodin::Assembly
         const auto& rows = testFES.getDOFs(d, i);
         const auto& cols = trialFES.getDOFs(d, i);
         for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
+        {
           for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
             triplets.emplace_back(rows(r), cols(c), Math::conj(local(r, c)));
+        }
         return hashCell(d, i, rows, cols);
       }
 
+      /**
+       * @brief Builds a compressed matrix from the assembled triplets.
+       * @param out Matrix receiving the assembled entries.
+       * @param triplets Assembled local entries.
+       * @param trialFES Trial finite element space.
+       * @param testFES Test finite element space.
+       */
       template <class TrialFES, class TestFES>
       static void setFromTriplets(MatrixType& out,
         const std::vector<Eigen::Triplet<ScalarType>>& triplets, const TrialFES& trialFES,
@@ -350,6 +381,8 @@ namespace Rodin::Assembly
        *
        * boost::hash_combine's mixer, kept local so that ScatterMap does not
        * depend on Boost.
+       * @param seed Hash accumulator to update.
+       * @param value Value to combine.
        */
       static void mix(size_t& seed, size_t value)
       {
@@ -364,6 +397,11 @@ namespace Rodin::Assembly
        * every count stays the same, and so does a change in which candidates
        * are visited. The whole-iteration fingerprint is the sum of these,
        * which makes it independent of visiting order.
+       * @param d Polytope dimension.
+       * @param i Candidate index.
+       * @param rows Test-space degree-of-freedom indices.
+       * @param cols Trial-space degree-of-freedom indices.
+       * @returns Fingerprint of the candidate and its degree-of-freedom maps.
        */
       template <class Rows, class Cols>
       static size_t hashCell(size_t d, Index i, const Rows& rows, const Cols& cols)
@@ -387,6 +425,11 @@ namespace Rodin::Assembly
        * the pattern for which the cached scatter indices were built. Whether
        * it fits the DOF maps and the selection is settled by the fingerprint,
        * which the scatter loop accumulates as it goes.
+       * @param out Matrix to validate.
+       * @param trialFES Trial finite element space.
+       * @param testFES Test finite element space.
+       * @param count Number of iteration candidates.
+       * @returns Whether the compressed pattern matches the cached matrix structure.
        */
       template <class TrialFES, class TestFES>
       bool isValid(const MatrixType& out, const TrialFES& trialFES,
@@ -411,6 +454,12 @@ namespace Rodin::Assembly
        * Expects @c m_offsets to hold, at <tt>i + 1</tt>, the local size of
        * candidate @c i, zero when it was not visited; turns them into offsets
        * and fills the index array.
+       * @param out Compressed assembled matrix.
+       * @param trialFES Trial finite element space.
+       * @param testFES Test finite element space.
+       * @param d Polytope dimension.
+       * @param count Number of iteration candidates.
+       * @param fingerprint Fingerprint of the visited candidates and their maps.
        */
       template <class TrialFES, class TestFES>
       void build(const MatrixType& out, const TrialFES& trialFES, const TestFES& testFES,

@@ -58,10 +58,8 @@ namespace Rodin::FormLanguage
   template <class T>
   struct IsPlainObject
   {
-    /**
-     * @brief True if T is derived from Eigen::PlainObjectBase<T>, false otherwise.
-     */
-    static constexpr const bool Value = std::is_base_of_v<Eigen::PlainObjectBase<T>, T>;
+      /// @brief True if T is derived from Eigen::PlainObjectBase<T>, false otherwise.
+      static constexpr const bool Value = std::is_base_of_v<Eigen::PlainObjectBase<T>, T>;
   };
 
   /**
@@ -74,10 +72,9 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct IsPlainObject<Eigen::PlainObjectBase<Derived>>
   {
-    /**
-     * @brief True if Derived is actually derived from PlainObjectBase<Derived>.
-     */
-    static constexpr const bool Value = std::is_base_of_v<Eigen::PlainObjectBase<Derived>, Derived>;
+      /// @brief True if Derived is actually derived from PlainObjectBase<Derived>.
+      static constexpr const bool Value =
+        std::is_base_of_v<Eigen::PlainObjectBase<Derived>, Derived>;
   };
 }
 

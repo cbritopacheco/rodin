@@ -55,7 +55,12 @@
 
 namespace Rodin::Variational
 {
-  /** @brief Subtracts an owned PETSc bilinear-form snapshot. */
+  /**
+   * @brief Subtracts an owned PETSc bilinear-form snapshot.
+   * @param pb Variational problem to operate on.
+   * @param bf Bilinear form.
+   * @returns Difference of the operands, or the negated operand for the unary overload.
+   */
   template <class Vector, class Scalar>
   auto operator-(
     const ProblemBody<::Mat, Vector, Scalar>& pb, const BilinearFormBase<::Mat>& bf)
@@ -69,7 +74,12 @@ namespace Rodin::Variational
     return res;
   }
 
-  /** @brief Adds a PETSc linear form to the residual, hence negates its load. */
+  /**
+   * @brief Adds a PETSc linear form to the residual, hence negates its load.
+   * @param pb Variational problem to operate on.
+   * @param lf Linear form.
+   * @returns Sum of the operands.
+   */
   template <class Operator, class Scalar>
   auto operator+(
     const ProblemBody<Operator, ::Vec, Scalar>& pb, const LinearFormBase<::Vec>& lf)
@@ -193,7 +203,10 @@ namespace Rodin::Variational
               }())
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Problem(const Problem& other)
         : Parent(other),
@@ -202,7 +215,10 @@ namespace Rodin::Variational
           m_axb(other.m_axb)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
@@ -270,6 +286,7 @@ namespace Rodin::Variational
        * function data as the initial guess: on entry to a linear solver the
        * solution vector is the guess, on exit it is the solution. Trial
        * functions are zero-initialized, so the guess is zero unless set.
+       * @returns Reference to this object after the operation.
        */
       Problem& assemble() override
       {
@@ -285,9 +302,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Assembles only the requested target into the linear system.
-      /// @param[in] target Assembly target to update.
-      /// @returns Reference to this problem.
+      /**
+       * @brief Assembles only the requested target into the linear system.
+       * @param[in] target Assembly target to update.
+       * @returns Reference to this problem.
+       */
       Problem& assemble(AssemblyTarget target) override
       {
         m_assembly.execute(
@@ -315,19 +334,28 @@ namespace Rodin::Variational
         this->getTrialFunction().getSolution().setData(axb.getSolution());
       }
 
-      /// @brief Returns a mutable reference to the linear system.
+      /**
+       * @brief Returns a mutable reference to the linear system.
+       * @returns A mutable reference to the linear system.
+       */
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
-      /// @brief Returns a read-only reference to the linear system.
+      /**
+       * @brief Returns a read-only reference to the linear system.
+       * @returns A read-only reference to the linear system.
+       */
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
-      /// @brief Creates a heap-allocated copy of this problem.
+      /**
+       * @brief Creates a heap-allocated copy of this problem.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
@@ -343,15 +371,14 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for two-field PETSc Problem.
+   * @param u Trial function.
+   * @param v Test function.
    */
   template <class Solution, class TrialFES, class TestFES>
-  Problem(
-      PETSc::Variational::TrialFunction<Solution, TrialFES>&,
-      PETSc::Variational::TestFunction<TestFES>&)
-    -> Problem<
-          PETSc::Math::LinearSystem,
-          TrialFunction<Solution, TrialFES>,
-          TestFunction<TestFES>>;
+  Problem(PETSc::Variational::TrialFunction<Solution, TrialFES>& u,
+    PETSc::Variational::TestFunction<TestFES>& v)
+    -> Problem<PETSc::Math::LinearSystem, TrialFunction<Solution, TrialFES>,
+      TestFunction<TestFES>>;
 
   /**
    * @brief PETSc variational problem for multiple coupled trial / test
@@ -517,9 +544,6 @@ namespace Rodin::Variational
       using AssemblyInput =
         Assembly::ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
 
-      // --------------------------
-      // Ctors / assignment
-      // --------------------------
       /**
        * @brief Constructs a multi-field problem from trial and test functions.
        * @param u1 First function (trial or test).
@@ -538,7 +562,10 @@ namespace Rodin::Variational
         buildUUIDMaps();
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Problem(const Problem& other)
         : Parent(other),
           m_assembled(other.m_assembled),
@@ -555,7 +582,10 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
           m_assembled(std::exchange(other.m_assembled, false)),
@@ -624,9 +654,6 @@ namespace Rodin::Variational
         return *this;
       }
 
-      // --------------------------
-      // ProblemBody binding
-      // --------------------------
       /**
        * @brief Assigns a problem body (bilinear and linear forms).
        * @param[in] rhs Problem body to assign.
@@ -644,9 +671,6 @@ namespace Rodin::Variational
         return m_pb;
       }
 
-      // --------------------------
-      // Assembly / solve
-      // --------------------------
       /**
        * @brief Assembles the block-structured variational formulation and
        *        establishes the initial guess.
@@ -655,6 +679,7 @@ namespace Rodin::Variational
        * function data, gathered at the trial offsets, as the initial guess:
        * on entry to a linear solver the solution vector is the guess, on
        * exit it is the solution.
+       * @returns Reference to this object after the operation.
        */
       Problem& assemble() override
       {
@@ -715,9 +740,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Assembles only the requested target into the block linear system.
-      /// @param[in] target Assembly target to update.
-      /// @returns Reference to this problem.
+      /**
+       * @brief Assembles only the requested target into the block linear system.
+       * @param[in] target Assembly target to update.
+       * @returns Reference to this problem.
+       */
       Problem& assemble(AssemblyTarget target) override
       {
         computeOffsets();
@@ -757,37 +784,61 @@ namespace Rodin::Variational
           });
       }
 
-      // --------------------------
-      // Accessors (useful for solvers / debugging)
-      // --------------------------
-      /// @brief Returns a mutable reference to the linear system.
+      /**
+       * @brief Returns a mutable reference to the linear system.
+       * @returns A mutable reference to the linear system.
+       */
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
-      /// @brief Returns a read-only reference to the linear system.
+      /**
+       * @brief Returns a read-only reference to the linear system.
+       * @returns A read-only reference to the linear system.
+       */
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
-      /// @brief Returns the DOF offset array for trial fields.
+      /**
+       * @brief Returns the DOF offset array for trial fields.
+       * @returns The DOF offset array for trial fields.
+       */
       const auto& getTrialOffsets() const { return m_trialOffsets; }
-      /// @brief Returns the DOF offset array for test fields.
+      /**
+       * @brief Returns the DOF offset array for test fields.
+       * @returns The DOF offset array for test fields.
+       */
       const auto& getTestOffsets()  const { return m_testOffsets;  }
 
-      /// @brief Returns the total number of trial DOFs across all fields.
+      /**
+       * @brief Returns the total number of trial DOFs across all fields.
+       * @returns The total number of trial DOFs across all fields.
+       */
       size_t getTotalTrialSize() const { return m_totalTrial; }
-      /// @brief Returns the total number of test DOFs across all fields.
+      /**
+       * @brief Returns the total number of test DOFs across all fields.
+       * @returns The total number of test DOFs across all fields.
+       */
       size_t getTotalTestSize()  const { return m_totalTest;  }
 
-      /// @brief Returns the UUID-to-index map for trial functions.
+      /**
+       * @brief Returns the UUID-to-index map for trial functions.
+       * @returns The UUID-to-index map for trial functions.
+       */
       const auto& getTrialUUIDMap() const { return m_trialUUIDMap; }
-      /// @brief Returns the UUID-to-index map for test functions.
+      /**
+       * @brief Returns the UUID-to-index map for test functions.
+       * @returns The UUID-to-index map for test functions.
+       */
       const auto& getTestUUIDMap()  const { return m_testUUIDMap;  }
 
-      /// @brief Creates a heap-allocated copy of this problem.
+      /**
+       * @brief Creates a heap-allocated copy of this problem.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
@@ -930,7 +981,10 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Deduces the MPI communicator from the trial mesh contexts.
+      /**
+       * @brief Deduces the MPI communicator from the trial mesh contexts.
+       * @returns MPI communicator shared by the trial mesh contexts.
+       */
       MPI_Comm deduceCommunicator() const
       {
         // Take mesh context from the first trial function in the tuple.
@@ -1017,19 +1071,23 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for multi-field PETSc Problem.
+   *
+   * This guide is enabled only when all arguments are PETSc trial or test wrappers.
+   *
+   * @param u1 First function (trial or test).
+   * @param u2 Second function.
+   * @param u3 Third function.
+   * @param us Additional functions.
    */
-  // PETSc-only CTAD guide (enabled only if ALL args are PETSc trial/test wrappers)
   template <class U1, class U2, class U3, class... Us>
     requires AllPETScTrialOrTest<U1, U2, U3, Us...>::value
-  Problem(U1&, U2&, U3&, Us&...)
-    -> Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>;
+  Problem(U1& u1, U2& u2, U3& u3,
+    Us&... us) -> Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>;
 }
 
 namespace Rodin::PETSc::Variational
 {
-  /**
-   * @brief Convenient PETSc alias for Rodin::Variational::Problem.
-   */
+  /// @brief Convenient PETSc alias for Rodin::Variational::Problem.
   template <class ... Us>
   using Problem =
     Rodin::Variational::Problem<PETSc::Math::LinearSystem, Us...>;

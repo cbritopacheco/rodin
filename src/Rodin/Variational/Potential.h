@@ -226,39 +226,59 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = FunctionBase<Potential<LHSType, RHSType>>;
 
-      /// @brief Constructs the potential of an operand against a kernel.
+      /**
+       * @brief Constructs the potential of an operand against a kernel.
+       * @param kernel Kernel of the nonlocal integral operator.
+       * @param u Operand expression.
+       */
       Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel), m_u(u.copy())
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Potential(const Potential& other)
         : Parent(other),
           m_kernel(other.m_kernel),
           m_u(other.m_u->copy())
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Potential(Potential&& other)
         : Parent(std::move(other)),
           m_kernel(std::move(other.m_kernel)),
           m_u(std::move(other.m_u))
       {}
 
-      /// @brief Gets the kernel of the potential.
+      /**
+       * @brief Gets the kernel of the potential.
+       * @returns The kernel of the potential.
+       */
       const auto& getKernel() const
       {
         return m_kernel.get();
       }
 
-      /// @brief Gets the operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       const auto& getOperand() const
       {
         assert(m_u);
         return *m_u;
       }
 
-      /// @brief Evaluates the expression at a geometric point.
+      /**
+       * @brief Evaluates the expression at a geometric point.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       auto getValue(const Geometry::Point& p) const
       {
         const auto& kernel = getKernel();
@@ -334,7 +354,10 @@ namespace Rodin::Variational
       //   }
       // }
 
-      /// @brief Gets the quadrature formula of the potential.
+      /**
+       * @brief Gets the quadrature formula of the potential.
+       * @returns The quadrature formula of the potential.
+       */
       const auto& getQuadratureFormula() const
       {
         return m_qf;
@@ -353,10 +376,12 @@ namespace Rodin::Variational
 
   /**
    * @brief CTAD for Potential.
+   * @param kernel Kernel of the nonlocal integral operator.
+   * @param u Operand expression.
    */
   template <class LHSType, class RHSDerived>
-  Potential(const LHSType&, const FunctionBase<RHSDerived>&)
-    -> Potential<LHSType, FunctionBase<RHSDerived>>;
+  Potential(const LHSType& kernel,
+    const FunctionBase<RHSDerived>& u) -> Potential<LHSType, FunctionBase<RHSDerived>>;
 
   /**
    * @ingroup PotentialSpecializations
@@ -409,36 +434,55 @@ namespace Rodin::Variational
       /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<Potential>::LHSRangeType;
 
-      /// @brief Constructs the potential of an operand against a kernel.
+      /**
+       * @brief Constructs the potential of an operand against a kernel.
+       * @param kernel Kernel of the nonlocal integral operator.
+       * @param u Operand expression.
+       */
       Potential(const KernelType& kernel, const OperandType& u)
         : m_kernel(kernel), m_u(u)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Potential(const Potential& other)
         : Parent(other),
           m_kernel(other.m_kernel), m_u(other.m_u)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Potential(Potential&& other)
         : Parent(std::move(other)),
           m_kernel(std::move(other.m_kernel)), m_u(std::move(other.m_u))
       {}
 
-      /// @brief Gets the kernel of the potential.
+      /**
+       * @brief Gets the kernel of the potential.
+       * @returns The kernel of the potential.
+       */
       const KernelType& getKernel() const
       {
         return m_kernel;
       }
 
-      /// @brief Gets the operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const
       {
         return Geometry::Region::Cells;
@@ -456,10 +500,16 @@ namespace Rodin::Variational
 
   /**
    * @brief CTAD for Potential.
+   * @param kernel Kernel of the nonlocal integral operator.
+   * @param u Operand expression.
    */
-  template <class LHSType, class RHSDerived, class FESType, ShapeFunctionSpaceType SpaceType>
-  Potential(const LHSType&, const ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>&)
-    -> Potential<LHSType, ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType, SpaceType>>;
+  template <class LHSType, class RHSDerived, class FESType,
+    ShapeFunctionSpaceType SpaceType>
+  Potential(const LHSType& kernel,
+    const ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>, FESType,
+      SpaceType>& u) -> Potential<LHSType,
+                       ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, SpaceType>,
+                         FESType, SpaceType>>;
 
   /// @brief Integral of a potential tested against a shape function.
   template <class Kernel, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
@@ -498,58 +548,84 @@ namespace Rodin::Variational
             Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
-      /// @brief Constructs the expression from its left and right operands.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Integral(const LHSType& lhs, const RHSType& rhs)
         : Integral(Dot(lhs, rhs))
       {}
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       Integral(const IntegrandType& integrand)
         : Parent(integrand)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Integral(const Integral& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Integral(Integral&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Returns the region the test function is integrated over.
+      /**
+       * @brief Returns the region the test function is integrated over.
+       * @returns The region the test function is integrated over.
+       */
       Geometry::Region getTestRegion() const override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Creates a polymorphic copy.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Integral* copy() const noexcept override
       {
         return new Integral(*this);
       }
   };
 
-  /// @brief Deduction guide for @c Integral.
-  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  /**
+   * @brief Deduction guide for @c Integral.
+   * @param integrand Expression to integrate.
+   */
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived,
+    class TestFES>
   Integral(
-      const Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>&)
+    const Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+      ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>& integrand)
     -> Integral<
-          Dot<
-            Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+      Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+        ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 
-  /// @brief Deduction guide for @c Integral.
-  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived, class TestFES>
+  /**
+   * @brief Deduction guide for @c Integral.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
+  template <class KernelType, class LHSDerived, class TrialFES, class RHSDerived,
+    class TestFES>
   Integral(
-      const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>&,
-      const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>&)
+    const Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>& lhs,
+    const ShapeFunctionBase<RHSDerived, TestFES, TestSpace>& rhs)
     -> Integral<
-          Dot<
-            Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
-            ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
+      Dot<Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>>,
+        ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 }
 
 #endif

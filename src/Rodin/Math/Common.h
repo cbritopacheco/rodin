@@ -161,9 +161,11 @@ namespace Rodin::Math
    * @tparam N Exponent
    * @param[in] x Base value
    * @return @f$ x^N @f$
+   * @param orderTag Compile-time order or value-range dimension tag.
    */
   template <class Base, size_t N>
-  constexpr Base pow(const Base& x, std::integral_constant<size_t, N>)
+  constexpr Base pow(
+    const Base& x, [[maybe_unused]] std::integral_constant<size_t, N> orderTag)
   {
     return pow<N>(x);
   }
@@ -888,7 +890,12 @@ namespace Rodin::Math
   {
     return min(max(x, lo), hi);
   }
-  /// @brief Frobenius contraction of spatial tensors, conjugating the RHS.
+  /**
+   * @brief Frobenius contraction of spatial tensors, conjugating the RHS.
+   * @returns Scalar Frobenius contraction of the operands.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSScalar, class RHSScalar, size_t Rank>
   auto dot(
     const SpatialTensor<LHSScalar, Rank>& lhs, const SpatialTensor<RHSScalar, Rank>& rhs)
@@ -896,7 +903,11 @@ namespace Rodin::Math
     return lhs.dot(rhs);
   }
 
-  /// @brief Entrywise tensor conjugation.
+  /**
+   * @brief Entrywise tensor conjugation.
+   * @param value Value to store or assign.
+   * @returns Entrywise conjugate of the tensor.
+   */
   template <class Scalar, size_t Rank>
   auto conj(const SpatialTensor<Scalar, Rank>& value)
   {

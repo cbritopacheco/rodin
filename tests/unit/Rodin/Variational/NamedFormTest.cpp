@@ -89,8 +89,10 @@ namespace Rodin::Tests::Unit
       ASSERT_EQ(a.rows(), e.rows());
       ASSERT_EQ(a.cols(), e.cols());
       for (Eigen::Index i = 0; i < a.rows(); ++i)
+      {
         for (Eigen::Index j = 0; j < a.cols(); ++j)
           EXPECT_NEAR(a(i, j), e(i, j), 1e-12) << "entry (" << i << ", " << j << ")";
+      }
     }
 
     template <class FES>

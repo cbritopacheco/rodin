@@ -151,20 +151,21 @@ namespace Rodin::Assembly
       std::reference_wrapper<GlobalBilinearFormIntegratorBaseListType>  m_gbfis;   ///< Global integrators
   };
 
-  /// @brief Template argument deduction guide for BilinearFormAssemblyInput
+  /**
+   * @brief Template argument deduction guide for BilinearFormAssemblyInput
+   * @param trialFES Trial finite element space
+   * @param testFES Test finite element space
+   * @param lbfis List of local bilinear form integrators
+   * @param gbfis List of global bilinear form integrators
+   */
   template <class TrialFES, class TestFES>
-  BilinearFormAssemblyInput(
-      const TrialFES&, const TestFES&,
-      FormLanguage::List<
-        Variational::LocalBilinearFormIntegratorBase<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>&,
-      FormLanguage::List<
-        Variational::GlobalBilinearFormIntegratorBase<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>&)
+  BilinearFormAssemblyInput(const TrialFES& trialFES, const TestFES& testFES,
+    FormLanguage::List<Variational::LocalBilinearFormIntegratorBase<
+      decltype(std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>& lbfis,
+    FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase<
+      decltype(std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>& gbfis)
     -> BilinearFormAssemblyInput<TrialFES, TestFES>;
 
   /**

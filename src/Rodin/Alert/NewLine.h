@@ -29,9 +29,9 @@ namespace Rodin::Alert
    * @return Reference to the output stream.
    *
    * Inserts a newline character into the output stream.
+   * @param tag Formatting or action tag selected through its type.
    */
-  inline
-  std::ostream& operator<<(std::ostream& os, const NewLineT&)
+  inline std::ostream& operator<<(std::ostream& os, [[maybe_unused]] const NewLineT& tag)
   {
     os << '\n';
     return os;

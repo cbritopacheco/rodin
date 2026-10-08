@@ -209,8 +209,10 @@ namespace Rodin::Variational
                 {
                   const auto testValue = testFE.getBasis(te)(reference);
                   for (size_t tr = 0; tr < trialFE.getCount(); ++tr)
+                  {
                     matrix(te, tr) =
                       Math::dot(trialFE.getBasis(tr)(reference), testValue);
+                  }
                 }
               }
             }
@@ -313,8 +315,11 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
-      /// @brief Move constructor.
-      MassForm(MassForm&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Form whose storage is moved.
+       */
+      MassForm(MassForm&& other) = default;
 
       OperatorType& getOperator() override
       {
@@ -344,6 +349,7 @@ namespace Rodin::Variational
       /**
        * @brief Gets the coefficient.
        * @pre The form carries a coefficient.
+       * @returns The coefficient function owned by the form.
        */
       const CoefficientType& getCoefficient() const
         requires HasCoefficient
@@ -351,13 +357,19 @@ namespace Rodin::Variational
         return *m_coefficient;
       }
 
-      /// @brief Gets the region the form integrates over.
+      /**
+       * @brief Gets the region the form integrates over.
+       * @returns The cell integration region.
+       */
       Geometry::Region getRegion() const
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Gets the attributes the form is restricted to, empty for all.
+      /**
+       * @brief Gets the attributes the form is restricted to, empty for all.
+       * @returns Selected cell attributes, or empty for all.
+       */
       const FlatSet<Geometry::Attribute>& getAttributes() const
       {
         return m_attributes;
@@ -410,7 +422,11 @@ namespace Rodin::Variational
       }
 
     private:
-      /// @brief Deep-copies a coefficient handle.
+      /**
+       * @brief Deep-copies a coefficient handle.
+       * @param coefficient Coefficient handle to copy.
+       * @returns Independent coefficient copy, or null for an unweighted form.
+       */
       static CoefficientPointer clone(const CoefficientPointer& coefficient)
       {
         if constexpr (HasCoefficient)
@@ -427,29 +443,43 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
-  /// @brief Deduction guide for the unweighted mass form.
+  /**
+   * @brief Deduction guide for the unweighted mass form.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class Solution, class TrialFES, class TestFES>
-  MassForm(const TrialFunction<Solution, TrialFES>&, const TestFunction<TestFES>&)
+  MassForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> MassForm<Solution, TrialFES, TestFES,
       Math::SparseMatrix<
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>;
 
-  /// @brief Deduction guide for the mass form weighted by a function.
+  /**
+   * @brief Deduction guide for the mass form weighted by a function.
+   * @param c Coefficient.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class CoefficientDerived, class Solution, class TrialFES, class TestFES>
-  MassForm(const FunctionBase<CoefficientDerived>&,
-    const TrialFunction<Solution, TrialFES>&, const TestFunction<TestFES>&)
+  MassForm(const FunctionBase<CoefficientDerived>& c,
+    const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> MassForm<Solution, TrialFES, TestFES,
       Math::SparseMatrix<
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
       CoefficientDerived>;
 
-  /// @brief Deduction guide for the mass form weighted by a lifted value.
+  /**
+   * @brief Deduction guide for the mass form weighted by a lifted value.
+   * @param c Coefficient.
+   * @param u Trial function.
+   * @param v Test function.
+   */
   template <class L, class Solution, class TrialFES, class TestFES>
     requires(!std::is_base_of_v<FormLanguage::Base, L>)
-  MassForm(
-    const L&, const TrialFunction<Solution, TrialFES>&, const TestFunction<TestFES>&)
+  MassForm(const L& c, const TrialFunction<Solution, TrialFES>& u,
+    const TestFunction<TestFES>& v)
     -> MassForm<Solution, TrialFES, TestFES,
       Math::SparseMatrix<
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,

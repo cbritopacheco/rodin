@@ -138,7 +138,10 @@ namespace Rodin::Assembly
         (void) ierr;
       }
 
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       MPI* copy() const noexcept override
       {
         return new MPI(*this);
@@ -262,7 +265,10 @@ namespace Rodin::Assembly
         (void) ierr;
       }
 
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       MPI* copy() const noexcept override
       {
         return new MPI(*this);
@@ -348,6 +354,12 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+      /**
+       * @brief Assembles the requested operator and vector contributions.
+       * @param axb Linear system receiving the assembled operator and vector.
+       * @param input Assembly input containing spaces and form integrators.
+       * @param mode Requested assembly mode.
+       */
 
       void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode)
       {
@@ -438,8 +450,10 @@ namespace Rodin::Assembly
               if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
                 for (const auto& [local, value] : dofs)
+                {
                   constraints.setFixed(
                     static_cast<Index>(local), static_cast<PetscScalar>(value));
+                }
               }
               else if constexpr (std::is_same_v<T, IdentDOFsType>)
               {
@@ -740,8 +754,10 @@ namespace Rodin::Assembly
         {
           std::vector<PetscInt> rowsToZero;
           for (const Index gs : constraints.getIdentifiedRows())
+          {
             if (rbegin <= gs && gs < rend)
               rowsToZero.push_back(static_cast<PetscInt>(gs));
+          }
 
           // MatZeroRows bumps the matrix's nonzero-state counter even when it
           // is handed zero rows. PETSc's PCSetUp compares that counter against
@@ -899,7 +915,10 @@ namespace Rodin::Assembly
       }
 
     public:
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       MPI* copy() const noexcept override
       {
         return new MPI(*this);
@@ -980,6 +999,12 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+      /**
+       * @brief Assembles the requested operator and vector contributions.
+       * @param axb Linear system receiving the assembled operator and vector.
+       * @param input Assembly input containing spaces and form integrators.
+       * @param mode Requested assembly mode.
+       */
 
       void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode)
       {
@@ -1144,9 +1169,11 @@ namespace Rodin::Assembly
               if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
                 for (const auto& [local, value] : dofs)
+                {
                   constraints.setFixed(
                     static_cast<Index>(uOff + static_cast<size_t>(local)),
                     static_cast<PetscScalar>(value));
+                }
               }
               else if constexpr (std::is_same_v<T, IdentDOFsType>)
               {
@@ -1499,8 +1526,10 @@ namespace Rodin::Assembly
         {
           std::vector<PetscInt> rowsToZero;
           for (const Index gs : constraints.getIdentifiedRows())
+          {
             if (ownsTrialGlobal(gs))
               rowsToZero.push_back(static_cast<PetscInt>(gs));
+          }
 
           // MatZeroRows bumps the matrix's nonzero-state counter even when it
           // is handed zero rows. PETSc's PCSetUp compares that counter against
@@ -1656,7 +1685,10 @@ namespace Rodin::Assembly
       }
 
     public:
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       MPI* copy() const noexcept override
       {
         return new MPI(*this);

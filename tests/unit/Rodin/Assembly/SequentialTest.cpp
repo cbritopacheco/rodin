@@ -730,13 +730,19 @@ namespace Rodin::Tests::Unit
     };
 
     for (const auto& e : matrixEntries)
+    {
       for (const auto& r : expand(e.row))
+      {
         for (const auto& c : expand(e.col))
           expectedA(r.first, c.first) += r.second * e.value * c.second;
+      }
+    }
 
     for (const auto& [row, value] : vectorEntries)
+    {
       for (const auto& r : expand(row))
         expectedB(r.first) += r.second * value;
+    }
 
     for (const auto& [slave, row] : ident)
     {

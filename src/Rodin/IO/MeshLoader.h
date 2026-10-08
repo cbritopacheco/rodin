@@ -56,19 +56,13 @@ namespace Rodin::IO
   class MeshLoaderBase : public IO::Loader<Rodin::Geometry::Mesh<Context>>
   {
     public:
-      /**
-       * @brief Context type for the mesh (e.g., sequential or parallel).
-       */
+      /// @brief Context type for the mesh (e.g., sequential or parallel).
       using ContextType = Context;
 
-      /**
-       * @brief Type of mesh object being loaded.
-       */
+      /// @brief Type of mesh object being loaded.
       using ObjectType = Geometry::Mesh<ContextType>;
 
-      /**
-       * @brief Parent Loader class type.
-       */
+      /// @brief Parent Loader class type.
       using Parent = IO::Loader<ObjectType>;
 
       /**

@@ -41,8 +41,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Jacobian over a grid function: exposes the finite element
-  /// space and the operand type.
+  /**
+   * @brief Type traits for @c Jacobian over a grid function: exposes the finite element
+   * space and the operand type.
+   */
   template <class Range, class Data, class Mesh>
     requires(!FormLanguage::IsMatrixRange<Range>::Value)
   struct Traits<
@@ -54,8 +56,10 @@ namespace Rodin::FormLanguage
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
-  /// @brief Type traits for @c Jacobian over a shape function: exposes the finite element
-  /// space, the shape function space and the operand type.
+  /**
+   * @brief Type traits for @c Jacobian over a shape function: exposes the finite element
+   * space, the shape function space and the operand type.
+   */
   template <class NestedDerived, class Range, class Mesh,
     Variational::ShapeFunctionSpaceType Space>
     requires(!FormLanguage::IsMatrixRange<Range>::Value)
@@ -119,28 +123,45 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
-      /// @brief Constructs the expression from its operand.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       Jacobian(const OperandType& u)
         : Parent(u)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Jacobian(const Jacobian& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Jacobian(Jacobian&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Interpolates at an integration point.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
         interpolate(out, ip.getPoint());
       }
 
-      /// @brief Interpolates at a geometric point.
+      /**
+       * @brief Interpolates at a geometric point.
+       * @param out Storage for the computed result.
+       * @param p Point at which the operation is evaluated.
+       */
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -249,7 +270,11 @@ namespace Rodin::Variational
         out = G * p.getJacobianInverse();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -257,7 +282,10 @@ namespace Rodin::Variational
         return (k == 0) ? 0 : (k - 1);
       }
 
-      /// @brief Creates a polymorphic copy.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
@@ -267,9 +295,11 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Jacobian of a P1 GridFunction
+   * @param u Operand expression.
    */
   template <class Range, class Data, class Mesh>
-  Jacobian(const GridFunction<P1<Range, Mesh>, Data>&) -> Jacobian<GridFunction<P1<Range, Mesh>, Data>>;
+  Jacobian(const GridFunction<P1<Range, Mesh>, Data>& u)
+    -> Jacobian<GridFunction<P1<Range, Mesh>, Data>>;
 
   /**
    * @ingroup JacobianSpecializations
@@ -327,13 +357,20 @@ namespace Rodin::Variational
               /// @brief Whether the key holds a cached entry.
               bool valid = false;
 
-              /// @brief Tests whether the key holds a cached entry.
+              /**
+               * @brief Tests whether the key holds a cached entry.
+               * @returns True if the key identifies a cached entry; false otherwise.
+               */
               explicit operator bool() const noexcept
               {
                 return valid;
               }
 
-              /// @brief Equality comparison.
+              /**
+               * @brief Equality comparison.
+               * @returns Whether the operands compare equal.
+               * @param o Key to compare with this key.
+               */
               bool operator==(const CellKey& o) const noexcept
               {
                 if (!valid || !o.valid)
@@ -342,8 +379,11 @@ namespace Rodin::Variational
                   transOrder == o.transOrder && vdim == o.vdim;
               }
 
-              /// @brief Resets the key, invalidating the cached entry.
-              void operator=(std::initializer_list<int>) noexcept
+              /**
+               * @brief Resets the key, invalidating the cached entry.
+               * @param other Object to copy from.
+               */
+              void operator=(std::initializer_list<int> other) noexcept
               {
                 valid = false;
                 mesh = nullptr;
@@ -365,13 +405,20 @@ namespace Rodin::Variational
             /// @brief Whether the key holds a cached entry.
             bool valid = false;
 
-            /// @brief Tests whether the key holds a cached entry.
+            /**
+             * @brief Tests whether the key holds a cached entry.
+             * @returns True if the key identifies a cached entry; false otherwise.
+             */
             explicit operator bool() const noexcept
             {
               return valid;
             }
 
-            /// @brief Equality comparison.
+            /**
+             * @brief Equality comparison.
+             * @returns Whether the operands compare equal.
+             * @param o Key to compare with this key.
+             */
             bool operator==(const QpKey& o) const noexcept
             {
               if (!valid || !o.valid)
@@ -379,8 +426,11 @@ namespace Rodin::Variational
               return qf == o.qf && qp == o.qp;
             }
 
-            /// @brief Resets the key, invalidating the cached entry.
-            void operator=(std::initializer_list<int>) noexcept
+            /**
+             * @brief Resets the key, invalidating the cached entry.
+             * @param reset Initializer-list tag; its contents are ignored when invalidating the key.
+             */
+            void operator=([[maybe_unused]] std::initializer_list<int> reset) noexcept
             {
               valid = false;
               qf = nullptr;
@@ -398,14 +448,20 @@ namespace Rodin::Variational
         QpKey qpKey;
       };
 
-      /// @brief Constructs the expression from its operand.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       Jacobian(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Jacobian(const Jacobian& other)
         : Parent(other),
           m_u(other.m_u),
@@ -413,7 +469,10 @@ namespace Rodin::Variational
           m_cache(other.m_cache)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -421,35 +480,51 @@ namespace Rodin::Variational
           m_cache(std::move(other.m_cache))
       {}
 
-      /// @brief Gets the operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Gets the finite element space.
+      /**
+       * @brief Gets the finite element space.
+       * @returns The finite element space.
+       */
       constexpr
       const FESType& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
 
-      /// @brief Gets the operand in the shape function expression.
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -457,7 +532,11 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
-      /// @brief Tests whether a polytope geometry is a tensor-product one.
+      /**
+       * @brief Tests whether a polytope geometry is a tensor-product one.
+       * @param g Mesh entity used by this operation.
+       * @returns Whether the geometry is a tensor-product reference cell.
+       */
       static constexpr bool isTensorGeom(Geometry::Polytope::Type g) noexcept
       {
         return g == Geometry::Polytope::Type::Quadrilateral
@@ -465,7 +544,11 @@ namespace Rodin::Variational
             || g == Geometry::Polytope::Type::Hexahedron;
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
@@ -585,7 +668,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       const SpatialMatrixType& getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
@@ -593,7 +680,11 @@ namespace Rodin::Variational
         return m_cache.jac[local];
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -614,10 +705,16 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
-  /// @brief Deduction guide for @c Jacobian.
-  template <class ShapeFunctionDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
+  /**
+   * @brief Deduction guide for @c Jacobian.
+   * @param u Operand expression.
+   */
+  template <class ShapeFunctionDerived, class Number, class Mesh,
+    ShapeFunctionSpaceType Space>
+  Jacobian(const ShapeFunction<ShapeFunctionDerived,
+    P1<Math::SpatialVector<Number>, Mesh>, Space>& u)
+    -> Jacobian<
+      ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
 #endif

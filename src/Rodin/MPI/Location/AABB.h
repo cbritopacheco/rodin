@@ -22,6 +22,7 @@ namespace Rodin::Location
    * local index and coordinates. The MPI mesh delegates their transformations
    * to the same shard. Construction, setters and queries perform no communication.
    * This specialization also supports derived MPI meshes, including SubMesh.
+   * @tparam MeshType MPI mesh type or a class derived from it.
    *
    * An empty result is a rank-local miss. Different ranks may each return an
    * owned incident entity at a shared spatial boundary; there is no global
@@ -36,52 +37,82 @@ namespace Rodin::Location
   class AABB<MeshType> final
   {
     public:
-      /// Snapshots owned shard-local candidates without communication.
+      /**
+       * @brief Snapshots owned shard-local candidates without communication.
+       * @param mesh MPI mesh, which must outlive the locator and its returned points.
+       */
       explicit AABB(const MeshType& mesh)
         : m_mesh(mesh),
           m_shard(mesh.getShard(), ownedCandidates(mesh))
       {}
 
-      /// Returns physical tolerance relative to the full shard's box diagonal.
+      /**
+       * @brief Returns physical tolerance relative to the full shard's box diagonal.
+       * @returns Dimensionless relative physical tolerance; the length tolerance uses the full shard vertex-box diagonal.
+       */
       Real getTolerance() const
       {
         return m_shard.getTolerance();
       }
-      /// Returns the dimensionless reference-coordinate tolerance.
+      /**
+       * @brief Returns the dimensionless reference-coordinate tolerance.
+       * @returns Dimensionless reference-coordinate overshoot tolerance.
+       */
       Real getReferenceTolerance() const
       {
         return m_shard.getReferenceTolerance();
       }
 
-      /// Sets relative physical tolerance and invalidates local bounds.
+      /**
+       * @brief Sets relative physical tolerance and invalidates local bounds.
+       * @param tolerance Relative physical tolerance passed to the local engine.
+       * @returns Reference to this locator.
+       */
       AABB& setTolerance(Real tolerance)
       {
         m_shard.setTolerance(tolerance);
         return *this;
       }
 
-      /// Sets the maximum reference-space overshoot before clipping.
+      /**
+       * @brief Sets the maximum reference-space overshoot before clipping.
+       * @param tolerance Dimensionless reference-coordinate overshoot tolerance.
+       * @returns Reference to this locator.
+       */
       AABB& setReferenceTolerance(Real tolerance)
       {
         m_shard.setReferenceTolerance(tolerance);
         return *this;
       }
 
-      /// Enables exhaustive inversion restricted to owned candidates.
+      /**
+       * @brief Enables exhaustive inversion restricted to owned candidates.
+       * @param enabled Whether to try every owned candidate after a tree miss.
+       * @returns Reference to this locator.
+       */
       AABB& setExhaustiveFallback(bool enabled)
       {
         m_shard.setExhaustiveFallback(enabled);
         return *this;
       }
 
-      /// Enables conservative projection pruning in the local engine.
+      /**
+       * @brief Enables conservative projection pruning in the local engine.
+       * @param enabled Whether to use conservative directional projection bounds.
+       * @returns Reference to this locator.
+       */
       AABB& setProjectionPruning(bool enabled)
       {
         m_shard.setProjectionPruning(enabled);
         return *this;
       }
 
-      /// Searches owned entities of dimension d and lifts the local result.
+      /**
+       * @brief Searches owned entities of dimension d and lifts the local result.
+       * @param dimension Topological dimension of the owned entities to search.
+       * @param x Physical query coordinates.
+       * @returns Point attached to an owned entity of this MPI mesh, or an empty optional for a rank-local miss.
+       */
       Optional<Geometry::Point> locate(
         size_t dimension, const Math::SpatialPoint& x) const
       {
@@ -94,13 +125,22 @@ namespace Rodin::Location
           hit->getReferenceCoordinates(), hit->getPhysicalCoordinates());
       }
 
-      /// Uses the MPI mesh's logical dimension, including on empty submesh ranks.
+      /**
+       * @brief Uses the MPI mesh's logical dimension, including on empty submesh ranks.
+       * @param x Physical query coordinates.
+       * @returns Point in an owned entity of the logical mesh dimension, or an empty optional for a rank-local miss.
+       */
       Optional<Geometry::Point> locate(const Math::SpatialPoint& x) const
       {
         return locate(m_mesh.get().getDimension(), x);
       }
 
     private:
+      /**
+       * @brief Snapshots owned shard-local entity indices in every dimension.
+       * @param mesh MPI mesh whose shard ownership is inspected.
+       * @returns Candidate indices grouped by topological dimension, including empty lists for empty dimensions.
+       */
       static typename AABB<Geometry::LocalMesh>::Candidates ownedCandidates(
         const MeshType& mesh)
       {
@@ -110,8 +150,10 @@ namespace Rodin::Location
         for (size_t d = 0; d <= shard.getDimension(); ++d)
         {
           for (Index i = 0; i < shard.getPolytopeCount(d); ++i)
+          {
             if (shard.isOwned(d, i))
               candidates[d].push_back(i);
+          }
         }
         return candidates;
       }

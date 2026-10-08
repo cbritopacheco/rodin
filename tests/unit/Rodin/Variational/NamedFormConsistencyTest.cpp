@@ -127,8 +127,10 @@ namespace Rodin::Tests::Unit
       ASSERT_EQ(a.cols(), e.cols()) << where;
       Real largest = 0;
       for (Eigen::Index i = 0; i < a.rows(); ++i)
+      {
         for (Eigen::Index j = 0; j < a.cols(); ++j)
           largest = std::max(largest, std::abs(a(i, j) - e(i, j)));
+      }
       EXPECT_LE(largest, tolerance)
         << where << ": largest entry-wise difference " << largest;
       EXPECT_GT(e.cwiseAbs().maxCoeff(), 0)

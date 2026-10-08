@@ -119,7 +119,11 @@ namespace Rodin::Variational
           return rhs;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = getLHS().getOrder(polytope);
@@ -163,9 +167,13 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for @c Min.
+  /**
+   * @brief Deduction guide for @c Min.
+   * @param a Left operand.
+   * @param b Right operand.
+   */
   template <class LHSDerived, class RHSDerived>
-  Min(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+  Min(const FunctionBase<LHSDerived>& a, const FunctionBase<RHSDerived>& b)
     -> Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /// @brief Pointwise minimum of a function expression.
@@ -287,9 +295,14 @@ namespace Rodin::Variational
       RHSType m_rhs;
   };
 
-  /// @brief Deduction guide for @c Min.
+  /**
+   * @brief Deduction guide for @c Min.
+   * @param a Left operand.
+   * @param b Right operand.
+   */
   template <class NestedDerived>
-  Min(const FunctionBase<NestedDerived>&, Real) -> Min<FunctionBase<NestedDerived>, Real>;
+  Min(const FunctionBase<NestedDerived>& a,
+    Real b) -> Min<FunctionBase<NestedDerived>, Real>;
 
   /// @brief Pointwise minimum of a function expression.
   template <class NestedDerived>
@@ -306,34 +319,52 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = Min<FunctionBase<NestedDerived>, Real>;
 
-      /// @brief Constructs the expression from its left and right operands.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param a Left operand.
+       * @param b Right operand.
+       */
       constexpr
       Min(const LHSType& a, const RHSType& b)
         : Parent(b, a)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Min(const Min& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Min(Min&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Creates a polymorphic copy.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual Min* copy() const noexcept override
       {
         return new Min(*this);
       }
   };
 
-  /// @brief Deduction guide for @c Min.
+  /**
+   * @brief Deduction guide for @c Min.
+   * @param a Left operand.
+   * @param b Right operand.
+   */
   template <class NestedDerived>
-  Min(Real, const FunctionBase<NestedDerived>&) -> Min<Real, FunctionBase<NestedDerived>>;
+  Min(Real a,
+    const FunctionBase<NestedDerived>& b) -> Min<Real, FunctionBase<NestedDerived>>;
 }
 
 #endif

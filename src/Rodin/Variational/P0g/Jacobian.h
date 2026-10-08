@@ -27,8 +27,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Jacobian over a grid function: exposes the finite element
-  /// space and the operand type.
+  /**
+   * @brief Type traits for @c Jacobian over a grid function: exposes the finite element
+   * space and the operand type.
+   */
   template <class Range, class Data, class Mesh>
   struct Traits<
     Variational::Jacobian<
@@ -41,8 +43,10 @@ namespace Rodin::FormLanguage
       using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
-  /// @brief Type traits for @c Jacobian over a shape function: exposes the finite element
-  /// space, the shape function space and the operand type.
+  /**
+   * @brief Type traits for @c Jacobian over a shape function: exposes the finite element
+   * space, the shape function space and the operand type.
+   */
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Jacobian<
@@ -83,17 +87,26 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
-      /// @brief Constructs the expression from its operand.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       Jacobian(const OperandType& u)
         : Parent(u)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Jacobian(const Jacobian& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Jacobian(Jacobian&& other)
         : Parent(std::move(other))
       {}
@@ -104,6 +117,8 @@ namespace Rodin::Variational
        * The output matrix is sized (vdim x d), where:
        * - vdim = vector dimension of the FE space (typically mesh dim)
        * - d    = dimension of the polytope we are evaluating on (cell or face)
+       * @param out Storage for the computed result.
+       * @param p Point at which the operation is evaluated.
        */
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
@@ -118,15 +133,22 @@ namespace Rodin::Variational
         out.setZero();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         // Identically zero.
         return 0;
       }
 
-      /// @brief Creates a polymorphic copy.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Jacobian* copy() const noexcept override
       {
         return new Jacobian(*this);
@@ -168,42 +190,61 @@ namespace Rodin::Variational
           FESType,
           SpaceType>;
 
-      /// @brief Constructs the expression from its operand.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       explicit Jacobian(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Jacobian(const Jacobian& other)
         : Parent(other),
           m_u(other.m_u),
           m_ip(nullptr)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Jacobian(Jacobian&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_ip(std::exchange(other.m_ip, nullptr))
       {}
 
-      /// @brief Gets the operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -211,7 +252,11 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
       {
         // keep operand aligned
@@ -234,6 +279,8 @@ namespace Rodin::Variational
        * @brief Returns the Jacobian of the local basis function (always zero).
        *
        * ShapeFunction Jacobian basis is a matrix (vdim x d).
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
        */
       constexpr
       const SpatialMatrixType& getBasis(size_t local) const
@@ -243,9 +290,13 @@ namespace Rodin::Variational
         return m_zero;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -264,15 +315,22 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Jacobian of a P0g vector GridFunction
+   * @param u Operand expression.
    */
   template <class Range, class Data, class Mesh>
-  Jacobian(const GridFunction<P0g<Range, Mesh>, Data>&)
+  Jacobian(const GridFunction<P0g<Range, Mesh>, Data>& u)
     -> Jacobian<GridFunction<P0g<Range, Mesh>, Data>>;
 
-  /// @brief Deduction guide for @c Jacobian.
-  template <class ShapeFunctionDerived, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
-  Jacobian(const ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>&)
-    -> Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
+  /**
+   * @brief Deduction guide for @c Jacobian.
+   * @param u Operand expression.
+   */
+  template <class ShapeFunctionDerived, class Scalar, class Mesh,
+    ShapeFunctionSpaceType Space>
+  Jacobian(const ShapeFunction<ShapeFunctionDerived,
+    P0g<Math::SpatialVector<Scalar>, Mesh>, Space>& u)
+    -> Jacobian<
+      ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
 }
 
 #endif
