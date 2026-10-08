@@ -1530,7 +1530,7 @@
 <g id="node128" class="node">
 <title>Rodin/Solver/NewtonSolver.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="19147.48" cy="-1692" rx="72" ry="72"/>
-<text text-anchor="middle" x="19147.48" y="-1689.8" font-family="Times,serif" font-size="9.00">Rodin/Solver/NewtonSolver.h</text>
+<text text-anchor="middle" x="19147.48" y="-1690.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/NewtonSolver.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/NewtonSolver.h -->
 <g id="edge127" class="edge">
@@ -1781,7 +1781,7 @@
 <!-- Rodin/IO/XDMF.h -->
 <g id="node149" class="node">
 <title>Rodin/IO/XDMF.h</title>
-<ellipse fill="#abdda4" stroke="black" cx="15071.48" cy="-2664" rx="108" ry="108"/>
+<ellipse fill="#e6f598" stroke="black" cx="15071.48" cy="-2664" rx="108" ry="108"/>
 <text text-anchor="middle" x="15071.48" y="-2660.5" font-family="Times,serif" font-size="15.00">Rodin/IO/XDMF.h</text>
 </g>
 <!-- Rodin/IO.h&#45;&gt;Rodin/IO/XDMF.h -->
@@ -4236,7 +4236,7 @@
 <g id="node320" class="node">
 <title>Rodin/Variational/P0g/Div.h</title>
 <ellipse fill="#ffffbf" stroke="black" cx="10059.48" cy="-5508" rx="144" ry="144"/>
-<text text-anchor="middle" x="10059.48" y="-5502.4" font-family="Times,serif" font-size="22.00">Rodin/Variational/P0g/Div.h</text>
+<text text-anchor="middle" x="10059.48" y="-5502.1" font-family="Times,serif" font-size="23.00">Rodin/Variational/P0g/Div.h</text>
 </g>
 <!-- Rodin/Variational/P0g.h&#45;&gt;Rodin/Variational/P0g/Div.h -->
 <g id="edge814" class="edge">
@@ -5832,7 +5832,7 @@
 <g id="node170" class="node">
 <title>Rodin/PETSc.h</title>
 <ellipse fill="#fdae61" stroke="black" cx="23456.48" cy="-8316" rx="180" ry="180"/>
-<text text-anchor="middle" x="23456.48" y="-8308.2" font-family="Times,serif" font-size="31.00">Rodin/PETSc.h</text>
+<text text-anchor="middle" x="23456.48" y="-8307.9" font-family="Times,serif" font-size="32.00">Rodin/PETSc.h</text>
 </g>
 <!-- Rodin/PETSc/ForwardDecls.h -->
 <g id="node171" class="node">
@@ -5946,7 +5946,7 @@
 <g id="node180" class="node">
 <title>Rodin/PETSc/IO/MEDIT.h</title>
 <ellipse fill="#abdda4" stroke="black" cx="24323.48" cy="-2664" rx="108" ry="108"/>
-<text text-anchor="middle" x="24323.48" y="-2660.5" font-family="Times,serif" font-size="15.00">Rodin/PETSc/IO/MEDIT.h</text>
+<text text-anchor="middle" x="24323.48" y="-2660.3" font-family="Times,serif" font-size="14.00">Rodin/PETSc/IO/MEDIT.h</text>
 </g>
 <!-- Rodin/PETSc/IO.h&#45;&gt;Rodin/PETSc/IO/MEDIT.h -->
 <g id="edge178" class="edge">
@@ -6077,7 +6077,7 @@
 <!-- Rodin/PETSc/Variational/Problem.h -->
 <g id="node191" class="node">
 <title>Rodin/PETSc/Variational/Problem.h</title>
-<ellipse fill="#fee08b" stroke="black" cx="22776.48" cy="-6552" rx="180" ry="180"/>
+<ellipse fill="#fdae61" stroke="black" cx="22776.48" cy="-6552" rx="180" ry="180"/>
 <text text-anchor="middle" x="22776.48" y="-6545.1" font-family="Times,serif" font-size="28.00">Rodin/PETSc/Variational/Problem.h</text>
 </g>
 <!-- Rodin/PETSc/Variational.h&#45;&gt;Rodin/PETSc/Variational/Problem.h -->
@@ -6102,7 +6102,7 @@
 <g id="node193" class="node">
 <title>Rodin/PETSc/Variational/BilinearForm.h</title>
 <ellipse fill="#ffffbf" stroke="black" cx="22508.48" cy="-5184" rx="144" ry="144"/>
-<text text-anchor="middle" x="22508.48" y="-5178.4" font-family="Times,serif" font-size="22.00">Rodin/PETSc/Variational/BilinearForm.h</text>
+<text text-anchor="middle" x="22508.48" y="-5178.1" font-family="Times,serif" font-size="23.00">Rodin/PETSc/Variational/BilinearForm.h</text>
 </g>
 <!-- Rodin/PETSc/Variational.h&#45;&gt;Rodin/PETSc/Variational/BilinearForm.h -->
 <g id="edge191" class="edge">
@@ -7158,7 +7158,7 @@
 <g id="node218" class="node">
 <title>Rodin/MPI.h</title>
 <ellipse fill="#fdae61" stroke="black" cx="1430.48" cy="-7380" rx="180" ry="180"/>
-<text text-anchor="middle" x="1430.48" y="-7372.8" font-family="Times,serif" font-size="29.00">Rodin/MPI.h</text>
+<text text-anchor="middle" x="1430.48" y="-7372.5" font-family="Times,serif" font-size="30.00">Rodin/MPI.h</text>
 </g>
 <!-- Rodin/MPI.h&#45;&gt;Rodin/MPI/Context.h -->
 <g id="edge242" class="edge">
@@ -7254,7 +7254,7 @@
 <g id="node228" class="node">
 <title>Rodin/MPI/Variational/P0.h</title>
 <ellipse fill="#abdda4" stroke="black" cx="1211.48" cy="-3420" rx="108" ry="108"/>
-<text text-anchor="middle" x="1211.48" y="-3416.5" font-family="Times,serif" font-size="15.00">Rodin/MPI/Variational/P0.h</text>
+<text text-anchor="middle" x="1211.48" y="-3416.3" font-family="Times,serif" font-size="14.00">Rodin/MPI/Variational/P0.h</text>
 </g>
 <!-- Rodin/MPI/Variational.h&#45;&gt;Rodin/MPI/Variational/P0.h -->
 <g id="edge251" class="edge">
@@ -7266,7 +7266,7 @@
 <g id="node229" class="node">
 <title>Rodin/MPI/Variational/P0g.h</title>
 <ellipse fill="#abdda4" stroke="black" cx="939.48" cy="-3420" rx="108" ry="108"/>
-<text text-anchor="middle" x="939.48" y="-3416.5" font-family="Times,serif" font-size="15.00">Rodin/MPI/Variational/P0g.h</text>
+<text text-anchor="middle" x="939.48" y="-3416.3" font-family="Times,serif" font-size="14.00">Rodin/MPI/Variational/P0g.h</text>
 </g>
 <!-- Rodin/MPI/Variational.h&#45;&gt;Rodin/MPI/Variational/P0g.h -->
 <g id="edge252" class="edge">
@@ -7458,7 +7458,7 @@
 <g id="node377" class="node">
 <title>Rodin/MPI/Assembly/BoundaryDOFs.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="16501.48" cy="-4860" rx="72" ry="72"/>
-<text text-anchor="middle" x="16501.48" y="-4858.7" font-family="Times,serif" font-size="6.00">Rodin/MPI/Assembly/BoundaryDOFs.h</text>
+<text text-anchor="middle" x="16501.48" y="-4858.4" font-family="Times,serif" font-size="7.00">Rodin/MPI/Assembly/BoundaryDOFs.h</text>
 </g>
 <!-- Rodin/MPI/Assembly/MPI.h&#45;&gt;Rodin/MPI/Assembly/BoundaryDOFs.h -->
 <g id="edge1063" class="edge">
@@ -7494,7 +7494,7 @@
 <g id="node382" class="node">
 <title>Rodin/MPI/Variational/P1/P1.h</title>
 <ellipse fill="#abdda4" stroke="black" cx="1445.48" cy="-2916" rx="108" ry="108"/>
-<text text-anchor="middle" x="1445.48" y="-2912.5" font-family="Times,serif" font-size="15.00">Rodin/MPI/Variational/P1/P1.h</text>
+<text text-anchor="middle" x="1445.48" y="-2912.3" font-family="Times,serif" font-size="14.00">Rodin/MPI/Variational/P1/P1.h</text>
 </g>
 <!-- Rodin/MPI/Variational/P1.h&#45;&gt;Rodin/MPI/Variational/P1/P1.h -->
 <g id="edge1089" class="edge">
@@ -8292,7 +8292,7 @@
 <g id="node289" class="node">
 <title>Rodin/Adaptation/CellDeformation.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="15139.48" cy="-4212" rx="72" ry="72"/>
-<text text-anchor="middle" x="15139.48" y="-4209.5" font-family="Times,serif" font-size="10.00">Rodin/Adaptation/CellDeformation.h</text>
+<text text-anchor="middle" x="15139.48" y="-4209.8" font-family="Times,serif" font-size="9.00">Rodin/Adaptation/CellDeformation.h</text>
 </g>
 <!-- Rodin/Adaptation.h&#45;&gt;Rodin/Adaptation/CellDeformation.h -->
 <g id="edge550" class="edge">
@@ -8657,7 +8657,7 @@
 <!-- Rodin/Adaptation/WNGIRPrimalBarrierForce.h -->
 <g id="node422" class="node">
 <title>Rodin/Adaptation/WNGIRPrimalBarrierForce.h</title>
-<ellipse fill="#abdda4" stroke="black" cx="14799.48" cy="-4860" rx="72" ry="72"/>
+<ellipse fill="#66c2a5" stroke="black" cx="14799.48" cy="-4860" rx="72" ry="72"/>
 <text text-anchor="middle" x="14799.48" y="-4857.5" font-family="Times,serif" font-size="10.00">Rodin/Adaptation/WNGIRPrimalBarrierForce.h</text>
 </g>
 <!-- Rodin/Adaptation/WNGIRSolver.h&#45;&gt;Rodin/Adaptation/WNGIRPrimalBarrierForce.h -->
@@ -8705,7 +8705,7 @@
 <!-- Rodin/Adaptation/WNGIRPrimalBarrierMetric.h -->
 <g id="node428" class="node">
 <title>Rodin/Adaptation/WNGIRPrimalBarrierMetric.h</title>
-<ellipse fill="#abdda4" stroke="black" cx="14637.48" cy="-4860" rx="72" ry="72"/>
+<ellipse fill="#66c2a5" stroke="black" cx="14637.48" cy="-4860" rx="72" ry="72"/>
 <text text-anchor="middle" x="14637.48" y="-4857.5" font-family="Times,serif" font-size="10.00">Rodin/Adaptation/WNGIRPrimalBarrierMetric.h</text>
 </g>
 <!-- Rodin/Adaptation/WNGIRSolver.h&#45;&gt;Rodin/Adaptation/WNGIRPrimalBarrierMetric.h -->
@@ -9564,7 +9564,7 @@
 <g id="node472" class="node">
 <title>Rodin/Variational/P1/P1Element.hpp</title>
 <ellipse fill="#66c2a5" stroke="black" cx="8505.48" cy="-1512" rx="72" ry="72"/>
-<text text-anchor="middle" x="8505.48" y="-1510.4" font-family="Times,serif" font-size="7.00">Rodin/Variational/P1/P1Element.hpp</text>
+<text text-anchor="middle" x="8505.48" y="-1510.1" font-family="Times,serif" font-size="8.00">Rodin/Variational/P1/P1Element.hpp</text>
 </g>
 <!-- Rodin/Variational/P1/P1Element.h&#45;&gt;Rodin/Variational/P1/P1Element.hpp -->
 <g id="edge1644" class="edge">
@@ -10176,7 +10176,7 @@
 <g id="node344" class="node">
 <title>Rodin/Solid/Local/Input.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="19465.48" cy="-4860" rx="72" ry="72"/>
-<text text-anchor="middle" x="19465.48" y="-4858.4" font-family="Times,serif" font-size="7.00">Rodin/Solid/Local/Input.h</text>
+<text text-anchor="middle" x="19465.48" y="-4858.1" font-family="Times,serif" font-size="8.00">Rodin/Solid/Local/Input.h</text>
 </g>
 <!-- Rodin/Solid.h&#45;&gt;Rodin/Solid/Local/Input.h -->
 <g id="edge872" class="edge">
@@ -10188,7 +10188,7 @@
 <g id="node345" class="node">
 <title>Rodin/Solid/Local/FiberKinematics.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="20221.48" cy="-1908" rx="72" ry="72"/>
-<text text-anchor="middle" x="20221.48" y="-1906.4" font-family="Times,serif" font-size="7.00">Rodin/Solid/Local/FiberKinematics.h</text>
+<text text-anchor="middle" x="20221.48" y="-1906.1" font-family="Times,serif" font-size="8.00">Rodin/Solid/Local/FiberKinematics.h</text>
 </g>
 <!-- Rodin/Solid.h&#45;&gt;Rodin/Solid/Local/FiberKinematics.h -->
 <g id="edge873" class="edge">
@@ -10248,7 +10248,7 @@
 <g id="node350" class="node">
 <title>Rodin/Solid/Constitutive/NeoHookean.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="21637.48" cy="-2160" rx="72" ry="72"/>
-<text text-anchor="middle" x="21637.48" y="-2158.4" font-family="Times,serif" font-size="7.00">Rodin/Solid/Constitutive/NeoHookean.h</text>
+<text text-anchor="middle" x="21637.48" y="-2158.1" font-family="Times,serif" font-size="8.00">Rodin/Solid/Constitutive/NeoHookean.h</text>
 </g>
 <!-- Rodin/Solid.h&#45;&gt;Rodin/Solid/Constitutive/NeoHookean.h -->
 <g id="edge878" class="edge">
@@ -10260,7 +10260,7 @@
 <g id="node351" class="node">
 <title>Rodin/Solid/Constitutive/SaintVenantKirchhoff.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="21799.48" cy="-2160" rx="72" ry="72"/>
-<text text-anchor="middle" x="21799.48" y="-2158.4" font-family="Times,serif" font-size="7.00">Rodin/Solid/Constitutive/SaintVenantKirchhoff.h</text>
+<text text-anchor="middle" x="21799.48" y="-2158.1" font-family="Times,serif" font-size="8.00">Rodin/Solid/Constitutive/SaintVenantKirchhoff.h</text>
 </g>
 <!-- Rodin/Solid.h&#45;&gt;Rodin/Solid/Constitutive/SaintVenantKirchhoff.h -->
 <g id="edge879" class="edge">
@@ -10272,7 +10272,7 @@
 <g id="node352" class="node">
 <title>Rodin/Solid/Constitutive/MooneyRivlin.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="21313.48" cy="-2160" rx="72" ry="72"/>
-<text text-anchor="middle" x="21313.48" y="-2158.4" font-family="Times,serif" font-size="7.00">Rodin/Solid/Constitutive/MooneyRivlin.h</text>
+<text text-anchor="middle" x="21313.48" y="-2158.1" font-family="Times,serif" font-size="8.00">Rodin/Solid/Constitutive/MooneyRivlin.h</text>
 </g>
 <!-- Rodin/Solid.h&#45;&gt;Rodin/Solid/Constitutive/MooneyRivlin.h -->
 <g id="edge880" class="edge">
@@ -10284,7 +10284,7 @@
 <g id="node353" class="node">
 <title>Rodin/Solid/Constitutive/Yeoh.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="21475.48" cy="-2160" rx="72" ry="72"/>
-<text text-anchor="middle" x="21475.48" y="-2158.4" font-family="Times,serif" font-size="7.00">Rodin/Solid/Constitutive/Yeoh.h</text>
+<text text-anchor="middle" x="21475.48" y="-2158.1" font-family="Times,serif" font-size="8.00">Rodin/Solid/Constitutive/Yeoh.h</text>
 </g>
 <!-- Rodin/Solid.h&#45;&gt;Rodin/Solid/Constitutive/Yeoh.h -->
 <g id="edge881" class="edge">
@@ -11088,7 +11088,7 @@
 <g id="node365" class="node">
 <title>Rodin/Solid/Local/Output.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="19741.48" cy="-3420" rx="72" ry="72"/>
-<text text-anchor="middle" x="19741.48" y="-3418.4" font-family="Times,serif" font-size="7.00">Rodin/Solid/Local/Output.h</text>
+<text text-anchor="middle" x="19741.48" y="-3418.1" font-family="Times,serif" font-size="8.00">Rodin/Solid/Local/Output.h</text>
 </g>
 <!-- Rodin/Solid/Integrators/InternalVirtualWork.h&#45;&gt;Rodin/Solid/Local/Output.h -->
 <g id="edge1005" class="edge">
@@ -12468,7 +12468,7 @@
 <g id="node448" class="node">
 <title>Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h</title>
 <ellipse fill="#abdda4" stroke="black" cx="18505.48" cy="-2160" rx="72" ry="72"/>
-<text text-anchor="middle" x="18505.48" y="-2157.2" font-family="Times,serif" font-size="11.00">Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h</text>
+<text text-anchor="middle" x="18505.48" y="-2157.5" font-family="Times,serif" font-size="10.00">Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h</text>
 </g>
 <!-- Rodin/Heart/CCMLC2014/Solver/Stepper.h&#45;&gt;Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h -->
 <g id="edge1439" class="edge">
