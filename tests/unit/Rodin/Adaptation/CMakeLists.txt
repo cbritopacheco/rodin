@@ -38,6 +38,10 @@ gtest_discover_tests(RodinAdaptationWNGIRLossTest
 )
 
 add_executable(RodinAdaptationWNGIRSolverTest WNGIRSolverTest.cpp)
+add_executable(RodinAdaptationWNGIRAdaptTest WNGIRAdaptTest.cpp)
+target_link_libraries(RodinAdaptationWNGIRAdaptTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationWNGIRAdaptTest PROPERTIES LABELS unit)
 
 if(TARGET Rodin::MMG)
   add_executable(RodinAdaptationWNGIRExampleParametersTest WNGIRExampleParametersTest.cpp)

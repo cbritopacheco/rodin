@@ -14,10 +14,10 @@
 #include "Rodin/Geometry/Types.h"
 #include "Rodin/Types.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /// @brief Runtime parameters controlling WNGIR assembly and iteration.
-  struct WNGIRParameters
+  struct Parameters
   {
       /// @brief Coefficients, reference scale and admissible geometry of the model.
       struct Model

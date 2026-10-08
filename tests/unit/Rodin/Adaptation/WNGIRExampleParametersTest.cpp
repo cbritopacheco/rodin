@@ -45,7 +45,7 @@ TEST(Rodin_Adaptation_WNGIRExampleParameters, CanonicalNamesMapToHierarchicalPar
   EXPECT_EQ(p.model.distortion, Real(5));
   EXPECT_EQ(p.convergence.iterations.outer, 20u);
   EXPECT_EQ(p.convergence.iterations.inner, 10u);
-  EXPECT_EQ(p.linear.solver, Adaptation::WNGIRParameters::LinearSolver::CG);
+  EXPECT_EQ(p.linear.solver, Adaptation::WNGIR::Parameters::LinearSolver::CG);
   EXPECT_EQ(p.convergence.tolerance.linearRelative, Real(1e-9));
 }
 
@@ -73,7 +73,7 @@ TEST(Rodin_Adaptation_WNGIRHingeProblem, CenteringEntersTheStationarityResidual)
   state = VectorFunction(Real(0.2), Real(0.4));
   Math::Matrix<Real> centering =
     Math::Matrix<Real>::Constant(space.getSize(), 1, Real(0.01));
-  Adaptation::WNGIRHingeProblem problem(trial, test);
+  Adaptation::WNGIR::HingeProblem problem(trial, test);
   problem = Integral(Dot(trial, test));
   problem.setState(state).setCentering(centering).assemble();
   const auto& system = problem.getLinearSystem();
@@ -97,7 +97,7 @@ TEST(Rodin_Adaptation_WNGIRAdmissibility, SamplingIsReadOnly)
     return value;
   });
   const Math::Vector<Real> before = displacement.getData();
-  const auto report = Adaptation::evaluateWNGIRAdmissibilitySampled(
+  const auto report = Adaptation::WNGIR::evaluateAdmissibility(
     std::as_const(displacement), Real(0.01));
   EXPECT_NEAR(report.minJ, Real(0.81), Real(1e-12));
   EXPECT_NEAR(report.maxQRel, Real(1), Real(1e-12));
@@ -106,7 +106,7 @@ TEST(Rodin_Adaptation_WNGIRAdmissibility, SamplingIsReadOnly)
 
   P1<Math::SpatialVector<Real>, LocalMesh> wrongSpace(mesh, 3);
   GridFunction wrongDimension(wrongSpace);
-  EXPECT_THROW(Adaptation::evaluateWNGIRAdmissibilitySampled(
+  EXPECT_THROW(Adaptation::WNGIR::evaluateAdmissibility(
     wrongDimension, Real(0.01)), Alert::Exception);
 }
 
@@ -122,7 +122,7 @@ TEST(Rodin_Adaptation_WNGIRAdmissibility, RejectsNonfiniteGeometry)
          std::numeric_limits<Real>::infinity()})
   {
     displacement.setData(Math::Vector<Real>::Constant(space.getSize(), invalid));
-    const auto report = Adaptation::evaluateWNGIRAdmissibilitySampled(
+    const auto report = Adaptation::WNGIR::evaluateAdmissibility(
       std::as_const(displacement), Real(0.01));
     EXPECT_GT(report.inadmissibleCount, 0u);
   }
@@ -130,9 +130,9 @@ TEST(Rodin_Adaptation_WNGIRAdmissibility, RejectsNonfiniteGeometry)
 
 TEST(Rodin_Adaptation_WNGIRReport, InnerFailuresUseCanonicalNames)
 {
-  Adaptation::WNGIRReport report;
-  report.reason = Adaptation::WNGIRReport::Reason::InnerLineSearchFailure;
+  Adaptation::WNGIR::Report report;
+  report.reason = Adaptation::WNGIR::Report::Reason::InnerLineSearchFailure;
   EXPECT_STREQ(report.getReasonString(), "inner-line-search-failure");
-  report.reason = Adaptation::WNGIRReport::Reason::InnerIterationLimit;
+  report.reason = Adaptation::WNGIR::Report::Reason::InnerIterationLimit;
   EXPECT_STREQ(report.getReasonString(), "inner-iteration-limit");
 }

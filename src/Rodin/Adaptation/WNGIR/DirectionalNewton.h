@@ -9,7 +9,7 @@
 #include <cmath>
 #include "Rodin/Types.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /**
    * @brief Quadratic-model minimizer with an optional physical-motion bound.
@@ -22,7 +22,7 @@ namespace Rodin::Adaptation
    * @param maximumStep Physical-motion bound; zero leaves scaling unrestricted.
    * @returns Directional scale, or zero when the model inputs are invalid.
    */
-  inline Real wngirDirectionalNewtonStep(Real action, Real curvature,
+  inline Real getDirectionalNewtonStep(Real action, Real curvature,
     Real fittingCurvature, Real directionNorm, Real maximumStep)
   {
     if (!(action > Real(0)) || !std::isfinite(action) || !(directionNorm > Real(0)) ||

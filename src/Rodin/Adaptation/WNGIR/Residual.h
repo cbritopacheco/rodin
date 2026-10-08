@@ -13,10 +13,10 @@
 
 #include "Loss.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /// @brief Pointwise robust residual state at a deformed interface point.
-  class WNGIRResidualState
+  class ResidualState
   {
     public:
       template <class PhiType, class GradType, class DeformationType>
@@ -27,11 +27,10 @@ namespace Rodin::Adaptation
        * @param phi Observation field.
        * @param grad Gradient of the observation field.
        * @param loss Loss applied to the observation residual.
-       * @param weighted Whether to weight the observation residual by geometric distortion.
        */
-      WNGIRResidualState(const PhiType& phi, const GradType& grad,
+      ResidualState(const PhiType& phi, const GradType& grad,
         const DeformationType& deformation, const Variational::IntegrationPoint& ip,
-        const WNGIRLoss& loss)
+        const Loss& loss)
       {
         const auto& moved = deformation.getMovedPoint(ip);
         m_residual = phi.getValue(moved);

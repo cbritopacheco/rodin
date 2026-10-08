@@ -11,10 +11,10 @@
 
 #include "Rodin/Types.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /// @brief Diagnostics produced by a WNGIR solve.
-  struct WNGIRReport
+  struct Report
   {
       enum class Reason
       {

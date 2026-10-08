@@ -11,13 +11,13 @@
 #include "Loss.h"
 #include "Residual.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /// @brief Negative first-variation coefficient of the robust interface energy.
   template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
-  class WNGIRFittingForce final
+  class FittingForce final
     : public Variational::VectorFunctionBase<Real,
-        WNGIRFittingForce<PhiDerived, GradDerived, Displacement, LocatorType>>
+        FittingForce<PhiDerived, GradDerived, Displacement, LocatorType>>
   {
     public:
       /// @brief Scalar value type.
@@ -26,7 +26,7 @@ namespace Rodin::Adaptation
       using RangeType = Math::SpatialVector<ScalarType>;
       /// @brief Parent class type.
       using Parent = Variational::VectorFunctionBase<ScalarType,
-        WNGIRFittingForce<PhiDerived, GradDerived, Displacement, LocatorType>>;
+        FittingForce<PhiDerived, GradDerived, Displacement, LocatorType>>;
       /// @brief Level-set function type.
       using PhiType = Variational::RealFunctionBase<PhiDerived>;
       /// @brief Level-set gradient function type.
@@ -42,8 +42,8 @@ namespace Rodin::Adaptation
        * @param normalization Fixed gradient-scale normalization.
        * @param dimension Spatial dimension.
        */
-      WNGIRFittingForce(const PhiType& phi, const GradType& grad,
-        const Displacement& current, const LocatorType& locator, const WNGIRLoss& loss,
+      FittingForce(const PhiType& phi, const GradType& grad,
+        const Displacement& current, const LocatorType& locator, const Loss& loss,
         Real normalization, std::size_t dimension)
         : m_phi(phi.copy()),
           m_grad(grad.copy()),
@@ -57,7 +57,7 @@ namespace Rodin::Adaptation
        * @brief Copy constructor.
        * @param other Coefficient to copy, cloning its target expressions.
        */
-      WNGIRFittingForce(const WNGIRFittingForce& other)
+      FittingForce(const FittingForce& other)
         : Parent(other),
           m_phi(other.m_phi->copy()),
           m_grad(other.m_grad->copy()),
@@ -74,7 +74,7 @@ namespace Rodin::Adaptation
        */
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
-        const WNGIRResidualState state(*m_phi, *m_grad, m_deformation, ip, m_loss);
+        const ResidualState state(*m_phi, *m_grad, m_deformation, ip, m_loss);
         return (-m_normalization * state.getWeight() * state.getResidual()) *
           state.getGradient();
       }
@@ -103,21 +103,21 @@ namespace Rodin::Adaptation
        * @brief Clones this coefficient.
        * @returns Newly allocated copy owned by the caller.
        */
-      WNGIRFittingForce* copy() const noexcept override
+      FittingForce* copy() const noexcept override
       {
-        return new WNGIRFittingForce(*this);
+        return new FittingForce(*this);
       }
 
     private:
       std::unique_ptr<PhiType> m_phi;
       std::unique_ptr<GradType> m_grad;
       DeformationMap<Displacement, LocatorType> m_deformation;
-      WNGIRLoss m_loss;
+      Loss m_loss;
       Real m_normalization;
       std::size_t m_dimension;
   };
   /**
-   * @brief Deduction guide for WNGIRFittingForce.
+   * @brief Deduction guide for FittingForce.
    * @param phi Observation field.
    * @param grad Gradient of the observation field.
    * @param current Current displacement field.
@@ -128,11 +128,11 @@ namespace Rodin::Adaptation
    */
 
   template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
-  WNGIRFittingForce(const Variational::RealFunctionBase<PhiDerived>& phi,
+  FittingForce(const Variational::RealFunctionBase<PhiDerived>& phi,
     const Variational::VectorFunctionBase<Real, GradDerived>& grad,
-    const Displacement& current, const LocatorType& locator, const WNGIRLoss& loss,
+    const Displacement& current, const LocatorType& locator, const Loss& loss,
     Real normalization, std::size_t dimension)
-    -> WNGIRFittingForce<PhiDerived, GradDerived, Displacement, LocatorType>;
+    -> FittingForce<PhiDerived, GradDerived, Displacement, LocatorType>;
 }
 
 #endif

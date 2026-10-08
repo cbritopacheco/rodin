@@ -10,7 +10,7 @@
 #include "../DeformationMap.h"
 #include "Parameters.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /**
    * @brief Matrix coefficient of the WNGIR surface fitting metric.
@@ -18,9 +18,9 @@ namespace Rodin::Adaptation
    * and fixed gradient-scale normalization.
    */
   template <class GradDerived, class Displacement, class LocatorType>
-  class WNGIRFittingCoefficient final
+  class FittingCoefficient final
     : public Variational::MatrixFunctionBase<Real,
-        WNGIRFittingCoefficient<GradDerived, Displacement, LocatorType>>
+        FittingCoefficient<GradDerived, Displacement, LocatorType>>
   {
     public:
       /// @brief Scalar value type.
@@ -29,7 +29,7 @@ namespace Rodin::Adaptation
       using RangeType = Math::SpatialMatrix<ScalarType>;
       /// @brief Parent class type.
       using Parent = Variational::MatrixFunctionBase<ScalarType,
-        WNGIRFittingCoefficient<GradDerived, Displacement, LocatorType>>;
+        FittingCoefficient<GradDerived, Displacement, LocatorType>>;
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
@@ -42,8 +42,8 @@ namespace Rodin::Adaptation
        * @param normalization Fixed gradient-scale normalization.
        * @param dimension Spatial dimension.
        */
-      WNGIRFittingCoefficient(const GradType& grad, const Displacement& current,
-        const LocatorType& locator, const WNGIRParameters& parameters, Real normalization,
+      FittingCoefficient(const GradType& grad, const Displacement& current,
+        const LocatorType& locator, const Parameters& parameters, Real normalization,
         std::size_t dimension)
         : m_grad(grad.copy()),
           m_deformation(current, locator),
@@ -56,7 +56,7 @@ namespace Rodin::Adaptation
        * @brief Copy constructor.
        * @param other Coefficient to copy, cloning its target gradient.
        */
-      WNGIRFittingCoefficient(const WNGIRFittingCoefficient& other)
+      FittingCoefficient(const FittingCoefficient& other)
         : Parent(other),
           m_grad(other.m_grad->copy()),
           m_deformation(other.m_deformation),
@@ -120,20 +120,20 @@ namespace Rodin::Adaptation
        * @brief Clones this coefficient.
        * @returns Newly allocated copy owned by the caller.
        */
-      WNGIRFittingCoefficient* copy() const noexcept override
+      FittingCoefficient* copy() const noexcept override
       {
-        return new WNGIRFittingCoefficient(*this);
+        return new FittingCoefficient(*this);
       }
 
     private:
       std::unique_ptr<GradType> m_grad;
       DeformationMap<Displacement, LocatorType> m_deformation;
-      std::reference_wrapper<const WNGIRParameters> m_parameters;
+      std::reference_wrapper<const Parameters> m_parameters;
       Real m_normalization;
       std::size_t m_dimension;
   };
   /**
-   * @brief Deduction guide for WNGIRFittingCoefficient.
+   * @brief Deduction guide for FittingCoefficient.
    * @param grad Gradient of the observation field.
    * @param current Current displacement field.
    * @param locator Point locator used to find mesh entities.
@@ -143,10 +143,10 @@ namespace Rodin::Adaptation
    */
 
   template <class GradDerived, class Displacement, class LocatorType>
-  WNGIRFittingCoefficient(const Variational::VectorFunctionBase<Real, GradDerived>& grad,
+  FittingCoefficient(const Variational::VectorFunctionBase<Real, GradDerived>& grad,
     const Displacement& current, const LocatorType& locator,
-    const WNGIRParameters& parameters, Real normalization,
-    std::size_t dimension) -> WNGIRFittingCoefficient<GradDerived, Displacement, LocatorType>;
+    const Parameters& parameters, Real normalization,
+    std::size_t dimension) -> FittingCoefficient<GradDerived, Displacement, LocatorType>;
 }
 
 #endif

@@ -11,7 +11,7 @@
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational/Problem.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /**
    * @brief Native variational tangent problem for the affine quadratic hinges.
@@ -24,7 +24,7 @@ namespace Rodin::Adaptation
    * referenced GridFunction; its lifetime must include the Newton solve.
    */
   template <class TrialFunction, class TestFunction>
-  class WNGIRHingeProblem final
+  class HingeProblem final
     : public std::decay_t<decltype(Variational::Problem(
         std::declval<TrialFunction&>(), std::declval<TestFunction&>()))>
   {
@@ -34,29 +34,29 @@ namespace Rodin::Adaptation
       using Displacement = typename Parent::SolutionType;
       using Parent::operator=;
 
-      WNGIRHingeProblem(TrialFunction& trial, TestFunction& test)
+      HingeProblem(TrialFunction& trial, TestFunction& test)
         : Parent(trial, test)
       {}
 
-      WNGIRHingeProblem& setState(const Displacement& state)
+      HingeProblem& setState(const Displacement& state)
       {
         m_state = &state;
         return *this;
       }
 
-      WNGIRHingeProblem& setBoundaryDOFs(const IndexMap<Real>& dofs)
+      HingeProblem& setBoundaryDOFs(const IndexMap<Real>& dofs)
       {
         m_boundaryDOFs = &dofs;
         return *this;
       }
 
-      WNGIRHingeProblem& setCentering(const Math::Matrix<Real>& couplings)
+      HingeProblem& setCentering(const Math::Matrix<Real>& couplings)
       {
         m_centering = couplings;
         return *this;
       }
 
-      WNGIRHingeProblem& assemble() override
+      HingeProblem& assemble() override
       {
         assert(m_state);
         const auto start = std::chrono::steady_clock::now();
@@ -81,9 +81,9 @@ namespace Rodin::Adaptation
         return m_assemblySeconds;
       }
 
-      WNGIRHingeProblem* copy() const noexcept override
+      HingeProblem* copy() const noexcept override
       {
-        return new WNGIRHingeProblem(*this);
+        return new HingeProblem(*this);
       }
 
     private:

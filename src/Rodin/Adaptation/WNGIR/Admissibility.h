@@ -21,10 +21,10 @@
 #include "../CellDeformation.h"
 #include "Parameters.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /// @brief Sampled geometric admissibility diagnostics.
-  struct WNGIRAdmissibilityReport
+  struct AdmissibilityReport
   {
       /// @brief Minimum sampled Jacobian determinant.
       Real minJ = std::numeric_limits<Real>::infinity();
@@ -42,13 +42,13 @@ namespace Rodin::Adaptation
    * @param quadratureOrder Sampling order; zero selects the finite-element rule.
    * @returns Sampled Jacobian, relative distortion and invalid-sample count.
    */
-  WNGIRAdmissibilityReport evaluateWNGIRAdmissibilitySampled(const Displacement& u,
+  AdmissibilityReport evaluateAdmissibility(const Displacement& u,
     Real jacobian, std::size_t quadratureOrder = 0)
   {
     using Variational::IntegrationPoint;
     using Variational::Jacobian;
 
-    WNGIRAdmissibilityReport rep;
+    AdmissibilityReport rep;
     const auto& fes = u.getFiniteElementSpace();
     const auto& mesh = fes.getMesh();
     const std::size_t dim = mesh.getDimension();
@@ -65,7 +65,7 @@ namespace Rodin::Adaptation
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
       const auto& qf = QF::PolytopeQuadratureFormula::get(quadratureOrder > 0
           ? quadratureOrder
-          : WNGIRParameters::Quadrature::getCellOrder(fe.getOrder()),
+          : Parameters::Quadrature::getCellOrder(fe.getOrder()),
         cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)

@@ -6,13 +6,13 @@ namespace Rodin::Adaptation
 {
   TEST(Rodin_Adaptation_WNGIRLoss, SmallWelschResidualDoesNotCancel)
   {
-    const WNGIRLoss loss(1);
+    const WNGIR::Loss loss(1);
     EXPECT_NEAR(loss.getValue(Real(1e-10)), Real(0.5e-20), Real(1e-35));
   }
 
   TEST(Rodin_Adaptation_WNGIRLoss, DroppedLevelSetHessianCurvature)
   {
-    const WNGIRLoss loss(Real(0.3));
+    const WNGIR::Loss loss(Real(0.3));
     constexpr Real eps = Real(1e-6);
     for (const Real r : {Real(0), Real(0.1), Real(0.3), Real(-0.7)})
     {
@@ -24,7 +24,7 @@ namespace Rodin::Adaptation
   /// @brief Verifies that the analytic influence equals the loss derivative.
   TEST(Rodin_Adaptation_WNGIRLoss, InfluenceMatchesFiniteDifference)
   {
-    const WNGIRLoss loss(Real(0.3));
+    const WNGIR::Loss loss(Real(0.3));
     for (const Real residual : {Real(-0.7), Real(-0.1), Real(0.1), Real(0.7)})
     {
       const Real epsilon = Real(1e-7);
@@ -39,7 +39,7 @@ namespace Rodin::Adaptation
   /// @brief Verifies bounded Welsch energy.
   TEST(Rodin_Adaptation_WNGIRLoss, SaturatesAtHalfScaleSquared)
   {
-    const WNGIRLoss loss(Real(0.3));
+    const WNGIR::Loss loss(Real(0.3));
     EXPECT_NEAR(loss.getValue(Real(100)), Real(0.045), Real(1e-12));
     EXPECT_LT(loss.getWeight(Real(100)), Real(1e-12));
   }

@@ -971,7 +971,7 @@ int main(int argc, char** argv)
       Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
       const auto wngir = Rodin::Examples::makeWNGIRParameters(
         argc, argv, h, interfaceAttribute, wngirDefaults);
-      Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
+      Rodin::Adaptation::WNGIR::Problem wngirSolver(wngirTrial, wngirTest);
       wngirSolver.setParameters(wngir);
       const auto wngirRep = wngirSolver.solve(phi, gradPhi);
       std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific

@@ -8,11 +8,11 @@
 #include "../CellDeformation.h"
 #include "Hinge.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /// @brief Hessian of the affine quadratic quality hinges.
   template <class TrialFunction, class TestFunction, class Displacement>
-  class WNGIRHingeMetric final : public Variational::LocalBilinearFormIntegratorBase<
+  class HingeMetric final : public Variational::LocalBilinearFormIntegratorBase<
                                    typename TrialFunction::ScalarType>
   {
     public:
@@ -30,9 +30,9 @@ namespace Rodin::Adaptation
        * @param parameters Quality budgets and hinge activation weights.
        * @param hingeCoefficient Effective hinge coefficient for this outer model.
        */
-      WNGIRHingeMetric(const TrialFunction& du, const TestFunction& z,
+      HingeMetric(const TrialFunction& du, const TestFunction& z,
         const Displacement& current, const Displacement& inner,
-        const WNGIRParameters& parameters, Real hingeCoefficient)
+        const Parameters& parameters, Real hingeCoefficient)
         : Parent(du.getLeaf(), z.getLeaf()),
           m_du(du),
           m_z(z),
@@ -46,7 +46,7 @@ namespace Rodin::Adaptation
        * @brief Copy constructor.
        * @param other Integrator to copy, retaining its field references.
        */
-      WNGIRHingeMetric(const WNGIRHingeMetric& other) = default;
+      HingeMetric(const HingeMetric& other) = default;
 
       /**
        * @brief Returns the current polytope.
@@ -63,7 +63,7 @@ namespace Rodin::Adaptation
        * @param polytope Cell to integrate.
        * @returns This integrator after binding and assembly.
        */
-      WNGIRHingeMetric& setPolytope(const Geometry::Polytope& polytope) final override
+      HingeMetric& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
         const std::size_t dim = polytope.getDimension();
@@ -75,7 +75,7 @@ namespace Rodin::Adaptation
         const auto& parameters = m_parameters.get();
         const std::size_t order = parameters.quadrature.order > 0
           ? parameters.quadrature.order
-          : WNGIRParameters::Quadrature::getCellOrder(trialFE.getOrder());
+          : Parameters::Quadrature::getCellOrder(trialFE.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -104,7 +104,7 @@ namespace Rodin::Adaptation
           deformation.setDisplacementGradient(currentJacobian.getValue(ip));
           if (!deformation.isAdmissible())
             continue;
-          const WNGIRHingeState state(
+          const HingeState state(
             deformation, innerJacobian.getValue(ip), parameters, m_hingeCoefficient);
           trialJacobian.setIntegrationPoint(ip);
           for (std::size_t local = 0; local < nTrial; ++local)
@@ -171,9 +171,9 @@ namespace Rodin::Adaptation
        * @brief Clones this integrator.
        * @returns Newly allocated copy owned by the caller.
        */
-      WNGIRHingeMetric* copy() const noexcept final override
+      HingeMetric* copy() const noexcept final override
       {
-        return new WNGIRHingeMetric(*this);
+        return new HingeMetric(*this);
       }
 
     private:
@@ -181,7 +181,7 @@ namespace Rodin::Adaptation
       std::reference_wrapper<const TestFunction> m_z;
       std::reference_wrapper<const Displacement> m_current;
       std::reference_wrapper<const Displacement> m_inner;
-      std::reference_wrapper<const WNGIRParameters> m_parameters;
+      std::reference_wrapper<const Parameters> m_parameters;
       Real m_hingeCoefficient;
       const Geometry::Polytope* m_polytope = nullptr;
       std::vector<Real> m_jTrial;

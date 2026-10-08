@@ -1669,17 +1669,29 @@
   The WNGIR step solves a metric-preconditioned (natural-gradient) problem
   built entirely in the variational form language: a surface force
   (the Welsch first variation, assembled on interface facets) balanced
-  against bulk, observation, and admissibility metrics. Hard admissibility
+  against fitting and centered distribution metrics. Affine quadratic hinges
+  recover quality in the direction problem. Hard admissibility
   (element validity) is enforced by a nonlinear line search.
 
   ## Key classes
-  - WNGIRParameters — solve configuration (budgets, tolerances, weights)
-  - WNGIRReport — per-solve diagnostics
-  - WNGIRSolver — backend-independent solver driver
+  - @ref Rodin::Adaptation::WNGIR::Parameters — budgets, tolerances and weights
+  - @ref Rodin::Adaptation::WNGIR::Report — per-solve diagnostics
+  - @ref Rodin::Adaptation::WNGIR::Problem — local fitting without mesh mutation
+  - @ref Rodin::Adaptation::WNGIR::Adapt — owned P1 setup and in-place displacement
 
   @note Interface-fitting constraints are formulated as smooth penalties;
   the module deliberately avoids hard geometric projections inside the
   solve, which break line-search continuity.
+ */
+
+/**
+  @namespace Rodin::Adaptation::WNGIR
+  @brief Robust interface fitting with a fitting--distribution metric.
+
+  @ref Rodin::Adaptation::WNGIR::Problem computes displacement using
+  @f$M=F+D@f$, quadratic affine quality hinges and Armijo globalization.
+  @ref Rodin::Adaptation::WNGIR::Adapt owns a local P1 setup and applies valid
+  results to affine simplicial meshes. MPI/PETSc execution is not implemented.
  */
 
 /**

@@ -10,10 +10,10 @@
 #include "Rodin/Variational.h"
 #include "../CellDeformation.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   template <class Displacement>
-  class WNGIRCurrentInverse;
+  class CurrentInverse;
 
   /**
    * @brief Sparse core of the frozen centered current-strain bilinear form.
@@ -25,14 +25,14 @@ namespace Rodin::Adaptation
    * element means are subtracted. Assembly clones isolate bind state.
    */
   template <class TrialFunction, class TestFunction, class Displacement>
-  class WNGIRDistribution final : public Variational::LocalBilinearFormIntegratorBase<
+  class Distribution final : public Variational::LocalBilinearFormIntegratorBase<
                                     typename TrialFunction::ScalarType>
   {
     public:
       using ScalarType = typename TrialFunction::ScalarType;
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      WNGIRDistribution(const TrialFunction& trial, const TestFunction& test,
+      Distribution(const TrialFunction& trial, const TestFunction& test,
         const Displacement& current, Real deviatoric, Real divergence, size_t order)
         : Parent(trial.getLeaf(), test.getLeaf()),
           m_trial(trial),
@@ -49,7 +49,7 @@ namespace Rodin::Adaptation
         return *m_polytope;
       }
 
-      WNGIRDistribution& setPolytope(const Geometry::Polytope& cell) final override
+      Distribution& setPolytope(const Geometry::Polytope& cell) final override
       {
         m_polytope = &cell;
         const auto d = cell.getDimension();
@@ -111,9 +111,9 @@ namespace Rodin::Adaptation
       {
         return Geometry::Region::Cells;
       }
-      WNGIRDistribution* copy() const noexcept final override
+      Distribution* copy() const noexcept final override
       {
-        return new WNGIRDistribution(*this);
+        return new Distribution(*this);
       }
 
       /**
@@ -135,7 +135,7 @@ namespace Rodin::Adaptation
             return deformation.getJacobian();
           });
         const auto gradient = Variational::Jacobian(test) *
-          WNGIRCurrentInverse<Displacement>(current, dimension);
+          CurrentInverse<Displacement>(current, dimension);
         const auto strain = Real(0.5) * (gradient + Variational::Transpose(gradient));
         auto traceIntegral = Variational::Integral(weight * Variational::Trace(strain));
         traceIntegral.setOrder(m_order);
@@ -189,11 +189,11 @@ namespace Rodin::Adaptation
 
   /// Frozen inverse deformation gradient, expressed as a form-language coefficient.
   template <class Displacement>
-  class WNGIRCurrentInverse final
-    : public Variational::MatrixFunctionBase<Real, WNGIRCurrentInverse<Displacement>>
+  class CurrentInverse final
+    : public Variational::MatrixFunctionBase<Real, CurrentInverse<Displacement>>
   {
     public:
-      WNGIRCurrentInverse(const Displacement& current, size_t dimension)
+      CurrentInverse(const Displacement& current, size_t dimension)
         : m_gradient(Variational::Jacobian(current)),
           m_dimension(dimension)
       {}
@@ -216,9 +216,9 @@ namespace Rodin::Adaptation
       {
         return std::nullopt;
       }
-      WNGIRCurrentInverse* copy() const noexcept override
+      CurrentInverse* copy() const noexcept override
       {
-        return new WNGIRCurrentInverse(*this);
+        return new CurrentInverse(*this);
       }
 
     private:

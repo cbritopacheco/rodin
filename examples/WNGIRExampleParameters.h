@@ -24,7 +24,7 @@
 namespace Rodin::Examples
 {
   /// @brief Lossless canonical responses, separate from the human-readable summary.
-  inline void printWNGIRResponses(const Adaptation::WNGIRReport& report)
+  inline void printWNGIRResponses(const Adaptation::WNGIR::Report& report)
   {
     const auto flags = std::cout.flags();
     const auto precision = std::cout.precision();
@@ -59,13 +59,13 @@ namespace Rodin::Examples
   struct WNGIRExampleDefaults
   {
       std::size_t maxIterations =
-        Adaptation::WNGIRParameters{}.convergence.iterations.outer;
+        Adaptation::WNGIR::Parameters{}.convergence.iterations.outer;
       std::size_t quadratureOrder = 0;
-      Real fit = Adaptation::WNGIRParameters{}.model.fit;
-      Real deviatoric = Adaptation::WNGIRParameters{}.model.distribution.deviatoric;
-      Real divergence = Adaptation::WNGIRParameters{}.model.distribution.divergence;
-      Real jacobianWeight = Adaptation::WNGIRParameters{}.model.jacobianWeight;
-      Real distortionWeight = Adaptation::WNGIRParameters{}.model.distortionWeight;
+      Real fit = Adaptation::WNGIR::Parameters{}.model.fit;
+      Real deviatoric = Adaptation::WNGIR::Parameters{}.model.distribution.deviatoric;
+      Real divergence = Adaptation::WNGIR::Parameters{}.model.distribution.divergence;
+      Real jacobianWeight = Adaptation::WNGIR::Parameters{}.model.jacobianWeight;
+      Real distortionWeight = Adaptation::WNGIR::Parameters{}.model.distortionWeight;
   };
 
   inline bool findOption(
@@ -167,7 +167,7 @@ namespace Rodin::Examples
     mesh = std::move(static_cast<MMG::Mesh::Parent&>(mmgMesh));
   }
 
-  inline Adaptation::WNGIRParameters makeWNGIRParameters(int argc, char** argv, Real h,
+  inline Adaptation::WNGIR::Parameters makeWNGIRParameters(int argc, char** argv, Real h,
     Geometry::Attribute interfaceAttribute, const WNGIRExampleDefaults& defaults = {})
   {
     constexpr const char* options[] = {"wngir-fit", "wngir-robust-scale",
@@ -194,7 +194,7 @@ namespace Rodin::Examples
             [&](const char* option) { return name == option; }))
         Alert::Exception() << "Unknown or removed WNGIR option: " << name << Alert::Raise;
     }
-    Adaptation::WNGIRParameters p;
+    Adaptation::WNGIR::Parameters p;
     p.model.h = h;
 
     p.model.fit = realOption(argc, argv, "wngir-fit", defaults.fit);
@@ -219,16 +219,16 @@ namespace Rodin::Examples
       argc, argv, "wngir-max-step-over-h", p.globalization.maxStepOverH);
     p.traceQualityWitness = boolOption(argc, argv, "wngir-quality-witness", false);
     const auto defaultSolver =
-      p.linear.solver == Adaptation::WNGIRParameters::LinearSolver::MUMPS ? "mumps"
+      p.linear.solver == Adaptation::WNGIR::Parameters::LinearSolver::MUMPS ? "mumps"
                                                                           : "sparse-lu";
     const auto linearSolver =
       stringOption(argc, argv, "wngir-linear-solver", defaultSolver);
     if (linearSolver == "mumps")
-      p.linear.solver = Adaptation::WNGIRParameters::LinearSolver::MUMPS;
+      p.linear.solver = Adaptation::WNGIR::Parameters::LinearSolver::MUMPS;
     else if (linearSolver == "sparse-lu")
-      p.linear.solver = Adaptation::WNGIRParameters::LinearSolver::SparseLU;
+      p.linear.solver = Adaptation::WNGIR::Parameters::LinearSolver::SparseLU;
     else if (linearSolver == "cg")
-      p.linear.solver = Adaptation::WNGIRParameters::LinearSolver::CG;
+      p.linear.solver = Adaptation::WNGIR::Parameters::LinearSolver::CG;
     else
       Alert::Exception() << "Unknown WNGIR solver: " << linearSolver << Alert::Raise;
     p.linear.threads = sizeOption(argc, argv, "wngir-linear-threads", 0);

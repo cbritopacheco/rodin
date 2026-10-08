@@ -52,9 +52,9 @@ TEST(Rodin_Adaptation_WNGIRRegularityMetric, CenteredVarianceKernelAndNativeForm
       return deformation.getJacobian();
     });
     const auto trialGradient = Jacobian(trial) *
-      Adaptation::WNGIRCurrentInverse(current, Dimension);
+      Adaptation::WNGIR::CurrentInverse(current, Dimension);
     const auto testGradient = Jacobian(test) *
-      Adaptation::WNGIRCurrentInverse(current, Dimension);
+      Adaptation::WNGIR::CurrentInverse(current, Dimension);
     const auto trialStrain = Real(0.5) * (trialGradient + Transpose(trialGradient));
     const auto testStrain = Real(0.5) * (testGradient + Transpose(testGradient));
     for (const auto& [dev, div] : {
@@ -64,7 +64,7 @@ TEST(Rodin_Adaptation_WNGIRRegularityMetric, CenteredVarianceKernelAndNativeForm
       SCOPED_TRACE(testing::Message() << "P" << Order << " d=" << Dimension
         << " deformed=" << deformed << " dev=" << dev << " div=" << div);
       BilinearForm core(trial, test), native(trial, test);
-      const Adaptation::WNGIRDistribution distribution(trial, test, current, dev, div, order);
+      const Adaptation::WNGIR::Distribution distribution(trial, test, current, dev, div, order);
       core = distribution;
       core.assemble();
       auto strainIntegral = Integral(dev * weight * trialStrain, testStrain);
@@ -176,7 +176,7 @@ TEST(Rodin_Adaptation_WNGIRRegularityMetric, BackgroundScaleMultipliesTheComplet
   for (const Real h : {Real(1), Real(0.5), Real(0.25)})
   {
     BilinearForm core(trial, test);
-    const Adaptation::WNGIRDistribution distribution(trial, test, current, h, 2 * h, 2);
+    const Adaptation::WNGIR::Distribution distribution(trial, test, current, h, 2 * h, 2);
     core = distribution;
     core.assemble();
     const auto couplings = distribution.getCentering();

@@ -22,7 +22,9 @@ set(RodinAdaptation_HEADERS
   WNGIR/Distribution.h
   WNGIR/DirectionalNewton.h
   WNGIR/Report.h
-  WNGIR/Solver.h
+  WNGIR/Problem.h
+  WNGIR/Adapt.h
+  WNGIR/ForwardDecls.h
   WNGIR/FittingCoefficient.h
   WNGIR/Residual.h
   WNGIR/FittingForce.h

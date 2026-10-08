@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_WNGIR_SOLVER_H
-#define RODIN_ADAPTATION_WNGIR_SOLVER_H
+#ifndef RODIN_ADAPTATION_WNGIR_PROBLEM_H
+#define RODIN_ADAPTATION_WNGIR_PROBLEM_H
 
 #include <algorithm>
 #include <chrono>
@@ -32,6 +32,7 @@
 #include "Rodin/Location.h"
 
 #include "../CellDeformation.h"
+#include "ForwardDecls.h"
 #include "Loss.h"
 #include "Parameters.h"
 #include "DirectionalNewton.h"
@@ -42,11 +43,19 @@
 #include "FittingCoefficient.h"
 #include "FittingForce.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
-  /// @brief Sampled componentwise physical displacement norm, independent of FE coefficients.
+  /**
+   * @brief Sampled physical displacement norm, independent of FE coefficients.
+   * @param[in] mesh Reference mesh.
+   * @param[in] fes Displacement finite element space.
+   * @param[in] cells Cells on which to sample physical displacement.
+   * @param[in] step Displacement to evaluate.
+   * @param[in] validationOrder Optional quadrature-order override.
+   * @returns Largest sampled absolute displacement component.
+   */
   template <class Mesh, class FES, class Displacement>
-  Real wngirPhysicalDisplacementNorm(const Mesh& mesh, const FES& fes,
+  Real getPhysicalDisplacementNorm(const Mesh& mesh, const FES& fes,
     const std::vector<Index>& cells, const Displacement& step,
     std::size_t validationOrder = 0)
   {
@@ -95,15 +104,18 @@ namespace Rodin::Adaptation
    * parameters, monitoring and metric extension examples.
    *
    * @par Architecture
-   * A native Problem assembles the predictor metric and fitting force.
-   * WNGIRHingeProblem assembles the inner tangent and stationarity residual;
-   * NewtonSolver drives its corrections through a merit-backtracking policy.
-   * One retained WNGIRLinearSolver handles both problems and their global
+   * A native @ref Rodin::Variational::Problem assembles the predictor metric
+   * and fitting force. @ref WNGIR::HingeProblem assembles the inner tangent
+   * and stationarity residual; @ref Rodin::Solver::NewtonSolver drives its
+   * corrections through a merit-backtracking policy.
+   * One retained @ref WNGIR::LinearSolver handles both problems and their global
    * mean-strain subtraction. The outer loop owns directional scaling, actual
    * geometry checks, Armijo acceptance and response reporting.
    * Configuration and results are exposed as Parameters and Report. Their
    * standalone types remain available to configure a solve before its
-   * finite-element types are known; implementation component names are private.
+   * finite-element types are known. Component types share the WNGIR namespace.
+   * Supplied trial/test storage selects the backend; currently only local Eigen
+   * assembly is implemented. PETSc storage is rejected at compile time.
    *
    * @section wngir-usage Usage
    * @subsection wngir-usage-setup Prepare the mesh and displacement space
@@ -141,7 +153,7 @@ namespace Rodin::Adaptation
    * P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
    * TrialFunction u(space);
    * TestFunction v(space);
-   * Adaptation::WNGIR fitting(u, v);
+   * Adaptation::WNGIR::Problem fitting(u, v);
    * @endcode
    * These snippets use the public headers `Rodin/Adaptation.h`,
    * `Rodin/Geometry.h` and `Rodin/Variational.h`, with `<cmath>` for the
@@ -384,7 +396,7 @@ namespace Rodin::Adaptation
    * reference size must be supplied by the application. Automatically selected
    * scales are fixed for the duration of a solve; they are not recomputed from
    * the shrinking or expanding mesh. The corresponding C++ fields are listed
-   * in @ref guides-wngir-controls and @ref WNGIRParameters.
+   * in @ref guides-wngir-controls and @ref Parameters.
    *
    * | Parameter | C++ | Description | Value |
    * |-----------|-----|-------------|-------|
@@ -414,56 +426,56 @@ namespace Rodin::Adaptation
    * | @f$N_{\mathrm{stag}}@f$ | `convergence.iterations.stagnation` | Consecutive small steps or energy changes before stagnation exit | @f$5@f$ |
    *
    * @subsection wngir-motion-controls Motion and robustness
-   * @ref WNGIRParameters::Model::fit controls normal-motion stiffness in the
+   * @ref Parameters::Model::fit controls normal-motion stiffness in the
    * metric, not the magnitude of the fitting force. Increasing @f$\kappa_F@f$
    * therefore does not mean stronger attraction to the interface.
-   * @ref WNGIRParameters::Model::Distribution::deviatoric and
-   * @ref WNGIRParameters::Model::Distribution::divergence control variations
+   * @ref Parameters::Model::Distribution::deviatoric and
+   * @ref Parameters::Model::Distribution::divergence control variations
    * of shape-changing strain and local volume-change rate about their global
    * means. Uniform global shear, stretching and scaling are not penalized.
    * Larger weights distribute motion more coherently but can impede fitting.
    * Relative weights select the predictor direction; directional Newton
    * selects its physical length. Neither term enforces quality by itself.
    *
-   * @ref WNGIRParameters::Model::h is the fixed background reference size, not the
+   * @ref Parameters::Model::h is the fixed background reference size, not the
    * size of the deformed elements. It scales distribution, the automatic
    * geometric target and the predictor-motion cap.
-   * @ref WNGIRParameters::Globalization::maxStepOverH bounds the scaled
+   * @ref Parameters::Globalization::maxStepOverH bounds the scaled
    * predictor in units of @f$h@f$ before quality recovery when positive; zero
    * leaves directional Newton unrestricted. The hinge solve can
    * alter that predictor, and outer backtracking checks the resulting motion.
-   * @ref WNGIRParameters::Model::robustScale sets @f$\sigma@f$ in level-set units.
+   * @ref Parameters::Model::robustScale sets @f$\sigma@f$ in level-set units.
    * Residuals much larger than @f$\sigma@f$ have reduced influence on the
    * force. This protects against poorly classified observations, but excessive
    * downweighting can also weaken useful fitting motion. Zero selects an
    * automatic scale, which remains fixed during the solve.
    *
    * @subsection wngir-quality-controls Quality recovery and admissibility
-   * @ref WNGIRParameters::Model::hinge scales the finite hinge penalty relative to
+   * @ref Parameters::Model::hinge scales the finite hinge penalty relative to
    * the predicted fitting improvement. Increasing @f$\widehat\mu@f$ strengthens
    * recovery when hinges are active; it has no effect on inactive hinges and
    * does not guarantee nonlinear feasibility.
-   * @ref WNGIRParameters::Model::qualityGuard sets their activation margins relative
+   * @ref Parameters::Model::qualityGuard sets their activation margins relative
    * to the identity margins. A wider guard reacts earlier, but also changes
    * the slack normalization and hence the penalty curvature.
-   * @ref WNGIRParameters::Model::jacobianWeight and @ref WNGIRParameters::Model::distortionWeight set the
+   * @ref Parameters::Model::jacobianWeight and @ref Parameters::Model::distortionWeight set the
    * relative importance of the Jacobian and distortion hinge rows.
    *
-   * @ref WNGIRParameters::Model::distortion is a spendable distortion budget, not a
-   * quantity that must be minimized. @ref WNGIRParameters::Model::jacobian protects
+   * @ref Parameters::Model::distortion is a spendable distortion budget, not a
+   * quantity that must be minimized. @ref Parameters::Model::jacobian protects
    * against relative volume collapse through the hinge and actual quality
    * checks. The same Jacobian floor is used throughout. Increasing a Jacobian floor restricts compression,
    * whereas @f$Q@f$ is insensitive to positive isotropic scaling.
    *
    * @subsection wngir-stopping-controls Accuracy and work limits
-   * @ref WNGIRParameters::Convergence::Tolerance::geometric specifies the sampled
+   * @ref Parameters::Convergence::Tolerance::geometric specifies the sampled
    * distance target; zero selects @f$h^{p+1}@f$.
-   * @ref WNGIRParameters::Convergence::Tolerance::innerRelative and
-   * @ref WNGIRParameters::Convergence::Tolerance::innerAbsolute control stationarity of the
+   * @ref Parameters::Convergence::Tolerance::innerRelative and
+   * @ref Parameters::Convergence::Tolerance::innerAbsolute control stationarity of the
    * direction problem, not geometric accuracy. Linear residual accuracy is
-   * controlled separately by @ref WNGIRParameters::Convergence::Tolerance::linearRelative.
-   * @ref WNGIRParameters::Convergence::Iterations::outer and
-   * @ref WNGIRParameters::Convergence::Iterations::inner are work limits, not convergence
+   * controlled separately by @ref Parameters::Convergence::Tolerance::linearRelative.
+   * @ref Parameters::Convergence::Iterations::outer and
+   * @ref Parameters::Convergence::Iterations::inner are work limits, not convergence
    * certificates. Persistent small accepted motion or small energy changes
    * produce best-effort exits. The report distinguishes these exits from a
    * geometric target hit and records fitting energy, maximum sampled error,
@@ -533,13 +545,13 @@ namespace Rodin::Adaptation
    * with a refinement-independent constant @f$C@f$.
    */
   template <class TrialFunctionType, class TestFunctionType>
-  class WNGIR
+  class Problem
   {
     public:
       /// @brief Model, convergence and backend configuration.
-      using Parameters = WNGIRParameters;
+      using Parameters = WNGIR::Parameters;
       /// @brief Accepted-geometry and iteration diagnostics.
-      using Report = WNGIRReport;
+      using Report = WNGIR::Report;
 
     private:
       using Displacement = std::remove_reference_t<
@@ -547,6 +559,13 @@ namespace Rodin::Adaptation
       using ProblemType = std::decay_t<decltype(Variational::Problem(
         std::declval<TrialFunctionType&>(), std::declval<TestFunctionType&>()))>;
       using LinearSystemType = typename ProblemType::LinearSystemType;
+      static_assert(std::is_same_v<
+        typename FormLanguage::Traits<LinearSystemType>::OperatorType,
+        Math::SparseMatrix<Real>> && std::is_same_v<
+        typename FormLanguage::Traits<LinearSystemType>::VectorType,
+        Math::Vector<Real>>,
+        "WNGIR::Problem currently supports local Eigen storage only; "
+        "PETSc/MPI assembly is not implemented.");
       using BilinearFormType = std::decay_t<decltype(Variational::BilinearForm(
         std::declval<TrialFunctionType&>(), std::declval<TestFunctionType&>()))>;
       using LinearFormType = std::decay_t<decltype(Variational::LinearForm(
@@ -554,19 +573,24 @@ namespace Rodin::Adaptation
 
       using SpatialVec = Math::SpatialVector<Real>;
       using SpatialMat = Math::SpatialMatrix<Real>;
-      using Loss = WNGIRLoss;
-      using Hinge = WNGIRHingeState;
-      using HingeProblem = WNGIRHingeProblem<TrialFunctionType, TestFunctionType>;
-      using LinearSolver = WNGIRLinearSolver<LinearSystemType>;
-      using Distribution = WNGIRDistribution<TrialFunctionType, TestFunctionType, Displacement>;
-      using HingeMetric = WNGIRHingeMetric<TrialFunctionType, TestFunctionType, Displacement>;
-      using HingeForce = WNGIRHingeForce<TestFunctionType, Displacement>;
+      using Loss = WNGIR::Loss;
+      using Hinge = HingeState;
+      using HingeProblem = WNGIR::HingeProblem<TrialFunctionType, TestFunctionType>;
+      using LinearSolver = WNGIR::LinearSolver<LinearSystemType>;
+      using Distribution = WNGIR::Distribution<TrialFunctionType, TestFunctionType, Displacement>;
+      using HingeMetric = WNGIR::HingeMetric<TrialFunctionType, TestFunctionType, Displacement>;
+      using HingeForce = WNGIR::HingeForce<TestFunctionType, Displacement>;
 
     public:
+      /// @brief Observer of accepted-step and final diagnostics.
       using Monitor = std::function<void(const Report&)>;
 
-      /// @brief Observes accepted steps and the final report, without changing the solve.
-      WNGIR& setMonitor(Optional<Monitor> monitor)
+      /**
+       * @brief Observes accepted steps and the final report without changing the solve.
+       * @param[in] monitor Observer, or an empty optional to remove it.
+       * @returns This problem.
+       */
+      Problem& setMonitor(Optional<Monitor> monitor)
       {
         m_monitor = std::move(monitor);
         return *this;
@@ -627,8 +651,12 @@ namespace Rodin::Adaptation
       };
 
     public:
-      /// @brief Constructs the WNGIR solver from trial and test functions.
-      WNGIR(TrialFunctionType& du, TestFunctionType& v)
+      /**
+       * @brief Constructs the fitting problem from trial and test functions.
+       * @param[in,out] du Trial function owning accumulated displacement.
+       * @param[in] v Matching test function.
+       */
+      Problem(TrialFunctionType& du, TestFunctionType& v)
         : m_u(&du.getSolution()),
           m_trialUUID(du.getUUID()),
           m_duStep(du.getFiniteElementSpace()),
@@ -642,8 +670,8 @@ namespace Rodin::Adaptation
           m_additionalMetric(du, v)
       {}
 
-      WNGIR(const WNGIR&) = delete;
-      WNGIR& operator=(const WNGIR&) = delete;
+      Problem(const Problem&) = delete;
+      Problem& operator=(const Problem&) = delete;
 
       /**
        * @brief Additional metric terms, assembled afresh at each outer iteration.
@@ -655,13 +683,21 @@ namespace Rodin::Adaptation
         return m_additionalMetric;
       }
 
+      /**
+       * @brief Inspects additional metric terms.
+       * @returns Read-only additional bilinear form.
+       */
       const BilinearFormType& getMetric() const
       {
         return m_additionalMetric;
       }
 
-      /// @brief Selects the marked interface to fit on the displacement mesh.
-      WNGIR& setInterfaceAttribute(Geometry::Attribute attribute)
+      /**
+       * @brief Selects the marked interface on the displacement mesh.
+       * @param[in] attribute Interface facet attribute.
+       * @returns This problem.
+       */
+      Problem& setInterfaceAttribute(Geometry::Attribute attribute)
       {
         m_parameters.interfaceAttribute = attribute;
         return *this;
@@ -673,8 +709,10 @@ namespace Rodin::Adaptation
        * Only value-prescribing, homogeneous conditions on the constructor's
        * trial function are supported. They constrain increments, not accumulated
        * displacement. Nonzero values and identification constraints are rejected.
+       * @param[in] condition Homogeneous condition on the constructor's trial function.
+       * @returns This problem.
        */
-      WNGIR& operator+=(const Variational::DirichletBCBase<Real>& condition)
+      Problem& operator+=(const Variational::DirichletBCBase<Real>& condition)
       {
         if (condition.getOperand().getUUID() != m_trialUUID)
           Alert::Exception() << "WNGIR boundary conditions must use its trial function."
@@ -683,15 +721,13 @@ namespace Rodin::Adaptation
         return *this;
       }
 
-      /// @brief Sets WNGIR runtime parameters.
-      WNGIR& setParameters(const Parameters& parameters)
+      /**
+       * @brief Sets WNGIR runtime parameters.
+       * @param[in] parameters Model, convergence and backend controls.
+       * @returns This problem.
+       */
+      Problem& setParameters(const Parameters& parameters)
       {
-        using OperatorType =
-          typename FormLanguage::Traits<LinearSystemType>::OperatorType;
-        using VectorType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
-        if constexpr (!std::is_same_v<OperatorType, Math::SparseMatrix<Real>> ||
-          !std::is_same_v<VectorType, Math::Vector<Real>>)
-          Alert::Exception() << "WNGIR requires the local Eigen backend." << Alert::Raise;
 #ifndef RODIN_USE_MUMPS
         if (parameters.linear.solver == Parameters::LinearSolver::MUMPS)
           Alert::Exception() << "WNGIR MUMPS solves require RODIN_USE_MUMPS."
@@ -743,13 +779,19 @@ namespace Rodin::Adaptation
         return *this;
       }
 
-      /// @brief Returns the current WNGIR parameters.
+      /**
+       * @brief Inspects current controls.
+       * @returns The current WNGIR parameters.
+       */
       const Parameters& getParameters() const
       {
         return m_parameters;
       }
 
-      /// @brief Returns diagnostics from the most recent solve.
+      /**
+       * @brief Inspects the most recent solve.
+       * @returns The last completed fitting report.
+       */
       const Report& getReport() const
       {
         return m_report;
@@ -762,6 +804,9 @@ namespace Rodin::Adaptation
        * at the moved quadrature points for the assembled force to be the exact
        * first variation of the line-search energy. An independently supplied
        * sensitivity is supported, but then defines a pseudo-gradient.
+       * @param[in] phi Target level-set function.
+       * @param[in] grad Target gradient in physical coordinates.
+       * @returns Accepted-geometry and iteration diagnostics.
        */
       template <class PhiDerived, class GradDerived>
       Report solve(const Variational::RealFunctionBase<PhiDerived>& phi,
@@ -976,13 +1021,13 @@ namespace Rodin::Adaptation
         for (; rep.iterations < p.convergence.iterations.outer; ++rep.iterations)
         {
           auto tic = Clock::now();
-          WNGIRFittingCoefficient obsCoeff(
+          FittingCoefficient obsCoeff(
             grad, u, locator, p, dataNormalization, meshDim);
           auto obsMetric =
             Variational::FaceIntegral(Variational::Dot(obsCoeff * m_duStep, m_vStep));
           obsMetric.setOrder(surfaceOrder);
           obsMetric.over(*p.interfaceAttribute);
-          WNGIRFittingForce forceCoeff(
+          FittingForce forceCoeff(
             phi, grad, u, locator, loss, dataNormalization, meshDim);
           auto surfaceForce = Variational::FaceIntegral(forceCoeff, m_vStep);
           surfaceForce.setOrder(surfaceOrder);
@@ -1061,10 +1106,10 @@ namespace Rodin::Adaptation
             const auto curvatures =
               getSurfaceDirectionalCurvature(mesh, fes, u, predictor, phi, grad,
                 interfaceFacets, loss, dataNormalization, locator);
-            const Real norm = wngirPhysicalDisplacementNorm(
+            const Real norm = getPhysicalDisplacementNorm(
               mesh, fes, validationCells, predictor, p.quadrature.validation);
             rep.predictorScale =
-              wngirDirectionalNewtonStep(predictorAction, curvatures.first,
+              getDirectionalNewtonStep(predictorAction, curvatures.first,
                 curvatures.second, norm, h * p.globalization.maxStepOverH);
             if (!(rep.predictorScale > Real(0)) || !std::isfinite(rep.predictorScale))
             {
@@ -1427,7 +1472,7 @@ namespace Rodin::Adaptation
             // Measure the accepted FE field, not its coefficient vector.
             scratch = u;
             scratch -= previousU;
-            rep.acceptedStep = wngirPhysicalDisplacementNorm(
+            rep.acceptedStep = getPhysicalDisplacementNorm(
               mesh, fes, validationCells, scratch, p.quadrature.validation);
           }
           rep.minJ = adm.minJ;
@@ -1595,7 +1640,7 @@ namespace Rodin::Adaptation
               const auto& point = quadrature.getPoint(q);
               const Variational::IntegrationPoint ip(point, &qf, q);
               const auto value = direction.getValue(point);
-              const WNGIRResidualState state(phi, grad, deformation, ip, loss);
+              const ResidualState state(phi, grad, deformation, ip, loss);
               const Real residual = state.getResidual();
               const Real action = state.getGradient().dot(value);
               const Real weight =
@@ -1695,7 +1740,7 @@ namespace Rodin::Adaptation
 #pragma omp parallel
 #endif
         {
-          WNGIRFittingForce force(
+          FittingForce force(
             phi, grad, current, locator, loss, normalization, dimension);
 #ifdef RODIN_USE_OPENMP
 #pragma omp for schedule(static)

@@ -74,15 +74,16 @@ fitting owns node positions and never decides topology.
 On this branch the module is **WNGIR**: Welsch natural-gradient interface
 fitting. The unique model is \(M=F+D\) with affine quadratic hinges.
 \(F\) is normalized half-squared fitting curvature without the level-set Hessian;
-\(D\) is pulled-back pointwise deviatoric current
-strain: \(h\kappa_D\int j\,\operatorname{dev}\epsilon(v):
-\operatorname{dev}\epsilon(z)\), where \(\epsilon(v)=\operatorname{sym}(\nabla v F^{-1})\).
-It does not penalize local infinitesimal rotations or isotropic strain. There is
-no global dilation coupling. Higher-order spaces can contain additional conformal
-kernel modes not covered by the similarity gauge; this term alone is not an
-\(H^1\) norm. Their independent coefficients
-are kappaF and kappaD, both defaulting to one. D retains the mesh
-factor \(h\); there is no shape or constraint Hessian in the metric.
+\(D\) penalizes deviations of current deviatoric strain and divergence from
+their global current-volume averages. These averages are not elementwise.
+Coherent affine motion is free, including translation, infinitesimal rotation,
+uniform dilation, shear and anisotropic stretching. Shared finite element DOFs
+couple elements. With both distribution coefficients positive, distribution
+controls \(H^1\) modulo global affine fields on a fixed connected Lipschitz domain;
+it is not a full-space norm or an unconditional uniform refinement bound.
+The defaults are `model.fit = 1`, `model.distribution.deviatoric = 1e-4`,
+`model.distribution.divergence = 1e-2` and `model.hinge = 10`.
+D retains the mesh factor \(h\); there is no shape or constraint Hessian in the metric.
 The fitting energy/force remain robust Welsch. Minimizing this integral is not
 equivalent to minimizing the maximum geometric residual. Power-loss experiments
 are isolated diagnostics, not a production option or schedule.
@@ -93,23 +94,28 @@ physical displacement sampling retain their own order rules.
 Inner Newton uses a frozen merit
 line search and a stationarity residual relative to the fixed fitting force.
 Directional Newton scales the predictor and frozen quadratic form before the
-hinge solve, bounded by physical predictor motion divided by \(h\). Nonpositive
+hinge solve. The optional physical-motion bound is disabled by default. Nonpositive
 robust directional curvature falls back to positive weighted fitting curvature.
 The outer Armijo line search only backtracks, enforcing the actual \(j\) and \(Q\)
 budgets. The geometric stopping target is sampled \(D_\infty\), not robust RMS.
 There is no mass completion, diagonal shift, logarithmic barrier, nonlinear-hinge
-alternative or separate inertia factorization. Each linear solve selects zero
-along unresolved similarity modes using a tiny restricted eigensolve. This gauge
-is not part of the objective and releases modes when active hinges resolve them;
-it is not a global coercivity certificate.
+alternative, gauge or separate inertia factorization. Unresolved modes remain
+subject to the selected linear backend; no uniqueness correction is imposed.
 
 `WNGIR.h` is the public include; the implementation lives in `Adaptation/WNGIR/`,
-without a `Detail` layer. `Solver.h` retains the outer orchestration and metric
+without a `Detail` layer. All method-specific types belong to
+`Rodin::Adaptation::WNGIR`, without redundant class prefixes.
+`Problem.h` retains the outer orchestration and metric
 Problem. `HingeProblem.h` assembles the tangent and negative stationarity
 residual for Rodin's `Solver::NewtonSolver`; its step policy retains the frozen
-inner merit search. `LinearSolver.h` adapts the similarity gauge and retained
+inner merit search. `LinearSolver.h` adapts the retained
 linear backends to the native solver interface. The local Eigen backend supports CG,
-SparseLU, and optional MUMPS solving the same pointwise deviatoric operator.
+SparseLU, and optional MUMPS solving the same globally centered operator.
+`Adapt.h` owns a local vector P1 space and `WNGIR::Problem`, applying accepted
+quality-valid displacements to affine simplicial meshes without changing topology.
+`WNGIR::Problem(u, v)` follows supplied storage and currently supports only Eigen.
+`WNGIR::Adapt(mesh)` defaults to Eigen for local meshes; MPI requires PETSc and
+construction is disabled until the distributed specialization is implemented.
 The sparse metric is symmetrized before factorization and residual evaluation,
 so triangular direct solvers and the true-residual test use the same operator.
 Metric and hinge Problems and metric forms are retained, but deformation-dependent forms are

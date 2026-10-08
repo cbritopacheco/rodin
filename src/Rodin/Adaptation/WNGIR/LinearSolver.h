@@ -17,7 +17,7 @@
 #include "Parameters.h"
 #include "Report.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /**
    * @brief Linear solve of the local WNGIR metric or hinge tangent.
@@ -29,33 +29,33 @@ namespace Rodin::Adaptation
    * are checked against the centered physical operator. No gauge is applied.
    */
   template <class LinearSystem>
-  class WNGIRLinearSolver final : public Solver::LinearSolverBase<LinearSystem>
+  class LinearSolver final : public Solver::LinearSolverBase<LinearSystem>
   {
     public:
       using Parent = Solver::LinearSolverBase<LinearSystem>;
       using LinearSystemType = LinearSystem;
       using Parent::solve;
-      explicit WNGIRLinearSolver(typename Parent::ProblemBaseType& problem)
+      explicit LinearSolver(typename Parent::ProblemBaseType& problem)
         : Parent(problem)
       {}
       /// Copies configuration and problem binding, not backend factorization resources.
-      WNGIRLinearSolver(const WNGIRLinearSolver& other)
+      LinearSolver(const LinearSolver& other)
         : Parent(other),
           m_centering(other.m_centering),
           m_parameters(other.m_parameters),
           m_report(other.m_report)
       {}
-      WNGIRLinearSolver& setParameters(const WNGIRParameters& parameters)
+      LinearSolver& setParameters(const Parameters& parameters)
       {
         m_parameters = parameters;
         return *this;
       }
-      WNGIRLinearSolver& setCentering(const Math::Matrix<Real>& couplings)
+      LinearSolver& setCentering(const Math::Matrix<Real>& couplings)
       {
         m_centering = couplings;
         return *this;
       }
-      WNGIRLinearSolver& setReport(WNGIRReport* report)
+      LinearSolver& setReport(Report* report)
       {
         m_report = report;
         return *this;
@@ -85,9 +85,9 @@ namespace Rodin::Adaptation
       {
         return m_seconds;
       }
-      WNGIRLinearSolver* copy() const noexcept override
+      LinearSolver* copy() const noexcept override
       {
-        return new WNGIRLinearSolver(*this);
+        return new LinearSolver(*this);
       }
 
     private:
@@ -163,7 +163,7 @@ namespace Rodin::Adaptation
           std::is_same_v<VectorType, Math::Vector<Real>>)
         {
           const auto& rhs = axb.getVector();
-          if (m_parameters.linear.solver != WNGIRParameters::LinearSolver::CG)
+          if (m_parameters.linear.solver != Parameters::LinearSolver::CG)
           {
             const auto solveDirect = [&](auto& direct, StringView backend) {
               const auto solveSystem = [&](LinearSystemType& system) {
@@ -262,7 +262,7 @@ namespace Rodin::Adaptation
               return true;
             };
 #ifdef RODIN_USE_MUMPS
-            if (m_parameters.linear.solver == WNGIRParameters::LinearSolver::MUMPS)
+            if (m_parameters.linear.solver == Parameters::LinearSolver::MUMPS)
             {
               if (!m_mumps)
                 m_mumps =
@@ -316,8 +316,8 @@ namespace Rodin::Adaptation
 #ifdef RODIN_USE_MUMPS
       std::unique_ptr<Solver::MUMPS<LinearSystemType>> m_mumps;
 #endif
-      WNGIRParameters m_parameters;
-      WNGIRReport* m_report = nullptr;
+      Parameters m_parameters;
+      Report* m_report = nullptr;
       bool m_success = false;
       size_t m_iterations = 0;
       Real m_error = std::numeric_limits<Real>::infinity();
@@ -326,9 +326,11 @@ namespace Rodin::Adaptation
 }
 namespace Rodin::FormLanguage
 {
+  /// @brief Native solver traits for the WNGIR linear adapter.
   template <class LinearSystem>
-  struct Traits<Adaptation::WNGIRLinearSolver<LinearSystem>>
+  struct Traits<Adaptation::WNGIR::LinearSolver<LinearSystem>>
   {
+      /// @brief Linear system assembled by the variational problem.
       using LinearSystemType = LinearSystem;
   };
 }

@@ -546,10 +546,10 @@ int run(int argc, char** argv)
   TestFunction advTest(sh);
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
-  WNGIRParameters wp =
+  WNGIR::Parameters wp =
     Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
-  Adaptation::WNGIR wngir(wngirTrial, wngirTest);
+  Adaptation::WNGIR::Problem wngir(wngirTrial, wngirTest);
   wngir.setParameters(wp);
 
   WNGIRMesh moved(mesh);

@@ -12,7 +12,7 @@
 
 #include "Rodin/Types.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /**
    * @brief Fixed-scale Welsch loss with consistent influence and curvature.
@@ -22,14 +22,14 @@ namespace Rodin::Adaptation
    * variation, and directional curvature throughout one nonlinear solve.
    * The canonical observation metric is unweighted squared-fit curvature.
    */
-  class WNGIRLoss
+  class Loss
   {
     public:
       /**
        * @brief Constructs a Welsch loss with positive scale.
        * @param scale Scale controlling the loss function.
        */
-      explicit WNGIRLoss(Real scale)
+      explicit Loss(Real scale)
         : m_scale2(scale * scale)
       {
         assert(scale > Real(0));

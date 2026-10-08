@@ -14,6 +14,7 @@
 
 #include "WNGIR/Parameters.h"
 #include "WNGIR/Report.h"
-#include "WNGIR/Solver.h"
+#include "WNGIR/Problem.h"
+#include "WNGIR/Adapt.h"
 
 #endif

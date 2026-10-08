@@ -536,10 +536,10 @@ int main(int argc, char** argv)
   TestFunction advTest(sh);
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
-  WNGIRParameters wp =
+  WNGIR::Parameters wp =
     Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
-  WNGIR wngir(wngirTrial, wngirTest);
+  WNGIR::Problem wngir(wngirTrial, wngirTest);
   wngir.setParameters(wp);
 
   // ---- Initial level set ---------------------------------------------------
@@ -985,7 +985,7 @@ int main(int argc, char** argv)
       /*dim=*/2);
 
     u.getData().setZero();
-    WNGIRReport rep;
+    WNGIR::Report rep;
     {
       rep = wngir.solve(phiFn, gradPhiFn);
       // Diagnostic: did WNGIR actually move the mesh, and did it converge?

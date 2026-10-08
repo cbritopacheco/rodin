@@ -10,15 +10,15 @@
 #include "../CellDeformation.h"
 #include "Parameters.h"
 
-namespace Rodin::Adaptation
+namespace Rodin::Adaptation::WNGIR
 {
   /// @brief Pointwise slacks and Newton coefficients of the affine quadratic hinges.
-  class WNGIRHingeState
+  class HingeState
   {
     public:
       /// @brief Constructs the WNGIR hinge state.
-      WNGIRHingeState(const CellDeformation& deformation,
-        const Math::SpatialMatrix<Real>& innerGradient, const WNGIRParameters& parameters,
+      HingeState(const CellDeformation& deformation,
+        const Math::SpatialMatrix<Real>& innerGradient, const Parameters& parameters,
         Real hingeCoefficient)
         : m_rowDeformation(deformation)
       {
@@ -45,7 +45,7 @@ namespace Rodin::Adaptation
       }
 
       /// @brief Affine quality energy with the construction parameters, evaluated only on demand.
-      Real getEnergy(const WNGIRParameters& parameters, Real hingeCoefficient) const
+      Real getEnergy(const Parameters& parameters, Real hingeCoefficient) const
       {
         if (!isAdmissible())
           return std::numeric_limits<Real>::infinity();

@@ -6,7 +6,7 @@
 
   @section guides-wngir-setup Setup and ownership
 
-  @ref Rodin::Adaptation::WNGIR fits marked mesh facets to a supplied zero level
+  @ref Rodin::Adaptation::WNGIR::Problem fits marked mesh facets to a supplied zero level
   set. It writes accumulated displacement into the constructor's trial-function
   solution. It does not move vertices, replace mesh transformations, or remesh.
   The mesh is obtained from the displacement finite element space.
@@ -23,8 +23,8 @@
   // u owns the accumulated displacement; v tests increments on the same space.
   TrialFunction u(space);
   TestFunction v(space);
-  Adaptation::WNGIR fitting(u, v);
-  Adaptation::WNGIRParameters parameters;
+  Adaptation::WNGIR::Problem fitting(u, v);
+  Adaptation::WNGIR::Parameters parameters;
   // The reference spacing stays fixed as the displacement changes.
   parameters.model.h = referenceSpacing;
   fitting.setParameters(parameters).setInterfaceAttribute(Interface);
@@ -52,6 +52,41 @@
   Applying the result is a separate application decision. Vertex displacement
   is appropriate for a linear geometric mesh. Higher-order geometry requires
   updating its transformations, not merely moving its corner vertices.
+
+  For an affine simplicial mesh, @ref Rodin::Adaptation::WNGIR::Adapt owns the
+  vector P1 space and fitting problem and applies valid displacements in place:
+
+  @code{.cpp}
+  // Prepare connectivity and mark interface facets before constructing adapt.
+  Adaptation::WNGIR::Adapt adapt(mesh);
+  Adaptation::WNGIR::Parameters controls;
+  controls.model.h = referenceSpacing; // Keep the background scale fixed.
+  adapt.setParameters(controls).setInterfaceAttribute(Interface);
+  // Use the owned trial function for additional boundary conditions.
+  auto& trial = adapt.getTrialFunction();
+  adapt.getProblem() +=
+    DirichletBC(trial, VectorFunction(Real(0), Real(0))).on(FixedBoundary);
+  const auto adapted = adapt.execute(phi, gradient); // Mesh is updated here.
+  @endcode
+
+  Each execute call resets displacement to zero on the current mesh. It applies
+  a result when `qualityBudgetSatisfied` is true, including valid best-effort
+  exits, and leaves the mesh untouched otherwise. The report describes the
+  fit relative to that call's starting mesh. The mesh must outlive the workflow;
+  replacing connectivity requires a new workflow. Classification and remeshing
+  remain application responsibilities. `getProblem()` provides the same metric,
+  boundary-condition and monitor interfaces as an explicitly constructed problem.
+
+  | Entry point | Context/backend | Status |
+  |-------------|-----------------|--------|
+  | `WNGIR::Problem(u, v)` | Supplied local Eigen trial/test storage | Supported, including higher-order spaces |
+  | `WNGIR::Adapt(mesh)` | Local mesh, Eigen P1 storage | Supported for affine simplicial geometry |
+  | `WNGIR::Problem(u, v)` | PETSc trial/test storage | Explicitly unsupported |
+  | `WNGIR::Adapt(mesh)` | MPI mesh, requiring PETSc | Construction disabled pending distributed implementation |
+
+  Backend selection follows storage and mesh context, not a runtime conversion.
+  An MPI mesh will use PETSc when that specialization is implemented; it never
+  falls back to Eigen. Renaming the API does not provide distributed assembly.
 
   @section guides-wngir-model Mathematical model
 
@@ -102,7 +137,7 @@
   where @f$B_k@f$ is the squared-hinge penalty on frozen Jacobian and distortion
   slacks. Its stationarity residual controls inner convergence. The outer
   Armijo search then decreases @f$E@f$ while enforcing the actual sampled
-  quality budget. See the @ref Rodin::Adaptation::WNGIR "WNGIR class reference"
+  quality budget. See the @ref Rodin::Adaptation::WNGIR::Problem "WNGIR class reference"
   for the slack definitions, penalty scaling, Newton system, line search and
   geometric stopping equations.
 
@@ -188,7 +223,7 @@
   @section guides-wngir-results Reading results
 
   Use `report.reason` rather than parsing a message. A geometric target hit is
-  `WNGIRReport::Reason::GeometricTarget`. Budget, small-step and small-energy
+  `WNGIR::Report::Reason::GeometricTarget`. Budget, small-step and small-energy
   exits are best-effort results, not geometric convergence. The stable text
   token is available through `report.getReasonString()`.
 
@@ -224,7 +259,7 @@
   when the target was not reached.
 
   @code{.cpp}
-  fitting.setMonitor([](const Adaptation::WNGIRReport& report) {
+  fitting.setMonitor([](const Adaptation::WNGIR::Report& report) {
     // Record or display report.energy, report.geometricSup and quality fields.
   });
   @endcode
@@ -254,7 +289,8 @@
   @section guides-wngir-layout Implementation layout
 
   All method-specific code lives in `Adaptation/WNGIR/`:
-  `Solver.h` owns outer orchestration; `FittingCoefficient.h` and
+  `Adapt.h` owns the P1 mesh workflow; `Problem.h` owns outer orchestration;
+  `FittingCoefficient.h` and
   `FittingForce.h` assemble fitting; `Distribution.h` assembles distribution;
   `Hinge.h`, `HingeMetric.h`, `HingeForce.h` and `HingeProblem.h` define the
   inner model; `LinearSolver.h` adapts native linear solvers.

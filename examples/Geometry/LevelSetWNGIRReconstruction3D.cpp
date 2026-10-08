@@ -349,7 +349,7 @@ int main(int argc, char** argv)
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");
   auto wngirSolveParams = wngirParams;
-  Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
+  Rodin::Adaptation::WNGIR::Problem wngirSolver(wngirTrial, wngirTest);
   wngirSolver.setParameters(wngirSolveParams);
 
   LocalMesh moved(mesh);
@@ -488,7 +488,7 @@ int main(int argc, char** argv)
       const std::size_t nLocal = fe.getCount();
       const std::size_t qFitOrder = wngirParams.quadrature.validation > 0
         ? wngirParams.quadrature.validation
-        : WNGIRParameters::Quadrature::getValidationOrder(fe.getOrder());
+        : WNGIR::Parameters::Quadrature::getValidationOrder(fe.getOrder());
       const auto& qf = QF::PolytopeQuadratureFormula::get(qFitOrder, face->getGeometry());
       const auto& quad = face->getQuadrature(qf);
       std::vector<Index> dofs(nLocal);
