@@ -115,8 +115,7 @@ retains cross-component zeros, whereas Integral filters zero entries. The
 extra initial index construction and larger pattern are concrete setup work;
 this cost must be included when deciding whether repeated assembly amortizes
 it. The two-case storage check also reproduced the roughly 3.8x first-assembly
-ratio. Its raw records are in
-[the storage CSV](results/named-storage-2026-10-01.csv).
+ratio.
 
 A P2 scalar field increases the requested mass quadrature order from 4 to 6
 (6 to 11 triangle points; 11 to 23 tetrahedron points). Diffusion increases
@@ -200,9 +199,8 @@ BUILD/tests/benchmarks/RodinNamedFormBenchmarks --benchmark_min_time=0.02s --ben
 BUILD/tests/benchmarks/RodinGridFunctionBenchmarks --benchmark_filter='.*P2.*' --benchmark_min_time=0.03s --benchmark_repetitions=3 --benchmark_enable_random_interleaving=true
 ```
 
-Run each command twice, sequentially. Raw iteration records are in
-[the assembly CSV](results/named-evaluation-2026-10-01.csv) and
-[the P2 evaluation CSV](results/p2-evaluation-2026-10-01.csv). P1 controls,
-first assembly costs and every repeat are retained there. The older
+Run each command twice, sequentially. Use `--benchmark_out` to save raw
+measurements outside the repository. Include P1 controls, first assembly
+costs and every repeat in the saved output. The older
 `NamedForms.cpp` benchmarks remain available, but their nonzero-count checks
 alone are not numerical equivalence oracles.

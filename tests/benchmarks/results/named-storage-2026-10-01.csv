@@ -1,7 +1,0 @@
-run_name,repetition_index,iterations,cpu_time,real_time,time_unit,named_nonzeros,nonzeros,scatter_slots,relative_error
-NamedEvaluation/P2/VectorMass/Constant/Named/First/dimension:3/first:1/integral:0,0,3,7.388000000000024,7.426736003253609,ms,153225.0,51075.0,345600.0,4.5823563050616004e-17
-NamedEvaluation/P2/VectorMass/Constant/Named/First/dimension:3/first:1/integral:0,1,3,7.310000000000002,7.318291657914718,ms,153225.0,51075.0,345600.0,4.5823563050616004e-17
-NamedEvaluation/P2/VectorMass/Constant/Named/First/dimension:3/first:1/integral:0,2,3,7.438666666666667,7.453721986773114,ms,153225.0,51075.0,345600.0,4.5823563050616004e-17
-NamedEvaluation/P2/VectorMass/Constant/Integral/First/dimension:3/first:1/integral:1,0,15,1.9211999999999858,1.9250111343959968,ms,153225.0,51075.0,345600.0,4.5823563050616004e-17
-NamedEvaluation/P2/VectorMass/Constant/Integral/First/dimension:3/first:1/integral:1,1,15,1.9436000000000082,1.9477889329815905,ms,153225.0,51075.0,345600.0,4.5823563050616004e-17
-NamedEvaluation/P2/VectorMass/Constant/Integral/First/dimension:3/first:1/integral:1,2,15,1.8945333333333372,1.8984833305391173,ms,153225.0,51075.0,345600.0,4.5823563050616004e-17

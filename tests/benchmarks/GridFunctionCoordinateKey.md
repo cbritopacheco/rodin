@@ -236,9 +236,7 @@ The snapshot-only ablation removes `|| !sameReferenceCoordinates` from the
 basis-miss condition while retaining coordinate storage/writes; it must never
 be used as a correctness-preserving implementation.
 
-[Raw measurements](results/GridFunctionCoordinateKey-2026-09-30.csv) record
-protocol, variant, counts, CPU/wall times, errors and mesh sizes. All **1434**
-benchmark observations passed their applicable numerical oracle. Maximum large
+All **1434** benchmark observations passed their applicable numerical oracle. Maximum large
 checksum relative error was `2.09e-10`; maximum small absolute error `1.79e-14`.
 Mapped correctness is verified separately by the regression gates above, and
 must not be inferred from native-quadrature performance cases alone.

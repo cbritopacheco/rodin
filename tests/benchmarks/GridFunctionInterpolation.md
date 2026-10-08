@@ -114,11 +114,10 @@ Repeated randomized runs, reversed variant order, and controls are necessary
 before interpreting nanosecond differences.
 
 All measured cases passed their numerical oracle. The largest absolute error
-across the main runs was 8.15e-15. Raw per-repetition CPU and wall times, errors,
-iteration counts, protocol and variant are recorded in
-[the measurement CSV](results/GridFunctionInterpolation-2026-09-30.csv).
-Runs 1–4 are the full matrix, 5–6 the longer four-case confirmation, and 7–10
-the isolated pointwise controls. Do not combine protocols into one median.
+across the main runs was 8.15e-15. Full-matrix runs, longer four-case
+confirmations and isolated pointwise controls use distinct protocols; do not
+combine them into one median. Raw measurements are generated output and are
+kept outside the repository.
 
 ## Correctness gates
 

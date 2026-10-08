@@ -243,9 +243,7 @@ space/mesh bindings in these benchmarks. For coordinates, extract the header
 at `34adfb3db` and
 apply the same base-rvalue move fix; retain the current quadrature base class.
 
-[Raw per-repetition measurements](results/GridFunctionLarge-2026-09-30.csv)
-include protocol, variant, iteration count, sweep CPU/wall times, evaluations,
-normalized CPU time, error and mesh sizes. There are 1960 timed observations;
+There are 1960 timed observations;
 all passed numerical checks. Maximum checksum relative error was `2.09e-10`,
 from sequential summation in multi-million-evaluation pure-hit sweeps. Do not
 combine matrix, final-matrix, targeted-confirmation and isolated protocols into
