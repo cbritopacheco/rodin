@@ -94,7 +94,7 @@
 
   Higher-level functionality built on the variational core:
 
-  - @subpage guides-wngir - Marked-interface mesh fitting, quality budgets,
+  - @subpage guides-swift - Marked-interface mesh fitting, quality budgets,
     solver controls, diagnostics, and metric extension points
 
   - @subpage guides-shape-optimization — Shape derivatives, Hilbertian

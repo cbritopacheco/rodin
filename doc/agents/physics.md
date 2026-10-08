@@ -71,7 +71,7 @@ Moving-interface mesh adaptation under the layering invariant
 attributes (`Geometry::MinSTCut` is the classifier primitive), geometry
 fitting owns node positions and never decides topology.
 
-On this branch the module is **WNGIR**: Welsch natural-gradient interface
+On this branch the module is **SWIFT**: Welsch natural-gradient interface
 fitting. The unique model is \(M=F+D\) with affine quadratic hinges.
 \(F\) is normalized half-squared fitting curvature without the level-set Hessian;
 \(D\) penalizes deviations of current deviatoric strain and divergence from
@@ -102,19 +102,19 @@ There is no mass completion, diagonal shift, logarithmic barrier, nonlinear-hing
 alternative, gauge or separate inertia factorization. Unresolved modes remain
 subject to the selected linear backend; no uniqueness correction is imposed.
 
-`WNGIR.h` is the public include; the implementation lives in `Adaptation/WNGIR/`,
+`SWIFT.h` is the public include; the implementation lives in `Adaptation/SWIFT/`,
 without a `Detail` layer. All method-specific types belong to
-`Rodin::Adaptation::WNGIR`, without redundant class prefixes.
+`Rodin::Adaptation::SWIFT`, without redundant class prefixes.
 `Problem.h` retains the outer orchestration and metric
 Problem. `HingeProblem.h` assembles the tangent and negative stationarity
 residual for Rodin's `Solver::NewtonSolver`; its step policy retains the frozen
 inner merit search. `LinearSolver.h` adapts the retained
 linear backends to the native solver interface. The local Eigen backend supports CG,
 SparseLU, and optional MUMPS solving the same globally centered operator.
-`Adapt.h` owns a local vector P1 space and `WNGIR::Problem`, applying accepted
+`Adapt.h` owns a local vector P1 space and `SWIFT::Problem`, applying accepted
 quality-valid displacements to affine simplicial meshes without changing topology.
-`WNGIR::Problem(u, v)` follows supplied storage and currently supports only Eigen.
-`WNGIR::Adapt(mesh)` defaults to Eigen for local meshes; MPI requires PETSc and
+`SWIFT::Problem(u, v)` follows supplied storage and currently supports only Eigen.
+`SWIFT::Adapt(mesh)` defaults to Eigen for local meshes; MPI requires PETSc and
 construction is disabled until the distributed specialization is implemented.
 The sparse metric is symmetrized before factorization and residual evaluation,
 so triangular direct solvers and the true-residual test use the same operator.
@@ -123,7 +123,7 @@ reassembled per outer iteration. MUMPS retains symbolic analysis while the
 augmented sparsity pattern is unchanged and numeric factors for identical systems.
 `AnalyticFunctionAdapters.h` lifts analytic lambdas into FunctionBase;
 `CellGeomCache` caches per-cell geometry. Historical experimental comparisons
-remain in experiments/wngir_calibration; they are not current implementations.
+remain in experiments/swift_calibration; they are not current implementations.
 
 Standing principle regardless of branch: interface-fitting constraints
 inside variational solves are smooth penalties, never hard projections

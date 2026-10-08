@@ -31,7 +31,7 @@
   | [LevelSetCantilever3D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetCantilever3D.cpp) | The same in 3D |
   | [LevelSetArch2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetArch2D.cpp), [LevelSetMast2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetMast2D.cpp) | Other load cases |
   | [LevelSetEigenvalue2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetEigenvalue2D.cpp) | Eigenvalue objective |
-  | [LevelSetWNGIRCantilever2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetWNGIRCantilever2D.cpp) | Interface registration (WNGIR) instead of full remeshing |
+  | [LevelSetSWIFTCantilever2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetSWIFTCantilever2D.cpp) | Interface registration (SWIFT) instead of full remeshing |
   | [BoundaryOptimization](https://github.com/cbritopacheco/rodin/tree/develop/examples/BoundaryOptimization) | Boundary-condition/support optimization |
   | @ref examples-density_optimization-index "DensityOptimization" | Density (SIMP-type) approaches |
 
@@ -149,9 +149,9 @@
     metric conformity and element quality across iterations. Accurate
     domain and interface integrals; the cost is remeshing every
     iteration.
-  - **Interface registration (WNGIR).** Instead of remeshing, displace
+  - **Interface registration (SWIFT).** Instead of remeshing, displace
     the existing mesh so its interface tracks @f$ \{\phi=0\} @f$: the
-    @ref Rodin::Adaptation "Adaptation" module's WNGIR solver. Keeps the
+    @ref Rodin::Adaptation "Adaptation" module's SWIFT solver. Keeps the
     mesh topology and connectivity stable between iterations.
   - **Ersatz material / density.** Keep a fixed mesh and interpolate
     material properties (void as weak material) — the

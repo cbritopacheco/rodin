@@ -14,56 +14,56 @@ gtest_discover_tests(RodinAdaptationCellDeformationTest
     LABELS unit
 )
 
-add_executable(RodinAdaptationWNGIRHingeStateTest
-  WNGIRHingeStateTest.cpp)
-target_link_libraries(RodinAdaptationWNGIRHingeStateTest
+add_executable(RodinAdaptationSWIFTHingeStateTest
+  SWIFTHingeStateTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTHingeStateTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
   Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationWNGIRHingeStateTest
+gtest_discover_tests(RodinAdaptationSWIFTHingeStateTest
   PROPERTIES
     LABELS unit
 )
 
-add_executable(RodinAdaptationWNGIRLossTest WNGIRLossTest.cpp)
-target_link_libraries(RodinAdaptationWNGIRLossTest
+add_executable(RodinAdaptationSWIFTLossTest SWIFTLossTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTLossTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
   Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationWNGIRLossTest
+gtest_discover_tests(RodinAdaptationSWIFTLossTest
   PROPERTIES
     LABELS unit
 )
 
-add_executable(RodinAdaptationWNGIRSolverTest WNGIRSolverTest.cpp)
-add_executable(RodinAdaptationWNGIRAdaptTest WNGIRAdaptTest.cpp)
-target_link_libraries(RodinAdaptationWNGIRAdaptTest
+add_executable(RodinAdaptationSWIFTSolverTest SWIFTSolverTest.cpp)
+add_executable(RodinAdaptationSWIFTAdaptTest SWIFTAdaptTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTAdaptTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationWNGIRAdaptTest PROPERTIES LABELS unit)
+gtest_discover_tests(RodinAdaptationSWIFTAdaptTest PROPERTIES LABELS unit)
 
 if(TARGET Rodin::MMG)
-  add_executable(RodinAdaptationWNGIRExampleParametersTest WNGIRExampleParametersTest.cpp)
-  target_link_libraries(RodinAdaptationWNGIRExampleParametersTest
+  add_executable(RodinAdaptationSWIFTExampleParametersTest SWIFTExampleParametersTest.cpp)
+  target_link_libraries(RodinAdaptationSWIFTExampleParametersTest
     PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation Rodin::MMG)
-  gtest_discover_tests(RodinAdaptationWNGIRExampleParametersTest PROPERTIES LABELS unit)
+  gtest_discover_tests(RodinAdaptationSWIFTExampleParametersTest PROPERTIES LABELS unit)
 endif()
 
-add_executable(RodinAdaptationWNGIRRegularityMetricTest WNGIRRegularityMetricTest.cpp)
-add_executable(RodinAdaptationWNGIRDirectionalNewtonTest WNGIRDirectionalNewtonTest.cpp)
-target_link_libraries(RodinAdaptationWNGIRDirectionalNewtonTest
+add_executable(RodinAdaptationSWIFTRegularityMetricTest SWIFTRegularityMetricTest.cpp)
+add_executable(RodinAdaptationSWIFTDirectionalNewtonTest SWIFTDirectionalNewtonTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTDirectionalNewtonTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationWNGIRDirectionalNewtonTest PROPERTIES LABELS unit)
-target_link_libraries(RodinAdaptationWNGIRRegularityMetricTest
+gtest_discover_tests(RodinAdaptationSWIFTDirectionalNewtonTest PROPERTIES LABELS unit)
+target_link_libraries(RodinAdaptationSWIFTRegularityMetricTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationWNGIRRegularityMetricTest PROPERTIES LABELS unit)
-target_link_libraries(RodinAdaptationWNGIRSolverTest
+gtest_discover_tests(RodinAdaptationSWIFTRegularityMetricTest PROPERTIES LABELS unit)
+target_link_libraries(RodinAdaptationSWIFTSolverTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
   Rodin::Adaptation)
-gtest_discover_tests(RodinAdaptationWNGIRSolverTest
+gtest_discover_tests(RodinAdaptationSWIFTSolverTest
   PROPERTIES
     LABELS unit
 )

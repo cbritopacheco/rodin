@@ -46,6 +46,6 @@ sparsity pattern is unchanged (`MatGetNonzeroState` /
 pattern silently invalidate factor reuse — treat pattern stability as
 part of the assembly contract (the regression tests above pin it).
 
-Note: further PETSc-backed adaptation solvers (e.g. for WNGIR in 3D)
+Note: further PETSc-backed adaptation solvers (e.g. for SWIFT in 3D)
 live on the `module/Adaptation` lineage, not on `develop` — verify
 presence before citing them.

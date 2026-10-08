@@ -25,8 +25,8 @@ target_link_libraries(LevelSetCantilever3D
   Rodin::MMG
   )
 
-add_executable(LevelSetWNGIRCantilever2D LevelSetWNGIRCantilever2D.cpp)
-target_link_libraries(LevelSetWNGIRCantilever2D
+add_executable(LevelSetSWIFTCantilever2D LevelSetSWIFTCantilever2D.cpp)
+target_link_libraries(LevelSetSWIFTCantilever2D
   PUBLIC
   Rodin::Advection
   Rodin::Geometry
@@ -35,11 +35,11 @@ target_link_libraries(LevelSetWNGIRCantilever2D
   Rodin::Variational
   )
 
-add_executable(LevelSetWNGIRCantilever2DP2 LevelSetWNGIRCantilever2D.cpp)
-target_compile_definitions(LevelSetWNGIRCantilever2DP2
+add_executable(LevelSetSWIFTCantilever2DP2 LevelSetSWIFTCantilever2D.cpp)
+target_compile_definitions(LevelSetSWIFTCantilever2DP2
   PRIVATE
-  RODIN_WNGIR_P2_DISPLACEMENT=1)
-target_link_libraries(LevelSetWNGIRCantilever2DP2
+  RODIN_SWIFT_P2_DISPLACEMENT=1)
+target_link_libraries(LevelSetSWIFTCantilever2DP2
   PRIVATE
   Rodin::Advection
   Rodin::Geometry
@@ -49,8 +49,8 @@ target_link_libraries(LevelSetWNGIRCantilever2DP2
   )
 
 if (RODIN_USE_PETSC)
-  add_executable(LevelSetWNGIRCantilever3D LevelSetWNGIRCantilever3D.cpp)
-  target_link_libraries(LevelSetWNGIRCantilever3D
+  add_executable(LevelSetSWIFTCantilever3D LevelSetSWIFTCantilever3D.cpp)
+  target_link_libraries(LevelSetSWIFTCantilever3D
     PUBLIC
     Rodin::Advection
     Rodin::Geometry
@@ -60,11 +60,11 @@ if (RODIN_USE_PETSC)
     Rodin::Variational
     )
 
-  add_executable(LevelSetWNGIRCantilever3DP2 LevelSetWNGIRCantilever3D.cpp)
-  target_compile_definitions(LevelSetWNGIRCantilever3DP2
+  add_executable(LevelSetSWIFTCantilever3DP2 LevelSetSWIFTCantilever3D.cpp)
+  target_compile_definitions(LevelSetSWIFTCantilever3DP2
     PRIVATE
-    RODIN_WNGIR_P2_DISPLACEMENT=1)
-  target_link_libraries(LevelSetWNGIRCantilever3DP2
+    RODIN_SWIFT_P2_DISPLACEMENT=1)
+  target_link_libraries(LevelSetSWIFTCantilever3DP2
     PRIVATE
     Rodin::Advection
     Rodin::Geometry

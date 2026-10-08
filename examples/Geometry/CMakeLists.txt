@@ -14,87 +14,87 @@ target_link_libraries(Displace
   Rodin::Geometry
   Rodin::Variational)
 
-add_executable(LevelSetWNGIRReconstruction LevelSetWNGIRReconstruction.cpp)
-target_link_libraries(LevelSetWNGIRReconstruction
+add_executable(LevelSetSWIFTReconstruction LevelSetSWIFTReconstruction.cpp)
+target_link_libraries(LevelSetSWIFTReconstruction
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
-add_executable(LevelSetWNGIRReconstructionP2 LevelSetWNGIRReconstruction.cpp)
-target_compile_definitions(LevelSetWNGIRReconstructionP2
+add_executable(LevelSetSWIFTReconstructionP2 LevelSetSWIFTReconstruction.cpp)
+target_compile_definitions(LevelSetSWIFTReconstructionP2
   PRIVATE
-  RODIN_WNGIR_P2_DISPLACEMENT=1)
-target_link_libraries(LevelSetWNGIRReconstructionP2
+  RODIN_SWIFT_P2_DISPLACEMENT=1)
+target_link_libraries(LevelSetSWIFTReconstructionP2
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
-add_executable(LevelSetWNGIRReconstruction3D LevelSetWNGIRReconstruction3D.cpp)
-target_link_libraries(LevelSetWNGIRReconstruction3D
+add_executable(LevelSetSWIFTReconstruction3D LevelSetSWIFTReconstruction3D.cpp)
+target_link_libraries(LevelSetSWIFTReconstruction3D
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
-add_executable(LevelSetWNGIRSweep LevelSetWNGIRSweep.cpp)
-target_link_libraries(LevelSetWNGIRSweep
+add_executable(LevelSetSWIFTSweep LevelSetSWIFTSweep.cpp)
+target_link_libraries(LevelSetSWIFTSweep
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
-add_executable(LevelSetWNGIRSweepP2 LevelSetWNGIRSweep.cpp)
-target_compile_definitions(LevelSetWNGIRSweepP2
+add_executable(LevelSetSWIFTSweepP2 LevelSetSWIFTSweep.cpp)
+target_compile_definitions(LevelSetSWIFTSweepP2
   PRIVATE
-  RODIN_WNGIR_P2_DISPLACEMENT=1)
-target_link_libraries(LevelSetWNGIRSweepP2
+  RODIN_SWIFT_P2_DISPLACEMENT=1)
+target_link_libraries(LevelSetSWIFTSweepP2
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
-add_executable(LevelSetWNGIRReconstruction3DP2 LevelSetWNGIRReconstruction3D.cpp)
-target_compile_definitions(LevelSetWNGIRReconstruction3DP2
+add_executable(LevelSetSWIFTReconstruction3DP2 LevelSetSWIFTReconstruction3D.cpp)
+target_compile_definitions(LevelSetSWIFTReconstruction3DP2
   PRIVATE
-  RODIN_WNGIR_P2_DISPLACEMENT=1)
-target_link_libraries(LevelSetWNGIRReconstruction3DP2
+  RODIN_SWIFT_P2_DISPLACEMENT=1)
+target_link_libraries(LevelSetSWIFTReconstruction3DP2
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
-add_executable(LevelSetWNGIRSweep3D LevelSetWNGIRSweep3D.cpp)
-target_link_libraries(LevelSetWNGIRSweep3D
+add_executable(LevelSetSWIFTSweep3D LevelSetSWIFTSweep3D.cpp)
+target_link_libraries(LevelSetSWIFTSweep3D
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
-add_executable(LevelSetWNGIRSweep3DP2 LevelSetWNGIRSweep3D.cpp)
-target_compile_definitions(LevelSetWNGIRSweep3DP2
+add_executable(LevelSetSWIFTSweep3DP2 LevelSetSWIFTSweep3D.cpp)
+target_compile_definitions(LevelSetSWIFTSweep3DP2
   PRIVATE
-  RODIN_WNGIR_P2_DISPLACEMENT=1)
-target_link_libraries(LevelSetWNGIRSweep3DP2
+  RODIN_SWIFT_P2_DISPLACEMENT=1)
+target_link_libraries(LevelSetSWIFTSweep3DP2
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
-add_executable(LevelSetWNGIRAdvection LevelSetWNGIRAdvection.cpp)
-target_link_libraries(LevelSetWNGIRAdvection
+add_executable(LevelSetSWIFTAdvection LevelSetSWIFTAdvection.cpp)
+target_link_libraries(LevelSetSWIFTAdvection
   PUBLIC
   Rodin::Advection
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
-add_executable(LevelSetWNGIRAdvectionP2 LevelSetWNGIRAdvection.cpp)
-target_compile_definitions(LevelSetWNGIRAdvectionP2
+add_executable(LevelSetSWIFTAdvectionP2 LevelSetSWIFTAdvection.cpp)
+target_compile_definitions(LevelSetSWIFTAdvectionP2
   PRIVATE
-  RODIN_WNGIR_P2_DISPLACEMENT=1)
-target_link_libraries(LevelSetWNGIRAdvectionP2
+  RODIN_SWIFT_P2_DISPLACEMENT=1)
+target_link_libraries(LevelSetSWIFTAdvectionP2
   PUBLIC
   Rodin::Advection
   Rodin::Geometry
@@ -102,11 +102,11 @@ target_link_libraries(LevelSetWNGIRAdvectionP2
   Rodin::Variational)
 
 foreach(target IN ITEMS
-    LevelSetWNGIRReconstruction LevelSetWNGIRReconstructionP2
-    LevelSetWNGIRReconstruction3D LevelSetWNGIRReconstruction3DP2
-    LevelSetWNGIRSweep LevelSetWNGIRSweepP2
-    LevelSetWNGIRSweep3D LevelSetWNGIRSweep3DP2
-    LevelSetWNGIRAdvection LevelSetWNGIRAdvectionP2)
+    LevelSetSWIFTReconstruction LevelSetSWIFTReconstructionP2
+    LevelSetSWIFTReconstruction3D LevelSetSWIFTReconstruction3DP2
+    LevelSetSWIFTSweep LevelSetSWIFTSweepP2
+    LevelSetSWIFTSweep3D LevelSetSWIFTSweep3DP2
+    LevelSetSWIFTAdvection LevelSetSWIFTAdvectionP2)
   target_link_libraries(${target} PRIVATE Rodin::MMG)
 endforeach()
 
