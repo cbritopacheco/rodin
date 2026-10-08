@@ -32,3 +32,21 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
     target_link_libraries(ForcedConvectionNewton PUBLIC Rodin::Scotch)
   endif()
 endif()
+
+if (RODIN_USE_PETSC AND RODIN_USE_MPI)
+  # PCM melting with natural convection (enthalpy-porosity, Newton + OSGS):
+  # 2 m x 0.10 m roof layer under Calama weather.
+  add_executable(NaturalConvectionPCM NaturalConvectionPCM.cpp)
+  target_link_libraries(NaturalConvectionPCM
+    PUBLIC
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(NaturalConvectionPCM PUBLIC Rodin::Scotch)
+  endif()
+endif()
