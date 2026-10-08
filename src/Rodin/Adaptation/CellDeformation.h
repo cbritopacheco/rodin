@@ -204,13 +204,19 @@ namespace Rodin::Adaptation
         return getJacobian() * getInverseTranspose().dot(G);
       }
 
-      /// @brief Mixed second variation of the Jacobian; requires an invertible state.
-      Real getJacobianSecondAction(const Math::SpatialMatrix<Real>& G,
-        const Math::SpatialMatrix<Real>& H) const
+      /**
+       * @brief Mixed second variation of the Jacobian; requires an invertible state.
+       * @param G First deformation-gradient perturbation.
+       * @param H Second deformation-gradient perturbation.
+       * @returns The mixed determinant derivative in the two directions.
+       */
+      Real getJacobianSecondAction(
+        const Math::SpatialMatrix<Real>& G, const Math::SpatialMatrix<Real>& H) const
       {
         const auto inverse = getInverseTranspose().transpose();
-        return getJacobian() * (getInverseTranspose().dot(G) * getInverseTranspose().dot(H) -
-          (inverse * G * inverse * H).trace());
+        return getJacobian() *
+          (getInverseTranspose().dot(G) * getInverseTranspose().dot(H) -
+            (inverse * G * inverse * H).trace());
       }
 
       /**
@@ -225,9 +231,14 @@ namespace Rodin::Adaptation
         return getRelativeDistortionGradient().dot(G);
       }
 
-      /// @brief Mixed second variation of relative distortion; requires a positive Jacobian.
-      Real getRelativeDistortionSecondAction(const Math::SpatialMatrix<Real>& G,
-        const Math::SpatialMatrix<Real>& H) const
+      /**
+       * @brief Mixed second variation of relative distortion; requires a positive Jacobian.
+       * @param G First deformation-gradient perturbation.
+       * @param H Second deformation-gradient perturbation.
+       * @returns The mixed relative-distortion derivative in the two directions.
+       */
+      Real getRelativeDistortionSecondAction(
+        const Math::SpatialMatrix<Real>& G, const Math::SpatialMatrix<Real>& H) const
       {
         assert(isAdmissible());
         const Real d = static_cast<Real>(m_d);

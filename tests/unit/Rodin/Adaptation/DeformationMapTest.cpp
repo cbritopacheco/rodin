@@ -43,9 +43,13 @@ namespace Rodin::Tests::Unit
           return LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
       }();
       for (std::size_t from = 0; from <= Dimension; ++from)
+      {
         for (std::size_t to = 0; to <= Dimension; ++to)
+        {
           if (from != to)
             mesh.getConnectivity().compute(from, to);
+        }
+      }
       auto space = [&] {
         if constexpr (Order == 1)
           return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, Dimension);

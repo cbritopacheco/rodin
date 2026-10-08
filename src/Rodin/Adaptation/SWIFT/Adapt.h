@@ -78,8 +78,8 @@ namespace Rodin::Adaptation::SWIFT
       /// @brief This specialization uses the local Eigen variational backend.
       static constexpr bool isSupported = true;
       /// @brief Vector P1 space on the local mesh.
-      using Space = Variational::P1<Math::SpatialVector<Real>,
-        Geometry::Mesh<Context::Local>>;
+      using Space =
+        Variational::P1<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>>;
       /// @brief Trial function owning displacement.
       using TrialFunction = decltype(Variational::TrialFunction(std::declval<Space&>()));
       /// @brief Test function on the displacement space.
@@ -92,27 +92,40 @@ namespace Rodin::Adaptation::SWIFT
        * @param[in,out] mesh Affine simplicial mesh to fit in place.
        */
       explicit Adapt(Mesh& mesh)
-        : m_mesh(mesh), m_space(mesh, mesh.getDimension()),
-          m_trial(m_space), m_test(m_space), m_problem(m_trial, m_test)
+        : m_mesh(mesh),
+          m_space(mesh, mesh.getDimension()),
+          m_trial(m_space),
+          m_test(m_space),
+          m_problem(m_trial, m_test)
       {
         if (mesh.getSpaceDimension() != mesh.getDimension())
           Alert::Exception() << "SWIFT::Adapt requires a full-dimensional mesh."
-            << Alert::Raise;
+                             << Alert::Raise;
         for (auto cell = mesh.getCell(); !cell.end(); ++cell)
         {
           const auto geometry = cell->getGeometry();
           if ((geometry != Geometry::Polytope::Type::Segment &&
-              geometry != Geometry::Polytope::Type::Triangle &&
-              geometry != Geometry::Polytope::Type::Tetrahedron) ||
-            mesh.getPolytopeTransformation(mesh.getDimension(),
-              cell->getIndex()).getOrder() != 1)
+                geometry != Geometry::Polytope::Type::Triangle &&
+                geometry != Geometry::Polytope::Type::Tetrahedron) ||
+            mesh.getPolytopeTransformation(mesh.getDimension(), cell->getIndex())
+                .getOrder() != 1)
             Alert::Exception() << "SWIFT::Adapt requires affine simplicial geometry. "
-              << "Use SWIFT::Problem for curved geometry." << Alert::Raise;
+                               << "Use SWIFT::Problem for curved geometry."
+                               << Alert::Raise;
         }
       }
 
-      Adapt(const Adapt&) = delete;
-      Adapt& operator=(const Adapt&) = delete;
+      /**
+       * @brief Copying an owned adaptation workflow is disabled.
+       * @param other Workflow that cannot be copied.
+       */
+      Adapt(const Adapt& other) = delete;
+      /**
+       * @brief Copy assignment of an owned adaptation workflow is disabled.
+       * @param other Workflow that cannot be assigned.
+       * @returns No value, since assignment is deleted.
+       */
+      Adapt& operator=(const Adapt& other) = delete;
 
       /**
        * @brief Configures the owned fitting problem.

@@ -42,8 +42,8 @@ namespace Rodin::Adaptation::SWIFT
    * @param quadratureOrder Sampling order; zero selects the automatic quality policy.
    * @returns Jacobian, relative distortion and invalid-sample count at quadrature points and vertices.
    */
-  AdmissibilityReport evaluateAdmissibility(const Displacement& u,
-    Real jacobian, std::size_t quadratureOrder = 0)
+  AdmissibilityReport evaluateAdmissibility(
+    const Displacement& u, Real jacobian, std::size_t quadratureOrder = 0)
   {
     using Variational::IntegrationPoint;
     using Variational::Jacobian;
@@ -65,8 +65,8 @@ namespace Rodin::Adaptation::SWIFT
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
       const auto& qf = QF::PolytopeQuadratureFormula::get(quadratureOrder > 0
           ? quadratureOrder
-          : Parameters::Quadrature{}.getQualityOrder(
-              fe.getOrder(), cell.getTransformation().getOrder(),
+          : Parameters::Quadrature{}.getQualityOrder(fe.getOrder(),
+              cell.getTransformation().getOrder(),
               Geometry::Polytope::Traits(cell.getGeometry()).getVertexCount() == dim + 1),
         cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(qf);

@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SWIFT_SWIFTEXAMPLEPARAMETERS_H
-#define RODIN_SWIFT_SWIFTEXAMPLEPARAMETERS_H
+#ifndef RODIN_EXPERIMENTS_SWIFT_PARAMETERS_H
+#define RODIN_EXPERIMENTS_SWIFT_PARAMETERS_H
 
 #include <algorithm>
 #include <cstddef>
@@ -173,23 +173,22 @@ namespace Rodin::Examples
     Geometry::Attribute interfaceAttribute, const SWIFTExampleDefaults& defaults = {})
   {
     constexpr const char* options[] = {"swift-fit", "swift-robust-scale",
-      "swift-jacobian-weight", "swift-distortion-weight", "swift-jacobian", "swift-distortion",
-      "swift-quality-guard", "swift-distribution-deviatoric",
+      "swift-jacobian-weight", "swift-distortion-weight", "swift-jacobian",
+      "swift-distortion", "swift-quality-guard", "swift-distribution-deviatoric",
       "swift-distribution-divergence", "swift-directional-newton",
-      "swift-max-step-over-h", "swift-quality-witness",
-      "swift-linear-solver", "swift-linear-threads",
-      "swift-geometric-tolerance", "swift-inner-iterations",
+      "swift-max-step-over-h", "swift-quality-witness", "swift-linear-solver",
+      "swift-linear-threads", "swift-geometric-tolerance", "swift-inner-iterations",
       "swift-inner-relative-tolerance", "swift-inner-absolute-tolerance",
-      "swift-stagnation-iterations", "swift-hinge",
-      "swift-backtracks", "swift-armijo", "swift-energy-tolerance",
-      "swift-step-tolerance", "swift-step-over-h-tolerance", "swift-outer-iterations", "swift-linear-relative-tolerance",
+      "swift-stagnation-iterations", "swift-hinge", "swift-backtracks", "swift-armijo",
+      "swift-energy-tolerance", "swift-step-tolerance", "swift-step-over-h-tolerance",
+      "swift-outer-iterations", "swift-linear-relative-tolerance",
       "swift-linear-iterations", "swift-trace"};
     for (int i = 1; i < argc; ++i)
     {
       const std::string argument(argv[i]);
       if (argument.starts_with("--wngir-"))
-        Alert::Exception() << "WNGIR options have been renamed to --swift-*: "
-                           << argument << Alert::Raise;
+        Alert::Exception() << "WNGIR options have been renamed to --swift-*: " << argument
+                           << Alert::Raise;
       if (!argument.starts_with("--swift-"))
         continue;
       const auto name = argument.substr(2,
@@ -220,12 +219,12 @@ namespace Rodin::Examples
       realOption(argc, argv, "swift-distribution-divergence", defaults.divergence);
     p.globalization.directionalNewton = boolOption(
       argc, argv, "swift-directional-newton", p.globalization.directionalNewton);
-    p.globalization.maxStepOverH = realOption(
-      argc, argv, "swift-max-step-over-h", p.globalization.maxStepOverH);
+    p.globalization.maxStepOverH =
+      realOption(argc, argv, "swift-max-step-over-h", p.globalization.maxStepOverH);
     p.traceQualityWitness = boolOption(argc, argv, "swift-quality-witness", false);
     const auto defaultSolver =
       p.linear.solver == Adaptation::SWIFT::Parameters::LinearSolver::MUMPS ? "mumps"
-                                                                          : "sparse-lu";
+                                                                            : "sparse-lu";
     const auto linearSolver =
       stringOption(argc, argv, "swift-linear-solver", defaultSolver);
     if (linearSolver == "mumps")
@@ -239,8 +238,8 @@ namespace Rodin::Examples
     p.linear.threads = sizeOption(argc, argv, "swift-linear-threads", 0);
     p.convergence.tolerance.geometric =
       realOption(argc, argv, "swift-geometric-tolerance", 0);
-    p.convergence.iterations.inner = sizeOption(
-      argc, argv, "swift-inner-iterations", p.convergence.iterations.inner);
+    p.convergence.iterations.inner =
+      sizeOption(argc, argv, "swift-inner-iterations", p.convergence.iterations.inner);
     p.convergence.tolerance.innerRelative = realOption(argc, argv,
       "swift-inner-relative-tolerance", p.convergence.tolerance.innerRelative);
     p.convergence.tolerance.innerAbsolute = realOption(argc, argv,
@@ -257,8 +256,8 @@ namespace Rodin::Examples
       realOption(argc, argv, "swift-energy-tolerance", p.convergence.tolerance.energy);
     p.convergence.tolerance.step =
       realOption(argc, argv, "swift-step-tolerance", p.convergence.tolerance.step);
-    p.convergence.tolerance.stepOverH =
-      realOption(argc, argv, "swift-step-over-h-tolerance", p.convergence.tolerance.stepOverH);
+    p.convergence.tolerance.stepOverH = realOption(
+      argc, argv, "swift-step-over-h-tolerance", p.convergence.tolerance.stepOverH);
 
     p.quadrature.order = sizeOption(argc, argv, "quad-order", defaults.quadratureOrder);
     p.quadrature.surface = sizeOption(argc, argv, "surface-quadrature-order", 0);
@@ -269,8 +268,8 @@ namespace Rodin::Examples
     p.convergence.iterations.outer =
       sizeOption(argc, argv, "swift-outer-iterations", defaults.maxIterations);
 
-    p.convergence.tolerance.linearRelative = realOption(
-      argc, argv, "swift-linear-relative-tolerance", p.convergence.tolerance.linearRelative);
+    p.convergence.tolerance.linearRelative = realOption(argc, argv,
+      "swift-linear-relative-tolerance", p.convergence.tolerance.linearRelative);
     p.convergence.iterations.linear =
       sizeOption(argc, argv, "swift-linear-iterations", p.convergence.iterations.linear);
     p.interfaceAttribute = interfaceAttribute;

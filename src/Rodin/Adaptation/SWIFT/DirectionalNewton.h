@@ -22,8 +22,8 @@ namespace Rodin::Adaptation::SWIFT
    * @param maximumStep Physical-motion bound; zero leaves scaling unrestricted.
    * @returns Directional scale, or zero when the model inputs are invalid.
    */
-  inline Real getDirectionalNewtonStep(Real action, Real curvature,
-    Real fittingCurvature, Real directionNorm, Real maximumStep)
+  inline Real getDirectionalNewtonStep(Real action, Real curvature, Real fittingCurvature,
+    Real directionNorm, Real maximumStep)
   {
     if (!(action > Real(0)) || !std::isfinite(action) || !(directionNorm > Real(0)) ||
       !std::isfinite(directionNorm) || maximumStep < Real(0) ||

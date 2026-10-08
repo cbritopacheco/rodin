@@ -1,7 +1,7 @@
 add_executable(RodinGeometryLobedSphereLevelSetTest LobedSphereLevelSetTest.cpp)
 target_include_directories(RodinGeometryLobedSphereLevelSetTest
   PRIVATE
-  ${PROJECT_SOURCE_DIR}/examples/Adaptation/SWIFT)
+  ${PROJECT_SOURCE_DIR}/experiments/swift_calibration)
 target_link_libraries(RodinGeometryLobedSphereLevelSetTest
   PUBLIC
   GTest::gtest

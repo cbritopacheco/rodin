@@ -8,9 +8,11 @@
   Technique. Robust Welsch fitting drives the marked interface towards the
   target, while centered strain distributes the displacement through the mesh.
 
-  Reconstruction, advection, parameter-sweep and cantilever examples are
-  collected in `examples/Adaptation/SWIFT`. Their executables are generated in
-  the corresponding build directory, with the same `LevelSetSWIFT*` target names.
+  The self-contained `ReconstructionP1.cpp`, `ReconstructionP2.cpp` and
+  `ReconstructionP3.cpp` examples are collected in `examples/Adaptation/SWIFT`.
+  They fit a circle or sphere with the native API and write XDMF output.
+  Calibration drivers and their command-line controls live separately in
+  `experiments/swift_calibration` and are not built by default.
 
   @section guides-swift-setup Setup and ownership
 

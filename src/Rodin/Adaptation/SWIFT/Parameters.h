@@ -28,7 +28,8 @@ namespace Rodin::Adaptation::SWIFT
           struct Distribution
           {
               Real deviatoric = Real(1e-4); ///< @f$\kappa_{\rm dev}@f$.
-              Real divergence = Real(1e-2); ///< @f$\kappa_{\rm div}@f$, with 1/d normalization.
+              Real divergence =
+                Real(1e-2); ///< @f$\kappa_{\rm div}@f$, with 1/d normalization.
           };
           Distribution distribution; ///< Centered current-strain distribution.
           Real distortion = 10; ///< @f$Q_{\max}@f$, relative-distortion budget.
@@ -110,12 +111,13 @@ namespace Rodin::Adaptation::SWIFT
            * @param simplex Whether the entity is a simplex; tensor-product degree one is not P1.
            * @returns Two for affine P1; otherwise at least eight. Not an exactness guarantee.
            */
-          static size_t getCellOrder(size_t feOrder, size_t transformationOrder = 1,
-            bool simplex = true)
+          static size_t getCellOrder(
+            size_t feOrder, size_t transformationOrder = 1, bool simplex = true)
           {
             constexpr size_t affineOrder = 2, nonlinearMinimum = 8;
             return feOrder <= 1 && transformationOrder == 1 && simplex
-              ? affineOrder : std::max(nonlinearMinimum, 2 * feOrder);
+              ? affineOrder
+              : std::max(nonlinearMinimum, 2 * feOrder);
           }
 
           /**
@@ -127,12 +129,13 @@ namespace Rodin::Adaptation::SWIFT
            * @param simplex Whether the entity is a simplex.
            * @returns Automatic interface integration order.
            */
-          static size_t getInterfaceOrder(size_t feOrder, size_t transformationOrder = 1,
-            bool simplex = true)
+          static size_t getInterfaceOrder(
+            size_t feOrder, size_t transformationOrder = 1, bool simplex = true)
           {
             constexpr size_t affineOrder = 8, nonlinearMinimum = 12;
             return feOrder <= 1 && transformationOrder == 1 && simplex
-              ? affineOrder : std::max(nonlinearMinimum, 2 * feOrder + 2);
+              ? affineOrder
+              : std::max(nonlinearMinimum, 2 * feOrder + 2);
           }
 
           /**
@@ -153,11 +156,12 @@ namespace Rodin::Adaptation::SWIFT
            * @param simplex Whether the entity is a simplex.
            * @returns Selected surface integration order.
            */
-          size_t getSurfaceOrder(size_t feOrder, size_t transformationOrder = 1,
-            bool simplex = true) const
+          size_t getSurfaceOrder(
+            size_t feOrder, size_t transformationOrder = 1, bool simplex = true) const
           {
-            return surface > 0 ? surface : order > 0 ? order
-              : getInterfaceOrder(feOrder, transformationOrder, simplex);
+            return surface > 0 ? surface
+              : order > 0      ? order
+                               : getInterfaceOrder(feOrder, transformationOrder, simplex);
           }
 
           /**
@@ -167,11 +171,12 @@ namespace Rodin::Adaptation::SWIFT
            * @param simplex Whether the entity is a simplex.
            * @returns Selected volume integration order.
            */
-          size_t getVolumeOrder(size_t feOrder, size_t transformationOrder = 1,
-            bool simplex = true) const
+          size_t getVolumeOrder(
+            size_t feOrder, size_t transformationOrder = 1, bool simplex = true) const
           {
-            return volume > 0 ? volume : order > 0 ? order
-              : getCellOrder(feOrder, transformationOrder, simplex);
+            return volume > 0 ? volume
+              : order > 0     ? order
+                              : getCellOrder(feOrder, transformationOrder, simplex);
           }
 
           /**
@@ -181,18 +186,21 @@ namespace Rodin::Adaptation::SWIFT
            * @param simplex Whether the entity is a simplex.
            * @returns Independent quality order: two for affine P1, otherwise at least sixteen.
            */
-          size_t getQualityOrder(size_t feOrder, size_t transformationOrder = 1,
-            bool simplex = true) const
+          size_t getQualityOrder(
+            size_t feOrder, size_t transformationOrder = 1, bool simplex = true) const
           {
             constexpr size_t affineOrder = 2, nonlinearMinimum = 16;
-            return quality > 0 ? quality : feOrder <= 1 && transformationOrder == 1 && simplex
-              ? affineOrder : std::max(nonlinearMinimum, 2 * feOrder + 4);
+            return quality > 0 ? quality
+              : feOrder <= 1 && transformationOrder == 1 && simplex
+              ? affineOrder
+              : std::max(nonlinearMinimum, 2 * feOrder + 4);
           }
 
           std::size_t order = 0; ///< Zero selects automatic integration orders.
           std::size_t surface = 0; ///< Zero uses the common or automatic surface order.
           std::size_t volume = 0; ///< Zero uses the common or automatic volume order.
-          std::size_t quality = 0; ///< Zero selects independent automatic quality sampling; vertices are always checked.
+          std::size_t quality =
+            0; ///< Zero selects independent automatic quality sampling; vertices are always checked.
           std::size_t validation = 0; ///< Zero selects an independent validation order.
       };
 

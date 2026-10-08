@@ -35,20 +35,31 @@ namespace Rodin::Adaptation::SWIFT
         assert(scale > Real(0));
       }
 
-      /// @brief Returns the squared robust residual scale.
+      /**
+       * @brief Returns the squared robust residual scale.
+       * @returns The fixed squared scale.
+       */
       Real getScaleSquared() const noexcept
       {
         return m_scale2;
       }
 
-      /// @brief Evaluates @f$\rho(r)@f$.
+      /**
+       * @brief Evaluates @f$\rho(r)@f$.
+       * @param residual Signed level-set residual.
+       * @returns The Welsch loss value.
+       */
       Real getValue(Real residual) const
       {
         const Real s2 = residual * residual / m_scale2;
         return -Real(0.5) * m_scale2 * std::expm1(-s2);
       }
 
-      /// @brief Evaluates the weight @f$w(r)=\rho'(r)/r@f$.
+      /**
+       * @brief Evaluates the weight @f$w(r)=\rho'(r)/r@f$.
+       * @param residual Signed level-set residual.
+       * @returns The robust influence weight, including its limit at zero.
+       */
       Real getWeight(Real residual) const
       {
         const Real s2 = residual * residual / m_scale2;
@@ -65,7 +76,11 @@ namespace Rodin::Adaptation::SWIFT
         return getWeight(residual) * residual;
       }
 
-      /// @brief Second derivative in the scalar residual, without level-set Hessian.
+      /**
+       * @brief Second derivative in the scalar residual, without level-set Hessian.
+       * @param residual Signed level-set residual.
+       * @returns The scalar Welsch curvature, which may be negative.
+       */
       Real getCurvature(Real residual) const
       {
         return getWeight(residual) * (Real(1) - Real(2) * residual * residual / m_scale2);

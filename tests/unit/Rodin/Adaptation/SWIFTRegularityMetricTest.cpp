@@ -43,40 +43,44 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric, CenteredVarianceKernelAndNativeForm
       Math::SpatialVector<Real> value = Math::SpatialVector<Real>::Zero(Dimension);
       for (size_t axis = 0; axis < Dimension; ++axis)
       {
-        value(axis) = deformed ? Real(0.1) * point.getCoordinates()(axis) *
-            point.getCoordinates()(axis) : Real(0);
+        value(axis) = deformed
+          ? Real(0.1) * point.getCoordinates()(axis) * point.getCoordinates()(axis)
+          : Real(0);
       }
       return value;
     });
-    position = VectorFunction(Dimension,
-      [](const Point& point) { return Math::SpatialVector<Real>(point.getCoordinates()); });
+    position = VectorFunction(Dimension, [](const Point& point) {
+      return Math::SpatialVector<Real>(point.getCoordinates());
+    });
     position += current;
     const size_t order = 2 * Order;
-    const auto weight = RealFunction([gradient = Jacobian(current)](const auto& point) -> Real {
-      Adaptation::CellDeformation deformation(Dimension);
-      deformation.setDisplacementGradient(gradient.getValue(point));
-      return deformation.getJacobian();
-    });
-    const auto trialGradient = Jacobian(trial) *
-      Adaptation::SWIFT::CurrentInverse(current, Dimension);
-    const auto testGradient = Jacobian(test) *
-      Adaptation::SWIFT::CurrentInverse(current, Dimension);
+    const auto weight =
+      RealFunction([gradient = Jacobian(current)](const auto& point) -> Real {
+        Adaptation::CellDeformation deformation(Dimension);
+        deformation.setDisplacementGradient(gradient.getValue(point));
+        return deformation.getJacobian();
+      });
+    const auto trialGradient =
+      Jacobian(trial) * Adaptation::SWIFT::CurrentInverse(current, Dimension);
+    const auto testGradient =
+      Jacobian(test) * Adaptation::SWIFT::CurrentInverse(current, Dimension);
     const auto trialStrain = Real(0.5) * (trialGradient + Transpose(trialGradient));
     const auto testStrain = Real(0.5) * (testGradient + Transpose(testGradient));
-    for (const auto& [dev, div] : {
-        std::pair<Real, Real>{0, 0}, {0, 1}, {1, 0}, {Real(0.1), 10},
-        {10, Real(0.1)}, {1, 1}})
+    for (const auto& [dev, div] : {std::pair<Real, Real>{0, 0}, {0, 1}, {1, 0},
+           {Real(0.1), 10}, {10, Real(0.1)}, {1, 1}})
     {
-      SCOPED_TRACE(testing::Message() << "P" << Order << " d=" << Dimension
-        << " deformed=" << deformed << " dev=" << dev << " div=" << div);
+      SCOPED_TRACE(testing::Message()
+        << "P" << Order << " d=" << Dimension << " deformed=" << deformed
+        << " dev=" << dev << " div=" << div);
       BilinearForm core(trial, test), native(trial, test);
-      const Adaptation::SWIFT::Distribution distribution(trial, test, current, dev, div, order);
+      const Adaptation::SWIFT::Distribution distribution(
+        trial, test, current, dev, div, order);
       core = distribution;
       core.assemble();
       auto strainIntegral = Integral(dev * weight * trialStrain, testStrain);
       strainIntegral.setOrder(order);
-      auto traceIntegral = Integral((div - dev) / Real(Dimension) * weight *
-        Trace(trialStrain), Trace(testStrain));
+      auto traceIntegral = Integral(
+        (div - dev) / Real(Dimension) * weight * Trace(trialStrain), Trace(testStrain));
       traceIntegral.setOrder(order);
       native = strainIntegral + traceIntegral;
       native.assemble();
@@ -91,8 +95,10 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric, CenteredVarianceKernelAndNativeForm
       ASSERT_EQ(spectrum.info(), Eigen::Success);
       EXPECT_GE(spectrum.eigenvalues().minCoeff(), -tolerance);
       if (dev > 0 && div > 0)
+      {
         EXPECT_EQ((spectrum.eigenvalues().array().abs() < tolerance).count(),
           Dimension * (Dimension + 1));
+      }
 
       // Every global affine current-coordinate motion has constant strain.
       for (size_t row = 0; row < Dimension; ++row)
@@ -108,15 +114,16 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric, CenteredVarianceKernelAndNativeForm
           Math::Matrix<Real> affine = Math::Matrix<Real>::Zero(Dimension, Dimension);
           affine(row, column) = 1;
           field = MatrixFunction(affine) * position;
-          EXPECT_LT((matrix * field.getData()).norm(), tolerance * field.getData().norm());
+          EXPECT_LT(
+            (matrix * field.getData()).norm(), tolerance * field.getData().norm());
         }
       }
       field = VectorFunction(Dimension, [](const Point& point) {
         Math::SpatialVector<Real> value(Dimension);
         for (size_t axis = 0; axis < Dimension; ++axis)
         {
-          value(axis) = Real(axis + 1) * point.getCoordinates()(axis) *
-            point.getCoordinates()(axis);
+          value(axis) =
+            Real(axis + 1) * point.getCoordinates()(axis) * point.getCoordinates()(axis);
         }
         return value;
       });
@@ -141,7 +148,8 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric, CenteredVarianceKernelAndNativeForm
           const Real divergence = strain.trace();
           for (size_t axis = 0; axis < Dimension; ++axis)
             strain(axis, axis) -= divergence / Real(Dimension);
-          const Real w = rule.getWeight(q) * point.getDistortion() * deformation.getJacobian();
+          const Real w =
+            rule.getWeight(q) * point.getDistortion() * deformation.getJacobian();
           volume += w;
           firstDev += w * strain;
           secondDev += w * strain.squaredNorm();
@@ -168,7 +176,8 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric, CenteredVarianceKernelAndNativeForm
   }
 }
 
-TEST(Rodin_Adaptation_SWIFTRegularityMetric, BackgroundScaleMultipliesTheCompleteCenteredForm)
+TEST(Rodin_Adaptation_SWIFTRegularityMetric,
+  BackgroundScaleMultipliesTheCompleteCenteredForm)
 {
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
   for (size_t from = 1; from <= 2; ++from)

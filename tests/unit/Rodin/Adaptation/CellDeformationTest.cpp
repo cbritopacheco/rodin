@@ -154,8 +154,8 @@ namespace Rodin::Tests::Unit
       Math::SpatialMatrix<Real> G = Math::SpatialMatrix<Real>::Identity(d, d);
       G(0, 1) = Real(0.3);
       const auto energy = [d](const Math::SpatialMatrix<Real>& matrix) {
-        return -std::log(matrix.determinant()) + Real(d) / Real(2) *
-          std::log(matrix.squaredNorm() / Real(d));
+        return -std::log(matrix.determinant()) +
+          Real(d) / Real(2) * std::log(matrix.squaredNorm() / Real(d));
       };
       CellDeformation deformation(d);
       deformation.setDeformationGradient(F);
@@ -171,8 +171,10 @@ namespace Rodin::Tests::Unit
       };
       EXPECT_NEAR(hessian(F), Real(0), Real(1e-13));
       constexpr Real eps = Real(1e-4);
-      const Real difference = (energy(Math::SpatialMatrix<Real>(F + eps * G)) -
-        Real(2) * energy(F) + energy(Math::SpatialMatrix<Real>(F - eps * G))) / (eps * eps);
+      const Real difference =
+        (energy(Math::SpatialMatrix<Real>(F + eps * G)) - Real(2) * energy(F) +
+          energy(Math::SpatialMatrix<Real>(F - eps * G))) /
+        (eps * eps);
       EXPECT_NEAR(hessian(G), difference, Real(1e-6));
       F(1, 1) = Real(1e-6);
       EXPECT_GT(energy(F), Real(5));

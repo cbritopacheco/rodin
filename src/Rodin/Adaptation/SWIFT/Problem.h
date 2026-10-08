@@ -561,11 +561,11 @@ namespace Rodin::Adaptation::SWIFT
       using ProblemType = std::decay_t<decltype(Variational::Problem(
         std::declval<TrialFunctionType&>(), std::declval<TestFunctionType&>()))>;
       using LinearSystemType = typename ProblemType::LinearSystemType;
-      static_assert(std::is_same_v<
-        typename FormLanguage::Traits<LinearSystemType>::OperatorType,
-        Math::SparseMatrix<Real>> && std::is_same_v<
-        typename FormLanguage::Traits<LinearSystemType>::VectorType,
-        Math::Vector<Real>>,
+      static_assert(
+        std::is_same_v<typename FormLanguage::Traits<LinearSystemType>::OperatorType,
+          Math::SparseMatrix<Real>> &&
+          std::is_same_v<typename FormLanguage::Traits<LinearSystemType>::VectorType,
+            Math::Vector<Real>>,
         "SWIFT::Problem currently supports local Eigen storage only; "
         "PETSc/MPI assembly is not implemented.");
       using BilinearFormType = std::decay_t<decltype(Variational::BilinearForm(
@@ -579,8 +579,10 @@ namespace Rodin::Adaptation::SWIFT
       using Hinge = HingeState;
       using HingeProblem = SWIFT::HingeProblem<TrialFunctionType, TestFunctionType>;
       using LinearSolver = SWIFT::LinearSolver<LinearSystemType>;
-      using Distribution = SWIFT::Distribution<TrialFunctionType, TestFunctionType, Displacement>;
-      using HingeMetric = SWIFT::HingeMetric<TrialFunctionType, TestFunctionType, Displacement>;
+      using Distribution =
+        SWIFT::Distribution<TrialFunctionType, TestFunctionType, Displacement>;
+      using HingeMetric =
+        SWIFT::HingeMetric<TrialFunctionType, TestFunctionType, Displacement>;
       using HingeForce = SWIFT::HingeForce<TestFunctionType, Displacement>;
 
     public:
@@ -672,8 +674,17 @@ namespace Rodin::Adaptation::SWIFT
           m_additionalMetric(du, v)
       {}
 
-      Problem(const Problem&) = delete;
-      Problem& operator=(const Problem&) = delete;
+      /**
+       * @brief Copying a problem with owned solver bindings is disabled.
+       * @param other Problem that cannot be copied.
+       */
+      Problem(const Problem& other) = delete;
+      /**
+       * @brief Copy assignment of a problem with owned solver bindings is disabled.
+       * @param other Problem that cannot be assigned.
+       * @returns No value, since assignment is deleted.
+       */
+      Problem& operator=(const Problem& other) = delete;
 
       /**
        * @brief Additional metric terms, assembled afresh at each outer iteration.
@@ -738,13 +749,14 @@ namespace Rodin::Adaptation::SWIFT
         if (!std::isfinite(parameters.model.fit) || !(parameters.model.fit > Real(0)))
           Alert::Exception() << "SWIFT requires a finite positive fitting weight."
                              << Alert::Raise;
-        for (const Real value : {parameters.model.jacobianWeight, parameters.model.distortionWeight,
-               parameters.model.distribution.deviatoric,
-               parameters.model.distribution.divergence,
-               parameters.convergence.tolerance.innerAbsolute,
-               parameters.convergence.tolerance.energy,
-               parameters.convergence.tolerance.step,
-               parameters.convergence.tolerance.stepOverH, parameters.model.robustScale})
+        for (const Real value :
+          {parameters.model.jacobianWeight, parameters.model.distortionWeight,
+            parameters.model.distribution.deviatoric,
+            parameters.model.distribution.divergence,
+            parameters.convergence.tolerance.innerAbsolute,
+            parameters.convergence.tolerance.energy,
+            parameters.convergence.tolerance.step,
+            parameters.convergence.tolerance.stepOverH, parameters.model.robustScale})
         {
           if (!std::isfinite(value) || value < Real(0))
             Alert::Exception()
@@ -906,8 +918,8 @@ namespace Rodin::Adaptation::SWIFT
           return getAdmissibilityState(mesh, fes, validationCells, gf, meshDim);
         };
         auto surfaceState = [&](const Displacement& gf) {
-          return getSurfaceState(mesh, fes, gf, phi, interfaceFacets, loss,
-            dataNormalization, locator);
+          return getSurfaceState(
+            mesh, fes, gf, phi, interfaceFacets, loss, dataNormalization, locator);
         };
         auto recordSurfaceState = [&rep](const SurfaceState& state) {
           rep.energy = state.energy;
@@ -929,8 +941,10 @@ namespace Rodin::Adaptation::SWIFT
         const Variational::Integrator::OrderType surfaceOrder =
           [&](const Geometry::Polytope& face) -> std::size_t {
           const auto& fe = fes.getFiniteElement(face.getDimension(), face.getIndex());
-          return p.quadrature.getSurfaceOrder(fe.getOrder(), face.getTransformation().getOrder(),
-            Geometry::Polytope::Traits(face.getGeometry()).getVertexCount() == face.getDimension() + 1);
+          return p.quadrature.getSurfaceOrder(fe.getOrder(),
+            face.getTransformation().getOrder(),
+            Geometry::Polytope::Traits(face.getGeometry()).getVertexCount() ==
+              face.getDimension() + 1);
         };
 
         AdmissibilityState initialAdm{};
@@ -1026,23 +1040,23 @@ namespace Rodin::Adaptation::SWIFT
         for (; rep.iterations < p.convergence.iterations.outer; ++rep.iterations)
         {
           auto tic = Clock::now();
-          FittingTensor tensor(
-            grad, u, locator, p, dataNormalization, meshDim);
+          FittingTensor tensor(grad, u, locator, p, dataNormalization, meshDim);
           const auto fittingIntegrand = Variational::Dot(tensor * m_duStep, m_vStep);
           auto fittingMetric = Variational::FaceIntegral(fittingIntegrand);
           // Native order propagation is valid for a known tensor on an affine
           // entity. Curved surface measures and unknown compositions retain
           // the non-polynomial policy. Explicit orders always take precedence.
-          fittingMetric.setOrder([&, integrand = fittingIntegrand](const Geometry::Polytope& face) {
-            if (p.quadrature.surface > 0 || p.quadrature.order > 0)
+          fittingMetric.setOrder(
+            [&, integrand = fittingIntegrand](const Geometry::Polytope& face) {
+              if (p.quadrature.surface > 0 || p.quadrature.order > 0)
+                return surfaceOrder(face);
+              const auto order = integrand.getOrder(face);
+              const auto& transformation =
+                mesh.getPolytopeTransformation(face.getDimension(), face.getIndex());
+              if (order && transformation.getOrder() == 1)
+                return *order;
               return surfaceOrder(face);
-            const auto order = integrand.getOrder(face);
-            const auto& transformation = mesh.getPolytopeTransformation(
-              face.getDimension(), face.getIndex());
-            if (order && transformation.getOrder() == 1)
-              return *order;
-            return surfaceOrder(face);
-          });
+            });
           fittingMetric.over(*p.interfaceAttribute);
           FittingForce forceCoeff(
             phi, grad, u, locator, loss, dataNormalization, meshDim);
@@ -1065,11 +1079,12 @@ namespace Rodin::Adaptation::SWIFT
           size_t order = 0;
           for (auto cell = mesh.getCell(); cell; ++cell)
           {
-            order = std::max(
-              order, p.quadrature.getVolumeOrder(
+            order = std::max(order,
+              p.quadrature.getVolumeOrder(
                 fes.getFiniteElement(meshDim, cell->getIndex()).getOrder(),
                 cell->getTransformation().getOrder(),
-                Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() == meshDim + 1));
+                Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() ==
+                  meshDim + 1));
           }
           const Distribution distribution(
             m_duStep, m_vStep, u, deviatoric, divergence, order);
@@ -1122,9 +1137,8 @@ namespace Rodin::Adaptation::SWIFT
           rep.predictorScale = Real(1);
           if (p.globalization.directionalNewton)
           {
-            const auto curvatures =
-              getSurfaceDirectionalCurvature(mesh, fes, u, predictor, phi, grad,
-                interfaceFacets, loss, dataNormalization, locator);
+            const auto curvatures = getSurfaceDirectionalCurvature(mesh, fes, u,
+              predictor, phi, grad, interfaceFacets, loss, dataNormalization, locator);
             const Real norm = getPhysicalDisplacementNorm(
               mesh, fes, validationCells, predictor, p.quadrature.validation);
             rep.predictorScale =
@@ -1203,7 +1217,8 @@ namespace Rodin::Adaptation::SWIFT
               typename ProblemType::ProblemBodyType body(m_distributionForm);
               body = body + m_fittingMetric + hingeMetric - m_fittingForce - hingeForce;
               m_hingeProblem = body;
-              m_hingeProblem.setState(vK).setBoundaryDOFs(m_fixedIncrementDOFs)
+              m_hingeProblem.setState(vK)
+                .setBoundaryDOFs(m_fixedIncrementDOFs)
                 .setCentering(m_centering);
               using Newton = Solver::NewtonSolver<LinearSolver>;
               Newton newton(m_linearSolver);
@@ -1276,7 +1291,8 @@ namespace Rodin::Adaptation::SWIFT
                   const auto merit = [&](const Displacement& increment) {
                     Math::Vector<Real> image;
                     image = fixedMetric * increment.getData();
-                    image -= m_centering * (m_centering.transpose() * increment.getData());
+                    image -=
+                      m_centering * (m_centering.transpose() * increment.getData());
                     const Real quadratic = Real(0.5) * increment.getData().dot(image);
                     const Real force = fixedForce.dot(increment.getData());
                     const Real quality = getHingeEnergy(mesh, fes, validationCells, u,
@@ -1328,11 +1344,10 @@ namespace Rodin::Adaptation::SWIFT
                   if (!meritAccepted)
                   {
                     if (p.trace)
-                      std::cout
-                        << "        hinge inner=" << (newtonReport.iterations + 1)
-                        << "  outer=" << rep.iterations << "  linear_ok=1"
-                        << "  merit_ok=0  converged=0  cg_it=" << linearIterations
-                        << "  cg_err=" << linearError << std::endl;
+                      std::cout << "        hinge inner=" << (newtonReport.iterations + 1)
+                                << "  outer=" << rep.iterations << "  linear_ok=1"
+                                << "  merit_ok=0  converged=0  cg_it=" << linearIterations
+                                << "  cg_err=" << linearError << std::endl;
                     rep.reason = Report::Reason::InnerLineSearchFailure;
                     solveOk = false;
                     return typename Newton::StepResult{false, false, Real(0)};
@@ -1543,8 +1558,9 @@ namespace Rodin::Adaptation::SWIFT
             std::cout << "      swift it=" << std::setw(3) << rep.iterations
                       << "  E=" << std::scientific << std::setprecision(3) << eNow
                       << "  residualRMS=" << surf.residualRMS << "  residualRMS/(hG)="
-                      << (levelSetMeshScale > Real(0) ? surf.residualRMS / levelSetMeshScale
-                                                      : Real(0))
+                      << (levelSetMeshScale > Real(0)
+                             ? surf.residualRMS / levelSetMeshScale
+                             : Real(0))
                       << "  residualSup=" << surf.residualSup
                       << "  step/h=" << (h > Real(0) ? rep.acceptedStep / h : Real(0))
                       << "  linIt=" << rep.linearIterations << "  alpha=" << alpha
@@ -1608,6 +1624,11 @@ namespace Rodin::Adaptation::SWIFT
       }
 
     private:
+      /**
+       * @brief Publishes final diagnostics to the optional monitor.
+       * @param report Completed solve diagnostics.
+       * @returns The stored final report.
+       */
       Report finish(const Report& report)
       {
         m_report = report;
@@ -1624,13 +1645,26 @@ namespace Rodin::Adaptation::SWIFT
           Real normalRMS = std::numeric_limits<Real>::infinity();
       };
 
-      /// Robust fitting Hessian action, omitting D2 phi; no metric assembly/solve.
+      /**
+       * @brief Evaluates directional robust curvature without the level-set Hessian.
+       * @param mesh Fixed reference mesh.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @param current Frozen outer displacement.
+       * @param direction Proposed incremental displacement.
+       * @param phi Target level-set function.
+       * @param grad Target level-set gradient.
+       * @param interfaceFacets Indices of the classified interface facets.
+       * @param loss Fixed-scale robust loss.
+       * @param normalization Energy and force normalization factor.
+       * @param locator Target-evaluation point locator.
+       * @returns Robust scalar curvature and its nonnegative influence-weighted counterpart.
+       */
       template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
       std::pair<Real, Real> getSurfaceDirectionalCurvature(const Mesh& mesh,
         const FES& fes, const Displacement& current, const Displacement& direction,
         const PhiType& phi, const GradType& grad,
-        const std::vector<Index>& interfaceFacets, const Loss& loss,
-        Real normalization, const LocatorType& locator) const
+        const std::vector<Index>& interfaceFacets, const Loss& loss, Real normalization,
+        const LocatorType& locator) const
       {
         if constexpr (requires { current.acquire(); })
           current.acquire();
@@ -1679,11 +1713,13 @@ namespace Rodin::Adaptation::SWIFT
       }
 
       /**
-       * @brief Quadrature formula SWIFT uses on a polytope.
-       *
+       * @brief Selects assembly quadrature for the entity and displacement order.
        * Affine P1 uses calibrated surface/volume orders; higher-order or
        * curved entities use provisional non-polynomial policies.
        * Specific orders override the common integration order.
+       * @param polytope Entity on which quadrature is requested.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @returns The cached surface or volume quadrature formula.
        */
       template <class FES>
       const QF::QuadratureFormulaBase& getQuadrature(
@@ -1692,8 +1728,9 @@ namespace Rodin::Adaptation::SWIFT
         const auto& fe =
           fes.getFiniteElement(polytope.getDimension(), polytope.getIndex());
         const bool isInterface = polytope.getDimension() < fes.getMesh().getDimension();
-        const bool simplex = Geometry::Polytope::Traits(polytope.getGeometry()).getVertexCount()
-          == polytope.getDimension() + 1;
+        const bool simplex =
+          Geometry::Polytope::Traits(polytope.getGeometry()).getVertexCount() ==
+          polytope.getDimension() + 1;
         const std::size_t order = isInterface
           ? m_parameters.quadrature.getSurfaceOrder(
               fe.getOrder(), polytope.getTransformation().getOrder(), simplex)
@@ -1702,7 +1739,12 @@ namespace Rodin::Adaptation::SWIFT
         return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
       }
 
-      /// @brief Higher-order quadrature used only for reported geometric responses.
+      /**
+       * @brief Selects diagnostic quadrature independently of assembly quadrature.
+       * @param polytope Entity on which quadrature is requested.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @returns The cached geometric-response quadrature formula.
+       */
       template <class FES>
       const QF::QuadratureFormulaBase& getGeometricValidationQuadrature(
         const Geometry::Polytope& polytope, const FES& fes) const
@@ -1715,7 +1757,13 @@ namespace Rodin::Adaptation::SWIFT
         return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
       }
 
-      /// @brief Measure of the fixed background domain used to normalize the QP.
+      /**
+       * @brief Integrates the fixed reference domain measure.
+       * @param mesh Fixed reference mesh.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @param validationCells Reference cell indices included in the check.
+       * @returns The reference volume used to normalize the quadratic model.
+       */
       template <class Mesh, class FES>
       Real getDomainMeasure(
         const Mesh& mesh, const FES& fes, const std::vector<Index>& validationCells) const
@@ -1739,13 +1787,26 @@ namespace Rodin::Adaptation::SWIFT
         }
       }
 
-      /// @brief Action of the negative robust-energy first variation on a direction.
+      /**
+       * @brief Evaluates the negative robust-energy first variation on a direction.
+       * @param mesh Fixed reference mesh.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @param current Frozen outer displacement.
+       * @param direction Proposed incremental displacement.
+       * @param phi Target level-set function.
+       * @param grad Target level-set gradient.
+       * @param interfaceFacets Indices of the classified interface facets.
+       * @param loss Fixed-scale robust loss.
+       * @param normalization Energy and force normalization factor.
+       * @param dimension Spatial dimension.
+       * @param locator Target-evaluation point locator.
+       * @returns The normalized fitting-force action.
+       */
       template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
       Real getSurfaceForceAction(const Mesh& mesh, const FES& fes,
         const Displacement& current, const Displacement& direction, const PhiType& phi,
-        const GradType& grad, const std::vector<Index>& interfaceFacets,
-        const Loss& loss, Real normalization, std::size_t dimension,
-        const LocatorType& locator) const
+        const GradType& grad, const std::vector<Index>& interfaceFacets, const Loss& loss,
+        Real normalization, std::size_t dimension, const LocatorType& locator) const
       {
         if constexpr (requires { current.acquire(); })
           current.acquire();
@@ -1760,8 +1821,7 @@ namespace Rodin::Adaptation::SWIFT
 #pragma omp parallel
 #endif
         {
-          FittingForce force(
-            phi, grad, current, locator, loss, normalization, dimension);
+          FittingForce force(phi, grad, current, locator, loss, normalization, dimension);
 #ifdef RODIN_USE_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -1787,7 +1847,17 @@ namespace Rodin::Adaptation::SWIFT
         return action;
       }
 
-      /// @brief Detects active affine hinges on their assembly quadrature.
+      /**
+       * @brief Detects active affine hinges at assembly quadrature points.
+       * @param mesh Fixed reference mesh.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @param cells Reference cell indices included in the check.
+       * @param current Frozen outer displacement.
+       * @param inner Current inner increment.
+       * @param dimension Spatial dimension.
+       * @param coefficient Effective hinge penalty coefficient.
+       * @returns Whether any hinge is active or the frozen state is inadmissible.
+       */
       template <class Mesh, class FES>
       bool hasActiveHinges(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& cells, const Displacement& current,
@@ -1824,6 +1894,17 @@ namespace Rodin::Adaptation::SWIFT
         return active;
       }
 
+      /**
+       * @brief Integrates the affine squared-hinge energy.
+       * @param mesh Fixed reference mesh.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @param validationCells Reference cell indices included in the check.
+       * @param current Frozen outer displacement.
+       * @param inner Current inner increment.
+       * @param dimension Spatial dimension.
+       * @param coefficient Effective hinge penalty coefficient.
+       * @returns The penalty energy of the current inner increment.
+       */
       template <class Mesh, class FES>
       Real getHingeEnergy(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& validationCells, const Displacement& current,
@@ -1860,6 +1941,16 @@ namespace Rodin::Adaptation::SWIFT
         return energy;
       }
 
+      /**
+       * @brief Checks the actual deformed cell geometry.
+       * @param mesh Fixed reference mesh.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @param validationCells Reference cell indices included in the check.
+       * @param u Displacement whose deformed interface or geometry is evaluated.
+       * @param dimension Spatial dimension.
+       * @param current Optional frozen displacement for affine predictions and quality witnesses.
+       * @returns Sampled Jacobian and distortion extrema and violation counts.
+       */
       template <class Mesh, class FES>
       AdmissibilityState getAdmissibilityState(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& validationCells, const Displacement& u,
@@ -1903,9 +1994,10 @@ namespace Rodin::Adaptation::SWIFT
             const auto cell = mesh.getCell(cellIndex);
             const auto& fe = fes.getFiniteElement(dimension, cellIndex);
             const auto& qf = QF::PolytopeQuadratureFormula::get(
-              m_parameters.quadrature.getQualityOrder(
-                fe.getOrder(), cell->getTransformation().getOrder(),
-                Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() == dimension + 1),
+              m_parameters.quadrature.getQualityOrder(fe.getOrder(),
+                cell->getTransformation().getOrder(),
+                Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() ==
+                  dimension + 1),
               cell->getGeometry());
             const auto& quad = cell->getQuadrature(qf);
             const auto evaluate = [&](const auto& ip) {
@@ -1980,11 +2072,23 @@ namespace Rodin::Adaptation::SWIFT
        * interface quadrature point. Energy uses the robust loss, but residual
        * diagnostics include the complete interface without an active-weight cutoff.
        */
+      /**
+       * @brief Computes robust energy and interface residual diagnostics.
+       * @param mesh Fixed reference mesh.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @param u Displacement whose deformed interface or geometry is evaluated.
+       * @param phi Target level-set function.
+       * @param interfaceFacets Indices of the classified interface facets.
+       * @param loss Fixed-scale robust loss.
+       * @param normalization Energy and force normalization factor.
+       * @param locator Target-evaluation point locator.
+       * @returns The energy, measure and residual norms at assembly quadrature.
+       */
       template <class Mesh, class FES, class PhiType, class LocatorType>
       SurfaceState getSurfaceState(const Mesh& mesh, const FES& fes,
         const Displacement& u, const PhiType& phi,
-        const std::vector<Index>& interfaceFacets, const Loss& loss,
-        Real normalization, const LocatorType& locator) const
+        const std::vector<Index>& interfaceFacets, const Loss& loss, Real normalization,
+        const LocatorType& locator) const
       {
         if constexpr (requires { u.acquire(); })
           u.acquire();
@@ -2051,6 +2155,18 @@ namespace Rodin::Adaptation::SWIFT
        * fields are measured without replacing their image by an affine facet.
        * Normal orientation is ignored because interior-facet orientation is not
        * intrinsic to the interface skeleton.
+       */
+      /**
+       * @brief Computes geometric discrepancies on the complete fitted interface.
+       * @param mesh Fixed reference mesh.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @param u Displacement whose deformed interface or geometry is evaluated.
+       * @param phi Target level-set function.
+       * @param grad Target level-set gradient.
+       * @param interfaceFacets Indices of the classified interface facets.
+       * @param dimension Spatial dimension.
+       * @param locator Target-evaluation point locator.
+       * @returns Sampled RMS and maximum geometric discrepancy and normal mismatch.
        */
       template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
       InterfaceGeometryState getInterfaceGeometryState(const Mesh& mesh, const FES& fes,
@@ -2216,6 +2332,14 @@ namespace Rodin::Adaptation::SWIFT
        * compared up to sign, since facet orientation is not consistent across
        * the interface.
        */
+      /**
+       * @brief Computes jumps between averaged adjacent interface normals.
+       * @param mesh Fixed reference mesh.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @param interfaceFacets Indices of the classified interface facets.
+       * @param dimension Spatial dimension.
+       * @returns Measure-weighted RMS and maximum normal-angle jumps.
+       */
       template <class Mesh, class FES>
       NormalJump getNormalJump(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& interfaceFacets, std::size_t dimension) const
@@ -2358,6 +2482,16 @@ namespace Rodin::Adaptation::SWIFT
           Real gradientScale = 0;
       };
 
+      /**
+       * @brief Estimates a fixed robust scale from the initial interface.
+       * @param mesh Fixed reference mesh.
+       * @param fes Displacement finite element space defining quadrature orders.
+       * @param phi Target level-set function.
+       * @param grad Target level-set gradient.
+       * @param interfaceFacets Indices of the classified interface facets.
+       * @param h Reference mesh spacing.
+       * @returns The robust residual scale and sampled gradient normalization.
+       */
       template <class Mesh, class FES, class PhiType, class GradType>
       RobustScale getRobustScale(const Mesh& mesh, const FES& fes, const PhiType& phi,
         const GradType& grad, const std::vector<Index>& interfaceFacets, Real h) const
@@ -2432,6 +2566,12 @@ namespace Rodin::Adaptation::SWIFT
       /**
        * @brief Solves the predictor and transfers it to a displacement field.
        * The retained linear adapter also serves the native inner Newton solve.
+       */
+      /**
+       * @brief Solves the assembled centered metric for the unconstrained predictor.
+       * @param out Returned predictor displacement, updated only on success.
+       * @param report Destination for linear-solver diagnostics.
+       * @returns Whether the centered physical residual met the linear tolerance.
        */
       bool solvePredictor(Displacement& out, Report& report)
       {

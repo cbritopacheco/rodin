@@ -22,7 +22,7 @@
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
 
-#include "SWIFTExampleParameters.h"
+#include "Parameters.h"
 #include "LobedSphereLevelSet.h"
 
 #include <algorithm>
@@ -665,9 +665,8 @@ int main(int argc, char** argv)
   std::cout << "    SWIFT it=" << iterations << "  fit=" << std::scientific
             << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
             << "  step=" << acceptedStep << "  min_j=" << minJ << "  max_j=" << maxJ
-            << "  max_qrel=" << maxQRel
-            << "  residual_rms=" << residualRMS << "  residual_sup=" << residualSup
-            << "  residual_rms_hg="
+            << "  max_qrel=" << maxQRel << "  residual_rms=" << residualRMS
+            << "  residual_sup=" << residualSup << "  residual_rms_hg="
             << (h * levelSetGradientScale > Real(0)
                    ? residualRMS / (h * levelSetGradientScale)
                    : Real(0))

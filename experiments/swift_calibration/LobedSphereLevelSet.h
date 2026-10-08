@@ -8,8 +8,8 @@
  * @file
  * @brief Axis-balanced lobed sphere target and its analytic gradient.
  */
-#ifndef RODIN_SWIFT_LOBEDSPHERELEVELSET_H
-#define RODIN_SWIFT_LOBEDSPHERELEVELSET_H
+#ifndef RODIN_EXPERIMENTS_SWIFT_LOBEDSPHERELEVELSET_H
+#define RODIN_EXPERIMENTS_SWIFT_LOBEDSPHERELEVELSET_H
 
 #include <Rodin/Math.h>
 
@@ -35,9 +35,9 @@ namespace Rodin::Examples
           return R0 + amp;
         const Vec3 direction = rotateZ(x / r, -phase);
         const Real frequency = lobes;
-        return R0 + amp / Real(3) *
-          (std::cos(frequency * direction(0)) +
-            std::cos(frequency * direction(1)) +
+        return R0 +
+          amp / Real(3) *
+          (std::cos(frequency * direction(0)) + std::cos(frequency * direction(1)) +
             std::cos(frequency * direction(2)));
       }
 
@@ -58,8 +58,8 @@ namespace Rodin::Examples
         Vec3 angularGradient(3);
         for (int i = 0; i < 3; ++i)
         {
-          angularGradient(i) = -amp * frequency / Real(3) *
-            std::sin(frequency * direction(i));
+          angularGradient(i) =
+            -amp * frequency / Real(3) * std::sin(frequency * direction(i));
         }
         angularGradient = rotateZ(angularGradient, phase);
         return n - (angularGradient - n * n.dot(angularGradient)) / r;

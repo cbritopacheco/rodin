@@ -24,7 +24,7 @@
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
 
-#include "SWIFTExampleParameters.h"
+#include "Parameters.h"
 #include "LobedSphereLevelSet.h"
 
 #include <algorithm>

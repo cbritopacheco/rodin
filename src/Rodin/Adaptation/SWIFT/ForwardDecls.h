@@ -20,8 +20,9 @@ namespace Rodin::Adaptation::SWIFT
   struct Report;
   template <class TrialFunctionType, class TestFunctionType>
   class Problem;
-  template <class Mesh, class ContextType = std::remove_cvref_t<
-    decltype(std::declval<const Mesh&>().getContext())>>
+  template <class Mesh,
+    class ContextType =
+      std::remove_cvref_t<decltype(std::declval<const Mesh&>().getContext())>>
   class Adapt;
 }
 

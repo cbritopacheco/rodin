@@ -31,7 +31,6 @@
   | [LevelSetCantilever3D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetCantilever3D.cpp) | The same in 3D |
   | [LevelSetArch2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetArch2D.cpp), [LevelSetMast2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetMast2D.cpp) | Other load cases |
   | [LevelSetEigenvalue2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/ShapeOptimization/LevelSetEigenvalue2D.cpp) | Eigenvalue objective |
-  | [LevelSetSWIFTCantilever2D.cpp](https://github.com/cbritopacheco/rodin/blob/develop/examples/Adaptation/SWIFT/LevelSetSWIFTCantilever2D.cpp) | Interface registration (SWIFT) instead of full remeshing |
   | [BoundaryOptimization](https://github.com/cbritopacheco/rodin/tree/develop/examples/BoundaryOptimization) | Boundary-condition/support optimization |
   | @ref examples-density_optimization-index "DensityOptimization" | Density (SIMP-type) approaches |
 

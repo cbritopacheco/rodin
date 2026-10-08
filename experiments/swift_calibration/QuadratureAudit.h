@@ -29,9 +29,10 @@ namespace Rodin::Experiments
   class QuadratureAudit
   {
     public:
-      QuadratureAudit(const Displacement& current,
-        const Adaptation::SWIFT::Parameters& parameters)
-        : m_current(current), m_parameters(parameters)
+      QuadratureAudit(
+        const Displacement& current, const Adaptation::SWIFT::Parameters& parameters)
+        : m_current(current),
+          m_parameters(parameters)
       {}
 
       void volume() const
@@ -44,21 +45,25 @@ namespace Rodin::Experiments
         std::array<Displacement, 3> probes{
           Displacement(fes), Displacement(fes), Displacement(fes)};
         for (size_t i = 0; i < probes.size(); ++i)
-          probes[i] = Adaptation::AnalyticVectorFunction([=](const Point& point) {
-            Math::SpatialVector<Real> value = Math::SpatialVector<Real>::Zero(dimension);
-            if (i < 2)
-              value(i) = point.getCoordinates()(i) * point.getCoordinates()(i);
-            else
-              for (size_t axis = 0; axis < dimension; ++axis)
-                value(axis) = point.x() * point.y();
-            return value;
-          }, dimension);
+          probes[i] = Adaptation::AnalyticVectorFunction(
+            [=](const Point& point) {
+              Math::SpatialVector<Real> value =
+                Math::SpatialVector<Real>::Zero(dimension);
+              if (i < 2)
+                value(i) = point.getCoordinates()(i) * point.getCoordinates()(i);
+              else
+                for (size_t axis = 0; axis < dimension; ++axis)
+                  value(axis) = point.x() * point.y();
+              return value;
+            },
+            dimension);
         auto gradient = Jacobian(m_current);
-        std::array probeGradients{Jacobian(probes[0]), Jacobian(probes[1]), Jacobian(probes[2])};
+        std::array probeGradients{
+          Jacobian(probes[0]), Jacobian(probes[1]), Jacobian(probes[2])};
         const bool affineP1 = [&] {
           for (auto cell = mesh.getCell(); cell; ++cell)
             if (fes.getFiniteElement(dimension, cell->getIndex()).getOrder() != 1 ||
-                cell->getTransformation().getOrder() != 1)
+              cell->getTransformation().getOrder() != 1)
               return false;
           return true;
         }();
@@ -87,9 +92,18 @@ namespace Rodin::Experiments
             deformation.setDisplacementGradient(gradient.getValue(ip));
             const Real j = deformation.getJacobian();
             const Real q = deformation.isAdmissible()
-              ? deformation.getRelativeDistortion() : std::numeric_limits<Real>::infinity();
-            if (j < minJ) { minJ = j; minCell = index; }
-            if (q > maxQ) { maxQ = q; maxCell = index; }
+              ? deformation.getRelativeDistortion()
+              : std::numeric_limits<Real>::infinity();
+            if (j < minJ)
+            {
+              minJ = j;
+              minCell = index;
+            }
+            if (q > maxQ)
+            {
+              maxQ = q;
+              maxCell = index;
+            }
           };
           for (auto cell = mesh.getCell(); cell; ++cell)
           {
@@ -101,7 +115,8 @@ namespace Rodin::Experiments
               const IntegrationPoint ip(quadrature.getPoint(q), &qf, q);
               quality(ip, cell->getIndex());
               if (!deformation.isAdmissible())
-                throw std::runtime_error("Fixed state is inverted; distribution is undefined.");
+                throw std::runtime_error(
+                  "Fixed state is inverted; distribution is undefined.");
               const Real weight = qf.getWeight(q) * ip.getPoint().getDistortion() *
                 deformation.getJacobian();
               // Frozen affine hinge, with a compressive trial that activates
@@ -109,8 +124,10 @@ namespace Rodin::Experiments
               Math::SpatialMatrix<Real> inner(dimension, dimension);
               inner.setZero();
               inner(0, 0) = -Real(0.2);
-              const Adaptation::SWIFT::HingeState state(deformation, inner, m_parameters, 1);
-              const Real referenceWeight = qf.getWeight(q) * ip.getPoint().getDistortion();
+              const Adaptation::SWIFT::HingeState state(
+                deformation, inner, m_parameters, 1);
+              const Real referenceWeight =
+                qf.getWeight(q) * ip.getPoint().getDistortion();
               hingeEnergy += referenceWeight * state.getEnergy(m_parameters, 1);
               for (size_t i = 0; i < 3; ++i)
                 for (size_t j = 0; j < 3; ++j)
@@ -118,8 +135,10 @@ namespace Rodin::Experiments
                   const auto gi = probeGradients[i].getValue(ip);
                   const auto gj = probeGradients[j].getValue(ip);
                   hinge(i, j) += referenceWeight *
-                    (state.getJacobianHessian() * state.getJacobianRow(gi) * state.getJacobianRow(gj) +
-                     state.getDistortionHessian() * state.getDistortionRow(gi) * state.getDistortionRow(gj));
+                    (state.getJacobianHessian() * state.getJacobianRow(gi) *
+                        state.getJacobianRow(gj) +
+                      state.getDistortionHessian() * state.getDistortionRow(gi) *
+                        state.getDistortionRow(gj));
                 }
               volume += weight;
               const Math::SpatialMatrix<Real> inverse =
@@ -128,7 +147,8 @@ namespace Rodin::Experiments
               Math::Vector<Real> trace(3);
               for (size_t i = 0; i < 3; ++i)
               {
-                const Math::SpatialMatrix<Real> h = probeGradients[i].getValue(ip) * inverse;
+                const Math::SpatialMatrix<Real> h =
+                  probeGradients[i].getValue(ip) * inverse;
                 strains[i] = Real(0.5) * (h + h.transpose());
                 trace(i) = strains[i].trace();
                 for (size_t axis = 0; axis < dimension; ++axis)
@@ -140,9 +160,9 @@ namespace Rodin::Experiments
                 for (size_t j = 0; j < 3; ++j)
                   action(i, j) += weight *
                     (m_parameters.model.distribution.deviatoric *
-                      (strains[i].transpose() * strains[j]).trace() +
-                     m_parameters.model.distribution.divergence / Real(dimension) *
-                       trace(i) * trace(j));
+                        (strains[i].transpose() * strains[j]).trace() +
+                      m_parameters.model.distribution.divergence / Real(dimension) *
+                        trace(i) * trace(j));
             }
             const Polytope::Traits traits(cell->getGeometry());
             for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
@@ -151,9 +171,10 @@ namespace Rodin::Experiments
           for (size_t i = 0; i < 3; ++i)
             for (size_t j = 0; j < 3; ++j)
               action(i, j) -= (m_parameters.model.distribution.deviatoric *
-                (means[i].transpose() * means[j]).trace() +
-                m_parameters.model.distribution.divergence / Real(dimension) *
-                  traces(i) * traces(j)) / volume;
+                                  (means[i].transpose() * means[j]).trace() +
+                                m_parameters.model.distribution.divergence /
+                                  Real(dimension) * traces(i) * traces(j)) /
+                volume;
           action *= m_parameters.model.h;
           if (reference.size() == 0)
           {
@@ -166,14 +187,15 @@ namespace Rodin::Experiments
           referenceMinJ = std::min(referenceMinJ, minJ);
           referenceMaxQ = std::max(referenceMaxQ, maxQ);
           std::cout << "audit volume order=" << order
-                    << " evaluated_order=" << (affineP1 ? 2 : order)
-                    << " action_error=" << (action - reference).norm() /
-                         std::max(reference.norm(), NumericalFloor)
-                    << " hinge_error=" << (hinge - referenceHinge).norm() /
-                         std::max(referenceHinge.norm(), NumericalFloor)
-                    << " hinge_energy=" << hingeEnergy
-                    << " hinge_energy_error=" << std::abs(hingeEnergy - referenceHingeEnergy) /
-                         std::max(std::abs(referenceHingeEnergy), NumericalFloor)
+                    << " evaluated_order=" << (affineP1 ? 2 : order) << " action_error="
+                    << (action - reference).norm() /
+              std::max(reference.norm(), NumericalFloor)
+                    << " hinge_error="
+                    << (hinge - referenceHinge).norm() /
+              std::max(referenceHinge.norm(), NumericalFloor)
+                    << " hinge_energy=" << hingeEnergy << " hinge_energy_error="
+                    << std::abs(hingeEnergy - referenceHingeEnergy) /
+              std::max(std::abs(referenceHingeEnergy), NumericalFloor)
                     << " min_j=" << minJ << " max_q=" << maxQ
                     << " seconds=" << elapsed(start) << '\n';
         }
@@ -190,7 +212,8 @@ namespace Rodin::Experiments
                   deformation.setDisplacementGradient(gradient.getValue(point));
                   const Real j = deformation.getJacobian();
                   const Real q = deformation.isAdmissible()
-                    ? deformation.getRelativeDistortion() : std::numeric_limits<Real>::infinity();
+                    ? deformation.getRelativeDistortion()
+                    : std::numeric_limits<Real>::infinity();
                   if (j < referenceMinJ || q > referenceMaxQ)
                     critical.insert(cell->getIndex());
                   referenceMinJ = std::min(referenceMinJ, j);
@@ -239,13 +262,15 @@ namespace Rodin::Experiments
           Real energy = 0, sup = 0;
           const auto distance = [&](const Geometry::Point& point) {
             const auto& moved = deformation.getMovedPoint(IntegrationPoint(point));
-            const Real value = std::abs(phi.getValue(moved)) / grad.getValue(moved).norm();
+            const Real value =
+              std::abs(phi.getValue(moved)) / grad.getValue(moved).norm();
             sup = std::max(sup, value);
           };
           for (auto face = mesh.getFace(); face; ++face)
             if (face->getAttribute() == *m_parameters.interfaceAttribute)
             {
-              const auto& qf = QF::PolytopeQuadratureFormula::get(order, face->getGeometry());
+              const auto& qf =
+                QF::PolytopeQuadratureFormula::get(order, face->getGeometry());
               const auto& quadrature = face->getQuadrature(qf);
               for (size_t q = 0; q < quadrature.getSize(); ++q)
               {
@@ -268,12 +293,15 @@ namespace Rodin::Experiments
           }
           maximum = std::max(maximum, sup);
           std::cout << "audit surface order=" << order << " energy=" << energy
-                    << " energy_error=" << std::abs(energy - referenceEnergy) /
-                         std::max(std::abs(referenceEnergy), NumericalFloor)
-                    << " force_error=" << (rhs.getVector() - referenceForce).norm() /
-                         std::max(referenceForce.norm(), NumericalFloor)
-                    << " metric_error=" << (metric.getOperator() - referenceMetric).norm() /
-                         std::max(referenceMetric.norm(), NumericalFloor)
+                    << " energy_error="
+                    << std::abs(energy - referenceEnergy) /
+              std::max(std::abs(referenceEnergy), NumericalFloor)
+                    << " force_error="
+                    << (rhs.getVector() - referenceForce).norm() /
+              std::max(referenceForce.norm(), NumericalFloor)
+                    << " metric_error="
+                    << (metric.getOperator() - referenceMetric).norm() /
+              std::max(referenceMetric.norm(), NumericalFloor)
                     << " geom_sup=" << sup << " seconds=" << elapsed(start) << '\n';
         }
         const Adaptation::DeformationMap deformation(m_current, locator);
@@ -283,16 +311,18 @@ namespace Rodin::Experiments
             if (face->getAttribute() == *m_parameters.interfaceAttribute)
               lattice(*face, density, [&](const Geometry::Point& point) {
                 const auto& moved = deformation.getMovedPoint(IntegrationPoint(point));
-                maximum = std::max(maximum,
-                  std::abs(phi.getValue(moved)) / grad.getValue(moved).norm());
+                maximum = std::max(
+                  maximum, std::abs(phi.getValue(moved)) / grad.getValue(moved).norm());
               });
-          std::cout << "audit geometry density=" << density << " geom_sup=" << maximum << '\n';
+          std::cout << "audit geometry density=" << density << " geom_sup=" << maximum
+                    << '\n';
         }
       }
 
     private:
       template <class Evaluate>
-      static void lattice(const Geometry::Polytope& cell, size_t density, Evaluate evaluate)
+      static void lattice(
+        const Geometry::Polytope& cell, size_t density, Evaluate evaluate)
       {
         const Geometry::Polytope::Traits traits(cell.getGeometry());
         if (traits.getVertexCount() != cell.getDimension() + 1)
@@ -315,11 +345,13 @@ namespace Rodin::Experiments
 
       static Real elapsed(std::chrono::steady_clock::time_point start)
       {
-        return std::chrono::duration<Real>(std::chrono::steady_clock::now() - start).count();
+        return std::chrono::duration<Real>(std::chrono::steady_clock::now() - start)
+          .count();
       }
       static constexpr Real NumericalFloor = Real(1e-14);
       static constexpr std::array<size_t, 8> Orders{32, 24, 2, 4, 6, 8, 12, 16};
-      static constexpr std::array<size_t, 9> SurfaceOrders{64, 32, 2, 4, 6, 8, 12, 16, 24};
+      static constexpr std::array<size_t, 9> SurfaceOrders{
+        64, 32, 2, 4, 6, 8, 12, 16, 24};
       const Displacement& m_current;
       const Adaptation::SWIFT::Parameters& m_parameters;
   };

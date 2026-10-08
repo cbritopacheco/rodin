@@ -38,7 +38,8 @@ class Calibration
         const Polytope::Traits traits(face->getGeometry());
         bool interface = true;
         for (size_t i = 0; i < traits.getVertexCount(); ++i)
-          interface &= std::abs(Point(*face, traits.getVertex(i)).x() - Real(0.5)) < Real(1e-12);
+          interface &=
+            std::abs(Point(*face, traits.getVertex(i)).x() - Real(0.5)) < Real(1e-12);
         if (interface)
         {
           mesh.setAttribute({dimension - 1, face->getIndex()}, 10);
@@ -47,22 +48,24 @@ class Calibration
       }
       H1 space(std::integral_constant<size_t, Degree>{}, mesh, dimension);
       GridFunction current(space);
-      current = AnalyticVectorFunction([=](const Point& point) {
-        Math::SpatialVector<Real> value = Math::SpatialVector<Real>::Zero(dimension);
-        const Real x = point.x(), y = point.y();
-        if (stress)
-        {
-          const Real r = x - Real(0.37);
-          value(0) = -Real(0.85) * (r - r * r * r / Real(3));
-          value(1) = Real(0.6) * (x - Real(0.5)) * y * (1 - y);
-        }
-        else
-        {
-          value(0) = Real(0.08) * x * (1 - x);
-          value(1) = Real(0.02) * y * (1 - y);
-        }
-        return value;
-      }, dimension);
+      current = AnalyticVectorFunction(
+        [=](const Point& point) {
+          Math::SpatialVector<Real> value = Math::SpatialVector<Real>::Zero(dimension);
+          const Real x = point.x(), y = point.y();
+          if (stress)
+          {
+            const Real r = x - Real(0.37);
+            value(0) = -Real(0.85) * (r - r * r * r / Real(3));
+            value(1) = Real(0.6) * (x - Real(0.5)) * y * (1 - y);
+          }
+          else
+          {
+            value(0) = Real(0.08) * x * (1 - x);
+            value(1) = Real(0.02) * y * (1 - y);
+          }
+          return value;
+        },
+        dimension);
       Adaptation::SWIFT::Parameters p;
       p.model.h = Real(0.5);
       p.model.fit = 1;
@@ -71,27 +74,32 @@ class Calibration
       p.model.hinge = 10;
       p.interfaceAttribute = 10;
       std::cout << std::setprecision(17) << "audit case dimension=" << dimension
-                << " degree=" << Degree << " stress=" << stress << " facets=" << facets << '\n';
+                << " degree=" << Degree << " stress=" << stress << " facets=" << facets
+                << '\n';
       Experiments::QuadratureAudit audit(current, p);
       audit.volume();
       const RealFunction phi([=](const Point& point) {
         return point.x() - Real(0.55) + Real(0.02) * std::sin(6 * point.y()) +
-          (dimension == 3 ? Real(0.01) * std::sin(5 * point.getCoordinates()(2)) : Real(0));
+          (dimension == 3 ? Real(0.01) * std::sin(5 * point.getCoordinates()(2))
+                          : Real(0));
       });
-      const AnalyticVectorFunction grad([=](const Point& point) {
-        Math::SpatialVector<Real> value = Math::SpatialVector<Real>::Zero(dimension);
-        value(0) = 1;
-        value(1) = Real(0.12) * std::cos(6 * point.y());
-        if (dimension == 3)
-          value(2) = Real(0.05) * std::cos(5 * point.getCoordinates()(2));
-        return value;
-      }, dimension);
+      const AnalyticVectorFunction grad(
+        [=](const Point& point) {
+          Math::SpatialVector<Real> value = Math::SpatialVector<Real>::Zero(dimension);
+          value(0) = 1;
+          value(1) = Real(0.12) * std::cos(6 * point.y());
+          if (dimension == 3)
+            value(2) = Real(0.05) * std::cos(5 * point.getCoordinates()(2));
+          return value;
+        },
+        dimension);
       std::cout << "audit target kind=analytic\n";
       audit.surface(phi, grad, Real(0.2), Real(1));
       H1 targetSpace(std::integral_constant<size_t, Degree>{}, mesh);
       GridFunction target(targetSpace);
       target = phi;
-      const RealFunction adapter([&](const Point& point) { return target.getValue(point); });
+      const RealFunction adapter(
+        [&](const Point& point) { return target.getValue(point); });
       auto targetGradient = Grad(target);
       targetGradient.traceOf(1);
       std::cout << "audit target kind=fe\n";
@@ -108,9 +116,16 @@ int main(int argc, char** argv)
   Calibration calibration;
   switch (degree)
   {
-    case 1: calibration.run<1>(dimension, stress); break;
-    case 2: calibration.run<2>(dimension, stress); break;
-    case 3: calibration.run<3>(dimension, stress); break;
-    default: return 2;
+    case 1:
+      calibration.run<1>(dimension, stress);
+      break;
+    case 2:
+      calibration.run<2>(dimension, stress);
+      break;
+    case 3:
+      calibration.run<3>(dimension, stress);
+      break;
+    default:
+      return 2;
   }
 }

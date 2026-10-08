@@ -20,7 +20,8 @@ TEST(SWIFTDirectionalNewton, StepSelectionAndFallback)
   EXPECT_DOUBLE_EQ(SWIFT::getDirectionalNewtonStep(1e-9, 1, 1, 1, 100), 1e-9);
   EXPECT_DOUBLE_EQ(SWIFT::getDirectionalNewtonStep(-1, 1, 1, 1, 100), 0);
   EXPECT_DOUBLE_EQ(
-    SWIFT::getDirectionalNewtonStep(1, std::numeric_limits<Real>::infinity(), 2, 1, 100), 0.5);
+    SWIFT::getDirectionalNewtonStep(1, std::numeric_limits<Real>::infinity(), 2, 1, 100),
+    0.5);
   EXPECT_DOUBLE_EQ(SWIFT::getDirectionalNewtonStep(1, 0, 0, 1, 100), 0);
 }
 
@@ -49,7 +50,8 @@ TEST(SWIFTDirectionalNewton, ZeroMotionBoundIsUnrestricted)
   EXPECT_DOUBLE_EQ(SWIFT::getDirectionalNewtonStep(400, -1, 4, 1e6, 0), 100);
   EXPECT_DOUBLE_EQ(SWIFT::getDirectionalNewtonStep(1, 2, 3, 1, -1), 0);
   EXPECT_DOUBLE_EQ(
-    SWIFT::getDirectionalNewtonStep(1, 2, 3, 1, std::numeric_limits<Real>::quiet_NaN()), 0);
+    SWIFT::getDirectionalNewtonStep(1, 2, 3, 1, std::numeric_limits<Real>::quiet_NaN()),
+    0);
 }
 
 TEST(SWIFTDirectionalNewton, AffineResidualCurvatureMatchesForceDifference)
@@ -61,9 +63,11 @@ TEST(SWIFTDirectionalNewton, AffineResidualCurvatureMatchesForceDifference)
     {
       const Real epsilon = Real(1e-6);
       const Real curvature = loss.getWeight(residual) *
-        (Real(1) - Real(2) * residual * residual / loss.getScaleSquared()) * projection * projection;
+        (Real(1) - Real(2) * residual * residual / loss.getScaleSquared()) * projection *
+        projection;
       const Real difference = (loss.getInfluence(residual + epsilon * projection) -
-        loss.getInfluence(residual - epsilon * projection)) * projection / (Real(2) * epsilon);
+                                loss.getInfluence(residual - epsilon * projection)) *
+        projection / (Real(2) * epsilon);
       EXPECT_NEAR(curvature, difference, 1e-8);
     }
   }

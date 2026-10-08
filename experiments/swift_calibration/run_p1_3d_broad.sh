@@ -3,7 +3,7 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 runner="$root/experiments/swift_calibration/run_p1_3d_screen.py"
-executable="$root/build-p1-3d-clang19/examples/Adaptation/SWIFT/LevelSetSWIFTReconstruction3D"
+executable="$root/build-p1-3d-clang19/experiments/swift_calibration/LevelSetSWIFTReconstruction3D"
 output_root="$root/tmp/swift_p1_3d_canonical"
 
 run_stage() {

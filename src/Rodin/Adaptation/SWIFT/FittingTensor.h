@@ -21,9 +21,8 @@ namespace Rodin::Adaptation::SWIFT
    * and fixed gradient-scale normalization.
    */
   template <class GradDerived, class Displacement, class LocatorType>
-  class FittingTensor final
-    : public Variational::MatrixFunctionBase<Real,
-        FittingTensor<GradDerived, Displacement, LocatorType>>
+  class FittingTensor final : public Variational::MatrixFunctionBase<Real,
+                                FittingTensor<GradDerived, Displacement, LocatorType>>
   {
     public:
       /// @brief Scalar value type.
@@ -120,7 +119,7 @@ namespace Rodin::Adaptation::SWIFT
         [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         if constexpr (std::is_same_v<GradDerived,
-          Variational::VectorFunction<Math::Vector<Real>>>)
+                        Variational::VectorFunction<Math::Vector<Real>>>)
           return m_grad->getOrder(polytope);
         return std::nullopt;
       }
@@ -153,8 +152,8 @@ namespace Rodin::Adaptation::SWIFT
 
   template <class GradDerived, class Displacement, class LocatorType>
   FittingTensor(const Variational::VectorFunctionBase<Real, GradDerived>& grad,
-    const Displacement& current, const LocatorType& locator,
-    const Parameters& parameters, Real normalization,
+    const Displacement& current, const LocatorType& locator, const Parameters& parameters,
+    Real normalization,
     std::size_t dimension) -> FittingTensor<GradDerived, Displacement, LocatorType>;
 }
 

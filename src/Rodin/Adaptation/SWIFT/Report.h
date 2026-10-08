@@ -16,6 +16,7 @@ namespace Rodin::Adaptation::SWIFT
   /// @brief Diagnostics produced by a SWIFT solve.
   struct Report
   {
+      /// @brief Typed termination condition of the outer fitting solve.
       enum class Reason
       {
         IterationLimit,
@@ -38,7 +39,10 @@ namespace Rodin::Adaptation::SWIFT
         SmallEnergyChanges
       };
 
-      /// @brief Stable log token for the typed stopping reason.
+      /**
+       * @brief Stable log token for the typed stopping reason.
+       * @returns A static string identifying the termination condition.
+       */
       const char* getReasonString() const
       {
         switch (reason)
@@ -118,6 +122,7 @@ namespace Rodin::Adaptation::SWIFT
       Real innerResidual = std::numeric_limits<Real>::infinity();
       /// @brief Residual divided by the fixed fitting-force norm.
       Real innerRelativeResidual = std::numeric_limits<Real>::infinity();
+      /// @brief Absolute stationarity threshold used by the final inner solve.
       Real innerResidualTolerance = 0;
       /// @brief Step factor accepted by the last inner correction.
       Real lastInnerAlpha = 0;
@@ -160,8 +165,11 @@ namespace Rodin::Adaptation::SWIFT
       /// @brief RMS unoriented normal discrepancy over the complete fitted interface.
       Real normalRMS = std::numeric_limits<Real>::infinity();
 
+      /// @brief Requested maximum geometric discrepancy in physical length units.
       Real geometricSupTarget = 0;
+      /// @brief Whether the sampled maximum discrepancy meets the geometric target.
       bool geometricTargetReached = false;
+      /// @brief Whether the accepted geometry satisfies the sampled Jacobian and distortion bounds.
       bool qualityBudgetSatisfied = false;
       /// @brief Measure of the complete interface quadrature set.
       Real interfaceMeasure = 0;

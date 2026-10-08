@@ -45,7 +45,7 @@ namespace Rodin::Tests::Unit
 
     struct MPIMesh
     {
-      const Rodin::Context::MPI& getContext() const;
+        const Rodin::Context::MPI& getContext() const;
     };
 
     TEST(Rodin_Adaptation_SWIFTAdapt, ContextSelection)
@@ -66,7 +66,8 @@ namespace Rodin::Tests::Unit
       parameters.convergence.tolerance.geometric = Real(1e-7);
       adapt.setParameters(parameters).setInterfaceAttribute(Interface);
       auto& trial = adapt.getTrialFunction();
-      adapt.getProblem() += DirichletBC(trial, VectorFunction(Real(0), Real(0))).on(Fixed);
+      adapt.getProblem() +=
+        DirichletBC(trial, VectorFunction(Real(0), Real(0))).on(Fixed);
 
       P1<Math::SpatialVector<Real>, LocalMesh> space(reference, 2);
       TrialFunction u(space);
@@ -85,8 +86,10 @@ namespace Rodin::Tests::Unit
       reference.displace(u.getSolution());
       for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
       {
-        EXPECT_LT((mesh.getVertexCoordinates(vertex) -
-          reference.getVertexCoordinates(vertex)).norm(), Real(1e-12));
+        EXPECT_LT(
+          (mesh.getVertexCoordinates(vertex) - reference.getVertexCoordinates(vertex))
+            .norm(),
+          Real(1e-12));
       }
 
       const auto again = adapt.execute(phi, gradient);
@@ -94,8 +97,10 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(again.iterations, 0u);
       for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
       {
-        EXPECT_LT((mesh.getVertexCoordinates(vertex) -
-          reference.getVertexCoordinates(vertex)).norm(), Real(1e-12));
+        EXPECT_LT(
+          (mesh.getVertexCoordinates(vertex) - reference.getVertexCoordinates(vertex))
+            .norm(),
+          Real(1e-12));
       }
     }
 
@@ -114,8 +119,10 @@ namespace Rodin::Tests::Unit
       EXPECT_STREQ(report.getReasonString(), "empty-interface");
       for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
       {
-        EXPECT_EQ((mesh.getVertexCoordinates(vertex) -
-          reference.getVertexCoordinates(vertex)).norm(), Real(0));
+        EXPECT_EQ(
+          (mesh.getVertexCoordinates(vertex) - reference.getVertexCoordinates(vertex))
+            .norm(),
+          Real(0));
       }
     }
 
@@ -130,8 +137,8 @@ namespace Rodin::Tests::Unit
       parameters.convergence.iterations.outer = 1;
       parameters.convergence.tolerance.geometric = Real(1e-30);
       adapt.setParameters(parameters).setInterfaceAttribute(Interface);
-      adapt.getProblem() += DirichletBC(adapt.getTrialFunction(),
-        VectorFunction(Real(0), Real(0))).on(Fixed);
+      adapt.getProblem() +=
+        DirichletBC(adapt.getTrialFunction(), VectorFunction(Real(0), Real(0))).on(Fixed);
       RealFunction phi([](const Point& p) { return p.x() - Real(0.55); });
       VectorFunction gradient(Real(1), Real(0));
       const auto report = adapt.execute(phi, gradient);
@@ -140,8 +147,9 @@ namespace Rodin::Tests::Unit
       Real motion = 0;
       for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
       {
-        motion = std::max(motion, (mesh.getVertexCoordinates(vertex) -
-          reference.getVertexCoordinates(vertex)).norm());
+        motion = std::max(motion,
+          (mesh.getVertexCoordinates(vertex) - reference.getVertexCoordinates(vertex))
+            .norm());
       }
       EXPECT_GT(motion, Real(0));
     }
@@ -185,8 +193,8 @@ namespace Rodin::Tests::Unit
         transformation.transform(point, element.getNode(node));
         points.col(node) = point;
       }
-      mesh.setPolytopeTransformation({2, 0},
-        new ParametricTransformation(points, element));
+      mesh.setPolytopeTransformation(
+        {2, 0}, new ParametricTransformation(points, element));
       EXPECT_THROW((SWIFT::Adapt(mesh)), Alert::Exception);
     }
   }

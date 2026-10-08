@@ -32,29 +32,53 @@ namespace Rodin::Adaptation::SWIFT
   class LinearSolver final : public Solver::LinearSolverBase<LinearSystem>
   {
     public:
+      /// @brief Native linear-solver interface.
       using Parent = Solver::LinearSolverBase<LinearSystem>;
+      /// @brief Linear-system type handled by this solver.
       using LinearSystemType = LinearSystem;
       using Parent::solve;
+      /**
+       * @brief Binds a solver to its variational problem.
+       * @param problem Problem whose lifetime includes all solves.
+       */
       explicit LinearSolver(typename Parent::ProblemBaseType& problem)
         : Parent(problem)
       {}
-      /// Copies configuration and problem binding, not backend factorization resources.
+      /**
+       * @brief Copies configuration and problem binding, not backend factorization resources.
+       * @param other Solver whose configuration is copied.
+       */
       LinearSolver(const LinearSolver& other)
         : Parent(other),
           m_centering(other.m_centering),
           m_parameters(other.m_parameters),
           m_report(other.m_report)
       {}
+      /**
+       * @brief Copies solver and convergence controls.
+       * @param parameters Backend and residual-tolerance configuration.
+       * @returns This solver.
+       */
       LinearSolver& setParameters(const Parameters& parameters)
       {
         m_parameters = parameters;
         return *this;
       }
+      /**
+       * @brief Copies the centered metric's low-rank factor.
+       * @param couplings Factor of the mean-strain subtraction.
+       * @returns This solver.
+       */
       LinearSolver& setCentering(const Math::Matrix<Real>& couplings)
       {
         m_centering = couplings;
         return *this;
       }
+      /**
+       * @brief Binds an optional destination for factorization counters.
+       * @param report Diagnostics destination, or null to disable counters.
+       * @returns This solver.
+       */
       LinearSolver& setReport(Report* report)
       {
         m_report = report;
@@ -69,18 +93,34 @@ namespace Rodin::Adaptation::SWIFT
         m_seconds =
           std::chrono::duration<Real>(std::chrono::steady_clock::now() - start).count();
       }
+      /**
+       * @brief Reports whether the last solve met the physical residual tolerance.
+       * @returns Whether the last solution is finite and residual-validated.
+       */
       bool success() const noexcept
       {
         return m_success;
       }
+      /**
+       * @brief Returns the last iterative solve count.
+       * @returns CG iterations, or zero for a direct solve.
+       */
       size_t getIterations() const noexcept
       {
         return m_iterations;
       }
+      /**
+       * @brief Returns the last centered-system residual.
+       * @returns Relative Euclidean residual norm.
+       */
       Real getError() const noexcept
       {
         return m_error;
       }
+      /**
+       * @brief Returns the last solve duration.
+       * @returns Elapsed wall-clock seconds including factorization.
+       */
       Real getSolveSeconds() const noexcept
       {
         return m_seconds;
@@ -91,6 +131,12 @@ namespace Rodin::Adaptation::SWIFT
       }
 
     private:
+      /**
+       * @brief Applies the centered physical operator.
+       * @param matrix Sparse uncentered operator.
+       * @param x Input vector.
+       * @param y Output vector, overwritten by the centered operator action.
+       */
       void applyMetric(const Math::SparseMatrix<Real>& matrix,
         const Math::Vector<Real>& x, Math::Vector<Real>& y) const
       {
@@ -99,10 +145,20 @@ namespace Rodin::Adaptation::SWIFT
           y -= m_centering * (m_centering.transpose() * x);
       }
 
+      /**
+       * @brief Solves the centered system with diagonally preconditioned CG.
+       * @param A Sparse uncentered operator.
+       * @param b Right-hand side.
+       * @param x Initial guess and returned solution.
+       * @param maxIterations Maximum CG corrections.
+       * @param relativeTolerance Residual threshold relative to the load norm.
+       * @param iterations Returned correction count.
+       * @param error Returned relative residual norm.
+       * @returns Whether the recurrence residual satisfies the requested tolerance.
+       */
       bool metricConjugateGradient(const Math::SparseMatrix<Real>& A,
-        const Math::Vector<Real>& b,
-        Math::Vector<Real>& x, std::size_t maxIterations, Real relativeTolerance,
-        std::size_t& iterations, Real& error) const
+        const Math::Vector<Real>& b, Math::Vector<Real>& x, std::size_t maxIterations,
+        Real relativeTolerance, std::size_t& iterations, Real& error) const
       {
         Math::Vector<Real> jacobi(A.rows());
         for (Eigen::Index i = 0; i < A.rows(); ++i)
@@ -151,6 +207,11 @@ namespace Rodin::Adaptation::SWIFT
         return std::isfinite(error) && error <= relativeTolerance;
       }
 
+      /**
+       * @brief Solves and validates a centered physical system.
+       * @param axb System whose solution is overwritten by the selected backend.
+       * @returns Whether the backend succeeded with a finite, residual-validated solution.
+       */
       bool solveSystem(LinearSystemType& axb)
       {
         auto& iterations = m_iterations;
@@ -220,7 +281,7 @@ namespace Rodin::Adaptation::SWIFT
                 for (Eigen::Index column = 0; column < matrix.outerSize(); ++column)
                 {
                   for (Math::SparseMatrix<Real>::InnerIterator entry(matrix, column);
-                    entry; ++entry)
+                       entry; ++entry)
                     entries.emplace_back(entry.row(), entry.col(), entry.value());
                 }
                 for (Eigen::Index k = 0; k < rank; ++k)
@@ -285,9 +346,9 @@ namespace Rodin::Adaptation::SWIFT
                   AutomaticCGIterationsPerDOF * axb.getOperator().rows()));
           Math::Vector<Real> solution =
             (guess.size() == rhs.size()) ? guess : Math::Vector<Real>::Zero(rhs.size());
-          const bool solved = metricConjugateGradient(axb.getOperator(), rhs,
-            solution, maxIterations, m_parameters.convergence.tolerance.linearRelative,
-            iterations, error);
+          const bool solved =
+            metricConjugateGradient(axb.getOperator(), rhs, solution, maxIterations,
+              m_parameters.convergence.tolerance.linearRelative, iterations, error);
           Math::Vector<Real> image;
           applyMetric(axb.getOperator(), solution, image);
           error =

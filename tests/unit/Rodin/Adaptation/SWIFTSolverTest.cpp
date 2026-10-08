@@ -136,12 +136,14 @@ namespace Rodin::Tests::Unit
       H1 space(std::integral_constant<size_t, 2>{}, mesh, 2);
       TrialFunction trial(space);
       TestFunction test(space);
-      trial.getSolution() = AnalyticVectorFunction([](const Point& point) {
-        Math::SpatialVector<Real> value(2);
-        value(0) = -Real(0.55) * point.x() * point.x();
-        value(1) = 0;
-        return value;
-      }, 2);
+      trial.getSolution() = AnalyticVectorFunction(
+        [](const Point& point) {
+          Math::SpatialVector<Real> value(2);
+          value(0) = -Real(0.55) * point.x() * point.x();
+          value(1) = 0;
+          return value;
+        },
+        2);
       for (auto face = mesh.getFace(); face; ++face)
         mesh.setAttribute({1, face->getIndex()}, 10);
       const RealFunction phi([](const Point& point) { return point.x() - Real(0.5); });
@@ -187,7 +189,8 @@ namespace Rodin::Tests::Unit
         return integral;
       };
       SWIFT::Parameters::Quadrature parameters;
-      const auto reference = integrate(24), screening = integrate(parameters.getSurfaceOrder(1));
+      const auto reference = integrate(24),
+                 screening = integrate(parameters.getSurfaceOrder(1));
       // This coarse analytic facet needs an explicit higher order for the
       // historical 1e-4 accuracy requirement; the calibrated default screens at 1%.
       constexpr Real screeningTolerance = Real(1e-2);
@@ -237,7 +240,8 @@ namespace Rodin::Tests::Unit
       SWIFT::Parameters::LinearSolver linearSolver =
         SWIFT::Parameters::LinearSolver::SparseLU,
       bool flat = false, Real innerTolerance = Real(1e-3), Real muHat = Real(90),
-      const std::function<void(SWIFT::Parameters&)>& configure = {}, Setup setup = nullptr)
+      const std::function<void(SWIFT::Parameters&)>& configure = {},
+      Setup setup = nullptr)
     {
       constexpr std::size_t n = 5;
       constexpr Real h = Real(1) / Real(n - 1);
@@ -627,17 +631,18 @@ namespace Rodin::Tests::Unit
       GridFunction phi(targetSpace);
       phi.getData().setZero();
       const auto gradient = Grad(phi);
-      const SWIFT::FittingTensor piecewise(
-        gradient, current, locator, parameters, 1, 2);
+      const SWIFT::FittingTensor piecewise(gradient, current, locator, parameters, 1, 2);
       // Even P1 gradients can change when the moved facet crosses a cell.
       EXPECT_EQ(piecewise.getOrder(*face), std::nullopt);
     };
     check.operator()<1>();
     check.operator()<2>();
     check.operator()<3>();
-    const AnalyticVectorFunction analytic([](const Point& point) {
-      return Math::SpatialVector<Real>(point.getPhysicalCoordinates());
-    }, 2);
+    const AnalyticVectorFunction analytic(
+      [](const Point& point) {
+        return Math::SpatialVector<Real>(point.getPhysicalCoordinates());
+      },
+      2);
     const SWIFT::FittingTensor unknown(analytic, current, locator, parameters, 1, 2);
     EXPECT_EQ(unknown.getOrder(*face), std::nullopt);
   }
@@ -723,8 +728,8 @@ namespace Rodin::Tests::Unit
       initial.report.getReasonString(), "full-interface-geometric-sup-converged");
     // A straight target is exactly representable, so this tests stopping rather
     // than an unattainable maximum-error threshold for a curved P1 interface.
-    const auto fitted = solveTranslatedLine(Real(1), 0, false, Real(1e-3), false,
-      1000, false, SWIFT::Parameters::LinearSolver::SparseLU, true);
+    const auto fitted = solveTranslatedLine(Real(1), 0, false, Real(1e-3), false, 1000,
+      false, SWIFT::Parameters::LinearSolver::SparseLU, true);
     EXPECT_GT(fitted.report.iterations, 0);
     EXPECT_LE(fitted.report.geometricSup, Real(1e-3));
     EXPECT_GT(fitted.report.minJ, Real(0.01));
@@ -742,10 +747,9 @@ namespace Rodin::Tests::Unit
   {
     {
       testing::internal::CaptureStdout();
-      const SolveState state =
-        solveTranslatedLine(Real(1), Real(0), true, Real(0), false, 1000, true,
-          SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(1000),
-          [](SWIFT::Parameters& p) { p.model.qualityGuard = Real(0.95); });
+      const SolveState state = solveTranslatedLine(Real(1), Real(0), true, Real(0), false,
+        1000, true, SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3),
+        Real(1000), [](SWIFT::Parameters& p) { p.model.qualityGuard = Real(0.95); });
       const std::string output = testing::internal::GetCapturedStdout();
       EXPECT_LT(state.report.geometricSup, Real(0.05));
       EXPECT_GT(state.report.minJ, Real(0.01));
@@ -916,7 +920,8 @@ namespace Rodin::Tests::Unit
     for (const auto backend :
       {SWIFT::Parameters::LinearSolver::CG, SWIFT::Parameters::LinearSolver::SparseLU
 #ifdef RODIN_USE_MUMPS
-        , SWIFT::Parameters::LinearSolver::MUMPS
+        ,
+        SWIFT::Parameters::LinearSolver::MUMPS
 #endif
       })
     {
@@ -934,7 +939,8 @@ namespace Rodin::Tests::Unit
       Math::Matrix<Real> core = Math::Matrix<Real>::Zero(2, 2);
       core(0, 0) = 3;
       core(1, 1) = 4;
-      const Math::Vector<Real> force = (core - centering * centering.transpose()) * expected;
+      const Math::Vector<Real> force =
+        (core - centering * centering.transpose()) * expected;
       for (const Real scale : {Real(1), Real(0.2)})
       {
         system.getOperator() = (scale * core).sparseView();
@@ -1089,7 +1095,9 @@ namespace Rodin::Tests::Unit
       EXPECT_TRUE(reports[i].qualityBudgetSatisfied);
       EXPECT_GT(reports[i].interfaceMeasure, Real(0));
       if (i > 0)
+      {
         EXPECT_LT(reports[i].energy, reports[i - 1].energy);
+      }
     }
     EXPECT_EQ(reports.back().reason, state.report.reason);
     EXPECT_EQ(reports.back().geometricSup, state.report.geometricSup);

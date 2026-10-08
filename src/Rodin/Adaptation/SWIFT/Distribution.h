@@ -26,12 +26,23 @@ namespace Rodin::Adaptation::SWIFT
    */
   template <class TrialFunction, class TestFunction, class Displacement>
   class Distribution final : public Variational::LocalBilinearFormIntegratorBase<
-                                    typename TrialFunction::ScalarType>
+                               typename TrialFunction::ScalarType>
   {
     public:
+      /// @brief Scalar coefficient type of the trial field.
       using ScalarType = typename TrialFunction::ScalarType;
+      /// @brief Native cell-integrator interface.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /**
+       * @brief Constructs the sparse core of the frozen distribution form.
+       * @param trial Increment trial function.
+       * @param test Increment test function.
+       * @param current Frozen outer displacement.
+       * @param deviatoric Deviatoric strain weight including mesh scaling.
+       * @param divergence Divergence weight including mesh scaling.
+       * @param order Cell quadrature order.
+       */
       Distribution(const TrialFunction& trial, const TestFunction& test,
         const Displacement& current, Real deviatoric, Real divergence, size_t order)
         : Parent(trial.getLeaf(), test.getLeaf()),
@@ -90,15 +101,14 @@ namespace Rodin::Adaptation::SWIFT
               m_testStrains[local] = Real(0.5) * (L + L.transpose());
             }
           }
-          const Real weight = qf.getWeight(q) * point.getDistortion() *
-            deformation.getJacobian();
+          const Real weight =
+            qf.getWeight(q) * point.getDistortion() * deformation.getJacobian();
           for (size_t test = 0; test < nTest; ++test)
           {
             for (size_t trial = 0; trial < nTrial; ++trial)
             {
-              m_matrix(test, trial) +=
-                weight * (m_deviatoric *
-                  Math::dot(m_trialStrains[trial], m_testStrains[test]) +
+              m_matrix(test, trial) += weight *
+                (m_deviatoric * Math::dot(m_trialStrains[trial], m_testStrains[test]) +
                   (m_divergence - m_deviatoric) / Real(d) *
                     m_trialStrains[trial].trace() * m_testStrains[test].trace());
             }
@@ -132,14 +142,15 @@ namespace Rodin::Adaptation::SWIFT
         const auto& test = m_test.get();
         const auto& current = m_current.get();
         const auto dimension = test.getFiniteElementSpace().getMesh().getDimension();
-        const auto weight = Variational::RealFunction(
-          [gradient = Variational::Jacobian(current), dimension](const auto& point) -> Real {
+        const auto weight =
+          Variational::RealFunction([gradient = Variational::Jacobian(current),
+                                      dimension](const auto& point) -> Real {
             CellDeformation deformation(dimension);
             deformation.setDisplacementGradient(gradient.getValue(point));
             return deformation.getJacobian();
           });
-        const auto gradient = Variational::Jacobian(test) *
-          CurrentInverse<Displacement>(current, dimension);
+        const auto gradient =
+          Variational::Jacobian(test) * CurrentInverse<Displacement>(current, dimension);
         const auto strain = Real(0.5) * (gradient + Variational::Transpose(gradient));
         auto traceIntegral = Variational::Integral(weight * Variational::Trace(strain));
         traceIntegral.setOrder(m_order);
@@ -147,13 +158,15 @@ namespace Rodin::Adaptation::SWIFT
         trace = traceIntegral;
         trace.assemble();
         Variational::GridFunction position(test.getFiniteElementSpace());
-        position = Variational::VectorFunction(dimension, [](const Geometry::Point& point) {
-          return Math::SpatialVector<Real>(point.getCoordinates());
-        });
+        position =
+          Variational::VectorFunction(dimension, [](const Geometry::Point& point) {
+            return Math::SpatialVector<Real>(point.getCoordinates());
+          });
         position += current;
         const Real volume = trace.getVector().dot(position.getData()) / Real(dimension);
         assert(volume > Real(0));
-        Math::Matrix<Real> centering(trace.getVector().size(), dimension * (dimension + 1) / 2);
+        Math::Matrix<Real> centering(
+          trace.getVector().size(), dimension * (dimension + 1) / 2);
         size_t column = 0;
         for (size_t a = 0; a < dimension; ++a)
         {
@@ -171,8 +184,8 @@ namespace Rodin::Adaptation::SWIFT
               tensor(axis, axis) +=
                 (std::sqrt(m_divergence) - std::sqrt(m_deviatoric)) * mean;
             }
-            auto integral = Variational::Integral(weight *
-              Variational::Dot(Variational::MatrixFunction(tensor), strain));
+            auto integral = Variational::Integral(
+              weight * Variational::Dot(Variational::MatrixFunction(tensor), strain));
             integral.setOrder(m_order);
             Variational::LinearForm form(test);
             form = integral;
@@ -201,10 +214,20 @@ namespace Rodin::Adaptation::SWIFT
     : public Variational::MatrixFunctionBase<Real, CurrentInverse<Displacement>>
   {
     public:
+      /**
+       * @brief Binds the inverse of the frozen deformation gradient.
+       * @param current Frozen outer displacement.
+       * @param dimension Spatial dimension.
+       */
       CurrentInverse(const Displacement& current, size_t dimension)
         : m_gradient(Variational::Jacobian(current)),
           m_dimension(dimension)
       {}
+      /**
+       * @brief Evaluates the inverse deformation gradient.
+       * @param point Reference-mesh evaluation point.
+       * @returns The inverse current deformation gradient.
+       */
       template <class Point>
       Math::SpatialMatrix<Real> getValue(const Point& point) const
       {
@@ -212,15 +235,28 @@ namespace Rodin::Adaptation::SWIFT
         deformation.setDisplacementGradient(m_gradient.getValue(point));
         return Math::SpatialMatrix<Real>(deformation.getInverseTranspose().transpose());
       }
+      /**
+       * @brief Returns the coefficient's row count.
+       * @returns The spatial dimension.
+       */
       size_t getRows() const
       {
         return m_dimension;
       }
+      /**
+       * @brief Returns the coefficient's column count.
+       * @returns The spatial dimension.
+       */
       size_t getColumns() const
       {
         return m_dimension;
       }
-      Optional<size_t> getOrder(const Geometry::Polytope&) const
+      /**
+       * @brief Reports that inversion has no polynomial order guarantee.
+       * @param polytope Entity whose coefficient order is requested.
+       * @returns No inferred polynomial order.
+       */
+      Optional<size_t> getOrder([[maybe_unused]] const Geometry::Polytope& polytope) const
       {
         return std::nullopt;
       }

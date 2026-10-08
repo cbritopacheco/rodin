@@ -29,7 +29,7 @@ def main():
     obj = output / "fixed-quadrature.o"
     compile_command[compile_command.index("-o") + 1] = str(obj)
     compile_command[compile_command.index("-c") + 1] = str(source)
-    link = shlex.split((build / "examples/Adaptation/SWIFT/CMakeFiles/LevelSetSWIFTSweep.dir/link.txt").read_text())
+    link = shlex.split((build / "experiments/swift_calibration/CMakeFiles/LevelSetSWIFTSweep.dir/link.txt").read_text())
     link[link.index("-o") + 1] = str(executable)
     link = [str(obj) if v.endswith(".cpp.o") else v for v in link]
     if (output / "manifest.json").exists():

@@ -1,5 +1,15 @@
 # Canonical SWIFT Campaigns
 
+Calibration drivers live here rather than in the production API examples.
+They are excluded from the default build and can be built explicitly:
+
+```sh
+cmake --build build --target LevelSetSWIFTReconstruction LevelSetSWIFTReconstruction3D -j1
+```
+
+Executables are written to `build/experiments/swift_calibration`. The short
+P1/P2/P3 API examples live in `examples/Adaptation/SWIFT`.
+
 SWIFT now has one model: $M=F+D$ (Fitting, Distribution), affine quadratic hinges,
 directional Newton, frozen inner-merit backtracking, and actual outer j/Q
 and fitting-energy Armijo checks. No shape or constraint Hessian is assembled
@@ -9,18 +19,24 @@ completion, mass term, or nonlinear-hinge path. PSD does not imply invertibility
 
 - F is kappa_f times the normalized Hessian of half the squared level-set residual with
   the level-set Hessian omitted. It is not robust-weighted.
-- $D$ is $h\kappa_D$ times pointwise deviatoric current-configuration strain.
-  Local infinitesimal rotations and isotropic strain have zero cost.
+- $D$ is the centered current-configuration strain form, with separate
+  deviatoric and divergence weights and a common reference-spacing factor.
+  Its means are taken over the current domain, not independently per element.
+  Global affine motions have zero distribution cost.
 - The fitting energy and force remain robust Welsch.
-- Hinge widths are 0.1 times the identity quality margins. The default
-  model-decrease-scaled hinge weight is $\widehat\mu=100$.
-- Defaults are 30 outer / 15 inner corrections and
-  $(\kappa_F,\kappa_D,\widehat\mu)=(1,10^{-3},100)$.
-  This is the provisional leader of the ongoing fitting--distribution campaign,
-  preferring unit fitting weight among tied leaders; it is not a completed
-  cross-dimensional calibration. There is no shared bulk coefficient.
-  Historical shape-curvature runs are retained separately, not reproduced by
-  the canonical metric away from identity.
+- Hinge widths are 0.1 times the identity quality margins. The effective
+  coefficient is scaled by predicted model decrease.
+- Historical shape-curvature runs are retained separately and are not
+  reproduced by the canonical metric away from identity.
+
+| Setting | Production Default |
+|---------|--------------------|
+| Fitting weight | $1$ |
+| Deviatoric distribution weight | $10^{-4}$ |
+| Divergence distribution weight | $10^{-2}$ |
+| Hinge weight | $10$ |
+| Outer iteration cap | $30$ |
+| Inner correction cap | $15$ |
 
 There is no separate inertia audit or automatic metric repair. Linear residual,
 direction, inner merit and actual outer quality/energy checks remain in place.

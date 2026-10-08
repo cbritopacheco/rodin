@@ -16,7 +16,13 @@ namespace Rodin::Adaptation::SWIFT
   class HingeState
   {
     public:
-      /// @brief Constructs the SWIFT hinge state.
+      /**
+       * @brief Constructs the SWIFT hinge state.
+       * @param deformation Frozen outer deformation.
+       * @param innerGradient Gradient of the proposed inner increment.
+       * @param parameters Quality bounds, guard widths and relative hinge weights.
+       * @param hingeCoefficient Effective penalty coefficient for this outer model.
+       */
       HingeState(const CellDeformation& deformation,
         const Math::SpatialMatrix<Real>& innerGradient, const Parameters& parameters,
         Real hingeCoefficient)
@@ -44,7 +50,12 @@ namespace Rodin::Adaptation::SWIFT
           parameters.model.distortionWeight, m_qHessian, m_qForce);
       }
 
-      /// @brief Affine quality energy with the construction parameters, evaluated only on demand.
+      /**
+       * @brief Affine quality energy with the construction parameters, evaluated only on demand.
+       * @param parameters Quality guards and relative hinge weights used at construction.
+       * @param hingeCoefficient Effective penalty coefficient used at construction.
+       * @returns The squared-hinge energy, or infinity for an inadmissible frozen state.
+       */
       Real getEnergy(const Parameters& parameters, Real hingeCoefficient) const
       {
         if (!isAdmissible())
@@ -61,57 +72,92 @@ namespace Rodin::Adaptation::SWIFT
             parameters.model.distortionWeight);
       }
 
-      /// @brief Whether the frozen deformation permits evaluation; affine slacks may be negative.
+      /**
+       * @brief Whether the frozen deformation permits evaluation; affine slacks may be negative.
+       * @returns Whether the frozen deformation has a positive Jacobian.
+       */
       bool isAdmissible() const
       {
         return m_rowDeformation.isAdmissible();
       }
-      /// Negative Jacobian differential at the frozen outer state.
+      /**
+       * @brief Negative Jacobian differential at the frozen outer state.
+       * @param gradient Incremental deformation gradient.
+       * @returns The negative determinant differential.
+       */
       Real getJacobianRow(const Math::SpatialMatrix<Real>& gradient) const
       {
         return -m_rowDeformation.getJacobianAction(gradient);
       }
-      /// Distortion differential at the frozen outer state.
+      /**
+       * @brief Distortion differential at the frozen outer state.
+       * @param gradient Incremental deformation gradient.
+       * @returns The relative-distortion differential.
+       */
       Real getDistortionRow(const Math::SpatialMatrix<Real>& gradient) const
       {
         return m_rowDeformation.getRelativeDistortionAction(gradient);
       }
-      /// @brief The jacobian action.
+      /**
+       * @brief The jacobian action.
+       * @returns The negative determinant differential on the inner increment.
+       */
       Real getJacobianAction() const
       {
         return m_jAction;
       }
-      /// @brief The distortion action.
+      /**
+       * @brief The distortion action.
+       * @returns The distortion differential on the inner increment.
+       */
       Real getDistortionAction() const
       {
         return m_qAction;
       }
-      /// @brief The jacobian slack.
+      /**
+       * @brief The jacobian slack.
+       * @returns The affine distance above the Jacobian floor.
+       */
       Real getJacobianSlack() const
       {
         return m_jSlack;
       }
-      /// @brief The distortion slack.
+      /**
+       * @brief The distortion slack.
+       * @returns The affine distance below the distortion ceiling.
+       */
       Real getDistortionSlack() const
       {
         return m_qSlack;
       }
-      /// @brief The jacobian hessian.
+      /**
+       * @brief The jacobian hessian.
+       * @returns The active Jacobian hinge curvature coefficient, or zero.
+       */
       Real getJacobianHessian() const
       {
         return m_jHessian;
       }
-      /// @brief The distortion hessian.
+      /**
+       * @brief The distortion hessian.
+       * @returns The active distortion hinge curvature coefficient, or zero.
+       */
       Real getDistortionHessian() const
       {
         return m_qHessian;
       }
-      /// @brief The jacobian force.
+      /**
+       * @brief The jacobian force.
+       * @returns The coefficient of the Jacobian row in the Newton load.
+       */
       Real getJacobianForce() const
       {
         return m_jForce;
       }
-      /// @brief The distortion force.
+      /**
+       * @brief The distortion force.
+       * @returns The coefficient of the distortion row in the Newton load.
+       */
       Real getDistortionForce() const
       {
         return m_qForce;

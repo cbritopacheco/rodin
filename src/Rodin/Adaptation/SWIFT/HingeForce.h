@@ -30,8 +30,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param hingeCoefficient Effective hinge coefficient for this outer model.
        */
       HingeForce(const TestFunction& z, const Displacement& current,
-        const Displacement& inner, const Parameters& parameters,
-        Real hingeCoefficient)
+        const Displacement& inner, const Parameters& parameters, Real hingeCoefficient)
         : Parent(z.getLeaf()),
           m_z(z),
           m_current(current),
@@ -69,8 +68,8 @@ namespace Rodin::Adaptation::SWIFT
         const auto& fes = m_z.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
-        const std::size_t order = parameters.quadrature.getVolumeOrder(
-          fe.getOrder(), polytope.getTransformation().getOrder(),
+        const std::size_t order = parameters.quadrature.getVolumeOrder(fe.getOrder(),
+          polytope.getTransformation().getOrder(),
           Geometry::Polytope::Traits(polytope.getGeometry()).getVertexCount() == dim + 1);
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());

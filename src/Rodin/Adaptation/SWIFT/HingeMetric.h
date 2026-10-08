@@ -13,7 +13,7 @@ namespace Rodin::Adaptation::SWIFT
   /// @brief Hessian of the affine quadratic quality hinges.
   template <class TrialFunction, class TestFunction, class Displacement>
   class HingeMetric final : public Variational::LocalBilinearFormIntegratorBase<
-                                   typename TrialFunction::ScalarType>
+                              typename TrialFunction::ScalarType>
   {
     public:
       /// @brief Scalar value type.
@@ -73,8 +73,8 @@ namespace Rodin::Adaptation::SWIFT
         const auto& trialFE = trialFES.getFiniteElement(dim, index);
         const auto& testFE = testFES.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
-        const std::size_t order = parameters.quadrature.getVolumeOrder(
-          trialFE.getOrder(), polytope.getTransformation().getOrder(),
+        const std::size_t order = parameters.quadrature.getVolumeOrder(trialFE.getOrder(),
+          polytope.getTransformation().getOrder(),
           Geometry::Polytope::Traits(polytope.getGeometry()).getVertexCount() == dim + 1);
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());

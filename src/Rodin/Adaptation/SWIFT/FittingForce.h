@@ -42,9 +42,9 @@ namespace Rodin::Adaptation::SWIFT
        * @param normalization Fixed gradient-scale normalization.
        * @param dimension Spatial dimension.
        */
-      FittingForce(const PhiType& phi, const GradType& grad,
-        const Displacement& current, const LocatorType& locator, const Loss& loss,
-        Real normalization, std::size_t dimension)
+      FittingForce(const PhiType& phi, const GradType& grad, const Displacement& current,
+        const LocatorType& locator, const Loss& loss, Real normalization,
+        std::size_t dimension)
         : m_phi(phi.copy()),
           m_grad(grad.copy()),
           m_deformation(current, locator),

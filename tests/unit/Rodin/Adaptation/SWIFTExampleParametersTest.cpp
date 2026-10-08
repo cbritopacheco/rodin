@@ -8,7 +8,7 @@
 #include "Rodin/Adaptation/SWIFT/Admissibility.h"
 #include "Rodin/Adaptation/SWIFT/HingeProblem.h"
 #include "Rodin/Variational.h"
-#include "../../../../examples/Adaptation/SWIFT/SWIFTExampleParameters.h"
+#include "../../../../experiments/swift_calibration/Parameters.h"
 
 using namespace Rodin;
 
@@ -118,8 +118,8 @@ TEST(Rodin_Adaptation_SWIFTAdmissibility, SamplingIsReadOnly)
     return value;
   });
   const Math::Vector<Real> before = displacement.getData();
-  const auto report = Adaptation::SWIFT::evaluateAdmissibility(
-    std::as_const(displacement), Real(0.01));
+  const auto report =
+    Adaptation::SWIFT::evaluateAdmissibility(std::as_const(displacement), Real(0.01));
   EXPECT_NEAR(report.minJ, Real(0.81), Real(1e-12));
   EXPECT_NEAR(report.maxQRel, Real(1), Real(1e-12));
   EXPECT_EQ(report.inadmissibleCount, 0u);
@@ -127,8 +127,8 @@ TEST(Rodin_Adaptation_SWIFTAdmissibility, SamplingIsReadOnly)
 
   P1<Math::SpatialVector<Real>, LocalMesh> wrongSpace(mesh, 3);
   GridFunction wrongDimension(wrongSpace);
-  EXPECT_THROW(Adaptation::SWIFT::evaluateAdmissibility(
-    wrongDimension, Real(0.01)), Alert::Exception);
+  EXPECT_THROW(Adaptation::SWIFT::evaluateAdmissibility(wrongDimension, Real(0.01)),
+    Alert::Exception);
 }
 
 TEST(Rodin_Adaptation_SWIFTAdmissibility, RejectsNonfiniteGeometry)
@@ -139,12 +139,12 @@ TEST(Rodin_Adaptation_SWIFTAdmissibility, RejectsNonfiniteGeometry)
   mesh.getConnectivity().compute(2, 0);
   P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
   GridFunction displacement(space);
-  for (const Real invalid : {std::numeric_limits<Real>::quiet_NaN(),
-         std::numeric_limits<Real>::infinity()})
+  for (const Real invalid :
+    {std::numeric_limits<Real>::quiet_NaN(), std::numeric_limits<Real>::infinity()})
   {
     displacement.setData(Math::Vector<Real>::Constant(space.getSize(), invalid));
-    const auto report = Adaptation::SWIFT::evaluateAdmissibility(
-      std::as_const(displacement), Real(0.01));
+    const auto report =
+      Adaptation::SWIFT::evaluateAdmissibility(std::as_const(displacement), Real(0.01));
     EXPECT_GT(report.inadmissibleCount, 0u);
   }
 }
