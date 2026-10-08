@@ -132,7 +132,8 @@ $$
 
 Let $E\in\mathbb R^{N_u\times N_f}$ select the $N_f$ unconstrained velocity
 indices. Logical index elimination gives $A_f=E^TAE$ and $B_f=BE$.
-For the P1 constant coefficient vector $c=\mathbf 1$, a basis
+For the interpolated pressure-constant coefficient vector
+$c\in\mathbb R^{N_p}$, a basis
 $T\in\mathbb R^{N_p\times(N_p-1)}$ is constructed for
 $\ker(c^TM)$, so pressure constants are excluded using the physical mass
 metric rather than an arbitrarily pinned node. The reduced generalized
@@ -166,16 +167,43 @@ is required. Removing divergence leaves the dimensions unchanged and must
 produce an exactly zero spectrum. These are spectral refinement studies,
 not error-slope studies: no power of $h$ is fitted to $\beta_h$.
 
+The $P_3/P_2$ extension is locally verified, independently
+of the $P_2/P_1$ matrix. It uses the same six applicable
+geometries and affine/exact quadratic maps, with three levels $n=3,4,5$ and
+assembly orders $16$ and $20$. Every level requires resolved positivity,
+agreement of the Schur and whitened-divergence routes, and the stated relative
+quadrature budget. The curved $n=3$ missing-divergence control must retain the
+dimensions and give exactly zero eigenvalues. Local and MPI ranks one
+through four pass in sequential/OpenMP configurations; these are finite-mesh
+checks, not hosted-CI certification or a mesh-uniform lower bound.
+
+The pressure constant is interpolated through the actual finite-element DOF
+functionals and synchronized before its PETSc vector is passed to the oracle.
+Owned coefficients are collected in global algebraic order; ghosts are not
+additional pressure coefficients. Although P1 gives $c=\mathbf1$, the
+higher-order basis is not assigned that layout. A second synthetic metric
+uses $A_f=4$, $B_f=(1,2)^T$, $M=\mathrm{diag}(1,3)$ and $c=(2,-1)^T$.
+Then $T=(3,2)^T$, so $S_0=49/4$, $M_0=21$ and $\beta_h^2=7/12$.
+Replacing these constant coefficients by ones instead gives $1/48$ and is
+rejected by the independently specified value. This isolates coefficient
+transport from finite-element approximation and from a successful PDE solve.
+
 Local and MPI rank counts $1,2,3,4$ have separate geometry registrations,
 using the selected sequential/OpenMP assembly configuration. The
 `PETScMixedStability` adapter is explicitly collective on the matrix
 communicator because its mathematical input is the complete global operator.
-Sparse operators and integer constraint indices are replicated for this
-small-mesh oracle, then the backend-independent spectral calculation is
-performed. No collective is added to geometry queries, field evaluation, or
+Sparse operators, pressure-constant coefficients and integer constraint indices
+are collected for this small-mesh oracle. The backend-independent dense
+spectral calculation is performed once on communicator rank zero; its
+dimensions, eigenvalues and algebraic consistency defects are then distributed
+to every participant. A fatal spectral failure is communicated before result
+transfer, so participants do not wait for a missing result.
+This explicitly global result distribution does not infer entity ownership
+or reconcile mesh metadata. No collective is added to geometry queries, field evaluation, or
 rank-local Shard operations. Each dense workspace is bounded by the shared
 96 MiB admission policy before allocation; this is not a bound on total
-process memory, and replicated spectra are not a scalable solver benchmark.
+process memory. Sparse-input collection and the dense oracle are verification
+operations, not a scalable solver benchmark.
 The registrations retain slow labels and 1800-second execution budgets.
 The finite matrix does not establish a mesh-uniform inf-sup theorem;
 the pyramid/wedge stability argument remains a separate unresolved item.
