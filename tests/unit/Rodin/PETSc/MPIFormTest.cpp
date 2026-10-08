@@ -59,15 +59,20 @@ namespace
     return sharder.gather(0);
   }
 
-  /** Partition the three-dimensional P2 regression mesh from rank zero. */
-  Mesh<Context::MPI> distributeP2Tetrahedron(const Context::MPI& ctx)
+  /**
+   * Partitions a tetrahedral regression mesh from rank zero.
+   * @param ctx Distributed execution context.
+   * @param nodeCount Number of grid nodes in each coordinate direction.
+   * @returns Distributed mesh with complete face and edge connectivity.
+   */
+  Mesh<Context::MPI> distributeP2Tetrahedron(const Context::MPI& ctx, size_t nodeCount)
   {
     const auto& comm = ctx.getCommunicator();
     Sharder<Context::MPI> sharder(ctx);
     if (comm.rank() == 0)
     {
-      auto mesh =
-        Mesh<Context::Local>::UniformGrid(Polytope::Type::Tetrahedron, {9, 9, 9});
+      auto mesh = Mesh<Context::Local>::UniformGrid(
+        Polytope::Type::Tetrahedron, {nodeCount, nodeCount, nodeCount});
       auto& connectivity = mesh.getConnectivity();
       connectivity.compute(3, 3);
       connectivity.compute(3, 0);
@@ -197,7 +202,10 @@ namespace
   TEST(PETSc_MPI_Form, NamedScalarAndVectorP1AndP2MatchIntegrals)
   {
     Context::MPI ctx(*g_env, *g_world);
-    auto mesh = distributeP2Tetrahedron(ctx);
+    // Multiple cells, interior DOFs and partition interfaces are sufficient
+    // for these matrix comparisons; the legacy constraint regressions below
+    // retain their larger mesh. Keep the full P2 oracle affordable in Debug.
+    auto mesh = distributeP2Tetrahedron(ctx, 4);
     P1 scalarLinear(mesh);
     checkDistributedScalarNamedForms(scalarLinear);
     H1 scalarQuadratic(std::integral_constant<size_t, 2>{}, mesh);
@@ -218,7 +226,7 @@ namespace
   {
     const auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeP2Tetrahedron(ctx);
+    auto mesh = distributeP2Tetrahedron(ctx, 9);
     // MPI Mesh::getFaceCount() is global, while facet indices are shard-local.
     // The previous affine-defect loop used the former as a local loop bound.
     EXPECT_GT(mesh.getFaceCount(), mesh.getShard().getFaceCount());
@@ -377,7 +385,7 @@ namespace
   {
     const auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeP2Tetrahedron(ctx);
+    auto mesh = distributeP2Tetrahedron(ctx, 9);
     P1 fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TrialFunction master(fes);
