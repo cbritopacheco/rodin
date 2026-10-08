@@ -19,6 +19,7 @@
 #include "Rodin/Math/SparseMatrix.h"
 
 #include "BilinearForm.h"
+#include "NamedFormStorage.h"
 #include "DiffusionForm.h"
 #include "Function.h"
 #include "MassForm.h"
@@ -222,17 +223,17 @@ namespace Rodin::Variational
 
       OperatorType& getOperator() override
       {
-        return m_operator;
+        return m_operator.get();
       }
 
       const OperatorType& getOperator() const override
       {
-        return m_operator;
+        return m_operator.get();
       }
 
       void assemble() override
       {
-        m_assembly.execute(m_operator, *this);
+        m_assembly.execute(m_operator.get(), *this);
       }
 
       const TrialFunction<SolutionType, TrialFESType>& getTrialFunction() const override
@@ -353,7 +354,7 @@ namespace Rodin::Variational
       std::unique_ptr<DiffusionCoefficientType> m_diffusionCoefficient;
       std::unique_ptr<MassCoefficientType> m_massCoefficient;
       FlatSet<Geometry::Attribute> m_attributes;
-      OperatorType m_operator;
+      NamedFormStorage<OperatorType> m_operator;
       AssemblyType m_assembly;
   };
 
@@ -370,9 +371,9 @@ namespace Rodin::Variational
     const FunctionBase<MassDerived>& c, const TrialFunction<Solution, TrialFES>& u,
     const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
-      Math::SparseMatrix<
+      typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
       DiffusionDerived, MassDerived>;
 
   /**
@@ -388,9 +389,9 @@ namespace Rodin::Variational
   HelmholtzForm(const FunctionBase<DiffusionDerived>& a, const C& c,
     const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
-      Math::SparseMatrix<
+      typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
       DiffusionDerived, typename FormLanguage::FunctionDerived<RealFunction<C>>::Type>;
 
   /**
@@ -405,9 +406,9 @@ namespace Rodin::Variational
   HelmholtzForm(const A& a, const FunctionBase<MassDerived>& c,
     const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
-      Math::SparseMatrix<
+      typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
       typename FormLanguage::FunctionDerived<RealFunction<A>>::Type, MassDerived>;
 
   /**
@@ -423,9 +424,9 @@ namespace Rodin::Variational
   HelmholtzForm(const A& a, const C& c, const TrialFunction<Solution, TrialFES>& u,
     const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
-      Math::SparseMatrix<
+      typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
       typename FormLanguage::FunctionDerived<RealFunction<A>>::Type,
       typename FormLanguage::FunctionDerived<RealFunction<C>>::Type>;
 }

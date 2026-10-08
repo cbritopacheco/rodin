@@ -27,6 +27,7 @@
 #include "Rodin/Math/Traits.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Variational/BilinearForm.h"
+#include "Rodin/Variational/NamedFormStorage.h"
 #include "Rodin/Variational/Function.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/RealFunction.h"
@@ -343,17 +344,17 @@ namespace Rodin::Variational
 
       OperatorType& getOperator() override
       {
-        return m_operator;
+        return m_operator.get();
       }
 
       const OperatorType& getOperator() const override
       {
-        return m_operator;
+        return m_operator.get();
       }
 
       void assemble() override
       {
-        m_assembly.execute(m_operator, *this);
+        m_assembly.execute(m_operator.get(), *this);
       }
 
       const TrialFunction<SolutionType, FESType>& getTrialFunction() const override
@@ -473,7 +474,7 @@ namespace Rodin::Variational
       std::unique_ptr<LambdaType> m_lambda;
       std::unique_ptr<MuType> m_mu;
       FlatSet<Geometry::Attribute> m_attributes;
-      OperatorType m_operator;
+      NamedFormStorage<OperatorType> m_operator;
       AssemblyType m_assembly;
   };
 
@@ -487,10 +488,10 @@ namespace Rodin::Variational
   template <class LambdaDerived, class MuDerived, class Solution, class FES>
   LinearElasticityForm(const FunctionBase<LambdaDerived>& lambda,
     const FunctionBase<MuDerived>& mu, const TrialFunction<Solution, FES>& u,
-    const TestFunction<FES>& v)
-    -> LinearElasticityForm<Solution, FES,
-      Math::SparseMatrix<typename FormLanguage::Traits<FES>::ScalarType>, LambdaDerived,
-      MuDerived>;
+    const TestFunction<FES>& v) -> LinearElasticityForm<Solution, FES,
+                                  typename FormLanguage::NamedFormOperatorType<Solution,
+                                    typename FormLanguage::Traits<FES>::ScalarType>::Type,
+                                  LambdaDerived, MuDerived>;
 
   /**
    * @brief Deduction guide for a function first parameter and a lifted shear modulus.
@@ -504,8 +505,9 @@ namespace Rodin::Variational
   LinearElasticityForm(const FunctionBase<LambdaDerived>& lambda, const M& mu,
     const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
-      Math::SparseMatrix<typename FormLanguage::Traits<FES>::ScalarType>, LambdaDerived,
-      typename FormLanguage::FunctionDerived<RealFunction<M>>::Type>;
+      typename FormLanguage::NamedFormOperatorType<Solution,
+        typename FormLanguage::Traits<FES>::ScalarType>::Type,
+      LambdaDerived, typename FormLanguage::FunctionDerived<RealFunction<M>>::Type>;
 
   /**
    * @brief Deduction guide for a lifted first parameter and a function shear modulus.
@@ -519,7 +521,8 @@ namespace Rodin::Variational
   LinearElasticityForm(const L& lambda, const FunctionBase<MuDerived>& mu,
     const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
-      Math::SparseMatrix<typename FormLanguage::Traits<FES>::ScalarType>,
+      typename FormLanguage::NamedFormOperatorType<Solution,
+        typename FormLanguage::Traits<FES>::ScalarType>::Type,
       typename FormLanguage::FunctionDerived<RealFunction<L>>::Type, MuDerived>;
 
   /**
@@ -535,7 +538,8 @@ namespace Rodin::Variational
   LinearElasticityForm(const L& lambda, const M& mu,
     const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
-      Math::SparseMatrix<typename FormLanguage::Traits<FES>::ScalarType>,
+      typename FormLanguage::NamedFormOperatorType<Solution,
+        typename FormLanguage::Traits<FES>::ScalarType>::Type,
       typename FormLanguage::FunctionDerived<RealFunction<L>>::Type,
       typename FormLanguage::FunctionDerived<RealFunction<M>>::Type>;
 }

@@ -21,6 +21,7 @@
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "BilinearForm.h"
+#include "NamedFormStorage.h"
 #include "Function.h"
 #include "IntegrationPoint.h"
 #include "RealFunction.h"
@@ -323,17 +324,17 @@ namespace Rodin::Variational
 
       OperatorType& getOperator() override
       {
-        return m_operator;
+        return m_operator.get();
       }
 
       const OperatorType& getOperator() const override
       {
-        return m_operator;
+        return m_operator.get();
       }
 
       void assemble() override
       {
-        m_assembly.execute(m_operator, *this);
+        m_assembly.execute(m_operator.get(), *this);
       }
 
       const TrialFunction<SolutionType, TrialFESType>& getTrialFunction() const override
@@ -439,7 +440,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const TestFunction<TestFESType>> m_v;
       CoefficientPointer m_coefficient;
       FlatSet<Geometry::Attribute> m_attributes;
-      OperatorType m_operator;
+      NamedFormStorage<OperatorType> m_operator;
       AssemblyType m_assembly;
   };
 
@@ -451,9 +452,9 @@ namespace Rodin::Variational
   template <class Solution, class TrialFES, class TestFES>
   MassForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> MassForm<Solution, TrialFES, TestFES,
-      Math::SparseMatrix<
+      typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>;
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type>;
 
   /**
    * @brief Deduction guide for the mass form weighted by a function.
@@ -465,9 +466,9 @@ namespace Rodin::Variational
   MassForm(const FunctionBase<CoefficientDerived>& c,
     const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> MassForm<Solution, TrialFES, TestFES,
-      Math::SparseMatrix<
+      typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
       CoefficientDerived>;
 
   /**
@@ -481,9 +482,9 @@ namespace Rodin::Variational
   MassForm(const L& c, const TrialFunction<Solution, TrialFES>& u,
     const TestFunction<TestFES>& v)
     -> MassForm<Solution, TrialFES, TestFES,
-      Math::SparseMatrix<
+      typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
-          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>,
+          typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
       typename FormLanguage::FunctionDerived<RealFunction<L>>::Type>;
 }
 

@@ -43,6 +43,94 @@
 namespace Rodin::Assembly
 {
   /**
+   * @brief MPI PETSc assembly using a named form's local kernel.
+   *
+   * Every cell's DOF pairs are retained, including structural zeros outside
+   * the selected attributes, so changing coefficients or attributes reuses
+   * the matrix graph. Mesh connectivity and spaces must stay fixed.
+   * @tparam Form Named bilinear form type.
+   */
+  template <class Form>
+    requires FormLanguage::IsNamedForm<Form>::Value
+  class MPI<::Mat, Form> final : public AssemblyBase<::Mat, Form>
+  {
+    public:
+      /// @brief Parent assembly interface.
+      using Parent = AssemblyBase<::Mat, Form>;
+      /// @brief Form supplying spaces, region and kernel.
+      using InputType = typename Parent::InputType;
+      /**
+       * @brief Assembles or reassembles the named operator.
+       * @param out Matrix receiving cell contributions; created when null.
+       * @param input Named form supplying the local kernel.
+       */
+      void execute(::Mat& out, const InputType& input) override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        const auto& mesh = trialFES.getMesh();
+        assert(&mesh == &testFES.getMesh());
+        PetscErrorCode ierr;
+        const auto& shard = mesh.getShard();
+        size_t rbegin, rend, cbegin, cend;
+        testFES.getOwnershipRange(rbegin, rend);
+        trialFES.getOwnershipRange(cbegin, cend);
+        if (!out)
+        {
+          ierr = MatCreate(mesh.getContext().getCommunicator(), &out);
+          assert(ierr == PETSC_SUCCESS);
+        }
+        ierr = PETSc::Assembly::MatrixSetup(out).prepare(
+          {static_cast<PetscInt>(rend - rbegin), static_cast<PetscInt>(cend - cbegin),
+            static_cast<PetscInt>(testFES.getSize()),
+            static_cast<PetscInt>(trialFES.getSize()), nullptr, true});
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatSetOption(out, MAT_IGNORE_ZERO_ENTRIES, PETSC_FALSE);
+        assert(ierr == PETSC_SUCCESS);
+        const auto& attributes = input.getAttributes();
+        MPIIteration seq(mesh, input.getRegion());
+        auto kernel = input.getKernel();
+        Math::Matrix<PetscScalar> local;
+        for (auto it = seq.getIterator(); it; ++it)
+        {
+          const size_t d = it->getDimension();
+          const Index i = it->getIndex();
+          if (!shard.isOwned(d, i))
+            continue;
+          const auto& rows = testFES.getDOFs(d, i);
+          const auto& cols = trialFES.getDOFs(d, i);
+          const auto attribute = it->getAttribute();
+          if (attributes.empty() || (attribute && attributes.count(*attribute)))
+            kernel.compute(local, *it);
+          else
+            local.setZero(rows.size(), cols.size());
+          for (Index r = 0; r < static_cast<Index>(rows.size()); ++r)
+          {
+            for (Index c = 0; c < static_cast<Index>(cols.size()); ++c)
+            {
+              ierr = MatSetValue(out, static_cast<PetscInt>(rows[r]),
+                static_cast<PetscInt>(cols[c]), Math::conj(local(r, c)), ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
+          }
+        }
+        ierr = MatAssemblyBegin(out, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatAssemblyEnd(out, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+      }
+      /**
+       * @brief Copies the assembler.
+       * @returns New assembler owned by the caller.
+       */
+      MPI* copy() const noexcept override
+      {
+        return new MPI(*this);
+      }
+  };
+
+  /**
    * @brief MPI-parallel assembly of a PETSc vector from a linear form.
    *
    * Each MPI rank assembles contributions from its owned polytopes into

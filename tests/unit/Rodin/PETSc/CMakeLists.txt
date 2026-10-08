@@ -1,3 +1,19 @@
+add_executable(RodinPETScNamedFormTest NamedFormTest.cpp)
+target_link_libraries(RodinPETScNamedFormTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::PETSc)
+add_test(
+  NAME RodinPETScNamedFormTest
+  COMMAND $<TARGET_FILE:RodinPETScNamedFormTest>
+)
+set_tests_properties(RodinPETScNamedFormTest PROPERTIES
+  LABELS "unit;petsc"
+)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScNamedFormTest)
+
 add_executable(RodinPETScGridFunctionTest GridFunctionTest.cpp)
 target_link_libraries(RodinPETScGridFunctionTest
   PUBLIC

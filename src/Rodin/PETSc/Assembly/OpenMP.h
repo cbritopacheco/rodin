@@ -30,6 +30,129 @@
 namespace Rodin::Assembly
 {
   /**
+   * @brief OpenMP PETSc assembly using a named form's local kernel.
+   *
+   * Every cell's DOF pairs are retained, including structural zeros outside
+   * the selected attributes, so changing coefficients or attributes reuses
+   * the matrix graph. Mesh connectivity and spaces must stay fixed.
+   * @tparam Form Named bilinear form type.
+   */
+  template <class Form>
+    requires FormLanguage::IsNamedForm<Form>::Value
+  class OpenMP<::Mat, Form> final : public AssemblyBase<::Mat, Form>
+  {
+    public:
+      /// @brief Parent assembly interface.
+      using Parent = AssemblyBase<::Mat, Form>;
+      /// @brief Form supplying spaces, region and kernel.
+      using InputType = typename Parent::InputType;
+      /**
+       * @brief Sets the number of evaluation workers.
+       * @param count Positive worker count.
+       * @returns Reference to this assembler.
+       */
+      OpenMP& setThreadCount(size_t count)
+      {
+        assert(count > 0);
+        m_threadCount = count;
+        return *this;
+      }
+      /**
+       * @brief Gets the configured worker count.
+       * @returns Worker count, or OpenMP's maximum when unset.
+       */
+      size_t getThreadCount() const
+      {
+        return m_threadCount.value_or(omp_get_max_threads());
+      }
+      /**
+       * @brief Assembles or reassembles the named operator.
+       * @param out Matrix receiving cell contributions; created when null.
+       * @param input Named form supplying the local kernel.
+       */
+      void execute(::Mat& out, const InputType& input) override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        const auto& mesh = trialFES.getMesh();
+        assert(&mesh == &testFES.getMesh());
+        PetscErrorCode ierr;
+        if (!out)
+        {
+          ierr = MatCreate(PETSC_COMM_SELF, &out);
+          assert(ierr == PETSC_SUCCESS);
+        }
+        ierr = PETSc::Assembly::MatrixSetup(out).prepare(
+          {static_cast<PetscInt>(testFES.getSize()),
+            static_cast<PetscInt>(trialFES.getSize()),
+            static_cast<PetscInt>(testFES.getSize()),
+            static_cast<PetscInt>(trialFES.getSize()), nullptr, true});
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatSetOption(out, MAT_IGNORE_ZERO_ENTRIES, PETSC_FALSE);
+        assert(ierr == PETSC_SUCCESS);
+        const auto& attributes = input.getAttributes();
+        OpenMPIteration seq(mesh, input.getRegion());
+        using Entry = std::tuple<PetscInt, PetscInt, PetscScalar>;
+        const size_t threadCount = getThreadCount();
+        std::vector<std::vector<Entry>> entries(threadCount);
+#pragma omp parallel num_threads(threadCount)
+        {
+          auto kernel = input.getKernel();
+          Math::Matrix<PetscScalar> local;
+          auto& buffer = entries[omp_get_thread_num()];
+#pragma omp for
+          for (Index i = 0; i < static_cast<Index>(seq.getCount()); ++i)
+          {
+            if (!seq.filter(i))
+              continue;
+            const auto cell = seq.getPolytope(i);
+            const size_t d = cell.getDimension();
+            const auto& rows = testFES.getDOFs(d, cell.getIndex());
+            const auto& cols = trialFES.getDOFs(d, cell.getIndex());
+            const auto attribute = cell.getAttribute();
+            if (attributes.empty() || (attribute && attributes.count(*attribute)))
+              kernel.compute(local, cell);
+            else
+              local.setZero(rows.size(), cols.size());
+            for (Index r = 0; r < static_cast<Index>(rows.size()); ++r)
+            {
+              for (Index c = 0; c < static_cast<Index>(cols.size()); ++c)
+              {
+                buffer.emplace_back(static_cast<PetscInt>(rows[r]),
+                  static_cast<PetscInt>(cols[c]), Math::conj(local(r, c)));
+              }
+            }
+          }
+        }
+        // PETSc calls stay on the calling thread; only local evaluation is parallel.
+        for (const auto& buffer : entries)
+        {
+          for (const auto& [row, column, value] : buffer)
+          {
+            ierr = MatSetValue(out, row, column, value, ADD_VALUES);
+            assert(ierr == PETSC_SUCCESS);
+          }
+        }
+        ierr = MatAssemblyBegin(out, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatAssemblyEnd(out, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+      }
+      /**
+       * @brief Copies the assembler.
+       * @returns New assembler owned by the caller.
+       */
+      OpenMP* copy() const noexcept override
+      {
+        return new OpenMP(*this);
+      }
+
+    private:
+      std::optional<size_t> m_threadCount;
+  };
+
+  /**
    * @brief OpenMP-parallel assembly of a PETSc vector from a linear form.
    *
    * Uses thread-local buffers and barriers to assemble linear form

@@ -21,6 +21,8 @@
 #include <Rodin/MPI/Variational/P1.h>
 #include <Rodin/MPI/Variational/H1/H1.h>
 #include <Rodin/PETSc.h>
+#include <Rodin/Solid/Linear/LinearElasticityForm.h>
+#include <Rodin/Solid/Linear/LinearElasticityIntegral.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -80,6 +82,131 @@ namespace
       sharder.scatter(0);
     }
     return sharder.gather(0);
+  }
+
+  /** Compares the full distributed operator, including off-process contributions. */
+  void expectNamedMatrixNear(::Mat actual, ::Mat expected)
+  {
+    ::Mat difference = nullptr;
+    ASSERT_EQ(MatDuplicate(actual, MAT_COPY_VALUES, &difference), PETSC_SUCCESS);
+    ASSERT_EQ(
+      MatAXPY(difference, -1, expected, DIFFERENT_NONZERO_PATTERN), PETSC_SUCCESS);
+    PetscReal error, norm;
+    ASSERT_EQ(MatNorm(difference, NORM_FROBENIUS, &error), PETSC_SUCCESS);
+    ASSERT_EQ(MatNorm(expected, NORM_FROBENIUS, &norm), PETSC_SUCCESS);
+    EXPECT_LE(error, 1e-11 * std::max(PetscReal(1), norm));
+    ASSERT_EQ(MatDestroy(&difference), PETSC_SUCCESS);
+  }
+
+  /**
+   * Checks scalar named forms with a live distributed coefficient.
+   * @tparam FES Distributed finite element space type.
+   * @param fes Scalar finite element space.
+   */
+  template <class FES>
+  void checkDistributedScalarNamedForms(FES& fes)
+  {
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    PETSc::Variational::GridFunction coefficient(fes);
+    coefficient = RealFunction(1.);
+    MassForm mass(coefficient, u, v);
+    DiffusionForm diffusion(coefficient, u, v);
+    HelmholtzForm helmholtz(coefficient, Real(2), u, v);
+    BilinearForm expected(u, v);
+    PetscObjectState pattern;
+    ASSERT_EQ(MatGetNonzeroState(mass.getOperator(), &pattern), PETSC_SUCCESS);
+    ASSERT_EQ(
+      MatSetOption(mass.getOperator(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE),
+      PETSC_SUCCESS);
+    for (const Real scale : {2., 5., 0.})
+    {
+      coefficient = RealFunction([scale](const Point& p) { return scale * (1 + p.x()); });
+      mass.assemble();
+      expected = Integral(coefficient * u, v);
+      expected.assemble();
+      expectNamedMatrixNear(mass.getOperator(), expected.getOperator());
+      diffusion.assemble();
+      expected = Integral(coefficient * Grad(u), Grad(v));
+      expected.assemble();
+      expectNamedMatrixNear(diffusion.getOperator(), expected.getOperator());
+      helmholtz.assemble();
+      expected = Integral(coefficient * Grad(u), Grad(v)) + Integral(Real(2) * u, v);
+      expected.assemble();
+      expectNamedMatrixNear(helmholtz.getOperator(), expected.getOperator());
+      PetscObjectState current;
+      ASSERT_EQ(MatGetNonzeroState(mass.getOperator(), &current), PETSC_SUCCESS);
+      EXPECT_EQ(current, pattern);
+    }
+    MPI_Comm comm;
+    ASSERT_EQ(
+      PetscObjectGetComm(reinterpret_cast<PetscObject>(mass.getOperator()), &comm),
+      PETSC_SUCCESS);
+    int size;
+    MPI_Comm_size(comm, &size);
+    EXPECT_EQ(size, g_world->size());
+    size_t begin, end;
+    fes.getOwnershipRange(begin, end);
+    PetscInt first, last;
+    ASSERT_EQ(MatGetOwnershipRange(mass.getOperator(), &first, &last), PETSC_SUCCESS);
+    EXPECT_EQ(first, static_cast<PetscInt>(begin));
+    EXPECT_EQ(last, static_cast<PetscInt>(end));
+    MassForm copied(mass);
+    EXPECT_NE(copied.getOperator(), mass.getOperator());
+    expectNamedMatrixNear(copied.getOperator(), mass.getOperator());
+
+    Problem actual(u, v);
+    actual = HelmholtzForm(Real(1), Real(2), u, v) - Integral(RealFunction(1.), v) +
+      DirichletBC(u, RealFunction(0));
+    actual.assemble();
+    Problem reference(u, v);
+    reference = Integral(Grad(u), Grad(v)) + Integral(Real(2) * u, v) -
+      Integral(RealFunction(1.), v) + DirichletBC(u, RealFunction(0));
+    reference.assemble();
+    expectNamedMatrixNear(
+      actual.getLinearSystem().getOperator(), reference.getLinearSystem().getOperator());
+  }
+
+  /**
+   * Checks distributed vector mass and elasticity operators.
+   * @tparam FES Distributed finite element space type.
+   * @param fes Vector finite element space.
+   */
+  template <class FES>
+  void checkDistributedVectorNamedForms(FES& fes)
+  {
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    MassForm mass(Real(2), u, v);
+    LinearElasticityForm elasticity(Real(2), Real(3), u, v);
+    BilinearForm expected(u, v);
+    for (size_t repeat = 0; repeat < 2; ++repeat)
+    {
+      mass.assemble();
+      expected = Integral(Real(2) * u, v);
+      expected.assemble();
+      expectNamedMatrixNear(mass.getOperator(), expected.getOperator());
+      elasticity.assemble();
+      expected = LinearElasticityIntegral(u, v)(Real(2), Real(3));
+      expected.assemble();
+      expectNamedMatrixNear(elasticity.getOperator(), expected.getOperator());
+    }
+  }
+
+  /** Checks distributed named forms on P1 and P2 tetrahedra. */
+  TEST(PETSc_MPI_Form, NamedScalarAndVectorP1AndP2MatchIntegrals)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    auto mesh = distributeP2Tetrahedron(ctx);
+    P1 scalarLinear(mesh);
+    checkDistributedScalarNamedForms(scalarLinear);
+    H1 scalarQuadratic(std::integral_constant<size_t, 2>{}, mesh);
+    checkDistributedScalarNamedForms(scalarQuadratic);
+    P1 vectorLinear(mesh, mesh.getSpaceDimension());
+    checkDistributedVectorNamedForms(vectorLinear);
+    H1 vectorQuadratic(
+      std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    checkDistributedVectorNamedForms(vectorQuadratic);
   }
 
   /**
