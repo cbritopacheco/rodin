@@ -23,6 +23,13 @@ TEST(Rodin_Adaptation_WNGIRExampleParameters, CalibratedDefaultsAreInherited)
   EXPECT_EQ(p.model.hinge, Real(10));
   EXPECT_EQ(p.convergence.iterations.outer, 30u);
   EXPECT_EQ(p.convergence.iterations.inner, 15u);
+  EXPECT_EQ(p.quadrature.getSurfaceOrder(1), 8u);
+  EXPECT_EQ(p.quadrature.getVolumeOrder(1), 2u);
+  EXPECT_EQ(p.quadrature.getQualityOrder(1), 2u);
+  EXPECT_EQ(p.quadrature.getSurfaceOrder(2), 12u);
+  EXPECT_EQ(p.quadrature.getVolumeOrder(2), 8u);
+  EXPECT_EQ(p.quadrature.getQualityOrder(2), 16u);
+  EXPECT_EQ(Adaptation::WNGIR::Parameters::Quadrature::getValidationOrder(1), 32u);
 }
 
 TEST(Rodin_Adaptation_WNGIRExampleParameters, CanonicalNamesMapToHierarchicalParameters)
@@ -31,7 +38,9 @@ TEST(Rodin_Adaptation_WNGIRExampleParameters, CanonicalNamesMapToHierarchicalPar
     "--wngir-distribution-deviatoric=0.0003", "--wngir-distribution-divergence=0.0004",
     "--wngir-hinge=10", "--wngir-jacobian=0.02", "--wngir-distortion=5",
     "--wngir-outer-iterations=20", "--wngir-inner-iterations=10",
-    "--wngir-linear-solver=cg", "--wngir-linear-relative-tolerance=1e-9"};
+    "--wngir-linear-solver=cg", "--wngir-linear-relative-tolerance=1e-9",
+    "--quad-order=12", "--surface-quadrature-order=8", "--volume-quadrature-order=2",
+    "--quality-validation-order=16", "--geometric-validation-order=32"};
   std::vector<char*> argv;
   for (auto& argument : arguments)
     argv.push_back(argument.data());
@@ -47,6 +56,11 @@ TEST(Rodin_Adaptation_WNGIRExampleParameters, CanonicalNamesMapToHierarchicalPar
   EXPECT_EQ(p.convergence.iterations.inner, 10u);
   EXPECT_EQ(p.linear.solver, Adaptation::WNGIR::Parameters::LinearSolver::CG);
   EXPECT_EQ(p.convergence.tolerance.linearRelative, Real(1e-9));
+  EXPECT_EQ(p.quadrature.order, 12u);
+  EXPECT_EQ(p.quadrature.surface, 8u);
+  EXPECT_EQ(p.quadrature.volume, 2u);
+  EXPECT_EQ(p.quadrature.quality, 16u);
+  EXPECT_EQ(p.quadrature.validation, 32u);
 }
 
 TEST(Rodin_Adaptation_WNGIRExampleParameters, RemovedOptionsAreRejected)

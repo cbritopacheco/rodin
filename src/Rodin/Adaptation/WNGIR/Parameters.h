@@ -104,26 +104,35 @@ namespace Rodin::Adaptation::WNGIR
       struct Quadrature
       {
           /**
-           * @brief Cell assembly and sampled admissibility order for FE products.
+           * @brief Calibrated P1 or provisional higher-order volume integration policy.
            * @param feOrder Polynomial order of the displacement finite element.
-           * @returns Maximum of two and twice the finite-element order.
+           * @param transformationOrder Polynomial order of the geometry transformation.
+           * @param simplex Whether the entity is a simplex; tensor-product degree one is not P1.
+           * @returns Two for affine P1; otherwise at least eight. Not an exactness guarantee.
            */
-          static size_t getCellOrder(size_t feOrder)
+          static size_t getCellOrder(size_t feOrder, size_t transformationOrder = 1,
+            bool simplex = true)
           {
-            return std::max<size_t>(2, 2 * feOrder);
+            constexpr size_t affineOrder = 2, nonlinearMinimum = 8;
+            return feOrder <= 1 && transformationOrder == 1 && simplex
+              ? affineOrder : std::max(nonlinearMinimum, 2 * feOrder);
           }
 
           /**
            * @brief Surface order including the non-polynomial composed level set.
-           * The minimum resolves the coarse curved-interface integration regression;
-           * it is not an exactness guarantee for arbitrary analytic coefficients.
+           * Eight is calibrated for affine P1; the higher-order minimum is provisional.
+           * Neither is an exactness guarantee for arbitrary analytic coefficients.
            * @param feOrder Polynomial order of the displacement finite element.
+           * @param transformationOrder Polynomial order of the geometry transformation.
+           * @param simplex Whether the entity is a simplex.
            * @returns Automatic interface integration order.
            */
-          static size_t getInterfaceOrder(size_t feOrder)
+          static size_t getInterfaceOrder(size_t feOrder, size_t transformationOrder = 1,
+            bool simplex = true)
           {
-            constexpr size_t minimumOrder = 12;
-            return std::max(minimumOrder, 2 * feOrder + 2);
+            constexpr size_t affineOrder = 8, nonlinearMinimum = 12;
+            return feOrder <= 1 && transformationOrder == 1 && simplex
+              ? affineOrder : std::max(nonlinearMinimum, 2 * feOrder + 2);
           }
 
           /**
@@ -133,11 +142,51 @@ namespace Rodin::Adaptation::WNGIR
            */
           static size_t getValidationOrder(size_t feOrder)
           {
-            constexpr size_t minimumOrder = 14;
+            constexpr size_t minimumOrder = 32;
             return std::max(minimumOrder, 2 * feOrder + 4);
           }
 
+          /// @brief Surface integration order; specific settings override the common order.
+          /// @param feOrder Displacement finite-element order.
+          /// @param transformationOrder Geometry transformation order.
+          /// @param simplex Whether the entity is a simplex.
+          /// @returns Selected surface integration order.
+          size_t getSurfaceOrder(size_t feOrder, size_t transformationOrder = 1,
+            bool simplex = true) const
+          {
+            return surface > 0 ? surface : order > 0 ? order
+              : getInterfaceOrder(feOrder, transformationOrder, simplex);
+          }
+
+          /// @brief Volume integration order; specific settings override the common order.
+          /// @param feOrder Displacement finite-element order.
+          /// @param transformationOrder Geometry transformation order.
+          /// @param simplex Whether the entity is a simplex.
+          /// @returns Selected volume integration order.
+          size_t getVolumeOrder(size_t feOrder, size_t transformationOrder = 1,
+            bool simplex = true) const
+          {
+            return volume > 0 ? volume : order > 0 ? order
+              : getCellOrder(feOrder, transformationOrder, simplex);
+          }
+
+          /// @brief Independent actual-quality sampling order.
+          /// @param feOrder Displacement finite-element order.
+          /// @param transformationOrder Geometry transformation order.
+          /// @param simplex Whether the entity is a simplex.
+          /// @returns Independent quality order: two for affine P1, otherwise at least sixteen.
+          size_t getQualityOrder(size_t feOrder, size_t transformationOrder = 1,
+            bool simplex = true) const
+          {
+            constexpr size_t affineOrder = 2, nonlinearMinimum = 16;
+            return quality > 0 ? quality : feOrder <= 1 && transformationOrder == 1 && simplex
+              ? affineOrder : std::max(nonlinearMinimum, 2 * feOrder + 4);
+          }
+
           std::size_t order = 0; ///< Zero selects automatic integration orders.
+          std::size_t surface = 0; ///< Zero uses the common or automatic surface order.
+          std::size_t volume = 0; ///< Zero uses the common or automatic volume order.
+          std::size_t quality = 0; ///< Zero selects independent automatic quality sampling; vertices are always checked.
           std::size_t validation = 0; ///< Zero selects an independent validation order.
       };
 

@@ -39,8 +39,8 @@ namespace Rodin::Adaptation::WNGIR
    * @brief Evaluates sampled admissibility without changing the displacement.
    * @param u Displacement field to sample.
    * @param jacobian Lower admissible relative Jacobian bound.
-   * @param quadratureOrder Sampling order; zero selects the finite-element rule.
-   * @returns Sampled Jacobian, relative distortion and invalid-sample count.
+   * @param quadratureOrder Sampling order; zero selects the automatic quality policy.
+   * @returns Jacobian, relative distortion and invalid-sample count at quadrature points and vertices.
    */
   AdmissibilityReport evaluateAdmissibility(const Displacement& u,
     Real jacobian, std::size_t quadratureOrder = 0)
@@ -65,13 +65,12 @@ namespace Rodin::Adaptation::WNGIR
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
       const auto& qf = QF::PolytopeQuadratureFormula::get(quadratureOrder > 0
           ? quadratureOrder
-          : Parameters::Quadrature::getCellOrder(fe.getOrder()),
+          : Parameters::Quadrature{}.getQualityOrder(
+              fe.getOrder(), cell.getTransformation().getOrder(),
+              Geometry::Polytope::Traits(cell.getGeometry()).getVertexCount() == dim + 1),
         cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(qf);
-      for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-      {
-        const auto& pt = quadrature.getPoint(q);
-        const IntegrationPoint ip(pt, &qf, q);
+      const auto evaluate = [&](const auto& ip) {
         deformation.setDisplacementGradient(gradU.getValue(ip));
         const Real j = deformation.getJacobian();
 
@@ -88,7 +87,12 @@ namespace Rodin::Adaptation::WNGIR
         }
         if (invalid)
           ++rep.inadmissibleCount;
-      }
+      };
+      for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+        evaluate(IntegrationPoint(quadrature.getPoint(q), &qf, q));
+      const Geometry::Polytope::Traits traits(cell.getGeometry());
+      for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+        evaluate(Geometry::Point(cell, traits.getVertex(vertex)));
     }
     return rep;
   }

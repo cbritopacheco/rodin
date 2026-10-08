@@ -256,6 +256,9 @@ namespace Rodin::Examples
       realOption(argc, argv, "wngir-step-over-h-tolerance", p.convergence.tolerance.stepOverH);
 
     p.quadrature.order = sizeOption(argc, argv, "quad-order", defaults.quadratureOrder);
+    p.quadrature.surface = sizeOption(argc, argv, "surface-quadrature-order", 0);
+    p.quadrature.volume = sizeOption(argc, argv, "volume-quadrature-order", 0);
+    p.quadrature.quality = sizeOption(argc, argv, "quality-validation-order", 0);
     p.quadrature.validation =
       sizeOption(argc, argv, "geometric-validation-order", p.quadrature.validation);
     p.convergence.iterations.outer =

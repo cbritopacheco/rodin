@@ -40,7 +40,7 @@
 #include "HingeForce.h"
 #include "HingeMetric.h"
 #include "Report.h"
-#include "FittingCoefficient.h"
+#include "FittingTensor.h"
 #include "FittingForce.h"
 
 namespace Rodin::Adaptation::WNGIR
@@ -922,10 +922,9 @@ namespace Rodin::Adaptation::WNGIR
         // order is given to the integrator explicitly, per face.
         const Variational::Integrator::OrderType surfaceOrder =
           [&](const Geometry::Polytope& face) -> std::size_t {
-          if (p.quadrature.order > 0)
-            return p.quadrature.order;
           const auto& fe = fes.getFiniteElement(face.getDimension(), face.getIndex());
-          return Parameters::Quadrature::getInterfaceOrder(fe.getOrder());
+          return p.quadrature.getSurfaceOrder(fe.getOrder(), face.getTransformation().getOrder(),
+            Geometry::Polytope::Traits(face.getGeometry()).getVertexCount() == face.getDimension() + 1);
         };
 
         AdmissibilityState initialAdm{};
@@ -1021,12 +1020,24 @@ namespace Rodin::Adaptation::WNGIR
         for (; rep.iterations < p.convergence.iterations.outer; ++rep.iterations)
         {
           auto tic = Clock::now();
-          FittingCoefficient obsCoeff(
+          FittingTensor tensor(
             grad, u, locator, p, dataNormalization, meshDim);
-          auto obsMetric =
-            Variational::FaceIntegral(Variational::Dot(obsCoeff * m_duStep, m_vStep));
-          obsMetric.setOrder(surfaceOrder);
-          obsMetric.over(*p.interfaceAttribute);
+          const auto fittingIntegrand = Variational::Dot(tensor * m_duStep, m_vStep);
+          auto fittingMetric = Variational::FaceIntegral(fittingIntegrand);
+          // Native order propagation is valid for a known tensor on an affine
+          // entity. Curved surface measures and unknown compositions retain
+          // the non-polynomial policy. Explicit orders always take precedence.
+          fittingMetric.setOrder([&, integrand = fittingIntegrand](const Geometry::Polytope& face) {
+            if (p.quadrature.surface > 0 || p.quadrature.order > 0)
+              return surfaceOrder(face);
+            const auto order = integrand.getOrder(face);
+            const auto& transformation = mesh.getPolytopeTransformation(
+              face.getDimension(), face.getIndex());
+            if (order && transformation.getOrder() == 1)
+              return *order;
+            return surfaceOrder(face);
+          });
+          fittingMetric.over(*p.interfaceAttribute);
           FittingForce forceCoeff(
             phi, grad, u, locator, loss, dataNormalization, meshDim);
           auto surfaceForce = Variational::FaceIntegral(forceCoeff, m_vStep);
@@ -1035,7 +1046,7 @@ namespace Rodin::Adaptation::WNGIR
           // The observation metric and the fitting force depend on the outer
           // displacement, not on the hinge increment, so they are assembled
           // here and reused by every correction below.
-          m_fittingMetric = obsMetric;
+          m_fittingMetric = fittingMetric;
           m_fittingMetric.assemble();
           if (!m_additionalMetric.getLocalIntegrators().empty() ||
             !m_additionalMetric.getGlobalIntegrators().empty())
@@ -1045,13 +1056,13 @@ namespace Rodin::Adaptation::WNGIR
           }
           const Real deviatoric = p.model.h * p.model.distribution.deviatoric;
           const Real divergence = p.model.h * p.model.distribution.divergence;
-          size_t order = 2;
+          size_t order = 0;
           for (auto cell = mesh.getCell(); cell; ++cell)
             order = std::max(
-              order, Parameters::Quadrature::getCellOrder(
-                fes.getFiniteElement(meshDim, cell->getIndex()).getOrder()));
-          if (p.quadrature.order > 0)
-            order = p.quadrature.order;
+              order, p.quadrature.getVolumeOrder(
+                fes.getFiniteElement(meshDim, cell->getIndex()).getOrder(),
+                cell->getTransformation().getOrder(),
+                Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() == meshDim + 1));
           const Distribution distribution(
             m_duStep, m_vStep, u, deviatoric, divergence, order);
           m_distributionForm = distribution;
@@ -1662,9 +1673,9 @@ namespace Rodin::Adaptation::WNGIR
       /**
        * @brief Quadrature formula WNGIR uses on a polytope.
        *
-       * Cell sampling integrates finite-element products at order @f$2k@f$.
-       * Interface sampling uses a higher minimum because its composed
-       * level-set coefficients are non-polynomial. A pinned parameter overrides both.
+       * Affine P1 uses calibrated surface/volume orders; higher-order or
+       * curved entities use provisional non-polynomial policies.
+       * Specific orders override the common integration order.
        */
       template <class FES>
       const QF::QuadratureFormulaBase& getQuadrature(
@@ -1673,12 +1684,13 @@ namespace Rodin::Adaptation::WNGIR
         const auto& fe =
           fes.getFiniteElement(polytope.getDimension(), polytope.getIndex());
         const bool isInterface = polytope.getDimension() < fes.getMesh().getDimension();
-        const std::size_t automaticOrder = isInterface
-          ? Parameters::Quadrature::getInterfaceOrder(fe.getOrder())
-          : Parameters::Quadrature::getCellOrder(fe.getOrder());
-        const std::size_t order = m_parameters.quadrature.order > 0
-          ? m_parameters.quadrature.order
-          : automaticOrder;
+        const bool simplex = Geometry::Polytope::Traits(polytope.getGeometry()).getVertexCount()
+          == polytope.getDimension() + 1;
+        const std::size_t order = isInterface
+          ? m_parameters.quadrature.getSurfaceOrder(
+              fe.getOrder(), polytope.getTransformation().getOrder(), simplex)
+          : m_parameters.quadrature.getVolumeOrder(
+              fe.getOrder(), polytope.getTransformation().getOrder(), simplex);
         return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
       }
 
@@ -1881,11 +1893,14 @@ namespace Rodin::Adaptation::WNGIR
           {
             const Index cellIndex = validationCells[static_cast<std::size_t>(i)];
             const auto cell = mesh.getCell(cellIndex);
-            const auto& qf = getQuadrature(*cell, fes);
+            const auto& fe = fes.getFiniteElement(dimension, cellIndex);
+            const auto& qf = QF::PolytopeQuadratureFormula::get(
+              m_parameters.quadrature.getQualityOrder(
+                fe.getOrder(), cell->getTransformation().getOrder(),
+                Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() == dimension + 1),
+              cell->getGeometry());
             const auto& quad = cell->getQuadrature(qf);
-            for (std::size_t q = 0; q < quad.getSize(); ++q)
-            {
-              const Variational::IntegrationPoint ip(quad.getPoint(q), &qf, q);
+            const auto evaluate = [&](const auto& ip) {
               deformation.setDisplacementGradient(displacementJacobian.getValue(ip));
               const Real j = deformation.getJacobian();
               minJ = std::min(minJ, j);
@@ -1925,6 +1940,13 @@ namespace Rodin::Adaptation::WNGIR
                       cellIndex};
                 }
               }
+            };
+            for (std::size_t q = 0; q < quad.getSize(); ++q)
+              evaluate(Variational::IntegrationPoint(quad.getPoint(q), &qf, q));
+            {
+              const Geometry::Polytope::Traits traits(cell->getGeometry());
+              for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+                evaluate(Geometry::Point(*cell, traits.getVertex(vertex)));
             }
           }
         }

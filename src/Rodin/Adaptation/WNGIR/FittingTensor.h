@@ -2,10 +2,13 @@
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
  */
-#ifndef RODIN_ADAPTATION_WNGIR_FITTINGCOEFFICIENT_H
-#define RODIN_ADAPTATION_WNGIR_FITTINGCOEFFICIENT_H
+#ifndef RODIN_ADAPTATION_WNGIR_FITTINGTENSOR_H
+#define RODIN_ADAPTATION_WNGIR_FITTINGTENSOR_H
+
+#include <type_traits>
 
 #include "Rodin/Variational/MatrixFunction.h"
+#include "Rodin/Variational/VectorFunction.h"
 
 #include "../DeformationMap.h"
 #include "Parameters.h"
@@ -18,9 +21,9 @@ namespace Rodin::Adaptation::WNGIR
    * and fixed gradient-scale normalization.
    */
   template <class GradDerived, class Displacement, class LocatorType>
-  class FittingCoefficient final
+  class FittingTensor final
     : public Variational::MatrixFunctionBase<Real,
-        FittingCoefficient<GradDerived, Displacement, LocatorType>>
+        FittingTensor<GradDerived, Displacement, LocatorType>>
   {
     public:
       /// @brief Scalar value type.
@@ -29,7 +32,7 @@ namespace Rodin::Adaptation::WNGIR
       using RangeType = Math::SpatialMatrix<ScalarType>;
       /// @brief Parent class type.
       using Parent = Variational::MatrixFunctionBase<ScalarType,
-        FittingCoefficient<GradDerived, Displacement, LocatorType>>;
+        FittingTensor<GradDerived, Displacement, LocatorType>>;
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
@@ -42,7 +45,7 @@ namespace Rodin::Adaptation::WNGIR
        * @param normalization Fixed gradient-scale normalization.
        * @param dimension Spatial dimension.
        */
-      FittingCoefficient(const GradType& grad, const Displacement& current,
+      FittingTensor(const GradType& grad, const Displacement& current,
         const LocatorType& locator, const Parameters& parameters, Real normalization,
         std::size_t dimension)
         : m_grad(grad.copy()),
@@ -56,7 +59,7 @@ namespace Rodin::Adaptation::WNGIR
        * @brief Copy constructor.
        * @param other Coefficient to copy, cloning its target gradient.
        */
-      FittingCoefficient(const FittingCoefficient& other)
+      FittingTensor(const FittingTensor& other)
         : Parent(other),
           m_grad(other.m_grad->copy()),
           m_deformation(other.m_deformation),
@@ -106,13 +109,19 @@ namespace Rodin::Adaptation::WNGIR
       }
 
       /**
-       * @brief Reports no intrinsic polynomial order.
-       * @returns Polynomial order on the entity, or an empty optional when no order is available.
-       * @param polytope Mesh entity; the reported order is independent of this argument.
+       * @brief Polynomial order of the composed fitting tensor when known.
+       * A globally constant vector is unchanged by deformation. Elementwise
+       * orders cannot be forwarded through point location: a moved entity may
+       * cross target cells, including cells with different constant gradients.
+       * @returns Zero for a globally constant gradient, or an empty optional.
+       * @param polytope Reference entity on which the tensor is integrated.
        */
       Optional<std::size_t> getOrder(
         [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
+        if constexpr (std::is_same_v<GradDerived,
+          Variational::VectorFunction<Math::Vector<Real>>>)
+          return m_grad->getOrder(polytope);
         return std::nullopt;
       }
 
@@ -120,9 +129,9 @@ namespace Rodin::Adaptation::WNGIR
        * @brief Clones this coefficient.
        * @returns Newly allocated copy owned by the caller.
        */
-      FittingCoefficient* copy() const noexcept override
+      FittingTensor* copy() const noexcept override
       {
-        return new FittingCoefficient(*this);
+        return new FittingTensor(*this);
       }
 
     private:
@@ -133,7 +142,7 @@ namespace Rodin::Adaptation::WNGIR
       std::size_t m_dimension;
   };
   /**
-   * @brief Deduction guide for FittingCoefficient.
+   * @brief Deduction guide for FittingTensor.
    * @param grad Gradient of the observation field.
    * @param current Current displacement field.
    * @param locator Point locator used to find mesh entities.
@@ -143,10 +152,10 @@ namespace Rodin::Adaptation::WNGIR
    */
 
   template <class GradDerived, class Displacement, class LocatorType>
-  FittingCoefficient(const Variational::VectorFunctionBase<Real, GradDerived>& grad,
+  FittingTensor(const Variational::VectorFunctionBase<Real, GradDerived>& grad,
     const Displacement& current, const LocatorType& locator,
     const Parameters& parameters, Real normalization,
-    std::size_t dimension) -> FittingCoefficient<GradDerived, Displacement, LocatorType>;
+    std::size_t dimension) -> FittingTensor<GradDerived, Displacement, LocatorType>;
 }
 
 #endif

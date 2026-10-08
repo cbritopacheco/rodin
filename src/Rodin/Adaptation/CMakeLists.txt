@@ -25,7 +25,7 @@ set(RodinAdaptation_HEADERS
   WNGIR/Problem.h
   WNGIR/Adapt.h
   WNGIR/ForwardDecls.h
-  WNGIR/FittingCoefficient.h
+  WNGIR/FittingTensor.h
   WNGIR/Residual.h
   WNGIR/FittingForce.h
 )

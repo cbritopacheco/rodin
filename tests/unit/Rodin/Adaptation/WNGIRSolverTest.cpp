@@ -44,15 +44,17 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(parameters.quadrature.validation, 0);
       EXPECT_EQ(WNGIR::Parameters::Quadrature::getCellOrder(0), 2);
       EXPECT_EQ(WNGIR::Parameters::Quadrature::getCellOrder(1), 2);
-      EXPECT_EQ(WNGIR::Parameters::Quadrature::getCellOrder(2), 4);
-      EXPECT_EQ(WNGIR::Parameters::Quadrature::getCellOrder(3), 6);
-      EXPECT_EQ(WNGIR::Parameters::Quadrature::getInterfaceOrder(1), 12);
+      EXPECT_EQ(WNGIR::Parameters::Quadrature::getCellOrder(2), 8);
+      EXPECT_EQ(WNGIR::Parameters::Quadrature::getCellOrder(3), 8);
+      EXPECT_EQ(WNGIR::Parameters::Quadrature::getCellOrder(1, 2), 8);
+      EXPECT_EQ(WNGIR::Parameters::Quadrature::getInterfaceOrder(1), 8);
+      EXPECT_EQ(WNGIR::Parameters::Quadrature::getInterfaceOrder(1, 2), 12);
       EXPECT_EQ(WNGIR::Parameters::Quadrature::getInterfaceOrder(2), 12);
       EXPECT_EQ(WNGIR::Parameters::Quadrature::getInterfaceOrder(3), 12);
       EXPECT_EQ(WNGIR::Parameters::Quadrature::getInterfaceOrder(7), 16);
-      EXPECT_EQ(WNGIR::Parameters::Quadrature::getValidationOrder(1), 14);
-      EXPECT_EQ(WNGIR::Parameters::Quadrature::getValidationOrder(2), 14);
-      EXPECT_EQ(WNGIR::Parameters::Quadrature::getValidationOrder(3), 14);
+      EXPECT_EQ(WNGIR::Parameters::Quadrature::getValidationOrder(1), 32);
+      EXPECT_EQ(WNGIR::Parameters::Quadrature::getValidationOrder(2), 32);
+      EXPECT_EQ(WNGIR::Parameters::Quadrature::getValidationOrder(3), 32);
     }
 
     TEST(Rodin_Adaptation_WNGIRSolver, HierarchicalParametersAreCopiedBySolver)
@@ -92,7 +94,72 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(stored.linear.solver, WNGIR::Parameters::LinearSolver::SparseLU);
     }
 
-    TEST(Rodin_Adaptation_WNGIRSolver, CurvedSurfaceQuadratureResolvesNonpolynomialFit)
+    TEST(Rodin_Adaptation_WNGIRSolver, IndependentQuadratureOrdersAndOverrides)
+    {
+      WNGIR::Parameters::Quadrature q;
+      EXPECT_EQ(q.getSurfaceOrder(2), 12);
+      EXPECT_EQ(q.getVolumeOrder(2), 8);
+      EXPECT_EQ(q.getQualityOrder(2), 16);
+      EXPECT_EQ(q.getSurfaceOrder(1), 8);
+      EXPECT_EQ(q.getVolumeOrder(1), 2);
+      EXPECT_EQ(q.getQualityOrder(1), 2);
+      EXPECT_EQ(q.getSurfaceOrder(1, 2), 12);
+      EXPECT_EQ(q.getVolumeOrder(1, 2), 8);
+      EXPECT_EQ(q.getQualityOrder(1, 2), 16);
+      EXPECT_EQ(q.getSurfaceOrder(1, 1, false), 12);
+      EXPECT_EQ(q.getVolumeOrder(1, 1, false), 8);
+      EXPECT_EQ(q.getQualityOrder(1, 1, false), 16);
+      q.order = 6;
+      EXPECT_EQ(q.getSurfaceOrder(2), 6);
+      EXPECT_EQ(q.getVolumeOrder(2), 6);
+      EXPECT_EQ(q.getQualityOrder(2), 16);
+      EXPECT_EQ(q.getQualityOrder(1), 2);
+      q.surface = 8;
+      q.volume = 2;
+      q.quality = 16;
+      EXPECT_EQ(q.getSurfaceOrder(2), 8);
+      EXPECT_EQ(q.getVolumeOrder(2), 2);
+      EXPECT_EQ(q.getQualityOrder(2), 16);
+    }
+
+    TEST(Rodin_Adaptation_WNGIRSolver, IndependentQualityChecksCatchVertexInversion)
+    {
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      for (size_t from = 1; from <= 2; ++from)
+        for (size_t to = 0; to <= 2; ++to)
+          if (from != to)
+            mesh.getConnectivity().compute(from, to);
+      H1 space(std::integral_constant<size_t, 2>{}, mesh, 2);
+      TrialFunction trial(space);
+      TestFunction test(space);
+      trial.getSolution() = AnalyticVectorFunction([](const Point& point) {
+        Math::SpatialVector<Real> value(2);
+        value(0) = -Real(0.55) * point.x() * point.x();
+        value(1) = 0;
+        return value;
+      }, 2);
+      for (auto face = mesh.getFace(); face; ++face)
+        mesh.setAttribute({1, face->getIndex()}, 10);
+      const RealFunction phi([](const Point& point) { return point.x() - Real(0.5); });
+      Math::Vector<Real> normal(2);
+      normal << 1, 0;
+      const VectorFunction gradient(normal);
+      WNGIR::Problem problem(trial, test);
+      WNGIR::Parameters p;
+      p.model.h = 1;
+      p.interfaceAttribute = 10;
+      p.quadrature.volume = 2;
+      problem.setParameters(p);
+      EXPECT_EQ(problem.solve(phi, gradient).reason,
+        WNGIR::Report::Reason::InvalidInitialGeometry);
+      p.quadrature.quality = 1;
+      problem.setParameters(p);
+      EXPECT_EQ(problem.solve(phi, gradient).reason,
+        WNGIR::Report::Reason::InvalidInitialGeometry);
+      EXPECT_EQ(p.quadrature.getVolumeOrder(2), 2);
+    }
+
+    TEST(Rodin_Adaptation_WNGIRSolver, SurfaceQuadratureSupportsHigherAccuracyOverride)
     {
       const auto integrate = [](size_t order) {
         const auto& rule =
@@ -115,8 +182,15 @@ namespace Rodin::Tests::Unit
         }
         return integral;
       };
-      const auto reference = integrate(24),
-                 actual = integrate(WNGIR::Parameters::Quadrature::getInterfaceOrder(1));
+      WNGIR::Parameters::Quadrature parameters;
+      const auto reference = integrate(24), screening = integrate(parameters.getSurfaceOrder(1));
+      // This coarse analytic facet needs an explicit higher order for the
+      // historical 1e-4 accuracy requirement; the calibrated default screens at 1%.
+      constexpr Real screeningTolerance = Real(1e-2);
+      EXPECT_LT((screening - reference).norm() / reference.norm(), screeningTolerance);
+      EXPECT_LT(std::abs(screening(0) - reference(0)) / reference(0), screeningTolerance);
+      parameters.surface = 12;
+      const auto actual = integrate(parameters.getSurfaceOrder(1));
       EXPECT_LT((actual - reference).norm() / reference.norm(), Real(1e-4));
       EXPECT_LT(std::abs(actual(0) - reference(0)) / reference(0), Real(1e-4));
       EXPECT_GT(std::abs(integrate(4)(0) - reference(0)) / reference(0), Real(0.1));
@@ -469,7 +543,7 @@ namespace Rodin::Tests::Unit
           },
           dimension);
         const Real normalization = Real(1) / (levelSetScale * levelSetScale);
-        WNGIR::FittingCoefficient coefficient(
+        WNGIR::FittingTensor coefficient(
           grad, current, locator, p, normalization, dimension);
         const auto actual = coefficient.getValue(ip);
         const auto x = point.getCoordinates();
@@ -500,6 +574,60 @@ namespace Rodin::Tests::Unit
         p.model.fit = Real(1);
       }
     }
+  }
+
+  TEST(Rodin_Adaptation_WNGIRSolver, FittingTensorPropagatesOnlyKnownComposedOrders)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+    GridFunction current(space);
+    current.getData().setZero();
+    const Location::AABB<LocalMesh> locator(mesh);
+    const WNGIR::Parameters parameters;
+    Math::Vector<Real> normal(2);
+    normal << 1, 0;
+    const VectorFunction constant(normal);
+    const WNGIR::FittingTensor tensor(constant, current, locator, parameters, 1, 2);
+    auto face = mesh.getFace();
+    ASSERT_TRUE(face);
+    EXPECT_EQ(tensor.getOrder(*face), Optional<size_t>(0));
+    const auto check = [&]<size_t Order>() {
+      H1 fe(std::integral_constant<size_t, Order>{}, mesh, 2);
+      TrialFunction u(fe);
+      TestFunction v(fe);
+      const auto integrand = Dot(tensor * u, v);
+      EXPECT_EQ(integrand.getOrder(*face), Optional<size_t>(2 * Order));
+      auto integral = FaceIntegral(integrand);
+      BilinearForm inferred(u, v), reference(u, v);
+      inferred = integral;
+      inferred.assemble();
+      integral.setOrder(12);
+      reference = integral;
+      reference.assemble();
+      EXPECT_LT((inferred.getOperator() - reference.getOperator()).norm(),
+        Real(1e-11) * std::max(Real(1), reference.getOperator().norm()));
+      integral.setOrder(9);
+      EXPECT_EQ(integral.getOrder(*face), Optional<size_t>(9));
+
+      H1 targetSpace(std::integral_constant<size_t, Order>{}, mesh);
+      GridFunction phi(targetSpace);
+      phi.getData().setZero();
+      const auto gradient = Grad(phi);
+      const WNGIR::FittingTensor piecewise(
+        gradient, current, locator, parameters, 1, 2);
+      // Even P1 gradients can change when the moved facet crosses a cell.
+      EXPECT_EQ(piecewise.getOrder(*face), std::nullopt);
+    };
+    check.operator()<1>();
+    check.operator()<2>();
+    check.operator()<3>();
+    const AnalyticVectorFunction analytic([](const Point& point) {
+      return Math::SpatialVector<Real>(point.getPhysicalCoordinates());
+    }, 2);
+    const WNGIR::FittingTensor unknown(analytic, current, locator, parameters, 1, 2);
+    EXPECT_EQ(unknown.getOrder(*face), std::nullopt);
   }
 
   /// @brief The default affine-hinge solve reduces fit while preserving geometry.

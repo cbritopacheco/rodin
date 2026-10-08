@@ -73,9 +73,9 @@ namespace Rodin::Adaptation::WNGIR
         const auto& trialFE = trialFES.getFiniteElement(dim, index);
         const auto& testFE = testFES.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
-        const std::size_t order = parameters.quadrature.order > 0
-          ? parameters.quadrature.order
-          : Parameters::Quadrature::getCellOrder(trialFE.getOrder());
+        const std::size_t order = parameters.quadrature.getVolumeOrder(
+          trialFE.getOrder(), polytope.getTransformation().getOrder(),
+          Geometry::Polytope::Traits(polytope.getGeometry()).getVertexCount() == dim + 1);
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);

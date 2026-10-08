@@ -209,10 +209,44 @@
   | @f$\varepsilon_{\mathrm{step}}/h@f$ | `convergence.tolerance.stepOverH` | Small accepted-motion threshold for a best-effort exit | @f$5\times10^{-4}@f$ |
   | @f$\varepsilon_E@f$ | `convergence.tolerance.energy` | Relative energy-change threshold for a best-effort exit | @f$10^{-8}@f$ |
   | @f$N_{\mathrm{stag}}@f$ | `convergence.iterations.stagnation` | Consecutive small steps or energy changes before stagnation exit | @f$5@f$ |
+  | @f$q@f$ | `quadrature.order` | Common integration override | Automatic (`0`) |
+  | @f$q_\Gamma@f$ | `quadrature.surface` | Surface energy, force and fitting integration; overrides the common order | Automatic (`0`) |
+  | @f$q_\Omega@f$ | `quadrature.volume` | Distribution and hinge integration; overrides the common order | Automatic (`0`) |
+  | @f$q_{j,Q}@f$ | `quadrature.quality` | Independent actual-quality sampling plus cell vertices | Automatic (`0`) |
+  | @f$q_{\mathrm{geom}}@f$ | `quadrature.validation` | Independent geometric-response sampling plus facet vertices | Automatic (`0`) |
 
   MUMPS is the default when compiled in; otherwise SparseLU is selected.
   Set `linear.solver` and `linear.threads` explicitly for reproducible runs.
-  Quadrature orders are selected automatically unless overridden.
+  The automatic sampling policies are:
+
+  | Entity and displacement | Surface integration | Volume integration | Quality sampling | Geometric sampling |
+  |-------------------------|---------------------|--------------------|------------------|--------------------|
+  | Affine simplicial @f$P_1@f$ | @f$8@f$ | @f$2@f$ | @f$2@f$ + vertices | @f$32@f$ + facet vertices |
+  | Curved or @f$P_2/P_3@f$ | @f$12@f$ | @f$8@f$ | @f$16@f$ + vertices | @f$32@f$ + facet vertices |
+
+  The affine @f$P_1@f$ policy is calibrated on the tested cases. Higher-order
+  policies are provisional and require refinement checks, particularly when
+  hinges are active. Orders grow for degrees beyond this table; those floors
+  are heuristic policies, not exactness guarantees for nonlinear integrands.
+  Selection is per entity. Nonsimplicial volume elements use the higher-order
+  volume and quality policies even at degree one; surface integration uses
+  the facet's geometry and trace degree.
+  Quadrature orders are selected automatically unless overridden by
+  `quadrature.order` (example flag `--quad-order`). A known fitting tensor on
+  an affine entity uses the complete integrand's native order propagation.
+  A globally constant target gradient is unchanged by point location and
+  yields order @f$2p@f$ for degree-@f$p@f$ displacement functions.
+  Elementwise target orders alone cannot be propagated through deformation:
+  a moved facet may cross target cells, and curved surface measures may be
+  nonpolynomial. Such tensors retain the nonpolynomial interface policy,
+  as do the Welsch force and energy; these two use the same integration rule.
+  `quadrature.validation` (`--geometric-validation-order`) independently
+  controls geometric-response sampling and is not reduced by `--quad-order`.
+  The surface and volume settings use `--surface-quadrature-order` and
+  `--volume-quadrature-order`. Independent quality checks use
+  `--quality-validation-order`. Cell vertices are always checked, and common
+  integration overrides do not change independent quality sampling.
+  These checks remain sampling, not an everywhere certificate on curved cells.
   Example flags use the same names as the C++ parameters: `--wngir-fit`,
   `--wngir-distribution-deviatoric`, `--wngir-distribution-divergence`,
   `--wngir-hinge`, `--wngir-jacobian` and `--wngir-distortion`.
@@ -290,7 +324,7 @@
 
   All method-specific code lives in `Adaptation/WNGIR/`:
   `Adapt.h` owns the P1 mesh workflow; `Problem.h` owns outer orchestration;
-  `FittingCoefficient.h` and
+  `FittingTensor.h` and
   `FittingForce.h` assemble fitting; `Distribution.h` assembles distribution;
   `Hinge.h`, `HingeMetric.h`, `HingeForce.h` and `HingeProblem.h` define the
   inner model; `LinearSolver.h` adapts native linear solvers.
