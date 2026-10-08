@@ -40,6 +40,24 @@ foreach(q 1 3)
 endforeach()
 
 if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
+  include(../../PETScRefinement.cmake)
+  rodin_add_petsc_refinement(RodinConvergenceIsoparametricPETScReactionDiffusionBoundary
+    ../../h/PETScReactionDiffusion/BoundaryConditions.cpp)
+  target_compile_definitions(RodinConvergenceIsoparametricPETScReactionDiffusionBoundary
+    PRIVATE RODIN_REACTION_BOUNDARY_CURVED)
+  # The complete sequential local pyramid group took 139 minutes; MPI-1
+  # already exceeds 157 minutes before its final boundary family. Reserve
+  # four hours per context without changing meshes or numerical acceptance.
+  set(_RODIN_CURVED_REACTION_BOUNDARY_PYRAMID_TIMEOUT 14400)
+  set_tests_properties(RodinConvergenceIsoparametricPETScReactionDiffusionBoundary_Pyramid
+    PROPERTIES TIMEOUT ${_RODIN_CURVED_REACTION_BOUNDARY_PYRAMID_TIMEOUT})
+  if (RODIN_USE_MPI)
+    foreach(np 1 2 3 4)
+      set_tests_properties(
+        RodinConvergenceIsoparametricPETScReactionDiffusionBoundary_MPI_np${np}_Pyramid
+        PROPERTIES TIMEOUT ${_RODIN_CURVED_REACTION_BOUNDARY_PYRAMID_TIMEOUT})
+    endforeach()
+  endif()
   add_executable(RodinConvergenceIsoparametricPETScReactionDiffusion ReactionDiffusion.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScReactionDiffusion
     PRIVATE RODIN_CURVED_REACTION_DIFFUSION_PETSC)

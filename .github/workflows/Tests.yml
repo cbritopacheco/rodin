@@ -493,12 +493,12 @@ jobs:
     # Keep complete geometry/rank studies; partition their execution cost
     # instead of adding all natural-boundary workloads to the curved bulk job.
     runs-on: ubuntu-24.04
-    timeout-minutes: 240
+    timeout-minutes: ${{ matrix.physics == 'ReactionDiffusion' && matrix.geometry == 'pyramid' && 300 || 240 }}
     strategy:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        physics: [Poisson, Conductivity, LinearElasticity]
+        physics: [Poisson, Conductivity, ReactionDiffusion, LinearElasticity]
         geometry: [light, tetrahedron, pyramid]
         selection: [all]
         # Scalar pyramid groups exceed one hour locally for both physics.
@@ -507,6 +507,7 @@ jobs:
         exclude:
           - {physics: Poisson, geometry: pyramid}
           - {physics: Conductivity, geometry: pyramid}
+          - {physics: ReactionDiffusion, geometry: pyramid}
           - {physics: LinearElasticity, geometry: tetrahedron}
         include:
           - {multithreaded: ON, physics: Poisson, geometry: pyramid, selection: local}
@@ -529,6 +530,16 @@ jobs:
           - {multithreaded: OFF, physics: Conductivity, geometry: pyramid, selection: np3}
           - {multithreaded: ON, physics: Conductivity, geometry: pyramid, selection: np4}
           - {multithreaded: OFF, physics: Conductivity, geometry: pyramid, selection: np4}
+          - {multithreaded: ON, physics: ReactionDiffusion, geometry: pyramid, selection: local}
+          - {multithreaded: OFF, physics: ReactionDiffusion, geometry: pyramid, selection: local}
+          - {multithreaded: ON, physics: ReactionDiffusion, geometry: pyramid, selection: np1}
+          - {multithreaded: OFF, physics: ReactionDiffusion, geometry: pyramid, selection: np1}
+          - {multithreaded: ON, physics: ReactionDiffusion, geometry: pyramid, selection: np2}
+          - {multithreaded: OFF, physics: ReactionDiffusion, geometry: pyramid, selection: np2}
+          - {multithreaded: ON, physics: ReactionDiffusion, geometry: pyramid, selection: np3}
+          - {multithreaded: OFF, physics: ReactionDiffusion, geometry: pyramid, selection: np3}
+          - {multithreaded: ON, physics: ReactionDiffusion, geometry: pyramid, selection: np4}
+          - {multithreaded: OFF, physics: ReactionDiffusion, geometry: pyramid, selection: np4}
           - {multithreaded: ON, physics: LinearElasticity, geometry: tetrahedron, selection: local}
           - {multithreaded: OFF, physics: LinearElasticity, geometry: tetrahedron, selection: local}
           - {multithreaded: ON, physics: LinearElasticity, geometry: tetrahedron, selection: np1}

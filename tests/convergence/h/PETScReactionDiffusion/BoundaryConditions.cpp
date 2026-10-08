@@ -9,6 +9,9 @@
 
 #include "../../PETScReactionDiffusionProblem.h"
 #include "../../FieldConvergence.h"
+#ifdef RODIN_REACTION_BOUNDARY_CURVED
+#include "../../CurvedGeometry.h"
+#endif
 #ifdef RODIN_USE_MPI
 #include <boost/mpi/environment.hpp>
 #include "../../MPIConvergence.h"
@@ -38,12 +41,23 @@ namespace Rodin::Tests::Convergence::ReactionDiffusionBoundaryTests
     {
       auto mesh = UniformGrid(geometry).makeMesh(n);
       initialize(mesh);
+#ifdef RODIN_REACTION_BOUNDARY_CURVED
+      CurvedGeometry curved(mesh);
+      curved.template install<2>();
+#endif
       return mesh;
     }
 #ifdef RODIN_USE_MPI
     else
-      return DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
-        .makeMesh(n, initialize);
+    {
+      auto mesh = DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
+                    .makeMesh(n, initialize);
+#ifdef RODIN_REACTION_BOUNDARY_CURVED
+      CurvedGeometry curved(mesh);
+      curved.template install<2>();
+#endif
+      return mesh;
+    }
 #endif
   }
 
@@ -72,13 +86,14 @@ namespace Rodin::Tests::Convergence::ReactionDiffusionBoundaryTests
       }
 
       template <size_t K>
-      void checkPatch(Boundary boundary, bool omitCoupling = false) const
+      void checkPatch(Boundary boundary, bool omitCoupling = false,
+        ReactionDiffusionData::Field field = K == 1
+          ? ReactionDiffusionData::Field::Affine
+          : ReactionDiffusionData::Field::Quadratic) const
       {
         const auto mesh = makeMesh<ContextType>(this->GetParam(), 3);
         using Problem =
           PETScReactionDiffusionProblem<K, std::remove_cvref_t<decltype(mesh)>>;
-        const auto field = K == 1 ? ReactionDiffusionData::Field::Affine
-                                  : ReactionDiffusionData::Field::Quadratic;
         const Problem problem(
           mesh, field, 16, static_cast<typename Problem::Boundary>(boundary));
         for (const auto& error : problem.solve(omitCoupling, 1e-13, 18))
@@ -97,18 +112,40 @@ namespace Rodin::Tests::Convergence::ReactionDiffusionBoundaryTests
         }
       }
 
+      void checkCouplingControl(Boundary boundary) const
+      {
+#ifdef RODIN_REACTION_BOUNDARY_CURVED
+        checkPatch<2>(boundary, true, ReactionDiffusionData::Field::Affine);
+#else
+        checkPatch<1>(boundary, true);
+#endif
+      }
+
       void checkFluxControl(Boundary boundary) const
       {
         const auto mesh = makeMesh<ContextType>(this->GetParam(), 3);
         using Problem =
           PETScReactionDiffusionProblem<2, std::remove_cvref_t<decltype(mesh)>>;
-        const Problem problem(mesh, ReactionDiffusionData::Field::Smooth, 16,
-          static_cast<typename Problem::Boundary>(boundary));
+        constexpr auto field =
+#ifdef RODIN_REACTION_BOUNDARY_CURVED
+          ReactionDiffusionData::Field::Affine;
+#else
+          ReactionDiffusionData::Field::Smooth;
+#endif
+        const Problem problem(
+          mesh, field, 16, static_cast<typename Problem::Boundary>(boundary));
         const auto correct = problem.solve(false, 1e-13, 18);
         const auto wrong = problem.solve(false, 1e-13, 18, true);
         for (size_t component = 0; component < 2; ++component)
         {
           SCOPED_TRACE(::testing::Message() << "component=" << component);
+#ifdef RODIN_REACTION_BOUNDARY_CURVED
+          EXPECT_TRUE(correct[component].isFinite());
+          EXPECT_LT(correct[component].getL2(), Real(1e-9));
+          EXPECT_LT(correct[component].getH1Seminorm(), Real(1e-9));
+          EXPECT_GT(wrong[component].getL2(), Real(1e-3));
+          EXPECT_GT(wrong[component].getH1Seminorm(), Real(1e-3));
+#endif
           EXPECT_TRUE(wrong[component].isFinite());
           EXPECT_GT(wrong[component].getL2(), 5 * correct[component].getL2());
           EXPECT_GT(
@@ -141,7 +178,77 @@ namespace Rodin::Tests::Convergence::ReactionDiffusionBoundaryTests
               Real(1e-6));
           }
       }
+
+#ifdef RODIN_REACTION_BOUNDARY_CURVED
+      void checkP1QuadratureAdequacy(Boundary boundary) const
+      {
+        // Keep the rate-study settings unchanged until this independent
+        // lower-order candidate has passed. This is not a relaxed rate bound.
+        const auto mesh = makeMesh<ContextType>(this->GetParam(), 5);
+        using Problem =
+          PETScReactionDiffusionProblem<1, std::remove_cvref_t<decltype(mesh)>>;
+        const auto kind = static_cast<typename Problem::Boundary>(boundary);
+        const Problem referenceProblem(
+          mesh, ReactionDiffusionData::Field::Smooth, 16, kind);
+        const Problem candidateProblem(
+          mesh, ReactionDiffusionData::Field::Smooth, 12, kind);
+        const auto reference = referenceProblem.solve(false, 1e-13, 18);
+        // Vary assembly and norm quadrature separately, then together.
+        const std::array candidates{candidateProblem.solve(false, 1e-13, 18),
+          referenceProblem.solve(false, 1e-13, 12),
+          candidateProblem.solve(false, 1e-13, 12)};
+        for (size_t variation = 0; variation < candidates.size(); ++variation)
+        {
+          const auto& candidate = candidates[variation];
+          SCOPED_TRACE(::testing::Message() << "assembly=" << (variation == 1 ? 16 : 12)
+                                            << " norm=" << (variation == 0 ? 18 : 12));
+          for (size_t component = 0; component < 2; ++component)
+          {
+            SCOPED_TRACE(::testing::Message() << "component=" << component);
+            ASSERT_TRUE(reference[component].isFinite());
+            ASSERT_TRUE(candidate[component].isFinite());
+            ASSERT_GT(reference[component].getL2(), 0);
+            ASSERT_GT(reference[component].getH1Seminorm(), 0);
+            EXPECT_LT(
+              std::abs(candidate[component].getL2() / reference[component].getL2() - 1),
+              Real(1e-6));
+            EXPECT_LT(std::abs(candidate[component].getH1Seminorm() /
+                          reference[component].getH1Seminorm() -
+                        1),
+              Real(1e-6));
+          }
+        }
+      }
+#endif
   };
+
+#ifdef RODIN_REACTION_BOUNDARY_CURVED
+#define RODIN_REACTION_BOUNDARY_QUADRATURE(Name, Prefix, Kind)                           \
+  TEST_P(Name, Prefix##P1QuadratureAdequacy)                                             \
+  {                                                                                      \
+    checkP1QuadratureAdequacy(Boundary::Kind);                                           \
+  }
+#define RODIN_REACTION_BOUNDARY_PATCHES(Name, Prefix, Kind)                              \
+  TEST_P(Name, Prefix##AffineP2Patch)                                                    \
+  {                                                                                      \
+    checkPatch<2>(Boundary::Kind, false, ReactionDiffusionData::Field::Affine);          \
+  }                                                                                      \
+  TEST_P(Name, Prefix##QuadraticP4Patch)                                                 \
+  {                                                                                      \
+    checkPatch<4>(Boundary::Kind);                                                       \
+  }
+#else
+#define RODIN_REACTION_BOUNDARY_QUADRATURE(Name, Prefix, Kind)
+#define RODIN_REACTION_BOUNDARY_PATCHES(Name, Prefix, Kind)                              \
+  TEST_P(Name, Prefix##AffineP1Patch)                                                    \
+  {                                                                                      \
+    checkPatch<1>(Boundary::Kind);                                                       \
+  }                                                                                      \
+  TEST_P(Name, Prefix##QuadraticP2Patch)                                                 \
+  {                                                                                      \
+    checkPatch<2>(Boundary::Kind);                                                       \
+  }
+#endif
 
 #define RODIN_REACTION_BOUNDARY_CASES(Name, Prefix, Kind)                                \
   TEST_P(Name, Prefix##P1Rates)                                                          \
@@ -156,17 +263,10 @@ namespace Rodin::Tests::Convergence::ReactionDiffusionBoundaryTests
   {                                                                                      \
     checkRates<3>(Boundary::Kind);                                                       \
   }                                                                                      \
-  TEST_P(Name, Prefix##AffineP1Patch)                                                    \
-  {                                                                                      \
-    checkPatch<1>(Boundary::Kind);                                                       \
-  }                                                                                      \
-  TEST_P(Name, Prefix##QuadraticP2Patch)                                                 \
-  {                                                                                      \
-    checkPatch<2>(Boundary::Kind);                                                       \
-  }                                                                                      \
+  RODIN_REACTION_BOUNDARY_PATCHES(Name, Prefix, Kind)                                    \
   TEST_P(Name, Prefix##RejectsMissingCoupling)                                           \
   {                                                                                      \
-    checkPatch<1>(Boundary::Kind, true);                                                 \
+    checkCouplingControl(Boundary::Kind);                                                \
   }                                                                                      \
   TEST_P(Name, Prefix##RejectsMissingFlux)                                               \
   {                                                                                      \
@@ -175,7 +275,8 @@ namespace Rodin::Tests::Convergence::ReactionDiffusionBoundaryTests
   TEST_P(Name, Prefix##IndependentSensitivity)                                           \
   {                                                                                      \
     checkSensitivity(Boundary::Kind);                                                    \
-  }
+  }                                                                                      \
+  RODIN_REACTION_BOUNDARY_QUADRATURE(Name, Prefix, Kind)
 
 #define RODIN_REACTION_BOUNDARY_TESTS(Name)                                              \
   RODIN_REACTION_BOUNDARY_CASES(Name, MixedNeumann, MixedNeumann)                        \
@@ -197,6 +298,8 @@ namespace Rodin::Tests::Convergence::ReactionDiffusionBoundaryTests
 #endif
 #undef RODIN_REACTION_BOUNDARY_TESTS
 #undef RODIN_REACTION_BOUNDARY_CASES
+#undef RODIN_REACTION_BOUNDARY_PATCHES
+#undef RODIN_REACTION_BOUNDARY_QUADRATURE
 }
 
 int main(int argc, char** argv)

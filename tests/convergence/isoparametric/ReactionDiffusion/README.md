@@ -232,6 +232,95 @@ under sequential and OpenMP assembly. Slow labels, 1800-second watchdogs,
 MPI processor counts and the pyramid resource lock are retained.
 Registration alone does not certify a numerical run.
 
+## Natural boundaries on the exact quadratic domain
+
+The real-PETSc natural-boundary target reuses the flat boundary fixture and
+physical reaction–diffusion data, with the exact quadratic map installed after
+reference-boundary classification. Attributes and MPI ownership retain their
+logical identities; no physical-coordinate matching or new collective query
+is used. Global assembly, solution and error norms retain collective semantics.
+
+Mixed Neumann and Robin cases prescribe essential data on the mapped image
+of $\lbrace \xi_0=0\rbrace$ and use the complementary boundary $\Gamma_N$. Pure
+Neumann uses $\Gamma_N=\partial\Omega$. With $\beta=0$ for Neumann and
+$\beta=1$ for Robin, the physical data and weak form are
+
+$$
+g_i=\kappa_i\nabla u_i\cdot n+\beta u_i,\qquad
+a(u,v)+\beta\sum_{i=0}^1\int_{\Gamma_N}u_iv_i\thinspace ds
+=\sum_{i=0}^1\left(\int_\Omega f_iv_i\thinspace dx+
+\int_{\Gamma_N}g_iv_i\thinspace ds\right).
+$$
+
+The positive reaction bound $\lambda_{\min}(R)=0.8$ controls constants,
+including pure Neumann cases; no artificial mean constraint is introduced.
+Physical unit normals and surface measures come from the mapped geometry.
+Each component is checked independently in both error norms.
+
+Degrees $p=1,2,3$ use respectively $n=5,9,17$ and $n=3,5,9$ for each
+higher degree. Both adjacent intervals require strict error reduction and
+L2/H1-seminorm rate floors $1.65/0.75$, $2.45/1.55$, and $3.45/2.55$.
+Physical affine and quadratic patches use field degrees two and four:
+their pullbacks under the degree-two map have degrees at most two and four,
+respectively. Correct patches require $E_{i,0},E_{i,1}<10^{-9}$.
+Omitting either cross-coupling or normal flux on the affine patch must give
+$E_{i,0},E_{i,1}>10^{-3}$; the flux control also retains the fivefold
+separation from the correct error, without coarse smooth-field contamination.
+The Robin exact-value load is retained in the omitted-normal-flux control.
+
+Assembly order $16\to18$, norm order $18\to20$, and CG relative tolerance
+$10^{-13}\to10^{-14}$ are varied independently on the smooth P2 field,
+with relative changes below $10^{-6}$ in both component norms. Registrations
+cover all seven geometries locally and at MPI ranks one through four,
+separately under sequential and OpenMP assembly. These registrations specify
+the validation matrix; their presence alone does not certify a passing run.
+
+The natural-boundary targets retain slow labels and the common pyramid
+resource lock. Pyramid contexts have a 14400-second CTest budget and are
+separated into local and individual MPI rank-count jobs, each with a
+300-minute CI budget including configuration and compilation. Other
+natural-boundary contexts retain 1800 seconds and their existing CI
+partitions. This scheduling policy preserves all 27 cases per context,
+refinement levels, quadrature and numerical acceptance. The completed
+sequential local pyramid group took approximately 139 minutes with other
+validation work active; MPI-1 exceeded 157 minutes before its final boundary
+family. These are scheduling observations, not isolated benchmarks. The
+complete local matrix has passed under both assembly modes, with Local and
+MPI ranks one through four on all seven geometries. Hosted-CI success and
+runner-specific budget headroom remain separate checks.
+
+An additional P1 quadrature-adequacy study uses $n=5$ for each natural
+boundary variant and geometry. It compares assembly order 12 and norm
+order 12 against the existing 16/18 reference, varying assembly and norms
+separately before testing their combined change. For each component and
+each nonzero norm $E$, it requires
+
+$$
+\left|\frac{E_{12,18}}{E_{16,18}}-1\right|<10^{-6},\qquad
+\left|\frac{E_{16,12}}{E_{16,18}}-1\right|<10^{-6},\qquad
+\left|\frac{E_{12,12}}{E_{16,18}}-1\right|<10^{-6}.
+$$
+
+CG tolerance remains $10^{-13}$. This independent candidate study does
+not change the quadrature settings or acceptance bounds of the rate tests,
+and a coarse-mesh comparison alone does not establish adequacy at every
+refinement level. It adds three cases, giving 27 case selections per
+geometry/context. Any subsequent adoption of cheaper settings must retain
+the three-level convergence checks and justify their integration budgets.
+
+Polynomial moment exactness is not a sufficient criterion for these
+integrands. For example, the reference pyramid approximation space contains
+the rational mode
+
+$$
+\psi(r,s,t)=\frac{rs}{1-t},\qquad
+0\le r,s\le1-t,\quad0\le t<1.
+$$
+
+Its gradients and their mapped products are not polynomial moments in
+$(r,s,t)$. Quadrature adequacy is therefore checked on the actual field
+errors, independently of the nominal polynomial order of the rule.
+
 ## Cubic fields on quadratic approximated geometry
 
 The `ApproximatedP3Q2` extension retains the coupled smooth fields, unequal
