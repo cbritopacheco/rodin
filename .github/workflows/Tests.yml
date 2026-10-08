@@ -19,12 +19,14 @@ jobs:
     # Keep the original h/p/hp gate separate from the growing curved matrix.
     # A single new scalar 3D degree study took 21 minutes locally; the former
     # 45-minute combined job no longer budgets build and complete refinement.
+    # Curved projection/geometry checks have their own budget: both baseline
+    # modes exhausted 45 minutes while the pyramid P0 projection was active.
     timeout-minutes: ${{ matrix.suite == 'baseline' && 45 || 180 }}
     strategy:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        suite: [baseline, curved_scalar, curved_elasticity, curved_stokes, curved_helmholtz]
+        suite: [baseline, curved_projection, curved_scalar, curved_elasticity, curved_stokes, curved_helmholtz]
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -71,6 +73,10 @@ jobs:
         run: |
           case "${{ matrix.suite }}" in
             baseline) cmake --build build -j 2 ;;
+            curved_projection)
+              cmake --build build -j 2 --target \
+                RodinConvergenceIsoparametricP0Projection \
+                RodinConvergenceIsoparametricGeometryApproximation ;;
             curved_scalar)
               cmake --build build -j 2 --target \
                 RodinConvergenceIsoparametricDiffusion \
@@ -87,11 +93,12 @@ jobs:
 
       - name: Run convergence suites
         run: |
-          curved_pattern='^RodinConvergenceIsoparametric(.*Diffusion|NonlinearPoisson|LinearElasticity|Stokes|Helmholtz)_'
+          curved_pattern='^RodinConvergenceIsoparametric(P0Projection|GeometryApproximation|.*Diffusion|NonlinearPoisson|LinearElasticity|Stokes|Helmholtz)_'
           case "${{ matrix.suite }}" in
             baseline)
               ctest --test-dir build/tests -L convergence -E "$curved_pattern" \
                 --output-on-failure --no-tests=error -j 2 ;;
+            curved_projection) suite_pattern='(P0Projection|GeometryApproximation)' ;;
             curved_scalar) suite_pattern='(.*Diffusion|NonlinearPoisson)' ;;
             curved_elasticity) suite_pattern='LinearElasticity' ;;
             curved_stokes) suite_pattern='Stokes' ;;
