@@ -179,6 +179,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
   {
     checkApproximatedRates<2>();
   }
+  TEST_P(PETScHelmholtzLocalTest, ApproximatedP3Q2Rates)
+  {
+    checkHigherOrderApproximatedRates();
+  }
+  TEST_P(PETScHelmholtzLocalTest, ApproximatedP3Q2Sensitivity)
+  {
+    checkApproximatedSensitivity<3>();
+  }
+  TEST_P(PETScHelmholtzLocalTest, ApproximatedP3Q2PatchRejectsOmittedMass)
+  {
+    checkApproximatedPatchAndControl<3>();
+  }
   TEST_P(PETScHelmholtzLocalTest, ApproximatedP1Sensitivity)
   {
     checkApproximatedSensitivity<1>();
@@ -278,6 +290,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
   TEST_P(PETScHelmholtzMPITest, ApproximatedP2Rates)
   {
     checkApproximatedRates<2>();
+  }
+  TEST_P(PETScHelmholtzMPITest, ApproximatedP3Q2Rates)
+  {
+    checkHigherOrderApproximatedRates();
+  }
+  TEST_P(PETScHelmholtzMPITest, ApproximatedP3Q2Sensitivity)
+  {
+    checkApproximatedSensitivity<3>();
+  }
+  TEST_P(PETScHelmholtzMPITest, ApproximatedP3Q2PatchRejectsOmittedMass)
+  {
+    checkApproximatedPatchAndControl<3>();
   }
   TEST_P(PETScHelmholtzMPITest, ApproximatedP1Sensitivity)
   {

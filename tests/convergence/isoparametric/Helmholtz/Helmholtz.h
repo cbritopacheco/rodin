@@ -16,6 +16,7 @@
 #include "../../CurvedGeometry.h"
 #include "../../Helmholtz.h"
 #include "../../LiftedErrorNorm.h"
+#include "../../LiftedConvergence.h"
 #include "../../SineMap.h"
 
 namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
@@ -231,13 +232,34 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
         }
       }
 
+      void checkHigherOrderApproximatedRates() const
+      {
+        static_assert(Workload::GeometryDegree == 2);
+        const auto levels = this->GetParam() == Geometry::Polytope::Type::Segment
+          ? std::array<size_t, 3>{5, 9, 17}
+          : std::array<size_t, 3>{3, 5, 9};
+        LiftedConvergence history;
+        for (size_t n : levels)
+        {
+          SCOPED_TRACE(::testing::Message() << "field degree=3 geometry degree=2 n=" << n);
+          Workload problem(this->GetParam(), n, Map::Sine, true);
+          LiftedErrorNorm::Result lifted;
+          const auto represented = problem.template solve<3>(HelmholtzData::Field::Smooth,
+            false, AssemblyOrder, SolverTolerance, NormOrder, &lifted);
+          ASSERT_FALSE(::testing::Test::HasFatalFailure());
+          history.append(Real(1) / Real(n - 1), represented, lifted);
+        }
+        history.expectMixedRates(3, 2);
+      }
+
+      template <size_t K = 2>
       void checkApproximatedPatchAndControl() const
       {
         Workload problem(this->GetParam(), 5, Map::Sine, true);
         LiftedErrorNorm::Result base, wrong;
-        const auto patch = problem.template solve<2>(HelmholtzData::Field::Affine, false,
+        const auto patch = problem.template solve<K>(HelmholtzData::Field::Affine, false,
           AssemblyOrder, SolverTolerance, NormOrder, &base);
-        const auto control = problem.template solve<2>(HelmholtzData::Field::Affine, true,
+        const auto control = problem.template solve<K>(HelmholtzData::Field::Affine, true,
           AssemblyOrder, SolverTolerance, NormOrder, &wrong);
         checkDecomposition(base);
         checkDecomposition(wrong);

@@ -421,3 +421,51 @@ all ranks; geometry installation and pointwise manufactured data are local.
 The existing shared registration helper supplies slow labels, processor
 counts, 1800-second watchdogs and a pyramid resource lock. These declarations
 describe the test matrix; they are not evidence of a completed run.
+
+## Cubic fields on quadratic approximated geometry
+
+The `ApproximatedP3Q2` extension uses the existing complex smooth field,
+manufactured source and essential trace on the represented sine-map domain,
+with field degree $p=3$ and geometry degree $q=2$. Three levels are
+$n=3,5,9$, except Segment ($n=5,9,17$). The represented-domain error and
+the lifted field, geometry and total defects are measured independently.
+Under the preceding approximation and regularity hypotheses, the expected
+$L^2/H^1$ orders are $4/3$ for field errors and $3/2$ for geometry errors.
+These are conditional estimates, not a two-sided asymptotic equivalence for
+the total error.
+
+`LiftedConvergence::expectMixedRates` checks the independent component-rate
+windows and both norm triangle inequalities. For norm index
+$j\in\lbrace 0,1\rbrace$, adjacent spacing ratio $\rho=h_f/h_c<1$,
+and field, geometry and total errors $F_j,G_j,T_j$, its total-error rule is
+
+$$
+T_{j,f}<T_{j,c},\qquad
+T_{j,f}\le F_{j,c}\rho^{4-j-\delta_j}
+             +G_{j,c}\rho^{3-j-\delta_j}+10^{-11},
+\qquad \delta_0=0.55,\quad\delta_1=0.45.
+$$
+
+The margins and dimensionless roundoff floor are the existing acceptance
+policies. The sum envelope does not assume that geometry already dominates
+the total error; monotonicity is an additional finite-hierarchy policy.
+Assembly order $11\to16$, norm order $13\to18$, and solver tolerance
+$10^{-13}\to10^{-14}$ are varied separately at $n=5$, retaining the
+$10^{-6}$ relative budget for every positive error component. A physical
+affine cubic-field patch remains representable on quadratic geometry and
+retains the $10^{-9}$ absolute reproduction budget. Omitting the mass term
+while retaining its source and trace must violate the existing field-error
+floors and increase total errors by a factor greater than two; geometry
+errors must remain unchanged.
+
+Separate registrations cover seven geometries, native and complex-PETSc
+local execution, MPI ranks one through four, and both thread configurations.
+They retain slow labels, 1800-second watchdogs and pyramid locks, excluding
+these cases from the older approximated-geometry groups. The complete finite
+matrix has been verified locally: 84 registrations select 252 configurations,
+with 504 successful rank-level reports. Both thread configurations have been
+built with Clang and syntax-checked with GCC. The registration inventory and
+runtime reports have been checked independently, including source identity,
+case selection, watchdogs, processor counts and resource locks. Sampled RSS
+guards do not establish continuous peak-memory bounds. Hosted CI verification
+and convergence beyond these finite hierarchies remain separate obligations.

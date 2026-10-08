@@ -146,6 +146,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::Helmholtz
   {
     checkApproximatedRates<2>();
   }
+  TEST_P(NativeHelmholtzTest, ApproximatedP3Q2Rates)
+  {
+    checkHigherOrderApproximatedRates();
+  }
+  TEST_P(NativeHelmholtzTest, ApproximatedP3Q2Sensitivity)
+  {
+    checkApproximatedSensitivity<3>();
+  }
+  TEST_P(NativeHelmholtzTest, ApproximatedP3Q2PatchRejectsOmittedMass)
+  {
+    checkApproximatedPatchAndControl<3>();
+  }
   TEST_P(NativeHelmholtzTest, ApproximatedP1Sensitivity)
   {
     checkApproximatedSensitivity<1>();

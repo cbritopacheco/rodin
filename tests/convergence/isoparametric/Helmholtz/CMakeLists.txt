@@ -110,12 +110,51 @@ foreach(q 1 3)
   endforeach()
 endforeach()
 
+# Higher field degree retains its own process and runtime budget.
+foreach(geometry IN LISTS _RODIN_CURVED_HELMHOLTZ_GEOMETRIES)
+  set(_higher_test RodinConvergenceIsoparametricHelmholtz_P3Q2_${geometry})
+  add_test(NAME ${_higher_test}
+    COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricHelmholtz>
+      "--gtest_filter=AllGeometries/NativeHelmholtzTest.ApproximatedP3Q2*/${geometry}")
+  set_tests_properties(${_higher_test} PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
+  if (geometry STREQUAL "Pyramid")
+    set_tests_properties(${_higher_test} PROPERTIES RESOURCE_LOCK curved_helmholtz_pyramid)
+  endif()
+  if (RODIN_USE_PETSC AND RODIN_CONVERGENCE_PETSC_COMPLEX)
+    set(_higher_test RodinConvergenceIsoparametricPETScHelmholtz_P3Q2_${geometry})
+    add_test(NAME ${_higher_test}
+      COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScHelmholtz>
+        "--gtest_filter=AllGeometries/PETScHelmholtzLocalTest.ApproximatedP3Q2*/${geometry}")
+    set_tests_properties(${_higher_test} PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
+    rodin_suppress_external_mpi_lsan_for_test(${_higher_test})
+    if (geometry STREQUAL "Pyramid")
+      set_tests_properties(${_higher_test} PROPERTIES RESOURCE_LOCK curved_helmholtz_pyramid)
+    endif()
+    if (RODIN_USE_MPI)
+      foreach(np 1 2 3 4)
+        set(_higher_test RodinConvergenceIsoparametricPETScMPIHelmholtz_P3Q2_np${np}_${geometry})
+        add_test(NAME ${_higher_test}
+          COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinConvergenceIsoparametricPETScHelmholtz>
+            "--gtest_filter=AllGeometries/PETScHelmholtzMPITest.ApproximatedP3Q2*/${geometry}")
+        set_tests_properties(${_higher_test} PROPERTIES
+          LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
+        rodin_suppress_external_mpi_lsan_for_test(${_higher_test})
+        if (geometry STREQUAL "Pyramid")
+          set_tests_properties(${_higher_test} PROPERTIES RESOURCE_LOCK curved_helmholtz_pyramid)
+        endif()
+      endforeach()
+    endif()
+  endif()
+endforeach()
+
 # Keep the changing-domain hierarchy separate from the exact-map hierarchy.
 foreach(geometry IN LISTS _RODIN_CURVED_HELMHOLTZ_GEOMETRIES)
   set(_native_test RodinConvergenceIsoparametricHelmholtz_Approximated_${geometry})
   add_test(NAME ${_native_test}
     COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricHelmholtz>
-      "--gtest_filter=AllGeometries/NativeHelmholtzTest.Approximated*/${geometry}:AllGeometries/NativeHelmholtzTest.ComplexLifted*/${geometry}")
+      "--gtest_filter=AllGeometries/NativeHelmholtzTest.Approximated*/${geometry}:AllGeometries/NativeHelmholtzTest.ComplexLifted*/${geometry}-*P3Q2*")
   set_tests_properties(${_native_test}
     PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
   if (geometry STREQUAL "Pyramid")
@@ -125,7 +164,7 @@ foreach(geometry IN LISTS _RODIN_CURVED_HELMHOLTZ_GEOMETRIES)
     set(_local_test RodinConvergenceIsoparametricPETScHelmholtz_Approximated_${geometry})
     add_test(NAME ${_local_test}
       COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScHelmholtz>
-        "--gtest_filter=AllGeometries/PETScHelmholtzLocalTest.Approximated*/${geometry}:AllGeometries/PETScHelmholtzLocalTest.ComplexLifted*/${geometry}")
+        "--gtest_filter=AllGeometries/PETScHelmholtzLocalTest.Approximated*/${geometry}:AllGeometries/PETScHelmholtzLocalTest.ComplexLifted*/${geometry}-*P3Q2*")
     set_tests_properties(${_local_test}
       PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
     rodin_suppress_external_mpi_lsan_for_test(${_local_test})
@@ -139,7 +178,7 @@ foreach(geometry IN LISTS _RODIN_CURVED_HELMHOLTZ_GEOMETRIES)
           COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
             $<TARGET_FILE:RodinConvergenceIsoparametricPETScHelmholtz>
-            "--gtest_filter=AllGeometries/PETScHelmholtzMPITest.Approximated*/${geometry}:AllGeometries/PETScHelmholtzMPITest.ComplexLifted*/${geometry}")
+            "--gtest_filter=AllGeometries/PETScHelmholtzMPITest.Approximated*/${geometry}:AllGeometries/PETScHelmholtzMPITest.ComplexLifted*/${geometry}-*P3Q2*")
         set_tests_properties(${_mpi_test} PROPERTIES
           LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
         rodin_suppress_external_mpi_lsan_for_test(${_mpi_test})
