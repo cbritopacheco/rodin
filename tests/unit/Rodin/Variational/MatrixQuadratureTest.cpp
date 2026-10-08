@@ -32,8 +32,10 @@ namespace
       : d == 2         ? Mesh<>::UniformGrid(geometry, {2, 2})
                        : Mesh<>::UniformGrid(geometry, {2, 2, 2});
     for (size_t from = 1; from <= d; ++from)
+    {
       for (size_t to = 0; to < from; ++to)
         mesh.getConnectivity().compute(from, to);
+    }
     return mesh;
   }
 
@@ -61,15 +63,20 @@ namespace
       integrand.setIntegrationPoint(ip);
       const Real weight = formula.getWeight(qp) * point.getDistortion();
       for (size_t i = 0; i < tests.size(); ++i)
+      {
         for (size_t j = 0; j < trials.size(); ++j)
+        {
           expected(i, j) += weight *
             Math::dot(integrand.getLHS().getBasis(trials[j]),
               integrand.getRHS().getBasis(tests[i]));
+        }
+      }
     }
     auto copied = rule;
     auto moved = std::move(copied);
     moved.setPolytope(cell);
     for (size_t i = 0; i < tests.size(); ++i)
+    {
       for (size_t j = 0; j < trials.size(); ++j)
       {
         EXPECT_LE(std::abs(rule.integrate(trials[j], tests[i]) - expected(i, j)),
@@ -77,6 +84,7 @@ namespace
         EXPECT_LE(std::abs(moved.integrate(trials[j], tests[i]) - expected(i, j)),
           tolerance * (1 + std::abs(expected(i, j))));
       }
+    }
   }
 
   template <class TrialFES, class TestFES>
@@ -198,21 +206,29 @@ namespace
     auto matrixRule = Integral(Potential(scalarKernel, u), v);
     Matrix coupling(rows, rows);
     for (size_t i = 0; i < rows; ++i)
+    {
       for (size_t j = 0; j < rows; ++j)
         coupling(i, j) = Scalar(1 + 2 * i + 3 * j);
+    }
     const auto rowKernel = [&](
                              Matrix& out, const Point&, const Point&) { out = coupling; };
     auto rowRule = Integral(Potential(rowKernel, u), v);
     Math::SpatialTensor<Scalar, 4> tensor(rows, cols, rows, cols);
     for (size_t i = 0; i < rows; ++i)
+    {
       for (size_t j = 0; j < cols; ++j)
+      {
         for (size_t k = 0; k < rows; ++k)
+        {
           for (size_t l = 0; l < cols; ++l)
           {
             tensor(i, j, k, l) = Scalar(1 + i + 2 * j + 3 * k + 4 * l);
             if constexpr (std::is_same_v<Scalar, Complex>)
               tensor(i, j, k, l) += Complex(0, 2 + i + j + k + l);
           }
+        }
+      }
+    }
     const auto tensorKernel = [&](Math::SpatialTensor<Scalar, 4>& out, const Point&,
                                 const Point&) { out = tensor; };
     auto tensorRule = Integral(Potential(tensorKernel, u), v);
@@ -234,6 +250,7 @@ namespace
       const size_t nte =
         scalar.getFiniteElement(test.getDimension(), test.getIndex()).getCount();
       for (size_t tr = 0; tr < ntr * components; ++tr)
+      {
         for (size_t te = 0; te < nte * components; ++te)
         {
           const auto block = scalarRule.integrate(tr / components, te / components);
@@ -249,6 +266,7 @@ namespace
                       tensor(tc / cols, tc % cols, rc / cols, rc % cols) * block),
             tolerance);
         }
+      }
     }
     // Verify global nonlocal assembly uses the space's actual DOF maps.
     // Independent reference: the constant kernel separates the two integrals.
@@ -262,8 +280,10 @@ namespace
       const auto& fe = scalar.getFiniteElement(cell->getDimension(), cell->getIndex());
       const auto& dofs = scalar.getDOFs(cell->getDimension(), cell->getIndex());
       for (size_t local = 0; local < fe.getCount(); ++local)
+      {
         moments(dofs(local)) += formula.getWeight(0) * point.getDistortion() *
           fe.getBasis(local)(formula.getPoint(0));
+      }
     }
     for (size_t action = 0; action < 3; ++action)
     {
@@ -279,6 +299,7 @@ namespace
       const auto& actual = problem.getLinearSystem().getOperator();
       EXPECT_GT(actual.norm(), 0);
       for (size_t te = 0; te < fes.getSize(); ++te)
+      {
         for (size_t tr = 0; tr < fes.getSize(); ++tr)
         {
           const size_t tc = te % components, rc = tr % components;
@@ -293,6 +314,7 @@ namespace
             << "entry " << te << ", " << tr << ": " << actual(te, tr) << " vs "
             << expected;
         }
+      }
     }
   }
 }
@@ -304,12 +326,14 @@ TEST(MatrixQuadrature, MatrixPotentialAllGeometriesAndShapes)
   {
     auto mesh = makeMesh(geometry);
     for (size_t rows = 1; rows <= 3; ++rows)
+    {
       for (size_t cols = 1; cols <= 3; ++cols)
       {
         SCOPED_TRACE(
           ::testing::Message() << int(geometry) << ": " << rows << "x" << cols);
         checkPotential<Real>(mesh, rows, cols);
       }
+    }
   }
 }
 
@@ -326,12 +350,14 @@ TEST(MatrixQuadrature, JacobianFormsAllSpacesGeometriesAndShapes)
   {
     const auto mesh = makeMesh(geometry);
     for (size_t rows = 1; rows <= 3; ++rows)
+    {
       for (size_t cols = 1; cols <= 3; ++cols)
       {
         SCOPED_TRACE(
           ::testing::Message() << int(geometry) << ": " << rows << "x" << cols);
         checkFamilies<Real>(mesh, rows, cols);
       }
+    }
   }
 }
 

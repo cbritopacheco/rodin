@@ -581,8 +581,10 @@ namespace
       if (*a == inlet)
         return true;
       for (const Attribute o : outlets)
+      {
         if (*a == o)
           return true;
+      }
       return false;
     };
 
@@ -603,11 +605,13 @@ namespace
       if (it->getAttribute() != fsi)
         continue;
       for (const auto& v : it->getVertices())
+      {
         if (capVertices.count(v))
         {
           toRelabel.push_back(it->getIndex());
           break;
         }
+      }
     }
 
     for (const Index f : toRelabel)
@@ -685,7 +689,9 @@ namespace
       Index bestSolid = 0;
       bool found = false;
       for (long long dx = -1; dx <= 1; ++dx)
+      {
         for (long long dy = -1; dy <= 1; ++dy)
+        {
           for (long long dz = -1; dz <= 1; ++dz)
           {
             const std::array<long long, 3> key{base[0] + dx, base[1] + dy, base[2] + dz};
@@ -703,6 +709,8 @@ namespace
               }
             }
           }
+        }
+      }
 
       if (!found || best > tol)
       {
@@ -775,8 +783,10 @@ namespace
   static bool isFiniteVec(const Math::SpatialVector<Real>& x)
   {
     for (Index i = 0; i < x.size(); ++i)
+    {
       if (!std::isfinite(x(i)))
         return false;
+    }
     return true;
   }
 
@@ -1637,9 +1647,11 @@ int main(int argc, char** argv)
           const auto dS = dState(xs);
           const auto dP = dPred(xs);
           for (Index i = 0; i < static_cast<Index>(dim); ++i)
+          {
             value(i) = Ja *
               (robinVelocityCoeff * (dS(i) - dP(i)) + robinAlpha * vp(i) -
                 robinAlpha * uf(i));
+          }
 
           return value;
         });
@@ -1960,8 +1972,10 @@ int main(int argc, char** argv)
             const PetscScalar* arr = nullptr;
             VecGetArrayRead(mOld, &arr);
             for (PetscInt i = lo; i < hi; ++i)
+            {
               if (arr[i - lo] != PetscScalar(0))
                 VecSetValue(b, vOff + i, arr[i - lo], ADD_VALUES);
+            }
             VecRestoreArrayRead(mOld, &arr);
             VecAssemblyBegin(b);
             VecAssemblyEnd(b);

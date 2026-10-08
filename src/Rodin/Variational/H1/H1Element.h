@@ -501,8 +501,10 @@ namespace Rodin::Variational
               const auto& xi = GLL01<K>::getNodes();
               nodes.reserve((K + 1) * (K + 1));
               for (size_t j = 0; j <= K; ++j)
+              {
                 for (size_t i = 0; i <= K; ++i)
                   nodes.emplace_back(Math::SpatialPoint{{xi[i], xi[j]}});
+              }
               return nodes;
             }();
             return s_nodes;
@@ -1545,9 +1547,11 @@ namespace Rodin::Variational
         out.resize(m_rows, m_cols);
         const size_t components = m_rows * m_cols;
         for (size_t c = 0; c < components; ++c)
+        {
           m_scalar.evaluate(
             out(c / m_cols, c % m_cols),
             [&](size_t a) { return coefficient(a * components + c); }, point);
+        }
       }
 
       /// @brief Returns the number of local matrix basis functions.

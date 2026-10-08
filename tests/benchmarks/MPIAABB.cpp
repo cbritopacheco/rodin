@@ -131,8 +131,10 @@ namespace
             builder.setOwner(0, local, vertexOwner[v]);
           else
             for (int r = 0; r < comm.size(); ++r)
+            {
               if (r != comm.rank() && (overlap || holders[v].contains(r)))
                 builder.halo(0, local, r);
+            }
         }
       const auto [local, inserted] = builder.include(
         {d, cell->getIndex()}, owned ? Shard::State::Owned : Shard::State::Ghost);
@@ -140,8 +142,10 @@ namespace
         builder.setOwner(d, local, owner);
       else if (overlap)
         for (int r = 0; r < comm.size(); ++r)
+        {
           if (r != comm.rank())
             builder.halo(d, local, r);
+        }
     }
     auto localShard = builder.finalize();
     if (d == 0)
@@ -297,8 +301,10 @@ namespace
     {
       candidateIds = 0;
       for (size_t dimension = 0; dimension <= shard.getDimension(); ++dimension)
+      {
         for (Index i = 0; i < shard.getPolytopeCount(dimension); ++i)
           candidateIds += shard.isOwned(dimension, i);
+      }
     }
     state.counters["candidate_id_bytes"] = candidateIds * sizeof(Index);
     state.counters["ranks"] = comm.size();
@@ -313,6 +319,7 @@ namespace
         continue;
       for (auto [backend, name] : {std::pair{Backend::FullShard, "FullShard"},
              {Backend::OwnedSubset, "OwnedSubset"}, {Backend::MPI, "MPI"}})
+      {
         for (auto [query, kind] :
           {std::pair{Query::Build, "Build"}, {Query::Interior, "Interior"},
             {Query::Boundary, "Boundary"}, {Query::NearMiss, "NearMiss"}})
@@ -334,6 +341,7 @@ namespace
             ->Iterations(TimingSamples)
             ->UseManualTime();
         }
+      }
     }
   }
 }

@@ -1560,9 +1560,11 @@ namespace Rodin::Variational
         out.resize(m_rows, m_cols);
         const size_t components = m_rows * m_cols;
         for (size_t c = 0; c < components; ++c)
+        {
           m_scalar.evaluate(
             out(c / m_cols, c % m_cols),
             [&](size_t a) { return coefficient(a * components + c); }, point);
+        }
       }
 
       /// @brief Returns the number of local matrix basis functions.

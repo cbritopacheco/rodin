@@ -207,6 +207,10 @@ rather than extended:
 
 ## Surface style (imitate exactly)
 
+- A `for` body may omit braces only when the entire body statement occupies
+  one physical line. Wrapped statements and outer loops containing nested
+  loops on subsequent lines require Allman braces. The loop header's line
+  count does not affect this rule; a one-line inner body may remain unbraced.
 - Boost Software License header block at the top of every file; include
   guards `RODIN_<NAMESPACE>_<FILE>_H` (no `#pragma once`).
 - Members `m_camelCase`; accessors `getX()`/`setX(...)`, setters return a

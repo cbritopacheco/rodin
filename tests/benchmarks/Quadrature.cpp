@@ -93,9 +93,13 @@ namespace Rodin::Tests::Benchmarks
         const auto& x = qf.getPoint(q);
         Math::SpatialMatrix<Real> F(d, d);
         for (size_t i = 0; i < d; ++i)
+        {
           for (size_t j = 0; j < d; ++j)
+          {
             F(i, j) = (i == j ? Real(1) : Real(0)) +
               Real(0.1) * x[static_cast<Eigen::Index>((i + j) % d)];
+          }
+        }
         const Real j0 = F.determinant();
         acc += qf.getWeight(q) * (j0 + F.squaredNorm() / j0);
       }
@@ -109,8 +113,10 @@ namespace Rodin::Tests::Benchmarks
   static void Cases(benchmark::internal::Benchmark* b)
   {
     for (int64_t g = 0; g < 4; ++g)
+    {
       for (int64_t order : {2, 4, 6, 8})
         b->Args({g, order});
+    }
   }
 
   /// @brief Registers point-access benchmarks for the quadrature cases.

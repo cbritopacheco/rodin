@@ -262,8 +262,10 @@ namespace Rodin::Solid
               const auto gradTest = testGradient.getBasis(te);
               ScalarType val = 0;
               for (size_t c = 0; c < vdim; ++c)
+              {
                 for (size_t k = 0; k < d; ++k)
                   val += dP(c, k) * gradTest(c, k);
+              }
               m_matrix(te, tr) += wq * distortion * val;
             }
           }
@@ -576,8 +578,10 @@ namespace Rodin::Solid
         // DJ[du] = J (F^{-T} : grad du)
             ScalarType FinvTdF = 0;
             for (size_t c = 0; c < vdim; ++c)
+            {
               for (size_t k = 0; k < d; ++k)
                 FinvTdF += FinvT(c, k) * dF(c, k);
+            }
 
         // D(F^{-T})[du] = -F^{-T} (grad du)^T F^{-T}
             const Math::SpatialMatrix<ScalarType> M = FinvT * dF.transpose() * FinvT;
@@ -852,8 +856,10 @@ namespace Rodin::Solid
             const auto gradTest = testGradient.getBasis(te);
             ScalarType FinvTG = 0;
             for (size_t c = 0; c < vdim; ++c)
+            {
               for (size_t k = 0; k < d; ++k)
                 FinvTG += FinvT(c, k) * gradTest(c, k);
+            }
             for (size_t tr = 0; tr < trialDofs; ++tr)
             {
               const ScalarType dp = trialFE.getBasis(tr)(rc);
@@ -1092,8 +1098,10 @@ namespace Rodin::Solid
             const auto dF = trialGradient.getBasis(tr);
             ScalarType FinvTdF = 0;
             for (size_t c = 0; c < vdim; ++c)
+            {
               for (size_t k = 0; k < d; ++k)
                 FinvTdF += FinvT(c, k) * dF(c, k);
+            }
             const ScalarType dJ = J * FinvTdF;
             for (size_t te = 0; te < testDofs; ++te)
             {

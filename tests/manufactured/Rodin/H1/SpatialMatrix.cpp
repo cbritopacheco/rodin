@@ -20,6 +20,7 @@ namespace
     auto exact = MatrixFunction(fes.getRows(), fes.getColumns(), [&](const Point& p) {
       Math::SpatialMatrix<Real> value(fes.getRows(), fes.getColumns());
       for (size_t r = 0; r < fes.getRows(); ++r)
+      {
         for (size_t c = 0; c < fes.getColumns(); ++c)
         {
           value(r, c) = 1 + 7 * r + c;
@@ -27,6 +28,7 @@ namespace
             for (size_t k = 0; k < p.getCoordinates().size(); ++k)
               value(r, c) += (r + c + k + 1) * p.getCoordinates()[k];
         }
+      }
       return value;
     });
     exact.setOrder(diffusion ? 1 : 0);
@@ -64,11 +66,13 @@ TEST(SpatialMatrixManufactured, EverySpaceAndGeometry)
       : D == 2         ? LocalMesh::UniformGrid(geometry, {3, 3})
                        : LocalMesh::UniformGrid(geometry, {3, 3, 3});
     for (size_t d = 1; d <= D; ++d)
+    {
       for (size_t lower = 0; lower < d; ++lower)
       {
         mesh.getConnectivity().compute(d, lower);
         mesh.getConnectivity().compute(lower, d);
       }
+    }
     for (const auto& shape : {std::pair<size_t, size_t>{2, 3}, {3, 3}})
     {
       const auto [rows, cols] = shape;
@@ -90,15 +94,19 @@ TEST(SpatialMatrixManufactured, QuadraticReactionDiffusion)
       Math::SpatialMatrix<Real> value(2, 3);
       const Real square = p.getCoordinates().squaredNorm();
       for (size_t r = 0; r < 2; ++r)
+      {
         for (size_t c = 0; c < 3; ++c)
           value(r, c) = 1 + r + c + (1 + 3 * r + c) * square;
+      }
       return value;
     });
     auto forcing = MatrixFunction(2, 3, [&](const Point& p) {
       auto value = exact.getValue(p);
       for (size_t r = 0; r < 2; ++r)
+      {
         for (size_t c = 0; c < 3; ++c)
           value(r, c) -= 2 * D * (1 + 3 * r + c);
+      }
       return value;
     });
     exact.setOrder(2);
@@ -130,11 +138,13 @@ TEST(SpatialMatrixManufactured, QuadraticReactionDiffusion)
       : D == 2         ? LocalMesh::UniformGrid(geometry, {2, 2})
                        : LocalMesh::UniformGrid(geometry, {2, 2, 2});
     for (size_t d = 1; d <= D; ++d)
+    {
       for (size_t lower = 0; lower < d; ++lower)
       {
         mesh.getConnectivity().compute(d, lower);
         mesh.getConnectivity().compute(lower, d);
       }
+    }
     check(H1(std::integral_constant<size_t, 2>{}, mesh, 2, 3));
     check(H1(std::integral_constant<size_t, 3>{}, mesh, 2, 3));
   }

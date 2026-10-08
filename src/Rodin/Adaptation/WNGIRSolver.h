@@ -1375,8 +1375,10 @@ namespace Rodin::Adaptation
         {
           incident.reserve(2 * interfaceFacets.size());
           for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
+          {
             for (const Index v : mesh.getFace(interfaceFacets[i])->getVertices())
               incident[static_cast<std::uint64_t>(v)].push_back(i);
+          }
         }
         else if (dimension == 3)
         {
@@ -1612,8 +1614,10 @@ namespace Rodin::Adaptation
           Math::Vector<Real> mode =
             Math::Vector<Real>::Zero(m_rigidModeBasis.front().size());
           for (Eigen::Index j = 0; j < n; ++j)
+          {
             mode +=
               eig.eigenvectors()(j, i) * m_rigidModeBasis[static_cast<std::size_t>(j)];
+          }
           const Real norm = mode.norm();
           if (norm > Real(0))
           {
@@ -1662,8 +1666,10 @@ namespace Rodin::Adaptation
           y = A * x;
         }
         for (std::size_t k = 0; k < stabilisation.weights.size(); ++k)
+        {
           y += stabilisation.weights[k] * stabilisation.modes[k].dot(x) *
             stabilisation.modes[k];
+        }
       }
       /**
        * @brief Solves the linear system with rigid-mode-stabilised conjugate gradients.

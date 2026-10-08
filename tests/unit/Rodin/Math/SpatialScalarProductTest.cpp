@@ -41,16 +41,19 @@ namespace Rodin::Tests::Unit
     static_assert(
       std::is_same_v<decltype(Real{} * SpatialMatrix<Real>{}), SpatialMatrix<Real>>);
     for (std::uint8_t rows = 0; rows <= 3; ++rows)
+    {
       for (std::uint8_t cols = 0; cols <= 3; ++cols)
       {
         SpatialMatrix<Real> a(rows, cols);
         SpatialMatrix<Complex> z(rows, cols);
         for (std::uint8_t i = 0; i < rows; ++i)
+        {
           for (std::uint8_t j = 0; j < cols; ++j)
           {
             a(i, j) = Real(i + 2 * j + 1);
             z(i, j) = Complex(a(i, j), Real(i + j + 1));
           }
+        }
         for (const Real scale : {Real(0), Real(-0.5), Real(2)})
         {
           const Complex c(scale, 0.25);
@@ -63,6 +66,7 @@ namespace Rodin::Tests::Unit
           EXPECT_EQ(promotedRight.rows(), rows);
           EXPECT_EQ(promotedRight.cols(), cols);
           for (std::uint8_t i = 0; i < 3; ++i)
+          {
             for (std::uint8_t j = 0; j < 3; ++j)
             {
               const bool active = i < rows && j < cols;
@@ -73,8 +77,10 @@ namespace Rodin::Tests::Unit
               EXPECT_EQ(promotedLeft.getData()(i, j), promoted);
               EXPECT_EQ(promotedRight.getData()(i, j), promoted);
             }
+          }
         }
       }
+    }
   }
 
   template <class Scalar>
@@ -130,12 +136,15 @@ namespace Rodin::Tests::Unit
     using Out = typename FormLanguage::Mult<Factor, Scalar>::Type;
     const Factor factor = coefficient;
     for (std::uint8_t rows = 0; rows <= 3; ++rows)
+    {
       for (std::uint8_t cols = 0; cols <= 3; ++cols)
       {
         Math::SpatialMatrix<Scalar> value(rows, cols);
         for (size_t i = 0; i < rows; ++i)
+        {
           for (size_t j = 0; j < cols; ++j)
             value(i, j) = baseValue<Scalar>() + Real(i + j);
+        }
         const auto left = coefficient * value;
         const auto right = value * coefficient;
         static_assert(
@@ -147,13 +156,16 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(right.rows(), rows);
         EXPECT_EQ(right.cols(), cols);
         for (size_t i = 0; i < rows; ++i)
+        {
           for (size_t j = 0; j < cols; ++j)
           {
             EXPECT_EQ(left(i, j), factor * value(i, j));
             EXPECT_EQ(right(i, j), value(i, j) * factor);
             EXPECT_EQ(value(i, j), baseValue<Scalar>() + Real(i + j));
           }
+        }
       }
+    }
   }
 
   TEST(SpatialScalarProductTest, VectorProductsPromoteRealAndComplex)
@@ -210,23 +222,30 @@ namespace Rodin::Tests::Unit
   {
     using Out = typename FormLanguage::Mult<LHS, RHS>::Type;
     for (std::uint8_t rows = 0; rows <= 3; ++rows)
+    {
       for (std::uint8_t inner = 0; inner <= 3; ++inner)
+      {
         for (std::uint8_t cols = 0; cols <= 3; ++cols)
         {
           Math::SpatialMatrix<LHS> a(rows, inner);
           Math::SpatialMatrix<RHS> b(inner, cols);
           for (size_t i = 0; i < rows; ++i)
+          {
             for (size_t k = 0; k < inner; ++k)
               a(i, k) = baseValue<LHS>() + Real(i + k);
+          }
           for (size_t k = 0; k < inner; ++k)
+          {
             for (size_t j = 0; j < cols; ++j)
               b(k, j) = baseValue<RHS>() + Real(k + j);
+          }
           const auto product = a * b;
           static_assert(
             std::is_same_v<std::decay_t<decltype(product)>, Math::SpatialMatrix<Out>>);
           EXPECT_EQ(product.rows(), rows);
           EXPECT_EQ(product.cols(), cols);
           for (size_t i = 0; i < rows; ++i)
+          {
             for (size_t j = 0; j < cols; ++j)
             {
               Out expected(0);
@@ -234,7 +253,10 @@ namespace Rodin::Tests::Unit
                 expected += a(i, k) * b(k, j);
               EXPECT_EQ(product(i, j), expected);
             }
+          }
         }
+      }
+    }
   }
 
   TEST(SpatialScalarProductTest, MatrixMatrixProductsPromoteRealAndComplex)

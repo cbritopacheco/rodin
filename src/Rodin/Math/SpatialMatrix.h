@@ -2635,8 +2635,10 @@ namespace Rodin::Math
     SpatialMatrix<Scalar> C(A.rows(), A.cols());
 
     for (std::uint8_t i = 0; i < A.rows(); ++i)
+    {
       for (std::uint8_t j = 0; j < A.cols(); ++j)
         C(i, j) = A(i, j) + B(i, j);
+    }
 
     return C;
   }
@@ -2688,9 +2690,13 @@ namespace Rodin::Math
     using Result = std::common_type_t<Scalar, Value>;
     SpatialMatrix<Result> value(matrix.rows(), matrix.cols());
     for (size_t row = 0; row < matrix.rows(); ++row)
+    {
       for (size_t col = 0; col < matrix.cols(); ++col)
+      {
         value(row, col) =
           static_cast<Result>(matrix(row, col)) / static_cast<Result>(divisor);
+      }
+    }
     return value;
   }
 }

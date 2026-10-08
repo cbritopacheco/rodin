@@ -30,13 +30,17 @@ namespace Rodin::Tests::Unit
 
     const auto& F = state.getDeformationGradient();
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(F(i, j), (i == j) ? 1.0 : 0.0, 1e-14);
+    }
 
     const auto& C = state.getRightCauchyGreenTensor();
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(C(i, j), (i == j) ? 1.0 : 0.0, 1e-14);
+    }
   }
 
   /// @brief Verifies simple shear 2 D for solid kinematic state by checking tolerance-based numerical results.
@@ -100,8 +104,10 @@ namespace Rodin::Tests::Unit
     // F * F^{-1} should be identity
     Math::SpatialMatrix<Real> product = F * Finv;
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(product(i, j), (i == j) ? 1.0 : 0.0, 1e-12);
+    }
   }
 
   // ========================================================================
@@ -211,8 +217,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> P;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-14);
+    }
 
     // Energy should also be zero
     EXPECT_NEAR(law.getStrainEnergyDensity(cache, cp), 0.0, 1e-14);
@@ -281,8 +289,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-5);
+    }
   }
 
   // ========================================================================
@@ -307,8 +317,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> P;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-14);
+    }
 
     EXPECT_NEAR(law.getStrainEnergyDensity(cache, cp), 0.0, 1e-14);
   }
@@ -351,8 +363,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-5);
+    }
   }
 
   /// @brief For small deformations, SVK should behave like linear elasticity.
@@ -382,8 +396,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> sigma = lambda * epsilon.trace() * I2 + 2.0 * mu * epsilon;
 
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), sigma(i, j), 1e-10);
+    }
   }
 
   // ========================================================================
@@ -408,8 +424,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> P;
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-12);
+    }
   }
 
   /// @brief Verifies tangent finite difference for solid mooney rivlin by checking tolerance-based numerical results.
@@ -450,8 +468,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-4);
+    }
   }
 
   // ========================================================================
@@ -482,8 +502,10 @@ namespace Rodin::Tests::Unit
     law.getFirstPiolaKirchhoffStress(P, cache, cp);
 
     for (int i = 0; i < 3; ++i)
+    {
       for (int j = 0; j < 3; ++j)
         EXPECT_NEAR(P(i, j), 0.0, 1e-12);
+    }
   }
 
   /// @brief Verifies tangent finite difference 3 D for solid holzapfel ogden by checking tolerance-based numerical results.
@@ -542,8 +564,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 3; ++i)
+    {
       for (int j = 0; j < 3; ++j)
         EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-8);
+    }
   }
 
   /// @brief Verifies adds fiber stress for solid active contraction by checking tolerance-based numerical results.
@@ -637,8 +661,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-6);
+    }
   }
 
   /// @brief Mixed passive + active in 3D, fiber not aligned with an axis.
@@ -705,8 +731,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 3; ++i)
+    {
       for (int j = 0; j < 3; ++j)
         EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-6);
+    }
   }
 
   /// @brief Verifies that, after the per-quadrature-point local Newton on c.
@@ -775,8 +803,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(dP(i, j), dPfd(i, j), 5e-5);
+    }
   }
 
   /// @brief Verifies dynamic tangent finite difference 3 D with passive for solid active contraction by checking tolerance-based numerical results, true predicates.
@@ -852,8 +882,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 3; ++i)
+    {
       for (int j = 0; j < 3; ++j)
         EXPECT_NEAR(dP(i, j), dPfd(i, j), 5e-5);
+    }
   }
 
   /// @brief After the local Newton converges, the dynamic residual should be at.
@@ -983,8 +1015,10 @@ namespace Rodin::Tests::Unit
     gl.getGreenLagrangeStrain(E, state);
 
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(E(i, j), 0.0, 1e-14);
+    }
   }
 
   /// @brief Verifies pure extension for solid green lagrange strain by checking tolerance-based numerical results.
@@ -1283,8 +1317,10 @@ namespace Rodin::Tests::Unit
 
     const size_t ndof = 3 * vdim;
     for (size_t i = 0; i < ndof; ++i)
+    {
       for (size_t j = 0; j < ndof; ++j)
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
+    }
   }
 
   /// @brief Verifies zero displacement symmetry SVK for solid internal virtual work tangent by checking tolerance-based numerical results.
@@ -1312,8 +1348,10 @@ namespace Rodin::Tests::Unit
 
     const size_t ndof = 3 * vdim;
     for (size_t i = 0; i < ndof; ++i)
+    {
       for (size_t j = 0; j < ndof; ++j)
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
+    }
   }
 
   /// @brief Verifies zero displacement symmetry mooney rivlin for solid internal virtual work tangent by checking tolerance-based numerical results.
@@ -1341,8 +1379,10 @@ namespace Rodin::Tests::Unit
 
     const size_t ndof = 3 * vdim;
     for (size_t i = 0; i < ndof; ++i)
+    {
       for (size_t j = 0; j < ndof; ++j)
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
+    }
   }
 
   /// @brief Verifies non zero displacement symmetry for solid internal virtual work tangent by checking tolerance-based numerical results.
@@ -1373,8 +1413,10 @@ namespace Rodin::Tests::Unit
 
     const size_t ndof = 3 * vdim;
     for (size_t i = 0; i < ndof; ++i)
+    {
       for (size_t j = 0; j < ndof; ++j)
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-10);
+    }
   }
 
   /// @brief Verifies non zero displacement non trivial for solid internal virtual work tangent.
@@ -1406,8 +1448,10 @@ namespace Rodin::Tests::Unit
     const size_t ndof = 3 * vdim;
     Real norm = 0;
     for (size_t i = 0; i < ndof; ++i)
+    {
       for (size_t j = 0; j < ndof; ++j)
         norm += tangent.integrate(i, j) * tangent.integrate(i, j);
+    }
     EXPECT_GT(norm, 1e-14);
   }
 
@@ -1488,8 +1532,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 3; ++i)
+    {
       for (int j = 0; j < 3; ++j)
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-5);
+    }
   }
 
   /// @brief Verifies tangent finite difference 3 D for solid saint venant kirchhoff by checking tolerance-based numerical results.
@@ -1533,8 +1579,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 3; ++i)
+    {
       for (int j = 0; j < 3; ++j)
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-5);
+    }
   }
 
   /// @brief Verifies tangent finite difference 3 D for solid mooney rivlin by checking tolerance-based numerical results.
@@ -1578,8 +1626,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> dP_fd = (1.0 / eps) * P_plus + (-1.0 / eps) * P;
 
     for (int i = 0; i < 3; ++i)
+    {
       for (int j = 0; j < 3; ++j)
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-4);
+    }
   }
 
   // ========================================================================
@@ -1721,8 +1771,10 @@ namespace Rodin::Tests::Unit
     pk1.getFirstPiolaKirchhoffStress(P_wrapper, cache, cp);
 
     for (int i = 0; i < 2; ++i)
+    {
       for (int j = 0; j < 2; ++j)
         EXPECT_NEAR(P_direct(i, j), P_wrapper(i, j), 1e-14);
+    }
   }
 
   /// @brief Verifies parameter accessors for solid mooney rivlin by checking tolerance-based numerical results.

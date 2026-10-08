@@ -1303,9 +1303,13 @@ namespace Rodin::Tests::Unit
       }
 
       for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      {
         for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
           EXPECT_NEAR(gradient[coordinate][derivative],
             coordinate == derivative ? 1.0 : 0.0, tolerance);
+        }
+      }
     };
 
     checkReferenceGradient(Polytope::Type::Triangle, Math::SpatialPoint{{0.0, 1.0}}, 2);

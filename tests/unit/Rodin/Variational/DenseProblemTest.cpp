@@ -79,8 +79,10 @@ namespace Rodin::Tests::Unit
 
     // Stiffness matrix for Laplacian should be symmetric
     for (Eigen::Index i = 0; i < A.rows(); i++)
+    {
       for (Eigen::Index j = 0; j < A.cols(); j++)
         EXPECT_NEAR(A(i, j), A(j, i), 1e-12);
+    }
   }
 
   /// @brief Verifies RHS is non zero with forcing for variational dense problem by checking true predicates, form assembly.

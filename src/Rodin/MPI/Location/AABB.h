@@ -150,8 +150,10 @@ namespace Rodin::Location
         for (size_t d = 0; d <= shard.getDimension(); ++d)
         {
           for (Index i = 0; i < shard.getPolytopeCount(d); ++i)
+          {
             if (shard.isOwned(d, i))
               candidates[d].push_back(i);
+          }
         }
         return candidates;
       }

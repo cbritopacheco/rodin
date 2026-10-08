@@ -407,8 +407,10 @@ namespace Rodin::Variational
             // Interior: 1 <= i <= K-1, 1 <= j <= K-1
             const size_t N1 = K + 1;
             for (size_t j = 1; j < K; ++j)
+            {
               for (size_t i = 1; i < K; ++i)
                 res.push_back(j * N1 + i);
+            }
             break;
           }
 
@@ -454,8 +456,10 @@ namespace Rodin::Variational
             }
 
             for (size_t s = 1; s < K; ++s)
+            {
               for (const size_t triIdx : triInterior)
                 res.push_back(s * TriCount + triIdx);
+            }
             break;
           }
 
@@ -494,9 +498,13 @@ namespace Rodin::Variational
             // Interior: 1 <= i,j,k <= K-1
             const size_t N1 = K + 1;
             for (size_t k = 1; k < K; ++k)
+            {
               for (size_t j = 1; j < K; ++j)
+              {
                 for (size_t i = 1; i < K; ++i)
                   res.push_back(k * N1 * N1 + j * N1 + i);
+              }
+            }
             break;
           }
 
@@ -842,12 +850,18 @@ namespace Rodin::Variational
             UnorderedSet<int> nbrs;
             const auto& dimensionHaloNeighbors = shard.getHalo(d);
             for (const auto& [i, peers] : dimensionHaloNeighbors)
+            {
               for (const Index r : peers)
+              {
                 if (static_cast<int>(r) != rank)
                   nbrs.insert(static_cast<int>(r));
+              }
+            }
             for (const auto& [i, r] : owner)
+            {
               if (static_cast<int>(r) != rank)
                 nbrs.insert(static_cast<int>(r));
+            }
             dimensionNeighbors.assign(nbrs.begin(), nbrs.end());
           }
 
@@ -912,8 +926,10 @@ namespace Rodin::Variational
         std::vector<std::pair<Index, Index>> globalToLocal;
         globalToLocal.reserve(localDofCount);
         for (size_t local = 0; local < localDofCount; ++local)
+        {
           globalToLocal.emplace_back(
             m_localToGlobal.left[local], static_cast<Index>(local));
+        }
         std::sort(globalToLocal.begin(), globalToLocal.end());
         m_localToGlobal.right.reserve(globalToLocal.size());
         for (const auto& [global, local] : globalToLocal)
@@ -1189,8 +1205,10 @@ namespace Rodin::Variational
         std::vector<std::pair<Index, Index>> globalToLocal;
         globalToLocal.reserve(localVecSize);
         for (size_t local = 0; local < localVecSize; ++local)
+        {
           globalToLocal.emplace_back(
             m_localToGlobal.left[local], static_cast<Index>(local));
+        }
         std::sort(globalToLocal.begin(), globalToLocal.end());
         m_localToGlobal.right.reserve(globalToLocal.size());
         for (const auto& [global, local] : globalToLocal)
@@ -1470,8 +1488,10 @@ namespace Rodin::Variational
             const auto& scalarDOFs = m_scalar.getDOFs(d, i);
             auto& dofs = m_dofs[d].emplace_back(scalarDOFs.size() * rows * cols);
             for (size_t a = 0; a < static_cast<size_t>(scalarDOFs.size()); ++a)
+            {
               for (size_t c = 0; c < rows * cols; ++c)
                 dofs[a * rows * cols + c] = scalarDOFs[a] * rows * cols + c;
+            }
             const auto& scalarFE = m_scalar.getFiniteElement(d, i);
             m_elements.try_emplace(scalarFE.getGeometry(), scalarFE, rows, cols);
           }

@@ -82,9 +82,11 @@ namespace Rodin::Math
       SpatialTensor& resize(const Extents& extents)
       {
         for (auto extent : extents)
+        {
           if (extent > MaxSize)
             Alert::Exception() << "SpatialTensor extent exceeds spatial capacity."
                                << Alert::Raise;
+        }
         m_extents = extents;
         m_size = 1;
         for (auto extent : extents)
@@ -292,8 +294,10 @@ namespace Rodin::Math
       {
         SpatialTensor<std::common_type_t<Scalar, Value>, Rank> value(m_extents);
         for (size_t i = 0; i < m_size; ++i)
+        {
           value[i] = static_cast<std::common_type_t<Scalar, Value>>(m_data[i]) *
             static_cast<std::common_type_t<Scalar, Value>>(factor);
+        }
         return value;
       }
       /**
@@ -307,8 +311,10 @@ namespace Rodin::Math
       {
         SpatialTensor<std::common_type_t<Scalar, Value>, Rank> value(m_extents);
         for (size_t i = 0; i < m_size; ++i)
+        {
           value[i] = static_cast<std::common_type_t<Scalar, Value>>(m_data[i]) /
             static_cast<std::common_type_t<Scalar, Value>>(divisor);
+        }
         return value;
       }
       /**
@@ -325,9 +331,13 @@ namespace Rodin::Math
           m_extents[0], m_extents[1]);
         value.setZero();
         for (size_t i = 0; i < m_extents[0]; ++i)
+        {
           for (size_t j = 0; j < m_extents[1]; ++j)
+          {
             for (size_t k = 0; k < m_extents[2]; ++k)
               value(i, j) += (*this)(i, j, k) * vector(k);
+          }
+        }
         return value;
       }
       /**
@@ -344,10 +354,16 @@ namespace Rodin::Math
           m_extents[0], m_extents[1]);
         value.setZero();
         for (size_t i = 0; i < m_extents[0]; ++i)
+        {
           for (size_t j = 0; j < m_extents[1]; ++j)
+          {
             for (size_t k = 0; k < m_extents[2]; ++k)
+            {
               for (size_t l = 0; l < m_extents[3]; ++l)
                 value(i, j) += (*this)(i, j, k, l) * matrix(k, l);
+            }
+          }
+        }
         return value;
       }
 
