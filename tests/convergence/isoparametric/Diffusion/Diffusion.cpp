@@ -10,6 +10,7 @@
 #include "../../Conductivity.h"
 #include "../../CurvedGeometry.h"
 #include "../../LiftedErrorNorm.h"
+#include "../../LiftedConvergence.h"
 #include "../../SineMap.h"
 #include <optional>
 #include "Rodin/Assembly.h"
@@ -396,15 +397,55 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
             }
           }
       }
+      void liftedHigherOrderRates() const
+      {
+        std::array<LiftedConvergence, 2> histories;
+        // Preserve three resolved meshes; the higher field degree is varied
+        // independently of the quadratic approximation of the sine map.
+        const auto levels = this->GetParam() == Polytope::Type::Segment
+          ? std::initializer_list<size_t>{5, 9, 17}
+          : std::initializer_list<size_t>{3, 5, 9};
+        for (size_t n : levels)
+        {
+          SCOPED_TRACE(::testing::Message() << "field degree=3 geometry degree=2 n=" << n);
+          Workload<ContextType> problem(this->GetParam(), n, Map::Sine, true);
+          for (bool poisson : {true, false})
+          {
+            SCOPED_TRACE(poisson ? "Poisson" : "Conductivity");
+            LiftedErrorNorm::Result lifted;
+            const auto represented = problem.template solve<3>(
+              poisson, Data::Field::Smooth, false, AssemblyOrder,
+              SolverTolerance, NormOrder, &lifted);
+            ASSERT_FALSE(::testing::Test::HasFatalFailure());
+            ::testing::Message quantities;
+            quantities << "R=(" << represented.getL2() << ","
+              << represented.getH1Seminorm() << ") F=(" << lifted.field.getL2()
+              << "," << lifted.field.getH1Seminorm() << ") G=("
+              << lifted.geometry.getL2() << "," << lifted.geometry.getH1Seminorm()
+              << ") T=(" << lifted.total.getL2() << ","
+              << lifted.total.getH1Seminorm() << ")";
+            RecordProperty(std::string(poisson ? "Poisson_n" : "Conductivity_n")
+              + std::to_string(n), quantities.GetString());
+            histories[poisson ? 0 : 1].append(
+              Real(1) / Real(n - 1), represented, lifted);
+          }
+        }
+        for (size_t physics = 0; physics < histories.size(); ++physics)
+        {
+          SCOPED_TRACE(physics == 0 ? "Poisson" : "Conductivity");
+          histories[physics].expectMixedRates(3, 2);
+        }
+      }
+      template <size_t K = 2>
       void liftedSmoothControls() const
       {
         Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
         for (bool poisson : {true, false})
         {
           LiftedErrorNorm::Result base, wrong;
-          problem.template solve<2>(poisson, Data::Field::Smooth, false, AssemblyOrder,
+          problem.template solve<K>(poisson, Data::Field::Smooth, false, AssemblyOrder,
             SolverTolerance, NormOrder, &base);
-          problem.template solve<2>(poisson, Data::Field::Smooth, true, AssemblyOrder,
+          problem.template solve<K>(poisson, Data::Field::Smooth, true, AssemblyOrder,
             SolverTolerance, NormOrder, &wrong);
           decomposition(base);
           decomposition(wrong);
@@ -605,6 +646,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
   {
     liftedSmoothRates<2>();
   }
+  TEST_P(LocalTest, LiftedSmoothP3Q2Rates)
+  {
+    liftedHigherOrderRates();
+  }
+  TEST_P(LocalTest, LiftedSmoothP3Q2Sensitivity)
+  {
+    liftedSensitivity<2, 3>(Data::Field::Smooth);
+  }
+  TEST_P(LocalTest, LiftedSmoothP3Q2RejectsWrongOperators)
+  {
+    liftedSmoothControls<3>();
+  }
   TEST_P(LocalTest, LiftedSmoothP1Sensitivity)
   {
     liftedSensitivity<2, 1>(Data::Field::Smooth);
@@ -725,6 +778,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::Diffusion
   TEST_P(MPITest, LiftedSmoothP2Rates)
   {
     liftedSmoothRates<2>();
+  }
+  TEST_P(MPITest, LiftedSmoothP3Q2Rates)
+  {
+    liftedHigherOrderRates();
+  }
+  TEST_P(MPITest, LiftedSmoothP3Q2Sensitivity)
+  {
+    liftedSensitivity<2, 3>(Data::Field::Smooth);
+  }
+  TEST_P(MPITest, LiftedSmoothP3Q2RejectsWrongOperators)
+  {
+    liftedSmoothControls<3>();
   }
   TEST_P(MPITest, LiftedSmoothP1Sensitivity)
   {

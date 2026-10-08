@@ -452,3 +452,74 @@ affine batch's runtime budget. The same seven geometries, real scalar
 spaces, native and real-PETSc local/MPI backends, sequential/OpenMP assembly,
 rank counts, slow label, timeout and pyramid lock apply. No new solver,
 mesh factory, integration cache or library-source path is introduced.
+
+### Higher field degree on quadratic approximated geometry
+
+The `LiftedSmoothP3Q2` extension retains the same physical sine field,
+manufactured sources, essential traces and quadratic sine-map approximation,
+but uses field degree $p=3$. The complete numerical matrix is locally verified
+in native and real-PETSc local/MPI contexts, including ranks one through four
+and both assembly thread modes; hosted CI certification remains separate.
+The three-level sequence is $n=3,5,9$, with $n=5,9,17$
+for Segment. Each solve supplies the represented-domain error and all
+three exact-domain defects to the shared `LiftedConvergence` history.
+Thus the represented and lifted-field norms are checked independently,
+rather than replacing one by the other.
+
+For uniformly regular maps and the stated primal and dual regularity,
+the expected field bounds are
+
+$$
+E_{0,R}=O(h^4),\qquad E_{1,R}=O(h^3),\qquad
+E_{0,F}=O(h^4),\qquad E_{1,F}=O(h^3).
+$$
+
+The quadratic geometry retains
+
+$$
+E_{0,G}=O(h^3),\qquad E_{1,G}=O(h^2),
+$$
+
+and the triangle inequality bounds the total errors by these slower orders.
+It does not establish a two-sided asymptotic equivalence or require those
+orders to dominate on the initial coarse meshes. Separate represented-field,
+lifted-field and geometry histories retain the existing two-sided rate
+windows. For the total error, every adjacent interval must decrease and
+satisfy a sum envelope instead of a single-power upper rate window.
+For $j\in\{0,1\}$, let $h_c>h_f$, $\rho=h_f/h_c$, and define
+$s_{j,F}=p+1-j$ and $s_{j,G}=q+1-j$. The checked envelope is
+
+$$
+E_{j,T}(h_f)\le
+E_{j,F}(h_c)\rho^{s_{j,F}-\delta_j}
++E_{j,G}(h_c)\rho^{s_{j,G}-\delta_j}+\varepsilon_{\mathrm{round}},
+$$
+
+where $\delta_0=0.55$, $\delta_1=0.45$ are the unchanged component-rate
+margins and $\varepsilon_{\mathrm{round}}=10^{-11}$ is the existing
+dimensionless norm budget. This follows from the triangle inequality and
+the independently checked component decay on the same interval.
+It certifies the mixed-order upper estimate without assuming geometry
+dominance, a nonzero leading total-error coefficient, or absence of
+cancellation. Monotonicity is an additional finite-mesh acceptance policy,
+not a consequence of the triangle inequality.
+
+For example, the sequential native triangle pilot at $n=9$ measured
+$E_{1,F}\approx2.068\times10^{-3}$ and
+$E_{1,G}\approx1.437\times10^{-3}$ for Poisson. The field contribution
+has not yet become negligible, so a total rate between the field and
+geometry rates is not a discretization defect. Independent synthetic
+histories regress this distinction, reject a stalled final field interval,
+and reject increasing total errors caused by changing cancellation.
+
+The higher-order sensitivity case varies assembly quadrature, norm quadrature
+and solver tolerance separately using the existing budgets. The incorrect
+Poisson-stiffness and constant-conductivity controls retain the exact source
+and trace, now at field degree three. Geometry errors must remain unchanged
+while both field and total errors reject the incorrect operator.
+
+Separate `SmoothLiftedDiffusion_P3Q2` CTest registrations retain all seven
+geometries in native local and real-PETSc local/MPI contexts, ranks one through
+four, both thread modes, slow labels, 1800-second timeouts and pyramid locks.
+They exclude the higher-order cases from the existing P1/P2 registration
+to avoid overlapping execution or consuming its timeout budget.

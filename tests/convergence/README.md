@@ -143,6 +143,26 @@ containing a PDE solve. Direct utility regressions include an invalid final
 interval and both violated triangle inequalities. Physics workloads retain
 their own manufactured data, solver policy and wrong-operator controls.
 
+When field and geometry degrees differ, a single two-sided rate window for
+the total error need not describe the resolved refinement range. For each
+norm index $j\in\lbrace 0,1\rbrace$, let $F_j$ and $G_j$ be the
+independently measured lifted field and geometry errors. With adjacent
+spacing ratio $\rho=h_f/h_c<1$, the mixed-order acceptance rule uses
+
+$$
+T_{j,f}\le F_{j,c}\rho^{s_{F,j}-\delta_j}
+             +G_{j,c}\rho^{s_{G,j}-\delta_j}+\varepsilon_j.
+$$
+
+The exponents $s_{F,j}$ and $s_{G,j}$ are specified by the workload's
+field and geometry approximation estimates. The rate allowance $\delta_j$
+and absolute floor $\varepsilon_j$ are acceptance policies, not proved
+error constants. Independent component-rate windows and triangle-inequality
+checks remain required. Strict decrease of $T_j$ is an additional numerical
+policy; it does not follow from the triangle inequality when cancellation
+changes between levels. This rule avoids presuming that the slower component
+already dominates the total error on the tested meshes.
+
 Representable-field geometry studies use a distinct acceptance path.
 If $u_\ast\rvert_{\Omega_h}\in V_h$, the exact represented-domain
 field error vanishes. Its measured counterpart is tested against a stated
@@ -207,11 +227,11 @@ exists yet.
 
 | Context | h | p | hp | Isoparametric |
 | --- | --- | --- | --- | --- |
-| Poisson | P1–P3, boundary variants; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
+| Poisson | P1–P3, boundary variants; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1–P3 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
 | Complex Helmholtz | P1/P2; native-complex PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/impedance P1–P3 with polynomial patches | P1–P4; native and complex-PETSc local/MPI | P1–P3; native and complex-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; affine P2/Q1 and P3/Q3 geometry-limited rates; native and complex-PETSc local/MPI |
 | Linear elasticity | Vector P1/P2, displacement and traction variants; nearly incompressible divergence-free P2 in 2D/3D; native and real-PETSc local/MPI | Analytic vector P1→P2→P3→P4; native and real-PETSc local/MPI | Analytic vector P1–P3; native and real-PETSc local/MPI | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; affine P2/Q1 and P3/Q3 geometry-limited displacement/strain/stress rates; native local and real-PETSc local/MPI |
 | Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI; native and real-PETSc local/MPI finite P2/P1 and P3/P2 pressure-spectrum checks; PETSc physical traction P2/P1 and P3/P2 without a mean multiplier | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; affine $P_2/P_1$ on linear and $P_3/P_2$ on cubic geometry; native local and real-PETSc local/MPI |
-| Variable conductivity | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3 with polynomial patches; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1/P2 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
+| Variable conductivity | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3 with polynomial patches; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1–P3 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
 | Coupled reaction–diffusion | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin/pure Neumann P1–P3 with coupled polynomial patches | P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | Analytic two-field P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 maps and represented/lifted sine-map domains; affine P2/Q1 and P3/Q3 componentwise geometry-limited rates; native local and real-PETSc local/MPI |
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI; PETSc P1–P3 mixed Neumann/Robin/pure Neumann with patch, flux and tangent controls | Analytic P1→P2→P3→P4; native and real-PETSc SNES local/MPI; tangent controls | Analytic P1–P3; native and real-PETSc SNES local/MPI; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; native Newton and real-PETSc SNES local/MPI |
 | P0 projection | Real/complex scalar and vector, first-order L2 | Not applicable to fixed degree | Not applicable to fixed degree | Real/complex scalar/vector on exact P2 maps; native and PETSc local/MPI; cell-moment controls |
@@ -396,6 +416,11 @@ axis, $h=1/(n-1)$, and field degree $p$:
   Lifted smooth P1/P2 studies retain the represented-domain sine refinement
   sequences and independently test all three components, their adjacent rates,
   numerical budgets and incorrect-operator controls on the exact domain.
+  The additional smooth P3-field/Q2-geometry studies use $n=3,5,9$ except
+  Segment ($n=5,9,17$). Their independent field and geometry orders are
+  $4/3$ and $3/2$ in $L^2/H^1$, respectively; total errors use the
+  mixed-order envelope above. Exact levels, allowances and numerical budgets
+  are stated in the diffusion suite specification.
   Curved complex Helmholtz instead uses `n=5→9→17` for P1 and
   `n=3→5→9` for P2 on every positive-dimensional geometry.
   Its approximated sine-map hierarchy measures represented-domain and lifted
