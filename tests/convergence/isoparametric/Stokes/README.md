@@ -301,3 +301,78 @@ case alone took about 25 minutes with MPI rank one, before its separate
 quadrature study; the native rate hierarchy exceeded the 30-minute default.
 These execution observations do not establish an end-to-end stage breakdown
 or a controlled performance comparison.
+
+## Physical traction on the exact quadratic domain
+
+`RodinConvergenceIsoparametricPETScStokesBoundary` uses the same exact
+quadratic map but a mixed physical-stress boundary condition. Set
+$\Gamma_D=\Phi(\lbrace \xi_0=0\rbrace)$ and
+$\Gamma_T=\partial\Omega\setminus\Gamma_D$. With unit viscosity,
+
+$$
+\sigma(u,p)=2\varepsilon(u)-pI,\qquad
+\varepsilon(u)=\tfrac12(Du+Du^T),\qquad
+-\mathrm{div}\sigma(u,p)=f,\qquad\mathrm{div}u=0,
+$$
+
+and prescribe $u=u_\star$ on $\Gamma_D$ and
+$\sigma(u,p)n=t_\star$ on $\Gamma_T$. For zero-trace velocity tests $v$
+and pressure tests $q$, the assembled equations are
+
+$$
+\int_\Omega 2\varepsilon(u):\varepsilon(v)-p\mathrm{div}v
++q\mathrm{div}u\thinspace \mathrm{d}x
+=\int_\Omega f\cdot v\thinspace \mathrm{d}x
++\int_{\Gamma_T}t_\star\cdot v\thinspace \mathrm{d}s.
+$$
+
+Traction determines the pressure level, so this two-field system has no
+pressure-mean multiplier. Here $\det D\Phi=1$ and $x_0=\xi_0$; the
+manufactured pressure integral is exactly two. Adding $2n$ to the prescribed
+traction changes the exact pressure to $p_\star-2$, with unchanged velocity.
+The negative control checks zero pressure integral and pressure $L^2$ error
+two, alongside velocity, pressure-gradient, and divergence patch budgets.
+
+Rate studies use $(u_\star,p_\star)=(x_1^3e_0,x_0^2-1/3+2)$ for
+P2/P1 and $(x_1^4e_0,x_0^3-1/4+2)$ for P3/P2. Both adjacent intervals
+of $n=3,5,9$ are checked. Expected velocity $L^2/H^1$ orders are
+$(K+1,K)$ and pressure orders $(K,K-1)$; the respective lower bounds are
+$(K+0.45,K-0.45)$ and $(K-0.55,K-1.45)$. These finite-hierarchy
+checks remain conditional on mixed-pair stability and solution regularity;
+they do not certify a uniform inf-sup constant.
+
+Exact physical quadratic and cubic shear patches use P4/P3 and P6/P5.
+In two dimensions, $x_1=\xi_1+0.1\xi_0^2$, so their velocity pullbacks
+can have degrees four and six. These choices also cover the undeformed
+shear coordinate in three dimensions; all patch field/divergence errors
+must be below $10^{-9}$. The pressure-level negative control uses the
+quadratic P4/P3 patch. Independent assembly order $16\to18$ and norm
+order $18\to20$ variations require changes below $10^{-6}$ relatively.
+The existing coefficient residual budget $10^{-11}$ remains separate.
+
+Six cases per geometry and context cover the six applicable geometries,
+locally and at MPI ranks one through four in real-PETSc sequential/OpenMP
+configurations. Reference boundary classification precedes rank-local map
+installation. Pointwise stress and geometry evaluation remain noncollective;
+mixed assembly, factorization, residual/norm reductions, and the pressure
+integral are explicitly global operations.
+
+CTest separates the two rate studies from the four patch/control studies
+into `Rates` and `Controls` processes for each geometry and rank count.
+The flat fixture separately isolates its two rate hierarchies and groups
+its four controls, as specified in the flat Stokes suite. Each group retains the slow label,
+1800-second watchdog, MPI processor count and common pyramid resource lock.
+No refinement level, finite-element degree, quadrature order, solver setting
+or numerical assertion is changed. The distinction bounds process lifetime,
+not the mathematical workload. An isolated OpenMP two-rank hexahedral P6/P5
+patch passed with sampled aggregate participant RSS of approximately
+1.01 GiB; the earlier combined process exceeded the 3 GiB validation limit
+after preceding rate studies. This comparison motivates fresh-process
+validation but does not identify the allocation or retention mechanism.
+The complete finite numerical matrix is locally verified on all six
+applicable geometries in both thread configurations, locally and at MPI
+ranks one through four. The recovery cases were verified in their new
+process groups; earlier successful contexts retain their complete numerical
+records with unchanged source and acceptance policies. Hosted CI
+certification remains separate. Sampled RSS is a resource-guard observation,
+not a continuous peak-memory measurement or a performance benchmark.

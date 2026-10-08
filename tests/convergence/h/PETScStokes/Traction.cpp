@@ -5,10 +5,13 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Physical-traction Stokes refinement and pressure-level checks. */
+/// @file @brief Physical-traction Stokes refinement and pressure-level checks.
 
 #include "../../PETScStokesTractionProblem.h"
 #include "../../FieldConvergence.h"
+#ifdef RODIN_STOKES_TRACTION_CURVED
+#include "../../CurvedGeometry.h"
+#endif
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -36,12 +39,23 @@ namespace Rodin::Tests::Convergence::StokesTractionTests
     {
       auto mesh = UniformGrid(geometry).makeMesh(n);
       initialize(mesh);
+#ifdef RODIN_STOKES_TRACTION_CURVED
+      CurvedGeometry curved(mesh);
+      curved.template install<2>();
+#endif
       return mesh;
     }
 #ifdef RODIN_USE_MPI
     else
-      return DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
-        .makeMesh(n, initialize);
+    {
+      auto mesh = DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
+                    .makeMesh(n, initialize);
+#ifdef RODIN_STOKES_TRACTION_CURVED
+      CurvedGeometry curved(mesh);
+      curved.template install<2>();
+#endif
+      return mesh;
+    }
 #endif
   }
 
@@ -49,6 +63,11 @@ namespace Rodin::Tests::Convergence::StokesTractionTests
   class Fixture : public ::testing::TestWithParam<Polytope::Type>
   {
     public:
+#ifdef RODIN_STOKES_TRACTION_CURVED
+      static constexpr size_t QuadraticPatchDegree = 4;
+#else
+      static constexpr size_t QuadraticPatchDegree = 2;
+#endif
       template <size_t K>
       void checkRates() const
       {
@@ -71,12 +90,10 @@ namespace Rodin::Tests::Convergence::StokesTractionTests
       }
 
       template <size_t K>
-      void checkPatch() const
+      void checkPatch(StokesData::Field field) const
       {
         const auto mesh = makeMesh<ContextType>(this->GetParam(), 3);
-        const StokesData data(mesh.getDimension(),
-          K == 2 ? StokesData::Field::Quadratic : StokesData::Field::Cubic, 1,
-          PressureOffset);
+        const StokesData data(mesh.getDimension(), field, 1, PressureOffset);
         const auto result = PETScStokesTractionProblem(mesh, data).template solve<K>();
         expectPatchFields(result);
         EXPECT_LT(result.fields.pressure.getL2(), PatchBudget);
@@ -88,8 +105,8 @@ namespace Rodin::Tests::Convergence::StokesTractionTests
         const auto mesh = makeMesh<ContextType>(this->GetParam(), 3);
         const StokesData data(
           mesh.getDimension(), StokesData::Field::Quadratic, 1, PressureOffset);
-        const auto result =
-          PETScStokesTractionProblem(mesh, data).template solve<2>(18, PressureOffset);
+        const auto result = PETScStokesTractionProblem(mesh, data)
+                              .template solve<QuadraticPatchDegree>(18, PressureOffset);
         // Adding c*n to traction makes p_h=p_exact-c, not a velocity error.
         expectPatchFields(result);
         EXPECT_NEAR(result.fields.pressure.getL2(), PressureOffset, PatchBudget);
@@ -131,6 +148,28 @@ namespace Rodin::Tests::Convergence::StokesTractionTests
       }
   };
 
+#ifdef RODIN_STOKES_TRACTION_CURVED
+#define RODIN_STOKES_TRACTION_PATCHES(Name)                                              \
+  TEST_P(Name, QuadraticP4P3Patch)                                                       \
+  {                                                                                      \
+    checkPatch<4>(StokesData::Field::Quadratic);                                         \
+  }                                                                                      \
+  TEST_P(Name, CubicP6P5Patch)                                                           \
+  {                                                                                      \
+    checkPatch<6>(StokesData::Field::Cubic);                                             \
+  }
+#else
+#define RODIN_STOKES_TRACTION_PATCHES(Name)                                              \
+  TEST_P(Name, QuadraticP2P1Patch)                                                       \
+  {                                                                                      \
+    checkPatch<2>(StokesData::Field::Quadratic);                                         \
+  }                                                                                      \
+  TEST_P(Name, CubicP3P2Patch)                                                           \
+  {                                                                                      \
+    checkPatch<3>(StokesData::Field::Cubic);                                             \
+  }
+#endif
+
 #define RODIN_STOKES_TRACTION_TESTS(Name)                                                \
   TEST_P(Name, P2P1Rates)                                                                \
   {                                                                                      \
@@ -140,14 +179,7 @@ namespace Rodin::Tests::Convergence::StokesTractionTests
   {                                                                                      \
     checkRates<3>();                                                                     \
   }                                                                                      \
-  TEST_P(Name, QuadraticP2P1Patch)                                                       \
-  {                                                                                      \
-    checkPatch<2>();                                                                     \
-  }                                                                                      \
-  TEST_P(Name, CubicP3P2Patch)                                                           \
-  {                                                                                      \
-    checkPatch<3>();                                                                     \
-  }                                                                                      \
+  RODIN_STOKES_TRACTION_PATCHES(Name)                                                    \
   TEST_P(Name, TractionDeterminesPressureLevel)                                          \
   {                                                                                      \
     checkPressureLevelControl();                                                         \
@@ -171,6 +203,7 @@ namespace Rodin::Tests::Convergence::StokesTractionTests
   RODIN_STOKES_TRACTION_TESTS(MPITest)
 #endif
 #undef RODIN_STOKES_TRACTION_TESTS
+#undef RODIN_STOKES_TRACTION_PATCHES
 }
 
 int main(int argc, char** argv)

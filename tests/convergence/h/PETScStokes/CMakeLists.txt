@@ -18,7 +18,8 @@ foreach(geometry Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
   rodin_suppress_external_mpi_lsan_for_test(${_stability_test})
 endforeach()
 rodin_add_petsc_refinement(RodinConvergenceHPETScStokesBoundary Traction.cpp
-  GEOMETRIES Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
+  GEOMETRIES Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge
+  RATE_CASES P2P1Rates P3P2Rates)
 
 add_executable(RodinConvergenceHPETScStokes Stokes.cpp)
 target_link_libraries(RodinConvergenceHPETScStokes
