@@ -34,6 +34,12 @@ namespace Rodin::Tests::Convergence
    * @f$-c n@f$, and is intended for natural-boundary verification rather than
    * the zero-mean fully prescribed-velocity workload.
    * Physical-coordinate overloads support exact-domain lift measurements.
+   * The CubicPressure and QuarticVelocity data split the Quartic workload
+   * into @f$(0,x_0^3-1/4)@f$ and @f$(x_{d-1}^4 e_0,0)@f$ when the
+   * shear axis is @f$d-1@f$. Their sources, traces and derivatives add
+   * exactly to the original data at zero pressure offset. They isolate
+   * coupled pressure-error
+   * contributions; they do not replace the original manufactured problem.
    */
   class StokesData
   {
@@ -44,7 +50,9 @@ namespace Rodin::Tests::Convergence
         Quadratic,
         Cubic,
         Quartic,
-        Smooth
+        Smooth,
+        CubicPressure,
+        QuarticVelocity
       };
 
       StokesData(
@@ -71,11 +79,12 @@ namespace Rodin::Tests::Convergence
         Math::SpatialVector<Real> u(static_cast<std::uint8_t>(m_dimension));
         u.setZero();
         const Real t = x(m_shearAxis);
-        u(0) = m_field == Field::Smooth ? std::sin(Math::Constants::pi() * t)
-          : m_field == Field::Quartic   ? t * t * t * t
-          : m_field == Field::Affine    ? t
-          : m_field == Field::Quadratic ? t * t
-                                        : t * t * t;
+        u(0) = m_field == Field::CubicPressure ? 0
+          : m_field == Field::Smooth           ? std::sin(Math::Constants::pi() * t)
+          : m_field == Field::Quartic || m_field == Field::QuarticVelocity ? t * t * t * t
+          : m_field == Field::Affine                                       ? t
+          : m_field == Field::Quadratic                                    ? t * t
+                                                                           : t * t * t;
         return u;
       }
 
@@ -88,11 +97,12 @@ namespace Rodin::Tests::Convergence
 
       Real getPressure(const Math::SpatialPoint& x) const
       {
-        const Real pressure = m_field == Field::Smooth
-          ? std::cos(Math::Constants::pi() * x(0))
-          : m_field == Field::Quartic ? x(0) * x(0) * x(0) - Real(1) / 4
-          : m_field == Field::Cubic   ? x(0) * x(0) - Real(1) / 3
-                                      : x(0) - 0.5;
+        const Real pressure = m_field == Field::QuarticVelocity ? 0
+          : m_field == Field::Smooth ? std::cos(Math::Constants::pi() * x(0))
+          : m_field == Field::Quartic || m_field == Field::CubicPressure
+          ? x(0) * x(0) * x(0) - Real(1) / 4
+          : m_field == Field::Cubic ? x(0) * x(0) - Real(1) / 3
+                                    : x(0) - 0.5;
         return pressure + m_pressureOffset;
       }
 
@@ -104,7 +114,9 @@ namespace Rodin::Tests::Convergence
             Math::SpatialVector<Real> f(static_cast<std::uint8_t>(dim));
             f.setZero();
             const Real pi = Math::Constants::pi();
-            f(0) = field == Field::Smooth
+            f(0) = field == Field::CubicPressure ? 3 * x(0) * x(0)
+              : field == Field::QuarticVelocity  ? -12 * x(axis) * x(axis)
+              : field == Field::Smooth
               ? pi * pi * std::sin(pi * x(axis)) - pi * std::sin(pi * x(0))
               : field == Field::Quartic   ? -12 * x(axis) * x(axis) + 3 * x(0) * x(0)
               : field == Field::Affine    ? 1
@@ -128,11 +140,12 @@ namespace Rodin::Tests::Convergence
         j.setZero();
         const Real pi = Math::Constants::pi();
         const Real t = x(m_shearAxis);
-        j(0, m_shearAxis) = m_field == Field::Smooth ? pi * std::cos(pi * t)
-          : m_field == Field::Quartic                ? 4 * t * t * t
-          : m_field == Field::Affine                 ? 1
-          : m_field == Field::Quadratic              ? 2 * t
-                                                     : 3 * t * t;
+        j(0, m_shearAxis) = m_field == Field::CubicPressure ? 0
+          : m_field == Field::Smooth                        ? pi * std::cos(pi * t)
+          : m_field == Field::Quartic || m_field == Field::QuarticVelocity ? 4 * t * t * t
+          : m_field == Field::Affine                                       ? 1
+          : m_field == Field::Quadratic                                    ? 2 * t
+                                                                           : 3 * t * t;
         return j;
       }
 
@@ -166,11 +179,12 @@ namespace Rodin::Tests::Convergence
       {
         Math::SpatialVector<Real> g(static_cast<std::uint8_t>(m_dimension));
         g.setZero();
-        g(0) = m_field == Field::Smooth
+        g(0) = m_field == Field::QuarticVelocity ? 0
+          : m_field == Field::Smooth
           ? -Math::Constants::pi() * std::sin(Math::Constants::pi() * x(0))
-          : m_field == Field::Quartic ? 3 * x(0) * x(0)
-          : m_field == Field::Cubic   ? 2 * x(0)
-                                      : 1;
+          : m_field == Field::Quartic || m_field == Field::CubicPressure ? 3 * x(0) * x(0)
+          : m_field == Field::Cubic                                      ? 2 * x(0)
+                                                                         : 1;
         return g;
       }
 

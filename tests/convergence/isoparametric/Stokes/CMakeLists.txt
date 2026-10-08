@@ -14,7 +14,7 @@ foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
       "--gtest_filter=AllGeometries/LocalTest.*/${geometry}-*LocalTest.Approximated*/${geometry}")
   add_test(NAME RodinConvergenceIsoparametricStokes_Approximated_${geometry}
     COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricStokes>
-      "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}")
+      "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}-*P3Q2*")
   set_tests_properties(RodinConvergenceIsoparametricStokes_${geometry}
     RodinConvergenceIsoparametricStokes_Approximated_${geometry}
     PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
@@ -78,7 +78,7 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
         "--gtest_filter=AllGeometries/LocalTest.*/${geometry}-*LocalTest.Approximated*/${geometry}")
     add_test(NAME RodinConvergenceIsoparametricPETScStokes_Approximated_${geometry}
       COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
-        "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}")
+        "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}-*P3Q2*")
     set_tests_properties(RodinConvergenceIsoparametricPETScStokes_${geometry}
       RodinConvergenceIsoparametricPETScStokes_Approximated_${geometry}
       PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
@@ -133,7 +133,7 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
           COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
             $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
-            "--gtest_filter=AllGeometries/MPITest.Approximated*/${geometry}")
+            "--gtest_filter=AllGeometries/MPITest.Approximated*/${geometry}-*P3Q2*")
         set_tests_properties(RodinConvergenceIsoparametricPETScMPIStokes_np${np}_${geometry}
           RodinConvergenceIsoparametricPETScMPIStokes_Approximated_np${np}_${geometry}
           PROPERTIES LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
@@ -150,3 +150,53 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
     endforeach()
   endif()
 endif()
+
+# Isolate each complete higher-degree hierarchy from its independent controls.
+foreach(group Rates SeparatedRates Controls)
+  set(_higher_case "ApproximatedP3Q2*")
+  set(_higher_exclusion "")
+  if (group STREQUAL "Rates")
+    set(_higher_case "ApproximatedP3Q2VelocityPressureRates")
+  elseif (group STREQUAL "SeparatedRates")
+    set(_higher_case "ApproximatedP3Q2SeparatedPressureRates")
+  else()
+    set(_higher_exclusion "-*ApproximatedP3Q2*Rates*")
+  endif()
+  foreach(geometry IN LISTS _RODIN_CURVED_STOKES_GEOMETRIES)
+    set(_higher_test RodinConvergenceIsoparametricStokes_P3Q2_${group}_${geometry})
+    add_test(NAME ${_higher_test}
+      COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricStokes>
+        "--gtest_filter=AllGeometries/LocalTest.${_higher_case}/${geometry}${_higher_exclusion}")
+    set_tests_properties(${_higher_test} PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
+    if (geometry STREQUAL "Pyramid")
+      set_tests_properties(${_higher_test} PROPERTIES RESOURCE_LOCK curved_stokes_pyramid)
+    endif()
+    if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
+      set(_higher_test RodinConvergenceIsoparametricPETScStokes_P3Q2_${group}_${geometry})
+      add_test(NAME ${_higher_test}
+        COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
+          "--gtest_filter=AllGeometries/LocalTest.${_higher_case}/${geometry}${_higher_exclusion}")
+      set_tests_properties(${_higher_test} PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
+      rodin_suppress_external_mpi_lsan_for_test(${_higher_test})
+      if (geometry STREQUAL "Pyramid")
+        set_tests_properties(${_higher_test} PROPERTIES RESOURCE_LOCK curved_stokes_pyramid)
+      endif()
+      if (RODIN_USE_MPI)
+        foreach(np 1 2 3 4)
+          set(_higher_test RodinConvergenceIsoparametricPETScMPIStokes_P3Q2_np${np}_${group}_${geometry})
+          add_test(NAME ${_higher_test}
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinConvergenceIsoparametricPETScStokes>
+              "--gtest_filter=AllGeometries/MPITest.${_higher_case}/${geometry}${_higher_exclusion}")
+          set_tests_properties(${_higher_test} PROPERTIES
+            LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
+          rodin_suppress_external_mpi_lsan_for_test(${_higher_test})
+          if (geometry STREQUAL "Pyramid")
+            set_tests_properties(${_higher_test} PROPERTIES RESOURCE_LOCK curved_stokes_pyramid)
+          endif()
+        endforeach()
+      endif()
+    endif()
+  endforeach()
+endforeach()

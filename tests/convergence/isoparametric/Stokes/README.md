@@ -301,3 +301,157 @@ case alone took about 25 minutes with MPI rank one, before its separate
 quadrature study; the native rate hierarchy exceeded the 30-minute default.
 These execution observations do not establish an end-to-end stage breakdown
 or a controlled performance comparison.
+
+## Higher-order mixed fields on quadratic approximated geometry
+
+The `ApproximatedP3Q2` extension uses velocity/pressure degrees $3/2$ on
+the same quadratic-interpolated sine-map domain. The manufactured fields are
+
+$$
+u_\star(x)=x_{d-1}^4e_0,\qquad
+p_\star(x)=x_0^3-\frac14,\qquad
+f(x)=(-12x_{d-1}^2+3x_0^2)e_0,
+\qquad d\in\lbrace2,3\rbrace.
+$$
+
+They satisfy $-\Delta u_\star+\nabla p_\star=f$ and
+$\operatorname{div}u_\star=0$. The physical velocity trace is prescribed;
+the existing global mean-pressure constraint is retained. The shear map
+preserves $x_0$ and volume, so the physical cubic pressure has zero mean
+on both domains and its geometry defect vanishes analytically. That defect
+uses the existing absolute $10^{-10}$ budget, not a relative rate fit.
+
+Three levels are $n=9,17,33$ for Triangle, $n=3,5,9$ for
+Quadrilateral and $n=3,4,5$ in 3D, with
+$h=(n-1)^{-1}$. The latter retains the module's three-dimensional mixed
+hierarchy strategy; it does not change any older pair's refinement levels.
+The original Triangle hierarchy $n=3,5,9$ gave pressure
+$L^2$ slopes $4.05,3.42$ and $H^1$-seminorm slopes $3.14,2.55$.
+These positive, strictly decreasing errors did not satisfy the stated
+two-sided finite-resolution windows. An isolated finer native Triangle
+study gave slopes $3.19,3.10$ and $2.31,2.19$, respectively, within
+the original windows and approaching the expected orders $3$ and $2$.
+The finer hierarchy therefore tests the resolved regime without widening
+an acceptance margin. This isolated observation does not identify a separate
+superconvergence theorem or certify another geometry or backend; the complete
+registered matrix is verified separately below. The fixed-mesh
+patch, quadrature and wrong-viscosity controls retain $n=3$ or $n=5$.
+Under the stated regularity, map and mixed-stability hypotheses, represented
+and lifted-field velocity errors have $L^2/H^1$ orders $4/3$ and geometry
+errors have orders $3/2$. For norm index $j\in\lbrace0,1\rbrace$, the
+shared mixed-order assertion checks both norm triangle inequalities and
+
+$$
+T_{j,f}<T_{j,c},\qquad
+T_{j,f}\le F_{j,c}\rho^{4-j-\delta_j}
+             +G_{j,c}\rho^{3-j-\delta_j}+10^{-11},
+\qquad\rho=\frac{h_f}{h_c},\quad
+\delta_0=0.55,\quad\delta_1=0.45.
+$$
+
+Every adjacent interval retains the independent velocity component windows.
+Represented, lifted-field and total pressure errors retain strict decay and
+the conditional $3/2$ rate floors with the same $0.55/0.45$ margins.
+An upper slope window is not imposed on this coupled pressure error: its
+velocity-induced contribution can dominate a finite hierarchy and decay
+faster than the pressure approximation order. The independently separated
+pressure-data study below retains two-sided pressure windows.
+Divergence defects remain
+bounded by $\sqrt d$ times the corresponding velocity derivative norm;
+no exact divergence order is asserted. These are finite-hierarchy acceptance
+policies, not a proof of uniform inf-sup stability or geometry dominance.
+
+The uniform tetrahedral family also supplies an independent interpolation
+reference for the pressure. On a coordinate slab $x_0\in[a,a+h]$, let
+$t=(x_0-a)/h$. The quadratic nodal interpolant $I_2p_\star$ satisfies
+
+$$
+p_\star-I_2p_\star=h^3t\left(t-\frac12\right)(t-1),\qquad
+\lVert p_\star-I_2p_\star\rVert_{L^2(\Omega_h)}
+=\frac{h^3}{\sqrt{840}},\qquad
+\lvert p_\star-I_2p_\star\rvert_{H^1(\Omega_h)}
+=\frac{h^2}{\sqrt{20}}.
+$$
+
+These identities use the slab's vertex/edge-midpoint interpolation nodes,
+preservation of $x_0$, and the unit-Jacobian shear map. They give a separate
+approximation scale for the represented pressure space. Mixed-solve
+pressure errors additionally depend on velocity approximation and finite
+mixed stability; their observed rates cannot be inferred from interpolation
+alone.
+
+The additional `ApproximatedP3Q2SeparatedPressureRates` gate resolves this
+coupling on the same mesh, spaces, quadrature and mean-pressure constraint.
+At zero pressure offset, the original data are decomposed as
+
+$$
+(u_\star,p_\star)=(u_\star^{P},p_\star^{P})
+                    +(u_\star^{V},p_\star^{V}),\qquad
+(u_\star^{P},p_\star^{P})=\left(0,x_0^3-\frac14\right),\qquad
+(u_\star^{V},p_\star^{V})=(x_{d-1}^4e_0,0).
+$$
+
+The corresponding body forces are $f^P=3x_0^2e_0$ and
+$f^V=-12x_{d-1}^2e_0$. Linearity of the constrained discrete Stokes problem
+then gives $p_h=p_h^P+p_h^V$ and $u_h=u_h^P+u_h^V$. For pressure defects
+$e_h^P=p_h^P-p_\star$ and $e_h^V=p_h^V$, the actual combined error satisfies
+
+$$
+\lVert p_h-p_\star\rVert_j^2
+=\lVert e_h^P\rVert_j^2+\lVert e_h^V\rVert_j^2
+ +2\langle e_h^P,e_h^V\rangle_j,\qquad j\in\lbrace0,1\rbrace,
+$$
+
+where $\langle a,b\rangle_0=\int_{\Omega_h}ab$ and
+$\langle a,b\rangle_1=\int_{\Omega_h}\nabla a\cdot\nabla b$.
+The lifted variants use the exact-domain measure and lifted gradients instead.
+Consequently, a finite-resolution slope of the combined pressure error need
+not equal the approximation slope of its pressure-data component. A bound
+$E(h)\le Ch^r$ does not supply the complementary lower bound needed to
+exclude a faster observed slope.
+
+The registered component gate retains the original coupled solve at every
+level. Logical cell/DOF layouts are compared exactly before numerical
+coefficient superposition is checked using
+$\lVert c_h-c_h^P-c_h^V\rVert_2/\max(1,\lVert c_h\rVert_2)$ against the
+existing dimensionless $10^{-9}$ roundoff budget, separately for velocity
+and pressure. This coefficient check is rank-local, including
+available halo coefficients, and introduces no collective. Represented,
+lifted-field and total pressure norms are independently computed with the
+existing owned-cell/global-norm contract. Both norm triangle inequalities
+are checked for each decomposition. All three data sets retain strict error
+reduction and rate floors $3-0.55$ and $2-0.45$; the pressure-data component
+additionally retains the upper windows $3+0.55$ and $2+0.45$.
+The same three-level geometry-specific hierarchy is used. The original coupled
+study retains its velocity component windows, pressure decay and pressure rate
+floors; the separated study additionally resolves the pressure-data order.
+Neither registration alone certifies the complete numerical matrix. These
+finite-hierarchy criteria do not establish an asymptotic lower bound for every
+coupled pressure error or a uniform inf-sup constant.
+
+At $n=5$, assembly order $12\to16$ and norm order $14\to18$ are varied
+separately; positive error components retain the $10^{-6}$ relative
+sensitivity budget. Direct factorization retains the existing independently
+recomputed residual budget; no iterative tolerance variation is introduced.
+At $n=3$, the physical affine shear patch must retain the existing $10^{-9}$
+reproduction budgets. A separate viscosity control changes the operator
+coefficient from one to two while retaining the original source and trace;
+pressure errors must exceed the existing $0.1/1$ floors. The geometry defects
+remain unchanged. Finally, physical volume and cubic-pressure mean are
+integrated independently with the existing $10^{-12}$ gauge budget.
+
+The original coupled hierarchy, the separated-pressure hierarchy and the four
+fixed-mesh controls run in distinct `Rates`, `SeparatedRates` and `Controls`
+process groups. Each rate group retains all three levels and both intervals;
+process isolation changes neither the discrete problem nor its acceptance
+criteria. These registrations cover six applicable geometries, native and
+real-PETSc local execution, MPI ranks one through four and both thread
+configurations. They retain slow labels, processor counts, pyramid locks and
+1800-second watchdogs. The complete six-case finite matrix is locally verified:
+216 process groups select 432 configurations with 864 successful rank-local
+reports. Both thread configurations were compiled freshly for native and
+real-PETSc execution. Source identity, dependency freshness, exact case
+selection, runtime results and resource guards were audited independently.
+The retained dependency libraries and finite mesh sequences do not constitute
+a complete dependency-library rebuild, hosted-CI certification or a uniform
+stability proof.
