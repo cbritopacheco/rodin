@@ -230,3 +230,56 @@ and real-PETSc local/MPI configurations, with ranks one through four.
 Sequential/OpenMP remains a build choice. These are finite hierarchy
 certificates; arbitrary map degrees and arbitrary curved meshes are not
 certified by these cases.
+
+## Cubic fields on quadratic approximated geometry
+
+The `ApproximatedP3Q2` extension retains the physical sine solution of
+$-\Delta u+u+u^3=f$, its full essential trace and the represented sine-map
+domain. Field degree $p=3$ and geometry degree $q=2$ are independent.
+Three levels are $n=3,5,9$, except Segment ($n=5,9,17$).
+Represented-domain errors and the lifted field, geometry and total defects
+are integrated independently. Under the preceding regularity, coercivity
+and map assumptions, field errors have $L^2/H^1$ orders $4/3$ and geometry
+errors have orders $3/2$.
+
+For norm index $j\in\lbrace0,1\rbrace$, let $F_j,G_j,T_j$ denote field,
+geometry and total errors and let $\rho=h_f/h_c<1$. The shared
+`LiftedConvergence` assertion checks component-rate windows, both norm
+triangle inequalities and the adjacent-level envelope
+
+$$
+T_{j,f}<T_{j,c},\qquad
+T_{j,f}\le F_{j,c}\rho^{4-j-\delta_j}
+             +G_{j,c}\rho^{3-j-\delta_j}+10^{-11},
+\qquad\delta_0=0.55,\quad\delta_1=0.45.
+$$
+
+These margins, monotonicity and the dimensionless floor are finite-hierarchy
+acceptance policies. No two-sided total-error rate or established geometry
+dominance is inferred from the component estimates.
+At $n=5$, assembly order $12\to16$, norm order $14\to18$, and nonlinear
+tolerance $10^{-11}\to10^{-12}$ are varied separately, retaining the
+$10^{-6}$ relative sensitivity budget for every positive error component.
+A physical affine field is representable at these degrees; represented and
+lifted-field errors must remain below $10^{-9}$. Omitting the cubic reaction
+while retaining the original source and trace must violate the existing
+field-error floors $10^{-3}/10^{-2}$ and double the total errors, without
+changing geometry defects.
+
+A fourth case tests the cubic-field residual derivative on the represented
+sine-map mesh at $n=3$. The existing homogeneous reference-bubble direction
+and central-difference oracle with step $10^{-5}$ are reused. The correct
+tangent must have relative defect below $10^{-6}$; changing the cubic
+derivative coefficient from $3u^2$ to $u^2$ must produce a defect above
+$10^{-3}$. This derivative consistency check is
+separate from convergence of the solved field.
+
+Separate registrations cover all seven geometries, native and real-PETSc
+local execution, MPI ranks one through four and both thread configurations.
+Slow labels, 1800-second watchdogs, processor counts and pyramid resource
+locks are retained. The complete finite matrix is locally verified: 84
+registrations select 336 configurations and produce 672 rank reports across
+the seven geometries, native and real-PETSc local/MPI execution, and both
+thread modes. Dependency freshness, case-selection uniqueness and every
+participant report are checked independently. This is not hosted-CI
+certification or a statement about arbitrary meshes and degrees.
