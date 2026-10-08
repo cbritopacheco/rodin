@@ -351,6 +351,73 @@ executions are distinct gates. The degree-specific entries have
 1800-second watchdogs, slow labels, MPI processor counts and the shared
 pyramid resource lock. Registration is not evidence of numerical completion.
 
-Mixed boundary conditions, arbitrary field/geometry degrees, complex material
-coefficients, and resonant or high-frequency Helmholtz workloads remain outside
-this suite's claim.
+Arbitrary field/geometry degrees, complex material coefficients, and resonant
+or high-frequency Helmholtz workloads remain outside this suite's claim.
+
+## Mixed Neumann and impedance data on exact quadratic geometry
+
+The complex-PETSc boundary target uses the fixed exact quadratic domain
+above, with $\Gamma_D=\Phi(\lbrace \xi_0=0\rbrace)$ and
+$\Gamma_N=\partial\Omega\setminus\Gamma_D$. Reference-face attributes
+are assigned before partitioning and mapping. Manufactured physical data are
+
+$$
+u=u_\ast\quad\text{on }\Gamma_D,\qquad
+\partial_nu+i\beta u=g_N\quad\text{on }\Gamma_N,\qquad
+g_N=\nabla u_\ast\cdot n+i\beta u_\ast,\qquad \beta\in\lbrace 0,1\rbrace.
+$$
+
+The normal contraction does not conjugate the complex gradient. The
+trial-first sesquilinear form and load are
+
+$$
+a_\beta(u,v)=\int_\Omega\nabla u\cdot\overline{\nabla v}\thinspace dx
+-\frac14\int_\Omega u\overline v\thinspace dx
++i\beta\int_{\Gamma_N}u\overline v\thinspace ds,\qquad
+\ell_\beta(v)=\int_\Omega f\overline v\thinspace dx
++\int_{\Gamma_N}g_N\overline v\thinspace ds.
+$$
+
+Here $\beta=0$ gives mixed Neumann data and $\beta=1$ impedance data.
+The mapped-boundary metric and outward normal are evaluated physically.
+Pullback to the reference box gives a conservative mixed Poincaré bound:
+$\Vert D\Phi\Vert_2\le1.2$ and $1\le\det D\Phi\le1.2$ imply
+
+$$
+\lambda_{\mathrm{mix}}(\Omega)\ge
+\frac{\pi^2}{4(1.2)^3}>\frac14.
+$$
+
+Thus the real part of $a_\beta(v,v)$ is coercive on the homogeneous
+essential-trace space. Mixed Neumann uses Hermitian CG; the non-Hermitian
+impedance form uses GMRES with Jacobi preconditioning. This bound concerns
+the stated map and wave number, not an arbitrary mixed Helmholtz problem.
+
+Both conditions use smooth $u_\ast=e^{is(x)}$ at field degrees one through
+three: $n=5,9,17$ for P1 and $n=3,5,9$ for P2/P3. Every adjacent
+interval must decrease and exceed L2/H1-seminorm floors
+$1.65/0.75$, $2.45/1.55$, and $3.45/2.55$, respectively, under the
+regularity and stable-approximation hypotheses stated above.
+Constant P1, physical-affine P2 and physical-quadratic P4 patches use
+$u_\ast=1+2i$, $1+2i+(1+i/2)s$, and $1+2i+(1+i/2)s^2$.
+Their pullbacks have degrees zero, two and four; both physical error norms
+must be below $10^{-9}$.
+
+Two independent controls retain the correct manufactured source and trace.
+Omitting the volume mass term on the affine P2 patch must give
+$E_0>10^{-3}$ and $E_1>10^{-2}$. Omitting only the normal flux, while
+retaining the impedance exact-value load, must give both errors above
+$10^{-3}$ and more than five times their correct patch counterparts.
+This representable-field control does not rely on a coarse smooth-field
+error being small. Assembly order $16\to18$, norm order $18\to20$,
+and solver tolerance $10^{-13}\to10^{-14}$ are varied independently;
+both smooth P2 error norms must change relatively by less than $10^{-6}$.
+The independent coefficient-residual budget remains $10^{-11}$.
+
+The target registers all seven positive-dimensional geometries locally and
+at MPI ranks one through four, separately in sequential/OpenMP builds.
+Real PETSc is excluded. Global assembly, solution and norm reductions require
+all ranks; geometry installation and pointwise manufactured data are local.
+The existing shared registration helper supplies slow labels, processor
+counts, 1800-second watchdogs and a pyramid resource lock. These declarations
+describe the test matrix; they are not evidence of a completed run.

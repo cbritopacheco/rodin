@@ -16,6 +16,11 @@ foreach(geometry IN LISTS _RODIN_CURVED_HELMHOLTZ_GEOMETRIES)
 endforeach()
 
 if (RODIN_USE_PETSC AND RODIN_CONVERGENCE_PETSC_COMPLEX)
+  include(../../PETScRefinement.cmake)
+  rodin_add_petsc_refinement(RodinConvergenceIsoparametricPETScHelmholtzBoundary
+    ../../h/PETScHelmholtz/BoundaryConditions.cpp)
+  target_compile_definitions(RodinConvergenceIsoparametricPETScHelmholtzBoundary
+    PRIVATE RODIN_HELMHOLTZ_BOUNDARY_CURVED)
   add_executable(RodinConvergenceIsoparametricPETScHelmholtz PETScHelmholtz.cpp)
   target_link_libraries(RodinConvergenceIsoparametricPETScHelmholtz
     PRIVATE GTest::gtest RodinConvergence Rodin::PETSc)

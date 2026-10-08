@@ -9,6 +9,9 @@
 
 #include "PETScHelmholtzProblem.h"
 #include "FieldConvergence.h"
+#ifdef RODIN_HELMHOLTZ_BOUNDARY_CURVED
+#include "CurvedGeometry.h"
+#endif
 #ifdef RODIN_USE_MPI
 #include <boost/mpi/environment.hpp>
 #include "MPIConvergence.h"
@@ -41,13 +44,22 @@ namespace Rodin::Tests::Convergence::HelmholtzBoundaryTests
     {
       auto mesh = UniformGrid(geometry).makeMesh(n);
       initialize(mesh);
+#ifdef RODIN_HELMHOLTZ_BOUNDARY_CURVED
+      CurvedGeometry curved(mesh);
+      curved.template install<2>();
+#endif
       return mesh;
     }
 #ifdef RODIN_USE_MPI
     else
     {
       Context::MPI context(*environment, *world);
-      return DistributedUniformGrid(context, geometry).makeMesh(n, initialize);
+      auto mesh = DistributedUniformGrid(context, geometry).makeMesh(n, initialize);
+#ifdef RODIN_HELMHOLTZ_BOUNDARY_CURVED
+      CurvedGeometry curved(mesh);
+      curved.template install<2>();
+#endif
+      return mesh;
     }
 #endif
   }
@@ -56,6 +68,11 @@ namespace Rodin::Tests::Convergence::HelmholtzBoundaryTests
   class Fixture : public ::testing::TestWithParam<Polytope::Type>
   {
     public:
+#ifdef RODIN_HELMHOLTZ_BOUNDARY_CURVED
+      static constexpr size_t AffinePatchDegree = 2;
+#else
+      static constexpr size_t AffinePatchDegree = 1;
+#endif
       template <size_t K>
       void checkRates(bool impedance) const
       {
@@ -81,7 +98,13 @@ namespace Rodin::Tests::Convergence::HelmholtzBoundaryTests
         const auto mesh = makeMesh<ContextType>(this->GetParam(), 3);
         using Problem = PETScHelmholtzProblem<K, std::remove_cvref_t<decltype(mesh)>>;
         const auto field =
+#ifdef RODIN_HELMHOLTZ_BOUNDARY_CURVED
+          K == 1   ? HelmholtzData::Field::Constant
+          : K == 2 ? HelmholtzData::Field::Affine
+                   : HelmholtzData::Field::Quadratic;
+#else
           K == 1 ? HelmholtzData::Field::Affine : HelmholtzData::Field::Quadratic;
+#endif
         const Problem problem(mesh, field, 16,
           impedance ? Problem::Boundary::Impedance : Problem::Boundary::MixedNeumann);
         const auto error = problem.solve(omitMass);
@@ -102,12 +125,25 @@ namespace Rodin::Tests::Convergence::HelmholtzBoundaryTests
       {
         const auto mesh = makeMesh<ContextType>(this->GetParam(), 3);
         using Problem = PETScHelmholtzProblem<2, std::remove_cvref_t<decltype(mesh)>>;
-        const Problem problem(mesh, HelmholtzData::Field::Smooth, 16,
-          impedance ? Problem::Boundary::Impedance : Problem::Boundary::MixedNeumann);
+        const Problem problem(mesh,
+#ifdef RODIN_HELMHOLTZ_BOUNDARY_CURVED
+          HelmholtzData::Field::Affine,
+#else
+          HelmholtzData::Field::Smooth,
+#endif
+          16, impedance ? Problem::Boundary::Impedance : Problem::Boundary::MixedNeumann);
         const auto correct = problem.solve();
         const auto wrong = problem.solve(false, Real(1e-13), 18, true);
         EXPECT_TRUE(correct.isFinite());
         EXPECT_TRUE(wrong.isFinite());
+#ifdef RODIN_HELMHOLTZ_BOUNDARY_CURVED
+        // The affine pullback is represented exactly in P2. This separates
+        // omitted physical flux from coarse smooth-field discretization error.
+        EXPECT_LT(correct.getL2(), Real(1e-9));
+        EXPECT_LT(correct.getH1Seminorm(), Real(1e-9));
+        EXPECT_GT(wrong.getL2(), Real(1e-3));
+        EXPECT_GT(wrong.getH1Seminorm(), Real(1e-3));
+#endif
         EXPECT_GT(wrong.getL2(), 5 * correct.getL2());
         EXPECT_GT(wrong.getH1Seminorm(), 5 * correct.getH1Seminorm());
       }
@@ -131,6 +167,32 @@ namespace Rodin::Tests::Convergence::HelmholtzBoundaryTests
       }
   };
 
+#ifdef RODIN_HELMHOLTZ_BOUNDARY_CURVED
+#define RODIN_HELMHOLTZ_BOUNDARY_PATCHES(Name, Prefix, Impedance)                        \
+  TEST_P(Name, Prefix##ConstantP1Patch)                                                  \
+  {                                                                                      \
+    checkPatch<1>(Impedance);                                                            \
+  }                                                                                      \
+  TEST_P(Name, Prefix##AffineP2Patch)                                                    \
+  {                                                                                      \
+    checkPatch<2>(Impedance);                                                            \
+  }                                                                                      \
+  TEST_P(Name, Prefix##QuadraticP4Patch)                                                 \
+  {                                                                                      \
+    checkPatch<4>(Impedance);                                                            \
+  }
+#else
+#define RODIN_HELMHOLTZ_BOUNDARY_PATCHES(Name, Prefix, Impedance)                        \
+  TEST_P(Name, Prefix##AffineP1Patch)                                                    \
+  {                                                                                      \
+    checkPatch<1>(Impedance);                                                            \
+  }                                                                                      \
+  TEST_P(Name, Prefix##QuadraticP2Patch)                                                 \
+  {                                                                                      \
+    checkPatch<2>(Impedance);                                                            \
+  }
+#endif
+
 #define RODIN_HELMHOLTZ_BOUNDARY_CONDITION(Name, Prefix, Impedance)                      \
   TEST_P(Name, Prefix##P1Rates)                                                          \
   {                                                                                      \
@@ -144,17 +206,10 @@ namespace Rodin::Tests::Convergence::HelmholtzBoundaryTests
   {                                                                                      \
     checkRates<3>(Impedance);                                                            \
   }                                                                                      \
-  TEST_P(Name, Prefix##AffineP1Patch)                                                    \
-  {                                                                                      \
-    checkPatch<1>(Impedance);                                                            \
-  }                                                                                      \
-  TEST_P(Name, Prefix##QuadraticP2Patch)                                                 \
-  {                                                                                      \
-    checkPatch<2>(Impedance);                                                            \
-  }                                                                                      \
+  RODIN_HELMHOLTZ_BOUNDARY_PATCHES(Name, Prefix, Impedance)                              \
   TEST_P(Name, Prefix##RejectsMissingMass)                                               \
   {                                                                                      \
-    checkPatch<1>(Impedance, true);                                                      \
+    checkPatch<AffinePatchDegree>(Impedance, true);                                      \
   }                                                                                      \
   TEST_P(Name, Prefix##RejectsMissingFlux)                                               \
   {                                                                                      \
@@ -184,6 +239,7 @@ namespace Rodin::Tests::Convergence::HelmholtzBoundaryTests
 #endif
 #undef RODIN_HELMHOLTZ_BOUNDARY_TESTS
 #undef RODIN_HELMHOLTZ_BOUNDARY_CONDITION
+#undef RODIN_HELMHOLTZ_BOUNDARY_PATCHES
 }
 
 int main(int argc, char** argv)

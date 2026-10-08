@@ -582,12 +582,12 @@ jobs:
     # Exact and approximated-domain studies retain resolved meshes and serialize
     # curved pyramids. The additional local/MPI matrix takes about 15 minutes
     # on the local sequential stack; retain headroom for dependency/build time.
-    timeout-minutes: 120
+    timeout-minutes: ${{ matrix.suite == 'curved_boundary' && 240 || 120 }}
     strategy:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        suite: [bulk, boundary, submesh]
+        suite: [bulk, boundary, curved_boundary, submesh]
     env:
       OMP_NUM_THREADS: 2
 
@@ -640,7 +640,7 @@ jobs:
         if: matrix.suite == 'bulk'
         run: >-
           ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP|Isoparametric)PETSc(MPI)?Helmholtz|RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_|RodinPETScSNESStateTest|RodinPETSc(MPI)?ScalarIntegralTest|Rodin_Variational_Integral'
-          -E '^RodinConvergenceHPETScHelmholtzBoundary_'
+          -E '^RodinConvergence(H|Isoparametric)PETScHelmholtzBoundary_'
           --output-on-failure -j 2
 
       - name: Build complex PETSc Helmholtz boundary suite
@@ -661,6 +661,16 @@ jobs:
         if: matrix.suite == 'submesh'
         run: >-
           ctest --test-dir build/tests -R '^RodinPETScMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
+          --output-on-failure --no-tests=error -j 1
+
+      - name: Build curved complex PETSc Helmholtz boundary suite
+        if: matrix.suite == 'curved_boundary'
+        run: cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScHelmholtzBoundary
+
+      - name: Run curved complex PETSc Helmholtz boundary suite
+        if: matrix.suite == 'curved_boundary'
+        run: >-
+          ctest --test-dir build/tests -R '^RodinConvergenceIsoparametricPETScHelmholtzBoundary_'
           --output-on-failure --no-tests=error -j 1
 
   PETScMatrixRanges:
