@@ -36,6 +36,37 @@ foreach(geometry IN LISTS _RODIN_CURVED_DIFFUSION_GEOMETRIES)
 endforeach()
 
 if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
+  include(../../PETScRefinement.cmake)
+  # Complete sequential pyramid groups took 4169 seconds for local Poisson
+  # and 5345 seconds for one-rank conductivity. Reserve two hours per context;
+  # these concurrent validation timings are not controlled benchmarks.
+  # Refinement levels, quadrature and numerical acceptance remain unchanged.
+  set(_RODIN_CURVED_DIFFUSION_BOUNDARY_PYRAMID_TIMEOUT 7200)
+  foreach(physics Poisson Conductivity)
+    set(_boundary_target RodinConvergenceIsoparametricPETSc${physics}Boundary)
+    rodin_add_petsc_refinement(${_boundary_target}
+      ../../h/PETScPoisson/BoundaryConditions.cpp)
+    set_tests_properties(${_boundary_target}_Pyramid PROPERTIES
+      TIMEOUT ${_RODIN_CURVED_DIFFUSION_BOUNDARY_PYRAMID_TIMEOUT})
+    if (RODIN_USE_MPI)
+      foreach(np 1 2 3 4)
+        set_tests_properties(${_boundary_target}_MPI_np${np}_Pyramid PROPERTIES
+          TIMEOUT ${_RODIN_CURVED_DIFFUSION_BOUNDARY_PYRAMID_TIMEOUT})
+      endforeach()
+    endif()
+    target_compile_definitions(${_boundary_target}
+      PRIVATE RODIN_DIFFUSION_BOUNDARY_CURVED)
+    if (physics STREQUAL "Conductivity")
+      target_compile_definitions(${_boundary_target}
+        PRIVATE RODIN_DIFFUSION_BOUNDARY_VARIABLE)
+    endif()
+    if (RODIN_CONVERGENCE_PETSC_MUMPS)
+      target_compile_definitions(${_boundary_target}
+        PRIVATE RODIN_DIFFUSION_BOUNDARY_MUMPS)
+    else()
+      message(STATUS "Curved pure Neumann ${physics} excluded: PETSc lacks MUMPS")
+    endif()
+  endforeach()
   add_executable(RodinConvergenceIsoparametricPETScDiffusion Diffusion.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScDiffusion
     PRIVATE RODIN_CURVED_DIFFUSION_PETSC)

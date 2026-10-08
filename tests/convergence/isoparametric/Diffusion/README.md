@@ -130,6 +130,102 @@ Complex-PETSc builds do not register this real-field suite; complex scalar
 or vector diffusion coverage is not claimed here.
 Tests are labelled slow, have 1800-second timeouts and share a pyramid lock.
 
+## Natural boundary data on the exact curved domain
+
+The real-PETSc boundary targets reuse the scalar diffusion formulation on
+the exact quadratic domain above. Boundary attributes are assigned to
+reference-box faces before partitioning and mapping. For mixed data,
+$\Gamma_D=\Phi(\lbrace \xi_0=0\rbrace)$ and
+$\Gamma_N=\partial\Omega\setminus\Gamma_D$. The prescribed physical
+flux is $g_N=\gamma\nabla u\cdot n$, with the mapped outward normal $n$.
+Mixed Neumann data impose this flux on $\Gamma_N$; Robin data impose
+$\gamma\partial_n u+2u=g_N+2u$ there. The weak boundary contributions are
+
+$$
+\int_{\Gamma_N}g_Nv\thinspace ds
+\quad\text{or}\quad
+\int_{\Gamma_N}(g_N+2u)v\thinspace ds-2\int_{\Gamma_N}u_hv\thinspace ds.
+$$
+
+The manufactured trace is imposed on $\Gamma_D$. For pure Neumann data,
+all boundary faces are natural and a P0g multiplier imposes
+$\int_\Omega u_h\thinspace dx=0$. This target requires MUMPS. The reference field
+is shifted by its domain mean, not by the flat unit-box mean:
+
+$$
+u_0=u-\bar u,\qquad
+\bar u=\frac{1}{|\Omega|}\int_\Omega u\thinspace dx.
+$$
+
+Let $a=0.1$ and $L=1+a$. For $u=e^{\sum_jx_j}$, the reference mean is
+
+$$
+\bar u=
+\begin{cases}
+(e^L-1)/L,&d=1,\cr
+(e-1)^{d-1}\displaystyle\int_0^1e^{t+at^2}\thinspace dt,&d=2,3.
+\end{cases}
+$$
+
+The one-dimensional reference integral uses order 24, independently of
+the PDE mesh, and is checked against order 32 within $10^{-13}$.
+It is also checked within the same budget against the independent positive
+series
+
+$$
+\int_0^1e^{t+at^2}\thinspace dt
+=\sum_{i=0}^{\infty}\sum_{j=0}^{\infty}
+\frac{a^j}{i!j!(i+2j+1)}.
+$$
+
+The oracle truncates at $i=40$, $j=20$. Positivity and
+$(i+2j+1)^{-1}\leq1$ bound the omitted tails, before floating-point rounding,
+by the two factorial-series remainders:
+
+$$
+0\leq T\leq
+\frac{e^a}{41!\thinspace (1-1/42)}+
+\frac{e\thinspace a^{21}}{21!\thinspace (1-a/22)}
+<6\times10^{-41},\qquad a=0.1.
+$$
+
+It is rank-local prescribed data, not an MPI reduction. Constants have
+mean one; the affine and quadratic patch means are respectively
+$1+L/2$ and $1+L^2/3$ in one dimension, and
+$1+d/2+a/3$ and $1+d/3+a/3+a^2/5$ in dimensions two and three.
+The multiplier integral measures the compatibility defect
+$\int_\Omega f\thinspace dx+\int_{\partial\Omega}g_N\thinspace ds$ for any domain volume.
+
+Each boundary condition and coefficient has P1/P2/P3 exponential-field
+studies on three levels: $n=5,9,17$ for P1 and $n=3,5,9$ for P2/P3.
+Both adjacent intervals must decrease, with L2/H1-seminorm rate floors
+$1.65/0.75$, $2.45/1.55$, and $3.45/2.35$, respectively.
+Constant P1, physical-affine P2 and physical-quadratic P4 patches require
+both errors below $10^{-9}$. These field degrees are deliberate: on
+quadratic geometry their pullbacks have degrees zero, two and four.
+Omitting the manufactured flux must increase both errors by a factor
+greater than five. Independent assembly-order, norm-order and solver
+sensitivity checks retain the flat boundary suite's $10^{-6}$ relative
+budget; residual and gauge budgets are $10^{-11}$ and $10^{-10}$.
+
+The shared boundary fixture accepts an explicit manufactured mean and
+retains its analytic unit-box default for existing flat tests. No mesh
+matching or additional communication is introduced. All seven geometries
+have local and MPI rank 1–4 registrations in sequential/OpenMP builds;
+global assembly, solves and norm integration require all ranks, while
+geometry installation, pointwise data and the reference mean are local.
+Complex-PETSc builds do not register these real-field targets. They use
+the existing slow label and pyramid resource lock. Curved Poisson and
+conductivity pyramid groups have a 7200-second safety timeout; other groups
+retain 1800 seconds. CI separates the local and individual MPI rank-count
+contexts for both pyramid workloads instead of accumulating five complete
+groups in one job. The completed sequential local Poisson and one-rank
+conductivity groups took approximately 70 and 89 minutes, respectively,
+with other validation workloads active; these are scheduling observations,
+not isolated performance benchmarks.
+This scheduling allowance does not alter refinement levels, quadrature,
+solver settings or error acceptance.
+
 ## Field refinement on approximated sine geometry
 
 The opt-in `Sine` cases use the same equations, analytic physical fields,

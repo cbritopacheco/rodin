@@ -498,14 +498,37 @@ jobs:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        physics: [LinearElasticity]
+        physics: [Poisson, Conductivity, LinearElasticity]
         geometry: [light, tetrahedron, pyramid]
         selection: [all]
+        # Scalar pyramid groups exceed one hour locally for both physics.
         # Resolved P1 tetrahedral traction also exceeds a 30-minute group
         # budget. Give each costly context its own job.
         exclude:
+          - {physics: Poisson, geometry: pyramid}
+          - {physics: Conductivity, geometry: pyramid}
           - {physics: LinearElasticity, geometry: tetrahedron}
         include:
+          - {multithreaded: ON, physics: Poisson, geometry: pyramid, selection: local}
+          - {multithreaded: OFF, physics: Poisson, geometry: pyramid, selection: local}
+          - {multithreaded: ON, physics: Poisson, geometry: pyramid, selection: np1}
+          - {multithreaded: OFF, physics: Poisson, geometry: pyramid, selection: np1}
+          - {multithreaded: ON, physics: Poisson, geometry: pyramid, selection: np2}
+          - {multithreaded: OFF, physics: Poisson, geometry: pyramid, selection: np2}
+          - {multithreaded: ON, physics: Poisson, geometry: pyramid, selection: np3}
+          - {multithreaded: OFF, physics: Poisson, geometry: pyramid, selection: np3}
+          - {multithreaded: ON, physics: Poisson, geometry: pyramid, selection: np4}
+          - {multithreaded: OFF, physics: Poisson, geometry: pyramid, selection: np4}
+          - {multithreaded: ON, physics: Conductivity, geometry: pyramid, selection: local}
+          - {multithreaded: OFF, physics: Conductivity, geometry: pyramid, selection: local}
+          - {multithreaded: ON, physics: Conductivity, geometry: pyramid, selection: np1}
+          - {multithreaded: OFF, physics: Conductivity, geometry: pyramid, selection: np1}
+          - {multithreaded: ON, physics: Conductivity, geometry: pyramid, selection: np2}
+          - {multithreaded: OFF, physics: Conductivity, geometry: pyramid, selection: np2}
+          - {multithreaded: ON, physics: Conductivity, geometry: pyramid, selection: np3}
+          - {multithreaded: OFF, physics: Conductivity, geometry: pyramid, selection: np3}
+          - {multithreaded: ON, physics: Conductivity, geometry: pyramid, selection: np4}
+          - {multithreaded: OFF, physics: Conductivity, geometry: pyramid, selection: np4}
           - {multithreaded: ON, physics: LinearElasticity, geometry: tetrahedron, selection: local}
           - {multithreaded: OFF, physics: LinearElasticity, geometry: tetrahedron, selection: local}
           - {multithreaded: ON, physics: LinearElasticity, geometry: tetrahedron, selection: np1}

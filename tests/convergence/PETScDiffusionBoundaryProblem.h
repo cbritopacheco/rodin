@@ -31,7 +31,9 @@ namespace Rodin::Tests::Convergence
    * ErrorNorm integrates the field independently. Solver status, coefficient
    * residual, mean and compatibility multiplier have separate acceptance.
    * Distributed assembly, solution and global error/residual integration
-   * have collective semantics; prescribing the analytic mean does not.
+   * have collective semantics; prescribing the reference mean does not.
+   * An explicit reference mean permits other prescribed domains without
+   * changing the default analytic unit-box path.
    */
   template <size_t K, class MeshType, bool ConstantCoefficient = true>
   class PETScDiffusionBoundaryProblem
@@ -46,13 +48,20 @@ namespace Rodin::Tests::Convergence
       static constexpr Geometry::Attribute DirichletAttribute = 101;
       static constexpr Geometry::Attribute NaturalAttribute = 102;
 
+      /** @brief Bind the mesh and prescribed manufactured boundary data.
+       * @param referenceMean Optional physical-domain mean for pure Neumann
+       * data; omission retains the analytic unit-box mean. Supplying this
+       * datum neither integrates the mesh nor communicates between ranks.
+       */
       PETScDiffusionBoundaryProblem(const MeshType& mesh, Condition condition,
         size_t assemblyOrder = 16,
-        ConductivityData::Field field = ConductivityData::Field::Exponential)
+        ConductivityData::Field field = ConductivityData::Field::Exponential,
+        Optional<Real> referenceMean = std::nullopt)
         : m_mesh(mesh),
           m_condition(condition),
           m_order(assemblyOrder),
-          m_field(field)
+          m_field(field),
+          m_referenceMean(referenceMean)
       {}
 
       /** @brief Assemble, solve, and measure the global boundary problem.
@@ -69,7 +78,7 @@ namespace Rodin::Tests::Convergence
         const bool pure = m_condition == Condition::PureNeumann;
         const ConductivityData data(dim, m_field);
         const auto solution = data.getSolution();
-        const Real mean = pure ? getUnitBoxMean(dim) : 0;
+        const Real mean = pure ? m_referenceMean.value_or(getUnitBoxMean(dim)) : 0;
         const RealFunction exact(
           [solution, mean](const Geometry::Point& p) { return solution(p) - mean; });
         const auto gradient = data.getGradient();
@@ -165,8 +174,9 @@ namespace Rodin::Tests::Convergence
         solutionMean.setOrder(normOrder);
         compatibility.setOrder(normOrder);
         EXPECT_LT(std::abs(solutionMean.compute()), GaugeTolerance);
-        // Integrating -div(gamma grad u) + lambda = f gives lambda = integral(f+g)
-        // on the unit-volume box. Missing flux must violate compatibility.
+        // Integrating -div(gamma grad u) + lambda = f gives
+        // integral(lambda) = integral(f) + boundary_integral(g), for any volume.
+        // Missing flux must violate compatibility.
         const Real defect = std::abs(compatibility.compute());
         if (wrongFlux)
         {
@@ -236,6 +246,7 @@ namespace Rodin::Tests::Convergence
       Condition m_condition;
       size_t m_order;
       ConductivityData::Field m_field;
+      Optional<Real> m_referenceMean;
   };
 }
 
