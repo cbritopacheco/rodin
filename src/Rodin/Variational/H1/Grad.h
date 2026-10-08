@@ -434,8 +434,10 @@ namespace Rodin::Variational
         for (size_t a = 0; a < ndof; ++a)
         {
           for (size_t ii = 0; ii < d; ++ii)
+          {
             ref(ii) = qf ? tab->getGradient(qp, a)[ii]
                          : fe.getBasis(a).template getDerivative<1>(ii)(rc);
+          }
 
           m_cache.gradPhys[a] = JinvT * ref;
         }

@@ -963,8 +963,10 @@ namespace Rodin::IO
         }
         const size_t count = mesh.getVertexCount();
         for (size_t i = 0; i < count; ++i)
+        {
           for (size_t d = 0; d < vdim; ++d)
             is >> gf[d * count + i];
+        }
       }
 
     private:
@@ -1615,8 +1617,10 @@ namespace Rodin::IO
           {
             const auto value = gf(p);
             for (size_t r = 0; r < fes.getRows(); ++r)
+            {
               for (size_t c = 0; c < fes.getColumns(); ++c)
                 os << value(r, c) << ' ';
+            }
             os << '\n';
           }
           else
@@ -1676,8 +1680,10 @@ namespace Rodin::IO
         {
           const auto& dofs = vertexSpace.getDOFs(0, v);
           for (size_t c = 0; c < components; ++c)
+          {
             if (!(is >> vertexField.getData().coeffRef(dofs[c])))
               fail();
+          }
         }
         gf = vertexField;
       }

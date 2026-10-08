@@ -114,9 +114,11 @@ namespace
       result.insert(i);
     const auto& mesh = fes.getMesh();
     for (auto cell = mesh.getCell(); cell; ++cell)
+    {
       if (mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
         for (Index dof : fes.getDOFs(mesh.getDimension(), cell->getIndex()))
           result.insert(dof);
+    }
     return result;
   }
 
@@ -193,6 +195,7 @@ namespace Rodin::Tests::Unit
       boost::mpi::all_gather(world, localEntries, gathered);
       UnorderedMap<Index, std::vector<Index>> expected;
       for (const auto& entries : gathered)
+      {
         for (const auto& [entity, dofs] : entries)
         {
           const auto [it, inserted] = expected.emplace(entity, dofs);
@@ -201,6 +204,7 @@ namespace Rodin::Tests::Unit
             EXPECT_EQ(it->second, dofs);
           }
         }
+      }
     };
 
     P0<Real, Mesh<Context::MPI>> scalarP0(mesh);
@@ -228,11 +232,13 @@ namespace Rodin::Tests::Unit
         const Index localSize = fes.getShard().getSize();
         Index mismatch = localSize;
         for (Index local = 0; local < localSize; ++local)
+        {
           if (fes.getLocalIndex(fes.getGlobalIndex(local)) != Optional<Index>(local))
           {
             mismatch = local;
             break;
           }
+        }
         EXPECT_EQ(mismatch, localSize) << name << " rank=" << world.rank();
       }
       TrialFunction u(fes);
@@ -360,8 +366,10 @@ namespace Rodin::Tests::Unit
     builder.initialize(parent);
     const size_t D = parent.getDimension();
     for (auto cell = parent.getCell(); cell; ++cell)
+    {
       if (parent.getShard().isOwned(D, cell->getIndex()))
         builder.include(D, cell->getIndex());
+    }
     auto sub = builder.finalize();
     const Mesh<Context::MPI>& mesh = sub;
     const auto probe = [&](const auto& fes) {
@@ -372,11 +380,15 @@ namespace Rodin::Tests::Unit
       const auto required = requiredDOFs(fes);
       std::set<Index> expected;
       for (auto face = mesh.getFace(); face; ++face)
+      {
         if (physical.contains(
               mesh.getShard().getPolytopeMap(D - 1).left.at(face->getIndex())))
           for (Index dof : fes.getDOFs(D - 1, face->getIndex()))
+          {
             if (required.contains(dof))
               expected.insert(dof);
+          }
+      }
       EXPECT_EQ(values.size(), expected.size());
       for (Index dof : expected)
         EXPECT_TRUE(values.contains(dof));
@@ -413,8 +425,10 @@ namespace Rodin::Tests::Unit
       std::vector<Index> local;
       // Independent oracle: enumerate the original owned boundary faces.
       for (auto it = mesh.getBoundary(); it; ++it)
+      {
         for (Index dof : fes.getDOFs(mesh.getDimension() - 1, it->getIndex()))
           local.push_back(dof);
+      }
       std::vector<std::vector<Index>> gathered;
       boost::mpi::all_gather(world, local, gathered);
       std::set<Index> all;
@@ -505,9 +519,11 @@ namespace Rodin::Tests::Unit
       for (Index dof = begin; dof < end; ++dof)
         required.insert(dof);
       for (auto cell = mesh.getCell(); cell; ++cell)
+      {
         if (shard.isOwned(dim, cell->getIndex()))
           for (Index dof : space.getDOFs(dim, cell->getIndex()))
             required.insert(dof);
+      }
 
       size_t falseFaces = 0, relevantFalseFaces = 0;
       for (auto face = mesh.getFace(); face; ++face)
@@ -538,8 +554,10 @@ namespace Rodin::Tests::Unit
       boost::mpi::all_gather(*g_world, incidences, gathered);
       IndexMap<std::set<Index>> expected;
       for (const auto& records : gathered)
+      {
         for (const auto& [dof, face] : records)
           expected[dof].insert(face);
+      }
       size_t missing = 0, filtered = 0;
       for (Index dof : required)
       {
@@ -605,6 +623,7 @@ namespace Rodin::Tests::Unit
       IndexMap<Index> owners;
       IndexMap<IndexSet> holders;
       for (size_t peer = 0; peer < gathered.size(); ++peer)
+      {
         for (const auto& [gid, declaration] : gathered[peer])
         {
           holders[gid].insert(peer);
@@ -615,7 +634,9 @@ namespace Rodin::Tests::Unit
               << "duplicate owner gid=" << gid;
           }
         }
+      }
       for (const auto& records : gathered)
+      {
         for (const auto& [gid, declaration] : records)
         {
           const auto owner = owners.find(gid);
@@ -625,7 +646,9 @@ namespace Rodin::Tests::Unit
             EXPECT_EQ(owner->second, declaration.first);
           }
         }
+      }
       for (Index i = 0; i < shard.getPolytopeCount(dim); ++i)
+      {
         if (shard.isOwned(dim, i))
         {
           auto expected = holders.at(shard.getPolytopeMap(dim).left.at(i));
@@ -640,6 +663,7 @@ namespace Rodin::Tests::Unit
             EXPECT_EQ(halo->second, expected);
           }
         }
+      }
     }
   }
 
@@ -715,12 +739,16 @@ namespace Rodin::Tests::Unit
     auto mpiMesh = sharder.gather(0);
     size_t localSelected = 0;
     for (auto it = mpiMesh.getBoundary(); it; ++it)
+    {
       if (it->getAttribute() == selected)
         ++localSelected;
+    }
     size_t visibleSelected = 0;
     for (auto it = mpiMesh.getFace(); it; ++it)
+    {
       if (it->getAttribute() == selected)
         ++visibleSelected;
+    }
     const size_t selectedCount =
       boost::mpi::all_reduce(world, localSelected, std::plus<size_t>());
     P0g<Real, Mesh<Context::MPI>> fes(mpiMesh);
@@ -749,8 +777,10 @@ namespace Rodin::Tests::Unit
     {
       auto parent = makeShardableMesh(Polytope::Type::Triangle, {9, 9});
       for (auto face = parent.getFace(); face; ++face)
+      {
         if (!parent.isBoundary(face->getIndex()))
           parent.setAttribute({1, face->getIndex()}, selected);
+      }
       BalancedCompactPartitioner partitioner(parent);
       partitioner.partition(static_cast<size_t>(g_world->size()));
       sharder.shard(partitioner);
@@ -765,18 +795,24 @@ namespace Rodin::Tests::Unit
       affine.on(selected).assemble();
       std::vector<Index> local;
       for (auto face = mesh.getFace(); face; ++face)
+      {
         if (mesh.getShard().isOwned(1, face->getIndex()) &&
           face->getAttribute() == selected)
           for (Index dof : fes.getDOFs(1, face->getIndex()))
             local.push_back(dof);
+      }
       std::vector<std::vector<Index>> gathered;
       boost::mpi::all_gather(*g_world, local, gathered);
       const auto required = requiredDOFs(fes);
       std::set<Index> expected;
       for (const auto& indices : gathered)
+      {
         for (Index dof : indices)
+        {
           if (required.contains(dof))
             expected.insert(dof);
+        }
+      }
       const auto& values = std::get<IndexMap<Real>>(value.getDOFs());
       const auto& rows =
         std::get<DirichletBCBase<Real>::IdentifiedDOFs>(affine.getDOFs());
@@ -869,8 +905,10 @@ namespace Rodin::Tests::Unit
     const auto& rows = std::get<DirichletBCBase<Real>::IdentifiedDOFs>(dbc.getDOFs());
     std::vector<Index> boundary;
     for (auto it = mesh.getBoundary(); it; ++it)
+    {
       for (Index dof : slave.getDOFs(1, it->getIndex()))
         boundary.push_back(dof);
+    }
     std::vector<std::vector<Index>> gathered;
     boost::mpi::all_gather(*g_world, boundary, gathered);
     const auto local = requiredDOFs(slave);
@@ -882,9 +920,13 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(slave.getLocalIndex(slave.getSize()), std::nullopt);
     std::set<Index> expected;
     for (const auto& indices : gathered)
+    {
       for (Index dof : indices)
+      {
         if (local.contains(dof))
           expected.insert(dof);
+      }
+    }
     EXPECT_EQ(rows.size(), expected.size());
     for (Index dof : expected)
       EXPECT_TRUE(rows.contains(dof)) << "slave=" << dof;

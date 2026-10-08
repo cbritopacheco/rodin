@@ -2418,8 +2418,10 @@ namespace Rodin::Examples::Heart
         const auto outletRCRStart = CoronaryClock::now();
         m_cfg.dt = physicalDt;
         for (const Attribute tag : m_cfg.outlets)
+        {
           updateOutlet0D(
             m_cfg, m_wrms, m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
+        }
         m_stepTiming.outletRCR = secondsSince(outletRCRStart);
 
         const auto csvStart = CoronaryClock::now();

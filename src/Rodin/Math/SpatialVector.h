@@ -1308,8 +1308,10 @@ namespace Rodin::Math
     SpatialMatrix<Scalar> C(A.rows(), A.cols());
 
     for (std::uint8_t i = 0; i < A.rows(); ++i)
+    {
       for (std::uint8_t j = 0; j < A.cols(); ++j)
         C(i, j) = A(i, j) - B(i, j);
+    }
 
     return C;
   }
@@ -1333,8 +1335,10 @@ namespace Rodin::Math
     SpatialMatrix<Scalar> C(B.rows(), B.cols());
 
     for (std::uint8_t i = 0; i < B.rows(); ++i)
+    {
       for (std::uint8_t j = 0; j < B.cols(); ++j)
         C(i, j) = A(i, j) - B(i, j);
+    }
 
     return C;
   }

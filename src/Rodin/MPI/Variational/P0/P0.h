@@ -310,12 +310,18 @@ namespace Rodin::Variational
         {
           UnorderedSet<int> nbrs;
           for (const auto& [i, peers] : halo)
+          {
             for (const Index r : peers)
+            {
               if (static_cast<int>(r) != rank)
                 nbrs.insert(static_cast<int>(r));
+            }
+          }
           for (const auto& entry : owner)
+          {
             if (static_cast<int>(entry.second) != rank)
               nbrs.insert(static_cast<int>(entry.second));
+          }
           neighbors.assign(nbrs.begin(), nbrs.end());
         }
         for (int r : neighbors)
@@ -716,8 +722,10 @@ namespace Rodin::Variational
             const auto& scalarDOFs = m_scalar.getDOFs(d, i);
             auto& dofs = m_dofs[d].emplace_back(scalarDOFs.size() * rows * cols);
             for (size_t a = 0; a < static_cast<size_t>(scalarDOFs.size()); ++a)
+            {
               for (size_t c = 0; c < rows * cols; ++c)
                 dofs[a * rows * cols + c] = scalarDOFs[a] * rows * cols + c;
+            }
             const auto& scalarFE = m_scalar.getFiniteElement(d, i);
             m_elements.try_emplace(scalarFE.getGeometry(), scalarFE, rows, cols);
           }

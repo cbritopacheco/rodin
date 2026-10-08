@@ -23,8 +23,10 @@ namespace
     auto mesh = threeD ? LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3})
                        : LocalMesh::UniformGrid(Polytope::Type::Triangle, {8, 8});
     for (size_t d = 1; d <= mesh.getDimension(); ++d)
+    {
       for (size_t l = 0; l < d; ++l)
         mesh.getConnectivity().compute(d, l);
+    }
     auto run = [&](const auto& fes, size_t repetitions) {
       using Space = std::remove_cvref_t<decltype(fes)>;
       using Triplets = std::vector<Math::SparseTriplet<Real>>;
@@ -72,11 +74,17 @@ namespace
         Triplets expectedTriplets;
         expectedTriplets.reserve(9 * scalar.nonZeros());
         for (Index outer = 0; outer < static_cast<Index>(scalar.outerSize()); ++outer)
+        {
           for (Math::SparseMatrix<Real>::InnerIterator entry(scalar, outer); entry;
                ++entry)
+          {
             for (Index component = 0; component < 9; ++component)
+            {
               expectedTriplets.emplace_back(
                 9 * entry.row() + component, 9 * entry.col() + component, entry.value());
+            }
+          }
+        }
         Math::SparseMatrix<Real> expected(reference.rows(), reference.cols());
         expected.setFromTriplets(expectedTriplets.begin(), expectedTriplets.end());
         const Real difference = (reference - expected).norm();
@@ -130,16 +138,22 @@ namespace
           else if constexpr (Stage == 2)
           {
             for (auto& integral : form.getLocalIntegrators())
+            {
               for (Index i = 0; i < mesh.getPolytopeCount(dimension); ++i)
                 integral.setPolytope(*mesh.getPolytope(dimension, i));
+            }
           }
           else if constexpr (Stage == 3)
           {
             Real checksum = 0;
             for (auto& integral : form.getLocalIntegrators())
+            {
               for (size_t i = 0; i < localDOFs; ++i)
+              {
                 for (size_t j = 0; j < localDOFs; ++j)
                   checksum += integral.integrate(j, i);
+              }
+            }
             benchmark::DoNotOptimize(checksum);
           }
           else

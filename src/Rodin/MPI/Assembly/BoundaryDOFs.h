@@ -64,9 +64,11 @@ namespace Rodin::Assembly
           for (Index i = begin; i < end; ++i)
             required.insert(i);
           for (auto cell = mesh.getCell(); cell; ++cell)
+          {
             if (shard.isOwned(dim, cell->getIndex()))
               for (Index dof : fes.getDOFs(dim, cell->getIndex()))
                 required.insert(dof);
+          }
         }
 
         // Face order is unrelated to global DOF order. Select into a hash

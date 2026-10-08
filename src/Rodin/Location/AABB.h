@@ -569,9 +569,11 @@ namespace Rodin::Location
           if (projectionsEnabled)
             ranges[n].end = index.projections.size();
           for (size_t i = 0; i < sdim; ++i)
+          {
             mid[n][i] = std::isfinite(lo[n][i]) && std::isfinite(hi[n][i])
               ? Real(0.5) * lo[n][i] + Real(0.5) * hi[n][i]
               : Real(0);
+          }
           index.entries.push_back(polytope.getIndex());
           if constexpr (!Restricted)
             ++it;
@@ -1024,8 +1026,10 @@ namespace Rodin::Location
           // not an inverse of the full (k+1)^d by (k+1)^d lattice matrix.
           Math::Matrix<Real> vandermonde(k + 1, k + 1);
           for (size_t m = 0; m <= k; ++m)
+          {
             for (size_t c = 0; c <= k; ++c)
               vandermonde(m, c) = bernstein(k, c, static_cast<Real>(m) / k);
+          }
           const Eigen::FullPivLU<Math::Matrix<Real>> lu(vandermonde);
           if (lu.isInvertible())
           {
@@ -1237,15 +1241,21 @@ namespace Rodin::Location
             for (size_t axis = 0; axis < basis.tensorFactors; ++axis)
             {
               for (size_t block = 0; block < n; block += width * stride)
+              {
                 for (size_t offset = 0; offset < stride; ++offset)
+                {
                   for (size_t j = 0; j < width; ++j)
                   {
                     const size_t dst = block + offset + j * stride;
                     next.col(dst).setZero();
                     for (size_t c = 0; c < width; ++c)
+                    {
                       next.col(dst) +=
                         control.col(block + offset + c * stride) * basis.conversion(c, j);
+                    }
                   }
+                }
+              }
               control.swap(next);
               stride *= width;
             }
@@ -1477,8 +1487,10 @@ namespace Rodin::Location
                 // can overflow. The solution is unchanged by common scaling.
                 Real scale = 0;
                 for (size_t i = 0; i < pdim; ++i)
+                {
                   for (size_t j = 0; j < rdim; ++j)
                     scale = std::max(scale, std::abs(jac(i, j)));
+                }
                 if (!(scale > Real(0)))
                   break;
                 for (size_t i = 0; i < pdim; ++i)

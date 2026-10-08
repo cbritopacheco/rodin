@@ -139,8 +139,10 @@ namespace Rodin::Solid
         Math::SpatialMatrix<Real> A(d, d);
         A.setZero();
         for (std::uint8_t i = 0; i < d; ++i)
+        {
           for (std::uint8_t j = 0; j < d; ++j)
             A(i, j) = a[i] * a[j];
+        }
         return A;
       }
 

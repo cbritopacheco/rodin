@@ -325,8 +325,10 @@ namespace Rodin::Assembly
             const auto& rows = input.getTestFES().getDOFs(d, p);
             const auto& cols = input.getTrialFES().getDOFs(d, p);
             for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+            {
               for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                 res(rows(l), cols(m)) += bfi.integrate(m, l);
+            }
           }
         }
         for (auto& bfi : input.getGlobalBFIs())
@@ -365,8 +367,10 @@ namespace Rodin::Assembly
               bfi.setPolytope(trialPolytope, testPolytope);
               const auto& cols = input.getTrialFES().getDOFs(rd, tr);
               for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+              {
                 for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                   res(rows(l), cols(m)) += bfi.integrate(m, l);
+              }
             }
           }
         }
@@ -1066,8 +1070,10 @@ namespace Rodin::Assembly
                 if (colValue != ScalarType(0))
                   b.coeffRef(r.index) -= r.coefficient * val * colValue;
                 for (const auto& c : constraints.expand(col))
+                {
                   triplets.emplace_back(
                     r.index, c.index, r.coefficient * val * c.coefficient);
+                }
               }
             }
             else
@@ -1296,15 +1302,20 @@ namespace Rodin::Assembly
             if constexpr (IsSparse)
             {
               for (int k = 0; k < op.outerSize(); ++k)
+              {
                 for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+                {
                   matrixEntry(static_cast<Index>(vOff) + it.row(),
                     static_cast<Index>(uOff) + it.col(), it.value());
+                }
+              }
             }
             else
             {
               const auto opRows = op.rows();
               const auto opCols = op.cols();
               for (Eigen::Index i = 0; i < opRows; ++i)
+              {
                 for (Eigen::Index j = 0; j < opCols; ++j)
                 {
                   const auto val = op(i, j);
@@ -1312,6 +1323,7 @@ namespace Rodin::Assembly
                     matrixEntry(
                       static_cast<Index>(vOff) + i, static_cast<Index>(uOff) + j, val);
                 }
+              }
             }
           }
 
@@ -1326,8 +1338,10 @@ namespace Rodin::Assembly
 
             const auto& vec = lf.getVector();
             for (Eigen::Index i = 0; i < vec.size(); ++i)
+            {
               vectorEntry(
                 static_cast<Index>(vOff) + i, static_cast<ScalarType>(vec.coeff(i)));
+            }
           }
 
           // ------------------------------------------------------------
@@ -1584,8 +1598,10 @@ namespace Rodin::Assembly
                 if constexpr (std::is_same_v<T, ValueDOFsType>)
                 {
                   for (const auto& [local, value] : dofs)
+                  {
                     constraints.setFixed(
                       static_cast<Index>(local), static_cast<ScalarType>(value));
+                  }
                 }
                 else if constexpr (std::is_same_v<T, IdentDOFsType>)
                 {
@@ -1656,8 +1672,10 @@ namespace Rodin::Assembly
                 if (colValue != ScalarType(0))
                   b.coeffRef(r.index) -= r.coefficient * val * colValue;
                 for (const auto& c : constraints.expand(col))
+                {
                   triplets.emplace_back(
                     r.index, c.index, r.coefficient * val * c.coefficient);
+                }
               }
             }
             else
@@ -1784,20 +1802,24 @@ namespace Rodin::Assembly
               if constexpr (IsSparse)
               {
                 for (int k = 0; k < op.outerSize(); ++k)
+                {
                   for (typename OperatorType::InnerIterator it(op, k); it; ++it)
                     matrixEntry(it.row(), it.col(), it.value());
+                }
               }
               else
               {
                 const auto opRows = op.rows();
                 const auto opCols = op.cols();
                 for (Eigen::Index i = 0; i < opRows; ++i)
+                {
                   for (Eigen::Index j = 0; j < opCols; ++j)
                   {
                     const auto val = op(i, j);
                     if (val != ScalarType(0))
                       matrixEntry(static_cast<Index>(i), static_cast<Index>(j), val);
                   }
+                }
               }
             }
           } // doMatrix
@@ -1948,8 +1970,10 @@ namespace Rodin::Assembly
               }
               triplets.resize(write);
               for (Index i = 0; i < static_cast<Index>(rows); ++i)
+              {
                 if (constraints.isFixed(i))
                   triplets.emplace_back(i, i, ScalarType(1));
+              }
               A.resize(rows, cols);
               A.setFromTriplets(triplets.begin(), triplets.end());
             }
@@ -1969,8 +1993,10 @@ namespace Rodin::Assembly
           {
             // RHS-only: assemble the vector; fixed entries -> prescribed value.
             for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
+            {
               if (constraints.isFixed(idx))
                 b.coeffRef(static_cast<size_t>(idx)) = constraints.getFixedValue(idx);
+            }
           }
         }
 

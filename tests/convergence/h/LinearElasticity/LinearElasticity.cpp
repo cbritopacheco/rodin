@@ -107,8 +107,10 @@ namespace Rodin::Tests::Convergence::H::LinearElasticity
         Math::SpatialMatrix<Real> value(
           static_cast<std::uint8_t>(dim), static_cast<std::uint8_t>(dim));
         for (size_t i = 0; i < dim; ++i)
+        {
           for (size_t j = 0; j < dim; ++j)
             value(i, j) = Real(i + 1) * exponential;
+        }
         return value;
       })};
   }

@@ -316,8 +316,10 @@ namespace
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
+    {
       if (std::string(argv[i]).rfind(prefix, 0) == 0)
         return std::stoul(std::string(argv[i]).substr(prefix.size()));
+    }
     return fallback;
   }
 
@@ -325,8 +327,10 @@ namespace
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
+    {
       if (std::string(argv[i]).rfind(prefix, 0) == 0)
         return std::stod(std::string(argv[i]).substr(prefix.size()));
+    }
     return fallback;
   }
 
@@ -335,8 +339,10 @@ namespace
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
+    {
       if (std::string(argv[i]).rfind(prefix, 0) == 0)
         return std::string(argv[i]).substr(prefix.size());
+    }
     return fallback;
   }
 
@@ -344,8 +350,10 @@ namespace
   {
     const std::string flag = "--" + name;
     for (int i = 1; i < argc; ++i)
+    {
       if (std::string(argv[i]) == flag)
         return true;
+    }
     return false;
   }
 
@@ -769,14 +777,18 @@ int run(int argc, char** argv)
       }
       const auto classified = MinSTCut().classify(volumes, moments, edges);
       for (std::size_t i = 0; i < classified.labels.size(); ++i)
+      {
         mesh.setAttribute({D, localToCell[i]},
           classified.labels[i] == MinSTCut::Inside ? Interior : Exterior);
+      }
 
       std::vector<char> support(mesh.getCellCount(), 0);
       for (auto bit = mesh.getBoundary(); bit; ++bit)
+      {
         if (mesh.getAttribute(D - 1, bit->getIndex()) == Attribute{GammaD})
           for (const Index c : conn.getIncidence({2, 3}, bit->getIndex()))
             support[c] = 1;
+      }
       const auto materialComponents = mesh.ccl([](const Polytope& a, const Polytope& b) {
         return a.getAttribute() == b.getAttribute();
       });
@@ -813,17 +825,21 @@ int run(int argc, char** argv)
       volume = 0;
       insideCount = 0;
       for (std::size_t i = 0; i < cells.size(); ++i)
+      {
         if (mesh.getAttribute(D, localToCell[i]) == Attribute{Interior})
         {
           volume += cells[i].volume;
           ++insideCount;
           currentInterior[localToCell[i]] = 1;
         }
+      }
       std::size_t changedCells = 0;
       if (haveClassification)
         for (std::size_t c = 0; c < currentInterior.size(); ++c)
+        {
           if (currentInterior[c] != previousInterior[c])
             ++changedCells;
+        }
       std::vector<Index> oldFacets = cachedInterfaceFacets;
       std::vector<Index> newFacets = interfaceFacets;
       std::sort(oldFacets.begin(), oldFacets.end());
@@ -881,11 +897,15 @@ int run(int argc, char** argv)
 
     updateMovedMesh(mesh, moved, u);
     for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+    {
       if (const auto a = mesh.getAttribute(D, c))
         moved.setAttribute({D, c}, *a);
+    }
     for (auto fit = mesh.getFace(); fit; ++fit)
+    {
       if (const auto a = mesh.getAttribute(D - 1, fit->getIndex()))
         moved.setAttribute({D - 1, fit->getIndex()}, *a);
+    }
 
     // Solve mechanics only on the fitted material submesh. Since the active
     // cell set may change, this FE graph is rebuilt for the current design.
@@ -1238,8 +1258,10 @@ int run(int argc, char** argv)
     phiH.getData() = adv.getSolution().getData();
     Real maxPhiChange = 0;
     for (Eigen::Index i = 0; i < phiH.getData().size(); ++i)
+    {
       maxPhiChange =
         std::max(maxPhiChange, std::abs(phiH.getData()(i) - phiBeforeAdvection(i)));
+    }
     std::cout << "  advect: dt/h=" << (h > Real(0) ? dt / h : Real(0))
               << " max|dJ|=" << dJMax
               << " max|dphi|/h=" << (h > Real(0) ? maxPhiChange / h : Real(0)) << '\n';

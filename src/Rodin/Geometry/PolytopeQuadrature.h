@@ -337,22 +337,26 @@ namespace Rodin::Geometry
           {
             std::lock_guard<std::mutex> lock(dim.mutex);
             for (const auto& candidate : dim.formulas)
+            {
               if (candidate->qf == &qf)
               {
                 formula = candidate.get();
                 break;
               }
+            }
 
             if (!formula)
             {
               dim.formulas.emplace_back(std::make_unique<Formula>(&qf, count));
               formula = dim.formulas.back().get();
               for (auto& entry : dim.lookup)
+              {
                 if (!entry.load(std::memory_order_relaxed))
                 {
                   entry.store(formula, std::memory_order_release);
                   break;
                 }
+              }
             }
           }
           dim.hot.store(formula, std::memory_order_release);

@@ -96,8 +96,10 @@ namespace Rodin::Tests::Convergence::H::Conductivity
       {
         value(i) = pi * std::cos(pi * p(i));
         for (size_t j = 0; j < dim; ++j)
+        {
           if (j != i)
             value(i) *= std::sin(pi * p(j));
+        }
       }
       return value;
     });
@@ -114,8 +116,10 @@ namespace Rodin::Tests::Convergence::H::Conductivity
       {
         Real derivative = pi * std::cos(pi * p(i));
         for (size_t j = 0; j < dim; ++j)
+        {
           if (j != i)
             derivative *= std::sin(pi * p(j));
+        }
         result -= derivative;
       }
       return result;

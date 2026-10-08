@@ -243,6 +243,7 @@ namespace Rodin::Assembly
               const auto& rows = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
               const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
               for (PetscInt i = 0; i < rows.size(); ++i)
+              {
                 for (PetscInt j = 0; j < cols.size(); ++j)
                 {
                   const PetscScalar v = PetscScalar(bfi.integrate(j, i));
@@ -250,6 +251,7 @@ namespace Rodin::Assembly
                   assert(ierr == PETSC_SUCCESS);
                   (void)ierr;
                 }
+              }
             }
           }
         }
@@ -429,8 +431,10 @@ namespace Rodin::Assembly
               if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
                 for (const auto& [local, value] : dofs)
+                {
                   constraints.setFixed(
                     static_cast<Index>(local), static_cast<PetscScalar>(value));
+                }
               }
               else if constexpr (std::is_same_v<T, IdentDOFsType>)
               {
@@ -660,8 +664,10 @@ namespace Rodin::Assembly
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
             for (PetscInt i = 0; i < vecSize; ++i)
+            {
               if (arr[i] != PetscScalar(0))
                 vector_entry(static_cast<Index>(i), arr[i]);
+            }
             ierr = VecRestoreArrayRead(vec, &arr);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
@@ -695,8 +701,10 @@ namespace Rodin::Assembly
           std::vector<PetscInt> rowsToZero;
           rowsToZero.reserve(constraints.getIdentifiedRows().size());
           for (const Index gs : constraints.getIdentifiedRows())
+          {
             if (static_cast<size_t>(gs) < rows)
               rowsToZero.push_back(static_cast<PetscInt>(gs));
+          }
 
           if (!rowsToZero.empty())
           {
@@ -1047,9 +1055,11 @@ namespace Rodin::Assembly
               if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
                 for (const auto& [local, value] : dofs)
+                {
                   constraints.setFixed(
                     static_cast<Index>(uOff + static_cast<size_t>(local)),
                     static_cast<PetscScalar>(value));
+                }
               }
               else if constexpr (std::is_same_v<T, IdentDOFsType>)
               {
@@ -1379,8 +1389,10 @@ namespace Rodin::Assembly
           std::vector<PetscInt> zeroRowsIdx;
           zeroRowsIdx.reserve(constraints.getIdentifiedRows().size());
           for (const Index gs : constraints.getIdentifiedRows())
+          {
             if (static_cast<size_t>(gs) < nrows)
               zeroRowsIdx.push_back(static_cast<PetscInt>(gs));
+          }
 
           if (!zeroRowsIdx.empty())
           {

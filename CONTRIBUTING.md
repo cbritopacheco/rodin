@@ -10,7 +10,7 @@ existing code, and the tooling is configured to match it.
 |-------|------|-------------|
 | 1. Formatting | Indentation, braces, wrapping | [`.clang-format`](.clang-format) — CI checks **changed lines only** |
 | 2. Naming | Identifier conventions | [`.clang-tidy`](.clang-tidy) + [`dev/check_clang_tidy.py`](dev/check_clang_tidy.py) — ratchet against a findings baseline |
-| 3. House rules | Include guards, license blocks, header docs, PETSc containment | [`dev/style_lint.py`](dev/style_lint.py) |
+| 3. House rules | Include guards, license blocks, header docs, loop braces, PETSc containment | [`dev/style_lint.py`](dev/style_lint.py) |
 | 4. Documentation | No new Doxygen warnings | [`dev/check_doxygen_warnings.py`](dev/check_doxygen_warnings.py) |
 | 5. Design | The semantic style | Review, guided by [`doc/agents/philosophy.md`](doc/agents/philosophy.md) |
 
@@ -25,6 +25,13 @@ line, offending source, and suggested fix.
   line starting with `: ` on their own line, empty bodies as `{}` on their
   own line, pointers/references bind left (`Base* copy()`), includes are
   **never reordered** (order is load-bearing).
+- **For loops**: A loop body may omit braces only when its entire statement
+  occupies one physical line. A statement wrapped across multiple lines must
+  use Allman braces, even if it is a single statement. An outer loop containing
+  a nested loop on subsequent lines must therefore be braced; the inner loop
+  may omit braces when its body fits on one line. The loop header's line count
+  does not affect this rule. StyleLint enforces it in library sources, tests,
+  examples, bindings, and development utilities.
 - **Naming**: types/namespaces/template parameters `CamelCase`;
   functions/methods `camelBack` (accessors `getX`/`setX`, chainable setters
   return `*this`); private/protected members `m_camelBack`; parameters,

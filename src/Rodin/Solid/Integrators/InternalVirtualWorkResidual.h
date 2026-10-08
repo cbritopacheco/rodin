@@ -232,8 +232,10 @@ namespace Rodin::Solid
             const auto gradTest = testGradient.getBasis(te);
             ScalarType val = 0;
             for (size_t c = 0; c < vdim; ++c)
+            {
               for (size_t k = 0; k < d; ++k)
                 val += P(c, k) * gradTest(c, k);
+            }
             m_elemVec(te) += wq * distortion * val;
           }
         }
@@ -517,8 +519,10 @@ namespace Rodin::Solid
             const auto gradTest = testGradient.getBasis(te);
             ScalarType val = 0;
             for (size_t c = 0; c < vdim; ++c)
+            {
               for (size_t k = 0; k < d; ++k)
                 val += (P(c, k) + p * J * FinvT(c, k)) * gradTest(c, k);
+            }
             m_elemVec(te) += wq * distortion * val;
           }
         }

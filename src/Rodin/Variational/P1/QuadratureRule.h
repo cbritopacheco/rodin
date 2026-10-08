@@ -1902,9 +1902,13 @@ namespace Rodin::Variational
               }
 
               for (size_t i = 0; i < n; ++i)
+              {
                 for (size_t j = i + 1; j < n; ++j)
+                {
                   m_matrix(i, j) +=
                     wdet * Math::dot(cmv * (G * trialRefGrad[j]), trialRefGrad[i]);
+                }
+              }
             }
             else
             {
@@ -1912,9 +1916,13 @@ namespace Rodin::Variational
               const size_t nte = testRefGrad.size();
 
               for (size_t te = 0; te < nte; ++te)
+              {
                 for (size_t tr = 0; tr < ntr; ++tr)
+                {
                   m_matrix(te, tr) +=
                     wdet * Math::dot(cmv * (G * trialRefGrad[tr]), testRefGrad[te]);
+                }
+              }
             }
           }
           else
@@ -3059,8 +3067,10 @@ namespace Rodin::Variational
               J.resize(trialfes.getVectorDimension(), d);
               const auto& basis = trialfe.getBasis(local);
               for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+              {
                 for (size_t j = 0; j < d; ++j)
                   J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+              }
             }
 
             if (trialfes == testfes)
@@ -3076,8 +3086,10 @@ namespace Rodin::Variational
                 J.resize(testfes.getVectorDimension(), d);
                 const auto& basis = testfe.getBasis(local);
                 for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+                {
                   for (size_t j = 0; j < d; ++j)
                     J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+                }
               }
             }
           }
@@ -3364,8 +3376,10 @@ namespace Rodin::Variational
             J.resize(trialfes.getVectorDimension(), d);
             const auto& basis = trialfe.getBasis(local);
             for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+            {
               for (size_t j = 0; j < d; ++j)
                 J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+            }
           }
           if (trialfes == testfes)
           {
@@ -3380,8 +3394,10 @@ namespace Rodin::Variational
               J.resize(testfes.getVectorDimension(), d);
               const auto& basis = testfe.getBasis(local);
               for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+              {
                 for (size_t j = 0; j < d; ++j)
                   J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+              }
             }
           }
         }
@@ -3739,8 +3755,10 @@ namespace Rodin::Variational
               J.resize(trialfes.getVectorDimension(), d);
               const auto& basis = trialfe.getBasis(local);
               for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+              {
                 for (size_t j = 0; j < d; ++j)
                   J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+              }
             }
 
             if (trialfes == testfes)
@@ -3756,8 +3774,10 @@ namespace Rodin::Variational
                 J.resize(testfes.getVectorDimension(), d);
                 const auto& basis = testfe.getBasis(local);
                 for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+                {
                   for (size_t j = 0; j < d; ++j)
                     J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+                }
               }
             }
           }
@@ -3831,9 +3851,13 @@ namespace Rodin::Variational
               }
 
               for (size_t i = 0; i < n; ++i)
+              {
                 for (size_t j = i + 1; j < n; ++j)
+                {
                   m_matrix(i, j) += wdet *
                     Math::dot(cmv * (trialRefJac[j] * Jinv), trialRefJac[i] * Jinv);
+                }
+              }
             }
             else
             {
@@ -3844,8 +3868,10 @@ namespace Rodin::Variational
               {
                 const auto Jte = testRefJac[te] * Jinv;
                 for (size_t tr = 0; tr < ntr; ++tr)
+                {
                   m_matrix(te, tr) +=
                     wdet * Math::dot(cmv * (trialRefJac[tr] * Jinv), Jte);
+                }
               }
             }
           }

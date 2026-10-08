@@ -58,8 +58,10 @@ namespace
     mesh.getConnectivity().compute(D - 1, D);
     mesh.getConnectivity().compute(D - 1, 0);
     for (size_t d = 1; d <= D; ++d)
+    {
       for (size_t dp = 0; dp <= D; ++dp)
         mesh.getConnectivity().compute(d, dp);
+    }
     return mesh;
   }
 
@@ -601,8 +603,10 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
         boost::mpi::all_gather(*g_world, visible, allVisible);
         std::set<Index> owners, holders;
         for (const auto& indices : allOwned)
+        {
           for (Index gid : indices)
             EXPECT_TRUE(owners.insert(gid).second) << "duplicate owner, dim=" << dp;
+        }
         for (const auto& indices : allVisible)
           holders.insert(indices.begin(), indices.end());
         EXPECT_EQ(owners, holders);
@@ -612,10 +616,12 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
           {
             IndexSet expectedHalo;
             for (size_t rank = 0; rank < allVisible.size(); ++rank)
+            {
               if (rank != static_cast<size_t>(g_world->rank()) &&
                 std::find(allVisible[rank].begin(), allVisible[rank].end(), ids[i]) !=
                   allVisible[rank].end())
                 expectedHalo.insert(rank);
+            }
             const auto& halo = sub.getShard().getHalo(dp);
             const auto found = halo.find(i);
             EXPECT_EQ(found == halo.end() ? IndexSet{} : found->second, expectedHalo);
@@ -638,8 +644,10 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
       // Every selected entity already held by the parent must be retained.
       const auto& subIDs = sub.getShard().getPolytopeMap(d).right;
       for (const auto& entry : parent.getShard().getPolytopeMap(d).right)
+      {
         EXPECT_EQ(
           subIDs.find(entry.first) != subIDs.end(), selected.contains(entry.first));
+      }
       if (d == 0)
         continue;
       std::vector<std::pair<Index, Index>> incidences;
@@ -650,15 +658,19 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
         if (!parent.getShard().isOwned(d, i) || !selected.contains(gid))
           continue;
         for (Index face : parent.getConnectivity().getIncidence({d, d - 1}, i))
+        {
           incidences.emplace_back(
             parent.getShard().getPolytopeMap(d - 1).left.at(face), gid);
+        }
       }
       std::vector<std::vector<std::pair<Index, Index>>> allIncidences;
       boost::mpi::all_gather(*g_world, incidences, allIncidences);
       IndexMap<std::set<Index>> incidentCells;
       for (const auto& records : allIncidences)
+      {
         for (const auto& [face, cell] : records)
           incidentCells[face].insert(cell);
+      }
       for (auto face = sub.getFace(); face; ++face)
       {
         const Index i = face->getIndex();
@@ -671,8 +683,10 @@ TEST(MPI_Geometry_SubMesh, SelectionClosureAcrossGeometries)
       SubMesh<Context::MPI>::Builder nestedBuilder;
       nestedBuilder.initialize(sub);
       for (auto cell = sub.getCell(); cell; ++cell)
+      {
         if (sub.getShard().isOwned(d, cell->getIndex()))
           nestedBuilder.include(d, cell->getIndex());
+      }
       auto nested = nestedBuilder.finalize();
       EXPECT_EQ(nested.getPolytopeCount(d), selected.size());
       EXPECT_EQ(nested.getShard().getPolytopeMap(d).right.size(),

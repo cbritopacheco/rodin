@@ -577,8 +577,10 @@ namespace Rodin::Variational
             << Alert::Raise;
         RangeType value(gradient.getDimension(0), gradient.getDimension(1));
         for (size_t row = 0; row < value.rows(); ++row)
+        {
           for (size_t col = 0; col < value.cols(); ++col)
             value(row, col) = gradient(row, col, m_direction);
+        }
         return value;
       }
       /**
@@ -704,8 +706,10 @@ namespace Rodin::Variational
             << Alert::Raise;
         RangeType value(gradient.getDimension(0), gradient.getDimension(1));
         for (size_t row = 0; row < value.rows(); ++row)
+        {
           for (size_t col = 0; col < value.cols(); ++col)
             value(row, col) = gradient(row, col, m_direction);
+        }
         return value;
       }
       /**
