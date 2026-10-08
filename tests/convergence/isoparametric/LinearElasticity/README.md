@@ -273,3 +273,66 @@ and OpenMP configurations are distinct verification gates. These entries
 retain slow labels, 1800-second watchdogs, MPI processor counts and the
 shared pyramid resource lock. The registration specifies the intended
 matrix, not evidence of a completed execution.
+
+## Mixed traction on exact quadratic geometry
+
+The real-PETSc boundary target uses the same exact quadratic domain and
+Lamé coefficients, with $\Gamma_D=\Phi(\lbrace \xi_0=0\rbrace)$ and
+$\Gamma_N=\partial\Omega\setminus\Gamma_D$. Reference-face attributes
+are assigned before partitioning and mapping. The manufactured physical
+traction is $t=\sigma(u_\ast)n$, with the mapped outward unit normal $n$.
+The weak problem is
+
+$$
+\int_\Omega\bigl(\lambda\mathrm{div}u_h\mathrm{div}v_h
++2\mu\varepsilon(u_h):\varepsilon(v_h)\bigr)\thinspace dx
+=\int_\Omega f\cdot v_h\thinspace dx+\int_{\Gamma_N}t\cdot v_h\thinspace ds,
+\qquad v_h\rvert_{\Gamma_D}=0,
+$$
+
+with $u_h=I_h^{\Gamma_D}u_\ast$ on the essential boundary. The nonempty
+essential face removes rigid motions; Korn's inequality and $\mu>0$ give
+coercivity. This is a compressible mixed-boundary study, not a uniform
+locking-free assertion. The existing flat nearly-incompressible studies
+remain separate and unchanged.
+
+The exponential physical field above has P1/P2/P3 studies. P1 uses
+$n=5,9,17$, except Tetrahedron retains the finer $n=9,17,33$ path from
+the flat mixed-traction fixture. P2/P3 use $n=3,5,9$. Both adjacent
+intervals must decrease, with displacement L2/H1-seminorm rate floors
+$1.65/0.75$, $2.45/1.55$, and $3.45/2.55$, respectively. The same
+regularity and finite-resolution qualifications apply as above.
+
+At $n=3$, physical-affine and physical-quadratic patches use field degrees
+two and four. Their pullbacks under the quadratic map have degrees at most
+two and four, respectively. The asymmetric affine field is
+$u_\ast=\mathbf{1}+Ax$, with $A$ defined in the vector-lift section above;
+the quadratic field is $u_{*,i}=1+(i+1)(\sum_jx_j)^2$.
+Both displacement errors must be below $10^{-9}$.
+
+Two separate affine-P2 controls retain the original manufactured data.
+One omits only the traction load; the other omits only the volumetric
+bilinear term, retaining the full physical traction. The correct patch
+must meet the absolute reproduction budget, whereas each wrong operator
+must give $E_0>10^{-3}$ and $E_1>10^{-2}$. These are dimensionless
+separation budgets on the prescribed unit-scale domain, not index-matching
+tolerances. Entity correspondence and boundary attributes remain logical.
+
+Assembly order $16\to18$, norm order $18\to20$, and CG relative
+tolerance $10^{-13}\to10^{-14}$ are varied independently on the smooth
+P2 field; both errors must change relatively by less than $10^{-6}$.
+CG/Jacobi requires a positive convergence reason and an independently
+recomputed coefficient residual below $10^{-11}$.
+
+The target registers all seven geometries locally and at MPI ranks one
+through four, separately under sequential/OpenMP assembly. Real-PETSc
+storage and the existing vector workload are reused; no solver or library
+implementation is added. Geometry installation and physical data evaluation
+remain local; global assembly, solution and owned-cell norm sums require
+communicator participation. Registrations retain slow labels and the shared
+pyramid lock. Tetrahedral traction groups reserve a two-hour execution budget
+for the resolved P1 hierarchy; the other geometries retain 30-minute budgets.
+CI separates local and each MPI rank count for tetrahedral traction, so the
+cost of five complete groups is not accumulated in one job. These are
+scheduling policies, not numerical error budgets or performance bounds.
+A registered test is not, by itself, evidence of completed numerical validation.

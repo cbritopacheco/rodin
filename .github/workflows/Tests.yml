@@ -489,6 +489,93 @@ jobs:
             -R "^RodinConvergenceIsoparametricPETSc${context_pattern}${physics_pattern}_${rank_pattern}.*${geometry_pattern}$" \
             --output-on-failure --no-tests=error -j 1
 
+  PETScCurvedBoundaryConvergence:
+    # Keep complete geometry/rank studies; partition their execution cost
+    # instead of adding all natural-boundary workloads to the curved bulk job.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        multithreaded: [ON, OFF]
+        physics: [LinearElasticity]
+        geometry: [light, tetrahedron, pyramid]
+        selection: [all]
+        # Resolved P1 tetrahedral traction also exceeds a 30-minute group
+        # budget. Give each costly context its own job.
+        exclude:
+          - {physics: LinearElasticity, geometry: tetrahedron}
+        include:
+          - {multithreaded: ON, physics: LinearElasticity, geometry: tetrahedron, selection: local}
+          - {multithreaded: OFF, physics: LinearElasticity, geometry: tetrahedron, selection: local}
+          - {multithreaded: ON, physics: LinearElasticity, geometry: tetrahedron, selection: np1}
+          - {multithreaded: OFF, physics: LinearElasticity, geometry: tetrahedron, selection: np1}
+          - {multithreaded: ON, physics: LinearElasticity, geometry: tetrahedron, selection: np2}
+          - {multithreaded: OFF, physics: LinearElasticity, geometry: tetrahedron, selection: np2}
+          - {multithreaded: ON, physics: LinearElasticity, geometry: tetrahedron, selection: np3}
+          - {multithreaded: OFF, physics: LinearElasticity, geometry: tetrahedron, selection: np3}
+          - {multithreaded: ON, physics: LinearElasticity, geometry: tetrahedron, selection: np4}
+          - {multithreaded: OFF, physics: LinearElasticity, geometry: tetrahedron, selection: np4}
+    env:
+      OMP_NUM_THREADS: 2
+      OPENBLAS_NUM_THREADS: 1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc-14
+          cmake: true
+
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
+          libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+
+      - name: Configure curved boundary convergence build
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DRODIN_BUILD_SRC=ON
+          -DRODIN_BUILD_UNIT_TESTS=OFF
+          -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=ON
+          -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_BENCHMARKS=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
+
+      - name: Build curved boundary convergence suite
+        run: >-
+          cmake --build build -j 2 --target
+          RodinConvergenceIsoparametricPETSc${{ matrix.physics }}Boundary
+
+      - name: Run curved boundary convergence partition
+        run: |
+          case "${{ matrix.geometry }}" in
+            tetrahedron) geometry_pattern='Tetrahedron' ;;
+            pyramid) geometry_pattern='Pyramid' ;;
+            light) geometry_pattern='(Segment|Triangle|Quadrilateral|Hexahedron|Wedge)' ;;
+            *) exit 1 ;;
+          esac
+          case "${{ matrix.selection }}" in
+            all) context_pattern='.*' ;;
+            local) context_pattern='' ;;
+            np1|np2|np3|np4) context_pattern='MPI_${{ matrix.selection }}_' ;;
+            *) exit 1 ;;
+          esac
+          ctest --test-dir build/tests \
+            -R "^RodinConvergenceIsoparametricPETSc${{ matrix.physics }}Boundary_${context_pattern}${geometry_pattern}$" \
+            --output-on-failure --no-tests=error -j 1
+
   PETScComplexConvergence:
     # Pin the PETSc 3.19 compatibility gate, independently of the real build.
     runs-on: ubuntu-24.04

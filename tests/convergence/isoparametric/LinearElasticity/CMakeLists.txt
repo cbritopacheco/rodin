@@ -36,6 +36,23 @@ foreach(q 1 3)
 endforeach()
 
 if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
+  include(../../PETScRefinement.cmake)
+  rodin_add_petsc_refinement(RodinConvergenceIsoparametricPETScLinearElasticityBoundary
+    ../../h/PETScLinearElasticity/Traction.cpp)
+  target_compile_definitions(RodinConvergenceIsoparametricPETScLinearElasticityBoundary
+    PRIVATE RODIN_ELASTICITY_BOUNDARY_CURVED)
+  # The completed tetrahedral traction group took 1952 seconds in sequential
+  # validation, exceeding its old 30-minute budget. Reserve two hours for
+  # this slow group; this is a scheduling policy, not a runtime bound.
+  set(_RODIN_CURVED_ELASTICITY_BOUNDARY_TET_TIMEOUT 7200)
+  set_tests_properties(RodinConvergenceIsoparametricPETScLinearElasticityBoundary_Tetrahedron
+    PROPERTIES TIMEOUT ${_RODIN_CURVED_ELASTICITY_BOUNDARY_TET_TIMEOUT})
+  if (RODIN_USE_MPI)
+    foreach(np 1 2 3 4)
+      set_tests_properties(RodinConvergenceIsoparametricPETScLinearElasticityBoundary_MPI_np${np}_Tetrahedron
+        PROPERTIES TIMEOUT ${_RODIN_CURVED_ELASTICITY_BOUNDARY_TET_TIMEOUT})
+    endforeach()
+  endif()
   add_executable(RodinConvergenceIsoparametricPETScLinearElasticity LinearElasticity.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScLinearElasticity
     PRIVATE RODIN_CURVED_ELASTICITY_PETSC)

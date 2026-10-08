@@ -9,6 +9,9 @@
 
 #include "PETScLinearElasticityProblem.h"
 #include "FieldConvergence.h"
+#ifdef RODIN_ELASTICITY_BOUNDARY_CURVED
+#include "CurvedGeometry.h"
+#endif
 #ifdef RODIN_USE_MPI
 #include <boost/mpi/environment.hpp>
 #include "MPIConvergence.h"
@@ -39,13 +42,22 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
     {
       auto mesh = UniformGrid(geometry).makeMesh(n);
       initialize(mesh);
+#ifdef RODIN_ELASTICITY_BOUNDARY_CURVED
+      CurvedGeometry curved(mesh);
+      curved.template install<2>();
+#endif
       return mesh;
     }
 #ifdef RODIN_USE_MPI
     else
     {
       Context::MPI context(*environment, *world);
-      return DistributedUniformGrid(context, geometry).makeMesh(n, initialize);
+      auto mesh = DistributedUniformGrid(context, geometry).makeMesh(n, initialize);
+#ifdef RODIN_ELASTICITY_BOUNDARY_CURVED
+      CurvedGeometry curved(mesh);
+      curved.template install<2>();
+#endif
+      return mesh;
     }
 #endif
   }
@@ -54,6 +66,11 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
   class Fixture : public ::testing::TestWithParam<Polytope::Type>
   {
     public:
+#ifdef RODIN_ELASTICITY_BOUNDARY_CURVED
+      static constexpr size_t AffinePatchDegree = 2, QuadraticPatchDegree = 4;
+#else
+      static constexpr size_t AffinePatchDegree = 1, QuadraticPatchDegree = 2;
+#endif
       template <size_t K>
       void checkRates(bool nearly = false) const
       {
@@ -81,7 +98,7 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
         }
         history.expectAlgebraicFloor(nearly ? Rates{2.25, 1.35}
             : K == 1                        ? Rates{1.65, 0.75}
-                                            : Rates{2.45, 1.55});
+                                            : Rates{Real(K) + 0.45, Real(K) - 0.45});
       }
 
       template <size_t K>
@@ -91,23 +108,29 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
         using Problem =
           PETScLinearElasticityProblem<K, std::remove_cvref_t<decltype(mesh)>>;
         const Problem problem(mesh,
-          K == 1 ? Data::Field::AsymmetricAffine : Data::Field::Quadratic, AssemblyOrder,
-          Problem::Boundary::MixedTraction, Lambda, Mu, PCJACOBI);
+          K == AffinePatchDegree ? Data::Field::AsymmetricAffine : Data::Field::Quadratic,
+          AssemblyOrder, Problem::Boundary::MixedTraction, Lambda, Mu, PCJACOBI);
         const auto error = problem.solve();
         EXPECT_TRUE(error.isFinite());
         EXPECT_LT(error.getL2(), PatchTolerance);
         EXPECT_LT(error.getH1Seminorm(), PatchTolerance);
       }
 
-      void checkControl() const
+      void checkControl(bool omitVolumetric = false) const
       {
         const auto mesh = makeMesh<ContextType>(this->GetParam(), 3, true);
         using Problem =
           PETScLinearElasticityProblem<2, std::remove_cvref_t<decltype(mesh)>>;
-        const Problem problem(mesh, Data::Field::Quadratic, AssemblyOrder,
-          Problem::Boundary::MixedTraction, Lambda, Mu, PCJACOBI);
+        const Problem problem(mesh,
+#ifdef RODIN_ELASTICITY_BOUNDARY_CURVED
+          Data::Field::AsymmetricAffine,
+#else
+          Data::Field::Quadratic,
+#endif
+          AssemblyOrder, Problem::Boundary::MixedTraction, Lambda, Mu, PCJACOBI);
         const auto correct = problem.solve();
-        const auto wrong = problem.solve(false, SolverTolerance, NormOrder, true);
+        const auto wrong =
+          problem.solve(omitVolumetric, SolverTolerance, NormOrder, !omitVolumetric);
         EXPECT_LT(correct.getL2(), PatchTolerance);
         EXPECT_LT(correct.getH1Seminorm(), PatchTolerance);
         EXPECT_TRUE(wrong.isFinite());
@@ -156,6 +179,28 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
       static constexpr Real SensitivityTolerance = 1e-6;
   };
 
+#ifdef RODIN_ELASTICITY_BOUNDARY_CURVED
+#define RODIN_ELASTICITY_BOUNDARY_EXTRA(Name)                                            \
+  TEST_P(Name, MixedTractionP3Rates)                                                     \
+  {                                                                                      \
+    checkRates<3>();                                                                     \
+  }                                                                                      \
+  TEST_P(Name, RejectsMissingVolumetricTerm)                                             \
+  {                                                                                      \
+    checkControl(true);                                                                  \
+  }
+#else
+#define RODIN_ELASTICITY_BOUNDARY_EXTRA(Name)                                            \
+  TEST_P(Name, NearlyIncompressibleP2Rates)                                              \
+  {                                                                                      \
+    checkRates<2>(true);                                                                 \
+  }                                                                                      \
+  TEST_P(Name, NearlyIncompressibleIndependentSensitivity)                               \
+  {                                                                                      \
+    checkSensitivity(true);                                                              \
+  }
+#endif
+
 #define RODIN_ELASTICITY_BOUNDARY_TESTS(Name)                                            \
   TEST_P(Name, MixedTractionP1Rates)                                                     \
   {                                                                                      \
@@ -167,11 +212,11 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
   }                                                                                      \
   TEST_P(Name, AsymmetricAffineTractionPatch)                                            \
   {                                                                                      \
-    checkPatch<1>();                                                                     \
+    checkPatch<AffinePatchDegree>();                                                     \
   }                                                                                      \
   TEST_P(Name, QuadraticTractionPatch)                                                   \
   {                                                                                      \
-    checkPatch<2>();                                                                     \
+    checkPatch<QuadraticPatchDegree>();                                                  \
   }                                                                                      \
   TEST_P(Name, RejectsMissingTraction)                                                   \
   {                                                                                      \
@@ -181,14 +226,7 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
   {                                                                                      \
     checkSensitivity();                                                                  \
   }                                                                                      \
-  TEST_P(Name, NearlyIncompressibleP2Rates)                                              \
-  {                                                                                      \
-    checkRates<2>(true);                                                                 \
-  }                                                                                      \
-  TEST_P(Name, NearlyIncompressibleIndependentSensitivity)                               \
-  {                                                                                      \
-    checkSensitivity(true);                                                              \
-  }                                                                                      \
+  RODIN_ELASTICITY_BOUNDARY_EXTRA(Name)                                                  \
   INSTANTIATE_TEST_SUITE_P(AllGeometries, Name,                                          \
     ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,                 \
       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,                        \
@@ -204,6 +242,7 @@ namespace Rodin::Tests::Convergence::PETScLinearElasticityBoundaryTests
   RODIN_ELASTICITY_BOUNDARY_TESTS(MPITest)
 #endif
 #undef RODIN_ELASTICITY_BOUNDARY_TESTS
+#undef RODIN_ELASTICITY_BOUNDARY_EXTRA
 }
 
 int main(int argc, char** argv)
