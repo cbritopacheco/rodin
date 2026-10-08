@@ -45,7 +45,7 @@
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
 
-#include "../SWIFTExampleParameters.h"
+#include "SWIFTExampleParameters.h"
 
 #include <algorithm>
 #include <array>

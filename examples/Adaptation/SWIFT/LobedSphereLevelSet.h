@@ -4,8 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_EXAMPLES_GEOMETRY_LOBEDSPHERELEVELSET_H
-#define RODIN_EXAMPLES_GEOMETRY_LOBEDSPHERELEVELSET_H
+/**
+ * @file
+ * @brief Axis-balanced lobed sphere target and its analytic gradient.
+ */
+#ifndef RODIN_SWIFT_LOBEDSPHERELEVELSET_H
+#define RODIN_SWIFT_LOBEDSPHERELEVELSET_H
 
 #include <Rodin/Math.h>
 
@@ -53,8 +57,10 @@ namespace Rodin::Examples
         const Real frequency = lobes;
         Vec3 angularGradient(3);
         for (int i = 0; i < 3; ++i)
+        {
           angularGradient(i) = -amp * frequency / Real(3) *
             std::sin(frequency * direction(i));
+        }
         angularGradient = rotateZ(angularGradient, phase);
         return n - (angularGradient - n * n.dot(angularGradient)) / r;
       }

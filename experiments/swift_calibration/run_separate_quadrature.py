@@ -42,11 +42,11 @@ def main():
             if args.source_2d is None:
                 parser.error("--source-2d is required when building the FE-target drivers")
             source = args.source_2d.resolve()
-            command.insert(1, "-I" + str(root / "examples/Geometry"))
+            command.insert(1, "-I" + str(root / "examples/Adaptation/SWIFT"))
         obj, executable = output / (family + ".o"), output / ("solver-" + family)
         command[command.index("-o") + 1] = str(obj)
         command[command.index("-c") + 1] = str(source)
-        link = shlex.split((build / f"examples/Geometry/CMakeFiles/{target}.dir/link.txt").read_text())
+        link = shlex.split((build / f"examples/Adaptation/SWIFT/CMakeFiles/{target}.dir/link.txt").read_text())
         link[link.index("-o") + 1] = str(executable)
         link = [str(obj) if value.endswith(".cpp.o") else value for value in link]
         if args.build_only or not executable.exists():

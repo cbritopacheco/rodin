@@ -5,11 +5,14 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 //
-// Wavy-circle sweep test for a SWIFT-style level-set mesh motion.
+// Wavy-circle reconstruction benchmark for SWIFT.
 //
-// At every frame the background grid is classified from the analytic level
-// set. SWIFT then fits the classified skeleton directly to phi = 0 using
-// the residual phi(X + u(X)) on the classified interior faces.
+// The background grid is classified from a fixed analytic level set. SWIFT
+// then fits the classified skeleton directly to the analytic target
+// interface using phi(X + u(X)) on the skeleton. The example is deliberately
+// single-frame: it is the controlled reconstruction benchmark, while
+// LevelSetSWIFTSweep and LevelSetSWIFTAdvection provide time-dependent stress
+// tests.
 //
 #include <Rodin/Adaptation.h>
 #include <Rodin/Assembly.h>
@@ -17,10 +20,12 @@
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Math.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/Solver/CG.h>
+#include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Solid.h>
 #include <Rodin/Variational.h>
 
-#include "../SWIFTExampleParameters.h"
+#include "SWIFTExampleParameters.h"
 
 #include <algorithm>
 #include <array>
@@ -30,6 +35,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -52,9 +58,6 @@ namespace
   }
 
 #ifdef RODIN_SWIFT_P2_DISPLACEMENT
-  // Promote every triangle to a quadratic (P2) isoparametric cell by installing
-  // a degree-2 parametric transformation seeded from the affine node positions.
-  // The SWIFT solve then integrates over genuinely curved geometry.
   void installP2CellTransformations(LocalMesh& mesh)
   {
     Variational::RealH1Element<2> geomFe(Polytope::Type::Triangle);
@@ -83,20 +86,15 @@ namespace
     const LocalMesh& mesh, LocalMesh& moved, const Displacement& u)
   {
     const auto& uFes = u.getFiniteElementSpace();
-    const auto& uData = u.getData();
     const Index vn = mesh.getVertexCount();
     for (Index vertex = 0; vertex < vn; ++vertex)
     {
       const Vec2 x = mesh.getVertexCoordinates(vertex);
       const auto& dofs = uFes.getDOFs(0, vertex);
-      moved.setVertexCoordinates(
-        vertex, vec2(x(0) + uData(dofs[0]), x(1) + uData(dofs[1])));
+      moved.setVertexCoordinates(vertex, vec2(x(0) + u[dofs[0]], x(1) + u[dofs[1]]));
     }
 
 #ifdef RODIN_SWIFT_P2_DISPLACEMENT
-    // Carry the full P2 displacement (corner + mid-edge nodes) onto the moved
-    // mesh as a curved parametric transformation, so the displaced geometry is
-    // genuinely quadratic rather than its affine corner approximation.
     Variational::RealH1Element<2> geomFe(Polytope::Type::Triangle);
     Math::SpatialPoint X;
     const std::size_t D = mesh.getDimension();
@@ -108,8 +106,8 @@ namespace
       {
         const auto& rc = geomFe.getNode(a);
         cell.getTransformation().transform(X, rc);
-        const Real ux = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2));
-        const Real uy = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2 + 1));
+        const Real ux = u[uFes.getGlobalIndex({D, cell.getIndex()}, a * 2)];
+        const Real uy = u[uFes.getGlobalIndex({D, cell.getIndex()}, a * 2 + 1)];
         pm(0, a) = X(0) + ux;
         pm(1, a) = X(1) + uy;
       }
@@ -132,12 +130,14 @@ namespace
       std::size_t numInadmissible = 0;
   };
 
-  /// Sampled per-cell admissibility distribution (j, Q_rel) at all
-  /// quadrature points of the displacement field. Returns percentiles
-  /// (10/50/90) of both margins plus counts of cells "near" each
-  /// constraint boundary. Lighter than sampled admissibility diagnostic
-  /// only conceptually — same dominant cost (cell-loop gradU eval),
-  /// but accumulates a distribution rather than min/max.
+  /**
+   * Sampled per-cell admissibility distribution (j, Q_rel) at all
+   * quadrature points of the displacement field. Returns percentiles
+   * (10/50/90) of both margins plus counts of cells "near" each
+   * constraint boundary. Lighter than the sampled admissibility diagnostic
+   * only conceptually — same dominant cost (cell-loop gradU eval),
+   * but accumulates a distribution rather than min/max.
+   */
   template <class Displacement>
   AdmissibilityDistribution evaluateAdmissibilityDistribution(
     Displacement& u, Real jSafe, Real qMax, std::size_t qOrder = 2)
@@ -272,7 +272,7 @@ namespace
       const auto& cell = *cellIt;
       const auto& vertices = cell.getVertices();
       if (vertices.size() != 3)
-        throw std::runtime_error("LevelSetSWIFTSweep expects triangular cells.");
+        throw std::runtime_error("LevelSetSWIFTReconstruction expects triangular cells.");
 
       CellMomentInfo info;
       info.index = cell.getIndex();
@@ -348,12 +348,13 @@ namespace
 
 }
 
-int main(int argc, char** argv)
+int run(int argc, char** argv)
 {
   const std::size_t n = parseSizeTOption(argc, argv, "n", 50);
-  const std::size_t nFrames = parseSizeTOption(argc, argv, "frames", 40);
-
-  const Real orbitR = parseRealOption(argc, argv, "orbitR", Real(0.10));
+  constexpr std::size_t nFrames = 1;
+  const Real cx = parseRealOption(argc, argv, "cx", Real(0.5));
+  const Real cy = parseRealOption(argc, argv, "cy", Real(0.5));
+  const Real phase = parseRealOption(argc, argv, "phase", Real(0));
   const Real amp = parseRealOption(argc, argv, "amp", Real(0.05));
   const Real R0 = parseRealOption(argc, argv, "R0", Real(0.20));
   const Real kLobes = parseRealOption(argc, argv, "lobes", Real(6));
@@ -361,17 +362,17 @@ int main(int argc, char** argv)
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = parseRealOption(argc, argv, "classifier-eps", Real(1.25) * h);
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.008));
+  Rodin::Examples::SWIFTExampleDefaults swiftDefaults;
   const bool verbose = hasFlag(argc, argv, "verbose");
 
   constexpr Attribute interiorAttribute = 1;
   constexpr Attribute exteriorAttribute = 2;
   constexpr Attribute interfaceAttribute = 10;
   constexpr Attribute boundaryAttribute = 20;
+  constexpr Attribute supportAttribute = 21;
 
-  Rodin::Examples::SWIFTExampleDefaults swiftDefaults;
-  const auto swiftParams = Rodin::Examples::makeSWIFTParameters(
+  auto swiftParams = Rodin::Examples::makeSWIFTParameters(
     argc, argv, h, interfaceAttribute, swiftDefaults);
-  const std::size_t qOrder = swiftParams.quadrature.order;
   const bool trace = swiftParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
@@ -386,8 +387,25 @@ int main(int argc, char** argv)
 #endif
 
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
-    mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()}, boundaryAttribute);
+  {
+    bool support = true;
+    Real ym = 0;
+    for (const Index vertex : faceIt->getVertices())
+    {
+      support = support && std::abs(mesh.getVertexCoordinates(vertex)(0)) < Real(1e-12);
+      ym += mesh.getVertexCoordinates(vertex)(1);
+    }
+    ym /= static_cast<Real>(faceIt->getVertices().size());
+    support = support && ym < h;
+    mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
+      support ? supportAttribute : boundaryAttribute);
+  }
 
+#ifdef RODIN_SWIFT_P2_DISPLACEMENT
+  using ScalarFES = H1<2, Real, LocalMesh>;
+#else
+  using ScalarFES = P1<Real, LocalMesh>;
+#endif
   using ScalarP1 = P1<Real, LocalMesh>;
   using ScalarP0 = P0<Real, LocalMesh>;
 #ifdef RODIN_SWIFT_P2_DISPLACEMENT
@@ -396,7 +414,11 @@ int main(int argc, char** argv)
   using VectorFES = P1<Math::SpatialVector<Real>, LocalMesh>;
 #endif
 
-  ScalarP1 p1Fes(mesh);
+  ScalarFES scalarFes(
+#ifdef RODIN_SWIFT_P2_DISPLACEMENT
+    std::integral_constant<std::size_t, 2>{},
+#endif
+    mesh);
   ScalarP0 p0Fes(mesh);
 #ifdef RODIN_SWIFT_P2_DISPLACEMENT
   VectorFES vectorFes(std::integral_constant<std::size_t, 2>{}, mesh, 2);
@@ -404,14 +426,14 @@ int main(int argc, char** argv)
   VectorFES vectorFes(mesh, 2);
 #endif
 
-  GridFunction phiGf(p1Fes);
+  GridFunction phiGf(scalarFes);
   phiGf.setName("phi");
   GridFunction cellLabel(p0Fes);
   cellLabel.setName("cell_label");
   GridFunction phaseMoment(p0Fes);
-  phaseMoment.setName("phase_moment");
   TrialFunction swiftTrial(vectorFes);
   TestFunction swiftTest(vectorFes);
+  phaseMoment.setName("phase_moment");
   auto& u = swiftTrial.getSolution();
   u.setName("displacement");
   GridFunction du(vectorFes);
@@ -422,17 +444,21 @@ int main(int argc, char** argv)
 
   LocalMesh moved(mesh);
   ScalarP0 p0FesMoved(moved);
-  ScalarP1 p1FesMoved(moved);
+  ScalarFES scalarFesMoved(
+#ifdef RODIN_SWIFT_P2_DISPLACEMENT
+    std::integral_constant<std::size_t, 2>{},
+#endif
+    moved);
   GridFunction movedLabel(p0FesMoved);
   movedLabel.setName("cell_label");
-  GridFunction phiMoved(p1FesMoved);
-  phiMoved.setName("phi_moved");
+  GridFunction phiMoved(scalarFesMoved);
   GridFunction jMoved(p0FesMoved);
-  jMoved.setName("j");
   GridFunction qRelMoved(p0FesMoved);
+  phiMoved.setName("phi_moved");
+  jMoved.setName("j");
   qRelMoved.setName("q_rel");
 
-  IO::XDMF xdmf(Rodin::Examples::swiftOutput("LevelSetSWIFTSweep"));
+  IO::XDMF xdmf(Rodin::Examples::swiftOutput("LevelSetSWIFTReconstruction"));
   auto backgroundGrid = xdmf.grid("background");
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);
@@ -448,10 +474,12 @@ int main(int argc, char** argv)
   movedGrid.add(qRelMoved, IO::XDMF::Center::Cell);
   movedGrid.add(phiMoved, IO::XDMF::Center::Node);
 
-  std::cout << "Wavy-circle SWIFT sweep on " << n << "x" << n << " unit-square mesh, "
-            << nFrames << " frames\n";
-  std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
-            << "  orbit R=" << orbitR << "  fit=" << swiftParams.model.fit
+  std::cout << "Wavy-circle SWIFT reconstruction on " << n << "x" << n
+            << " unit-square mesh\n";
+  std::cout << "  elements=" << mesh.getCellCount() << '\n';
+  std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes << "  center=(" << cx
+            << ", " << cy << ")"
+            << "  phase=" << phase << "  fit=" << swiftParams.model.fit
             << " deviatoric=" << swiftParams.model.distribution.deviatoric
             << " divergence=" << swiftParams.model.distribution.divergence << '\n';
 
@@ -461,24 +489,36 @@ int main(int argc, char** argv)
 
   for (std::size_t frame = 0; frame < nFrames; ++frame)
   {
-    const Real t = static_cast<Real>(frame) / static_cast<Real>(nFrames);
-    const Real angle = Real(2) * Real(M_PI) * t;
+    const Real t = 0;
 
     WavyCircleLevelSet levelSet;
-    levelSet.cx = Real(0.5) + orbitR * std::cos(angle);
-    levelSet.cy = Real(0.5) + orbitR * std::sin(angle);
+    levelSet.cx = cx;
+    levelSet.cy = cy;
     levelSet.R0 = R0;
     levelSet.amp = amp;
     levelSet.k = kLobes;
-    levelSet.phase = angle;
+    levelSet.phase = phase;
 
-    std::cout << "\n--- Frame " << std::setw(2) << frame << " : c=(" << std::fixed
-              << std::setprecision(4) << levelSet.cx << ", " << levelSet.cy << ")"
-              << "  phase=" << std::setprecision(3) << angle << " rad\n";
+    std::cout << "\n--- Reconstruction"
+              << " : c=(" << std::fixed << std::setprecision(4) << levelSet.cx << ", "
+              << levelSet.cy << ")"
+              << "  phase=" << std::setprecision(3) << phase << " rad\n";
 
     clearXDMFRegionAttributes(mesh);
     for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
-      mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()}, boundaryAttribute);
+    {
+      bool support = true;
+      Real ym = 0;
+      for (const Index vertex : faceIt->getVertices())
+      {
+        support = support && std::abs(mesh.getVertexCoordinates(vertex)(0)) < Real(1e-12);
+        ym += mesh.getVertexCoordinates(vertex)(1);
+      }
+      ym /= static_cast<Real>(faceIt->getVertices().size());
+      support = support && ym < h;
+      mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
+        support ? supportAttribute : boundaryAttribute);
+    }
 
     const auto cellMoments = collectCellMomentInfo(
       mesh, [&](const Vec2& p) { return levelSet.phi(p); }, epsilon);
@@ -553,8 +593,8 @@ int main(int argc, char** argv)
       },
       /*dimension=*/2);
 
-    u.getData().setZero();
-    du.getData().setZero();
+    u *= Real(0);
+    du *= Real(0);
 
     auto computeInterfaceFit = [&]() -> Real {
       Real interfacePhi = 0;
@@ -584,8 +624,8 @@ int main(int argc, char** argv)
           for (std::size_t l = 0; l < nLocal; ++l)
           {
             const auto bv = fe.getBasis(l)(rc);
-            ux(0) += bv(0) * u.getData()(dofs[l]);
-            ux(1) += bv(1) * u.getData()(dofs[l]);
+            ux(0) += bv(0) * u[dofs[l]];
+            ux(1) += bv(1) * u[dofs[l]];
           }
           const Vec2 y = vec2(Xp(0) + ux(0), Xp(1) + ux(1));
           const Real phiVal = levelSet.phi(y);
@@ -611,15 +651,27 @@ int main(int argc, char** argv)
                 << "  outside=" << (classified.labels.size() - insideCount)
                 << "  fit0=" << interfaceFit << "\n";
     }
-    Real bestFit = interfaceFit;
-    Math::Vector<Real> bestU = u.getData();
+    bool geometricTargetReached = false;
     Real minJ = Real(1);
+    Real maxJ = Real(1);
     Real maxQRel = Real(1);
+    Real residualRMS = Real(0);
+    Real residualSup = Real(0);
+    Real levelSetGradientScale = Real(0);
+    Real geometricRMS = std::numeric_limits<Real>::infinity();
+    Real geometricSup = std::numeric_limits<Real>::infinity();
+    Real normalRMS = std::numeric_limits<Real>::infinity();
+    std::size_t jacobianRejections = 0;
+    std::size_t distortionRejections = 0;
+    std::size_t energyRejections = 0;
     Real lastAlpha = Real(0);
+    Real maxStep = Real(0);
     Real acceptedStep = Real(0);
+    Real lastInnerAlpha = Real(0);
+    Real minInnerAlpha = Real(1);
+    std::size_t fullInnerSteps = 0;
     std::size_t iterations = 0;
 
-    bool geometricTargetReached = false;
     const char* exitReason = "iter-budget";
     {
       const auto swiftRep = swiftSolver.solve(phi, gradPhi);
@@ -629,31 +681,37 @@ int main(int argc, char** argv)
                 << std::setprecision(2) << "  assembly=" << swiftRep.tAssembly
                 << "  setup=" << swiftRep.tSetup << "  solve=" << swiftRep.tSolve
                 << "  cgIt=" << swiftRep.linearIterations
+                << "  cgSolves=" << swiftRep.linearSolveCount << "  cgMean="
+                << (swiftRep.linearSolveCount > 0
+                       ? Real(swiftRep.linearIterations) / Real(swiftRep.linearSolveCount)
+                       : Real(0))
+                << "  cgMax=" << swiftRep.maxLinearIterations
                 << "  cgErr=" << swiftRep.linearError << "  ls=" << swiftRep.tLineSearch
                 << "  exit=" << swiftRep.getReasonString() << '\n';
       iterations = swiftRep.iterations;
       lastAlpha = swiftRep.lastAlpha;
       acceptedStep = swiftRep.acceptedStep;
+      lastInnerAlpha = swiftRep.lastInnerAlpha;
+      minInnerAlpha = swiftRep.minInnerAlpha;
+      fullInnerSteps = swiftRep.fullInnerSteps;
       minJ = swiftRep.minJ;
+      maxJ = swiftRep.maxJ;
       maxQRel = swiftRep.maxQRel;
+      residualRMS = swiftRep.residualRMS;
+      residualSup = swiftRep.residualSup;
+      levelSetGradientScale = swiftRep.levelSetGradientScale;
+      geometricRMS = swiftRep.geometricRMS;
+      geometricSup = swiftRep.geometricSup;
+      normalRMS = swiftRep.normalRMS;
+      jacobianRejections = swiftRep.jacobianRejections;
+      distortionRejections = swiftRep.distortionRejections;
+      energyRejections = swiftRep.energyRejections;
       exitReason = swiftRep.getReasonString();
       interfaceFit = computeInterfaceFit();
-      if (interfaceFit < bestFit)
-      {
-        bestFit = interfaceFit;
-        bestU = u.getData();
-      }
       if (trace)
         std::cout << "      swift sigma=" << swiftRep.sigma
                   << "  (3hG=" << Real(3) * h * swiftRep.levelSetGradientScale << ")\n";
     }
-
-    u.getData() = bestU;
-    interfaceFit = bestFit;
-    const auto bestAdm = SWIFT::evaluateAdmissibility(
-      u, swiftParams.model.jacobian, qOrder);
-    minJ = bestAdm.minJ;
-    maxQRel = bestAdm.maxQRel;
 
     const bool converged = geometricTargetReached;
     if (converged)
@@ -666,8 +724,8 @@ int main(int argc, char** argv)
       const Index cellIdx = cellIt->getIndex();
       const std::size_t local = cellToLocal.at(cellIdx);
       const Index dof = p0Fes.getGlobalIndex({D, cellIdx}, 0);
-      cellLabel.getData()(dof) = static_cast<Real>(classified.labels[local]);
-      phaseMoment.getData()(dof) = cellMoments[local].moment;
+      cellLabel[dof] = static_cast<Real>(classified.labels[local]);
+      phaseMoment[dof] = cellMoments[local].moment;
     }
 
     updateMovedMeshFromDisplacement(mesh, moved, u);
@@ -699,11 +757,10 @@ int main(int argc, char** argv)
       const auto& dst = dstCache[dstLocal];
       const Real sigDetAu = static_cast<Real>(src.sigmaK) * dst.detAK;
       const Real jK = sigDetAu / src.Jscale;
-      jMoved.getData()(dof) = jK;
+      jMoved[dof] = jK;
       const Math::SpatialMatrix<Real> F = dst.A * src.A.inverse();
-      qRelMoved.getData()(dof) = F.squaredNorm() / (Real(2) * std::max(jK, Real(1e-30)));
-      movedLabel.getData()(dof) =
-        static_cast<Real>(classified.labels[cellToLocal.at(cellIdx)]);
+      qRelMoved[dof] = F.squaredNorm() / (Real(2) * std::max(jK, Real(1e-30)));
+      movedLabel[dof] = static_cast<Real>(classified.labels[cellToLocal.at(cellIdx)]);
     }
 
     phiMoved = [&](const Geometry::Point& p) -> Real {
@@ -713,10 +770,19 @@ int main(int argc, char** argv)
 
     std::cout << "    SWIFT it=" << iterations << "  fit=" << std::scientific
               << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
-              << "  step=" << acceptedStep << "  min_j=" << minJ
-              << "  max_qrel=" << maxQRel
+              << "  step=" << acceptedStep << "  min_j=" << minJ << "  max_j=" << maxJ
+              << "  max_qrel=" << maxQRel << "  residual_rms=" << residualRMS
+              << "  residual_sup=" << residualSup << "  residual_rms_hg="
+              << (h * levelSetGradientScale > Real(0)
+                     ? residualRMS / (h * levelSetGradientScale)
+                     : Real(0))
+              << "  pb_alpha=" << lastInnerAlpha
+              << "  pb_min_alpha=" << minInnerAlpha
+              << "  pb_full_steps=" << fullInnerSteps << "  rej_j=" << jacobianRejections
+              << "  rej_q=" << distortionRejections << "  rej_e=" << energyRejections
               << "  converged=" << (converged ? "yes" : "best-effort")
-              << "  exit=" << exitReason << '\n';
+              << "  exit=" << exitReason << "  geom_rms=" << geometricRMS
+              << "  geom_sup=" << geometricSup << "  normal_rms=" << normalRMS << '\n';
 
     xdmf.write(t).flush();
   }
@@ -724,7 +790,7 @@ int main(int argc, char** argv)
   xdmf.close();
 
   std::cout << "\nSummary\n";
-  std::cout << "  frames converged: " << framesConverged << " / " << nFrames << '\n';
+  std::cout << "  cases converged: " << framesConverged << " / " << nFrames << '\n';
   if (!finalFitPerFrame.empty())
   {
     const Real fitMin =
@@ -740,4 +806,9 @@ int main(int argc, char** argv)
   }
 
   return 0;
+}
+
+int main(int argc, char** argv)
+{
+  return run(argc, argv);
 }

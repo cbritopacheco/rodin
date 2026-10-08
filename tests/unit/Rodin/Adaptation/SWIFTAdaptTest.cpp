@@ -84,15 +84,19 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(report.geometricSup, expected.geometricSup, Real(1e-12));
       reference.displace(u.getSolution());
       for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      {
         EXPECT_LT((mesh.getVertexCoordinates(vertex) -
           reference.getVertexCoordinates(vertex)).norm(), Real(1e-12));
+      }
 
       const auto again = adapt.execute(phi, gradient);
       EXPECT_TRUE(again.geometricTargetReached);
       EXPECT_EQ(again.iterations, 0u);
       for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      {
         EXPECT_LT((mesh.getVertexCoordinates(vertex) -
           reference.getVertexCoordinates(vertex)).norm(), Real(1e-12));
+      }
     }
 
     TEST(Rodin_Adaptation_SWIFTAdapt, EmptyInterfaceDoesNotMoveMesh)
@@ -109,8 +113,10 @@ namespace Rodin::Tests::Unit
       EXPECT_FALSE(report.qualityBudgetSatisfied);
       EXPECT_STREQ(report.getReasonString(), "empty-interface");
       for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      {
         EXPECT_EQ((mesh.getVertexCoordinates(vertex) -
           reference.getVertexCoordinates(vertex)).norm(), Real(0));
+      }
     }
 
     TEST(Rodin_Adaptation_SWIFTAdapt, AppliesQualityValidBestEffort)
@@ -133,8 +139,10 @@ namespace Rodin::Tests::Unit
       EXPECT_FALSE(report.geometricTargetReached);
       Real motion = 0;
       for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      {
         motion = std::max(motion, (mesh.getVertexCoordinates(vertex) -
           reference.getVertexCoordinates(vertex)).norm());
+      }
       EXPECT_GT(motion, Real(0));
     }
 

@@ -219,9 +219,9 @@ namespace Rodin::Adaptation::SWIFT
                 entries.reserve(matrix.nonZeros() + 2 * n * rank + rank);
                 for (Eigen::Index column = 0; column < matrix.outerSize(); ++column)
                 {
-                    for (Math::SparseMatrix<Real>::InnerIterator entry(matrix, column);
-                      entry; ++entry)
-                      entries.emplace_back(entry.row(), entry.col(), entry.value());
+                  for (Math::SparseMatrix<Real>::InnerIterator entry(matrix, column);
+                    entry; ++entry)
+                    entries.emplace_back(entry.row(), entry.col(), entry.value());
                 }
                 for (Eigen::Index k = 0; k < rank; ++k)
                 {

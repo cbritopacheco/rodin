@@ -23,9 +23,13 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric, CenteredVarianceKernelAndNativeForm
         return LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
     }();
     for (size_t from = 1; from <= Dimension; ++from)
+    {
       for (size_t to = 0; to <= Dimension; ++to)
+      {
         if (from != to)
           mesh.getConnectivity().compute(from, to);
+      }
+    }
     auto fes = [&] {
       if constexpr (Order == 1)
         return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, Dimension);
@@ -38,8 +42,10 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric, CenteredVarianceKernelAndNativeForm
     current = VectorFunction(Dimension, [=](const Point& point) {
       Math::SpatialVector<Real> value = Math::SpatialVector<Real>::Zero(Dimension);
       for (size_t axis = 0; axis < Dimension; ++axis)
+      {
         value(axis) = deformed ? Real(0.1) * point.getCoordinates()(axis) *
             point.getCoordinates()(axis) : Real(0);
+      }
       return value;
     });
     position = VectorFunction(Dimension,
@@ -108,8 +114,10 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric, CenteredVarianceKernelAndNativeForm
       field = VectorFunction(Dimension, [](const Point& point) {
         Math::SpatialVector<Real> value(Dimension);
         for (size_t axis = 0; axis < Dimension; ++axis)
+        {
           value(axis) = Real(axis + 1) * point.getCoordinates()(axis) *
             point.getCoordinates()(axis);
+        }
         return value;
       });
       auto currentJacobian = Jacobian(current);
@@ -164,9 +172,13 @@ TEST(Rodin_Adaptation_SWIFTRegularityMetric, BackgroundScaleMultipliesTheComplet
 {
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
   for (size_t from = 1; from <= 2; ++from)
+  {
     for (size_t to = 0; to <= 2; ++to)
+    {
       if (from != to)
         mesh.getConnectivity().compute(from, to);
+    }
+  }
   P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, 2);
   TrialFunction trial(fes);
   TestFunction test(fes);

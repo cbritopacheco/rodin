@@ -8,7 +8,7 @@
 #include "Rodin/Adaptation/SWIFT/Admissibility.h"
 #include "Rodin/Adaptation/SWIFT/HingeProblem.h"
 #include "Rodin/Variational.h"
-#include "../../../../examples/SWIFTExampleParameters.h"
+#include "../../../../examples/Adaptation/SWIFT/SWIFTExampleParameters.h"
 
 using namespace Rodin;
 

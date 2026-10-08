@@ -94,14 +94,14 @@ namespace Rodin::Adaptation::SWIFT
             deformation.getJacobian();
           for (size_t test = 0; test < nTest; ++test)
           {
-              for (size_t trial = 0; trial < nTrial; ++trial)
-              {
-                  m_matrix(test, trial) +=
-                    weight * (m_deviatoric *
-                      Math::dot(m_trialStrains[trial], m_testStrains[test]) +
-                      (m_divergence - m_deviatoric) / Real(d) *
-                        m_trialStrains[trial].trace() * m_testStrains[test].trace());
-              }
+            for (size_t trial = 0; trial < nTrial; ++trial)
+            {
+              m_matrix(test, trial) +=
+                weight * (m_deviatoric *
+                  Math::dot(m_trialStrains[trial], m_testStrains[test]) +
+                  (m_divergence - m_deviatoric) / Real(d) *
+                    m_trialStrains[trial].trace() * m_testStrains[test].trace());
+            }
           }
         }
         return *this;
@@ -157,28 +157,28 @@ namespace Rodin::Adaptation::SWIFT
         size_t column = 0;
         for (size_t a = 0; a < dimension; ++a)
         {
-            for (size_t b = a; b < dimension; ++b)
+          for (size_t b = a; b < dimension; ++b)
+          {
+            Math::Matrix<Real> tensor = Math::Matrix<Real>::Zero(dimension, dimension);
+            if (a == b)
+              tensor(a, b) = Real(1);
+            else
+              tensor(a, b) = tensor(b, a) = Real(1) / std::sqrt(Real(2));
+            const Real mean = tensor.trace() / Real(dimension);
+            tensor *= std::sqrt(m_deviatoric);
+            for (size_t axis = 0; axis < dimension; ++axis)
             {
-              Math::Matrix<Real> tensor = Math::Matrix<Real>::Zero(dimension, dimension);
-              if (a == b)
-                tensor(a, b) = Real(1);
-              else
-                tensor(a, b) = tensor(b, a) = Real(1) / std::sqrt(Real(2));
-              const Real mean = tensor.trace() / Real(dimension);
-              tensor *= std::sqrt(m_deviatoric);
-              for (size_t axis = 0; axis < dimension; ++axis)
-              {
-                  tensor(axis, axis) +=
-                    (std::sqrt(m_divergence) - std::sqrt(m_deviatoric)) * mean;
-              }
-              auto integral = Variational::Integral(weight *
-                Variational::Dot(Variational::MatrixFunction(tensor), strain));
-              integral.setOrder(m_order);
-              Variational::LinearForm form(test);
-              form = integral;
-              form.assemble();
-              centering.col(column++) = form.getVector() / std::sqrt(volume);
+              tensor(axis, axis) +=
+                (std::sqrt(m_divergence) - std::sqrt(m_deviatoric)) * mean;
             }
+            auto integral = Variational::Integral(weight *
+              Variational::Dot(Variational::MatrixFunction(tensor), strain));
+            integral.setOrder(m_order);
+            Variational::LinearForm form(test);
+            form = integral;
+            form.assemble();
+            centering.col(column++) = form.getVector() / std::sqrt(volume);
+          }
         }
         return centering;
       }

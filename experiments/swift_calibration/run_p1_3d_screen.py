@@ -187,7 +187,7 @@ def main():
     parser.add_argument("--amp", type=float, default=0.08)
     parser.add_argument("--r0", type=float, default=0.24)
     parser.add_argument("--exe", type=Path,
-                        default=Path("build-p1-3d-clang19/examples/Geometry/"
+                        default=Path("build-p1-3d-clang19/examples/Adaptation/SWIFT/"
                                      "LevelSetSWIFTReconstruction3D"))
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--scratch", type=Path,

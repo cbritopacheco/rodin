@@ -8,6 +8,10 @@
   Technique. Robust Welsch fitting drives the marked interface towards the
   target, while centered strain distributes the displacement through the mesh.
 
+  Reconstruction, advection, parameter-sweep and cantilever examples are
+  collected in `examples/Adaptation/SWIFT`. Their executables are generated in
+  the corresponding build directory, with the same `LevelSetSWIFT*` target names.
+
   @section guides-swift-setup Setup and ownership
 
   @ref Rodin::Adaptation::SWIFT::Problem fits marked mesh facets to a supplied zero level

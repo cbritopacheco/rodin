@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_EXAMPLES_SWIFTEXAMPLEPARAMETERS_H
-#define RODIN_EXAMPLES_SWIFTEXAMPLEPARAMETERS_H
+#ifndef RODIN_SWIFT_SWIFTEXAMPLEPARAMETERS_H
+#define RODIN_SWIFT_SWIFTEXAMPLEPARAMETERS_H
 
 #include <algorithm>
 #include <cstddef>
@@ -133,8 +133,10 @@ namespace Rodin::Examples
     return value;
   }
 
-  /// Remesh the linear background before constructing spaces or curved maps.
-  /// MMG lengths are physical: hmin = 0.1 h, hmax = h, hausd = 0.05 h.
+  /**
+   * Remesh the linear background before constructing spaces or curved maps.
+   * MMG lengths are physical: hmin = 0.1 h, hmax = h, hausd = 0.05 h.
+   */
   inline void remeshSWIFTBackground(
     Geometry::Mesh<Context::Local>& mesh, int argc, char** argv, Real h)
   {

@@ -27,15 +27,19 @@ TEST(SWIFTDirectionalNewton, StepSelectionAndFallback)
 TEST(SWIFTDirectionalNewton, PhysicalStepIsIndependentOfDirectionScale)
 {
   for (const Real curvature : {Real(-2), Real(2)})
+  {
     for (const Real bound : {Real(0), Real(0.1), Real(100)})
     {
       const Real reference = SWIFT::getDirectionalNewtonStep(1, curvature, 3, 2, bound);
       for (const Real scale : {Real(1e-8), Real(1e-3), Real(1e4)})
+      {
         EXPECT_NEAR(scale *
             SWIFT::getDirectionalNewtonStep(
               scale, scale * scale * curvature, scale * scale * 3, scale * 2, bound),
           reference, 1e-14);
+      }
     }
+  }
 }
 
 TEST(SWIFTDirectionalNewton, ZeroMotionBoundIsUnrestricted)
@@ -52,6 +56,7 @@ TEST(SWIFTDirectionalNewton, AffineResidualCurvatureMatchesForceDifference)
 {
   const Adaptation::SWIFT::Loss loss(Real(0.3));
   for (Real residual : {Real(0), Real(0.1), Real(0.3), Real(-0.7)})
+  {
     for (Real projection : {Real(-2), Real(0.4)})
     {
       const Real epsilon = Real(1e-6);
@@ -61,4 +66,5 @@ TEST(SWIFTDirectionalNewton, AffineResidualCurvatureMatchesForceDifference)
         loss.getInfluence(residual - epsilon * projection)) * projection / (Real(2) * epsilon);
       EXPECT_NEAR(curvature, difference, 1e-8);
     }
+  }
 }

@@ -20,6 +20,7 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_SWIFTHingeState, AffineHingeDerivatives2D3D)
   {
     for (const std::size_t dimension : {2u, 3u})
+    {
       for (const Real amplitude : {Real(0), Real(1)})
       {
         CellDeformation deformation(dimension);
@@ -71,6 +72,7 @@ namespace Rodin::Tests::Unit
           s.getJacobianHessian() * rowJ * rowJ + s.getDistortionHessian() * rowQ * rowQ,
           (derivative(plus) - derivative(minus)) / (Real(2) * eps), Real(1e-7));
       }
+    }
   }
 
   TEST(Rodin_Adaptation_SWIFTHingeState, AffineHingeAssembledTangentP1P2)

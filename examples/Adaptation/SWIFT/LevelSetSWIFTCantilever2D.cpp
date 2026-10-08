@@ -35,7 +35,7 @@
 #include <Rodin/Solid.h>
 #include <Rodin/Variational.h>
 
-#include "../SWIFTExampleParameters.h"
+#include "SWIFTExampleParameters.h"
 
 #include <Eigen/IterativeLinearSolvers>
 

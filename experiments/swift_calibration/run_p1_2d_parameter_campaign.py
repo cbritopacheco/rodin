@@ -366,7 +366,7 @@ def cases_for(stage, ns, lobes, kappa_f, kappa_d, mu_hat, kappa_j, kappa_q):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default="/Users/carlos/Projects/rodin")
-    parser.add_argument("--exe", default="build/examples/Geometry/LevelSetSWIFTReconstruction")
+    parser.add_argument("--exe", default="build/examples/Adaptation/SWIFT/LevelSetSWIFTReconstruction")
     parser.add_argument("--out-dir", required=True)
     parser.add_argument("--deadline", default="none",
                         help="wall-clock stop time, or 'none' to run to completion")
