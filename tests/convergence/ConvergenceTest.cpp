@@ -306,6 +306,87 @@ namespace Rodin::Tests::Convergence
     study.expectRates(1, 2);
   }
 
+  TEST(LiftedConvergenceTest, MixedOrdersDoNotRequireGeometryDominance)
+  {
+    LiftedConvergence study;
+    // A large field-error constant keeps the faster field term dominant on
+    // these meshes, although the geometry has the slower asymptotic order.
+    constexpr Real FieldConstant = 256;
+    for (Real h : {0.25, 0.125, 0.0625})
+    {
+      const ErrorNorms field(FieldConstant * std::pow(h, 4),
+        FieldConstant * std::pow(h, 3)), geometry(std::pow(h, 3), h * h);
+      const ErrorNorms total(field.getL2() + geometry.getL2(),
+        field.getH1Seminorm() + geometry.getH1Seminorm());
+      study.append(h, field, {field, geometry, total});
+    }
+    ::testing::TestPartResultArray failures;
+    {
+      ::testing::ScopedFakeTestPartResultReporter intercept(
+        ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+        &failures);
+      study.expectRates(3, 2);
+    }
+    ASSERT_GT(failures.size(), 0);
+    for (int i = 0; i < failures.size(); ++i)
+      EXPECT_NE(std::string(failures.GetTestPartResult(i).message()).find("component=3"),
+        std::string::npos);
+    study.expectMixedRates(3, 2);
+  }
+
+  TEST(LiftedConvergenceTest, MixedOrdersRejectBadFinalFieldInterval)
+  {
+    LiftedConvergence study;
+    for (Real h : {0.25, 0.125, 0.0625})
+    {
+      const Real scale = h == 0.0625 ? Real(0.125) : h;
+      const ErrorNorms field(std::pow(scale, 4), std::pow(scale, 3)),
+        geometry(std::pow(h, 3), h * h);
+      const ErrorNorms total(field.getL2() + geometry.getL2(),
+        field.getH1Seminorm() + geometry.getH1Seminorm());
+      study.append(h, field, {field, geometry, total});
+    }
+    ::testing::TestPartResultArray failures;
+    {
+      ::testing::ScopedFakeTestPartResultReporter intercept(
+        ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+        &failures);
+      study.expectMixedRates(3, 2);
+    }
+    ASSERT_GT(failures.size(), 0);
+    for (int i = 0; i < failures.size(); ++i)
+      EXPECT_NE(std::string(failures.GetTestPartResult(i).message()).find("interval=2"),
+        std::string::npos);
+  }
+
+  TEST(LiftedConvergenceTest, MixedOrdersRejectIncreasingTotalAfterCancellation)
+  {
+    LiftedConvergence study;
+    // Nearly opposite defects on the first mesh do not certify monotone total
+    // convergence, even when both individual defects have their exact orders.
+    constexpr Real FieldConstant = 3.9;
+    for (Real h : {0.25, 0.125, 0.0625})
+    {
+      const ErrorNorms field(FieldConstant * std::pow(h, 4),
+        FieldConstant * std::pow(h, 3)), geometry(std::pow(h, 3), h * h);
+      const Real sign = h == 0.25 ? Real(-1) : Real(1);
+      const ErrorNorms total(std::abs(field.getL2() + sign * geometry.getL2()),
+        std::abs(field.getH1Seminorm() + sign * geometry.getH1Seminorm()));
+      study.append(h, field, {field, geometry, total});
+    }
+    ::testing::TestPartResultArray failures;
+    {
+      ::testing::ScopedFakeTestPartResultReporter intercept(
+        ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+        &failures);
+      study.expectMixedRates(3, 2);
+    }
+    ASSERT_EQ(failures.size(), 2);
+    for (int i = 0; i < failures.size(); ++i)
+      EXPECT_NE(std::string(failures.GetTestPartResult(i).message())
+          .find("mixed total interval=1"), std::string::npos);
+  }
+
   TEST(LiftedConvergenceTest, RejectsBadFinalInterval)
   {
     LiftedConvergence study;
