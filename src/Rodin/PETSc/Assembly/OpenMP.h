@@ -69,26 +69,39 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
-      /// Set number of OpenMP threads
+      /**
+       * Set number of OpenMP threads
+       * @returns Reference to this object after the operation.
+       * @param tc Number of threads.
+       */
       OpenMP& setThreadCount(size_t tc) noexcept
       {
         m_threadCount = tc;
         return *this;
       }
 
-      /// Get current thread count or max if not set
+      /**
+       * Get current thread count or max if not set
+       * @returns The thread count.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
@@ -189,7 +202,10 @@ namespace Rodin::Assembly
         (void)ierr2;
       }
 
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -246,25 +262,38 @@ namespace Rodin::Assembly
 
       /// @brief Default constructor.
       OpenMP() = default;
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
-      /// Set number of OpenMP threads
+      /**
+       * Set number of OpenMP threads
+       * @returns Reference to this object after the operation.
+       * @param tc Number of threads.
+       */
       OpenMP& setThreadCount(size_t tc) noexcept
       {
         m_threadCount = tc;
         return *this;
       }
 
-      /// Get current thread count or max if not set
+      /**
+       * Get current thread count or max if not set
+       * @returns The thread count.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
@@ -366,12 +395,14 @@ namespace Rodin::Assembly
               const auto& rows = input.getTestFES().getDOFs(dim, i);
               const auto& cols = input.getTrialFES().getDOFs(dim, i);
               for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
+              {
                 for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                 {
                   const PetscScalar v = integrator->integrate(c, r);
                   local.emplace_back(
                     static_cast<PetscInt>(rows[r]), static_cast<PetscInt>(cols[c]), v);
                 }
+              }
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -440,12 +471,14 @@ namespace Rodin::Assembly
 
                 const auto& cols = input.getTrialFES().getDOFs(rdim, tr);
                 for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
+                {
                   for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                   {
                     const PetscScalar v = integrator->integrate(c, r);
                     local.emplace_back(
                       static_cast<PetscInt>(rows[r]), static_cast<PetscInt>(cols[c]), v);
                   }
+                }
               }
             }
 
@@ -467,7 +500,10 @@ namespace Rodin::Assembly
         (void)ierr2;
       }
 
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -530,12 +566,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other), m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)), m_threadCount(std::move(other.m_threadCount))
       {}
@@ -551,7 +593,10 @@ namespace Rodin::Assembly
         return *this;
       }
 
-      /// @brief Returns the configured thread count, or OpenMP's maximum.
+      /**
+       * @brief Returns the configured thread count, or OpenMP's maximum.
+       * @returns The configured thread count, or OpenMP's maximum.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
@@ -594,6 +639,12 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+      /**
+       * @brief Assembles the requested operator and vector contributions.
+       * @param axb Linear system receiving the assembled operator and vector.
+       * @param input Assembly input containing spaces and form integrators.
+       * @param mode Requested assembly mode.
+       */
 
       void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
       {
@@ -726,8 +777,10 @@ namespace Rodin::Assembly
             if (doMatrix)
             {
               for (const auto& c : constraints.expand(col))
+              {
                 local.emplace_back(static_cast<PetscInt>(r.index),
                   static_cast<PetscInt>(c.index), r.coefficient * val * c.coefficient);
+              }
             }
           }
         };
@@ -1109,8 +1162,10 @@ namespace Rodin::Assembly
           std::vector<PetscInt> rowsToZero;
           rowsToZero.reserve(constraints.getIdentifiedRows().size());
           for (const Index gs : constraints.getIdentifiedRows())
+          {
             if (static_cast<PetscInt>(gs) < nrows)
               rowsToZero.push_back(static_cast<PetscInt>(gs));
+          }
 
           if (!rowsToZero.empty())
           {
@@ -1232,7 +1287,10 @@ namespace Rodin::Assembly
       }
 
     public:
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -1291,12 +1349,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       OpenMP() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       OpenMP(const OpenMP& other)
         : Parent(other), m_threadCount(other.m_threadCount)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)), m_threadCount(std::move(other.m_threadCount))
       {}
@@ -1312,7 +1376,10 @@ namespace Rodin::Assembly
         return *this;
       }
 
-      /// @brief Returns the configured thread count, or OpenMP's maximum.
+      /**
+       * @brief Returns the configured thread count, or OpenMP's maximum.
+       * @returns The configured thread count, or OpenMP's maximum.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
@@ -1355,6 +1422,12 @@ namespace Rodin::Assembly
         LHS,
         RHS
       };
+      /**
+       * @brief Assembles the requested operator and vector contributions.
+       * @param axb Linear system receiving the assembled operator and vector.
+       * @param input Assembly input containing spaces and form integrators.
+       * @param mode Requested assembly mode.
+       */
 
       void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
       {
@@ -1499,9 +1572,11 @@ namespace Rodin::Assembly
               if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
                 for (const auto& [local, value] : dofs)
+                {
                   constraints.setFixed(
                     static_cast<Index>(uOff + static_cast<size_t>(local)),
                     static_cast<PetscScalar>(value));
+                }
               }
               else if constexpr (std::is_same_v<T, IdentDOFsType>)
               {
@@ -1557,8 +1632,10 @@ namespace Rodin::Assembly
               localRhs.emplace_back(
                 static_cast<PetscInt>(r.index), -r.coefficient * val * colValue);
             for (const auto& c : constraints.expand(col))
+            {
               local.emplace_back(static_cast<PetscInt>(r.index),
                 static_cast<PetscInt>(c.index), r.coefficient * val * c.coefficient);
+            }
           }
         };
 
@@ -1970,8 +2047,10 @@ namespace Rodin::Assembly
           std::vector<PetscInt> zeroRowsIdx;
           zeroRowsIdx.reserve(constraints.getIdentifiedRows().size());
           for (const Index gs : constraints.getIdentifiedRows())
+          {
             if (gs < nrows)
               zeroRowsIdx.push_back(static_cast<PetscInt>(gs));
+          }
 
           if (!zeroRowsIdx.empty())
           {
@@ -2087,7 +2166,10 @@ namespace Rodin::Assembly
       }
 
     public:
-      /// @brief Creates a heap-allocated copy of this assembly backend.
+      /**
+       * @brief Creates a heap-allocated copy of this assembly backend.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);

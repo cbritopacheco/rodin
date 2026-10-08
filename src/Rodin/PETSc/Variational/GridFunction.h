@@ -232,35 +232,47 @@ namespace Rodin::Variational
       using FESType =
         FES;
 
-      /// @brief Underlying PETSc vector data type (@c Vec), used to store the
-      ///        DOF coefficient vector @f$ \mathbf{u} @f$.
+      /**
+       * @brief Underlying PETSc vector data type (@c Vec), used to store the
+       *        DOF coefficient vector @f$ \mathbf{u} @f$.
+       */
       using DataType =
         ::Vec;
 
-      /// @brief Scalar type of each DOF coefficient (`PetscScalar`); determines
-      ///        the arithmetic precision of all vector operations.
+      /**
+       * @brief Scalar type of each DOF coefficient (`PetscScalar`); determines
+       *        the arithmetic precision of all vector operations.
+       */
       using ScalarType =
         PetscScalar;
 
-      /// @brief Range type of the finite element space (e.g. `PetscScalar`
-      ///        for scalar FE spaces, or `Math::Vector<PetscScalar>` for
-      ///        vector-valued spaces).
+      /**
+       * @brief Range type of the finite element space (e.g. `PetscScalar`
+       *        for scalar FE spaces, or `Math::Vector<PetscScalar>` for
+       *        vector-valued spaces).
+       */
       using RangeType =
         typename FormLanguage::Traits<FESType>::RangeType;
 
-      /// @brief Mesh type associated with the finite element space (e.g.
-      ///        `Geometry::Mesh<Context::Local>` or `Geometry::Mesh<Context::MPI>`).
+      /**
+       * @brief Mesh type associated with the finite element space (e.g.
+       *        `Geometry::Mesh<Context::Local>` or `Geometry::Mesh<Context::MPI>`).
+       */
       using FESMeshType =
         typename FormLanguage::Traits<FESType>::MeshType;
 
-      /// @brief Context type of the finite element space mesh; either
-      ///        @ref Rodin::Context::Local for sequential problems or
-      ///        @ref Rodin::Context::MPI for distributed problems.
+      /**
+       * @brief Context type of the finite element space mesh; either
+       *        @ref Rodin::Context::Local for sequential problems or
+       *        @ref Rodin::Context::MPI for distributed problems.
+       */
       using FESMeshContextType =
         typename FormLanguage::Traits<FESMeshType>::ContextType;
 
-      /// @brief Parent CRTP base class providing the generic
-      ///        GridFunctionBase interface (projection, interpolation, I/O).
+      /**
+       * @brief Parent CRTP base class providing the generic
+       *        GridFunctionBase interface (projection, interpolation, I/O).
+       */
       using Parent =
         GridFunctionBase<GridFunction<FESType, DataType>>;
 
@@ -532,8 +544,10 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Destructor; calls `release()` to restore any acquired arrays
-      ///        and destroy the underlying PETSc vector.
+      /**
+       * @brief Destructor; calls `release()` to restore any acquired arrays
+       *        and destroy the underlying PETSc vector.
+       */
       virtual ~GridFunction()
       {
         this->release();
@@ -1411,22 +1425,28 @@ namespace Rodin::Variational
         return m_data;
       }
 
-      /// @brief Returns the current read-access state, including the
-      ///        acquired flag and the raw pointer (may be null if not acquired).
+      /**
+       * @brief Returns the current read-access state, including the
+       *        acquired flag and the raw pointer (may be null if not acquired).
+       */
       const ArrayRead& getArrayRead() const
       {
         return m_read;
       }
 
-      /// @brief Returns the current write-access state, including the
-      ///        acquired flag and the raw pointer (may be null if not acquired).
+      /**
+       * @brief Returns the current write-access state, including the
+       *        acquired flag and the raw pointer (may be null if not acquired).
+       */
       const ArrayWrite& getArrayWrite() const
       {
         return m_write;
       }
 
-      /// @brief Returns the polynomial order of the finite element space on
-      ///        the given polytope.
+      /**
+       * @brief Returns the polynomial order of the finite element space on
+       *        the given polytope.
+       */
       constexpr Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto& fes = this->getFiniteElementSpace();
@@ -1564,9 +1584,10 @@ namespace Rodin::PETSc::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for PETSc::Variational::GridFunction.
+   * @param fes Finite element space.
    */
   template <class FES>
-  GridFunction(const FES&) -> GridFunction<FES>;
+  GridFunction(const FES& fes) -> GridFunction<FES>;
 }
 
 namespace Rodin::FormLanguage

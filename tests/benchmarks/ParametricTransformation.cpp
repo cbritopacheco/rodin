@@ -28,8 +28,10 @@ namespace Rodin::Tests::Benchmarks
     Variational::RealH1Element<K> fe(geometry);
     PointCloud nodes(physicalDimension, fe.getCount());
     for (size_t a = 0; a < fe.getCount(); ++a)
+    {
       for (size_t j = 0; j < physicalDimension; ++j)
         nodes(j, a) = j < traits.getDimension() ? fe.getNode(a)[j] : Real(1);
+    }
     ParametricTransformation transformation(std::move(nodes), fe);
     const Math::SpatialPoint reference = traits.getCentroid();
     Math::SpatialPoint x;

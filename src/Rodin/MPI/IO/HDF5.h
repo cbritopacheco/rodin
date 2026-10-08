@@ -62,17 +62,11 @@ namespace Rodin::IO
     : public MeshLoaderBase<Context::MPI>
   {
     public:
-      /**
-       * @brief Distributed context type handled by this loader.
-       */
+      /// @brief Distributed context type handled by this loader.
       using ContextType = Context::MPI;
-      /**
-       * @brief Distributed mesh object type loaded by this specialization.
-       */
+      /// @brief Distributed mesh object type loaded by this specialization.
       using ObjectType = Geometry::Mesh<ContextType>;
-      /**
-       * @brief Base loader interface specialization.
-       */
+      /// @brief Base loader interface specialization.
       using Parent = MeshLoaderBase<ContextType>;
 
       /**
@@ -86,8 +80,9 @@ namespace Rodin::IO
       /**
        * @brief Stream-based loading is not supported for HDF5 format.
        * @throws Alert::MemberFunctionException always.
+       * @param is Input stream; stream-based loading is unsupported by this format.
        */
-      void load(std::istream&) override
+      void load([[maybe_unused]] std::istream& is) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 MPI mesh loading is file-path based. "
@@ -121,6 +116,11 @@ namespace Rodin::IO
         std::vector<HDF5::U64> haloOffsets;
         std::vector<HDF5::U64> haloIndices;
       };
+      /**
+       * @brief Loads a local mesh and its shard metadata.
+       * @param filename Path of the mesh shard file.
+       * @returns Mesh shard reconstructed from the HDF5 file.
+       */
 
       static Geometry::Shard loadShard(
         const boost::filesystem::path& filename, const Context::MPI& context)
@@ -163,6 +163,13 @@ namespace Rodin::IO
 
         return shard;
       }
+      /**
+       * @brief Reads and validates shard metadata for one entity dimension.
+       * @param file Open HDF5 file handle.
+       * @param baseMesh Local mesh underlying the shard.
+       * @param d Topological entity dimension.
+       * @returns Entity states, ownership, halo, and polytope-map metadata for the requested dimension.
+       */
 
       static ShardDimensionMetadata readShardDimensionMetadata(
           hid_t file,
@@ -216,6 +223,11 @@ namespace Rodin::IO
 
         return metadata;
       }
+      /**
+       * @brief Decodes a stored shard entity-state flag.
+       * @param flag Stored entity-state flag: one for owned, two for ghost, otherwise shared.
+       * @returns Owned for flag one, Ghost for flag two, and Shared otherwise.
+       */
 
       static Geometry::Shard::State stateOf(HDF5::U8 flag)
       {
@@ -225,6 +237,12 @@ namespace Rodin::IO
           return Geometry::Shard::State::Ghost;
         return Geometry::Shard::State::Shared;
       }
+      /**
+       * @brief Includes entities of one dimension in the shard builder.
+       * @param builder Shard builder receiving entity membership and ownership.
+       * @param d Topological entity dimension.
+       * @param metadata Serialized shard metadata for the entity dimension.
+       */
 
       static void includeDimension(
           Geometry::Shard::Builder& builder,
@@ -234,6 +252,12 @@ namespace Rodin::IO
         for (Index i = 0; i < static_cast<Index>(metadata.state.size()); ++i)
           builder.include({ d, i }, stateOf(metadata.state[i]));
       }
+      /**
+       * @brief Restores entity ownership and halo metadata.
+       * @param builder Shard builder receiving entity membership and ownership.
+       * @param d Topological entity dimension.
+       * @param metadata Serialized shard metadata for the entity dimension.
+       */
 
       static void applyOwnership(
           Geometry::Shard::Builder& builder,
@@ -263,6 +287,12 @@ namespace Rodin::IO
             builder.halo(d, key, static_cast<Index>(metadata.haloIndices[j]));
         }
       }
+      /**
+       * @brief Restores the shard polytope-index map.
+       * @param shard Mesh shard to inspect or restore.
+       * @param d Topological entity dimension.
+       * @param left Serialized left-to-right polytope-map indices.
+       */
 
       static void restorePolytopeMap(
           Geometry::Shard& shard,
@@ -325,17 +355,11 @@ namespace Rodin::IO
     : public MeshPrinterBase<Context::MPI>
   {
     public:
-      /**
-       * @brief Distributed context type handled by this printer.
-       */
+      /// @brief Distributed context type handled by this printer.
       using ContextType = Context::MPI;
-      /**
-       * @brief Distributed mesh object type written by this specialization.
-       */
+      /// @brief Distributed mesh object type written by this specialization.
       using ObjectType = Geometry::Mesh<ContextType>;
-      /**
-       * @brief Base printer interface specialization.
-       */
+      /// @brief Base printer interface specialization.
       using Parent = MeshPrinterBase<ContextType>;
 
       /**
@@ -349,8 +373,9 @@ namespace Rodin::IO
       /**
        * @brief Stream-based printing is not supported for HDF5 format.
        * @throws Alert::MemberFunctionException always.
+       * @param os Output stream required by the printer interface; unused by this implementation.
        */
-      void print(std::ostream&) override
+      void print([[maybe_unused]] std::ostream& os) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 MPI mesh printing is file-path based. "
@@ -465,6 +490,9 @@ namespace Rodin::IO
        * @brief Writes ownership flags for dimension `d`.
        *
        * Encodes each Flags value as U8: 0=None, 1=Owned, 2=Ghost.
+       * @param file Open HDF5 file handle.
+       * @param shard Mesh shard to inspect or restore.
+       * @param d Topological entity dimension.
        */
       static void writeFlags(hid_t file, const Geometry::Shard& shard, size_t d)
       {
@@ -484,6 +512,9 @@ namespace Rodin::IO
 
       /**
        * @brief Writes bidirectional polytope index map for dimension `d`.
+       * @param file Open HDF5 file handle.
+       * @param shard Mesh shard to inspect or restore.
+       * @param d Topological entity dimension.
        */
       static void writePolytopeMap(hid_t file, const Geometry::Shard& shard, size_t d)
       {
@@ -540,6 +571,9 @@ namespace Rodin::IO
 
       /**
        * @brief Writes ghost-to-owner rank map for dimension `d`.
+       * @param file Open HDF5 file handle.
+       * @param shard Mesh shard to inspect or restore.
+       * @param d Topological entity dimension.
        */
       static void writeOwner(hid_t file, const Geometry::Shard& shard, size_t d)
       {
@@ -576,6 +610,9 @@ namespace Rodin::IO
        * - Keys: owned local indices that appear in other ranks
        * - Offsets: CSR offsets into Indices (length = Keys.size() + 1)
        * - Indices: flattened neighbor rank sets
+       * @param file Open HDF5 file handle.
+       * @param shard Mesh shard to inspect or restore.
+       * @param d Topological entity dimension.
        */
       static void writeHalo(hid_t file, const Geometry::Shard& shard, size_t d)
       {

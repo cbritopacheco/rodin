@@ -87,7 +87,7 @@ namespace Rodin::Variational
       /// Number of nodal DOFs on a reference hexahedron ((K+1)³ tensor GLL grid).
       static constexpr size_t HexahedronCount = (K + 1) * (K + 1) * (K + 1);
 
-      /** @} */
+      /// @}
 
       /// @brief Number of entries.
       static constexpr size_t Count =

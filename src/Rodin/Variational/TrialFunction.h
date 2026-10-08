@@ -25,8 +25,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c TrialFunction: exposes the finite element space, the shape
-  /// function space and the solution type.
+  /**
+   * @brief Type traits for @c TrialFunction: exposes the finite element space, the shape
+   * function space and the solution type.
+   */
   template <class Solution, class FES>
   struct Traits<Variational::TrialFunction<Solution, FES>>
   {
@@ -111,7 +113,10 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_ref.get().getIntegrationPoint();
@@ -188,14 +193,21 @@ namespace Rodin::Variational
         return m_ref.get().getSolution();
       }
 
-      /// @brief Sets the name of the field.
+      /**
+       * @brief Sets the name of the field.
+       * @param name Name of the object.
+       * @returns Reference to this object after the operation.
+       */
       TrialFunctionReference& setName(const std::string& name)
       {
         m_ref.get().setName(name);
         return *this;
       }
 
-      /// @brief Gets the name of the field.
+      /**
+       * @brief Gets the name of the field.
+       * @returns The name of the field.
+       */
       Optional<StringView> getName() const override
       {
         return m_ref.get().getName();
@@ -311,11 +323,17 @@ namespace Rodin::Variational
           m_gf(std::move(other.m_gf))
       {}
 
-      /// @brief Copy assignment is deleted
-      void operator=(const TrialFunction&) = delete;
+      /**
+       * @brief Copy assignment is deleted
+       * @param other Object to copy from.
+       */
+      void operator=(const TrialFunction& other) = delete;
 
-      /// @brief Move assignment is deleted
-      void operator=(TrialFunction&&) = delete;
+      /**
+       * @brief Move assignment is deleted
+       * @param other Object to move from.
+       */
+      void operator=(TrialFunction&& other) = delete;
 
       /**
        * @brief Gets the x-component of a vector-valued trial function.
@@ -383,14 +401,21 @@ namespace Rodin::Variational
         return m_gf;
       }
 
-      /// @brief Sets the name of the field.
+      /**
+       * @brief Sets the name of the field.
+       * @param name Name of the object.
+       * @returns Reference to this object after the operation.
+       */
       TrialFunction& setName(const std::string& name)
       {
         m_gf.setName(name);
         return *this;
       }
 
-      /// @brief Gets the name of the field.
+      /**
+       * @brief Gets the name of the field.
+       * @returns The name of the field.
+       */
       Optional<StringView> getName() const override
       {
         return m_gf.getName();
@@ -413,11 +438,12 @@ namespace Rodin::Variational
    * P1 Uh(mesh);
    * TrialFunction u(Uh);  // Type deduced automatically
    * ```
+   * @param fes Finite element space
    */
   template <class FES>
-  TrialFunction(const FES&)
+  TrialFunction(const FES& fes)
     -> TrialFunction<
-        GridFunction<FES, Math::Vector<
-          typename FormLanguage::Traits<FES>::ScalarType>>, FES>;
+      GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>,
+      FES>;
 }
 #endif

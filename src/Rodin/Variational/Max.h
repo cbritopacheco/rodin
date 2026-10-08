@@ -124,7 +124,11 @@ namespace Rodin::Variational
           return lhs;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = getLHS().getOrder(polytope);
@@ -168,9 +172,13 @@ namespace Rodin::Variational
       std::unique_ptr<RHSType> m_rhs;
   };
 
-  /// @brief Deduction guide for @c Max.
+  /**
+   * @brief Deduction guide for @c Max.
+   * @param a First function
+   * @param b Second function
+   */
   template <class LHSDerived, class RHSDerived>
-  Max(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+  Max(const FunctionBase<LHSDerived>& a, const FunctionBase<RHSDerived>& b)
     -> Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
@@ -293,9 +301,14 @@ namespace Rodin::Variational
       RHSType m_rhs;
   };
 
-  /// @brief Deduction guide for @c Max.
+  /**
+   * @brief Deduction guide for @c Max.
+   * @param a First function
+   * @param b Second function
+   */
   template <class NestedDerived>
-  Max(const FunctionBase<NestedDerived>&, Real) -> Max<FunctionBase<NestedDerived>, Real>;
+  Max(const FunctionBase<NestedDerived>& a,
+    Real b) -> Max<FunctionBase<NestedDerived>, Real>;
 
   /// @brief Pointwise maximum of a function expression.
   template <class NestedDerived>
@@ -312,34 +325,52 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = Max<FunctionBase<NestedDerived>, Real>;
 
-      /// @brief Constructs the expression from its left and right operands.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param a Left operand.
+       * @param b Right operand.
+       */
       constexpr
       Max(const LHSType& a, const RHSType& b)
         : Parent(b, a)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Max(const Max& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Max(Max&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Creates a polymorphic copy.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual Max* copy() const noexcept override
       {
         return new Max(*this);
       }
   };
 
-  /// @brief Deduction guide for @c Max.
+  /**
+   * @brief Deduction guide for @c Max.
+   * @param a First function
+   * @param b Second function
+   */
   template <class NestedDerived>
-  Max(Real, const FunctionBase<NestedDerived>&) -> Max<Real, FunctionBase<NestedDerived>>;
+  Max(Real a,
+    const FunctionBase<NestedDerived>& b) -> Max<Real, FunctionBase<NestedDerived>>;
 }
 
 #endif

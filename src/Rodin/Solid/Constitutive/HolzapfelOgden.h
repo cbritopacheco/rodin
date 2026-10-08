@@ -88,30 +88,55 @@ namespace Rodin::Solid
           Math::SpatialVector<Real> direction;
       };
 
-      /// @brief Constructs the law from a parameter object.
+      /**
+       * @brief Constructs the law from a parameter object.
+       * @param params Material parameters configuring the law.
+       */
       explicit HolzapfelOgden(const Parameters& params)
         : m_params(params)
       {}
 
-      /// @brief Constructs the law from scalar material parameters.
+      /**
+       * @brief Constructs the law from scalar material parameters.
+       * @param mu1 Isochoric first-invariant coefficient.
+       * @param mu2 Isochoric second-invariant coefficient.
+       * @param C0 Exponential first-invariant scale.
+       * @param C1 Exponential first-invariant stiffness.
+       * @param C2 Fiber exponential scale.
+       * @param C3 Fiber exponential stiffness.
+       * @param kappa Volumetric penalty coefficient.
+       */
       HolzapfelOgden(Real mu1, Real mu2, Real C0, Real C1, Real C2, Real C3, Real kappa)
         : m_params{mu1, mu2, C0, C1, C2, C3, kappa}
       {}
 
-      /// @brief Returns the material parameters.
+      /**
+       * @brief Returns the material parameters.
+       * @returns The material parameters.
+       */
       const Parameters& getParameters() const
       {
         return m_params;
       }
 
-      /// @brief Populates invariant caches at a constitutive point.
+      /**
+       * @brief Populates invariant caches at a constitutive point.
+       * @param cache Storage for the constitutive invariant cache.
+       * @param cp Constitutive evaluation point.
+       */
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         setCache(cache, cp.getKinematicState(), FiberKinematics::direction(cp));
       }
 
-      /// @brief Returns the stored strain-energy density.
-      Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint&) const
+      /**
+       * @brief Returns the stored strain-energy density.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @returns The stored strain-energy density.
+       * @param cp Constitutive point required by the material-law interface; unused because the energy is obtained from the cache.
+       */
+      Real getStrainEnergyDensity(
+        const Cache& cache, [[maybe_unused]] const ConstitutivePoint& cp) const
       {
         return m_params.mu1 * (cache.I1bar - 3.0) + m_params.mu2 * (cache.I2bar - 3.0) +
           m_params.C0 * std::exp(m_params.C1 * square(cache.I1bar - 3.0)) +
@@ -119,14 +144,25 @@ namespace Rodin::Solid
           m_params.kappa * (cache.J - 1.0 - std::log(cache.J));
       }
 
-      /// @brief Computes the first Piola-Kirchhoff stress.
+      /**
+       * @brief Computes the first Piola-Kirchhoff stress.
+       * @param P Storage for the first Piola-Kirchhoff stress.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cp Constitutive evaluation point.
+       */
       void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
         const ConstitutivePoint& cp) const
       {
         computeFirstPiolaKirchhoffStress(P, cache, cp.getKinematicState());
       }
 
-      /// @brief Computes the material tangent action by directional differencing.
+      /**
+       * @brief Computes the material tangent action by directional differencing.
+       * @param dP Storage for the resulting stress increment.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cp Constitutive evaluation point.
+       * @param dF Increment of the deformation gradient.
+       */
       void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
         const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
       {
@@ -150,10 +186,21 @@ namespace Rodin::Solid
       }
 
     private:
+      /**
+       * @brief Computes the square of a scalar.
+       * @param x Scalar evaluation argument.
+       * @returns The scalar multiplied by itself.
+       */
       static Real square(Real x)
       {
         return x * x;
       }
+      /**
+       * @brief Updates the material cache from the kinematic state.
+       * @param cache Constitutive cache used or updated by the evaluation.
+       * @param state Kinematic state at the material point.
+       * @param direction Material direction to include in the stress contribution.
+       */
 
       void setCache(Cache& cache, const KinematicState& state,
         const Math::SpatialVector<Real>& direction) const
@@ -171,6 +218,12 @@ namespace Rodin::Solid
         cache.I4 = direction.dot(C * direction);
         cache.I4bar = cache.I4 * cache.I3m13;
       }
+      /**
+       * @brief Accumulates the cached first Piola-Kirchhoff stress.
+       * @param P First Piola-Kirchhoff stress accumulator.
+       * @param cache Constitutive cache used or updated by the evaluation.
+       * @param state Kinematic state at the material point.
+       */
 
       void computeFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P,
         const Cache& cache, const KinematicState& state) const

@@ -128,9 +128,11 @@ namespace Rodin
    *
    * @tparam L Type of the first element.
    * @tparam R Type of the second element.
+   * @param lhs Left element.
+   * @param rhs Right element.
    */
   template <class L, class R>
-  Pair(L, R) -> Pair<L, R>;
+  Pair(L lhs, R rhs) -> Pair<L, R>;
 }
 
 #endif

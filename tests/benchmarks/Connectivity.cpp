@@ -80,8 +80,10 @@ namespace Rodin::Tests::Benchmarks
         const size_t D = mesh.getDimension();
         auto& conn = mesh.getConnectivity();
         for (size_t d = 0; d <= D; ++d)
+        {
           for (size_t dp = 0; dp <= D; ++dp)
             conn.compute(d, dp, mode);
+        }
       }
 
       static void clearAllDerived(LocalMesh& mesh)

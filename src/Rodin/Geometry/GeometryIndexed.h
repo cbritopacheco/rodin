@@ -61,9 +61,7 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
   public:
-    /**
-     * @brief Default constructor that initializes all entries with default values.
-     */
+    /// @brief Default constructor that initializes all entries with default values.
     GeometryIndexed()
     {
       for (size_t i = 0; i < Count; ++i)
@@ -102,9 +100,7 @@ namespace Rodin::Geometry
         new (&m_map[i]) T(std::move(*other.ptr(i)));
     }
 
-    /**
-     * @brief Destructor that properly destroys all stored objects.
-     */
+    /// @brief Destructor that properly destroys all stored objects.
     ~GeometryIndexed()
     {
       for (size_t i = 0; i < Count; ++i)

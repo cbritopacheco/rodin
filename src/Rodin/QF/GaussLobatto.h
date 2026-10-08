@@ -363,11 +363,13 @@ namespace Rodin::QF
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
         for(size_t j=0;j<ny;++j)
+        {
           for(size_t i=0;i<nx;++i){
             Math::SpatialVector<Real> p; p.resize(2); p[0]=x[i]; p[1]=y[j];
             m_points.push_back(std::move(p));
             m_weights[k++] = wx[i]*wy[j]; // area 1
           }
+        }
       }
 
       /**
@@ -394,6 +396,7 @@ namespace Rodin::QF
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
         for(size_t j=0;j<nv;++j)
+        {
           for(size_t i=0;i<nu;++i){
             const Real r = u[i];
             const Real s = (1.0 - u[i]) * v[j];
@@ -401,6 +404,7 @@ namespace Rodin::QF
             m_points.push_back(std::move(p));
             m_weights[k++] = wu[i]*wv[j]*(1.0 - u[i]); // integrates to 1/2
           }
+        }
       }
 
       /**
@@ -429,7 +433,9 @@ namespace Rodin::QF
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
         for(size_t kk=0; kk<nw; ++kk)
+        {
           for(size_t j=0; j<nv; ++j)
+          {
             for(size_t i=0; i<nu; ++i){
               const Real r = u[i];
               const Real s = (1.0 - u[i]) * v[j];
@@ -438,6 +444,8 @@ namespace Rodin::QF
               m_points.push_back(std::move(p));
               m_weights[k++] = wu[i]*wv[j]*ww[kk] * (1.0 - u[i])*(1.0 - u[i])*(1.0 - v[j]); // volume 1/6
             }
+          }
+        }
       }
 
       /**
@@ -462,7 +470,9 @@ namespace Rodin::QF
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
         for(size_t kk=0; kk<nz; ++kk)
+        {
           for(size_t j=0; j<ntri; ++j)
+          {
             for(size_t i=0; i<ntri; ++i){
               const Real r = u[i];
               const Real s = (1.0 - u[i]) * v[j];
@@ -471,6 +481,8 @@ namespace Rodin::QF
               m_points.push_back(std::move(p));
               m_weights[k++] = wu[i]*wv[j]*(1.0 - u[i]) * wz[kk]; // wedge volume = 1/2
             }
+          }
+        }
       }
 
       /**

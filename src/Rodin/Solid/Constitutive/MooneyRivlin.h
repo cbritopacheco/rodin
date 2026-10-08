@@ -71,21 +71,40 @@ namespace Rodin::Solid
           m_kappa(kappa)
       {}
 
-      /// @brief Copy constructor.
-      MooneyRivlin(const MooneyRivlin&) = default;
-      /// @brief Move constructor.
-      MooneyRivlin(MooneyRivlin&&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      MooneyRivlin(const MooneyRivlin& other) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      MooneyRivlin(MooneyRivlin&& other) = default;
 
-      /// @brief Gets @f$ c_1 @f$.
+      /**
+       * @brief Gets @f$ c_1 @f$.
+       * @returns @f$ c_1 @f$.
+       */
       Real getMaterialConstantC1() const { return m_c1; }
 
-      /// @brief Gets @f$ c_2 @f$.
+      /**
+       * @brief Gets @f$ c_2 @f$.
+       * @returns @f$ c_2 @f$.
+       */
       Real getMaterialConstantC2() const { return m_c2; }
 
-      /// @brief Gets the bulk modulus @f$ \kappa @f$.
+      /**
+       * @brief Gets the bulk modulus @f$ \kappa @f$.
+       * @returns The bulk modulus @f$ \kappa @f$.
+       */
       Real getBulkModulus() const { return m_kappa; }
 
-      /// @brief Populates the invariant cache at a constitutive point.
+      /**
+       * @brief Populates the invariant cache at a constitutive point.
+       * @param cache Storage for the constitutive invariant cache.
+       * @param cp Constitutive evaluation point.
+       */
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
@@ -104,7 +123,12 @@ namespace Rodin::Solid
         cache.I2bar = cache.Jm4d * cache.I2;
       }
 
-      /// @brief Returns the stored strain-energy density.
+      /**
+       * @brief Returns the stored strain-energy density.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cp Constitutive evaluation point.
+       * @returns The stored strain-energy density.
+       */
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
         const Real dd = static_cast<Real>(cp.getKinematicState().getDimension());
@@ -113,7 +137,12 @@ namespace Rodin::Solid
              + 0.5 * m_kappa * (cache.J - 1.0) * (cache.J - 1.0);
       }
 
-      /// @brief Computes the first Piola-Kirchhoff stress.
+      /**
+       * @brief Computes the first Piola-Kirchhoff stress.
+       * @param P Storage for the first Piola-Kirchhoff stress.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cp Constitutive evaluation point.
+       */
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
@@ -147,7 +176,13 @@ namespace Rodin::Solid
         P = m_c1 * dI1bar_dF + m_c2 * dI2bar_dF + dJvol_dF;
       }
 
-      /// @brief Computes the material tangent action.
+      /**
+       * @brief Computes the material tangent action.
+       * @param dP Storage for the resulting stress increment.
+       * @param cache Constitutive invariant cache populated by setCache().
+       * @param cp Constitutive evaluation point.
+       * @param dF Increment of the deformation gradient.
+       */
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,

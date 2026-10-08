@@ -29,13 +29,9 @@
 
 namespace Rodin::Variational
 {
-  /**
-   * @addtogroup GradSpecializations
-   */
+  /// @addtogroup GradSpecializations
 
-  /**
-   * @brief Base class for Grad classes.
-   */
+  /// @brief Base class for Grad classes.
   template <class Operand, class Derived>
   class GradBase;
 
@@ -91,7 +87,11 @@ namespace Rodin::Variational
         : Parent(std::move(other))
       {}
 
-      /// @brief Interpolates at an integration point.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
         interpolate(out, ip.getPoint());
@@ -180,7 +180,11 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -188,7 +192,10 @@ namespace Rodin::Variational
         return (k == 0) ? 0 : (k - 1);
       }
 
-      /// @brief Creates a polymorphic copy.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Grad* copy() const noexcept override
       {
         return new Grad(*this);
@@ -246,13 +253,20 @@ namespace Rodin::Variational
           /// @brief Whether the key holds a cached entry.
               bool valid = false;
 
-          /// @brief Tests whether the key holds a cached entry.
+          /**
+           * @brief Tests whether the key holds a cached entry.
+           * @returns True if the key identifies a cached entry; false otherwise.
+           */
               explicit operator bool() const noexcept
               {
                 return valid;
               }
 
-          /// @brief Equality comparison.
+              /**
+               * @brief Equality comparison.
+               * @returns Whether the operands compare equal.
+               * @param o Key to compare with this key.
+               */
               bool operator==(const CellKey& o) const noexcept
               {
                 if (!valid || !o.valid)
@@ -261,8 +275,11 @@ namespace Rodin::Variational
                   transOrder == o.transOrder;
               }
 
-          /// @brief Resets the key, invalidating the cached entry.
-              void operator=(std::initializer_list<int>) noexcept
+              /**
+               * @brief Resets the key, invalidating the cached entry.
+               * @param other Object to copy from.
+               */
+              void operator=(std::initializer_list<int> other) noexcept
               {
                 valid = false;
                 mesh = nullptr;
@@ -283,13 +300,20 @@ namespace Rodin::Variational
             /// @brief Whether the key holds a cached entry.
             bool valid = false;
 
-            /// @brief Tests whether the key holds a cached entry.
+            /**
+             * @brief Tests whether the key holds a cached entry.
+             * @returns True if the key identifies a cached entry; false otherwise.
+             */
             explicit operator bool() const noexcept
             {
               return valid;
             }
 
-            /// @brief Equality comparison.
+            /**
+             * @brief Equality comparison.
+             * @returns Whether the operands compare equal.
+             * @param o Key to compare with this key.
+             */
             bool operator==(const QpKey& o) const noexcept
             {
               if (!valid || !o.valid)
@@ -297,8 +321,11 @@ namespace Rodin::Variational
               return qf == o.qf && qp == o.qp;
             }
 
-            /// @brief Resets the key, invalidating the cached entry.
-            void operator=(std::initializer_list<int>) noexcept
+            /**
+             * @brief Resets the key, invalidating the cached entry.
+             * @param reset Initializer-list tag; its contents are ignored when invalidating the key.
+             */
+            void operator=([[maybe_unused]] std::initializer_list<int> reset) noexcept
             {
               valid = false;
               qf = nullptr;
@@ -316,14 +343,20 @@ namespace Rodin::Variational
         QpKey qpKey;
       };
 
-      /// @brief Constructs the expression from its operand.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       Grad(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Grad(const Grad& other)
         : Parent(other),
           m_u(other.m_u),
@@ -331,7 +364,10 @@ namespace Rodin::Variational
           m_cache(other.m_cache)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -339,21 +375,31 @@ namespace Rodin::Variational
           m_cache(std::move(other.m_cache))
       {}
 
-      /// @brief Gets the operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Gets the operand in the shape function expression.
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       constexpr
       size_t getDOFs(const Geometry::Polytope& element) const
       {
@@ -361,7 +407,10 @@ namespace Rodin::Variational
         return getOperand().getDOFs(element);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -369,7 +418,11 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Grad& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
@@ -461,7 +514,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       constexpr const SpatialVectorType& getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
@@ -469,7 +526,11 @@ namespace Rodin::Variational
         return m_cache.grad[local];
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -555,26 +616,42 @@ namespace Rodin::Variational
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialTensor<ScalarType>;
-      /// @brief Constructs the matrix gradient with the derivative axis last.
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param operand Operand expression.
+       */
       explicit Grad(const OperandType& operand)
         : m_operand(operand)
       {}
-      /// @brief Constructs the matrix gradient with the derivative axis last.
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param other Object to copy from.
+       */
       Grad(const Grad& other)
         : Parent(other),
           m_operand(other.m_operand)
       {}
-      /// @brief Constructs the matrix gradient with the derivative axis last.
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param other Object to move from.
+       */
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_operand(other.m_operand)
       {}
-      /// @brief Returns the differentiated or indexed operand.
+      /**
+       * @brief Returns the differentiated or indexed operand.
+       * @returns The differentiated or indexed operand.
+       */
       const OperandType& getOperand() const
       {
         return m_operand.get();
       }
-      /// @brief Evaluates the expression at the supplied physical or integration point.
+      /**
+       * @brief Evaluates the expression at the supplied physical or integration point.
+       * @param point Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Geometry::Point& point) const
       {
         const auto& fes = getOperand().getFiniteElementSpace();
@@ -602,12 +679,20 @@ namespace Rodin::Variational
         }
         return value;
       }
-      /// @brief Evaluates the expression at the supplied physical or integration point.
+      /**
+       * @brief Evaluates the expression at the supplied physical or integration point.
+       * @param point Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const IntegrationPoint& point) const
       {
         return getValue(point.getPoint());
       }
-      /// @brief Returns the polynomial order when it is known.
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto order = getOperand().getOrder(poly);
@@ -619,7 +704,11 @@ namespace Rodin::Variational
       }
 
     private:
-      /// @brief Resolves the volume-side point for the selected trace domain.
+      /**
+       * @brief Resolves the volume-side point for the selected trace domain.
+       * @param point Evaluation point whose volume-side trace is resolved.
+       * @returns Volume-side evaluation point selected by the trace domain.
+       */
       Geometry::Point getDerivativePoint(const Geometry::Point& point) const
       {
         const auto& mesh = getOperand().getFiniteElementSpace().getMesh();
@@ -679,43 +768,69 @@ namespace Rodin::Variational
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
       /// @brief Evaluated matrix, tensor, or scalar range type.
       using RangeType = Math::SpatialTensor<ScalarType>;
-      /// @brief Constructs the matrix gradient with the derivative axis last.
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param operand Operand expression.
+       */
       explicit Grad(const OperandType& operand)
         : Parent(operand.getFiniteElementSpace()),
           m_operand(operand.copy())
       {}
-      /// @brief Constructs the matrix gradient with the derivative axis last.
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param other Object to copy from.
+       */
       Grad(const Grad& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
-      /// @brief Constructs the matrix gradient with the derivative axis last.
+      /**
+       * @brief Constructs the matrix gradient with the derivative axis last.
+       * @param other Object to move from.
+       */
       Grad(Grad&& other)
         : Parent(std::move(other)),
           m_operand(std::move(other.m_operand))
       {}
-      /// @brief Returns the differentiated or indexed operand.
+      /**
+       * @brief Returns the differentiated or indexed operand.
+       * @returns The differentiated or indexed operand.
+       */
       const OperandType& getOperand() const
       {
         return *m_operand;
       }
-      /// @brief Returns the leaf shape function used for assembly.
+      /**
+       * @brief Returns the leaf shape function used for assembly.
+       * @returns The leaf shape function used for assembly.
+       */
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
-      /// @brief Returns the local basis count for the selected polytope.
+      /**
+       * @brief Returns the local basis count for the selected polytope.
+       * @param poly Mesh entity used by this operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       size_t getDOFs(const Geometry::Polytope& poly) const
       {
         return getOperand().getDOFs(poly);
       }
-      /// @brief Returns the currently bound integration point.
+      /**
+       * @brief Returns the currently bound integration point.
+       * @returns The currently bound integration point.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_point);
         return *m_point;
       }
-      /// @brief Binds the integration point and prepares local basis values.
+      /**
+       * @brief Binds the integration point and prepares local basis values.
+       * @param point Point at which the operation is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Grad& setIntegrationPoint(const IntegrationPoint& point)
       {
         m_point = &point;
@@ -747,12 +862,20 @@ namespace Rodin::Variational
         }
         return *this;
       }
-      /// @brief Returns a basis value at the bound integration point.
+      /**
+       * @brief Returns a basis value at the bound integration point.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       const RangeType& getBasis(size_t local) const
       {
         return m_basis.at(local);
       }
-      /// @brief Returns the polynomial order when it is known.
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @param poly Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& poly) const noexcept
       {
         const auto order = getOperand().getOrder(poly);

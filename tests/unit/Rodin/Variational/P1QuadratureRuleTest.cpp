@@ -423,8 +423,10 @@ namespace Rodin::Tests::Unit
     auto kernel = [&](Math::SpatialMatrix<Complex>& out, const Point&, const Point&) {
       out.resize(2, 2);
       for (size_t i = 0; i < 2; ++i)
+      {
         for (size_t j = 0; j < 2; ++j)
           out(i, j) = entries[i][j];
+      }
     };
 
     DenseProblem problem(u, v);

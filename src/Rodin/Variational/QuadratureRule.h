@@ -134,6 +134,7 @@ namespace Rodin::Variational
        *
        * The cached value and polytope binding are not copied. The quadrature
        * formula pointer is copied because it refers to a canonical formula.
+       * @param other Object to copy from.
        */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
@@ -145,6 +146,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
@@ -297,6 +299,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
@@ -307,6 +310,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
@@ -521,6 +525,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        *
        * The bound polytope and mapped quadrature are not copied.
+       * @param other Object to copy from.
        */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
@@ -536,6 +541,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
@@ -773,6 +779,7 @@ namespace Rodin::Variational
        * @brief Copy constructor.
        *
        * The bound polytope and mapped quadrature are not copied.
+       * @param other Object to copy from.
        */
       constexpr QuadratureRule(const QuadratureRule& other)
         : Parent(other),
@@ -788,6 +795,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       constexpr QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),

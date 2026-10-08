@@ -38,8 +38,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Derivative over a grid function: exposes the finite
-  /// element space, the operand type and the range type.
+  /**
+   * @brief Type traits for @c Derivative over a grid function: exposes the finite
+   * element space, the operand type and the range type.
+   */
   template <size_t K, class Scalar, class Mesh, class Data>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::H1<K, Scalar, Mesh>, Data>>>
   {
@@ -106,6 +108,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Derivative(const Derivative& other)
         : Parent(other),
@@ -114,13 +117,18 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Derivative(Derivative&& other)
         : Parent(std::move(other)),
           m_i(other.m_i)
       {}
 
-      /// @brief Interpolates at an integration point.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
@@ -238,7 +246,11 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -246,7 +258,10 @@ namespace Rodin::Variational
         return (k == 0) ? 0 : (k - 1);
       }
 
-      /// @brief Creates a polymorphic copy.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Derivative* copy() const noexcept override
       {
         return new Derivative(*this);
@@ -259,9 +274,11 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Derivative of an H1 GridFunction.
+   * @param i Coordinate index (0 = x, 1 = y, 2 = z)
+   * @param u H1 GridFunction
    */
   template <size_t K, class Scalar, class Data, class Mesh>
-  Derivative(size_t, const GridFunction<H1<K, Scalar, Mesh>, Data>&)
+  Derivative(size_t i, const GridFunction<H1<K, Scalar, Mesh>, Data>& u)
     -> Derivative<GridFunction<H1<K, Scalar, Mesh>, Data>>;
 }
 

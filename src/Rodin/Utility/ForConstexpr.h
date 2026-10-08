@@ -51,9 +51,11 @@ namespace Rodin::Utility
     /**
      * @brief Invokes a callable once for each index in an index sequence.
      * @param f Callable receiving a @c std::integral_constant<size_t,I>.
+     * @param indices Compile-time indices used to instantiate the callable invocations.
      */
-    template <size_t ... Is, class F>
-    constexpr void ForIndexImpl(F&& f, std::index_sequence<Is...>)
+    template <size_t... Is, class F>
+    constexpr void ForIndexImpl(
+      F&& f, [[maybe_unused]] std::index_sequence<Is...> indices)
     {
       (std::forward<F>(f)(std::integral_constant<size_t, Is>{}), ...);
     }

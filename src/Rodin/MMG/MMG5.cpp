@@ -341,8 +341,10 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
     {
       size_t na = 0;
       for (auto it = src.getFace(); !it.end(); ++it)
+      {
         if ((*it).getAttribute().has_value())
           ++na;
+      }
       res->na = na;
 
       edgeRemap.assign(src.getFaceCount(), 0);
@@ -411,8 +413,10 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
     {
       size_t na = 0;
       for (auto it = src.getFace(); !it.end(); ++it)
+      {
         if ((*it).getAttribute().has_value())
           ++na;
+      }
       res->na = na;
 
       edgeRemap.assign(src.getFaceCount(), 0);
@@ -519,8 +523,10 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       const auto rodinEdgeCount = src.getPolytopeCount(edgeDim);
       size_t na = 0;
       for (auto it = src.getPolytope(edgeDim); !it.end(); ++it)
+      {
         if ((*it).getAttribute().has_value())
           ++na;
+      }
       res->na = na;
 
       edgeRemap.assign(rodinEdgeCount, 0);

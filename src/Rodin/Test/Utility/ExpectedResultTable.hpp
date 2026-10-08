@@ -38,8 +38,10 @@ namespace Rodin::Test::Utility
   {
     bool allPassed = true;
     for (const auto& it : m_table)
+    {
       allPassed = allPassed && m_compare(
           std::apply(m_model, it.getParameters()), it.getResult());
+    }
     return allPassed;
   }
 }

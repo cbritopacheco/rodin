@@ -127,13 +127,17 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
     for (Index i = begin; i < end; ++i)
       required.insert(i);
     for (auto cell = mesh.getCell(); cell; ++cell)
+    {
       if (mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
         for (Index dof : space.getDOFs(mesh.getDimension(), cell->getIndex()))
           required.insert(dof);
+    }
     for (const Index slave : all)
+    {
       EXPECT_EQ(rows.contains(slave), required.contains(slave))
         << "rank=" << world->rank()
         << " geometry=" << UniformGrid::getGeometryName(geometry) << " slave=" << slave;
+    }
   }
 
   /** Exact P2 polynomial, with either prescribed or affine-identified trace. */
@@ -170,8 +174,10 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       SubMesh<Context::MPI>::Builder builder;
       builder.initialize(parent);
       for (auto cell = parent.getCell(); cell; ++cell)
+      {
         if (parent.getShard().isOwned(dim, cell->getIndex()))
           builder.include(dim, cell->getIndex());
+      }
       sub.emplace(builder.finalize());
     }
     const Mesh<Context::MPI>& mesh =
@@ -233,8 +239,10 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       {
         value(d) = pi * std::cos(pi * p(d));
         for (size_t j = 0; j < dim; ++j)
+        {
           if (j != d)
             value(d) *= std::sin(pi * p(j));
+        }
       }
       return value;
     });
@@ -307,8 +315,10 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       {
         value(i) = pi * std::cos(pi * p(i));
         for (size_t j = 0; j < dim; ++j)
+        {
           if (j != i)
             value(i) *= std::sin(pi * p(j));
+        }
       }
       return value;
     });
@@ -384,8 +394,10 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
       {
         value(d) = pi * std::cos(pi * p(d));
         for (size_t j = 0; j < dim; ++j)
+        {
           if (j != d)
             value(d) *= std::sin(pi * p(j));
+        }
       }
       return value;
     });

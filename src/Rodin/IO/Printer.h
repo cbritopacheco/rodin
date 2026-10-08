@@ -77,9 +77,7 @@ namespace Rodin::IO
   class Printer
   {
     public:
-      /**
-       * @brief Type of object being printed.
-       */
+      /// @brief Type of object being printed.
       using ObjectType = T;
 
       /**

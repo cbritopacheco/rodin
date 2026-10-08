@@ -265,6 +265,7 @@ namespace Rodin::Variational
       /**
        * @brief Adds a bilinear integrator to the bilinear form.
        * @returns Reference to this (for method chaining)
+       * @param bfi Bilinear form integrator.
        */
       BilinearFormBase& operator+=(const LocalBilinearFormIntegratorBaseType& bfi)
       {
@@ -290,6 +291,7 @@ namespace Rodin::Variational
       /**
        * @brief Adds a bilinear integrator to the bilinear form.
        * @returns Reference to this (for method chaining)
+       * @param bfi Bilinear form integrator.
        */
       BilinearFormBase& operator+=(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
@@ -315,6 +317,7 @@ namespace Rodin::Variational
       /**
        * @brief Adds a bilinear integrator to the bilinear form.
        * @returns Reference to this (for method chaining)
+       * @param bfi Bilinear form integrator.
        */
       BilinearFormBase& operator-=(const LocalBilinearFormIntegratorBaseType& bfi)
       {
@@ -340,6 +343,7 @@ namespace Rodin::Variational
       /**
        * @brief Adds a bilinear integrator to the bilinear form.
        * @returns Reference to this (for method chaining)
+       * @param bfi Bilinear form integrator.
        */
       BilinearFormBase& operator-=(const GlobalBilinearFormIntegratorBaseType& bfi)
       {
@@ -365,11 +369,13 @@ namespace Rodin::Variational
       /**
        * @brief Gets the reference to the associated operator of the bilinear
        * form.
+       * @returns The reference to the associated operator of the bilinear form.
        */
       virtual OperatorType& getOperator() = 0;
 
       /** @brief Gets a constant reference to the associated operator of the
        * bilinear form.
+       * @returns A constant reference to the associated operator of the bilinear form.
        */
       virtual const OperatorType& getOperator() const = 0;
 
@@ -535,6 +541,8 @@ namespace Rodin::Variational
        *
        * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
        * at @f$ ( u, v ) @f$.
+       * @param u Function operand.
+       * @param v Function operand.
        */
       template <class UData, class VData>
       constexpr
@@ -592,7 +600,11 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
-  /// @brief Deduces the default sparse bilinear form type.
+  /**
+   * @brief Deduces the default sparse bilinear form type.
+   * @param u Function operand.
+   * @param v Function operand.
+   */
   template <class Solution, class TrialFES, class TestFES>
   BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> BilinearForm<
@@ -727,6 +739,8 @@ namespace Rodin::Variational
        *
        * @returns The action @f$ a(u, v) @f$ which the bilinear form takes
        * at @f$ ( u, v ) @f$.
+       * @param u Function operand.
+       * @param v Function operand.
        */
       template <class UData, class VData>
       constexpr

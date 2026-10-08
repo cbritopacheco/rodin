@@ -27,6 +27,8 @@ MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false
 
 # Braces: Allman everywhere; empty bodies "{}" stay together on their own line.
+# A for body may omit braces only if the whole body statement occupies one
+# physical line. style_lint.py enforces this; clang-format does not insert braces.
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterCaseLabel: true

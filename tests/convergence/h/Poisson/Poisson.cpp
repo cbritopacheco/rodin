@@ -173,16 +173,20 @@ namespace Rodin::Tests::Convergence::H::Poisson
       {
         value(i) = pi * std::cos(pi * p(i));
         for (size_t j = 0; j < dim; ++j)
+        {
           if (j != i)
             value(i) *= std::sin(pi * p(j));
+        }
       }
       return value;
     });
 
     ErrorHistory history;
     for (const size_t level : hierarchy.getLevels())
+    {
       history.append(hierarchy.getMeshSize(level),
         solve<1>(hierarchy, level, exact, forcing, exactGradient));
+    }
 
     expectRate(history, 1.65, 2.35, 0.75, 1.25);
   }
@@ -223,8 +227,10 @@ namespace Rodin::Tests::Convergence::H::Poisson
 
     ErrorHistory history;
     for (const size_t level : hierarchy.getLevels())
+    {
       history.append(hierarchy.getMeshSize(level),
         solve<1>(hierarchy, level, exact, forcing, exactGradient));
+    }
 
     expectRate(history, 1.65, 2.35, 0.75, 1.25);
   }
@@ -255,16 +261,20 @@ namespace Rodin::Tests::Convergence::H::Poisson
       {
         value(i) = pi * std::cos(pi * p(i));
         for (size_t j = 0; j < dim; ++j)
+        {
           if (j != i)
             value(i) *= std::sin(pi * p(j));
+        }
       }
       return value;
     });
 
     ErrorHistory history;
     for (const size_t level : hierarchy.getLevels())
+    {
       history.append(hierarchy.getMeshSize(level),
         solve<K>(hierarchy, level, exact, forcing, exactGradient));
+    }
 
     expectRate(history, minimumL2Rate, maximumL2Rate, minimumH1Rate, maximumH1Rate);
   }

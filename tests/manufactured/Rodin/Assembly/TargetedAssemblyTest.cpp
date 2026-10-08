@@ -65,8 +65,10 @@ namespace Rodin::Tests::Manufactured::Assembly
     const Math::SparseMatrix<Real> diff = expected - actual;
     Real maxAbs = 0;
     for (int k = 0; k < diff.outerSize(); ++k)
+    {
       for (Math::SparseMatrix<Real>::InnerIterator it(diff, k); it; ++it)
         maxAbs = std::max(maxAbs, std::abs(it.value()));
+    }
     EXPECT_LE(maxAbs, 1e-12);
   }
 

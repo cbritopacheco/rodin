@@ -65,9 +65,7 @@ namespace Rodin::Geometry
   class SubMesh<Context::MPI> final : public SubMeshBase, public Mesh<Context::MPI>
   {
     public:
-      /**
-       * @brief Parent mesh type.
-       */
+      /// @brief Parent mesh type.
       using Parent = Mesh<Context::MPI>;
 
       /**
@@ -89,9 +87,7 @@ namespace Rodin::Geometry
       class Builder
       {
         public:
-          /**
-           * @brief Default constructor.
-           */
+          /// @brief Default constructor.
           Builder()
             : m_dimension(0)
           {}
@@ -170,8 +166,9 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy assignment (deleted).
+       * @param other Object to copy from.
        */
-      SubMesh& operator=(const SubMesh&) = delete;
+      SubMesh& operator=(const SubMesh& other) = delete;
 
       /**
        * @brief Move assignment operator.

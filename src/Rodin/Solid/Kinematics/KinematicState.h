@@ -75,14 +75,28 @@ namespace Rodin::Solid
         m_logJ = 0.0;
       }
 
-      /// @brief Copy constructor.
-      KinematicState(const KinematicState&) = default;
-      /// @brief Move constructor.
-      KinematicState(KinematicState&&) = default;
-      /// @brief Copy assignment operator.
-      KinematicState& operator=(const KinematicState&) = default;
-      /// @brief Move assignment operator.
-      KinematicState& operator=(KinematicState&&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      KinematicState(const KinematicState& other) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      KinematicState(KinematicState&& other) = default;
+      /**
+       * @brief Copy assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      KinematicState& operator=(const KinematicState& other) = default;
+      /**
+       * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      KinematicState& operator=(KinematicState&& other) = default;
 
       /**
        * @brief Sets the displacement gradient @f$ \nabla \mathbf{u} @f$.
@@ -121,31 +135,58 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Gets the spatial dimension.
+      /**
+       * @brief Gets the spatial dimension.
+       * @returns The spatial dimension.
+       */
       size_t getDimension() const { return m_d; }
 
-      /// @brief Gets the displacement gradient @f$ \nabla \mathbf{u} @f$.
+      /**
+       * @brief Gets the displacement gradient @f$ \nabla \mathbf{u} @f$.
+       * @returns The displacement gradient @f$ \nabla \mathbf{u} @f$.
+       */
       const Math::SpatialMatrix<Real>& getDisplacementGradient() const { return m_H; }
 
-      /// @brief Gets the deformation gradient @f$ \mathbf{F} = \mathbf{I} + \nabla \mathbf{u} @f$.
+      /**
+       * @brief Gets the deformation gradient @f$ \mathbf{F} = \mathbf{I} + \nabla \mathbf{u} @f$.
+       * @returns The deformation gradient @f$ \mathbf{F} = \mathbf{I} + \nabla \mathbf{u} @f$.
+       */
       const Math::SpatialMatrix<Real>& getDeformationGradient() const { return m_F; }
 
-      /// @brief Gets @f$ \mathbf{F}^{-1} @f$.
+      /**
+       * @brief Gets @f$ \mathbf{F}^{-1} @f$.
+       * @returns @f$ \mathbf{F}^{-1} @f$.
+       */
       const Math::SpatialMatrix<Real>& getDeformationGradientInverse() const { return m_Finv; }
 
-      /// @brief Gets @f$ \mathbf{F}^{-T} @f$.
+      /**
+       * @brief Gets @f$ \mathbf{F}^{-T} @f$.
+       * @returns @f$ \mathbf{F}^{-T} @f$.
+       */
       const Math::SpatialMatrix<Real>& getDeformationGradientInverseTranspose() const { return m_FinvT; }
 
-      /// @brief Gets the right Cauchy-Green tensor @f$ \mathbf{C} = \mathbf{F}^T \mathbf{F} @f$.
+      /**
+       * @brief Gets the right Cauchy-Green tensor @f$ \mathbf{C} = \mathbf{F}^T \mathbf{F} @f$.
+       * @returns The right Cauchy-Green tensor @f$ \mathbf{C} = \mathbf{F}^T \mathbf{F} @f$.
+       */
       const Math::SpatialMatrix<Real>& getRightCauchyGreenTensor() const { return m_C; }
 
-      /// @brief Gets the left Cauchy-Green tensor @f$ \mathbf{b} = \mathbf{F} \mathbf{F}^T @f$.
+      /**
+       * @brief Gets the left Cauchy-Green tensor @f$ \mathbf{b} = \mathbf{F} \mathbf{F}^T @f$.
+       * @returns The left Cauchy-Green tensor @f$ \mathbf{b} = \mathbf{F} \mathbf{F}^T @f$.
+       */
       const Math::SpatialMatrix<Real>& getLeftCauchyGreenTensor() const { return m_b; }
 
-      /// @brief Gets the Jacobian @f$ J = \det(\mathbf{F}) @f$.
+      /**
+       * @brief Gets the Jacobian @f$ J = \det(\mathbf{F}) @f$.
+       * @returns Derivative evaluated at the supplied point.
+       */
       Real getJacobian() const { return m_J; }
 
-      /// @brief Gets @f$ \ln(J) @f$.
+      /**
+       * @brief Gets @f$ \ln(J) @f$.
+       * @returns @f$ \ln(J) @f$.
+       */
       Real getLogJacobian() const { return m_logJ; }
 
     private:

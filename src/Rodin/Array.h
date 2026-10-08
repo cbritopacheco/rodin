@@ -41,9 +41,7 @@ namespace Rodin
    */
   using IndexArray = Array<Index>;
 
-  /**
-   * @brief Functor for lexicographically ordering index arrays.
-   */
+  /// @brief Functor for lexicographically ordering index arrays.
   struct IndexArrayCompare
   {
     /**

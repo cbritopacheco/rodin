@@ -63,9 +63,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD guide for PartialPivLU.
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  PartialPivLU(Variational::ProblemBase<LinearSystem>&) -> PartialPivLU<LinearSystem>;
+  PartialPivLU(Variational::ProblemBase<LinearSystem>& pb) -> PartialPivLU<LinearSystem>;
 
   /**
    * @brief Dense LU factorization solver with partial pivoting for general matrices.
@@ -93,22 +94,34 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      /// @brief Constructs the solver from the problem to be solved.
+      /**
+       * @brief Constructs the solver from the problem to be solved.
+       * @param pb Variational problem to operate on.
+       */
       PartialPivLU(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       PartialPivLU(const PartialPivLU& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       PartialPivLU(PartialPivLU&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Solves the assembled linear system.
+      /**
+       * @brief Solves the assembled linear system.
+       * @param axb Variational expression defining the problem.
+       */
       void solve(LinearSystemType& axb) override
       {
         const auto& A = axb.getOperator();
@@ -125,7 +138,10 @@ namespace Rodin::Solver
         axb.getSolution() = m_solver.solve(b);
       }
 
-      /// @brief Returns a polymorphic copy of this solver.
+      /**
+       * @brief Returns a polymorphic copy of this solver.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       PartialPivLU* copy() const noexcept override
       {
         return new PartialPivLU(*this);
@@ -135,6 +151,7 @@ namespace Rodin::Solver
        * @brief Returns the underlying Eigen solver.
        *
        * Useful for diagnostics such as permutationP(), matrixLU(), rcond().
+       * @returns The underlying Eigen solver.
        */
       const Eigen::PartialPivLU<OperatorType>& getSolver() const noexcept
       {

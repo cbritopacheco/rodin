@@ -20,8 +20,10 @@ namespace
   {
     std::vector<std::pair<size_t, size_t>> shapes;
     for (size_t rows = 1; rows <= 3; ++rows)
+    {
       for (size_t cols = 1; cols <= 3; ++cols)
         shapes.emplace_back(rows, cols);
+    }
     return shapes;
   }
 
@@ -36,8 +38,10 @@ namespace
     ASSERT_EQ(fe.getCount(), scalar.getCount() * rows * cols);
     EXPECT_EQ(fe.getOrder(), scalar.getOrder());
     for (size_t a = 0; a < fe.getCount(); ++a)
+    {
       for (size_t b = 0; b < fe.getCount(); ++b)
         EXPECT_NEAR(fe.getLinearForm(a)(fe.getBasis(b)), a == b ? 1.0 : 0.0, 1e-10);
+    }
   }
 
   template <class FES, class ScalarFES>
@@ -47,8 +51,10 @@ namespace
     EXPECT_EQ(fes.getSize(), scalar.getSize() * components);
     Matrix value(rows, cols);
     for (size_t r = 0; r < rows; ++r)
+    {
       for (size_t c = 0; c < cols; ++c)
         value(r, c) = 1 + 10 * r + c;
+    }
     GridFunction field(fes);
     field = value;
     const FES copied(fes);
@@ -74,8 +80,10 @@ namespace
       ASSERT_EQ(evaluated.rows(), rows);
       ASSERT_EQ(evaluated.cols(), cols);
       for (size_t r = 0; r < rows; ++r)
+      {
         for (size_t c = 0; c < cols; ++c)
           EXPECT_NEAR(evaluated(r, c), value(r, c), 1e-10);
+      }
       const auto& dofs = fes.getDOFs(poly.getDimension(), poly.getIndex());
       EXPECT_TRUE((moved.getDOFs(poly.getDimension(), poly.getIndex()) == dofs).all());
       EXPECT_TRUE((assigned.getDOFs(poly.getDimension(), poly.getIndex()) == dofs).all());
@@ -89,12 +97,16 @@ namespace
       mass.setPolytope(poly);
       scalarMass.setPolytope(poly);
       for (size_t a = 0; a < fe.getCount(); ++a)
+      {
         for (size_t b = 0; b < fe.getCount(); ++b)
+        {
           EXPECT_NEAR(mass.integrate(a, b),
             a % components == b % components
               ? scalarMass.integrate(a / components, b / components)
               : 0.0,
             1e-10);
+        }
+      }
       auto load = Integral(MatrixFunction(value), test);
       load.setPolytope(poly);
       // Summing the load entries tests the partition of unity for each component.
@@ -126,12 +138,16 @@ namespace
     const auto& actual = globalMass.getOperator();
     const auto& expected = globalScalarMass.getOperator();
     for (size_t a = 0; a < fes.getSize(); ++a)
+    {
       for (size_t b = 0; b < fes.getSize(); ++b)
+      {
         EXPECT_NEAR(actual.coeff(a, b),
           a % components == b % components
             ? expected.coeff(a / components, b / components)
             : 0.0,
           1e-10);
+      }
+    }
   }
 }
 
@@ -139,7 +155,9 @@ TEST(MatrixRange, NodalDualityAllGeometriesAndShapes)
 {
   for (auto geometry : {G::Point, G::Segment, G::Triangle, G::Quadrilateral,
          G::Tetrahedron, G::Pyramid, G::Wedge, G::Hexahedron})
+  {
     for (size_t rows = 1; rows <= 3; ++rows)
+    {
       for (size_t cols = 1; cols <= 3; ++cols)
       {
         checkElement<P0Element<Matrix>>(geometry, rows, cols);
@@ -149,6 +167,8 @@ TEST(MatrixRange, NodalDualityAllGeometriesAndShapes)
         checkElement<H1Element<2, Matrix>>(geometry, rows, cols);
         checkElement<H1Element<3, Matrix>>(geometry, rows, cols);
       }
+    }
+  }
 }
 
 TEST(MatrixRange, ProjectionAndAssemblyAllSpaces)
@@ -161,8 +181,10 @@ TEST(MatrixRange, ProjectionAndAssemblyAllSpaces)
       : threeD                         ? LocalMesh::UniformGrid(geometry, {2, 2, 2})
                                        : LocalMesh::UniformGrid(geometry, {2, 2});
     for (size_t d = 1; d <= mesh.getDimension(); ++d)
+    {
       for (size_t lower = 0; lower < d; ++lower)
         mesh.getConnectivity().compute(d, lower);
+    }
     for (const auto& shape : matrixShapes())
     {
       const auto [rows, cols] = shape;
@@ -217,12 +239,14 @@ TEST(MatrixRange, ComponentAndTransposeForms)
     mass.setPolytope(*it);
     const size_t count = fes.getFiniteElement(2, it->getIndex()).getCount();
     for (size_t a = 0; a < count; ++a)
+    {
       for (size_t b = 0; b < count; ++b)
       {
         EXPECT_NEAR(transposeMass.integrate(a, b), mass.integrate(a, b), 1e-12);
         EXPECT_NEAR(componentMass.integrate(a, b),
           a % 6 == 5 && b % 6 == 5 ? mass.integrate(a, b) : 0.0, 1e-12);
       }
+    }
   }
 }
 
@@ -236,8 +260,10 @@ TEST(MatrixRange, CubicProjection)
   auto polynomial = [](const Geometry::Point& p) {
     Matrix value(3, 3);
     for (size_t r = 0; r < 3; ++r)
+    {
       for (size_t c = 0; c < 3; ++c)
         value(r, c) = (r + 1) * p.x() * p.x() * p.y() + (c + 1) * p.y() + 10 * r + c;
+    }
     return value;
   };
   field.project(polynomial);
@@ -246,8 +272,10 @@ TEST(MatrixRange, CubicProjection)
     Geometry::Point p(*it, Math::SpatialPoint{0.2, 0.3});
     const auto actual = field.getValue(p), expected = polynomial(p);
     for (size_t r = 0; r < 3; ++r)
+    {
       for (size_t c = 0; c < 3; ++c)
         EXPECT_NEAR(actual(r, c), expected(r, c), 1e-10);
+    }
     EXPECT_NEAR(Component(field, 1, 2).getValue(p), expected(1, 2), 1e-10);
   }
 }
@@ -337,8 +365,10 @@ TEST(MatrixRange, MatrixDirichletValues)
   TrialFunction trial(fes);
   Matrix value(3, 3);
   for (size_t r = 0; r < 3; ++r)
+  {
     for (size_t c = 0; c < 3; ++c)
       value(r, c) = 1 + 10 * r + c;
+  }
   DirichletBC boundary(trial, MatrixFunction(value));
   boundary.assemble();
   ASSERT_EQ(
@@ -371,6 +401,7 @@ TEST(MatrixRange, ScalarAndMatrixWeightedMass)
       weighted.setPolytope(*it);
       const size_t count = fes.getFiniteElement(2, it->getIndex()).getCount();
       for (size_t a = 0; a < count; ++a)
+      {
         for (size_t b = 0; b < count; ++b)
         {
           EXPECT_NEAR(scaled.integrate(a, b), 4 * plain.integrate(a, b), 1e-10);
@@ -380,6 +411,7 @@ TEST(MatrixRange, ScalarAndMatrixWeightedMass)
             : 0;
           EXPECT_NEAR(weighted.integrate(a, b), expected, 1e-10);
         }
+      }
     }
   };
   P1 p1(mesh, 2, 3);
@@ -432,21 +464,27 @@ TEST(MatrixRange, MatrixDifferentialOperatorsAllSpacesAndGeometries)
       : dimension == 2         ? LocalMesh::UniformGrid(geometry, {2, 2})
                                : LocalMesh::UniformGrid(geometry, {2, 2, 2});
     for (size_t d = 1; d <= dimension; ++d)
+    {
       for (size_t lower = 0; lower < d; ++lower)
         mesh.getConnectivity().compute(d, lower);
+    }
     auto check = [&](const auto& fes, bool constant) {
       GridFunction field(fes);
       auto affine = [&](const Geometry::Point& point) {
         Matrix value(fes.getRows(), fes.getColumns());
         for (size_t row = 0; row < value.rows(); ++row)
+        {
           for (size_t col = 0; col < value.cols(); ++col)
           {
             value(row, col) = 1 + row + col;
             if (!constant)
               for (size_t k = 0; k < dimension; ++k)
+              {
                 value(row, col) +=
                   (row + 1) * (col + 2) * (k + 1) * point.getPhysicalCoordinates()(k);
+              }
           }
+        }
         return value;
       };
       field.project(affine);
@@ -478,6 +516,7 @@ TEST(MatrixRange, MatrixDifferentialOperatorsAllSpacesAndGeometries)
                                         field.getValue(Geometry::Point(*cell, minus))) /
           (2 * step);
         for (size_t row = 0; row < fes.getRows(); ++row)
+        {
           for (size_t col = 0; col < fes.getColumns(); ++col)
           {
             const Real expected = constant ? 0 : (row + 1) * (col + 2) * (k + 1);
@@ -485,6 +524,7 @@ TEST(MatrixRange, MatrixDifferentialOperatorsAllSpacesAndGeometries)
             EXPECT_NEAR(derivative(row, col), expected, tolerance);
             EXPECT_NEAR(finiteDifference(row, col), expected, tolerance);
           }
+        }
         EXPECT_NEAR(
           partial.getBasis(0)(0, 0), shapeGradient.getBasis(0)(0, 0, k), tolerance);
       }
@@ -506,8 +546,10 @@ TEST(MatrixRange, MatrixDifferentialOperatorsAllSpacesAndGeometries)
       Real energy = 0;
       const auto& dofs = fes.getDOFs(dimension, cell->getIndex());
       for (size_t a = 0; a < count; ++a)
+      {
         for (size_t b = 0; b < count; ++b)
           energy += field[dofs[a]] * stiffness.integrate(a, b) * field[dofs[b]];
+      }
       EXPECT_NEAR(energy, evaluated.squaredNorm() * cell->getMeasure(), 1e-6);
     };
     for (const auto& shape : matrixShapes())
@@ -556,6 +598,7 @@ TEST(MatrixRange, TensorCoefficientCouplesAllMatrixEntries)
     mass.setPolytope(*cell);
     const size_t count = fes.getFiniteElement(2, cell->getIndex()).getCount();
     for (size_t a = 0; a < count; ++a)
+    {
       for (size_t b = 0; b < count; ++b)
       {
         const size_t ca = a % 6, cb = b % 6;
@@ -563,13 +606,16 @@ TEST(MatrixRange, TensorCoefficientCouplesAllMatrixEntries)
           material(cb / 3, cb % 3, ca / 3, ca % 3) * mass.integrate(a / 6 * 6, b / 6 * 6),
           1e-10);
       }
+    }
     using ScalarFES = std::remove_cvref_t<decltype(fes.getScalarSpace())>;
     if constexpr (std::is_same_v<ScalarFES, P0<Real>> ||
       std::is_same_v<ScalarFES, P0g<Real, LocalMesh>>)
     {
       for (size_t a = 0; a < count; ++a)
+      {
         for (size_t b = 0; b < count; ++b)
           EXPECT_EQ(transport.integrate(a, b), 0);
+      }
     }
     else
     {
@@ -582,11 +628,15 @@ TEST(MatrixRange, TensorCoefficientCouplesAllMatrixEntries)
       dx.setPolytope(*cell);
       dy.setPolytope(*cell);
       for (size_t a = 0; a < count; ++a)
+      {
         for (size_t b = 0; b < count; ++b)
+        {
           EXPECT_NEAR(transport.integrate(a, b),
             a % 6 == b % 6 ? 2 * dx.integrate(a / 6, b / 6) - dy.integrate(a / 6, b / 6)
                            : 0,
             1e-10);
+        }
+      }
     }
   };
   P0 p0(mesh, 2, 3);
@@ -652,19 +702,23 @@ TEST(MatrixRange, ComplexMatrixDifferentials)
     field = [](const Geometry::Point& p) {
       ComplexMatrix value(2, 2);
       for (size_t r = 0; r < 2; ++r)
+      {
         for (size_t c = 0; c < 2; ++c)
           value(r, c) = Complex((1 + r) * p.x(), (1 + c) * p.y());
+      }
       return value;
     };
     auto cell = mesh.getCell();
     Geometry::Point point(*cell, Polytope::Traits(G::Triangle).getCentroid());
     const auto gradient = Grad(field).getValue(point);
     for (size_t r = 0; r < 2; ++r)
+    {
       for (size_t c = 0; c < 2; ++c)
       {
         EXPECT_NEAR(std::abs(gradient(r, c, 0) - Complex(1 + r, 0)), 0, 1e-10);
         EXPECT_NEAR(std::abs(gradient(r, c, 1) - Complex(0, 1 + c)), 0, 1e-10);
       }
+    }
     EXPECT_NEAR(gradient.squaredNorm(), 20, 1e-10);
     const auto value = field.getValue(point);
     EXPECT_NEAR(value.squaredNorm(), Math::dot(value, value).real(), 1e-10);
@@ -707,9 +761,13 @@ TEST(MatrixRange, BoundaryGradientsMatchScalarTraceSemantics)
     scalarForm.setPolytope(*face);
     const size_t count = fes.getFiniteElement(1, face->getIndex()).getCount();
     for (size_t a = 0; a < count; ++a)
+    {
       for (size_t b = 0; b < count; ++b)
+      {
         EXPECT_NEAR(matrixForm.integrate(a, b),
           a % 6 == b % 6 ? scalarForm.integrate(a / 6, b / 6) : 0, 1e-9);
+      }
+    }
   }
 }
 
@@ -742,8 +800,10 @@ TEST(MatrixRange, CurvedAndEmbeddedChainRule)
       field = [](const Geometry::Point& p) {
         Matrix value(2, 3);
         for (size_t i = 0; i < 2; ++i)
+        {
           for (size_t j = 0; j < 3; ++j)
             value(i, j) = (i + 1) * p.x() + (j + 1) * p.y();
+        }
         return value;
       };
       auto cell = mesh.getCell();
@@ -762,9 +822,13 @@ TEST(MatrixRange, CurvedAndEmbeddedChainRule)
                                   field.getValue(Geometry::Point(*cell, minus))) /
           2e-6;
         for (size_t i = 0; i < 2; ++i)
+        {
           for (size_t j = 0; j < 3; ++j)
+          {
             for (size_t k = 0; k < spaceDimension; ++k)
               expected(i, j, k) += difference(i, j) * inverse(l, k);
+          }
+        }
       }
       EXPECT_LE((gradient - expected).norm(), 1e-7);
       TrialFunction trial(fes);
@@ -787,8 +851,10 @@ TEST(MatrixRange, CurvedAndEmbeddedChainRule)
       const auto& dofs = fes.getDOFs(2, cell->getIndex());
       Real assembledEnergy = 0;
       for (Eigen::Index a = 0; a < dofs.size(); ++a)
+      {
         for (Eigen::Index b = 0; b < dofs.size(); ++b)
           assembledEnergy += field[dofs[a]] * stiffness.integrate(a, b) * field[dofs[b]];
+      }
       EXPECT_NEAR(assembledEnergy, integratedGradient,
         1e-9 * std::max(Real(1), integratedGradient));
       using ScalarFES = std::remove_cvref_t<decltype(fes.getScalarSpace())>;
@@ -803,9 +869,13 @@ TEST(MatrixRange, CurvedAndEmbeddedChainRule)
         const size_t components = fes.getRows() * fes.getColumns();
         Real scalarEnergy = 0;
         for (size_t a = 0; a < dofs.size() / components; ++a)
+        {
           for (size_t b = 0; b < dofs.size() / components; ++b)
+          {
             scalarEnergy += field[dofs[a * components]] *
               scalarStiffness.integrate(a, b) * field[dofs[b * components]];
+          }
+        }
         EXPECT_NEAR(scalarEnergy, scalarGradientEnergy,
           1e-9 * std::max(Real(1), scalarGradientEnergy));
       }
@@ -829,8 +899,10 @@ TEST(MatrixRange, MixedSpaceMassUsesFrobeniusProduct)
       : D == 2         ? LocalMesh::UniformGrid(geometry, {2, 2})
                        : LocalMesh::UniformGrid(geometry, {2, 2, 2});
     for (size_t d = 1; d <= D; ++d)
+    {
       for (size_t l = 0; l < d; ++l)
         mesh.getConnectivity().compute(d, l);
+    }
     auto check = [&](const auto& trialSpace, const auto& testSpace) {
       TrialFunction u(trialSpace);
       TestFunction v(testSpace);
@@ -844,9 +916,13 @@ TEST(MatrixRange, MixedSpaceMassUsesFrobeniusProduct)
       const size_t n = trialSpace.getFiniteElement(D, cell->getIndex()).getCount();
       const size_t m = testSpace.getFiniteElement(D, cell->getIndex()).getCount();
       for (size_t a = 0; a < n; ++a)
+      {
         for (size_t b = 0; b < m; ++b)
+        {
           EXPECT_NEAR(matrixMass.integrate(a, b),
             a % 6 == b % 6 ? scalarMass.integrate(a / 6, b / 6) : 0, 1e-9);
+        }
+      }
     };
     P0 p0(mesh, 2, 3);
     P0g p0g(mesh, 2, 3);
@@ -949,8 +1025,10 @@ TEST(MatrixRange, ZeroDimensionalFields)
     GridFunction field(fes);
     Matrix value(fes.getRows(), fes.getColumns());
     for (size_t i = 0; i < value.rows(); ++i)
+    {
       for (size_t j = 0; j < value.cols(); ++j)
         value(i, j) = 1 + 7 * i + j;
+    }
     field = value;
     auto vertex = mesh.getVertex();
     Geometry::Point point(
@@ -965,11 +1043,13 @@ TEST(MatrixRange, ZeroDimensionalFields)
     stiffness.setPolytope(*vertex);
     const size_t count = fes.getFiniteElement(0, vertex->getIndex()).getCount();
     for (size_t a = 0; a < count; ++a)
+    {
       for (size_t b = 0; b < count; ++b)
       {
         EXPECT_NEAR(mass.integrate(a, b), a == b ? 1 : 0, 1e-12);
         EXPECT_NEAR(stiffness.integrate(a, b), 0, 1e-12);
       }
+    }
   };
   for (auto [r, c] : matrixShapes())
   {
@@ -989,8 +1069,10 @@ TEST(MatrixRange, StressVelocityCouplingPreservesPhysicalIndices)
     Mesh mesh = D == 2 ? LocalMesh::UniformGrid(geometry, {2, 2})
                        : LocalMesh::UniformGrid(geometry, {2, 2, 2});
     for (size_t d = 1; d <= D; ++d)
+    {
       for (size_t l = 0; l < d; ++l)
         mesh.getConnectivity().compute(d, l);
+    }
     H1 stressSpace(order, mesh, 2, D);
     H1 velocitySpace(order, mesh, 2);
     H1 scalarSpace(order, mesh);
@@ -1022,6 +1104,7 @@ TEST(MatrixRange, StressVelocityCouplingPreservesPhysicalIndices)
         derivative.setOrder(12);
       derivative.setPolytope(*cell);
       for (size_t a = 0; a < matrixCount; ++a)
+      {
         for (size_t b = 0; b < vectorCount; ++b)
         {
           const size_t row = (a % (2 * D)) / D, column = a % D;
@@ -1037,6 +1120,7 @@ TEST(MatrixRange, StressVelocityCouplingPreservesPhysicalIndices)
               testRow == b % 2 ? derivative.integrate(b / 2, a / (2 * D)) : 0, 1e-9);
           }
         }
+      }
     }
     BilinearForm assembled(stress, velocityTest);
     assembled = Integral(Div(stress), velocityTest);

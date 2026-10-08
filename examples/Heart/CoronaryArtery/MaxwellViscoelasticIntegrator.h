@@ -148,8 +148,10 @@ namespace Rodin::Examples::Heart
               "have vdim = d*d.");
 
           for (size_t b = 0; b < nte; ++b)
+          {
             m_vec(static_cast<Eigen::Index>(b)) +=
               wdet * m_scale * contract(fe.getBasis(b), rc, Jinv, pv, d);
+          }
         }
 
         return *this;
@@ -184,9 +186,11 @@ namespace Rodin::Examples::Heart
           {
             ScalarType gradPhys = 0;
             for (size_t r = 0; r < d; ++r)
+            {
               gradPhys +=
                 Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r)) *
                 Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(j));
+            }
             s += pv(static_cast<std::uint8_t>(c * d + j)) * gradPhys;
           }
         }

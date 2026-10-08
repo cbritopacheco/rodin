@@ -30,8 +30,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Div over a grid function: exposes the finite element
-  /// space, the scalar type and the operand type.
+  /**
+   * @brief Type traits for @c Div over a grid function: exposes the finite element
+   * space, the scalar type and the operand type.
+   */
   template <class Scalar, class Data, class Mesh>
   struct Traits<Variational::Div<Variational::GridFunction<Variational::P1<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
@@ -45,8 +47,10 @@ namespace Rodin::FormLanguage
           Data>;
   };
 
-  /// @brief Type traits for @c Div over a shape function: exposes the finite element
-  /// space, the shape function space, the scalar type and the operand type.
+  /**
+   * @brief Type traits for @c Div over a shape function: exposes the finite element
+   * space, the shape function space, the scalar type and the operand type.
+   */
   template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Div<
@@ -97,28 +101,45 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
-      /// @brief Constructs the expression from its operand.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       Div(const OperandType& u)
         : Parent(u)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Div(const Div& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Div(Div&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Interpolates at an integration point.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       void interpolate(ScalarType& out, const IntegrationPoint& ip) const
       {
         interpolate(out, ip.getPoint());
       }
 
-      /// @brief Interpolates at a geometric point.
+      /**
+       * @brief Interpolates at a geometric point.
+       * @param out Storage for the computed result.
+       * @param p Point at which the operation is evaluated.
+       */
       void interpolate(ScalarType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
@@ -216,7 +237,11 @@ namespace Rodin::Variational
         }
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -224,7 +249,10 @@ namespace Rodin::Variational
         return (k == 0) ? 0 : (k - 1);
       }
 
-      /// @brief Creates a polymorphic copy.
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       Div* copy() const noexcept override
       {
         return new Div(*this);
@@ -234,9 +262,10 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Div of a P1 GridFunction
+   * @param u Operand expression.
    */
   template <class Scalar, class Data, class Mesh>
-  Div(const GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>&)
+  Div(const GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>& u)
     -> Div<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>>;
 
   /**
@@ -290,13 +319,20 @@ namespace Rodin::Variational
               /// @brief Whether the key holds a cached entry.
               bool valid = false;
 
-              /// @brief Tests whether the key holds a cached entry.
+              /**
+               * @brief Tests whether the key holds a cached entry.
+               * @returns True if the key identifies a cached entry; false otherwise.
+               */
               explicit operator bool() const noexcept
               {
                 return valid;
               }
 
-              /// @brief Equality comparison.
+              /**
+               * @brief Equality comparison.
+               * @returns Whether the operands compare equal.
+               * @param o Key to compare with this key.
+               */
               bool operator==(const CellKey& o) const noexcept
               {
                 if (!valid || !o.valid)
@@ -305,8 +341,11 @@ namespace Rodin::Variational
                   transOrder == o.transOrder && vdim == o.vdim;
               }
 
-              /// @brief Resets the key, invalidating the cached entry.
-              void operator=(std::initializer_list<int>) noexcept
+              /**
+               * @brief Resets the key, invalidating the cached entry.
+               * @param other Object to copy from.
+               */
+              void operator=(std::initializer_list<int> other) noexcept
               {
                 valid = false;
                 mesh = nullptr;
@@ -328,13 +367,20 @@ namespace Rodin::Variational
             /// @brief Whether the key holds a cached entry.
             bool valid = false;
 
-            /// @brief Tests whether the key holds a cached entry.
+            /**
+             * @brief Tests whether the key holds a cached entry.
+             * @returns True if the key identifies a cached entry; false otherwise.
+             */
             explicit operator bool() const noexcept
             {
               return valid;
             }
 
-            /// @brief Equality comparison.
+            /**
+             * @brief Equality comparison.
+             * @returns Whether the operands compare equal.
+             * @param o Key to compare with this key.
+             */
             bool operator==(const QpKey& o) const noexcept
             {
               if (!valid || !o.valid)
@@ -342,8 +388,11 @@ namespace Rodin::Variational
               return qf == o.qf && qp == o.qp;
             }
 
-            /// @brief Resets the key, invalidating the cached entry.
-            void operator=(std::initializer_list<int>) noexcept
+            /**
+             * @brief Resets the key, invalidating the cached entry.
+             * @param reset Initializer-list tag; its contents are ignored when invalidating the key.
+             */
+            void operator=([[maybe_unused]] std::initializer_list<int> reset) noexcept
             {
               valid = false;
               qf = nullptr;
@@ -361,14 +410,20 @@ namespace Rodin::Variational
         QpKey qpKey;
       };
 
-      /// @brief Constructs the expression from its operand.
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param u Operand expression.
+       */
       Div(const OperandType& u)
         : Parent(u.getFiniteElementSpace()),
           m_u(u),
           m_ip(nullptr)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Div(const Div& other)
         : Parent(other),
           m_u(other.m_u),
@@ -376,7 +431,10 @@ namespace Rodin::Variational
           m_cache(other.m_cache)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Div(Div&& other)
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
@@ -384,28 +442,41 @@ namespace Rodin::Variational
           m_cache(std::move(other.m_cache))
       {}
 
-      /// @brief Gets the operand function.
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
       constexpr
       const OperandType& getOperand() const
       {
         return m_u.get();
       }
 
-      /// @brief Gets the operand in the shape function expression.
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
       constexpr
       const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       constexpr
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         return getOperand().getDOFs(polytope);
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       constexpr
       const IntegrationPoint& getIntegrationPoint() const
       {
@@ -413,7 +484,11 @@ namespace Rodin::Variational
         return *m_ip;
       }
 
-      /// @brief Tests whether a polytope geometry is a tensor-product one.
+      /**
+       * @brief Tests whether a polytope geometry is a tensor-product one.
+       * @param g Mesh entity used by this operation.
+       * @returns Whether the geometry is a tensor-product reference cell.
+       */
       static constexpr bool isTensorGeom(Geometry::Polytope::Type g) noexcept
       {
         return g == Geometry::Polytope::Type::Quadrilateral
@@ -421,7 +496,11 @@ namespace Rodin::Variational
             || g == Geometry::Polytope::Type::Hexahedron;
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Div& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_ip = &ip;
@@ -513,7 +592,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       ScalarType getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
@@ -521,7 +604,11 @@ namespace Rodin::Variational
         return m_cache.div[local];
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -542,9 +629,12 @@ namespace Rodin::Variational
       Cache m_cache;
   };
 
-  /// @brief Deduction guide for @c Div.
+  /**
+   * @brief Deduction guide for @c Div.
+   * @param u Operand expression.
+   */
   template <class NestedDerived, class Number, class Mesh, ShapeFunctionSpaceType Space>
-  Div(const ShapeFunction<NestedDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>&)
+  Div(const ShapeFunction<NestedDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>& u)
     -> Div<ShapeFunction<NestedDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 

@@ -95,7 +95,11 @@ namespace Rodin::Variational
         return getOperand().getValue(p).real();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);
@@ -116,9 +120,10 @@ namespace Rodin::Variational
 
   /**
    * @brief CTAD for Re.
+   * @param f Complex-valued function operand
    */
   template <class NestedDerived>
-  Re(const FunctionBase<NestedDerived>&) -> Re<FunctionBase<NestedDerived>>;
+  Re(const FunctionBase<NestedDerived>& f) -> Re<FunctionBase<NestedDerived>>;
 }
 
 #endif
