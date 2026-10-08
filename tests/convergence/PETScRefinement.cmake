@@ -1,25 +1,24 @@
 include_guard(GLOBAL)
 
-# Shared geometry/rank registration for the p/hp backend counterparts.
+# Shared geometry/rank registration for PETSc refinement and curved-boundary suites.
 # The source provides AllGeometries/LocalTest and AllGeometries/MPITest.
+# The default keeps all cases together. SPLIT_RATES isolates cases ending in
+# Rates; RATE_CASES isolates each explicitly named case. Both opt-in modes
+# retain the complementary cases in Controls, including unlisted rate cases
+# in RATE_CASES mode. These alternatives change process lifetimes only:
+# complete hierarchies, numerical acceptance, rank counts and geometry policy
+# remain owned by the source suite. Combining the alternatives is an error.
 function(rodin_add_petsc_refinement target source)
-  cmake_parse_arguments(_refinement "" "" "GEOMETRIES" ${ARGN})
+  cmake_parse_arguments(_refinement "SPLIT_RATES" "" "GEOMETRIES;RATE_CASES" ${ARGN})
+  if (_refinement_SPLIT_RATES AND _refinement_RATE_CASES)
+    message(FATAL_ERROR "SPLIT_RATES and RATE_CASES specify alternative process partitions")
+  endif()
   add_executable(${target} ${source})
   target_link_libraries(${target} PRIVATE GTest::gtest RodinConvergence Rodin::PETSc)
   set(_geometries Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
   if (_refinement_GEOMETRIES)
     set(_geometries ${_refinement_GEOMETRIES})
   endif()
-  foreach(geometry IN LISTS _geometries)
-    add_test(NAME ${target}_${geometry} COMMAND $<TARGET_FILE:${target}>
-      "--gtest_filter=AllGeometries/LocalTest.*/${geometry}")
-    set_tests_properties(${target}_${geometry} PROPERTIES
-      LABELS "convergence;petsc;slow" TIMEOUT 1800)
-    if (geometry STREQUAL "Pyramid")
-      set_tests_properties(${target}_${geometry} PROPERTIES RESOURCE_LOCK petsc_refinement_pyramid)
-    endif()
-    rodin_suppress_external_mpi_lsan_for_test(${target}_${geometry})
-  endforeach()
   if (RODIN_USE_MPI)
     target_link_libraries(${target} PRIVATE Rodin::MPI)
     execute_process(COMMAND ${MPIEXEC_EXECUTABLE} --version
@@ -28,19 +27,80 @@ function(rodin_add_petsc_refinement target source)
     if (_version MATCHES "Open MPI|OpenRTE")
       set(_oversubscribe "--oversubscribe")
     endif()
-    foreach(np 1 2 3 4)
-      foreach(geometry IN LISTS _geometries)
-        add_test(NAME ${target}_MPI_np${np}_${geometry}
-          COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np} ${_oversubscribe}
-            $<TARGET_FILE:${target}> "--gtest_filter=AllGeometries/MPITest.*/${geometry}")
-        set_tests_properties(${target}_MPI_np${np}_${geometry} PROPERTIES
-          LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
-        if (geometry STREQUAL "Pyramid")
-          set_tests_properties(${target}_MPI_np${np}_${geometry}
-            PROPERTIES RESOURCE_LOCK petsc_refinement_pyramid)
-        endif()
-        rodin_suppress_external_mpi_lsan_for_test(${target}_MPI_np${np}_${geometry})
-      endforeach()
-    endforeach()
   endif()
+  # Opt-in process-lifetime partition: rate hierarchies and controls retain
+  # their complete case sets but do not share a long-lived solver process.
+  set(_groups All)
+  if (_refinement_SPLIT_RATES)
+    set(_groups Rates Controls)
+  elseif (_refinement_RATE_CASES)
+    set(_groups ${_refinement_RATE_CASES} Controls)
+  endif()
+  foreach(group IN LISTS _groups)
+    set(_suffix "")
+    set(_case "*")
+    if (group STREQUAL "Rates")
+      set(_suffix "_Rates")
+      set(_case "*Rates")
+    elseif (group STREQUAL "Controls")
+      set(_suffix "_Controls")
+    elseif (_refinement_RATE_CASES)
+      set(_suffix "_${group}")
+      set(_case "${group}")
+    endif()
+    foreach(geometry IN LISTS _geometries)
+      set(_test ${target}${_suffix}_${geometry})
+      set(_filter "AllGeometries/LocalTest.${_case}/${geometry}")
+      if (group STREQUAL "Controls")
+        if (_refinement_RATE_CASES)
+          set(_excluded "")
+          foreach(rate_case IN LISTS _refinement_RATE_CASES)
+            list(APPEND _excluded "AllGeometries/LocalTest.${rate_case}/${geometry}")
+          endforeach()
+          list(JOIN _excluded ":" _excluded_filter)
+          string(APPEND _filter "-${_excluded_filter}")
+        else()
+          string(APPEND _filter "-AllGeometries/LocalTest.*Rates/${geometry}")
+        endif()
+      endif()
+      add_test(NAME ${_test} COMMAND $<TARGET_FILE:${target}>
+        "--gtest_filter=${_filter}")
+      set_tests_properties(${_test} PROPERTIES
+        LABELS "convergence;petsc;slow" TIMEOUT 1800)
+      if (geometry STREQUAL "Pyramid")
+        set_tests_properties(${_test} PROPERTIES RESOURCE_LOCK petsc_refinement_pyramid)
+      endif()
+      rodin_suppress_external_mpi_lsan_for_test(${_test})
+    endforeach()
+    if (RODIN_USE_MPI)
+      foreach(np 1 2 3 4)
+        foreach(geometry IN LISTS _geometries)
+          set(_test ${target}_MPI_np${np}${_suffix}_${geometry})
+          set(_filter "AllGeometries/MPITest.${_case}/${geometry}")
+          if (group STREQUAL "Controls")
+            if (_refinement_RATE_CASES)
+              set(_excluded "")
+              foreach(rate_case IN LISTS _refinement_RATE_CASES)
+                list(APPEND _excluded "AllGeometries/MPITest.${rate_case}/${geometry}")
+              endforeach()
+              list(JOIN _excluded ":" _excluded_filter)
+              string(APPEND _filter "-${_excluded_filter}")
+            else()
+              string(APPEND _filter "-AllGeometries/MPITest.*Rates/${geometry}")
+            endif()
+          endif()
+          add_test(NAME ${_test}
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np} ${_oversubscribe}
+              $<TARGET_FILE:${target}> "--gtest_filter=${_filter}")
+          set_tests_properties(${_test} PROPERTIES
+            LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
+          if (geometry STREQUAL "Pyramid")
+            set_tests_properties(${_test}
+              PROPERTIES RESOURCE_LOCK petsc_refinement_pyramid)
+          endif()
+          rodin_suppress_external_mpi_lsan_for_test(${_test})
+        endforeach()
+      endforeach()
+    endif()
+  endforeach()
 endfunction()
