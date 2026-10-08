@@ -336,3 +336,55 @@ CI separates local and each MPI rank count for tetrahedral traction, so the
 cost of five complete groups is not accumulated in one job. These are
 scheduling policies, not numerical error budgets or performance bounds.
 A registered test is not, by itself, evidence of completed numerical validation.
+
+## Cubic vector fields on quadratic approximated geometry
+
+The `ApproximatedP3Q2` studies retain the smooth exponential physical field,
+full essential trace, fixed Lamé coefficients and represented sine-map domain.
+Field degree $p=3$ and geometry degree $q=2$ are varied independently.
+Three levels are $n=3,5,9$, except Segment ($n=5,9,17$).
+The represented-domain and lifted field errors are evaluated separately from
+the geometry and total defects for displacement, strain and stress.
+
+Subject to the stated regularity, coercivity and map assumptions, displacement
+field errors have $L^2/H^1$ orders $4/3$ and displacement geometry errors have
+orders $3/2$. Strain and stress are linear functions of the displacement
+gradient; their field and geometry errors have conditional orders $3$ and $2$.
+These component estimates do not assert that geometry already dominates the
+total error on a finite hierarchy.
+
+For each observable, let $F,G,T$ denote its field, geometry and total error,
+and let $\rho=h_f/h_c<1$. Both norm triangle inequalities are checked at
+every level. Each adjacent interval must satisfy
+
+$$
+T_f<T_c,\qquad
+T_f\le F_c\rho^{s_F-\delta}+G_c\rho^{s_G-\delta}+10^{-11}.
+$$
+
+For displacement $L^2$, $(s_F,s_G,\delta)=(4,3,0.55)$; for displacement
+$H^1$, strain and stress, $(s_F,s_G,\delta)=(3,2,0.45)$.
+The separate represented, field and geometry rates retain two-sided windows
+with these margins. Monotonicity, margins and the dimensionless roundoff floor
+are finite-hierarchy acceptance policies, not lower asymptotic bounds.
+
+Assembly order $11\to16$, norm order $13\to18$, and solver tolerance
+$10^{-13}\to10^{-14}$ are varied separately at $n=5$. Every positive error
+observable must retain the existing relative sensitivity budget $10^{-6}$.
+A physical asymmetric-affine field is representable with cubic fields on
+quadratic geometry; represented and lifted-field displacement, strain and
+stress errors must remain below $10^{-9}$. Omitting the volumetric bilinear
+term while retaining the exponential manufactured source and trace must
+increase each represented, field and total error by a factor greater than
+two, without changing geometry errors.
+
+Separate registrations cover seven geometries, native and real-PETSc local
+execution, MPI ranks one through four and both thread configurations. Slow
+labels, 1800-second watchdogs, processor counts and pyramid resource locks
+remain explicit. The complete finite numerical matrix was verified locally:
+84 registrations, 252 configurations and 504 rank-level reports across these
+geometries, backends, rank counts and thread configurations. Four Clang builds
+and four GNU syntax checks passed; 1249 transitive repository dependencies
+were checked for freshness. This establishes the stated finite-hierarchy
+acceptance criteria, not an unconditional asymptotic theorem or hosted-CI
+certification. Sampled memory guards do not measure continuous peak usage.
