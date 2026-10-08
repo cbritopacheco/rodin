@@ -275,7 +275,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
         std::array<LiftedConvergence, 2> histories;
         const auto levels = K == 1 ? std::initializer_list<size_t>{5, 9, 17}
           : this->GetParam() == Polytope::Type::Segment
-          ? std::initializer_list<size_t>{5, 9, 17, 33}
+          ? (K == 2 ? std::initializer_list<size_t>{5, 9, 17, 33}
+                    : std::initializer_list<size_t>{5, 9, 17})
           : std::initializer_list<size_t>{3, 5, 9};
         for (size_t n : levels)
         {
@@ -294,7 +295,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
         for (size_t component = 0; component < histories.size(); ++component)
         {
           SCOPED_TRACE(::testing::Message() << "field=" << component);
-          histories[component].expectRates(K);
+          if constexpr (K > 2)
+            histories[component].expectMixedRates(K, 2);
+          else
+            histories[component].expectRates(K);
         }
       }
 
@@ -327,13 +331,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
           }
       }
 
+      template <size_t K = 2>
       void checkApproximatedPatchAndControl() const
       {
         Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
         LiftedErrors base, wrong;
-        const auto patch = problem.template solve<2>(
+        const auto patch = problem.template solve<K>(
           Data::Field::Affine, false, AssemblyOrder, SolverTolerance, NormOrder, &base);
-        const auto incorrect = problem.template solve<2>(
+        const auto incorrect = problem.template solve<K>(
           Data::Field::Affine, true, AssemblyOrder, SolverTolerance, NormOrder, &wrong);
         for (size_t component = 0; component < 2; ++component)
         {
@@ -493,6 +498,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
   {
     checkApproximatedRates<2>();
   }
+  TEST_P(LocalTest, ApproximatedP3Q2Rates)
+  {
+    checkApproximatedRates<3>();
+  }
+  TEST_P(LocalTest, ApproximatedP3Q2Sensitivity)
+  {
+    checkApproximatedSensitivity<3>();
+  }
+  TEST_P(LocalTest, ApproximatedP3Q2PatchRejectsOmittedCoupling)
+  {
+    checkApproximatedPatchAndControl<3>();
+  }
   TEST_P(LocalTest, ApproximatedP1Sensitivity)
   {
     checkApproximatedSensitivity<1>();
@@ -584,6 +601,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::ReactionDiffusion
   TEST_P(MPITest, ApproximatedP2Rates)
   {
     checkApproximatedRates<2>();
+  }
+  TEST_P(MPITest, ApproximatedP3Q2Rates)
+  {
+    checkApproximatedRates<3>();
+  }
+  TEST_P(MPITest, ApproximatedP3Q2Sensitivity)
+  {
+    checkApproximatedSensitivity<3>();
+  }
+  TEST_P(MPITest, ApproximatedP3Q2PatchRejectsOmittedCoupling)
+  {
+    checkApproximatedPatchAndControl<3>();
   }
   TEST_P(MPITest, ApproximatedP1Sensitivity)
   {

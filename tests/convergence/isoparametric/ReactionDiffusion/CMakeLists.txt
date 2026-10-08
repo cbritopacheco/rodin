@@ -9,13 +9,18 @@ foreach(geometry IN LISTS _RODIN_CURVED_REACTION_DIFFUSION_GEOMETRIES)
       "--gtest_filter=AllGeometries/LocalTest.*/${geometry}-*LocalTest.Approximated*/${geometry}")
   add_test(NAME RodinConvergenceIsoparametricReactionDiffusion_Approximated_${geometry}
     COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricReactionDiffusion>
-      "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}")
+      "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}-*P3Q2*")
+  add_test(NAME RodinConvergenceIsoparametricReactionDiffusion_P3Q2_${geometry}
+    COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricReactionDiffusion>
+      "--gtest_filter=AllGeometries/LocalTest.ApproximatedP3Q2*/${geometry}")
   set_tests_properties(RodinConvergenceIsoparametricReactionDiffusion_${geometry}
     RodinConvergenceIsoparametricReactionDiffusion_Approximated_${geometry}
+    RodinConvergenceIsoparametricReactionDiffusion_P3Q2_${geometry}
     PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
   if (geometry STREQUAL "Pyramid")
     set_tests_properties(RodinConvergenceIsoparametricReactionDiffusion_${geometry}
       RodinConvergenceIsoparametricReactionDiffusion_Approximated_${geometry}
+      RodinConvergenceIsoparametricReactionDiffusion_P3Q2_${geometry}
       PROPERTIES RESOURCE_LOCK curved_reaction_diffusion_pyramid)
   endif()
 endforeach()
@@ -60,19 +65,26 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
         "--gtest_filter=AllGeometries/LocalTest.*/${geometry}-*LocalTest.Approximated*/${geometry}")
     add_test(NAME RodinConvergenceIsoparametricPETScReactionDiffusion_Approximated_${geometry}
       COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScReactionDiffusion>
-        "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}")
+        "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}-*P3Q2*")
+    add_test(NAME RodinConvergenceIsoparametricPETScReactionDiffusion_P3Q2_${geometry}
+      COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScReactionDiffusion>
+        "--gtest_filter=AllGeometries/LocalTest.ApproximatedP3Q2*/${geometry}")
     set_tests_properties(RodinConvergenceIsoparametricPETScReactionDiffusion_${geometry}
       RodinConvergenceIsoparametricPETScReactionDiffusion_Approximated_${geometry}
+      RodinConvergenceIsoparametricPETScReactionDiffusion_P3Q2_${geometry}
       PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
     if (geometry STREQUAL "Pyramid")
       set_tests_properties(RodinConvergenceIsoparametricPETScReactionDiffusion_${geometry}
         RodinConvergenceIsoparametricPETScReactionDiffusion_Approximated_${geometry}
+        RodinConvergenceIsoparametricPETScReactionDiffusion_P3Q2_${geometry}
         PROPERTIES RESOURCE_LOCK curved_reaction_diffusion_pyramid)
     endif()
     rodin_suppress_external_mpi_lsan_for_test(
       RodinConvergenceIsoparametricPETScReactionDiffusion_${geometry})
     rodin_suppress_external_mpi_lsan_for_test(
       RodinConvergenceIsoparametricPETScReactionDiffusion_Approximated_${geometry})
+    rodin_suppress_external_mpi_lsan_for_test(
+      RodinConvergenceIsoparametricPETScReactionDiffusion_P3Q2_${geometry})
   endforeach()
   if (RODIN_USE_MPI)
     target_link_libraries(RodinConvergenceIsoparametricPETScReactionDiffusion PRIVATE Rodin::MPI)
@@ -111,21 +123,30 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
           COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
             $<TARGET_FILE:RodinConvergenceIsoparametricPETScReactionDiffusion>
-            "--gtest_filter=AllGeometries/MPITest.Approximated*/${geometry}")
+            "--gtest_filter=AllGeometries/MPITest.Approximated*/${geometry}-*P3Q2*")
+        add_test(NAME RodinConvergenceIsoparametricPETScMPIReactionDiffusion_P3Q2_np${np}_${geometry}
+          COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinConvergenceIsoparametricPETScReactionDiffusion>
+            "--gtest_filter=AllGeometries/MPITest.ApproximatedP3Q2*/${geometry}")
         set_tests_properties(
           RodinConvergenceIsoparametricPETScMPIReactionDiffusion_np${np}_${geometry}
           RodinConvergenceIsoparametricPETScMPIReactionDiffusion_Approximated_np${np}_${geometry}
+          RodinConvergenceIsoparametricPETScMPIReactionDiffusion_P3Q2_np${np}_${geometry}
           PROPERTIES LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
         if (geometry STREQUAL "Pyramid")
           set_tests_properties(
             RodinConvergenceIsoparametricPETScMPIReactionDiffusion_np${np}_${geometry}
             RodinConvergenceIsoparametricPETScMPIReactionDiffusion_Approximated_np${np}_${geometry}
+            RodinConvergenceIsoparametricPETScMPIReactionDiffusion_P3Q2_np${np}_${geometry}
             PROPERTIES RESOURCE_LOCK curved_reaction_diffusion_pyramid)
         endif()
         rodin_suppress_external_mpi_lsan_for_test(
           RodinConvergenceIsoparametricPETScMPIReactionDiffusion_np${np}_${geometry})
         rodin_suppress_external_mpi_lsan_for_test(
           RodinConvergenceIsoparametricPETScMPIReactionDiffusion_Approximated_np${np}_${geometry})
+        rodin_suppress_external_mpi_lsan_for_test(
+          RodinConvergenceIsoparametricPETScMPIReactionDiffusion_P3Q2_np${np}_${geometry})
       endforeach()
     endforeach()
   endif()

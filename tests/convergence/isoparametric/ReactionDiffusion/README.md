@@ -231,3 +231,46 @@ in native and real-PETSc local/MPI ranks one through four, separately
 under sequential and OpenMP assembly. Slow labels, 1800-second watchdogs,
 MPI processor counts and the pyramid resource lock are retained.
 Registration alone does not certify a numerical run.
+
+## Cubic fields on quadratic approximated geometry
+
+The `ApproximatedP3Q2` extension retains the coupled smooth fields, unequal
+diffusion coefficients, reaction matrix, sources and essential traces, but
+uses field degree $p=3$ on quadratic sine-map geometry ($q=2$). Three
+grid-point levels are $n=3,5,9$, except Segment ($n=5,9,17$). Existing
+P1/P2 sequences and acceptance rules remain unchanged.
+
+Each field $i\in\lbrace 0,1\rbrace$ has independent represented-domain,
+lifted field, geometry and total error measurements and a separate
+`LiftedConvergence` history. Under the preceding coercivity, regularity and
+approximation hypotheses, the expected $L^2/H^1$ orders are $4/3$ for
+field errors and $3/2$ for geometry errors. The shared mixed-order rule in
+the [general methodology](../../README.md#acceptance-and-reproducibility)
+checks every adjacent interval, both component-rate windows and both norm
+triangle inequalities. Its total-error envelope uses the independently
+measured field and geometry errors; geometry dominance is not presumed.
+The rate margins remain $0.55/0.45$ and the dimensionless absolute floor
+remains $10^{-11}$. Strict total-error decrease is an additional policy,
+not a consequence of the triangle inequality. A combined two-field norm
+cannot replace either field's checks.
+
+At $n=5$, assembly order $11\to16$, norm order $13\to18$, and solver
+tolerance $10^{-13}\to10^{-14}$ are varied separately. Every positive
+error component retains the $10^{-6}$ relative sensitivity budget. Physical
+affine cubic-field patches remain representable on quadratic geometry and
+retain the $10^{-9}$ absolute reproduction budget. Omitting the off-diagonal
+coupling with unchanged sources and traces must violate the existing field
+error floors and increase each total norm by a factor greater than two;
+geometry errors must remain unchanged.
+
+Separate registrations cover seven geometries in native and real-PETSc
+local contexts, MPI ranks one through four, and both thread configurations.
+Slow labels, 1800-second watchdogs and pyramid locks are retained. The older
+approximated groups exclude these additions. The complete finite matrix is
+locally verified: 84 registrations select 252 configurations, with 504
+successful rank-level reports. Both thread configurations have been built
+with Clang and syntax-checked with GCC. Registration selection, source
+identity, runtime reports and build dependency freshness are independently
+checked. Sampled RSS guards are not continuous peak-memory measurements;
+hosted CI and behavior outside these finite hierarchies remain separate.
+The natural-boundary matrix uses a different target and is unaffected.
