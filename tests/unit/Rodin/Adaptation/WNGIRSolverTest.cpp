@@ -27,12 +27,12 @@ namespace Rodin::Tests::Unit
     {
       const WNGIRParameters parameters;
       EXPECT_EQ(parameters.model.fit, Real(1));
-      EXPECT_EQ(parameters.model.hinge, Real(100));
+      EXPECT_EQ(parameters.model.hinge, Real(10));
       EXPECT_EQ(parameters.convergence.iterations.inner, 15);
       EXPECT_EQ(parameters.convergence.tolerance.innerRelative, Real(1e-3));
       EXPECT_EQ(parameters.convergence.iterations.linear, 1000);
       EXPECT_EQ(parameters.model.distribution.deviatoric, Real(1e-4));
-      EXPECT_EQ(parameters.model.distribution.divergence, Real(1e-4));
+      EXPECT_EQ(parameters.model.distribution.divergence, Real(1e-2));
       EXPECT_EQ(parameters.model.distortion, Real(10));
       EXPECT_EQ(parameters.model.jacobian, Real(1e-2));
       EXPECT_EQ(parameters.linear.threads, 0u);
