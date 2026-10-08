@@ -602,15 +602,16 @@ jobs:
   PETScComplexConvergence:
     # Pin the PETSc 3.19 compatibility gate, independently of the real build.
     runs-on: ubuntu-24.04
-    # Exact and approximated-domain studies retain resolved meshes and serialize
-    # curved pyramids. The additional local/MPI matrix takes about 15 minutes
-    # on the local sequential stack; retain headroom for dependency/build time.
-    timeout-minutes: ${{ matrix.suite == 'curved_boundary' && 240 || 120 }}
+    # Both bulk jobs exhausted 120 minutes on CI while tests were still passing.
+    # Separate curved Helmholtz and projection matrices from the flat/core gate;
+    # isolate tetrahedra and pyramids while retaining every geometry and rank.
+    # These budgets include installation/build headroom, not performance bounds.
+    timeout-minutes: ${{ matrix.suite == 'curved_boundary' && 240 || startsWith(matrix.suite, 'curved_helmholtz') && 180 || 120 }}
     strategy:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        suite: [bulk, boundary, curved_boundary, submesh]
+        suite: [bulk, curved_helmholtz_light, curved_helmholtz_tetrahedron, curved_helmholtz_pyramid, curved_projection, boundary, curved_boundary, submesh]
     env:
       OMP_NUM_THREADS: 2
 
@@ -655,16 +656,42 @@ jobs:
           cmake --build build -j 2 --target
           RodinConvergenceHPETScHelmholtz RodinPETScSNESStateTest
           RodinConvergencePPETScHelmholtz RodinConvergenceHPPETScHelmholtz
-          RodinConvergenceIsoparametricPETScHelmholtz
-          RodinConvergenceIsoparametricPETScP0Projection
           RodinPETScScalarIntegralTest RodinVariationalIntegralTest
 
       - name: Run complex PETSc convergence suite
         if: matrix.suite == 'bulk'
         run: >-
-          ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP|Isoparametric)PETSc(MPI)?Helmholtz|RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_|RodinPETScSNESStateTest|RodinPETSc(MPI)?ScalarIntegralTest|Rodin_Variational_Integral'
-          -E '^RodinConvergence(H|Isoparametric)PETScHelmholtzBoundary_'
-          --output-on-failure -j 2
+          ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP)PETSc(MPI)?Helmholtz|RodinPETScSNESStateTest|RodinPETSc(MPI)?ScalarIntegralTest|Rodin_Variational_Integral'
+          -E '^RodinConvergenceHPETScHelmholtzBoundary_'
+          --output-on-failure --no-tests=error -j 2
+
+      - name: Build curved complex PETSc Helmholtz suite
+        if: startsWith(matrix.suite, 'curved_helmholtz')
+        run: cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScHelmholtz
+
+      - name: Run curved complex PETSc Helmholtz suite
+        if: startsWith(matrix.suite, 'curved_helmholtz')
+        run: |
+          case "${{ matrix.suite }}" in
+            curved_helmholtz_light) geometry_pattern='(Segment|Triangle|Quadrilateral|Hexahedron|Wedge)' ;;
+            curved_helmholtz_tetrahedron) geometry_pattern='Tetrahedron' ;;
+            curved_helmholtz_pyramid) geometry_pattern='Pyramid' ;;
+            *) exit 1 ;;
+          esac
+          ctest --test-dir build/tests \
+            -R "^RodinConvergenceIsoparametricPETSc(MPI)?Helmholtz_.*${geometry_pattern}$" \
+            --output-on-failure --no-tests=error -j 1
+
+      - name: Build curved complex PETSc projection suite
+        if: matrix.suite == 'curved_projection'
+        run: cmake --build build -j 2 --target RodinConvergenceIsoparametricPETScP0Projection
+
+      - name: Run curved complex PETSc projection suite
+        if: matrix.suite == 'curved_projection'
+        run: >-
+          ctest --test-dir build/tests
+          -R '^RodinConvergenceIsoparametricPETSc(MPI)?P0Projection_'
+          --output-on-failure --no-tests=error -j 1
 
       - name: Build complex PETSc Helmholtz boundary suite
         if: matrix.suite == 'boundary'
