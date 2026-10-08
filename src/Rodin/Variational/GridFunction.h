@@ -57,6 +57,7 @@
 #include <fstream>
 #include <functional>
 #include <vector>
+#include <variant>
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
@@ -168,7 +169,7 @@ namespace Rodin::Variational
        */
       explicit constexpr GridFunctionBaseReference(
         std::reference_wrapper<const Derived> ref)
-        : m_ref(std::cref(static_cast<const GridFunctionBaseReference&>(ref.get())))
+        : m_ref(&ref.get())
       {}
 
       /**
@@ -347,7 +348,7 @@ namespace Rodin::Variational
        * Evaluation resolves the derived object after construction finishes.
        */
       GridFunctionBaseReference()
-        : m_ref(std::cref(*this))
+        : m_ref(this)
       {}
 
     private:
@@ -357,10 +358,20 @@ namespace Rodin::Variational
        */
       constexpr const Derived& getReferencedGridFunction() const
       {
-        return static_cast<const Derived&>(m_ref.get());
+        if constexpr (std::is_base_of_v<GridFunctionBaseReference, Derived>)
+        {
+          if (const auto* derived = std::get_if<const Derived*>(&m_ref))
+            return **derived;
+          return static_cast<const Derived&>(
+            *std::get<const GridFunctionBaseReference*>(m_ref));
+        }
+        else
+        {
+          return *std::get<const Derived*>(m_ref);
+        }
       }
 
-      std::reference_wrapper<const GridFunctionBaseReference> m_ref;
+      std::variant<const Derived*, const GridFunctionBaseReference*> m_ref;
   };
 
   /**
