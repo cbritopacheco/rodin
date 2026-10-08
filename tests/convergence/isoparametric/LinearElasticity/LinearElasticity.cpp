@@ -405,7 +405,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
         std::array<NormHistory, 4> strain, stress;
         const auto levels = K == 1 ? std::initializer_list<size_t>{5, 9, 17}
           : this->GetParam() == Polytope::Type::Segment
-          ? std::initializer_list<size_t>{5, 9, 17, 33}
+          ? (K == 2 ? std::initializer_list<size_t>{5, 9, 17, 33}
+                    : std::initializer_list<size_t>{5, 9, 17})
           : std::initializer_list<size_t>{3, 5, 9};
         for (size_t n : levels)
         {
@@ -432,6 +433,43 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
         constexpr Real L2Margin = 0.55, DerivativeMargin = 0.45;
         for (size_t component = 0; component < displacement.size(); ++component)
         {
+          if constexpr (K > 2)
+          {
+            if (component == 3)
+            {
+              // Different component orders do not imply a two-sided total
+              // rate before geometry dominates. Each observable keeps its
+              // own norm triangle bounds and next-level sum envelope.
+              ASSERT_GE(displacement[component].getSize(), 3u);
+              for (size_t i = 1; i < displacement[component].getSize(); ++i)
+              {
+                const Real ratio = displacement[component].getSample(i).parameter /
+                  displacement[component].getSample(i - 1).parameter;
+                ASSERT_GT(ratio, 0);
+                ASSERT_LT(ratio, 1);
+                const auto values = [&](size_t c, size_t level) {
+                  const auto& error = displacement[c].getSample(level).error;
+                  return std::array{error.getL2(), error.getH1Seminorm(),
+                    strain[c].getSample(level).error, stress[c].getSample(level).error};
+                };
+                const auto coarse = values(3, i - 1), fine = values(3, i);
+                const auto field = values(1, i - 1), geometry = values(2, i - 1);
+                for (size_t quantity = 0; quantity < fine.size(); ++quantity)
+                {
+                  SCOPED_TRACE(::testing::Message()
+                    << "mixed total quantity=" << quantity << " interval=" << i);
+                  const Real offset = quantity == 0 ? 1 : 0;
+                  const Real margin = quantity == 0 ? L2Margin : DerivativeMargin;
+                  EXPECT_GT(coarse[quantity], fine[quantity]);
+                  EXPECT_LE(fine[quantity],
+                    field[quantity] * std::pow(ratio, K + offset - margin)
+                      + geometry[quantity] * std::pow(ratio, 2 + offset - margin)
+                      + DecompositionTolerance);
+                }
+              }
+              continue;
+            }
+          }
           const size_t degree = component < 2 ? K
             : component == 2                  ? 2
                                               : std::min(K, size_t(2));
@@ -494,14 +532,31 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
             }
       }
 
+      template <size_t K = 2>
       void checkApproximatedControl() const
       {
         using Map = typename Workload<ContextType>::Map;
         Workload<ContextType> problem(this->GetParam(), 5, Map::Sine, true);
+        if constexpr (K > 2)
+        {
+          LiftedErrors patch;
+          const auto represented = problem.template solve<K>(Data::Field::AsymmetricAffine,
+            false, AssemblyOrder, SolverTolerance, NormOrder, &patch);
+          checkDecomposition(patch);
+          const auto errors = components(represented, patch);
+          for (size_t component : {0u, 1u})
+          {
+            for (Real value : quantities(errors[component]))
+            {
+              EXPECT_TRUE(std::isfinite(value));
+              EXPECT_LT(value, PatchTolerance);
+            }
+          }
+        }
         LiftedErrors base, wrong;
-        const auto represented = problem.template solve<2>(Data::Field::Exponential,
+        const auto represented = problem.template solve<K>(Data::Field::Exponential,
           false, AssemblyOrder, SolverTolerance, NormOrder, &base);
-        const auto incorrect = problem.template solve<2>(Data::Field::Exponential, true,
+        const auto incorrect = problem.template solve<K>(Data::Field::Exponential, true,
           AssemblyOrder, SolverTolerance, NormOrder, &wrong);
         checkDecomposition(base);
         checkDecomposition(wrong);
@@ -796,6 +851,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
   {
     checkApproximatedRates<2>();
   }
+  TEST_P(LocalTest, ApproximatedP3Q2Rates)
+  {
+    checkApproximatedRates<3>();
+  }
+  TEST_P(LocalTest, ApproximatedP3Q2Sensitivity)
+  {
+    checkApproximatedSensitivity<3>();
+  }
+  TEST_P(LocalTest, ApproximatedP3Q2PatchAndVolumetricControl)
+  {
+    checkApproximatedControl<3>();
+  }
   TEST_P(LocalTest, ApproximatedP1Sensitivity)
   {
     checkApproximatedSensitivity<1>();
@@ -895,6 +962,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
   TEST_P(MPITest, ApproximatedP2Rates)
   {
     checkApproximatedRates<2>();
+  }
+  TEST_P(MPITest, ApproximatedP3Q2Rates)
+  {
+    checkApproximatedRates<3>();
+  }
+  TEST_P(MPITest, ApproximatedP3Q2Sensitivity)
+  {
+    checkApproximatedSensitivity<3>();
+  }
+  TEST_P(MPITest, ApproximatedP3Q2PatchAndVolumetricControl)
+  {
+    checkApproximatedControl<3>();
   }
   TEST_P(MPITest, ApproximatedP1Sensitivity)
   {

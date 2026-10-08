@@ -9,7 +9,7 @@ foreach(geometry IN LISTS _RODIN_CURVED_ELASTICITY_GEOMETRIES)
       "--gtest_filter=AllGeometries/LocalTest.*/${geometry}-*LocalTest.Approximated*/${geometry}")
   add_test(NAME RodinConvergenceIsoparametricLinearElasticity_Approximated_${geometry}
     COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricLinearElasticity>
-      "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}")
+      "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}-*P3Q2*")
   set_tests_properties(RodinConvergenceIsoparametricLinearElasticity_${geometry}
     RodinConvergenceIsoparametricLinearElasticity_Approximated_${geometry}
     PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
@@ -78,7 +78,7 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
         "--gtest_filter=AllGeometries/LocalTest.*/${geometry}-*LocalTest.Approximated*/${geometry}")
     add_test(NAME RodinConvergenceIsoparametricPETScLinearElasticity_Approximated_${geometry}
       COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScLinearElasticity>
-        "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}")
+        "--gtest_filter=AllGeometries/LocalTest.Approximated*/${geometry}-*P3Q2*")
     set_tests_properties(RodinConvergenceIsoparametricPETScLinearElasticity_${geometry}
       RodinConvergenceIsoparametricPETScLinearElasticity_Approximated_${geometry}
       PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
@@ -129,7 +129,7 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
           COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
             $<TARGET_FILE:RodinConvergenceIsoparametricPETScLinearElasticity>
-            "--gtest_filter=AllGeometries/MPITest.Approximated*/${geometry}")
+            "--gtest_filter=AllGeometries/MPITest.Approximated*/${geometry}-*P3Q2*")
         set_tests_properties(
           RodinConvergenceIsoparametricPETScMPILinearElasticity_np${np}_${geometry}
           RodinConvergenceIsoparametricPETScMPILinearElasticity_Approximated_np${np}_${geometry}
@@ -148,3 +148,42 @@ if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
     endforeach()
   endif()
 endif()
+
+# Different field/geometry degrees have separate runtime and process budgets.
+foreach(geometry IN LISTS _RODIN_CURVED_ELASTICITY_GEOMETRIES)
+  set(_higher_test RodinConvergenceIsoparametricLinearElasticity_P3Q2_${geometry})
+  add_test(NAME ${_higher_test}
+    COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricLinearElasticity>
+      "--gtest_filter=AllGeometries/LocalTest.ApproximatedP3Q2*/${geometry}")
+  set_tests_properties(${_higher_test} PROPERTIES LABELS "convergence;slow" TIMEOUT 1800)
+  if (geometry STREQUAL "Pyramid")
+    set_tests_properties(${_higher_test} PROPERTIES RESOURCE_LOCK curved_elasticity_pyramid)
+  endif()
+  if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
+    set(_higher_test RodinConvergenceIsoparametricPETScLinearElasticity_P3Q2_${geometry})
+    add_test(NAME ${_higher_test}
+      COMMAND $<TARGET_FILE:RodinConvergenceIsoparametricPETScLinearElasticity>
+        "--gtest_filter=AllGeometries/LocalTest.ApproximatedP3Q2*/${geometry}")
+    set_tests_properties(${_higher_test} PROPERTIES LABELS "convergence;petsc;slow" TIMEOUT 1800)
+    rodin_suppress_external_mpi_lsan_for_test(${_higher_test})
+    if (geometry STREQUAL "Pyramid")
+      set_tests_properties(${_higher_test} PROPERTIES RESOURCE_LOCK curved_elasticity_pyramid)
+    endif()
+    if (RODIN_USE_MPI)
+      foreach(np 1 2 3 4)
+        set(_higher_test RodinConvergenceIsoparametricPETScMPILinearElasticity_P3Q2_np${np}_${geometry})
+        add_test(NAME ${_higher_test}
+          COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinConvergenceIsoparametricPETScLinearElasticity>
+            "--gtest_filter=AllGeometries/MPITest.ApproximatedP3Q2*/${geometry}")
+        set_tests_properties(${_higher_test} PROPERTIES
+          LABELS "convergence;petsc;distributed;slow" TIMEOUT 1800 PROCESSORS ${np})
+        rodin_suppress_external_mpi_lsan_for_test(${_higher_test})
+        if (geometry STREQUAL "Pyramid")
+          set_tests_properties(${_higher_test} PROPERTIES RESOURCE_LOCK curved_elasticity_pyramid)
+        endif()
+      endforeach()
+    endif()
+  endif()
+endforeach()
