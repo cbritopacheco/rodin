@@ -35,8 +35,10 @@ namespace
   {
     std::vector<Polytope::Type> gs;
     for (const auto g : Polytope::Types)
+    {
       if (g != Polytope::Type::Point)
         gs.push_back(g);
+    }
     return gs;
   }
 

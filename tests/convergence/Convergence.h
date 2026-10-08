@@ -460,8 +460,10 @@ namespace Rodin::Tests::Convergence
         {
           Real result = 0;
           for (size_t i = 0; i < static_cast<size_t>(value.rows()); ++i)
+          {
             for (size_t j = 0; j < static_cast<size_t>(value.cols()); ++j)
               result += squaredMagnitude(value(i, j));
+          }
           return result;
         }
         else if constexpr (requires {

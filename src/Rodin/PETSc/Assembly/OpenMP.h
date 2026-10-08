@@ -395,12 +395,14 @@ namespace Rodin::Assembly
               const auto& rows = input.getTestFES().getDOFs(dim, i);
               const auto& cols = input.getTrialFES().getDOFs(dim, i);
               for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
+              {
                 for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                 {
                   const PetscScalar v = integrator->integrate(c, r);
                   local.emplace_back(
                     static_cast<PetscInt>(rows[r]), static_cast<PetscInt>(cols[c]), v);
                 }
+              }
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -469,12 +471,14 @@ namespace Rodin::Assembly
 
                 const auto& cols = input.getTrialFES().getDOFs(rdim, tr);
                 for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
+                {
                   for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                   {
                     const PetscScalar v = integrator->integrate(c, r);
                     local.emplace_back(
                       static_cast<PetscInt>(rows[r]), static_cast<PetscInt>(cols[c]), v);
                   }
+                }
               }
             }
 
@@ -773,8 +777,10 @@ namespace Rodin::Assembly
             if (doMatrix)
             {
               for (const auto& c : constraints.expand(col))
+              {
                 local.emplace_back(static_cast<PetscInt>(r.index),
                   static_cast<PetscInt>(c.index), r.coefficient * val * c.coefficient);
+              }
             }
           }
         };
@@ -1156,8 +1162,10 @@ namespace Rodin::Assembly
           std::vector<PetscInt> rowsToZero;
           rowsToZero.reserve(constraints.getIdentifiedRows().size());
           for (const Index gs : constraints.getIdentifiedRows())
+          {
             if (static_cast<PetscInt>(gs) < nrows)
               rowsToZero.push_back(static_cast<PetscInt>(gs));
+          }
 
           if (!rowsToZero.empty())
           {
@@ -1564,9 +1572,11 @@ namespace Rodin::Assembly
               if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
                 for (const auto& [local, value] : dofs)
+                {
                   constraints.setFixed(
                     static_cast<Index>(uOff + static_cast<size_t>(local)),
                     static_cast<PetscScalar>(value));
+                }
               }
               else if constexpr (std::is_same_v<T, IdentDOFsType>)
               {
@@ -1622,8 +1632,10 @@ namespace Rodin::Assembly
               localRhs.emplace_back(
                 static_cast<PetscInt>(r.index), -r.coefficient * val * colValue);
             for (const auto& c : constraints.expand(col))
+            {
               local.emplace_back(static_cast<PetscInt>(r.index),
                 static_cast<PetscInt>(c.index), r.coefficient * val * c.coefficient);
+            }
           }
         };
 
@@ -2035,8 +2047,10 @@ namespace Rodin::Assembly
           std::vector<PetscInt> zeroRowsIdx;
           zeroRowsIdx.reserve(constraints.getIdentifiedRows().size());
           for (const Index gs : constraints.getIdentifiedRows())
+          {
             if (gs < nrows)
               zeroRowsIdx.push_back(static_cast<PetscInt>(gs));
+          }
 
           if (!zeroRowsIdx.empty())
           {

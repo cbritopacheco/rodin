@@ -77,8 +77,10 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> jac(3, 3);
     t.jacobian(jac, rc);
     for (int i = 0; i < 3; ++i)
+    {
       for (int j = 0; j < 3; ++j)
         EXPECT_NEAR(jac(i, j), (i == j) ? 1.0 : 0.0, 1e-14);
+    }
   }
 
   /// @brief Verifies copy for geometry identity transformation by checking tolerance-based numerical results, exact expected values, copy semantics.

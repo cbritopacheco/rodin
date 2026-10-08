@@ -568,8 +568,10 @@ namespace Rodin::Assembly
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
               for (Eigen::Index r = 0; r < rows.size(); ++r)
+              {
                 for (Eigen::Index c = 0; c < cols.size(); ++c)
                   local(rows(r), cols(c)) += lbfi->integrate(c, r);
+              }
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -632,8 +634,10 @@ namespace Rodin::Assembly
                 const auto& rows = input.getTestFES().getDOFs(d, i);
                 const auto& cols = input.getTrialFES().getDOFs(rd, tr);
                 for (Eigen::Index r = 0; r < rows.size(); ++r)
+                {
                   for (Eigen::Index c = 0; c < cols.size(); ++c)
                     local(rows(r), cols(c)) += gbfi->integrate(c, r);
+                }
               }
             }
 
@@ -1146,8 +1150,10 @@ namespace Rodin::Assembly
               if (colValue != ScalarType(0))
                 localRhs.emplace_back(r.index, -r.coefficient * val * colValue);
               for (const auto& c : constraints.expand(col))
+              {
                 localT.emplace_back(
                   r.index, c.index, r.coefficient * val * c.coefficient);
+              }
             }
           };
 
@@ -1276,8 +1282,10 @@ namespace Rodin::Assembly
           {
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
+            {
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
                 sparseEntry(tchunks[0], rhsChunks[0], it.row(), it.col(), it.value());
+            }
           }
 
           // ---------------- LFIs ----------------
@@ -1324,8 +1332,10 @@ namespace Rodin::Assembly
           {
             const auto& vec = lf.getVector();
             for (Eigen::Index i = 0; i < vec.size(); ++i)
+            {
               vectorEntry(rhsChunks[0], static_cast<Index>(i),
                 static_cast<ScalarType>(vec.coeff(i)));
+            }
           }
 
           // ---------------- Reduce RHS chunks into b ----------------
@@ -1539,8 +1549,10 @@ namespace Rodin::Assembly
                             localRhs[static_cast<size_t>(r.index)] -=
                               r.coefficient * val * colValue;
                           for (const auto& c : constraints.expand(J))
+                          {
                             Alocal(r.index, c.index) +=
                               r.coefficient * val * c.coefficient;
+                          }
                         }
                       }
                     }
@@ -1557,6 +1569,7 @@ namespace Rodin::Assembly
             const auto opRows = op.rows();
             const auto opCols = op.cols();
             for (Eigen::Index i = 0; i < opRows; ++i)
+            {
               for (Eigen::Index j = 0; j < opCols; ++j)
               {
                 const auto val = op(i, j);
@@ -1575,6 +1588,7 @@ namespace Rodin::Assembly
                   }
                 }
               }
+            }
           }
 
           // Reduce dense matrices
@@ -1937,8 +1951,10 @@ namespace Rodin::Assembly
               rhsChunks[static_cast<size_t>(tid)].emplace_back(
                 r.index, -r.coefficient * val * colValue);
             for (const auto& c : constraints.expand(col))
+            {
               tchunks[static_cast<size_t>(tid)].emplace_back(
                 r.index, c.index, r.coefficient * val * c.coefficient);
+            }
           }
         };
 
@@ -2019,8 +2035,10 @@ namespace Rodin::Assembly
                             rhsChunks[static_cast<size_t>(tid)].emplace_back(
                               r.index, -r.coefficient * val * colValue);
                           for (const auto& c : constraints.expand(J))
+                          {
                             (*Alocal)(r.index, c.index) +=
                               r.coefficient * val * c.coefficient;
+                          }
                         }
                       }
                     }
@@ -2126,8 +2144,10 @@ namespace Rodin::Assembly
                               rhsChunks[static_cast<size_t>(tid)].emplace_back(
                                 r.index, -r.coefficient * val * colValue);
                             for (const auto& c : constraints.expand(J))
+                            {
                               (*Alocal)(r.index, c.index) +=
                                 r.coefficient * val * c.coefficient;
+                            }
                           }
                         }
                       }
@@ -2240,9 +2260,13 @@ namespace Rodin::Assembly
 
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
+            {
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+              {
                 sparseEntry(0, static_cast<Index>(vOff) + it.row(),
                   static_cast<Index>(uOff) + it.col(), it.value());
+              }
+            }
           }
 
           for (int tid = 0; tid < tc; ++tid)
@@ -2337,6 +2361,7 @@ namespace Rodin::Assembly
             const auto opRows = op.rows();
             const auto opCols = op.cols();
             for (Eigen::Index i = 0; i < opRows; ++i)
+            {
               for (Eigen::Index j = 0; j < opCols; ++j)
               {
                 const auto val = op(i, j);
@@ -2356,6 +2381,7 @@ namespace Rodin::Assembly
                   }
                 }
               }
+            }
           }
 
           for (const Index gs : constraints.getIdentifiedRows())

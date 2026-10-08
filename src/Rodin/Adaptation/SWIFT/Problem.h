@@ -78,8 +78,10 @@ namespace Rodin::Adaptation::SWIFT
         return norm;
       };
       for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
-        maximum =
-          std::max(maximum, evaluate(Geometry::Point(*cell, traits.getVertex(vertex))));
+      {
+          maximum =
+            std::max(maximum, evaluate(Geometry::Point(*cell, traits.getVertex(vertex))));
+      }
       const auto& fe = fes.getFiniteElement(cell->getDimension(), index);
       // This is a polynomial FE field, not the composed level-set residual.
       const auto& qf = QF::PolytopeQuadratureFormula::get(validationOrder > 0
@@ -743,10 +745,12 @@ namespace Rodin::Adaptation::SWIFT
                parameters.convergence.tolerance.energy,
                parameters.convergence.tolerance.step,
                parameters.convergence.tolerance.stepOverH, parameters.model.robustScale})
-          if (!std::isfinite(value) || value < Real(0))
-            Alert::Exception()
-              << "SWIFT weights and tolerances must be finite and nonnegative."
-              << Alert::Raise;
+        {
+            if (!std::isfinite(value) || value < Real(0))
+              Alert::Exception()
+                << "SWIFT weights and tolerances must be finite and nonnegative."
+                << Alert::Raise;
+        }
         if (!std::isfinite(parameters.convergence.tolerance.innerRelative) ||
           !(parameters.convergence.tolerance.innerRelative > Real(0)) ||
           !std::isfinite(parameters.convergence.tolerance.linearRelative) ||
@@ -857,8 +861,10 @@ namespace Rodin::Adaptation::SWIFT
         const Location::AABB<Mesh> locator(mesh);
         std::vector<Index> interfaceFacets;
         for (auto face = mesh.getFace(); face; ++face)
-          if (face->getAttribute() == *p.interfaceAttribute)
-            interfaceFacets.push_back(face->getIndex());
+        {
+            if (face->getAttribute() == *p.interfaceAttribute)
+              interfaceFacets.push_back(face->getIndex());
+        }
         if (interfaceFacets.empty())
         {
           rep.reason = Report::Reason::EmptyInterface;
@@ -1058,11 +1064,13 @@ namespace Rodin::Adaptation::SWIFT
           const Real divergence = p.model.h * p.model.distribution.divergence;
           size_t order = 0;
           for (auto cell = mesh.getCell(); cell; ++cell)
-            order = std::max(
-              order, p.quadrature.getVolumeOrder(
-                fes.getFiniteElement(meshDim, cell->getIndex()).getOrder(),
-                cell->getTransformation().getOrder(),
-                Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() == meshDim + 1));
+          {
+              order = std::max(
+                order, p.quadrature.getVolumeOrder(
+                  fes.getFiniteElement(meshDim, cell->getIndex()).getOrder(),
+                  cell->getTransformation().getOrder(),
+                  Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() == meshDim + 1));
+          }
           const Distribution distribution(
             m_duStep, m_vStep, u, deviatoric, divergence, order);
           m_distributionForm = distribution;
@@ -1954,8 +1962,10 @@ namespace Rodin::Adaptation::SWIFT
           minJ, maxJ, maxQ, inadmissibleCount, affineMinJ, affineMaxQ};
         Witness limiting;
         for (const auto& witness : witnesses)
-          if (witness.actual > limiting.actual)
-            limiting = witness;
+        {
+            if (witness.actual > limiting.actual)
+              limiting = witness;
+        }
         result.qualityCell = limiting.cell;
         result.qualityCurrent = limiting.current;
         result.qualityLinearChange = limiting.linear;
@@ -2284,8 +2294,10 @@ namespace Rodin::Adaptation::SWIFT
         {
           incident.reserve(2 * interfaceFacets.size());
           for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-            for (const Index v : mesh.getFace(interfaceFacets[i])->getVertices())
-              incident[static_cast<std::uint64_t>(v)].push_back(i);
+          {
+              for (const Index v : mesh.getFace(interfaceFacets[i])->getVertices())
+                incident[static_cast<std::uint64_t>(v)].push_back(i);
+          }
         }
         else if (dimension == 3)
         {

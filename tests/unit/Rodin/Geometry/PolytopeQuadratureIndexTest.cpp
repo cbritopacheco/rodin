@@ -397,6 +397,7 @@ namespace Rodin::Tests::Unit
     std::vector<std::thread> threads;
     threads.reserve(formulaCount);
     for (size_t i = 0; i < formulaCount; ++i)
+    {
       threads.emplace_back([&, i]() {
         for (size_t repetition = 0; repetition < repetitions; ++repetition)
         {
@@ -408,6 +409,7 @@ namespace Rodin::Tests::Unit
           EXPECT_EQ(&quadrature.getQuadratureFormula(), formulas[i].get());
         }
       });
+    }
 
     for (auto& thread : threads)
       thread.join();

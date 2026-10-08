@@ -933,8 +933,10 @@ namespace Rodin::IO
       const std::size_t n = mesh.getCellCount();
       std::size_t count = 0;
       for (Index i = 0; i < static_cast<Index>(n); ++i)
+      {
         if (shard->isOwned(D, i))
           ++count;
+      }
       return count;
     }
 
@@ -1394,8 +1396,10 @@ namespace Rodin::IO
         std::vector<U64> topology(layout.entryCount);
         U64 nextNode = 0;
         for (size_t i = 0; i < layout.rowCount; ++i)
+        {
           for (size_t k = 0; k < layout.columnCount; ++k)
             topology[i * layout.columnCount + k] = nextNode++;
+        }
 
         writeMatrixDataset(file, Path::MeshXDMFTopology, topology,
           static_cast<hsize_t>(layout.rowCount),
@@ -1937,12 +1941,14 @@ namespace Rodin::IO
               const Geometry::Point p(*gfCell, rc, pc);
               const auto value = gf(p);
               for (size_t c = 0; c < vdim; ++c)
+              {
                 values[out * vdim + c] = static_cast<HDF5::F64>([&]() {
                   if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
                     return value(c / gf.getColumns(), c % gf.getColumns());
                   else
                     return value[c];
                 }());
+              }
               ++out;
             }
           }
@@ -1987,12 +1993,14 @@ namespace Rodin::IO
           const auto value = gf(p);
 
           for (size_t c = 0; c < vdim; ++c)
+          {
             values[static_cast<size_t>(i) * vdim + c] = static_cast<HDF5::F64>([&]() {
               if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
                 return value(c / gf.getColumns(), c % gf.getColumns());
               else
                 return value[c];
             }());
+          }
         }
 
         if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
@@ -2128,12 +2136,14 @@ namespace Rodin::IO
           const Geometry::Point centroid(*polytope, ts.getCentroid());
           const auto value = gf(centroid);
           for (size_t c = 0; c < vdim; ++c)
+          {
             values.push_back(static_cast<HDF5::F64>([&]() {
               if constexpr (FormLanguage::IsMatrixRange<RangeType>::Value)
                 return value(c / gf.getColumns(), c % gf.getColumns());
               else
                 return value[c];
             }()));
+          }
         }
         if (values.size() != nc * vdim)
         {

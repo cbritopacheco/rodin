@@ -164,8 +164,10 @@ namespace Rodin::Tests::Benchmarks
           const auto& trialDOFs = trialFES.getDOFs(d, i);
           const auto& testDOFs = testFES.getDOFs(d, i);
           for (size_t l = 0; l < static_cast<size_t>(testDOFs.size()); ++l)
+          {
             for (size_t m = 0; m < static_cast<size_t>(trialDOFs.size()); ++m)
               checksum += integral.integrate(m, l);
+          }
         }
         benchmark::DoNotOptimize(checksum);
       }
@@ -213,9 +215,13 @@ namespace Rodin::Tests::Benchmarks
       const Index cells = mesh.getPolytopeCount(d);
       int64_t entries = 0;
       for (Index te = 0; te < cells; ++te)
+      {
         for (Index tr = 0; tr < cells; ++tr)
+        {
           entries += static_cast<int64_t>(trialFES.getDOFs(d, tr).size()) *
             static_cast<int64_t>(testFES.getDOFs(d, te).size());
+        }
+      }
 
       for (auto _ : state)
       {
@@ -230,8 +236,10 @@ namespace Rodin::Tests::Benchmarks
             integral.setPolytope(*trialPolytope, *testPolytope);
             const auto& trialDOFs = trialFES.getDOFs(d, tr);
             for (size_t l = 0; l < static_cast<size_t>(testDOFs.size()); ++l)
+            {
               for (size_t m = 0; m < static_cast<size_t>(trialDOFs.size()); ++m)
                 checksum += integral.integrate(m, l);
+            }
           }
         }
         benchmark::DoNotOptimize(checksum);

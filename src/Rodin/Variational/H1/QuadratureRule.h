@@ -1072,18 +1072,28 @@ namespace Rodin::Variational
                   const size_t rows = trialfes.getRows(), cols = trialfes.getColumns();
                   assert(m_cmv.rows() == rows && m_cmv.cols() == rows);
                   for (size_t column = 0; column < cols; ++column)
+                  {
                     for (size_t rowTest = 0; rowTest < rows; ++rowTest)
+                    {
                       for (size_t rowTrial = 0; rowTrial < rows; ++rowTrial)
+                      {
                         A[(ib * vdim + rowTest * cols + column) * ntr +
                           (ia * vdim + rowTrial * cols + column)] +=
                           basisProduct * m_cmv(rowTest, rowTrial);
+                      }
+                    }
+                  }
                 }
                 else
                 {
                   for (size_t dd = 0; dd < vdim; ++dd)
+                  {
                     for (size_t cc = 0; cc < vdim; ++cc)
+                    {
                       A[(ib * vdim + dd) * ntr + (ia * vdim + cc)] +=
                         basisProduct * m_cmv(dd, cc);
+                    }
+                  }
                 }
               }
             }
@@ -3125,16 +3135,20 @@ namespace Rodin::Variational
               const auto g = trTab.getGradient(qp, a);
               Gtr[a].setZero();
               for (size_t k = 0; k < spaceDimension; ++k)
+              {
                 for (size_t l = 0; l < d; ++l)
                   Gtr[a][k] += Jinv(l, k) * g[l];
+              }
             }
             for (size_t b = 0; b < scalarTestCount; ++b)
             {
               const auto g = teTab.getGradient(qp, b);
               Gte[b].setZero();
               for (size_t k = 0; k < spaceDimension; ++k)
+              {
                 for (size_t l = 0; l < d; ++l)
                   Gte[b][k] += Jinv(l, k) * g[l];
+              }
             }
           }
           else if (d == 3)
@@ -3202,12 +3216,14 @@ namespace Rodin::Variational
           if constexpr (FormLanguage::IsMatrixRange<Scalar>::Value)
           {
             for (size_t b = 0; b < scalarTestCount; ++b)
+            {
               for (size_t a = 0; a < (symmetric ? b + 1 : scalarTrialCount); ++a)
               {
                 const ScalarType entry = wdet * Math::dot(Gtr[a], Gte[b]);
                 for (size_t c = 0; c < components; ++c)
                   A[(b * components + c) * ntr + a * components + c] += entry;
               }
+            }
           }
           else if (symmetric)
           {

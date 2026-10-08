@@ -40,8 +40,10 @@ namespace
   {
     std::vector<std::pair<size_t, size_t>> shapes;
     for (size_t rows = 1; rows <= 3; ++rows)
+    {
       for (size_t cols = 1; cols <= 3; ++cols)
         shapes.emplace_back(rows, cols);
+    }
     return shapes;
   }
 
@@ -53,8 +55,10 @@ namespace
       MatrixFunction(fes.getRows(), fes.getColumns(), [&](const Geometry::Point& p) {
         BackendMatrix value(fes.getRows(), fes.getColumns());
         for (size_t r = 0; r < fes.getRows(); ++r)
+        {
           for (size_t c = 0; c < fes.getColumns(); ++c)
             value(r, c) = 1 + 7 * r + c + (diffusion ? p.x() : Real(0));
+        }
         return value;
       });
     exact.setOrder(diffusion ? 1 : 0);
@@ -105,13 +109,17 @@ namespace
 #ifdef RODIN_TEST_WITH_PETSC
     BackendMatrix value(matrix.getRows(), matrix.getColumns());
     for (size_t r = 0; r < matrix.getRows(); ++r)
+    {
       for (size_t c = 0; c < matrix.getColumns(); ++c)
         value(r, c) = 1 + 10 * r + c;
+    }
     GridFunction<MatrixSpace, ::Vec> field(matrix);
 #if defined(PETSC_USE_COMPLEX)
     for (size_t r = 0; r < matrix.getRows(); ++r)
+    {
       for (size_t c = 0; c < matrix.getColumns(); ++c)
         value(r, c) += PetscCMPLX(0, 1 + r + c);
+    }
 #endif
     field.project([&](const Geometry::Point&) { return value; });
     PETSc::Variational::TrialFunction petscTrial(matrix);
@@ -187,14 +195,18 @@ namespace
       const size_t count =
         matrix.getFiniteElement(it->getDimension(), it->getIndex()).getCount();
       for (size_t a : {size_t(0), count / 2, count - 1})
+      {
         for (size_t b : {size_t(0), count / 2, count - 1})
           EXPECT_LE(std::abs(jacobian.integrate(a, b) - gradient.integrate(a, b)), 1e-9);
+      }
 #ifdef RODIN_TEST_WITH_PETSC
       Geometry::Point point(*it, Polytope::Traits(it->getGeometry()).getCentroid());
       const auto actual = field.getValue(point);
       for (size_t r = 0; r < matrix.getRows(); ++r)
+      {
         for (size_t c = 0; c < matrix.getColumns(); ++c)
           EXPECT_NEAR(std::abs(actual(r, c) - value(r, c)), 0, 1e-10);
+      }
 #endif
     }
 #ifdef RODIN_TEST_WITH_PETSC
@@ -224,11 +236,13 @@ TEST(DistributedMatrixRange, AllSpaces)
                                  : LocalMesh::UniformGrid(geometry, {3, 3, 3});
       const size_t D = mesh.getDimension();
       for (size_t d = 1; d <= D; ++d)
+      {
         for (size_t lower = 0; lower < d; ++lower)
         {
           mesh.getConnectivity().compute(d, lower);
           mesh.getConnectivity().compute(lower, d);
         }
+      }
       mesh.getConnectivity().compute(D, D);
       mesh.getConnectivity().compute(D, 0);
       mesh.getConnectivity().compute(D, D - 1);
@@ -242,8 +256,10 @@ TEST(DistributedMatrixRange, AllSpaces)
     auto mesh = sharder.gather(0);
     auto& shard = mesh.getShard();
     for (size_t d = 1; d <= shard.getDimension(); ++d)
+    {
       for (size_t lower = 0; lower < d; ++lower)
         shard.getConnectivity().compute(d, lower);
+    }
     for (const auto& shape : matrixShapes())
     {
       const auto [rows, cols] = shape;
@@ -280,11 +296,13 @@ TEST(LocalPetscMatrixRange, AllSpaces)
 {
   auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
   for (size_t d = 1; d <= 2; ++d)
+  {
     for (size_t lower = 0; lower < d; ++lower)
     {
       mesh.getConnectivity().compute(d, lower);
       mesh.getConnectivity().compute(lower, d);
     }
+  }
   checkPetscSolve(P0<BackendMatrix, LocalMesh>(mesh, 2, 3), false);
   checkPetscSolve(P0g<BackendMatrix, LocalMesh>(mesh, 2, 3), false);
   checkPetscSolve(P1<BackendMatrix, LocalMesh>(mesh, 2, 3), true);

@@ -356,8 +356,10 @@ namespace Rodin::Variational
             << "Matrix divergence requires columns equal to the spatial dimension."
             << Alert::Raise;
         for (size_t row = 0; row < gradient.getDimension(0); ++row)
+        {
           for (size_t k = 0; k < gradient.getDimension(2); ++k)
             value(row) += gradient(row, k, k);
+        }
         return value;
       }
       /**
@@ -479,8 +481,10 @@ namespace Rodin::Variational
             << "Matrix divergence requires columns equal to the spatial dimension."
             << Alert::Raise;
         for (size_t row = 0; row < gradient.getDimension(0); ++row)
+        {
           for (size_t k = 0; k < gradient.getDimension(2); ++k)
             value(row) += gradient(row, k, k);
+        }
         return value;
       }
       /**

@@ -318,9 +318,11 @@ namespace
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
+    {
       if (std::string(argv[i]).rfind(prefix, 0) == 0)
         return static_cast<std::size_t>(
           std::stoul(std::string(argv[i]).substr(prefix.size())));
+    }
     return fallback;
   }
 
@@ -328,8 +330,10 @@ namespace
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
+    {
       if (std::string(argv[i]).rfind(prefix, 0) == 0)
         return static_cast<Real>(std::stod(std::string(argv[i]).substr(prefix.size())));
+    }
     return fallback;
   }
 
@@ -338,8 +342,10 @@ namespace
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
+    {
       if (std::string(argv[i]).rfind(prefix, 0) == 0)
         return std::string(argv[i]).substr(prefix.size());
+    }
     return fallback;
   }
 
@@ -860,9 +866,11 @@ int main(int argc, char** argv)
       const MinSTCut::Result classified = cut.classify(volumes, moments, graphEdges);
 
       for (std::size_t l = 0; l < classified.labels.size(); ++l)
+      {
         mesh.setAttribute({D, localToCell[l]},
           classified.labels[l] == MinSTCut::Inside ? interiorAttribute
                                                    : exteriorAttribute);
+      }
 
       {
         std::vector<char> isSupportCell(mesh.getCellCount(), 0);
@@ -890,11 +898,13 @@ int main(int argc, char** argv)
             continue;
           bool anchored = false;
           for (const Index c : comp)
+          {
             if (isSupportCell[c])
             {
               anchored = true;
               break;
             }
+          }
           if (!anchored)
             for (const Index c : comp)
             {
@@ -940,8 +950,10 @@ int main(int argc, char** argv)
       std::size_t changedCells = 0;
       if (haveClassification)
         for (std::size_t c = 0; c < currentInterior.size(); ++c)
+        {
           if (currentInterior[c] != previousInterior[c])
             ++changedCells;
+        }
       std::vector<Index> oldFacets = cachedInterfaceFacets;
       std::vector<Index> newFacets = interfaceFacets;
       std::sort(oldFacets.begin(), oldFacets.end());
@@ -1016,8 +1028,10 @@ int main(int argc, char** argv)
     // Build the body-fitted moved mesh and carry attributes.
     updateMovedMeshFromDisplacement(mesh, moved, u);
     for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+    {
       if (const auto a = mesh.getAttribute(D, c))
         moved.setAttribute({D, c}, *a);
+    }
     for (auto it = mesh.getFace(); it; ++it)
     {
       const Index f = it->getIndex();
@@ -1478,8 +1492,10 @@ int main(int argc, char** argv)
     phiH.getData() = adv.getSolution().getData();
     Real maxPhiChange = 0;
     for (Eigen::Index i = 0; i < phiH.getData().size(); ++i)
+    {
       maxPhiChange =
         std::max(maxPhiChange, std::abs(phiH.getData()(i) - phiBeforeAdvection(i)));
+    }
     std::cout << "  advect: dt/h=" << (h > Real(0) ? dtCur / h : Real(0))
               << " max|dJ|=" << dJMax
               << " max|dphi|/h=" << (h > Real(0) ? maxPhiChange / h : Real(0)) << '\n';

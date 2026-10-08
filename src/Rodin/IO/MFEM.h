@@ -2086,14 +2086,18 @@ namespace Rodin::IO
         if (header.ordering == MFEM::Ordering::Nodes) // Ordering: 0
         {
           for (size_t c = 0; c < vdim; ++c)
+          {
             for (size_t v = 0; v < vn; ++v)
               data.coeffRef(v + c * vn) = tmp[v + c * vn];
+          }
         }
         else // Ordering: 1 (VectorDimension)
         {
           for (size_t v = 0; v < vn; ++v)
+          {
             for (size_t c = 0; c < vdim; ++c)
               data.coeffRef(v + c * vn) = tmp[vdim * v + c];
+          }
         }
       }
 
@@ -2254,14 +2258,18 @@ namespace Rodin::IO
         if (header.ordering == MFEM::Ordering::Nodes) // 0: XXX..YYY..ZZZ..
         {
           for (size_t c = 0; c < vdim; ++c)
+          {
             for (size_t i = 0; i < scalarSize; ++i)
               mfemBlock[c][i] = mfemValues[c * scalarSize + i];
+          }
         }
         else // 1: XYZ,XYZ,XYZ...
         {
           for (size_t i = 0; i < scalarSize; ++i)
+          {
             for (size_t c = 0; c < vdim; ++c)
               mfemBlock[c][i] = mfemValues[i * vdim + c];
+          }
         }
 
         // Scalar-position cursor in the MFEM traversal (increments once per scalar DOF consumed)
@@ -2291,8 +2299,10 @@ namespace Rodin::IO
         auto setScalarDofFromPos = [&](Index scalarDof) {
           assert(pos < scalarSize);
           for (size_t c = 0; c < vdim; ++c)
+          {
             data.coeffRef(scalarDof + static_cast<Index>(c * scalarSize)) =
               mfemBlock[c][pos];
+          }
           ++pos;
         };
 
@@ -2521,8 +2531,10 @@ namespace Rodin::IO
                         continue;
 
                       for (size_t comp = 0; comp < vdim; ++comp)
+                      {
                         data.coeffRef(sd + static_cast<Index>(comp * scalarSize)) =
                           uRFace[comp](static_cast<Index>(k));
+                      }
                       written[s] = true;
                     }
                   }
@@ -2556,8 +2568,10 @@ namespace Rodin::IO
                       if (s < scalarSize)
                       {
                         for (size_t comp = 0; comp < vdim; ++comp)
+                        {
                           data.coeffRef(sdof + static_cast<Index>(comp * scalarSize)) =
                             mfemBlock[comp][pos];
+                        }
                         written[s] = true;
                       }
                       ++pos;
@@ -2658,8 +2672,10 @@ namespace Rodin::IO
                       continue;
 
                     for (size_t comp = 0; comp < vdim; ++comp)
+                    {
                       data.coeffRef(sd + static_cast<Index>(comp * scalarSize)) =
                         uRElem[comp](static_cast<Index>(k));
+                    }
                     written[s] = true;
                   }
                 }
@@ -2764,8 +2780,10 @@ namespace Rodin::IO
                       continue;
 
                     for (size_t comp = 0; comp < vdim; ++comp)
+                    {
                       data.coeffRef(sd + static_cast<Index>(comp * scalarSize)) =
                         uRElem[comp](static_cast<Index>(k));
+                    }
                     written[s] = true;
                   }
                 }
@@ -2837,8 +2855,10 @@ namespace Rodin::IO
                       continue;
 
                     for (size_t comp = 0; comp < vdim; ++comp)
+                    {
                       data.coeffRef(sd + static_cast<Index>(comp * scalarSize)) =
                         uRByComp[comp](static_cast<Index>(k));
+                    }
                     written[s] = true;
                   }
                 }
@@ -3049,8 +3069,10 @@ namespace Rodin::IO
           for (size_t c = 0; c < vdim; ++c)
           {
             for (size_t i = 0; i < scalarDofCount; ++i)
+            {
               data(static_cast<Index>(i + c * scalarDofCount)) =
                 tmp[i + c * scalarDofCount];
+            }
           }
         }
         else
@@ -3058,8 +3080,10 @@ namespace Rodin::IO
           for (size_t i = 0; i < scalarDofCount; ++i)
           {
             for (size_t c = 0; c < vdim; ++c)
+            {
               data(static_cast<Index>(i + c * scalarDofCount)) =
                 tmp[c + i * vdim];
+            }
           }
         }
       }
@@ -3902,17 +3926,21 @@ namespace Rodin::IO
           Alert::Exception() << "Invalid MFEM matrix field header." << Alert::Raise;
         std::vector<Scalar> values(scalar.getSize() * components);
         for (auto& value : values)
+        {
           if (!(is >> value))
             Alert::Exception() << "Truncated MFEM matrix data." << Alert::Raise;
+        }
         for (size_t c = 0; c < components; ++c)
         {
           std::stringstream stream;
           stream << std::setprecision(std::numeric_limits<Real>::max_digits10);
           stream << header[0] << '\n' << header[1] << "\nVDim: 1\nOrdering: 0\n\n";
           for (size_t a = 0; a < scalar.getSize(); ++a)
+          {
             stream
               << values[ordering == 0 ? c * scalar.getSize() + a : a * components + c]
               << '\n';
+          }
           Variational::GridFunction scalarField(scalar);
           GridFunctionLoader<FileFormat::MFEM, ScalarFES, Math::Vector<Scalar>>(
             scalarField)

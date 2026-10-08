@@ -3,7 +3,8 @@ name: Style
 # Style enforcement, layered (see CONTRIBUTING.md):
 #   Format         clang-format on CHANGED LINES only (never the whole tree)
 #   StyleLint      house rules: include guards, license blocks, @file docs,
-#                  Doxygen comment style, no #pragma once, PETSc containment
+#                  Doxygen comment style, multiline for-body braces,
+#                  no #pragma once, PETSc containment
 #                  (dev/style_lint.py)
 #   ClangTidy      identifier naming on the headers a change touches
 #   DoxygenRatchet no new documentation warnings (dev/check_doxygen_warnings.py)

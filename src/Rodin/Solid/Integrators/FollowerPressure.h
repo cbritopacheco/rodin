@@ -245,6 +245,7 @@ namespace Rodin::Solid
         {
           xjac = Xjac;
           for (size_t j = 0; j < faceDim; ++j)
+          {
             for (size_t a = 0; a < nv; ++a)
             {
               const Real g = p1FaceBasisGrad(a, j, faceDim);
@@ -253,6 +254,7 @@ namespace Rodin::Solid
               for (size_t c = 0; c < sdim; ++c)
                 xjac(c, j) += g * nodal(fes, d, a, c);
             }
+          }
         }
     };
   }
@@ -536,8 +538,10 @@ namespace Rodin::Solid
               {
                 const Real phi = Internal::p1FaceBasis(a, rc, m_kin.faceDim);
                 for (size_t ca = 0; ca < vdim; ++ca)
+                {
                   m_matrix(a * vdim + ca, tr) +=
                     wq * m_kin.orientation * p * dcr(ca) * phi;
+                }
               }
             }
           }

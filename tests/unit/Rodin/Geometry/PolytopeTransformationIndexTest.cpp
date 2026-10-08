@@ -37,6 +37,7 @@ namespace Rodin::Tests::Unit
     {
       threads.emplace_back([&, thread]() {
         for (size_t repetition = 0; repetition < repetitions; ++repetition)
+        {
           for (size_t offset = 0; offset < count; ++offset)
           {
             const Index i = static_cast<Index>((offset + thread) % count);
@@ -47,6 +48,7 @@ namespace Rodin::Tests::Unit
             EXPECT_EQ(transformation.getReferenceDimension(), 2u);
             EXPECT_EQ(transformation.getPhysicalDimension(), 2u);
           }
+        }
       });
     }
 

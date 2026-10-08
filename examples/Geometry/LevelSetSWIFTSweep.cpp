@@ -339,8 +339,10 @@ namespace
   {
     const std::string flag = "--" + name;
     for (int i = 1; i < argc; ++i)
+    {
       if (std::string(argv[i]) == flag)
         return true;
+    }
     return false;
   }
 
@@ -520,8 +522,10 @@ int main(int argc, char** argv)
     std::vector<Index> interfaceFacets;
     interfaceFacets.reserve(classified.cutEdges.size());
     for (const MinSTCut::Edge& edge : classified.cutEdges)
+    {
       if (edge.index != MinSTCut::InvalidIndex)
         interfaceFacets.push_back(edge.index);
+    }
 
     for (std::size_t local = 0; local < classified.labels.size(); ++local)
     {
@@ -598,8 +602,10 @@ int main(int argc, char** argv)
     {
       std::size_t insideCount = 0;
       for (int lbl : classified.labels)
+      {
         if (lbl == MinSTCut::Inside)
           ++insideCount;
+      }
       std::cout << "    debug: facets=" << interfaceFacets.size()
                 << "  inside=" << insideCount
                 << "  outside=" << (classified.labels.size() - insideCount)

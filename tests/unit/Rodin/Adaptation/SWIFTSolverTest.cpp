@@ -126,9 +126,13 @@ namespace Rodin::Tests::Unit
     {
       auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
       for (size_t from = 1; from <= 2; ++from)
-        for (size_t to = 0; to <= 2; ++to)
-          if (from != to)
-            mesh.getConnectivity().compute(from, to);
+      {
+          for (size_t to = 0; to <= 2; ++to)
+          {
+              if (from != to)
+                mesh.getConnectivity().compute(from, to);
+          }
+      }
       H1 space(std::integral_constant<size_t, 2>{}, mesh, 2);
       TrialFunction trial(space);
       TestFunction test(space);
@@ -244,17 +248,23 @@ namespace Rodin::Tests::Unit
       mesh.getConnectivity().compute(1, 2);
       if constexpr (Order > 1)
         for (std::size_t from = 1; from <= 2; ++from)
-          for (std::size_t to = 0; to <= 2; ++to)
-            if (from != to)
-              mesh.getConnectivity().compute(from, to);
+        {
+            for (std::size_t to = 0; to <= 2; ++to)
+            {
+                if (from != to)
+                  mesh.getConnectivity().compute(from, to);
+            }
+        }
 
       std::vector<Index> interfaceFacets;
       for (auto face = mesh.getFace(); face; ++face)
       {
         bool onInterface = true;
         for (const Index vertex : face->getVertices())
-          onInterface &=
-            std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+        {
+            onInterface &=
+              std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+        }
         if (onInterface)
         {
           interfaceFacets.push_back(face->getIndex());
@@ -549,8 +559,10 @@ namespace Rodin::Tests::Unit
         const auto x = point.getCoordinates();
         Math::SpatialMatrix<Real> expected(dimension, dimension);
         for (size_t i = 0; i < dimension; ++i)
-          for (size_t j = 0; j < dimension; ++j)
-            expected(i, j) = Real(4) * x(i) * x(j);
+        {
+            for (size_t j = 0; j < dimension; ++j)
+              expected(i, j) = Real(4) * x(i) * x(j);
+        }
         EXPECT_LT((actual - expected).norm(), Real(1e-12));
         Math::SpatialVector<Real> v(dimension);
         for (size_t i = 0; i < dimension; ++i)
@@ -1165,8 +1177,10 @@ namespace Rodin::Tests::Unit
     {
       bool marked = true;
       for (const Index vertex : face->getVertices())
-        marked &=
-          std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+      {
+          marked &=
+            std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+      }
       if (marked)
       {
         facets.push_back(face->getIndex());
@@ -1225,9 +1239,13 @@ namespace Rodin::Tests::Unit
     const auto check = []<size_t Order>() {
       auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
       for (size_t from = 1; from <= 2; ++from)
-        for (size_t to = 0; to <= 2; ++to)
-          if (from != to)
-            mesh.getConnectivity().compute(from, to);
+      {
+          for (size_t to = 0; to <= 2; ++to)
+          {
+              if (from != to)
+                mesh.getConnectivity().compute(from, to);
+          }
+      }
       H1 fes(std::integral_constant<size_t, Order>{}, mesh, 2);
       TrialFunction trial(fes);
       TestFunction test(fes);
@@ -1275,9 +1293,13 @@ namespace Rodin::Tests::Unit
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.scale(Real(0.5));
     for (std::size_t from = 1; from <= 2; ++from)
-      for (std::size_t to = 0; to <= 2; ++to)
-        if (from != to)
-          mesh.getConnectivity().compute(from, to);
+    {
+        for (std::size_t to = 0; to <= 2; ++to)
+        {
+            if (from != to)
+              mesh.getConnectivity().compute(from, to);
+        }
+    }
     H1 fes(std::integral_constant<std::size_t, 2>{}, mesh, 2);
     GridFunction field(fes);
     const auto cell = mesh.getCell();
@@ -1303,12 +1325,16 @@ namespace Rodin::Tests::Unit
       [](SWIFT::Parameters& p) -> Real& { return p.convergence.tolerance.innerRelative; },
       [](SWIFT::Parameters& p) -> Real& { return p.convergence.tolerance.energy; }};
     for (const auto& control : controls)
-      for (const Real invalid : {Real(-1), std::numeric_limits<Real>::infinity(),
-             std::numeric_limits<Real>::quiet_NaN()})
-        EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
-                       SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3),
-                       Real(90), [=](SWIFT::Parameters& p) { control(p) = invalid; }),
-          Alert::Exception);
+    {
+        for (const Real invalid : {Real(-1), std::numeric_limits<Real>::infinity(),
+               std::numeric_limits<Real>::quiet_NaN()})
+        {
+            EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+                           SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3),
+                           Real(90), [=](SWIFT::Parameters& p) { control(p) = invalid; }),
+              Alert::Exception);
+        }
+    }
     EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
                    SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
                    [](SWIFT::Parameters& p) { p.model.h = 0; }),

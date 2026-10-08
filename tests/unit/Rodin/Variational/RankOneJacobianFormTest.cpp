@@ -102,9 +102,13 @@ namespace Rodin::Tests::Unit
       const Math::Matrix<Real> actual = rankOne.getOperator();
       const Math::Matrix<Real> expected = divergence.getOperator();
       for (Eigen::Index i = 0; i < actual.rows(); ++i)
+      {
         for (Eigen::Index j = 0; j < actual.cols(); ++j)
+        {
           EXPECT_NEAR(actual(i, j), expected(i, j), 1e-12)
             << "entry (" << i << ", " << j << ")";
+        }
+      }
     }
 
     template <class FES>
@@ -128,9 +132,13 @@ namespace Rodin::Tests::Unit
       ASSERT_EQ(actual.rows(), expected.rows());
       ASSERT_EQ(actual.cols(), expected.cols());
       for (Eigen::Index i = 0; i < actual.rows(); ++i)
+      {
         for (Eigen::Index j = 0; j < actual.cols(); ++j)
+        {
           EXPECT_NEAR(actual(i, j), Real(2) * expected(i, j), 1e-12)
             << "entry (" << i << ", " << j << ")";
+        }
+      }
     }
   }
 
@@ -261,9 +269,13 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(actual.rows(), expected.rows());
     ASSERT_EQ(actual.cols(), expected.cols());
     for (Eigen::Index i = 0; i < actual.rows(); ++i)
+    {
       for (Eigen::Index j = 0; j < actual.cols(); ++j)
+      {
         EXPECT_NEAR(actual(i, j), expected(i, j), 1e-12)
           << "entry (" << i << ", " << j << ")";
+      }
+    }
   }
 
   /// @brief The assembled form is symmetric positive semi-definite.

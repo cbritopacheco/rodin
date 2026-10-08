@@ -418,8 +418,10 @@ namespace
   {
     const std::string flag = "--" + name;
     for (int i = 1; i < argc; ++i)
+    {
       if (std::string(argv[i]) == flag)
         return true;
+    }
     return false;
   }
 
@@ -796,8 +798,10 @@ int main(int argc, char** argv)
     std::vector<Index> interfaceFacets;
     interfaceFacets.reserve(classified.cutEdges.size());
     for (const MinSTCut::Edge& edge : classified.cutEdges)
+    {
       if (edge.index != MinSTCut::InvalidIndex)
         interfaceFacets.push_back(edge.index);
+    }
 
     for (std::size_t local = 0; local < classified.labels.size(); ++local)
     {
