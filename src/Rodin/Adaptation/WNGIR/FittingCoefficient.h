@@ -12,8 +12,11 @@
 
 namespace Rodin::Adaptation
 {
-  /// @brief Matrix coefficient of the WNGIR surface observation metric.
-  /// Hessian of half the squared residual, with D2 phi omitted and fixed normalization.
+  /**
+   * @brief Matrix coefficient of the WNGIR surface fitting metric.
+   * Hessian of half the squared residual, with @f$D^2\phi@f$ omitted
+   * and fixed gradient-scale normalization.
+   */
   template <class GradDerived, class Displacement, class LocatorType>
   class WNGIRFittingCoefficient final
     : public Variational::MatrixFunctionBase<Real,

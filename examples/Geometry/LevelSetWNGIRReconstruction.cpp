@@ -602,7 +602,7 @@ int run(int argc, char** argv)
         const std::size_t nLocal = fe.getCount();
         const std::size_t qFitOrder = wngirParams.quadrature.validation > 0
           ? wngirParams.quadrature.validation
-          : wngirGeometricValidationOrder(fe.getOrder());
+          : WNGIRParameters::Quadrature::getValidationOrder(fe.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(qFitOrder, face->getGeometry());
         const auto& quad = face->getQuadrature(qf);

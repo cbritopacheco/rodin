@@ -21,7 +21,14 @@ namespace Rodin::Adaptation
       /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
 
-      /// @brief Constructs the WNGIR hinge force.
+      /**
+       * @brief Constructs the affine quadratic hinge load.
+       * @param z Test function for the displacement increment.
+       * @param current Frozen outer displacement.
+       * @param inner Current inner displacement increment.
+       * @param parameters Quality budgets and hinge activation weights.
+       * @param hingeCoefficient Effective hinge coefficient for this outer model.
+       */
       WNGIRHingeForce(const TestFunction& z, const Displacement& current,
         const Displacement& inner, const WNGIRParameters& parameters,
         Real hingeCoefficient)
@@ -33,8 +40,11 @@ namespace Rodin::Adaptation
           m_hingeCoefficient(hingeCoefficient)
       {}
 
-      /// @brief Copy constructor.
-      WNGIRHingeForce(const WNGIRHingeForce&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Integrator to copy, retaining its field references.
+       */
+      WNGIRHingeForce(const WNGIRHingeForce& other) = default;
 
       /**
        * @brief Returns the current polytope.
@@ -46,7 +56,11 @@ namespace Rodin::Adaptation
         return *m_polytope;
       }
 
-      /// @brief Binds to a polytope and assembles the local system.
+      /**
+       * @brief Binds to a polytope and assembles the local load.
+       * @param polytope Cell to integrate.
+       * @returns This integrator after binding and assembly.
+       */
       WNGIRHingeForce& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -57,7 +71,7 @@ namespace Rodin::Adaptation
         const auto& parameters = m_parameters.get();
         const std::size_t order = parameters.quadrature.order > 0
           ? parameters.quadrature.order
-          : std::max<std::size_t>(2, 2 * fe.getOrder());
+          : WNGIRParameters::Quadrature::getCellOrder(fe.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -113,7 +127,10 @@ namespace Rodin::Adaptation
         return Geometry::Region::Cells;
       }
 
-      /// @brief Clones this object.
+      /**
+       * @brief Clones this integrator.
+       * @returns Newly allocated copy owned by the caller.
+       */
       WNGIRHingeForce* copy() const noexcept final override
       {
         return new WNGIRHingeForce(*this);

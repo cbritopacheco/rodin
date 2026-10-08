@@ -12,6 +12,9 @@
 
 namespace Rodin::Adaptation
 {
+  template <class Displacement>
+  class WNGIRCurrentInverse;
+
   /**
    * @brief Sparse core of the frozen centered current-strain bilinear form.
    *
@@ -113,6 +116,65 @@ namespace Rodin::Adaptation
         return new WNGIRDistribution(*this);
       }
 
+      /**
+       * @brief Global mean-strain subtraction represented by @f$UU^\top@f$.
+       * Native linear forms integrate the symmetric strain in an orthonormal
+       * tensor basis. The volume and moments use the sparse core's quadrature,
+       * preserving the variance identity for the centered form.
+       * @returns Mean-strain coupling matrix @f$U@f$ for the current fields and weights.
+       */
+      Math::Matrix<Real> getCentering() const
+      {
+        const auto& test = m_test.get();
+        const auto& current = m_current.get();
+        const auto dimension = test.getFiniteElementSpace().getMesh().getDimension();
+        const auto weight = Variational::RealFunction(
+          [gradient = Variational::Jacobian(current), dimension](const auto& point) -> Real {
+            CellDeformation deformation(dimension);
+            deformation.setDisplacementGradient(gradient.getValue(point));
+            return deformation.getJacobian();
+          });
+        const auto gradient = Variational::Jacobian(test) *
+          WNGIRCurrentInverse<Displacement>(current, dimension);
+        const auto strain = Real(0.5) * (gradient + Variational::Transpose(gradient));
+        auto traceIntegral = Variational::Integral(weight * Variational::Trace(strain));
+        traceIntegral.setOrder(m_order);
+        Variational::LinearForm trace(test);
+        trace = traceIntegral;
+        trace.assemble();
+        Variational::GridFunction position(test.getFiniteElementSpace());
+        position = Variational::VectorFunction(dimension, [](const Geometry::Point& point) {
+          return Math::SpatialVector<Real>(point.getCoordinates());
+        });
+        position += current;
+        const Real volume = trace.getVector().dot(position.getData()) / Real(dimension);
+        assert(volume > Real(0));
+        Math::Matrix<Real> centering(trace.getVector().size(), dimension * (dimension + 1) / 2);
+        size_t column = 0;
+        for (size_t a = 0; a < dimension; ++a)
+          for (size_t b = a; b < dimension; ++b)
+          {
+            Math::Matrix<Real> tensor = Math::Matrix<Real>::Zero(dimension, dimension);
+            if (a == b)
+              tensor(a, b) = Real(1);
+            else
+              tensor(a, b) = tensor(b, a) = Real(1) / std::sqrt(Real(2));
+            const Real mean = tensor.trace() / Real(dimension);
+            tensor *= std::sqrt(m_deviatoric);
+            for (size_t axis = 0; axis < dimension; ++axis)
+              tensor(axis, axis) +=
+                (std::sqrt(m_divergence) - std::sqrt(m_deviatoric)) * mean;
+            auto integral = Variational::Integral(weight *
+              Variational::Dot(Variational::MatrixFunction(tensor), strain));
+            integral.setOrder(m_order);
+            Variational::LinearForm form(test);
+            form = integral;
+            form.assemble();
+            centering.col(column++) = form.getVector() / std::sqrt(volume);
+          }
+        return centering;
+      }
+
     private:
       std::reference_wrapper<const TrialFunction> m_trial;
       std::reference_wrapper<const TestFunction> m_test;
@@ -164,76 +226,5 @@ namespace Rodin::Adaptation
       size_t m_dimension;
   };
 
-  template <class Displacement>
-  auto wngirCurrentVolumeWeight(const Displacement& current, size_t dimension)
-  {
-    return Variational::RealFunction(
-      [gradient = Variational::Jacobian(current), dimension](const auto& point) -> Real {
-        CellDeformation deformation(dimension);
-        deformation.setDisplacementGradient(gradient.getValue(point));
-        return deformation.getJacobian();
-      });
-  }
-
-  /// Pullback of sym(grad_y v), with y=x+u_k(x).
-  template <class Function, class Displacement>
-  auto wngirCurrentStrain(
-    const Function& function, const Displacement& current, size_t dimension)
-  {
-    const auto gradient =
-      Variational::Jacobian(function) * WNGIRCurrentInverse(current, dimension);
-    return Real(0.5) * (gradient + Variational::Transpose(gradient));
-  }
-
-  /**
-   * @brief Global mean-strain subtraction represented by @f$UU^\top@f$.
-   * Native linear forms integrate the symmetric strain in an orthonormal tensor
-   * basis. The weighted core minus @f$UU^\top@f$ is the centered distribution.
-   * Coefficients include the background mesh scale. The volume and moments use
-   * the same quadrature as the sparse core, preserving the variance identity.
-   */
-  template <class TestFunction, class Displacement>
-  Math::Matrix<Real> wngirCenteredStrainCouplings(const TestFunction& test,
-    const Displacement& current, size_t dimension, Real deviatoric,
-    Real divergence, size_t order)
-  {
-    const auto weight = wngirCurrentVolumeWeight(current, dimension);
-    const auto strain = wngirCurrentStrain(test, current, dimension);
-    auto traceIntegral = Variational::Integral(weight * Variational::Trace(strain));
-    traceIntegral.setOrder(order);
-    Variational::LinearForm trace(test);
-    trace = traceIntegral;
-    trace.assemble();
-    Variational::GridFunction position(test.getFiniteElementSpace());
-    position = Variational::VectorFunction(dimension, [](const Geometry::Point& point) {
-      return Math::SpatialVector<Real>(point.getCoordinates());
-    });
-    position += current;
-    const Real volume = trace.getVector().dot(position.getData()) / Real(dimension);
-    assert(volume > Real(0));
-    Math::Matrix<Real> couplings(trace.getVector().size(), dimension * (dimension + 1) / 2);
-    size_t column = 0;
-    for (size_t a = 0; a < dimension; ++a)
-      for (size_t b = a; b < dimension; ++b)
-      {
-        Math::Matrix<Real> tensor = Math::Matrix<Real>::Zero(dimension, dimension);
-        if (a == b)
-          tensor(a, b) = Real(1);
-        else
-          tensor(a, b) = tensor(b, a) = Real(1) / std::sqrt(Real(2));
-        const Real mean = tensor.trace() / Real(dimension);
-        tensor *= std::sqrt(deviatoric);
-        for (size_t axis = 0; axis < dimension; ++axis)
-          tensor(axis, axis) += (std::sqrt(divergence) - std::sqrt(deviatoric)) * mean;
-        auto integral = Variational::Integral(weight *
-          Variational::Dot(Variational::MatrixFunction(tensor), strain));
-        integral.setOrder(order);
-        Variational::LinearForm form(test);
-        form = integral;
-        form.assemble();
-        couplings.col(column++) = form.getVector() / std::sqrt(volume);
-      }
-    return couplings;
-  }
 }
 #endif

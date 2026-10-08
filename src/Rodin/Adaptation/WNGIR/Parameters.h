@@ -16,20 +16,6 @@
 
 namespace Rodin::Adaptation
 {
-  /// @brief Surface order including the non-polynomial composed level set.
-  /// The minimum resolves the coarse curved-interface integration regression;
-  /// it is not an exactness guarantee for arbitrary analytic coefficients.
-  inline std::size_t wngirInterfaceQuadratureOrder(std::size_t feOrder)
-  {
-    return std::max<std::size_t>(12, 2 * feOrder + 2);
-  }
-
-  /// @brief Independent geometric-validation order for a finite-element order.
-  inline std::size_t wngirGeometricValidationOrder(std::size_t feOrder)
-  {
-    return std::max<std::size_t>(14, 2 * feOrder + 4);
-  }
-
   /// @brief Runtime parameters controlling WNGIR assembly and iteration.
   struct WNGIRParameters
   {
@@ -117,6 +103,40 @@ namespace Rodin::Adaptation
       /// @brief Integration and independent geometry-validation orders.
       struct Quadrature
       {
+          /**
+           * @brief Cell assembly and sampled admissibility order for FE products.
+           * @param feOrder Polynomial order of the displacement finite element.
+           * @returns Maximum of two and twice the finite-element order.
+           */
+          static size_t getCellOrder(size_t feOrder)
+          {
+            return std::max<size_t>(2, 2 * feOrder);
+          }
+
+          /**
+           * @brief Surface order including the non-polynomial composed level set.
+           * The minimum resolves the coarse curved-interface integration regression;
+           * it is not an exactness guarantee for arbitrary analytic coefficients.
+           * @param feOrder Polynomial order of the displacement finite element.
+           * @returns Automatic interface integration order.
+           */
+          static size_t getInterfaceOrder(size_t feOrder)
+          {
+            constexpr size_t minimumOrder = 12;
+            return std::max(minimumOrder, 2 * feOrder + 2);
+          }
+
+          /**
+           * @brief Independent geometric-validation order for an FE order.
+           * @param feOrder Polynomial order of the displacement finite element.
+           * @returns Automatic geometric-validation sampling order.
+           */
+          static size_t getValidationOrder(size_t feOrder)
+          {
+            constexpr size_t minimumOrder = 14;
+            return std::max(minimumOrder, 2 * feOrder + 4);
+          }
+
           std::size_t order = 0; ///< Zero selects automatic integration orders.
           std::size_t validation = 0; ///< Zero selects an independent validation order.
       };

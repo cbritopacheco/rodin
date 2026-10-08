@@ -13,34 +13,26 @@
 #include <limits>
 #include "Rodin/Alert.h"
 
-#include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Types.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/Jacobian.h"
+
+#include "../CellDeformation.h"
+#include "Parameters.h"
 
 namespace Rodin::Adaptation
 {
   /// @brief Sampled geometric admissibility diagnostics.
   struct WNGIRAdmissibilityReport
   {
-    /// @brief Minimum sampled Jacobian determinant.
+      /// @brief Minimum sampled Jacobian determinant.
       Real minJ = std::numeric_limits<Real>::infinity();
-    /// @brief Number of sampled points below the admissibility floor.
+      /// @brief Number of failed Jacobian or distortion validity checks.
       std::size_t inadmissibleCount = 0;
-    /// @brief Maximum sampled relative distortion.
+      /// @brief Maximum finite sampled relative distortion.
       Real maxQRel = Real(0);
   };
-
-  /**
-   * @brief Returns the sampled admissibility quadrature order for FE order.
-   * @param feOrder Polynomial order of the displacement finite element.
-   * @returns Maximum of two and twice the finite element order.
-   */
-  inline std::size_t wngirAdmissibilityQuadratureOrder(std::size_t feOrder)
-  {
-    return std::max<std::size_t>(2, 2 * feOrder);
-  }
 
   template <class Displacement>
   /**
@@ -66,33 +58,36 @@ namespace Rodin::Adaptation
                          << Alert::Raise;
 
     auto gradU = Jacobian(u);
+    CellDeformation deformation(dim);
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
     {
       const auto& cell = *cellIt;
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
       const auto& qf = QF::PolytopeQuadratureFormula::get(quadratureOrder > 0
           ? quadratureOrder
-          : wngirAdmissibilityQuadratureOrder(fe.getOrder()),
+          : WNGIRParameters::Quadrature::getCellOrder(fe.getOrder()),
         cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)
       {
         const auto& pt = quadrature.getPoint(q);
         const IntegrationPoint ip(pt, &qf, q);
-        const Math::SpatialMatrix<Real> F =
-          Math::SpatialMatrix<Real>::Identity(dim, dim) + gradU.getValue(ip);
-        const Real j = F.determinant();
+        deformation.setDisplacementGradient(gradU.getValue(ip));
+        const Real j = deformation.getJacobian();
 
         rep.minJ = std::min(rep.minJ, j);
-        if (j <= jacobian)
-          ++rep.inadmissibleCount;
+        bool invalid = !std::isfinite(j) || j <= jacobian || !deformation.isAdmissible();
 
-        if (j > Real(0))
+        if (deformation.isAdmissible())
         {
-          const Real qRel = F.squaredNorm() /
-            (static_cast<Real>(dim) * std::pow(j, Real(2) / static_cast<Real>(dim)));
-          rep.maxQRel = std::max(rep.maxQRel, qRel);
+          const Real qRel = deformation.getRelativeDistortion();
+          if (!std::isfinite(qRel))
+            invalid = true;
+          else
+            rep.maxQRel = std::max(rep.maxQRel, qRel);
         }
+        if (invalid)
+          ++rep.inadmissibleCount;
       }
     }
     return rep;

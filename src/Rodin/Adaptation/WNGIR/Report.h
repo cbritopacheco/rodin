@@ -151,9 +151,11 @@ namespace Rodin::Adaptation
       Real geometricRMS = std::numeric_limits<Real>::infinity();
       /// @brief Maximum sampled normalized level-set residual over the complete fitted interface.
       Real geometricSup = std::numeric_limits<Real>::infinity();
-      /// @brief Sampled geometric score @f$C=D_\infty/h_0^{p+1}@f$, using the
-      /// fixed background scale and interface FE order, not the stopping tolerance.
-      /// This score is not a certified Hausdorff bound or an observed error order.
+      /**
+       * @brief Sampled geometric score @f$C=D_\infty/h_0^{p+1}@f$, using the
+       * fixed background scale and interface FE order, not the stopping tolerance.
+       * This score is not a certified Hausdorff bound or an observed error order.
+       */
       Real geometricConstant = std::numeric_limits<Real>::infinity();
       /// @brief RMS unoriented normal discrepancy over the complete fitted interface.
       Real normalRMS = std::numeric_limits<Real>::infinity();

@@ -42,13 +42,17 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(parameters.model.qualityGuard, Real(0.1));
       EXPECT_EQ(parameters.convergence.tolerance.geometric, Real(0));
       EXPECT_EQ(parameters.quadrature.validation, 0);
-      EXPECT_EQ(wngirInterfaceQuadratureOrder(1), 12);
-      EXPECT_EQ(wngirInterfaceQuadratureOrder(2), 12);
-      EXPECT_EQ(wngirInterfaceQuadratureOrder(3), 12);
-      EXPECT_EQ(wngirInterfaceQuadratureOrder(7), 16);
-      EXPECT_EQ(wngirGeometricValidationOrder(1), 14);
-      EXPECT_EQ(wngirGeometricValidationOrder(2), 14);
-      EXPECT_EQ(wngirGeometricValidationOrder(3), 14);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getCellOrder(0), 2);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getCellOrder(1), 2);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getCellOrder(2), 4);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getCellOrder(3), 6);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getInterfaceOrder(1), 12);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getInterfaceOrder(2), 12);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getInterfaceOrder(3), 12);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getInterfaceOrder(7), 16);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getValidationOrder(1), 14);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getValidationOrder(2), 14);
+      EXPECT_EQ(WNGIRParameters::Quadrature::getValidationOrder(3), 14);
     }
 
     TEST(Rodin_Adaptation_WNGIRSolver, HierarchicalParametersAreCopiedBySolver)
@@ -58,7 +62,9 @@ namespace Rodin::Tests::Unit
       TrialFunction u(space);
       TestFunction v(space);
       WNGIR solver(u, v);
-      WNGIRParameters parameters;
+      decltype(solver)::Parameters parameters;
+      static_assert(std::is_same_v<decltype(solver)::Parameters, WNGIRParameters>);
+      static_assert(std::is_same_v<decltype(solver)::Report, WNGIRReport>);
       parameters.model = {.h = Real(0.5),
         .fit = Real(2),
         .distribution = {.deviatoric = Real(0.01), .divergence = Real(0.02)},
@@ -110,7 +116,7 @@ namespace Rodin::Tests::Unit
         return integral;
       };
       const auto reference = integrate(24),
-                 actual = integrate(wngirInterfaceQuadratureOrder(1));
+                 actual = integrate(WNGIRParameters::Quadrature::getInterfaceOrder(1));
       EXPECT_LT((actual - reference).norm() / reference.norm(), Real(1e-4));
       EXPECT_LT(std::abs(actual(0) - reference(0)) / reference(0), Real(1e-4));
       EXPECT_GT(std::abs(integrate(4)(0) - reference(0)) / reference(0), Real(0.1));
@@ -266,7 +272,7 @@ namespace Rodin::Tests::Unit
         for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
           measure(Point(*cell, traits.getVertex(vertex)));
         const auto& qf = QF::PolytopeQuadratureFormula::get(
-          wngirGeometricValidationOrder(Order), cell->getGeometry());
+          WNGIRParameters::Quadrature::getValidationOrder(Order), cell->getGeometry());
         const auto& quadrature = cell->getQuadrature(qf);
         for (std::size_t q = 0; q < quadrature.getSize(); ++q)
           measure(quadrature.getPoint(q));

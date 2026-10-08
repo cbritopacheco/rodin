@@ -21,7 +21,15 @@ namespace Rodin::Adaptation
       /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
-      /// @brief Constructs the WNGIR hinge metric.
+      /**
+       * @brief Constructs the affine quadratic hinge tangent.
+       * @param du Trial function for the displacement correction.
+       * @param z Test function for the displacement correction.
+       * @param current Frozen outer displacement.
+       * @param inner Current inner displacement increment.
+       * @param parameters Quality budgets and hinge activation weights.
+       * @param hingeCoefficient Effective hinge coefficient for this outer model.
+       */
       WNGIRHingeMetric(const TrialFunction& du, const TestFunction& z,
         const Displacement& current, const Displacement& inner,
         const WNGIRParameters& parameters, Real hingeCoefficient)
@@ -34,8 +42,11 @@ namespace Rodin::Adaptation
           m_hingeCoefficient(hingeCoefficient)
       {}
 
-      /// @brief Copy constructor.
-      WNGIRHingeMetric(const WNGIRHingeMetric&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Integrator to copy, retaining its field references.
+       */
+      WNGIRHingeMetric(const WNGIRHingeMetric& other) = default;
 
       /**
        * @brief Returns the current polytope.
@@ -47,7 +58,11 @@ namespace Rodin::Adaptation
         return *m_polytope;
       }
 
-      /// @brief Binds to a polytope and assembles the local system.
+      /**
+       * @brief Binds to a polytope and assembles the local tangent.
+       * @param polytope Cell to integrate.
+       * @returns This integrator after binding and assembly.
+       */
       WNGIRHingeMetric& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -60,7 +75,7 @@ namespace Rodin::Adaptation
         const auto& parameters = m_parameters.get();
         const std::size_t order = parameters.quadrature.order > 0
           ? parameters.quadrature.order
-          : std::max<std::size_t>(2, 2 * trialFE.getOrder());
+          : WNGIRParameters::Quadrature::getCellOrder(trialFE.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
@@ -152,7 +167,10 @@ namespace Rodin::Adaptation
         return Geometry::Region::Cells;
       }
 
-      /// @brief Clones this object.
+      /**
+       * @brief Clones this integrator.
+       * @returns Newly allocated copy owned by the caller.
+       */
       WNGIRHingeMetric* copy() const noexcept final override
       {
         return new WNGIRHingeMetric(*this);

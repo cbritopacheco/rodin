@@ -11,9 +11,17 @@
 
 namespace Rodin::Adaptation
 {
-  /// @brief Quadratic-model minimizer with an optional physical-motion bound.
-  /// Positive fitting curvature supplies the fallback when robust curvature is nonpositive.
-  /// A zero maximumStep leaves the directional Newton scale unrestricted.
+  /**
+   * @brief Quadratic-model minimizer with an optional physical-motion bound.
+   * Positive fitting curvature supplies the fallback when robust curvature is nonpositive.
+   * A zero maximumStep leaves the directional Newton scale unrestricted.
+   * @param action Positive fitting-force action on the predictor.
+   * @param curvature Robust-energy directional curvature.
+   * @param fittingCurvature Positive squared-fit curvature used as a fallback.
+   * @param directionNorm Physical displacement norm of the predictor.
+   * @param maximumStep Physical-motion bound; zero leaves scaling unrestricted.
+   * @returns Directional scale, or zero when the model inputs are invalid.
+   */
   inline Real wngirDirectionalNewtonStep(Real action, Real curvature,
     Real fittingCurvature, Real directionNorm, Real maximumStep)
   {

@@ -3,6 +3,7 @@
  * Distributed under the Boost Software License, Version 1.0.
  */
 #include <gtest/gtest.h>
+#include <limits>
 #include <utility>
 #include "Rodin/Adaptation/WNGIR/Admissibility.h"
 #include "Rodin/Adaptation/WNGIR/HingeProblem.h"
@@ -107,6 +108,24 @@ TEST(Rodin_Adaptation_WNGIRAdmissibility, SamplingIsReadOnly)
   GridFunction wrongDimension(wrongSpace);
   EXPECT_THROW(Adaptation::evaluateWNGIRAdmissibilitySampled(
     wrongDimension, Real(0.01)), Alert::Exception);
+}
+
+TEST(Rodin_Adaptation_WNGIRAdmissibility, RejectsNonfiniteGeometry)
+{
+  using namespace Geometry;
+  using namespace Variational;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  mesh.getConnectivity().compute(2, 0);
+  P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+  GridFunction displacement(space);
+  for (const Real invalid : {std::numeric_limits<Real>::quiet_NaN(),
+         std::numeric_limits<Real>::infinity()})
+  {
+    displacement.setData(Math::Vector<Real>::Constant(space.getSize(), invalid));
+    const auto report = Adaptation::evaluateWNGIRAdmissibilitySampled(
+      std::as_const(displacement), Real(0.01));
+    EXPECT_GT(report.inadmissibleCount, 0u);
+  }
 }
 
 TEST(Rodin_Adaptation_WNGIRReport, InnerFailuresUseCanonicalNames)
