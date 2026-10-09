@@ -98,12 +98,25 @@ r_i^{(h)}=\frac{\log(E_{i-1}/E_i)}{\log(h_{i-1}/h_i)}.
 $$
 
 `UniformGridHierarchy` uses the nominal coordinate spacing
-$h_i=1/(n_i-1)$ for $n_i$ points per axis. On a fixed cell family, the
-geometry-dependent ratio between this spacing and element diameter cancels
-between levels. For a sufficiently regular exact solution of a stable,
-consistent conforming degree $p$ elliptic problem on regular meshes, the
-standard expectations are $E_{1,i}=O(h_i^p)$ and, when the required dual
-regularity holds, $E_{0,i}=O(h_i^{p+1})$. These orders are not asserted
+$h_i=1/(n_i-1)$ for $n_i$ points per axis. On an affine uniform grid of a
+fixed cell family, the geometry-dependent ratio between this spacing and
+element diameter cancels between levels. For curved meshes, nominal spacing
+remains the declared refinement parameter; its interpretation requires
+uniformly regular maps and a shape-regular family with physical mesh diameter
+$h_i^{\mathrm{phys}}=\max_{K\in\mathcal{T}_i}\operatorname{diam}(K)$ satisfying
+
+$$
+c h_i\le h_i^{\mathrm{phys}}\le C h_i,
+\qquad 0<c\le C<\infty,
+$$
+
+with constants independent of the level. This comparability transfers
+asymptotic orders, but does not make the physical and nominal adjacent-size
+ratios identical on finite curved meshes. Each study must identify the size
+parameter used in its reported rates. For a sufficiently regular exact
+solution of a stable, consistent conforming degree $p$ elliptic problem on
+regular meshes, the standard expectations are $E_{1,i}=O(h_i^p)$ and, when
+the required dual regularity holds, $E_{0,i}=O(h_i^{p+1})$. These orders are not asserted
 unconditionally for singular solutions, mixed boundary corners, or
 under-resolved geometric maps. Smooth-field P0 projection instead has an
 L2 error of order one; P0g reproduces constants exactly and has no
@@ -198,6 +211,15 @@ error are checked separately. When a rate approaches an assertion bound,
 quadrature order and solver tolerance are varied to identify numerical
 contamination; unexplained non-monotonicity or superconvergence is not
 absorbed by widening the bound.
+
+Rate certification also requires a finite computed rate: finite positive
+errors alone do not guarantee a finite intermediate quotient, and a lower
+bound alone does not exclude an infinite result. Logarithmic reductions must
+preserve resolved differences between nearby samples as well as handle the
+full positive floating-point range. Consequently, the rate utilities require
+independent algebraic regressions for extreme errors and scales, nearby
+samples, and genuinely unrepresentable rates. These are arithmetic and
+acceptance checks, not additional PDE convergence evidence.
 
 The present rate studies meet this minimum: h, hp and isoparametric paths
 contain three meshes, while analytic p studies contain four degrees,
@@ -536,8 +558,8 @@ $H^1$-seminorm errors,
 strict reduction, and the prescribed rate floors for every field and adjacent
 interval. Algebraic and exponential queries reuse `ErrorHistory`; an
 unchanged refinement parameter is rejected before a rate is computed.
-This prevents a successful component or an infinite slope from hiding a
-failed coupled-field study. Exact patches and L2-only discontinuous studies
+Individual fields and intervals retain their own diagnostics; computed-rate
+finiteness is a separate acceptance requirement. Exact patches and L2-only discontinuous studies
 have separate acceptance contracts.
 `StokesData` supplies common exact fields and sources;
 `StokesProblem` supplies the native mixed solve, solver/residual and pressure
