@@ -1,41 +1,48 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  run_axi_re.sh -- viscoelastic (sPTT) pulsatile cases of ArterialLesionAxi at
-#  ONE Reynolds number, several Wi, several geometries. One terminal per Re:
+#  run_axi_re.sh -- pulsatile cases of ArterialLesionAxi at ONE Reynolds
+#  number, for the fluids of the study, several geometries. One terminal per
+#  Re (and, if wanted, one per fluid group: see run_axi_extra.sh).
 #
-#     ./run_axi_re.sh 100          # terminal 1
-#     ./run_axi_re.sh 300          # terminal 2
-#     ./run_axi_re.sh 600          # terminal 3
+#     ./run_axi_re.sh 100          # terminal 1   (Wo 2.5: coronary)
+#     ./run_axi_re.sh 300          # terminal 2   (Wo 4:   carotid / femoral)
+#     ./run_axi_re.sh 600          # terminal 3   (Wo 5.5: iliac)
 #
-#  Each terminal runs its cases one after another with NP MPI ranks (30 by
-#  default), so three terminals need 3 x NP cores: check `nproc` first and
-#  lower NP if the machine has fewer, otherwise the three sweeps slow each
-#  other down.
+#  Fluids (FLUIDS="D R" by default; run_axi_extra.sh does "N CY"):
+#     N    Newtonian: the sPTT at Wi = 0.01                         -> <geo>/N/
+#     D    weak-elasticity sPTT (beta 0.889, eps 0.1), Wi in WI_LIST -> <geo>/Wi<wi>/
+#     CY   Carreau-Yasuda of whole blood (Cho & Kensey 1991), no psi -> <geo>/CY/
+#     R    generalised sPTT: one mode (eta_p 50 mPa s, lambda 4.83 s, eps 0.2,
+#          De 5.6 at 70 bpm) + Carreau-Yasuda solvent; its steady shear
+#          viscosity is exactly CY, so CY is its memory-free twin  -> <geo>/R/
+#  Re and Wo are defined with eta_ref = 3.45 mPa s (high-shear viscosity of
+#  blood) for CY and R; N and D are dimensionless-equivalent (eta_0 of D).
 #
-#  Output, one folder per case:
-#     $OUT/Re<Re>/<geometry>/Wi<Wi>/
-#        run.log      solver output        case.csv    one row per time step
-#        case.xdmf/h5 fields               params.txt  exact command line
-#        DONE | FAILED                     (DONE cases are skipped on a re-run)
-#     $OUT/Re<Re>/summary.csv              status, steps/cycle and minutes per case
+#  Output: $OUT/Re<Re>_Wo<Wo>/<geometry>/<fluid>/   (an existing $OUT/Re<Re>
+#  is reused when Wo = 4, so the runs of the first sweep keep their place)
+#     run.log  case.csv  case.xdmf/h5  params.txt  DONE | FAILED
+#     $OUT/Re<Re>_Wo<Wo>/summary.csv
 #
-#  Options (environment variables, all optional):
-#     WI_LIST="1 2 4"      Weissenberg numbers; add 0.01 for the Newtonian limit
-#     GEOS="S75 S50 H A200"   geometries, run in this order
+#  Options (environment variables):
+#     FLUIDS="D R"         fluids, in this order
+#     WI_LIST="2"          Wi of fluid D (use "1 2 4" for the Wi sweep)
+#     GEOS="S75 S50 H A200"
+#     WO=<n>               Womersley; default by Re: 100 -> 2.5, 300 -> 4, 600 -> 5.5
 #     NP=30                MPI ranks per case
-#     STEPS=<n>            steps per cycle; default 400 for Re <= 300, 800 above
-#                          (same throat CFL across Re, see the paper notes)
-#     CYCLES=3  WO=4  AMP=0.5  PTT_EPS=0.1  OUTPUT_EVERY=40  MESH_LEVEL=medium
-#     RETRY=1              a diverged case is re-run once with 2x STEPS into
-#                          <case>_dt2 (set RETRY=0 to disable)
-#     OUT=$HOME/Results/axi   MPIRUN=mpirun   EXE=... MESHDIR=...
+#     STEPS=<n>            steps per cycle; default 400 (Re <= 300), 800 above
+#     CYCLES=3             cycles for N, D, CY
+#     CYCLES_R=8           cycles for R (lambda spans ~6 beats: check the CSV
+#                          for cycle-to-cycle periodicity and extend if needed)
+#     AMP=0.5  PTT_EPS=0.1 (fluid D)  OUTPUT_EVERY=40  MESH_LEVEL=medium
+#     RETRY=1              a diverged case is re-run once with 2x STEPS (<case>_dt2)
+#     OUT=$HOME/Results/axi   MPIRUN=mpirun   EXE=...   MESHDIR=...
 #
-#  Usage: ./run_axi_re.sh <Re> [geometry ...]     (geometries override GEOS)
+#  Usage: ./run_axi_re.sh <Re> [geometry ...]
 # =============================================================================
 set -u
 
 if [[ $# -lt 1 ]]; then
-  sed -n '2,32p' "$0"; exit 1
+  sed -n '2,40p' "$0"; exit 1
 fi
 RE="$1"; shift
 
@@ -44,15 +51,20 @@ REPO="$(cd "$HERE/../../.." && pwd)"
 
 EXE="${EXE:-$REPO/build/examples/viscoelastic_fluids/ArterialLesionAxi_viscous_logarithmic_implicit/ArterialLesionAxi_viscous_logarithmic_implicit}"
 MESHDIR="${MESHDIR:-$REPO/resources/examples/viscoelastic_fluids}"
-OUT="${OUT:-$HOME/Results/axi}/Re${RE}"
 MPIRUN="${MPIRUN:-mpirun}"
 NP="${NP:-30}"
-WI_LIST="${WI_LIST:-1 2 4}"
+FLUIDS="${FLUIDS:-D R}"
+WI_LIST="${WI_LIST:-2}"
 GEOS="${GEOS:-S75 S50 H A200}"
 [[ $# -gt 0 ]] && GEOS="$*"
-WO="${WO:-4}"
+if [[ -z "${WO:-}" ]]; then
+  case "$RE" in
+    100) WO=2.5 ;; 300) WO=4 ;; 600) WO=5.5 ;; *) WO=4 ;;
+  esac
+fi
 AMP="${AMP:-0.5}"
 CYCLES="${CYCLES:-3}"
+CYCLES_R="${CYCLES_R:-8}"
 if [[ -z "${STEPS:-}" ]]; then
   STEPS=$(( RE > 300 ? 800 : 400 ))
 fi
@@ -61,79 +73,105 @@ PTT_EPS="${PTT_EPS:-0.1}"
 MESH_LEVEL="${MESH_LEVEL:-medium}"
 RETRY="${RETRY:-1}"
 NEWTON_ITS="${NEWTON_ITS:-8}"
+ETA_REF="${ETA_REF:-0.00345}"
+
+OUTROOT="${OUT:-$HOME/Results/axi}"
+if [[ "$WO" == "4" && -d "$OUTROOT/Re${RE}" ]]; then
+  OUT="$OUTROOT/Re${RE}"
+else
+  OUT="$OUTROOT/Re${RE}_Wo${WO}"
+fi
 
 if [[ ! -x "$EXE" ]]; then
   echo "Executable not found: $EXE"
   echo "  cmake -S $REPO -B $REPO/build && cmake --build $REPO/build -j --target ArterialLesionAxi_viscous_logarithmic_implicit"
   exit 1
 fi
-if command -v nproc > /dev/null; then
-  cores=$(nproc)
-elif command -v sysctl > /dev/null; then
-  cores=$(sysctl -n hw.ncpu)
-else
-  cores=0
-fi
+if command -v nproc > /dev/null; then cores=$(nproc)
+elif command -v sysctl > /dev/null; then cores=$(sysctl -n hw.ncpu)
+else cores=0; fi
 if [[ $cores -gt 0 && $NP -gt $cores ]]; then
   echo "WARNING: NP=$NP ranks on a machine with $cores cores (oversubscribed). Set NP=<cores> or less."
 fi
 mkdir -p "$OUT"
 
-# Keep a laptop awake (macOS only); harmless elsewhere.
 if [[ -z "${CAFFEINATED:-}" ]] && command -v caffeinate > /dev/null; then
   export CAFFEINATED=1
   exec caffeinate -ims "$0" "$RE" "$@"
 fi
 
 SUMMARY="$OUT/summary.csv"
-[[ -f "$SUMMARY" ]] || echo "geometry,Re,Wi,steps_per_cycle,status,minutes,folder" > "$SUMMARY"
+[[ -f "$SUMMARY" ]] || echo "geometry,Re,Wo,fluid,Wi,steps_per_cycle,cycles,status,minutes,folder" > "$SUMMARY"
 
-run_case() {   # geometry Wi steps dir
-  local geo="$1" wi="$2" steps="$3" dir="$4"
+# fluid_args <fluid> <wi>  -> the -al_ options of that fluid (echoed)
+fluid_args() {
+  case "$1" in
+    N)  echo "-al_wi 0.01 -al_ptt_epsilon $PTT_EPS" ;;
+    D)  echo "-al_wi $2 -al_ptt_epsilon $PTT_EPS" ;;
+    CY) echo "-al_fluid cy -al_eta_ref $ETA_REF" ;;
+    R)  echo "-al_fluid gsptt -al_eta_ref $ETA_REF -al_eta_p 0.050 -al_ptt_epsilon 0.2 -al_de 5.635 -al_wi 0 -al_conformation_its 10 -al_inlet_developed_conformation 1" ;;
+    *)  echo "unknown fluid $1" >&2; return 1 ;;
+  esac
+}
+
+run_case() {   # geometry fluid wi steps cycles dir
+  local geo="$1" fluid="$2" wi="$3" steps="$4" cycles="$5" dir="$6"
   local mesh="$MESHDIR/${geo}_axi_${MESH_LEVEL}.mesh"
 
   if [[ -f "$dir/DONE" ]]; then
-    echo "[skip] $geo Re=$RE Wi=$wi steps=$steps (DONE)"; return 0
+    echo "[skip] $geo $fluid Wi=$wi Re=$RE Wo=$WO (DONE)"; return 0
   fi
   if [[ ! -f "$mesh" ]]; then
     echo "[miss] $mesh not found"; return 2
   fi
   mkdir -p "$dir"; rm -f "$dir/FAILED"
 
+  local fargs
+  fargs=$(fluid_args "$fluid" "$wi") || return 2
   local cmd=("$MPIRUN" -n "$NP" "$EXE"
     -al_mesh "$mesh" -al_xdmf case -al_csv case.csv
-    -al_re "$RE" -al_wo "$WO" -al_amplitude "$AMP" -al_wi "$wi" -al_ptt_epsilon "$PTT_EPS"
-    -al_cycles "$CYCLES" -al_steps_per_cycle "$steps" -al_output_every "$OUTPUT_EVERY"
-    -al_conformation_its "$NEWTON_ITS")
+    -al_re "$RE" -al_wo "$WO" -al_amplitude "$AMP"
+    -al_cycles "$cycles" -al_steps_per_cycle "$steps" -al_output_every "$OUTPUT_EVERY")
+  [[ "$fluid" != "R" ]] && cmd+=(-al_conformation_its "$NEWTON_ITS")
+  # shellcheck disable=SC2206
+  cmd+=($fargs)
   printf '%q ' "${cmd[@]}" > "$dir/params.txt"; echo >> "$dir/params.txt"
 
-  echo "[run ] $(date '+%a %d %H:%M')  $geo Re=$RE Wi=$wi steps/cycle=$steps  NP=$NP  ->  $dir"
+  echo "[run ] $(date '+%a %d %H:%M')  $geo $fluid Wi=$wi Re=$RE Wo=$WO steps/cycle=$steps cycles=$cycles NP=$NP -> $dir"
   local t0=$SECONDS
   ( cd "$dir" && "${cmd[@]}" > run.log 2>&1 )
   local status=$?
   local minutes=$(( (SECONDS - t0) / 60 ))
   if [[ $status -eq 0 ]]; then
     touch "$dir/DONE"
-    echo "$geo,$RE,$wi,$steps,DONE,$minutes,$dir" >> "$SUMMARY"
-    echo "[done] $geo Re=$RE Wi=$wi in $minutes min"
+    echo "$geo,$RE,$WO,$fluid,$wi,$steps,$cycles,DONE,$minutes,$dir" >> "$SUMMARY"
+    echo "[done] $geo $fluid Wi=$wi in $minutes min"
   else
     echo "exit $status" > "$dir/FAILED"
-    echo "$geo,$RE,$wi,$steps,FAILED,$minutes,$dir" >> "$SUMMARY"
-    echo "[FAIL] $geo Re=$RE Wi=$wi (exit $status, $minutes min): $(grep -m1 -E 'diverged|Fatal|Error' "$dir/run.log")"
+    echo "$geo,$RE,$WO,$fluid,$wi,$steps,$cycles,FAILED,$minutes,$dir" >> "$SUMMARY"
+    echo "[FAIL] $geo $fluid Wi=$wi (exit $status, $minutes min): $(grep -m1 -E 'diverged|Fatal|Error' "$dir/run.log")"
   fi
   return $status
 }
 
-echo "Re=$RE  geometries: $GEOS  Wi: $WI_LIST  steps/cycle: $STEPS  NP=$NP  ->  $OUT"
+echo "Re=$RE Wo=$WO  fluids: $FLUIDS  geometries: $GEOS  Wi(D): $WI_LIST  steps/cycle: $STEPS  NP=$NP  ->  $OUT"
 for geo in $GEOS; do
-  for wi in $WI_LIST; do
-    dir="$OUT/$geo/Wi${wi}"
-    run_case "$geo" "$wi" "$STEPS" "$dir"
-    st=$?
-    if [[ $st -ne 0 && $st -ne 2 && "$RETRY" == "1" ]]; then
-      echo "[retry] $geo Wi=$wi with $(( 2 * STEPS )) steps/cycle"
-      run_case "$geo" "$wi" "$(( 2 * STEPS ))" "${dir}_dt2"
-    fi
+  for fluid in $FLUIDS; do
+    if [[ "$fluid" == "D" ]]; then wis="$WI_LIST"; else wis="-"; fi
+    for wi in $wis; do
+      case "$fluid" in
+        D) sub="Wi${wi}"; cycles="$CYCLES" ;;
+        R) sub="R"; cycles="$CYCLES_R" ;;
+        *) sub="$fluid"; cycles="$CYCLES" ;;
+      esac
+      dir="$OUT/$geo/$sub"
+      run_case "$geo" "$fluid" "$wi" "$STEPS" "$cycles" "$dir"
+      st=$?
+      if [[ $st -ne 0 && $st -ne 2 && "$RETRY" == "1" ]]; then
+        echo "[retry] $geo $fluid Wi=$wi with $(( 2 * STEPS )) steps/cycle"
+        run_case "$geo" "$fluid" "$wi" "$(( 2 * STEPS ))" "$cycles" "${dir}_dt2"
+      fi
+    done
   done
 done
-echo "Re=$RE finished $(date). Summary: $SUMMARY"
+echo "Re=$RE Wo=$WO finished $(date). Summary: $SUMMARY"

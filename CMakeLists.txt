@@ -281,6 +281,16 @@ if (RODIN_BUILD_SRC)
   # ---- Scotch ----
   if (RODIN_USE_SCOTCH)
     find_package(Scotch REQUIRED)
+    # cmake/FindScotch.cmake defines Scotch::Scotch. If it is missing and CMake
+    # falls back to the config shipped with Scotch itself (SCOTCH::scotch),
+    # provide the same target so src/Rodin/Scotch still links.
+    if (NOT TARGET Scotch::Scotch AND TARGET SCOTCH::scotch)
+      add_library(Scotch::Scotch INTERFACE IMPORTED)
+      target_link_libraries(Scotch::Scotch INTERFACE SCOTCH::scotch)
+      if (TARGET SCOTCH::scotcherr)
+        target_link_libraries(Scotch::Scotch INTERFACE SCOTCH::scotcherr)
+      endif()
+    endif()
   endif()
 
   # ---- MUMPS ----

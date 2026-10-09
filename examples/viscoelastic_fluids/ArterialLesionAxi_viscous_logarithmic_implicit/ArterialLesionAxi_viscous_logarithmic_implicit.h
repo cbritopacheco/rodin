@@ -51,6 +51,24 @@
  * Dimensionless groups, with eta_0 = eta_s + eta_p (as in the 3D driver):
  *   Re = rho Ubar D/eta_0,  Wo = (D/2) sqrt(omega rho/eta_0),
  *   Wi = lambda Ubar/D,     De = lambda/T.
+ * Config::etaRef replaces eta_0 in Re and Wo when set, so that fluids of
+ * different eta_0 can be run at the same physical flow (same Ubar, D, omega).
+ *
+ * Fluids (Config::fluid):
+ *  - "sptt"  the formulation above, constant solvent viscosity eta_s;
+ *  - "cy"    generalised Newtonian, T = 2 eta_CY(gd) eps(u) with the
+ *            Carreau-Yasuda viscosity eta_CY(gd) = eta_inf + (eta_0 - eta_inf)
+ *            [1 + (lambda_CY gd)^a]^((n-1)/a), gd = sqrt(2 eps:eps) including
+ *            the hoop strain u_r/r. No psi: (u, p) only, one solve per step,
+ *            eta_CY evaluated at u^n (lagged, first order like BDF1);
+ *  - "gsptt" one sPTT mode plus a shear-thinning solvent, eta_s(gd) =
+ *            eta_CY(gd) - eta_p/f(gd), f the steady-shear sPTT factor
+ *            (f^3 - f^2 - 2 eps lambda^2 gd^2 = 0), so that the steady shear
+ *            viscosity of the model is exactly eta_CY: the "cy" fluid is its
+ *            memory-free twin by construction (Bodnar, Sequeira & Prosi 2011,
+ *            generalised Oldroyd-B, with the sPTT mode instead). eta_s is
+ *            evaluated at u^n; the psi equation and its Newton Jacobian are
+ *            unchanged. Requires lambda0 = lambda.
  */
 #ifndef EXAMPLES_VISCOELASTICFLUIDS_ARTERIALLESIONAXI_VISCOUS_LOGARITHMIC_IMPLICIT_H
 #define EXAMPLES_VISCOELASTICFLUIDS_ARTERIALLESIONAXI_VISCOUS_LOGARITHMIC_IMPLICIT_H
@@ -167,6 +185,12 @@ namespace Rodin::Examples::ViscoelasticFluids
       using VectorProblemType = Rodin::Variational::Problem<LinearSystemType,
         VectorTrialFunctionType, VectorTestFunctionType>;
 
+      /// @brief (u, p; v, q), the generalised-Newtonian problem ("cy").
+      using FlowGNProblemType =
+        Rodin::Variational::Problem<LinearSystemType,
+          VectorTrialFunctionType, ScalarTrialFunctionType,
+          VectorTestFunctionType, ScalarTestFunctionType>;
+
       using FluxFormType = Rodin::Variational::LinearForm<ScalarFESType, ::Vec>;
 
       using CellFESType = Rodin::Variational::P0<Real, MeshType>;
@@ -199,8 +223,25 @@ namespace Rodin::Examples::ViscoelasticFluids
           Attribute lesion = 5;
       };
 
+      /// @brief Carreau-Yasuda viscosity of whole blood (Cho & Kensey 1991).
+      struct CarreauYasuda
+      {
+          Real etaZero = 0.056;    ///< zero-shear viscosity (Pa s)
+          Real etaInf = 0.00345;   ///< infinite-shear viscosity (Pa s)
+          Real lambda = 1.902;     ///< time constant (s)
+          Real n = 0.22;
+          Real a = 1.25;
+      };
+
       struct Config
       {
+          /// @brief "sptt", "cy" or "gsptt" (file header).
+          std::string fluid = "sptt";
+          CarreauYasuda carreauYasuda;
+          /// @brief Viscosity defining Re and Wo (Pa s); 0 means eta_s + eta_p
+          ///        for "sptt" and eta_inf for "cy" and "gsptt".
+          Real etaRef = 0.0;
+
           /// @brief Axisymmetric MEDIT "Dimension 2" mesh in units of D, y >= 0.
           std::string meshPath =
             "../resources/examples/viscoelastic_fluids/S75_axi_medium.mesh";
@@ -259,8 +300,19 @@ namespace Rodin::Examples::ViscoelasticFluids
           Real conformationTolerance = 1.0e-6;
           Real newtonMaxStep = 2.0;
           bool inletConformation = true;
+          /// @brief With inletConformation: impose on the inlet the conformation
+          ///        of steady simple shear at the shear rate of the mean
+          ///        (Poiseuille) profile, psi = log c_ss(gd(r)), instead of
+          ///        psi = 0 (relaxed). For a mode with lambda Ubar/D >> 1 the
+          ///        relaxed inflow would need ~lambda Ubar of pipe to develop;
+          ///        the developed one is the state of the fluid arriving from a
+          ///        long straight vessel. Requires lambda0 = lambda.
+          bool inletDevelopedConformation = false;
 
           Real maxVelocityFactor = 20.0;
+
+          /// @brief Print the Newton history of every step (not only the first three).
+          bool traceNewton = false;
       };
 
       struct Timing
@@ -302,7 +354,30 @@ namespace Rodin::Examples::ViscoelasticFluids
 
       void setupSpaces();
       void setupFlow();
+      /// @brief The (u, p) problem of the "cy" fluid.
+      void setupFlowGN();
       void setupWallShear();
+
+      /// @brief True for "cy": no psi, one linear solve per step.
+      bool isGeneralizedNewtonian() const noexcept;
+      /// @brief Carreau-Yasuda viscosity.
+      Real carreauYasuda(Real gammaDot) const;
+      /// @brief f of the sPTT mode in steady simple shear at gammaDot
+      ///        (f^3 - f^2 - 2 eps lambda^2 gd^2 = 0, f >= 1).
+      Real steadyPTTFactor(Real gammaDot) const;
+      /// @brief Solvent viscosity eta_s(gd): constant ("sptt"), eta_CY ("cy")
+      ///        or eta_CY - eta_p/f ("gsptt").
+      Real solventViscosity(Real gammaDot) const;
+      /// @brief sqrt(2 eps(u^n):eps(u^n)) at p, with the hoop strain u_r/r.
+      Real shearRateAt(const Rodin::Geometry::Point& p) const;
+      /// @brief eta_s(gd(u^n)) at p.
+      Real solventViscosityAt(const Rodin::Geometry::Point& p) const;
+      /// @brief psi (Voigt xx, xr, rr) of the sPTT mode in steady simple shear
+      ///        with signed shear rate L_xr = du_x/dr: c_xr = lambda L_xr/f,
+      ///        c_xx = 1 + 2 c_xr^2, c_rr = 1, f the steady PTT factor.
+      Rodin::Math::SpatialVector<Real> steadyShearLogConformation(Real dudr) const;
+      /// @brief The viscosity that defines Re and Wo.
+      Real referenceViscosity() const;
 
       template <class Expression>
       void projectVector(const Expression& expr, VectorGridFunctionType& out)
@@ -424,6 +499,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       // ---- Problems and solvers --------------------------------------------
       FlowProblemType m_flow;
       Rodin::Solver::KSP m_flowKSP;
+      FlowGNProblemType m_flowGN;
+      Rodin::Solver::KSP m_flowGNKSP;
       VectorProblemType m_vectorProjection;
       Rodin::Solver::KSP m_vectorProjectionKSP;
       VectorTrialFunctionType m_wssTrial;
@@ -446,6 +523,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       int m_conformationIts = 0;
       Real m_psiIncrement = 0.0;
       bool m_flowFieldSplitsSet = false;
+      bool m_flowGNFieldSplitsSet = false;
       bool m_initialized = false;
 
       int m_step = 0;
