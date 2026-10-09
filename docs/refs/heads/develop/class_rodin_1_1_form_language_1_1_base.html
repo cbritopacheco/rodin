@@ -84,7 +84,7 @@
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md37">Key Features</a></li>
+                <li><a href="#autotoc_md39">Key Features</a></li>
               </ul>
             </li>
             <li>
@@ -98,7 +98,7 @@
             </li>
           </ul>
         </nav>
-<p>This class serves as the foundational base for all form language objects, providing essential services such as unique identification, object lifetime management, and polymorphic copying capabilities. All form language expressions, functions, and operators derive from this base class.</p><aside class="m-note m-danger"><h4>Warning</h4><p>The FormLanguage::Base class is not thread safe. Only one thread should access the methods of a FormLanguage object at a time.</p></aside><section id="autotoc_md37_1s1"><section id="autotoc_md37"><h3><a href="#autotoc_md37">Key Features</a></h3><ul><li><strong>Unique Identification</strong>: Each instance receives a unique UUID for tracking</li><li><strong>Polymorphic Operations</strong>: Support for copying and cloning operations</li></ul></section></section>
+<p>This class serves as the foundational base for all form language objects, providing essential services such as unique identification, object lifetime management, and polymorphic copying capabilities. All form language expressions, functions, and operators derive from this base class.</p><aside class="m-note m-danger"><h4>Warning</h4><p>The FormLanguage::Base class is not thread safe. Only one thread should access the methods of a FormLanguage object at a time.</p></aside><section id="autotoc_md39_1s1"><section id="autotoc_md39"><h3><a href="#autotoc_md39">Key Features</a></h3><ul><li><strong>Unique Identification</strong>: Each instance receives a unique UUID for tracking</li><li><strong>Polymorphic Operations</strong>: Support for copying and cloning operations</li></ul></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -245,6 +245,16 @@
               class <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html" class="m-doc">Rodin::Variational::DirichletBCBase</a>
             </dt>
             <dd>Abstract base class for a Dirichlet boundary condition.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Rodin::Variational::FunctionBase</a>
+            </dt>
+            <dd>Base class for function objects which can be evaluated over a mesh.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Rodin::Variational::FunctionBase</a>
+            </dt>
+            <dd>Base class for function objects which can be evaluated over a mesh.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">Rodin::Variational::FunctionBase</a>
@@ -1330,6 +1340,11 @@
               class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html" class="m-doc">Rodin::Assembly::AssemblyBase&lt;LinearSystem, Variational::Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;</a>
             </dt>
             <dd>Base class for complete mixed problem assembly.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class OperatorType, class Form&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_operator_type_00_01_form_01_4.html" class="m-doc">Rodin::Assembly::AssemblyBase&lt;OperatorType, Form&gt;</a>
+            </dt>
+            <dd>Base class for the assembly of a named bilinear form.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class OperatorType, class Solution, class TrialFES, class TestFES&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_operator_type_00_01_variational_1_1_bilinear_forbca9c1861f33a24fefc425d57c7a8686.html" class="m-doc">Rodin::Assembly::AssemblyBase&lt;OperatorType, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, OperatorType&gt;&gt;</a>

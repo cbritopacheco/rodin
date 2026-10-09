@@ -100,7 +100,7 @@
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md153">Usage Example</a></li>
+                <li><a href="#autotoc_md155">Usage Example</a></li>
               </ul>
             </li>
             <li>
@@ -114,7 +114,7 @@
             </li>
           </ul>
         </nav>
-<p>MFEM matrix fields reuse the scalar family&#x27;s node permutation. Entries are separate components in row-major matrix order. MFEM does not record matrix shape, so the destination space supplies it when loading.</p><p>Implements the complete printer for grid functions stored as Math::Vector objects.</p><section id="autotoc_md153_1s1"><section id="autotoc_md153"><h3><a href="#autotoc_md153">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<p>MFEM matrix fields reuse the scalar family&#x27;s node permutation. Entries are separate components in row-major matrix order. MFEM does not record matrix shape, so the destination space supplies it when loading.</p><p>Implements the complete printer for grid functions stored as Math::Vector objects.</p><section id="autotoc_md155_1s1"><section id="autotoc_md155"><h3><a href="#autotoc_md155">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="c1">// ... compute solution ...</span>
 <span class="n">GridFunctionPrinter</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">printer</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>

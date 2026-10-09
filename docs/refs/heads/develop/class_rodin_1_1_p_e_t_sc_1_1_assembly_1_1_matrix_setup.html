@@ -84,13 +84,13 @@
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md179">Contract</a></li>
+                <li><a href="#autotoc_md181">Contract</a></li>
               </ul>
             </li>
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md180">Why this matters</a></li>
+                <li><a href="#autotoc_md182">Why this matters</a></li>
               </ul>
             </li>
             <li>
@@ -103,7 +103,7 @@
             </li>
           </ul>
         </nav>
-<section id="autotoc_md179_1s1"><section id="autotoc_md179"><h3><a href="#autotoc_md179">Contract</a></h3><p>The caller guarantees that, between successive assemblies of the <em>same</em> matrix object, the sparsity pattern is unchanged. Concretely this means the trial and test finite element spaces and the mesh connectivity are fixed. Vertex coordinates may move (as in an ALE formulation) because that changes geometry, not the connectivity graph, hence not the pattern.</p><p>A <code>LinearSystem</code> is associated with fixed finite element spaces, so its global dimensions remain constant throughout its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>PETSc does not support resizing an assembled matrix. Reuse requires the existing global dimensions to match the requested dimensions; this precondition is checked by a debug assertion. A change of finite element space or mesh requires a new <code>LinearSystem</code>.</p></aside></section></section><section id="autotoc_md180_1s1"><section id="autotoc_md180"><h3><a href="#autotoc_md180">Why this matters</a></h3><p>The structural calls <code>MatSetSizes</code> / <code>MatSetType</code> / <code>MatSetFromOptions</code> / <code>MatSetUp</code> re-establish the matrix internals and bump PETSc&#x27;s nonzero-state counter. Preconditioners compare that counter (<code>pc-&gt;matnonzerostate</code> != Amat-&gt;nonzerostate) to decide whether to redo the symbolic factorization. Running the structural calls on every assembly forces external direct solvers (e.g. MUMPS) to recompute their ordering/analysis each time — which, inside a SNES/Newton loop, repeats the expensive symbolic factorization on every residual/Jacobian evaluation.</p><p>When the existing structure is reusable, <code>prepare</code> skips the structural calls and only does <code>MatZeroEntries</code> + refill. No PETSc nonzero-pattern policy is set here; if the user wants to forbid or allow new nonzeros, that remains controlled by PETSc defaults or explicit user calls to <code>MatSetOption</code>.</p></section></section>
+<section id="autotoc_md181_1s1"><section id="autotoc_md181"><h3><a href="#autotoc_md181">Contract</a></h3><p>The caller guarantees that, between successive assemblies of the <em>same</em> matrix object, the sparsity pattern is unchanged. Concretely this means the trial and test finite element spaces and the mesh connectivity are fixed. Vertex coordinates may move (as in an ALE formulation) because that changes geometry, not the connectivity graph, hence not the pattern.</p><p>A <code>LinearSystem</code> is associated with fixed finite element spaces, so its global dimensions remain constant throughout its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>PETSc does not support resizing an assembled matrix. Reuse requires the existing global dimensions to match the requested dimensions; this precondition is checked by a debug assertion. A change of finite element space or mesh requires a new <code>LinearSystem</code>.</p></aside></section></section><section id="autotoc_md182_1s1"><section id="autotoc_md182"><h3><a href="#autotoc_md182">Why this matters</a></h3><p>The structural calls <code>MatSetSizes</code> / <code>MatSetType</code> / <code>MatSetFromOptions</code> / <code>MatSetUp</code> re-establish the matrix internals and bump PETSc&#x27;s nonzero-state counter. Preconditioners compare that counter (<code>pc-&gt;matnonzerostate</code> != Amat-&gt;nonzerostate) to decide whether to redo the symbolic factorization. Running the structural calls on every assembly forces external direct solvers (e.g. MUMPS) to recompute their ordering/analysis each time — which, inside a SNES/Newton loop, repeats the expensive symbolic factorization on every residual/Jacobian evaluation.</p><p>When the existing structure is reusable, <code>prepare</code> skips the structural calls and only does <code>MatZeroEntries</code> + refill. No PETSc nonzero-pattern policy is set here; if the user wants to forbid or allow new nonzeros, that remains controlled by PETSc defaults or explicit user calls to <code>MatSetOption</code>.</p></section></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

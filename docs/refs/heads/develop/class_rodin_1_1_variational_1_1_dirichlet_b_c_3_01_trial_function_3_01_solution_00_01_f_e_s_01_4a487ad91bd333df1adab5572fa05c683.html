@@ -526,9 +526,13 @@ $ \Gamma_D $
             </dt>
             <dd>Gets the map of constrained DOFs.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad77c4017d146aebf8faf8052fa1d0a2c" class="m-doc">getAssembly</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">Assembly::<wbr />AssemblyBase</a>&lt;<a href="#a3a04e0ffc5d5fb629fa84b061e294a4f" class="m-doc">ValueDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets the assembly backend for execution.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aff6a1e93809bb64d8f4c06546a34e1c8" class="m-doc">getAssembly</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">Assembly::<wbr />AssemblyBase</a>&lt;<a href="#a3a04e0ffc5d5fb629fa84b061e294a4f" class="m-doc">ValueDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;&amp;</span>
             </dt>
-            <dd>Gets the assembly backend.</dd>
+            <dd>Gets the assembly backend for inspection.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a4d78a76bfdf79b41e0e29e36dcf5045b" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -826,6 +830,23 @@ $ \Gamma_D $
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ad77c4017d146aebf8faf8052fa1d0a2c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class FES, class ValueDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">Assembly::<wbr />AssemblyBase</a>&lt;<a href="#a3a04e0ffc5d5fb629fa84b061e294a4f" class="m-doc">ValueDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES&gt;, FunctionBase&lt;ValueDerived&gt;&gt;&lt;Solution, FES, ValueDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad77c4017d146aebf8faf8052fa1d0a2c" class="m-doc-self">getAssembly</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Gets the assembly backend for execution.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The non-const assembly backend.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="aff6a1e93809bb64d8f4c06546a34e1c8"><div>
             <h3>
               <div class="m-doc-template">
@@ -833,12 +854,12 @@ $ \Gamma_D $
               </div>
               <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">Assembly::<wbr />AssemblyBase</a>&lt;<a href="#a3a04e0ffc5d5fb629fa84b061e294a4f" class="m-doc">ValueDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES&gt;, FunctionBase&lt;ValueDerived&gt;&gt;&lt;Solution, FES, ValueDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff6a1e93809bb64d8f4c06546a34e1c8" class="m-doc-self">getAssembly</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Gets the assembly backend.</p>
+            <p>Gets the assembly backend for inspection.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>The assembly backend.</td>
+                  <td>The const assembly backend.</td>
                 </tr>
               </tfoot>
             </table>

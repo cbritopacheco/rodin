@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt; class | Rodin</title>
+  <title>Rodin::Variational::LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt; class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -76,8 +76,8 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity_integral_8h.html">&lt;Rodin/Solid/Linear/P1/LinearElasticityIntegral.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <div class="m-doc-template">template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>P1 linear elasticity bilinear form integrator.</p>
         <nav class="m-block m-default">
@@ -86,7 +86,7 @@
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md228">Local Stiffness Matrix</a></li>
+                <li><a href="#autotoc_md230">Local Stiffness Matrix</a></li>
               </ul>
             </li>
             <li>
@@ -100,7 +100,7 @@
             </li>
           </ul>
         </nav>
-<p>Specialized integrator for the linear elasticity problem with P1 vector elements. Uses centroid quadrature which is exact for the constant Jacobians of P1 basis functions.</p><section id="autotoc_md228_1s1"><section id="autotoc_md228"><h3><a href="#autotoc_md228">Local Stiffness Matrix</a></h3><p>For element <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<p>Specialized integrator for the linear elasticity problem with P1 vector elements. Uses centroid quadrature which is exact for the constant Jacobians of P1 basis functions.</p><section id="autotoc_md230_1s1"><section id="autotoc_md230"><h3><a href="#autotoc_md230">Local Stiffness Matrix</a></h3><p>For element <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -176,7 +176,7 @@ $ K $
 <use x='303.569375' y='-4.505261' xlink:href='#eq2-g4-41'/>
 <use x='308.1217' y='-4.505261' xlink:href='#eq2-g4-93'/>
 </g>
-</svg></div></section></section>
+</svg></div><p>The coefficient slots follow the primary template, lambda then mu, so that the parameters deduced from the constructor land where the specialization expects them.</p></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -280,9 +280,9 @@ $ K $
           <section class="m-doc-details" id="a9515eef732da14b63b1fc0b4b8be8056"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+                template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9515eef732da14b63b1fc0b4b8be8056" class="m-doc-self">LinearElasticityIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, <a href="#ac060140aba010795ae30894af4e7eced" class="m-doc">TrialFESType</a>&gt;&amp; u,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt;&lt;Solution, LambdaDerived, MuDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9515eef732da14b63b1fc0b4b8be8056" class="m-doc-self">LinearElasticityIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, <a href="#ac060140aba010795ae30894af4e7eced" class="m-doc">TrialFESType</a>&gt;&amp; u,
               const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;<a href="#a0bb311e1e3d6a358af42786b77fa32e0" class="m-doc">TestFESType</a>&gt;&amp; v,
               const <a href="#a2dc3016a1565d306c0a456ea3901a89e" class="m-doc">LambdaType</a>&amp; lambda,
               const <a href="#a264f3da817d5b89820f8499c6ac89737" class="m-doc">MuType</a>&amp; mu)</span></span>
@@ -315,9 +315,9 @@ $ K $
           <section class="m-doc-details" id="a91f0f5af107e76c515d785bd7bb3a396"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+                template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a91f0f5af107e76c515d785bd7bb3a396" class="m-doc-self">LinearElasticityIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt;&lt;Solution, LambdaDerived, MuDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a91f0f5af107e76c515d785bd7bb3a396" class="m-doc-self">LinearElasticityIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -335,9 +335,9 @@ $ K $
           <section class="m-doc-details" id="a9725f4b392e9b2a111b39d35beabe02b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+                template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9725f4b392e9b2a111b39d35beabe02b" class="m-doc-self">LinearElasticityIntegrator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator</a>&amp;&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt;&lt;Solution, LambdaDerived, MuDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9725f4b392e9b2a111b39d35beabe02b" class="m-doc-self">LinearElasticityIntegrator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator</a>&amp;&amp; other)</span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -355,9 +355,9 @@ $ K $
           <section class="m-doc-details" id="a07a0ed42183d01cb7d7a5e5edf3caba3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+                template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt;&lt;Solution, LambdaDerived, MuDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Returns the current polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -372,9 +372,9 @@ $ K $
           <section class="m-doc-details" id="a08690be474a5ffe88130fe3a2f8cb0f6"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+                template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator</a>&amp; Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a08690be474a5ffe88130fe3a2f8cb0f6" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator</a>&amp; Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt;&lt;Solution, LambdaDerived, MuDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a08690be474a5ffe88130fe3a2f8cb0f6" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Sets the current polytope and assembles the local matrix.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -398,9 +398,9 @@ $ K $
           <section class="m-doc-details" id="af65301ad831f65b88eab3086cd8187cb"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+                template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#aa688c0ef62b0535887be68d0681e851e" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              <span class="m-doc-wrap-bumper"><a href="#aa688c0ef62b0535887be68d0681e851e" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt;&lt;Solution, LambdaDerived, MuDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
               size_t te) <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Returns an entry of the current element stiffness matrix.</p>
@@ -429,9 +429,9 @@ $ K $
           <section class="m-doc-details" id="a665c15fd4d38c14f3ba77239ca6f0a2a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+                template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a264f3da817d5b89820f8499c6ac89737" class="m-doc">MuType</a>&amp; Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a665c15fd4d38c14f3ba77239ca6f0a2a" class="m-doc-self">getShearModulus</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a264f3da817d5b89820f8499c6ac89737" class="m-doc">MuType</a>&amp; Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt;&lt;Solution, LambdaDerived, MuDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a665c15fd4d38c14f3ba77239ca6f0a2a" class="m-doc-self">getShearModulus</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the shear modulus function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -446,9 +446,9 @@ $ K $
           <section class="m-doc-details" id="a0cc290aaad04960af30e95647fc4df91"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+                template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="#a2dc3016a1565d306c0a456ea3901a89e" class="m-doc">LambdaType</a>&amp; Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0cc290aaad04960af30e95647fc4df91" class="m-doc-self">getLameFirstParameter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a2dc3016a1565d306c0a456ea3901a89e" class="m-doc">LambdaType</a>&amp; Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt;&lt;Solution, LambdaDerived, MuDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0cc290aaad04960af30e95647fc4df91" class="m-doc-self">getLameFirstParameter</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p>Gets the first Lamé parameter function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -463,9 +463,9 @@ $ K $
           <section class="m-doc-details" id="aa5d79cb88973b769fdd1665729c03952"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+                template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt;&lt;Solution, LambdaDerived, MuDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5d79cb88973b769fdd1665729c03952" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Returns the integration region.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -480,9 +480,9 @@ $ K $
           <section class="m-doc-details" id="aaf7cd784909d44f892c1a99fab183140"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Solution, class MuDerived, class LambdaDerived, class Range, class Mesh&gt;
+                template&lt;class Solution, class LambdaDerived, class MuDerived, class Range, class Mesh&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator</a>* Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, MuDerived, LambdaDerived&gt;&lt;Solution, MuDerived, LambdaDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf7cd784909d44f892c1a99fab183140" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator</a>* Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, P1&lt;Range, Mesh&gt;, LambdaDerived, MuDerived&gt;&lt;Solution, LambdaDerived, MuDerived, Range, Mesh&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf7cd784909d44f892c1a99fab183140" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Polymorphically copies this linear-elasticity integrator.</p>
             <table class="m-table m-fullwidth m-flat">

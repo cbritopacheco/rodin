@@ -86,13 +86,13 @@
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md366">Mathematical Foundation</a></li>
+                <li><a href="#autotoc_md368">Mathematical Foundation</a></li>
               </ul>
             </li>
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md367">Key Features</a></li>
+                <li><a href="#autotoc_md369">Key Features</a></li>
               </ul>
             </li>
             <li>
@@ -107,7 +107,7 @@
             </li>
           </ul>
         </nav>
-<p>GridFunctionBase represents discrete functions defined on finite element spaces, where the function is represented as a linear combination of basis functions with scalar coefficients stored in a data vector.</p><section id="autotoc_md366_1s1"><section id="autotoc_md366"><h3><a href="#autotoc_md366">Mathematical Foundation</a></h3><p>A grid function represents a discrete finite element approximation:</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
+<p>GridFunctionBase represents discrete functions defined on finite element spaces, where the function is represented as a linear combination of basis functions with scalar coefficients stored in a data vector.</p><section id="autotoc_md368_1s1"><section id="autotoc_md368"><h3><a href="#autotoc_md368">Mathematical Foundation</a></h3><p>A grid function represents a discrete finite element approximation:</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
 <title>
 \[  u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
 \]
@@ -192,7 +192,7 @@ $ N $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-78'/>
 </g>
-</svg> is the number of degrees of freedom</li></ul></section></section><section id="autotoc_md367_1s1"><section id="autotoc_md367"><h3><a href="#autotoc_md367">Key Features</a></h3><ul><li><strong>DOF Management</strong>: Automatic handling of degrees of freedom storage</li><li><strong>Function Evaluation</strong>: Point-wise evaluation via finite element interpolation</li><li><strong>I/O Support</strong>: Export to various visualization formats (MEDIT, MFEM)</li><li><strong>Space Association</strong>: Strong association with underlying finite element space</li></ul></section></section>
+</svg> is the number of degrees of freedom</li></ul></section></section><section id="autotoc_md369_1s1"><section id="autotoc_md369"><h3><a href="#autotoc_md369">Key Features</a></h3><ul><li><strong>DOF Management</strong>: Automatic handling of degrees of freedom storage</li><li><strong>Function Evaluation</strong>: Point-wise evaluation via finite element interpolation</li><li><strong>I/O Support</strong>: Export to various visualization formats (MEDIT, MFEM)</li><li><strong>Space Association</strong>: Strong association with underlying finite element space</li></ul></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -250,6 +250,10 @@ $ N $
               <span class="m-doc-wrap-bumper"><a href="#a45533ac8481f92ff90709929637a6d61" class="m-doc">GridFunctionBaseReference</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html" class="m-doc">GridFunctionBaseReference</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Move constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a17f48621ba8f7634fd9094b2e366ab15" class="m-doc">GridFunctionBaseReference</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">protected</span></span>
+            </dt>
+            <dd>Binds the reference to the grid function under construction.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -420,6 +424,16 @@ $ N $
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a17f48621ba8f7634fd9094b2e366ab15"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunctionBaseReference&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17f48621ba8f7634fd9094b2e366ab15" class="m-doc-self">GridFunctionBaseReference</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">protected</span></span></span>
+            </h3>
+            <p>Binds the reference to the grid function under construction.</p>
+<p>Store the base subobject without downcasting during construction. Evaluation resolves the derived object after construction finishes.</p>
           </div></section>
           <section class="m-doc-details" id="a11cae0eed7fc3211076c29a6552091ab"><div>
             <h3>

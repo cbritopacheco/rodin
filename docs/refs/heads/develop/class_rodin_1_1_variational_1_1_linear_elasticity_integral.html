@@ -126,13 +126,7 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a314c7eacfd6cbeeab0983517b6739478" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const L&amp; lambda,
               const M&amp; mu) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Creates integrator with constant Lamé parameters.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LambdaDerived, class MuDerived&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a52a13e175f6a567c1ff3e6ea29343bb6" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LambdaDerived&gt;&amp; lambda,
-              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;MuDerived&gt;&amp; mu) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
-            </dt>
-            <dd>Creates integrator with function-valued Lamé parameters.</dd>
+            <dd>Creates the integrator for the given Lamé parameters.</dd>
           </dl>
         </section>
         <section>
@@ -171,7 +165,7 @@
               <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />LinearElasticityIntegral&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a314c7eacfd6cbeeab0983517b6739478" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const L&amp; lambda,
               const M&amp; mu) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Creates integrator with constant Lamé parameters.</p>
+            <p>Creates the integrator for the given Lamé parameters.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -179,52 +173,21 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">lambda</td>
-                  <td>First Lamé parameter (scalar constant)</td>
+                  <td>First Lamé parameter</td>
                 </tr>
                 <tr>
                   <td>mu</td>
-                  <td>Second Lamé parameter/shear modulus (scalar constant)</td>
+                  <td>Second Lamé parameter/shear modulus</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>LinearElasticityIntegrator with constant parameters</td>
+                  <td>LinearElasticityIntegrator with the given parameters</td>
                 </tr>
               </tfoot>
             </table>
-          </div></section>
-          <section class="m-doc-details" id="a52a13e175f6a567c1ff3e6ea29343bb6"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Solution, class FES&gt;
-                template&lt;class LambdaDerived, class MuDerived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />LinearElasticityIntegral&lt;Solution, FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52a13e175f6a567c1ff3e6ea29343bb6" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;LambdaDerived&gt;&amp; lambda,
-              const <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;MuDerived&gt;&amp; mu) const <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p>Creates integrator with function-valued Lamé parameters.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lambda</td>
-                  <td>First Lamé parameter function</td>
-                </tr>
-                <tr>
-                  <td>mu</td>
-                  <td>Second Lamé parameter/shear modulus function</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>LinearElasticityIntegrator with spatially-varying parameters</td>
-                </tr>
-              </tfoot>
-            </table>
+<p>Each parameter is either a function, used through its FunctionBase, or a value, lifted to a RealFunction. The two are handled independently, so a function and a constant can be mixed.</p>
           </div></section>
         </section>
       </div>

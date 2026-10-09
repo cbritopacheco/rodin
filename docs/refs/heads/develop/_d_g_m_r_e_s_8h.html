@@ -84,13 +84,13 @@
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md245">Notes</a></li>
+                <li><a href="#autotoc_md247">Notes</a></li>
               </ul>
             </li>
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md246">Usage Example</a></li>
+                <li><a href="#autotoc_md248">Usage Example</a></li>
               </ul>
             </li>
             <li>
@@ -119,7 +119,7 @@
 <use x='194.944339' y='0' xlink:href='#eq1-g1-61'/>
 <use x='207.36982' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>DGMRES accelerates restarted GMRES by deflating (approximations of) invariant subspaces associated with slow-to-converge eigencomponents.</p><section id="autotoc_md245_1s1"><section id="autotoc_md245"><h3><a href="#autotoc_md245">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported DGMRES.</li></ul></section></section><section id="autotoc_md246_1s1"><section id="autotoc_md246"><h3><a href="#autotoc_md246">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">DGMRES</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>DGMRES accelerates restarted GMRES by deflating (approximations of) invariant subspaces associated with slow-to-converge eigencomponents.</p><section id="autotoc_md247_1s1"><section id="autotoc_md247"><h3><a href="#autotoc_md247">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported DGMRES.</li></ul></section></section><section id="autotoc_md248_1s1"><section id="autotoc_md248"><h3><a href="#autotoc_md248">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">DGMRES</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
 <span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">).</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">).</span><span class="n">setRestart</span><span class="p">(</span><span class="mi">50</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></section></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>

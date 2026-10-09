@@ -84,7 +84,7 @@
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md181">Zeroing</a></li>
+                <li><a href="#autotoc_md183">Zeroing</a></li>
               </ul>
             </li>
             <li>
@@ -117,7 +117,7 @@ $ \mathbf{x} $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-120'/>
 </g>
-</svg> therefore retain their global sizes throughout its lifetime. The first call establishes the vector layout; subsequent calls reuse that layout.</p><aside class="m-note m-info"><h4>Note</h4><p>PETSc does not support resizing a vector after its layout has been established. Reuse requires the existing global size to match the requested size; this precondition is checked by a debug assertion. A change of finite element space or mesh requires a new <code>LinearSystem</code>.</p></aside><section id="autotoc_md181_1s1"><section id="autotoc_md181"><h3><a href="#autotoc_md181">Zeroing</a></h3><p>The right-hand side and residual vectors are rebuilt from scratch on every assembly and must therefore be zeroed each time (<code>zeroOnReuse</code> = true, the default). The solution vector must <em>not</em> be zeroed on reuse: it carries the previous iterate, which iterative/Newton solvers consume as the initial guess. It is still zeroed once, when first laid out, to provide a defined starting point.</p></section></section>
+</svg> therefore retain their global sizes throughout its lifetime. The first call establishes the vector layout; subsequent calls reuse that layout.</p><aside class="m-note m-info"><h4>Note</h4><p>PETSc does not support resizing a vector after its layout has been established. Reuse requires the existing global size to match the requested size; this precondition is checked by a debug assertion. A change of finite element space or mesh requires a new <code>LinearSystem</code>.</p></aside><section id="autotoc_md183_1s1"><section id="autotoc_md183"><h3><a href="#autotoc_md183">Zeroing</a></h3><p>The right-hand side and residual vectors are rebuilt from scratch on every assembly and must therefore be zeroed each time (<code>zeroOnReuse</code> = true, the default). The solution vector must <em>not</em> be zeroed on reuse: it carries the previous iterate, which iterative/Newton solvers consume as the initial guess. It is still zeroed once, when first laid out, to provide a defined starting point.</p></section></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

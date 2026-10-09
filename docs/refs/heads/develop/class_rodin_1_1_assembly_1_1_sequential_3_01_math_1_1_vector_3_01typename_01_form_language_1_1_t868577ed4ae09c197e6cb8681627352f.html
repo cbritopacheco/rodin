@@ -96,7 +96,7 @@
             <li>
               <a href="#"></a>
               <ul>
-                <li><a href="#autotoc_md7">Assembly Algorithm</a></li>
+                <li><a href="#autotoc_md9">Assembly Algorithm</a></li>
               </ul>
             </li>
             <li>
@@ -149,7 +149,7 @@ $ b_i = l(\psi_i) $
 <use x='40.017088' y='1.793263' xlink:href='#eq2-g0-105'/>
 <use x='43.39836' y='0' xlink:href='#eq2-g2-41'/>
 </g>
-</svg> by sequentially iterating through mesh elements and accumulating contributions.</p><section id="autotoc_md7_1s1"><section id="autotoc_md7"><h3><a href="#autotoc_md7">Assembly Algorithm</a></h3><p>For each element <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+</svg> by sequentially iterating through mesh elements and accumulating contributions.</p><section id="autotoc_md9_1s1"><section id="autotoc_md9"><h3><a href="#autotoc_md9">Assembly Algorithm</a></h3><p>For each element <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -242,8 +242,8 @@ $ b $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a17f3d79a9feccadabf3a5592e96dc068" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&amp; res,
-              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a3aa92f90f3096b3aac9aadf7f174376f" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Executes the assembly and returns the vector associated to the linear form.</dd>
             <dt>
@@ -294,13 +294,13 @@ $ b $
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a17f3d79a9feccadabf3a5592e96dc068"><div>
+          <section class="m-doc-details" id="a3aa92f90f3096b3aac9aadf7f174376f"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />Sequential&lt;Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;, Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17f3d79a9feccadabf3a5592e96dc068" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&amp; res,
-              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />Sequential&lt;Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;, Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3aa92f90f3096b3aac9aadf7f174376f" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Executes the assembly and returns the vector associated to the linear form.</p>
             <table class="m-table m-fullwidth m-flat">

@@ -260,8 +260,8 @@ $ A(v) $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a4fcc3c0b5f52526cdeb170cf9e40853e" class="m-doc">DirichletBCShapeFunctionAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>&amp; u,
-              const <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; v,
+              <span class="m-doc-wrap-bumper"><a href="#ab77c599ed6e00215d80c9b1a66bdf9bd" class="m-doc">DirichletBCShapeFunctionAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>&amp; u,
+              <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; v,
               const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; essBdr)</span>
             </dt>
             <dd>Constructs identification Dirichlet BC assembly input.</dd>
@@ -275,7 +275,7 @@ $ A(v) $
             </dt>
             <dd>Gets the slave trial function operand.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4fa9fbf8c3fb4dff4de2bc76c06df467" class="m-doc">getShapeFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa5224cf73c2b86e080250349deae8633" class="m-doc">getShapeFunction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp;</span>
             </dt>
             <dd>Gets the shape-function expression on the right-hand side.</dd>
             <dt>
@@ -286,13 +286,13 @@ $ A(v) $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a4fcc3c0b5f52526cdeb170cf9e40853e"><div>
+          <section class="m-doc-details" id="ab77c599ed6e00215d80c9b1a66bdf9bd"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fcc3c0b5f52526cdeb170cf9e40853e" class="m-doc-self">DirichletBCShapeFunctionAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>&amp; u,
-              const <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; v,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab77c599ed6e00215d80c9b1a66bdf9bd" class="m-doc-self">DirichletBCShapeFunctionAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>&amp; u,
+              <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; v,
               const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; essBdr)</span></span>
             </h3>
             <p>Constructs identification Dirichlet BC assembly input.</p>
@@ -307,7 +307,7 @@ $ A(v) $
                 </tr>
                 <tr>
                   <td>v</td>
-                  <td>Shape-function expression used as the master value.</td>
+                  <td>Shape-function expression with writable evaluation state.</td>
                 </tr>
                 <tr>
                   <td>essBdr</td>
@@ -333,22 +333,23 @@ $ A(v) $
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a4fa9fbf8c3fb4dff4de2bc76c06df467"><div>
+          <section class="m-doc-details" id="aa5224cf73c2b86e080250349deae8633"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fa9fbf8c3fb4dff4de2bc76c06df467" class="m-doc-self">getShapeFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5224cf73c2b86e080250349deae8633" class="m-doc-self">getShapeFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the shape-function expression on the right-hand side.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Reference to the master expression.</td>
+                  <td>Non-const reference to the borrowed master expression.</td>
                 </tr>
               </tfoot>
             </table>
+<p>The input keeps its bindings fixed; assembly updates the expression through setIntegrationPoint() while evaluating its basis.</p>
           </div></section>
           <section class="m-doc-details" id="aebcc7cb36480775d8bb4c133533030f1"><div>
             <h3>

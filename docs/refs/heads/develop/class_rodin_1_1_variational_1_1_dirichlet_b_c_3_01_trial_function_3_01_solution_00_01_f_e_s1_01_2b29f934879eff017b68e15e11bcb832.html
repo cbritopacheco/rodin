@@ -127,11 +127,11 @@ $ u = A(v) + d $
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md318">Mathematical model</a></li>
-            <li><a href="#autotoc_md319">Concrete examples</a></li>
-            <li><a href="#autotoc_md320">Assembly: how </a></li>
-            <li><a href="#autotoc_md321">Exactness, by construction</a></li>
-            <li><a href="#autotoc_md322">Linear-system effect</a></li>
+            <li><a href="#autotoc_md320">Mathematical model</a></li>
+            <li><a href="#autotoc_md321">Concrete examples</a></li>
+            <li><a href="#autotoc_md322">Assembly: how </a></li>
+            <li><a href="#autotoc_md323">Exactness, by construction</a></li>
+            <li><a href="#autotoc_md324">Linear-system effect</a></li>
             <li>
               Reference
               <ul>
@@ -361,7 +361,7 @@ $ A(v)=R\,v $
 <use x='39.714527' y='0' xlink:href='#eq13-g0-82'/>
 <use x='50.71554' y='0' xlink:href='#eq13-g0-118'/>
 </g>
-</svg>, sums of these, …).</p><section id="autotoc_md318"><h2><a href="#autotoc_md318">Mathematical model</a></h2><p>Let <svg class="m-math" style="width: 4.087em; height: 1.581em; vertical-align: -0.482em;" viewBox="0 -10.560374 39.235873 15.173933">
+</svg>, sums of these, …).</p><section id="autotoc_md320"><h2><a href="#autotoc_md320">Mathematical model</a></h2><p>Let <svg class="m-math" style="width: 4.087em; height: 1.581em; vertical-align: -0.482em;" viewBox="0 -10.560374 39.235873 15.173933">
 <title>
 $ \{\varphi_j^v\}_{j=1}^{N_v} $
 </title>
@@ -795,7 +795,7 @@ $ d_s $
 <use x='0' y='0' xlink:href='#eq32-g1-100'/>
 <use x='6.082693' y='1.793263' xlink:href='#eq32-g0-115'/>
 </g>
-</svg> are stored separately in <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">IdentificationValues</a>.</p></section><section id="autotoc_md319"><h2><a href="#autotoc_md319">Concrete examples</a></h2><ul><li><strong>Identity, same FES (Lagrange).</strong> <svg class="m-math" style="width: 3.570em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 34.276641 8.302191">
+</svg> are stored separately in <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">IdentificationValues</a>.</p></section><section id="autotoc_md321"><h2><a href="#autotoc_md321">Concrete examples</a></h2><ul><li><strong>Identity, same FES (Lagrange).</strong> <svg class="m-math" style="width: 3.570em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 34.276641 8.302191">
 <title>
 $ A=\mathrm{id} $
 </title>
@@ -1253,7 +1253,7 @@ $ 1 $
 <g id='eq57-page1'>
 <use x='0' y='0' xlink:href='#eq57-g0-49'/>
 </g>
-</svg>.</li></ul></section><section id="autotoc_md320"><h2><a href="#autotoc_md320">Assembly: how </a></h2><p>The identification assembler computes <svg class="m-math" style="width: 8.572em; height: 1.403em; vertical-align: -0.471em;" viewBox="0 -8.966376 82.293234 13.471637">
+</svg>.</li></ul></section><section id="autotoc_md322"><h2><a href="#autotoc_md322">Assembly: how </a></h2><p>The identification assembler computes <svg class="m-math" style="width: 8.572em; height: 1.403em; vertical-align: -0.471em;" viewBox="0 -8.966376 82.293234 13.471637">
 <title>
 $ C_{sj}=\ell_s^u(A(\varphi_j^v)) $
 </title>
@@ -1357,7 +1357,7 @@ $ A(v) $
 <use x='13.327672' y='0' xlink:href='#eq61-g0-118'/>
 <use x='19.415891' y='0' xlink:href='#eq61-g1-41'/>
 </g>
-</svg>, and queries ShapeFunctionBase::getBasis() for the selected master basis. That pointwise integration point carries a null quadrature-formula pointer, so no synthetic single-point quadrature rule is needed. During quadrature integration, callers should continue to use ShapeFunctionBase::setIntegrationPoint() with the active quadrature formula and quadrature index so quadrature metadata remains available.</p><p>The slave FE decides where to sample the callable — point evaluation for Lagrange, an integral over the face for moment-based FEs, directional samples for RT/Nedelec — and the assembler does not branch on the FE type. This is what makes the implementation <strong>FES-generic</strong>: the only contracts used are <code>fes.getDOFs(face)</code>, <code>fes.getFiniteElement(face)</code>, <code>fe.getLinearForm(s)</code>, and <code>fes.getPullback(face, callable)</code>.</p></section><section id="autotoc_md321"><h2><a href="#autotoc_md321">Exactness, by construction</a></h2><p>Slave/master DOFs are paired by index on shared faces: <code>fes_u.getDOFs(faceDim, fi)</code> and <code>fes_v.getDOFs(faceDim, fi)</code> on the <em>same</em> face polytope. There is no geometric search, no tolerance, no <svg class="m-math" style="width: 0.571em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.478023 5.147373">
+</svg>, and queries ShapeFunctionBase::getBasis() for the selected master basis. That pointwise integration point carries a null quadrature-formula pointer, so no synthetic single-point quadrature rule is needed. During quadrature integration, callers should continue to use ShapeFunctionBase::setIntegrationPoint() with the active quadrature formula and quadrature index so quadrature metadata remains available.</p><p>The slave FE decides where to sample the callable — point evaluation for Lagrange, an integral over the face for moment-based FEs, directional samples for RT/Nedelec — and the assembler does not branch on the FE type. This is what makes the implementation <strong>FES-generic</strong>: the only contracts used are <code>fes.getDOFs(face)</code>, <code>fes.getFiniteElement(face)</code>, <code>fe.getLinearForm(s)</code>, and <code>fes.getPullback(face, callable)</code>.</p></section><section id="autotoc_md323"><h2><a href="#autotoc_md323">Exactness, by construction</a></h2><p>Slave/master DOFs are paired by index on shared faces: <code>fes_u.getDOFs(faceDim, fi)</code> and <code>fes_v.getDOFs(faceDim, fi)</code> on the <em>same</em> face polytope. There is no geometric search, no tolerance, no <svg class="m-math" style="width: 0.571em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.478023 5.147373">
 <title>
 $ \varepsilon $
 </title>
@@ -1367,7 +1367,7 @@ $ \varepsilon $
 <g id='eq62-page1'>
 <use x='0' y='0' xlink:href='#eq62-g0-34'/>
 </g>
-</svg> anywhere. Coefficient pruning uses strict <code>&quot;c != 0&quot;</code> so that exact zeros from Lagrange duality (or from component projections) are eliminated bit-for-bit. For a cross-face periodic relation use <code>Rodin::Variational::PeriodicBC</code>, which takes an explicit DOF adjacency map.</p></section><section id="autotoc_md322"><h2><a href="#autotoc_md322">Linear-system effect</a></h2><p>For each slave global index <svg class="m-math" style="width: 0.992em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 9.521226 7.47198">
+</svg> anywhere. Coefficient pruning uses strict <code>&quot;c != 0&quot;</code> so that exact zeros from Lagrange duality (or from component projections) are eliminated bit-for-bit. For a cross-face periodic relation use <code>Rodin::Variational::PeriodicBC</code>, which takes an explicit DOF adjacency map.</p></section><section id="autotoc_md324"><h2><a href="#autotoc_md324">Linear-system effect</a></h2><p>For each slave global index <svg class="m-math" style="width: 0.992em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 9.521226 7.47198">
 <title>
 $ g_s $
 </title>
@@ -1790,9 +1790,13 @@ $ \Gamma_D $
             </dt>
             <dd>Returns optional defects for affine identification BCs.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a80561148cd4500bad12a49008d6f6996" class="m-doc">getAssembly</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">Assembly::<wbr />AssemblyBase</a>&lt;<a href="#a4846b44876e547c56dc6b4a54565b273" class="m-doc">IdentifiedDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets the assembly backend for execution.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#add9387fec6e5824259ced14e45d7b625" class="m-doc">getAssembly</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">Assembly::<wbr />AssemblyBase</a>&lt;<a href="#a4846b44876e547c56dc6b4a54565b273" class="m-doc">IdentifiedDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;&amp;</span>
             </dt>
-            <dd>Gets the assembly backend.</dd>
+            <dd>Gets the assembly backend for inspection.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a4d78a76bfdf79b41e0e29e36dcf5045b" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -2527,6 +2531,23 @@ $ v $
             </table>
 <p>Value-prescribing BCs and homogeneous identification BCs return an empty map. Affine identification BCs override this to provide the known additive defect value for each slave row.</p>
           </div></section>
+          <section class="m-doc-details" id="a80561148cd4500bad12a49008d6f6996"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">ShapeFunctionSpaceType</a> Sp&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">Assembly::<wbr />AssemblyBase</a>&lt;<a href="#a4846b44876e547c56dc6b4a54565b273" class="m-doc">IdentifiedDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80561148cd4500bad12a49008d6f6996" class="m-doc-self">getAssembly</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Gets the assembly backend for execution.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The non-const assembly backend.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="add9387fec6e5824259ced14e45d7b625"><div>
             <h3>
               <div class="m-doc-template">
@@ -2534,12 +2555,12 @@ $ v $
               </div>
               <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">Assembly::<wbr />AssemblyBase</a>&lt;<a href="#a4846b44876e547c56dc6b4a54565b273" class="m-doc">IdentifiedDOFs</a>, <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>&gt;&amp; Rodin::<wbr />Variational::<wbr />DirichletBC&lt;TrialFunction&lt;Solution, FES1&gt;, ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&lt;Solution, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add9387fec6e5824259ced14e45d7b625" class="m-doc-self">getAssembly</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Gets the assembly backend.</p>
+            <p>Gets the assembly backend for inspection.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>The assembly backend.</td>
+                  <td>The const assembly backend.</td>
                 </tr>
               </tfoot>
             </table>

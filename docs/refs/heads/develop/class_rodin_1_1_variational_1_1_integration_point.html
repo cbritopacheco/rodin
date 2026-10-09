@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>An IntegrationPoint always stores a geometric point. It may optionally be associated to a quadrature formula and quadrature index:</p><ul><li><code>getQuadratureFormula() != nullptr</code>: the point is part of a quadrature loop, and <code>getIndex()</code> identifies the quadrature sample in that formula.</li><li><code>getQuadratureFormula() == nullptr</code>: the point represents a generic pointwise evaluation (outside a quadrature tabulation context). In this case, consumers are expected to evaluate using <code>getPoint().getReferenceCoordinates()</code> rather than quadrature tabulation.</li></ul><aside class="m-note m-info"><h4>Note</h4><p>The quadrature formula pointer is non-owning. The referenced quadrature object must outlive all IntegrationPoint uses that dereference this pointer.</p></aside>
+<p>An IntegrationPoint always stores a geometric point. It may optionally be associated to a quadrature formula and quadrature index:</p><ul><li><code>getQuadratureFormula() != nullptr</code>: the point is part of a quadrature loop, and <code>getIndex()</code> identifies the quadrature sample in that formula.</li><li><code>getQuadratureFormula() == nullptr</code>: the point represents a generic pointwise evaluation (outside a quadrature tabulation context). In this case, consumers are expected to evaluate using <code>getPoint().getReferenceCoordinates()</code> rather than quadrature tabulation.</li></ul><p>The formula/index records sample provenance. Mapping a face sample into an adjacent cell changes its reference coordinates while retaining that provenance. Coordinate-sensitive caches must therefore account for the actual geometric point, rather than only the formula/index.</p><aside class="m-note m-info"><h4>Note</h4><p>The quadrature formula pointer is non-owning. The referenced quadrature object must outlive all IntegrationPoint uses that dereference this pointer.</p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -156,7 +156,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Geometric point (usually built from quadrature sample coordinates)</td>
+                  <td>Geometric point, possibly mapped from the quadrature sample into another polytope</td>
                 </tr>
                 <tr>
                   <td>qf&nbsp;<span class="m-label m-flat m-info">in</span></td>
