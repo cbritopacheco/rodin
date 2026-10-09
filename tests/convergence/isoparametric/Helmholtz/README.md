@@ -418,9 +418,22 @@ The target registers all seven positive-dimensional geometries locally and
 at MPI ranks one through four, separately in sequential/OpenMP builds.
 Real PETSc is excluded. Global assembly, solution and norm reductions require
 all ranks; geometry installation and pointwise manufactured data are local.
-The existing shared registration helper supplies slow labels, processor
-counts, 1800-second watchdogs and a pyramid resource lock. These declarations
-describe the test matrix; they are not evidence of a completed run.
+The existing shared registration helper places each of the six boundary/order
+rate hierarchies in its own process and groups the twelve fixed-mesh controls
+separately. Each hierarchy retains all three levels and both adjacent intervals;
+no numerical assertion is omitted or changed. The groups retain slow labels,
+MPI processor counts, 1800-second watchdogs and a common pyramid resource lock.
+This partition bounds process lifetime rather than total computational work.
+The former combined pyramid registration exceeded its watchdog although the
+completed individual rate cases did not. These scheduling declarations are
+not numerical or performance certificates; runtime verification remains separate.
+
+The local verification of this partition completed all 490 process groups:
+1260 case configurations and 2772 rank reports, covering every boundary case
+on all seven geometries in local and MPI ranks one through four, separately
+in sequential and OpenMP builds. Compiler-dependency checks and exact test-name
+inventories were audited independently. This is finite local runtime evidence
+for the stated cases; it is not a hosted-CI result or a performance benchmark.
 
 ## Cubic fields on quadratic approximated geometry
 
