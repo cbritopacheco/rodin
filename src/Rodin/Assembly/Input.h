@@ -496,11 +496,11 @@ namespace Rodin::Assembly
        * @brief Constructs identification Dirichlet BC assembly input.
        *
        * @param u Slave trial function to constrain.
-       * @param v Shape-function expression used as the master value.
+       * @param v Shape-function expression with writable evaluation state.
        * @param essBdr Boundary attributes where the condition applies.
        */
-      DirichletBCShapeFunctionAssemblyInput(const OperandType& u, const ValueType& v,
-        const FlatSet<Geometry::Attribute>& essBdr)
+      DirichletBCShapeFunctionAssemblyInput(
+        const OperandType& u, ValueType& v, const FlatSet<Geometry::Attribute>& essBdr)
         : m_u(u),
           m_v(v),
           m_essBdr(essBdr)
@@ -517,9 +517,12 @@ namespace Rodin::Assembly
 
       /**
        * @brief Gets the shape-function expression on the right-hand side.
-       * @return Reference to the master expression.
+       * @return Non-const reference to the borrowed master expression.
+       *
+       * The input keeps its bindings fixed; assembly updates the expression
+       * through setIntegrationPoint() while evaluating its basis.
        */
-      const ValueType& getShapeFunction() const
+      ValueType& getShapeFunction() const
       {
         return m_v.get();
       }
@@ -535,7 +538,7 @@ namespace Rodin::Assembly
 
     private:
       std::reference_wrapper<const OperandType> m_u;
-      std::reference_wrapper<const ValueType> m_v;
+      std::reference_wrapper<ValueType> m_v;
       std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;
   };
 

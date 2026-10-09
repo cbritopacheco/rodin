@@ -10,6 +10,8 @@
 #include <omp.h>
 #include <utility>
 
+#include "Rodin/FormLanguage/Traits.h"
+
 #include "Rodin/Math/Vector.h"
 
 #include "Rodin/Math/Matrix.h"
@@ -27,9 +29,67 @@
 #include "Sequential.h"
 
 #include "ForwardDecls.h"
+#include "ScatterMap.h"
 
 namespace Rodin::Assembly
 {
+  /**
+   * @brief Assembly of a named bilinear form into a sparse matrix over OpenMP
+   * threads.
+   *
+   * Runs the form's own local kernel over the polytopes of the form's region
+   * and attributes and scatters the local matrices through a ScatterMap, so
+   * that every assembly after the first reuses the sparsity pattern of the
+   * operator.
+   *
+   * @tparam Scalar Scalar value type of the operator.
+   * @tparam Form Named form type, see FormLanguage::IsNamedForm.
+   */
+  template <class Scalar, class Form>
+    requires FormLanguage::IsNamedForm<Form>::Value
+  class OpenMP<Math::SparseMatrix<Scalar>, Form> final
+    : public AssemblyBase<Math::SparseMatrix<Scalar>, Form>
+  {
+    public:
+      /// @brief Assembled operator type.
+      using OperatorType = Math::SparseMatrix<Scalar>;
+
+      /// @brief Named form type being assembled.
+      using FormType = Form;
+
+      /// @brief Parent assembly base class.
+      using Parent = AssemblyBase<OperatorType, FormType>;
+
+      /// @brief Input data type for the assembly pipeline.
+      using InputType = typename Parent::InputType;
+
+      /**
+       * @brief Assembles the named form into @p out.
+       * @param[in,out] out Matrix receiving the assembled form.
+       * @param[in] input Form supplying the spaces, the region and the kernel.
+       */
+      void execute(OperatorType& out, const InputType& input) override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        OpenMPIteration seq(trialFES.getMesh(), input.getRegion());
+        m_scatterMap.assemble(out, input.getKernel(), trialFES, testFES, seq,
+          input.getAttributes(), omp_get_max_threads());
+      }
+
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a new copy.
+       */
+      OpenMP* copy() const noexcept override
+      {
+        return new OpenMP(*this);
+      }
+
+    private:
+      ScatterMap<Scalar> m_scatterMap;
+  };
+
   /**
    * @brief OpenMP-based parallel mesh iteration for multi-threaded assembly.
    *
@@ -210,7 +270,7 @@ namespace Rodin::Assembly
        * @param input Input data.
        * @param res Storage for the assembled operator.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         const size_t capacity =
           input.getTestFES().getSize() * std::log(input.getTrialFES().getSize());
@@ -401,7 +461,7 @@ namespace Rodin::Assembly
        * @param input Input data.
        * @param res Storage for the assembled operator.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         std::vector<Math::SparseTriplet<ScalarType>> triplets;
         m_assembly.execute(triplets, {
@@ -525,7 +585,7 @@ namespace Rodin::Assembly
        * @param res Output dense matrix.
        * @param input Bilinear form assembly input.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
@@ -733,7 +793,7 @@ namespace Rodin::Assembly
        * @param res Output vector.
        * @param input Linear form assembly input.
        */
-      void execute(VectorType& res, const InputType& input) const override
+      void execute(VectorType& res, const InputType& input) override
       {
         res.resize(input.getFES().getSize());
         res.setZero();
@@ -890,7 +950,7 @@ namespace Rodin::Assembly
        * @param res Output map from constrained DOFs to values.
        * @param input Boundary condition input.
        */
-      void execute(IndexMap<Scalar>& res, const InputType& input) const override
+      void execute(IndexMap<Scalar>& res, const InputType& input) override
       {
         const auto& u = input.getOperand();
         const auto& value = input.getValue();
@@ -1048,7 +1108,7 @@ namespace Rodin::Assembly
        * @param axb Output linear system.
        * @param input Problem assembly input.
        */
-      void execute(LinearSystemType& axb, const InputType& input) const override
+      void execute(LinearSystemType& axb, const InputType& input) override
       {
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
@@ -1706,7 +1766,7 @@ namespace Rodin::Assembly
        * @param target Side of the system to assemble.
        */
       void execute(LinearSystemType& axb, const InputType& input,
-        Rodin::Variational::AssemblyTarget target) const
+        Rodin::Variational::AssemblyTarget target)
       {
         LinearSystemType scratch;
         execute(scratch, input);
@@ -1798,7 +1858,7 @@ namespace Rodin::Assembly
        * @param axb Output linear system.
        * @param input Mixed problem input.
        */
-      void execute(LinearSystemType& axb, const InputType& input) const override
+      void execute(LinearSystemType& axb, const InputType& input) override
       {
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
@@ -2434,7 +2494,7 @@ namespace Rodin::Assembly
        * @param target Side of the system to assemble.
        */
       void execute(LinearSystemType& axb, const InputType& input,
-        Rodin::Variational::AssemblyTarget target) const
+        Rodin::Variational::AssemblyTarget target)
       {
         LinearSystemType scratch;
         execute(scratch, input);
@@ -2516,10 +2576,10 @@ namespace Rodin::Assembly
        * @param res Output map from slave DOFs to master DOF coefficients.
        * @param input Boundary condition input.
        */
-      void execute(OutputType& res, const InputType& input) const override
+      void execute(OutputType& res, const InputType& input) override
       {
         const auto& u = input.getOperand();
-        auto& Av = const_cast<ValueType&>(input.getShapeFunction());
+        auto& Av = input.getShapeFunction();
         const auto& essBdr = input.getEssentialBoundary();
 
         const auto& fesU = u.getFiniteElementSpace();

@@ -19,6 +19,14 @@ the relevant commits to find why a condition, threshold, or formula was
 introduced or removed, especially in numerical convergence and stopping logic.
 If the implementation differs from a paper or specification, establish whether
 the difference was deliberate before editing the code.
+
+## Const correctness
+
+**`const_cast` is forbidden.** Operations that update assembly or evaluation
+state must express that requirement through non-const objects or explicitly
+borrowed non-const references. Use owned working storage when the input must
+remain read-only; never cast away constness to update it.
+
 ## Numerical constants
 
 Avoid unexplained numeric thresholds, safety factors, and iteration limits.

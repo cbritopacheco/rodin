@@ -9,6 +9,7 @@
 
 #include "Rodin/Math.h"
 #include "Rodin/Tuple.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 #include "ForwardDecls.h"
 #include "Input.h"
@@ -16,6 +17,8 @@
 
 namespace Rodin::Assembly
 {
+  // Execution may update retained assembly state. Inputs remain const;
+  // concurrent executions require separate assembler instances.
   /**
    * @brief Base class for bilinear form assembly operations.
    *
@@ -67,12 +70,48 @@ namespace Rodin::Assembly
        * the bilinear form, @f$ \phi_j @f$ are trial basis functions, and
        * @f$ \psi_i @f$ are test basis functions.
        */
-      virtual void execute(OperatorType& out, const InputType& data) const = 0;
+      virtual void execute(OperatorType& out, const InputType& data) = 0;
 
       /**
        * @brief Creates a polymorphic copy of this assembly object.
        * 
        * @return AssemblyBase* Pointer to a new copy of this object
+       */
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
+
+  /**
+   * @brief Base class for the assembly of a named bilinear form.
+   *
+   * Unlike the generic bilinear form, a named form carries its own local
+   * kernel, so the assembly is handed the form itself rather than a
+   * BilinearFormAssemblyInput: it needs the kernel, the region and the
+   * attributes the form integrates over.
+   *
+   * @tparam OperatorType Matrix type for the assembled operator.
+   * @tparam Form Named form type, see FormLanguage::IsNamedForm.
+   */
+  template <class OperatorType, class Form>
+    requires FormLanguage::IsNamedForm<Form>::Value
+  class AssemblyBase<OperatorType, Form> : public FormLanguage::Base
+  {
+    public:
+      /// @brief Input data type for the assembly, the named form itself.
+      using InputType = Form;
+
+      /// @brief Virtual destructor.
+      virtual ~AssemblyBase() = default;
+
+      /**
+       * @brief Executes the assembly operation.
+       * @param[in,out] out Matrix receiving the assembled form.
+       * @param[in] input Form supplying the spaces, the region and the kernel.
+       */
+      virtual void execute(OperatorType& out, const InputType& input) = 0;
+
+      /**
+       * @brief Creates a polymorphic copy of this assembly object.
+       * @returns Pointer to a new copy of this object.
        */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
@@ -116,7 +155,7 @@ namespace Rodin::Assembly
        * @param out Output operator.
        * @param data Tuple assembly input.
        */
-      virtual void execute(OperatorType& out, const InputType& data) const = 0;
+      virtual void execute(OperatorType& out, const InputType& data) = 0;
 
       /**
        * @brief Creates a polymorphic copy.
@@ -172,7 +211,7 @@ namespace Rodin::Assembly
        * @f$ b_i = l(\psi_i) @f$ where @f$ l(\cdot) @f$ is the linear form
        * and @f$ \psi_i @f$ are test basis functions.
        */
-      virtual void execute(VectorType& out, const InputType& data) const = 0;
+      virtual void execute(VectorType& out, const InputType& data) = 0;
 
       /**
        * @brief Creates a polymorphic copy of this assembly object.
@@ -221,7 +260,7 @@ namespace Rodin::Assembly
        * @param out Output vector.
        * @param data Tuple assembly input.
        */
-      virtual void execute(VectorType& out, const InputType& data) const = 0;
+      virtual void execute(VectorType& out, const InputType& data) = 0;
 
       /**
        * @brief Creates a polymorphic copy.
@@ -276,7 +315,7 @@ namespace Rodin::Assembly
        * @param out Output index map of prescribed values.
        * @param data Boundary condition input.
        */
-      virtual void execute(IndexMap<ScalarType>& out, const InputType& data) const = 0;
+      virtual void execute(IndexMap<ScalarType>& out, const InputType& data) = 0;
 
       /**
        * @brief Creates a polymorphic copy.
@@ -335,7 +374,7 @@ namespace Rodin::Assembly
        * @param out Output map of slave DOFs to master DOF coefficients.
        * @param data Boundary condition input.
        */
-      virtual void execute(OutputType& out, const InputType& data) const = 0;
+      virtual void execute(OutputType& out, const InputType& data) = 0;
 
       /**
        * @brief Creates a polymorphic copy.
@@ -401,7 +440,7 @@ namespace Rodin::Assembly
        * @param out Output linear system.
        * @param input Problem assembly input.
        */
-      virtual void execute(LinearSystem& out, const InputType& input) const = 0;
+      virtual void execute(LinearSystem& out, const InputType& input) = 0;
 
       /**
        * @brief Creates a polymorphic copy.
@@ -467,7 +506,7 @@ namespace Rodin::Assembly
        * @param out Output linear system.
        * @param input Mixed problem assembly input.
        */
-      virtual void execute(LinearSystem& out, const InputType& input) const = 0;
+      virtual void execute(LinearSystem& out, const InputType& input) = 0;
 
       /**
        * @brief Creates a polymorphic copy.

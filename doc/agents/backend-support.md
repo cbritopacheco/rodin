@@ -22,6 +22,7 @@ parallel execution through template specializations.
 | Mesh topology/geometry | required | same as Local | mirror specialization and reconciliation | consumed by PETSc forms |
 | Finite element space | required | same as Local | mirror specialization when distributed use is claimed | must work with PETSc trial/test if claimed |
 | Form-language node | required | same expression node | works if the FES/backend traits support it | works if PETSc form assembly supports it |
+| Named bilinear forms | Eigen Sequential | Eigen OpenMP | PETSc MPI | PETSc Sequential/OpenMP/MPI for Mass, Diffusion, Helmholtz, and LinearElasticity |
 | Linear/bilinear assembly | `Sequential` | `OpenMP` if enabled | `MPI` if distributed | PETSc Sequential/OpenMP/MPI if PETSc support is claimed |
 | Solver | sparse/dense specialization as appropriate | same solver | usually not standalone | PETSc `LinearSystem` specialization if claimed |
 | IO format | local loader/printer | same | shard-aware loader/printer if distributed | PETSc data specialization if PETSc fields are claimed |

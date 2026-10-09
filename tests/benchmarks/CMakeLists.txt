@@ -2,6 +2,7 @@ set(RodinBenchmarks_SRCS
   GridFunction.cpp
   P1.cpp
   Poisson.cpp
+  NamedForms.cpp
   RankOneJacobian.cpp
   MeshIO.cpp
   UniformGrid.cpp
@@ -36,6 +37,17 @@ if (RODIN_USE_MPI)
     Rodin::Variational
     benchmark::benchmark)
 endif()
+
+# Build the interpolation measurements without unrelated solver benchmarks.
+add_executable(RodinGridFunctionBenchmarks
+  GridFunctionInterpolation.cpp GridFunctionLarge.cpp)
+target_link_libraries(RodinGridFunctionBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark benchmark::benchmark_main)
+
+# Named operators with numerical oracles, independently of solver benchmarks.
+add_executable(RodinNamedFormBenchmarks NamedFormEvaluation.cpp)
+target_link_libraries(RodinNamedFormBenchmarks PRIVATE
+  Rodin::Variational Rodin::Solid benchmark::benchmark benchmark::benchmark_main)
 
 add_executable(RodinSpatialMatrixBenchmarks SpatialMatrix.cpp)
 target_link_libraries(RodinSpatialMatrixBenchmarks PRIVATE
