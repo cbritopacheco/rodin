@@ -19,12 +19,14 @@ jobs:
     # Keep the original h/p/hp gate separate from the growing curved matrix.
     # A single new scalar 3D degree study took 21 minutes locally; the former
     # 45-minute combined job no longer budgets build and complete refinement.
+    # Both combined curved-scalar jobs exhausted three hours. Separate physics
+    # and the two expensive cell families without dropping refinement cases.
     timeout-minutes: ${{ matrix.suite == 'baseline' && 45 || 180 }}
     strategy:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        suite: [baseline, curved_scalar, curved_elasticity, curved_stokes, curved_helmholtz]
+        suite: [baseline, curved_diffusion_light, curved_diffusion_tetrahedron, curved_diffusion_pyramid, curved_reaction_light, curved_reaction_tetrahedron, curved_reaction_pyramid, curved_nonlinear_light, curved_nonlinear_tetrahedron, curved_nonlinear_pyramid, curved_elasticity, curved_stokes, curved_helmholtz]
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -71,11 +73,12 @@ jobs:
         run: |
           case "${{ matrix.suite }}" in
             baseline) cmake --build build -j 2 ;;
-            curved_scalar)
-              cmake --build build -j 2 --target \
-                RodinConvergenceIsoparametricDiffusion \
-                RodinConvergenceIsoparametricReactionDiffusion \
-                RodinConvergenceIsoparametricNonlinearPoisson ;;
+            curved_diffusion_*)
+              cmake --build build -j 2 --target RodinConvergenceIsoparametricDiffusion ;;
+            curved_reaction_*)
+              cmake --build build -j 2 --target RodinConvergenceIsoparametricReactionDiffusion ;;
+            curved_nonlinear_*)
+              cmake --build build -j 2 --target RodinConvergenceIsoparametricNonlinearPoisson ;;
             curved_elasticity)
               cmake --build build -j 2 --target RodinConvergenceIsoparametricLinearElasticity ;;
             curved_stokes)
@@ -92,13 +95,27 @@ jobs:
             baseline)
               ctest --test-dir build/tests -L convergence -E "$curved_pattern" \
                 --output-on-failure --no-tests=error -j 2 ;;
-            curved_scalar) suite_pattern='(.*Diffusion|NonlinearPoisson)' ;;
+            curved_diffusion_*) suite_pattern='(Approximated|Lifted|SmoothLifted)?Diffusion' ;;
+            curved_reaction_*) suite_pattern='ReactionDiffusion' ;;
+            curved_nonlinear_*) suite_pattern='NonlinearPoisson' ;;
             curved_elasticity) suite_pattern='LinearElasticity' ;;
             curved_stokes) suite_pattern='Stokes' ;;
             curved_helmholtz) suite_pattern='Helmholtz' ;;
             *) exit 1 ;;
           esac
-          if [ "${{ matrix.suite }}" != baseline ]; then
+          if [[ "${{ matrix.suite }}" == curved_diffusion_* || \
+                "${{ matrix.suite }}" == curved_reaction_* || \
+                "${{ matrix.suite }}" == curved_nonlinear_* ]]; then
+            case "${{ matrix.suite }}" in
+              *_light) geometry_exclude='_(Tetrahedron|Pyramid)$' ;;
+              *_tetrahedron) geometry_exclude='_(Segment|Triangle|Quadrilateral|Pyramid|Hexahedron|Wedge)$' ;;
+              *_pyramid) geometry_exclude='_(Segment|Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge)$' ;;
+              *) exit 1 ;;
+            esac
+            ctest --test-dir build/tests -L convergence \
+              -R "^RodinConvergenceIsoparametric${suite_pattern}_" -E "$geometry_exclude" \
+              --output-on-failure --no-tests=error -j 1
+          elif [ "${{ matrix.suite }}" != baseline ]; then
             ctest --test-dir build/tests -L convergence \
               -R "^RodinConvergenceIsoparametric${suite_pattern}_" \
               --output-on-failure --no-tests=error -j 1
