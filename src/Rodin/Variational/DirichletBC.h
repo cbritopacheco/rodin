@@ -615,13 +615,21 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets the assembly backend.
-       * @returns The assembly backend.
+       * @brief Gets the assembly backend for execution.
+       * @returns The non-const assembly backend.
+       */
+      Assembly::AssemblyBase<ValueDOFs, DirichletBC>& getAssembly()
+      {
+        return m_assembly;
+      }
+
+      /**
+       * @brief Gets the assembly backend for inspection.
+       * @returns The const assembly backend.
        */
       const Assembly::AssemblyBase<ValueDOFs, DirichletBC>& getAssembly() const
       {
-        assert(m_assembly);
-        return *m_assembly;
+        return m_assembly;
       }
 
       DirichletBC* copy() const noexcept override
@@ -1153,8 +1161,17 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets the assembly backend.
-       * @returns The assembly backend.
+       * @brief Gets the assembly backend for execution.
+       * @returns The non-const assembly backend.
+       */
+      Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly()
+      {
+        return m_assembly;
+      }
+
+      /**
+       * @brief Gets the assembly backend for inspection.
+       * @returns The const assembly backend.
        */
       const Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly() const
       {

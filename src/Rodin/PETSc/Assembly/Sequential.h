@@ -36,6 +36,89 @@
 namespace Rodin::Assembly
 {
   /**
+   * @brief Sequential PETSc assembly using a named form's local kernel.
+   *
+   * Every cell's DOF pairs are retained, including structural zeros outside
+   * the selected attributes, so changing coefficients or attributes reuses
+   * the matrix graph. Mesh connectivity and spaces must stay fixed.
+   * @tparam Form Named bilinear form type.
+   */
+  template <class Form>
+    requires FormLanguage::IsNamedForm<Form>::Value
+  class Sequential<::Mat, Form> final : public AssemblyBase<::Mat, Form>
+  {
+    public:
+      /// @brief Parent assembly interface.
+      using Parent = AssemblyBase<::Mat, Form>;
+      /// @brief Form supplying spaces, region and kernel.
+      using InputType = typename Parent::InputType;
+      /**
+       * @brief Assembles or reassembles the named operator.
+       * @param out Matrix receiving cell contributions; created when null.
+       * @param input Named form supplying the local kernel.
+       */
+      void execute(::Mat& out, const InputType& input) override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        const auto& mesh = trialFES.getMesh();
+        assert(&mesh == &testFES.getMesh());
+        PetscErrorCode ierr;
+        if (!out)
+        {
+          ierr = MatCreate(PETSC_COMM_SELF, &out);
+          assert(ierr == PETSC_SUCCESS);
+        }
+        ierr = PETSc::Assembly::MatrixSetup(out).prepare(
+          {static_cast<PetscInt>(testFES.getSize()),
+            static_cast<PetscInt>(trialFES.getSize()),
+            static_cast<PetscInt>(testFES.getSize()),
+            static_cast<PetscInt>(trialFES.getSize()), nullptr, true});
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatSetOption(out, MAT_IGNORE_ZERO_ENTRIES, PETSC_FALSE);
+        assert(ierr == PETSC_SUCCESS);
+        const auto& attributes = input.getAttributes();
+        SequentialIteration seq(mesh, input.getRegion());
+        auto kernel = input.getKernel();
+        Math::Matrix<PetscScalar> local;
+        for (auto it = seq.getIterator(); it; ++it)
+        {
+          const size_t d = it->getDimension();
+          const Index i = it->getIndex();
+          const auto& rows = testFES.getDOFs(d, i);
+          const auto& cols = trialFES.getDOFs(d, i);
+          const auto attribute = it->getAttribute();
+          if (attributes.empty() || (attribute && attributes.count(*attribute)))
+            kernel.compute(local, *it);
+          else
+            local.setZero(rows.size(), cols.size());
+          for (Index r = 0; r < static_cast<Index>(rows.size()); ++r)
+          {
+            for (Index c = 0; c < static_cast<Index>(cols.size()); ++c)
+            {
+              ierr = MatSetValue(out, static_cast<PetscInt>(rows[r]),
+                static_cast<PetscInt>(cols[c]), Math::conj(local(r, c)), ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
+          }
+        }
+        ierr = MatAssemblyBegin(out, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = MatAssemblyEnd(out, MAT_FINAL_ASSEMBLY);
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+      }
+      /**
+       * @brief Copies the assembler.
+       * @returns New assembler owned by the caller.
+       */
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+  };
+
+  /**
    * @brief Sequential assembly of a PETSc vector from a linear form.
    *
    * Iterates over mesh polytopes on a single thread, evaluates
@@ -68,7 +151,7 @@ namespace Rodin::Assembly
        * @param[in,out] res PETSc vector receiving accumulated entries.
        * @param[in] input Linear-form assembly input.
        */
-      void execute(VectorType& res, const InputType& input) const override
+      void execute(VectorType& res, const InputType& input) override
       {
         assert(res);
         const size_t n = input.getFES().getSize();
@@ -170,7 +253,7 @@ namespace Rodin::Assembly
        * @param[in,out] res PETSc matrix receiving accumulated entries.
        * @param[in] input Bilinear-form assembly input.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         assert(res);
         const size_t m = input.getTestFES().getSize();
@@ -323,7 +406,7 @@ namespace Rodin::Assembly
        * @param[in,out] axb Linear system receiving operator, RHS, and solution layout.
        * @param[in] input Single-field problem assembly input.
        */
-      void execute(LinearSystemType& axb, const InputType& input) const override
+      void execute(LinearSystemType& axb, const InputType& input) override
       {
         execute(axb, input, AssemblyMode::Full);
       }
@@ -335,7 +418,7 @@ namespace Rodin::Assembly
        * @param[in] target Assembly target to update.
        */
       void execute(LinearSystemType& axb, const InputType& input,
-        Rodin::Variational::AssemblyTarget target) const
+        Rodin::Variational::AssemblyTarget target)
       {
         switch (target)
         {
@@ -362,7 +445,7 @@ namespace Rodin::Assembly
        * @param mode Requested assembly mode.
        */
 
-      void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
+      void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode)
       {
         static_assert(std::is_same_v<TrialMeshContextType, Rodin::Context::Local>,
           "PETSc sequential assembly should only be used with Local mesh context.");
@@ -873,7 +956,7 @@ namespace Rodin::Assembly
        * @param[in,out] axb Linear system receiving operator, RHS, and solution layout.
        * @param[in] input Multi-field problem assembly input.
        */
-      void execute(LinearSystemType& axb, const InputType& input) const override
+      void execute(LinearSystemType& axb, const InputType& input) override
       {
         execute(axb, input, AssemblyMode::Full);
       }
@@ -885,7 +968,7 @@ namespace Rodin::Assembly
        * @param[in] target Assembly target to update.
        */
       void execute(LinearSystemType& axb, const InputType& input,
-        Rodin::Variational::AssemblyTarget target) const
+        Rodin::Variational::AssemblyTarget target)
       {
         switch (target)
         {
@@ -912,7 +995,7 @@ namespace Rodin::Assembly
        * @param mode Requested assembly mode.
        */
 
-      void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
+      void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode)
       {
         const bool doMatrix = mode != AssemblyMode::RHS;
         const bool doVector = mode != AssemblyMode::LHS;

@@ -1372,6 +1372,25 @@ namespace Rodin::Variational
   }
 
   /**
+   * @brief Combines a bilinear form and a local bilinear form integrator.
+   * @param bf Assembled bilinear form.
+   * @param bfi Local bilinear form integrator.
+   * @returns Problem body containing both terms.
+   */
+  template <class OperatorType, class RHSScalar>
+  auto operator+(const BilinearFormBase<OperatorType>& bf,
+    const LocalBilinearFormIntegratorBase<RHSScalar>& bfi)
+  {
+    using LHSScalar =
+      typename FormLanguage::Traits<std::remove_reference_t<OperatorType>>::ScalarType;
+    using ScalarType = typename FormLanguage::Sum<LHSScalar, RHSScalar>::Type;
+    ProblemBody<OperatorType, void, ScalarType> res;
+    res.getBFs().add(bf);
+    res.getLocalBFIs().add(bfi);
+    return res;
+  }
+
+  /**
    * @brief Combines a preassembled BilinearForm with a DirichletBC into a
    * ProblemBody.
    *

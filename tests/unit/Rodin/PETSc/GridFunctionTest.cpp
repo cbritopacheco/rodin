@@ -34,6 +34,26 @@ namespace
     return id;
   }
 
+  /// @brief Explicit references to PETSc wrappers keep borrowing the live field.
+  TEST(PETSc_GridFunction, ExplicitWrapperReferenceAndClone)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh);
+    PETSc::Variational::GridFunction field(fes);
+    field = RealFunction(2.);
+    using Reference = GridFunctionBaseReference<decltype(field)>;
+    Reference reference(std::cref(field));
+    std::unique_ptr<Reference> clone(reference.copy());
+    const Point p(*mesh.getCell(0), Math::SpatialPoint{0.2, 0.3});
+    EXPECT_EQ(reference.getSize(), field.getSize());
+    EXPECT_EQ(&reference.getFiniteElementSpace(), &fes);
+    EXPECT_EQ(reference.getData(), field.getData());
+    EXPECT_NEAR(reference(p), 2., 1e-14);
+    field = RealFunction(5.);
+    EXPECT_NEAR(reference(p), 5., 1e-14);
+    EXPECT_NEAR((*clone)(p), 5., 1e-14);
+  }
+
   /// @brief Verifies sequential operator bracket read write for PET sc grid function by checking tolerance-based numerical results.
   TEST(PETSc_GridFunction, SequentialOperatorBracketReadWrite)
   {

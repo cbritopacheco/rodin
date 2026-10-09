@@ -50,11 +50,14 @@
 #ifndef RODIN_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
-#include <utility>
 #include <atomic>
+#include <cstring>
+#include <algorithm>
+#include <utility>
 #include <fstream>
 #include <functional>
 #include <vector>
+#include <variant>
 #include <boost/filesystem.hpp>
 #include <type_traits>
 
@@ -164,10 +167,9 @@ namespace Rodin::Variational
        * the data-full object.
        * @param ref Reference to the wrapped grid function.
        */
-      explicit
-      constexpr
-      GridFunctionBaseReference(std::reference_wrapper<const Derived> ref)
-        : m_ref(ref)
+      explicit constexpr GridFunctionBaseReference(
+        std::reference_wrapper<const Derived> ref)
+        : m_ref(&ref.get())
       {}
 
       /**
@@ -211,7 +213,7 @@ namespace Rodin::Variational
       constexpr
       auto operator()(const Geometry::Point& p) const
       {
-        return m_ref.get().getValue(p);
+        return getReferencedGridFunction().getValue(p);
       }
 
       /**
@@ -222,7 +224,7 @@ namespace Rodin::Variational
       constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
-        return m_ref.get().getValue(ip);
+        return getReferencedGridFunction().getValue(ip);
       }
 
       /**
@@ -233,7 +235,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
-        return m_ref.get().getValue(p);
+        return getReferencedGridFunction().getValue(p);
       }
 
       /**
@@ -244,7 +246,7 @@ namespace Rodin::Variational
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
-        return m_ref.get().getValue(ip);
+        return getReferencedGridFunction().getValue(ip);
       }
 
       /**
@@ -254,7 +256,7 @@ namespace Rodin::Variational
       constexpr
       auto x() const
       {
-        return m_ref.get().x();
+        return getReferencedGridFunction().x();
       }
 
       /**
@@ -264,7 +266,7 @@ namespace Rodin::Variational
       constexpr
       auto y() const
       {
-        return m_ref.get().y();
+        return getReferencedGridFunction().y();
       }
 
       /**
@@ -274,7 +276,7 @@ namespace Rodin::Variational
       constexpr
       auto z() const
       {
-        return m_ref.get().z();
+        return getReferencedGridFunction().z();
       }
 
       /**
@@ -286,7 +288,7 @@ namespace Rodin::Variational
       template <class DataType>
       constexpr decltype(auto) setData(const DataType& data, size_t offset = 0)
       {
-        return m_ref.get().setData(data, offset);
+        return getReferencedGridFunction().setData(data, offset);
       }
 
       /**
@@ -296,7 +298,7 @@ namespace Rodin::Variational
       constexpr
       const auto& getData()
       {
-        return m_ref.get().getData();
+        return getReferencedGridFunction().getData();
       }
 
       /**
@@ -306,7 +308,7 @@ namespace Rodin::Variational
       constexpr
       const auto& getFiniteElementSpace() const
       {
-        return m_ref.get().getFiniteElementSpace();
+        return getReferencedGridFunction().getFiniteElementSpace();
       }
 
       /**
@@ -316,7 +318,7 @@ namespace Rodin::Variational
       constexpr
       size_t getSize() const
       {
-        return m_ref.get().getSize();
+        return getReferencedGridFunction().getSize();
       }
 
       /**
@@ -326,7 +328,7 @@ namespace Rodin::Variational
        */
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
-        return m_ref.get().getOrder(geom);
+        return getReferencedGridFunction().getOrder(geom);
       }
 
       /**
@@ -338,8 +340,38 @@ namespace Rodin::Variational
         return new GridFunctionBaseReference(*this);
       }
 
+    protected:
+      /**
+       * @brief Binds the reference to the grid function under construction.
+       *
+       * Store the base subobject without downcasting during construction.
+       * Evaluation resolves the derived object after construction finishes.
+       */
+      GridFunctionBaseReference()
+        : m_ref(this)
+      {}
+
     private:
-      std::reference_wrapper<const Derived> m_ref;
+      /**
+       * @brief Resolves the fully constructed grid function being referenced.
+       * @returns Reference to the bound grid function.
+       */
+      constexpr const Derived& getReferencedGridFunction() const
+      {
+        if constexpr (std::is_base_of_v<GridFunctionBaseReference, Derived>)
+        {
+          if (const auto* derived = std::get_if<const Derived*>(&m_ref))
+            return **derived;
+          return static_cast<const Derived&>(
+            *std::get<const GridFunctionBaseReference*>(m_ref));
+        }
+        else
+        {
+          return *std::get<const Derived*>(m_ref);
+        }
+      }
+
+      std::variant<const Derived*, const GridFunctionBaseReference*> m_ref;
   };
 
   /**
@@ -425,9 +457,9 @@ namespace Rodin::Variational
        * vector is sized according to the space dimension.
        */
       GridFunctionBase(const FES& fes)
-        : Parent(std::cref(static_cast<const Derived&>(*this))),
+        : Parent(),
           m_fes(std::cref(fes)),
-          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
+          m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -435,10 +467,10 @@ namespace Rodin::Variational
        * @param[in] other Grid function to copy
        */
       GridFunctionBase(const GridFunctionBase& other)
-        : Parent(std::cref(static_cast<const Derived&>(*this))),
+        : Parent(),
           m_name(other.m_name),
           m_fes(other.m_fes),
-          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
+          m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -446,10 +478,10 @@ namespace Rodin::Variational
        * @param[in] other Grid function to move from
        */
       GridFunctionBase(GridFunctionBase&& other)
-        : Parent(std::cref(static_cast<const Derived&>(*this))),
+        : Parent(),
           m_name(std::move(other.m_name)),
           m_fes(std::move(other.m_fes)),
-          m_cacheIdentity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
+          m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       virtual ~GridFunctionBase() = default;
@@ -831,6 +863,11 @@ namespace Rodin::Variational
       constexpr
       void interpolate(RangeType& res, const IntegrationPoint& ip) const
       {
+        if (ip.getQuadratureFormula() == nullptr)
+        {
+          static_cast<const Derived&>(*this).interpolate(res, ip.getPoint());
+          return;
+        }
         const auto& p = ip.getPoint();
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
@@ -1251,13 +1288,24 @@ namespace Rodin::Variational
       }
 
     private:
+      /**
+       * @brief Per-thread cache of the DOFs and basis values of the polytope
+       * last evaluated.
+       *
+       * The cache outlives the grid functions that fill it, so it cannot be
+       * keyed on their address: a grid function destroyed and another built
+       * in the same storage, as happens to any local in a loop or in
+       * consecutive scopes, would find the previous one's entry and read
+       * DOFs of a different mesh. It is keyed instead on an identity no two
+       * grid functions ever share.
+       */
       struct EvaluationCache
       {
         const GridFunctionBase* owner = nullptr;
         size_t ownerIdentity = static_cast<size_t>(-1);
         const FES* fes = nullptr;
-        // Distinguishes geometry-specific static elements when stack addresses
-        // for successive grid functions and spaces are reused.
+        const Geometry::MeshBase* mesh = nullptr;
+        // Space assignments can change the element even with fixed connectivity.
         const ElementType* element = nullptr;
         size_t d = static_cast<size_t>(-1);
         Index i = static_cast<Index>(-1);
@@ -1266,6 +1314,8 @@ namespace Rodin::Variational
         bool hasBasisValues = false;
         const QF::QuadratureFormulaBase* qf = nullptr;
         size_t qp = static_cast<size_t>(-1);
+        size_t qfIdentity = static_cast<size_t>(-1);
+        Math::SpatialPoint referenceCoordinates;
         std::vector<RangeType> basisValues;
       };
       /**
@@ -1289,14 +1339,17 @@ namespace Rodin::Variational
       {
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
+        const auto* mesh = &fes->getMesh();
         const auto* element = &fes->getFiniteElement(d, i);
-        if (cache.owner != this || cache.ownerIdentity != m_cacheIdentity ||
-          cache.fes != fes || cache.element != element || cache.d != d || cache.i != i)
+        if (cache.owner != this || cache.ownerIdentity != m_identity ||
+          cache.fes != fes || cache.mesh != mesh || cache.element != element ||
+          cache.d != d || cache.i != i)
         {
           const auto& dofs = fes->getDOFs(d, i);
           cache.owner = this;
-          cache.ownerIdentity = m_cacheIdentity;
+          cache.ownerIdentity = m_identity;
           cache.fes = fes;
+          cache.mesh = mesh;
           cache.element = element;
           cache.d = d;
           cache.i = i;
@@ -1322,23 +1375,40 @@ namespace Rodin::Variational
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
         const auto* element = &fes->getFiniteElement(d, i);
+        const auto* qf = ip.getQuadratureFormula();
+        const size_t qfIdentity = qf->getCacheIdentity();
+        const auto& referenceCoordinates = ip.getPoint().getReferenceCoordinates();
+        bool sameReferenceCoordinates =
+          cache.referenceCoordinates.size() == referenceCoordinates.size();
+        // Mapped face samples can share a formula/index but have different cell
+        // coordinates. Exact component representations prevent approximate hits
+        // and distinguish signed zeros without allocating coordinate storage.
+        for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinates.size();
+             ++j)
+        {
+          sameReferenceCoordinates = std::memcmp(&cache.referenceCoordinates(j),
+                                       &referenceCoordinates(j), sizeof(Real)) == 0;
+        }
         if (!cache.hasBasisValues || cache.owner != this ||
-          cache.ownerIdentity != m_cacheIdentity || cache.fes != fes ||
-          cache.element != element || cache.d != d || cache.i != i ||
-          cache.qf != ip.getQuadratureFormula() || cache.qp != ip.getIndex())
+          cache.ownerIdentity != m_identity || cache.fes != fes ||
+          cache.element != element || cache.d != d || cache.i != i || cache.qf != qf ||
+          cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex() ||
+          !sameReferenceCoordinates)
         {
           const auto& fe = *element;
           const size_t count = fe.getCount();
           const auto& p = ip.getPoint();
 
           cache.owner = this;
-          cache.ownerIdentity = m_cacheIdentity;
+          cache.ownerIdentity = m_identity;
           cache.fes = fes;
           cache.element = element;
           cache.d = d;
           cache.i = i;
-          cache.qf = ip.getQuadratureFormula();
+          cache.qf = qf;
+          cache.qfIdentity = qfIdentity;
           cache.qp = ip.getIndex();
+          cache.referenceCoordinates = referenceCoordinates;
           cache.basisValues.resize(count);
           for (Index local = 0; local < count; ++local)
           {
@@ -1353,7 +1423,7 @@ namespace Rodin::Variational
       Optional<std::string> m_name;
       std::reference_wrapper<const FESType> m_fes;
       inline static std::atomic<size_t> s_nextCacheIdentity{0};
-      const size_t m_cacheIdentity;
+      const size_t m_identity;
   };
 
   /**
@@ -1425,7 +1495,7 @@ namespace Rodin::Variational
        */
       GridFunction& operator=(GridFunction&& other)
       {
-        Parent::operator=(std::move(other));
+        Parent::operator=(static_cast<Parent&&>(other));
         m_data = std::move(other.m_data);
         return *this;
       }
