@@ -735,11 +735,28 @@ namespace Rodin::Examples::ViscoelasticFluids
     return out;
   }
 
+  PulsatilePipeInflow& PulsatilePipeInflow::setMeanProfile(std::vector<Real> r, std::vector<Real> phi)
+  {
+    assert(r.size() == phi.size() && r.size() >= 2);
+    m_meanR = std::move(r);
+    m_meanPhi = std::move(phi);
+    return *this;
+  }
+
   PulsatilePipeInflow::Real PulsatilePipeInflow::velocity(Real r, Real t) const
   {
     assert(m_k.size() == m_c.size());
     r = std::min(std::abs(r), m_radius);
-    Real out = m_c[0].real() * 2.0 * (1.0 - r * r / (m_radius * m_radius));
+    Real phi0 = 2.0 * (1.0 - r * r / (m_radius * m_radius));
+    if (!m_meanR.empty())
+    {
+      const auto it = std::upper_bound(m_meanR.begin(), m_meanR.end(), r);
+      const size_t j = std::min<size_t>(
+        std::max<std::ptrdiff_t>(it - m_meanR.begin(), 1), m_meanR.size() - 1);
+      const Real w = (r - m_meanR[j - 1]) / (m_meanR[j] - m_meanR[j - 1]);
+      phi0 = (1.0 - w) * m_meanPhi[j - 1] + w * m_meanPhi[j];
+    }
+    Real out = m_c[0].real() * phi0;
     for (size_t n = 1; n < m_c.size(); ++n)
     {
       const Real theta = static_cast<Real>(n) * m_omega * t;
@@ -819,6 +836,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_shearMagnitude(m_sh),
       m_tawss(m_sh),
       m_osi(m_sh),
+      m_tawssLesion(m_sh),
+      m_osiLesion(m_sh),
       m_qFlux(m_sh),
       m_one(m_sh),
       m_flux(m_qFlux),
@@ -896,7 +915,14 @@ namespace Rodin::Examples::ViscoelasticFluids
     if (m_cfg.fluid == "sptt")
       m_inflow.setFluid(rho, ob.etaS, ob.etaP, ob.lambda, omega, 0.5 * D);
     else
+    {
+      // Mean mode: the developed steady Carreau-Yasuda profile (also the one
+      // of "gsptt", whose steady shear viscosity is eta_CY). Oscillatory
+      // modes: Womersley at eta_inf, a linearisation about the mean flow.
       m_inflow.setFluid(rho, m_cfg.carreauYasuda.etaInf, ob.etaP, ob.lambda, omega, 0.5 * D);
+      computeDevelopedProfile();
+      m_inflow.setMeanProfile(m_inletR, m_inletPhi);
+    }
 
     if (m_cfg.fluid != "sptt")
     {
@@ -1005,6 +1031,75 @@ namespace Rodin::Examples::ViscoelasticFluids
     if (m_cfg.fluid == "sptt")
       return m_cfg.oldroydB.etaS + m_cfg.oldroydB.etaP;
     return m_cfg.carreauYasuda.etaInf;
+  }
+
+  void ArterialLesionAxiViscousLogImplicit::computeDevelopedProfile()
+  {
+    const Real R = 0.5 * m_cfg.diameter;
+    const Real etaInf = m_cfg.carreauYasuda.etaInf;
+    const size_t n = 801;
+    std::vector<Real> r(n), gd(n), u(n);
+    for (size_t i = 0; i < n; ++i)
+      r[i] = R * static_cast<Real>(i) / static_cast<Real>(n - 1);
+
+    // eta_CY(gd) gd is increasing in gd, and eta_CY >= eta_inf bounds gd.
+    const auto shearRate = [this, etaInf](Real tau) {
+      if (tau <= 0.0)
+        return Real(0);
+      Real lo = 0.0, hi = tau / etaInf;
+      for (int it = 0; it < 200; ++it)
+      {
+        const Real mid = 0.5 * (lo + hi);
+        if (carreauYasuda(mid) * mid < tau) lo = mid; else hi = mid;
+        if (hi - lo <= 1.0e-14 * hi) break;
+      }
+      return 0.5 * (lo + hi);
+    };
+    const auto meanVelocity = [&](Real G) {
+      for (size_t i = 0; i < n; ++i)
+        gd[i] = shearRate(0.5 * G * r[i]);
+      u[n - 1] = 0.0;
+      for (size_t i = n - 1; i-- > 0;)
+        u[i] = u[i + 1] + 0.5 * (gd[i] + gd[i + 1]) * (r[i + 1] - r[i]);
+      Real q = 0.0;   // int u r dr
+      for (size_t i = 0; i + 1 < n; ++i)
+        q += 0.5 * (u[i] * r[i] + u[i + 1] * r[i + 1]) * (r[i + 1] - r[i]);
+      return 2.0 * q / (R * R);
+    };
+
+    // Bisection on log G: the Newtonian gradients at eta_0 and eta_inf bracket G.
+    Real lo = std::log(8.0 * etaInf * m_meanVelocity / (R * R));
+    Real hi = std::log(8.0 * m_cfg.carreauYasuda.etaZero * m_meanVelocity / (R * R)) + 1.0;
+    for (int it = 0; it < 200; ++it)
+    {
+      const Real mid = 0.5 * (lo + hi);
+      if (meanVelocity(std::exp(mid)) < m_meanVelocity) lo = mid; else hi = mid;
+      if (hi - lo < 1.0e-13) break;
+    }
+    const Real G = std::exp(0.5 * (lo + hi));
+    const Real U = meanVelocity(G);
+
+    m_inletR = r;
+    m_inletPhi.resize(n);
+    m_inletShear = gd;
+    for (size_t i = 0; i < n; ++i)
+      m_inletPhi[i] = u[i] / U;   // unit mean, exactly on this grid
+
+    if (isRoot())
+      Alert::Info() << "[inflow] developed Carreau-Yasuda profile: dp/dx=" << G
+                    << " Pa/m  u_max/Ubar=" << m_inletPhi[0] << "  wall shear rate="
+                    << gd[n - 1] << " 1/s  tau_w=" << 0.5 * G * R << " Pa" << Alert::Raise;
+  }
+
+  ArterialLesionAxiViscousLogImplicit::Real
+  ArterialLesionAxiViscousLogImplicit::interpolateInlet(const std::vector<Real>& table, Real r) const
+  {
+    r = std::clamp<Real>(std::abs(r), m_inletR.front(), m_inletR.back());
+    const auto it = std::upper_bound(m_inletR.begin(), m_inletR.end(), r);
+    const size_t j = std::min<size_t>(
+      std::max<std::ptrdiff_t>(it - m_inletR.begin(), 1), m_inletR.size() - 1);
+    const Real w = (r - m_inletR[j - 1]) / (m_inletR[j] - m_inletR[j - 1]);
+    return (1.0 - w) * table[j - 1] + w * table[j];
   }
 
   ArterialLesionAxiViscousLogImplicit::Real
@@ -1425,6 +1520,8 @@ namespace Rodin::Examples::ViscoelasticFluids
         return Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
       const Real r = p.getPhysicalCoordinates()(1);
       const Real D = m_cfg.diameter;
+      if (!m_inletShear.empty())
+        return steadyShearLogConformation(-interpolateInlet(m_inletShear, r));
       return steadyShearLogConformation(-16.0 * m_meanVelocity * r / (D * D));
     });
     if (m_cfg.inletConformation)
@@ -1824,6 +1921,18 @@ namespace Rodin::Examples::ViscoelasticFluids
       (void)e;
     };
 
+    // The same indices on the lesion wall only.
+    const auto onLesion = [this, faceDim](const Polytope& facet) {
+      const auto a = m_mesh.getAttribute(faceDim, facet.getIndex());
+      return a && *a == m_cfg.labels.lesion;
+    };
+    m_tawssLesion = Real(0);
+    m_osiLesion = Real(0);
+    m_tawssLesion.project(Region::Boundary,
+      RealFunction([this](const Point& p) -> Real { return m_tawss.getValue(p); }), onLesion);
+    m_osiLesion.project(Region::Boundary,
+      RealFunction([this](const Point& p) -> Real { return m_osi.getValue(p); }), onLesion);
+
     zeroWithGhosts(m_netShear.getData());
     zeroWithGhosts(m_absShear.getData());
   }
@@ -1856,13 +1965,15 @@ namespace Rodin::Examples::ViscoelasticFluids
   void ArterialLesionAxiViscousLogImplicit::writeCSVHeader()
   {
     m_csv << "t,cycle,qTarget,qIn,qOut,pInletMean,pOutletMean,dp,maxU,maxSigma,"
-          << "newtonIts,dpsi,maxTAWSS,maxOSI\n";
+          << "newtonIts,dpsi,maxTAWSS,maxOSI,maxTAWSSLesion,maxOSILesion\n";
   }
 
   void ArterialLesionAxiViscousLogImplicit::writeCSVRow(int cycle)
   {
     const Real tawss = m_tawss.max();
     const Real osi = m_osi.max();
+    const Real tawssLesion = m_tawssLesion.max();
+    const Real osiLesion = m_osiLesion.max();
 
     if (!isRoot())
       return;
@@ -1873,7 +1984,7 @@ namespace Rodin::Examples::ViscoelasticFluids
           << m_inletPressure << ',' << m_outletMeanPressure << ','
           << (m_inletPressure - m_outletMeanPressure) << ',' << m_speed << ',' << m_stress
           << ',' << m_conformationIts << ',' << m_psiIncrement << ',' << tawss << ',' << osi
-          << '\n';
+          << ',' << tawssLesion << ',' << osiLesion << '\n';
     m_csv.flush();
   }
 
@@ -1927,9 +2038,12 @@ namespace Rodin::Examples::ViscoelasticFluids
 
         const Real maxTawss = m_tawss.max();
         const Real maxOsi = m_osi.max();
+        const Real lesionTawss = m_tawssLesion.max();
+        const Real lesionOsi = m_osiLesion.max();
         if (isRoot())
           Alert::Info() << "[cycle " << (cycle + 1) << "/" << m_cfg.cycles
                         << "] maxTAWSS=" << maxTawss << " Pa  maxOSI=" << maxOsi
+                        << "  lesion: maxTAWSS=" << lesionTawss << " Pa  maxOSI=" << lesionOsi
                         << Alert::Raise;
       }
 

@@ -130,6 +130,11 @@ namespace Rodin::Examples::ViscoelasticFluids
       /// @brief U(r, t)/Ubar.
       Real velocity(Real r, Real t) const;
 
+      /// @brief Replaces the mean mode phi_0 = 2 (1 - r^2/R^2) by a tabulated
+      ///        profile of unit cross-sectional mean (r ascending, from 0 to
+      ///        R): the developed steady profile of a shear-thinning fluid.
+      PulsatilePipeInflow& setMeanProfile(std::vector<Real> r, std::vector<Real> phi);
+
       /// @brief max_t q(t), sampled.
       Real getPeak() const;
 
@@ -144,6 +149,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       std::vector<Complex> m_k;
       Real m_omega = 0.0;
       Real m_radius = 1.0;
+      std::vector<Real> m_meanR;
+      std::vector<Real> m_meanPhi;
   };
 
   class ArterialLesionAxiViscousLogImplicit
@@ -378,6 +385,13 @@ namespace Rodin::Examples::ViscoelasticFluids
       Rodin::Math::SpatialVector<Real> steadyShearLogConformation(Real dudr) const;
       /// @brief The viscosity that defines Re and Wo.
       Real referenceViscosity() const;
+      /// @brief Developed steady pipe flow of the Carreau-Yasuda viscosity at
+      ///        the mean velocity Ubar: tau(r) = G r/2, eta_CY(gd) gd = tau,
+      ///        u(r) = int_r^R gd, G by bisection on the flow rate. Fills
+      ///        m_inletR, m_inletPhi (u/Ubar) and m_inletShear (gd >= 0).
+      void computeDevelopedProfile();
+      /// @brief Linear interpolation of a table on m_inletR.
+      Real interpolateInlet(const std::vector<Real>& table, Real r) const;
 
       template <class Expression>
       void projectVector(const Expression& expr, VectorGridFunctionType& out)
@@ -422,6 +436,11 @@ namespace Rodin::Examples::ViscoelasticFluids
       Config m_cfg;
 
       PulsatilePipeInflow m_inflow;
+      /// @brief Developed steady profile of the shear-thinning fluids ("cy",
+      ///        "gsptt") on a radial grid: r, u/Ubar and |du/dr|.
+      std::vector<Real> m_inletR;
+      std::vector<Real> m_inletPhi;
+      std::vector<Real> m_inletShear;
       Real m_meanVelocity = 0.0;
       Real m_period = 0.0;
       Real m_dt = 0.0;
@@ -490,6 +509,10 @@ namespace Rodin::Examples::ViscoelasticFluids
       ScalarGridFunctionType m_shearMagnitude;
       ScalarGridFunctionType m_tawss;
       ScalarGridFunctionType m_osi;
+      /// @brief TAWSS and OSI restricted to the lesion wall (tag 5), zero
+      ///        elsewhere: their maxima are the lesion indices of the CSV.
+      ScalarGridFunctionType m_tawssLesion;
+      ScalarGridFunctionType m_osiLesion;
 
       // ---- Fluxes ----------------------------------------------------------
       ScalarTestFunctionType m_qFlux;
