@@ -28,6 +28,38 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief One-dimensional deformation has scalar stretch and no shape distortion.
+  TEST(Rodin_Adaptation_CellDeformation, SegmentStretchAndDerivatives)
+  {
+    constexpr Real Tolerance = Real(1e-12);
+    CellDeformation deformation(1);
+    Math::SpatialMatrix<Real> gradient(1, 1), direction(1, 1);
+    gradient(0, 0) = Real(0.5);
+    direction(0, 0) = Real(0.3);
+    deformation.setDisplacementGradient(gradient);
+    EXPECT_EQ(deformation.getDimension(), 1u);
+    EXPECT_NEAR(deformation.getJacobian(), Real(1.5), Tolerance);
+    EXPECT_NEAR(deformation.getInverseTranspose()(0, 0), Real(2) / Real(3), Tolerance);
+    EXPECT_NEAR(deformation.getJacobianAction(direction), direction(0, 0), Tolerance);
+    EXPECT_NEAR(deformation.getJacobianSecondAction(direction, direction), 0, Tolerance);
+    EXPECT_NEAR(deformation.getRelativeDistortion(), 1, Tolerance);
+    EXPECT_NEAR(deformation.getRelativeDistortionGradient()(0, 0), 0, Tolerance);
+    EXPECT_NEAR(deformation.getRelativeDistortionAction(direction), 0, Tolerance);
+    EXPECT_NEAR(
+      deformation.getRelativeDistortionSecondAction(direction, direction), 0, Tolerance);
+
+    gradient(0, 0) = Real(-2);
+    deformation.setDeformationGradient(gradient);
+    EXPECT_FALSE(deformation.isAdmissible());
+    EXPECT_TRUE(deformation.isInvertible());
+    EXPECT_NEAR(deformation.getInverseTranspose()(0, 0), Real(-0.5), Tolerance);
+
+    gradient(0, 0) = 0;
+    deformation.setDeformationGradient(gradient);
+    EXPECT_FALSE(deformation.isAdmissible());
+    EXPECT_FALSE(deformation.isInvertible());
+  }
+
   /// @brief The Jacobian is the determinant of the deformation gradient.
   TEST(Rodin_Adaptation_CellDeformation, Jacobian_IsDeterminant)
   {

@@ -46,12 +46,12 @@ namespace Rodin::Adaptation
     public:
       /**
        * @brief Constructs an undeformed state of the given spatial dimension.
-       * @param d Topological dimension of the entity.
+       * @param d Spatial dimension, from one to three.
        */
       explicit CellDeformation(std::size_t d)
         : m_d(d)
       {
-        assert(d == 2 || d == 3);
+        assert(d >= 1 && d <= 3);
         m_F = Math::SpatialMatrix<Real>::Identity(
           static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
       }
