@@ -436,7 +436,12 @@ namespace Rodin::Variational
 
       /**
        * @brief Tabulates the basis on a quadrature formula.
-       * @returns The tabulation.
+       *
+       * Thread-local entries are identified by the reference geometry and the
+       * quadrature formula's logical lifetime and assignment identity. Reusing
+       * formula storage does not reuse tabulation of its previous contents.
+       *
+       * @returns The tabulation for the current formula contents.
        * @param qf Quadrature formula defining the evaluation points.
        */
       const Tabulation& getTabulation(const QF::QuadratureFormulaBase& qf) const;

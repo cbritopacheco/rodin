@@ -355,6 +355,7 @@ namespace Rodin::Variational
     struct CacheEntry
     {
       const QF::QuadratureFormulaBase* qf;
+      size_t identity;
       Geometry::Polytope::Type g;
       size_t nqp;
       bool valid;
@@ -362,6 +363,7 @@ namespace Rodin::Variational
 
       CacheEntry()
         : qf(nullptr),
+          identity(0),
           g(Geometry::Polytope::Type::Point),
           nqp(0),
           valid(false),
@@ -379,11 +381,13 @@ namespace Rodin::Variational
 
     const auto g   = this->getGeometry();
     const auto nqp = qf.getSize();
+    const auto identity = qf.getCacheIdentity();
 
     // 1) lookup
     for (auto& ce : s_cache.e)
     {
-      if (ce.valid && ce.qf == &qf && ce.g == g && ce.nqp == nqp)
+      if (ce.valid && ce.qf == &qf && ce.identity == identity && ce.g == g &&
+        ce.nqp == nqp)
         return ce.tab;
     }
 
@@ -393,6 +397,7 @@ namespace Rodin::Variational
 
     ce.valid = true;
     ce.qf = &qf;
+    ce.identity = identity;
     ce.g = g;
     ce.nqp = nqp;
 
