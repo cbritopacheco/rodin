@@ -715,7 +715,7 @@ refinement path, and backend, rather than by the presence of a directory.
 | 3 | Exact-domain comparisons and further degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches. At geometry degree 2, Poisson, conductivity, complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson have represented-domain and lifted P1/P2 studies; Taylor–Hood Stokes has the P2/P1 study. Poisson/conductivity additionally have lifted affine studies at geometry degrees 1–3, with field degree $p=\max(2,q)$. Complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson additionally have matched affine studies at geometry degrees 1 and 3. Stokes additionally has affine shear studies at these geometry degrees with velocity/pressure degrees $k/(k-1)$, $k=\max(2,q)$. Further field/geometry degree combinations remain outside the currently verified matrix |
 | 4 | Maintain the implemented real/complex scalar/vector/matrix structural matrix for P0, P0g, P1 and H1 degrees one through six | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction; native and PETSc storage gates have separately stated scopes |
 | Last | Independent NAFEMS benchmarks, after the convergence/structural/backend batches | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |
-| Separate PR | Assembly performance across existing physical contexts, geometries, spaces, and backends ([PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Isolated stage timings, reproducible workload metadata, verified assembled operators, and controlled thread/rank scaling in `tests/benchmarks`; tracked independently from convergence certification |
+| Parallel verification track | Assembly performance across existing physical contexts, geometries, spaces, and backends (benchmark foundation imported from [PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Isolated stage timings, reproducible workload metadata, verified assembled operators, and controlled thread/rank scaling in `tests/benchmarks`; repair measured convergence-suite hotspots with correctness regressions and reproducing benchmarks |
 
 ### Coupled reaction–diffusion batch and continuation
 
@@ -778,9 +778,11 @@ nonpolynomial geometry, and exact-index MPI structural combinations.
 The curved complex Helmholtz batch supplies P1/P2 field rates on exact
 P2 maps, with native local and complex-PETSc local/MPI counterparts.
 Independent NAFEMS implementation is the last phase, after these
-verification batches. Assembly benchmarks advance separately in PR #356;
-completion of that PR is not a prerequisite for implementing convergence
-suites. Each convergence batch still requires its own passing CI evidence
+verification batches. The benchmark foundation from PR #356 is now integrated
+in this branch. Performance repairs and reproducing benchmarks accompany
+convergence certification; completion of the independent extended benchmark
+matrix is not a prerequisite for implementing convergence suites.
+Each convergence batch still requires its own passing CI evidence
 before being described as CI-certified.
 
 Backend extensions require an initial support check: a mathematically meaningful
@@ -847,9 +849,10 @@ in explicitly timed slow tests with the required backend coverage retained.
 
 ### Assembly performance workplan
 
-Performance work is tracked in [PR #356](https://github.com/cbritopacheco/rodin/pull/356)
-in the existing `tests/benchmarks` module, separately from numerical
-convergence assertions. The following describes the intended final scope,
+The benchmark foundation from [PR #356](https://github.com/cbritopacheco/rodin/pull/356)
+is integrated in this branch, in the existing `tests/benchmarks` module.
+Performance measurements remain separate from numerical convergence assertions.
+The following describes the intended final scope of the performance matrix,
 not a claim of complete implemented coverage. The physical contexts are
 Poisson, variable conductivity, complex Helmholtz, vector linear elasticity,
 coupled reaction–diffusion, Taylor–Hood Stokes, and nonlinear Poisson. Scalar
@@ -858,14 +861,15 @@ vector P0/P0g spaces; these are assembly workloads, not additional PDE rate
 claims. H1 workloads begin with P1/P2 and extend through the orders already
 covered by the convergence suites, using stable mixed pairs for Stokes.
 
-Performance or resource issues exposed by convergence studies are handed to
-that workstream with the exact test selection, refinement hierarchy, backend,
+Performance or resource issues exposed by convergence studies are recorded
+with the exact test selection, refinement hierarchy, backend,
 build and thread/rank settings, observed timings or memory, and available
 stage evidence. End-to-end time and peak memory do not identify an assembly
 hotspot without stage-isolated measurements. Investigation and fixes may
-occur alongside convergence work, but benchmark implementation, benchmark
-correctness checks and performance regression gates remain in the separate
-workstream. A resource-interrupted convergence run remains unverified;
+occur alongside convergence work. Each repair requires a reproducing benchmark,
+benchmark correctness checks and affected numerical regressions. Performance
+thresholds require a controlled runner and established measurement variance.
+A resource-interrupted convergence run remains unverified;
 neither successful smaller cases nor a different backend certify that run.
 
 Every meaningful formulation is to be exercised on segment, triangle,
