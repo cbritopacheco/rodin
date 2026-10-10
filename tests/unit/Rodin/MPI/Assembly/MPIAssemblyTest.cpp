@@ -1862,6 +1862,42 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /**
+   * @brief Distinguishes an absent global source from a valid communicator rank.
+   *
+   * Selected real and complex constants reach every rank. An absent attribute
+   * leaves synchronization inputs unchanged, while assembly clears old values.
+   * Reusing the selected source subsequently restores the prescribed constants.
+   */
+  TEST_P(MPITraceGeometryTest, P0gBoundarySourcePresence)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    auto mesh = makeMesh(ctx);
+    constexpr Attribute absent = 99;
+    for (auto face = mesh.getFace(); face; ++face)
+      ASSERT_NE(face->getAttribute(), absent);
+    const auto probe = [&](const auto& function, auto prescribed) {
+      using Scalar = decltype(prescribed);
+      P0g<Scalar, Mesh<Context::MPI>> fes(mesh);
+      const Assembly::MPIBoundaryDOFs selected(fes, {});
+      const Assembly::MPIBoundaryDOFs unselected(fes, {absent});
+      IndexMap<Scalar> values;
+      selected.assemble(values, function);
+      ASSERT_EQ(values.size(), 1u);
+      EXPECT_EQ(values.at(0), prescribed);
+      unselected.synchronize(values);
+      ASSERT_EQ(values.size(), 1u);
+      EXPECT_EQ(values.at(0), prescribed);
+      unselected.assemble(values, function);
+      EXPECT_TRUE(values.empty());
+      selected.assemble(values, function);
+      ASSERT_EQ(values.size(), 1u);
+      EXPECT_EQ(values.at(0), prescribed);
+    };
+    probe(RealFunction(2), Real(2));
+    probe(ComplexFunction(Complex(2, 3)), Complex(2, 3));
+  }
+
   /** Affine offsets and identification rows must have the same rank scope. */
   TEST(Assembly_MPI_DirichletBC, AffineIdentificationValuesReachRequiredDOFs)
   {
