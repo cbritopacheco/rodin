@@ -166,7 +166,9 @@ namespace
 
       field = PetscScalar(-7);
       if (fes.getShard().getSize() > 0)
+      {
         EXPECT_EQ(read[fes.getGlobalIndex(0)], PetscScalar(-7));
+      }
       field.project(Region::Cells, function, eligible);
       Index begin = 0;
       Index end = 0;
@@ -255,7 +257,9 @@ namespace
     Context::MPI ctx(*g_env, *g_world);
     auto mesh = distributeWithEmptyRoot(ctx, GetParam());
     if (g_world->size() > 1 && g_world->rank() == 0)
+    {
       EXPECT_EQ(mesh.getShard().getVertexCount(), 0);
+    }
     checkInterpolationSpaces(mesh, Polytope::Traits(GetParam()).getDimension());
   }
 
