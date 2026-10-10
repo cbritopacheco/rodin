@@ -94,6 +94,41 @@ points than optimized tables.
   process-wide pool. An eight-entry thread-local cache serves repeated hot-path
   lookups without locking; cache misses enter the locked canonical pool.
 
+Reference-formula reuse and mapped-point ownership are separate lifetimes.
+Variational quadrature rules own a `Geometry::PolytopeQuadrature` for their
+currently bound polytope; rebinding releases the previous mapped points.
+This bounds mapped-point storage by the active rules and quadrature sizes,
+not by the number of traversed cells. Explicit `mesh.getQuadrature(...)`
+calls still return mesh-owned, stable borrowed objects until geometry is
+flushed. Assembly does not evict these objects. Both lifetimes are
+backend-independent and introduce no MPI collective.
+
+Mapped-quadrature construction prepares geometric Jacobians through the
+transformation's bulk `jacobian` overload. Parametric elements reuse their
+existing logical-identity reference tables, while generic transformations
+retain the pointwise implementation. The resulting matrices belong to the
+mapped points; no borrowed reference-table storage escapes the bulk call.
+Temporary matrix storage is proportional to the current formula size, not
+the number of mesh cells. Copying or moving a point preserves its owned
+geometry, and rebinding it invalidates that geometry normally.
+
+Physical-coordinate evaluation reuses the basis values from the same reference
+table without making coordinates eager. A mapped point owns its reference
+coordinates and stores only the formula identity and quadrature index. The
+parametric transformation borrows a matching table during evaluation and
+accumulates
+
+$$
+x_{K,j}(\widehat x_q)=\sum_a X_{K,ja}\phi_a(\widehat x_q)
+$$
+
+in the same local-basis order as direct evaluation. The table is never retained
+by the point. If the entry has been evicted or evaluation occurs on another
+thread, the direct map is evaluated at the owned reference coordinates instead.
+The identity is a logical lifetime/assignment identity, not a coordinate
+comparison or pointer-lifetime assumption. This preserves lazy evaluation for
+integrands that need Jacobians but not physical coordinates.
+
 The Xiao--Gimbutas coefficients are taken from the authors' `triasymq`
 distribution. The Witherden--Vincent coefficients are taken from PyFR's
 published quadrature tables. The transformed coefficients, exact source

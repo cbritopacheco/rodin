@@ -48,6 +48,8 @@ namespace Rodin::IO
    * path using the canonical local mesh HDF5 layout and the vertex/cell @ref Rodin::Geometry::Shard "shard"
    * metadata stored under `/Shard/...`.  The file is expected to have been
    * produced by `MeshPrinter<FileFormat::HDF5, Context::MPI>`.
+   * Reconstruction is collective: the maximum local dimension determines
+   * the distributed dimension and the metadata extent on empty shards.
    *
    * @note Each rank must be given a rank-specific file path (e.g. via
    *       the callable filename overload on Mesh<Context::MPI>::load).
@@ -91,14 +93,16 @@ namespace Rodin::IO
       }
 
       /**
-       * @brief Loads the local mesh shard from the given HDF5 file.
+       * @brief Collectively loads shard files and establishes the distributed dimension.
        *
        * @param[in] filename  Path to the HDF5 file for this rank's shard.
        */
       void load(const boost::filesystem::path& filename) override
       {
         auto& mesh = this->getObject();
-        mesh.getShard() = loadShard(filename);
+        mesh = Geometry::Mesh<Context::MPI>::Builder(mesh.getContext())
+                 .initialize(loadShard(filename, mesh.getContext()))
+                 .finalize();
       }
 
     private:
@@ -115,10 +119,12 @@ namespace Rodin::IO
       /**
        * @brief Loads a local mesh and its shard metadata.
        * @param filename Path of the mesh shard file.
+       * @param context Distributed context used to reconstruct shard ownership.
        * @returns Mesh shard reconstructed from the HDF5 file.
        */
 
-      static Geometry::Shard loadShard(const boost::filesystem::path& filename)
+      static Geometry::Shard loadShard(
+        const boost::filesystem::path& filename, const Context::MPI& context)
       {
         Geometry::Mesh<Context::Local> baseMesh;
         baseMesh.load(filename, FileFormat::HDF5);
@@ -133,13 +139,15 @@ namespace Rodin::IO
         }
 
         const size_t Dmax = baseMesh.getDimension();
+        const size_t dimension = boost::mpi::all_reduce(
+          context.getCommunicator(), Dmax, boost::mpi::maximum<size_t>());
         const auto vertexMetadata =
           readShardDimensionMetadata(file.get(), baseMesh, 0);
         const auto cellMetadata =
           readShardDimensionMetadata(file.get(), baseMesh, Dmax);
 
         Geometry::Shard::Builder builder;
-        builder.initialize(baseMesh);
+        builder.initialize(baseMesh, dimension);
 
         includeDimension(builder, 0, vertexMetadata);
         if (Dmax > 0)

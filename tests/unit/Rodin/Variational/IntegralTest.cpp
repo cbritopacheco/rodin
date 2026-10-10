@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <mutex>
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
@@ -12,6 +13,99 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /** Grade-zero integration is linear, not conjugate-linear, in the field. */
+  TEST(Rodin_Variational_Integral, ComplexGridFunctionIntegralIsLinearOnAllSpaces)
+  {
+    constexpr Real tolerance = 1e-11; // Constant-reproduction roundoff budget.
+    const Complex value(2, 3), scale(-1, 2);
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dim = Polytope::Traits(geometry).getDimension();
+      Array<size_t> shape(dim);
+      for (size_t d = 0; d < dim; ++d)
+        shape(d) = 2;
+      auto mesh = LocalMesh::UniformGrid(geometry, shape);
+      for (size_t d = dim; d > 0; --d)
+        mesh.getConnectivity().compute(d, d - 1);
+      const auto check = [&](const auto& space) {
+        GridFunction field(space);
+        field = ComplexFunction(value);
+        auto integral = Integral(field);
+        integral.setOrder(18);
+        const Complex actual = integral.compute();
+        EXPECT_NEAR(actual.real(), value.real(), tolerance);
+        EXPECT_NEAR(actual.imag(), value.imag(), tolerance);
+        field.getData() *= scale;
+        const Complex scaled = integral.compute(), expected = scale * value;
+        EXPECT_NEAR(scaled.real(), expected.real(), tolerance);
+        EXPECT_NEAR(scaled.imag(), expected.imag(), tolerance);
+      };
+      check(P0<Complex, LocalMesh>(mesh));
+      check(P0g<Complex, LocalMesh>(mesh));
+      check(P1<Complex, LocalMesh>(mesh));
+      const auto order = [&]<size_t K>() {
+        check(H1<K, Complex, LocalMesh>(std::integral_constant<size_t, K>{}, mesh));
+      };
+      order.template operator()<1>();
+      order.template operator()<2>();
+      order.template operator()<3>();
+      order.template operator()<4>();
+    }
+  }
+
+  /** Explicit and per-entity orders survive the GridFunction-to-form delegation. */
+  TEST(Rodin_Variational_Integral, GridFunction_ForwardsOrderOnAllGeometries)
+  {
+    constexpr size_t order = 18;
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dim = Polytope::Traits(geometry).getDimension();
+      Array<size_t> shape(dim);
+      for (size_t d = 0; d < dim; ++d)
+        shape(d) = 2;
+      auto mesh = LocalMesh::UniformGrid(geometry, shape);
+      for (size_t d = dim; d > 0; --d)
+        mesh.getConnectivity().compute(d, d - 1);
+      H1<2, Real, LocalMesh> space(std::integral_constant<size_t, 2>{}, mesh);
+      GridFunction field(space);
+      field.getData().setLinSpaced(space.getSize(), Real(0), Real(1));
+      TestFunction v(space);
+      auto reference = Integral(v);
+      reference.setOrder(order);
+      LinearForm form(v);
+      form = reference;
+      form.assemble();
+      const Real expected = form(field);
+
+      auto constant = Integral(field);
+      EXPECT_FALSE(static_cast<bool>(constant.getOrder()));
+      constant.setOrder(order);
+      EXPECT_TRUE(static_cast<bool>(constant.getOrder()));
+      EXPECT_EQ(constant.compute(), expected);
+
+      IndexSet visited;
+      std::mutex mutex;
+      auto selected = Integral(field);
+      selected.setOrder([&](const Polytope& polytope) {
+        std::lock_guard lock(mutex);
+        EXPECT_EQ(polytope.getDimension(), dim);
+        visited.insert(polytope.getIndex());
+        return order;
+      });
+      auto copied = selected;
+      EXPECT_EQ(copied.compute(), expected);
+      EXPECT_EQ(visited.size(), mesh.getPolytopeCount(dim));
+      selected.setOrder(std::nullopt);
+      EXPECT_FALSE(static_cast<bool>(selected.getOrder()));
+    }
+  }
+
   /// @brief Verifies test function construction for variational integral by checking exact expected values.
   TEST(Rodin_Variational_Integral, TestFunction_Construction)
   {

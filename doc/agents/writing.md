@@ -63,6 +63,29 @@ and domains, and distinguish a norm of a difference from a difference of norms.
 Separate observation from interpretation; explanations should be identified as
 such unless the evidence establishes causation.
 
+## Doxygen layout
+
+Documentation comments place the brief on its own line, separate the longer
+description with a blank line, and use Markdown section headings separated
+from the surrounding text by blank lines. Use this layout for new and revised
+documentation throughout the project:
+
+```cpp
+/**
+ * @brief A concise description.
+ *
+ * The full description introduces the mathematical object and its role.
+ *
+ * ## Architecture
+ *
+ * The implementation stages and their invariants are described here.
+ */
+```
+
+Retain Doxygen mathematical delimiters for rendered expressions and explicit
+links to public concepts. A layout change must not discard assumptions,
+contracts, mathematical content, or existing cross-references.
+
 ## Editing checklist
 
 Before completion, verify that the main question and construction are visible,

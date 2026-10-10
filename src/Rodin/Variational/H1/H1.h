@@ -734,8 +734,8 @@ namespace Rodin::Variational
         : Parent(other),
           m_mesh(other.m_mesh),
           m_vdim(other.m_vdim),
-          m_closure(other.m_closure),
-          m_size(other.m_size)
+          m_size(other.m_size),
+          m_closure(other.m_closure)
       {}
 
       /// @brief Move constructor.
@@ -743,8 +743,8 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_mesh(std::move(other.m_mesh)),
           m_vdim(std::move(other.m_vdim)),
-          m_closure(std::move(other.m_closure)),
-          m_size(std::move(other.m_size))
+          m_size(std::move(other.m_size)),
+          m_closure(std::move(other.m_closure))
       {}
 
       virtual ~H1() = default;

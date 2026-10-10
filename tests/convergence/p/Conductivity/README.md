@@ -15,14 +15,14 @@ degree increases.
 Two manufactured fields distinguish exact representation from finite-range
 degree decay:
 
-1. For $u_*(x)=\sum_j x_j^2$, the source is
-   $f_*(x)=-2\{\sum_j x_j+d\gamma(x)\}$. The degree-one solution has
+1. For $u_\ast(x)=\sum_j x_j^2$, the source is
+   $f_\ast(x)=-2\lbrace \sum_j x_j+d\gamma(x)\rbrace$. The degree-one solution has
    nonzero $L^2$ and $H^1$-seminorm errors, while the degree-two solution
-   reproduces $u_*$ to an absolute error below $10^{-10}$ in both norms.
+   reproduces $u_\ast$ to an absolute error below $10^{-10}$ in both norms.
 2. For $u(x)=\exp(\sum_j x_j)$, one has $\nabla u=u(1,\ldots,1)$ and
    $f=-d(1+\gamma)u$. The errors
    $E_{0,K}=\lVert u-u_K\rVert_{L^2(\Omega)}$ and
-   $E_{1,K}=|u-u_K|_{H^1(\Omega)}$ are integrated independently of the
+   $E_{1,K}=|u-u_K\rvert_{H^1(\Omega)}$ are integrated independently of the
    assembled residual. At every adjacent degree $K-1\to K$ for
    $K=2,3,4$, both errors must strictly decrease and satisfy
    $\log(E_{j,K-1}/E_{j,K})>0.25$ for $j=0,1$.

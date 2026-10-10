@@ -235,7 +235,12 @@ namespace Rodin::Variational
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& p, Callable&& v) const
       {
-        return m_fes.getPullback(p, std::forward<Callable>(v));
+        // Reuse the shared pullback implementation, but retain the MPI mesh
+        // identity. A shard-attached point loses SubMesh ancestry and cannot
+        // be included in a parent GridFunction's mesh.
+        const auto& [d, i] = p;
+        return Pullback<Callable>(
+          *getMesh().getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /// @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
@@ -498,7 +503,11 @@ namespace Rodin::Variational
       template <class Callable>
       auto getPullback(const std::pair<size_t, Index>& p, Callable&& v) const
       {
-        return m_fes.getPullback(p, std::forward<Callable>(v));
+        // The mathematical pullback is shared; point provenance belongs to
+        // the MPI mesh, not its rank-local shard (as for MPI P0 and H1).
+        const auto& [d, i] = p;
+        return Pullback<Callable>(
+          *getMesh().getPolytope(d, i), std::forward<Callable>(v));
       }
 
       /**
@@ -565,7 +574,8 @@ namespace Rodin::Variational
         : m_scalar(ScalarSpace(mesh)),
           m_rows(rows),
           m_cols(cols),
-          m_shard(mesh.getShard(), rows, cols)
+          m_shard(mesh.getShard(), rows, cols),
+          m_size(0)
       {
         if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
           cols > RODIN_MAXIMAL_SPACE_DIMENSION)
@@ -755,7 +765,7 @@ namespace Rodin::Variational
       size_t m_rows, m_cols;
       FESType m_shard;
       std::map<Index, Index> m_globalToLocal;
-      size_t m_size = 0;
+      size_t m_size;
       std::vector<std::vector<IndexArray>> m_dofs;
       std::map<Geometry::Polytope::Type, ElementType> m_elements;
   };

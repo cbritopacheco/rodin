@@ -96,6 +96,18 @@ namespace Rodin::Solver
    * Info::status holds the `Eigen::ComputationInfo` of the most recent
    * operation, and getLastErrorMessage() its diagnostic.
    *
+   * @par Architecture
+   * The operator is factorized once and the right-hand side is solved with
+   * those factors. Optional iterative refinement reuses the same factors:
+   * @f[
+   * r_k=b-Ax_k,\qquad A\delta x_k=r_k,\qquad x_{k+1}=x_k+\delta x_k.
+   * @f]
+   * Residuals and corrections use ScalarType arithmetic. Zero refinement
+   * steps, the default, preserve the direct solve. A fixed positive count
+   * can reduce forward error but does not guarantee monotonic improvement
+   * or repair a singular operator. Every factorization and correction solve
+   * updates the reported backend status; a failed correction is not applied.
+   *
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    */
   template <class Scalar>
@@ -129,7 +141,10 @@ namespace Rodin::Solver
        * @param pb Reference to the problem to solve
        */
       SparseLU(ProblemBaseType& pb)
-        : Parent(pb)
+        : Parent(pb),
+          m_refinementSteps(0),
+          m_info(),
+          m_solver()
       {}
 
       /**
@@ -137,7 +152,10 @@ namespace Rodin::Solver
        * @param other Solver to copy from
        */
       SparseLU(const SparseLU& other)
-        : Parent(other)
+        : Parent(other),
+          m_refinementSteps(other.m_refinementSteps),
+          m_info(),
+          m_solver()
       {}
 
       /**
@@ -145,8 +163,33 @@ namespace Rodin::Solver
        * @param other Solver to move from
        */
       SparseLU(SparseLU&& other)
-        : Parent(std::move(other))
+        : Parent(std::move(other)),
+          m_refinementSteps(other.m_refinementSteps),
+          m_info(),
+          m_solver()
       {}
+
+      /** @brief Set the number of residual-correction solves after the direct solve.
+       * The matrix and right-hand side are unchanged and no additional
+       * factorization is performed. The default is zero; no residual-based
+       * stopping tolerance or higher-precision arithmetic is introduced.
+       * @param steps Number of residual-correction solves after factorization.
+       * @returns Reference to this solver after updating the correction count.
+       */
+      SparseLU& setRefinementSteps(size_t steps)
+      {
+        m_refinementSteps = steps;
+        return *this;
+      }
+
+      /**
+       * @brief Get the configured number of residual-correction solves.
+       * @returns Number of corrections applied after the initial direct solve.
+       */
+      size_t getRefinementSteps() const
+      {
+        return m_refinementSteps;
+      }
 
       /**
        * @brief Solves the linear system using sparse LU factorization.
@@ -169,7 +212,17 @@ namespace Rodin::Solver
         }
         m_info.factorization = Factorization::Numeric;
         axb.getSolution() = m_solver.solve(axb.getVector());
-        record();
+        if (!record())
+          return;
+        for (size_t step = 0; step < m_refinementSteps; ++step)
+        {
+          const VectorType residual =
+            axb.getVector() - axb.getOperator() * axb.getSolution();
+          const VectorType correction = m_solver.solve(residual);
+          if (!record())
+            return;
+          axb.getSolution() += correction;
+        }
       }
 
       /**
@@ -212,6 +265,9 @@ namespace Rodin::Solver
       }
 
     private:
+      /// Number of solves with the retained factors after the direct solve.
+      size_t m_refinementSteps;
+
       /**
        * @brief Records the Eigen status, and returns whether it succeeded.
        * @returns True if the Eigen solver reports success; false otherwise.

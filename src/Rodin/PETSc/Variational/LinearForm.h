@@ -210,7 +210,7 @@ namespace Rodin::Variational
        * @brief Evaluates the linear form at a grid function @f$ u_h @f$.
        *
        * Computes the action @f$ L(u_h) = \mathbf{u}^* \mathbf{b} @f$
-       * via `VecDot(u, b, &result)`.
+       * via `VecDot(b, u, &result)`; PETSc conjugates the second operand.
        *
        * @param[in] u The grid function @f$ u_h @f$ to evaluate at.
        * @returns The scalar value @f$ L(u_h) @f$.
@@ -219,7 +219,7 @@ namespace Rodin::Variational
       {
         ScalarType result;
         PetscErrorCode ierr;
-        ierr = VecDot(u.getData(), this->getVector(), &result);
+        ierr = VecDot(this->getVector(), u.getData(), &result);
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
         return result;

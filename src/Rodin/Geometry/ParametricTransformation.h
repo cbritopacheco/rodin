@@ -35,6 +35,14 @@ namespace Rodin::Geometry
    * @f]
    *
    * The same class covers affine P1 geometry and curved Pk geometry.
+   *
+   * ## Quadrature evaluation
+   *
+   * A bulk Jacobian evaluation borrows the element's existing reference
+   * tabulation for the duration of the call, then contracts it with this
+   * transformation's control points. It retains no table reference or new
+   * cache. Elements without tabulation use the pointwise interface. The
+   * scalar accumulation order is unchanged in either case.
    */
   template <class FE>
   class ParametricTransformation final : public PolytopeTransformation
@@ -187,6 +195,50 @@ namespace Rodin::Geometry
       }
 
       /**
+       * @brief Computes quadrature Jacobians using the element's reference table.
+       *
+       * For control coordinates @f$P_{ja}@f$, each matrix entry is
+       * @f$J_{ji}(\hat x_q)=\sum_a P_{ja}\partial_i\phi_a(\hat x_q)@f$.
+       * Only reference derivatives are shared across cells; mapped matrices
+       * remain specific to the current transformation. Generic scalar elements
+       * without a table retain the default pointwise evaluation.
+       *
+       * @param[out] jacobians Jacobian matrices in quadrature-point order.
+       * @param[in] qf Reference formula identifying the element tabulation.
+       */
+      void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
+        const QF::QuadratureFormulaBase& qf) const override
+      {
+        if constexpr (requires { m_fe.getTabulation(qf); })
+        {
+          const auto& table = m_fe.getTabulation(qf);
+          const size_t rdim = getReferenceDimension(), pdim = getPhysicalDimension();
+          assert(table.dim == rdim);
+          assert(table.ndof == m_fe.getCount());
+          jacobians.resize(table.nqp);
+          for (size_t qp = 0; qp < table.nqp; ++qp)
+          {
+            auto& matrix = jacobians[qp];
+            matrix.resize(pdim, rdim);
+            matrix.setZero();
+            for (size_t local = 0; local < m_fe.getCount(); ++local)
+            {
+              const auto gradient = table.getGradient(qp, local);
+              for (size_t i = 0; i < rdim; ++i)
+              {
+                const Real value = gradient[i];
+                for (size_t j = 0; j < pdim && j < Math::SpatialMatrix<Real>::MaxSize;
+                     ++j)
+                  matrix(j, i) += m_pm(j, local) * value;
+              }
+            }
+          }
+        }
+        else
+          Parent::jacobian(jacobians, qf);
+      }
+
+      /**
        * @brief Gets the control-point coordinate matrix.
        * @returns The control-point coordinate matrix.
        */
@@ -211,6 +263,40 @@ namespace Rodin::Geometry
       ParametricTransformation* copy() const noexcept override
       {
         return new ParametricTransformation(*this);
+      }
+
+    protected:
+      /**
+       * @brief Maps a logical reference sample without retaining reference storage.
+       *
+       * When its existing table is present, @f$x_K(\hat x_q)=
+       * \sum_a X_{K,a}\phi_a(\hat x_q)@f$ is accumulated in pointwise order.
+       * Table eviction, another thread, and generic elements use direct
+       * evaluation at the point's owned coordinates instead.
+       *
+       * @param[out] pc Physical coordinates.
+       * @param rc Owned reference sample coordinates.
+       * @param identity Formula lifetime/assignment identity.
+       * @param qp Logical sample index established by point construction.
+       */
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
+        size_t identity, size_t qp) const override
+      {
+        if constexpr (requires { m_fe.findTabulation(identity); })
+        {
+          if (const auto found = m_fe.findTabulation(identity))
+          {
+            const auto& table = found->get();
+            assert(table.ndof == m_fe.getCount());
+            assert(qp < table.nqp);
+            pc.resize(getPhysicalDimension());
+            pc.setZero();
+            for (size_t local = 0; local < m_fe.getCount(); ++local)
+              pc += m_pm[local] * table.getBasis(qp, local);
+            return;
+          }
+        }
+        transform(pc, rc);
       }
 
     private:

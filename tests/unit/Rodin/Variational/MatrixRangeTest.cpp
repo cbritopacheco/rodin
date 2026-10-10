@@ -655,20 +655,41 @@ TEST(MatrixRange, TensorCoefficientCouplesAllMatrixEntries)
 
 TEST(MatrixRange, HigherOrdersPreserveComponentDuality)
 {
-  auto check = []<size_t K>(std::integral_constant<size_t, K>, G geometry) {
-    H1Element<K, Matrix> fe(geometry, 2, 3);
-    for (size_t a = 0; a < fe.getCount(); ++a)
+  auto checkRange = []<class Range>(std::type_identity<Range>) {
+    SCOPED_TRACE((std::is_same_v<Range, Matrix> ? "real matrix" : "complex matrix"));
+    auto check = []<size_t K>(std::integral_constant<size_t, K>, G geometry) {
+      SCOPED_TRACE(::testing::Message()
+        << "degree=" << K << ", geometry=" << static_cast<int>(geometry));
+      H1Element<K, Range> fe(geometry, 2, 3);
+      ASSERT_EQ(fe.getCount(), 6 * fe.getScalarElement().getCount());
+      for (size_t a = 0; a < fe.getCount(); ++a)
+      {
+        SCOPED_TRACE(a);
+        EXPECT_LE(std::abs(fe.getLinearForm(a)(fe.getBasis(a)) - 1.0), 1e-8);
+        EXPECT_LE(
+          std::abs(fe.getLinearForm(a)(fe.getBasis((a + 1) % fe.getCount()))), 1e-8);
+        // The neighbouring scalar node has the same matrix component. The
+        // adjacent flattened basis above usually checks a different component.
+        if (fe.getScalarElement().getCount() > 1)
+        {
+          EXPECT_LE(
+            std::abs(fe.getLinearForm(a)(fe.getBasis((a + 6) % fe.getCount()))), 1e-8);
+        }
+      }
+    };
+    for (auto geometry : {G::Point, G::Segment, G::Triangle, G::Quadrilateral,
+           G::Tetrahedron, G::Pyramid, G::Wedge, G::Hexahedron})
     {
-      EXPECT_NEAR(fe.getLinearForm(a)(fe.getBasis(a)), 1, 1e-8);
-      EXPECT_NEAR(fe.getLinearForm(a)(fe.getBasis((a + 1) % fe.getCount())), 0, 1e-8);
+      check(std::integral_constant<size_t, 1>{}, geometry);
+      check(std::integral_constant<size_t, 2>{}, geometry);
+      check(std::integral_constant<size_t, 3>{}, geometry);
+      check(std::integral_constant<size_t, 4>{}, geometry);
+      check(std::integral_constant<size_t, 5>{}, geometry);
+      check(std::integral_constant<size_t, 6>{}, geometry);
     }
   };
-  for (auto geometry : {G::Point, G::Segment, G::Triangle, G::Quadrilateral,
-         G::Tetrahedron, G::Pyramid, G::Wedge, G::Hexahedron})
-  {
-    check(std::integral_constant<size_t, 4>{}, geometry);
-    check(std::integral_constant<size_t, 5>{}, geometry);
-  }
+  checkRange(std::type_identity<Matrix>{});
+  checkRange(std::type_identity<Math::SpatialMatrix<Complex>>{});
 }
 
 TEST(MatrixRange, ComplexMatrixDifferentials)

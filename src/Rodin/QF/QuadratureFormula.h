@@ -50,14 +50,17 @@ namespace Rodin::QF
   class QuadratureFormulaBase : public Copyable
   {
     public:
-      QuadratureFormulaBase() = default;
+      QuadratureFormulaBase()
+        : m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
+      {}
 
       /**
        * @brief Copy constructor.
        * @param other Another quadrature formula to copy from
        */
       QuadratureFormulaBase(const QuadratureFormulaBase& other)
-        : Copyable(other)
+        : Copyable(other),
+          m_identity(s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed))
       {}
 
       /**
@@ -122,7 +125,7 @@ namespace Rodin::QF
 
     private:
       inline static std::atomic<size_t> s_nextCacheIdentity{0};
-      size_t m_identity = s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed);
+      size_t m_identity;
   };
 }
 

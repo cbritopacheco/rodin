@@ -15,6 +15,7 @@
 #include <cassert>
 #include <cmath>
 #include <functional>
+#include <limits>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/BalancedCompactPartitioner.h>
@@ -22,8 +23,9 @@
 #include <Rodin/MPI/Context/MPI.h>
 #include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
-#include <Rodin/MPI/Variational/P1.h>
+#include <Rodin/MPI/Variational.h>
 #include <Rodin/PETSc/Variational/GridFunction.h>
+#include <Rodin/Serialization/Vector.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -34,6 +36,269 @@ static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
+  /// @brief Partitions over nonzero ranks so every geometry has an empty root.
+  class EmptyRootPartitioner final : public Partitioner
+  {
+    public:
+      EmptyRootPartitioner(const Mesh<Context::Local>& mesh, size_t count)
+        : m_partitioner(mesh),
+          m_count(count)
+      {
+        m_partitioner.partition(count > 1 ? count - 1 : count);
+      }
+
+      const Mesh<Context::Local>& getMesh() const override
+      {
+        return m_partitioner.getMesh();
+      }
+
+      void partition(size_t count, size_t dimension) override
+      {
+        m_count = count;
+        m_partitioner.partition(count > 1 ? count - 1 : count, dimension);
+      }
+
+      size_t getCount() const override
+      {
+        return m_count;
+      }
+
+      size_t getPartition(Index index) const override
+      {
+        return m_partitioner.getPartition(index) + (m_count > 1);
+      }
+
+    private:
+      BalancedCompactPartitioner m_partitioner;
+      size_t m_count;
+  };
+
+  Mesh<Context::MPI> distributeWithEmptyRoot(const Context::MPI& ctx, Polytope::Type type)
+  {
+    const auto& comm = ctx.getCommunicator();
+    Sharder<Context::MPI> sharder(ctx);
+    if (comm.rank() == 0)
+    {
+      const size_t dim = Polytope::Traits(type).getDimension();
+      auto local = dim == 1 ? Mesh<Context::Local>::UniformGrid(type, {3})
+        : dim == 2          ? Mesh<Context::Local>::UniformGrid(type, {3, 3})
+                            : Mesh<Context::Local>::UniformGrid(type, {3, 3, 3});
+      local.getConnectivity().compute(dim, dim);
+      for (size_t d = 1; d <= dim; ++d)
+      {
+        local.getConnectivity().compute(dim, d - 1);
+        local.getConnectivity().compute(d, d - 1);
+      }
+      EmptyRootPartitioner partitioner(local, static_cast<size_t>(comm.size()));
+      sharder.shard(partitioner);
+      sharder.scatter(0);
+    }
+    return sharder.gather(0);
+  }
+
+  /**
+   * @brief Checks owner and ghost coefficients against a global source oracle.
+   *
+   * Each owned eligible cell contributes its actual finite-element functionals
+   * to an independent all-gather. For each global DOF, the reference chooses
+   * the smallest distributed cell index. The expression depends on that index,
+   * so competing incident-cell sources produce distinguishable coefficients.
+   * No coordinate matching or nodal interpretation of H1 coefficients is used.
+   * Full, odd-cell and empty selections also check preservation outside the
+   * selected region. The const read is deliberately kept open before project.
+   */
+  template <class FES, class Function>
+  void checkInterpolation(const FES& fes, size_t dim, const Function& function)
+  {
+    const auto& comm = *g_world;
+    const auto& shard = fes.getMesh().getShard();
+    Rodin::PETSc::Variational::GridFunction field(fes);
+    const auto& read = field;
+    const Index none = std::numeric_limits<Index>::max();
+    std::vector<PetscScalar> aliasExpected(fes.getSize(), PetscScalar(-7));
+    for (size_t filter = 0; filter < 3; ++filter)
+    {
+      SCOPED_TRACE(::testing::Message() << "filter=" << filter);
+      const auto eligible = [&](const Polytope& cell) {
+        const Index gid = shard.getPolytopeMap(dim).left.at(cell.getIndex());
+        return filter == 0 || (filter == 1 && gid % 2 == 1);
+      };
+      std::vector<Index> localIndices;
+      std::vector<PetscScalar> localValues;
+      for (Index cell = 0; cell < shard.getPolytopeCount(dim); ++cell)
+      {
+        if (!shard.isOwned(dim, cell) || !eligible(*fes.getMesh().getPolytope(dim, cell)))
+          continue;
+        const auto& fe = fes.getFiniteElement(dim, cell);
+        const auto pullback = fes.getPullback({dim, cell}, function);
+        for (Index local = 0; local < fe.getCount(); ++local)
+        {
+          localIndices.push_back(fes.getGlobalIndex({dim, cell}, local));
+          localIndices.push_back(shard.getPolytopeMap(dim).left.at(cell));
+          localValues.push_back(fe.getLinearForm(local)(pullback));
+        }
+      }
+      std::vector<std::vector<Index>> allIndices;
+      std::vector<std::vector<PetscScalar>> allValues;
+      boost::mpi::all_gather(comm, localIndices, allIndices);
+      boost::mpi::all_gather(comm, localValues, allValues);
+      std::vector<Index> source(fes.getSize(), none);
+      std::vector<PetscScalar> expected(fes.getSize(), PetscScalar(-7));
+      for (size_t rank = 0; rank < allIndices.size(); ++rank)
+      {
+        for (size_t i = 0; i < allValues[rank].size(); ++i)
+        {
+          const Index dof = allIndices[rank][2 * i];
+          const Index cell = allIndices[rank][2 * i + 1];
+          if (cell < source[dof])
+          {
+            source[dof] = cell;
+            expected[dof] = allValues[rank][i];
+          }
+        }
+      }
+      if (filter == 0)
+        for (Index dof = 0; dof < fes.getSize(); ++dof)
+        {
+          if (source[dof] != none)
+            aliasExpected[dof] = PetscScalar(-14);
+        }
+
+      field = PetscScalar(-7);
+      if (fes.getShard().getSize() > 0)
+      {
+        EXPECT_EQ(read[fes.getGlobalIndex(0)], PetscScalar(-7));
+      }
+      field.project(Region::Cells, function, eligible);
+      Index begin = 0;
+      Index end = 0;
+      fes.getOwnershipRange(begin, end);
+      for (Index dof = begin; dof < end; ++dof)
+        EXPECT_EQ(read[dof], expected[dof]) << "owned global DOF=" << dof;
+      for (Index local = 0; local < fes.getShard().getSize(); ++local)
+      {
+        const Index dof = fes.getGlobalIndex(local);
+        EXPECT_EQ(read[dof], expected[dof]) << "represented global DOF=" << dof;
+      }
+      read.flush();
+    }
+
+    // Every source coefficient is read before any destination value changes.
+    // This checks aliasing through an expression, including higher-order
+    // functionals whose evaluation reads several coefficients at once.
+    field.project(Region::Cells, field + field, [](const auto&) { return true; });
+    for (Index local = 0; local < fes.getShard().getSize(); ++local)
+    {
+      const Index dof = fes.getGlobalIndex(local);
+      EXPECT_LE(PetscAbsScalar(read[dof] - aliasExpected[dof]), Real(1e-10));
+    }
+    read.flush();
+  }
+
+  void checkInterpolationSpaces(const Mesh<Context::MPI>& mesh, size_t dim)
+  {
+    const auto& shard = mesh.getShard();
+#if defined(PETSC_USE_COMPLEX)
+    ComplexFunction scalar([&](const Point& point) {
+#else
+    RealFunction scalar([&](const Point& point) {
+#endif
+      const Index gid = shard.getPolytopeMap(dim).left.at(point.getPolytope().getIndex());
+      Real value = Real(2) + Real(gid);
+      const auto& coordinates = point.getPhysicalCoordinates();
+      for (size_t d = 0; d < coordinates.size(); ++d)
+        value += coordinates(d);
+#if defined(PETSC_USE_COMPLEX)
+      return Complex(value, Real(2) * value);
+#else
+      return value;
+#endif
+    });
+    const auto vector = VectorFunction(size_t(2), [scalar](const Point& point) {
+      Math::SpatialVector<PetscScalar> value(2);
+      value(0) = scalar(point);
+      value(1) = Real(2) * value(0);
+      return value;
+    });
+    const auto checkScalar = [&](const auto& fes, const char* name) {
+      SCOPED_TRACE(name);
+      checkInterpolation(fes, dim, scalar);
+    };
+    const auto checkVector = [&](const auto& fes, const char* name) {
+      SCOPED_TRACE(name);
+      checkInterpolation(fes, dim, vector);
+    };
+    using Scalar = PetscScalar;
+    using Vector = Math::SpatialVector<Scalar>;
+    using MeshType = Mesh<Context::MPI>;
+    checkScalar(P0<Scalar, MeshType>(mesh), "P0 scalar");
+    checkVector(P0<Vector, MeshType>(mesh, size_t(2)), "P0 vector");
+    checkScalar(P0g<Scalar, MeshType>(mesh), "P0g scalar");
+    checkVector(P0g<Vector, MeshType>(mesh, size_t(2)), "P0g vector");
+    checkScalar(P1<Scalar, MeshType>(mesh), "P1 scalar");
+    checkVector(P1<Vector, MeshType>(mesh, size_t(2)), "P1 vector");
+    checkScalar(
+      H1<1, Scalar, MeshType>(std::integral_constant<size_t, 1>{}, mesh), "H1 K1 scalar");
+    checkVector(
+      H1<1, Vector, MeshType>(std::integral_constant<size_t, 1>{}, mesh, size_t(2)),
+      "H1 K1 vector");
+    checkScalar(
+      H1<2, Scalar, MeshType>(std::integral_constant<size_t, 2>{}, mesh), "H1 K2 scalar");
+    checkVector(
+      H1<2, Vector, MeshType>(std::integral_constant<size_t, 2>{}, mesh, size_t(2)),
+      "H1 K2 vector");
+    checkScalar(
+      H1<3, Scalar, MeshType>(std::integral_constant<size_t, 3>{}, mesh), "H1 K3 scalar");
+    checkVector(
+      H1<3, Vector, MeshType>(std::integral_constant<size_t, 3>{}, mesh, size_t(2)),
+      "H1 K3 vector");
+  }
+
+  class PETSc_MPI_Interpolation : public ::testing::TestWithParam<Polytope::Type>
+  {};
+
+  TEST_P(PETSc_MPI_Interpolation, SourcesAndStorageAcrossSpaces)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    auto mesh = distributeWithEmptyRoot(ctx, GetParam());
+    if (g_world->size() > 1 && g_world->rank() == 0)
+    {
+      EXPECT_EQ(mesh.getShard().getVertexCount(), 0);
+    }
+    checkInterpolationSpaces(mesh, Polytope::Traits(GetParam()).getDimension());
+  }
+
+  /**
+   * @brief Zero-dimensional interpolation distinguishes actual point entities
+   *        from an empty domain, including PETSc vectors with no owned entries.
+   *
+   * The point belongs only to the last rank, leaving the P0g coefficient owner
+   * without any source entity whenever more than one rank participates.
+   */
+  TEST(PETSc_MPI_GridFunction, EmptyAndPointMeshInterpolation)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    for (const bool includePoint : {false, true})
+    {
+      SCOPED_TRACE(includePoint);
+      Shard::Builder builder;
+      builder.initialize(0, 3);
+      if (includePoint && g_world->rank() == g_world->size() - 1)
+        builder.vertex(0, Math::SpatialPoint{0, 0, 0}, Shard::State::Owned);
+      auto mesh =
+        Mesh<Context::MPI>::Builder(ctx).initialize(builder.finalize()).finalize();
+      EXPECT_EQ(mesh.getDimension(), 0);
+      EXPECT_EQ(mesh.getShard().getVertexCount(),
+        size_t(includePoint && g_world->rank() == g_world->size() - 1));
+      checkInterpolationSpaces(mesh, 0);
+    }
+  }
+
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, PETSc_MPI_Interpolation,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge));
+
   /// @brief Returns the PETSc object id of a vector.
   ///
   /// Unlike the raw handle, an id is never reused by a later object, which
@@ -99,7 +364,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     gf = static_cast<PetscScalar>(3.0);
@@ -126,7 +391,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     if (world.rank() == 0)
@@ -148,8 +413,8 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
-    P1 vectorFES(mesh, size_t(2));
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
+    P1<Math::SpatialVector<PetscScalar>, Mesh<Context::MPI>> vectorFES(mesh, size_t(2));
     Rodin::PETSc::Variational::GridFunction gf(fes);
     Rodin::PETSc::Variational::GridFunction vector(vectorFES);
     gf = static_cast<PetscScalar>(3.25);
@@ -179,7 +444,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction y(fes);
     Rodin::PETSc::Variational::GridFunction x(fes);
 
@@ -220,7 +485,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction y(fes);
     Rodin::PETSc::Variational::GridFunction zero(fes);
 
@@ -259,7 +524,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     writeShardDOFs(mesh, fes, gf, [](Index) { return static_cast<PetscScalar>(5.0); });
@@ -301,7 +566,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     const auto dofValue = [](Index i) {
@@ -348,7 +613,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     Index begin = 0;
@@ -396,7 +661,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction source(fes);
     Rodin::PETSc::Variational::GridFunction destination(fes);
 
