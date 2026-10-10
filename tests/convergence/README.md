@@ -730,6 +730,24 @@ hosted CI are additional completion requirements, reported separately from
 the rate-entry percentage. Benchmark registrations, sanity checks and timing
 samples do not increase convergence coverage.
 
+A CTest registration is an execution group, not necessarily one entry of
+$\mathcal C$: a single geometry/backend registration can select several
+patches, rate studies and negative controls. Registration-level progress must
+therefore be labelled separately from case-level numerical coverage. A group
+is complete only when every selected case passes; rank-local reports are
+participants in that calculation, not additional independent cases. Neither
+percentage estimates remaining wall-clock time, since the finest 3D studies
+can dominate the execution cost.
+
+The registration census must include discovery-based tests whose executables
+have not yet been built: CTest's configured listing alone can omit these tests.
+The current source declarations and enabled backend configuration determine the
+matrix. Identical native registrations in real- and complex-PETSc build trees
+are not counted twice within one thread configuration; distinct real- and
+complex-PETSc calculations remain separate, even when their test names agree.
+Retained discovery listings and runtime logs must be reconciled with current
+sources rather than combined by an unchecked union of test names.
+
 | Priority | Extension | Required evidence |
 | --- | --- | --- |
 | 1 | PETSc local and MPI PDE coverage: remaining boundary/refinement variants of Poisson, Helmholtz, conductivity, linear elasticity, Stokes, coupled reaction–diffusion, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
