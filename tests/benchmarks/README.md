@@ -494,6 +494,16 @@ mesh-owned borrowed quadratures. This prevents untimed validation from retaining
 all cells' quadrature points during timed assembly. Integer request-count
 regressions enforce that lifecycle separately from numerical agreement.
 
+Mapped-quadrature construction prepares the current cell's Jacobians in one
+bulk transformation call. H1 geometry reuses its existing reference derivative
+table, but mapped matrices remain owned by each geometric point. The same
+assembly benchmark therefore measures this change without a separate assembly
+path. Pointwise-versus-bulk exact comparisons, logical formula-lifetime checks,
+and point copy/move/rebinding tests gate the geometry operation independently
+of the assembled numerical oracles. Assembly introduces no MPI collective for
+this operation and retains mapped points only for its currently bound cells;
+the explicit mesh-owned quadrature cache remains a separate public facility.
+
 ```sh
 build/tests/benchmarks/RodinNonlinearPoissonAssemblyBenchmarks \
   --benchmark_filter='^NonlinearPoisson/(Residual|Tangent)/P1/Tetrahedron/' \

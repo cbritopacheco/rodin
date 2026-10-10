@@ -14,6 +14,78 @@
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
+/**
+ * @brief Preserves implicit Eigen coordinate construction alongside cached Jacobians.
+ *
+ * Existing vector values and expressions must select the physical-coordinate
+ * constructor unambiguously. The new Jacobian-first form is checked separately.
+ * All positive-dimensional reference geometries are exercised with exact entries.
+ */
+TEST(Geometry_Point, EigenCoordinatesRemainUnambiguous)
+{
+  class EigenPoint final : public PointBase
+  {
+    public:
+      /**
+       * @brief Constructs the base directly from existing Eigen coordinates.
+       * @param polytope Containing polytope.
+       * @param reference Reference coordinates.
+       * @param physical Physical coordinates in an Eigen vector.
+       */
+      EigenPoint(const Polytope& polytope, const Math::SpatialPoint& reference,
+        const Eigen::VectorXd& physical)
+        : PointBase(polytope, physical),
+          m_reference(reference)
+      {}
+
+      /**
+       * @brief Gets the reference coordinates.
+       * @returns The owned reference coordinates.
+       */
+      const Math::SpatialPoint& getReferenceCoordinates() const override
+      {
+        return m_reference;
+      }
+
+    private:
+      Math::SpatialPoint m_reference;
+  };
+
+  for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    Array<size_t> shape(Polytope::Traits(geometry).getDimension());
+    shape.setConstant(3);
+    const auto mesh = Mesh<Context::Local>::UniformGrid(geometry, shape);
+    const auto polytope = *mesh.getCell();
+    const auto reference = Polytope::Traits(geometry).getCentroid();
+    const Point direct(polytope, reference);
+    const auto& physical = direct.getPhysicalCoordinates();
+    Eigen::VectorXd eigenReference(reference.size()), eigenPhysical(physical.size());
+    for (size_t i = 0; i < reference.size(); ++i)
+      eigenReference[i] = reference[i];
+    for (size_t i = 0; i < physical.size(); ++i)
+      eigenPhysical[i] = physical[i];
+    const Point value(polytope, reference, eigenPhysical);
+    const Point expression(polytope,
+      eigenReference + Eigen::VectorXd::Zero(reference.size()),
+      eigenPhysical + Eigen::VectorXd::Zero(physical.size()));
+    const EigenPoint base(polytope, reference, eigenPhysical);
+    const Point prepared(direct.getJacobian(), polytope, reference);
+    for (size_t i = 0; i < physical.size(); ++i)
+    {
+      EXPECT_EQ(value.getPhysicalCoordinates()[i], physical[i]);
+      EXPECT_EQ(expression.getPhysicalCoordinates()[i], physical[i]);
+      EXPECT_EQ(base.getPhysicalCoordinates()[i], physical[i]);
+      EXPECT_EQ(prepared.getPhysicalCoordinates()[i], physical[i]);
+      for (size_t j = 0; j < reference.size(); ++j)
+        EXPECT_EQ(prepared.getJacobian()(i, j), direct.getJacobian()(i, j));
+    }
+  }
+}
+
 // ==================== Basic Construction Tests ====================
 
 /// @brief Verifies basic construction 2 D triangle for geometry point by checking exact expected values.

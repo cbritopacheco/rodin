@@ -50,6 +50,11 @@ compare coordinate/key sets in tests.
 - `PointCloud` — sdim × n coordinate container with Eigen views, the input
   for parametric transformations.
 - `PolytopeQuadrature` caches quadrature data attached to mesh polytopes.
+  Construction evaluates the cell's quadrature Jacobians in one bulk
+  transformation call and stores them in the points' existing owned caches.
+  Parametric H1 geometry borrows its existing reference table only during this
+  call; neither points nor transformations retain a table or formula pointer.
+  Physical coordinates and derived metric quantities remain lazy.
   Variational rules own only their bound polytope's mapped points. The explicit
   mesh cache is retained for callers requiring borrowed quadratures whose
   lifetime extends until geometry is flushed; variational quadrature rules

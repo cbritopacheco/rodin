@@ -1,11 +1,14 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <vector>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational/H1.h>
 #include <Rodin/Variational/P1.h>
+#include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/Test/Random/RandomPointOnTriangle.h>
 
 using namespace Rodin;
@@ -381,12 +384,519 @@ namespace Rodin::Tests::Unit
         Math::SpatialMatrix<Real> J;
         transformation.jacobian(J, Polytope::Traits(geometry).getCentroid());
         EXPECT_EQ(evaluations, fe.getCount() * Polytope::Traits(geometry).getDimension());
+        evaluations = 0;
+        const auto& formula = QF::PolytopeQuadratureFormula::get(4, geometry);
+        std::vector<Math::SpatialMatrix<Real>> matrices;
+        transformation.jacobian(matrices, formula);
+        EXPECT_EQ(matrices.size(), formula.getSize());
+        EXPECT_EQ(evaluations,
+          formula.getSize() * fe.getCount() * Polytope::Traits(geometry).getDimension());
       };
       SCOPED_TRACE(static_cast<int>(geometry));
       check.template operator()<1>();
       check.template operator()<2>();
       check.template operator()<3>();
       check.template operator()<4>();
+    }
+  }
+
+  /**
+   * @brief Exercises quadrature Jacobians independently of field and backend.
+   *
+   * ## Architecture
+   *
+   * Bulk evaluation is compared with direct basis evaluation using distinct
+   * control clouds. Formula-read and basis-read counters independently certify
+   * that reference tables, rather than physical Jacobians, are reused across
+   * transformations. Logical lifetime changes invalidate reference reuse.
+   */
+  class QuadratureTransformationTest : public ::testing::Test
+  {
+    protected:
+      /**
+       * @brief Compares bulk evaluation with the pointwise transformation.
+       * @tparam K Geometry element degree.
+       * @param geometry Reference polytope type.
+       */
+      template <size_t K>
+      void checkEvaluation(Polytope::Type geometry)
+      {
+        SCOPED_TRACE(K);
+        Variational::RealH1Element<K> element(geometry);
+        const size_t rdim = Polytope::Traits(geometry).getDimension();
+        for (const size_t order : {size_t(8), size_t(16)})
+        {
+          SCOPED_TRACE(order);
+          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+          for (size_t pdim = std::max(size_t(1), rdim); pdim <= 3; ++pdim)
+          {
+            for (size_t cell = 0; cell < 2; ++cell)
+            {
+              PointCloud controls(pdim, element.getCount());
+              for (size_t a = 0; a < element.getCount(); ++a)
+              {
+                for (size_t j = 0; j < pdim; ++j)
+                {
+                  controls(j, a) = Real((a + 1) * (j + 1) + cell) /
+                    Real(element.getCount() + cell + 1) * (a % 2 ? -1 : 1);
+                }
+              }
+              ParametricTransformation transformation(controls, element);
+              const PolytopeTransformation& polymorphic = transformation;
+              std::vector<Math::SpatialMatrix<Real>> matrices;
+              polymorphic.jacobian(matrices, formula);
+              ASSERT_EQ(matrices.size(), formula.getSize());
+              for (size_t qp = 0; qp < matrices.size(); ++qp)
+              {
+                Math::SpatialMatrix<Real> expected;
+                transformation.jacobian(expected, formula.getPoint(qp));
+                ASSERT_EQ(matrices[qp].rows(), expected.rows());
+                ASSERT_EQ(matrices[qp].cols(), expected.cols());
+                for (size_t j = 0; j < pdim; ++j)
+                {
+                  for (size_t i = 0; i < rdim; ++i)
+                    EXPECT_EQ(matrices[qp](j, i), expected(j, i));
+                }
+              }
+            }
+          }
+        }
+      }
+
+      class ObservedFormula final : public QF::QuadratureFormulaBase
+      {
+        public:
+          /**
+           * @brief Constructs an observed one-point formula.
+           * @param point Reference coordinate returned by the formula.
+           */
+          explicit ObservedFormula(const Math::SpatialPoint& point)
+            : m_point(point),
+              m_reads(0)
+          {}
+          /**
+           * @brief Copies the point with a new logical formula identity.
+           * @param other Formula whose point is copied.
+           */
+          ObservedFormula(const ObservedFormula& other)
+            : QuadratureFormulaBase(other),
+              m_point(other.m_point),
+              m_reads(0)
+          {}
+          /**
+           * @brief Assigns a point and invalidates the old logical identity.
+           * @param other Formula whose point is copied.
+           * @returns This formula after assignment.
+           */
+          ObservedFormula& operator=(const ObservedFormula& other)
+          {
+            QuadratureFormulaBase::operator=(other);
+            m_point = other.m_point;
+            m_reads = 0;
+            return *this;
+          }
+          /**
+           * @brief Returns the single reference sample.
+           * @returns The formula size, one.
+           */
+          size_t getSize() const override
+          {
+            return 1;
+          }
+          /**
+           * @brief Returns the dummy unit weight used by the cache probe.
+           * @param i Sample index; unused because this probe does not integrate.
+           * @returns Unit weight.
+           */
+          Real getWeight([[maybe_unused]] size_t i) const override
+          {
+            return 1;
+          }
+          /**
+           * @brief Reads and counts the single reference sample.
+           * @param i Sample index, which must be zero.
+           * @returns The stored reference coordinates.
+           */
+          const Math::SpatialPoint& getPoint(size_t i) const override
+          {
+            assert(i == 0);
+            ++m_reads;
+            return m_point;
+          }
+          /**
+           * @brief Returns the number of reference-point reads.
+           * @returns Number of calls to getPoint().
+           */
+          size_t getReads() const
+          {
+            return m_reads;
+          }
+          /**
+           * @brief Copies the observed formula polymorphically.
+           * @returns A newly owned formula copy.
+           */
+          ObservedFormula* copy() const noexcept override
+          {
+            return new ObservedFormula(*this);
+          }
+
+        private:
+          Math::SpatialPoint m_point;
+          mutable size_t m_reads;
+      };
+
+      struct ObservedElement
+      {
+          using RangeType = Real;
+          Variational::RealH1Element<2> element;
+          size_t* basisReads;
+          size_t* tableReads;
+          /**
+         * @brief Observes an H1 geometry element's evaluation entry points.
+         * @param geometry Reference geometry type.
+         * @param basis Counter for direct basis access.
+         * @param table Counter for reference-table access.
+         */
+          ObservedElement(Polytope::Type geometry, size_t& basis, size_t& table)
+            : element(geometry),
+              basisReads(&basis),
+              tableReads(&table)
+          {}
+          /**
+         * @brief Gets the underlying reference geometry.
+         * @returns The element geometry type.
+         */
+          auto getGeometry() const
+          {
+            return element.getGeometry();
+          }
+          /**
+         * @brief Gets the underlying basis count.
+         * @returns Number of scalar basis functions.
+         */
+          size_t getCount() const
+          {
+            return element.getCount();
+          }
+          /**
+         * @brief Gets the geometry element order.
+         * @returns The element order.
+         */
+          size_t getOrder() const
+          {
+            return element.getOrder();
+          }
+          /**
+         * @brief Counts direct scalar basis access.
+         * @param i Local scalar basis index.
+         * @returns The underlying basis function.
+         */
+          const auto& getBasis(size_t i) const
+          {
+            ++*basisReads;
+            return element.getBasis(i);
+          }
+          /**
+         * @brief Counts access to the existing shared reference table.
+         * @param formula Formula defining the reference sample set.
+         * @returns The underlying element tabulation.
+         */
+          const auto& getTabulation(const QF::QuadratureFormulaBase& formula) const
+          {
+            ++*tableReads;
+            return element.getTabulation(formula);
+          }
+      };
+
+      /**
+       * @brief Certifies reference-only reuse and formula lifetime invalidation.
+       * @param geometry Reference polytope type.
+       */
+      void checkReuse(Polytope::Type geometry)
+      {
+        const Polytope::Traits traits(geometry);
+        const auto centroid = traits.getCentroid();
+        const auto vertex = traits.getVertex(0);
+        size_t basisReads = 0, tableReads = 0;
+        ObservedElement element(geometry, basisReads, tableReads);
+        PointCloud first(3, element.getCount()), second(3, element.getCount());
+        for (size_t a = 0; a < element.getCount(); ++a)
+        {
+          for (size_t j = 0; j < 3; ++j)
+          {
+            first(j, a) = Real((a + 1) * (j + 1)) / element.getCount();
+            second(j, a) = 2 * first(j, a);
+          }
+        }
+        ParametricTransformation firstMap(first, element), secondMap(second, element);
+        Optional<ObservedFormula> formula;
+        formula.emplace(centroid);
+        const auto* address = &*formula;
+        const auto initialIdentity = formula->getCacheIdentity();
+        std::vector<Math::SpatialMatrix<Real>> firstMatrices, secondMatrices;
+        firstMap.jacobian(firstMatrices, *formula);
+        ASSERT_EQ(formula->getReads(), 1);
+        secondMap.jacobian(secondMatrices, *formula);
+        EXPECT_EQ(formula->getReads(), 1);
+        EXPECT_EQ(tableReads, 2);
+        EXPECT_EQ(basisReads, 0);
+        for (size_t j = 0; j < 3; ++j)
+        {
+          for (size_t i = 0; i < traits.getDimension(); ++i)
+            EXPECT_EQ(secondMatrices[0](j, i), 2 * firstMatrices[0](j, i));
+        }
+        *formula = ObservedFormula(vertex);
+        ASSERT_EQ(&*formula, address);
+        ASSERT_NE(formula->getCacheIdentity(), initialIdentity);
+        firstMap.jacobian(firstMatrices, *formula);
+        EXPECT_EQ(formula->getReads(), 1);
+        const auto assignedMatrices = firstMatrices;
+        const auto assignedIdentity = formula->getCacheIdentity();
+        formula.emplace(centroid);
+        ASSERT_EQ(&*formula, address);
+        ASSERT_NE(formula->getCacheIdentity(), assignedIdentity);
+        firstMap.jacobian(firstMatrices, *formula);
+        EXPECT_EQ(formula->getReads(), 1);
+        EXPECT_EQ(tableReads, 4);
+        EXPECT_EQ(basisReads, 0);
+        ParametricTransformation baseline(first, element.element);
+        Math::SpatialMatrix<Real> expectedCentroid, expectedVertex;
+        baseline.jacobian(expectedCentroid, centroid);
+        baseline.jacobian(expectedVertex, vertex);
+        for (size_t j = 0; j < 3; ++j)
+        {
+          for (size_t i = 0; i < traits.getDimension(); ++i)
+          {
+            EXPECT_EQ(firstMatrices[0](j, i), expectedCentroid(j, i));
+            EXPECT_EQ(assignedMatrices[0](j, i), expectedVertex(j, i));
+          }
+        }
+      }
+
+      /**
+       * @brief Observes geometric evaluation without changing its arithmetic.
+       *
+       * Pointwise and bulk entry counters distinguish owned point-cache access
+       * from repeated transformation evaluation. The wrapped Q2 map owns all
+       * geometric coefficients; counters are borrowed for the test lifetime.
+       */
+      class ObservedTransformation final : public PolytopeTransformation
+      {
+        public:
+          /**
+           * @brief Constructs an observed parametric geometry map.
+           * @param controls Physical geometry-node coordinates.
+           * @param element Scalar Q2 reference element.
+           * @param point Counter for pointwise Jacobian evaluation.
+           * @param bulk Counter for quadrature Jacobian evaluation.
+           */
+          ObservedTransformation(const PointCloud& controls,
+            const Variational::RealH1Element<2>& element, size_t& point, size_t& bulk)
+            : PolytopeTransformation(
+                Polytope::Traits(element.getGeometry()).getDimension(), controls.rows()),
+              m_map(controls, element),
+              m_point(&point),
+              m_bulk(&bulk)
+          {}
+
+          /**
+           * @brief Copies the geometry map and retains its observed counters.
+           * @param other Transformation being copied.
+           */
+          ObservedTransformation(const ObservedTransformation& other)
+            : PolytopeTransformation(other),
+              m_map(other.m_map),
+              m_point(other.m_point),
+              m_bulk(other.m_bulk)
+          {}
+
+          /**
+           * @brief Gets the underlying map order.
+           * @returns The geometry order.
+           */
+          size_t getOrder() const override
+          {
+            return m_map.getOrder();
+          }
+
+          /**
+           * @brief Evaluates the underlying physical map.
+           * @param[out] physical Mapped physical coordinates.
+           * @param[in] reference Reference coordinates.
+           */
+          void transform(Math::SpatialPoint& physical,
+            const Math::SpatialPoint& reference) const override
+          {
+            m_map.transform(physical, reference);
+          }
+
+          /**
+           * @brief Counts direct geometric Jacobian evaluation.
+           * @param[out] matrix Geometric Jacobian.
+           * @param[in] reference Reference coordinates.
+           */
+          void jacobian(Math::SpatialMatrix<Real>& matrix,
+            const Math::SpatialPoint& reference) const override
+          {
+            ++*m_point;
+            m_map.jacobian(matrix, reference);
+          }
+
+          /**
+           * @brief Counts bulk geometric Jacobian evaluation.
+           * @param[out] matrices Geometric Jacobians in formula order.
+           * @param[in] formula Reference quadrature formula.
+           */
+          void jacobian(std::vector<Math::SpatialMatrix<Real>>& matrices,
+            const QF::QuadratureFormulaBase& formula) const override
+          {
+            ++*m_bulk;
+            m_map.jacobian(matrices, formula);
+          }
+
+          /**
+           * @brief Copies the observed transformation polymorphically.
+           * @returns A newly owned transformation copy.
+           */
+          ObservedTransformation* copy() const noexcept override
+          {
+            return new ObservedTransformation(*this);
+          }
+
+        private:
+          ParametricTransformation<Variational::RealH1Element<2>> m_map;
+          size_t* m_point;
+          size_t* m_bulk;
+      };
+
+      /**
+       * @brief Certifies point ownership and invalidation after bulk evaluation.
+       * @param geometry Positive-dimensional reference geometry type.
+       */
+      void checkPointOwnership(Polytope::Type geometry)
+      {
+        const size_t dimension = Polytope::Traits(geometry).getDimension();
+        Array<size_t> shape(dimension);
+        shape.setConstant(3);
+        auto mesh = Mesh<Context::Local>::UniformGrid(geometry, shape);
+        const std::array<Polytope, 2> cells{
+          *mesh.getPolytope(dimension, 0), *mesh.getPolytope(dimension, 1)};
+        Variational::RealH1Element<2> element(geometry);
+        std::array<PointCloud, 2> controls;
+        size_t pointReads = 0, bulkReads = 0;
+        // This shear has positive derivative in 1D and unit determinant in 2D/3D.
+        constexpr Real ShearAmplitude = Real(1) / 8;
+        for (size_t cell = 0; cell < cells.size(); ++cell)
+        {
+          controls[cell].resize(dimension, element.getCount());
+          for (size_t a = 0; a < element.getCount(); ++a)
+          {
+            Point point(cells[cell], element.getNode(a));
+            auto physical = point.getPhysicalCoordinates();
+            physical(dimension - 1) += ShearAmplitude * physical(0) * physical(0);
+            for (size_t j = 0; j < dimension; ++j)
+              controls[cell](j, a) = physical(j);
+          }
+          mesh.setPolytopeTransformation({dimension, cells[cell].getIndex()},
+            new ObservedTransformation(controls[cell], element, pointReads, bulkReads));
+        }
+        Optional<Point> retained;
+        Math::SpatialPoint reference;
+        {
+          QF::PolytopeQuadratureFormula formula(8, geometry);
+          reference = formula.getPoint(0);
+          PolytopeQuadrature quadrature(cells[0], formula);
+          EXPECT_EQ(bulkReads, 1);
+          for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
+            static_cast<void>(quadrature.getPoint(qp).getJacobian());
+          EXPECT_EQ(pointReads, 0);
+          PolytopeQuadrature moved(std::move(quadrature));
+          PolytopeQuadrature copied(moved);
+          Point copy(copied.getPoint(0));
+          retained.emplace(std::move(copy));
+        }
+        // The formula and both quadratures have been destroyed. The point owns
+        // its coordinates and Jacobian, with no borrowed table or formula.
+        const auto& jacobian = retained->getJacobian();
+        EXPECT_EQ(pointReads, 0);
+        EXPECT_EQ(bulkReads, 1);
+        Point direct(cells[0], reference);
+        const auto& expected = direct.getJacobian();
+        for (size_t j = 0; j < dimension; ++j)
+        {
+          EXPECT_EQ(
+            retained->getPhysicalCoordinates()(j), direct.getPhysicalCoordinates()(j));
+          for (size_t i = 0; i < dimension; ++i)
+          {
+            EXPECT_EQ(jacobian(j, i), expected(j, i));
+            EXPECT_EQ(
+              retained->getJacobianInverse()(j, i), direct.getJacobianInverse()(j, i));
+          }
+        }
+        EXPECT_EQ(retained->getJacobianDeterminant(), direct.getJacobianDeterminant());
+        EXPECT_EQ(retained->getDistortion(), direct.getDistortion());
+        EXPECT_EQ(pointReads, 1);
+        retained->setPolytope(cells[1]);
+        static_cast<void>(retained->getJacobian());
+        EXPECT_EQ(pointReads, 2);
+        Point rebound(cells[1], reference);
+        for (size_t j = 0; j < dimension; ++j)
+        {
+          EXPECT_EQ(
+            retained->getPhysicalCoordinates()(j), rebound.getPhysicalCoordinates()(j));
+          for (size_t i = 0; i < dimension; ++i)
+          {
+            EXPECT_EQ(retained->getJacobian()(j, i), rebound.getJacobian()(j, i));
+            EXPECT_EQ(
+              retained->getJacobianInverse()(j, i), rebound.getJacobianInverse()(j, i));
+          }
+        }
+        EXPECT_EQ(retained->getJacobianDeterminant(), rebound.getJacobianDeterminant());
+        EXPECT_EQ(retained->getDistortion(), rebound.getDistortion());
+        EXPECT_EQ(pointReads, 3);
+        EXPECT_EQ(bulkReads, 1);
+      }
+  };
+
+  /// @brief Compares bulk and pointwise Jacobians exactly on every reference geometry.
+  TEST_F(QuadratureTransformationTest, AllGeometriesOrdersAndEmbeddings)
+  {
+    for (const auto geometry :
+      {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+        Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+        Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      checkEvaluation<1>(geometry);
+      checkEvaluation<2>(geometry);
+      checkEvaluation<3>(geometry);
+      checkEvaluation<4>(geometry);
+      checkEvaluation<5>(geometry);
+      checkEvaluation<6>(geometry);
+    }
+  }
+
+  /// @brief Certifies logical formula identity and cross-cell reference reuse.
+  TEST_F(QuadratureTransformationTest, ReferenceReuseAndFormulaLifetime)
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      checkReuse(geometry);
+    }
+  }
+
+  /// @brief Verifies owned mapped points survive source lifetimes and invalidate on rebinding.
+  TEST_F(QuadratureTransformationTest, PointOwnershipCopyMoveAndRebinding)
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      checkPointOwnership(geometry);
     }
   }
 }

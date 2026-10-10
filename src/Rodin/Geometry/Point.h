@@ -96,6 +96,18 @@ namespace Rodin::Geometry
       PointBase(const Polytope& polytope, const Math::SpatialPoint& pc);
 
       /**
+       * @brief Constructs a point with its geometric Jacobian already evaluated.
+       *
+       * The matrix is owned by the point, just as after lazy evaluation.
+       * Physical coordinates, inverse, determinant and distortion remain lazy.
+       * Rebinding the point invalidates this matrix with the other geometric data.
+       *
+       * @param[in] jacobian Geometric Jacobian at the point's reference coordinates.
+       * @param[in] polytope Polytope whose transformation produced the matrix.
+       */
+      PointBase(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope);
+
+      /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
@@ -342,6 +354,22 @@ namespace Rodin::Geometry
        */
       explicit
       Point(const Polytope& polytope, const Math::SpatialPoint& rc, const Math::SpatialPoint& pc);
+
+      /**
+       * @brief Constructs a reference point with a precomputed geometric Jacobian.
+       *
+       * No reference to a formula or reference tabulation is retained. Copies
+       * and moves preserve the owned geometric data independently of the
+       * quadrature object that constructed the point.
+       * The distinct Jacobian-first signature preserves existing construction
+       * from Eigen coordinate expressions without conversion ambiguity.
+       *
+       * @param[in] jacobian Jacobian of the polytope transformation at @p rc.
+       * @param[in] polytope Polytope containing the point.
+       * @param[in] rc Reference coordinates at which the Jacobian was evaluated.
+       */
+      Point(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope,
+        const Math::SpatialPoint& rc);
 
       /**
        * @brief Copy constructor.

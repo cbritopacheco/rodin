@@ -7,6 +7,8 @@
 #ifndef RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
 #define RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
 
+#include <vector>
+
 /**
  * @file
  * @brief Base class for polytope geometric transformations.
@@ -21,6 +23,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/QF/ForwardDecls.h"
 
 #include "ForwardDecls.h"
 
@@ -178,6 +181,20 @@ namespace Rodin::Geometry
        * the reference dimension and @f$ s @f$ is the physical dimension.
        */
       virtual void jacobian(Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const = 0;
+
+      /**
+       * @brief Computes the Jacobians at a reference quadrature's points.
+       *
+       * The output contains @f$J_x(\hat x_q)@f$ in formula order. The default
+       * implementation evaluates the pointwise operation. Parametric elements
+       * may reuse their reference tabulation while retaining cell-dependent
+       * control points. This bulk operation is local and stores no cache.
+       *
+       * @param[out] jacobians Jacobian matrices, resized to the formula size.
+       * @param[in] qf Reference quadrature formula defining the points.
+       */
+      virtual void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
+        const QF::QuadratureFormulaBase& qf) const;
 
       /**
        * @brief Computes the reference coordinates from physical coordinates.

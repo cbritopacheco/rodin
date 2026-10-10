@@ -27,6 +27,16 @@ namespace Rodin::Geometry
     : m_polytope(polytope), m_pc(pc)
   {}
 
+  PointBase::PointBase(
+    const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope)
+    : m_polytope(polytope),
+      m_jacobian(jacobian)
+  {
+    assert(
+      static_cast<size_t>(jacobian.rows()) == polytope.getMesh().getSpaceDimension());
+    assert(static_cast<size_t>(jacobian.cols()) == polytope.getDimension());
+  }
+
   bool PointBase::operator<(const PointBase& p) const
   {
     assert(this->getDimension() == p.getDimension());
@@ -339,6 +349,12 @@ namespace Rodin::Geometry
   Point::Point(
     const Polytope& polytope, const Math::SpatialPoint& rc, const Math::SpatialPoint& pc)
     : PointBase(polytope, pc),
+      m_rc(rc)
+  {}
+
+  Point::Point(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope,
+    const Math::SpatialPoint& rc)
+    : PointBase(jacobian, polytope),
       m_rc(rc)
   {}
 

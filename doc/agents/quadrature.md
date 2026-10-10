@@ -103,6 +103,15 @@ calls still return mesh-owned, stable borrowed objects until geometry is
 flushed. Assembly does not evict these objects. Both lifetimes are
 backend-independent and introduce no MPI collective.
 
+Mapped-quadrature construction prepares geometric Jacobians through the
+transformation's bulk `jacobian` overload. Parametric elements reuse their
+existing logical-identity reference tables, while generic transformations
+retain the pointwise implementation. The resulting matrices belong to the
+mapped points; no borrowed reference-table storage escapes the bulk call.
+Temporary matrix storage is proportional to the current formula size, not
+the number of mesh cells. Copying or moving a point preserves its owned
+geometry, and rebinding it invalidates that geometry normally.
+
 The Xiao--Gimbutas coefficients are taken from the authors' `triasymq`
 distribution. The Witherden--Vincent coefficients are taken from PyFR's
 published quadrature tables. The transformed coefficients, exact source
