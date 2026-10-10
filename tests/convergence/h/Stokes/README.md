@@ -111,6 +111,75 @@ scale, not from an independently proved mesh-uniform stability bound.
 A synthetic unequal-mass example has the independent value
 $\beta_h^2=4/3$ and checks logical constraint elimination and mean reduction.
 
+### Bounded-workspace spectral construction
+
+The reduced divergence remains sparse. For a pressure-column block $T_J$,
+the Schur route solves $AX_J=B^\mathsf{T}T_J$ and assigns
+$S_{0,:,J}=T^\mathsf{T}(BX_J)$. The Frobenius residual is accumulated
+over these disjoint column blocks; its normalization is unchanged.
+The independent LLT route defines
+
+$$
+Z=L^{-1}PB^\mathsf{T}T.
+$$
+
+For a block $E_I$ of velocity coordinate columns, its rows are obtained
+without constructing the full dense matrix $Z$:
+
+$$
+E_I^\mathsf{T}Z
+=\bigl(T^\mathsf{T}BP^\mathsf{T}L^{-\mathsf{T}}E_I\bigr)^\mathsf{T}.
+$$
+
+Incremental Givens QR retains a pressure-sized upper-triangular factor $R$.
+An orthogonal factor need not be stored because $Z=QR$ implies
+$\sigma_j(ZC^{-\mathsf{T}})=\sigma_j(RC^{-\mathsf{T}})$.
+Here the reduced factor has $\min(n_v,n_p-1)$ rows and $Q$ has orthonormal
+columns. If $n_v<n_p-1$, the stored square factor contains additional zero
+rows; the dimension-required zero singular values are padded explicitly.
+Thus the independent SVD is retained rather than replaced by a
+cross-product eigenproblem. Its pressure-sized factor is evaluated by
+divide-and-conquer SVD; no singular vectors are requested. This changes the
+spectral algorithm, not the compared quantity, padding rule or acceptance
+budget. Algebraic known-spectrum controls and the independent generalized
+Schur spectrum remain separate gates. Certification still requires the
+complete geometry/backend matrix below, rather than agreement on small
+algebraic cases alone. Identity rotations are skipped only for exact
+zero entries. Rectangular zero padding depends on $n_v$ and $n_p-1$,
+not on a numerical rank threshold.
+
+Each rotation is constructed by Eigen's scaled Givens algorithm. For
+subnormal entries $a,b$, forming $r=\operatorname{hypot}(a,b)$ first and
+then taking $c=a/r$, $s=b/r$ can lose the identity $c^2+s^2=1$ through
+rounding of $r$. The resulting rotation can corrupt ordinary-sized
+trailing entries. The regression uses $A=I_2$, $M=I_3$, pressure-constant
+coefficients $e_2$, and
+
+$$
+B=\begin{pmatrix}\eta&\eta\\1&0\\0&0\end{pmatrix},
+$$
+
+where $\eta$ takes two subnormal values and the smallest positive normal
+value. At working precision the reduced squared spectrum is $(0,1)$.
+The independent spectral comparison detects corruption of this value;
+small pivots are retained without a rank threshold.
+
+Blocks contain at most 64 columns, further limited by the 96 MiB allowance
+for an individual blocked velocity workspace. Individual pressure-sized
+matrices have a separate 128 MiB allowance. The finest $P_4/P_3$ pyramid
+hierarchy has $n_p=3925$, so its full pressure matrix requires
+$8n_p^2=123245000$ bytes in double precision. The 128 MiB ceiling is the
+next binary allowance above that requirement; it does not change a
+spectral or residual acceptance criterion. These policies do not bound
+the total of all live workspaces,
+sparse factors or backend storage. A separate slow algebraic regression
+has $n_v=19999$ and $n_p=650$: the full dense coupling would exceed the
+allowance, while $A=I$, $B=[I\;0]$ and $M=I$ give the independent spectrum
+$\lambda_j=1$. Unequal mass, non-nodal constant coefficients, an exact
+rectangular obstruction and omitted divergence are checked separately.
+The algebraic regressions are locally verified; PDE-spectrum
+recertification of this bounded-workspace implementation is pending.
+
 For $k=2$, all six applicable geometries use $n=2,3,5$ on affine and exact quadratic
 maps. Assembly orders $16$ and $20$ are compared independently; each positive
 minimum eigenvalue must change relatively by less than $10^{-8}$.
@@ -123,7 +192,8 @@ Omitting the divergence operator on the curved $n=3$ mesh must give an
 exactly zero spectrum and fail the positivity predicate with unchanged
 space dimensions.
 
-The $P_3/P_2$ extension is locally verified in sequential and OpenMP builds.
+The $P_3/P_2$ extension was locally verified with the previous dense oracle
+in sequential and OpenMP builds.
 It retains all
 six applicable geometries, affine and exact quadratic maps, and independent
 assembly orders $16$ and $20$. Its three levels are $n=3,4,5$; every level
@@ -139,6 +209,42 @@ unexamined single-interval $n=2$ higher-order mesh.
 Sequential and OpenMP native assembly are separate execution gates. This
 target does not certify PETSc/MPI operator spectra or a mesh-uniform
 inf-sup theorem. Geometry-specific registrations retain all pair-specific tests, slow
-labels and 1800-second watchdogs. Each dense velocity/pressure workspace
-is bounded by 96 MiB before allocation; this is not a bound on all
+labels and 1800-second watchdogs. The separate workspace regression is
+also slow with a 1800-second watchdog. Each blocked velocity workspace
+is bounded by 96 MiB and each pressure matrix by 128 MiB before allocation;
+this is not a bound on all
 simultaneously live matrices or factorization storage.
+
+## Degree-four pressure-spectrum extension
+
+The implemented $P_4/P_3$ extension applies the same finite-spectrum
+criteria to all six geometries on affine and exact quadratic maps at
+$n=3,4,5$. Each level compares orders $16$ and $20$, requires resolved
+positivity, and checks both spectral routes and their residuals. The
+curved $n=3$ control omits divergence while retaining all space dimensions
+and requires an exactly zero spectrum. Pressure constants are interpolated
+in the actual degree-three basis. This is implemented coverage with
+numerical certification pending, not a mesh-uniform stability claim.
+
+The complete hierarchy and its missing-divergence control have separate
+slow registrations. The pyramid hierarchy has a 3600-second watchdog;
+all other hierarchies and controls retain 1800 seconds. The existing
+$P_2/P_1$ and $P_3/P_2$ geometry registrations exclude these new cases,
+so every compiled case is selected once. No refinement level or algebraic
+consistency budget is relaxed by the process partition.
+
+CI runs this target separately from the baseline h/p/hp workload. Light
+geometries (triangle, quadrilateral, hexahedron and wedge), tetrahedron,
+and pyramid form three serial partitions per thread configuration.
+Algebraic utility and workspace checks belong to the light partition.
+Each job has a 180-minute build/execution budget; per-registration
+watchdogs remain in force. The observed tetrahedral
+$P_4/P_3$ hierarchy took approximately sixteen minutes locally. This
+measurement motivates partitioning but is not a phase timing or a
+performance regression threshold. Complete numerical certification of
+the higher-order matrix remains pending. The native pyramid hierarchy
+exceeded its earlier 1800-second limit without a reported numerical
+assertion failure or memory stop. A later stack sample was inside the
+independent pressure-sized singular-value calculation. The one-hour
+allowance is an execution policy, not an established completed runtime
+or a change to the spectral acceptance criteria.

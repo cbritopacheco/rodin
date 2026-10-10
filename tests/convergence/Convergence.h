@@ -117,7 +117,13 @@ namespace Rodin::Tests::Convergence
         const auto& coarse = getCoarse(fineSample);
         const auto& fine = getFine(fineSample);
         assert(coarse.parameter > fine.parameter);
-        return getRates(coarse, fine, std::log(coarse.parameter / fine.parameter));
+        const Real ratio = coarse.parameter / fine.parameter;
+        // Preserve the ordinary quotient path, especially for nearby samples.
+        // Separate logarithms are needed only when division over/underflows.
+        const Real denominator = std::isfinite(ratio) && ratio > 0
+          ? std::log(ratio)
+          : std::log(coarse.parameter) - std::log(fine.parameter);
+        return getRates(coarse, fine, denominator);
       }
 
       Rates getExponentialRates(size_t fineSample) const
@@ -150,9 +156,16 @@ namespace Rodin::Tests::Convergence
         assert(fine.error.getL2() > 0);
         assert(coarse.error.getH1Seminorm() > 0);
         assert(fine.error.getH1Seminorm() > 0);
-        return {std::log(coarse.error.getL2() / fine.error.getL2()) / denominator,
-          std::log(coarse.error.getH1Seminorm() / fine.error.getH1Seminorm()) /
-            denominator};
+        const Real l2Ratio = coarse.error.getL2() / fine.error.getL2();
+        const Real h1Ratio = coarse.error.getH1Seminorm() / fine.error.getH1Seminorm();
+        const Real l2Log = std::isfinite(l2Ratio) && l2Ratio > 0
+          ? std::log(l2Ratio)
+          : std::log(coarse.error.getL2()) - std::log(fine.error.getL2());
+        const Real h1Log = std::isfinite(h1Ratio) && h1Ratio > 0
+          ? std::log(h1Ratio)
+          : std::log(coarse.error.getH1Seminorm()) -
+            std::log(fine.error.getH1Seminorm());
+        return {l2Log / denominator, h1Log / denominator};
       }
 
       std::vector<Sample> m_samples;
@@ -191,8 +204,15 @@ namespace Rodin::Tests::Convergence
         const auto& fine = m_samples[fineSample];
         assert(coarse.parameter > fine.parameter);
         assert(coarse.error > 0 && fine.error > 0);
-        return std::log(coarse.error / fine.error) /
-          std::log(coarse.parameter / fine.parameter);
+        const Real errorRatio = coarse.error / fine.error;
+        const Real parameterRatio = coarse.parameter / fine.parameter;
+        const Real numerator = std::isfinite(errorRatio) && errorRatio > 0
+          ? std::log(errorRatio)
+          : std::log(coarse.error) - std::log(fine.error);
+        const Real denominator = std::isfinite(parameterRatio) && parameterRatio > 0
+          ? std::log(parameterRatio)
+          : std::log(coarse.parameter) - std::log(fine.parameter);
+        return numerator / denominator;
       }
 
     private:

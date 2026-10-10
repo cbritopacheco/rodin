@@ -85,6 +85,8 @@ namespace Rodin::Tests::Convergence
             }
             const auto rate = Exponential ? m_histories[field].getExponentialRates(i)
                                           : m_histories[field].getAlgebraicRates(i);
+            ASSERT_TRUE(std::isfinite(rate.getL2()));
+            ASSERT_TRUE(std::isfinite(rate.getH1Seminorm()));
             SCOPED_TRACE(::testing::Message()
               << "L2=" << coarse.getL2() << " -> " << fine.getL2()
               << " H1=" << coarse.getH1Seminorm() << " -> " << fine.getH1Seminorm()

@@ -31,7 +31,8 @@ namespace
   {
     public:
       explicit EmptyRootPartitioner(const Mesh<Context::Local>& mesh)
-        : m_partitioner(mesh)
+        : m_partitioner(mesh),
+          m_count(0)
       {}
 
       const Mesh<Context::Local>& getMesh() const override
@@ -57,7 +58,7 @@ namespace
 
     private:
       BalancedCompactPartitioner m_partitioner;
-      size_t m_count = 0;
+      size_t m_count;
   };
 
   Mesh<Context::MPI> distribute(Polytope::Type geometry, bool completeIncidences = true)

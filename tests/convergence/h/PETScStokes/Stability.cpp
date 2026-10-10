@@ -147,6 +147,7 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
       void checkHierarchy() const
       {
         for (bool curved : {false, true})
+        {
           for (size_t n : {2u, 3u, 5u})
           {
             SCOPED_TRACE(::testing::Message() << "curved=" << curved << " n=" << n);
@@ -172,6 +173,7 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
                 measurements[0].eigenvalues.minCoeff() - 1), QuadratureTolerance);
             }
           }
+        }
       }
 
       void checkMissingDivergence() const
@@ -189,16 +191,19 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
         EXPECT_TRUE(wrong.eigenvalues.isZero(0));
       }
 
+      template <size_t K = 3>
       void checkHigherOrderHierarchy() const
       {
         for (bool curved : {false, true})
+        {
           for (size_t n : {3u, 4u, 5u})
           {
-            SCOPED_TRACE(::testing::Message() << "velocity degree=3 curved=" << curved << " n=" << n);
+            SCOPED_TRACE(::testing::Message() << "velocity degree=" << K
+              << " curved=" << curved << " n=" << n);
             std::array<MixedStability::Result, 2> measurements;
             for (size_t i = 0; i < measurements.size(); ++i)
             {
-              measure<3>(measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
+              measure<K>(measurements[i], n, curved, i == 0 ? AssemblyOrder : RefinedOrder);
               ASSERT_FALSE(::testing::Test::HasFatalFailure());
               SCOPED_TRACE(::testing::Message() << "freeVelocity=" << measurements[i].freeVelocity
                 << " zeroMeanPressure=" << measurements[i].zeroMeanPressure
@@ -213,14 +218,16 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
             EXPECT_LT(std::abs(measurements[1].eigenvalues.minCoeff() /
               measurements[0].eigenvalues.minCoeff() - 1), QuadratureTolerance);
           }
+        }
       }
 
+      template <size_t K = 3>
       void checkHigherOrderMissingDivergence() const
       {
         MixedStability::Result correct, wrong;
-        measure<3>(correct, 3, true, AssemblyOrder);
+        measure<K>(correct, 3, true, AssemblyOrder);
         ASSERT_FALSE(::testing::Test::HasFatalFailure());
-        measure<3>(wrong, 3, true, AssemblyOrder, true);
+        measure<K>(wrong, 3, true, AssemblyOrder, true);
         ASSERT_FALSE(::testing::Test::HasFatalFailure());
         MixedStability::expectConsistent(correct);
         MixedStability::expectConsistent(wrong);
@@ -237,6 +244,8 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
   TEST_P(LocalStabilityTest, MissingDivergenceRejected) { checkMissingDivergence(); }
   TEST_P(LocalStabilityTest, P3P2PressureSpectrumAcrossRefinementLevels) { checkHigherOrderHierarchy(); }
   TEST_P(LocalStabilityTest, P3P2MissingDivergenceRejected) { checkHigherOrderMissingDivergence(); }
+  TEST_P(LocalStabilityTest, P4P3PressureSpectrumAcrossRefinementLevels) { checkHigherOrderHierarchy<4>(); }
+  TEST_P(LocalStabilityTest, P4P3MissingDivergenceRejected) { checkHigherOrderMissingDivergence<4>(); }
   INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalStabilityTest,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
       Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
@@ -248,6 +257,8 @@ namespace Rodin::Tests::Convergence::H::PETScStokesStability
   TEST_P(MPIStabilityTest, MissingDivergenceRejected) { checkMissingDivergence(); }
   TEST_P(MPIStabilityTest, P3P2PressureSpectrumAcrossRefinementLevels) { checkHigherOrderHierarchy(); }
   TEST_P(MPIStabilityTest, P3P2MissingDivergenceRejected) { checkHigherOrderMissingDivergence(); }
+  TEST_P(MPIStabilityTest, P4P3PressureSpectrumAcrossRefinementLevels) { checkHigherOrderHierarchy<4>(); }
+  TEST_P(MPIStabilityTest, P4P3MissingDivergenceRejected) { checkHigherOrderMissingDivergence<4>(); }
   INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIStabilityTest,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
       Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,

@@ -32,6 +32,12 @@ namespace Rodin::Tests::Convergence
    * Local and MPI meshes consume the same variational form without DOF-layout
    * assumptions or matrix resizing. PREONLY/LU/MUMPS handles the saddle-point
    * operator, with a 100-percent factor-workspace margin for delayed pivots.
+   * An explicit positive refinement count instead selects unit-damped
+   * Richardson iterations with the retained LU factors: one initial solve
+   * and the requested residual corrections. This global linear-system
+   * operation retains distributed vectors; MUMPS internal refinement is not
+   * used because its distributed-solution path disables it. The actual
+   * iteration count is checked independently of the coefficient residual.
    * MUMPS factorization status, solver status, an independent coefficient residual,
    * and the pressure mean are checked before physical-cell error integration.
    * MPI errors sum owned-cell contributions globally, excluding halo copies.
@@ -40,12 +46,15 @@ namespace Rodin::Tests::Convergence
   class PETScStokesProblem
   {
     public:
-      PETScStokesProblem(
-        const MeshType& mesh, const StokesData& data, size_t quadratureOrder = 16)
+      PETScStokesProblem(const MeshType& mesh, const StokesData& data,
+        size_t quadratureOrder = 16, PetscInt refinementSteps = 0)
         : m_mesh(mesh),
           m_data(data),
-          m_order(quadratureOrder)
-      {}
+          m_order(quadratureOrder),
+          m_refinementSteps(refinementSteps)
+      {
+        assert(refinementSteps >= 0 && refinementSteps < PETSC_MAX_INT);
+      }
 
       template <size_t K>
       StokesErrors solve(Real viscosity = 1) const
@@ -102,7 +111,17 @@ namespace Rodin::Tests::Convergence
           }
         }
         PETSc::Solver::KSP solver(problem);
-        solver.setType(KSPPREONLY);
+        if (m_refinementSteps == 0)
+          solver.setType(KSPPREONLY);
+        else
+        {
+          solver.setType(KSPRICHARDSON);
+          solver.setTolerances(PETSc::Solver::KSP::DEFAULT_RTOL,
+            PETSc::Solver::KSP::DEFAULT_ABSTOL, PETSc::Solver::KSP::DEFAULT_DTOL,
+            m_refinementSteps + 1);
+          EXPECT_EQ(KSPSetNormType(solver.getHandle(), KSP_NORM_NONE), PETSC_SUCCESS);
+          EXPECT_EQ(KSPRichardsonSetScale(solver.getHandle(), 1), PETSC_SUCCESS);
+        }
         PC pc = nullptr;
         EXPECT_EQ(KSPGetPC(solver.getHandle(), &pc), PETSC_SUCCESS);
         EXPECT_EQ(PCSetType(pc, PCLU), PETSC_SUCCESS);
@@ -121,6 +140,17 @@ namespace Rodin::Tests::Convergence
         KSPConvergedReason reason = KSP_CONVERGED_ITERATING;
         EXPECT_EQ(KSPGetConvergedReason(solver.getHandle(), &reason), PETSC_SUCCESS);
         EXPECT_GT(reason, 0);
+        if (m_refinementSteps > 0)
+        {
+          const char* type = nullptr;
+          EXPECT_EQ(KSPGetType(solver.getHandle(), &type), PETSC_SUCCESS);
+          EXPECT_STREQ(type, KSPRICHARDSON);
+          KSPNormType normType = KSP_NORM_DEFAULT;
+          EXPECT_EQ(KSPGetNormType(solver.getHandle(), &normType), PETSC_SUCCESS);
+          EXPECT_EQ(normType, KSP_NORM_NONE);
+          EXPECT_EQ(
+            solver.getIterationNumber(), static_cast<size_t>(m_refinementSteps + 1));
+        }
         auto& system = problem.getLinearSystem();
         Vec residual = nullptr;
         EXPECT_EQ(VecDuplicate(system.getVector(), &residual), PETSC_SUCCESS);
@@ -152,6 +182,7 @@ namespace Rodin::Tests::Convergence
       std::reference_wrapper<const MeshType> m_mesh;
       StokesData m_data;
       size_t m_order;
+      PetscInt m_refinementSteps;
   };
 }
 

@@ -27,9 +27,24 @@ E_0=\lVert u-u_p\rVert_{L^2(\Omega)},\qquad
 E_1=\lVert\nabla u-\nabla u_p\rVert_{L^2(\Omega)}.
 $$
 
-Every adjacent interval requires finite positive errors, strict reduction,
-and $\log(E_{\ell,p-1}/E_{\ell,p})>0.1$ for $\ell=0,1$. Four degrees
-provide three measured intervals; no fixed-degree h order is asserted.
+For norm index $\ell\in\lbrace0,1\rbrace$, the adjacent-degree decay is
+
+$$
+\alpha_{\ell,p}
+=\frac{\log(E_{\ell,p-1}/E_{\ell,p})}{p-(p-1)},
+\qquad p\in\lbrace2,3,4\rbrace.
+$$
+
+Every interval requires finite positive errors, strict reduction, and a finite
+computed decay satisfying $\alpha_{\ell,p}>0.1$. The degree increment is
+one, so this retains the logarithmic-reduction threshold of the original
+study. The shared `FieldConvergence` acceptance protocol applies separately
+to both norms and every interval. The threshold is a finite-resolution
+acceptance policy, not a lower bound proved for arbitrary degrees or meshes.
+Four degrees provide three measured intervals; no fixed-degree h order is
+asserted. Extreme-error arithmetic and nonfinite-rate rejection are tested
+separately in the shared convergence utilities, not inferred from this PDE
+hierarchy.
 
 ## Newton, tangent, and negative controls
 

@@ -426,12 +426,72 @@ at one through four ranks in both OpenMP configurations. Small segment
 partitions include empty shards. An empty benchmark filter or failed oracle
 returns nonzero. Performance claims require separate isolated repeated runs.
 
+## Prescribed-state nonlinear Poisson assembly
+
+`RodinNonlinearPoissonAssemblyBenchmarks` isolates warmed native residual and
+tangent assembly at a prescribed field. The active native backend is sequential
+or OpenMP according to the build configuration. Degrees one through three,
+all seven positive-dimensional geometries, grid-point counts $n=3,5,9$, and
+quadrature orders eight and sixteen give 252 registrations per configuration.
+The order-sixteen cases match the volume quadrature order of the nonlinear
+natural-boundary convergence studies; these are not complete boundary-problem
+or Newton-solve timings.
+
+For $\Omega=(0,1)^d$, the interpolated state is $q_s(x)=s(1+x_0)$. The timed
+forms are
+
+$$
+R(q_s;v)=\int_\Omega\left[\nabla q_s\cdot\nabla v+(q_s+q_s^3)v\right]\,dx,
+\qquad
+J(q_s;w,v)=\int_\Omega\left[\nabla w\cdot\nabla v+(1+3q_s^2)wv\right]\,dx.
+$$
+
+The affine field is interpolated through DOF functionals, without assumptions
+about coefficient numbering. Before and after timing, the analytic actions
+
+$$
+R(q_s;q_s)=\frac{10}{3}s^2+\frac{31}{5}s^4,
+\qquad
+J(q_s;q_s,q_s)=\frac{10}{3}s^2+\frac{93}{5}s^4
+$$
+
+must agree to relative tolerance $10^{-9}$. The tangent is also compared with
+the original test-only quadrature loop to relative Frobenius tolerance
+$10^{-11}$, using denominator $\max(1,\|J_{\mathrm{ref}}\|_F)$.
+An assembled central difference in the direction $w=1+x_0$, with step
+$\varepsilon=10^{-5}$, must agree with $J(q_1)w$ to tolerance $10^{-7}$,
+normalized by $\max(1,\|J(q_1)w\|_2)$. These are numerical oracle policies,
+not performance thresholds. After timing, $s$ changes from one to two and
+both forms are reassembled, checking state-update visibility and replacement
+rather than accumulation. Omitting the cubic contribution would change the
+analytic residual action by more than ten percent.
+
+Setup, interpolation, independent checks and state changes are untimed. Source
+terms, natural-boundary integrals, constraints, SNES/KSP, and error norms are
+excluded. PETSc/MPI parity and separate timings for those excluded operations
+remain required before attributing a full distributed solve's cost to this
+benchmark. Counters report cells, global native DOFs, nonzeros, degree,
+quadrature order and points per cell. CI executes all smallest-mesh cases as
+numerical checks, without timing thresholds.
+
+```sh
+build/tests/benchmarks/RodinNonlinearPoissonAssemblyBenchmarks \
+  --benchmark_filter='^NonlinearPoisson/(Residual|Tangent)/P1/Tetrahedron/' \
+  --benchmark_min_time=0.1s --benchmark_repetitions=5 \
+  --benchmark_out=nonlinear-volume.json --benchmark_out_format=json
+```
+
+Paired optimization measurements must hold the compiler, assembly backend,
+thread count, mesh, degree, quadrature and benchmark scope fixed. Independent
+repetitions are required; a smallest-mesh numerical smoke run is not evidence
+of a speedup or of complete convergence certification.
+
 ## Remaining performance workplan
 
 | Extension | Required measurement or evidence |
 | --- | --- |
 | Extended workload/constraint parity | Full constrained scalar Poisson/conductivity/reaction--diffusion assembly is implemented; extend to vector physics, mixed boundary conditions and identification constraints |
-| Complex Helmholtz, coupled reaction–diffusion, Taylor–Hood Stokes, nonlinear Poisson | Loads/block forms and residual/tangent assembly at a prescribed state; supported scalar/backend paths; stable mixed spaces |
+| Complex Helmholtz, coupled reaction–diffusion, Taylor–Hood Stokes, nonlinear Poisson | Loads/block forms and residual/tangent assembly; nonlinear Poisson has prescribed-state native volume assembly through degree three, with PETSc/MPI and boundary parity remaining; stable mixed spaces |
 | Projection solves, global couplings, and higher-order H1 physics | Mass/reaction and constrained scalar diffusion through degree three are implemented; extend to projection solves, mixed/global-integrator couplings, degree-four/vector physics, and meaningful point/0D forms |
 | Remaining setup and stage isolation | Cold allocation, mesh/space setup, PETSc/MPI insertion and completion, constraints, solve, and norm timings; warmed sequential binding/kernel/triplet/finalization scopes are implemented |
 | Curved geometry and boundary variants | Map degree/regularity, quadrature-point counts, constraints and boundary workload metadata |

@@ -11,6 +11,7 @@
 #include <cmath>
 #include <vector>
 #include <Eigen/Eigenvalues>
+#include <Eigen/Jacobi>
 #include <Eigen/SparseCholesky>
 #include <Eigen/SVD>
 #include <gtest/gtest.h>
@@ -26,6 +27,12 @@ namespace Rodin::Tests::Convergence
    * Boundary elimination and the zero-mean pressure basis are constructed
    * independently of a saddle-point solve. Generalized Schur eigenvalues are
    * compared with squared singular values from independent LLT whitening.
+   * @par Architecture
+   * The reduced divergence remains sparse. LDLT solves construct the Schur
+   * complement in pressure-column blocks. Independent LLT dual solves supply
+   * rows of the whitened divergence to incremental Givens QR; only its
+   * pressure-sized triangular factor is retained for the singular-value
+   * calculation. No full dense velocity-pressure coupling is allocated.
    * These finite spectra do not prove mesh-uniform inf-sup stability.
    * @par Distribution
    * Inputs are complete matrices on one process. This measurement introduces
@@ -34,8 +41,14 @@ namespace Rodin::Tests::Convergence
   class MixedStability
   {
     public:
-      // Bounds one dense velocity/pressure workspace before its allocation.
+      // Bounds one blocked velocity workspace before its allocation.
       static constexpr size_t WorkspaceBytes = 96 * 1024 * 1024;
+      // The n=5 P4/P3 pyramid has 3925 pressure DOFs; its square matrix
+      // requires 123245000 bytes. The next binary allowance is 128 MiB.
+      // This is an individual pressure-matrix policy, not total process RSS.
+      static constexpr size_t PressureWorkspaceBytes = 128 * 1024 * 1024;
+      // Scheduling policy for triangular solves, not a rank or error threshold.
+      static constexpr size_t BlockSize = 64;
       // Dimensionless algebraic consistency budget, not a uniform beta bound.
       static constexpr Real ConsistencyTolerance = 1e-10;
 
@@ -80,8 +93,10 @@ namespace Rodin::Tests::Convergence
             reduced[i] = nv++;
         const Eigen::Index np = fullM.rows();
         ASSERT_GT(nv, 0);
-        ASSERT_LE(size_t(nv), WorkspaceBytes / sizeof(Real) / size_t(np));
-        ASSERT_LE(size_t(np), WorkspaceBytes / sizeof(Real) / size_t(np));
+        ASSERT_LE(size_t(np), PressureWorkspaceBytes / sizeof(Real) / size_t(np));
+        const Eigen::Index blockSize = static_cast<Eigen::Index>(
+          std::min(BlockSize, WorkspaceBytes / sizeof(Real) / size_t(nv)));
+        ASSERT_GT(blockSize, 0);
         std::vector<Eigen::Triplet<Real>> entries;
         for (Eigen::Index col = 0; col < fullA.outerSize(); ++col)
           for (Math::SparseMatrix<Real>::InnerIterator it(fullA, col); it; ++it)
@@ -89,11 +104,13 @@ namespace Rodin::Tests::Convergence
               entries.emplace_back(reduced[it.row()], reduced[it.col()], it.value());
         Math::SparseMatrix<Real> A(nv, nv);
         A.setFromTriplets(entries.begin(), entries.end());
-        Math::Matrix<Real> B = Math::Matrix<Real>::Zero(np, nv);
+        entries.clear();
         for (Eigen::Index col = 0; col < fullB.outerSize(); ++col)
           for (Math::SparseMatrix<Real>::InnerIterator it(fullB, col); it; ++it)
             if (reduced[it.col()] >= 0)
-              B(it.row(), reduced[it.col()]) = it.value();
+              entries.emplace_back(it.row(), reduced[it.col()], it.value());
+        Math::SparseMatrix<Real> B(np, nv);
+        B.setFromTriplets(entries.begin(), entries.end());
         const Math::Matrix<Real> M = fullM;
         const Math::Vector<Real> mean = M * constant;
         Eigen::Index pivot = 0;
@@ -110,10 +127,18 @@ namespace Rodin::Tests::Convergence
         Eigen::SimplicialLDLT<Math::SparseMatrix<Real>> factor(A);
         ASSERT_EQ(factor.info(), Eigen::Success);
         ASSERT_GT(factor.vectorD().minCoeff(), 0);
-        const Math::Matrix<Real> rhs = B.transpose() * T;
-        const Math::Matrix<Real> X = factor.solve(rhs);
-        ASSERT_EQ(factor.info(), Eigen::Success);
-        const Math::Matrix<Real> S0 = T.transpose() * B * X;
+        Math::Matrix<Real> S0(np - 1, np - 1);
+        Real residualSquared = 0, rhsSquared = 0;
+        for (Eigen::Index first = 0; first < np - 1; first += blockSize)
+        {
+          const Eigen::Index count = std::min(blockSize, np - 1 - first);
+          const Math::Matrix<Real> rhs = B.transpose() * T.middleCols(first, count);
+          const Math::Matrix<Real> X = factor.solve(rhs);
+          ASSERT_EQ(factor.info(), Eigen::Success);
+          S0.middleCols(first, count) = T.transpose() * (B * X);
+          residualSquared += (A * X - rhs).squaredNorm();
+          rhsSquared += rhs.squaredNorm();
+        }
         const Math::Matrix<Real> M0 = T.transpose() * M * T;
         Eigen::GeneralizedSelfAdjointEigenSolver<Math::Matrix<Real>> spectrum(S0, M0);
         ASSERT_EQ(spectrum.info(), Eigen::Success);
@@ -123,14 +148,52 @@ namespace Rodin::Tests::Convergence
         Eigen::LLT<Math::Matrix<Real>> pressureCholesky(M0);
         ASSERT_EQ(cholesky.info(), Eigen::Success);
         ASSERT_EQ(pressureCholesky.info(), Eigen::Success);
-        const Math::Matrix<Real> permuted = cholesky.permutationP() * rhs;
-        const Math::Matrix<Real> velocityWhitened = cholesky.matrixL().solve(permuted);
-        const Math::Matrix<Real> whitened =
-          pressureCholesky.matrixL().solve(velocityWhitened.transpose());
-        Eigen::JacobiSVD<Math::Matrix<Real>> singularSpectrum(whitened);
+        // Z=L^-1 P B^T T. For a block of coordinate columns E,
+        // E^T Z=(T^T B P^T L^-T E)^T. Z=Q R then preserves singular
+        // values after pressure whitening: Z C^-T=Q (R C^-T).
+        Math::Matrix<Real> R = Math::Matrix<Real>::Zero(np - 1, np - 1);
+        for (Eigen::Index first = 0; first < nv; first += blockSize)
+        {
+          const Eigen::Index count = std::min(blockSize, nv - first);
+          Math::Matrix<Real> coordinates = Math::Matrix<Real>::Zero(nv, count);
+          for (Eigen::Index col = 0; col < count; ++col)
+            coordinates(first + col, col) = 1;
+          const Math::Matrix<Real> dual = cholesky.matrixU().solve(coordinates);
+          Math::Matrix<Real> rows =
+            (T.transpose() * (B * (cholesky.permutationPinv() * dual))).transpose();
+          for (Eigen::Index row = 0; row < count; ++row)
+          {
+            for (Eigen::Index column = 0; column < np - 1; ++column)
+            {
+              // Exact zero skips an identity rotation, not a rank decision.
+              if (rows(row, column) == 0)
+                continue;
+              // Form the rotation from scaled ratios. Dividing by a rounded
+              // subnormal hypot can violate c*c+s*s=1 and corrupt trailing
+              // entries whose magnitude is unrelated to the tiny pivot.
+              Eigen::JacobiRotation<Real> rotation;
+              Real radius;
+              rotation.makeGivens(R(column, column), rows(row, column), &radius);
+              const Real cosine = rotation.c();
+              const Real sine = -rotation.s();
+              for (Eigen::Index next = column + 1; next < np - 1; ++next)
+              {
+                const Real upper = R(column, next), lower = rows(row, next);
+                R(column, next) = cosine * upper + sine * lower;
+                rows(row, next) = -sine * upper + cosine * lower;
+              }
+              R(column, column) = radius;
+              rows(row, column) = 0;
+            }
+          }
+        }
+        const Math::Matrix<Real> whitened = pressureCholesky.matrixL().solve(R.transpose());
+        // Divide-and-conquer retains the independent singular-value oracle;
+        // forming another normal-equation spectrum would square conditioning.
+        Eigen::BDCSVD<Math::Matrix<Real>> singularSpectrum(whitened);
         ASSERT_EQ(singularSpectrum.info(), Eigen::Success);
         Math::Vector<Real> squaredSingular = Math::Vector<Real>::Zero(np - 1);
-        for (Eigen::Index i = 0; i < singularSpectrum.singularValues().size(); ++i)
+        for (Eigen::Index i = 0; i < std::min(nv, np - 1); ++i)
           squaredSingular(np - 2 - i) =
             singularSpectrum.singularValues()(i) * singularSpectrum.singularValues()(i);
         // Padding follows the rectangular dimensions exactly, not a numerical
@@ -156,11 +219,17 @@ namespace Rodin::Tests::Convergence
         const Real difference =
           (result.eigenvalues - squaredSingular).cwiseAbs().maxCoeff();
         result.spectralDifference = scale > 0 ? difference / scale : difference;
-        result.velocityResidual = (A * X - rhs).norm() / std::max(Real(1), rhs.norm());
+        result.velocityResidual =
+          std::sqrt(residualSquared) / std::max(Real(1), std::sqrt(rhsSquared));
       }
 
       static void expectConsistent(const Result& result)
       {
+        SCOPED_TRACE(::testing::Message()
+          << "mean-basis defect=" << result.meanBasisDefect
+          << " eigen-residual=" << result.eigenResidual
+          << " spectral difference=" << result.spectralDifference
+          << " velocity residual=" << result.velocityResidual);
         ASSERT_EQ(result.eigenvalues.size(), result.zeroMeanPressure);
         EXPECT_TRUE(result.eigenvalues.allFinite());
         for (Real defect : {result.meanBasisDefect, result.eigenResidual,

@@ -8,6 +8,7 @@
 /** @file @brief Semilinear Poisson degree-refinement verification. */
 
 #include "../../NonlinearPoisson.h"
+#include "../../FieldConvergence.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -23,27 +24,14 @@ namespace Rodin::Tests::Convergence::P::NonlinearPoisson
     const NonlinearPoissonProblem problem(mesh);
     const auto e1 = problem.solve<1>(), e2 = problem.solve<2>();
     const auto e3 = problem.solve<3>(), e4 = problem.solve<4>();
-    ErrorHistory history;
-    history.append(1, e1);
-    history.append(2, e2);
-    history.append(3, e3);
-    history.append(4, e4);
-    for (size_t i = 1; i < 4; ++i)
-    {
-      const auto& a = history.getSample(i - 1).error;
-      const auto& b = history.getSample(i).error;
-      ASSERT_TRUE(a.isFinite());
-      ASSERT_TRUE(b.isFinite());
-      ASSERT_GT(b.getL2(), 0);
-      ASSERT_GT(b.getH1Seminorm(), 0);
-      ASSERT_GT(a.getL2(), b.getL2());
-      ASSERT_GT(a.getH1Seminorm(), b.getH1Seminorm());
-      SCOPED_TRACE(::testing::Message()
-        << "degree=" << i + 1 << " L2 " << a.getL2() << " -> " << b.getL2() << " H1 "
-        << a.getH1Seminorm() << " -> " << b.getH1Seminorm());
-      EXPECT_GT(std::log(a.getL2() / b.getL2()), 0.1);
-      EXPECT_GT(std::log(a.getH1Seminorm() / b.getH1Seminorm()), 0.1);
-    }
+    FieldConvergence<1> history;
+    history.append(1, {e1});
+    history.append(2, {e2});
+    history.append(3, {e3});
+    history.append(4, {e4});
+    // Finite-resolution analytic degree-decay policy, not a universal bound.
+    constexpr Real DegreeFloor = 0.1;
+    history.expectExponentialFloor({DegreeFloor, DegreeFloor});
   }
 
   TEST_P(NonlinearPoissonPTest, TangentsAgreeWithResidualAndRejectWrongDerivative)

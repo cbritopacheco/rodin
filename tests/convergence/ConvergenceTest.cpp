@@ -10,8 +10,12 @@
  * @brief Tests for convergence-study infrastructure shared by all strategies.
  */
 
+#include <array>
+#include <bit>
 #include <cmath>
+#include <cstddef>
 #include <limits>
+#include <utility>
 
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
@@ -226,6 +230,195 @@ namespace Rodin::Tests::Convergence
     EXPECT_EQ(algebraic.getSize(), 3u);
     EXPECT_EQ(exponential.getSize(), 3u);
     EXPECT_EQ(scalar.getSize(), 3u);
+  }
+
+  /**
+   * @brief Extreme finite errors retain their finite mathematical rates.
+   *
+   * The sequence @f$(10^{300},10^{-200},10^{-300})@f$ has finite,
+   * positive, decreasing entries, but its first floating-point quotient
+   * overflows. Its logarithmic reductions are nevertheless
+   * @f$500\log(10)@f$ and @f$100\log(10)@f$. These independently known
+   * reductions certify both paired norms and the single-norm history.
+   * Reversing the errors tests quotient underflow and finite negative rates;
+   * such a history measures error growth, not convergence.
+   */
+  TEST(ErrorHistoryTest, ExtremeFiniteErrorsRetainKnownRates)
+  {
+    ErrorHistory algebraic, exponential, increasing;
+    const std::array<Real, 3> errors = {1e300, 1e-200, 1e-300};
+    const std::array<Real, 3> scales = {0.5, 0.25, 0.125};
+    for (size_t i = 0; i < errors.size(); ++i)
+    {
+      algebraic.append(scales[i], ErrorNorms(errors[i], errors[i]));
+      exponential.append(Real(i + 1), ErrorNorms(errors[i], errors[i]));
+      increasing.append(scales[i],
+        ErrorNorms(errors[errors.size() - 1 - i], errors[errors.size() - 1 - i]));
+    }
+    for (size_t i = 1; i < errors.size(); ++i)
+    {
+      const Real reduction = Real(i == 1 ? 500 : 100) * std::log(Real(10));
+      const auto hRate = algebraic.getAlgebraicRates(i);
+      const auto pRate = exponential.getExponentialRates(i);
+      EXPECT_DOUBLE_EQ(hRate.getL2(), reduction / std::log(Real(2)));
+      EXPECT_DOUBLE_EQ(hRate.getH1Seminorm(), reduction / std::log(Real(2)));
+      EXPECT_DOUBLE_EQ(pRate.getL2(), reduction);
+      EXPECT_DOUBLE_EQ(pRate.getH1Seminorm(), reduction);
+      const Real growth = Real(i == 1 ? 100 : 500) * std::log(Real(10));
+      EXPECT_DOUBLE_EQ(increasing.getAlgebraicRates(i).getL2(),
+        -growth / std::log(Real(2)));
+      EXPECT_DOUBLE_EQ(increasing.getAlgebraicRates(i).getH1Seminorm(),
+        -growth / std::log(Real(2)));
+    }
+    NormHistory scalar;
+    ErrorHistory paired;
+    for (Real error : errors)
+    {
+      scalar.append(error, error);
+      paired.append(error, ErrorNorms(error, error));
+    }
+    for (size_t i = 1; i < errors.size(); ++i)
+    {
+      // Equal logarithmic reductions in scale and error give rate one.
+      EXPECT_EQ(scalar.getAlgebraicRate(i), 1);
+      EXPECT_EQ(paired.getAlgebraicRates(i).getL2(), 1);
+      EXPECT_EQ(paired.getAlgebraicRates(i).getH1Seminorm(), 1);
+    }
+  }
+
+  /**
+   * @brief The actual binary floating-point endpoints retain finite rates.
+   *
+   * For a binary scalar with precision @f$t@f$ and exponent limits
+   * @f$e_{\min},e_{\max}@f$, its largest finite value and smallest
+   * subnormal value are @f$(2-\epsilon)2^{e_{\max}-1}@f$ and
+   * @f$2^{e_{\min}-t}@f$. Their logarithmic reduction is evaluated
+   * independently from these integer exponents, not by their quotient.
+   */
+  TEST(ErrorHistoryTest, FloatingPointEndpointsRetainKnownRates)
+  {
+    using Limits = std::numeric_limits<Real>;
+    static_assert(Limits::radix == 2 && Limits::has_denorm == std::denorm_present);
+    constexpr Real Largest = Limits::max(), Smallest = Limits::denorm_min();
+    const Real reduction =
+      Real(Limits::max_exponent - 1 - Limits::min_exponent + Limits::digits)
+        * std::log(Real(2)) + std::log(Real(2) - Limits::epsilon());
+    ASSERT_TRUE(std::isfinite(reduction));
+    ErrorHistory degree, paired;
+    NormHistory scalar;
+    degree.append(1, ErrorNorms(Largest, Smallest))
+      .append(2, ErrorNorms(Smallest, Largest));
+    paired.append(Largest, ErrorNorms(Largest, Largest))
+      .append(Smallest, ErrorNorms(Smallest, Smallest));
+    scalar.append(Largest, Largest).append(Smallest, Smallest);
+    EXPECT_DOUBLE_EQ(degree.getExponentialRates(1).getL2(), reduction);
+    EXPECT_DOUBLE_EQ(degree.getExponentialRates(1).getH1Seminorm(), -reduction);
+    EXPECT_EQ(paired.getAlgebraicRates(1).getL2(), 1);
+    EXPECT_EQ(paired.getAlgebraicRates(1).getH1Seminorm(), 1);
+    EXPECT_EQ(scalar.getAlgebraicRate(1), 1);
+  }
+
+  /**
+   * @brief Nearby large samples retain their resolved logarithmic reduction.
+   *
+   * Subtracting logarithms unconditionally loses this reduction because
+   * @f$\log(10^{300})@f$ and the logarithm of its adjacent representable
+   * neighbour round to the same value. A representable quotient must retain
+   * its ordinary logarithmic evaluation.
+   */
+  TEST(ErrorHistoryTest, NearbyLargeSamplesRetainResolvedRates)
+  {
+    constexpr Real Coarse = 1e300;
+    const Real fine = std::nextafter(Coarse, Real(0));
+    const Real reduction = std::log(Coarse / fine);
+    ASSERT_GT(reduction, 0);
+    ErrorHistory scales, errors;
+    NormHistory scalar;
+    scales.append(Coarse, ErrorNorms(2, 2)).append(fine, ErrorNorms(1, 1));
+    scalar.append(Coarse, 2).append(fine, 1);
+    errors.append(0.5, ErrorNorms(Coarse, Coarse))
+      .append(0.25, ErrorNorms(fine, fine));
+    EXPECT_DOUBLE_EQ(scales.getAlgebraicRates(1).getL2(), std::log(Real(2)) / reduction);
+    EXPECT_DOUBLE_EQ(scales.getAlgebraicRates(1).getH1Seminorm(),
+      std::log(Real(2)) / reduction);
+    EXPECT_DOUBLE_EQ(scalar.getAlgebraicRate(1), std::log(Real(2)) / reduction);
+    EXPECT_DOUBLE_EQ(errors.getAlgebraicRates(1).getL2(), reduction / std::log(Real(2)));
+    EXPECT_DOUBLE_EQ(errors.getAlgebraicRates(1).getH1Seminorm(),
+      reduction / std::log(Real(2)));
+  }
+
+  /** @brief Resolved quotient evaluation retains the existing rate bits. */
+  TEST(ErrorHistoryTest, ResolvedQuotientsPreserveExistingEvaluation)
+  {
+    using Bits = std::array<std::byte, sizeof(Real)>;
+    const std::array<Real, 7> errors = {1e-200, 1e-20, 0.125, 1, 8, 1e20, 1e200};
+    for (Real coarse : errors)
+      for (Real fine : errors)
+      {
+        const Real ratio = coarse / fine, inverse = fine / coarse;
+        // Extreme unrepresentable quotients have their own known-rate oracle.
+        if (!std::isfinite(ratio) || ratio <= 0 || !std::isfinite(inverse) || inverse <= 0)
+          continue;
+        for (Real scale : {Real(0.5), Real(0.125), Real(1) / 6, Real(1) / 32})
+        {
+          SCOPED_TRACE(::testing::Message() << "coarse=" << coarse
+            << " fine=" << fine << " scale=" << scale);
+          ErrorHistory paired, exponential;
+          NormHistory scalar;
+          paired.append(1, ErrorNorms(coarse, fine))
+            .append(scale, ErrorNorms(fine, coarse));
+          scalar.append(1, coarse).append(scale, fine);
+          exponential.append(1, ErrorNorms(coarse, fine))
+            .append(4, ErrorNorms(fine, coarse));
+          const auto hRate = paired.getAlgebraicRates(1);
+          const auto pRate = exponential.getExponentialRates(1);
+          const Real denominator = std::log(Real(1) / scale);
+          for (const auto& [actual, expected] :
+            {std::pair{hRate.getL2(), std::log(ratio) / denominator},
+              std::pair{hRate.getH1Seminorm(), std::log(inverse) / denominator},
+              std::pair{scalar.getAlgebraicRate(1), std::log(ratio) / denominator},
+              std::pair{pRate.getL2(), std::log(ratio) / 3},
+              std::pair{pRate.getH1Seminorm(), std::log(inverse) / 3}})
+            EXPECT_EQ(std::bit_cast<Bits>(actual), std::bit_cast<Bits>(expected));
+        }
+      }
+  }
+
+  /**
+   * @brief A genuinely unrepresentable rate cannot certify convergence.
+   *
+   * With @f$\Delta p=\mathrm{min}_{\mathrm{normal}}@f$, the rate
+   * @f$500\log(10)/\Delta p@f$ exceeds the floating-point range, whereas
+   * @f$\log(2)/\Delta p@f$ remains finite. Each norm is isolated in turn.
+   */
+  TEST(FieldConvergenceTest, RejectsNonfiniteExponentialRates)
+  {
+    for (bool h1 : {false, true})
+    {
+      SCOPED_TRACE(::testing::Message() << "h1=" << h1);
+      FieldConvergence<1> study;
+      const std::array<Real, 3> extreme = {1e300, 1e-200, 1e-300};
+      const std::array<Real, 3> ordinary = {1, 0.5, 0.25};
+      constexpr Real ParameterStep = std::numeric_limits<Real>::min();
+      const std::array<Real, 3> parameters = {0, ParameterStep, 2 * ParameterStep};
+      for (size_t i = 0; i < parameters.size(); ++i)
+        study.append(parameters[i], {ErrorNorms(
+          h1 ? ordinary[i] : extreme[i], h1 ? extreme[i] : ordinary[i])});
+      ::testing::TestPartResultArray failures;
+      {
+        ::testing::ScopedFakeTestPartResultReporter intercept(
+          ::testing::ScopedFakeTestPartResultReporter::INTERCEPT_ONLY_CURRENT_THREAD,
+          &failures);
+        study.expectExponentialFloor({0.5, 0.5});
+      }
+      EXPECT_EQ(failures.size(), 1);
+      if (failures.size() != 1)
+        continue;
+      EXPECT_TRUE(failures.GetTestPartResult(0).fatally_failed());
+      EXPECT_NE(std::string(failures.GetTestPartResult(0).message()).find(
+        h1 ? "std::isfinite(rate.getH1Seminorm())" : "std::isfinite(rate.getL2())"),
+        std::string::npos);
+    }
   }
 
   TEST(FieldConvergenceTest, RejectsBadFinalIntervalInOtherField)

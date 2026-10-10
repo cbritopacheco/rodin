@@ -50,6 +50,7 @@ jobs:
           RodinPhysicsStageBenchmarks RodinQuadratureExpressionBenchmarks
           RodinMassAssemblyBenchmarks
           RodinConstrainedAssemblyBenchmarks
+          RodinNonlinearPoissonAssemblyBenchmarks
           RodinVariationalQuadratureExpressionTest RodinMathSpatialScalarProductTest
           RodinVariationalQuadratureRuleDispatchTest -j2
       - name: Check expression reuse, complex promotion, and unchanged dispatch
@@ -82,6 +83,11 @@ jobs:
           build/tests/benchmarks/RodinConstrainedAssemblyBenchmarks
           --benchmark_filter='/3/real_time$' --benchmark_min_time=1x
           --benchmark_out=assembly-constrained-smoke.json --benchmark_out_format=json
+      - name: Check prescribed-state nonlinear residuals and tangents
+        run: >-
+          build/tests/benchmarks/RodinNonlinearPoissonAssemblyBenchmarks
+          --benchmark_filter='/3/(8|16)/real_time$' --benchmark_min_time=1x
+          --benchmark_out=assembly-nonlinear-smoke.json --benchmark_out_format=json
       - uses: actions/upload-artifact@v4
         with:
           name: assembly-smoke-openmp-${{ matrix.openmp }}
@@ -91,6 +97,7 @@ jobs:
             assembly-expressions-smoke.json
             assembly-mass-smoke.json
             assembly-constrained-smoke.json
+            assembly-nonlinear-smoke.json
 
   PETScNumericalSmoke:
     runs-on: ubuntu-latest

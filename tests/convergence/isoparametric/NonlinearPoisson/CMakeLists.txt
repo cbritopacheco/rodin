@@ -35,6 +35,28 @@ foreach(q 1 3)
 endforeach()
 
 if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
+  rodin_add_petsc_refinement(RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary
+    ../../h/PETScNonlinearPoisson/BoundaryConditions.cpp
+    RATE_CASES MixedNeumannP1Rates MixedNeumannP2Rates MixedNeumannP3Rates
+      RobinP1Rates RobinP2Rates RobinP3Rates
+      PureNeumannP1Rates PureNeumannP2Rates PureNeumannP3Rates)
+  # The resolved local pure-Neumann P1 tetrahedral hierarchy took 6836 seconds.
+  # Three hours is a scheduling allowance, not an error or iteration budget.
+  set(_RODIN_CURVED_NONLINEAR_TETRAHEDRON_P1_TIMEOUT 10800)
+  foreach(boundary MixedNeumann Robin PureNeumann)
+    set_tests_properties(
+      RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary_${boundary}P1Rates_Tetrahedron
+      PROPERTIES TIMEOUT ${_RODIN_CURVED_NONLINEAR_TETRAHEDRON_P1_TIMEOUT})
+    if (RODIN_USE_MPI)
+      foreach(np 1 2 3 4)
+        set_tests_properties(
+          RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary_MPI_np${np}_${boundary}P1Rates_Tetrahedron
+          PROPERTIES TIMEOUT ${_RODIN_CURVED_NONLINEAR_TETRAHEDRON_P1_TIMEOUT})
+      endforeach()
+    endif()
+  endforeach()
+  target_compile_definitions(RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary
+    PRIVATE RODIN_NONLINEAR_BOUNDARY_CURVED)
   add_executable(RodinConvergenceIsoparametricPETScNonlinearPoisson NonlinearPoisson.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScNonlinearPoisson
     PRIVATE RODIN_CURVED_NONLINEAR_POISSON_PETSC)

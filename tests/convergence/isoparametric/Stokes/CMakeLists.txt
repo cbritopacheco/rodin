@@ -49,6 +49,12 @@ foreach(q 1 3)
 endforeach()
 
 if (RODIN_USE_PETSC AND NOT RODIN_CONVERGENCE_PETSC_COMPLEX)
+  rodin_add_petsc_refinement(RodinConvergenceIsoparametricPETScStokesBoundary
+    ../../h/PETScStokes/Traction.cpp
+    RATE_CASES P2P1Rates P3P2Rates
+    GEOMETRIES ${_RODIN_CURVED_STOKES_GEOMETRIES})
+  target_compile_definitions(RodinConvergenceIsoparametricPETScStokesBoundary
+    PRIVATE RODIN_STOKES_TRACTION_CURVED)
   add_executable(RodinConvergenceIsoparametricPETScStokes Stokes.cpp)
   target_compile_definitions(RodinConvergenceIsoparametricPETScStokes
     PRIVATE RODIN_CURVED_STOKES_PETSC)

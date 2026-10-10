@@ -118,7 +118,8 @@ linked p/hp suites; the distinct mixed-boundary formulation follows below.
 The separate `RodinConvergenceHPETScStokesStability` target measures the
 finite-dimensional stability of the homogeneous-velocity $P_2/P_1$ pair
 without solving a manufactured saddle-point problem. The finite local/MPI
-matrix is locally verified in sequential/OpenMP configurations; this is not
+matrix was locally verified with the previous dense oracle in
+sequential/OpenMP configurations; this is not
 hosted-CI certification or a mesh-uniform stability theorem.
 Let $A\in\mathbb R^{N_u\times N_u}$ denote the velocity-gradient energy
 matrix, $B\in\mathbb R^{N_p\times N_u}$ the divergence matrix, and
@@ -167,7 +168,7 @@ is required. Removing divergence leaves the dimensions unchanged and must
 produce an exactly zero spectrum. These are spectral refinement studies,
 not error-slope studies: no power of $h$ is fitted to $\beta_h$.
 
-The $P_3/P_2$ extension is locally verified, independently
+The $P_3/P_2$ extension was locally verified with that oracle, independently
 of the $P_2/P_1$ matrix. It uses the same six applicable
 geometries and affine/exact quadratic maps, with three levels $n=3,4,5$ and
 assembly orders $16$ and $20$. Every level requires resolved positivity,
@@ -176,6 +177,19 @@ quadrature budget. The curved $n=3$ missing-divergence control must retain the
 dimensions and give exactly zero eigenvalues. Local and MPI ranks one
 through four pass in sequential/OpenMP configurations; these are finite-mesh
 checks, not hosted-CI certification or a mesh-uniform lower bound.
+
+The implemented $P_4/P_3$ extension retains the six geometries, both maps,
+$n=3,4,5$, orders $16$ and $20$, positivity and residual criteria, and a
+curved $n=3$ missing-divergence control. Native and real-PETSc local/MPI
+rank 1–4 registrations are present in both thread configurations.
+Certification of this extension and recertification of the existing
+PDE spectra with the [bounded-workspace shared oracle](../Stokes/README.md#bounded-workspace-spectral-construction)
+are pending. Its algebraic known-spectrum, non-nodal-constant and logical
+constraint regressions are locally verified. The new degree-four
+hierarchy and control use separate slow processes, with the
+geometry-specific watchdogs specified below and explicit MPI processor
+counts; the old registrations
+exclude these cases, retaining one selection per geometry and context.
 
 The pressure constant is interpolated through the actual finite-element DOF
 functionals and synchronized before its PETSc vector is passed to the oracle.
@@ -193,18 +207,24 @@ using the selected sequential/OpenMP assembly configuration. The
 `PETScMixedStability` adapter is explicitly collective on the matrix
 communicator because its mathematical input is the complete global operator.
 Sparse operators, pressure-constant coefficients and integer constraint indices
-are collected for this small-mesh oracle. The backend-independent dense
+are collected for this finite-mesh oracle. The backend-independent blocked
 spectral calculation is performed once on communicator rank zero; its
 dimensions, eigenvalues and algebraic consistency defects are then distributed
 to every participant. A fatal spectral failure is communicated before result
 transfer, so participants do not wait for a missing result.
 This explicitly global result distribution does not infer entity ownership
 or reconcile mesh metadata. No collective is added to geometry queries, field evaluation, or
-rank-local Shard operations. Each dense workspace is bounded by the shared
-96 MiB admission policy before allocation; this is not a bound on total
-process memory. Sparse-input collection and the dense oracle are verification
+rank-local Shard operations. Each blocked velocity workspace is bounded by
+96 MiB and each pressure matrix by 128 MiB before allocation, as specified
+by the shared oracle; these individual admission policies do not bound total
+process memory. Sparse-input collection and the blocked oracle are verification
 operations, not a scalable solver benchmark.
-The registrations retain slow labels and 1800-second execution budgets.
+The registrations retain slow labels and 1800-second execution budgets,
+except the $P_4/P_3$ pyramid hierarchy, which receives 3600 seconds.
+The native route exceeded the earlier half-hour limit; local and
+rank-zero PETSc verification use the same independent spectral oracle.
+This allowance is not a measured upper runtime bound or a relaxation of
+the numerical criteria.
 The finite matrix does not establish a mesh-uniform inf-sup theorem;
 the pyramid/wedge stability argument remains a separate unresolved item.
 

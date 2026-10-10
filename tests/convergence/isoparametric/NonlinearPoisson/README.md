@@ -231,6 +231,102 @@ Sequential/OpenMP remains a build choice. These are finite hierarchy
 certificates; arbitrary map degrees and arbitrary curved meshes are not
 certified by these cases.
 
+## Natural boundaries on the exact quadratic domain
+
+`RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary` reuses the
+natural-boundary workload on the exact map
+
+$$
+\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1},\qquad
+\Omega=\Phi((0,1)^d),\qquad d\in\lbrace 1,2,3\rbrace.
+$$
+
+Boundary attributes are assigned in reference coordinates before installing
+the map. The mixed cases prescribe the exact trace on
+$\Gamma_D=\Phi(\lbrace \xi_0=0\rbrace)$; the remaining boundary is $\Gamma_N$.
+The pure-Neumann case has $\Gamma_D=\varnothing$. Physical coordinates,
+physical outward normals, and mapped measures define all manufactured data.
+For $\beta=0$ (Neumann) or $\beta=1$ (Robin), the problem is
+
+$$
+-\Delta u+u+u^3=f\quad\text{in }\Omega,\qquad
+u=u_\star\quad\text{on }\Gamma_D,\qquad
+\partial_nu+\beta u=g\quad\text{on }\Gamma_N,
+$$
+
+where $f=-\Delta u_\star+u_\star+u_\star^3$ and
+$g=\nabla u_\star\cdot n+\beta u_\star$. The residual and its derivative
+for test and increment functions $v,z$ with zero trace on $\Gamma_D$ are
+
+$$
+F(u;v)=\int_\Omega[\nabla u\cdot\nabla v+(u+u^3-f)v]\thinspace\mathrm{d}x
++\int_{\Gamma_N}(\beta u-g)v\thinspace\mathrm{d}s,
+$$
+
+$$
+D_uF(u)[z;v]=\int_\Omega[\nabla z\cdot\nabla v+(1+3u^2)zv]\thinspace\mathrm{d}x
++\beta\int_{\Gamma_N}zv\thinspace\mathrm{d}s.
+$$
+
+Since $1+3u^2\ge1$, the reaction controls constants even for pure Neumann
+data: no mean constraint or nullspace gauge is introduced.
+
+The smooth field is $u_\star(x)=\prod_{j=0}^{d-1}\sin(\pi x_j)$.
+P1, P2, and P3 check both adjacent refinement intervals in physical $L^2$
+and $H^1$ seminorms. P1 uses $n=5,9,17$, except curved tetrahedra,
+which use $n=9,17,33$ for all three boundary conditions; P2 and P3 use
+$n=3,5,9$. With $h=(n-1)^{-1}$,
+the expected orders are $h^{K+1}$ and $h^K$. The observed-rate floors are
+$(1.65,0.75)$ for P1 and $(K+0.45,K-0.45)$ for P2/P3. These are tests
+of the stated finite hierarchies, not a proof of regularity on arbitrary domains.
+
+The finer tetrahedral P1 path retains the original rate floors. On the coarse
+interval $n=5\to9$, mixed Neumann and Robin data gave $L^2$ rates about
+$1.611$ and $1.637$, respectively, below the $1.65$ policy. Independent
+coarse-level assembly-order, norm-order and solver-tolerance variations changed
+the errors by less than $1.5\times10^{-14}$ relatively. Separate local
+three-level studies on $n=9,17,33$ recovered $L^2$ rates approximately
+$1.877,1.965$ for mixed Neumann and $1.887,1.968$ for Robin; their
+$H^1$-seminorm rates were approximately $0.937,0.981$ for both conditions.
+These observations support selecting a resolved finite hierarchy rather than
+lowering its acceptance bounds. They do not establish the mechanism of every
+coarse-grid transient or certify the corresponding MPI and OpenMP runs;
+those remain separate verification gates. The flat mixed-Neumann and Robin
+hierarchies are unchanged.
+
+Exact physical patches use $u_\star=a$, $a(1+\sum_jx_j)$, and
+$a(1+\sum_jx_j^2)$ with $a=1/4$. Their pullbacks are represented by
+P1, P2, and P4 respectively; both norm errors must be below $10^{-9}$.
+Separate negative controls omit the cubic source response or the natural
+flux. Finite-difference residual/tangent comparisons exercise P1/P2 and
+reject missing cubic and Robin derivatives; the direction $z(x)=x_0$
+vanishes on the mapped Dirichlet face but has nonzero natural-boundary trace.
+Assembly order $16\to18$, norm order $18\to20$, and nonlinear tolerance
+$10^{-12}\to10^{-13}$ are varied independently, requiring relative error
+changes below $10^{-6}$.
+
+There are 37 case selections per geometry and context, covering all seven
+positive-dimensional geometries. CTest separates local and MPI ranks one
+through four; real-PETSc sequential and OpenMP configurations use the same
+cases. Geometry installation is rank-local after explicit mesh distribution;
+assembly, solver operations, and global norm reductions retain their global
+contracts. The workload does not add collectives to local geometry queries.
+Each of the nine boundary/order rate hierarchies has a separate process;
+the remaining 28 fixed-mesh controls are grouped separately. All three
+levels and both adjacent intervals remain in each rate case. The tetrahedral
+P1 entries have a three-hour watchdog: the resolved local pure-Neumann
+hierarchy took approximately 6836 seconds. Other entries retain 1800-second
+watchdogs. These are scheduling allowances, not numerical budgets or a
+performance certificate. MPI processor counts and the common pyramid
+resource lock are retained. Full runtime certification of the revised
+hierarchy and process partition remains separate from its registration.
+The CI workflow additionally assigns each tetrahedral P1 boundary hierarchy
+and local/MPI rank count to a separate job. The six P2/P3 hierarchies and
+28 fixed-mesh controls form another partition for each context. Both thread
+configurations retain every selection; a four-hour job budget accommodates
+the three-hour P1 test watchdog and dependency/build time. This scheduling
+structure does not assert that the hosted jobs have passed.
+
 ## Cubic fields on quadratic approximated geometry
 
 The `ApproximatedP3Q2` extension retains the physical sine solution of

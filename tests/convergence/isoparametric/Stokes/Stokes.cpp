@@ -34,6 +34,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
   constexpr Real WrongPressureL2 = 0.1;
   constexpr Real WrongPressureH1 = 1;
   constexpr Real GaugeTolerance = 1e-12; // Analytic unit volume and zero pressure mean.
+#ifdef RODIN_CURVED_STOKES_PETSC
+  constexpr size_t CubicGeometryRefinementSteps =
+    2; // Forward-accuracy policy, not a bound.
+#endif
   constexpr size_t NormOrder = 14, RefinedNormOrder = 18;
 
   struct LiftedErrors
@@ -147,7 +151,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
             lifted->divergence[component] = std::sqrt(squared[component]);
         };
 #ifdef RODIN_CURVED_STOKES_PETSC
-        return PETScStokesProblem(m_mesh, data, order)
+        return PETScStokesProblem(
+          m_mesh, data, order, Q == 3 ? CubicGeometryRefinementSteps : 0)
           .template solve<K>(viscosity, normOrder, observe);
 #else
         return StokesProblem(m_mesh, data, order).solve<K>(viscosity, normOrder, observe);
@@ -224,6 +229,31 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         }
         velocity.expectGeometryRates(Q);
       }
+
+#ifdef RODIN_CURVED_STOKES_PETSC
+      /** @brief Fixed-mesh forward accuracy, independent of a rate fit.
+       * Affine pressure is represented exactly by the cubic-geometry pair.
+       * The dimensionless absolute budget resolves factorization error below
+       * the separate three-level reproduction budget. No ownership decision
+       * or logical-layout comparison depends on this numerical threshold.
+       */
+      void cubicPressureForwardAccuracy() const
+      {
+        static_assert(Q == 3);
+        constexpr Real PressureForwardTolerance = 1e-11;
+        Workload<ContextType, Q> problem(this->GetParam(), 3, Map::Sine, true);
+        LiftedErrors lifted;
+        const auto represented = problem.template solve<3>(
+          StokesData::Field::Affine, 1, AssemblyOrder, NormOrder, &lifted);
+        for (const auto& pressure :
+          {represented.pressure, lifted.pressure.field, lifted.pressure.total})
+        {
+          ASSERT_TRUE(pressure.isFinite());
+          EXPECT_LT(pressure.getL2(), PressureForwardTolerance);
+          EXPECT_LT(pressure.getH1Seminorm(), PressureForwardTolerance);
+        }
+      }
+#endif
 
       void liftedQuadratureSensitivity() const
       {
@@ -707,6 +737,12 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
   {
     checkGauge(Map::Sine);
   }
+#ifdef RODIN_CURVED_STOKES_PETSC
+  TEST_P(LocalQ3Test, CubicPressureForwardAccuracy)
+  {
+    cubicPressureForwardAccuracy();
+  }
+#endif
   INSTANTIATE_TEST_SUITE_P(AllGeometries, LocalQ3Test,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
       Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
@@ -844,6 +880,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
   TEST_P(MPIQ3Test, LiftedPhysicalPressureGauge)
   {
     checkGauge(Map::Sine);
+  }
+  TEST_P(MPIQ3Test, CubicPressureForwardAccuracy)
+  {
+    cubicPressureForwardAccuracy();
   }
   INSTANTIATE_TEST_SUITE_P(AllGeometries, MPIQ3Test,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral,

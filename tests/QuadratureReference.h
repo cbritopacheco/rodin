@@ -25,7 +25,11 @@ namespace Rodin::Tests
       using Scalar = typename FormLanguage::Traits<Integrand>::ScalarType;
 
       explicit QuadratureReference(const Integral& integral)
-        : m_integrand(integral.getIntegrand())
+        : m_integrand(integral.getIntegrand()),
+          m_matrix(),
+          m_qf(nullptr),
+          m_order(0),
+          m_geometry(Geometry::Polytope::Type::Point)
       {}
 
       void assemble(const Geometry::Polytope& cell, size_t order)
@@ -67,9 +71,9 @@ namespace Rodin::Tests
     private:
       Integrand m_integrand;
       Math::Matrix<Scalar> m_matrix;
-      const QF::QuadratureFormulaBase* m_qf = nullptr;
-      size_t m_order = 0;
-      Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
+      const QF::QuadratureFormulaBase* m_qf;
+      size_t m_order;
+      Geometry::Polytope::Type m_geometry;
   };
 
   /** @brief Original-loop integrator for backend-equivalence tests only. */
@@ -84,13 +88,15 @@ namespace Rodin::Tests
       explicit ReferenceIntegral(const Integral& integral)
         : Parent(integral),
           m_integral(integral),
-          m_reference(integral)
+          m_reference(integral),
+          m_polytope(nullptr)
       {}
 
       ReferenceIntegral(const ReferenceIntegral& other)
         : Parent(other),
           m_integral(other.m_integral),
-          m_reference(m_integral)
+          m_reference(m_integral),
+          m_polytope(nullptr)
       {}
 
       ReferenceIntegral& setPolytope(const Geometry::Polytope& cell) override
@@ -125,7 +131,7 @@ namespace Rodin::Tests
     private:
       Integral m_integral;
       QuadratureReference<Integral> m_reference;
-      const Geometry::Polytope* m_polytope = nullptr;
+      const Geometry::Polytope* m_polytope;
   };
 }
 #endif

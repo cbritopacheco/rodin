@@ -36,6 +36,10 @@ add_executable(RodinPhysicsStageBenchmarks PhysicsStages.cpp)
 target_link_libraries(RodinPhysicsStageBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
 
+add_executable(RodinNonlinearPoissonAssemblyBenchmarks NonlinearPoissonAssembly.cpp)
+target_link_libraries(RodinNonlinearPoissonAssemblyBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
 add_executable(RodinQuadratureExpressionBenchmarks QuadratureExpressions.cpp)
 target_link_libraries(RodinQuadratureExpressionBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)

@@ -1301,20 +1301,34 @@ namespace Rodin::Variational
        */
       struct EvaluationCache
       {
-        const GridFunctionBase* owner = nullptr;
-        size_t ownerIdentity = static_cast<size_t>(-1);
-        const FES* fes = nullptr;
-        const Geometry::MeshBase* mesh = nullptr;
+        EvaluationCache()
+          : owner(nullptr),
+            ownerIdentity(static_cast<size_t>(-1)),
+            fes(nullptr),
+            mesh(nullptr),
+            element(nullptr),
+            d(static_cast<size_t>(-1)),
+            i(static_cast<Index>(-1)),
+            hasBasisValues(false),
+            qf(nullptr),
+            qp(static_cast<size_t>(-1)),
+            qfIdentity(static_cast<size_t>(-1))
+        {}
+
+        const GridFunctionBase* owner;
+        size_t ownerIdentity;
+        const FES* fes;
+        const Geometry::MeshBase* mesh;
         // Space assignments can change the element even with fixed connectivity.
-        const ElementType* element = nullptr;
-        size_t d = static_cast<size_t>(-1);
-        Index i = static_cast<Index>(-1);
+        const ElementType* element;
+        size_t d;
+        Index i;
         std::vector<Index> dofs;
 
-        bool hasBasisValues = false;
-        const QF::QuadratureFormulaBase* qf = nullptr;
-        size_t qp = static_cast<size_t>(-1);
-        size_t qfIdentity = static_cast<size_t>(-1);
+        bool hasBasisValues;
+        const QF::QuadratureFormulaBase* qf;
+        size_t qp;
+        size_t qfIdentity;
         Math::SpatialPoint referenceCoordinates;
         std::vector<RangeType> basisValues;
       };

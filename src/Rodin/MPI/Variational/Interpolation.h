@@ -77,7 +77,8 @@ namespace Rodin::Variational
       /** Selects the functional source for each coefficient to be updated. */
       template <class Pred>
       Interpolation(const FES& fes, Geometry::Region region, const Pred& pred)
-        : m_fes(fes)
+        : m_fes(fes),
+          m_dimension(0)
       {
         if constexpr (std::is_same_v<FES,
                         P0<typename FES::RangeType, typename FES::MeshType>>)
@@ -183,7 +184,7 @@ namespace Rodin::Variational
 
     private:
       const FES& m_fes;
-      size_t m_dimension = 0;
+      size_t m_dimension;
       IndexMap<std::pair<Index, Index>> m_dofs;
       Optional<Rank> m_source;
   };

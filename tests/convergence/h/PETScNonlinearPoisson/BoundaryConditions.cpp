@@ -9,6 +9,9 @@
 
 #include "../../PETScNonlinearPoisson.h"
 #include "../../FieldConvergence.h"
+#ifdef RODIN_NONLINEAR_BOUNDARY_CURVED
+#include "../../CurvedGeometry.h"
+#endif
 #ifdef RODIN_USE_MPI
 #include <boost/mpi/environment.hpp>
 #include "../../MPIConvergence.h"
@@ -39,12 +42,23 @@ namespace Rodin::Tests::Convergence::NonlinearBoundaryTests
     {
       auto mesh = UniformGrid(geometry).makeMesh(n);
       initialize(mesh);
+#ifdef RODIN_NONLINEAR_BOUNDARY_CURVED
+      CurvedGeometry curved(mesh);
+      curved.template install<2>();
+#endif
       return mesh;
     }
 #ifdef RODIN_USE_MPI
     else
-      return DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
-        .makeMesh(n, initialize);
+    {
+      auto mesh = DistributedUniformGrid(Context::MPI(*environment, *world), geometry)
+                    .makeMesh(n, initialize);
+#ifdef RODIN_NONLINEAR_BOUNDARY_CURVED
+      CurvedGeometry curved(mesh);
+      curved.template install<2>();
+#endif
+      return mesh;
+    }
 #endif
   }
 
@@ -74,10 +88,14 @@ namespace Rodin::Tests::Convergence::NonlinearBoundaryTests
       void checkRates(Boundary boundary) const
       {
         FieldConvergence<1> history;
-        const bool resolveNeumannTransient = K == 1 &&
-          boundary == Boundary::PureNeumann &&
-          this->GetParam() == Polytope::Type::Tetrahedron;
-        const auto levels = resolveNeumannTransient
+        const bool resolveTetrahedronTransient = K == 1 &&
+          this->GetParam() == Polytope::Type::Tetrahedron &&
+          (boundary == Boundary::PureNeumann
+#ifdef RODIN_NONLINEAR_BOUNDARY_CURVED
+            || boundary == Boundary::MixedNeumann || boundary == Boundary::Robin
+#endif
+          );
+        const auto levels = resolveTetrahedronTransient
           ? std::initializer_list<size_t>{9, 17, 33}
           : K == 1 ? std::initializer_list<size_t>{5, 9, 17}
                    : std::initializer_list<size_t>{3, 5, 9};
@@ -173,6 +191,36 @@ namespace Rodin::Tests::Convergence::NonlinearBoundaryTests
       }
   };
 
+#ifdef RODIN_NONLINEAR_BOUNDARY_CURVED
+#define RODIN_NONLINEAR_BOUNDARY_PATCHES(Name, Prefix, Kind)                             \
+  TEST_P(Name, Prefix##ConstantP1Patch)                                                  \
+  {                                                                                      \
+    checkPatch<1>(Boundary::Kind, Field::Constant);                                      \
+  }                                                                                      \
+  TEST_P(Name, Prefix##AffineP2Patch)                                                    \
+  {                                                                                      \
+    checkPatch<2>(Boundary::Kind, Field::Affine);                                        \
+  }                                                                                      \
+  TEST_P(Name, Prefix##QuadraticP4Patch)                                                 \
+  {                                                                                      \
+    checkPatch<4>(Boundary::Kind, Field::Quadratic);                                     \
+  }
+#else
+#define RODIN_NONLINEAR_BOUNDARY_PATCHES(Name, Prefix, Kind)                             \
+  TEST_P(Name, Prefix##ConstantP1Patch)                                                  \
+  {                                                                                      \
+    checkPatch<1>(Boundary::Kind, Field::Constant);                                      \
+  }                                                                                      \
+  TEST_P(Name, Prefix##AffineP1Patch)                                                    \
+  {                                                                                      \
+    checkPatch<1>(Boundary::Kind, Field::Affine);                                        \
+  }                                                                                      \
+  TEST_P(Name, Prefix##QuadraticP2Patch)                                                 \
+  {                                                                                      \
+    checkPatch<2>(Boundary::Kind, Field::Quadratic);                                     \
+  }
+#endif
+
 #define RODIN_NONLINEAR_BOUNDARY_CASES(Name, Prefix, Kind)                               \
   TEST_P(Name, Prefix##P1Rates)                                                          \
   {                                                                                      \
@@ -186,18 +234,7 @@ namespace Rodin::Tests::Convergence::NonlinearBoundaryTests
   {                                                                                      \
     checkRates<3>(Boundary::Kind);                                                       \
   }                                                                                      \
-  TEST_P(Name, Prefix##ConstantP1Patch)                                                  \
-  {                                                                                      \
-    checkPatch<1>(Boundary::Kind, Field::Constant);                                      \
-  }                                                                                      \
-  TEST_P(Name, Prefix##AffineP1Patch)                                                    \
-  {                                                                                      \
-    checkPatch<1>(Boundary::Kind, Field::Affine);                                        \
-  }                                                                                      \
-  TEST_P(Name, Prefix##QuadraticP2Patch)                                                 \
-  {                                                                                      \
-    checkPatch<2>(Boundary::Kind, Field::Quadratic);                                     \
-  }                                                                                      \
+  RODIN_NONLINEAR_BOUNDARY_PATCHES(Name, Prefix, Kind)                                   \
   TEST_P(Name, Prefix##RejectsMissingCubic)                                              \
   {                                                                                      \
     checkCubicControl(Boundary::Kind);                                                   \
@@ -247,6 +284,7 @@ namespace Rodin::Tests::Convergence::NonlinearBoundaryTests
 #endif
 #undef RODIN_NONLINEAR_BOUNDARY_TESTS
 #undef RODIN_NONLINEAR_BOUNDARY_CASES
+#undef RODIN_NONLINEAR_BOUNDARY_PATCHES
 }
 
 int main(int argc, char** argv)

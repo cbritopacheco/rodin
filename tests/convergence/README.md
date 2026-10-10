@@ -251,8 +251,8 @@ exists yet.
 | --- | --- | --- | --- | --- |
 | Poisson | P1–P3, boundary variants; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1–P3 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
 | Complex Helmholtz | P1/P2; native-complex PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/impedance P1–P3 with polynomial patches | P1–P4; native and complex-PETSc local/MPI | P1–P3; native and complex-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; affine P2/Q1 and P3/Q3 geometry-limited rates; smooth P3/Q2 mixed-order component rates, total-error envelope, sensitivity and omitted-mass controls; native and complex-PETSc local/MPI |
-| Linear elasticity | Vector P1/P2, displacement and traction variants; nearly incompressible divergence-free P2 in 2D/3D; native and real-PETSc local/MPI | Analytic vector P1→P2→P3→P4; native and real-PETSc local/MPI | Analytic vector P1–P3; native and real-PETSc local/MPI | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; affine P2/Q1 and P3/Q3 geometry-limited displacement/strain/stress rates; native local and real-PETSc local/MPI |
-| Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI; native and real-PETSc local/MPI finite P2/P1 and P3/P2 pressure-spectrum checks; PETSc physical traction P2/P1 and P3/P2 without a mean multiplier | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; affine $P_2/P_1$ on linear and $P_3/P_2$ on cubic geometry; smooth $P_3/P_2$ on approximated $Q_2$, coupled and separated pressure rates, mixed-order velocity envelopes and controls; native local and real-PETSc local/MPI |
+| Linear elasticity | Vector P1/P2, displacement and traction variants; nearly incompressible divergence-free P2 in 2D/3D; native and real-PETSc local/MPI | Analytic vector P1→P2→P3→P4; native and real-PETSc local/MPI | Analytic vector P1–P3; native and real-PETSc local/MPI | P1/P2 displacement, strain and stress on exact P2 maps and represented/lifted sine-map domains; affine P2/Q1 and P3/Q3 geometry-limited displacement/strain/stress rates; smooth P3/Q2 component rates, mixed-order total-error envelopes, sensitivity, affine patch and omitted-volumetric controls; native local and real-PETSc local/MPI |
+| Stokes | Taylor–Hood P2/P1/P0g; native and PETSc local/MPI; native and real-PETSc local/MPI finite P2/P1 and P3/P2 pressure-spectrum checks; PETSc physical traction P2/P1 and P3/P2 without a mean multiplier | Velocity/pressure pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | Analytic pairs $2/1\to3/2\to4/3$; native and PETSc local/MPI | P2/P1/P0g on exact P2 and approximated sine maps; represented-domain and lifted velocity/pressure errors; affine $P_2/P_1$ on linear and $P_3/P_2$ on cubic geometry; smooth $P_3/P_2$ on approximated $Q_2$, coupled and separated pressure rates, mixed-order velocity envelopes and controls; exact-Q2 physical traction P2/P1 and P3/P2 rates, P4/P3 and P6/P5 patches and pressure-level controls; native local and real-PETSc local/MPI |
 | Variable conductivity | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3 with polynomial patches; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1–P3 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
 | Coupled reaction–diffusion | P1/P2; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin/pure Neumann P1–P3 with coupled polynomial patches | P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | Analytic two-field P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 maps and represented/lifted sine-map domains; affine P2/Q1 and P3/Q3 componentwise geometry-limited rates; smooth P3/Q2 independent two-field component rates, total-error envelopes, sensitivity and omitted-coupling controls; native local and real-PETSc local/MPI; exact-P2 natural-boundary P1–P3 rates, affine/quadratic patches, coupling/flux rejection and independent quadrature/solver controls |
 | Nonlinear Poisson | $P_1/P_2$; native and real-PETSc SNES local/MPI; PETSc P1–P3 mixed Neumann/Robin/pure Neumann with patch, flux and tangent controls | Analytic P1→P2→P3→P4; native and real-PETSc SNES local/MPI; tangent controls | Analytic P1–P3; native and real-PETSc SNES local/MPI; tangent controls | P1/P2 on exact P2 and approximated sine maps; represented-domain and lifted field/geometry/total errors; smooth P3/Q2 component rates, total-error envelopes, sensitivity, affine patch, omitted-cubic and residual/tangent controls; native Newton and real-PETSc SNES local/MPI |
@@ -574,10 +574,21 @@ the fixed-domain field rates and independent controls.
 
 The native CI matrix runs the full local suite in both sequential and
 OpenMP configurations (`RODIN_MULTITHREADED=OFF/ON`). Execution is partitioned
-into a baseline and curved scalar, linear-elasticity, Stokes and Helmholtz
-jobs. Every convergence registration belongs to exactly one partition in
-each configuration. The baseline retains its 45-minute job budget; curved
-partitions have 180-minute budgets and run one CTest process at a time.
+into a baseline, finite pressure-spectrum partitions, and curved
+projection/geometry, scalar, linear-elasticity, Stokes and Helmholtz jobs.
+Every convergence registration belongs to exactly
+one partition in each configuration. The baseline retains its 45-minute job
+budget; curved partitions have 180-minute budgets and run one CTest process
+at a time.
+Native pressure-spectrum execution has separate light, tetrahedral and
+pyramidal jobs with the same 180-minute budget. The light job includes
+triangle, quadrilateral, hexahedron, wedge and algebraic utility cases.
+Real-PETSc pressure-spectrum execution uses the same geometry partitions,
+each split into local and individual MPI-rank-count jobs with 240-minute
+budgets. Their union retains every registered pair, map, quadrature
+comparison and omitted-divergence control. The budgets are scheduling
+policies motivated by the measured higher-order hierarchy cost; they are
+not algebraic error tolerances or runtime guarantees.
 This scheduling policy changes neither refinement levels nor numerical
 acceptance and separates the large vector and mixed direct solves.
 Curved real-PETSc bulk execution is split into scalar, linear-elasticity and
@@ -803,15 +814,24 @@ $P_2/P_1$ pair, six geometries, maps and levels in local contexts and at MPI
 ranks one through four, independently in both thread configurations. Its
 explicitly global oracle collects complete operators and integer boundary
 indices; it introduces no collectives into mesh queries or field evaluation.
-The finite matrix is locally verified, not hosted-CI certified.
-The native gate also locally verifies the $P_3/P_2$ pair on affine and
+The finite matrix was locally verified with the previous dense oracle,
+not hosted-CI certified. Recertification with the
+[bounded-workspace oracle](h/Stokes/README.md#bounded-workspace-spectral-construction)
+is pending.
+The native gate also previously verified the $P_3/P_2$ pair on affine and
 quadratic maps at grid levels $3,4,5$ in both thread configurations,
 with the same independent spectra and missing-divergence control.
-The corresponding higher-order real-PETSc gate also locally verifies all six
+The corresponding higher-order real-PETSc gate previously verified all six
 geometries and both maps at these levels in local and MPI rank 1–4 contexts,
-separately in sequential/OpenMP builds. Its dense spectral calculation is
+separately in sequential/OpenMP builds. Its spectral calculation is
 performed once on the matrix communicator and the result is distributed;
 pressure constants use interpolated coefficients, not an assumed nodal layout.
+The implemented $P_4/P_3$ extension retains all six geometries, both maps,
+grid levels $3,4,5$, local/MPI rank 1–4 contexts, and both thread configurations.
+Its numerical certification and recertification of the older pairs remain
+pending. The shared oracle preserves the independent Schur and singular-value
+routes with separately bounded pressure matrices and velocity-column blocks;
+it does not replace numerical spectra with a dimension count.
 These finite gates do not establish mesh-uniform stability or stability of
 the full higher-order family;
 a uniform stability argument for the pyramid/wedge families remains unresolved.

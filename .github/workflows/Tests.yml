@@ -19,6 +19,8 @@ jobs:
     # Keep the original h/p/hp gate separate from the growing curved matrix.
     # A single new scalar 3D degree study took 21 minutes locally; the former
     # 45-minute combined job no longer budgets build and complete refinement.
+    # Curved projection/geometry checks have their own budget: both baseline
+    # modes exhausted 45 minutes while the pyramid P0 projection was active.
     # Both combined curved-scalar jobs exhausted three hours. Separate physics
     # and the two expensive cell families without dropping refinement cases.
     timeout-minutes: ${{ matrix.suite == 'baseline' && 45 || 180 }}
@@ -26,7 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        suite: [baseline, curved_diffusion_light, curved_diffusion_tetrahedron, curved_diffusion_pyramid, curved_reaction_light, curved_reaction_tetrahedron, curved_reaction_pyramid, curved_nonlinear_light, curved_nonlinear_tetrahedron, curved_nonlinear_pyramid, curved_elasticity, curved_stokes, curved_helmholtz]
+        suite: [baseline, pressure_light, pressure_tetrahedron, pressure_pyramid, curved_projection, curved_diffusion_light, curved_diffusion_tetrahedron, curved_diffusion_pyramid, curved_reaction_light, curved_reaction_tetrahedron, curved_reaction_pyramid, curved_nonlinear_light, curved_nonlinear_tetrahedron, curved_nonlinear_pyramid, curved_elasticity, curved_stokes, curved_helmholtz]
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -73,6 +75,12 @@ jobs:
         run: |
           case "${{ matrix.suite }}" in
             baseline) cmake --build build -j 2 ;;
+            pressure_*)
+              cmake --build build -j 2 --target RodinConvergenceHStokesStability ;;
+            curved_projection)
+              cmake --build build -j 2 --target \
+                RodinConvergenceIsoparametricP0Projection \
+                RodinConvergenceIsoparametricGeometryApproximation ;;
             curved_diffusion_*)
               cmake --build build -j 2 --target RodinConvergenceIsoparametricDiffusion ;;
             curved_reaction_*)
@@ -90,11 +98,15 @@ jobs:
 
       - name: Run convergence suites
         run: |
-          curved_pattern='^RodinConvergenceIsoparametric(.*Diffusion|NonlinearPoisson|LinearElasticity|Stokes|Helmholtz)_'
+          curved_pattern='^RodinConvergenceIsoparametric(P0Projection|GeometryApproximation|.*Diffusion|NonlinearPoisson|LinearElasticity|Stokes|Helmholtz)_'
           case "${{ matrix.suite }}" in
             baseline)
-              ctest --test-dir build/tests -L convergence -E "$curved_pattern" \
+              ctest --test-dir build/tests -L convergence -E "$curved_pattern|^RodinConvergenceHStokesStability_" \
                 --output-on-failure --no-tests=error -j 2 ;;
+            pressure_light) pressure_exclude='_(Tetrahedron|Pyramid)$' ;;
+            pressure_tetrahedron) pressure_exclude='_(Triangle|Quadrilateral|Pyramid|Hexahedron|Wedge|Utility|Workspace)$' ;;
+            pressure_pyramid) pressure_exclude='_(Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge|Utility|Workspace)$' ;;
+            curved_projection) suite_pattern='(P0Projection|GeometryApproximation)' ;;
             curved_diffusion_*) suite_pattern='(Approximated|Lifted|SmoothLifted)?Diffusion' ;;
             curved_reaction_*) suite_pattern='ReactionDiffusion' ;;
             curved_nonlinear_*) suite_pattern='NonlinearPoisson' ;;
@@ -103,9 +115,13 @@ jobs:
             curved_helmholtz) suite_pattern='Helmholtz' ;;
             *) exit 1 ;;
           esac
-          if [[ "${{ matrix.suite }}" == curved_diffusion_* || \
-                "${{ matrix.suite }}" == curved_reaction_* || \
-                "${{ matrix.suite }}" == curved_nonlinear_* ]]; then
+          if [[ "${{ matrix.suite }}" == pressure_* ]]; then
+            ctest --test-dir build/tests -L convergence \
+              -R '^RodinConvergenceHStokesStability_' -E "$pressure_exclude" \
+              --output-on-failure --no-tests=error -j 1
+          elif [[ "${{ matrix.suite }}" == curved_diffusion_* || \
+                  "${{ matrix.suite }}" == curved_reaction_* || \
+                  "${{ matrix.suite }}" == curved_nonlinear_* ]]; then
             case "${{ matrix.suite }}" in
               *_light) geometry_exclude='_(Tetrahedron|Pyramid)$' ;;
               *_tetrahedron) geometry_exclude='_(Segment|Triangle|Quadrilateral|Pyramid|Hexahedron|Wedge)$' ;;
@@ -184,12 +200,50 @@ jobs:
     # The sequential job exhausted 90 minutes, including dependency/build time.
     # Nonlinear geometry partitions include the finer pure-Neumann tetrahedron
     # study; give their rank matrix headroom without changing numerical gates.
-    timeout-minutes: ${{ startsWith(matrix.suite, 'nonlinear_boundary') && 240 || 120 }}
+    timeout-minutes: ${{ (startsWith(matrix.suite, 'nonlinear_boundary') || startsWith(matrix.suite, 'pressure_')) && 240 || 120 }}
     strategy:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        suite: [bulk, poisson_boundary, conductivity_boundary, elasticity_boundary, stokes_boundary, reaction_boundary, nonlinear_boundary, nonlinear_boundary_tetrahedron, nonlinear_boundary_pyramid]
+        suite: [bulk, poisson_boundary, conductivity_boundary, elasticity_boundary, stokes_boundary, reaction_boundary, nonlinear_boundary, nonlinear_boundary_tetrahedron, nonlinear_boundary_pyramid, pressure_light, pressure_tetrahedron, pressure_pyramid]
+        context: [all]
+        # A native tetrahedral P4/P3 spectrum hierarchy takes about 16 minutes.
+        # Preserve every local/MPI context without summing five copies in bulk.
+        exclude:
+          - {suite: pressure_light}
+          - {suite: pressure_tetrahedron}
+          - {suite: pressure_pyramid}
+        include:
+          - {multithreaded: ON, suite: pressure_light, context: local}
+          - {multithreaded: ON, suite: pressure_light, context: np1}
+          - {multithreaded: ON, suite: pressure_light, context: np2}
+          - {multithreaded: ON, suite: pressure_light, context: np3}
+          - {multithreaded: ON, suite: pressure_light, context: np4}
+          - {multithreaded: OFF, suite: pressure_light, context: local}
+          - {multithreaded: OFF, suite: pressure_light, context: np1}
+          - {multithreaded: OFF, suite: pressure_light, context: np2}
+          - {multithreaded: OFF, suite: pressure_light, context: np3}
+          - {multithreaded: OFF, suite: pressure_light, context: np4}
+          - {multithreaded: ON, suite: pressure_tetrahedron, context: local}
+          - {multithreaded: ON, suite: pressure_tetrahedron, context: np1}
+          - {multithreaded: ON, suite: pressure_tetrahedron, context: np2}
+          - {multithreaded: ON, suite: pressure_tetrahedron, context: np3}
+          - {multithreaded: ON, suite: pressure_tetrahedron, context: np4}
+          - {multithreaded: OFF, suite: pressure_tetrahedron, context: local}
+          - {multithreaded: OFF, suite: pressure_tetrahedron, context: np1}
+          - {multithreaded: OFF, suite: pressure_tetrahedron, context: np2}
+          - {multithreaded: OFF, suite: pressure_tetrahedron, context: np3}
+          - {multithreaded: OFF, suite: pressure_tetrahedron, context: np4}
+          - {multithreaded: ON, suite: pressure_pyramid, context: local}
+          - {multithreaded: ON, suite: pressure_pyramid, context: np1}
+          - {multithreaded: ON, suite: pressure_pyramid, context: np2}
+          - {multithreaded: ON, suite: pressure_pyramid, context: np3}
+          - {multithreaded: ON, suite: pressure_pyramid, context: np4}
+          - {multithreaded: OFF, suite: pressure_pyramid, context: local}
+          - {multithreaded: OFF, suite: pressure_pyramid, context: np1}
+          - {multithreaded: OFF, suite: pressure_pyramid, context: np2}
+          - {multithreaded: OFF, suite: pressure_pyramid, context: np3}
+          - {multithreaded: OFF, suite: pressure_pyramid, context: np4}
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
@@ -244,14 +298,40 @@ jobs:
           RodinConvergenceHPETScReactionDiffusion
           RodinConvergenceHPETScNonlinearPoisson
           RodinConvergenceHPETScStokes
-          RodinConvergenceHPETScStokesStability
 
       - name: Run PETSc convergence suite
         if: matrix.suite == 'bulk'
         run: >-
           ctest --test-dir build/tests -R '^RodinConvergenceHPETSc'
-          -E '^RodinConvergenceHPETSc(Poisson|Conductivity|LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson)Boundary_'
+          -E '^RodinConvergenceHPETSc(Poisson|Conductivity|LinearElasticity|Stokes|ReactionDiffusion|NonlinearPoisson)Boundary_|^RodinConvergenceHPETSc(MPI)?StokesStability_'
           --output-on-failure -j 1
+
+      - name: Build PETSc pressure-spectrum suite
+        if: startsWith(matrix.suite, 'pressure_')
+        run: cmake --build build -j 2 --target RodinConvergenceHPETScStokesStability
+
+      - name: Run PETSc pressure-spectrum suite
+        if: startsWith(matrix.suite, 'pressure_')
+        run: |
+          case "${{ matrix.suite }}" in
+            pressure_light) geometry_pattern='(Triangle|Quadrilateral|Hexahedron|Wedge)' ;;
+            pressure_tetrahedron) geometry_pattern='Tetrahedron' ;;
+            pressure_pyramid) geometry_pattern='Pyramid' ;;
+            *) exit 1 ;;
+          esac
+          utility_pattern=''
+          if [ "${{ matrix.context }}" = local ]; then
+            if [ "${{ matrix.suite }}" = pressure_light ]; then utility_pattern='|Utility'; fi
+            pattern="^RodinConvergenceHPETScStokesStability_((P4P3_(Rates|Controls)_)?${geometry_pattern}${utility_pattern})$"
+          else
+            rank="${{ matrix.context }}"
+            rank="${rank#np}"
+            case "$rank" in 1|2|3|4) ;; *) exit 1 ;; esac
+            if [ "${{ matrix.suite }}" = pressure_light ]; then utility_pattern="|Utility_np${rank}"; fi
+            pattern="^RodinConvergenceHPETScMPIStokesStability_((P4P3_)?np${rank}_((Rates|Controls)_)?${geometry_pattern}${utility_pattern})$"
+          fi
+          ctest --test-dir build/tests -R "$pattern" \
+            --output-on-failure --no-tests=error -j 1
 
       - name: Build PETSc Poisson boundary convergence suite
         if: matrix.suite == 'poisson_boundary'
@@ -515,7 +595,7 @@ jobs:
       fail-fast: false
       matrix:
         multithreaded: [ON, OFF]
-        physics: [Poisson, Conductivity, ReactionDiffusion, LinearElasticity]
+        physics: [Poisson, Conductivity, ReactionDiffusion, LinearElasticity, NonlinearPoisson, Stokes]
         geometry: [light, tetrahedron, pyramid]
         selection: [all]
         # Scalar pyramid groups exceed one hour locally for both physics.
@@ -526,6 +606,7 @@ jobs:
           - {physics: Conductivity, geometry: pyramid}
           - {physics: ReactionDiffusion, geometry: pyramid}
           - {physics: LinearElasticity, geometry: tetrahedron}
+          - {physics: NonlinearPoisson, geometry: tetrahedron}
         include:
           - {multithreaded: ON, physics: Poisson, geometry: pyramid, selection: local}
           - {multithreaded: OFF, physics: Poisson, geometry: pyramid, selection: local}
@@ -626,6 +707,82 @@ jobs:
           ctest --test-dir build/tests \
             -R "^RodinConvergenceIsoparametricPETSc${{ matrix.physics }}Boundary_${context_pattern}${geometry_pattern}$" \
             --output-on-failure --no-tests=error -j 1
+
+  PETScCurvedNonlinearTetrahedronConvergence:
+    # A resolved local P1 pure-Neumann hierarchy took 6836 seconds.
+    # Isolate each P1 boundary study and execution context; retain the other
+    # six rate studies and 28 controls in a separate per-context partition.
+    # The four-hour job budget includes one hour beyond the P1 test watchdog.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        multithreaded: [ON, OFF]
+        selection: [local, np1, np2, np3, np4]
+        partition: [MixedNeumannP1Rates, RobinP1Rates, PureNeumannP1Rates, remaining]
+    env:
+      OMP_NUM_THREADS: 2
+      OPENBLAS_NUM_THREADS: 1
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: gcc-14
+          cmake: true
+
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
+          libscotch-dev libmetis-dev libhdf5-dev petsc-dev mpich
+
+      - name: Configure curved nonlinear tetrahedral convergence build
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DRODIN_BUILD_SRC=ON
+          -DRODIN_BUILD_UNIT_TESTS=OFF
+          -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=ON
+          -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_BENCHMARKS=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
+          -DRODIN_USE_MPI=ON
+          -DRODIN_USE_PETSC=ON
+
+      - name: Build curved nonlinear tetrahedral convergence suite
+        run: >-
+          cmake --build build -j 2 --target
+          RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary
+
+      - name: Run curved nonlinear tetrahedral convergence partition
+        run: |
+          case "${{ matrix.selection }}" in
+            local) context_pattern='' ;;
+            np1|np2|np3|np4) context_pattern='MPI_${{ matrix.selection }}_' ;;
+            *) exit 1 ;;
+          esac
+          prefix="^RodinConvergenceIsoparametricPETScNonlinearPoissonBoundary_${context_pattern}"
+          case "${{ matrix.partition }}" in
+            MixedNeumannP1Rates|RobinP1Rates|PureNeumannP1Rates)
+              ctest --test-dir build/tests \
+                -R "${prefix}${{ matrix.partition }}_Tetrahedron$" \
+                --output-on-failure --no-tests=error -j 1 ;;
+            remaining)
+              ctest --test-dir build/tests \
+                -R "${prefix}[A-Za-z0-9]+_Tetrahedron$" \
+                -E '_(MixedNeumann|Robin|PureNeumann)P1Rates_Tetrahedron$' \
+                --output-on-failure --no-tests=error -j 1 ;;
+            *) exit 1 ;;
+          esac
 
   PETScComplexConvergence:
     # Pin the PETSc 3.19 compatibility gate, independently of the real build.
