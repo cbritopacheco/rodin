@@ -7,12 +7,17 @@
 
 /**
  * @file
- * @brief Targeted assembly test manufactured regression tests.
+ * @brief PETSc local targeted-assembly and reassembly contracts.
  *
- * These tests assemble Rodin variational forms for a Targeted Assembly Test manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the PETSc-backed assembly and solve path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ * Mass, diffusion and coupled forms on fixed triangular meshes compare targeted
+ * updates of @f$A@f$ and @f$b@f$ with full reassembly. Unselected entries,
+ * constraints, sparsity allocation and coefficient updates retain their stated
+ * contracts. Spaces and scalar loads use the configured PETSc coefficient field;
+ * the fixed data are real-valued even in complex-storage builds.
  */
 
 #include <cassert>
+#include <type_traits>
 
 #include <gtest/gtest.h>
 
@@ -30,6 +35,10 @@ using namespace Rodin::Variational;
 
 namespace
 {
+  /// @brief Scalar data with the configured PETSc coefficient field.
+  using PETScScalarFunction = std::conditional_t<std::is_same_v<PetscScalar, Complex>,
+    ComplexFunction<PetscScalar>, RealFunction<PetscScalar>>;
+
   template <template <class, class> class Assembler>
   PETSc::Math::LinearSystem assembleLocal(
     Variational::AssemblyTarget target, bool targeted)
@@ -37,14 +46,14 @@ namespace
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.getConnectivity().compute(1, 2);
 
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction v(fes);
 
     using LinearSystemType = PETSc::Math::LinearSystem;
     using ProblemType = Problem<LinearSystemType, decltype(u), decltype(v)>;
     typename ProblemType::ProblemBodyType body =
-      Integral(u, v) - Integral(RealFunction(1.0), v);
+      Integral(u, v) - Integral(PETScScalarFunction(1.0), v);
 
     Assembly::ProblemAssemblyInput<typename ProblemType::ProblemBodyType, decltype(u),
       decltype(v)>
@@ -171,7 +180,7 @@ namespace
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction v(fes);
     RealFunction gamma(gammaValue);
@@ -183,7 +192,7 @@ namespace
       lhs.over(999);
 
     typename ProblemType::ProblemBodyType body =
-      lhs - Integral(RealFunction(sourceValue), v);
+      lhs - Integral(PETScScalarFunction(sourceValue), v);
 
     Assembly::ProblemAssemblyInput<typename ProblemType::ProblemBodyType, decltype(u),
       decltype(v)>
@@ -334,20 +343,20 @@ namespace
   TEST(PETSc_TargetedAssembly, PreassembledFormSignsAndSnapshots)
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TestFunction v(fes);
     BilinearForm metric(u, v);
     LinearForm load(v);
     metric = Integral(u, v);
-    load = Integral(RealFunction(1), v);
+    load = Integral(PETScScalarFunction(1), v);
     metric.assemble();
     load.assemble();
     Problem expected(u, v), actual(u, v);
     ProblemBase<PETSc::Math::LinearSystem>& base = actual;
     base += metric;
     base -= load;
-    expected = Integral(u, v) - Integral(RealFunction(1), v);
+    expected = Integral(u, v) - Integral(PETScScalarFunction(1), v);
     expected.assemble();
     actual.assemble();
     expectSameMatrix(
@@ -370,7 +379,7 @@ namespace
     ASSERT_EQ(ierr, PETSC_SUCCESS);
     ierr = VecScale(load.getVector(), 9);
     ASSERT_EQ(ierr, PETSC_SUCCESS);
-    expected = -Integral(u, v) + Integral(RealFunction(1), v);
+    expected = -Integral(u, v) + Integral(PETScScalarFunction(1), v);
     expected.assemble();
     actual.assemble();
     expectSameMatrix(
@@ -383,19 +392,19 @@ namespace
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.getConnectivity().compute(1, 2);
-    P1 fes(mesh);
-    P0 pressure(mesh);
+    P1<PetscScalar> fes(mesh);
+    P0<PetscScalar> pressure(mesh);
     PETSc::Variational::TrialFunction u(fes);
     PETSc::Variational::TrialFunction p(pressure);
     PETSc::Variational::TestFunction v(fes);
     PETSc::Variational::TestFunction q(pressure);
     Problem expected(u, v), actual(u, v);
-    expected =
-      Integral(u, v) - Integral(RealFunction(1), v) + DirichletBC(u, RealFunction(1));
+    expected = Integral(u, v) - Integral(PETScScalarFunction(1), v) +
+      DirichletBC(u, PETScScalarFunction(1));
     ProblemBase<PETSc::Math::LinearSystem>& base = actual;
     base += Integral(u, v);
-    base -= Integral(RealFunction(1), v);
-    base += DirichletBC(u, RealFunction(1));
+    base -= Integral(PETScScalarFunction(1), v);
+    base += DirichletBC(u, PETScScalarFunction(1));
     expected.assemble();
     actual.assemble();
     expectSameMatrix(
@@ -409,11 +418,11 @@ namespace
     BilinearForm pressureMetric(p, q);
     LinearForm pressureLoad(q);
     pressureMetric = Integral(p, q);
-    pressureLoad = Integral(RealFunction(1), q);
+    pressureLoad = Integral(PETScScalarFunction(1), q);
     pressureMetric.assemble();
     pressureLoad.assemble();
-    mixedExpected =
-      Integral(u, v) + Integral(p, q) - Integral(p, v) - Integral(RealFunction(1), q);
+    mixedExpected = Integral(u, v) + Integral(p, q) - Integral(p, v) -
+      Integral(PETScScalarFunction(1), q);
     mixedActual += Integral(u, v);
     mixedActual += pressureMetric;
     mixedActual += pressureMetric;

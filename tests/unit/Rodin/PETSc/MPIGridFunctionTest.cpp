@@ -214,7 +214,12 @@ namespace
       return value;
 #endif
     });
-    const auto vector = VectorFunction(scalar, Real(2) * scalar);
+    const auto vector = VectorFunction(size_t(2), [scalar](const Point& point) {
+      Math::SpatialVector<PetscScalar> value(2);
+      value(0) = scalar(point);
+      value(1) = Real(2) * value(0);
+      return value;
+    });
     const auto checkScalar = [&](const auto& fes, const char* name) {
       SCOPED_TRACE(name);
       checkInterpolation(fes, dim, scalar);
@@ -359,7 +364,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     gf = static_cast<PetscScalar>(3.0);
@@ -386,7 +391,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     if (world.rank() == 0)
@@ -408,8 +413,8 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
-    P1 vectorFES(mesh, size_t(2));
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
+    P1<Math::SpatialVector<PetscScalar>, Mesh<Context::MPI>> vectorFES(mesh, size_t(2));
     Rodin::PETSc::Variational::GridFunction gf(fes);
     Rodin::PETSc::Variational::GridFunction vector(vectorFES);
     gf = static_cast<PetscScalar>(3.25);
@@ -439,7 +444,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction y(fes);
     Rodin::PETSc::Variational::GridFunction x(fes);
 
@@ -480,7 +485,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction y(fes);
     Rodin::PETSc::Variational::GridFunction zero(fes);
 
@@ -519,7 +524,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     writeShardDOFs(mesh, fes, gf, [](Index) { return static_cast<PetscScalar>(5.0); });
@@ -561,7 +566,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     const auto dofValue = [](Index i) {
@@ -608,7 +613,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     Index begin = 0;
@@ -656,7 +661,7 @@ namespace
     auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
-    P1 fes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(mesh);
     Rodin::PETSc::Variational::GridFunction source(fes);
     Rodin::PETSc::Variational::GridFunction destination(fes);
 
