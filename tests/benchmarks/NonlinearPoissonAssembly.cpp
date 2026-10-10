@@ -164,6 +164,7 @@ namespace Rodin::Tests::Benchmarks
         using G = Geometry::Polytope::Type;
         for (auto geometry : {G::Segment, G::Triangle, G::Quadrilateral, G::Tetrahedron,
                G::Hexahedron, G::Wedge, G::Pyramid})
+        {
           for (bool residual : {false, true})
           {
             const std::string name = std::string("NonlinearPoisson/") +
@@ -174,6 +175,7 @@ namespace Rodin::Tests::Benchmarks
               ->ArgsProduct({{3, 5, 9}, {8, 16}})
               ->UseRealTime();
           }
+        }
       }
   };
 }

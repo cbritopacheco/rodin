@@ -121,6 +121,7 @@ namespace Rodin::Tests::Benchmarks
           {Polytope::Type::Segment, Polytope::Type::Triangle,
             Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
             Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+        {
           for (unsigned physics : {0u, 1u, 2u})
           {
             const std::string name = std::string(physics == 0 ? "Poisson"
@@ -140,6 +141,7 @@ namespace Rodin::Tests::Benchmarks
             else
               entry->UseRealTime();
           }
+        }
       }
   };
 }

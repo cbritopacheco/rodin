@@ -163,8 +163,7 @@ namespace Rodin::Tests::Convergence
           : std::log(coarse.error.getL2()) - std::log(fine.error.getL2());
         const Real h1Log = std::isfinite(h1Ratio) && h1Ratio > 0
           ? std::log(h1Ratio)
-          : std::log(coarse.error.getH1Seminorm()) -
-            std::log(fine.error.getH1Seminorm());
+          : std::log(coarse.error.getH1Seminorm()) - std::log(fine.error.getH1Seminorm());
         return {l2Log / denominator, h1Log / denominator};
       }
 

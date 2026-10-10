@@ -61,9 +61,13 @@ namespace Rodin::Tests::Benchmarks
         baseline.assemble(*cell, 6);
         const auto& expected = baseline.getOperator();
         for (Eigen::Index te = 0; te < expected.rows(); ++te)
+        {
           for (Eigen::Index tr = 0; tr < expected.cols(); ++tr)
+          {
             if (integral.integrate(tr, te) != expected(te, tr))
               return false;
+          }
+        }
       }
       return true;
     };
@@ -110,6 +114,7 @@ namespace Rodin::Tests::Benchmarks
     for (auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
            Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
       for (bool original : {false, true})
       {
         const std::string family = Family == 0 ? "H1/P" + std::to_string(K)
@@ -129,6 +134,7 @@ namespace Rodin::Tests::Benchmarks
           ->Arg(5)
           ->UseRealTime();
       }
+    }
   }
 
   template <class Scalar, bool Vector>

@@ -46,8 +46,10 @@ namespace Rodin::Tests::Benchmarks
               auto root = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
               const size_t dimension = root.getDimension();
               for (size_t d = 0; d <= dimension; ++d)
+              {
                 for (size_t dp = 0; dp <= dimension; ++dp)
                   root.getConnectivity().compute(d, dp);
+              }
               Geometry::BalancedCompactPartitioner partitioner(root);
               partitioner.partition(static_cast<size_t>(comm.size()));
               sharder.shard(partitioner);
@@ -154,8 +156,10 @@ namespace Rodin::Tests::Benchmarks
         if constexpr (Distributed)
         {
           for (Index i = 0; i < mesh.getShard().getCellCount(); ++i)
+          {
             if (mesh.getShard().isOwned(dim, i))
               ++owned;
+          }
         }
         else
           owned = mesh.getPolytopeCount(dim);

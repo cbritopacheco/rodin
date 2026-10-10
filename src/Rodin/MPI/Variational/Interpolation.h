@@ -74,7 +74,14 @@ namespace Rodin::Variational
       static constexpr bool Global =
         std::is_same_v<FES, P0g<typename FES::RangeType, typename FES::MeshType>>;
 
-      /** Selects the functional source for each coefficient to be updated. */
+      /**
+       * @brief Selects the functional source for each coefficient to be updated.
+       *
+       * @tparam Pred Entity predicate type.
+       * @param fes Distributed space defining the functionals and ownership.
+       * @param region Region from which eligible entities are selected.
+       * @param pred Predicate selecting eligible entities consistently on replicas.
+       */
       template <class Pred>
       Interpolation(const FES& fes, Geometry::Region region, const Pred& pred)
         : m_fes(fes),
@@ -148,13 +155,24 @@ namespace Rodin::Variational
         }
       }
 
-      /// Global DOF -> (shard-local entity, entity-local functional ordinal).
+      /**
+       * @brief Gets the selected interpolation sources.
+       *
+       * @returns Global DOF indices mapped to shard-local entity indices and
+       * entity-local functional ordinals.
+       */
       const auto& getDOFs() const
       {
         return m_dofs;
       }
 
-      /** Evaluates selected coefficients and returns only locally owned entries. */
+      /**
+       * @brief Evaluates selected coefficients and returns only locally owned entries.
+       *
+       * @tparam Function Source function type.
+       * @param[out] values Owned coefficients, replacing any prior entries.
+       * @param function Function evaluated through the selected DOF functionals.
+       */
       template <class Function>
       void assemble(IndexMap<Scalar>& values, const Function& function) const
       {
@@ -177,8 +195,10 @@ namespace Rodin::Variational
           m_fes.getOwnershipRange(begin, end);
           values.clear();
           for (const auto& [global, value] : entries)
+          {
             if (begin <= global && global < end)
               values.emplace(global, value);
+          }
         }
       }
 
@@ -189,10 +209,19 @@ namespace Rodin::Variational
       Optional<Rank> m_source;
   };
 
-  /** Deduces the space that defines the interpolation functionals. */
+  /**
+   * @brief Deduces the space that defines the interpolation functionals.
+   *
+   * @tparam FES Distributed finite element space type.
+   * @tparam Pred Entity predicate type.
+   * @param fes Space defining the interpolation functionals.
+   * @param region Region of eligible interpolation entities.
+   * @param pred Consistent eligibility predicate.
+   */
   template <class FES, class Pred>
     requires std::is_same_v<typename FES::ContextType, Context::MPI>
-  Interpolation(const FES&, Geometry::Region, const Pred&) -> Interpolation<FES>;
+  Interpolation(
+    const FES& fes, Geometry::Region region, const Pred& pred) -> Interpolation<FES>;
 }
 
 #endif

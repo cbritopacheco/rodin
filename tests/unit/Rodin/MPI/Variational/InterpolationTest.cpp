@@ -164,19 +164,23 @@ namespace
         const auto& element = fes.getFiniteElement(sourceDimension, local);
         const auto pullback = fes.getPullback({sourceDimension, local}, function);
         for (Index ordinal = 0; ordinal < static_cast<Index>(dofs.size()); ++ordinal)
+        {
           records.push_back(
             {dofs[ordinal], {source, element.getLinearForm(ordinal)(pullback)}});
+        }
       }
     std::vector<std::vector<Record>> gathered;
     boost::mpi::all_gather(comm, records, gathered);
     IndexMap<std::pair<Index, Scalar>> expected;
     for (const auto& rank : gathered)
+    {
       for (const auto& [dof, candidate] : rank)
       {
         const auto found = expected.find(dof);
         if (found == expected.end() || candidate.first < found->second.first)
           expected[dof] = candidate;
       }
+    }
 
     Interpolation interpolation(fes, region, predicate);
     IndexMap<Scalar> values;
@@ -187,6 +191,7 @@ namespace
     fes.getOwnershipRange(begin, end);
     size_t expectedCount = 0;
     for (const auto& [dof, candidate] : expected)
+    {
       if (begin <= dof && dof < end)
       {
         ++expectedCount;
@@ -195,6 +200,7 @@ namespace
         if (found != values.end())
           EXPECT_EQ(found->second, candidate.second);
       }
+    }
     EXPECT_EQ(values.size(), expectedCount);
     for (const auto& [dof, value] : values)
     {

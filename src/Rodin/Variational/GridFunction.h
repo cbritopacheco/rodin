@@ -1301,36 +1301,36 @@ namespace Rodin::Variational
        */
       struct EvaluationCache
       {
-        EvaluationCache()
-          : owner(nullptr),
-            ownerIdentity(static_cast<size_t>(-1)),
-            fes(nullptr),
-            mesh(nullptr),
-            element(nullptr),
-            d(static_cast<size_t>(-1)),
-            i(static_cast<Index>(-1)),
-            hasBasisValues(false),
-            qf(nullptr),
-            qp(static_cast<size_t>(-1)),
-            qfIdentity(static_cast<size_t>(-1))
-        {}
+          EvaluationCache()
+            : owner(nullptr),
+              ownerIdentity(static_cast<size_t>(-1)),
+              fes(nullptr),
+              mesh(nullptr),
+              element(nullptr),
+              d(static_cast<size_t>(-1)),
+              i(static_cast<Index>(-1)),
+              hasBasisValues(false),
+              qf(nullptr),
+              qp(static_cast<size_t>(-1)),
+              qfIdentity(static_cast<size_t>(-1))
+          {}
 
-        const GridFunctionBase* owner;
-        size_t ownerIdentity;
-        const FES* fes;
-        const Geometry::MeshBase* mesh;
-        // Space assignments can change the element even with fixed connectivity.
-        const ElementType* element;
-        size_t d;
-        Index i;
-        std::vector<Index> dofs;
+          const GridFunctionBase* owner;
+          size_t ownerIdentity;
+          const FES* fes;
+          const Geometry::MeshBase* mesh;
+          // Space assignments can change the element even with fixed connectivity.
+          const ElementType* element;
+          size_t d;
+          Index i;
+          std::vector<Index> dofs;
 
-        bool hasBasisValues;
-        const QF::QuadratureFormulaBase* qf;
-        size_t qp;
-        size_t qfIdentity;
-        Math::SpatialPoint referenceCoordinates;
-        std::vector<RangeType> basisValues;
+          bool hasBasisValues;
+          const QF::QuadratureFormulaBase* qf;
+          size_t qp;
+          size_t qfIdentity;
+          Math::SpatialPoint referenceCoordinates;
+          std::vector<RangeType> basisValues;
       };
       /**
        * @brief Gets the thread-local evaluation cache.

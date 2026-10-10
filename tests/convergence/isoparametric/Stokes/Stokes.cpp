@@ -441,8 +441,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
             history[field].append(Real(1) / Real(n - 1), errors[field]);
             if (field == 1)
               for (size_t component = 0; component < 3; ++component)
+              {
                 pressureHistory[component].append(
                   Real(1) / Real(n - 1), errors[field][component]);
+              }
           }
           for (size_t component = 0; component < 2; ++component)
           {
@@ -469,6 +471,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
             EXPECT_LT(relativeDefect, PatchTolerance);
           }
           for (size_t component = 0; component < 3; ++component)
+          {
             for (size_t norm = 0; norm < 2; ++norm)
             {
               const auto value = [&](size_t field) {
@@ -478,16 +481,19 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
               EXPECT_LE(value(0), value(1) + value(2) + PatchTolerance);
               EXPECT_GE(value(0) + PatchTolerance, std::abs(value(1) - value(2)));
             }
+          }
         }
         for (const auto& field : history)
           field.expectAlgebraicFloor({3 - RateMargin, 2 - DerivativeMargin});
         for (const auto& component : pressureHistory)
+        {
           for (size_t interval = 1; interval < component.getSize(); ++interval)
           {
             const auto rate = component.getAlgebraicRates(interval);
             EXPECT_LT(rate.getL2(), 3 + RateMargin);
             EXPECT_LT(rate.getH1Seminorm(), 2 + DerivativeMargin);
           }
+        }
       }
 
       template <size_t K = 2>

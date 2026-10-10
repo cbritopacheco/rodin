@@ -135,7 +135,9 @@ namespace Rodin::Tests::Benchmarks
           {Polytope::Type::Segment, Polytope::Type::Triangle,
             Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
             Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+        {
           for (bool reaction : {false, true})
+          {
             for (bool rhs : {false, true})
             {
               const std::string name = std::string(reaction ? "Reaction/" : "Mass/") +
@@ -154,6 +156,8 @@ namespace Rodin::Tests::Benchmarks
               else
                 entry->UseRealTime();
             }
+          }
+        }
       }
   };
 }

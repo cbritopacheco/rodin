@@ -30,7 +30,7 @@
 
 namespace Rodin::Variational
 {
-  /** @brief Finite-element interpolation selected by the space's context. */
+  /// @brief Finite-element interpolation selected by the space's context.
   template <class FES>
   class Interpolation;
 

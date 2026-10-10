@@ -89,6 +89,7 @@ namespace Rodin::Tests::Benchmarks
         const auto evaluate = [&](bool bindOnly, bool energy) {
           Real result = 0;
           for (auto& integral : form.getLocalIntegrators())
+          {
             for (size_t cell = 0; cell < cells; ++cell)
             {
               const auto polytope = *mesh.getPolytope(dim, cell);
@@ -97,13 +98,16 @@ namespace Rodin::Tests::Benchmarks
                 continue;
               const auto& dofs = space.getDOFs(dim, cell);
               for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
+              {
                 for (size_t m = 0; m < static_cast<size_t>(dofs.size()); ++m)
                 {
                   const Real value = integral.integrate(m, l);
                   result += energy ? coefficients(dofs(l)) * value * coefficients(dofs(m))
                                    : value;
                 }
+              }
             }
+          }
           return result;
         };
         const auto valid = [&]() {
@@ -168,7 +172,9 @@ namespace Rodin::Tests::Benchmarks
     for (auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
            Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
       for (auto stage : {Stage::Binding, Stage::Kernel, Stage::Triplets, Stage::Finalize})
+      {
         for (size_t physics = 0; physics < 3; ++physics)
         {
           const char* stageName = stage == Stage::Binding ? "Binding"
@@ -193,6 +199,8 @@ namespace Rodin::Tests::Benchmarks
             ->Arg(9)
             ->UseRealTime();
         }
+      }
+    }
   }
 }
 

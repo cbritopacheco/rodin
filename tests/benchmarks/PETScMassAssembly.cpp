@@ -177,8 +177,10 @@ namespace Rodin::Tests::Benchmarks
         if constexpr (Distributed)
         {
           for (Index i = 0; i < mesh.getShard().getCellCount(); ++i)
+          {
             if (mesh.getShard().isOwned(dim, i))
               ++owned;
+          }
         }
         else
           owned = mesh.getPolytopeCount(dim);

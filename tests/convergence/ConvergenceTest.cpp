@@ -269,10 +269,10 @@ namespace Rodin::Tests::Convergence
       EXPECT_DOUBLE_EQ(pRate.getL2(), reduction);
       EXPECT_DOUBLE_EQ(pRate.getH1Seminorm(), reduction);
       const Real growth = Real(i == 1 ? 100 : 500) * std::log(Real(10));
-      EXPECT_DOUBLE_EQ(increasing.getAlgebraicRates(i).getL2(),
-        -growth / std::log(Real(2)));
-      EXPECT_DOUBLE_EQ(increasing.getAlgebraicRates(i).getH1Seminorm(),
-        -growth / std::log(Real(2)));
+      EXPECT_DOUBLE_EQ(
+        increasing.getAlgebraicRates(i).getL2(), -growth / std::log(Real(2)));
+      EXPECT_DOUBLE_EQ(
+        increasing.getAlgebraicRates(i).getH1Seminorm(), -growth / std::log(Real(2)));
     }
     NormHistory scalar;
     ErrorHistory paired;
@@ -305,8 +305,9 @@ namespace Rodin::Tests::Convergence
     static_assert(Limits::radix == 2 && Limits::has_denorm == std::denorm_present);
     constexpr Real Largest = Limits::max(), Smallest = Limits::denorm_min();
     const Real reduction =
-      Real(Limits::max_exponent - 1 - Limits::min_exponent + Limits::digits)
-        * std::log(Real(2)) + std::log(Real(2) - Limits::epsilon());
+      Real(Limits::max_exponent - 1 - Limits::min_exponent + Limits::digits) *
+        std::log(Real(2)) +
+      std::log(Real(2) - Limits::epsilon());
     ASSERT_TRUE(std::isfinite(reduction));
     ErrorHistory degree, paired;
     NormHistory scalar;
@@ -340,15 +341,14 @@ namespace Rodin::Tests::Convergence
     NormHistory scalar;
     scales.append(Coarse, ErrorNorms(2, 2)).append(fine, ErrorNorms(1, 1));
     scalar.append(Coarse, 2).append(fine, 1);
-    errors.append(0.5, ErrorNorms(Coarse, Coarse))
-      .append(0.25, ErrorNorms(fine, fine));
+    errors.append(0.5, ErrorNorms(Coarse, Coarse)).append(0.25, ErrorNorms(fine, fine));
     EXPECT_DOUBLE_EQ(scales.getAlgebraicRates(1).getL2(), std::log(Real(2)) / reduction);
-    EXPECT_DOUBLE_EQ(scales.getAlgebraicRates(1).getH1Seminorm(),
-      std::log(Real(2)) / reduction);
+    EXPECT_DOUBLE_EQ(
+      scales.getAlgebraicRates(1).getH1Seminorm(), std::log(Real(2)) / reduction);
     EXPECT_DOUBLE_EQ(scalar.getAlgebraicRate(1), std::log(Real(2)) / reduction);
     EXPECT_DOUBLE_EQ(errors.getAlgebraicRates(1).getL2(), reduction / std::log(Real(2)));
-    EXPECT_DOUBLE_EQ(errors.getAlgebraicRates(1).getH1Seminorm(),
-      reduction / std::log(Real(2)));
+    EXPECT_DOUBLE_EQ(
+      errors.getAlgebraicRates(1).getH1Seminorm(), reduction / std::log(Real(2)));
   }
 
   /** @brief Resolved quotient evaluation retains the existing rate bits. */
@@ -357,16 +357,18 @@ namespace Rodin::Tests::Convergence
     using Bits = std::array<std::byte, sizeof(Real)>;
     const std::array<Real, 7> errors = {1e-200, 1e-20, 0.125, 1, 8, 1e20, 1e200};
     for (Real coarse : errors)
+    {
       for (Real fine : errors)
       {
         const Real ratio = coarse / fine, inverse = fine / coarse;
         // Extreme unrepresentable quotients have their own known-rate oracle.
-        if (!std::isfinite(ratio) || ratio <= 0 || !std::isfinite(inverse) || inverse <= 0)
+        if (!std::isfinite(ratio) || ratio <= 0 || !std::isfinite(inverse) ||
+          inverse <= 0)
           continue;
         for (Real scale : {Real(0.5), Real(0.125), Real(1) / 6, Real(1) / 32})
         {
-          SCOPED_TRACE(::testing::Message() << "coarse=" << coarse
-            << " fine=" << fine << " scale=" << scale);
+          SCOPED_TRACE(::testing::Message()
+            << "coarse=" << coarse << " fine=" << fine << " scale=" << scale);
           ErrorHistory paired, exponential;
           NormHistory scalar;
           paired.append(1, ErrorNorms(coarse, fine))
@@ -386,6 +388,7 @@ namespace Rodin::Tests::Convergence
             EXPECT_EQ(std::bit_cast<Bits>(actual), std::bit_cast<Bits>(expected));
         }
       }
+    }
   }
 
   /**
@@ -406,8 +409,10 @@ namespace Rodin::Tests::Convergence
       constexpr Real ParameterStep = std::numeric_limits<Real>::min();
       const std::array<Real, 3> parameters = {0, ParameterStep, 2 * ParameterStep};
       for (size_t i = 0; i < parameters.size(); ++i)
-        study.append(parameters[i], {ErrorNorms(
-          h1 ? ordinary[i] : extreme[i], h1 ? extreme[i] : ordinary[i])});
+      {
+        study.append(parameters[i],
+          {ErrorNorms(h1 ? ordinary[i] : extreme[i], h1 ? extreme[i] : ordinary[i])});
+      }
       ::testing::TestPartResultArray failures;
       {
         ::testing::ScopedFakeTestPartResultReporter intercept(
@@ -419,8 +424,9 @@ namespace Rodin::Tests::Convergence
       if (failures.size() != 1)
         continue;
       EXPECT_TRUE(failures.GetTestPartResult(0).fatally_failed());
-      EXPECT_NE(std::string(failures.GetTestPartResult(0).message()).find(
-        h1 ? "std::isfinite(rate.getH1Seminorm())" : "std::isfinite(rate.getL2())"),
+      EXPECT_NE(std::string(failures.GetTestPartResult(0).message())
+                  .find(h1 ? "std::isfinite(rate.getH1Seminorm())"
+                           : "std::isfinite(rate.getL2())"),
         std::string::npos);
     }
   }

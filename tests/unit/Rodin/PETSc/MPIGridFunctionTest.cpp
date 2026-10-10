@@ -145,6 +145,7 @@ namespace
       std::vector<Index> source(fes.getSize(), none);
       std::vector<PetscScalar> expected(fes.getSize(), PetscScalar(-7));
       for (size_t rank = 0; rank < allIndices.size(); ++rank)
+      {
         for (size_t i = 0; i < allValues[rank].size(); ++i)
         {
           const Index dof = allIndices[rank][2 * i];
@@ -155,10 +156,13 @@ namespace
             expected[dof] = allValues[rank][i];
           }
         }
+      }
       if (filter == 0)
         for (Index dof = 0; dof < fes.getSize(); ++dof)
+        {
           if (source[dof] != none)
             aliasExpected[dof] = PetscScalar(-14);
+        }
 
       field = PetscScalar(-7);
       if (fes.getShard().getSize() > 0)
