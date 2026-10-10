@@ -92,21 +92,31 @@ namespace Rodin::Math
         : m_v(v)
       {}
 
-      /// @brief Copy constructor.
-      constexpr
-      Unit(const Unit&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      constexpr Unit(const Unit& other) = default;
 
-      /// @brief Move constructor.
-      constexpr
-      Unit(Unit&&) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      constexpr Unit(Unit&& other) = default;
 
-      /// @brief Copy assignment operator.
-      constexpr
-      Unit& operator=(const Unit&) = default;
+      /**
+       * @brief Copy assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      constexpr Unit& operator=(const Unit& other) = default;
 
-      /// @brief Move assignment operator.
-      constexpr
-      Unit& operator=(Unit&&) = default;
+      /**
+       * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      constexpr Unit& operator=(Unit&& other) = default;
 
       /**
        * @brief Explicit conversion to underlying type.

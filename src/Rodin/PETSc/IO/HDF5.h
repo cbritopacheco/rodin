@@ -46,9 +46,7 @@
 
 namespace Rodin::IO
 {
-  /**
-   * @brief Internal helpers for PETSc HDF5 serialization primitives.
-   */
+  /// @brief Internal helpers for PETSc HDF5 serialization primitives.
   namespace Internal
   {
     /**
@@ -154,6 +152,7 @@ namespace Rodin::IO
 
       /**
        * @brief Constructs an HDF5 loader bound to a PETSc-backed grid function.
+       * @param gf Grid function to load.
        */
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf)
@@ -162,8 +161,9 @@ namespace Rodin::IO
       /**
        * @brief Stream-based overload — not supported for HDF5.
        * @throws Alert::MemberFunctionException Always; use load(path) instead.
+       * @param is Input stream; stream-based loading is unsupported by this format.
        */
-      void load(std::istream&) override
+      void load([[maybe_unused]] std::istream& is) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 GridFunction loading is file-path based."
@@ -282,6 +282,7 @@ namespace Rodin::IO
 
       /**
        * @brief Constructs an HDF5 printer bound to a PETSc-backed grid function.
+       * @param gf Grid function to write.
        */
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
@@ -290,6 +291,7 @@ namespace Rodin::IO
       /**
        * @brief Stream-based overload — not supported for HDF5.
        * @throws Alert::MemberFunctionException Always; use print(path) instead.
+       * @param os Output stream.
        */
       void print(std::ostream& os) override
       {

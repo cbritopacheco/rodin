@@ -180,15 +180,15 @@ namespace Rodin::Alert
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
-      constexpr
-      Text(const Text&) = default;
+      constexpr Text(const Text& other) = default;
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
-      constexpr
-      Text(Text&&) = default;
+      constexpr Text(Text&& other) = default;
 
       /**
        * @brief Gets the text string content.

@@ -39,13 +39,17 @@ namespace Rodin::Assembly
   class MPIBoundaryDOFs
   {
     public:
-      /** Scalar field type of the constrained space. */
+      /// Scalar field type of the constrained space.
       using Scalar = typename FES::ScalarType;
-      /** Whether the space has globally supported constant DOFs. */
+      /// Whether the space has globally supported constant DOFs.
       static constexpr bool Global = std::is_same_v<FES,
         Variational::P0g<typename FES::RangeType, typename FES::MeshType>>;
 
-      /** Selects the boundary functional source for each required DOF. */
+      /**
+       * Selects the boundary functional source for each required DOF.
+       * @param fes Finite element space.
+       * @param attributes Mesh attributes selecting the region.
+       */
       MPIBoundaryDOFs(const FES& fes, const FlatSet<Geometry::Attribute>& attributes)
         : m_fes(fes),
           m_sourceRank(-1)
@@ -61,9 +65,11 @@ namespace Rodin::Assembly
           for (Index i = begin; i < end; ++i)
             required.insert(i);
           for (auto cell = mesh.getCell(); cell; ++cell)
+          {
             if (shard.isOwned(dim, cell->getIndex()))
               for (Index dof : fes.getDOFs(dim, cell->getIndex()))
                 required.insert(dof);
+          }
         }
 
         // Face order is unrelated to global DOF order. Select into a hash
@@ -120,13 +126,19 @@ namespace Rodin::Assembly
         }
       }
 
-      /// Global DOF -> (shard-local face, face-local functional ordinal).
+      /**
+       * Global DOF -> (shard-local face, face-local functional ordinal).
+       * @returns Degrees of freedom associated with the supplied mesh entity.
+       */
       const auto& getDOFs() const
       {
         return m_dofs;
       }
 
-      /** Broadcasts only the globally supported P0g payload; otherwise a no-op. */
+      /**
+       * Broadcasts only the globally supported P0g payload; otherwise a no-op.
+       * @param values Values used by the operation.
+       */
       template <class Payload>
       void synchronize(IndexMap<Payload>& values) const
       {
@@ -143,7 +155,11 @@ namespace Rodin::Assembly
         }
       }
 
-      /** Evaluates prescribed values or affine offsets at the selected functionals. */
+      /**
+       * Evaluates prescribed values or affine offsets at the selected functionals.
+       * @param values Values used by the operation.
+       * @param function Function to evaluate.
+       */
       template <class Function>
       void assemble(IndexMap<Scalar>& values, const Function& function) const
       {

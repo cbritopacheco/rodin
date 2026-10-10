@@ -32,7 +32,16 @@ namespace Rodin::Adaptation::Detail
       /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
-      /// @brief Constructs the WNGIR surface force coefficient.
+      /**
+       * @brief Constructs the WNGIR surface force coefficient.
+       * @param locator Point locator used to find mesh entities.
+       * @param normalization Normalization factor.
+       * @param phi Observation field.
+       * @param grad Gradient of the observation field.
+       * @param current Current displacement field.
+       * @param sigma2 Variance used to scale the observation residual.
+       * @param dimension Spatial dimension.
+       */
       WNGIRSurfaceForceCoefficient(const PhiType& phi, const GradType& grad,
         const Displacement& current, const LocatorType& locator, Real sigma2,
         Real normalization, std::size_t dimension)
@@ -44,7 +53,10 @@ namespace Rodin::Adaptation::Detail
           m_dimension(dimension)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       WNGIRSurfaceForceCoefficient(const WNGIRSurfaceForceCoefficient& other)
         : Parent(other),
           m_phi(other.m_phi->copy()),
@@ -55,7 +67,11 @@ namespace Rodin::Adaptation::Detail
           m_dimension(other.m_dimension)
       {}
 
-      /// @brief Evaluates the coefficient at a point.
+      /**
+       * @brief Evaluates the coefficient at a point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
         const WNGIRResidualState state(*m_phi, *m_grad, m_deformation, ip, m_loss, true);
@@ -63,14 +79,22 @@ namespace Rodin::Adaptation::Detail
           state.getGradient();
       }
 
-      /// @brief Dimension of the vector value.
+      /**
+       * @brief Dimension of the vector value.
+       * @returns The dimension.
+       */
       std::size_t getDimension() const noexcept
       {
         return m_dimension;
       }
 
-      /// @brief Reports no intrinsic polynomial order.
-      Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Reports no intrinsic polynomial order.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      Optional<std::size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -88,11 +112,22 @@ namespace Rodin::Adaptation::Detail
       Real m_normalization;
       std::size_t m_dimension;
   };
+  /**
+   * @brief Deduction guide for WNGIRSurfaceForceCoefficient.
+   * @param phi Observation field.
+   * @param grad Gradient of the observation field.
+   * @param current Current displacement field.
+   * @param locator Point locator used to find mesh entities.
+   * @param sigma2 Variance used to scale the observation residual.
+   * @param normalization Normalization factor.
+   * @param dimension Spatial dimension.
+   */
 
   template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
-  WNGIRSurfaceForceCoefficient(const Variational::RealFunctionBase<PhiDerived>&,
-    const Variational::VectorFunctionBase<Real, GradDerived>&, const Displacement&,
-    const LocatorType&, Real, Real, std::size_t)
+  WNGIRSurfaceForceCoefficient(const Variational::RealFunctionBase<PhiDerived>& phi,
+    const Variational::VectorFunctionBase<Real, GradDerived>& grad,
+    const Displacement& current, const LocatorType& locator, Real sigma2,
+    Real normalization, std::size_t dimension)
     -> WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>;
 }
 

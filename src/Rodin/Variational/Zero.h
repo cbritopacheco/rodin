@@ -58,9 +58,7 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = ScalarFunctionBase<Scalar, Zero<Scalar>>;
 
-      /**
-       * @brief Default constructor
-       */
+      /// @brief Default constructor
       Zero() {}
 
       /**
@@ -82,14 +80,18 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the zero function at a point
        * @returns Always returns 0
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      ScalarType getValue(const Geometry::Point&) const
+      constexpr ScalarType getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return 0;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -198,8 +200,9 @@ namespace Rodin::Variational
    * @brief CTAD for vector Zero
    *
    * Deduces Zero<Math::SpatialVector<Real>> from Zero(size_t)
+   * @param vdim Number of components in the value range.
    */
-  Zero(size_t) -> Zero<Math::SpatialVector<Real>>;
+  Zero(size_t vdim) -> Zero<Math::SpatialVector<Real>>;
 
   /**
    * @brief Convenience typedef for vector zero function

@@ -175,8 +175,10 @@ namespace Rodin::Geometry
     for (const auto& [local, rank] : owners)
       neighbors.insert(static_cast<int>(rank));
     for (const auto& [local, ranks] : halos)
+    {
       for (Index rank : ranks)
         neighbors.insert(static_cast<int>(rank));
+    }
     UnorderedMap<int, std::vector<Index>> outgoing, incoming;
     for (int rank : neighbors)
     {
@@ -184,8 +186,10 @@ namespace Rodin::Geometry
       incoming[rank];
     }
     for (Index local : m_s2ps[d].left)
+    {
       if (!shard.isOwned(d, local))
         outgoing.at(static_cast<int>(owners.at(local))).push_back(ids.left.at(local));
+    }
     const auto exchange = [&](int tag) {
       std::vector<boost::mpi::request> requests;
       for (int rank : neighbors)
@@ -306,8 +310,10 @@ namespace Rodin::Geometry
         for (const auto& [li, r] : pOwner)
           neighborSet.insert(static_cast<int>(r));
         for (const auto& [li, rs] : pHalo)
+        {
           for (Index r : rs)
             neighborSet.insert(static_cast<int>(r));
+        }
 
         if (neighborSet.empty())
           continue;
@@ -348,14 +354,18 @@ namespace Rodin::Geometry
         // Build owned-GID → sub-local-index lookup.
         UnorderedMap<Index, Index> ownedGidIdx;
         for (size_t i = 0; i < n; ++i)
+        {
           if (subState[i] == Shard::State::Owned)
             ownedGidIdx.emplace(pm.left[i], static_cast<Index>(i));
+        }
 
         // Aggregate queriers per GID.
         UnorderedMap<Index, std::vector<int>> gidQueriers;
         for (auto& [r, gids] : recvQuery)
+        {
           for (Index gid : gids)
             gidQueriers[gid].push_back(r);
+        }
 
         // ── Prune stale halo entries for Owned entities ───────────────────────
         // The SubMesh builder copies the parent shard's halo map verbatim.
@@ -392,8 +402,10 @@ namespace Rodin::Geometry
             const UnorderedSet<int> querierSet(qIt->second.begin(), qIt->second.end());
             IndexSet newHalo;
             for (const Index r : haloSet)
+            {
               if (querierSet.count(static_cast<int>(r)))
                 newHalo.insert(r);
+            }
             if (newHalo.empty())
               subHalo.erase(haloIt);
             else
@@ -459,8 +471,10 @@ namespace Rodin::Geometry
               subOwner.erase(localIdx);
               // Halo: all other queriers need the DOF from us.
               for (int q : queriers)
+              {
                 if (q != rank)
                   subHalo[localIdx].insert(static_cast<Index>(q));
+              }
             }
             else
             {
@@ -492,8 +506,10 @@ namespace Rodin::Geometry
       }
       auto& state = shard.getState(d);
       for (Index i = 0; i < state.size(); ++i)
+      {
         if (state[i] != Shard::State::Owned)
           state[i] = partition.contains(i) ? Shard::State::Shared : Shard::State::Ghost;
+      }
     }
 
     Mesh<Context::MPI>::Builder meshBuilder(parentMesh.getContext());

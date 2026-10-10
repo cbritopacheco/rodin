@@ -189,8 +189,10 @@ namespace Rodin::Tests::QF
   bool allWeightsPositive(const Rule& qf)
   {
     for (size_t i = 0; i < qf.getSize(); ++i)
+    {
       if (!(qf.getWeight(i) > Real(0)))
         return false;
+    }
     return true;
   }
 
@@ -216,8 +218,10 @@ namespace Rodin::Tests::QF
       p(static_cast<Eigen::Index>(i)) = x[i];
     const Math::Vector<Real> r = hs.matrix * p - hs.vector;
     for (Eigen::Index i = 0; i < r.size(); ++i)
+    {
       if (r(i) > tol)
         return false;
+    }
     return true;
   }
 
@@ -226,8 +230,10 @@ namespace Rodin::Tests::QF
   bool allPointsInside(const Rule& qf, Geometry::Polytope::Type g, Real tol = 1e-13)
   {
     for (size_t i = 0; i < qf.getSize(); ++i)
+    {
       if (!isInside(g, qf.getPoint(i), tol))
         return false;
+    }
     return true;
   }
 
@@ -337,8 +343,10 @@ namespace Rodin::Tests::QF
   bool isFullySymmetric(const Rule& qf, Geometry::Polytope::Type g, Real tol = 1e-12)
   {
     for (const auto& map : symmetryGroup(g))
+    {
       if (!isInvariantUnder(qf, map, tol))
         return false;
+    }
     return true;
   }
 }

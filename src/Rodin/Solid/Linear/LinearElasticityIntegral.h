@@ -15,6 +15,9 @@
 #ifndef RODIN_SOLID_LINEAR_LINEARELASTICITYINTEGRAL_H
 #define RODIN_SOLID_LINEAR_LINEARELASTICITYINTEGRAL_H
 
+#include <type_traits>
+
+#include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Geometry/PolytopeQuadrature.h"
 #include "Rodin/Math/Matrix.h"
@@ -141,7 +144,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Returns the current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const override
       {
         return m_polytope.value().get();
@@ -318,7 +324,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the current element stiffness matrix.
+      /**
+       * @brief Returns an entry of the current element stiffness matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) override
       {
         return m_matrix(te, tr);
@@ -381,11 +392,15 @@ namespace Rodin::Variational
 
   /**
    * @brief Deduction guide for LinearElasticityIntegrator.
+   * @param u Trial function (displacement)
+   * @param v Test function
+   * @param lambda First Lamé parameter function
+   * @param mu Second Lamé parameter (shear modulus) function
    */
   template <class Solution, class FES, class LambdaDerived, class MuDerived>
-  LinearElasticityIntegrator(
-      const TrialFunction<Solution, FES>&, const TestFunction<FES>&,
-      const FunctionBase<LambdaDerived>&, const FunctionBase<MuDerived>&)
+  LinearElasticityIntegrator(const TrialFunction<Solution, FES>& u,
+    const TestFunction<FES>& v, const FunctionBase<LambdaDerived>& lambda,
+    const FunctionBase<MuDerived>& mu)
     -> LinearElasticityIntegrator<Solution, FES, LambdaDerived, MuDerived>;
 
   /**
@@ -411,45 +426,64 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief Creates integrator with constant Lamé parameters.
-       * @param lambda First Lamé parameter (scalar constant)
-       * @param mu Second Lamé parameter/shear modulus (scalar constant)
-       * @returns LinearElasticityIntegrator with constant parameters
+       * @brief Creates the integrator for the given Lamé parameters.
+       *
+       * Each parameter is either a function, used through its FunctionBase,
+       * or a value, lifted to a RealFunction. The two are handled
+       * independently, so a function and a constant can be mixed.
+       *
+       * @param lambda First Lamé parameter
+       * @param mu Second Lamé parameter/shear modulus
+       * @returns LinearElasticityIntegrator with the given parameters
        */
       template <class L, class M>
       constexpr
       auto
       operator()(const L& lambda, const M& mu) const
       {
-        return LinearElasticityIntegrator(m_u.get(), m_v.get(),
-            RealFunction<L>(lambda), RealFunction<M>(mu));
-      }
-
-      /**
-       * @brief Creates integrator with function-valued Lamé parameters.
-       * @param lambda First Lamé parameter function
-       * @param mu Second Lamé parameter/shear modulus function
-       * @returns LinearElasticityIntegrator with spatially-varying parameters
-       */
-      template <class LambdaDerived, class MuDerived>
-      constexpr
-      auto
-      operator()(const FunctionBase<LambdaDerived>& lambda, const FunctionBase<MuDerived>& mu) const
-      {
-        return LinearElasticityIntegrator(m_u.get(), m_v.get(), lambda, mu);
+        return LinearElasticityIntegrator(m_u.get(), m_v.get(), lift(lambda), lift(mu));
       }
 
     private:
+      /**
+       * @brief Views a function through its FunctionBase, or lifts a value to
+       * a RealFunction.
+       *
+       * Splitting this into an overload of the call operator taking
+       * <tt>const L&</tt> for values and one taking
+       * <tt>const FunctionBase<D>&</tt> for functions does not work: the
+       * former is an exact match for every concrete function type, so it wins
+       * and wraps the function in a RealFunction it cannot build, and a
+       * function mixed with a value matches neither.
+       * @param t Function, constant or callable Lamé parameter.
+       * @returns Function-base reference for a function, or a lifted RealFunction value.
+       */
+      template <class T>
+      static decltype(auto) lift(const T& t)
+      {
+        if constexpr (std::is_base_of_v<FormLanguage::Base, T>)
+        {
+          return static_cast<
+            const FunctionBase<typename FormLanguage::FunctionDerived<T>::Type>&>(t);
+        }
+        else
+        {
+          return RealFunction<T>(t);
+        }
+      }
+
       std::reference_wrapper<const TrialFunction<Solution, FES>> m_u;  ///< Trial function
       std::reference_wrapper<const TestFunction<FES>>  m_v;             ///< Test function
   };
 
   /**
    * @brief Deduction guide for LinearElasticityIntegral.
+   * @param u Trial function (displacement)
+   * @param v Test function
    */
   template <class Solution, class FES>
-  LinearElasticityIntegral(const TrialFunction<Solution, FES>&, const TestFunction<FES>&)
-    -> LinearElasticityIntegral<Solution, FES>;
+  LinearElasticityIntegral(const TrialFunction<Solution, FES>& u,
+    const TestFunction<FES>& v) -> LinearElasticityIntegral<Solution, FES>;
 }
 
 #endif

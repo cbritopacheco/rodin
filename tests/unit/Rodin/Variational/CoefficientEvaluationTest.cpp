@@ -391,13 +391,17 @@ namespace
     reference.setOrder(4);
     reference.setPolytope(cell);
     for (size_t i = 0; i < n; ++i)
+    {
       for (size_t j = 0; j < nte; ++j)
         EXPECT_NEAR(rule.integrate(i, j), scale * reference.integrate(i, j), 1e-12);
+    }
     scale = 5;
     rule.setPolytope(cell);
     for (size_t i = 0; i < n; ++i)
+    {
       for (size_t j = 0; j < nte; ++j)
         EXPECT_NEAR(rule.integrate(i, j), scale * reference.integrate(i, j), 1e-12);
+    }
     EXPECT_EQ(coefficientCalls, 2 * qf.getSize());
   }
 }
@@ -417,8 +421,10 @@ TEST(CoefficientEvaluation, GenericRuleEvaluatesEachBasisOnceAndReassembles)
       : d == 2 ? LocalMesh::UniformGrid(geometry, {2, 2})
                : LocalMesh::UniformGrid(geometry, {2, 2, 2});
     for (size_t dim = 1; dim <= d; ++dim)
+    {
       for (size_t lower = 0; lower < dim; ++lower)
         mesh.getConnectivity().compute(dim, lower);
+    }
     H1<1, Real> p1(std::integral_constant<size_t, 1>{}, mesh);
     H1<2, Real> p2(std::integral_constant<size_t, 2>{}, mesh);
     H1<3, Real> p3(std::integral_constant<size_t, 3>{}, mesh);

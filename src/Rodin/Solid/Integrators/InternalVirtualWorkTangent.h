@@ -134,7 +134,10 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       InternalVirtualWorkTangent(const InternalVirtualWorkTangent& other)
         : Parent(other),
           m_law(other.m_law),
@@ -183,7 +186,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Sets the current polytope and assembles the element tangent.
+      /**
+       * @brief Sets the current polytope and assembles the element tangent.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWorkTangent& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -255,8 +262,10 @@ namespace Rodin::Solid
               const auto gradTest = testGradient.getBasis(te);
               ScalarType val = 0;
               for (size_t c = 0; c < vdim; ++c)
+              {
                 for (size_t k = 0; k < d; ++k)
                   val += dP(c, k) * gradTest(c, k);
+              }
               m_matrix(te, tr) += wq * distortion * val;
             }
           }
@@ -265,38 +274,59 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Returns an entry of the current element tangent matrix.
+      /**
+       * @brief Returns an entry of the current element tangent matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Polymorphically copies this tangent integrator.
+      /**
+       * @brief Polymorphically copies this tangent integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       InternalVirtualWorkTangent* copy() const noexcept final override
       {
         return new InternalVirtualWorkTangent(*this);
       }
 
-      /// @brief Returns the stored constitutive law.
+      /**
+       * @brief Returns the stored constitutive law.
+       * @returns The stored constitutive law.
+       */
       const LawType& getLaw() const
       {
         return m_law;
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& trialFES = m_trialfes.get();
@@ -402,7 +432,10 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       InternalVirtualWorkTangent(const InternalVirtualWorkTangent& other)
         : Parent(other),
           m_law(other.m_law),
@@ -465,7 +498,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Sets the current polytope and assembles the element tangent.
+      /**
+       * @brief Sets the current polytope and assembles the element tangent.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWorkTangent& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -541,8 +578,10 @@ namespace Rodin::Solid
         // DJ[du] = J (F^{-T} : grad du)
             ScalarType FinvTdF = 0;
             for (size_t c = 0; c < vdim; ++c)
+            {
               for (size_t k = 0; k < d; ++k)
                 FinvTdF += FinvT(c, k) * dF(c, k);
+            }
 
         // D(F^{-T})[du] = -F^{-T} (grad du)^T F^{-T}
             const Math::SpatialMatrix<ScalarType> M = FinvT * dF.transpose() * FinvT;
@@ -574,38 +613,59 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Returns an entry of the current element tangent matrix.
+      /**
+       * @brief Returns an entry of the current element tangent matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Polymorphically copies this tangent integrator.
+      /**
+       * @brief Polymorphically copies this tangent integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       InternalVirtualWorkTangent* copy() const noexcept final override
       {
         return new InternalVirtualWorkTangent(*this);
       }
 
-      /// @brief Returns the stored constitutive law.
+      /**
+       * @brief Returns the stored constitutive law.
+       * @returns The stored constitutive law.
+       */
       const LawType& getLaw() const
       {
         return m_law;
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& trialFES = m_trialfes.get();
@@ -696,7 +756,10 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       InternalVirtualWorkTangentUP(const InternalVirtualWorkTangentUP& other)
         : Parent(other),
           m_trial(other.m_trial),
@@ -732,7 +795,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Sets the current polytope and assembles the element tangent.
+      /**
+       * @brief Sets the current polytope and assembles the element tangent.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWorkTangentUP& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -789,8 +856,10 @@ namespace Rodin::Solid
             const auto gradTest = testGradient.getBasis(te);
             ScalarType FinvTG = 0;
             for (size_t c = 0; c < vdim; ++c)
+            {
               for (size_t k = 0; k < d; ++k)
                 FinvTG += FinvT(c, k) * gradTest(c, k);
+            }
             for (size_t tr = 0; tr < trialDofs; ++tr)
             {
               const ScalarType dp = trialFE.getBasis(tr)(rc);
@@ -802,32 +871,50 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Returns an entry of the current element tangent matrix.
+      /**
+       * @brief Returns an entry of the current element tangent matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Polymorphically copies this tangent integrator.
+      /**
+       * @brief Polymorphically copies this tangent integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       InternalVirtualWorkTangentUP* copy() const noexcept final override
       {
         return new InternalVirtualWorkTangentUP(*this);
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& trialFES = m_trialfes.get();
@@ -911,7 +998,10 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       InternalVirtualWorkTangentPU(const InternalVirtualWorkTangentPU& other)
         : Parent(other),
           m_trial(other.m_trial),
@@ -947,7 +1037,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Sets the current polytope and assembles the element tangent.
+      /**
+       * @brief Sets the current polytope and assembles the element tangent.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWorkTangentPU& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -1004,8 +1098,10 @@ namespace Rodin::Solid
             const auto dF = trialGradient.getBasis(tr);
             ScalarType FinvTdF = 0;
             for (size_t c = 0; c < vdim; ++c)
+            {
               for (size_t k = 0; k < d; ++k)
                 FinvTdF += FinvT(c, k) * dF(c, k);
+            }
             const ScalarType dJ = J * FinvTdF;
             for (size_t te = 0; te < testDofs; ++te)
             {
@@ -1018,32 +1114,50 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Returns an entry of the current element tangent matrix.
+      /**
+       * @brief Returns an entry of the current element tangent matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Polymorphically copies this tangent integrator.
+      /**
+       * @brief Polymorphically copies this tangent integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       InternalVirtualWorkTangentPU* copy() const noexcept final override
       {
         return new InternalVirtualWorkTangentPU(*this);
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& trialFES = m_trialfes.get();
@@ -1070,34 +1184,58 @@ namespace Rodin::Solid
       Math::Matrix<ScalarType> m_matrix;
   };
 
-  /// CTAD deduction guide for the displacement-only tangent
+  /**
+   * CTAD deduction guide for the displacement-only tangent
+   * @param law The constitutive law
+   * @param u The trial displacement function
+   * @param v The test displacement function
+   * @param displacement The current displacement state
+   */
   template <class LawDerived, class TrialFunctionType, class TestFunctionType,
     class DisplacementType>
-  InternalVirtualWorkTangent(const LawDerived&, const TrialFunctionType&,
-    const TestFunctionType&, const DisplacementType&)
+  InternalVirtualWorkTangent(const LawDerived& law, const TrialFunctionType& u,
+    const TestFunctionType& v, const DisplacementType& displacement)
     -> InternalVirtualWorkTangent<LawDerived, std::decay_t<TrialFunctionType>,
       std::decay_t<TestFunctionType>, std::decay_t<DisplacementType>>;
 
-  /// CTAD deduction guide for the mixed u-p displacement block
+  /**
+   * CTAD deduction guide for the mixed u-p displacement block
+   * @param law The isochoric constitutive law
+   * @param u The trial displacement function
+   * @param v The test displacement function
+   * @param displacement The current displacement state
+   * @param pressure The current pressure state
+   */
   template <class LawDerived, class TrialFunctionType, class TestFunctionType,
     class DisplacementType, class PressureType>
-  InternalVirtualWorkTangent(const LawDerived&, const TrialFunctionType&,
-    const TestFunctionType&, const DisplacementType&, const PressureType&)
+  InternalVirtualWorkTangent(const LawDerived& law, const TrialFunctionType& u,
+    const TestFunctionType& v, const DisplacementType& displacement,
+    const PressureType& pressure)
     -> InternalVirtualWorkTangent<LawDerived, std::decay_t<TrialFunctionType>,
       std::decay_t<TestFunctionType>, std::decay_t<DisplacementType>,
       std::decay_t<PressureType>>;
 
-  /// CTAD deduction guide for the K_up block
+  /**
+   * CTAD deduction guide for the K_up block
+   * @param p The trial pressure function
+   * @param v The test displacement function
+   * @param displacement The current displacement state
+   */
   template <class TrialPressFunctionType, class TestFunctionType, class DisplacementType>
-  InternalVirtualWorkTangentUP(
-    const TrialPressFunctionType&, const TestFunctionType&, const DisplacementType&)
+  InternalVirtualWorkTangentUP(const TrialPressFunctionType& p, const TestFunctionType& v,
+    const DisplacementType& displacement)
     -> InternalVirtualWorkTangentUP<std::decay_t<TrialPressFunctionType>,
       std::decay_t<TestFunctionType>, std::decay_t<DisplacementType>>;
 
-  /// CTAD deduction guide for the K_pu block
+  /**
+   * CTAD deduction guide for the K_pu block
+   * @param u The trial displacement function
+   * @param q The test pressure function
+   * @param displacement The current displacement state
+   */
   template <class TrialFunctionType, class TestPressFunctionType, class DisplacementType>
-  InternalVirtualWorkTangentPU(
-    const TrialFunctionType&, const TestPressFunctionType&, const DisplacementType&)
+  InternalVirtualWorkTangentPU(const TrialFunctionType& u, const TestPressFunctionType& q,
+    const DisplacementType& displacement)
     -> InternalVirtualWorkTangentPU<std::decay_t<TrialFunctionType>,
       std::decay_t<TestPressFunctionType>, std::decay_t<DisplacementType>>;
 } // namespace Rodin::Solid

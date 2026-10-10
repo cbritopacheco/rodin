@@ -146,8 +146,10 @@ namespace
           distortion * std::pow(first, static_cast<Real>(degree));
         bool internal = true;
         for (size_t axis = 0; axis < mesh.getDimension(); ++axis)
+        {
           internal = internal && original[axis] > FaceTolerance &&
             original[axis] < Real(1) - FaceTolerance;
+        }
         if (internal)
         {
           queries.shared.push_back(x);
@@ -308,14 +310,17 @@ namespace
         }
       }
       for (size_t enabled = 0; enabled < 2; ++enabled)
+      {
         std::cout << prefix << ',' << label << ',' << enabled << ',' << values->size()
                   << ',' << weightedTime[enabled] / static_cast<double>(values->size())
                   << '\n';
+      }
 #endif
     }
 #ifndef RODIN_AABB_WORKLOAD_DIAGNOSTICS
     std::vector<double> builds[2];
     for (size_t block = 0; block < ConstructionRepetitions; ++block)
+    {
       for (size_t turn = 0; turn < 2; ++turn)
       {
         const size_t enabled = (block + turn) % 2;
@@ -328,9 +333,12 @@ namespace
         builds[enabled].push_back(static_cast<double>(std::clock() - cpuStart) * 1e9 /
           static_cast<double>(CLOCKS_PER_SEC));
       }
+    }
     for (size_t enabled = 0; enabled < 2; ++enabled)
+    {
       std::cout << prefix << ",build," << enabled << ",1," << median(builds[enabled])
                 << '\n';
+    }
 #endif
   }
 }
@@ -375,7 +383,9 @@ int main(int argc, char** argv)
         : dim == 2                               ? std::vector<size_t>{4, 8, 16}
                                                  : std::vector<size_t>{3, 5, 8};
       for (size_t degree : {1, 2, 3, 4})
+      {
         for (Real distortion : {Real(0), Real(1), Real(4)})
+        {
           for (size_t size : sizes)
           {
             const std::string key = std::to_string(degree) + "/" +
@@ -384,6 +394,8 @@ int main(int argc, char** argv)
               run(type, name, size, degree, distortion, seconds,
                 warpDegree == 0 ? degree : warpDegree);
           }
+        }
+      }
     }
   }
   catch (const std::exception& error)

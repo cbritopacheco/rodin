@@ -225,7 +225,11 @@ namespace Rodin::Geometry
         std::vector<Index> left;             ///< Local shard index -> distributed index
         UnorderedMap<Index, Index> right;    ///< Distributed index -> local shard index
 
-        /// @brief Serializes the local/distributed index maps.
+        /**
+         * @brief Serializes the local/distributed index maps.
+         * @param ar Serialization archive.
+         * @param version Archive format version.
+         */
         template <class Archive>
         void serialize(Archive& ar, const unsigned int version)
         {
@@ -234,19 +238,13 @@ namespace Rodin::Geometry
         }
       };
 
-      /**
-       * @brief Context type (always local for shards).
-       */
+      /// @brief Context type (always local for shards).
       using ContextType = Rodin::Context::Local;
 
-      /**
-       * @brief Parent mesh type.
-       */
+      /// @brief Parent mesh type.
       using Parent = Mesh<ContextType>;
 
-      /**
-       * @brief Local state of a shard entity.
-       */
+      /// @brief Local state of a shard entity.
       enum class State : uint8_t
       {
         Shared = 0, ///< In local partition, owned remotely
@@ -280,9 +278,7 @@ namespace Rodin::Geometry
             Direct   ///< Initialize with explicit dimension and explicit contents
           };
 
-          /**
-           * @brief Default constructor.
-           */
+          /// @brief Default constructor.
           Builder();
 
           /**
@@ -305,7 +301,7 @@ namespace Rodin::Geometry
           /**
            * @brief Inserts a vertex in direct-construction mode.
            * @param[in] globalIdx Distributed/global vertex index.
-           * @param[in] x Vertex coordinates.
+           * @param[in] x Coordinates of the vertex.
            * @param[in] state Local shard state.
            * @returns Local shard vertex index.
            */
@@ -319,7 +315,7 @@ namespace Rodin::Geometry
            * @param[in] d Topological dimension.
            * @param[in] globalIdx Distributed/global polytope index.
            * @param[in] g Geometry type.
-           * @param[in] vs Local shard vertex indices.
+           * @param[in] vs Vertex indices defining the polytope.
            * @param[in] state Local shard state.
            * @returns Local shard polytope index.
            */
@@ -351,7 +347,7 @@ namespace Rodin::Geometry
           /**
            * @brief Sets the attribute of a local entity.
            * @param[in] p Pair `(d, localIdx)`.
-           * @param[in] attr Optional attribute.
+           * @param[in] attr Attribute to assign, or an empty optional to remove the attribute.
            * @returns Reference to this builder.
            */
           Builder& attribute(const std::pair<size_t, Index>& p, const Optional<Attribute>& attr);
@@ -401,6 +397,8 @@ namespace Rodin::Geometry
            * @f]
            *
            * and is meaningful for entities in state `Shared` or `Ghost`.
+           * @returns The owner map for dimension d.
+           * @param d Topological dimension of the entity.
            */
           UnorderedMap<Index, Index>& getOwner(size_t d);
 
@@ -414,6 +412,8 @@ namespace Rodin::Geometry
            * @f]
            *
            * and is meaningful only for owned local entities.
+           * @returns The halo map for owned entities of dimension d.
+           * @param d Topological dimension of the entity.
            */
           UnorderedMap<Index, IndexSet>& getHalo(size_t d);
 
@@ -449,9 +449,7 @@ namespace Rodin::Geometry
           PolytopeTransformationIndex m_transformations;
       };
 
-      /**
-       * @brief Default constructor.
-       */
+      /// @brief Default constructor.
       Shard() = default;
 
       /**

@@ -206,6 +206,7 @@ namespace Rodin::Tests::Benchmarks
           entry(rhs, i) = coefficient(i, 1);
         const auto checked = lhs * rhs;
         for (size_t i = 0; i < checked.rows(); ++i)
+        {
           for (size_t j = 0; j < checked.cols(); ++j)
           {
             Scalar expected = 0;
@@ -218,6 +219,7 @@ namespace Rodin::Tests::Benchmarks
               return;
             }
           }
+        }
         for (auto iteration : state)
         {
           benchmark::DoNotOptimize(&lhs);

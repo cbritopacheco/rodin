@@ -24,15 +24,18 @@ namespace Rodin::Utility
      * @ingroup UtilityModule
      *
      * This overload is selected when sizeof(T) is valid, indicating T is complete.
+     * @returns Type marker indicating that the template argument is complete.
+     * @param value Pointer used only for overload selection in the completeness test.
      */
     template <class T, std::size_t = sizeof(T)>
-    std::true_type IsCompleteTypeImpl(T *);
+    std::true_type IsCompleteTypeImpl(T* value);
 
     /**
      * @brief Helper function for IsCompleteType detection (incomplete type case).
      * @ingroup UtilityModule
      *
      * This fallback overload is selected when sizeof(T) is not valid.
+     * @returns Type marker indicating that the template argument is complete.
      */
     std::false_type IsCompleteTypeImpl(...);
   }

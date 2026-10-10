@@ -15,6 +15,7 @@
 
 #include "Rodin/Math/Common.h"
 #include "Rodin/Tuple.h"
+#include "Rodin/FormLanguage/Traits.h"
 
 #include "Rodin/Math/Traits.h"
 #include "Rodin/Math/Vector.h"
@@ -33,6 +34,7 @@
 #include "Rodin/Assembly/ConstraintMap.h"
 
 #include "ForwardDecls.h"
+#include "ScatterMap.h"
 
 namespace Rodin::Assembly
 {
@@ -57,8 +59,9 @@ namespace Rodin::Assembly
        * @brief Constructs sequential iteration over a mesh region.
        *
        * @param mesh Mesh to iterate over
+       * @param region Mesh region selected for iteration.
        */
-      SequentialIteration(const MeshType& mesh, const Geometry::Region&);
+      SequentialIteration(const MeshType& mesh, const Geometry::Region& region);
 
       /**
        * @brief Gets an iterator over the selected region.
@@ -73,13 +76,23 @@ namespace Rodin::Assembly
        */
       Geometry::Polytope getPolytope(Index i) const;
 
-      /// @brief Gets the topological dimension of the iteration.
+      /**
+       * @brief Gets the topological dimension of the iteration.
+       * @returns The topological dimension of the iteration.
+       */
       size_t getDimension() const;
 
-      /// @brief Gets the number of candidate polytopes.
+      /**
+       * @brief Gets the number of candidate polytopes.
+       * @returns The number of candidate polytopes.
+       */
       size_t getCount() const;
 
-      /// @brief Tests whether a candidate belongs to the iteration region.
+      /**
+       * @brief Tests whether a candidate belongs to the iteration region.
+       * @param i Index of the requested entry.
+       * @returns Whether the candidate belongs to the integration region.
+       */
       bool filter(Index i) const;
 
     private:
@@ -87,14 +100,75 @@ namespace Rodin::Assembly
       Geometry::Region m_region;                      ///< Region to iterate over
   };
 
-  /// @brief Template argument deduction guide for SequentialIteration
+  /**
+   * @brief Template argument deduction guide for SequentialIteration
+   * @param mesh Mesh on which the object is defined.
+   * @param region Mesh region selected for iteration.
+   */
   SequentialIteration(
-      const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region&)
+    const Geometry::Mesh<Context::Local>& mesh, const Geometry::Region& region)
     -> SequentialIteration<Geometry::Mesh<Context::Local>>;
 }
 
 namespace Rodin::Assembly
 {
+  /**
+   * @brief Assembly of a named bilinear form into a sparse matrix over a single
+   * thread.
+   *
+   * Runs the form's own local kernel over the polytopes of the form's region
+   * and attributes and scatters the local matrices through a ScatterMap, so
+   * that every assembly after the first reuses the sparsity pattern of the
+   * operator.
+   *
+   * @tparam Scalar Scalar value type of the operator.
+   * @tparam Form Named form type, see FormLanguage::IsNamedForm.
+   */
+  template <class Scalar, class Form>
+    requires FormLanguage::IsNamedForm<Form>::Value
+  class Sequential<Math::SparseMatrix<Scalar>, Form> final
+    : public AssemblyBase<Math::SparseMatrix<Scalar>, Form>
+  {
+    public:
+      /// @brief Assembled operator type.
+      using OperatorType = Math::SparseMatrix<Scalar>;
+
+      /// @brief Named form type being assembled.
+      using FormType = Form;
+
+      /// @brief Parent assembly base class.
+      using Parent = AssemblyBase<OperatorType, FormType>;
+
+      /// @brief Input data type for the assembly pipeline.
+      using InputType = typename Parent::InputType;
+
+      /**
+       * @brief Assembles the named form into @p out.
+       * @param[in,out] out Matrix receiving the assembled form.
+       * @param[in] input Form supplying the spaces, the region and the kernel.
+       */
+      void execute(OperatorType& out, const InputType& input) override
+      {
+        const auto& trialFES = input.getTrialFunction().getFiniteElementSpace();
+        const auto& testFES = input.getTestFunction().getFiniteElementSpace();
+        SequentialIteration seq(trialFES.getMesh(), input.getRegion());
+        m_scatterMap.assemble(
+          out, input.getKernel(), trialFES, testFES, seq, input.getAttributes());
+      }
+
+      /**
+       * @brief Creates a polymorphic copy.
+       * @returns Pointer to a new copy.
+       */
+      Sequential* copy() const noexcept override
+      {
+        return new Sequential(*this);
+      }
+
+    private:
+      ScatterMap<Scalar> m_scatterMap;
+  };
+
   /**
    * @brief Sequential assembly implementation for linear forms.
    *
@@ -144,12 +218,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       Sequential() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -157,8 +237,10 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the vector associated to the
        * linear form.
+       * @param input Input data.
+       * @param res Storage for the computed values.
        */
-      void execute(VectorType& res, const InputType& input) const override
+      void execute(VectorType& res, const InputType& input) override
       {
         res.resize(input.getFES().getSize());
         res.setZero();
@@ -254,12 +336,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       Sequential() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -267,8 +355,10 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
         res.setZero();
@@ -294,8 +384,10 @@ namespace Rodin::Assembly
             const auto& rows = input.getTestFES().getDOFs(d, p);
             const auto& cols = input.getTrialFES().getDOFs(d, p);
             for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+            {
               for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                 res(rows(l), cols(m)) += bfi.integrate(m, l);
+            }
           }
         }
         for (auto& bfi : input.getGlobalBFIs())
@@ -334,8 +426,10 @@ namespace Rodin::Assembly
               bfi.setPolytope(trialPolytope, testPolytope);
               const auto& cols = input.getTrialFES().getDOFs(rd, tr);
               for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
+              {
                 for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                   res(rows(l), cols(m)) += bfi.integrate(m, l);
+              }
             }
           }
         }
@@ -401,12 +495,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       Sequential() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -414,8 +514,10 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         std::vector<Math::SparseTriplet<ScalarType>> triplets;
         Sequential<std::vector<Math::SparseTriplet<ScalarType>>,
@@ -439,9 +541,7 @@ namespace Rodin::Assembly
       }
   };
 
-  /**
-   * @brief Sequential bilinear form assembly into Eigen triplets.
-   */
+  /// @brief Sequential bilinear form assembly into Eigen triplets.
   template <class Solution, class TrialFES, class TestFES>
   class Sequential<std::vector<Math::SparseTriplet<typename FormLanguage::Dot<
                      typename FormLanguage::Traits<TrialFES>::ScalarType,
@@ -490,12 +590,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       Sequential() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -503,8 +609,10 @@ namespace Rodin::Assembly
       /**
        * @brief Executes the assembly and returns the linear operator
        * associated to the bilinear form.
+       * @param input Input data.
+       * @param res Storage for the assembled operator.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         const auto& mesh = input.getTrialFES().getMesh();
         res.clear();
@@ -600,9 +708,7 @@ namespace Rodin::Assembly
       }
   };
 
-  /**
-   * @brief Sequential block bilinear form assembly into Eigen triplets.
-   */
+  /// @brief Sequential block bilinear form assembly into Eigen triplets.
   template <class... Solution, class... TrialFES, class... TestFES>
   class Sequential<std::vector<Math::SparseTriplet<Real>>,
     Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES,
@@ -640,12 +746,18 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       Sequential() = default;
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -655,7 +767,7 @@ namespace Rodin::Assembly
        * @param res Output triplet array.
        * @param input Block assembly input.
        */
-      void execute(OperatorType& res, const InputType& input) const override
+      void execute(OperatorType& res, const InputType& input) override
       {
         using AssemblyTuple = Tuple<Sequential<std::vector<Math::SparseTriplet<Real>>,
           Variational::BilinearForm<Solution, TrialFES, TestFES,
@@ -667,13 +779,11 @@ namespace Rodin::Assembly
 
         // Compute each block of triplets
         std::array<std::vector<Math::SparseTriplet<Real>>, AssemblyTuple::Size> ts;
-        assembly.zip(t).iapply(
-            [&](const Index i, auto& p)
-            {
-              const auto& as = p.first();
-              const auto& in = p.second();
-              as.execute(ts[i], in);
-            });
+        assembly.zip(t).iapply([&](const Index i, auto& p) {
+          auto& as = p.first();
+          const auto& in = p.second();
+          as.execute(ts[i], in);
+        });
 
         // Add the triplets with the offsets
         size_t capacity = 0;
@@ -703,9 +813,7 @@ namespace Rodin::Assembly
       }
   };
 
-  /**
-   * @brief Sequential block bilinear form assembly into a sparse matrix.
-   */
+  /// @brief Sequential block bilinear form assembly into a sparse matrix.
   template <class ... Solution, class ... TrialFES, class ... TestFES>
   class Sequential<
     Math::SparseMatrix<Real>,
@@ -730,12 +838,18 @@ namespace Rodin::Assembly
         /// @brief Default constructor.
         Sequential() = default;
 
-        /// @brief Copy constructor.
+        /**
+         * @brief Copy constructor.
+         * @param other Object to copy from.
+         */
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
-        /// @brief Move constructor.
+        /**
+         * @brief Move constructor.
+         * @param other Object to move from.
+         */
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
@@ -745,7 +859,7 @@ namespace Rodin::Assembly
          * @param res Output sparse matrix.
          * @param input Block assembly input.
          */
-        void execute(OperatorType& res, const InputType& input) const override
+        void execute(OperatorType& res, const InputType& input) override
         {
           Sequential<std::vector<Math::SparseTriplet<Real>>,
             Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES,
@@ -767,9 +881,7 @@ namespace Rodin::Assembly
         }
     };
 
-    /**
-   * @brief Sequential block linear form assembly into a vector.
-   */
+    /// @brief Sequential block linear form assembly into a vector.
     template <class... FES>
     class Sequential<Math::Vector<Real>,
       Tuple<Variational::LinearForm<FES, Math::Vector<Real>>...>>
@@ -792,12 +904,18 @@ namespace Rodin::Assembly
         /// @brief Default constructor.
         Sequential() = default;
 
-        /// @brief Copy constructor.
+        /**
+         * @brief Copy constructor.
+         * @param other Object to copy from.
+         */
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
-        /// @brief Move constructor.
+        /**
+         * @brief Move constructor.
+         * @param other Object to move from.
+         */
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
@@ -807,7 +925,7 @@ namespace Rodin::Assembly
          * @param res Output vector.
          * @param input Block assembly input.
          */
-        void execute(VectorType& res, const InputType& input) const override
+        void execute(VectorType& res, const InputType& input) override
         {
           using AssemblyTuple =
             Tuple<
@@ -823,14 +941,12 @@ namespace Rodin::Assembly
           AssemblyTuple assembly;
           VectorType vec;
 
-          assembly.zip(t).iapply(
-              [&](const Index i, const auto& p)
-              {
-                const auto& as = p.first();
-                const auto& in = p.second();
-                as.execute(vec, in);
-                res.segment(offsets[i], vec.size()) = vec;
-              });
+          assembly.zip(t).iapply([&](const Index i, auto& p) {
+            auto& as = p.first();
+            const auto& in = p.second();
+            as.execute(vec, in);
+            res.segment(offsets[i], vec.size()) = vec;
+          });
         }
 
         /**
@@ -843,9 +959,7 @@ namespace Rodin::Assembly
         }
     };
 
-    /**
-   * @brief Sequential mixed problem assembly.
-   */
+    /// @brief Sequential mixed problem assembly.
     template <class LinearSystem, class U1, class U2, class U3, class... Us>
     class Sequential<LinearSystem, Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
       final : public AssemblyBase<LinearSystem,
@@ -877,7 +991,7 @@ namespace Rodin::Assembly
        * @param axb Output linear system.
        * @param input Mixed problem input.
        */
-        void execute(LinearSystemType& axb, const InputType& input) const override
+        void execute(LinearSystemType& axb, const InputType& input) override
         {
           auto& A = axb.getOperator();
           auto& b = axb.getVector();
@@ -1011,8 +1125,10 @@ namespace Rodin::Assembly
                 if (colValue != ScalarType(0))
                   b.coeffRef(r.index) -= r.coefficient * val * colValue;
                 for (const auto& c : constraints.expand(col))
+                {
                   triplets.emplace_back(
                     r.index, c.index, r.coefficient * val * c.coefficient);
+                }
               }
             }
             else
@@ -1241,15 +1357,20 @@ namespace Rodin::Assembly
             if constexpr (IsSparse)
             {
               for (int k = 0; k < op.outerSize(); ++k)
+              {
                 for (typename OperatorType::InnerIterator it(op, k); it; ++it)
+                {
                   matrixEntry(static_cast<Index>(vOff) + it.row(),
                     static_cast<Index>(uOff) + it.col(), it.value());
+                }
+              }
             }
             else
             {
               const auto opRows = op.rows();
               const auto opCols = op.cols();
               for (Eigen::Index i = 0; i < opRows; ++i)
+              {
                 for (Eigen::Index j = 0; j < opCols; ++j)
                 {
                   const auto val = op(i, j);
@@ -1257,6 +1378,7 @@ namespace Rodin::Assembly
                     matrixEntry(
                       static_cast<Index>(vOff) + i, static_cast<Index>(uOff) + j, val);
                 }
+              }
             }
           }
 
@@ -1271,8 +1393,10 @@ namespace Rodin::Assembly
 
             const auto& vec = lf.getVector();
             for (Eigen::Index i = 0; i < vec.size(); ++i)
+            {
               vectorEntry(
                 static_cast<Index>(vOff) + i, static_cast<ScalarType>(vec.coeff(i)));
+            }
           }
 
           // ------------------------------------------------------------
@@ -1364,18 +1488,19 @@ namespace Rodin::Assembly
           }
         }
 
-        // Targeted (LHS-only / RHS-only) assembly for the block Eigen backend:
-        // assemble the full system into a scratch object and expose only the
-        // requested side, leaving the other operand untouched (the targeted
-        // contract). Keeps the block BC-elimination logic in one code path.
         /**
-       * @brief Executes targeted mixed problem assembly.
-       * @param axb Output linear system.
-       * @param input Mixed problem input.
-       * @param target Side of the system to assemble.
-       */
+         * @brief Executes targeted mixed problem assembly.
+         *
+         * The full system is assembled into temporary storage. Only the requested
+         * side is transferred to the output system; the other side is preserved.
+         * This uses the same boundary-condition elimination as full assembly.
+         *
+         * @param axb Output linear system.
+         * @param input Mixed problem input.
+         * @param target Side of the system to assemble.
+         */
         void execute(LinearSystemType& axb, const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+          Rodin::Variational::AssemblyTarget target)
         {
           LinearSystemType scratch;
           execute(scratch, input);
@@ -1395,9 +1520,7 @@ namespace Rodin::Assembly
         }
     };
 
-    /**
-   * @brief Sequential single-field problem assembly.
-   */
+    /// @brief Sequential single-field problem assembly.
     template <class LinearSystem, class TrialFunction, class TestFunction>
     class Sequential<LinearSystem,
       Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
@@ -1441,7 +1564,7 @@ namespace Rodin::Assembly
        * @param axb Output linear system.
        * @param input Problem assembly input.
        */
-        void execute(LinearSystemType& axb, const InputType& input) const override
+        void execute(LinearSystemType& axb, const InputType& input) override
         {
           execute(axb, input, AssemblyMode::Full);
         }
@@ -1453,7 +1576,7 @@ namespace Rodin::Assembly
        * @param target Side of the system to assemble.
        */
         void execute(LinearSystemType& axb, const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+          Rodin::Variational::AssemblyTarget target)
         {
           switch (target)
           {
@@ -1473,9 +1596,14 @@ namespace Rodin::Assembly
           LHS,
           RHS
         };
+        /**
+         * @brief Assembles the requested operator and vector contributions.
+         * @param axb Linear system receiving the assembled operator and vector.
+         * @param input Assembly input containing spaces and form integrators.
+         * @param mode Requested assembly mode.
+         */
 
-        void execute(
-          LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
+        void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode)
         {
           const bool doMatrix = mode != AssemblyMode::RHS;
           const bool doVector = mode != AssemblyMode::LHS;
@@ -1524,8 +1652,10 @@ namespace Rodin::Assembly
                 if constexpr (std::is_same_v<T, ValueDOFsType>)
                 {
                   for (const auto& [local, value] : dofs)
+                  {
                     constraints.setFixed(
                       static_cast<Index>(local), static_cast<ScalarType>(value));
+                  }
                 }
                 else if constexpr (std::is_same_v<T, IdentDOFsType>)
                 {
@@ -1596,8 +1726,10 @@ namespace Rodin::Assembly
                 if (colValue != ScalarType(0))
                   b.coeffRef(r.index) -= r.coefficient * val * colValue;
                 for (const auto& c : constraints.expand(col))
+                {
                   triplets.emplace_back(
                     r.index, c.index, r.coefficient * val * c.coefficient);
+                }
               }
             }
             else
@@ -1724,20 +1856,24 @@ namespace Rodin::Assembly
               if constexpr (IsSparse)
               {
                 for (int k = 0; k < op.outerSize(); ++k)
+                {
                   for (typename OperatorType::InnerIterator it(op, k); it; ++it)
                     matrixEntry(it.row(), it.col(), it.value());
+                }
               }
               else
               {
                 const auto opRows = op.rows();
                 const auto opCols = op.cols();
                 for (Eigen::Index i = 0; i < opRows; ++i)
+                {
                   for (Eigen::Index j = 0; j < opCols; ++j)
                   {
                     const auto val = op(i, j);
                     if (val != ScalarType(0))
                       matrixEntry(static_cast<Index>(i), static_cast<Index>(j), val);
                   }
+                }
               }
             }
           } // doMatrix
@@ -1888,8 +2024,10 @@ namespace Rodin::Assembly
               }
               triplets.resize(write);
               for (Index i = 0; i < static_cast<Index>(rows); ++i)
+              {
                 if (constraints.isFixed(i))
                   triplets.emplace_back(i, i, ScalarType(1));
+              }
               A.resize(rows, cols);
               A.setFromTriplets(triplets.begin(), triplets.end());
             }
@@ -1909,8 +2047,10 @@ namespace Rodin::Assembly
           {
             // RHS-only: assemble the vector; fixed entries -> prescribed value.
             for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
+            {
               if (constraints.isFixed(idx))
                 b.coeffRef(static_cast<size_t>(idx)) = constraints.getFixedValue(idx);
+            }
           }
         }
 
@@ -1925,9 +2065,7 @@ namespace Rodin::Assembly
         }
     };
 
-    /**
-   * @brief Sequential value Dirichlet boundary condition assembly.
-   */
+    /// @brief Sequential value Dirichlet boundary condition assembly.
     template <class Scalar, class Solution, class FES, class ValueDerived>
     class Sequential<IndexMap<Scalar>,
       Variational::DirichletBC<Variational::TrialFunction<Solution, FES>,
@@ -1961,12 +2099,18 @@ namespace Rodin::Assembly
         /// @brief Default constructor.
         Sequential() = default;
 
-        /// @brief Copy constructor.
+        /**
+         * @brief Copy constructor.
+         * @param other Object to copy from.
+         */
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
-        /// @brief Move constructor.
+        /**
+         * @brief Move constructor.
+         * @param other Object to move from.
+         */
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
@@ -1976,7 +2120,7 @@ namespace Rodin::Assembly
        * @param res Output map from constrained DOFs to values.
        * @param input Boundary condition input.
        */
-        void execute(IndexMap<Scalar>& res, const InputType& input) const override
+        void execute(IndexMap<Scalar>& res, const InputType& input) override
         {
           const auto& u = input.getOperand();
           const auto& essBdr = input.getEssentialBoundary();
@@ -2068,12 +2212,18 @@ namespace Rodin::Assembly
         /// @brief Default constructor.
         Sequential() = default;
 
-        /// @brief Copy constructor.
+        /**
+         * @brief Copy constructor.
+         * @param other Object to copy from.
+         */
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
-        /// @brief Move constructor.
+        /**
+         * @brief Move constructor.
+         * @param other Object to move from.
+         */
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
@@ -2083,14 +2233,10 @@ namespace Rodin::Assembly
        * @param res Output map from slave DOFs to master DOF coefficients.
        * @param input Boundary condition input.
        */
-        void execute(OutputType& res, const InputType& input) const override
+        void execute(OutputType& res, const InputType& input) override
         {
           const auto& u = input.getOperand();
-          // setIntegrationPoint mutates internal evaluation state; the input
-          // exposes Av as const, but we need to drive its IP cursor while
-          // probing each basis. The mutation is purely evaluation state, not
-          // semantic.
-          auto& Av = const_cast<ValueType&>(input.getShapeFunction());
+          auto& Av = input.getShapeFunction();
           const auto& essBdr = input.getEssentialBoundary();
 
           const auto& fesU = u.getFiniteElementSpace();

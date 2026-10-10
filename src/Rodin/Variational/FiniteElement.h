@@ -231,7 +231,7 @@ namespace Rodin::Variational
        * The exact return type depends on the Derived class (scalar-valued,
        * vector-valued, etc.) and is deduced automatically.
        *
-       * @param i Local basis function index.
+       * @param i Local basis-function index.
        * @return Basis function object usable as a callable functor.
        *
        * @note CRTP method: implemented by the Derived class.

@@ -24,8 +24,10 @@ namespace
       ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3})
       : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
     for (size_t d = 1; d <= dimension; ++d)
+    {
       for (size_t lower = 0; lower < d; ++lower)
         mesh.getConnectivity().compute(d, lower);
+    }
     auto fes = [&] {
       if constexpr (FormLanguage::IsMatrixRange<Range>::Value)
         return H1<Order, Range>(std::integral_constant<size_t, Order>{}, mesh, 2, 3);
@@ -57,6 +59,7 @@ namespace
       const auto n =
         fes.getFiniteElement(cell->getDimension(), cell->getIndex()).getCount();
       for (size_t i = 0; i < n; ++i)
+      {
         for (size_t j = 0; j < n; ++j)
         {
           const Real expected = reference.integrate(i, j);
@@ -67,6 +70,7 @@ namespace
             return;
           }
         }
+      }
     }
     for (auto _ : state)
     {

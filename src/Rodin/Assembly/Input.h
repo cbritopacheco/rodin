@@ -151,20 +151,21 @@ namespace Rodin::Assembly
       std::reference_wrapper<GlobalBilinearFormIntegratorBaseListType>  m_gbfis;   ///< Global integrators
   };
 
-  /// @brief Template argument deduction guide for BilinearFormAssemblyInput
+  /**
+   * @brief Template argument deduction guide for BilinearFormAssemblyInput
+   * @param trialFES Trial finite element space
+   * @param testFES Test finite element space
+   * @param lbfis List of local bilinear form integrators
+   * @param gbfis List of global bilinear form integrators
+   */
   template <class TrialFES, class TestFES>
-  BilinearFormAssemblyInput(
-      const TrialFES&, const TestFES&,
-      FormLanguage::List<
-        Variational::LocalBilinearFormIntegratorBase<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>&,
-      FormLanguage::List<
-        Variational::GlobalBilinearFormIntegratorBase<
-          decltype(
-            std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
-            std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>&)
+  BilinearFormAssemblyInput(const TrialFES& trialFES, const TestFES& testFES,
+    FormLanguage::List<Variational::LocalBilinearFormIntegratorBase<
+      decltype(std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>& lbfis,
+    FormLanguage::List<Variational::GlobalBilinearFormIntegratorBase<
+      decltype(std::declval<typename FormLanguage::Traits<TrialFES>::ScalarType>() *
+        std::declval<typename FormLanguage::Traits<TestFES>::ScalarType>())>>& gbfis)
     -> BilinearFormAssemblyInput<TrialFES, TestFES>;
 
   /**
@@ -495,11 +496,11 @@ namespace Rodin::Assembly
        * @brief Constructs identification Dirichlet BC assembly input.
        *
        * @param u Slave trial function to constrain.
-       * @param v Shape-function expression used as the master value.
+       * @param v Shape-function expression with writable evaluation state.
        * @param essBdr Boundary attributes where the condition applies.
        */
-      DirichletBCShapeFunctionAssemblyInput(const OperandType& u, const ValueType& v,
-        const FlatSet<Geometry::Attribute>& essBdr)
+      DirichletBCShapeFunctionAssemblyInput(
+        const OperandType& u, ValueType& v, const FlatSet<Geometry::Attribute>& essBdr)
         : m_u(u),
           m_v(v),
           m_essBdr(essBdr)
@@ -516,9 +517,12 @@ namespace Rodin::Assembly
 
       /**
        * @brief Gets the shape-function expression on the right-hand side.
-       * @return Reference to the master expression.
+       * @return Non-const reference to the borrowed master expression.
+       *
+       * The input keeps its bindings fixed; assembly updates the expression
+       * through setIntegrationPoint() while evaluating its basis.
        */
-      const ValueType& getShapeFunction() const
+      ValueType& getShapeFunction() const
       {
         return m_v.get();
       }
@@ -534,7 +538,7 @@ namespace Rodin::Assembly
 
     private:
       std::reference_wrapper<const OperandType> m_u;
-      std::reference_wrapper<const ValueType> m_v;
+      std::reference_wrapper<ValueType> m_v;
       std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;
   };
 

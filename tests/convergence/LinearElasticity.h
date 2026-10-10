@@ -115,6 +115,7 @@ namespace Rodin::Tests::Convergence::LinearElasticity
             }
             Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
             for (size_t i = 0; i < dim; ++i)
+            {
               value(i) = field == Field::DivergenceFree
                 ? (i == 0 ? mu * Math::Constants::pi() * Math::Constants::pi() *
                         std::sin(Math::Constants::pi() * p(1))
@@ -123,6 +124,7 @@ namespace Rodin::Tests::Convergence::LinearElasticity
                       : field == Field::Quadratic ? Real(2)
                                                   : Real(0)) *
                   (mu * Real(dim) * Real(i + 1) + (lambda + mu) * coefficientSum);
+            }
             return value;
           })
       {
@@ -154,7 +156,9 @@ namespace Rodin::Tests::Convergence::LinearElasticity
           return value;
         }
         for (size_t i = 0; i < m_dim; ++i)
+        {
           for (size_t j = 0; j < m_dim; ++j)
+          {
             value(i, j) = m_field == Field::AsymmetricAffine
               ? Real((i + 1) * (j + 1)) + (i == 0 && j == m_dim - 1)
               : Real(i + 1) *
@@ -162,6 +166,8 @@ namespace Rodin::Tests::Convergence::LinearElasticity
                     : m_field == Field::Quadratic ? 2 * exponent
                     : m_field == Field::Constant  ? Real(0)
                                                   : Real(1));
+          }
+        }
         return value;
       }
 

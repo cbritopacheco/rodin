@@ -2117,8 +2117,10 @@ namespace Rodin::Tests::Unit
         // At most one non-zero component
         size_t num_nonzero = 0;
         for (size_t j = 0; j < vdim; ++j)
+        {
           if (std::abs(val(j)) > RODIN_FUZZY_CONSTANT)
             num_nonzero++;
+        }
         EXPECT_LE(num_nonzero, 1u);
 
         // Component c matches scalar basis, others are zero
@@ -3343,10 +3345,14 @@ namespace Rodin::Tests::Unit
       }
 
       for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      {
         for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
           EXPECT_NEAR(gradient[coordinate][derivative],
             coordinate == derivative ? 1.0 : 0.0, tolerance)
             << "H1<" << K << "> geometry " << static_cast<int>(geometry);
+        }
+      }
     };
 
     Rodin::Utility::ForIndex<6>([&](auto order) {
@@ -3560,8 +3566,10 @@ namespace Rodin::Tests::Unit
     RealH1Element<1> element(Polytope::Type::Pyramid);
     const Math::SpatialPoint apex{{0.0, 0.0, 1.0}};
     for (size_t local = 0; local < element.getCount(); ++local)
+    {
       EXPECT_NEAR(
         element.getBasis(local)(apex), local == 4 ? 1.0 : 0.0, RODIN_FUZZY_CONSTANT);
+    }
   }
 
   /// @brief Verifies rational pyramid modal gradients retain directional limits near the apex.
@@ -3611,8 +3619,10 @@ namespace Rodin::Tests::Unit
       {
         Real xDx = 0.0;
         for (size_t local = 0; local < element.getCount(); ++local)
+        {
           xDx += element.getNode(local).x() *
             element.getBasis(local).getDerivative<1>(0)(Math::SpatialPoint{{x}});
+        }
         EXPECT_NEAR(xDx, 1.0, RODIN_FUZZY_CONSTANT);
       }
     }
@@ -3634,20 +3644,32 @@ namespace Rodin::Tests::Unit
         }
       }
       for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      {
         for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
           EXPECT_NEAR(gradient[coordinate][derivative],
             coordinate == derivative ? 1.0 : 0.0, RODIN_FUZZY_CONSTANT);
+        }
+      }
     };
 
     for (const Real x : {0.0, 1.0})
+    {
       for (const Real y : {0.0, 1.0})
         checkTensorGradient(Polytope::Type::Quadrilateral, Math::SpatialPoint{{x, y}}, 2);
+    }
 
     for (const Real x : {0.0, 1.0})
+    {
       for (const Real y : {0.0, 1.0})
+      {
         for (const Real z : {0.0, 1.0})
+        {
           checkTensorGradient(
             Polytope::Type::Hexahedron, Math::SpatialPoint{{x, y, z}}, 3);
+        }
+      }
+    }
   }
 
   /// @brief Verifies complex H1 simplex derivatives instantiate and reproduce coordinates at collapse.
@@ -3673,10 +3695,14 @@ namespace Rodin::Tests::Unit
       }
 
       for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      {
         for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
           EXPECT_NEAR(std::abs(gradient[coordinate][derivative] -
                         Complex(coordinate == derivative ? 1.0 : 0.0, 0.0)),
             0.0, tolerance);
+        }
+      }
     };
 
     checkReferenceGradient(Polytope::Type::Triangle, Math::SpatialPoint{{0.0, 1.0}}, 2);

@@ -25,8 +25,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Grad over a grid function: exposes the finite element
-  /// space, the operand type and the range type.
+  /**
+   * @brief Type traits for @c Grad over a grid function: exposes the finite element
+   * space, the operand type and the range type.
+   */
   template <class FES, class Data>
   struct Traits<Variational::Grad<Variational::GridFunction<FES, Data>>>
   {
@@ -41,8 +43,10 @@ namespace Rodin::FormLanguage
         Math::SpatialVector<typename FormLanguage::Traits<FESType>::ScalarType>;
   };
 
-  /// @brief Type traits for @c Grad over a shape function: exposes the finite element
-  /// space, the shape function space, the operand type and the range type.
+  /**
+   * @brief Type traits for @c Grad over a shape function: exposes the finite element
+   * space, the shape function space, the operand type and the range type.
+   */
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Grad<Variational::ShapeFunction<NestedDerived, FES, Space>>>
@@ -163,6 +167,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy constructor
+       * @param other Object to copy from.
        */
       GradBase(const GradBase& other)
         : Parent(other),
@@ -171,6 +176,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Move constructor
+       * @param other Object to move from.
        */
       GradBase(GradBase&& other)
         : Parent(std::move(other)),
@@ -197,6 +203,8 @@ namespace Rodin::Variational
        * Resolves mesh ownership and dispatches to the derived class's
        * @c interpolate. Falls back to inclusion / submesh restriction
        * when the polytope's mesh is not the FES mesh.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       SpatialVectorType getValue(const Geometry::Point& p) const
       {
@@ -231,6 +239,8 @@ namespace Rodin::Variational
        * If the polytope is owned by the FES mesh, dispatches to
        * @c interpolate(out, ip). Otherwise falls back to inclusion / submesh
        * restriction.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       SpatialVectorType getValue(const IntegrationPoint& ip) const
       {
@@ -277,7 +287,11 @@ namespace Rodin::Variational
         static_cast<const Derived&>(*this).interpolate(out, p);
       }
 
-      /// @brief Interpolates at an integration point.
+      /**
+       * @brief Interpolates at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Integration point at which the expression is evaluated.
+       */
       constexpr
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
@@ -297,7 +311,11 @@ namespace Rodin::Variational
         return m_u.get();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -306,6 +324,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Copy function to be overriden in Derived type.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
       GradBase* copy() const noexcept override
       {
@@ -319,16 +338,18 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Grad of a GridFunction
+   * @param operand Operand determining the expression type.
    */
   template <class FES, class Data>
-  Grad(const GridFunction<FES, Data>&) -> Grad<GridFunction<FES, Data>>;
+  Grad(const GridFunction<FES, Data>& operand) -> Grad<GridFunction<FES, Data>>;
 
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for Grad of a ShapeFunction
+   * @param operand Operand determining the expression type.
    */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  Grad(const ShapeFunction<NestedDerived, FES, Space>&)
+  Grad(const ShapeFunction<NestedDerived, FES, Space>& operand)
     -> Grad<ShapeFunction<NestedDerived, FES, Space>>;
 }
 

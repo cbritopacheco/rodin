@@ -74,13 +74,17 @@ namespace Rodin::Variational
       /// @brief PETSc vector type (@c Vec) used to store the load vector @f$ \mathbf{b} @f$.
       using VectorType = ::Vec;
 
-      /// @brief Context type (either @ref Rodin::Context::Local or
-      ///        @ref Rodin::Context::MPI) determined by the mesh.
+      /**
+       * @brief Context type (either @ref Rodin::Context::Local or
+       *        @ref Rodin::Context::MPI) determined by the mesh.
+       */
       using ContextType = typename FormLanguage::Traits<FESMeshType>::ContextType;
 
-      /// @brief Default assembly strategy deduced from the context type.
-      ///        Sequential assembly for local contexts, MPI assembly for
-      ///        distributed contexts.
+      /**
+       * @brief Default assembly strategy deduced from the context type.
+       *        Sequential assembly for local contexts, MPI assembly for
+       *        distributed contexts.
+       */
       using DefaultAssembly =
         typename Assembly::Default<ContextType>::template Type<VectorType, LinearForm>;
 
@@ -221,8 +225,10 @@ namespace Rodin::Variational
         return result;
       }
 
-      /// @brief Assembles the linear form into the owned PETSc vector
-      ///        using the @ref DefaultAssembly strategy.
+      /**
+       * @brief Assembles the linear form into the owned PETSc vector
+       *        using the @ref DefaultAssembly strategy.
+       */
       void assemble() override
       {
         const auto& fes = getTestFunction().getFiniteElementSpace();
@@ -291,16 +297,15 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    * @brief Deduction guide for PETSc-backed LinearForm.
+   * @param test Test function.
    */
   template <class FES>
-  LinearForm(const PETSc::Variational::TestFunction<FES>&) -> LinearForm<FES, ::Vec>;
+  LinearForm(const PETSc::Variational::TestFunction<FES>& test) -> LinearForm<FES, ::Vec>;
 }
 
 namespace Rodin::PETSc::Variational
 {
-  /**
-   * @brief Convenient PETSc alias for Rodin::Variational::LinearForm.
-   */
+  /// @brief Convenient PETSc alias for Rodin::Variational::LinearForm.
   template <class FES>
   using LinearForm = Rodin::Variational::LinearForm<FES, ::Vec>;
 }

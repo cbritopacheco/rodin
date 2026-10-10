@@ -111,7 +111,11 @@ namespace Rodin::Solid
           m_quadOrder(0)
       {}
 
-      /// @brief Rebinds the current displacement state.
+      /**
+       * @brief Rebinds the current displacement state.
+       * @param displacement Displacement field.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWork& setDisplacement(const State& displacement)
       {
         m_displacement = std::cref(displacement);
@@ -121,6 +125,7 @@ namespace Rodin::Solid
       /**
        * @brief Sets the quadrature order for both residual and tangent.
        * @param order Polynomial order (0 = auto: 2 * max(fe order))
+       * @returns Reference to this object after the operation.
        */
       InternalVirtualWork& setQuadratureOrder(size_t order)
       {
@@ -134,6 +139,8 @@ namespace Rodin::Solid
        * The input is propagated to every quadrature point in both
        * @c Residual() and @c Tangent() integrators, ensuring they see the
        * same fiber directions, activation parameters, etc.
+       * @param input Input data.
+       * @returns Reference to this object after the operation.
        */
       InternalVirtualWork& setInput(InputFunction input)
       {
@@ -151,6 +158,8 @@ namespace Rodin::Solid
        * derived quantities are taken.
        *
        * @see <a href="class_rodin_1_1_solid_1_1_output.html">Solid::Output</a>
+       * @param output Function operand.
+       * @returns Reference to this object after the operation.
        */
       InternalVirtualWork& setOutput(OutputFunctionType output)
       {
@@ -228,7 +237,10 @@ namespace Rodin::Solid
         }
       }
 
-      /// @brief Gets the constitutive law.
+      /**
+       * @brief Gets the constitutive law.
+       * @returns The constitutive law.
+       */
       const Law& getLaw() const
       {
         return m_law;
@@ -242,6 +254,8 @@ namespace Rodin::Solid
        *   \delta W^{\text{int}}(\mathbf{v})
        *     = \int_{\Omega_0} \mathbf{P}(\mathbf{u}) : \nabla_0 \mathbf{v} \, dX
        * @f]
+       * @param v Test shape function.
+       * @returns Internal-virtual-work residual integrator.
        */
       template <class Test>
       auto Residual(const Test& v) const
@@ -264,6 +278,9 @@ namespace Rodin::Solid
        *       : \nabla_0 \mathbf{v} \, dX
        * @f]
        * where @f$ \mathbf{A} = \partial\mathbf{P}/\partial\mathbf{F} @f$.
+       * @param u Trial shape function.
+       * @param v Test shape function.
+       * @returns Internal-virtual-work tangent integrator.
        */
       template <class Trial, class Test>
       auto Tangent(const Trial& u, const Test& v) const
@@ -287,10 +304,14 @@ namespace Rodin::Solid
       OutputFunctionType m_output;
   };
 
-  /// CTAD deduction guide for InternalVirtualWork
+  /**
+   * CTAD deduction guide for InternalVirtualWork
+   * @param law The constitutive law (stored by value)
+   * @param displacement The current displacement (stored by reference)
+   */
   template <class Law, class State>
-  InternalVirtualWork(const Law&,
-    const State&) -> InternalVirtualWork<std::decay_t<Law>, std::decay_t<State>>;
+  InternalVirtualWork(const Law& law, const State& displacement)
+    -> InternalVirtualWork<std::decay_t<Law>, std::decay_t<State>>;
 }
 
 #endif

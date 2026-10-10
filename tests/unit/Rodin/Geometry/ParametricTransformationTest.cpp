@@ -300,8 +300,10 @@ namespace Rodin::Tests::Unit
         PointCloud nodes(physicalDimension, fe.getCount());
         // Alternating coefficients exercise cancellation and every basis term.
         for (size_t a = 0; a < fe.getCount(); ++a)
+        {
           for (size_t j = 0; j < physicalDimension; ++j)
             nodes(j, a) = Real(a + j + 1) / Real(fe.getCount()) * (a % 2 ? -1 : 1);
+        }
         ParametricTransformation transformation(nodes, fe);
         std::vector<Math::SpatialPoint> references{traits.getCentroid()};
         // A Point has a zero-dimensional reference domain. Its centroid is
@@ -326,9 +328,13 @@ namespace Rodin::Tests::Unit
           {
             expectedPoint += nodes[a] * fe.getBasis(a)(reference);
             for (size_t i = 0; i < traits.getDimension(); ++i)
+            {
               for (size_t j = 0; j < physicalDimension; ++j)
+              {
                 expectedJacobian(j, i) +=
                   nodes(j, a) * fe.getBasis(a).template getDerivative<1>(i)(reference);
+              }
+            }
           }
           for (size_t j = 0; j < physicalDimension; ++j)
           {

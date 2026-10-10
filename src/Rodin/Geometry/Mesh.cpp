@@ -893,11 +893,17 @@ namespace Rodin::Geometry
 
         // Vertex coordinates: integer lattice (i, j, k)
         for (size_t k = 0; k < d; ++k)
+        {
           for (size_t j = 0; j < h; ++j)
+          {
             for (size_t i = 0; i < w; ++i)
+            {
               build.vertex({ static_cast<Real>(i),
                              static_cast<Real>(j),
                              static_cast<Real>(k) });
+            }
+          }
+        }
 
         // Helper: v(i,j,k) = i + j*w + k*w*h
         const auto vid = [w, h](size_t i, size_t j, size_t k) -> Index

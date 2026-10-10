@@ -22,7 +22,15 @@ namespace Rodin::Adaptation::Detail
   {
     public:
       template <class PhiType, class GradType, class DeformationType>
-      /// @brief Constructs the WNGIR residual state.
+      /**
+       * @brief Constructs the WNGIR residual state.
+       * @param deformation Deformation data.
+       * @param ip Integration point at which the expression is evaluated.
+       * @param phi Observation field.
+       * @param grad Gradient of the observation field.
+       * @param loss Loss applied to the observation residual.
+       * @param weighted Whether to weight the observation residual by geometric distortion.
+       */
       WNGIRResidualState(const PhiType& phi, const GradType& grad,
         const DeformationType& deformation, const Variational::IntegrationPoint& ip,
         const WNGIRLoss& loss, bool weighted)
@@ -33,19 +41,28 @@ namespace Rodin::Adaptation::Detail
         m_weight = weighted ? loss.getWeight(m_residual) : Real(1);
       }
 
-      /// @brief The residual.
+      /**
+       * @brief The residual.
+       * @returns The residual.
+       */
       Real getResidual() const
       {
         return m_residual;
       }
 
-      /// @brief The gradient.
+      /**
+       * @brief The gradient.
+       * @returns Derivative evaluated at the supplied point.
+       */
       const Math::SpatialVector<Real>& getGradient() const
       {
         return m_gradient;
       }
 
-      /// @brief The weight.
+      /**
+       * @brief The weight.
+       * @returns The weight.
+       */
       Real getWeight() const
       {
         return m_weight;

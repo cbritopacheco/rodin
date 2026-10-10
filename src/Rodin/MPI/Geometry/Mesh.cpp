@@ -1093,8 +1093,10 @@ namespace Rodin::Geometry
         {
           auto& sb = sendbuf[k];
           for (const Index i : convergeSend[k])
+          {
             for (const Index h : holderSet[i])
               sb.push_back({ i, h });
+          }
         }
 
         const int tagHolder = 2500 + static_cast<int>(d);

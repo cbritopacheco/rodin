@@ -77,6 +77,7 @@ namespace Rodin::Alert
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Notation(const Notation& other)
         : Parent(other)
@@ -84,6 +85,7 @@ namespace Rodin::Alert
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Notation(Notation&& other)
         : Parent(std::move(other))

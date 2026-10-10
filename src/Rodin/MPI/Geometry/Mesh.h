@@ -34,9 +34,7 @@
 
 namespace Rodin::Geometry
 {
-  /**
-   * @brief Convenience alias for the distributed mesh type.
-   */
+  /// @brief Convenience alias for the distributed mesh type.
   using MPIMesh = Mesh<Context::MPI>;
 
   /**
@@ -62,9 +60,7 @@ namespace Rodin::Geometry
   class Mesh<Context::MPI> : public MeshBase
   {
     public:
-      /**
-       * @brief Builder used to construct a distributed mesh from a shard.
-       */
+      /// @brief Builder used to construct a distributed mesh from a shard.
       class Builder
       {
         public:
@@ -155,14 +151,10 @@ namespace Rodin::Geometry
        */
       Mesh(Mesh&& other);
 
-      /**
-       * @brief Copy assignment operator.
-       */
+      /// @brief Copy assignment operator.
       Mesh& operator=(const Mesh& other);
 
-      /**
-       * @brief Move assignment operator.
-       */
+      /// @brief Move assignment operator.
       Mesh& operator=(Mesh&& other);
 
       /**
@@ -253,9 +245,7 @@ namespace Rodin::Geometry
        */
       bool isSubMesh() const override;
 
-      /**
-       * @brief Checks whether a point is attached to this mesh or its local shard.
-       */
+      /// @brief Checks whether a point is attached to this mesh or its local shard.
       bool isLocalPoint(const Point& p) const override;
 
       /**
@@ -807,19 +797,13 @@ namespace Rodin::Geometry
         throw std::runtime_error("asSubMesh() not implemented");
       }
 
-      /**
-       * @brief Returns mutable connectivity data of the local shard.
-       */
+      /// @brief Returns mutable connectivity data of the local shard.
       Connectivity<Context::Local>& getConnectivity() override;
 
-      /**
-       * @brief Returns const connectivity data of the local shard.
-       */
+      /// @brief Returns const connectivity data of the local shard.
       const Connectivity<Context::Local>& getConnectivity() const override;
 
-      /**
-       * @brief Options controlling iterative reconciliation rounds.
-       */
+      /// @brief Options controlling iterative reconciliation rounds.
       struct ReconcileOptions
       {
 

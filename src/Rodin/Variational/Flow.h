@@ -62,8 +62,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Flow over a shape function: exposes the finite element
-  /// space, the shape function space and the operand type.
+  /**
+   * @brief Type traits for @c Flow over a shape function: exposes the finite element
+   * space, the shape function space and the operand type.
+   */
   template <
     class Derived,
     class FES,
@@ -116,9 +118,9 @@ namespace Rodin::Variational
       /**
        * @brief Called when a traced trajectory reaches a boundary.
        * @returns false, indicating that the trace should stop.
+       * @param hit Boundary-hit data; this stopping policy leaves it unchanged.
        */
-      constexpr
-      bool operator()(const BoundaryHit&) const
+      constexpr bool operator()([[maybe_unused]] const BoundaryHit& hit) const
       {
         return false;
       }
@@ -162,9 +164,7 @@ namespace Rodin::Variational
       using Parent =
         FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy>>;
 
-      /**
-       * @brief Result of a characteristic trace.
-       */
+      /// @brief Result of a characteristic trace.
       class Trace
       {
         public:
@@ -184,6 +184,7 @@ namespace Rodin::Variational
 
           /**
            * @brief Returns the remaining unconsumed time.
+           * @returns The remaining unconsumed time.
            */
           Real getTime() const
           {
@@ -192,6 +193,7 @@ namespace Rodin::Variational
 
           /**
            * @brief Returns the traced point.
+           * @returns The traced point.
            */
           const Geometry::Point& getPoint() const
           {
@@ -200,6 +202,7 @@ namespace Rodin::Variational
 
           /**
            * @brief Indicates whether the trace exited or aborted.
+           * @returns Whether tracing stopped by exiting the domain or aborting.
            */
           bool exited() const
           {
@@ -208,6 +211,7 @@ namespace Rodin::Variational
 
           /**
            * @brief Returns the additive correction accumulated during tracing.
+           * @returns The additive correction accumulated during tracing.
            */
           Real getCorrection() const
           {
@@ -266,7 +270,10 @@ namespace Rodin::Variational
           m_p(nullptr)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Flow(const Flow& other)
         : Parent(other),
           m_maxZeroHops(other.m_maxZeroHops),
@@ -289,7 +296,10 @@ namespace Rodin::Variational
           m_p(other.m_p)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Flow(Flow&& other)
         : Parent(std::move(other)),
           m_maxZeroHops(std::move(other.m_maxZeroHops)),
@@ -1072,6 +1082,8 @@ namespace Rodin::Variational
        *
        * If tracing exits or aborts before completion, this default implementation
        * returns zero.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       constexpr
       auto getValue(const Geometry::Point& p) const
@@ -1082,7 +1094,10 @@ namespace Rodin::Variational
         return m_operand->getValue(tr.getPoint()) + tr.getCorrection();
       }
 
-      /// @brief Gets the operand in the shape function expression.
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
       constexpr
       const auto& getLeaf() const
       {
@@ -1091,6 +1106,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the operand function.
+       * @returns The operand function.
        */
       const auto& getOperand() const
       {
@@ -1100,6 +1116,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the velocity field.
+       * @returns The velocity field.
        */
       const auto& getVelocity() const
       {
@@ -1108,6 +1125,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the time integrator.
+       * @returns The time integrator.
        */
       const auto& getStep() const
       {
@@ -1116,6 +1134,7 @@ namespace Rodin::Variational
 
       /**
        * @brief Returns the boundary policy.
+       * @returns The boundary policy.
        */
       const auto& getBoundaryPolicy() const
       {
@@ -1126,6 +1145,8 @@ namespace Rodin::Variational
        * @brief Sets the maximum number of zero-time face hops.
        *
        * Default value: 128.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxZeroHops(size_t value)
       {
@@ -1138,6 +1159,8 @@ namespace Rodin::Variational
        *        face hit time.
        *
        * Default value: 16.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxBisections(size_t value)
       {
@@ -1150,6 +1173,8 @@ namespace Rodin::Variational
        *        bracketing fails.
        *
        * Default value: 8.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxSubdivisions(size_t value)
       {
@@ -1161,6 +1186,8 @@ namespace Rodin::Variational
        * @brief Sets the maximum number of outer trace loop iterations.
        *
        * Default value: 100000.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxOuterIterations(size_t value)
       {
@@ -1173,6 +1200,8 @@ namespace Rodin::Variational
        *        tolerated before aborting.
        *
        * Default value: 512.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxStagnations(size_t value)
       {
@@ -1185,6 +1214,8 @@ namespace Rodin::Variational
        *        predicted hit time.
        *
        * Default value: 6.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setFaceTrials(size_t value)
       {
@@ -1197,6 +1228,8 @@ namespace Rodin::Variational
        *        hit bracket.
        *
        * Default value: 2.0.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setBracketGrowth(Real value)
       {
@@ -1208,6 +1241,8 @@ namespace Rodin::Variational
        * @brief Sets the maximum number of bracket expansion attempts per face.
        *
        * Default value: 3.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMaxBracketExpansions(size_t value)
       {
@@ -1221,6 +1256,8 @@ namespace Rodin::Variational
        * Smaller values are more conservative.
        *
        * Default value: 0.5.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setStepSafety(Real value)
       {
@@ -1232,6 +1269,8 @@ namespace Rodin::Variational
        * @brief Sets the factor used to define the minimum admissible substep.
        *
        * Default value: 10.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setMinStepFactor(Real value)
       {
@@ -1244,6 +1283,8 @@ namespace Rodin::Variational
        *        geometric and directional tolerances.
        *
        * Default value: 50.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setTolFactor(Real value)
       {
@@ -1256,6 +1297,8 @@ namespace Rodin::Variational
        *        outside a cell to be clamped back inside.
        *
        * Default value: 10.
+       * @param value Value to store or assign.
+       * @returns Reference to this object after the operation.
        */
       Flow& setClampFactor(Real value)
       {
@@ -1263,8 +1306,12 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      Optional<size_t> getOrder(const Geometry::Polytope&) const
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      Optional<size_t> getOrder([[maybe_unused]] const Geometry::Polytope& polytope) const
       {
         return {};
       }
@@ -1329,28 +1376,39 @@ namespace Rodin::Variational
       const Geometry::Point* m_p;
   };
 
-  /// @brief Deduction guide for @c Flow.
+  /**
+   * @brief Deduction guide for @c Flow.
+   * @param time Duration of the flow integration.
+   * @param operand Function transported along the flow.
+   * @param velocity Velocity field.
+   */
   template <class Derived, class Velocity>
-  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&)
-    -> Flow<
-         FunctionBase<Derived>,
-         Velocity,
-         Math::RungeKutta::RK4,
-         DefaultBoundaryPolicy>;
+  Flow(const Real& time, const FunctionBase<Derived>& operand,
+    Velocity&& velocity) -> Flow<FunctionBase<Derived>, Velocity, Math::RungeKutta::RK4,
+                           DefaultBoundaryPolicy>;
 
-  /// @brief Deduction guide for @c Flow.
+  /**
+   * @brief Deduction guide for @c Flow.
+   * @param time Duration of the flow integration.
+   * @param operand Function transported along the flow.
+   * @param velocity Velocity field.
+   * @param stepper Time integration method.
+   */
   template <class Derived, class Velocity, class Step>
-  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&)
-    -> Flow<
-         FunctionBase<Derived>,
-         Velocity,
-         Step,
-         DefaultBoundaryPolicy>;
+  Flow(const Real& time, const FunctionBase<Derived>& operand, Velocity&& velocity,
+    Step&& stepper) -> Flow<FunctionBase<Derived>, Velocity, Step, DefaultBoundaryPolicy>;
 
-  /// @brief Deduction guide for @c Flow.
+  /**
+   * @brief Deduction guide for @c Flow.
+   * @param t Signed tracing time.
+   * @param u Operand function.
+   * @param vel Velocity field.
+   * @param st Time integrator.
+   * @param bp Boundary policy.
+   */
   template <class Derived, class Velocity, class Step, class BBP>
-  Flow(const Real&, const FunctionBase<Derived>&, Velocity&&, Step&&, BBP&&)
-    -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
+  Flow(const Real& t, const FunctionBase<Derived>& u, Velocity&& vel, Step&& st,
+    BBP&& bp) -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
 }
 
 #endif

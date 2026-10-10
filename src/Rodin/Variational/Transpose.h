@@ -64,14 +64,20 @@ namespace Rodin::Variational
         : m_operand(m.copy())
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Transpose(const Transpose& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
@@ -105,7 +111,11 @@ namespace Rodin::Variational
           return v.transpose();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return getOperand().getOrder(polytope);
@@ -122,9 +132,11 @@ namespace Rodin::Variational
 
   /**
    * @brief Deduction guide for function transpose.
+   * @param m Matrix function to transpose
    */
   template <class NestedDerived>
-  Transpose(const FunctionBase<NestedDerived>&) -> Transpose<FunctionBase<NestedDerived>>;
+  Transpose(
+    const FunctionBase<NestedDerived>& m) -> Transpose<FunctionBase<NestedDerived>>;
 
   /**
    * @brief Transpose of a matrix-valued ShapeFunction.
@@ -161,14 +173,20 @@ namespace Rodin::Variational
           m_operand(op.copy())
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       Transpose(const Transpose& other)
         : Parent(other),
           m_operand(other.m_operand->copy())
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       Transpose(Transpose&& other)
         : Parent(std::move(other)),
@@ -216,7 +234,11 @@ namespace Rodin::Variational
         return m_operand->getIntegrationPoint();
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Transpose& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_operand->setIntegrationPoint(ip);
@@ -248,7 +270,11 @@ namespace Rodin::Variational
         return m_operand->getFiniteElementSpace();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         return getOperand().getOrder(polytope);
@@ -265,9 +291,10 @@ namespace Rodin::Variational
 
   /**
    * @brief Deduction guide for ShapeFunction transpose.
+   * @param m Matrix function to transpose
    */
   template <class NestedDerived, class FES, ShapeFunctionSpaceType Space>
-  Transpose(const ShapeFunctionBase<NestedDerived, FES, Space>&)
+  Transpose(const ShapeFunctionBase<NestedDerived, FES, Space>& m)
     -> Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 

@@ -390,8 +390,10 @@ namespace Rodin::Geometry
       {
         const auto& map = m_s2ds[d].left;
         for (Index i = 0; i < map.size(); ++i)
+        {
           if (const auto* transformation = transforms.find(d, map[i]))
             res.setPolytopeTransformation({d, i}, transformation->copy());
+        }
       }
     }
     res.m_s2ds  = std::move(m_s2ds);

@@ -63,9 +63,7 @@ namespace Rodin::Variational
     class RelativeError
     {
       public:
-        /**
-         * @brief Enumeration of supported norms.
-         */
+        /// @brief Enumeration of supported norms.
         enum class Norm
         {
           L1,    ///< L1 norm (integral of absolute value)

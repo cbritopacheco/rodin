@@ -27,43 +27,42 @@ namespace Rodin::Test::Utility
   class ExpectedResultTable
   {
    public:
-    /**
-     * @brief Container for a single expected result and its parameters.
-     */
-    class ExpectedResult
-    {
-      public:
+    /// @brief Container for a single expected result and its parameters.
+     class ExpectedResult
+     {
+       public:
        /**
         * @brief Constructs an expected result entry.
         * @param res Expected result value
         * @param params Input parameters that should produce this result
         */
-       constexpr ExpectedResult(const Result& res, const Parameters&... params)
-        : m_res(res), m_params{params...}
-       {}
+         constexpr ExpectedResult(const Result& res, const Parameters&... params)
+           : m_res(res),
+             m_params{params...}
+         {}
 
        /**
         * @brief Gets the expected result value.
         * @return The expected result
         */
-       constexpr Result getResult() const
-       {
-        return m_res;
-       }
+         constexpr Result getResult() const
+         {
+           return m_res;
+         }
 
        /**
         * @brief Gets the input parameters.
         * @return Tuple of input parameters
         */
-       constexpr std::tuple<Parameters...> getParameters() const
-       {
-        return m_params;
-       }
+         constexpr std::tuple<Parameters...> getParameters() const
+         {
+           return m_params;
+         }
 
-      private:
-       Result m_res;                        ///< Expected result value
-       std::tuple<Parameters...> m_params; ///< Input parameters
-    };
+       private:
+         Result m_res;                        ///< Expected result value
+         std::tuple<Parameters...> m_params; ///< Input parameters
+     };
 
     /**
      * @brief Constructs an expected result table.

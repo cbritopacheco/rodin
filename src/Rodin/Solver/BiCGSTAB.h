@@ -70,9 +70,10 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for BiCGSTAB
+   * @param pb Reference to the problem to solve
    */
   template <class LinearSystem>
-  BiCGSTAB(Variational::ProblemBase<LinearSystem>&) -> BiCGSTAB<LinearSystem>;
+  BiCGSTAB(Variational::ProblemBase<LinearSystem>& pb) -> BiCGSTAB<LinearSystem>;
 
   /**
    * @ingroup BiCGSTABSpecializations
@@ -154,9 +155,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~BiCGSTAB() = default;
 
       /**

@@ -70,9 +70,11 @@ namespace Rodin::Solver
   /**
    * @ingroup RodinCTAD
    * @brief CTAD for HouseholderQR
+   * @param pb Variational problem to operate on.
    */
   template <class LinearSystem>
-  HouseholderQR(Variational::ProblemBase<LinearSystem>&) -> HouseholderQR<LinearSystem>;
+  HouseholderQR(
+    Variational::ProblemBase<LinearSystem>& pb) -> HouseholderQR<LinearSystem>;
 
   /**
    * @ingroup HouseholderQRSpecializations
@@ -105,22 +107,34 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
-      /// @brief Constructs the solver from the problem to be solved.
+      /**
+       * @brief Constructs the solver from the problem to be solved.
+       * @param pb Variational problem to operate on.
+       */
       HouseholderQR(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       HouseholderQR(const HouseholderQR& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       HouseholderQR(HouseholderQR&& other)
         : Parent(std::move(other))
       {}
 
-      /// @brief Solves the assembled linear system.
+      /**
+       * @brief Solves the assembled linear system.
+       * @param axb Variational expression defining the problem.
+       */
       void solve(LinearSystemType& axb) override
       {
         // Eigen reports no status for HouseholderQR, so this solver has no
@@ -130,7 +144,10 @@ namespace Rodin::Solver
         axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
-      /// @brief Returns a polymorphic copy of this solver.
+      /**
+       * @brief Returns a polymorphic copy of this solver.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       HouseholderQR* copy() const noexcept override
       {
         return new HouseholderQR(*this);

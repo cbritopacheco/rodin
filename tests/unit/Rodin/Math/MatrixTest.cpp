@@ -51,8 +51,10 @@ TEST_F(MatrixTest, Construction)
   EXPECT_EQ(m3.rows(), 2);
   EXPECT_EQ(m3.cols(), 3);
   for (int i = 0; i < m3.rows(); ++i)
+  {
     for (int j = 0; j < m3.cols(); ++j)
       EXPECT_DOUBLE_EQ(m3(i, j), 0.0);
+  }
 }
 
 // Test matrix assignment and access
@@ -312,16 +314,21 @@ TEST_F(MatrixTest, SpatialMatrixSetZeroConstantIdentity)
 
   sm.setZero();
   for (int i = 0; i < 3; ++i)
+  {
     for (int j = 0; j < 3; ++j)
       EXPECT_DOUBLE_EQ(sm(i, j), 0.0);
+  }
 
   sm.setConstant(5.0);
   for (int i = 0; i < 3; ++i)
+  {
     for (int j = 0; j < 3; ++j)
       EXPECT_DOUBLE_EQ(sm(i, j), 5.0);
+  }
 
   sm.setIdentity();
   for (int i = 0; i < 3; ++i)
+  {
     for (int j = 0; j < 3; ++j)
     {
       if (i == j)
@@ -329,6 +336,7 @@ TEST_F(MatrixTest, SpatialMatrixSetZeroConstantIdentity)
       else
         EXPECT_DOUBLE_EQ(sm(i, j), 0.0);
     }
+  }
 }
 
 /// @brief Verifies spatial matrix resize for matrix test by checking exact expected values.
@@ -560,6 +568,7 @@ TEST_F(MatrixTest, SpatialMatrixPseudoInverse)
 
   auto pi = sm.pseudoInverse();
   for (int i = 0; i < 2; ++i)
+  {
     for (int j = 0; j < 2; ++j)
     {
       if (i == j)
@@ -567,6 +576,7 @@ TEST_F(MatrixTest, SpatialMatrixPseudoInverse)
       else
         EXPECT_NEAR(pi(i, j), 0.0, 1e-10);
     }
+  }
 }
 
 /// @brief Verifies spatial matrix non square for matrix test by checking exact expected values.
@@ -649,8 +659,10 @@ TEST_F(MatrixTest, SpatialMatrixBinarySubtract3x3)
 
   auto c = a - b;
   for (int i = 0; i < 3; ++i)
+  {
     for (int j = 0; j < 3; ++j)
       EXPECT_DOUBLE_EQ(c(i, j), 0.0);
+  }
 }
 
 /// @brief Verifies spatial matrix binary subtract non square for matrix test by checking tolerance-based numerical results.

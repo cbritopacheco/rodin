@@ -22,7 +22,12 @@
 
 namespace Rodin::IO
 {
-  // ---- helpers (file-local) ------------------------------------------------
+  /**
+   * @brief Formats an index with leading zeros.
+   * @param index Degree-of-freedom index.
+   * @param width Minimum number of decimal digits.
+   * @returns Decimal index padded to at least the requested width.
+   */
 
   static
   std::string padIndex(size_t index, size_t width)
@@ -31,12 +36,27 @@ namespace Rodin::IO
     oss << std::setw(static_cast<int>(width)) << std::setfill('0') << index;
     return oss.str();
   }
+  /**
+   * @brief Formats the optional MPI rank suffix.
+   * @param rank Rank identifier; an empty string omits the rank suffix.
+   * @returns An empty string for an empty rank, otherwise the rank prefixed by .r.
+   */
 
   static
   std::string makeRankSuffix(const std::string& rank)
   {
     return rank.empty() ? std::string() : ".r" + rank;
   }
+  /**
+   * @brief Expands XDMF filename placeholders and normalizes separators.
+   * @param pattern Filename pattern containing named placeholders.
+   * @param stem Value replacing the stem placeholder.
+   * @param grid Value replacing the grid placeholder.
+   * @param name Value replacing the name placeholder.
+   * @param index Value replacing the index placeholder.
+   * @param rank Rank identifier; an empty string omits the rank suffix.
+   * @returns Expanded filename with separators introduced by empty placeholders normalized.
+   */
 
   static
   std::string expandPattern(
@@ -88,6 +108,10 @@ namespace Rodin::IO
 
     return result;
   }
+  /**
+   * @brief Writes the XDMF XML declaration and root opening tag.
+   * @param os Output stream receiving the formatted data.
+   */
 
   static
   void writeXMLHeader(std::ostream& os)
@@ -96,18 +120,32 @@ namespace Rodin::IO
     os << "<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n";
     os << "<Xdmf Version=\"3.0\" xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n";
   }
+  /**
+   * @brief Writes the XDMF root closing tag.
+   * @param os Output stream receiving the formatted data.
+   */
 
   static
   void writeXMLFooter(std::ostream& os)
   {
     os << "</Xdmf>\n";
   }
+  /**
+   * @brief Constructs indentation for an XML nesting level.
+   * @param level Indentation level, with two spaces per level.
+   * @returns A string containing two spaces per nesting level.
+   */
 
   static
   std::string indent(size_t level)
   {
     return std::string(level * 2, ' ');
   }
+  /**
+   * @brief Selects the XDMF coordinate-layout name.
+   * @param sdim Spatial coordinate dimension, from one to three.
+   * @returns X, XY, or XYZ for spatial dimensions one, two, or three.
+   */
 
   static
   const char* getGeometryType(size_t sdim)
@@ -128,6 +166,12 @@ namespace Rodin::IO
     assert(false);
     return nullptr;
   }
+  /**
+   * @brief Constructs a grid-piece name for an MPI rank.
+   * @param gridName Grid name, possibly empty.
+   * @param rank MPI rank identifying the grid piece.
+   * @returns Grid name followed by _r and the rank, or r and the rank when the grid name is empty.
+   */
 
   static
   std::string makeGridPieceName(const std::string& gridName, size_t rank)

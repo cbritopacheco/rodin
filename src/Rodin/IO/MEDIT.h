@@ -140,54 +140,108 @@ namespace Rodin::IO::MEDIT
     }
     return nullptr;
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(const std::string& str, Keyword kw)
   {
     return str == toCharString(kw);
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(const std::string& str, Keyword kw)
   {
     return str != toCharString(kw);
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(Keyword kw, const std::string& str)
   {
     return str == toCharString(kw);
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(Keyword kw, const std::string& str)
   {
     return str != toCharString(kw);
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(Keyword kw, const char* str)
   {
     return strcmp(toCharString(kw), str) == 0;
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param kw Format keyword to compare or write.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(Keyword kw, const char* str)
   {
     return strcmp(toCharString(kw), str) != 0;
   }
+  /**
+   * @brief Compares the operands for equality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare equal.
+   */
 
   inline
   bool operator==(const char* str, Keyword kw)
   {
     return strcmp(toCharString(kw), str) == 0;
   }
+  /**
+   * @brief Compares the operands for inequality.
+   * @param str Text to compare or convert to a format keyword.
+   * @param kw Format keyword to compare or write.
+   * @returns True when the operands compare unequal.
+   */
 
   inline
   bool operator!=(const char* str, Keyword kw)
   {
     return strcmp(toCharString(kw), str) != 0;
   }
+  /**
+   * @brief Writes the format keyword to a stream.
+   * @param os Output stream receiving the formatted data.
+   * @param kw Format keyword to compare or write.
+   * @returns Reference to the output stream after insertion.
+   */
 
   inline
   std::ostream& operator<<(std::ostream& os, Keyword kw)
@@ -195,6 +249,11 @@ namespace Rodin::IO::MEDIT
     os << toCharString(kw);
     return os;
   }
+  /**
+   * @brief Converts text to a format keyword.
+   * @param str Text to compare or convert to a format keyword.
+   * @returns Matching keyword, or an empty optional if the text is not recognized.
+   */
 
   inline
   Optional<Keyword> toKeyword(const char* str)
@@ -283,9 +342,7 @@ namespace Rodin::IO::MEDIT
   class ParseEntity
   {
     public:
-      /**
-       * @brief Parsed entity data.
-       */
+      /// @brief Parsed entity data.
       struct Data
       {
         Array<Index> vertices;       ///< Vertex indices defining the entity
@@ -617,54 +674,36 @@ namespace Rodin::IO
        */
       void load(std::istream& is) override;
 
-      /**
-       * @brief Reads one logical line while tracking line numbers.
-       */
+      /// @brief Reads one logical line while tracking line numbers.
       std::istream& getline(std::istream& is, std::string& line);
-      /**
-       * @brief Skips blank lines and returns the next non-empty line.
-       */
+      /// @brief Skips blank lines and returns the next non-empty line.
       std::string skipEmptyLines(std::istream& is);
-      /**
-       * @brief Reads and validates the MEDIT version section.
-       */
+      /// @brief Reads and validates the MEDIT version section.
       void readVersion(std::istream& is);
-      /**
-       * @brief Reads and validates the MEDIT dimension section.
-       */
+      /// @brief Reads and validates the MEDIT dimension section.
       void readDimension(std::istream& is);
-      /**
-       * @brief Reads vertex and element entities from the MEDIT stream.
-       */
+      /// @brief Reads vertex and element entities from the MEDIT stream.
       void readEntities(std::istream& is);
 
-      /**
-       * @brief Returns mutable counts collected for each MEDIT keyword.
-       */
+      /// @brief Returns mutable counts collected for each MEDIT keyword.
       std::unordered_map<MEDIT::Keyword, size_t>& getCountMap()
       {
         return m_count;
       }
 
-      /**
-       * @brief Returns counts collected for each MEDIT keyword.
-       */
+      /// @brief Returns counts collected for each MEDIT keyword.
       const std::unordered_map<MEDIT::Keyword, size_t>& getCountMap() const
       {
         return m_count;
       }
 
-      /**
-       * @brief Returns mutable stream positions for parsed MEDIT sections.
-       */
+      /// @brief Returns mutable stream positions for parsed MEDIT sections.
       std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap()
       {
         return m_pos;
       }
 
-      /**
-       * @brief Returns stream positions for parsed MEDIT sections.
-       */
+      /// @brief Returns stream positions for parsed MEDIT sections.
       const std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap() const
       {
         return m_pos;
@@ -713,21 +752,35 @@ namespace Rodin::IO
         printMesh(os, true);
       }
 
-      /// @brief Prints the full MEDIT mesh body.
+      /**
+       * @brief Prints the full MEDIT mesh body.
+       * @param os Output stream.
+       * @param printEnd Whether to write the mesh terminator.
+       */
       void printMesh(std::ostream& os, bool printEnd);
-      /// @brief Prints the MEDIT file version section.
+      /**
+       * @brief Prints the MEDIT file version section.
+       * @param os Output stream.
+       */
       void printVersion(std::ostream& os);
-      /// @brief Prints the MEDIT dimension section.
+      /**
+       * @brief Prints the MEDIT dimension section.
+       * @param os Output stream.
+       */
       void printDimension(std::ostream& os);
-      /// @brief Prints all supported mesh entity sections.
+      /**
+       * @brief Prints all supported mesh entity sections.
+       * @param os Output stream.
+       */
       void printEntities(std::ostream& os);
-      /// @brief Prints the MEDIT end marker.
+      /**
+       * @brief Prints the MEDIT end marker.
+       * @param os Output stream.
+       */
       void printEnd(std::ostream& os);
   };
 
-  /**
-   * @brief MEDIT grid-function loader for local P1 finite element spaces.
-   */
+  /// @brief MEDIT grid-function loader for local P1 finite element spaces.
   template <class Range>
     requires(!FormLanguage::IsMatrixRange<Range>::Value)
   class GridFunctionLoader<FileFormat::MEDIT,
@@ -769,14 +822,23 @@ namespace Rodin::IO
         readData(is);
       }
 
-      /// @brief Reads one input line and advances the line counter.
+      /**
+       * @brief Reads one input line and advances the line counter.
+       * @param is Input stream.
+       * @param line Input line to parse.
+       * @returns The line.
+       */
       std::istream& getline(std::istream& is, std::string& line)
       {
         m_currentLineNumber++;
         return std::getline(is, line);
       }
 
-      /// @brief Skips blank lines and returns the first nonblank line.
+      /**
+       * @brief Skips blank lines and returns the first nonblank line.
+       * @param is Input stream.
+       * @returns First nonblank input line, or an empty string when the stream ends.
+       */
       std::string skipEmptyLines(std::istream& is)
       {
         std::string line;
@@ -788,7 +850,10 @@ namespace Rodin::IO
         return line;
       }
 
-      /// @brief Reads the MEDIT solution-file version section.
+      /**
+       * @brief Reads the MEDIT solution-file version section.
+       * @param is Input stream.
+       */
       void readVersion(std::istream& is)
       {
         auto line = skipEmptyLines(is);
@@ -809,7 +874,10 @@ namespace Rodin::IO
         }
       }
 
-      /// @brief Reads the MEDIT solution-file dimension section.
+      /**
+       * @brief Reads the MEDIT solution-file dimension section.
+       * @param is Input stream.
+       */
       void readDimension(std::istream& is)
       {
         auto line = skipEmptyLines(is);
@@ -827,7 +895,10 @@ namespace Rodin::IO
         }
       }
 
-      /// @brief Reads the MEDIT SolAtVertices data section.
+      /**
+       * @brief Reads the MEDIT SolAtVertices data section.
+       * @param is Input stream.
+       */
       void readData(std::istream& is)
       {
         auto& gf = this->getObject();
@@ -892,8 +963,10 @@ namespace Rodin::IO
         }
         const size_t count = mesh.getVertexCount();
         for (size_t i = 0; i < count; ++i)
+        {
           for (size_t d = 0; d < vdim; ++d)
             is >> gf[d * count + i];
+        }
       }
 
     private:
@@ -902,9 +975,7 @@ namespace Rodin::IO
       size_t m_currentLineNumber;
   };
 
-  /**
-   * @brief MEDIT grid-function loader for local H1 finite element spaces.
-   */
+  /// @brief MEDIT grid-function loader for local H1 finite element spaces.
   template <size_t K, class Range>
     requires(!FormLanguage::IsMatrixRange<Range>::Value)
   class GridFunctionLoader<FileFormat::MEDIT,
@@ -945,14 +1016,22 @@ namespace Rodin::IO
       }
 
     private:
-      // -------------------------------------------------------------
-      // Line helpers (same style as P1 loader)
-      // -------------------------------------------------------------
+      /**
+       * @brief Reads one line while advancing the line counter.
+       * @param is Input stream from which a line is read.
+       * @param line Storage receiving the extracted line.
+       * @returns Reference to the input stream after extraction.
+       */
       std::istream& getline(std::istream& is, std::string& line)
       {
         m_currentLineNumber++;
         return std::getline(is, line);
       }
+      /**
+       * @brief Reads the next nonempty input line.
+       * @param is Input stream from which a line is read.
+       * @returns Next nonempty line, or an empty string when the input is exhausted.
+       */
 
       std::string skipEmptyLines(std::istream& is)
       {
@@ -964,6 +1043,10 @@ namespace Rodin::IO
         }
         return line;
       }
+      /**
+       * @brief Reads the mesh format version.
+       * @param is Input stream from which a line is read.
+       */
 
       void readVersion(std::istream& is)
       {
@@ -986,6 +1069,10 @@ namespace Rodin::IO
               << Alert::Raise;
         }
       }
+      /**
+       * @brief Reads the mesh spatial dimension.
+       * @param is Input stream from which a line is read.
+       */
 
       void readDimension(std::istream& is)
       {
@@ -1008,6 +1095,10 @@ namespace Rodin::IO
               << Alert::Raise;
         }
       }
+      /**
+       * @brief Reads the mesh data sections.
+       * @param is Input stream from which a line is read.
+       */
 
       void readData(std::istream& is)
       {
@@ -1433,13 +1524,19 @@ namespace Rodin::IO
         printEnd(os);
       }
 
-      /// @brief Prints the MEDIT solution-file version section.
+      /**
+       * @brief Prints the MEDIT solution-file version section.
+       * @param os Output stream.
+       */
       void printVersion(std::ostream& os)
       {
         os << MEDIT::Keyword::MeshVersionFormatted << "\n2" << "\n\n";
       }
 
-      /// @brief Prints the MEDIT solution-file dimension section.
+      /**
+       * @brief Prints the MEDIT solution-file dimension section.
+       * @param os Output stream.
+       */
       void printDimension(std::ostream& os)
       {
         const auto& gf = this->getObject();
@@ -1448,7 +1545,10 @@ namespace Rodin::IO
         os << MEDIT::Keyword::Dimension << '\n' << mesh.getSpaceDimension() << "\n\n";
       }
 
-      /// @brief Prints the MEDIT end marker.
+      /**
+       * @brief Prints the MEDIT end marker.
+       * @param os Output stream.
+       */
       void printEnd(std::ostream& os)
       {
         os << '\n' << IO::MEDIT::Keyword::End;
@@ -1459,16 +1559,17 @@ namespace Rodin::IO
         return m_gf.get();
       }
 
-      /// @brief Prints the concrete grid-function coefficient data.
+      /**
+       * @brief Prints the concrete grid-function coefficient data.
+       * @param os Output stream.
+       */
       virtual void printData(std::ostream& os) = 0;
 
     private:
       std::reference_wrapper<const ObjectType> m_gf;
   };
 
-  /**
-   * @brief MEDIT grid-function printer for vector-backed grid functions.
-   */
+  /// @brief MEDIT grid-function printer for vector-backed grid functions.
   template <class FES>
   class GridFunctionPrinter<
     FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
@@ -1496,7 +1597,10 @@ namespace Rodin::IO
 
       using Parent::Parent;
 
-      /// @brief Prints one value per mesh vertex in MEDIT solution order.
+      /**
+       * @brief Prints one value per mesh vertex in MEDIT solution order.
+       * @param os Output stream.
+       */
       void printData(std::ostream& os)
       {
         const auto& gf = this->getObject();
@@ -1513,8 +1617,10 @@ namespace Rodin::IO
           {
             const auto value = gf(p);
             for (size_t r = 0; r < fes.getRows(); ++r)
+            {
               for (size_t c = 0; c < fes.getColumns(); ++c)
                 os << value(r, c) << ' ';
+            }
             os << '\n';
           }
           else
@@ -1574,8 +1680,10 @@ namespace Rodin::IO
         {
           const auto& dofs = vertexSpace.getDOFs(0, v);
           for (size_t c = 0; c < components; ++c)
+          {
             if (!(is >> vertexField.getData().coeffRef(dofs[c])))
               fail();
+          }
         }
         gf = vertexField;
       }
