@@ -14,6 +14,15 @@ It builds two executables:
 - `KelvinBallSphere` — a validation tool that evaluates the objective on the
   symmetry-reduced chamber and on the full domain, and compares the two.
 
+The canonical optimisation uses P1–P1 Stokes, rotated Nitsche transmission,
+Hilbert identification and volume null-space projection, the paired first-exit
+thickness correction, periodic transport, and MinSTCut/SWIFT reconstruction.
+`--reconstruction=mmg` retains the alternative level-set cutter. Optional
+normal/curvature diagnostics and the sphere validation do not change this model.
+SWIFT fitting uses Rodin's `SWIFT::Adapt`; material interfaces are restored
+with `Mesh::trace`. One dissipation bilinear form evaluates all resistance
+products, and SWIFT options are parsed once per run.
+
 ## The problem
 
 ### Geometry and Stokes states
@@ -87,7 +96,8 @@ The coupling is normalised against the resistances the same body already has,
 \rho(\Omega_{\mathrm{s}}) := \frac{|c|}{\sqrt{k\,q}} \in [0, 1),
 ```
 
-which makes it scale invariant; the bound follows from positive definiteness of
+which is invariant under simultaneous dilation of the body and container;
+the bound follows from positive definiteness of
 $\mathcal R$. The optimisation problem is
 
 ```math
@@ -137,7 +147,7 @@ closure of the equivariant fields in $H^1_0(D;\mathbb R^3)$ with inner product
 
 ```math
 \langle \theta, \eta \rangle_{\mathcal H} = \int_D \bigl( \ell^2 \nabla\theta : \nabla\eta + \theta\cdot\eta \bigr)\,dx,
-\qquad \ell = 4h .
+\qquad \ell = 4h_0 .
 ```
 
 The length multiplier is set by `--regularization` (default 4).
@@ -198,8 +208,8 @@ source-area variation is also omitted. The actual penalty is re-evaluated
 after each step, and its change can differ from the surrogate prediction.
 
 The surrogate load is Hilbert-extended and projected into the volume
-constraint null space. The smallest nonnegative multiplier of the projected
-thickness-repair direction is chosen, when feasible, so that the normalized
+constraint null space. A nonnegative multiplier of the projected
+thickness-repair direction is sought by bracketing and bisection so that the normalized
 direction satisfies
 
 ```math
@@ -299,11 +309,12 @@ velocity; the right factor mixes the three states of the family. The condition
 on a cut therefore couples all three states, and **each family is solved as one
 coupled system** rather than three independent ones.
 
-The resistance is the chamber's viscous dissipation times the number of copies,
-for instance
+The family trace, rather than each tensor entry, is recovered by multiplying
+the chamber dissipation by the number of copies. For instance,
 
 ```math
-K_{ij} = |\mathcal G|\; 2\mu \int_{\Omega^{\mathrm{c}}_{\mathrm{f}}} e(u^T_i) : e(u^T_j)\,dx .
+k = \frac{2\mu|\mathcal G|}{3}\sum_{i=1}^3
+\int_{\Omega^{\mathrm{c}}_{\mathrm{f}}} e(u^T_i) : e(u^T_i)\,dx .
 ```
 
 With $D = [-L, L]^3$ and $L$ = `--outer-radius` (default 2), sewing the 24
@@ -425,7 +436,7 @@ fitting scales use $h_0$, not $\bar h$: changing the mesh does not implicitly
 change these algorithmic parameters. Local element sizes are still used by
 the finite-element stabilization and boundary integrators.
 
-### MMG (default)
+### MMG (optional)
 
 MMG discretises the advected level set at every iterate, with
 $h_{\min}$ and $h_{\max}$ given by the fixed size bounds, a Hausdorff tolerance of
@@ -549,7 +560,7 @@ All MMG calls run
 with angle detection disabled, since the only sharp edges of the chamber are
 the protected intersections of its fixed faces.
 
-### SWIFT
+### SWIFT (default)
 
 Rotated coupling drops quadrature points whose opposite fluid trace cannot
 be located. No matrix or load contribution is assembled at those points,
@@ -570,8 +581,7 @@ Both preparations use `--background-hausdorff` (default 0.05)
 in multiples of $h_0$.
 
 At every iterate a MinSTCut partition selects an envelope of internal facets.
-Cells whose nodal level-set values have one sign retain their material;
-mixed-sign cells are classified with a volume-weighted phase preference and
+All cell labels are free and are classified with a volume-weighted phase preference and
 a face-area perimeter cost. The phase moment is
 $\tanh(\overline\phi_K/(1.25h_K))$ and the capacity on an internal face is
 $0.04\min(h_K,h_L)|F|$, where $h_K$ is the volume-equivalent regular
@@ -587,7 +597,7 @@ the initial background remains fixed throughout the run.
 
 The boundary is treated by what it must preserve:
 
-- the outer sphere is curved, so its nodes are pinned, $u = 0$;
+- the physical container wall is pinned, $u = 0$;
 - the cuts only have to stay planes, so their nodes slide within them,
   $u \cdot n = 0$. This is imposed exactly by eliminating the normal
   displacement; nodes on the intersection of two cuts slide along their common
@@ -838,16 +848,6 @@ that coverage invariant is checked before each chamber state solve.
 KelvinBall restricts the local step matrices to the boundary-admissible
 space: zero motion on the outer
 sphere and tangential motion on the cuts.
-
-The old `--swift-kappa-s`, `--swift-kappa-bulk`, `--swift-quality-metric*`,
-`--swift-direct-step`, `--swift-quadratic-penalty`,
-`--swift-nonlinear-barrier` and `--swift-undamped-inner` options are removed
-and rejected, rather than silently ignored.
-The former `--swift-kappa-f`, `--swift-kappa-d`, `--swift-mu-hat`,
-`--swift-direct-solver`, `--swift-steps`, and
-`--swift-primal-barrier-iterations` spellings are also removed. Use the
-canonical flags above; the two centered distribution weights cannot be
-represented by a single old distribution coefficient.
 
 ## Running
 

@@ -153,20 +153,6 @@ namespace KelvinBall
         }
       }
 
-      template <class Space, class VelocityA, class VelocityB>
-      Real viscousProduct(const Space& space, const VelocityA& a, const VelocityB& b,
-        Real multiplicity) const
-      {
-        TrialFunction u(space);
-        TestFunction v(space);
-        const auto Du = Real(0.5) * (Jacobian(u) + Jacobian(u).T());
-        const auto Dv = Real(0.5) * (Jacobian(v) + Jacobian(v).T());
-        BilinearForm form(u, v);
-        form = Integral(Real(2) * Mu * Du, Dv);
-        form.assemble();
-        return multiplicity * form(a, b);
-      }
-
       template <class Rigid0, class Rigid1, class Rigid2, class Velocity0,
         class Velocity1, class Velocity2, class Pressure0, class Pressure1,
         class Pressure2>
@@ -283,6 +269,13 @@ namespace KelvinBall
         const Velocity1& uT1, const Velocity2& uT2, const Rotation0& uR0,
         const Rotation1& uR1, const Rotation2& uR2, Real multiplicity) const
       {
+        TrialFunction u(Vh);
+        TestFunction v(Vh);
+        const auto Du = Real(0.5) * (Jacobian(u) + Jacobian(u).T());
+        const auto Dv = Real(0.5) * (Jacobian(v) + Jacobian(v).T());
+        BilinearForm dissipation(u, v);
+        dissipation = Integral(Real(2) * Mu * Du, Dv);
+        dissipation.assemble();
         const std::array<const Velocity0*, 3> translations{&uT0, &uT1, &uT2};
         const std::array<const Rotation0*, 3> rotations{&uR0, &uR1, &uR2};
         Math::SpatialMatrix<Real> coupling(3, 3);
@@ -290,10 +283,10 @@ namespace KelvinBall
         Real q = 0;
         for (size_t i = 0; i < 3; ++i)
         {
-          k += viscousProduct(Vh, *translations[i], *translations[i], multiplicity);
-          q += viscousProduct(Vh, *rotations[i], *rotations[i], multiplicity);
+          k += multiplicity * dissipation(*translations[i], *translations[i]);
+          q += multiplicity * dissipation(*rotations[i], *rotations[i]);
           for (size_t j = 0; j < 3; ++j)
-            coupling(i, j) = viscousProduct(Vh, *translations[i], *rotations[j], 1);
+            coupling(i, j) = dissipation(*translations[i], *rotations[j]);
         }
         k /= 3;
         q /= 3;

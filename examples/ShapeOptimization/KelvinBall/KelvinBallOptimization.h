@@ -17,9 +17,10 @@ namespace KelvinBall
    * Each iteration follows the mathematical construction in order: chamber
    * discretization, fluid extraction, Stokes state solution, resistance
    * evaluation, shape differentiation, Hilbert identification, Feppon
-   * null-space projection, sewn output, level-set advection, and MMG
-   * reconstruction. The initial sphere and every accepted iterate are sewn
-   * into a complete 24-copy design before the level set is advanced.
+   * null-space projection, sewn output, level-set advection, and SWIFT
+   * reconstruction (or optional MMG reconstruction). The initial sphere and
+   * every accepted iterate are sewn into a complete 24-copy design before
+   * the level set is advanced.
    *
    * Architecture:
    * - configuration fixes the chamber, discretization, and descent scales;

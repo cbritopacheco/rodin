@@ -10,6 +10,39 @@
 
 namespace KelvinBall
 {
+  TEST(KelvinBallMeshOperations, MaterialTracePreservesChamberBoundaryLabels)
+  {
+    Mesh mesh = Mesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+    mesh.getConnectivity().compute(2, 3);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Geometry::Point point(
+        *cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      mesh.setAttribute({3, cell->getIndex()}, point.x() < 1 ? Obstacle : Fluid);
+    }
+    for (auto face = mesh.getBoundary(); face; ++face)
+      mesh.setAttribute({2, face->getIndex()}, SigmaPlus);
+
+    mesh.trace({{{Obstacle, Fluid}, Gamma}});
+    size_t interface = 0;
+    for (auto face = mesh.getFace(); face; ++face)
+    {
+      const auto& cells =
+        mesh.getConnectivity().getIncidence({2, 3}, face->getIndex());
+      if (cells.size() == 1)
+        EXPECT_EQ(face->getAttribute(), SigmaPlus);
+      else if (mesh.getPolytope(3, cells[0])->getAttribute() !=
+        mesh.getPolytope(3, cells[1])->getAttribute())
+      {
+        EXPECT_EQ(face->getAttribute(), Gamma);
+        ++interface;
+      }
+      else
+        EXPECT_FALSE(face->getAttribute());
+    }
+    EXPECT_GT(interface, 0);
+  }
+
   class FixedGeometryTest : public ::testing::Test
   {
     protected:

@@ -28,13 +28,11 @@ namespace KelvinBall
         rotation(row, column) = *coefficient++;
   }
 
-  Math::SpatialPoint centroid(const Mesh& mesh, const Polytope& face)
+  Math::SpatialPoint centroid(const Mesh&, const Polytope& face)
   {
-    Math::SpatialPoint result(3);
-    result.setZero();
-    for (const Index vertex : face.getVertices())
-      result += mesh.getVertexCoordinates(vertex);
-    return result / static_cast<Real>(face.getVertices().size());
+    const Geometry::Point point(
+      face, Polytope::Traits(face.getGeometry()).getCentroid());
+    return point.getPhysicalCoordinates();
   }
 
   Real cellSize(const Polytope& cell)

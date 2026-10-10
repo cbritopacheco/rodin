@@ -88,7 +88,7 @@ namespace KelvinBall
           Real minimumThickness = 0;
           Math::SpatialVector<Real> motionForce;
           size_t advectionQuadratureOrder = 8;
-          std::string reconstructionMethod = "mmg";
+          std::string reconstructionMethod = "swift";
 
           bool parse(int argc, char** argv)
           {
@@ -176,6 +176,8 @@ namespace KelvinBall
       };
 
       Options m_options;
+      Optional<Rodin::Examples::ReconstructionOptions> m_reconstructionOptions;
+      Adaptation::SWIFT::Parameters m_fittingParameters;
 
       static constexpr Real mu = KelvinBall::Mu;
       static constexpr Real remeshGradation = 2.0;
@@ -335,24 +337,6 @@ namespace KelvinBall
 
       using ReconstructionDiagnostics = KelvinBall::ReconstructionDiagnostics;
 
-      using MMGReconstruction = SphereDiscretization;
-
-      template <class Displacement>
-      void moveMesh(KelvinBall::Mesh& moved, const KelvinBall::Mesh& mesh,
-        const Displacement& displacement)
-      {
-        const auto& space = displacement.getFiniteElementSpace();
-        const auto& coefficients = displacement.getData();
-        for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
-        {
-          auto coordinates = mesh.getVertexCoordinates(vertex);
-          const auto& dofs = space.getDOFs(0, vertex);
-          for (size_t component = 0; component < mesh.getSpaceDimension(); ++component)
-            coordinates(component) += coefficients(dofs[component]);
-          moved.setVertexCoordinates(vertex, coordinates);
-        }
-      }
-
       template <class LevelSet>
       MMG::Mesh classifyLevelSetForSWIFT(
         const MMG::Mesh& background, const LevelSet& levelSet)
@@ -387,7 +371,7 @@ namespace KelvinBall
             continue;
           classified.setAttribute({2, face->getIndex()}, {});
         }
-        const auto options = getReconstructionOptions(m_argc, m_argv);
+        const auto& options = *m_reconstructionOptions;
         MinSTCut classifier(static_cast<const KelvinBall::Mesh&>(classified));
         decltype(classifier)::Parameters parameters;
         parameters.fidelity = options.classification.fidelity;
@@ -450,7 +434,7 @@ namespace KelvinBall
       Adaptation::SWIFT::Parameters getFittingParameters(
         Real referenceSpacing, int argc, char** argv) const
       {
-        auto parameters = getReconstructionOptions(argc, argv).parameters;
+        auto parameters = m_reconstructionOptions->parameters;
         FlatSet<std::string> specified;
         for (int i = 1; i < argc; ++i)
         {
@@ -474,9 +458,8 @@ namespace KelvinBall
       }
 
       template <class LevelSet>
-      MMGReconstruction fitLevelSetSWIFT(const KelvinBall::Mesh& mesh,
-        const LevelSet& levelSet, Real backgroundH, Real referenceSpacing,
-        Real outerRadius, int argc, char** argv)
+      SphereDiscretization fitLevelSetSWIFT(const KelvinBall::Mesh& mesh,
+        const LevelSet& levelSet, Real backgroundH, Real outerRadius)
       {
         size_t interfaceCount = 0;
         Real interfaceSizeSum = 0;
@@ -496,29 +479,22 @@ namespace KelvinBall
         // Classification changes labels only. Copy the P1 coefficients onto
         // that mesh so the locator used by SWIFT resolves both the target and
         // its exact element-wise gradient on the same geometry.
-        P1<Real, KelvinBall::Mesh> targetSpace(mesh);
+        KelvinBall::Mesh moved(mesh);
+        P1<Real, KelvinBall::Mesh> targetSpace(moved);
         GridFunction targetLevelSet(targetSpace);
         targetLevelSet.getData() = levelSet.getData();
         auto targetGradient = Grad(targetLevelSet);
         targetGradient.traceOf(Fluid);
 
-        P1<Math::SpatialVector<Real>, KelvinBall::Mesh> displacementSpace(mesh, 3);
-        TrialFunction displacementTrial(displacementSpace);
-        TestFunction displacementTest(displacementSpace);
-        auto parameters = getFittingParameters(referenceSpacing, argc, argv);
-        // The outer sphere is curved, so its nodes are pinned: sliding in a
-        // facet plane would walk them off the sphere. The cut planes bound the
-        // wedge but are not walls, and the rim of the interface lies entirely
-        // on them, so they slide within themselves instead of being frozen.
-        parameters.fixedBoundaryAttributes = {Outer};
-        parameters.slipBoundaryAttributes = {
-          SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus};
-        Adaptation::SWIFT::Problem fitting(displacementTrial, displacementTest);
-        fitting.setParameters(parameters);
+        Adaptation::SWIFT::Adapt fitting(moved);
+        fitting.setParameters(m_fittingParameters);
+        const auto& parameters = fitting.getParameters();
 
         RealFunction target(
           [&](const Geometry::Point& point) { return targetLevelSet.getValue(point); });
-        const auto report = fitting.solve(target, targetGradient);
+        const auto report = fitting.execute(target, targetGradient);
+        if (!report.qualityBudgetSatisfied)
+          throw std::runtime_error("The SWIFT fit did not satisfy its mesh quality budget.");
         Alert::Info()
           << substageHeading("SWIFT reconstruction") << Alert::NewLine
           << diagnosticLabel("Background mean edge h:")
@@ -610,8 +586,6 @@ namespace KelvinBall
           << diagnosticLabel("Total linear iterations:")
           << Alert::Notation::Number(report.linearIterations) << Alert::Raise;
 
-        KelvinBall::Mesh moved(mesh);
-        moveMesh(moved, mesh, displacementTrial.getSolution());
         checkFixedGeometry(moved, outerRadius);
         checkMaterials(moved);
         const MeshDiagnostics diagnostics = getMeshDiagnostics(moved);
@@ -620,7 +594,7 @@ namespace KelvinBall
             diagnostics.cells, diagnostics.cells}};
       }
 
-      void adaptSWIFT(MMGReconstruction& fitted, const Sphere& sphere,
+      void adaptSWIFT(SphereDiscretization& fitted, const Sphere& sphere,
         const Configuration& configuration, Real requestedWelschScale)
       {
         const auto before = getMeshDiagnostics(fitted.mesh);
@@ -642,15 +616,7 @@ namespace KelvinBall
         // MMG preserves the material partition, but may change the internal
         // face references. Gamma is the boundary between the two materials.
         fitted.mesh.getConnectivity().compute(2, 3);
-        for (auto face = fitted.mesh.getFace(); face; ++face)
-        {
-          const auto& cells =
-            fitted.mesh.getConnectivity().getIncidence({2, 3}, face->getIndex());
-          if (cells.size() == 2 &&
-            fitted.mesh.getPolytope(3, cells[0])->getAttribute() !=
-              fitted.mesh.getPolytope(3, cells[1])->getAttribute())
-            fitted.mesh.setAttribute({2, face->getIndex()}, Gamma);
-        }
+        fitted.mesh.trace({{{Obstacle, Fluid}, Gamma}});
         const auto after = getMeshDiagnostics(fitted.mesh);
         fitted.diagnostics.minimumSize = configuration.hmin;
         fitted.diagnostics.maximumSize = configuration.hmax;
@@ -776,10 +742,7 @@ namespace KelvinBall
 
       InitialDesign initialize(const Sphere& sphere, Real requestedWelschScale)
       {
-        const Real initialGridSpacing = m_options.configuration.getGridSpacing();
         const Real outerRadius = m_options.configuration.outerRadius;
-        const int argc = m_argc;
-        char** argv = m_argv;
         SphereDiscretization initial = m_options.reconstructionMethod == "swift"
           ? sphere.prepareSWIFTBackground(requestedWelschScale)
           : sphere.discretize(false, requestedWelschScale);
@@ -823,12 +786,8 @@ namespace KelvinBall
           });
           MMG::Mesh classified =
             classifyLevelSetForSWIFT(*swiftBackground, sphereLevelSet);
-          P1 classifiedSphereSpace(classified);
-          GridFunction classifiedSphereLevelSet(classifiedSphereSpace);
-          classifiedSphereLevelSet.getData() = sphereLevelSet.getData();
-          MMGReconstruction fitted =
-            fitLevelSetSWIFT(classified, classifiedSphereLevelSet, backgroundH,
-              initialGridSpacing, outerRadius, argc, argv);
+          SphereDiscretization fitted =
+            fitLevelSetSWIFT(classified, sphereLevelSet, backgroundH, outerRadius);
           if (m_options.configuration.adapt)
           {
             adaptSWIFT(fitted, sphere, m_options.configuration, requestedWelschScale);
@@ -885,7 +844,7 @@ namespace KelvinBall
           << Alert::NewLine << Alert::Notation("--advection-quadrature=<order>")
           << " Quadrature order for the transported distance (default: 8)."
           << Alert::NewLine << Alert::Notation("--reconstruction=<method>")
-          << "  Interface reconstruction: mmg or swift (default: mmg)." << Alert::NewLine
+          << "  Interface reconstruction: swift or mmg (default: swift)." << Alert::NewLine
           << Alert::Notation("--background-hausdorff=<value>")
           << " SWIFT background Hausdorff tolerance, in h0 (default: 0.05)."
           << Alert::NewLine << Alert::Notation("--background-gradation=<value>")
@@ -1163,7 +1122,7 @@ namespace KelvinBall
       }
 
       template <class LevelSet>
-      MMGReconstruction discretizeLevelSetMMG(MMG::Mesh& mesh, const LevelSet& levelSet,
+      SphereDiscretization discretizeLevelSetMMG(MMG::Mesh& mesh, const LevelSet& levelSet,
         Real targetSize, Real hmin, Real hmax, const Sphere& sphere, bool adapt,
         Real snap, Real requestedWelschScale)
       {
@@ -1452,12 +1411,20 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   char** argv = m_argv;
   if (!m_options.parse(argc, argv))
     return 0;
+  m_reconstructionOptions.emplace(getReconstructionOptions(argc, argv));
+  m_fittingParameters =
+    getFittingParameters(m_options.configuration.getGridSpacing(), argc, argv);
+  // The physical container wall is fixed; each artificial cut admits motion
+  // within its plane. Intersections carry all incident cut constraints.
+  m_fittingParameters.fixedBoundaryAttributes = {Outer};
+  m_fittingParameters.slipBoundaryAttributes = {
+    SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus};
   const Real outerRadius = m_options.configuration.outerRadius;
   const Real nitschePenalty = m_options.configuration.nitschePenalty;
   const Real stabilizationFactor = m_options.configuration.stabilizationFactor;
   const Real initialGridSpacing = m_options.configuration.getGridSpacing();
   const Real requestedWelschScale =
-    getFittingParameters(m_options.configuration.getGridSpacing(), argc, argv).model.robustScale;
+    m_fittingParameters.model.robustScale;
   reportConfiguration(requestedWelschScale);
   const Real nan = std::numeric_limits<Real>::quiet_NaN();
   const auto stage1Start = Clock::now();
@@ -2670,16 +2637,13 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     announce(m_options.reconstructionMethod == "swift"
         ? "Stage 9: Fitting the advected interface with SWIFT."
         : "Stage 9: Reconstructing the advected interface with MMG.");
-    MMGReconstruction result = [&]() {
+    SphereDiscretization result = [&]() {
       if (m_options.reconstructionMethod == "swift")
       {
         MMG::Mesh classified =
           classifyLevelSetForSWIFT(*swiftBackground, advectedDistance);
-        P1 classifiedLevelSetSpace(classified);
-        GridFunction classifiedLevelSet(classifiedLevelSetSpace);
-        classifiedLevelSet.getData() = advectedDistance.getData();
-        auto fitted = fitLevelSetSWIFT(classified, classifiedLevelSet, backgroundH,
-          initialGridSpacing, outerRadius, argc, argv);
+        auto fitted = fitLevelSetSWIFT(classified, advectedDistance, backgroundH,
+          outerRadius);
         if (m_options.configuration.adapt)
           adaptSWIFT(fitted, sphere, m_options.configuration, requestedWelschScale);
         return fitted;
