@@ -535,13 +535,19 @@ The retained dependency libraries and finite mesh sequences do not constitute
 a complete dependency-library rebuild, hosted-CI certification or a uniform
 stability proof.
 
-## Cubic-geometry pressure forward accuracy
+## Higher-order pressure forward accuracy
 
-Representable affine pressure on cubic geometry separates algebraic solve
-error from approximation error. A small coefficient residual alone does not
+Representable affine pressure on quadratic or cubic geometry separates
+algebraic solve error from approximation error. A small coefficient residual
+alone does not
 bound the physical pressure-gradient error independently of conditioning.
-The PETSc cubic-geometry fixture therefore requests two outer residual
-corrections using the retained LU/MUMPS factors. For the assembled constrained
+The PETSc fixture requests two outer residual corrections when the geometry
+degree or velocity degree is at least three. This includes the quadratic-map
+$P_3/P_2$ patch, for which hosted PETSc 3.19 checks observed H1 patch errors
+of approximately $1.04\times10^{-9}$ to $1.07\times10^{-9}$ despite a passing
+coefficient-residual check. The existing $10^{-9}$ patch budget is unchanged.
+The corrections use the same assembled operator and retained factors, not a
+modified manufactured problem. For the assembled constrained
 system $Ac=b$, unit-damped Richardson updates are
 
 $$
@@ -558,14 +564,20 @@ theorem. Solver type, norm policy and iteration count are checked exactly;
 coefficient residual and physical pressure errors retain independent checks.
 The MPI operation acts on the global distributed linear system. It adds no
 collective to local mesh queries and does not rely on internal MUMPS refinement
-for distributed solutions. Other geometry fixtures retain the default PREONLY
-solve. Incompatible runtime overrides fail the explicit policy checks.
+for distributed solutions. Lower-order field/geometry fixtures retain the
+default PREONLY solve. Incompatible runtime overrides fail the explicit
+policy checks.
 
-The `CubicPressureForwardAccuracy` regression uses $n=3$ on all six
+The `CubicPressureForwardAccuracy` and
+`ApproximatedP3Q2PressureForwardAccuracy` regressions use $n=3$ on all six
 applicable geometries, in Local and MPI rank-one-through-four contexts.
 Represented, lifted-field and total pressure errors must each satisfy
 $E_0<10^{-11}$ and $E_1<10^{-11}$, using dimensionless absolute budgets.
 This fixed-mesh regression supplements the three-level $n=3,5,9$ geometry
-study without relaxing its $10^{-9}$ reproduction budget. Fresh verification
-of the latest-develop integration remains pending; prior detached-tree results
-do not certify the newly combined implementation.
+study without relaxing its $10^{-9}$ reproduction budget. Fresh focused
+quadratic-geometry verification passed all 60 process groups, 120 configurations
+and 264 rank-local reports across the six geometries, Local/MPI
+rank-one-through-four contexts and sequential/OpenMP builds. The uncorrected
+OpenMP tetrahedral control failed the stricter pressure regression in all five
+contexts. This is a fixed-mesh forward-accuracy certificate, not renewed
+certification of the complete higher-order rate matrix or hosted PETSc 3.19 CI.
