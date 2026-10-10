@@ -3,6 +3,7 @@
  * Distributed under the Boost Software License, Version 1.0.
  */
 #include <Rodin/Alert.h>
+#include <Rodin/Adaptation/SWIFT/QualityLattice.h>
 #include <Rodin/Geometry/Polytope.h>
 #include <Rodin/Math/SpatialVector.h>
 
@@ -49,7 +50,7 @@ namespace Examples
 
       struct Options
       {
-        size_t count = 6, iterations = 100, resolution = 12, seed = 13, maxEvaluations = 0;
+        size_t subdivisions = 2, iterations = 100, resolution = 12, seed = 13, maxEvaluations = 0;
         Real stepTolerance = 1e-6;
         std::string geometry = "triangle", output, evaluate;
       };
@@ -78,17 +79,15 @@ namespace Examples
       }
 
       Witness(Type type, Options options)
-        : m_options(std::move(options)),
+        : m_options(std::move(options)), m_type(type),
           m_dimension(Geometry::Polytope::Traits(type).getDimension()),
-          m_coordinates(std::max(size_t(1), m_dimension)), m_center(m_coordinates)
+          m_coordinates(std::max(size_t(1), m_dimension))
       {
         const Geometry::Polytope::Traits traits(type);
         for (size_t i = 0; i < traits.getVertexCount(); ++i)
         {
           m_vertices.push_back(traits.getVertex(i));
-          m_center += traits.getVertex(i);
         }
-        m_center /= Real(m_vertices.size());
         const auto& halfSpace = traits.getHalfSpace();
         for (Eigen::Index i = 0; i < halfSpace.matrix.rows(); ++i)
           m_planes.push_back({Point(halfSpace.matrix.row(i).transpose()), halfSpace.vector(i)});
@@ -218,51 +217,21 @@ namespace Examples
         return result;
       }
 
-      boost::json::object run(const Points& supplied = {})
+      boost::json::object run(const Points& supplied = {}, bool optimize = true)
       {
         const auto start = Clock::now();
-        if (!m_options.count || (m_dimension == 0 && m_options.count != 1))
-          Alert::Exception() << "Invalid witness count for this geometry." << Alert::Raise;
         const size_t resolution = m_options.resolution;
         size_t initialResolution = 0, initialLatticeSize = 0;
         std::string initialization = "supplied";
         Points initial = supplied;
         if (initial.empty())
         {
-          if (m_options.count == 1)
-          {
-            initial.push_back(m_center);
-            initialization = "vertex_barycenter";
-          }
-          else
-          {
-            Points candidates;
-            do
-            {
-              candidates = grid(++initialResolution);
-            } while (candidates.size() < m_options.count);
-            initialLatticeSize = candidates.size();
-            if (candidates.size() == m_options.count)
-            {
-              initial = candidates;
-              initialization = "complete_uniform_lattice";
-            }
-            else
-            {
-              initialization = "uniform_lattice_farthest_subset";
-              const auto closest = std::min_element(candidates.begin(), candidates.end(), [&](const Point& a, const Point& b) {
-                return (a-m_center).squaredNorm() < (b-m_center).squaredNorm();
-              });
-              initial.push_back(*closest);
-              while (initial.size() < m_options.count)
-              {
-                const auto farthest = std::max_element(candidates.begin(), candidates.end(), [&](const Point& a, const Point& b) {
-                  return nearestSquared(a, initial) < nearestSquared(b, initial);
-                });
-                initial.push_back(*farthest);
-              }
-            }
-          }
+          initialResolution = m_options.subdivisions;
+          const auto& lattice = Adaptation::SWIFT::QualityLattice::get(m_type, initialResolution);
+          for (size_t i = 0; i < lattice.getSize(); ++i)
+            initial.push_back(m_dimension ? lattice.getPoint(i) : m_vertices.front());
+          initialLatticeSize = initial.size();
+          initialization = "complete_uniform_lattice";
         }
         const Coverage initialCoverage = evaluate(initial);
         if (!std::isfinite(initialCoverage.radius))
@@ -272,18 +241,18 @@ namespace Examples
         boost::json::array history;
         size_t sweeps = 0, fallbacks = 0;
         Real localSeconds = 0, coverageSeconds = 0, motion = 0;
-        std::string termination = supplied.empty() ? "iteration_limit" : "evaluation";
+        std::string termination = optimize ? "iteration_limit" : "evaluation";
         history.push_back(boost::json::object{{"sweep", 0}, {"radius", bestRadius}});
-        if (supplied.empty() && m_dimension == 1)
+        if (optimize && m_dimension == 1)
         {
           best.clear();
-          for (size_t i = 0; i < m_options.count; ++i)
-            best.push_back(Point{(Real(i)+0.5)/Real(m_options.count)});
+          for (size_t i = 0; i < initial.size(); ++i)
+            best.push_back(Point{(Real(i)+0.5)/Real(initial.size())});
           termination = "analytic";
           history.clear();
-          history.push_back(boost::json::object{{"sweep", 0}, {"radius", Real(0.5)/m_options.count}});
+          history.push_back(boost::json::object{{"sweep", 0}, {"radius", Real(0.5)/initial.size()}});
         }
-        else if (supplied.empty() && m_dimension > 1 && m_options.iterations)
+        else if (optimize && m_dimension > 1 && m_options.iterations)
         {
           Coverage coverage = initialCoverage;
           for (; sweeps < m_options.iterations && !exhausted(); ++sweeps)
@@ -355,18 +324,18 @@ namespace Examples
           {"initial_cells", json(initialCoverage.cells)},
           {"initial_worst_locations", json(initialCoverage.holes)},
           {"initialization", boost::json::object{
-            {"method", initialization}, {"resolution", initialResolution},
+            {"method", initialization}, {"subdivisions", initialResolution},
             {"lattice_size", initialLatticeSize}}},
           {"reference_vertices", json(m_vertices)}, {"reference_edges", std::move(edges)},
           {"validation_lattice_lower_bound", lowerBound},
           {"optimality", m_dimension == 0 ? "unique_admissible_set" :
-            (m_dimension == 1 && supplied.empty() ? "analytic_interval_solution" : "not_certified")},
+            (m_dimension == 1 && optimize ? "analytic_interval_solution" : "not_certified")},
           {"radius_evaluation", "clipped_voronoi_float64"},
           {"history", std::move(history)},
           {"search", boost::json::object{
             {"implementation", "checked_enclosing_ball"},
             {"enclosing_ball_backend", "CGAL::Min_sphere_of_spheres_d"},
-            {"mode", supplied.empty() ? "search" : "evaluation"},
+            {"mode", optimize ? "search" : "evaluation"},
             {"objective", "exact"}, {"resolution", resolution},
             {"iterations", m_options.iterations}, {"seed", m_options.seed},
             {"step_tolerance", m_options.stepTolerance}, {"sweeps", sweeps},
@@ -500,8 +469,8 @@ namespace Examples
       }
 
       const Options m_options;
+      const Type m_type;
       const size_t m_dimension, m_coordinates;
-      Point m_center;
       Points m_vertices;
       Faces m_faces;
       std::vector<Plane> m_planes;
@@ -516,13 +485,14 @@ int main(int argc, char** argv)
   try
   {
     Witness::Options options;
-    bool countSet = false;
+    bool subdivisionsSet = false;
     for (int i = 1; i < argc; ++i)
     {
       std::string argument = argv[i], name, value;
       if (argument == "--help")
       {
-        std::cout << "SWIFT_Witness [n] [--geometry triangle|...|all] [--output result.json]\n"
+        std::cout << "SWIFT_Witness [subdivisions] [--geometry triangle|...|all] [--output result.json]\n"
+          "  --subdivisions 2 (complete Rodin reference lattice)\n"
           "  --iterations 100 --resolution 12 --seed 13\n"
           "  --step-tolerance 1e-6 --max-evaluations 0 --evaluate input.json\n"
           "All witness positions are free. Search optimality is not certified.\n";
@@ -541,7 +511,7 @@ int main(int argc, char** argv)
       }
       else
       {
-        name = "n";
+        name = "subdivisions";
         value = argument;
       }
       if (name == "geometry")
@@ -563,10 +533,10 @@ int main(int argc, char** argv)
         const auto parsed = std::from_chars(value.data(), value.data()+value.size(), number);
         if (parsed.ec != std::errc() || parsed.ptr != value.data()+value.size())
           Alert::Exception() << "Invalid integer for --" << name << Alert::Raise;
-        if (name == "n" && !countSet)
+        if (name == "subdivisions" && !subdivisionsSet)
         {
-          options.count = number;
-          countSet = true;
+          options.subdivisions = number;
+          subdivisionsSet = true;
         }
         else if (name == "iterations") options.iterations = number;
         else if (name == "resolution") options.resolution = number;
@@ -575,8 +545,8 @@ int main(int argc, char** argv)
         else Alert::Exception() << "Unknown or repeated option: " << name << Alert::Raise;
       }
     }
-    if (!options.count || !options.resolution)
-      Alert::Exception() << "Count and resolution must be positive." << Alert::Raise;
+    if (!options.subdivisions || !options.resolution)
+      Alert::Exception() << "Subdivisions and resolution must be positive." << Alert::Raise;
     boost::json::value input;
     if (!options.evaluate.empty())
     {
@@ -585,7 +555,8 @@ int main(int argc, char** argv)
         Alert::Exception() << "Cannot read " << options.evaluate << Alert::Raise;
       input = boost::json::parse(std::string(std::istreambuf_iterator<char>(stream), {}));
       options.geometry = std::string(input.at("geometry").as_string());
-      options.count = input.at("points").as_array().size();
+      if (input.at("points").as_array().empty())
+        Alert::Exception() << "Input witnesses must not be empty." << Alert::Raise;
     }
     boost::json::value output;
     boost::json::array all;
@@ -596,11 +567,11 @@ int main(int argc, char** argv)
         continue;
       auto settings = options;
       settings.geometry = name;
-      if (name == "point" && options.geometry == "all")
-        settings.count = 1;
+      Witness::Points initial;
       Witness generator(type, settings);
-      const auto result = input.is_null() ? generator.run()
-        : generator.run(generator.readPoints(input.at("points").as_array()));
+      if (!input.is_null())
+        initial = generator.readPoints(input.at("points").as_array());
+      auto result = generator.run(initial, input.is_null());
       std::cout << name << ": n=" << result.at("count") << ", radius="
         << result.at("covering_radius") << ", seconds="
         << result.at("search").at("wall_seconds") << std::endl;
@@ -615,7 +586,8 @@ int main(int argc, char** argv)
     if (options.geometry == "all")
       output = std::move(all);
     const std::filesystem::path path = options.output.empty()
-      ? "witness-"+options.geometry+"-"+std::to_string(options.count)+".json" : options.output;
+      ? "witness-"+options.geometry+"-subdivisions-"+
+        std::to_string(options.subdivisions)+".json" : options.output;
     if (path.has_parent_path())
       std::filesystem::create_directories(path.parent_path());
     std::ofstream stream(path);

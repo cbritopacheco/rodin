@@ -327,3 +327,7 @@ _codeql_build_dir/
 *.h5
 *.xdmf
 stem.xdmf
+
+# Local calibration campaigns; include only when explicitly requested.
+/experiments/*calibration/**/*.md
+/experiments/*calibration/**/*.py

@@ -61,9 +61,10 @@ class Plot:
             upper += radius
         extent = max(float((upper-lower).max()), 1.)
         scale = 400/extent
+        initialization = 'Lattice-derived initialization'
         panels = [(row, view, panel, name, key)
                   for row, view in enumerate(views)
-                  for panel, (name, key) in enumerate((('Lattice-derived initialization', 'initial_points'),
+                  for panel, (name, key) in enumerate(((initialization, 'initial_points'),
                                                        ('Numerical covering candidate', 'points')))]
         for row, view, panel, name, key in panels:
             offset = row*540
