@@ -909,8 +909,9 @@ jobs:
           --output-on-failure --no-tests=error -j 1
 
   PETScMatrixRanges:
-    # Preserve the upstream real/complex matrix-range gate independently of
-    # the convergence partitions, which require a real PETSc build.
+    # Preserve the real/complex matrix-range and coefficient-storage gates
+    # independently of the convergence partitions. The standard Unit jobs
+    # use real PETSc, so complex storage requires this explicit selection.
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -959,11 +960,15 @@ jobs:
           -DRODIN_USE_PETSC=ON
 
       - name: Build distributed finite element tests
-        run: cmake --build build -j 2 --target RodinMPIMatrixRangeTest
+        run: >-
+          cmake --build build -j 2 --target
+          RodinMPIMatrixRangeTest RodinPETScGridFunctionTest
+          RodinPETScMPIGridFunctionTest RodinPETScMPIP0P0gTest
 
       - name: Run distributed finite element tests
         run: >-
-          ctest --test-dir build/tests -R '^RodinMPIMatrixRangeTest_np[1-4]$'
+          ctest --test-dir build/tests
+          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4])$'
           --output-on-failure --no-tests=error -j 1
 
   Unit:
