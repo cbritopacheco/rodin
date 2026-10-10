@@ -131,7 +131,7 @@ src/Rodin/
 ├── Distance/           # Distance / redistancing models (header-only)
 ├── Eikonal/            # Fast Marching Method (header-only)
 ├── Hilbert/            # H1 extension-regularization, H1a (header-only)
-├── Adaptation/         # Moving-interface mesh adaptation, WNGIR (header-only)
+├── Adaptation/         # Moving-interface mesh adaptation, SWIFT (header-only)
 ├── Solid/              # Hyperelastic solid mechanics (header-only)
 │   └── Linear/         # Small-strain elasticity integrators
 ├── Heart/              # Reduced-order (0D) cardiac models (header-only)

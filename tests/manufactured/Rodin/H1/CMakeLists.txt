@@ -148,6 +148,19 @@ gtest_discover_tests(RodinManufacturedH1NavierStokes3D
     PROPERTIES
     LABELS slow manufactured)
 
+# TEMPORARY: rates of the stabilized P1--P1 pair used by the Kelvin-ball example.
+add_executable(RodinManufacturedStokesStabilizedTemporary StokesStabilizedTemporary.cpp)
+target_link_libraries(RodinManufacturedStokesStabilizedTemporary
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+  )
+gtest_discover_tests(RodinManufacturedStokesStabilizedTemporary
+  PROPERTIES
+    LABELS manufactured)
 add_executable(RodinManufacturedSpatialMatrix SpatialMatrix.cpp)
 target_link_libraries(RodinManufacturedSpatialMatrix
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational Rodin::Assembly Rodin::Solver)
