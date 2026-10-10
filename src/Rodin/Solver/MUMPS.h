@@ -28,6 +28,7 @@
 
 #ifdef RODIN_USE_MUMPS
 
+#include <algorithm>
 #include <limits>
 
 #include <dmumps_c.h>
@@ -176,6 +177,8 @@ namespace Rodin::Solver
           bool symbolic = false;
           /// @brief Whether a reusable numeric factorization is retained.
           bool numeric = false;
+          /// @brief Backend workspace margin established by JOB=-1.
+          MUMPS_INT defaultWorkspacePercentage = 0;
 
           void initialize(const MUMPS& solver, Symmetry symmetry)
           {
@@ -194,6 +197,7 @@ namespace Rodin::Solver
             dmumps_c(&instance);
             initialized = true;
             solver.check("initialization");
+            defaultWorkspacePercentage = instance.icntl[13];
           }
 
           /**
@@ -349,10 +353,11 @@ namespace Rodin::Solver
        */
       MUMPS& setWorkspacePercentage(Integer percentage)
       {
-        if (percentage < 0)
+        if (percentage < 0 || percentage > std::numeric_limits<MUMPS_INT>::max())
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "The working space percentage must not be negative." << Alert::Raise;
+            << "The working space percentage must fit a nonnegative MUMPS integer."
+            << Alert::Raise;
         }
         m_workspacePercentage = percentage;
         return *this;
@@ -368,7 +373,10 @@ namespace Rodin::Solver
        * @brief Analyzes and numerically factorizes the system matrix.
        *
        * Reuses existing symbolic analysis and replaces any previous numeric
-       * factorization. The matrix sparsity pattern must remain unchanged until
+       * factorization. Workspace exhaustion (INFOG(1)=-9) retries numeric
+       * factorization at most three times with increasing workspace, retaining
+       * symbolic analysis. Other failures are returned without retry.
+       * The matrix sparsity pattern must remain unchanged until
        * the symbolic factorization is cleared.
        */
       void factorize(LinearSystemType& axb)
@@ -427,6 +435,15 @@ namespace Rodin::Solver
         m_resources.clear(Factorization::Numeric);
         instance.job = JobFactorize;
         dmumps_c(&instance);
+        for (size_t retry = 0; instance.infog[0] == -9 && retry < 3; ++retry)
+        {
+          const auto margin = instance.icntl[13];
+          if (margin > (std::numeric_limits<MUMPS_INT>::max() - 20) / 2)
+            break;
+          instance.icntl[13] = 2 * std::max<MUMPS_INT>(0, margin) + 20;
+          instance.job = JobFactorize;
+          dmumps_c(&instance);
+        }
         if (instance.infog[0] < 0)
           return record(Factorization::Symbolic);
         m_resources.numeric = true;
@@ -654,7 +671,9 @@ namespace Rodin::Solver
         instance.icntl[3] = 0;
         instance.icntl[6] = static_cast<MUMPS_INT>(m_ordering);
         instance.icntl[15] = static_cast<MUMPS_INT>(m_maxThreads);
-        instance.icntl[13] = static_cast<MUMPS_INT>(m_workspacePercentage);
+        instance.icntl[13] = m_workspacePercentage > 0
+          ? static_cast<MUMPS_INT>(m_workspacePercentage)
+          : m_resources.defaultWorkspacePercentage;
       }
 
       void dropConvertedState()

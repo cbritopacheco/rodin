@@ -7,345 +7,408 @@
 #include <gtest/gtest.h>
 
 #include <Rodin/Geometry.h>
+#include <Rodin/Alert/Exception.h>
 
 #include <algorithm>
-#include <vector>
+#include <functional>
+#include <limits>
+#include <type_traits>
+#include <utility>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
-  namespace
+  class Rodin_Geometry_MinSTCut : public testing::Test
   {
-    // Build the edges of a (rows x cols) 4-connected grid of cells with
-    // uniform capacity.
-    std::vector<MinSTCut::Edge> gridEdges(
-      std::size_t rows, std::size_t cols, Real capacity)
-    {
-      std::vector<MinSTCut::Edge> edges;
-      auto idx = [cols](std::size_t r, std::size_t c) -> Index { return r * cols + c; };
-      for (std::size_t r = 0; r < rows; ++r)
+    protected:
+      static std::function<Real(const Polytope&)> average(std::vector<Real> values)
       {
-        for (std::size_t c = 0; c < cols; ++c)
+        return [values = std::move(values)](const Polytope& cell)
         {
-          if (c + 1 < cols)
-            edges.push_back({idx(r, c), idx(r, c + 1), capacity});
-          if (r + 1 < rows)
-            edges.push_back({idx(r, c), idx(r + 1, c), capacity});
+          return values.at(cell.getIndex());
+        };
+      }
+  };
+
+  class MinSTCutMeshTest : public Rodin_Geometry_MinSTCut,
+    public testing::WithParamInterface<Polytope::Type>
+  {
+    protected:
+      MinSTCutMeshTest()
+        : m_mesh(GetParam() == Polytope::Type::Segment
+            ? LocalMesh::UniformGrid(GetParam(), {3})
+            : GetParam() == Polytope::Type::Triangle ||
+              GetParam() == Polytope::Type::Quadrilateral
+              ? LocalMesh::UniformGrid(GetParam(), {3, 2})
+              : GetParam() == Polytope::Type::Hexahedron
+                ? LocalMesh::UniformGrid(GetParam(), {3, 2, 2})
+                : LocalMesh::UniformGrid(GetParam(), {2, 2, 2}))
+      {
+        m_mesh.getConnectivity().compute(m_mesh.getDimension() - 1, m_mesh.getDimension());
+      }
+
+      LocalMesh m_mesh;
+  };
+
+  TEST_P(MinSTCutMeshTest, UniformSignsAndBorrowedMesh)
+  {
+    MinSTCut classifier(m_mesh);
+    EXPECT_EQ(&classifier.getMesh(), &m_mesh);
+    for (int sign : {-1, 1})
+    {
+      const auto result = classifier.classify(
+        average(std::vector<Real>(m_mesh.getCellCount(), sign)));
+      EXPECT_TRUE(result.cut.empty());
+      EXPECT_DOUBLE_EQ(result.energy, 0);
+      EXPECT_EQ(result.inside.size(), sign < 0 ? m_mesh.getCellCount() : 0);
+      EXPECT_EQ(result.outside.size(), sign > 0 ? m_mesh.getCellCount() : 0);
+    }
+  }
+
+  TEST_P(MinSTCutMeshTest, CapturingLambdaReceivesInteriorMeshFacetsOnce)
+  {
+    IndexVector visited;
+    const Real weight = 0.01;
+    MinSTCut<LocalMesh>::Parameters parameters;
+    parameters.fidelity = 2;
+    parameters.smoothing = [&visited, weight, this](const Polytope& facet)
+    {
+      EXPECT_EQ(&facet.getMesh(), &m_mesh);
+      EXPECT_EQ(facet.getDimension(), m_mesh.getDimension() - 1);
+      const auto& cells = m_mesh.getConnectivity().getIncidence(
+        {m_mesh.getDimension() - 1, m_mesh.getDimension()}, facet.getIndex());
+      EXPECT_EQ(cells.size(), 2u);
+      visited.push_back(facet.getIndex());
+      return weight;
+    };
+    std::vector<Real> averages(m_mesh.getCellCount());
+    for (Index i = 0; i < averages.size(); ++i)
+      averages[i] = i % 2 ? 1 : -1;
+    MinSTCut classifier(m_mesh);
+    classifier.setParameters(parameters);
+    IndexVector cellsVisited;
+    const auto result = classifier.classify([&](const Polytope& cell)
+    {
+      EXPECT_EQ(&cell.getMesh(), &m_mesh);
+      EXPECT_EQ(cell.getDimension(), m_mesh.getDimension());
+      cellsVisited.push_back(cell.getIndex());
+      return averages[cell.getIndex()];
+    });
+    ASSERT_EQ(cellsVisited.size(), m_mesh.getCellCount());
+    for (Index i = 0; i < cellsVisited.size(); ++i)
+      EXPECT_EQ(cellsVisited[i], i);
+    IndexVector expected;
+    Real energy = 0;
+    const auto& incidence = m_mesh.getConnectivity().getIncidence(
+      m_mesh.getDimension() - 1, m_mesh.getDimension());
+    for (auto face = m_mesh.getFace(); face; ++face)
+    {
+      const auto& cells = incidence.at(face->getIndex());
+      if (cells.size() != 2)
+        continue;
+      expected.push_back(face->getIndex());
+      if ((std::find(result.inside.begin(), result.inside.end(), cells[0]) !=
+          result.inside.end()) !=
+          (std::find(result.inside.begin(), result.inside.end(), cells[1]) !=
+            result.inside.end()))
+      {
+        EXPECT_NE(std::find(result.cut.begin(), result.cut.end(), face->getIndex()),
+          result.cut.end());
+        energy += weight * (m_mesh.getDimension() == 1 ? Real(1) : face->getMeasure());
+      }
+    }
+    EXPECT_EQ(visited, expected);
+    for (auto cell = m_mesh.getCell(); cell; ++cell)
+    {
+      const Index i = cell->getIndex();
+      const bool inside = std::find(result.inside.begin(), result.inside.end(), i) !=
+        result.inside.end();
+      energy += parameters.fidelity * (inside
+        ? cell->getMeasure() * std::max(Real(0), averages[i])
+        : cell->getMeasure() * std::max(Real(0), -averages[i]));
+    }
+    EXPECT_NEAR(result.energy, energy, 1e-14);
+  }
+
+  TEST_P(MinSTCutMeshTest, CutMatchesExhaustiveEnumeration)
+  {
+    MinSTCut<LocalMesh>::Parameters parameters;
+    parameters.fidelity = 1.7;
+    parameters.smoothing = [](const Polytope& facet)
+    {
+      return Real(0.03) * (1 + facet.getIndex() % 3);
+    };
+    std::vector<Real> averages(m_mesh.getCellCount());
+    for (Index i = 0; i < averages.size(); ++i)
+      averages[i] = (i % 2 ? 1 : -1) * Real(i + 1) / averages.size();
+    Real minimum = std::numeric_limits<Real>::infinity();
+    const auto& incidence = m_mesh.getConnectivity().getIncidence(
+      m_mesh.getDimension() - 1, m_mesh.getDimension());
+    for (size_t mask = 0; mask < (size_t(1) << averages.size()); ++mask)
+    {
+      Real energy = 0;
+      for (auto cell = m_mesh.getCell(); cell; ++cell)
+      {
+        const Index i = cell->getIndex();
+        energy += parameters.fidelity * ((mask & (size_t(1) << i))
+          ? cell->getMeasure() * std::max(Real(0), averages[i])
+          : cell->getMeasure() * std::max(Real(0), -averages[i]));
+      }
+      for (auto face = m_mesh.getFace(); face; ++face)
+      {
+        const auto& cells = incidence.at(face->getIndex());
+        if (cells.size() == 2 &&
+            bool(mask & (size_t(1) << cells[0])) != bool(mask & (size_t(1) << cells[1])))
+        {
+          energy += parameters.smoothing(*face) *
+            (m_mesh.getDimension() == 1 ? Real(1) : face->getMeasure());
         }
       }
-      return edges;
+      minimum = std::min(minimum, energy);
     }
+    const auto result = MinSTCut(m_mesh).setParameters(parameters).classify(average(averages));
+    EXPECT_NEAR(result.energy, minimum, 1e-14);
+    IndexVector cells = result.inside;
+    cells.insert(cells.end(), result.outside.begin(), result.outside.end());
+    std::sort(cells.begin(), cells.end());
+    ASSERT_EQ(cells.size(), m_mesh.getCellCount());
+    for (Index i = 0; i < cells.size(); ++i)
+      EXPECT_EQ(cells[i], i);
   }
 
-  /// @brief Verifies sign conventions for geometry min ST cut by checking exact expected values.
-  TEST(Rodin_Geometry_MinSTCut, SignConventions)
+  TEST_P(MinSTCutMeshTest, ClassificationDoesNotModifyAttributes)
   {
-    EXPECT_EQ(MinSTCut::Inside, -1);
-    EXPECT_EQ(MinSTCut::Outside, +1);
+    for (auto cell = m_mesh.getCell(); cell; ++cell)
+      m_mesh.setAttribute({m_mesh.getDimension(), cell->getIndex()}, 17);
+    for (auto face = m_mesh.getFace(); face; ++face)
+      m_mesh.setAttribute({m_mesh.getDimension() - 1, face->getIndex()}, 23);
+    MinSTCut(m_mesh).classify(average(std::vector<Real>(m_mesh.getCellCount(), -1)));
+    for (auto cell = m_mesh.getCell(); cell; ++cell)
+      EXPECT_EQ(cell->getAttribute(), 17);
+    for (auto face = m_mesh.getFace(); face; ++face)
+      EXPECT_EQ(face->getAttribute(), 23);
   }
 
-  /// @brief Verifies all negative moments are inside for geometry min ST cut by checking exact expected values, true predicates.
-  TEST(Rodin_Geometry_MinSTCut, AllNegativeMomentsAreInside)
+  INSTANTIATE_TEST_SUITE_P(Rodin_Geometry_MinSTCut, MinSTCutMeshTest,
+    testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron));
+
+  TEST_F(Rodin_Geometry_MinSTCut, OwnedParametersAreCopiedAndChainable)
   {
-    const std::vector<Real> volumes(4, 1);
-    const std::vector<Real> moments(4, -1);
-    const std::vector<MinSTCut::Edge> edges;
-
-    const auto result = MinSTCut().classify(volumes, moments, edges);
-
-    ASSERT_EQ(result.labels.size(), 4u);
-    for (const int label : result.labels)
-      EXPECT_EQ(label, MinSTCut::Inside);
-    EXPECT_EQ(result.insideCells.size(), 4u);
-    EXPECT_EQ(result.outsideCells.size(), 0u);
-    EXPECT_TRUE(result.cutEdges.empty());
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(1, 2);
+    MinSTCut<LocalMesh>::Parameters parameters;
+    const Real weight = 0.01;
+    parameters.smoothing = [weight](const Polytope&) { return weight; };
+    MinSTCut classifier(mesh);
+    classifier.setParameters(parameters);
+    static_assert(std::is_same_v<decltype(classifier), MinSTCut<LocalMesh>>);
+    parameters.smoothing = [](const Polytope&) { return 1; };
+    EXPECT_DOUBLE_EQ(classifier.getParameters().smoothing(*mesh.getFace()), weight);
+    const auto owned = classifier.classify(average({-0.4, 0.6}));
+    EXPECT_EQ(owned.inside, IndexVector{0});
+    EXPECT_EQ(owned.outside, IndexVector{1});
+    const auto updated = classifier.setParameters(parameters).classify(average({-0.4, 0.6}));
+    EXPECT_TRUE(updated.inside.empty() || updated.outside.empty());
+    parameters.fidelity = 2;
+    EXPECT_EQ(&classifier.setParameters(parameters), &classifier);
+    parameters.fidelity = 10;
+    EXPECT_DOUBLE_EQ(classifier.getParameters().fidelity, 2);
+    EXPECT_DOUBLE_EQ(MinSTCut<LocalMesh>::Parameters{}.smoothing(*mesh.getFace()), 1);
   }
 
-  /// @brief Verifies all positive moments are outside for geometry min ST cut by checking exact expected values.
-  TEST(Rodin_Geometry_MinSTCut, AllPositiveMomentsAreOutside)
+  TEST_F(Rodin_Geometry_MinSTCut, FidelityControlsSmoothingBalanceWithoutPinning)
   {
-    const std::vector<Real> volumes(4, 1);
-    const std::vector<Real> moments(4, +1);
-    const std::vector<MinSTCut::Edge> edges;
-
-    const auto result = MinSTCut().classify(volumes, moments, edges);
-
-    for (const int label : result.labels)
-      EXPECT_EQ(label, MinSTCut::Outside);
-    EXPECT_EQ(result.outsideCells.size(), 4u);
-    EXPECT_EQ(result.insideCells.size(), 0u);
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(1, 2);
+    MinSTCut classifier(mesh);
+    const auto smooth = classifier.classify(average({-0.9, 0.9}));
+    EXPECT_TRUE(smooth.inside.empty() || smooth.outside.empty());
+    EXPECT_TRUE(smooth.cut.empty());
+    EXPECT_NEAR(smooth.energy, 0.45, 1e-14);
+    MinSTCut<LocalMesh>::Parameters parameters;
+    parameters.fidelity = 100;
+    const auto split = classifier.setParameters(parameters).classify(average({-0.9, 0.9}));
+    EXPECT_EQ(split.inside, IndexVector{0});
+    EXPECT_EQ(split.outside, IndexVector{1});
+    ASSERT_EQ(split.cut.size(), 1u);
+    EXPECT_NEAR(split.energy, mesh.getFace(split.cut[0])->getMeasure(), 1e-14);
   }
 
-  /// @brief Single isolated cell with a negative moment is labelled Inside.
-  TEST(Rodin_Geometry_MinSTCut, NegativeMomentIsInside)
+  TEST_F(Rodin_Geometry_MinSTCut, CellVolumesAreAppliedOnce)
   {
-    // Single isolated cell with a negative moment is labelled Inside.
-    const std::vector<Real> volumes{1.0};
-    const std::vector<Real> moments{-0.7};
-    const auto result = MinSTCut().classify(volumes, moments, {});
-    ASSERT_EQ(result.labels.size(), 1u);
-    EXPECT_EQ(result.labels[0], MinSTCut::Inside);
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(1, 2);
+    MinSTCut<LocalMesh>::Parameters parameters;
+    parameters.smoothing = [](const Polytope&) { return 10; };
+    const auto result = MinSTCut(mesh).setParameters(parameters).classify(average({-0.25, 0.5}));
+    EXPECT_TRUE(result.inside.empty());
+    EXPECT_EQ(result.outside, (IndexVector{0, 1}));
+    EXPECT_NEAR(result.energy, 0.125, 1e-14);
   }
 
-  /// @brief Single isolated cell with a positive moment is labelled Outside.
-  TEST(Rodin_Geometry_MinSTCut, PositiveMomentIsOutside)
+  TEST_F(Rodin_Geometry_MinSTCut, FacetAttributesCanControlTheCut)
   {
-    // Single isolated cell with a positive moment is labelled Outside.
-    const std::vector<Real> volumes{1.0};
-    const std::vector<Real> moments{+0.7};
-    const auto result = MinSTCut().classify(volumes, moments, {});
-    ASSERT_EQ(result.labels.size(), 1u);
-    EXPECT_EQ(result.labels[0], MinSTCut::Outside);
-  }
-
-  /// @brief Two cells with conflicting moments (one negative, one positive).
-  TEST(Rodin_Geometry_MinSTCut, TwoCellStrongEdgeForcesCommonLabel)
-  {
-    // Two cells with conflicting moments (one negative, one positive)
-    // connected by an edge whose capacity dominates the unary terms.
-    // The optimal cut keeps both on the same side of the source/sink
-    // partition, i.e. they share a label and no cut edge appears.
-    const std::vector<Real> volumes{1.0, 1.0};
-    const std::vector<Real> moments{-0.4, +0.4};
-    const std::vector<MinSTCut::Edge> edges{{0, 1, 1e3}};
-    const auto result = MinSTCut().classify(volumes, moments, edges);
-    ASSERT_EQ(result.labels.size(), 2u);
-    EXPECT_EQ(result.labels[0], result.labels[1]);
-    EXPECT_TRUE(result.cutEdges.empty());
-  }
-
-  /// @brief Same conflicting-moment setup as above but with a weak smoothing.
-  TEST(Rodin_Geometry_MinSTCut, TwoCellWeakEdgeFollowsData)
-  {
-    // Same conflicting-moment setup as above but with a weak smoothing
-    // edge: the data term wins and the labels split along the moment
-    // sign, producing one cut edge.
-    const std::vector<Real> volumes{1.0, 1.0};
-    const std::vector<Real> moments{-0.4, +0.4};
-    const std::vector<MinSTCut::Edge> edges{{0, 1, 1e-3}};
-    const auto result = MinSTCut().classify(volumes, moments, edges);
-    ASSERT_EQ(result.labels.size(), 2u);
-    EXPECT_EQ(result.labels[0], MinSTCut::Inside);
-    EXPECT_EQ(result.labels[1], MinSTCut::Outside);
-    ASSERT_EQ(result.cutEdges.size(), 1u);
-  }
-
-  /// @brief 2x2 grid with checkerboard sign pattern:.
-  TEST(Rodin_Geometry_MinSTCut, Checkerboard2x2SmoothsForLargeLambda)
-  {
-    // 2x2 grid with checkerboard sign pattern:
-    //
-    //   (0,0) = -  (0,1) = +
-    //   (1,0) = +  (1,1) = -
-    //
-    // With weak smoothing the cut produces a checkerboard label
-    // pattern; with strong smoothing the optimal labelling is uniform
-    // (all Inside or all Outside, here Inside because the negative
-    // unary costs slightly dominate the matched positives in our toy
-    // capacities).
-    constexpr std::size_t rows = 2;
-    constexpr std::size_t cols = 2;
-    const std::vector<Real> volumes(rows * cols, 1.0);
-    const std::vector<Real> moments{-1.0, +1.0, +1.0, -1.0};
-    const auto edges = gridEdges(rows, cols, 1.0);
-
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {5, 2});
+    mesh.getConnectivity().compute(1, 2);
+    Index weak = 0;
+    for (auto face = mesh.getFace(); face; ++face)
     {
-      MinSTCut::Options weak;
-      weak.lambdaScale = 1e-6;
-      const auto result = MinSTCut().classify(volumes, moments, edges, weak);
-      // Checkerboard preserved (each cell matches its own sign).
-      EXPECT_EQ(result.labels[0], MinSTCut::Inside);
-      EXPECT_EQ(result.labels[1], MinSTCut::Outside);
-      EXPECT_EQ(result.labels[2], MinSTCut::Outside);
-      EXPECT_EQ(result.labels[3], MinSTCut::Inside);
+      const auto& cells = mesh.getConnectivity().getIncidence({1, 2}, face->getIndex());
+      if (cells.size() == 2 && std::min(cells[0], cells[1]) == 1)
+      {
+        weak = face->getIndex();
+        mesh.setAttribute({1, weak}, 42);
+      }
     }
+    MinSTCut<LocalMesh>::Parameters parameters;
+    parameters.smoothing = [](const Polytope& facet)
     {
-      MinSTCut::Options strong;
-      strong.lambdaScale = 1e6;
-      const auto result = MinSTCut().classify(volumes, moments, edges, strong);
-      // Strong smoothing collapses the 2x2 to a single label.
-      EXPECT_EQ(result.labels[0], result.labels[1]);
-      EXPECT_EQ(result.labels[1], result.labels[2]);
-      EXPECT_EQ(result.labels[2], result.labels[3]);
-      EXPECT_TRUE(result.cutEdges.empty());
+      return facet.getAttribute().value_or(0) == 42 ? 0.001 : 5.0;
+    };
+    const auto result = MinSTCut(mesh).setParameters(parameters).classify(
+      average({-1, -0.4, 0.4, 1}));
+    EXPECT_EQ(result.inside, (IndexVector{0, 1}));
+    EXPECT_EQ(result.outside, (IndexVector{2, 3}));
+    EXPECT_EQ(result.cut, IndexVector{weak});
+  }
+
+  TEST_F(Rodin_Geometry_MinSTCut, ZeroSmoothingFollowsData)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.getConnectivity().compute(1, 2);
+    MinSTCut<LocalMesh>::Parameters parameters;
+    parameters.smoothing = [](const Polytope&) { return 0; };
+    std::vector<Real> averages(mesh.getCellCount());
+    IndexVector inside;
+    IndexVector outside;
+    for (Index i = 0; i < averages.size(); ++i)
+    {
+      averages[i] = i % 2 ? 1 : -1;
+      (i % 2 ? outside : inside).push_back(i);
     }
+    const auto result = MinSTCut(mesh).setParameters(parameters).classify(average(averages));
+    EXPECT_EQ(result.inside, inside);
+    EXPECT_EQ(result.outside, outside);
+    EXPECT_DOUBLE_EQ(result.energy, 0);
   }
 
-  /// @brief Inside cost charges only positive moments, outside only negative.
-  TEST(Rodin_Geometry_MinSTCut, UnaryCostMatchesAdvertisedConvention)
+  TEST_F(Rodin_Geometry_MinSTCut, InvalidInputsUseRodinAlerts)
   {
-    // Inside cost charges only positive moments, outside only negative.
-    EXPECT_DOUBLE_EQ(MinSTCut::getInsideCost(2.0, +0.5), 1.0);
-    EXPECT_DOUBLE_EQ(MinSTCut::getInsideCost(2.0, -0.5), 0.0);
-    EXPECT_DOUBLE_EQ(MinSTCut::getOutsideCost(2.0, -0.5), 1.0);
-    EXPECT_DOUBLE_EQ(MinSTCut::getOutsideCost(2.0, +0.5), 0.0);
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(1, 2);
+    MinSTCut classifier(mesh);
+    EXPECT_THROW(classifier.classify({}), Alert::Exception);
+    EXPECT_THROW(classifier.classify(average({std::numeric_limits<Real>::quiet_NaN(), 1})),
+      Alert::Exception);
+    for (Real value : {-1.0, std::numeric_limits<Real>::infinity(),
+        std::numeric_limits<Real>::quiet_NaN()})
+    {
+      MinSTCut<LocalMesh>::Parameters parameters;
+      parameters.fidelity = value;
+      EXPECT_THROW(classifier.setParameters(parameters).classify(average({-1, 1})),
+        Alert::Exception);
+      parameters.fidelity = 1;
+      parameters.smoothing = [value](const Polytope&) { return value; };
+      EXPECT_THROW(classifier.setParameters(parameters).classify(average({-1, 1})),
+        Alert::Exception);
+    }
+    MinSTCut<LocalMesh>::Parameters parameters;
+    parameters.smoothing = {};
+    EXPECT_THROW(classifier.setParameters(parameters).classify(average({-1, 1})), Alert::Exception);
   }
 
-  /// @brief 3x3 grid: center cell has near-zero negative moment, surrounded by.
-  TEST(Rodin_Geometry_MinSTCut, SingleInteriorFlipIsHealedByStrongLambda)
+  TEST_F(Rodin_Geometry_MinSTCut, MissingConnectivityIsReported)
   {
-    // 3x3 grid: center cell has near-zero negative moment, surrounded by
-    // strongly positive cells. Without smoothing the cut yields a
-    // checkerboard with a single Inside cell. Sufficient lambda heals it.
-    constexpr std::size_t rows = 3;
-    constexpr std::size_t cols = 3;
-    std::vector<Real> volumes(rows * cols, 1);
-    std::vector<Real> moments(rows * cols, +1);
-    const Index center = 1 * cols + 1;
-    moments[center] = -1e-3;
-
-    const auto baseEdges = gridEdges(rows, cols, 1.0);
-
-    MinSTCut::Options weak;
-    weak.lambdaScale = 1e-6;
-    const auto weakResult = MinSTCut().classify(volumes, moments, baseEdges, weak);
-    EXPECT_EQ(weakResult.labels[center], MinSTCut::Inside);
-
-    MinSTCut::Options strong;
-    strong.lambdaScale = 10;
-    const auto strongResult = MinSTCut().classify(volumes, moments, baseEdges, strong);
-    EXPECT_EQ(strongResult.labels[center], MinSTCut::Outside);
+    auto mesh = LocalMesh::Builder().initialize(2).nodes(3)
+      .vertex({0, 0}).vertex({1, 0}).vertex({0, 1})
+      .polytope(Polytope::Type::Triangle, {0, 1, 2}).finalize();
+    EXPECT_THROW(MinSTCut(mesh).classify(average({-1})), Alert::Exception);
+    mesh.getConnectivity().compute(1, 2);
+    const auto result = MinSTCut(mesh).classify(average({-1}));
+    EXPECT_EQ(result.inside, IndexVector{0});
+    EXPECT_TRUE(result.outside.empty());
   }
 
-  /// @brief Two cells: moment +0.9 (definitely Outside) and moment -0.9.
-  TEST(Rodin_Geometry_MinSTCut, FarFieldThresholdPinsLabels)
+  TEST_F(Rodin_Geometry_MinSTCut, EmptyMeshHasEmptyClassification)
   {
-    // Two cells: moment +0.9 (definitely Outside) and moment -0.9
-    // (definitely Inside), connected by an enormous edge that would
-    // otherwise collapse them onto the same label.
-    const std::vector<Real> volumes{1, 1};
-    const std::vector<Real> moments{-0.9, +0.9};
-    const std::vector<MinSTCut::Edge> edges{{0, 1, 1e6}};
-
-    // Without pinning, the huge edge forces both labels to whichever
-    // side wins on total unary; certainly the cut does not split them.
-    const auto unpinned = MinSTCut().classify(volumes, moments, edges);
-    EXPECT_EQ(unpinned.labels[0], unpinned.labels[1]);
-
-    MinSTCut::Options pinned;
-    pinned.farFieldThreshold = 0.5;
-    const auto pinnedResult = MinSTCut().classify(volumes, moments, edges, pinned);
-    EXPECT_EQ(pinnedResult.labels[0], MinSTCut::Inside);
-    EXPECT_EQ(pinnedResult.labels[1], MinSTCut::Outside);
-    EXPECT_EQ(pinnedResult.cutEdges.size(), 1u);
+    auto mesh = LocalMesh::Builder().initialize(2).finalize();
+    const auto result = MinSTCut(mesh).classify(average({}));
+    EXPECT_TRUE(result.inside.empty());
+    EXPECT_TRUE(result.outside.empty());
+    EXPECT_TRUE(result.cut.empty());
+    EXPECT_DOUBLE_EQ(result.energy, 0);
   }
 
-  /// @brief Three cells in a row. Outer cells are out-of-band (fixed to their.
-  TEST(Rodin_Geometry_MinSTCut, CellInBandFixesFarFieldCells)
+  TEST_F(Rodin_Geometry_MinSTCut, ZeroDimensionalMeshIsNoOp)
   {
-    // Three cells in a row. Outer cells are out-of-band (fixed to their
-    // moment sign), the middle cell is free with a tiny opposing moment.
-    // The fixed cells force the middle to flip along with the smoothing
-    // term.
-    const std::vector<Real> volumes(3, 1);
-    const std::vector<Real> moments{-1, +1e-3, -1};
-    const auto edges = gridEdges(1, 3, 10.0);
-
-    MinSTCut::Options options;
-    options.cellInBand = {false, true, false};
-    options.lambdaScale = 1.0;
-
-    const auto result = MinSTCut().classify(volumes, moments, edges, options);
-    EXPECT_EQ(result.labels[0], MinSTCut::Inside);
-    EXPECT_EQ(result.labels[2], MinSTCut::Inside);
-    EXPECT_EQ(result.labels[1], MinSTCut::Inside);
+    auto mesh = LocalMesh::Builder().initialize(1).nodes(1).vertex({0}).finalize();
+    ASSERT_EQ(mesh.getDimension(), 0u);
+    MinSTCut classifier(mesh);
+    Index calls = 0;
+    const auto result = classifier.classify([&](const Polytope&)
+    {
+      ++calls;
+      return Real(0);
+    });
+    EXPECT_EQ(calls, 0u);
+    EXPECT_TRUE(result.inside.empty());
+    EXPECT_TRUE(result.outside.empty());
+    EXPECT_TRUE(result.cut.empty());
+    EXPECT_DOUBLE_EQ(result.energy, 0);
+    EXPECT_NO_THROW(classifier.classify({}));
   }
 
-  /// @brief 1x4 row with a clean sign change between cells 1 and 2.
-  TEST(Rodin_Geometry_MinSTCut, PerEdgeLambdaSteersCutToWeakestFacets)
+  TEST_F(Rodin_Geometry_MinSTCut, UnequalCellMeasuresDetermineTheCommonLabel)
   {
-    // 1x4 row with a clean sign change between cells 1 and 2.
-    // Default pairwise capacities are uniform and small; an additional
-    // tiny per-edge lambda on edge (1,2) makes it the cheapest cut, while
-    // boosting the other two edges. The cut must land on (1,2).
-    const std::vector<Real> volumes(4, 1);
-    const std::vector<Real> moments{-1, -0.4, +0.4, +1};
-    const auto edges = gridEdges(1, 4, 1.0);
-    ASSERT_EQ(edges.size(), 3u);
-
-    MinSTCut::Options options;
-    options.perEdgeLambda = {5.0, 1e-3, 5.0};
-
-    const auto result = MinSTCut().classify(volumes, moments, edges, options);
-    EXPECT_EQ(result.labels[0], MinSTCut::Inside);
-    EXPECT_EQ(result.labels[1], MinSTCut::Inside);
-    EXPECT_EQ(result.labels[2], MinSTCut::Outside);
-    EXPECT_EQ(result.labels[3], MinSTCut::Outside);
-    ASSERT_EQ(result.cutEdges.size(), 1u);
-    EXPECT_EQ(result.cutEdges[0].first, 1u);
-    EXPECT_EQ(result.cutEdges[0].second, 2u);
+    auto mesh = LocalMesh::Builder().initialize(2).nodes(6)
+      .vertex({0, 0}).vertex({1, 0}).vertex({3, 0})
+      .vertex({0, 1}).vertex({1, 1}).vertex({3, 1})
+      .polytope(Polytope::Type::Quadrilateral, {0, 1, 4, 3})
+      .polytope(Polytope::Type::Quadrilateral, {1, 2, 5, 4}).finalize();
+    mesh.getConnectivity().compute(1, 2);
+    MinSTCut<LocalMesh>::Parameters parameters;
+    parameters.smoothing = [](const Polytope&) { return 10; };
+    const auto result = MinSTCut(mesh).setParameters(parameters).classify(average({-0.8, 0.5}));
+    EXPECT_TRUE(result.inside.empty());
+    EXPECT_EQ(result.outside, (IndexVector{0, 1}));
+    EXPECT_NEAR(result.energy, 0.8, 1e-14);
   }
 
-  /// @brief Two cells with weak moments straddling zero, joined by a small.
-  TEST(Rodin_Geometry_MinSTCut, UnaryScaleShiftsDataVsSmoothingBalance)
+  TEST_F(Rodin_Geometry_MinSTCut, NonmanifoldFacetsAreRejected)
   {
-    // Two cells with weak moments straddling zero, joined by a small
-    // smoothing edge. Tiny unary lets smoothing dominate (same label);
-    // large unary lets the data dominate (split).
-    const std::vector<Real> volumes(2, 1);
-    const std::vector<Real> moments{-0.1, +0.1};
-    const std::vector<MinSTCut::Edge> edges{{0, 1, 1.0}};
-
-    MinSTCut::Options dataLight;
-    dataLight.unaryScale = 1e-3;
-    const auto smoothed = MinSTCut().classify(volumes, moments, edges, dataLight);
-    EXPECT_EQ(smoothed.labels[0], smoothed.labels[1]);
-
-    MinSTCut::Options dataHeavy;
-    dataHeavy.unaryScale = 1e3;
-    const auto split = MinSTCut().classify(volumes, moments, edges, dataHeavy);
-    EXPECT_NE(split.labels[0], split.labels[1]);
-    EXPECT_EQ(split.labels[0], MinSTCut::Inside);
-    EXPECT_EQ(split.labels[1], MinSTCut::Outside);
+    auto mesh = LocalMesh::Builder().initialize(2).nodes(5)
+      .vertex({0, 0}).vertex({1, 0}).vertex({0, 1})
+      .vertex({0, -1}).vertex({1, 1})
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {1, 0, 3})
+      .polytope(Polytope::Type::Triangle, {0, 1, 4}).finalize();
+    mesh.getConnectivity().compute(1, 2);
+    EXPECT_THROW(MinSTCut(mesh).classify(average({-1, 1, 1})), Alert::Exception);
   }
 
-  /// @brief Verifies mismatched input sizes throw for geometry min ST cut by checking exception behavior.
-  TEST(Rodin_Geometry_MinSTCut, MismatchedInputSizesThrow)
+  TEST_F(Rodin_Geometry_MinSTCut, GeometryChangesAreNotCachedInTheClassifier)
   {
-    EXPECT_THROW(MinSTCut().classify({1.0}, {1.0, 1.0}, {}), std::invalid_argument);
-
-    MinSTCut::Options options;
-    options.perEdgeLambda = {1.0};
-    EXPECT_THROW(
-      MinSTCut().classify({1.0, 1.0}, {0.0, 0.0}, {}, options), std::invalid_argument);
-
-    MinSTCut::Options bandOptions;
-    bandOptions.cellInBand = {true};
-    EXPECT_THROW(MinSTCut().classify({1.0, 1.0}, {0.0, 0.0}, {}, bandOptions),
-      std::invalid_argument);
-  }
-
-  /// @brief Verifies negative capacities throw for geometry min ST cut by checking exception behavior.
-  TEST(Rodin_Geometry_MinSTCut, NegativeCapacitiesThrow)
-  {
-    EXPECT_THROW(MinSTCut().classify({1.0, 1.0}, {-1.0, +1.0}, {{0, 1, -1.0}}),
-      std::invalid_argument);
-
-    MinSTCut::Options options;
-    options.perEdgeLambda = {-1.0};
-    EXPECT_THROW(MinSTCut().classify({1.0, 1.0}, {-1.0, +1.0}, {{0, 1, 1.0}}, options),
-      std::invalid_argument);
-  }
-
-  /// @brief Verifies out of range edge throws for geometry min ST cut by checking exception behavior.
-  TEST(Rodin_Geometry_MinSTCut, OutOfRangeEdgeThrows)
-  {
-    EXPECT_THROW(
-      MinSTCut().classify({1.0, 1.0}, {-1.0, +1.0}, {{0, 5, 1.0}}), std::out_of_range);
-  }
-
-  /// @brief Without edges the unary contribution equals the sum of the.
-  TEST(Rodin_Geometry_MinSTCut, EnergyMatchesLabelChoiceForUnconnectedCells)
-  {
-    // Without edges the unary contribution equals the sum of the
-    // selected-label costs.
-    const std::vector<Real> volumes{2.0, 3.0};
-    const std::vector<Real> moments{-0.25, +0.5};
-    const auto result = MinSTCut().classify(volumes, moments, {});
-    const Real expected = MinSTCut::getInsideCost(volumes[0], moments[0]) +
-      MinSTCut::getOutsideCost(volumes[1], moments[1]);
-    EXPECT_DOUBLE_EQ(result.energy, expected);
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(1, 2);
+    MinSTCut<LocalMesh>::Parameters parameters;
+    parameters.fidelity = 100;
+    MinSTCut classifier(mesh);
+    classifier.setParameters(parameters);
+    const auto before = classifier.classify(average({-1, 1}));
+    for (Index i = 0; i < mesh.getVertexCount(); ++i)
+    {
+      const auto coordinates = mesh.getVertexCoordinates(i);
+      mesh.setVertexCoordinates(i, Real(2) * coordinates(0), 0);
+      mesh.setVertexCoordinates(i, Real(2) * coordinates(1), 1);
+    }
+    const auto after = classifier.classify(average({-1, 1}));
+    EXPECT_EQ(before.inside, after.inside);
+    EXPECT_EQ(before.outside, after.outside);
+    EXPECT_EQ(before.cut, after.cut);
+    EXPECT_NEAR(after.energy, 2 * before.energy, 1e-14);
   }
 }

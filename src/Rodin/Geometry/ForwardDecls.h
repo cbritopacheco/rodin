@@ -68,6 +68,11 @@ namespace Rodin::Geometry
    */
   class Polytope;
 
+  /// @brief Mesh-aware binary Potts classifier selected by mesh type.
+  /// @tparam MeshType Mesh type, including its execution context.
+  template <class MeshType>
+  class MinSTCut;
+
   class PolytopeQuadrature;
 
   /**
