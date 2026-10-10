@@ -13,9 +13,18 @@ namespace Rodin::Tests
 {
   /**
    * @brief Test-only pre-reuse bilinear quadrature algorithm.
+   *
    * Retains the expression and matrix allocation across binds, as the original
    * production rule did. There is no alternate production dispatch path.
    * Every test expression is evaluated inside the trial/test pair loop.
+   *
+   * ## Architecture
+   *
+   * Mapped quadrature points are owned only for the bound polytope. The
+   * reference entry algorithm is independent of production value reuse, but
+   * must not populate the mesh's borrowed-quadrature cache: otherwise an
+   * untimed numerical oracle retains points for every traversed cell and
+   * contaminates subsequent assembly memory measurements.
    */
   template <class Integral>
   class QuadratureReference
@@ -27,6 +36,7 @@ namespace Rodin::Tests
       explicit QuadratureReference(const Integral& integral)
         : m_integrand(integral.getIntegrand()),
           m_matrix(),
+          m_quadrature(),
           m_qf(nullptr),
           m_order(0),
           m_geometry(Geometry::Polytope::Type::Point)
@@ -46,7 +56,8 @@ namespace Rodin::Tests
           m_geometry = cell.getGeometry();
           m_qf = &QF::PolytopeQuadratureFormula::get(order, m_geometry);
         }
-        const auto& quadrature = cell.getQuadrature(*m_qf);
+        m_quadrature.emplace(cell, *m_qf);
+        const auto& quadrature = *m_quadrature;
         for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
         {
           const auto& p = quadrature.getPoint(qp);
@@ -71,6 +82,7 @@ namespace Rodin::Tests
     private:
       Integrand m_integrand;
       Math::Matrix<Scalar> m_matrix;
+      Optional<Geometry::PolytopeQuadrature> m_quadrature;
       const QF::QuadratureFormulaBase* m_qf;
       size_t m_order;
       Geometry::Polytope::Type m_geometry;

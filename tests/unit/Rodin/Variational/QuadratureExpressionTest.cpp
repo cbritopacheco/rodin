@@ -59,9 +59,11 @@ namespace Rodin::Tests::Unit
     void checkLocal(I& integral, const Polytope& cell, size_t order = 6)
     {
       integral.setOrder(order);
-      const auto expected = reference(integral, cell, order);
       const auto& mesh = static_cast<const ObservedMesh&>(cell.getMesh());
       const size_t requests = mesh.requests;
+      const auto expected = reference(integral, cell, order);
+      EXPECT_EQ(mesh.requests, requests)
+        << "The untimed reference must not retain mapped points for every mesh cell";
       integral.setPolytope(cell);
       EXPECT_EQ(mesh.requests, requests)
         << "Local assembly must not retain mapped points for every mesh cell";
@@ -259,6 +261,41 @@ namespace Rodin::Tests::Unit
         [](const Point& p) { return Complex(1 + p(0), 2 - p(0)); });
       checkFunctionLifetime(real, mesh);
       checkFunctionLifetime(complex, mesh);
+    }
+
+    TEST_P(QuadratureExpression, ReferenceOwnsOnlyBoundCellQuadrature)
+    {
+      ObservedMesh mesh(Convergence::UniformGrid(GetParam()).makeMesh(3));
+      H1 space(std::integral_constant<size_t, 2>{}, mesh);
+      TrialFunction u(space);
+      TestFunction v(space);
+      // Compound arguments select the generic entry loop, preserving its
+      // arithmetic order for exact comparison with the original algorithm.
+      auto integral = Integral((1 + F::x * F::x) * (u + u), v - 0.25 * v);
+      QuadratureReference<decltype(integral)> baseline(integral);
+      for (size_t order : {size_t(6), size_t(8), size_t(6)})
+      {
+        const auto& qf = QF::PolytopeQuadratureFormula::get(order, GetParam());
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const auto& borrowed = cell->getQuadrature(qf);
+          const size_t requests = mesh.requests;
+          baseline.assemble(*cell, order);
+          EXPECT_EQ(mesh.requests, requests);
+          integral.setOrder(order);
+          integral.setPolytope(*cell);
+          const auto& expected = baseline.getOperator();
+          for (Eigen::Index te = 0; te < expected.rows(); ++te)
+          {
+            for (Eigen::Index tr = 0; tr < expected.cols(); ++tr)
+              EXPECT_EQ(integral.integrate(tr, te), expected(te, tr));
+          }
+          // Ownership must neither request nor evict an explicitly borrowed object.
+          EXPECT_EQ(mesh.requests, requests);
+          EXPECT_EQ(&cell->getQuadrature(qf), &borrowed);
+          EXPECT_EQ(mesh.requests, requests + 1);
+        }
+      }
     }
 
     TEST_P(QuadratureExpression, H1RealOrdersOneTwoThree)

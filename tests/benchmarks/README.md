@@ -235,7 +235,7 @@ not a second production dispatch path.
 
 `RodinQuadratureExpressionBenchmarks` measures local binding only, with paired
 `Original` and `Reuse` registrations. Both retain expression and matrix storage
-across binds, use the same mesh-owned mapped quadrature, and exclude setup and
+across binds, own mapped quadrature only for the bound cell, and exclude setup and
 entry comparisons from timing. The original loop lives in the shared test-only
 `tests/QuadratureReference.h`. Every local entry must agree exactly before and
 after timing; a mismatch returns nonzero. Comparisons are separate measurements,
@@ -277,6 +277,11 @@ from 0.9673 to 0.7929 ms. Scalar P0 and P0g controls increased by approximately
 These small costs are reported rather than treated as evaluation-count gains:
 both constant scalar cases have only one local trial function. The measurements
 are workload-specific observations, not CI thresholds or universal speedups.
+
+These historical paired measurements predate the reference oracle's bounded
+mapped-point ownership. Fresh comparisons must use the current ownership
+contract on both sides; the historical numbers are not a baseline for that
+lifecycle change.
 
 With matched original-header and repaired-header builds of the full physics
 benchmark, real P2 linear-elasticity assembly decreased from 886.8 to 208.7 ms
@@ -473,6 +478,12 @@ remain required before attributing a full distributed solve's cost to this
 benchmark. Counters report cells, global native DOFs, nonzeros, degree,
 quadrature order and points per cell. CI executes all smallest-mesh cases as
 numerical checks, without timing thresholds.
+
+The independent quadrature oracle owns mapped points only for its currently
+bound cell, just as production assembly does. It does not request or evict
+mesh-owned borrowed quadratures. This prevents untimed validation from retaining
+all cells' quadrature points during timed assembly. Integer request-count
+regressions enforce that lifecycle separately from numerical agreement.
 
 ```sh
 build/tests/benchmarks/RodinNonlinearPoissonAssemblyBenchmarks \
