@@ -964,11 +964,12 @@ jobs:
           cmake --build build -j 2 --target
           RodinMPIMatrixRangeTest RodinPETScGridFunctionTest
           RodinPETScMPIGridFunctionTest RodinPETScMPIP0P0gTest
+          RodinPETScMPISubMeshGridFunctionTest
 
       - name: Run distributed finite element tests
         run: >-
           ctest --test-dir build/tests
-          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4])$'
+          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4]|RodinPETScMPISubMeshGridFunctionTest_np[124])$'
           --output-on-failure --no-tests=error -j 1
 
   Unit:
