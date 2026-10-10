@@ -32,6 +32,25 @@ tolerances or factors, from one named constant so they cannot drift apart.
 Literal coordinate indices, zero and one, and explicit mathematical identities
 do not need artificial names.
 
+## Optional state and sentinels
+
+Represent absence explicitly with `Optional<T>` rather than reserving a valid
+value of `T` as a sentinel. Use semantic type aliases where appropriate. For
+example, prefer:
+
+```cpp
+using Rank = int;
+Optional<Rank> m_source;
+```
+
+over `int m_sourceRank = -1;`. Initialize members in constructors rather than
+in declarations. A sentinel representation requires a demonstrated performance
+improvement over explicit optional state in a representative benchmark; presumed
+overhead is not sufficient justification. Document the reserved value, its
+exclusion from valid inputs, and the measured benefit. When an external API
+requires a sentinel, translate it at the interface rather than propagating it
+through internal state.
+
 ## Anomalies
 
 **An unexplained measurement is a finding, not a footnote. Do not ship a
