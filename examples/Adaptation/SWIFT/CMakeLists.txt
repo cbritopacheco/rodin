@@ -5,3 +5,5 @@ foreach(degree IN ITEMS 1 2 3)
   target_link_libraries(SWIFT_ReconstructionP${degree}
     PRIVATE Rodin::Geometry Rodin::Solver Rodin::Variational)
 endforeach()
+
+add_subdirectory(Witness)

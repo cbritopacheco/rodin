@@ -402,6 +402,10 @@ write a campaign CSV or trajectory archive.
 
 ## Further Documentation
 
+- [Reference witness generator](Witness/README.md): offline numerical covering
+  sets for every Rodin reference geometry, with configurable point counts and
+  SVG comparisons. This tool does not change SWIFT's production witnesses.
+
 - [SWIFT guide source](../../../doc/Guides/SWIFT.dox): mathematical model,
   solver stages, supported contexts, and extension points.
 - [Parameter definitions](../../../src/Rodin/Adaptation/SWIFT/Parameters.h):
