@@ -4,7 +4,7 @@ These self-contained examples demonstrate the Strain-distributed Welsch
 Implicit-interface Fitting Technique (SWIFT). A classified mesh interface is
 fitted to a circle or lobed circle in two dimensions, or a sphere or lobed
 sphere in three dimensions. The
-mesh topology is retained; the outer box boundary is held fixed.
+mesh topology is retained; the outer box boundary is free to move.
 
 ## Examples
 
@@ -113,8 +113,8 @@ directories to retain several resolutions or dimensions.
 Replace only the executable name to repeat a configuration with another
 degree. Model defaults are identical, while automatic quadrature and geometric
 target policies still depend on degree. These illustrative examples retain
-centroid classification and a fixed exterior boundary; they do not reproduce
-the historical calibration drivers' classifier or boundary setup.
+centroid classification and impose no exterior Dirichlet condition; they do
+not reproduce the historical calibration drivers' classifier or boundary setup.
 
 ## Geometry and Workflow
 
@@ -161,7 +161,7 @@ remeshing is performed.
 | `Inside` | `1` | Cells with negative centroid level-set value |
 | `Outside` | `2` | Remaining cells |
 | `Interface` | `10` | Facets separating inside and outside cells |
-| `Boundary` | `20` | Exterior box facets, with zero displacement increments |
+| `Boundary` | `20` | Exterior box facets; label only, with no prescribed displacement |
 
 Each example prepares mesh connectivity, constructs the level set and its
 analytic gradient, marks the facets, solves the fit, checks the quality
@@ -180,15 +180,15 @@ TestFunction v(space);
 Adaptation::SWIFT::Problem fitting(u, v);
 // Named flags populate the same hierarchical parameter object for every degree.
 fitting.setParameters(options.parameters).setInterfaceAttribute(Interface);
-const Math::Vector<Real> zero = Math::Vector<Real>::Zero(dimension);
-fitting += DirichletBC(u, VectorFunction(zero)).on(Boundary);
 const auto report = fitting.solve(phi, gradient);
 const auto& displacement = u.getSolution(); // mesh has not been modified.
 ```
 
 The mesh, space, trial and test functions must outlive the problem. The
 supplied gradient must differentiate the level set; its Hessian is not
-required. Homogeneous Dirichlet conditions constrain each increment.
+required. No Dirichlet condition is imposed by this example: exterior mesh
+facets move with the computed displacement. Applications may explicitly add
+boundary conditions to the problem when their geometry requires them.
 
 After a valid solve, all degrees create a separate mesh and
 evaluate the displacement at the original mesh's geometry nodes. They update
@@ -316,22 +316,27 @@ from geometric success.
 
 | Displacement/geometry | Surface integration | Volume integration | Quality sampling | Geometric sampling |
 |-----------------------|---------------------|--------------------|------------------|--------------------|
-| Affine simplicial \(P_1\) | `8` | `2` | Lobatto degree `2` | `32` plus facet vertices |
-| These \(P_2/P_3\) examples | `12` | `8` | Lobatto degree `16` | `32` plus facet vertices |
+| Affine simplicial \(P_1\) | `8` | `2` | `2` lattice subdivisions | `32` plus facet vertices |
+| These \(P_2/P_3\) examples | `12` | `8` | `16` lattice subdivisions | `32` plus facet vertices |
 
 `quadrature.order` overrides common integration order; `quadrature.surface`
 and `quadrature.volume` override their respective integrations independently.
 `quadrature.quality` selects the shared inner-hinge and actual-quality witnesses:
-positive boundary-inclusive Lobatto points, including vertices. Mapped
-quadrature weights determine each cell's mass. Separate adaptive Jacobian and
-distortion measures mix equal mass with normalized nonlinear guard penetration
+uniform barycentric lattices on simplices, including vertices. Tensor cells use
+Cartesian grids, wedges use triangle-times-segment grids, and pyramids use
+shrinking square layers. No supplemental points are added. The setting counts
+subdivisions per reference edge, not polynomial degree. Equal positive reference
+weights sum to reference volume; mapped weights determine each cell's discrete
+mass. Separate adaptive Jacobian and distortion measures mix equal mass with
+normalized nonlinear guard penetration
 at the current and full-predictor geometries. These positive measures preserve
 cell mass and remain frozen throughout the inner solve, with the same weights
 in its energy, residual and tangent. The equal fraction is one half, risks are
 capped at 100, and an inverted predictor receives maximal distortion risk.
-Actual quality checks take unweighted extrema over all witnesses. Collapsed
-elements use Jacobi--Lobatto rules. The degree specifies reference polynomial
-exactness, not exact integration of nonlinear quality functions.
+Actual quality checks take unweighted extrema over all witnesses. These sets
+are not degree-exact integration rules or continuous quality certificates.
+The default simplex counts are 6/10 witnesses on triangles/tetrahedra for
+affine \(P_1\), and 153/969 for \(P_2/P_3\).
 `quadrature.validation` controls independent geometric sampling.
 All default to `0`, selecting the automatic policy.
 The higher-order policies are provisional, not exactness guarantees for

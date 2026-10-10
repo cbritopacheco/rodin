@@ -350,7 +350,7 @@ namespace Rodin::Adaptation::SWIFT
    *        +w^Q_{K,s}\kappa_Q\left(1-\frac{s_Q(v)}{\delta_Q}\right)_+^2\right]_{K,s},
    * \qquad \mu_k=\widehat\mu\frac{f_k[\bar p_k]}{2|\Omega_0|}.
    * @f]
-   * The set @f$\mathcal S_K@f$ contains the same boundary-inclusive Lobatto
+   * The set @f$\mathcal S_K@f$ contains the same boundary-inclusive uniform lattice
    * points as the actual-quality checks. For each constraint, @ref QualitySamples
    * computes capped nonlinear guard penetration at the current geometry and
    * the full physical predictor, retaining the larger risk @f$r^c_{K,s}@f$.

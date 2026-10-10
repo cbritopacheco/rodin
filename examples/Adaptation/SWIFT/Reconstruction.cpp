@@ -105,8 +105,6 @@ int main(int argc, char** argv)
     TestFunction v(space);
     Adaptation::SWIFT::Problem fitting(u, v);
     fitting.setParameters(options.parameters).setInterfaceAttribute(Interface);
-    const Math::Vector<Real> zero = Math::Vector<Real>::Zero(dimension);
-    fitting += DirichletBC(u, VectorFunction(zero)).on(Boundary);
     const auto report = fitting.solve(phi, gradient);
 
     // A valid best-effort fit may miss the target: report fit and quality separately.

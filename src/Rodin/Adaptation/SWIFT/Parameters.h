@@ -180,11 +180,11 @@ namespace Rodin::Adaptation::SWIFT
           }
 
           /**
-           * @brief Independent actual-quality sampling order.
+           * @brief Independent quality-lattice subdivisions per reference edge.
            * @param feOrder Displacement finite-element order.
            * @param transformationOrder Geometry transformation order.
            * @param simplex Whether the entity is a simplex.
-           * @returns Independent quality order: two for affine P1, otherwise at least sixteen.
+           * @returns Subdivisions: two for affine P1, otherwise at least sixteen.
            */
           size_t getQualityOrder(
             size_t feOrder, size_t transformationOrder = 1, bool simplex = true) const
@@ -200,7 +200,7 @@ namespace Rodin::Adaptation::SWIFT
           std::size_t surface = 0; ///< Zero uses the common or automatic surface order.
           std::size_t volume = 0; ///< Zero uses the common or automatic volume order.
           std::size_t quality =
-            0; ///< Zero selects independent automatic quality sampling; vertices are always checked.
+            0; ///< Quality-lattice subdivisions; zero selects the automatic policy.
           std::size_t validation = 0; ///< Zero selects an independent validation order.
       };
 

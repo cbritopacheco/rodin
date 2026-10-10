@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "Rodin/Variational/IntegrationPoint.h"
-#include "Rodin/QF/GaussLobatto.h"
+#include "QualityLattice.h"
 #include "Parameters.h"
 #include "../CellDeformation.h"
 
@@ -18,11 +18,10 @@ namespace Rodin::Adaptation::SWIFT
   /**
    * @brief Common witnesses for affine hinges and actual quality checks.
    *
-   * Positive Lobatto--Jacobi conical products include vertices and boundary
-   * points in the volume quadrature itself. Hinges and actual quality checks
-   * use the same points. Adaptive hinge weights are not quadrature weights.
-   * Polynomial exactness is a reference-rule property,
-   * not an exactness guarantee for nonlinear quality integrands.
+   * Uniform reference lattices include vertices and boundary points. Hinges
+   * and actual quality checks use the same points. Equal positive reference
+   * weights determine mapped cell mass; adaptive hinge weights redistribute
+   * that mass. These witnesses are not degree-exact integration rules.
    */
   class QualitySamples
   {
@@ -31,17 +30,17 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Constructs the cell quality sampling policy.
        * @param cell Reference cell.
        * @param order Displacement finite-element order.
-       * @param parameters Validation quadrature policy.
+       * @param parameters Quality sampling policy.
        */
       QualitySamples(const Geometry::Polytope& cell, size_t order,
         const Parameters& parameters)
         : m_cell(cell),
           m_parameters(parameters),
-          m_formula(QF::GaussLobatto::get(cell.getGeometry(),
-            std::max<size_t>(2, (parameters.quadrature.getQualityOrder(order,
+          m_formula(QualityLattice::get(cell.getGeometry(),
+            parameters.quadrature.getQualityOrder(order,
               cell.getTransformation().getOrder(),
               Geometry::Polytope::Traits(cell.getGeometry()).getVertexCount() ==
-                cell.getDimension() + 1) + 4) / 2)))
+                cell.getDimension() + 1)))
       {}
 
       /**
@@ -130,7 +129,7 @@ namespace Rodin::Adaptation::SWIFT
       static constexpr Real MaximumRisk = Real(100);
       std::reference_wrapper<const Geometry::Polytope> m_cell;
       std::reference_wrapper<const Parameters> m_parameters;
-      std::reference_wrapper<const QF::GaussLobatto> m_formula;
+      std::reference_wrapper<const QualityLattice> m_formula;
   };
 }
 

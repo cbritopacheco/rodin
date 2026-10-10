@@ -61,9 +61,12 @@ namespace Rodin::Tests::Unit
           minimum = std::min(minimum, value);
           maximum = std::max(maximum, value);
         }
-        // The fixed outer boundary must still span the unit square/cube.
-        EXPECT_NEAR(minimum, Real(0), CoordinateTolerance);
-        EXPECT_NEAR(maximum, Real(1), CoordinateTolerance);
+        EXPECT_GT(maximum - minimum, CoordinateTolerance);
+        if (block == "background")
+        {
+          EXPECT_NEAR(minimum, Real(0), CoordinateTolerance);
+          EXPECT_NEAR(maximum, Real(1), CoordinateTolerance);
+        }
       }
       const auto topology = IO::HDF5::readVectorDataset<IO::HDF5::U64>(
         file.get(), IO::HDF5::Path::MeshXDMFTopology);

@@ -3,6 +3,7 @@
  * Distributed under the Boost Software License, Version 1.0.
  */
 #include <gtest/gtest.h>
+#include <tuple>
 
 #include "Rodin/Geometry.h"
 #include "Rodin/Variational.h"
@@ -83,7 +84,56 @@ namespace Rodin::Tests::Unit
   }
 
 
-  TEST(Rodin_Adaptation_SWIFTHingeState, QualityQuadratureAcrossGeometries)
+  TEST(Rodin_Adaptation_SWIFTHingeState, UniformQualityLattices)
+  {
+    using G = Geometry::Polytope::Type;
+    constexpr size_t subdivisions = 4;
+    for (const auto [geometry, count, volume] : {
+      std::tuple{G::Point, 1u, Real(1)},
+      std::tuple{G::Segment, 5u, Real(1)},
+      std::tuple{G::Triangle, 15u, Real(0.5)},
+      std::tuple{G::Quadrilateral, 25u, Real(1)},
+      std::tuple{G::Tetrahedron, 35u, Real(1) / 6},
+      std::tuple{G::Hexahedron, 125u, Real(1)},
+      std::tuple{G::Wedge, 75u, Real(0.5)},
+      std::tuple{G::Pyramid, 55u, Real(1) / 3}})
+    {
+      const auto& lattice = SWIFT::QualityLattice::get(geometry, subdivisions);
+      EXPECT_EQ(&lattice, &SWIFT::QualityLattice::get(geometry, subdivisions));
+      EXPECT_NE(lattice.getCacheIdentity(),
+        SWIFT::QualityLattice::get(geometry, subdivisions + 1).getCacheIdentity());
+      ASSERT_EQ(lattice.getSize(), count);
+      for (size_t i = 0; i < count; ++i)
+      {
+        EXPECT_DOUBLE_EQ(lattice.getWeight(i), volume / count);
+        const auto& point = lattice.getPoint(i);
+        for (size_t d = 0; d < point.size(); ++d)
+        {
+          EXPECT_GE(point[d], Real(0));
+          EXPECT_LE(point[d], Real(1));
+          EXPECT_NEAR(subdivisions * point[d],
+            std::round(subdivisions * point[d]), Real(1e-14));
+        }
+        if (geometry == G::Triangle || geometry == G::Tetrahedron)
+          EXPECT_LE(point.getData().sum(), Real(1));
+        if (geometry == G::Wedge)
+          EXPECT_LE(point[0] + point[1], Real(1));
+        if (geometry == G::Pyramid)
+        {
+          EXPECT_LE(point[0] + point[2], Real(1));
+          EXPECT_LE(point[1] + point[2], Real(1));
+        }
+        for (size_t j = 0; j < i; ++j)
+          EXPECT_GT((point - lattice.getPoint(j)).norm(), Real(1e-14));
+      }
+    }
+    EXPECT_EQ(SWIFT::QualityLattice::get(G::Triangle, 2).getSize(), 6u);
+    EXPECT_EQ(SWIFT::QualityLattice::get(G::Tetrahedron, 2).getSize(), 10u);
+    EXPECT_EQ(SWIFT::QualityLattice::get(G::Triangle, 16).getSize(), 153u);
+    EXPECT_EQ(SWIFT::QualityLattice::get(G::Tetrahedron, 16).getSize(), 969u);
+  }
+
+  TEST(Rodin_Adaptation_SWIFTHingeState, QualityWitnessesAcrossGeometries)
   {
     using namespace Geometry;
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
@@ -96,7 +146,7 @@ namespace Rodin::Tests::Unit
       auto mesh = LocalMesh::UniformGrid(geometry, shape);
       SWIFT::Parameters parameters;
       parameters.quadrature.quality = 4;
-      Real mass = 0, moment = 0;
+      Real mass = 0;
       for (Index index = 0; index < mesh.getCellCount(); ++index)
       {
         const auto cell = mesh.getCell(index);
@@ -105,8 +155,6 @@ namespace Rodin::Tests::Unit
         samples.forEach([&](const Variational::IntegrationPoint& ip, Real weight) {
           EXPECT_GT(weight, Real(0));
           mass += weight;
-          const Real x = ip.getPoint().getCoordinates()(0);
-          moment += weight * x * x;
           for (size_t vertex = 0; vertex < vertices.size(); ++vertex)
           {
             const Point point(*cell, traits.getVertex(vertex));
@@ -118,7 +166,6 @@ namespace Rodin::Tests::Unit
           EXPECT_TRUE(included);
       }
       EXPECT_NEAR(mass, Real(1), Real(1e-12)) << static_cast<int>(geometry);
-      EXPECT_NEAR(moment, Real(1) / 3, Real(1e-12)) << static_cast<int>(geometry);
     }
   }
 

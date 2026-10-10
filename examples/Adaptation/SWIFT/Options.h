@@ -118,7 +118,7 @@ namespace Rodin::Examples
           {"volume-quadrature-order",
             {&p.quadrature.volume, "Volume integration override"}},
           {"quality-validation-order",
-            {&p.quadrature.quality, "Independent quality sampling order"}},
+            {&p.quadrature.quality, "Quality-lattice subdivisions per reference edge"}},
           {"geometric-validation-order",
             {&p.quadrature.validation, "Independent geometric sampling order"}},
           {"swift-trace", {&p.trace, "Print iteration diagnostics (0 or 1)"}},

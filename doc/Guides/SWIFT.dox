@@ -148,15 +148,17 @@
   @f]
   where @f$B_k@f$ is the squared-hinge penalty on frozen Jacobian and distortion
   slacks. The penalty and actual-quality checks use the same boundary-inclusive
-  Lobatto point set, including cell vertices. Separate positive Jacobian and
+  uniform reference lattice, including cell vertices. On simplices this is a
+  uniform barycentric lattice, without supplemental points. Separate positive Jacobian and
   distortion weights mix equal mass with normalized nonlinear guard penetration
   at the current and full-predictor geometries. Each family preserves mapped
   cell mass, and its weights stay fixed during the inner solve. The equal
   fraction is one half and dimensionless risks are capped at 100. Inverted
   predictor points receive maximal distortion risk without evaluating distortion.
-  Validation checks every witness without weights. Reference quadrature weights
-  determine cell mass, not individual adaptive penalty weights; polynomial
-  exactness does not certify nonlinear quality between witnesses.
+  Validation checks every witness without weights. Equal reference weights,
+  normalized to reference volume and mapped to each cell, determine cell mass,
+  not individual adaptive penalty weights. Lattices are not degree-exact
+  quadrature rules and do not certify nonlinear quality between witnesses.
   Its stationarity residual controls inner convergence. The outer
   Armijo search then decreases @f$E@f$ while enforcing the actual sampled
   quality budget. See the @ref Rodin::Adaptation::SWIFT::Problem "SWIFT class reference"
@@ -234,7 +236,7 @@
   | @f$q@f$ | `quadrature.order` | Common integration override | Automatic (`0`) |
   | @f$q_\Gamma@f$ | `quadrature.surface` | Surface energy, force and fitting integration; overrides the common order | Automatic (`0`) |
   | @f$q_\Omega@f$ | `quadrature.volume` | Distribution integration; overrides the common order | Automatic (`0`) |
-  | @f$q_{j,Q}@f$ | `quadrature.quality` | Shared boundary-inclusive Lobatto degree for hinges and actual quality | Automatic (`0`) |
+  | @f$m_{j,Q}@f$ | `quadrature.quality` | Uniform lattice subdivisions per reference edge, shared by hinges and actual quality | Automatic (`0`) |
   | @f$q_{\mathrm{geom}}@f$ | `quadrature.validation` | Independent geometric-response sampling plus facet vertices | Automatic (`0`) |
 
   MUMPS is the default when compiled in; otherwise SparseLU is selected.
@@ -243,8 +245,8 @@
 
   | Entity and displacement | Surface integration | Volume integration | Quality sampling | Geometric sampling |
   |-------------------------|---------------------|--------------------|------------------|--------------------|
-  | Affine simplicial @f$P_1@f$ | @f$8@f$ | @f$2@f$ | Lobatto degree @f$2@f$ | @f$32@f$ + facet vertices |
-  | Curved or @f$P_2/P_3@f$ | @f$12@f$ | @f$8@f$ | Lobatto degree @f$16@f$ | @f$32@f$ + facet vertices |
+  | Affine simplicial @f$P_1@f$ | @f$8@f$ | @f$2@f$ | @f$2@f$ lattice subdivisions | @f$32@f$ + facet vertices |
+  | Curved or @f$P_2/P_3@f$ | @f$12@f$ | @f$8@f$ | @f$16@f$ lattice subdivisions | @f$32@f$ + facet vertices |
 
   The affine @f$P_1@f$ policy is calibrated on the tested cases. Higher-order
   policies are provisional and require refinement checks, particularly when
@@ -266,7 +268,11 @@
   controls geometric-response sampling and is not reduced by `--quad-order`.
   The surface and volume settings use `--surface-quadrature-order` and
   `--volume-quadrature-order`. Independent quality checks use
-  `--quality-validation-order`. Cell vertices are always checked, and common
+  `--quality-validation-order`, interpreted as lattice subdivisions, not
+  polynomial exactness. Tensor cells use Cartesian grids, wedges use triangular
+  grids times segments, and pyramids use shrinking square layers.
+  Default triangle/tetrahedron counts are @f$6/10@f$ for affine @f$P_1@f$ and
+  @f$153/969@f$ for @f$P_2/P_3@f$. Cell vertices are always checked, and common
   integration overrides do not change independent quality sampling.
   These checks remain sampling, not an everywhere certificate on curved cells.
   Example flags use the same names as the C++ parameters: `--swift-fit`,
