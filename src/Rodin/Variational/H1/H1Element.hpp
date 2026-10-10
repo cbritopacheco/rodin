@@ -403,14 +403,14 @@ namespace Rodin::Variational
   const typename H1Element<K, Scalar>::Tabulation& H1Element<K, Scalar>::getTabulation(
     const QF::QuadratureFormulaBase& qf) const
   {
-    auto& s_cache = getTabulationCache();
+    auto& cache = getTabulationCache();
 
     const auto g   = this->getGeometry();
     const auto nqp = qf.getSize();
     const auto identity = qf.getCacheIdentity();
 
     // 1) lookup
-    for (auto& ce : s_cache.e)
+    for (auto& ce : cache.e)
     {
       if (ce.valid && ce.qf == &qf && ce.identity == identity && ce.g == g &&
         ce.nqp == nqp)
@@ -418,8 +418,8 @@ namespace Rodin::Variational
     }
 
     // 2) miss -> rebuild into an entry
-    auto& ce = s_cache.e[s_cache.next];
-    s_cache.next = (s_cache.next + 1) % s_cache.e.size();
+    auto& ce = cache.e[cache.next];
+    cache.next = (cache.next + 1) % cache.e.size();
 
     ce.valid = true;
     ce.qf = &qf;

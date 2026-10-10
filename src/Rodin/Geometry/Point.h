@@ -318,9 +318,7 @@ namespace Rodin::Geometry
         const QF::QuadratureFormulaBase& qf, size_t qp);
 
     private:
-      /**
-       * @brief Logical provenance of an owned reference sample.
-       */
+      /// @brief Logical provenance of an owned reference sample.
       struct ReferenceSample
       {
           /**

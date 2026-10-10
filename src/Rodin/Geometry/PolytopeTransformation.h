@@ -74,48 +74,47 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
     friend class PointBase;
 
-    public:
+  public:
       /**
        * @brief Constructs a transformation with given dimensions.
        * @param[in] rdim Reference dimension @f$ k @f$
        * @param[in] pdim Physical dimension @f$ s @f$
        */
-      constexpr
-      PolytopeTransformation(size_t rdim, size_t pdim)
-        : m_rdim(rdim), m_pdim(pdim)
-      {}
+    constexpr PolytopeTransformation(size_t rdim, size_t pdim)
+      : m_rdim(rdim),
+        m_pdim(pdim)
+    {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr PolytopeTransformation(const PolytopeTransformation& other) = default;
+    constexpr PolytopeTransformation(const PolytopeTransformation& other) = default;
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr PolytopeTransformation(PolytopeTransformation&& other) = default;
+    constexpr PolytopeTransformation(PolytopeTransformation&& other) = default;
 
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
        * @param other Object to move from.
        */
-      PolytopeTransformation& operator=(PolytopeTransformation&& other) = default;
+    PolytopeTransformation& operator=(PolytopeTransformation&& other) = default;
 
       /// @brief Virtual destructor.
-      virtual ~PolytopeTransformation() = default;
+    virtual ~PolytopeTransformation() = default;
 
       /**
        * @brief Gets the reference dimension @f$ k @f$.
        * @returns Reference dimension (topological dimension of reference element)
        */
-      constexpr
-      size_t getReferenceDimension() const
-      {
-        return m_rdim;
-      }
+    constexpr size_t getReferenceDimension() const
+    {
+      return m_rdim;
+    }
 
       /**
        * @brief Gets the physical dimension @f$ s @f$.
