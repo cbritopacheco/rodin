@@ -438,6 +438,15 @@ tangent assembly at a prescribed field. The active native backend is sequential
 or OpenMP according to the build configuration. Degrees one through three,
 all seven positive-dimensional geometries, grid-point counts $n=3,5,9$, and
 quadrature orders eight and sixteen give 252 registrations per configuration.
+An additional 216 `CurvedQ2` registrations use degree-two geometry on all six
+two- and three-dimensional geometries, with the same field degrees, sizes and
+quadrature orders. The existing `CurvedGeometry` utility installs
+$\Phi(\xi)=\xi+0.1\xi_0^2e_{d-1}$ on cells and traces before spaces are built.
+For $d\ge2$, $\det D\Phi=1$ and $x_0=\xi_0$. Consequently the physical affine
+state, its gradient, and both analytic actions below are unchanged on
+$\Omega=\Phi((0,1)^d)$. This comparison changes geometry evaluation while
+holding the physical integrand and domain moments fixed. Segment shear is
+excluded from this comparison because neither identity holds in dimension one.
 The order-sixteen cases match the volume quadrature order of the nonlinear
 natural-boundary convergence studies; these are not complete boundary-problem
 or Newton-solve timings.
@@ -475,7 +484,7 @@ Setup, interpolation, independent checks and state changes are untimed. Source
 terms, natural-boundary integrals, constraints, SNES/KSP, and error norms are
 excluded. PETSc/MPI parity and separate timings for those excluded operations
 remain required before attributing a full distributed solve's cost to this
-benchmark. Counters report cells, global native DOFs, nonzeros, degree,
+benchmark. Counters report cells, global native DOFs, nonzeros, field and geometry degrees,
 quadrature order and points per cell. CI executes all smallest-mesh cases as
 numerical checks, without timing thresholds.
 

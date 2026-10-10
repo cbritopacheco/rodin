@@ -13,6 +13,7 @@
 
 #include "Rodin/Variational/H1.h"
 #include "../convergence/Convergence.h"
+#include "../convergence/CurvedGeometry.h"
 #include "../QuadratureReference.h"
 #ifdef RODIN_USE_OPENMP
 #include <omp.h>
@@ -37,18 +38,28 @@ namespace Rodin::Tests::Benchmarks
    * check analytic actions, and differentiate the assembled residual. Warm
    * replacement assembly is timed; a post-timing state change checks cache
    * invalidation. There are no constraints, boundary integrals, source terms,
-   * nonlinear iterations, or linear solves in this scope.
+   * nonlinear iterations, or linear solves in this scope. Curved Q2 cases use
+   * the existing volume-preserving quadratic shear in dimensions two and
+   * three. Its first coordinate is unchanged, so the same affine state and
+   * analytic actions apply without a geometry-dependent reference solve.
    */
   template <size_t K>
   class NonlinearPoissonAssembly
   {
     public:
-      static void run(
-        benchmark::State& timing, Geometry::Polytope::Type geometry, bool residual)
+      static void run(benchmark::State& timing, Geometry::Polytope::Type geometry,
+        bool residual, bool curved)
       {
         using namespace Variational;
         const size_t n = timing.range(0), order = timing.range(1);
         auto mesh = Convergence::UniformGrid(geometry).makeMesh(n);
+        Optional<Convergence::CurvedGeometry<decltype(mesh)>> map;
+        if (curved)
+        {
+          assert(mesh.getDimension() >= 2);
+          map.emplace(mesh);
+          map->template install<2>();
+        }
         H1 space(std::integral_constant<size_t, K>{}, mesh);
         GridFunction q(space);
         TrialFunction u(space);
@@ -154,6 +165,7 @@ namespace Rodin::Tests::Benchmarks
         timing.counters["dofs"] = space.getSize();
         timing.counters["nnz"] = tangent.getOperator().nonZeros();
         timing.counters["degree"] = K;
+        timing.counters["geometry_degree"] = curved ? 2 : 1;
         timing.counters["quadrature_order"] = order;
         timing.counters["quadrature_points_per_cell"] =
           QF::PolytopeQuadratureFormula::get(order, geometry).getSize();
@@ -167,13 +179,21 @@ namespace Rodin::Tests::Benchmarks
         {
           for (bool residual : {false, true})
           {
-            const std::string name = std::string("NonlinearPoisson/") +
-              (residual ? "Residual" : "Tangent") + "/P" + std::to_string(K) + "/" +
-              std::string(Convergence::UniformGrid::getGeometryName(geometry));
-            benchmark::RegisterBenchmark(name.c_str(),
-              [geometry, residual](auto& state) { run(state, geometry, residual); })
-              ->ArgsProduct({{3, 5, 9}, {8, 16}})
-              ->UseRealTime();
+            for (bool curved : {false, true})
+            {
+              // In one dimension the shear changes the volume and affine pullback.
+              if (curved && geometry == G::Segment)
+                continue;
+              const std::string name = std::string("NonlinearPoisson/") +
+                (curved ? "CurvedQ2/" : "") + (residual ? "Residual" : "Tangent") + "/P" +
+                std::to_string(K) + "/" +
+                std::string(Convergence::UniformGrid::getGeometryName(geometry));
+              benchmark::RegisterBenchmark(name.c_str(),
+                [geometry, residual, curved](
+                  auto& state) { run(state, geometry, residual, curved); })
+                ->ArgsProduct({{3, 5, 9}, {8, 16}})
+                ->UseRealTime();
+            }
           }
         }
       }
