@@ -198,7 +198,9 @@ namespace
         const auto found = values.find(dof);
         EXPECT_NE(found, values.end());
         if (found != values.end())
+        {
           EXPECT_EQ(found->second, candidate.second);
+        }
       }
     }
     EXPECT_EQ(values.size(), expectedCount);
@@ -213,7 +215,9 @@ namespace
       const auto found = expected.find(dof);
       EXPECT_NE(found, expected.end());
       if (found != expected.end())
+      {
         EXPECT_EQ(mesh.getGlobalIndex(sourceDimension, entity), found->second.first);
+      }
       EXPECT_EQ(fes.getGlobalIndex({sourceDimension, entity}, ordinal), dof);
     }
     IndexMap<Scalar> repeated;
@@ -291,7 +295,9 @@ namespace Rodin::Tests::Unit
       SCOPED_TRACE(static_cast<int>(geometry));
       auto mesh = distribute(context, geometry);
       if (g_world->size() > 1 && g_world->rank() == 0)
+      {
         EXPECT_EQ(mesh.getShard().getVertexCount(), 0u);
+      }
       checkSpaces<Real>(mesh, false);
       checkSpaces<Complex>(mesh, false);
     }
