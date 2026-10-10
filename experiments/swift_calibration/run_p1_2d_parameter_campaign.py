@@ -195,36 +195,36 @@ def run_case(args, exe, stage, n, lobes, kappa_f, kappa_d, mu_hat, kappa_j, kapp
         f"--R0={args.r0}",
         f"--classifier-eps={1.25 / (n - 1):.14g}",
         "--classifier-lambda=0.008",
-        f"--swift-distribution-deviatoric={kappa_d:.14g}",
-        f"--swift-distribution-divergence={kappa_d:.14g}",
-        f"--swift-hinge={mu_hat:.14g}",
-        f"--swift-jacobian-weight={kappa_j:.14g}",
-        f"--swift-distortion-weight={kappa_q:.14g}",
-        f"--swift-fit={kappa_f:.14g}", "--swift-quality-guard=0.1",
-        "--swift-robust-scale=0",
-        "--swift-linear-solver=mumps", f"--swift-linear-threads={args.threads}",
-        "--swift-jacobian=1e-2",
-        "--swift-distortion=10",
-        f"--swift-inner-iterations={args.barrier_max_iters}",
-        f"--swift-inner-relative-tolerance={getattr(args, 'inner_rtol', 1e-3):.14g}",
+        f"--model-distribution-deviatoric={kappa_d:.14g}",
+        f"--model-distribution-divergence={kappa_d:.14g}",
+        f"--model-hinge={mu_hat:.14g}",
+        f"--model-jacobian-weight={kappa_j:.14g}",
+        f"--model-distortion-weight={kappa_q:.14g}",
+        f"--model-fit={kappa_f:.14g}", "--model-quality-guard=0.1",
+        "--model-robust-scale=0",
+        "--linear-solver=mumps", f"--linear-threads={args.threads}",
+        "--model-jacobian=1e-2",
+        "--model-distortion=10",
+        f"--convergence-iterations-inner={args.barrier_max_iters}",
+        f"--convergence-tolerance-inner-relative={getattr(args, 'inner_rtol', 1e-3):.14g}",
 
-        "--swift-armijo=1e-4",
-        "--swift-backtracks=32",
-        f"--swift-geometric-tolerance={1 / (n - 1) ** 2:.14g}",
-        "--swift-energy-tolerance=1e-8",
+        "--globalization-armijo=1e-4",
+        "--convergence-iterations-backtracks=32",
+        f"--convergence-tolerance-geometric={1 / (n - 1) ** 2:.14g}",
+        "--convergence-tolerance-energy=1e-8",
         # Small steps indicate stagnation, not geometric success.
-        "--swift-step-tolerance=0", "--swift-step-over-h-tolerance=5e-4",
-        "--swift-stagnation-iterations=5",
-        "--swift-directional-newton=1", "--swift-max-step-over-h=0",
-        f"--swift-linear-relative-tolerance={getattr(args, 'cg_rtol', 1e-9):.14g}",
-        "--swift-linear-iterations=1000",
-        f"--swift-outer-iterations={args.steps}",
+        "--convergence-tolerance-step=0", "--convergence-tolerance-step-over-h=5e-4",
+        "--convergence-iterations-stagnation=5",
+        "--globalization-directional-newton=1", "--globalization-max-step-over-h=0",
+        f"--convergence-tolerance-linear-relative={getattr(args, 'cg_rtol', 1e-9):.14g}",
+        "--convergence-iterations-linear=1000",
+        f"--convergence-iterations-outer={args.steps}",
         "--output=0",
     ]
     if args.extra:
         cmd.extend(args.extra.split())
     if args.log_iterations:
-        cmd.extend(["--trace=1", "--swift-trace=1"])
+        cmd.extend(["--trace=1", "--trace=1"])
     env = dict(os.environ)
     env["OMP_NUM_THREADS"] = str(args.threads)
     env["OPENBLAS_NUM_THREADS"] = str(args.threads)

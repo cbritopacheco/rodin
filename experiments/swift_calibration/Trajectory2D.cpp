@@ -373,7 +373,7 @@ int main(int argc, char** argv)
   Rodin::Examples::SWIFTExampleDefaults swiftDefaults;
   const auto swiftParams = Rodin::Examples::makeSWIFTParameters(
     argc, argv, h, interfaceAttribute, swiftDefaults);
-  const std::size_t qOrder = swiftParams.quadrature.order;
+  const std::size_t subdivision = swiftParams.sampling.subdivision;
   const bool trace = swiftParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
@@ -653,7 +653,7 @@ int main(int argc, char** argv)
     u.getData() = bestU;
     interfaceFit = bestFit;
     const auto bestAdm =
-      SWIFT::evaluateAdmissibility(u, swiftParams.model.jacobian, qOrder);
+      SWIFT::evaluateAdmissibility(u, swiftParams.model.jacobian, subdivision);
     minJ = bestAdm.minJ;
     maxQRel = bestAdm.maxQRel;
 

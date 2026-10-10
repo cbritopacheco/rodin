@@ -17,15 +17,15 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionNamedOptions)
 {
   std::vector<std::string> arguments = {"SWIFT_ReconstructionP2", "--n", "8",
     "--dimension=3", "--lobes=4", "--amp=0.03", "--R0=0.2", "--phase=0.4", "--cx=0.4",
-    "--cy=0.6", "--cz=0.3", "--output=results/test", "--swift-fit=2",
-    "--swift-distribution-deviatoric=0.001", "--swift-distribution-divergence=0.01",
-    "--swift-hinge=100", "--swift-jacobian=0.02", "--swift-distortion=8",
-    "--swift-outer-iterations=20", "--swift-inner-iterations=10",
-    "--swift-linear-solver=cg", "--swift-linear-threads=2",
-    "--swift-linear-relative-tolerance=1e-9", "--swift-linear-iterations=500",
-    "--quad-order=6", "--surface-quadrature-order=8", "--volume-quadrature-order=4",
-    "--quality-validation-order=16", "--geometric-validation-order=32",
-    "--swift-directional-newton=0", "--swift-trace", "--swift-quality-witness=1"};
+    "--cy=0.6", "--cz=0.3", "--output=results/test", "--model-fit=2",
+    "--model-distribution-deviatoric=0.001", "--model-distribution-divergence=0.01",
+    "--model-hinge=100", "--model-jacobian=0.02", "--model-distortion=8",
+    "--convergence-iterations-outer=20", "--convergence-iterations-inner=10",
+    "--linear-solver=cg", "--linear-threads=2",
+    "--convergence-tolerance-linear-relative=1e-9", "--convergence-iterations-linear=500",
+    "--quadrature-order=6", "--quadrature-surface=8", "--quadrature-volume=4",
+    "--sampling-subdivision=16", "--quadrature-validation=32",
+    "--globalization-directional-newton=0", "--trace", "--trace-quality-witness=1"};
   std::vector<char*> argv;
   for (auto& argument : arguments)
     argv.push_back(argument.data());
@@ -57,7 +57,7 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionNamedOptions)
   EXPECT_EQ(p.quadrature.order, 6u);
   EXPECT_EQ(p.quadrature.surface, 8u);
   EXPECT_EQ(p.quadrature.volume, 4u);
-  EXPECT_EQ(p.quadrature.quality, 16u);
+  EXPECT_EQ(p.sampling.subdivision, 16u);
   EXPECT_EQ(p.quadrature.validation, 32u);
   EXPECT_FALSE(p.globalization.directionalNewton);
   EXPECT_TRUE(p.trace);
@@ -68,17 +68,61 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionRejectsMalformedOpti
 {
   for (const char* invalid :
     {"--n", "--n=", "--n=-1", "--n=3", "--n=8junk", "--n=184467440737095516160",
-      "--dimension=4", "--swift-fit=nan", "--swift-fit=inf", "--swift-fit=1bad",
-      "--swift-trace=2", "--swift-linear-solver=unknown", "--wngir-fit=1", "--unknown=1",
+      "--dimension=4", "--model-fit=nan", "--model-fit=inf", "--model-fit=1bad",
+      "--trace=2", "--linear-solver=unknown", "--wngir-fit=1", "--unknown=1",
       "--lobes=2.5", "--amp=-0.1", "--R0=0.01", "16",
       "--swift-equal-hinge-weights", "--swift-stratified-hinge-weights",
       "--swift-critical-fraction=0.5", "--swift-adaptive-hinge-weights",
-      "--swift-nonlinear-hinges"})
+      "--swift-nonlinear-hinges", "--quality-validation-order=16"})
   {
     SCOPED_TRACE(invalid);
     std::string executable = "SWIFT_ReconstructionP1", argument = invalid;
     char* argv[] = {executable.data(), argument.data()};
     EXPECT_THROW(Examples::ReconstructionOptions(2, argv), Alert::Exception);
+  }
+}
+
+TEST(Rodin_Adaptation_SWIFTExampleParameters, FlatParameterFlagsAreRejected)
+{
+  for (const char* option : {
+    "--swift-fit=1",
+    "--swift-distribution-deviatoric=1",
+    "--swift-distribution-divergence=1",
+    "--swift-hinge=1",
+    "--swift-jacobian=1",
+    "--swift-distortion=1",
+    "--swift-quality-guard=1",
+    "--swift-jacobian-weight=1",
+    "--swift-distortion-weight=1",
+    "--swift-robust-scale=1",
+    "--swift-directional-newton=1",
+    "--swift-max-step-over-h=1",
+    "--swift-armijo=1",
+    "--swift-linear-threads=1",
+    "--swift-geometric-tolerance=1",
+    "--swift-inner-relative-tolerance=1",
+    "--swift-inner-absolute-tolerance=1",
+    "--swift-linear-relative-tolerance=1",
+    "--swift-energy-tolerance=1",
+    "--swift-step-tolerance=1",
+    "--swift-step-over-h-tolerance=1",
+    "--swift-outer-iterations=1",
+    "--swift-inner-iterations=1",
+    "--swift-linear-iterations=1",
+    "--swift-backtracks=1",
+    "--swift-stagnation-iterations=1",
+    "--quad-order=1",
+    "--surface-quadrature-order=1",
+    "--volume-quadrature-order=1",
+    "--geometric-validation-order=1",
+    "--swift-trace=1",
+    "--swift-quality-witness=1",
+    "--swift-linear-solver=1"})
+  {
+    std::string executable = "SWIFT_ReconstructionP1", argument = option;
+    char* argv[] = {executable.data(), argument.data()};
+    EXPECT_THROW(Examples::ReconstructionOptions(2, argv), Alert::Exception);
+    EXPECT_THROW(Examples::makeSWIFTParameters(2, argv, Real(0.1), 10), Alert::Exception);
   }
 }
 
@@ -117,22 +161,22 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, CalibratedDefaultsAreInherited)
   EXPECT_EQ(p.convergence.iterations.inner, 15u);
   EXPECT_EQ(p.quadrature.getSurfaceOrder(1), 8u);
   EXPECT_EQ(p.quadrature.getVolumeOrder(1), 2u);
-  EXPECT_EQ(p.quadrature.getQualityOrder(1), 2u);
+  EXPECT_EQ(p.sampling.getSubdivision(1), 2u);
   EXPECT_EQ(p.quadrature.getSurfaceOrder(2), 12u);
   EXPECT_EQ(p.quadrature.getVolumeOrder(2), 8u);
-  EXPECT_EQ(p.quadrature.getQualityOrder(2), 16u);
+  EXPECT_EQ(p.sampling.getSubdivision(2), 16u);
   EXPECT_EQ(Adaptation::SWIFT::Parameters::Quadrature::getValidationOrder(1), 32u);
 }
 
 TEST(Rodin_Adaptation_SWIFTExampleParameters, CanonicalNamesMapToHierarchicalParameters)
 {
-  std::vector<std::string> arguments = {"example", "--swift-fit=2",
-    "--swift-distribution-deviatoric=0.0003", "--swift-distribution-divergence=0.0004",
-    "--swift-hinge=10", "--swift-jacobian=0.02", "--swift-distortion=5",
-    "--swift-outer-iterations=20", "--swift-inner-iterations=10",
-    "--swift-linear-solver=cg", "--swift-linear-relative-tolerance=1e-9",
-    "--quad-order=12", "--surface-quadrature-order=8", "--volume-quadrature-order=2",
-    "--quality-validation-order=16", "--geometric-validation-order=32"};
+  std::vector<std::string> arguments = {"example", "--model-fit=2",
+    "--model-distribution-deviatoric=0.0003", "--model-distribution-divergence=0.0004",
+    "--model-hinge=10", "--model-jacobian=0.02", "--model-distortion=5",
+    "--convergence-iterations-outer=20", "--convergence-iterations-inner=10",
+    "--linear-solver=cg", "--convergence-tolerance-linear-relative=1e-9",
+    "--quadrature-order=12", "--quadrature-surface=8", "--quadrature-volume=2",
+    "--sampling-subdivision=16", "--quadrature-validation=32"};
   std::vector<char*> argv;
   for (auto& argument : arguments)
     argv.push_back(argument.data());
@@ -151,7 +195,7 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, CanonicalNamesMapToHierarchicalPar
   EXPECT_EQ(p.quadrature.order, 12u);
   EXPECT_EQ(p.quadrature.surface, 8u);
   EXPECT_EQ(p.quadrature.volume, 2u);
-  EXPECT_EQ(p.quadrature.quality, 16u);
+  EXPECT_EQ(p.sampling.subdivision, 16u);
   EXPECT_EQ(p.quadrature.validation, 32u);
 }
 
@@ -221,6 +265,29 @@ TEST(Rodin_Adaptation_SWIFTAdmissibility, SamplingIsReadOnly)
   GridFunction wrongDimension(wrongSpace);
   EXPECT_THROW(Adaptation::SWIFT::evaluateAdmissibility(wrongDimension, Real(0.01)),
     Alert::Exception);
+}
+
+TEST(Rodin_Adaptation_SWIFTAdmissibility, UsesSharedLatticeSubdivision)
+{
+  using namespace Geometry;
+  using namespace Variational;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  mesh.getConnectivity().compute(2, 0);
+  P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+  GridFunction displacement(space);
+  displacement = VectorFunction(size_t(2), [](const Point& point) {
+    Math::SpatialVector<Real> value(2);
+    value(0) = -Real(2) * point.x();
+    value(1) = 0;
+    return value;
+  });
+  const auto automatic = Adaptation::SWIFT::evaluateAdmissibility(
+    std::as_const(displacement), Real(0.01));
+  const auto explicitSampling = Adaptation::SWIFT::evaluateAdmissibility(
+    std::as_const(displacement), Real(0.01), 3);
+  EXPECT_EQ(automatic.inadmissibleCount, 6u * mesh.getCellCount());
+  EXPECT_EQ(explicitSampling.inadmissibleCount, 10u * mesh.getCellCount());
+  EXPECT_NEAR(explicitSampling.minJ, Real(-1), Real(1e-12));
 }
 
 TEST(Rodin_Adaptation_SWIFTAdmissibility, RejectsNonfiniteGeometry)

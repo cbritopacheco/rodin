@@ -64,14 +64,14 @@ def main():
     if args.retry_analytic:
         cases = [("2d", 32, 0), ("p2", 8, 0)]
     variants = {
-        "control": ["--quad-order=12"],
-        "surface8": ["--surface-quadrature-order=8", "--volume-quadrature-order=2", "--quality-validation-order=16"],
-        "surface12": ["--surface-quadrature-order=12", "--volume-quadrature-order=2", "--quality-validation-order=16"],
-        "surface24": ["--surface-quadrature-order=24", "--volume-quadrature-order=2", "--quality-validation-order=16"],
+        "control": ["--quadrature-order=12"],
+        "surface8": ["--quadrature-surface=8", "--quadrature-volume=2", "--sampling-subdivision=16"],
+        "surface12": ["--quadrature-surface=12", "--quadrature-volume=2", "--sampling-subdivision=16"],
+        "surface24": ["--quadrature-surface=24", "--quadrature-volume=2", "--sampling-subdivision=16"],
     }
     if args.p1_validation:
         cases = [("2d", 32, 0), ("2d", 16, 1), ("2d", 16, 3), ("3d", 8, 0)]
-        variants = {key: [value.replace("quality-validation-order=16", "quality-validation-order=2") for value in values]
+        variants = {key: [value.replace("sampling-subdivision=16", "sampling-subdivision=2") for value in values]
                     for key, values in variants.items() if key in ("surface8", "surface12")}
     manifest = {"cases": cases, "variants": variants, "attempts": len(cases) * len(variants), "timeout_seconds": 180,
                 "binary_sha256": {key: hashlib.sha256(value.read_bytes()).hexdigest() for key, value in binaries.items()},
@@ -82,14 +82,14 @@ def main():
     for family, n, degree in cases:
         for variant, options in variants.items():
             if family == "p2":
-                options = [value.replace("volume-quadrature-order=2", "volume-quadrature-order=8") for value in options]
+                options = [value.replace("quadrature-volume=2", "quadrature-volume=8") for value in options]
             directory = output / f"{family}-n{n}-target{degree}-{variant}"
             directory.mkdir()
             command = [str(binaries[family]), f"--n={n}", "--frames=1", "--lobes=4", "--amp=0.08", "--R0=0.24", "--orbitR=0",
-                       "--swift-outer-iterations=30", "--swift-inner-iterations=15", "--swift-fit=1",
-                       "--swift-distribution-deviatoric=0.0001", "--swift-distribution-divergence=0.01", "--swift-hinge=10",
-                       "--swift-linear-solver=mumps", "--swift-linear-threads=1", "--swift-linear-relative-tolerance=1e-6",
-                       "--swift-trace=1", "--geometric-validation-order=32", *options]
+                       "--convergence-iterations-outer=30", "--convergence-iterations-inner=15", "--model-fit=1",
+                       "--model-distribution-deviatoric=0.0001", "--model-distribution-divergence=0.01", "--model-hinge=10",
+                       "--linear-solver=mumps", "--linear-threads=1", "--convergence-tolerance-linear-relative=1e-6",
+                       "--trace=1", "--quadrature-validation=32", *options]
             (directory / "command.json").write_text(json.dumps(command, indent=2))
             env = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", VECLIB_MAXIMUM_THREADS="1")
             env.pop("SWIFT_TARGET_DEGREE", None)

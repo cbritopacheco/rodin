@@ -37,7 +37,7 @@ namespace Rodin::Adaptation::SWIFT
         : m_cell(cell),
           m_parameters(parameters),
           m_formula(QualityLattice::get(cell.getGeometry(),
-            parameters.quadrature.getQualityOrder(order,
+            parameters.sampling.getSubdivision(order,
               cell.getTransformation().getOrder(),
               Geometry::Polytope::Traits(cell.getGeometry()).getVertexCount() ==
                 cell.getDimension() + 1)))

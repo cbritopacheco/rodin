@@ -621,16 +621,16 @@ namespace Rodin::Adaptation::SWIFT
       /// @brief Mesh-validity summary of a displacement.
       struct AdmissibilityState
       {
-          /// @brief Smallest Jacobian over all cell quadrature points.
+          /// @brief Smallest Jacobian over all quality witnesses.
           Real minJ = std::numeric_limits<Real>::infinity();
 
-          /// @brief Largest Jacobian over all cell quadrature points.
+          /// @brief Largest Jacobian over all quality witnesses.
           Real maxJ = -std::numeric_limits<Real>::infinity();
 
           /// @brief Largest relative distortion over the non-inverted points.
           Real maxQ = 0;
 
-          /// @brief Number of quadrature points at or below the Jacobian floor.
+          /// @brief Number of quality witnesses at or below the Jacobian floor.
           std::size_t inadmissibleCount = 0;
           Real affineMinJ = std::numeric_limits<Real>::infinity();
           Real affineMaxQ = 0;

@@ -80,7 +80,7 @@ if(TARGET SWIFT_ReconstructionP1)
       set(fixture "SWIFT.Output.P${degree}.D${dimension}")
       add_test(NAME ${fixture}.Generate
         COMMAND $<TARGET_FILE:SWIFT_ReconstructionP${degree}>
-          --n=4 --dimension=${dimension} --swift-outer-iterations=1
+          --n=4 --dimension=${dimension} --convergence-iterations-outer=1
           --output=${output_dir}/reconstruction)
       set_tests_properties(${fixture}.Generate PROPERTIES
         LABELS unit FIXTURES_SETUP ${fixture} TIMEOUT 120

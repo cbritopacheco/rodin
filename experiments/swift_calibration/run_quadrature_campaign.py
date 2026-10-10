@@ -71,12 +71,12 @@ def main():
                 directory.mkdir()
                 command = [str(binaries[family]), f"--n={n}", "--frames=1", "--lobes=4",
                            "--amp=0.08", "--R0=0.24", "--orbitR=0",
-                           "--swift-outer-iterations=30", "--swift-inner-iterations=15",
-                           "--swift-fit=1", "--swift-distribution-deviatoric=0.0001",
-                           "--swift-distribution-divergence=0.01", "--swift-hinge=10",
-                           "--swift-linear-solver=mumps", "--swift-linear-threads=1",
-                           "--swift-linear-relative-tolerance=1e-6", "--swift-trace=1",
-                           "--geometric-validation-order=32", f"--quad-order={order}"]
+                           "--convergence-iterations-outer=30", "--convergence-iterations-inner=15",
+                           "--model-fit=1", "--model-distribution-deviatoric=0.0001",
+                           "--model-distribution-divergence=0.01", "--model-hinge=10",
+                           "--linear-solver=mumps", "--linear-threads=1",
+                           "--convergence-tolerance-linear-relative=1e-6", "--trace=1",
+                           "--quadrature-validation=32", f"--quadrature-order={order}"]
                 env = dict(environment)
                 env.pop("SWIFT_TARGET_DEGREE", None)
                 if degree:

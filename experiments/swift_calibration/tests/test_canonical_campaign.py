@@ -101,24 +101,24 @@ class CanonicalCampaignTest(unittest.TestCase):
                                barrier_max_iters=15, cg_rtol=1e-8,
                                log_iterations=False)
         result = command(args, 20, 4, 5, 90, 30)
-        for option in ("--swift-fit=2", "--swift-distribution-deviatoric=5"):
+        for option in ("--model-fit=2", "--model-distribution-deviatoric=5"):
             self.assertIn(option, result)
 
     def check_command(self, args):
-        self.assertIn("--swift-fit=1", args)
+        self.assertIn("--model-fit=1", args)
         self.assertFalse(any("kappa-s" in arg for arg in args))
-        self.assertIn("--swift-distribution-deviatoric=1", args)
-        self.assertIn("--swift-distribution-divergence=1", args)
+        self.assertIn("--model-distribution-deviatoric=1", args)
+        self.assertIn("--model-distribution-divergence=1", args)
         self.assertFalse(any("omega-min" in arg or "jls" in arg or "volume-gauge" in arg
                              for arg in args))
-        self.assertIn("--swift-linear-solver=mumps", args)
-        self.assertIn("--swift-inner-iterations=15", args)
-        self.assertIn("--swift-outer-iterations=30", args)
-        self.assertIn("--swift-step-tolerance=0", args)
-        self.assertIn("--swift-step-over-h-tolerance=5e-4", args)
-        self.assertIn("--swift-stagnation-iterations=5", args)
-        self.assertIn("--swift-max-step-over-h=0", args)
-        self.assertTrue(any(arg.startswith("--swift-geometric-tolerance=") for arg in args))
+        self.assertIn("--linear-solver=mumps", args)
+        self.assertIn("--convergence-iterations-inner=15", args)
+        self.assertIn("--convergence-iterations-outer=30", args)
+        self.assertIn("--convergence-tolerance-step=0", args)
+        self.assertIn("--convergence-tolerance-step-over-h=5e-4", args)
+        self.assertIn("--convergence-iterations-stagnation=5", args)
+        self.assertIn("--globalization-max-step-over-h=0", args)
+        self.assertTrue(any(arg.startswith("--convergence-tolerance-geometric=") for arg in args))
         self.assertFalse(any("rms-tol" in arg or "rms-floor" in arg or "descent-fraction" in arg
                              or "positive-shape-curvature" in arg for arg in args))
         self.assertFalse(any("rigid-stabilisation" in arg or "quality-model" in arg

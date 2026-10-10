@@ -98,10 +98,10 @@ cd /tmp/rodin-swift
 # Fit the same four-lobe target with explicit model weights and work budgets.
 "$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" \
   --n=16 --dimension=2 --lobes=4 --amp=0.05 --R0=0.25 \
-  --swift-fit=1 --swift-distribution-deviatoric=1e-4 \
-  --swift-distribution-divergence=1e-2 --swift-hinge=10 \
-  --swift-outer-iterations=30 --swift-inner-iterations=15 \
-  --swift-linear-solver=sparse-lu --swift-trace \
+  --model-fit=1 --model-distribution-deviatoric=1e-4 \
+  --model-distribution-divergence=1e-2 --model-hinge=10 \
+  --convergence-iterations-outer=30 --convergence-iterations-inner=15 \
+  --linear-solver=sparse-lu --trace \
   --output=results/lobed-p2
 ```
 
@@ -223,23 +223,23 @@ named flags. The complete model/control mapping is:
 
 | Flag | C++ parameter |
 |------|---------------|
-| `--swift-fit` | `model.fit` |
-| `--swift-distribution-deviatoric` | `model.distribution.deviatoric` |
-| `--swift-distribution-divergence` | `model.distribution.divergence` |
-| `--swift-hinge` | `model.hinge` |
-| `--swift-jacobian` | `model.jacobian` |
-| `--swift-distortion` | `model.distortion` |
-| `--swift-quality-guard` | `model.qualityGuard` |
-| `--swift-jacobian-weight` | `model.jacobianWeight` |
-| `--swift-distortion-weight` | `model.distortionWeight` |
-| `--swift-robust-scale` | `model.robustScale` |
-| `--swift-directional-newton` | `globalization.directionalNewton` |
-| `--swift-max-step-over-h` | `globalization.maxStepOverH` |
-| `--swift-armijo` | `globalization.armijo` |
-| `--swift-linear-solver` | `linear.solver`: `cg`, `sparse-lu`, or compiled-in `mumps` |
-| `--swift-linear-threads` | `linear.threads` |
-| `--swift-trace`, `--trace` | `trace` |
-| `--swift-quality-witness` | `traceQualityWitness` |
+| `--model-fit` | `model.fit` |
+| `--model-distribution-deviatoric` | `model.distribution.deviatoric` |
+| `--model-distribution-divergence` | `model.distribution.divergence` |
+| `--model-hinge` | `model.hinge` |
+| `--model-jacobian` | `model.jacobian` |
+| `--model-distortion` | `model.distortion` |
+| `--model-quality-guard` | `model.qualityGuard` |
+| `--model-jacobian-weight` | `model.jacobianWeight` |
+| `--model-distortion-weight` | `model.distortionWeight` |
+| `--model-robust-scale` | `model.robustScale` |
+| `--globalization-directional-newton` | `globalization.directionalNewton` |
+| `--globalization-max-step-over-h` | `globalization.maxStepOverH` |
+| `--globalization-armijo` | `globalization.armijo` |
+| `--linear-solver` | `linear.solver`: `cg`, `sparse-lu`, or compiled-in `mumps` |
+| `--linear-threads` | `linear.threads` |
+| `--trace` | `trace` |
+| `--trace-quality-witness` | `traceQualityWitness` |
 
 | C++ parameter | What it controls | Default |
 |---------------|------------------|---------|
@@ -272,47 +272,52 @@ parameters.linear.solver = Adaptation::SWIFT::Parameters::LinearSolver::SparseLU
 
 | Flag | C++ parameter under `convergence` |
 |------|----------------------------------|
-| `--swift-geometric-tolerance` | `tolerance.geometric` |
-| `--swift-inner-relative-tolerance` | `tolerance.innerRelative` |
-| `--swift-inner-absolute-tolerance` | `tolerance.innerAbsolute` |
-| `--swift-linear-relative-tolerance` | `tolerance.linearRelative` |
-| `--swift-energy-tolerance` | `tolerance.energy` |
-| `--swift-step-tolerance` | `tolerance.step` |
-| `--swift-step-over-h-tolerance` | `tolerance.stepOverH` |
-| `--swift-outer-iterations` | `iterations.outer` |
-| `--swift-inner-iterations` | `iterations.inner` |
-| `--swift-linear-iterations` | `iterations.linear` |
-| `--swift-backtracks` | `iterations.backtracks` |
-| `--swift-stagnation-iterations` | `iterations.stagnation` |
+| `--convergence-tolerance-geometric` | `convergence.tolerance.geometric` |
+| `--convergence-tolerance-inner-relative` | `convergence.tolerance.innerRelative` |
+| `--convergence-tolerance-inner-absolute` | `convergence.tolerance.innerAbsolute` |
+| `--convergence-tolerance-linear-relative` | `convergence.tolerance.linearRelative` |
+| `--convergence-tolerance-energy` | `convergence.tolerance.energy` |
+| `--convergence-tolerance-step` | `convergence.tolerance.step` |
+| `--convergence-tolerance-step-over-h` | `convergence.tolerance.stepOverH` |
+| `--convergence-iterations-outer` | `convergence.iterations.outer` |
+| `--convergence-iterations-inner` | `convergence.iterations.inner` |
+| `--convergence-iterations-linear` | `convergence.iterations.linear` |
+| `--convergence-iterations-backtracks` | `convergence.iterations.backtracks` |
+| `--convergence-iterations-stagnation` | `convergence.iterations.stagnation` |
 
 | C++ parameter under `convergence` | Meaning | Default |
 |----------------------------------|---------|---------|
-| `tolerance.geometric` | Sampled maximum-error success target | `0`: automatic \(h^{p+1}\) for displacement degree \(p\) |
-| `tolerance.innerRelative` | Inner stationarity residual relative to fitting force | `1e-3` |
-| `tolerance.innerAbsolute` | Absolute inner stationarity allowance | `1e-12` |
-| `tolerance.linearRelative` | Linear residual tolerance for all backends | `1e-6` |
-| `tolerance.energy` | Relative energy-change stagnation threshold | `1e-8` |
-| `tolerance.step` | Absolute accepted-motion stagnation threshold | `0` |
-| `tolerance.stepOverH` | Accepted-motion/reference-spacing stagnation threshold | `5e-4` |
-| `iterations.outer` | Outer fitting cap | `30` |
-| `iterations.inner` | Newton-correction cap per outer iteration | `15` |
-| `iterations.linear` | Iteration cap per CG solve; does not cap direct solves | `1000` |
-| `iterations.backtracks` | Outer trial-halving cap | `32` |
-| `iterations.stagnation` | Consecutive small steps or energy changes before a best-effort exit | `5` |
+| `convergence.tolerance.geometric` | Sampled maximum-error success target | `0`: automatic \(h^{p+1}\) for displacement degree \(p\) |
+| `convergence.tolerance.innerRelative` | Inner stationarity residual relative to fitting force | `1e-3` |
+| `convergence.tolerance.innerAbsolute` | Absolute inner stationarity allowance | `1e-12` |
+| `convergence.tolerance.linearRelative` | Linear residual tolerance for all backends | `1e-6` |
+| `convergence.tolerance.energy` | Relative energy-change stagnation threshold | `1e-8` |
+| `convergence.tolerance.step` | Absolute accepted-motion stagnation threshold | `0` |
+| `convergence.tolerance.stepOverH` | Accepted-motion/reference-spacing stagnation threshold | `5e-4` |
+| `convergence.iterations.outer` | Outer fitting cap | `30` |
+| `convergence.iterations.inner` | Newton-correction cap per outer iteration | `15` |
+| `convergence.iterations.linear` | Iteration cap per CG solve; does not cap direct solves | `1000` |
+| `convergence.iterations.backtracks` | Outer trial-halving cap | `32` |
+| `convergence.iterations.stagnation` | Consecutive small steps or energy changes before a best-effort exit | `5` |
 
 A positive geometric tolerance overrides the automatic target. Zero does not
 disable geometric stopping. Stagnation and iteration-limit exits are distinct
 from geometric success.
 
-### Quadrature and Validation
+### Quadrature and Sampling
+
+Parameter flags follow the C++ hierarchy: dots become hyphens and camel-case
+words are separated by hyphens. For example, `parameters.sampling.subdivision`
+maps to `--sampling-subdivision`, and `parameters.convergence.iterations.outer`
+maps to `--convergence-iterations-outer`. Previous flat flag names are rejected.
 
 | Flag | C++ parameter |
 |------|---------------|
-| `--quad-order` | `quadrature.order` |
-| `--surface-quadrature-order` | `quadrature.surface` |
-| `--volume-quadrature-order` | `quadrature.volume` |
-| `--quality-validation-order` | `quadrature.quality` |
-| `--geometric-validation-order` | `quadrature.validation` |
+| `--quadrature-order` | `quadrature.order` |
+| `--quadrature-surface` | `quadrature.surface` |
+| `--quadrature-volume` | `quadrature.volume` |
+| `--sampling-subdivision` | `sampling.subdivision` |
+| `--quadrature-validation` | `quadrature.validation` |
 
 | Displacement/geometry | Surface integration | Volume integration | Quality sampling | Geometric sampling |
 |-----------------------|---------------------|--------------------|------------------|--------------------|
@@ -321,7 +326,7 @@ from geometric success.
 
 `quadrature.order` overrides common integration order; `quadrature.surface`
 and `quadrature.volume` override their respective integrations independently.
-`quadrature.quality` selects the shared inner-hinge and actual-quality witnesses:
+`sampling.subdivision` selects the shared inner-hinge and actual-quality witnesses:
 uniform barycentric lattices on simplices, including vertices. Tensor cells use
 Cartesian grids, wedges use triangle-times-segment grids, and pyramids use
 shrinking square layers. No supplemental points are added. The setting counts

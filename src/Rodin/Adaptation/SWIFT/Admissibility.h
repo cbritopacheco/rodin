@@ -13,13 +13,13 @@
 #include <limits>
 #include "Rodin/Alert.h"
 
-#include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Types.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Variational/Jacobian.h"
 
 #include "../CellDeformation.h"
 #include "Parameters.h"
+#include "QualitySamples.h"
 
 namespace Rodin::Adaptation::SWIFT
 {
@@ -39,11 +39,11 @@ namespace Rodin::Adaptation::SWIFT
    * @brief Evaluates sampled admissibility without changing the displacement.
    * @param u Displacement field to sample.
    * @param jacobian Lower admissible relative Jacobian bound.
-   * @param quadratureOrder Sampling order; zero selects the automatic quality policy.
-   * @returns Jacobian, relative distortion and invalid-sample count at quadrature points and vertices.
+   * @param subdivision Reference-edge subdivisions; zero selects the automatic sampling policy.
+   * @returns Jacobian, relative distortion and invalid-sample count on the quality lattice.
    */
   AdmissibilityReport evaluateAdmissibility(
-    const Displacement& u, Real jacobian, std::size_t quadratureOrder = 0)
+    const Displacement& u, Real jacobian, std::size_t subdivision = 0)
   {
     using Variational::IntegrationPoint;
     using Variational::Jacobian;
@@ -58,19 +58,15 @@ namespace Rodin::Adaptation::SWIFT
                          << Alert::Raise;
 
     auto gradU = Jacobian(u);
+    Parameters parameters;
+    parameters.sampling.subdivision = subdivision;
     CellDeformation deformation(dim);
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
     {
       const auto& cell = *cellIt;
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-      const auto& qf = QF::PolytopeQuadratureFormula::get(quadratureOrder > 0
-          ? quadratureOrder
-          : Parameters::Quadrature{}.getQualityOrder(fe.getOrder(),
-              cell.getTransformation().getOrder(),
-              Geometry::Polytope::Traits(cell.getGeometry()).getVertexCount() == dim + 1),
-        cell.getGeometry());
-      const auto& quadrature = cell.getQuadrature(qf);
-      const auto evaluate = [&](const auto& ip) {
+      const QualitySamples samples(cell, fe.getOrder(), parameters);
+      samples.forEach([&](const IntegrationPoint& ip, Real) {
         deformation.setDisplacementGradient(gradU.getValue(ip));
         const Real j = deformation.getJacobian();
 
@@ -87,12 +83,7 @@ namespace Rodin::Adaptation::SWIFT
         }
         if (invalid)
           ++rep.inadmissibleCount;
-      };
-      for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-        evaluate(IntegrationPoint(quadrature.getPoint(q), &qf, q));
-      const Geometry::Polytope::Traits traits(cell.getGeometry());
-      for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
-        evaluate(Geometry::Point(cell, traits.getVertex(vertex)));
+      });
     }
     return rep;
   }

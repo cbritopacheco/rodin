@@ -172,24 +172,34 @@ namespace Rodin::Examples
   inline Adaptation::SWIFT::Parameters makeSWIFTParameters(int argc, char** argv, Real h,
     Geometry::Attribute interfaceAttribute, const SWIFTExampleDefaults& defaults = {})
   {
-    constexpr const char* options[] = {"swift-fit", "swift-robust-scale",
-      "swift-jacobian-weight", "swift-distortion-weight", "swift-jacobian",
-      "swift-distortion", "swift-quality-guard", "swift-distribution-deviatoric",
-      "swift-distribution-divergence", "swift-directional-newton",
-      "swift-max-step-over-h", "swift-quality-witness", "swift-linear-solver",
-      "swift-linear-threads", "swift-geometric-tolerance", "swift-inner-iterations",
-      "swift-inner-relative-tolerance", "swift-inner-absolute-tolerance",
-      "swift-stagnation-iterations", "swift-hinge", "swift-backtracks", "swift-armijo",
-      "swift-energy-tolerance", "swift-step-tolerance", "swift-step-over-h-tolerance",
-      "swift-outer-iterations", "swift-linear-relative-tolerance",
-      "swift-linear-iterations", "swift-trace"};
+    constexpr const char* options[] = {"model-fit", "model-robust-scale",
+      "model-jacobian-weight", "model-distortion-weight", "model-jacobian",
+      "model-distortion", "model-quality-guard", "model-distribution-deviatoric",
+      "model-distribution-divergence", "globalization-directional-newton",
+      "globalization-max-step-over-h", "trace-quality-witness", "linear-solver",
+      "linear-threads", "convergence-tolerance-geometric", "convergence-iterations-inner",
+      "convergence-tolerance-inner-relative", "convergence-tolerance-inner-absolute",
+      "convergence-iterations-stagnation", "model-hinge", "convergence-iterations-backtracks", "globalization-armijo",
+      "convergence-tolerance-energy", "convergence-tolerance-step", "convergence-tolerance-step-over-h",
+      "convergence-iterations-outer", "convergence-tolerance-linear-relative",
+      "convergence-iterations-linear", "trace", "quadrature-order",
+      "quadrature-surface", "quadrature-volume", "quadrature-validation",
+      "sampling-subdivision"};
     for (int i = 1; i < argc; ++i)
     {
       const std::string argument(argv[i]);
-      if (argument.starts_with("--wngir-"))
-        Alert::Exception() << "WNGIR options have been renamed to --swift-*: " << argument
+      if (argument.starts_with("--wngir-") || argument.starts_with("--swift-") ||
+          argument.starts_with("--quality-validation-order") ||
+          argument.starts_with("--quad-order") ||
+          argument.starts_with("--surface-quadrature-order") ||
+          argument.starts_with("--volume-quadrature-order") ||
+          argument.starts_with("--geometric-validation-order"))
+        Alert::Exception() << "Use hierarchical SWIFT parameter flags: " << argument
                            << Alert::Raise;
-      if (!argument.starts_with("--swift-"))
+      if (!argument.starts_with("--model-") && !argument.starts_with("--globalization-") &&
+          !argument.starts_with("--linear-") && !argument.starts_with("--convergence-") &&
+          !argument.starts_with("--quadrature-") && !argument.starts_with("--sampling-") &&
+          !argument.starts_with("--trace"))
         continue;
       const auto name = argument.substr(2,
         argument.find('=') == std::string::npos ? std::string::npos
@@ -201,32 +211,32 @@ namespace Rodin::Examples
     Adaptation::SWIFT::Parameters p;
     p.model.h = h;
 
-    p.model.fit = realOption(argc, argv, "swift-fit", defaults.fit);
+    p.model.fit = realOption(argc, argv, "model-fit", defaults.fit);
     p.model.robustScale =
-      realOption(argc, argv, "swift-robust-scale", p.model.robustScale);
+      realOption(argc, argv, "model-robust-scale", p.model.robustScale);
 
     p.model.jacobianWeight =
-      realOption(argc, argv, "swift-jacobian-weight", defaults.jacobianWeight);
+      realOption(argc, argv, "model-jacobian-weight", defaults.jacobianWeight);
     p.model.distortionWeight =
-      realOption(argc, argv, "swift-distortion-weight", defaults.distortionWeight);
-    p.model.jacobian = realOption(argc, argv, "swift-jacobian", p.model.jacobian);
-    p.model.distortion = realOption(argc, argv, "swift-distortion", p.model.distortion);
+      realOption(argc, argv, "model-distortion-weight", defaults.distortionWeight);
+    p.model.jacobian = realOption(argc, argv, "model-jacobian", p.model.jacobian);
+    p.model.distortion = realOption(argc, argv, "model-distortion", p.model.distortion);
     p.model.qualityGuard =
-      realOption(argc, argv, "swift-quality-guard", p.model.qualityGuard);
+      realOption(argc, argv, "model-quality-guard", p.model.qualityGuard);
     p.model.distribution.deviatoric =
-      realOption(argc, argv, "swift-distribution-deviatoric", defaults.deviatoric);
+      realOption(argc, argv, "model-distribution-deviatoric", defaults.deviatoric);
     p.model.distribution.divergence =
-      realOption(argc, argv, "swift-distribution-divergence", defaults.divergence);
+      realOption(argc, argv, "model-distribution-divergence", defaults.divergence);
     p.globalization.directionalNewton = boolOption(
-      argc, argv, "swift-directional-newton", p.globalization.directionalNewton);
+      argc, argv, "globalization-directional-newton", p.globalization.directionalNewton);
     p.globalization.maxStepOverH =
-      realOption(argc, argv, "swift-max-step-over-h", p.globalization.maxStepOverH);
-    p.traceQualityWitness = boolOption(argc, argv, "swift-quality-witness", false);
+      realOption(argc, argv, "globalization-max-step-over-h", p.globalization.maxStepOverH);
+    p.traceQualityWitness = boolOption(argc, argv, "trace-quality-witness", false);
     const auto defaultSolver =
       p.linear.solver == Adaptation::SWIFT::Parameters::LinearSolver::MUMPS ? "mumps"
                                                                             : "sparse-lu";
     const auto linearSolver =
-      stringOption(argc, argv, "swift-linear-solver", defaultSolver);
+      stringOption(argc, argv, "linear-solver", defaultSolver);
     if (linearSolver == "mumps")
       p.linear.solver = Adaptation::SWIFT::Parameters::LinearSolver::MUMPS;
     else if (linearSolver == "sparse-lu")
@@ -235,46 +245,46 @@ namespace Rodin::Examples
       p.linear.solver = Adaptation::SWIFT::Parameters::LinearSolver::CG;
     else
       Alert::Exception() << "Unknown SWIFT solver: " << linearSolver << Alert::Raise;
-    p.linear.threads = sizeOption(argc, argv, "swift-linear-threads", 0);
+    p.linear.threads = sizeOption(argc, argv, "linear-threads", 0);
     p.convergence.tolerance.geometric =
-      realOption(argc, argv, "swift-geometric-tolerance", 0);
+      realOption(argc, argv, "convergence-tolerance-geometric", 0);
     p.convergence.iterations.inner =
-      sizeOption(argc, argv, "swift-inner-iterations", p.convergence.iterations.inner);
+      sizeOption(argc, argv, "convergence-iterations-inner", p.convergence.iterations.inner);
     p.convergence.tolerance.innerRelative = realOption(argc, argv,
-      "swift-inner-relative-tolerance", p.convergence.tolerance.innerRelative);
+      "convergence-tolerance-inner-relative", p.convergence.tolerance.innerRelative);
     p.convergence.tolerance.innerAbsolute = realOption(argc, argv,
-      "swift-inner-absolute-tolerance", p.convergence.tolerance.innerAbsolute);
+      "convergence-tolerance-inner-absolute", p.convergence.tolerance.innerAbsolute);
     p.convergence.iterations.stagnation = sizeOption(
-      argc, argv, "swift-stagnation-iterations", p.convergence.iterations.stagnation);
-    p.model.hinge = realOption(argc, argv, "swift-hinge", p.model.hinge);
+      argc, argv, "convergence-iterations-stagnation", p.convergence.iterations.stagnation);
+    p.model.hinge = realOption(argc, argv, "model-hinge", p.model.hinge);
     p.convergence.iterations.backtracks =
-      sizeOption(argc, argv, "swift-backtracks", p.convergence.iterations.backtracks);
+      sizeOption(argc, argv, "convergence-iterations-backtracks", p.convergence.iterations.backtracks);
     p.globalization.armijo =
-      realOption(argc, argv, "swift-armijo", p.globalization.armijo);
+      realOption(argc, argv, "globalization-armijo", p.globalization.armijo);
 
     p.convergence.tolerance.energy =
-      realOption(argc, argv, "swift-energy-tolerance", p.convergence.tolerance.energy);
+      realOption(argc, argv, "convergence-tolerance-energy", p.convergence.tolerance.energy);
     p.convergence.tolerance.step =
-      realOption(argc, argv, "swift-step-tolerance", p.convergence.tolerance.step);
+      realOption(argc, argv, "convergence-tolerance-step", p.convergence.tolerance.step);
     p.convergence.tolerance.stepOverH = realOption(
-      argc, argv, "swift-step-over-h-tolerance", p.convergence.tolerance.stepOverH);
+      argc, argv, "convergence-tolerance-step-over-h", p.convergence.tolerance.stepOverH);
 
-    p.quadrature.order = sizeOption(argc, argv, "quad-order", defaults.quadratureOrder);
-    p.quadrature.surface = sizeOption(argc, argv, "surface-quadrature-order", 0);
-    p.quadrature.volume = sizeOption(argc, argv, "volume-quadrature-order", 0);
-    p.quadrature.quality = sizeOption(argc, argv, "quality-validation-order", 0);
+    p.quadrature.order = sizeOption(argc, argv, "quadrature-order", defaults.quadratureOrder);
+    p.quadrature.surface = sizeOption(argc, argv, "quadrature-surface", 0);
+    p.quadrature.volume = sizeOption(argc, argv, "quadrature-volume", 0);
+    p.sampling.subdivision = sizeOption(argc, argv, "sampling-subdivision", 0);
     p.quadrature.validation =
-      sizeOption(argc, argv, "geometric-validation-order", p.quadrature.validation);
+      sizeOption(argc, argv, "quadrature-validation", p.quadrature.validation);
     p.convergence.iterations.outer =
-      sizeOption(argc, argv, "swift-outer-iterations", defaults.maxIterations);
+      sizeOption(argc, argv, "convergence-iterations-outer", defaults.maxIterations);
 
     p.convergence.tolerance.linearRelative = realOption(argc, argv,
-      "swift-linear-relative-tolerance", p.convergence.tolerance.linearRelative);
+      "convergence-tolerance-linear-relative", p.convergence.tolerance.linearRelative);
     p.convergence.iterations.linear =
-      sizeOption(argc, argv, "swift-linear-iterations", p.convergence.iterations.linear);
+      sizeOption(argc, argv, "convergence-iterations-linear", p.convergence.iterations.linear);
     p.interfaceAttribute = interfaceAttribute;
     p.trace =
-      boolOption(argc, argv, "trace", boolOption(argc, argv, "swift-trace", false));
+      boolOption(argc, argv, "trace", false);
     return p;
   }
 }

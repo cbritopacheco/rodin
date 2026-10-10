@@ -94,32 +94,37 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(stored.linear.solver, SWIFT::Parameters::LinearSolver::SparseLU);
     }
 
-    TEST(Rodin_Adaptation_SWIFTSolver, IndependentQuadratureOrdersAndOverrides)
+    TEST(Rodin_Adaptation_SWIFTSolver, IndependentQuadratureAndSamplingOverrides)
     {
       SWIFT::Parameters::Quadrature q;
+      SWIFT::Parameters::Sampling s;
       EXPECT_EQ(q.getSurfaceOrder(2), 12);
       EXPECT_EQ(q.getVolumeOrder(2), 8);
-      EXPECT_EQ(q.getQualityOrder(2), 16);
+      EXPECT_EQ(s.getSubdivision(2), 16);
       EXPECT_EQ(q.getSurfaceOrder(1), 8);
       EXPECT_EQ(q.getVolumeOrder(1), 2);
-      EXPECT_EQ(q.getQualityOrder(1), 2);
+      EXPECT_EQ(s.getSubdivision(1), 2);
       EXPECT_EQ(q.getSurfaceOrder(1, 2), 12);
       EXPECT_EQ(q.getVolumeOrder(1, 2), 8);
-      EXPECT_EQ(q.getQualityOrder(1, 2), 16);
+      EXPECT_EQ(s.getSubdivision(1, 2), 16);
       EXPECT_EQ(q.getSurfaceOrder(1, 1, false), 12);
       EXPECT_EQ(q.getVolumeOrder(1, 1, false), 8);
-      EXPECT_EQ(q.getQualityOrder(1, 1, false), 16);
+      EXPECT_EQ(s.getSubdivision(1, 1, false), 16);
       q.order = 6;
       EXPECT_EQ(q.getSurfaceOrder(2), 6);
       EXPECT_EQ(q.getVolumeOrder(2), 6);
-      EXPECT_EQ(q.getQualityOrder(2), 16);
-      EXPECT_EQ(q.getQualityOrder(1), 2);
+      EXPECT_EQ(s.getSubdivision(2), 16);
+      EXPECT_EQ(s.getSubdivision(1), 2);
       q.surface = 8;
       q.volume = 2;
-      q.quality = 16;
+      s.subdivision = 5;
       EXPECT_EQ(q.getSurfaceOrder(2), 8);
       EXPECT_EQ(q.getVolumeOrder(2), 2);
-      EXPECT_EQ(q.getQualityOrder(2), 16);
+      EXPECT_EQ(s.getSubdivision(2), 5);
+      EXPECT_EQ(s.getSubdivision(1), 5);
+      s.subdivision = 0;
+      EXPECT_EQ(s.getSubdivision(1), 2);
+      EXPECT_EQ(s.getSubdivision(2), 16);
     }
 
     TEST(Rodin_Adaptation_SWIFTSolver, IndependentQualityChecksCatchVertexInversion)
@@ -158,7 +163,7 @@ namespace Rodin::Tests::Unit
       problem.setParameters(p);
       EXPECT_EQ(problem.solve(phi, gradient).reason,
         SWIFT::Report::Reason::InvalidInitialGeometry);
-      p.quadrature.quality = 1;
+      p.sampling.subdivision = 1;
       problem.setParameters(p);
       EXPECT_EQ(problem.solve(phi, gradient).reason,
         SWIFT::Report::Reason::InvalidInitialGeometry);

@@ -48,7 +48,7 @@ namespace Rodin::Tests::Unit
       const auto cell = mesh.getCell(0);
       SWIFT::Parameters p;
       p.model.distortion = 2;
-      p.quadrature.quality = 4;
+      p.sampling.subdivision = 4;
       const SWIFT::QualitySamples samples(*cell, 2, p);
       Real measure = 0;
       size_t count = 0;
@@ -145,7 +145,7 @@ namespace Rodin::Tests::Unit
       shape.setConstant(2);
       auto mesh = LocalMesh::UniformGrid(geometry, shape);
       SWIFT::Parameters parameters;
-      parameters.quadrature.quality = 4;
+      parameters.sampling.subdivision = 4;
       Real mass = 0;
       for (Index index = 0; index < mesh.getCellCount(); ++index)
       {
@@ -336,7 +336,7 @@ namespace Rodin::Tests::Unit
       return Math::SpatialVector<Real>{0, Real(-0.48) * y * y};
     });
     SWIFT::Parameters parameters;
-    parameters.quadrature.quality = 1;
+    parameters.sampling.subdivision = 1;
     parameters.quadrature.volume = 1;
     auto jacobian = Jacobian(inner);
     Real mass = 0;

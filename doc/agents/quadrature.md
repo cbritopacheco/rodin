@@ -98,7 +98,7 @@ points than optimized tables.
   all directional quality limits.
 - SWIFT uses its own cached `QualityLattice` for hinges and actual-quality
   checks: uniform barycentric simplex lattices and uniform-grid counterparts
-  on other cells. `quadrature.quality` counts reference-edge subdivisions.
+  on other cells. `sampling.subdivision` counts reference-edge subdivisions.
   Equal positive base weights sum to reference volume; adaptive hinge weights
   preserve mapped discrete mass. This sampling policy makes no polynomial
   exactness or continuous quality-certification claim. It does not replace

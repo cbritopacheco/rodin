@@ -179,6 +179,15 @@ namespace Rodin::Adaptation::SWIFT
                               : getCellOrder(feOrder, transformationOrder, simplex);
           }
 
+          std::size_t order = 0; ///< Zero selects automatic integration orders.
+          std::size_t surface = 0; ///< Zero uses the common or automatic surface order.
+          std::size_t volume = 0; ///< Zero uses the common or automatic volume order.
+          std::size_t validation = 0; ///< Zero selects an independent validation order.
+      };
+
+      /// @brief Shared reference witnesses for hinges and actual-quality checks.
+      struct Sampling
+      {
           /**
            * @brief Independent quality-lattice subdivisions per reference edge.
            * @param feOrder Displacement finite-element order.
@@ -186,22 +195,18 @@ namespace Rodin::Adaptation::SWIFT
            * @param simplex Whether the entity is a simplex.
            * @returns Subdivisions: two for affine P1, otherwise at least sixteen.
            */
-          size_t getQualityOrder(
+          size_t getSubdivision(
             size_t feOrder, size_t transformationOrder = 1, bool simplex = true) const
           {
-            constexpr size_t affineOrder = 2, nonlinearMinimum = 16;
-            return quality > 0 ? quality
+            constexpr size_t affineSubdivision = 2, nonlinearMinimum = 16;
+            return subdivision > 0 ? subdivision
               : feOrder <= 1 && transformationOrder == 1 && simplex
-              ? affineOrder
+              ? affineSubdivision
               : std::max(nonlinearMinimum, 2 * feOrder + 4);
           }
 
-          std::size_t order = 0; ///< Zero selects automatic integration orders.
-          std::size_t surface = 0; ///< Zero uses the common or automatic surface order.
-          std::size_t volume = 0; ///< Zero uses the common or automatic volume order.
-          std::size_t quality =
+          std::size_t subdivision =
             0; ///< Quality-lattice subdivisions; zero selects the automatic policy.
-          std::size_t validation = 0; ///< Zero selects an independent validation order.
       };
 
       Model model; ///< Fitting, distribution and quality model.
@@ -209,6 +214,7 @@ namespace Rodin::Adaptation::SWIFT
       Globalization globalization; ///< Predictor scaling and outer acceptance.
       Linear linear; ///< Linear backend and thread policy.
       Quadrature quadrature; ///< Integration and validation orders.
+      Sampling sampling; ///< Shared hinge and actual-quality witnesses.
       Optional<Geometry::Attribute> interfaceAttribute; ///< Marked facets to fit.
       bool trace = false; ///< Print diagnostics; accepted geometry is always validated.
       bool traceQualityWitness =
