@@ -480,13 +480,49 @@ both forms are reassembled, checking state-update visibility and replacement
 rather than accumulation. Omitting the cubic contribution would change the
 analytic residual action by more than ten percent.
 
-Setup, interpolation, independent checks and state changes are untimed. Source
-terms, natural-boundary integrals, constraints, SNES/KSP, and error norms are
-excluded. PETSc/MPI parity and separate timings for those excluded operations
+Setup, interpolation, independent checks and state changes are untimed. The
+residual and tangent scopes exclude source terms, natural-boundary integrals,
+constraints, SNES/KSP, and error norms. PETSc/MPI parity and separate timings for those excluded operations
 remain required before attributing a full distributed solve's cost to this
 benchmark. Counters report cells, global native DOFs, nonzeros, field and geometry degrees,
 quadrature order and points per cell. CI executes all smallest-mesh cases as
 numerical checks, without timing thresholds.
+
+### Physical-coordinate-dependent source
+
+Separate `Source` registrations measure replacement assembly of
+
+$$
+L_s(v)=s\int_\Omega (1+x_0+x_{d-1}^2)v\,dx.
+$$
+
+These loads exercise physical-coordinate evaluation, which the prescribed-state
+residual and tangent do not require. Field degrees one through three, all seven
+positive-dimensional geometries, affine and exact quadratic geometry,
+$n=3,5,9$, and quadrature orders eight and sixteen give 252 source registrations
+per backend configuration. Setup and reference integration remain untimed.
+
+With the quadratic amplitude $a=0.1$ (or $a=0$ for affine geometry), the
+constant-test action in dimensions two and three is
+
+$$
+L_s(1)=s\left(\frac{11}{6}+\frac{a}{3}+\frac{a^2}{5}\right).
+$$
+
+The curved segment is included in this scope: its image is $(0,\ell)$ with
+$\ell=1+a$, so
+
+$$
+L_s(1)=s\left(\ell+\frac{\ell^2}{2}+\frac{\ell^3}{3}\right).
+$$
+
+Every coefficient is compared with an independent pointwise mapping, Jacobian
+and basis integration loop, using relative vector tolerance $10^{-11}$ with
+denominator $\max(1,\|b_{\mathrm{ref}}\|_2)$. The analytic action uses relative
+tolerance $10^{-9}$. Gates run before and after timing and after changing
+$s=1$ to $s=2$. Omitting the quadratic source term changes the analytic action
+by more than ten percent. These are accuracy gates, not timing thresholds.
+The source workload is not a nonlinear solve or a distributed assembly benchmark.
 
 The independent quadrature oracle owns mapped points only for its currently
 bound cell, just as production assembly does. It does not request or evict

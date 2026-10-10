@@ -171,12 +171,132 @@ namespace Rodin::Tests::Benchmarks
           QF::PolytopeQuadratureFormula::get(order, geometry).getSize();
       }
 
+      /**
+       * @brief Measures a source load that requires physical coordinates.
+       *
+       * The timed form is @f$L_s(v)=s\int_\Omega(1+x_0+x_{d-1}^2)v\,dx@f$.
+       * An independent pointwise map, Jacobian and basis loop checks every
+       * assembled coefficient. Constant-test actions have closed-form moments
+       * on the unit box and its prescribed quadratic image. Unlike the affine
+       * state benchmarks, this source study also supports the curved segment.
+       *
+       * @param timing Benchmark iteration state and workload sizes.
+       * @param geometry Reference-cell family.
+       * @param curved Whether to install exact quadratic geometry.
+       */
+      static void runSource(
+        benchmark::State& timing, Geometry::Polytope::Type geometry, bool curved)
+      {
+        using namespace Variational;
+        const size_t n = timing.range(0), order = timing.range(1);
+        auto mesh = Convergence::UniformGrid(geometry).makeMesh(n);
+        const size_t dimension = mesh.getDimension();
+        constexpr Real Amplitude = Real(1) / 10;
+        Optional<Convergence::CurvedGeometry<decltype(mesh)>> map;
+        if (curved)
+        {
+          map.emplace(
+            mesh, Convergence::CurvedGeometry<decltype(mesh)>::Map::Quadratic, Amplitude);
+          map->template install<2>();
+        }
+        H1 space(std::integral_constant<size_t, K>{}, mesh);
+        GridFunction one(space);
+        one = RealFunction(1);
+        TestFunction v(space);
+        Real scale = 1;
+        const RealFunction source([&](const Geometry::Point& point) {
+          const auto& x = point.getPhysicalCoordinates();
+          return scale * (1 + x(0) + x(dimension - 1) * x(dimension - 1));
+        });
+        auto integral = Integral(source, v);
+        integral.setOrder(order);
+        LinearForm load(v);
+        load = integral;
+
+        Math::Vector<Real> reference = Math::Vector<Real>::Zero(space.getSize());
+        const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const auto& element = space.getFiniteElement(dimension, cell->getIndex());
+          const auto dofs = space.getDOFs(dimension, cell->getIndex());
+          for (size_t qp = 0; qp < formula.getSize(); ++qp)
+          {
+            const Geometry::Point point(*cell, formula.getPoint(qp));
+            const auto& x = point.getPhysicalCoordinates();
+            const Real weight = formula.getWeight(qp) * point.getDistortion();
+            const Real value = 1 + x(0) + x(dimension - 1) * x(dimension - 1);
+            for (size_t local = 0; local < element.getCount(); ++local)
+            {
+              reference(dofs(local)) +=
+                weight * value * element.getBasis(local)(formula.getPoint(qp));
+            }
+          }
+        }
+        const Real amplitude = curved ? Amplitude : 0;
+        const Real length = 1 + amplitude;
+        const Real moment = dimension == 1
+          ? length + length * length / 2 + length * length * length / 3
+          : Real(11) / 6 + amplitude / 3 + amplitude * amplitude / 5;
+        const Real omittedMoment =
+          dimension == 1 ? length + length * length / 2 : Real(3) / 2;
+        constexpr Real ActionTolerance = 1e-9;
+        constexpr Real VectorTolerance = 1e-11;
+        constexpr Real MissingQuadraticMinimumDefect = 0.1;
+        const auto valid = [&] {
+          const auto& values = load.getVector();
+          const Real action = one.getData().dot(values);
+          return values.allFinite() && std::isfinite(action) &&
+            std::abs(action / (scale * moment) - 1) < ActionTolerance &&
+            (values - scale * reference).norm() <
+            VectorTolerance * std::max(Real(1), (scale * reference).norm()) &&
+            std::abs(omittedMoment / moment - 1) > MissingQuadraticMinimumDefect;
+        };
+        load.assemble();
+        if (!valid())
+        {
+          nonlinearCheckFailed = true;
+          timing.SkipWithError("Physical source vector or analytic moment failed");
+          return;
+        }
+        for (auto _ : timing)
+        {
+          load.assemble();
+          benchmark::DoNotOptimize(load.getVector().data());
+          benchmark::ClobberMemory();
+        }
+        bool ok = valid();
+        scale = 2;
+        load.assemble();
+        ok = ok && valid();
+        if (!ok)
+        {
+          nonlinearCheckFailed = true;
+          timing.SkipWithError("Physical source replacement or state update failed");
+        }
+        timing.counters["cells"] = mesh.getPolytopeCount(dimension);
+        timing.counters["dofs"] = space.getSize();
+        timing.counters["degree"] = K;
+        timing.counters["geometry_degree"] = curved ? 2 : 1;
+        timing.counters["quadrature_order"] = order;
+        timing.counters["quadrature_points_per_cell"] = formula.getSize();
+      }
+
       static void registerCases()
       {
         using G = Geometry::Polytope::Type;
         for (auto geometry : {G::Segment, G::Triangle, G::Quadrilateral, G::Tetrahedron,
                G::Hexahedron, G::Wedge, G::Pyramid})
         {
+          for (bool curved : {false, true})
+          {
+            const std::string name = std::string("NonlinearPoisson/") +
+              (curved ? "CurvedQ2/" : "") + "Source/P" + std::to_string(K) + "/" +
+              std::string(Convergence::UniformGrid::getGeometryName(geometry));
+            benchmark::RegisterBenchmark(name.c_str(),
+              [geometry, curved](auto& state) { runSource(state, geometry, curved); })
+              ->ArgsProduct({{3, 5, 9}, {8, 16}})
+              ->UseRealTime();
+          }
           for (bool residual : {false, true})
           {
             for (bool curved : {false, true})

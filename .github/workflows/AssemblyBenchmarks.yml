@@ -83,7 +83,7 @@ jobs:
           build/tests/benchmarks/RodinConstrainedAssemblyBenchmarks
           --benchmark_filter='/3/real_time$' --benchmark_min_time=1x
           --benchmark_out=assembly-constrained-smoke.json --benchmark_out_format=json
-      - name: Check prescribed-state nonlinear residuals and tangents
+      - name: Check nonlinear residuals, tangents, and physical source loads
         run: >-
           build/tests/benchmarks/RodinNonlinearPoissonAssemblyBenchmarks
           --benchmark_filter='/3/(8|16)/real_time$' --benchmark_min_time=1x
