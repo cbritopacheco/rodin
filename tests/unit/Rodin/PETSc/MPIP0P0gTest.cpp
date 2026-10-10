@@ -172,7 +172,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     }
     auto mesh = sharder.gather(0);
     if (world.size() > 1 && world.rank() == 0)
+    {
       EXPECT_EQ(mesh.getShard().getVertexCount(), 0);
+    }
 
     P0g<PetscScalar, decltype(mesh)> scalarSpace(mesh);
     P0g<Math::SpatialVector<PetscScalar>, decltype(mesh)> vectorSpace(mesh, size_t(2));
