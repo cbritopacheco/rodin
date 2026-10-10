@@ -887,7 +887,7 @@ KelvinBallSphere --h=0.125 --outer-radius=2 --save-mesh
 
 ## Output
 
-Each iterate is written to three XDMF series.
+Each iterate is written to the chamber and sewn XDMF series.
 
 - `KelvinBall.xdmf` — the chamber design and states. On iterations followed by
   an update, `Advected` is the transported distance on the mesh passed to the
@@ -895,10 +895,13 @@ Each iterate is written to three XDMF series.
 - `KelvinBallSewed.xdmf` — the complete 24-copy design with the sewn distance
   and deformation, and a complete fluid grid carrying the six sewn velocities
   and pressures.
-- `KelvinBallMMG.xdmf` or `KelvinBallSWIFT.xdmf` — the reconstructed mesh,
+- `KelvinBallMMG.xdmf` — additionally written for MMG reconstruction only,
+  containing the reconstructed mesh,
   with the initial design at time 0 and successive updates at times 1, 2, etc.,
   before the next finite-element spaces are built. Each snapshot is flushed
   immediately, including when using `--geometry-only` for the initial design.
+
+SWIFT reconstruction does not write a separate reconstruction-only series.
 
 Post-SWIFT MMG adaptation is transactional. A failed adaptation or invalid
 fixed-boundary projection discards the candidate, retains the fitted mesh and

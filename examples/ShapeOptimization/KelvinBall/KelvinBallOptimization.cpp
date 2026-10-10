@@ -1471,12 +1471,15 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   Optional<MMG::Mesh> swiftBackground = std::move(initial.background);
   Real backgroundH = initial.backgroundH;
   ReconstructionDiagnostics reconstruction = initial.diagnostics;
-  const std::string reconstructionName =
-    m_options.reconstructionMethod == "swift" ? "KelvinBallSWIFT" : "KelvinBallMMG";
-  IO::XDMF reconstructionXdmf(reconstructionName);
-  auto reconstructionOutput = reconstructionXdmf.grid("Reconstructed");
-  reconstructionOutput.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
-  reconstructionXdmf.write(Real(0)).flush();
+  Optional<IO::XDMF> reconstructionXdmf;
+  Optional<IO::XDMF::Grid> reconstructionOutput;
+  if (m_options.reconstructionMethod == "mmg")
+  {
+    reconstructionXdmf.emplace("KelvinBallMMG");
+    reconstructionOutput.emplace(reconstructionXdmf->grid("Reconstructed"));
+    reconstructionOutput->setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
+    reconstructionXdmf->write(Real(0)).flush();
+  }
   checkFixedGeometry(mesh, outerRadius);
   checkMaterials(mesh);
   if (m_options.saveMeshDiagnostic)
@@ -2720,9 +2723,12 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       }
     }();
     reconstruction = result.diagnostics;
-    reconstructionOutput.clear();
-    reconstructionOutput.setMesh(result.mesh, IO::XDMF::MeshPolicy::Transient);
-    reconstructionXdmf.write(static_cast<Real>(iteration + 1)).flush();
+    if (reconstructionXdmf)
+    {
+      reconstructionOutput->clear();
+      reconstructionOutput->setMesh(result.mesh, IO::XDMF::MeshPolicy::Transient);
+      reconstructionXdmf->write(static_cast<Real>(iteration + 1)).flush();
+    }
     checkFixedGeometry(result.mesh, outerRadius);
     checkMaterials(result.mesh);
     nextMesh.emplace(std::move(result.mesh));
@@ -2734,10 +2740,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   }
 
   Alert::Success() << "Wrote KelvinBall.xdmf, KelvinBallSewed.xdmf, "
-                   << reconstructionName
-                   << ".xdmf, and "
-                      "kelvin-ball.csv"
-                   << Alert::Raise;
+                   << (reconstructionXdmf ? "KelvinBallMMG.xdmf, " : "")
+                   << "and kelvin-ball.csv" << Alert::Raise;
   return 0;
 }
 
