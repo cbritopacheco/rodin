@@ -102,13 +102,13 @@ namespace Rodin::Tests::Convergence
           EXPECT_GT(coarse.error.getL2(), fine.error.getL2());
           EXPECT_GT(coarse.error.getH1Seminorm(), fine.error.getH1Seminorm());
           EXPECT_LE(fine.error.getL2(),
-            field.getL2() * std::pow(ratio, fieldDegree + 1 - L2Margin)
-              + geometry.getL2() * std::pow(ratio, geometryDegree + 1 - L2Margin)
-              + RoundoffTolerance);
+            field.getL2() * std::pow(ratio, fieldDegree + 1 - L2Margin) +
+              geometry.getL2() * std::pow(ratio, geometryDegree + 1 - L2Margin) +
+              RoundoffTolerance);
           EXPECT_LE(fine.error.getH1Seminorm(),
-            field.getH1Seminorm() * std::pow(ratio, fieldDegree - H1Margin)
-              + geometry.getH1Seminorm() * std::pow(ratio, geometryDegree - H1Margin)
-              + RoundoffTolerance);
+            field.getH1Seminorm() * std::pow(ratio, fieldDegree - H1Margin) +
+              geometry.getH1Seminorm() * std::pow(ratio, geometryDegree - H1Margin) +
+              RoundoffTolerance);
         }
       }
 
@@ -167,6 +167,7 @@ namespace Rodin::Tests::Convergence
       static void expectSensitivity(const Components& base, const Components& refined)
       {
         for (size_t component = 0; component < base.size(); ++component)
+        {
           for (const auto& pair :
             {std::pair{base[component].getL2(), refined[component].getL2()},
               std::pair{
@@ -177,15 +178,14 @@ namespace Rodin::Tests::Convergence
             ASSERT_TRUE(std::isfinite(pair.second));
             EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
           }
+        }
       }
 
     private:
-      void expectRatesFrom(
-        size_t firstComponent, size_t fieldDegree, size_t geometryDegree,
-        size_t lastComponent = 4) const
+      void expectRatesFrom(size_t firstComponent, size_t fieldDegree,
+        size_t geometryDegree, size_t lastComponent = 4) const
       {
-        for (size_t component = firstComponent; component < lastComponent;
-             ++component)
+        for (size_t component = firstComponent; component < lastComponent; ++component)
         {
           const auto& history = m_histories[component];
           ASSERT_GE(history.getSize(), 3);

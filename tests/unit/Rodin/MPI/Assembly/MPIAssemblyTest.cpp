@@ -219,8 +219,10 @@ namespace Rodin::Tests::Unit
       return distributeFromRoot(ctx, GetParam(), {2, 2, 2});
     }();
     for (size_t d = 0; d <= dim; ++d)
+    {
       for (size_t dp = 0; dp <= dim; ++dp)
         mesh.getConnectivity().compute(d, dp);
+    }
     for (size_t d = 1; d < dim; ++d)
       mesh.reconcile(d);
 
@@ -360,8 +362,10 @@ namespace Rodin::Tests::Unit
       }
       EXPECT_EQ(next, space.getSize());
       for (Index local = 0; local < space.getShard().getSize(); ++local)
+      {
         EXPECT_EQ(
           space.getLocalIndex(space.getGlobalIndex(local)), Optional<Index>(local));
+      }
       using Record = std::pair<Index, std::vector<Index>>;
       for (size_t d = 0; d <= dimension; ++d)
       {
@@ -377,6 +381,7 @@ namespace Rodin::Tests::Unit
         boost::mpi::all_gather(world, local, gathered);
         IndexMap<std::vector<Index>> expected;
         for (const auto& records : gathered)
+        {
           for (const auto& [entity, indices] : records)
           {
             const auto [it, inserted] = expected.emplace(entity, indices);
@@ -385,6 +390,7 @@ namespace Rodin::Tests::Unit
               EXPECT_EQ(it->second, indices) << "dimension=" << d << " entity=" << entity;
             }
           }
+        }
       }
     };
     const auto orders = [&]<size_t K>() {
@@ -404,6 +410,7 @@ namespace Rodin::Tests::Unit
       check(realVector);
       check(complexVector);
       for (size_t d = 0; d <= dimension; ++d)
+      {
         for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
         {
           EXPECT_EQ(real.getDOFs(d, entity).size(), complex.getDOFs(d, entity).size());
@@ -420,6 +427,7 @@ namespace Rodin::Tests::Unit
               (realVector.getDOFs(d, entity) == complexVector.getDOFs(d, entity)).all());
           }
         }
+      }
     };
     orders.template operator()<1>();
     orders.template operator()<2>();
@@ -445,16 +453,20 @@ namespace Rodin::Tests::Unit
                                  : distributeFromRoot(ctx, GetParam(), {5, 5, 5});
     Index localMaximum = 0;
     for (Index vertex = 0; vertex < parent.getShard().getVertexCount(); ++vertex)
+    {
       if (parent.getShard().isOwned(0, vertex))
         localMaximum = std::max(localMaximum, parent.getGlobalIndex(0, vertex));
+    }
     const Index selected = boost::mpi::all_reduce(
       world, localMaximum, [](Index a, Index b) { return std::max(a, b); });
     SubMesh<Context::MPI>::Builder builder;
     builder.initialize(parent);
     for (Index vertex = 0; vertex < parent.getShard().getVertexCount(); ++vertex)
+    {
       if (parent.getShard().isOwned(0, vertex) &&
         parent.getGlobalIndex(0, vertex) == selected)
         builder.include(0, vertex);
+    }
     auto sub = builder.finalize();
     const Mesh<Context::MPI>& mesh = sub;
     EXPECT_EQ(mesh.getDimension(), 0u);
@@ -477,8 +489,10 @@ namespace Rodin::Tests::Unit
     boost::mpi::all_gather(world, mesh.getShard().getVertexCount() ? 1 : 0, present);
     IndexSet holders;
     for (size_t rank = 0; rank < present.size(); ++rank)
+    {
       if (present[rank] && static_cast<int>(rank) != owner)
         holders.insert(rank);
+    }
     for (Index vertex = 0; vertex < mesh.getShard().getVertexCount(); ++vertex)
     {
       const auto& shard = mesh.getShard();
@@ -534,8 +548,10 @@ namespace Rodin::Tests::Unit
           return MatrixFunction(size_t{2}, size_t{3}, [first](const Point&) {
             Math::SpatialMatrix<Scalar> value(2, 3);
             for (size_t r = 0; r < 2; ++r)
+            {
               for (size_t s = 0; s < 3; ++s)
                 value(r, s) = first + Scalar(3 * r + s);
+            }
             return value;
           });
         else if constexpr (vector)
@@ -565,8 +581,10 @@ namespace Rodin::Tests::Unit
           if (value.rows() == 2 && value.cols() == 3)
           {
             for (size_t r = 0; r < 2; ++r)
+            {
               for (size_t s = 0; s < 3; ++s)
                 EXPECT_EQ(value(r, s), first + Scalar(3 * r + s));
+            }
           }
         }
         else if constexpr (vector)
@@ -614,8 +632,10 @@ namespace Rodin::Tests::Unit
             const Scalar base = scalarTrace(point);
             Math::SpatialMatrix<Scalar> value(2, 3);
             for (size_t r = 0; r < 2; ++r)
+            {
               for (size_t s = 0; s < 3; ++s)
                 value(r, s) = base + Scalar(3 * r + s);
+            }
             return value;
           });
         else if constexpr (vector)
@@ -644,8 +664,10 @@ namespace Rodin::Tests::Unit
             if (actual.rows() == 2 && actual.cols() == 3)
             {
               for (size_t r = 0; r < 2; ++r)
+              {
                 for (size_t s = 0; s < 3; ++s)
                   EXPECT_EQ(actual(r, s), expected(r, s));
+              }
             }
           }
           else if constexpr (vector)
@@ -741,6 +763,7 @@ namespace Rodin::Tests::Unit
       std::vector<Index> actualParents;
       const auto& cellParents = sub.getPolytopeMap(subDimension).left;
       for (auto cell = mesh.getCell(); cell; ++cell)
+      {
         if (mesh.getShard().isOwned(subDimension, cell->getIndex()))
         {
           EXPECT_LT(cell->getIndex(), cellParents.size());
@@ -748,6 +771,7 @@ namespace Rodin::Tests::Unit
             actualParents.push_back(immediateParent.getGlobalIndex(
               subDimension, cellParents[cell->getIndex()]));
         }
+      }
       using Selection = std::pair<std::vector<Index>, std::vector<Index>>;
       std::vector<Selection> selections;
       boost::mpi::all_gather(
@@ -764,6 +788,7 @@ namespace Rodin::Tests::Unit
       std::sort(actualSelection.begin(), actualSelection.end());
       EXPECT_EQ(actualSelection, expectedSelection);
       for (size_t d = 0; d <= subDimension; ++d)
+      {
         for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
         {
           const auto& map = sub.getPolytopeMap(d);
@@ -798,6 +823,7 @@ namespace Rodin::Tests::Unit
               mappedVertices, parentEntity->getVertices()));
           }
         }
+      }
       // Entity ownership is a global invariant, distinct from DOF ownership.
       for (size_t d = 0; d <= subDimension; ++d)
       {
@@ -839,8 +865,10 @@ namespace Rodin::Tests::Unit
           }
         }
         for (const auto& [entity, ancestor] : expectedAncestor)
+        {
           EXPECT_TRUE(owners.contains(entity))
             << "dimension=" << d << " entity=" << entity;
+        }
         for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
         {
           const Index global = mesh.getGlobalIndex(d, entity);
@@ -957,6 +985,7 @@ namespace Rodin::Tests::Unit
           boost::mpi::all_gather(world, local, gathered);
           IndexMap<std::vector<Index>> expected;
           for (const auto& records : gathered)
+          {
             for (const auto& [entity, indices] : records)
             {
               const auto [it, inserted] = expected.emplace(entity, indices);
@@ -966,6 +995,7 @@ namespace Rodin::Tests::Unit
                   << "dimension=" << d << " entity=" << entity;
               }
             }
+          }
         }
       };
       const auto compareRanges = [&](const auto& real, const auto& complex,
@@ -980,6 +1010,7 @@ namespace Rodin::Tests::Unit
         checkSpace(realVector);
         checkSpace(complexVector);
         for (size_t d = cellOnly ? subDimension : 0; d <= subDimension; ++d)
+        {
           for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
           {
             // getDOFs may return a reusable scratch view. Compare snapshots,
@@ -999,6 +1030,7 @@ namespace Rodin::Tests::Unit
               EXPECT_TRUE((vector == complexValues).all());
             }
           }
+        }
       };
       const auto compareMatrices = [&](const auto& scalar, const auto& realMatrix,
                                      const auto& complexMatrix) {
@@ -1013,6 +1045,7 @@ namespace Rodin::Tests::Unit
         checkSpace(realMatrix);
         checkSpace(complexMatrix);
         for (size_t d = cellOnly ? subDimension : 0; d <= subDimension; ++d)
+        {
           for (Index entity = 0; entity < mesh.getShard().getPolytopeCount(d); ++entity)
           {
             const IndexArray scalarDOFs = scalar.getDOFs(d, entity);
@@ -1026,6 +1059,7 @@ namespace Rodin::Tests::Unit
               EXPECT_EQ(complexDOFs(a), matrixDOFs(a));
             }
           }
+        }
       };
       const auto families = [&]<template <class, class> class Family>() {
         Family<Real, Mesh<Context::MPI>> real(mesh);
@@ -1189,22 +1223,26 @@ namespace Rodin::Tests::Unit
       if (selectedDimension == dimension)
       {
         for (auto cell = parent.getCell(); cell; ++cell)
+        {
           if (parent.getShard().isOwned(dimension, cell->getIndex()) &&
             (!sparse || parent.getGlobalIndex(dimension, cell->getIndex()) % 2 == 0))
           {
             builder.include(dimension, cell->getIndex());
             selected.push_back(parent.getGlobalIndex(dimension, cell->getIndex()));
           }
+        }
       }
       else
       {
         for (auto face = parent.getBoundary(); face; ++face)
+        {
           if (parent.getShard().isOwned(selectedDimension, face->getIndex()))
           {
             builder.include(selectedDimension, face->getIndex());
             selected.push_back(
               parent.getGlobalIndex(selectedDimension, face->getIndex()));
           }
+        }
       }
       auto sub = builder.finalize();
       EXPECT_EQ(sub.getDimension(), selectedDimension);
@@ -1213,12 +1251,14 @@ namespace Rodin::Tests::Unit
       nestedBuilder.initialize(sub);
       std::vector<Index> nestedSelected;
       for (auto cell = sub.getCell(); cell; ++cell)
+      {
         if (sub.getShard().isOwned(selectedDimension, cell->getIndex()))
         {
           nestedBuilder.include(selectedDimension, cell->getIndex());
           nestedSelected.push_back(
             sub.getGlobalIndex(selectedDimension, cell->getIndex()));
         }
+      }
       auto nested = nestedBuilder.finalize();
       EXPECT_EQ(nested.getDimension(), selectedDimension);
       check(nested, nestedSelected);
@@ -1560,11 +1600,15 @@ namespace Rodin::Tests::Unit
       const auto required = requiredDOFs(fes);
       std::set<Index> expected;
       for (auto face = mesh.getFace(); face; ++face)
+      {
         if (physical.contains(
               mesh.getShard().getPolytopeMap(D - 1).left.at(face->getIndex())))
           for (Index dof : fes.getDOFs(D - 1, face->getIndex()))
+          {
             if (required.contains(dof))
               expected.insert(dof);
+          }
+      }
       if constexpr (std::is_same_v<typename Space::ElementType,
                       P0gElement<typename Space::RangeType>>)
       {
@@ -1577,12 +1621,14 @@ namespace Rodin::Tests::Unit
       }
       Math::SpatialMatrix<Scalar> prescribed(2, 3);
       for (size_t r = 0; r < 2; ++r)
+      {
         for (size_t c = 0; c < 3; ++c)
         {
           prescribed(r, c) = Scalar(1 + 3 * r + c);
           if constexpr (std::is_same_v<Scalar, Complex>)
             prescribed(r, c) += Complex(0, 1 + r + c);
         }
+      }
       TrialFunction u(fes);
       TrialFunction v(fes);
       auto value = DirichletBC(u, MatrixFunction(prescribed));

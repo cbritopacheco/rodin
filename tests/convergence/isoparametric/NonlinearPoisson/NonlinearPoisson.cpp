@@ -302,6 +302,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
         const auto solver = problem.template solve<K>(
           Data::Field::Sine, false, AssemblyOrder, RefinedTolerance);
         for (const auto& e : {quad, solver})
+        {
           for (const auto& pair : {std::pair{base.getL2(), e.getL2()},
                  std::pair{base.getH1Seminorm(), e.getH1Seminorm()}})
           {
@@ -310,6 +311,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::NonlinearPoisson
             ASSERT_GT(pair.first, 0);
             EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
           }
+        }
       }
       void tangent(Map map = Map::Quadratic) const
       {

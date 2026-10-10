@@ -176,6 +176,8 @@ namespace Rodin::Variational
       /** @brief Gets the configured order rule for delegation to another integrator.
        * An empty callable preserves inference; a nonempty callable preserves
        * constant or per-polytope order selection without resolving it early.
+       * @returns Reference to the configured order rule; an empty rule selects
+       * integrand-based inference.
        */
       const OrderType& getOrder() const noexcept
       {

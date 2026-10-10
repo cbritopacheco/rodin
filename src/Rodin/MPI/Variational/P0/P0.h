@@ -266,8 +266,9 @@ namespace Rodin::Variational
        * All ranks in the mesh communicator participate, including empty ranks.
        * Ownership numbering and global size are established for this fixed
        * layout; subsequent size queries and copies require no communication.
-       * @param[in] mesh Mesh on which the object is defined.
-       * @param[in] vdim Number of components in the value range.
+       *
+       * @param mesh Mesh on which the object is defined.
+       * @param vdim Number of components in the value range.
        */
       P0(const MeshType& mesh, size_t vdim)
         : m_mesh(mesh),

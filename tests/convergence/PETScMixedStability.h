@@ -50,7 +50,8 @@ namespace Rodin::Tests::Convergence
         }
         int count = static_cast<int>(local.size());
         std::vector<int> counts(ranks), offsets(ranks);
-        ASSERT_EQ(MPI_Allgather(&count, 1, MPI_INT, counts.data(), 1, MPI_INT, comm), MPI_SUCCESS);
+        ASSERT_EQ(MPI_Allgather(&count, 1, MPI_INT, counts.data(), 1, MPI_INT, comm),
+          MPI_SUCCESS);
         int total = 0;
         for (int rank = 0; rank < ranks; ++rank)
         {
@@ -60,7 +61,8 @@ namespace Rodin::Tests::Convergence
         }
         std::vector<PetscInt> indices(total);
         ASSERT_EQ(MPI_Allgatherv(local.data(), count, MPIU_INT, indices.data(),
-          counts.data(), offsets.data(), MPIU_INT, comm), MPI_SUCCESS);
+                    counts.data(), offsets.data(), MPIU_INT, comm),
+          MPI_SUCCESS);
         IndexMap<Real> global;
         for (PetscInt index : indices)
         {
@@ -80,15 +82,19 @@ namespace Rodin::Tests::Convergence
         ASSERT_EQ(size, mass.rows());
         Vec complete = nullptr;
         VecScatter scatter = nullptr;
-        ASSERT_EQ(VecScatterCreateToAll(pressureConstant, &scatter, &complete), PETSC_SUCCESS);
-        EXPECT_EQ(VecScatterBegin(scatter, pressureConstant, complete,
-          INSERT_VALUES, SCATTER_FORWARD), PETSC_SUCCESS);
-        EXPECT_EQ(VecScatterEnd(scatter, pressureConstant, complete,
-          INSERT_VALUES, SCATTER_FORWARD), PETSC_SUCCESS);
+        ASSERT_EQ(
+          VecScatterCreateToAll(pressureConstant, &scatter, &complete), PETSC_SUCCESS);
+        EXPECT_EQ(VecScatterBegin(
+                    scatter, pressureConstant, complete, INSERT_VALUES, SCATTER_FORWARD),
+          PETSC_SUCCESS);
+        EXPECT_EQ(VecScatterEnd(
+                    scatter, pressureConstant, complete, INSERT_VALUES, SCATTER_FORWARD),
+          PETSC_SUCCESS);
         const PetscScalar* values = nullptr;
         EXPECT_EQ(VecGetArrayRead(complete, &values), PETSC_SUCCESS);
         Math::Vector<Real> constant(size);
-        for (PetscInt i = 0; i < size; ++i) constant(i) = values[i];
+        for (PetscInt i = 0; i < size; ++i)
+          constant(i) = values[i];
         EXPECT_EQ(VecRestoreArrayRead(complete, &values), PETSC_SUCCESS);
         EXPECT_EQ(VecScatterDestroy(&scatter), PETSC_SUCCESS);
         EXPECT_EQ(VecDestroy(&complete), PETSC_SUCCESS);
@@ -100,8 +106,7 @@ namespace Rodin::Tests::Convergence
         int failed = rank == 0 && ::testing::Test::HasFatalFailure();
         ASSERT_EQ(MPI_Bcast(&failed, 1, MPI_INT, 0, comm), MPI_SUCCESS);
         ASSERT_EQ(failed, 0) << "Global pressure-spectrum computation failed";
-        std::array<PetscInt, 2> dimensions{
-          static_cast<PetscInt>(result.freeVelocity),
+        std::array<PetscInt, 2> dimensions{static_cast<PetscInt>(result.freeVelocity),
           static_cast<PetscInt>(result.zeroMeanPressure)};
         ASSERT_EQ(MPI_Bcast(dimensions.data(), dimensions.size(), MPIU_INT, 0, comm),
           MPI_SUCCESS);
@@ -113,10 +118,12 @@ namespace Rodin::Tests::Convergence
         result.eigenvalues.resize(dimensions[1]);
         static_assert(std::is_same_v<Real, PetscReal>);
         ASSERT_EQ(MPI_Bcast(result.eigenvalues.data(), static_cast<int>(dimensions[1]),
-          MPIU_REAL, 0, comm), MPI_SUCCESS);
+                    MPIU_REAL, 0, comm),
+          MPI_SUCCESS);
         std::array<Real, 4> defects{result.meanBasisDefect, result.eigenResidual,
           result.spectralDifference, result.velocityResidual};
-        ASSERT_EQ(MPI_Bcast(defects.data(), defects.size(), MPIU_REAL, 0, comm), MPI_SUCCESS);
+        ASSERT_EQ(
+          MPI_Bcast(defects.data(), defects.size(), MPIU_REAL, 0, comm), MPI_SUCCESS);
         result.meanBasisDefect = defects[0];
         result.eigenResidual = defects[1];
         result.spectralDifference = defects[2];
@@ -130,8 +137,9 @@ namespace Rodin::Tests::Convergence
         if (ranks == 1)
           ASSERT_EQ(MatDuplicate(source, MAT_COPY_VALUES, &complete), PETSC_SUCCESS);
         else
-          ASSERT_EQ(MatCreateRedundantMatrix(source, ranks, MPI_COMM_NULL,
-            MAT_INITIAL_MATRIX, &complete), PETSC_SUCCESS);
+          ASSERT_EQ(MatCreateRedundantMatrix(
+                      source, ranks, MPI_COMM_NULL, MAT_INITIAL_MATRIX, &complete),
+            PETSC_SUCCESS);
         PetscInt rows = 0, columns = 0;
         EXPECT_EQ(MatGetSize(complete, &rows, &columns), PETSC_SUCCESS);
         PetscInt first = 0, last = 0;
@@ -147,7 +155,8 @@ namespace Rodin::Tests::Convergence
           EXPECT_EQ(MatGetRow(complete, row, &count, &indices, &values), PETSC_SUCCESS);
           for (PetscInt i = 0; i < count; ++i)
             entries.emplace_back(row, indices[i], values[i]);
-          EXPECT_EQ(MatRestoreRow(complete, row, &count, &indices, &values), PETSC_SUCCESS);
+          EXPECT_EQ(
+            MatRestoreRow(complete, row, &count, &indices, &values), PETSC_SUCCESS);
         }
         EXPECT_EQ(MatDestroy(&complete), PETSC_SUCCESS);
         destination.resize(rows, columns);

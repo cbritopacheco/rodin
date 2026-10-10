@@ -220,8 +220,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
 #ifdef RODIN_USE_MPI
           if constexpr (requires { m_mesh.getShard(); })
             for (Real& value : squared)
+            {
               value = boost::mpi::all_reduce(
                 m_mesh.getContext().getCommunicator(), value, std::plus<Real>());
+            }
 #endif
           for (size_t i = 0; i < lifted->strain.size(); ++i)
           {
@@ -247,10 +249,14 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
         for (size_t i = 0; i < jacobian.rows(); ++i)
           trace += jacobian(i, i);
         for (size_t i = 0; i < jacobian.rows(); ++i)
+        {
           for (size_t j = 0; j < jacobian.cols(); ++j)
+          {
             value(i, j) = stress
               ? Lambda * trace * (i == j) + Mu * (jacobian(i, j) + jacobian(j, i))
               : (jacobian(i, j) + jacobian(j, i)) / 2;
+          }
+        }
         return value;
       }
 
@@ -322,11 +328,13 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
           checkDecomposition(lifted);
           const auto errors = components(represented, lifted);
           for (size_t component : {0u, 1u})
+          {
             for (Real value : quantities(errors[component]))
             {
               EXPECT_TRUE(std::isfinite(value));
               EXPECT_LT(value, PatchTolerance);
             }
+          }
           const auto geometry = quantities(errors[2]), total = quantities(errors[3]);
           for (size_t quantity = 0; quantity < geometry.size(); ++quantity)
           {
@@ -340,6 +348,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
         }
         constexpr Real L2Margin = 0.55, DerivativeMargin = 0.45;
         for (size_t component = 0; component < histories.size(); ++component)
+        {
           for (size_t quantity = 0; quantity < histories[component].size(); ++quantity)
           {
             const auto& history = histories[component][quantity];
@@ -359,6 +368,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
               EXPECT_LT(rate, order + margin);
             }
           }
+        }
       }
 
       void checkMatchedGeometrySensitivity() const
@@ -377,14 +387,18 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
           checkDecomposition(lifted);
           errors[i] = components(represented, lifted);
           for (size_t component : {0u, 1u})
+          {
             for (Real value : quantities(errors[i][component]))
             {
               EXPECT_TRUE(std::isfinite(value));
               EXPECT_LT(value, PatchTolerance);
             }
+          }
         }
         for (size_t i = 1; i < errors.size(); ++i)
+        {
           for (size_t component : {2u, 3u})
+          {
             for (size_t quantity = 0; quantity < 4; ++quantity)
             {
               SCOPED_TRACE(::testing::Message() << "control=" << i << " component="
@@ -395,6 +409,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
               ASSERT_TRUE(std::isfinite(refined));
               EXPECT_LT(std::abs(refined / base - 1), SensitivityTolerance);
             }
+          }
+        }
       }
 
       template <size_t K>
@@ -462,9 +478,9 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
                   const Real margin = quantity == 0 ? L2Margin : DerivativeMargin;
                   EXPECT_GT(coarse[quantity], fine[quantity]);
                   EXPECT_LE(fine[quantity],
-                    field[quantity] * std::pow(ratio, K + offset - margin)
-                      + geometry[quantity] * std::pow(ratio, 2 + offset - margin)
-                      + DecompositionTolerance);
+                    field[quantity] * std::pow(ratio, K + offset - margin) +
+                      geometry[quantity] * std::pow(ratio, 2 + offset - margin) +
+                      DecompositionTolerance);
                 }
               }
               continue;
@@ -519,7 +535,9 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
           errors[i] = components(represented, lifted);
         }
         for (size_t i = 1; i < errors.size(); ++i)
+        {
           for (size_t component = 0; component < errors[i].size(); ++component)
+          {
             for (size_t quantity = 0; quantity < 4; ++quantity)
             {
               SCOPED_TRACE(::testing::Message() << "control=" << i << " component="
@@ -530,6 +548,8 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
               ASSERT_TRUE(std::isfinite(refined));
               EXPECT_LT(std::abs(refined / base - 1), SensitivityTolerance);
             }
+          }
+        }
       }
 
       template <size_t K = 2>
@@ -540,8 +560,9 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
         if constexpr (K > 2)
         {
           LiftedErrors patch;
-          const auto represented = problem.template solve<K>(Data::Field::AsymmetricAffine,
-            false, AssemblyOrder, SolverTolerance, NormOrder, &patch);
+          const auto represented =
+            problem.template solve<K>(Data::Field::AsymmetricAffine, false, AssemblyOrder,
+              SolverTolerance, NormOrder, &patch);
           checkDecomposition(patch);
           const auto errors = components(represented, patch);
           for (size_t component : {0u, 1u})
@@ -793,6 +814,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
         const auto solver = problem.template solve<K>(
           Data::Field::Exponential, false, AssemblyOrder, RefinedTolerance);
         for (const auto& refined : {quadrature, solver})
+        {
           for (const auto& pair :
             {std::pair{baseline.displacement.getL2(), refined.displacement.getL2()},
               std::pair{baseline.displacement.getH1Seminorm(),
@@ -805,6 +827,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::LinearElasticity
             ASSERT_GT(pair.first, 0);
             EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
           }
+        }
       }
   };
 

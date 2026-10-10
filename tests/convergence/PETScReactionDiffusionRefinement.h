@@ -99,6 +99,7 @@ namespace Rodin::Tests::Convergence
               SolverTolerance, NormOrder + 2),
             solve<K>(mesh, ReactionDiffusionData::Field::Smooth, false, AssemblyOrder,
               SolverTolerance / 10)})
+        {
           for (size_t field = 0; field < 2; ++field)
           {
             SCOPED_TRACE(::testing::Message() << "field=" << field);
@@ -113,6 +114,7 @@ namespace Rodin::Tests::Convergence
                 refined[field].getH1Seminorm() / baseline[field].getH1Seminorm() - 1),
               SensitivityTolerance);
           }
+        }
       }
 
     private:

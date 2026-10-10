@@ -144,8 +144,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
 #ifdef RODIN_USE_MPI
           if constexpr (requires { m_mesh.getShard(); })
             for (Real& value : squared)
+            {
               value = boost::mpi::all_reduce(
                 m_mesh.getContext().getCommunicator(), value, std::plus<Real>());
+            }
 #endif
           for (size_t component = 0; component < squared.size(); ++component)
             lifted->divergence[component] = std::sqrt(squared[component]);
@@ -274,8 +276,10 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
           LiftedConvergence::expectGeometrySensitivity(
             errors[0].velocity, errors[i].velocity);
           for (size_t component : {1u, 2u})
+          {
             EXPECT_NEAR(errors[0].divergence[component], errors[i].divergence[component],
               PatchTolerance);
+          }
         }
       }
 
@@ -350,6 +354,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         else
           velocity.expectRates(2, 2);
         for (size_t component = 0; component < pressure.size(); ++component)
+        {
           for (size_t i = 1; i < pressure[component].getSize(); ++i)
           {
             SCOPED_TRACE(::testing::Message()
@@ -375,6 +380,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
             // approximation order. The separate pressure-data gate retains
             // its two-sided windows; this coupled gate retains decay/floors.
           }
+        }
       }
 
       /** @brief Resolve pressure approximation separately from velocity coupling.
@@ -508,6 +514,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
           LiftedConvergence::expectSensitivity(velocity[0], velocity[i]);
           // Geometry-pressure norms are analytically zero: no relative comparison.
           for (size_t component : {0u, 1u, 3u})
+          {
             for (const auto& pair :
               {std::pair{pressure[0][component].getL2(), pressure[i][component].getL2()},
                 std::pair{pressure[0][component].getH1Seminorm(),
@@ -517,6 +524,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
               ASSERT_TRUE(std::isfinite(pair.second));
               EXPECT_LT(std::abs(pair.second / pair.first - 1), SensitivityTolerance);
             }
+          }
         }
       }
 
@@ -657,6 +665,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
         const auto refined = problem.solve(StokesData::Field::Cubic, 1, RefinedOrder);
         for (const auto& pair : {std::pair{baseline.velocity, refined.velocity},
                std::pair{baseline.pressure, refined.pressure}})
+        {
           for (const auto& norms : {std::pair{pair.first.getL2(), pair.second.getL2()},
                  std::pair{pair.first.getH1Seminorm(), pair.second.getH1Seminorm()}})
           {
@@ -665,6 +674,7 @@ namespace Rodin::Tests::Convergence::Isoparametric::Stokes
             ASSERT_GT(norms.first, 0);
             EXPECT_LT(std::abs(norms.second / norms.first - 1), SensitivityTolerance);
           }
+        }
       }
 
       void checkGauge(Map map = Map::Quadratic,

@@ -89,8 +89,10 @@ namespace Rodin::Tests::Convergence
           ASSERT_LT(index, static_cast<Index>(fullA.rows()));
         Eigen::Index nv = 0;
         for (Index i = 0; i < static_cast<Index>(fullA.rows()); ++i)
+        {
           if (constrained.find(i) == constrained.end())
             reduced[i] = nv++;
+        }
         const Eigen::Index np = fullM.rows();
         ASSERT_GT(nv, 0);
         ASSERT_LE(size_t(np), PressureWorkspaceBytes / sizeof(Real) / size_t(np));
@@ -99,16 +101,24 @@ namespace Rodin::Tests::Convergence
         ASSERT_GT(blockSize, 0);
         std::vector<Eigen::Triplet<Real>> entries;
         for (Eigen::Index col = 0; col < fullA.outerSize(); ++col)
+        {
           for (Math::SparseMatrix<Real>::InnerIterator it(fullA, col); it; ++it)
+          {
             if (reduced[it.row()] >= 0 && reduced[it.col()] >= 0)
               entries.emplace_back(reduced[it.row()], reduced[it.col()], it.value());
+          }
+        }
         Math::SparseMatrix<Real> A(nv, nv);
         A.setFromTriplets(entries.begin(), entries.end());
         entries.clear();
         for (Eigen::Index col = 0; col < fullB.outerSize(); ++col)
+        {
           for (Math::SparseMatrix<Real>::InnerIterator it(fullB, col); it; ++it)
+          {
             if (reduced[it.col()] >= 0)
               entries.emplace_back(it.row(), reduced[it.col()], it.value());
+          }
+        }
         Math::SparseMatrix<Real> B(np, nv);
         B.setFromTriplets(entries.begin(), entries.end());
         const Math::Matrix<Real> M = fullM;
@@ -119,11 +129,13 @@ namespace Rodin::Tests::Convergence
         Math::Matrix<Real> T = Math::Matrix<Real>::Zero(np, np - 1);
         Eigen::Index column = 0;
         for (Eigen::Index row = 0; row < np; ++row)
+        {
           if (row != pivot)
           {
             T(row, column) = 1;
             T(pivot, column++) = -mean(row) / mean(pivot);
           }
+        }
         Eigen::SimplicialLDLT<Math::SparseMatrix<Real>> factor(A);
         ASSERT_EQ(factor.info(), Eigen::Success);
         ASSERT_GT(factor.vectorD().minCoeff(), 0);
@@ -187,15 +199,18 @@ namespace Rodin::Tests::Convergence
             }
           }
         }
-        const Math::Matrix<Real> whitened = pressureCholesky.matrixL().solve(R.transpose());
+        const Math::Matrix<Real> whitened =
+          pressureCholesky.matrixL().solve(R.transpose());
         // Divide-and-conquer retains the independent singular-value oracle;
         // forming another normal-equation spectrum would square conditioning.
         Eigen::BDCSVD<Math::Matrix<Real>> singularSpectrum(whitened);
         ASSERT_EQ(singularSpectrum.info(), Eigen::Success);
         Math::Vector<Real> squaredSingular = Math::Vector<Real>::Zero(np - 1);
-        for (Eigen::Index i = 0; i < std::min(nv, np - 1); ++i)
+        for (Eigen::Index i = 0; i < singularSpectrum.singularValues().size(); ++i)
+        {
           squaredSingular(np - 2 - i) =
             singularSpectrum.singularValues()(i) * singularSpectrum.singularValues()(i);
+        }
         // Padding follows the rectangular dimensions exactly, not a numerical
         // rank threshold. A coarse pressure dimension may exceed velocity's.
         const Real scale = std::max(spectrum.eigenvalues().cwiseAbs().maxCoeff(),
@@ -205,16 +220,17 @@ namespace Rodin::Tests::Convergence
         {
           const Real lambda = spectrum.eigenvalues()(i);
           const auto vector = spectrum.eigenvectors().col(i);
-          const Real denominator = (S0.norm() + std::abs(lambda) * M0.norm()) * vector.norm();
+          const Real denominator =
+            (S0.norm() + std::abs(lambda) * M0.norm()) * vector.norm();
           const Real residual = (S0 * vector - lambda * M0 * vector).norm();
-          maximumResidual = std::max(maximumResidual,
-            denominator > 0 ? residual / denominator : residual);
+          maximumResidual = std::max(
+            maximumResidual, denominator > 0 ? residual / denominator : residual);
         }
         result.freeVelocity = nv;
         result.zeroMeanPressure = np - 1;
         result.eigenvalues = spectrum.eigenvalues();
-        result.meanBasisDefect = (mean.transpose() * T).norm() /
-          std::max(Real(1), mean.norm() * T.norm());
+        result.meanBasisDefect =
+          (mean.transpose() * T).norm() / std::max(Real(1), mean.norm() * T.norm());
         result.eigenResidual = maximumResidual;
         const Real difference =
           (result.eigenvalues - squaredSingular).cwiseAbs().maxCoeff();
@@ -226,9 +242,8 @@ namespace Rodin::Tests::Convergence
       static void expectConsistent(const Result& result)
       {
         SCOPED_TRACE(::testing::Message()
-          << "mean-basis defect=" << result.meanBasisDefect
-          << " eigen-residual=" << result.eigenResidual
-          << " spectral difference=" << result.spectralDifference
+          << "mean-basis defect=" << result.meanBasisDefect << " eigen-residual="
+          << result.eigenResidual << " spectral difference=" << result.spectralDifference
           << " velocity residual=" << result.velocityResidual);
         ASSERT_EQ(result.eigenvalues.size(), result.zeroMeanPressure);
         EXPECT_TRUE(result.eigenvalues.allFinite());
@@ -249,7 +264,7 @@ namespace Rodin::Tests::Convergence
       {
         return result.eigenvalues.size() > 0 && result.eigenvalues.allFinite() &&
           result.eigenvalues.minCoeff() >
-            ConsistencyTolerance * result.eigenvalues.cwiseAbs().maxCoeff();
+          ConsistencyTolerance * result.eigenvalues.cwiseAbs().maxCoeff();
       }
   };
 }

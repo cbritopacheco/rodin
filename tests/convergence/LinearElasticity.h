@@ -197,11 +197,15 @@ namespace Rodin::Tests::Convergence::LinearElasticity
         Math::SpatialMatrix<Real> value(
           static_cast<std::uint8_t>(m_dim), static_cast<std::uint8_t>(m_dim));
         for (size_t i = 0; i < m_dim; ++i)
+        {
           for (size_t j = 0; j < m_dim; ++j)
+          {
             value(i, j) = m_field == Field::AsymmetricAffine
               ? Real((i + 1) * (j + 1)) +
                 Real((i == 0 && j == m_dim - 1) + (j == 0 && i == m_dim - 1)) / 2
               : Real(i + j + 2) * factor / 2;
+          }
+        }
         return value;
       }
 
@@ -227,7 +231,9 @@ namespace Rodin::Tests::Convergence::LinearElasticity
         Math::SpatialMatrix<Real> value(
           static_cast<std::uint8_t>(m_dim), static_cast<std::uint8_t>(m_dim));
         for (size_t i = 0; i < m_dim; ++i)
+        {
           for (size_t j = 0; j < m_dim; ++j)
+          {
             value(i, j) = m_field == Field::AsymmetricAffine
               ? 2 * m_mu * Real((i + 1) * (j + 1)) +
                 m_mu * ((i == 0 && j == m_dim - 1) + (j == 0 && i == m_dim - 1)) +
@@ -235,6 +241,8 @@ namespace Rodin::Tests::Convergence::LinearElasticity
                   (Real(m_dim * (m_dim + 1) * (2 * m_dim + 1)) / 6 + (m_dim == 1)) *
                   (i == j)
               : factor * (m_mu * Real(i + j + 2) + m_lambda * coefficientSum * (i == j));
+          }
+        }
         return value;
       }
       Real getLambda() const

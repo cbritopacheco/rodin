@@ -98,8 +98,10 @@ namespace Rodin::Tests::Convergence
           }
           value(j) = m_amplitude * pi * std::cos(pi * x(j));
           for (size_t k = 0; k < m_dimension; ++k)
+          {
             if (k != j)
               value(j) *= std::sin(pi * x(k));
+          }
         }
         return value;
       }

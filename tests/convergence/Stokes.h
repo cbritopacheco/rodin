@@ -161,9 +161,13 @@ namespace Rodin::Tests::Convergence
         Math::SpatialMatrix<Real> stress(
           static_cast<std::uint8_t>(m_dimension), static_cast<std::uint8_t>(m_dimension));
         for (size_t i = 0; i < m_dimension; ++i)
+        {
           for (size_t j = 0; j < m_dimension; ++j)
+          {
             stress(i, j) = viscosity * (gradient(i, j) + gradient(j, i)) -
               (i == j ? pressure : Real(0));
+          }
+        }
         return stress;
       }
 

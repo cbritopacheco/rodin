@@ -136,8 +136,10 @@ namespace Rodin::Tests::Convergence
 #ifdef RODIN_USE_MPI
         if constexpr (requires { reference.getShard(); })
           for (Real& value : squared)
+          {
             value = boost::mpi::all_reduce(
               reference.getContext().getCommunicator(), value, std::plus<Real>());
+          }
 #endif
         return {{std::sqrt(squared[0]), std::sqrt(squared[1])},
           {std::sqrt(squared[2]), std::sqrt(squared[3])},

@@ -104,8 +104,10 @@ namespace Rodin::Tests::Convergence
           {
             value(d) = pi * std::cos(pi * p(d));
             for (size_t j = 0; j < dim; ++j)
+            {
               if (j != d)
                 value(d) *= std::sin(pi * p(j));
+            }
           }
         }
         return value;
