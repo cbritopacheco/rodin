@@ -280,19 +280,21 @@ namespace Rodin::Variational
         const Real a = r.x() / q;
         const Real b = r.y() / q;
 
-        const Real Ba = BernsteinPyramid<K>::getBasis(n, i, a);
-        const Real Bb = BernsteinPyramid<K>::getBasis(n, j, b);
         const Real Bz = BernsteinPyramid<K>::getBasis(K, k, z);
-        const Real dBa = BernsteinPyramid<K>::getDerivative(n, i, a);
-        const Real dBb = BernsteinPyramid<K>::getDerivative(n, j, b);
-        const Real dBz = BernsteinPyramid<K>::getDerivative(K, k, z);
-
         if (deriv == 0)
-          return dBa * Bb * Bz / q;
+          return BernsteinPyramid<K>::getDerivative(n, i, a) *
+            BernsteinPyramid<K>::getBasis(n, j, b) * Bz / q;
+        const Real Ba = BernsteinPyramid<K>::getBasis(n, i, a);
+        const Real dBb = BernsteinPyramid<K>::getDerivative(n, j, b);
         if (deriv == 1)
           return Ba * dBb * Bz / q;
         if (deriv == 2)
+        {
+          const Real Bb = BernsteinPyramid<K>::getBasis(n, j, b);
+          const Real dBa = BernsteinPyramid<K>::getDerivative(n, i, a);
+          const Real dBz = BernsteinPyramid<K>::getDerivative(K, k, z);
           return (dBa * (a / q) * Bb + Ba * dBb * (b / q)) * Bz + Ba * Bb * dBz;
+        }
         return 0;
       }
   };

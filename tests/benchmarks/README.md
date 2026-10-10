@@ -506,6 +506,33 @@ thread count, mesh, degree, quadrature and benchmark scope fixed. Independent
 repetitions are required; a smallest-mesh numerical smoke run is not evidence
 of a speedup or of complete convergence certification.
 
+For the curved pyramid geometry-evaluation workload, use the same executable:
+
+```sh
+build/tests/benchmarks/RodinNonlinearPoissonAssemblyBenchmarks \
+  --benchmark_filter='^NonlinearPoisson/CurvedQ2/(Residual|Tangent)/P1/Pyramid/3/16/real_time$' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5 \
+  --benchmark_out=nonlinear-curved-pyramid.json --benchmark_out_format=json
+```
+
+The pyramid modal derivative evaluates only the Bernstein factors required by
+the selected coordinate direction. This removes unused evaluations without
+changing the returned expression, apex policy, or nodal transformation.
+`PyramidDirectionalDerivativesPreserveArithmetic` compares every modal
+derivative exactly with the unpruned expression for orders one through six,
+at quadrature points, vertices and near-apex points. Independent analytic
+gradient tests and the assembly oracles above remain separate checks.
+Compare baseline and candidate binaries in separate processes, reversing their
+execution order, and retain unchanged-geometry controls. A single selected
+case per process fixes initial cache-population order; random interleaving of
+multiple cases is a different experiment. Neither check supplies a portable
+wall-time threshold or certifies the complete nonlinear convergence matrix.
+If an unchanged-geometry control shifts, inspect both generated instructions
+and helper placement before attributing the shift to its numerical kernel.
+A diagnostic relink with matched helper placement can distinguish binary-layout
+effects from added arithmetic; it is an experimental control, not a production
+linker policy. Repeat optimization comparisons after changes to shared caches.
+
 ## Remaining performance workplan
 
 | Extension | Required measurement or evidence |

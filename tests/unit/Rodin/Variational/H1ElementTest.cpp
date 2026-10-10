@@ -9,7 +9,10 @@
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #endif
 
+#include <array>
 #include <complex>
+
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "Rodin/Variational/P0/P0Element.h"
 #include "Rodin/Variational/P1/P1Element.h"
@@ -3731,6 +3734,62 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(
         element.getBasis(local)(apex), local == 4 ? 1.0 : 0.0, RODIN_FUZZY_CONSTANT);
     }
+  }
+
+  /**
+   * @brief Preserves the evaluated pyramid modal derivative across orders.
+   *
+   * The unpruned tensor-product expression is compared exactly with each
+   * directional evaluation at quadrature points, vertices and near-apex
+   * points. This checks arithmetic preservation, not a convergence rate.
+   * Independent polynomial and near-apex derivative tests remain separate.
+   */
+  TEST(Rodin_Variational_RealH1Element, PyramidDirectionalDerivativesPreserveArithmetic)
+  {
+    Rodin::Utility::ForIndex<6>([](auto order) {
+      constexpr size_t K = order.value + 1;
+      const auto check = [K](const Math::SpatialPoint& point) {
+        for (size_t mode = 0; mode < PyramidIndex<K>::Count; ++mode)
+        {
+          size_t i, j, k;
+          PyramidIndex<K>::decode(mode, i, j, k);
+          const Real z = point.z(), q = Real(1) - z;
+          std::array<Real, 4> expected{};
+          if (q != 0)
+          {
+            const size_t n = K - k;
+            const Real a = point.x() / q, b = point.y() / q;
+            const Real Ba = BernsteinPyramid<K>::getBasis(n, i, a);
+            const Real Bb = BernsteinPyramid<K>::getBasis(n, j, b);
+            const Real Bz = BernsteinPyramid<K>::getBasis(K, k, z);
+            const Real dBa = BernsteinPyramid<K>::getDerivative(n, i, a);
+            const Real dBb = BernsteinPyramid<K>::getDerivative(n, j, b);
+            const Real dBz = BernsteinPyramid<K>::getDerivative(K, k, z);
+            expected[0] = dBa * Bb * Bz / q;
+            expected[1] = Ba * dBb * Bz / q;
+            expected[2] = (dBa * (a / q) * Bb + Ba * dBb * (b / q)) * Bz + Ba * Bb * dBz;
+          }
+          for (size_t direction = 0; direction < expected.size(); ++direction)
+          {
+            EXPECT_EQ(
+              PyramidModal<K>::getDerivative(mode, direction, point), expected[direction])
+              << "degree " << K << ", mode " << mode << ", direction " << direction;
+          }
+        }
+      };
+      for (const size_t quadratureOrder : {size_t(8), size_t(16)})
+      {
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(quadratureOrder, Polytope::Type::Pyramid);
+        for (size_t point = 0; point < qf.getSize(); ++point)
+          check(qf.getPoint(point));
+      }
+      const Polytope::Traits traits(Polytope::Type::Pyramid);
+      for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+        check(traits.getVertex(vertex));
+      const Real z = Real(1) - 1e-15, q = Real(1) - z;
+      check(Math::SpatialPoint{{q / 4, 3 * q / 4, z}});
+    });
   }
 
   /// @brief Verifies rational pyramid modal gradients retain directional limits near the apex.
