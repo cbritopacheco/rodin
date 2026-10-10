@@ -43,9 +43,7 @@ namespace Rodin::Geometry::Euclidean
   class Rectangle
   {
     public:
-      /**
-       * @brief Corner enumeration for rectangle corners.
-       */
+      /// @brief Corner enumeration for rectangle corners.
       enum Corner
       {
         BottomLeft,   ///< Bottom-left corner @f$ (x_{\min}, y_{\min}) @f$

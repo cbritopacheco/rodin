@@ -6,6 +6,8 @@ Checks the rules that clang-format and clang-tidy cannot express:
   guard      include guard must be RODIN_<PATH>_H derived from the file path
   license    every source file starts with the Boost Software License block
   filedoc    every header under src/Rodin carries Doxygen @brief documentation
+  docstyle   multiline Doxygen uses /** ... */; one-line Doxygen uses ///
+  forbraces  for-loop bodies spanning multiple physical lines require braces
   pragma     include guards, never #pragma once
   petsc      PETSc headers are only included under src/Rodin/PETSc/
 
@@ -85,10 +87,176 @@ def expected_guard(relpath):
     return "RODIN_" + "_".join(p.upper() for p in parts) + suffix
 
 
+CPP_COMMENTS = re.compile(
+    r'R"(?P<delimiter>[^ ()\\\t\r\n]{0,16})\(.*?\)(?P=delimiter)"'
+    r'|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\''
+    r'|(?P<comment>//[^\n]*|/\*.*?\*/)', re.DOTALL)
+
+CPP_TOKENS = re.compile(
+    r"\b[0-9][0-9A-Za-z_'.]*|" + CPP_COMMENTS.pattern
+    + r'|(?P<directive>^[ \t]*#(?:[^\n]*\\\n)*[^\n]*)'
+    + r'|(?P<token>[A-Za-z_]\w*|[^\s])', re.DOTALL | re.MULTILINE)
+
+
+def multiline_for_bodies(text):
+    """Yield unbraced for bodies whose code spans multiple physical lines.
+
+    Match complete statements, including nested controls, rather than counting
+    semicolons inside loop headers, calls, initializers, or lambda bodies.
+    Comments and preprocessor directives do not supply code tokens; literals
+    remain single tokens with their original source extent.
+    """
+    tokens = [(m.group("token") or m.group(), m.start(), m.end())
+              for m in CPP_TOKENS.finditer(text)
+              if m.group("comment") is None and m.group("directive") is None]
+    pairs = {}
+    stack = []
+    for i, (value, _, _) in enumerate(tokens):
+        if value in ("(", "[", "{"):
+            stack.append(i)
+        elif value in (")", "]", "}") and stack:
+            opening = stack.pop()
+            if {"(": ")", "[": "]", "{": "}"}[tokens[opening][0]] == value:
+                pairs[opening] = i
+
+    def value(i):
+        return tokens[i][0] if i < len(tokens) else None
+
+    def control_body(i):
+        i += 1
+        if value(i) in ("constexpr", "co_await"):
+            i += 1
+        if value(i) != "(" or i not in pairs:
+            return None
+        return pairs[i] + 1
+
+    def skip_attributes(i):
+        while (i is not None and value(i) == "[" and value(i + 1) == "["
+               and i in pairs):
+            i = pairs[i] + 1
+        return i
+
+    def statement_end(i):
+        i = skip_attributes(i)
+        if i is None or i >= len(tokens):
+            return None
+        first = value(i)
+        if first == "{":
+            return pairs.get(i)
+        if first in ("for", "if", "while", "switch"):
+            end = statement_end(control_body(i))
+            if first == "if" and end is not None and value(end + 1) == "else":
+                return statement_end(end + 2)
+            return end
+        if first == "do":
+            end = statement_end(i + 1)
+            if end is None or value(end + 1) != "while":
+                return None
+            tail = control_body(end + 1)
+            return tail if tail is not None and value(tail) == ";" else None
+        if first == "try":
+            end = statement_end(i + 1)
+            while end is not None and value(end + 1) == "catch":
+                end = statement_end(control_body(end + 1))
+            return end
+        if value(i + 1) == ":" and value(i + 2) != ":":
+            return statement_end(i + 2)
+        while i < len(tokens):
+            if value(i) == ";":
+                return i
+            if value(i) == "}":
+                return None
+            if value(i) in ("(", "[", "{"):
+                if i not in pairs:
+                    return None
+                i = pairs[i]
+            i += 1
+        return None
+
+    for i, (keyword, start, _) in enumerate(tokens):
+        if keyword != "for":
+            continue
+        body = control_body(i)
+        if body is None or value(skip_attributes(body)) == "{":
+            continue
+        end = statement_end(body)
+        if end is not None:
+            body_start, body_end = tokens[body][1], tokens[end][2]
+            if "\n" in text[body_start:body_end]:
+                yield start, body_start, body_end
+
+
+def doxygen_style_edits(text):
+    """Yield standalone comment replacements, ignoring strings and trailing docs."""
+    comments = []
+    for match in CPP_COMMENTS.finditer(text):
+        comment = match.group("comment")
+        if comment is None:
+            continue
+        start, end = match.span()
+        line_start = text.rfind("\n", 0, start) + 1
+        line_end = text.find("\n", end)
+        if line_end < 0:
+            line_end = len(text)
+        indent = text[line_start:start]
+        if indent.strip() or text[end:line_end].strip():
+            continue
+        if comment.startswith("///") and not comment.startswith(("///<", "////")):
+            content = comment[3:]
+            if content.startswith(" "):
+                content = content[1:]
+            comments.append((line_start, end, indent, content))
+        elif comment.startswith("/**") and not comment.startswith(("/**<", "/***")):
+            content = [re.sub(r"^\s*\* ?", "", line).strip()
+                       for line in comment[3:-2].splitlines()]
+            content = [line for line in content if line]
+            if len(content) == 1:
+                yield line_start, end, indent + "/// " + content[0]
+    group = []
+    for entry in comments:
+        if group and (text[group[-1][1]:entry[0]] != "\n"
+                      or group[-1][2] != entry[2]):
+            if len(group) > 1:
+                yield _block_edit(group)
+            group = []
+        group.append(entry)
+    if len(group) > 1:
+        yield _block_edit(group)
+
+
+def _block_edit(group):
+    indent = group[0][2]
+    body = "\n".join(indent + " *" + (" " + entry[3] if entry[3] else "")
+                     for entry in group)
+    return group[0][0], group[-1][1], indent + "/**\n" + body + "\n" + indent + " */"
+
+
+def for_brace_findings(relpath, lines):
+    """Check loop bodies without applying library-only header conventions."""
+    text = "\n".join(lines)
+    for start, _, _ in multiline_for_bodies(text):
+        line = text.count("\n", 0, start) + 1
+        yield Finding(
+            "forbraces", relpath, line,
+            "for-loop bodies spanning multiple physical lines require braces",
+            source=lines[line - 1],
+            suggestion="enclose the loop body in Allman braces; only a body "
+                       "on one physical line may omit them")
+
+
 def check_file(relpath, lines):
-    findings = []
+    findings = list(for_brace_findings(relpath, lines))
     text = "\n".join(lines)
     is_header = relpath.endswith((".h", ".hpp"))
+
+    for start, end, replacement in doxygen_style_edits(text):
+        line = text.count("\n", 0, start) + 1
+        findings.append(Finding(
+            "docstyle", relpath, line,
+            "use /** ... */ for multiline Doxygen documentation and /// for "
+            "single-line documentation",
+            source=lines[line - 1],
+            suggestion="replace this comment with " + replacement.splitlines()[0].strip()))
 
     # license: the Boost license block must appear near the top.
     head = "\n".join(lines[:10])
@@ -223,6 +391,16 @@ def main():
     all_findings = []
     for path in files:
         all_findings.extend(check_file(rel(path), read_lines(path)))
+
+    # Tests, examples, bindings, and development utilities follow the same loop
+    # rule, without inheriting the library's include-guard and header-doc rules.
+    if args.update_baseline or not args.paths:
+        extra_files = collect_files([os.path.join(REPO, root)
+                                     for root in ("tests", "examples", "py", "dev",
+                                                  "src/Rodin.h")])
+        for path in extra_files:
+            all_findings.extend(for_brace_findings(rel(path), read_lines(path)))
+        files.extend(extra_files)
 
     if args.update_baseline:
         keys = sorted({f.key() for f in all_findings})

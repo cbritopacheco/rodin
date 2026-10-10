@@ -7,25 +7,30 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinAdaptation_HEADERS
   AnalyticFunctionAdapters.h
-  WNGIR.h
-  WNGIR/Admissibility.h
+  SWIFT.h
+  SWIFT/Admissibility.h
   CellDeformation.h
   DeformationMap.h
   CellGeomCache.h
-  WNGIR/Loss.h
-  WNGIR/Parameters.h
-  WNGIR/HingeForce.h
-  WNGIR/HingeMetric.h
-  WNGIR/Hinge.h
-  WNGIR/HingeProblem.h
-  WNGIR/LinearSolver.h
-  WNGIR/Distribution.h
-  WNGIR/DirectionalNewton.h
-  WNGIR/Report.h
-  WNGIR/Solver.h
-  WNGIR/FittingCoefficient.h
-  WNGIR/Residual.h
-  WNGIR/FittingForce.h
+  SWIFT/Loss.h
+  SWIFT/Parameters.h
+  SWIFT/QualitySamples.h
+  SWIFT/QualityCovering.h
+  SWIFT/QualityLattice.h
+  SWIFT/HingeForce.h
+  SWIFT/HingeMetric.h
+  SWIFT/Hinge.h
+  SWIFT/HingeProblem.h
+  SWIFT/LinearSolver.h
+  SWIFT/Distribution.h
+  SWIFT/DirectionalNewton.h
+  SWIFT/Report.h
+  SWIFT/Problem.h
+  SWIFT/Adapt.h
+  SWIFT/ForwardDecls.h
+  SWIFT/FittingTensor.h
+  SWIFT/Residual.h
+  SWIFT/FittingForce.h
 )
 
 # Header-only / interface library

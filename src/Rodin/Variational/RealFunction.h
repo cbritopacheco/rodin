@@ -83,23 +83,27 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = ScalarFunctionBase<ScalarType, RealFunctionBase<Derived>>;
 
-      /// @brief Import traceOf methods from parent
+      // Import traceOf methods from parent.
       using Parent::traceOf;
 
-      /// @brief Import operator() from parent
+      // Import operator() from parent.
       using Parent::operator();
 
       /// @brief Default constructor
       RealFunctionBase() = default;
 
-      /// @brief Copy constructor
-      /// @param[in] other Function to copy from
+      /**
+       * @brief Copy constructor
+       * @param[in] other Function to copy from
+       */
       RealFunctionBase(const RealFunctionBase& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor
-      /// @param[in] other Function to move from
+      /**
+       * @brief Move constructor
+       * @param[in] other Function to move from
+       */
       RealFunctionBase(RealFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -143,6 +147,7 @@ namespace Rodin::Variational
        *
        * @tparam Args Variadic template for trace domain specification
        * @returns Reference to derived object (for method chaining)
+       * @param args Arguments forwarded to the constructed object.
        */
       template <class ... Args>
       constexpr
@@ -254,9 +259,11 @@ namespace Rodin::Variational
 
   /**
    * @brief CTAD for RealFunction.
+   * @param nested Real-valued expression to clone
    */
   template <class Derived>
-  RealFunction(const RealFunctionBase<Derived>&) -> RealFunction<FunctionBase<Derived>>;
+  RealFunction(
+    const RealFunctionBase<Derived>& nested) -> RealFunction<FunctionBase<Derived>>;
 
   /**
    * @ingroup RealFunctionSpecializations
@@ -302,9 +309,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the constant function at a point.
        * @returns Constant real value
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      Real getValue(const Geometry::Point&) const
+      constexpr Real getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return m_x;
       }
@@ -312,6 +319,7 @@ namespace Rodin::Variational
       /**
        * @brief Leaves constant functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param args Arguments forwarded to the constructed object.
        */
       template <class ... Args>
       RealFunction& traceOf(Args&&... args) noexcept
@@ -322,9 +330,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order of a constant function.
        * @returns Zero polynomial order
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return size_t(0);
       }
@@ -340,8 +349,9 @@ namespace Rodin::Variational
 
   /**
    * @brief CTAD for RealFunction.
+   * @param x Constant scalar value
    */
-  RealFunction(Real) -> RealFunction<Real>;
+  RealFunction(Real x) -> RealFunction<Real>;
 
   /**
    * @ingroup RealFunctionSpecializations
@@ -387,9 +397,9 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the constant function at a point.
        * @returns Constant value converted to Real
+       * @param point Evaluation point; the result is independent of this argument.
        */
-      constexpr
-      Real getValue(const Geometry::Point&) const
+      constexpr Real getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return m_x;
       }
@@ -397,6 +407,7 @@ namespace Rodin::Variational
       /**
        * @brief Leaves constant functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param args Arguments forwarded to the constructed object.
        */
       template <class ... Args>
       RealFunction& traceOf(Args&&... args) noexcept
@@ -407,9 +418,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order of a constant function.
        * @returns Zero polynomial order
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return size_t(0);
       }
@@ -423,8 +435,11 @@ namespace Rodin::Variational
       const Integer m_x;
   };
 
-  /// @brief CTAD for integer constants.
-  RealFunction(Integer) -> RealFunction<Integer>;
+  /**
+   * @brief CTAD for integer constants.
+   * @param x Constant integer value
+   */
+  RealFunction(Integer x) -> RealFunction<Integer>;
 
   /**
    * @ingroup RealFunctionSpecializations
@@ -496,6 +511,7 @@ namespace Rodin::Variational
       /**
        * @brief Leaves callable functions unchanged on trace domains.
        * @returns Reference to this function
+       * @param args Arguments forwarded to the constructed object.
        */
       template <class ... Args>
       RealFunction& traceOf(Args&&... args) noexcept
@@ -506,9 +522,10 @@ namespace Rodin::Variational
       /**
        * @brief Returns the polynomial order of the callable.
        * @returns std::nullopt because arbitrary callables have unknown order
+       * @param polytope Mesh entity; the reported order is independent of this argument.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return std::nullopt;
       }
@@ -524,9 +541,11 @@ namespace Rodin::Variational
 
   /**
    * @brief CTAD for RealFunction.
+   * @param f Callable returning a Real from a Geometry::Point
    */
-  template <class F, typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&>>>
-  RealFunction(F) -> RealFunction<F>;
+  template <class F,
+    typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&>>>
+  RealFunction(F f) -> RealFunction<F>;
 }
 
 #endif

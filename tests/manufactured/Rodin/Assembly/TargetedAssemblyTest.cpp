@@ -65,8 +65,10 @@ namespace Rodin::Tests::Manufactured::Assembly
     const Math::SparseMatrix<Real> diff = expected - actual;
     Real maxAbs = 0;
     for (int k = 0; k < diff.outerSize(); ++k)
+    {
       for (Math::SparseMatrix<Real>::InnerIterator it(diff, k); it; ++it)
         maxAbs = std::max(maxAbs, std::abs(it.value()));
+    }
     EXPECT_LE(maxAbs, 1e-12);
   }
 
@@ -248,5 +250,27 @@ namespace Rodin::Tests::Manufactured::Assembly
 
     expectSameMatrix(Afull, Alhs);
     expectSameVector(bfull, brhs);
+
+    Problem incremental(u, v, p, q);
+    BilinearForm pressureMetric(p, q);
+    LinearForm pressureLoad(q);
+    pressureMetric = Integral(p, q);
+    pressureLoad = Integral(RealFunction(2.0), q);
+    pressureMetric.assemble();
+    pressureLoad.assemble();
+    incremental += Integral(Grad(u), Grad(v));
+    incremental += Integral(u, v);
+    incremental -= Integral(p, v);
+    incremental -= Integral(u, q);
+    incremental += pressureMetric;
+    incremental += pressureMetric;
+    incremental -= pressureMetric;
+    incremental -= Integral(RealFunction(1.0), v);
+    incremental -= pressureLoad;
+    incremental += pressureLoad;
+    incremental -= pressureLoad;
+    incremental.assemble();
+    expectSameMatrix(Afull, incremental.getLinearSystem().getOperator());
+    expectSameVector(bfull, incremental.getLinearSystem().getVector());
   }
 }

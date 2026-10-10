@@ -131,6 +131,7 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(product.rows(), extents[0]);
         EXPECT_EQ(product.cols(), extents[1]);
         for (size_t i = 0; i < extents[0]; ++i)
+        {
           for (size_t j = 0; j < extents[1]; ++j)
           {
             Complex expected = 0;
@@ -142,38 +143,53 @@ namespace Rodin::Tests::Unit
               realExpected += a[(i * extents[1] + j) * extents[2] + k] * realVector[k];
             EXPECT_EQ(realProduct(i, j), realExpected);
           }
+        }
       }
       else if constexpr (Rank == 4)
       {
         SpatialMatrix<Complex> m(extents[2], extents[3]);
         for (size_t k = 0; k < extents[2]; ++k)
+        {
           for (size_t l = 0; l < extents[3]; ++l)
             m(k, l) = Complex(Real(k + l + 1), -Real(k + 2 * l + 1));
+        }
         SpatialMatrix<Real> realMatrix(extents[2], extents[3]);
         for (size_t k = 0; k < extents[2]; ++k)
+        {
           for (size_t l = 0; l < extents[3]; ++l)
             realMatrix(k, l) = std::real(m(k, l));
+        }
         const auto realProduct = a * realMatrix;
         const auto product = a * m;
         EXPECT_EQ(product.rows(), extents[0]);
         EXPECT_EQ(product.cols(), extents[1]);
         for (size_t i = 0; i < extents[0]; ++i)
+        {
           for (size_t j = 0; j < extents[1]; ++j)
           {
             Complex expected = 0;
             for (size_t k = 0; k < extents[2]; ++k)
+            {
               for (size_t l = 0; l < extents[3]; ++l)
+              {
                 expected +=
                   a[((i * extents[1] + j) * extents[2] + k) * extents[3] + l] * m(k, l);
+              }
+            }
             EXPECT_EQ(product(i, j), expected);
             Scalar realExpected = 0;
             for (size_t k = 0; k < extents[2]; ++k)
+            {
               for (size_t l = 0; l < extents[3]; ++l)
+              {
                 realExpected +=
                   a[((i * extents[1] + j) * extents[2] + k) * extents[3] + l] *
                   realMatrix(k, l);
+              }
+            }
             EXPECT_EQ(realProduct(i, j), realExpected);
           }
+        }
       }
     }
   }

@@ -87,9 +87,7 @@ namespace Rodin::IO
       /// @brief Coefficient data storage type.
       using DataType = Data;
 
-      /**
-       * @brief Type of mesh object being printed.
-       */
+      /// @brief Type of mesh object being printed.
       using ObjectType = Variational::GridFunction<FES, Data>;
 
       /**
@@ -102,22 +100,29 @@ namespace Rodin::IO
 
       /**
        * @brief Returns the grid function bound to this printer.
+       * @returns The grid function bound to this printer.
        */
       const ObjectType& getObject() const override
       {
         return m_gf.get();
       }
 
-      /// @brief Rejects formats without a concrete finite element collection.
-      void print(std::ostream&) override
+      /**
+       * @brief Rejects formats without a concrete finite element collection.
+       * @param os Output stream required by the printer interface; unused by this implementation.
+       */
+      void print([[maybe_unused]] std::ostream& os) override
       {
         Alert::Exception()
           << "No grid-function printer for this finite element collection."
           << Alert::Raise;
       }
 
-      /// @brief Hook for format-specific coefficient printers.
-      virtual void printData(std::ostream&) {}
+      /**
+       * @brief Hook for format-specific coefficient printers.
+       * @param os Output stream required by the printer interface; unused by this implementation.
+       */
+      virtual void printData([[maybe_unused]] std::ostream& os) {}
 
     private:
       std::reference_wrapper<const ObjectType> m_gf;

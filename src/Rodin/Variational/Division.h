@@ -17,9 +17,11 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c Division over a shape function: exposes the finite element
-  /// space, the shape function space, the left-hand side operand, the right-hand side
-  /// operand and the range type.
+  /**
+   * @brief Type traits for @c Division over a shape function: exposes the finite element
+   * space, the shape function space, the left-hand side operand, the right-hand side
+   * operand and the range type.
+   */
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<
     Variational::Division<
@@ -163,7 +165,11 @@ namespace Rodin::Variational
         return lhs / rhs;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         const auto lo = getLHS().getOrder(polytope);
@@ -189,9 +195,11 @@ namespace Rodin::Variational
   };
   /**
    * @brief Deduction guide for Division.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
    */
   template <class LHSDerived, class RHSDerived>
-  Division(const FunctionBase<LHSDerived>&, const FunctionBase<RHSDerived>&)
+  Division(const FunctionBase<LHSDerived>& lhs, const FunctionBase<RHSDerived>& rhs)
     -> Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>;
 
   /**
@@ -260,82 +268,137 @@ namespace Rodin::Variational
       using Parent =
         ShapeFunctionBase<Division<LHSType, RHSType>, FES, Space>;
 
-      /// @brief Constructs the expression from its left and right operands.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       Division(const LHSType& lhs, const RHSType& rhs)
         : Parent(lhs.getFiniteElementSpace()),
           m_lhs(lhs.copy()),
-          m_rhs(rhs.copy())
+          m_rhs(rhs.copy()),
+          m_cache(*m_rhs)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       Division(const Division& other)
         : Parent(other),
           m_lhs(other.m_lhs->copy()),
-          m_rhs(other.m_rhs->copy())
+          m_rhs(other.m_rhs->copy()),
+          m_cache(*m_rhs)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       Division(Division&& other)
         : Parent(std::move(other)),
           m_lhs(std::move(other.m_lhs)),
-          m_rhs(std::move(other.m_rhs))
+          m_rhs(std::move(other.m_rhs)),
+          m_cache(*m_rhs)
       {}
 
-      /// @brief Gets the operand in the shape function expression.
+      /**
+       * @brief Gets the operand in the shape function expression.
+       * @returns The operand in the shape function expression.
+       */
       const auto& getLeaf() const
       {
         return getLHS().getLeaf();
       }
 
-      /// @brief Gets the global DOF indices for a polytope.
+      /**
+       * @brief Returns the number of local basis functions for a polytope.
+       * @param element Finite element used by the operation.
+       * @returns Number of local basis functions on the selected entity.
+       */
       size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getLHS().getDOFs(element);
       }
 
-      /// @brief Gets the finite element space.
+      /**
+       * @brief Gets the finite element space.
+       * @returns The finite element space.
+       */
       const auto& getFiniteElementSpace() const
       {
         return getLHS().getFiniteElementSpace();
       }
 
-      /// @brief Gets the left-hand side operand.
+      /**
+       * @brief Gets the left-hand side operand.
+       * @returns The left-hand side operand.
+       */
       const LHSType& getLHS() const
       {
         assert(m_lhs);
         return *m_lhs;
       }
 
-      /// @brief Gets the right-hand side operand.
+      /**
+       * @brief Gets the right-hand side operand.
+       * @returns The right-hand side operand.
+       */
       const RHSType& getRHS() const
       {
         assert(m_rhs);
         return *m_rhs;
       }
 
-      /// @brief Gets the integration point the expression is evaluated at.
+      /**
+       * @brief Gets the integration point the expression is evaluated at.
+       * @returns The integration point the expression is evaluated at.
+       */
       const IntegrationPoint& getIntegrationPoint() const
       {
         return m_lhs->getIntegrationPoint();
       }
 
-      /// @brief Sets the integration point the expression is evaluated at.
+      /**
+       * @brief Sets the integration point the expression is evaluated at.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Reference to this object after the operation.
+       */
       Division& setIntegrationPoint(const IntegrationPoint& ip)
       {
         m_lhs->setIntegrationPoint(ip);
+        m_cache.setIntegrationPoint(ip);
         return *this;
       }
 
-      /// @brief Gets the basis function of a local degree of freedom.
+      /**
+       * @brief Gets the basis function of a local degree of freedom.
+       * @param local Index in the local numbering.
+       * @returns Value of the selected local basis function at the evaluation point.
+       */
       auto getBasis(size_t local) const
       {
         const auto& ip = getIntegrationPoint();
         decltype(auto) lhs = getLHS().getBasis(local);
-        const auto rhs = getRHS().getValue(ip);
-        return lhs / rhs;
+        if (const auto* rhs = m_cache.get())
+        {
+          if constexpr (requires { (lhs / *rhs).eval(); })
+            return (lhs / *rhs).eval();
+          else
+            return lhs / *rhs;
+        }
+        decltype(auto) rhs = getRHS().getValue(ip);
+        if constexpr (requires { (lhs / rhs).eval(); })
+          return (lhs / rhs).eval();
+        else
+          return lhs / rhs;
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto lo = getLHS().getOrder(polytope);
@@ -355,16 +418,26 @@ namespace Rodin::Variational
     private:
       std::unique_ptr<LHSType> m_lhs;
       std::unique_ptr<RHSType> m_rhs;
+      /// @brief Function value at the current quadrature binding.
+      typename RHSType::Cache m_cache;
   };
 
-  /// @brief Deduction guide for @c Division.
+  /**
+   * @brief Deduction guide for @c Division.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
-  Division(
-      const ShapeFunctionBase<LHSDerived, FES, Space>&,
-      const FunctionBase<RHSDerived>&)
+  Division(const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,
+    const FunctionBase<RHSDerived>& rhs)
     -> Division<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>;
 
-  /// @brief Quotient of two shape function expressions.
+  /**
+   * @brief Quotient of two shape function expressions.
+   * @param lhs Left operand.
+   * @param rhs Right operand.
+   * @returns Quotient of the operands.
+   */
   template <class LHSDerived, class RHSDerived, class FES, ShapeFunctionSpaceType Space>
   auto operator/(
       const ShapeFunctionBase<LHSDerived, FES, Space>& lhs,

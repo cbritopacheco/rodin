@@ -15,6 +15,12 @@
 #ifndef RODIN_VARIATIONAL_FUNCTION_H
 #define RODIN_VARIATIONAL_FUNCTION_H
 
+#include <functional>
+#include <optional>
+#include <type_traits>
+
+#include <Eigen/Core>
+
 #include "Rodin/Cast.h"
 
 #include "Rodin/Geometry/Point.h"
@@ -84,13 +90,19 @@ namespace Rodin::Variational
       /// @brief Default constructor
       FunctionBase() = default;
 
-      /// @brief Copy constructor
+      /**
+       * @brief Copy constructor
+       * @param other Object to copy from.
+       */
       FunctionBase(const FunctionBase& other)
         : Parent(other),
           m_traceDomain(other.m_traceDomain)
       {}
 
-      /// @brief Move constructor
+      /**
+       * @brief Move constructor
+       * @param other Object to move from.
+       */
       FunctionBase(FunctionBase&& other)
         : Parent(std::move(other)),
           m_traceDomain(std::move(other.m_traceDomain))
@@ -99,7 +111,11 @@ namespace Rodin::Variational
       /// @brief Virtual destructor
       virtual ~FunctionBase() = default;
 
-      /// @brief Move assignment operator.
+      /**
+       * @brief Move assignment operator.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
+       */
       FunctionBase& operator=(FunctionBase&& other)
       {
         m_traceDomain = std::move(other.m_traceDomain);
@@ -121,7 +137,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      /// @brief Evaluates the function at an integration point.
+      /**
+       * @brief Evaluates the function at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
@@ -223,6 +243,9 @@ namespace Rodin::Variational
        * The attributes are collected into the trace domain of the function.
        *
        * @returns Reference to self (for method chaining)
+       * @param a1 Mesh attributes selecting the region.
+       * @param a2 Mesh attributes selecting the region.
+       * @param as Mesh attributes selecting the region.
        */
       template <class A1, class A2, class ... As>
       constexpr
@@ -257,6 +280,7 @@ namespace Rodin::Variational
        * shall be a continuous extension from values to the interior
        * boundaries. If the trace domain is empty, then this has the
        * semantic value that it has not been specified yet.
+       * @returns The set of attributes which will be interpreted as the domains to "trace".
        */
       constexpr
       const TraceDomain& getTraceDomain() const
@@ -267,6 +291,8 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the function on a Point belonging to the mesh.
        * @note CRTP function to be overriden in Derived class.
+       * @param p Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
        */
       constexpr
       auto getValue(const Geometry::Point& p) const
@@ -274,7 +300,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      /// @brief Evaluates the function at an integration point.
+      /**
+       * @brief Evaluates the function at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -283,6 +313,132 @@ namespace Rodin::Variational
         else
           return static_cast<const Derived&>(*this).getValue(ip.getPoint());
       }
+
+      /**
+       * @brief Function value retained for the current quadrature binding.
+       *
+       * Holds the function value at the quadrature point last passed to
+       * setIntegrationPoint(), allowing shape expressions to reuse it across basis indices.
+       * The owning shape expression refreshes this snapshot on every point
+       * binding, including reassembly at an unchanged point. Direct pointwise
+       * bindings clear it and retain normal function evaluation. Only owning,
+       * copyable values are held; lazy Eigen expressions retain direct evaluation.
+       * Each shape expression owns a separate cache so evaluation passes do not
+       * share mutable state.
+       */
+      class Cache
+      {
+        public:
+          /// @brief Type returned when evaluating the enclosing function.
+          using Value =
+            std::decay_t<decltype(std::declval<const FunctionBase&>().getValue(
+              std::declval<const IntegrationPoint&>()))>;
+
+          /// @brief Declared range of the enclosing function.
+          using Range = typename FormLanguage::Traits<FunctionBase>::RangeType;
+
+          /// @brief Whether an owning, assignable snapshot can be retained.
+          static constexpr bool Enabled =
+            (std::is_same_v<Value, Range> ||
+              std::is_base_of_v<Eigen::PlainObjectBase<Value>, Value>) &&
+            std::is_copy_constructible_v<Value> && std::is_copy_assignable_v<Value>;
+
+          /**
+           * @brief Constructs an empty cache bound to a function.
+           * @param[in] f Function to evaluate on subsequent point bindings.
+           * @note The function is not owned and must outlive this cache.
+           */
+          explicit Cache(const FunctionBase& f)
+            : m_function(f)
+          {}
+
+          /**
+           * @brief Prevents binding a cache to a temporary function.
+           * @param[in] f Temporary function whose lifetime cannot cover the cache.
+           */
+          Cache(const FunctionBase&& f) = delete;
+
+          /**
+           * @brief Constructs an empty cache when copying an evaluation pass.
+           * @param[in] other Source cache whose function binding is copied, but whose snapshot is not.
+           */
+          Cache(const Cache& other)
+            : Cache(other.m_function.get())
+          {}
+
+          /**
+           * @brief Transfers the function binding and current snapshot.
+           * @param[in] other Source cache to move from.
+           */
+          Cache(Cache&& other) = default;
+
+          /**
+           * @brief Clears the snapshot when copying another evaluation pass.
+           * @param[in] other Source cache whose function binding is copied, but whose snapshot is not.
+           * @returns This cache with an empty snapshot.
+           */
+          Cache& operator=(const Cache& other)
+          {
+            m_function = other.m_function;
+            m_value.reset();
+            return *this;
+          }
+
+          /**
+           * @brief Transfers the function binding and snapshot on move assignment.
+           * @param[in] other Source cache to move from.
+           * @returns This cache.
+           */
+          Cache& operator=(Cache&& other) = default;
+
+          /**
+           * @brief Evaluates the bound function at an integration point.
+           * @param[in] ip Evaluation point; no reference to it is retained.
+           * @returns This cache.
+           *
+           * When @ref Enabled is true and @p ip has quadrature metadata, evaluates
+           * the bound function and owns its value. Every call evaluates again,
+           * even at the same point, so reassembly observes changed function data. A point without
+           * quadrature metadata clears the snapshot. With @ref Enabled false,
+           * leaves the cache empty and does not evaluate the function.
+           */
+          Cache& setIntegrationPoint(const IntegrationPoint& ip)
+          {
+            if constexpr (Enabled)
+            {
+              if (!ip.getQuadratureFormula())
+              {
+                m_value.reset();
+                return *this;
+              }
+              if (m_value)
+                *m_value = m_function.get().getValue(ip);
+              else
+                m_value.emplace(m_function.get().getValue(ip));
+            }
+            return *this;
+          }
+
+          /**
+           * @brief Gets the snapshot for the current binding.
+           * @returns Pointer to the owned value, or @c nullptr when empty or disabled.
+           * @note The pointer is valid until this cache is rebound, assigned,
+           * moved from or destroyed. Consumers must not retain it across bindings.
+           */
+          const Value* get() const
+          {
+            if constexpr (Enabled)
+            {
+              if (m_value)
+                return &*m_value;
+            }
+            return nullptr;
+          }
+
+        private:
+          std::reference_wrapper<const FunctionBase> m_function;
+          std::optional<Value> m_value;
+      };
 
       /**
        * @brief Returns a geometry-dependent polynomial order bound of the expression
@@ -305,19 +461,28 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getOrder(geom);
       }
 
-      /// @brief Returns this object as the CRTP-derived type.
+      /**
+       * @brief Returns this object as the CRTP-derived type.
+       * @returns This object as the CRTP-derived type.
+       */
       Derived& getDerived() noexcept
       {
         return static_cast<Derived&>(*this);
       }
 
-      /// @brief Returns this object as the CRTP-derived type.
+      /**
+       * @brief Returns this object as the CRTP-derived type.
+       * @returns This object as the CRTP-derived type.
+       */
       const Derived& getDerived() const noexcept
       {
         return static_cast<const Derived&>(*this);
       }
 
-      /// @brief Polymorphically copies the derived function.
+      /**
+       * @brief Polymorphically copies the derived function.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       virtual FunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
@@ -327,7 +492,12 @@ namespace Rodin::Variational
       FlatSet<Geometry::Attribute> m_traceDomain;
   };
 
-  /// @brief Returns the order only when a function is elementwise constant.
+  /**
+   * @brief Returns the order only when a function is elementwise constant.
+   * @param f Function operand.
+   * @param polytope Mesh entity used by this operation.
+   * @returns Zero when the function is known to be elementwise constant, or an empty optional otherwise.
+   */
   template <class Derived>
   inline Optional<size_t>
   GetOrderIfConstant(const FunctionBase<Derived>& f, const Geometry::Polytope& polytope) noexcept

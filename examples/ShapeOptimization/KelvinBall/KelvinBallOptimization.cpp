@@ -47,7 +47,7 @@
 #include "Thickness.h"
 #include "HilbertIdentification.h"
 #include "Sphere.h"
-#include "../../WNGIRExampleParameters.h"
+#include "../../Adaptation/SWIFT/Options.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -125,10 +125,7 @@ namespace KelvinBall
                 advectionQuadratureOrder = std::stoul(std::string(mode.substr(23)));
               else if (mode.rfind("--reconstruction=", 0) == 0)
                 reconstructionMethod = std::string(mode.substr(17));
-              else if (mode.rfind("--wngir-", 0) == 0 ||
-                mode.rfind("--quad-order=", 0) == 0 || mode == "--trace" ||
-                mode.rfind("--trace=", 0) == 0 || mode.rfind("--j-safe=", 0) == 0 ||
-                mode.rfind("--j-ls=", 0) == 0 || mode.rfind("--j-min=", 0) == 0)
+              else if (mode.rfind("--swift-", 0) == 0)
                 continue;
               else if (mode == "--save-mesh")
                 saveMeshDiagnostic = true;
@@ -166,8 +163,8 @@ namespace KelvinBall
             if (advectionQuadratureOrder == 0)
               throw std::runtime_error(
                 "The advection quadrature order must be positive.");
-            if (reconstructionMethod != "mmg" && reconstructionMethod != "wngir")
-              throw std::runtime_error("The reconstruction method must be mmg or wngir.");
+            if (reconstructionMethod != "mmg" && reconstructionMethod != "swift")
+              throw std::runtime_error("The reconstruction method must be mmg or swift.");
             if (configuration.mmgSnap > 0 && reconstructionMethod != "mmg")
               throw std::runtime_error(
                 "--mmg-snap applies only to --reconstruction=mmg.");
@@ -357,7 +354,7 @@ namespace KelvinBall
       }
 
       template <class LevelSet>
-      MMG::Mesh classifyLevelSetForWNGIR(
+      MMG::Mesh classifyLevelSetForSWIFT(
         const MMG::Mesh& background, const LevelSet& levelSet)
       {
         MMG::Mesh classified(background);
@@ -405,6 +402,14 @@ namespace KelvinBall
         // The Potts perimeter term suppresses folded cell-wise sign patterns.
         // Cells whose vertices have one sign retain that phase exactly.
         const auto partition = MinSTCut().classify(volumes, moments, edges, options);
+        Alert::Info() << substageHeading("MinSTCut classification") << Alert::NewLine
+                      << diagnosticLabel("Solid cells:")
+                      << Alert::Notation::Number(partition.insideCells.size())
+                      << Alert::NewLine << diagnosticLabel("Fluid cells:")
+                      << Alert::Notation::Number(partition.outsideCells.size())
+                      << Alert::NewLine << diagnosticLabel("Interface triangles:")
+                      << Alert::Notation::Number(partition.cutEdges.size())
+                      << Alert::Raise;
         for (Index cell = 0; cell < classified.getCellCount(); ++cell)
           classified.setAttribute(
             {3, cell}, partition.labels[cell] == MinSTCut::Inside ? Obstacle : Fluid);
@@ -413,8 +418,50 @@ namespace KelvinBall
         return classified;
       }
 
+      Adaptation::SWIFT::Parameters getFittingParameters(
+        Real referenceSpacing, int argc, char** argv) const
+      {
+        std::vector<std::string> arguments{argv[0]};
+        FlatSet<std::string> specified;
+        for (int i = 1; i < argc; ++i)
+        {
+          const std::string argument(argv[i]);
+          if (!argument.starts_with("--swift-"))
+            continue;
+          const std::string option = "--" + argument.substr(8);
+          if (!option.starts_with("--model-") &&
+            !option.starts_with("--globalization-") && !option.starts_with("--linear-") &&
+            !option.starts_with("--convergence-") &&
+            !option.starts_with("--quadrature-") && !option.starts_with("--sampling-") &&
+            option != "--trace" && !option.starts_with("--trace=") &&
+            !option.starts_with("--trace-quality-witness"))
+            throw std::runtime_error("Unknown SWIFT fitting option: " + argument);
+          specified.insert(option.substr(2, option.find('=') - 2));
+          arguments.push_back(option);
+        }
+        std::vector<char*> pointers;
+        for (auto& argument : arguments)
+          pointers.push_back(argument.data());
+        auto parameters = Rodin::Examples::ReconstructionOptions(
+          static_cast<int>(pointers.size()), pointers.data())
+                            .parameters;
+        parameters.model.h = referenceSpacing;
+        parameters.interfaceAttribute = Gamma;
+        if (!specified.contains("convergence-tolerance-geometric"))
+          parameters.convergence.tolerance.geometric =
+            Real(0.1) * referenceSpacing * referenceSpacing;
+        if (!specified.contains("convergence-tolerance-step"))
+          parameters.convergence.tolerance.step =
+            Real(1e-3) * referenceSpacing * referenceSpacing;
+        if (!specified.contains("convergence-tolerance-step-over-h"))
+          parameters.convergence.tolerance.stepOverH = Real(1e-3) * referenceSpacing;
+        if (!specified.contains("trace"))
+          parameters.trace = true;
+        return parameters;
+      }
+
       template <class LevelSet>
-      MMGReconstruction fitLevelSetWNGIR(const KelvinBall::Mesh& mesh,
+      MMGReconstruction fitLevelSetSWIFT(const KelvinBall::Mesh& mesh,
         const LevelSet& levelSet, Real backgroundH, Real referenceSpacing,
         Real outerRadius, int argc, char** argv)
       {
@@ -434,7 +481,7 @@ namespace KelvinBall
           : interfaceSizeSum / static_cast<Real>(interfaceCount);
 
         // Classification changes labels only. Copy the P1 coefficients onto
-        // that mesh so the locator used by WNGIR resolves both the target and
+        // that mesh so the locator used by SWIFT resolves both the target and
         // its exact element-wise gradient on the same geometry.
         P1<Real, KelvinBall::Mesh> targetSpace(mesh);
         GridFunction targetLevelSet(targetSpace);
@@ -445,34 +492,7 @@ namespace KelvinBall
         P1<Math::SpatialVector<Real>, KelvinBall::Mesh> displacementSpace(mesh, 3);
         TrialFunction displacementTrial(displacementSpace);
         TestFunction displacementTest(displacementSpace);
-        Rodin::Examples::WNGIRExampleDefaults defaults;
-        defaults.maxIterations = 30;
-        auto parameters = Rodin::Examples::makeWNGIRParameters(
-          argc, argv, referenceSpacing, Gamma, defaults);
-        if (!Rodin::Examples::findOption(argc, argv, "wngir-inner-iterations", nullptr))
-          parameters.convergence.iterations.inner = 15;
-        parameters.convergence.iterations.outer =
-          std::clamp(parameters.convergence.iterations.outer, size_t{1}, size_t{30});
-        parameters.convergence.iterations.inner =
-          std::min(parameters.convergence.iterations.inner, size_t{15});
-        if (!Rodin::Examples::findOption(
-              argc, argv, "wngir-geometric-tolerance", nullptr))
-          parameters.convergence.tolerance.geometric =
-            Real(0.1) * referenceSpacing * referenceSpacing;
-        if (!Rodin::Examples::findOption(
-              argc, argv, "wngir-inner-relative-tolerance", nullptr))
-          parameters.convergence.tolerance.innerRelative = Real(1e-3);
-        parameters.convergence.iterations.linear =
-          std::clamp(parameters.convergence.iterations.linear, size_t{1}, size_t{1000});
-        if (!Rodin::Examples::findOption(argc, argv, "wngir-step-tolerance", nullptr))
-          parameters.convergence.tolerance.step =
-            Real(1e-3) * referenceSpacing * referenceSpacing;
-        if (!Rodin::Examples::findOption(
-              argc, argv, "wngir-step-over-h-tolerance", nullptr))
-          parameters.convergence.tolerance.stepOverH = Real(1e-3) * referenceSpacing;
-        if (!Rodin::Examples::findOption(argc, argv, "trace", nullptr) &&
-          !Rodin::Examples::findOption(argc, argv, "wngir-trace", nullptr))
-          parameters.trace = true;
+        auto parameters = getFittingParameters(referenceSpacing, argc, argv);
         // The outer sphere is curved, so its nodes are pinned: sliding in a
         // facet plane would walk them off the sphere. The cut planes bound the
         // wedge but are not walls, and the rim of the interface lies entirely
@@ -480,14 +500,14 @@ namespace KelvinBall
         parameters.fixedBoundaryAttributes = {Outer};
         parameters.slipBoundaryAttributes = {
           SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus};
-        Adaptation::WNGIR fitting(displacementTrial, displacementTest);
+        Adaptation::SWIFT::Problem fitting(displacementTrial, displacementTest);
         fitting.setParameters(parameters);
 
         RealFunction target(
           [&](const Geometry::Point& point) { return targetLevelSet.getValue(point); });
         const auto report = fitting.solve(target, targetGradient);
         Alert::Info()
-          << substageHeading("WNGIR reconstruction") << Alert::NewLine
+          << substageHeading("SWIFT reconstruction") << Alert::NewLine
           << diagnosticLabel("Background mean edge h:")
           << Alert::Notation::Number(backgroundH) << Alert::NewLine
           << diagnosticLabel("Fitting reference spacing h0:")
@@ -503,7 +523,7 @@ namespace KelvinBall
           << diagnosticLabel("Inner relative residual tolerance:")
           << Alert::Notation::Number(parameters.convergence.tolerance.innerRelative)
           << Alert::NewLine << diagnosticLabel("Barrier model:")
-          << "Affine quadratic quality hinges" << Alert::NewLine
+          << "Adaptive affine quadratic quality hinges" << Alert::NewLine
           << diagnosticLabel("Soft quality guard fraction:")
           << Alert::Notation::Number(parameters.model.qualityGuard) << Alert::NewLine
           << diagnosticLabel("Fitting / deviatoric / divergence:")
@@ -519,10 +539,10 @@ namespace KelvinBall
           << diagnosticLabel("Inner Newton steps:")
           << "Full with fixed-inner merit backtracking" << Alert::NewLine
           << diagnosticLabel("Linear backend:")
-          << (parameters.linear.solver == Adaptation::WNGIRParameters::LinearSolver::CG
+          << (parameters.linear.solver == Adaptation::SWIFT::Parameters::LinearSolver::CG
                  ? "CG"
                  : (parameters.linear.solver ==
-                         Adaptation::WNGIRParameters::LinearSolver::MUMPS
+                         Adaptation::SWIFT::Parameters::LinearSolver::MUMPS
                        ? "MUMPS"
                        : "SparseLU"))
           << Alert::NewLine << diagnosticLabel("Linear relative tolerance:")
@@ -587,7 +607,7 @@ namespace KelvinBall
             diagnostics.cells, diagnostics.cells}};
       }
 
-      void adaptWNGIR(MMGReconstruction& fitted, const Sphere& sphere,
+      void adaptSWIFT(MMGReconstruction& fitted, const Sphere& sphere,
         const Configuration& configuration, Real requestedWelschScale)
       {
         const auto before = getMeshDiagnostics(fitted.mesh);
@@ -599,9 +619,9 @@ namespace KelvinBall
         {
           fitted.diagnostics.cellsBefore = before.cells;
           fitted.diagnostics.cellsAfter = before.cells;
-          Alert::Warning() << "Skipped MMG adaptation after WNGIR reconstruction: "
+          Alert::Warning() << "Skipped MMG adaptation after SWIFT reconstruction: "
                            << error.what() << Alert::NewLine
-                           << "Retaining the WNGIR-fitted mesh with "
+                           << "Retaining the SWIFT-fitted mesh with "
                            << Alert::Notation::Number(before.cells)
                            << " cells and continuing optimization." << Alert::Raise;
           return;
@@ -627,7 +647,7 @@ namespace KelvinBall
         fitted.diagnostics.cellsAfter = after.cells;
         fitted.diagnostics.requiredBoundaryTriangles =
           sphere.protectFixedGeometry(fitted.mesh, false);
-        Alert::Info() << substageHeading("MMG adaptation after WNGIR reconstruction")
+        Alert::Info() << substageHeading("MMG adaptation after SWIFT reconstruction")
                       << Alert::NewLine << diagnosticLabel("Cell count:")
                       << Alert::Notation::Number(before.cells) << " -> "
                       << Alert::Notation::Number(after.cells) << Alert::NewLine
@@ -692,7 +712,7 @@ namespace KelvinBall
                           << "Full shape direction" << Alert::NewLine
                           << diagnosticLabel("Reconstruction method:")
                           << m_options.reconstructionMethod;
-        if (m_options.reconstructionMethod == "wngir" && !m_options.configuration.adapt)
+        if (m_options.reconstructionMethod == "swift" && !m_options.configuration.adapt)
         {
           configurationInfo << Alert::NewLine << diagnosticLabel("Background Hausdorff:")
                             << Alert::Notation::Number(
@@ -710,13 +730,13 @@ namespace KelvinBall
                             << Alert::NewLine
                             << diagnosticLabel("Adaptation hmax (far field):")
                             << Alert::Notation::Number(m_options.configuration.hmax);
-          if (m_options.reconstructionMethod == "wngir")
+          if (m_options.reconstructionMethod == "swift")
             configurationInfo << Alert::NewLine
                               << diagnosticLabel("Background Hausdorff:")
                               << Alert::Notation::Number(
                                    m_options.configuration.backgroundHausdorff)
                               << " h0";
-          if (m_options.reconstructionMethod == "wngir")
+          if (m_options.reconstructionMethod == "swift")
             configurationInfo << Alert::NewLine
                               << diagnosticLabel("Welsch size-map scale:")
                               << (requestedWelschScale > 0
@@ -747,18 +767,18 @@ namespace KelvinBall
         const Real outerRadius = m_options.configuration.outerRadius;
         const int argc = m_argc;
         char** argv = m_argv;
-        SphereDiscretization initial = m_options.reconstructionMethod == "wngir"
-          ? sphere.prepareWNGIRBackground(requestedWelschScale)
+        SphereDiscretization initial = m_options.reconstructionMethod == "swift"
+          ? sphere.prepareSWIFTBackground(requestedWelschScale)
           : sphere.discretize(false, requestedWelschScale);
         ReconstructionDiagnostics reconstruction = initial.diagnostics;
-        Optional<MMG::Mesh> wngirBackground;
+        Optional<MMG::Mesh> swiftBackground;
         Real backgroundH = std::numeric_limits<Real>::quiet_NaN();
         MMG::Mesh mesh;
-        if (m_options.reconstructionMethod == "wngir")
+        if (m_options.reconstructionMethod == "swift")
         {
-          wngirBackground.emplace(std::move(initial.mesh));
+          swiftBackground.emplace(std::move(initial.mesh));
           const MeshDiagnostics backgroundDiagnostics =
-            getMeshDiagnostics(*wngirBackground, false);
+            getMeshDiagnostics(*swiftBackground, false);
           backgroundH = backgroundDiagnostics.meanElementSize;
           Alert::Info backgroundInfo;
           backgroundInfo
@@ -783,22 +803,22 @@ namespace KelvinBall
                            << Alert::NewLine << diagnosticLabel("Welsch size-map scale:")
                            << Alert::Notation::Number(reconstruction.welschScale);
           backgroundInfo << Alert::Raise;
-          P1 sphereSpace(*wngirBackground);
+          P1 sphereSpace(*swiftBackground);
           GridFunction sphereLevelSet(sphereSpace);
           sphereLevelSet = RealFunction([](const Geometry::Point& point) {
             return point.getPhysicalCoordinates().norm() - Real(1);
           });
           MMG::Mesh classified =
-            classifyLevelSetForWNGIR(*wngirBackground, sphereLevelSet);
+            classifyLevelSetForSWIFT(*swiftBackground, sphereLevelSet);
           P1 classifiedSphereSpace(classified);
           GridFunction classifiedSphereLevelSet(classifiedSphereSpace);
           classifiedSphereLevelSet.getData() = sphereLevelSet.getData();
           MMGReconstruction fitted =
-            fitLevelSetWNGIR(classified, classifiedSphereLevelSet, backgroundH,
+            fitLevelSetSWIFT(classified, classifiedSphereLevelSet, backgroundH,
               initialGridSpacing, outerRadius, argc, argv);
           if (m_options.configuration.adapt)
           {
-            adaptWNGIR(fitted, sphere, m_options.configuration, requestedWelschScale);
+            adaptSWIFT(fitted, sphere, m_options.configuration, requestedWelschScale);
             reconstruction = fitted.diagnostics;
           }
           mesh = std::move(fitted.mesh);
@@ -807,12 +827,12 @@ namespace KelvinBall
         {
           mesh = std::move(initial.mesh);
         }
-        if (wngirBackground && m_options.configuration.adapt)
+        if (swiftBackground && m_options.configuration.adapt)
         {
-          wngirBackground.emplace(mesh);
-          backgroundH = meanElementSize(*wngirBackground);
+          swiftBackground.emplace(mesh);
+          backgroundH = meanElementSize(*swiftBackground);
         }
-        return {std::move(mesh), std::move(wngirBackground), backgroundH, reconstruction};
+        return {std::move(mesh), std::move(swiftBackground), backgroundH, reconstruction};
       }
 
       static void printUsage(const char* executable)
@@ -852,15 +872,15 @@ namespace KelvinBall
           << Alert::NewLine << Alert::Notation("--advection-quadrature=<order>")
           << " Quadrature order for the transported distance (default: 8)."
           << Alert::NewLine << Alert::Notation("--reconstruction=<method>")
-          << "  Interface reconstruction: mmg or wngir (default: mmg)." << Alert::NewLine
+          << "  Interface reconstruction: mmg or swift (default: mmg)." << Alert::NewLine
           << Alert::Notation("--background-hausdorff=<value>")
-          << " WNGIR background Hausdorff tolerance, in h0 (default: 0.05)."
+          << " SWIFT background Hausdorff tolerance, in h0 (default: 0.05)."
           << Alert::NewLine << Alert::Notation("--background-gradation=<value>")
-          << " WNGIR background gradation (default: 2)." << Alert::NewLine
+          << " SWIFT background gradation (default: 2)." << Alert::NewLine
           << Alert::Notation("--mmg-adapt")
           << "                Adapt near the interface after each reconstruction:"
           << Alert::NewLine
-          << "                              MMG cut or WNGIR fit, including the initial "
+          << "                              MMG cut or SWIFT fit, including the initial "
              "design."
           << Alert::NewLine
           << "                              Adaptation uses the fixed size factors times "
@@ -875,26 +895,26 @@ namespace KelvinBall
           << "      MMG path: retries of a failed reconstruction, each at half"
           << Alert::NewLine
           << "                              the previous MMG scale (default: 2)."
-          << Alert::NewLine << Alert::Notation("--wngir-*=<value>")
-          << "        WNGIR fitting parameters (defaults and caps: 30 outer / 15 inner;"
+          << Alert::NewLine << Alert::Notation("--swift-*=<value>")
+          << "        SWIFT fitting parameters (defaults: 30 outer / 15 inner;"
           << Alert::NewLine
-          << "                              iteration trace on; --wngir-trace=0 disables;"
+          << "                              iteration trace on; --swift-trace=0 disables;"
           << Alert::NewLine
           << "                              grouped model and convergence controls)."
-          << Alert::NewLine << Alert::Notation("--wngir-fit=<value>")
+          << Alert::NewLine << Alert::Notation("--swift-model-fit=<value>")
           << "  Fitting curvature weight (default: 1)." << Alert::NewLine
-          << Alert::Notation("--wngir-distribution-deviatoric=<value>")
+          << Alert::Notation("--swift-model-distribution-deviatoric=<value>")
           << "  Centered deviatoric weight (default: 0.0001)." << Alert::NewLine
-          << Alert::Notation("--wngir-distribution-divergence=<value>")
+          << Alert::Notation("--swift-model-distribution-divergence=<value>")
           << "  Centered divergence weight (default: 0.01)." << Alert::NewLine
-          << Alert::Notation("--wngir-linear-solver=<name>")
-          << "  WNGIR linear backend: mumps, sparse-lu, or cg (default: MUMPS when "
+          << Alert::Notation("--swift-linear-solver=<name>")
+          << "  SWIFT linear backend: mumps, sparse-lu, or cg (default: MUMPS when "
              "built)."
-          << Alert::NewLine << Alert::Notation("--wngir-directional-newton[=0|1]")
+          << Alert::NewLine << Alert::Notation("--swift-globalization-directional-newton[=0|1]")
           << "  Scale the frozen model with directional Newton (default: 1)."
-          << Alert::NewLine << Alert::Notation("--wngir-hinge=<value>")
+          << Alert::NewLine << Alert::Notation("--swift-model-hinge=<value>")
           << "  Dimensionless quadratic-hinge weight (default: 10)." << Alert::NewLine
-          << Alert::Notation("--wngir-quality-guard=<fraction>")
+          << Alert::Notation("--swift-model-quality-guard=<fraction>")
           << "  Soft guard fraction for that penalty (default: 0.1)." << Alert::NewLine
           << Alert::Notation("--geometry-only")
           << "             Stop after initial reconstruction." << Alert::NewLine
@@ -1417,22 +1437,22 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   const Real stabilizationFactor = m_options.configuration.stabilizationFactor;
   const Real initialGridSpacing = m_options.configuration.getGridSpacing();
   const Real requestedWelschScale =
-    Rodin::Examples::realOption(argc, argv, "wngir-robust-scale", Real(0));
+    getFittingParameters(m_options.configuration.getGridSpacing(), argc, argv).model.robustScale;
   reportConfiguration(requestedWelschScale);
   const Real nan = std::numeric_limits<Real>::quiet_NaN();
   const auto stage1Start = Clock::now();
-  announce(m_options.reconstructionMethod == "wngir"
+  announce(m_options.reconstructionMethod == "swift"
       ? "Stage 1: Preparing the background mesh and fitting the initial sphere with "
-        "WNGIR."
+        "SWIFT."
       : "Stage 1: Discretizing the initial sphere with MMG.");
   Sphere sphere(m_options.configuration);
   auto initial = initialize(sphere, requestedWelschScale);
   MMG::Mesh mesh = std::move(initial.mesh);
-  Optional<MMG::Mesh> wngirBackground = std::move(initial.background);
+  Optional<MMG::Mesh> swiftBackground = std::move(initial.background);
   Real backgroundH = initial.backgroundH;
   ReconstructionDiagnostics reconstruction = initial.diagnostics;
   const std::string reconstructionName =
-    m_options.reconstructionMethod == "wngir" ? "KelvinBallWNGIR" : "KelvinBallMMG";
+    m_options.reconstructionMethod == "swift" ? "KelvinBallSWIFT" : "KelvinBallMMG";
   IO::XDMF reconstructionXdmf(reconstructionName);
   auto reconstructionOutput = reconstructionXdmf.grid("Reconstructed");
   reconstructionOutput.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
@@ -1521,12 +1541,12 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     {
       mesh = std::move(*nextMesh);
       nextMesh.reset();
-      if (wngirBackground && m_options.configuration.adapt)
+      if (swiftBackground && m_options.configuration.adapt)
       {
         // Refresh only between iterations, after the previous spaces and
         // fields have expired. The background is fixed during each fit.
-        wngirBackground.emplace(mesh);
-        backgroundH = meanElementSize(*wngirBackground);
+        swiftBackground.emplace(mesh);
+        backgroundH = meanElementSize(*swiftBackground);
       }
     }
     const Real h = meanElementSize(mesh);
@@ -2227,7 +2247,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
 
     stageSeconds[5] = elapsedSeconds(stage6Start);
     reportStageTiming(6, stageSeconds[5]);
-    MMG::Mesh& advectionMesh = wngirBackground ? *wngirBackground : mesh;
+    MMG::Mesh& advectionMesh = swiftBackground ? *swiftBackground : mesh;
     P1 advectionLevelSetSpace(advectionMesh);
     GridFunction advectedDistance(advectionLevelSetSpace);
     // Only the transported scalar survives this scope. In particular, the
@@ -2479,7 +2499,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       P1 advectionShapeSpace(advectionMesh, 3);
       GridFunction advectionDistance(advectionLevelSetSpace);
       GridFunction advectionDirection(advectionShapeSpace);
-      if (wngirBackground)
+      if (swiftBackground)
       {
       // The fitted mesh is the background with its vertices moved: the same
       // numbering at different positions. Copying nodal values would carry
@@ -2624,21 +2644,21 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     }
 
     const auto stage9Start = Clock::now();
-    announce(m_options.reconstructionMethod == "wngir"
-        ? "Stage 9: Fitting the advected interface with WNGIR."
+    announce(m_options.reconstructionMethod == "swift"
+        ? "Stage 9: Fitting the advected interface with SWIFT."
         : "Stage 9: Reconstructing the advected interface with MMG.");
     MMGReconstruction result = [&]() {
-      if (m_options.reconstructionMethod == "wngir")
+      if (m_options.reconstructionMethod == "swift")
       {
         MMG::Mesh classified =
-          classifyLevelSetForWNGIR(*wngirBackground, advectedDistance);
+          classifyLevelSetForSWIFT(*swiftBackground, advectedDistance);
         P1 classifiedLevelSetSpace(classified);
         GridFunction classifiedLevelSet(classifiedLevelSetSpace);
         classifiedLevelSet.getData() = advectedDistance.getData();
-        auto fitted = fitLevelSetWNGIR(classified, classifiedLevelSet, backgroundH,
+        auto fitted = fitLevelSetSWIFT(classified, classifiedLevelSet, backgroundH,
           initialGridSpacing, outerRadius, argc, argv);
         if (m_options.configuration.adapt)
-          adaptWNGIR(fitted, sphere, m_options.configuration, requestedWelschScale);
+          adaptSWIFT(fitted, sphere, m_options.configuration, requestedWelschScale);
         return fitted;
       }
       // A failed MMG stage is retried on the same advected level set with

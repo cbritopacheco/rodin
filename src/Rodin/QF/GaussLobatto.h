@@ -11,15 +11,17 @@
  * @file GaussLobatto.h
  * @brief Defines the GaussLobatto quadrature formula.
  *
- * @note This file provides a header-only implementation of Gauss-Lobatto
- * quadrature.
+ * @note Rule construction is defined here; canonical caching is compiled
+ * in GaussLobatto.cpp.
  */
 
 #include <vector>
 #include <cassert>
 #include <cmath>
+#include <map>
 
 #include "QuadratureFormula.h"
+#include "GaussLegendre.h"
 
 
 namespace Rodin::QF
@@ -51,6 +53,14 @@ namespace Rodin::QF
    * - Triangle: @f$ (r,s) = (u, (1-u)v) @f$ with Jacobian @f$ (1-u) @f$
    * - Tetrahedron: @f$ (r,s,t) = (u, (1-u)v, (1-u)(1-v)w) @f$ with Jacobian
    *   @f$ (1-u)^2(1-v) @f$
+   * The collapsed Jacobians are absorbed into Gauss--Lobatto--Jacobi weights,
+   * rather than evaluated at the nodes. All weights, including vertex weights,
+   * are strictly positive. Coincident collapsed nodes are merged. With at least
+   * @f$ n @f$ points in every direction, total-degree exactness is @f$ 2n-3 @f$.
+   * Conical products are not fully symmetric under vertex permutations.
+   * A pyramid integrand evaluated at the apex must have a defined value or
+   * documented trace; rational finite-element derivatives need not have a
+   * direction-independent limit there.
    *
    * ## Supported Geometries
    * - Point
@@ -59,10 +69,18 @@ namespace Rodin::QF
    * - Quadrilateral
    * - Tetrahedron
    * - Wedge
+   * - Pyramid
    * - Hexahedron
    *
    * @note Requires at least @f$ n \geq 2 @f$ points per direction for proper
    * Lobatto quadrature (to include both endpoints).
+   *
+   * ## Architecture
+   *
+   * Constructors own their nodes and weights. @ref get returns immutable
+   * canonical rules keyed by geometry and point count, retaining their identity
+   * for mapped quadrature caches. A thread-local hot cache avoids repeated
+   * locking; a process-wide pool owns the rules until program termination.
    */
   class GaussLobatto final : public QuadratureFormulaBase
   {
@@ -76,6 +94,17 @@ namespace Rodin::QF
     public:
       /// Parent class type
       using Parent = QuadratureFormulaBase;
+
+      /**
+       * @brief Gets a cached rule with a uniform point count per direction.
+       * @param g Reference geometry.
+       * @param count Points per one-dimensional direction, at least two.
+       * @returns Canonical rule whose reference remains valid until termination.
+       *
+       * The argument is a point count, not polynomial degree. Exactness is
+       * @f$2\,\mathrm{count}-3@f$ for positive-dimensional geometries.
+       */
+      static const GaussLobatto& get(Geometry::Polytope::Type g, size_t count);
 
       /**
        * @brief Constructs Gauss-Lobatto quadrature with uniform order.
@@ -165,6 +194,61 @@ namespace Rodin::QF
       { return new GaussLobatto(*this); }
 
     private:
+      /**
+       * @brief Lobatto rule for @f$ (1-x)^\alpha @f$ on @f$ [0,1] @f$.
+       *
+       * Interior nodes and weights come from Gaussian quadrature for
+       * @f$ x(1-x)^{\alpha+1} @f$. Closed-form endpoint weights avoid
+       * subtractive cancellation at the collapsed vertex.
+       */
+      static void gjl1dUnit(size_t n, size_t alpha,
+        std::vector<Real>& x, std::vector<Real>& w)
+      {
+        assert(n >= 2);
+        x.resize(n);
+        w.resize(n);
+        x.front() = 0;
+        x.back() = 1;
+        const Real count = static_cast<Real>(n);
+        const Real a = static_cast<Real>(alpha);
+        w.front() = Real(1) / ((count - 1) * (count + a));
+        w.back() = std::exp(std::lgamma(a + 1) + std::lgamma(a + 2) +
+          std::lgamma(count - 1) + std::lgamma(count) -
+          std::lgamma(count + a) - std::lgamma(count + a + 1));
+        if (n > 2)
+        {
+          std::vector<Real> interior, weights;
+          GaussLegendre::gj1dUnit(n - 2, alpha + 1, 1, interior, weights);
+          for (size_t i = 0; i < interior.size(); ++i)
+          {
+            x[i + 1] = interior[i];
+            w[i + 1] = weights[i] / (interior[i] * (1 - interior[i]));
+          }
+        }
+      }
+
+      /// @brief Merge exactly coincident nodes produced by collapsed endpoints.
+      void mergeCollapsedPoints()
+      {
+        std::map<std::vector<Real>, size_t> indices;
+        std::vector<Math::SpatialVector<Real>> points;
+        Math::Vector<Real> weights = Math::Vector<Real>::Zero(m_weights.size());
+        for (size_t i = 0; i < m_points.size(); ++i)
+        {
+          const auto& point = m_points[i];
+          std::vector<Real> key(point.size());
+          for (size_t d = 0; d < key.size(); ++d)
+            key[d] = point[d];
+          const auto [entry, inserted] = indices.emplace(key, points.size());
+          if (inserted)
+            points.push_back(point);
+          weights[entry->second] += m_weights[i];
+        }
+        weights.conservativeResize(points.size());
+        m_points = std::move(points);
+        m_weights = std::move(weights);
+      }
+
       /**
        * @brief Computes 1D Gauss-Lobatto nodes and weights on [0,1].
        * @param n Number of quadrature points (must be at least 2)
@@ -295,7 +379,7 @@ namespace Rodin::QF
             buildQuad(m_nx, m_ny);
             break;
           case Geometry::Polytope::Type::Triangle:
-            buildTri(m_nx, m_nx);
+            buildTri(m_nx, m_ny);
             break;
           case Geometry::Polytope::Type::Tetrahedron:
             buildTet(m_nx, m_ny, m_nz);
@@ -310,6 +394,11 @@ namespace Rodin::QF
             buildHex(m_nx, m_ny, m_nz);
             break;
         }
+        if (getGeometry() == Geometry::Polytope::Type::Triangle ||
+            getGeometry() == Geometry::Polytope::Type::Tetrahedron ||
+            getGeometry() == Geometry::Polytope::Type::Wedge ||
+            getGeometry() == Geometry::Polytope::Type::Pyramid)
+          mergeCollapsedPoints();
       }
 
       /**
@@ -363,11 +452,13 @@ namespace Rodin::QF
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
         for(size_t j=0;j<ny;++j)
+        {
           for(size_t i=0;i<nx;++i){
             Math::SpatialVector<Real> p; p.resize(2); p[0]=x[i]; p[1]=y[j];
             m_points.push_back(std::move(p));
             m_weights[k++] = wx[i]*wy[j]; // area 1
           }
+        }
       }
 
       /**
@@ -385,22 +476,23 @@ namespace Rodin::QF
        */
       void buildTri(size_t nu, size_t nv)
       {
-        // Duffy with 1D GLL in each param:
-        // (r,s)=(u,(1-u)v),  J=(1-u)
+        // The Duffy Jacobian (1-u) is carried by the Jacobi weights.
         std::vector<Real> u,wu,v,wv;
-        gll1dUnit(nu, u, wu);
+        gjl1dUnit(nu, 1, u, wu);
         gll1dUnit(nv, v, wv);
         const size_t N = nu*nv;
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
         for(size_t j=0;j<nv;++j)
+        {
           for(size_t i=0;i<nu;++i){
             const Real r = u[i];
             const Real s = (1.0 - u[i]) * v[j];
             Math::SpatialVector<Real> p; p.resize(2); p[0]=r; p[1]=s;
             m_points.push_back(std::move(p));
-            m_weights[k++] = wu[i]*wv[j]*(1.0 - u[i]); // integrates to 1/2
+            m_weights[k++] = wu[i]*wv[j];
           }
+        }
       }
 
       /**
@@ -419,25 +511,28 @@ namespace Rodin::QF
        */
       void buildTet(size_t nu, size_t nv, size_t nw)
       {
-        // 3D Duffy with 1D GLL:
-        // (r,s,t)=(u,(1-u)v,(1-u)(1-v)w),  J=(1-u)^2(1-v)
+        // The Duffy Jacobian (1-u)^2(1-v) is carried by the Jacobi weights.
         std::vector<Real> u,wu,v,wv,w,ww;
-        gll1dUnit(nu, u, wu);
-        gll1dUnit(nv, v, wv);
+        gjl1dUnit(nu, 2, u, wu);
+        gjl1dUnit(nv, 1, v, wv);
         gll1dUnit(nw, w, ww);
         const size_t N = nu*nv*nw;
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
         for(size_t kk=0; kk<nw; ++kk)
+        {
           for(size_t j=0; j<nv; ++j)
+          {
             for(size_t i=0; i<nu; ++i){
               const Real r = u[i];
               const Real s = (1.0 - u[i]) * v[j];
               const Real t = (1.0 - u[i]) * (1.0 - v[j]) * w[kk];
               Math::SpatialVector<Real> p; p.resize(3); p[0]=r; p[1]=s; p[2]=t;
               m_points.push_back(std::move(p));
-              m_weights[k++] = wu[i]*wv[j]*ww[kk] * (1.0 - u[i])*(1.0 - u[i])*(1.0 - v[j]); // volume 1/6
+              m_weights[k++] = wu[i]*wv[j]*ww[kk];
             }
+          }
+        }
       }
 
       /**
@@ -453,24 +548,28 @@ namespace Rodin::QF
        */
       void buildWedge(size_t ntri, size_t nz)
       {
-        // triangle (Duffy with GLL) × segment (GLL)
+        // Jacobi--Lobatto triangle times Lobatto segment.
         std::vector<Real> u,wu,v,wv,z,wz;
-        gll1dUnit(ntri, u, wu);
+        gjl1dUnit(ntri, 1, u, wu);
         gll1dUnit(ntri, v, wv);
         gll1dUnit(nz, z, wz);
         const size_t N = ntri*ntri*nz;
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
         for(size_t kk=0; kk<nz; ++kk)
+        {
           for(size_t j=0; j<ntri; ++j)
+          {
             for(size_t i=0; i<ntri; ++i){
               const Real r = u[i];
               const Real s = (1.0 - u[i]) * v[j];
               const Real t = z[kk];
               Math::SpatialVector<Real> p; p.resize(3); p[0]=r; p[1]=s; p[2]=t;
               m_points.push_back(std::move(p));
-              m_weights[k++] = wu[i]*wv[j]*(1.0 - u[i]) * wz[kk]; // wedge volume = 1/2
+              m_weights[k++] = wu[i]*wv[j]*wz[kk];
             }
+          }
+        }
       }
 
       /**
@@ -487,7 +586,7 @@ namespace Rodin::QF
         std::vector<Real> u, wu, v, wv, z, wz;
         gll1dUnit(nx, u, wu);
         gll1dUnit(ny, v, wv);
-        gll1dUnit(nz, z, wz);
+        gjl1dUnit(nz, 2, z, wz);
         const size_t N = nx * ny * nz;
         m_points.clear();
         m_points.reserve(N);
@@ -506,7 +605,7 @@ namespace Rodin::QF
               p[1] = q * v[j];
               p[2] = z[kk];
               m_points.push_back(std::move(p));
-              m_weights[k++] = wu[i] * wv[j] * wz[kk] * q * q;
+              m_weights[k++] = wu[i] * wv[j] * wz[kk];
             }
           }
         }

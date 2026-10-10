@@ -420,7 +420,7 @@ The fixed requested MMG bounds are
 $h_{\min}=\texttt{hmin-factor}\,h_0$ and
 $h_{\max}=\texttt{hmax-factor}\,h_0$, with factors 0.1 and 10 by default.
 The measured mean tetrahedral edge length $\bar h$ is reported separately.
-Regularization, normal smoothing, advection, the refinement band and WNGIR
+Regularization, normal smoothing, advection, the refinement band and SWIFT
 fitting scales use $h_0$, not $\bar h$: changing the mesh does not implicitly
 change these algorithmic parameters. Local element sizes are still used by
 the finite-element stabilization and boundary integrators.
@@ -443,7 +443,7 @@ angle detection disabled it keeps a plane flat only if its borders are given
 as features, so every edge between two differently labelled faces, one of them
 the outer face or a cut, is handed to MMG as a ridge, and every vertex on three
 or more labels as a corner. This covers the lines where two faces of the
-chamber meet and the rim of $\Gamma$ on the cuts. The WNGIR background, which
+chamber meet and the rim of $\Gamma$ on the cuts. The SWIFT background, which
 never carries an interface, keeps its cut triangles required.
 
 Each cut starts from a single material: before MMG sees the mesh, every cell is
@@ -468,20 +468,20 @@ h(x)=h_{\mathrm{far}}-(h_{\mathrm{far}}-h_\Gamma)
 ```
 
 For MMG reconstruction, $d$ is the unsigned FMM distance to $\Gamma$ on
-the newly cut mesh. For the initial WNGIR background, which has no interface
+the newly cut mesh. For the initial SWIFT background, which has no interface
 yet, $d(x)=|\lVert x\rVert-1|$ is the exact distance to the initial sphere.
 Thus the weight and scale agree, while the distance field belongs to the
 geometry present at each stage.
 
-With `--mmg-adapt`, the initial WNGIR background size map uses a Welsch width
+With `--mmg-adapt`, the initial SWIFT background size map uses a Welsch width
 of $3h_0$ by default. MMG uses the factor-derived
 $h_{\min}$ and $h_{\max}$ as background size bounds.
-`--wngir-robust-scale` overrides that width and the WNGIR loss scale together.
-Otherwise WNGIR selects its loss scale from $h_0$ and
+`--swift-model-robust-scale` overrides that width and the SWIFT loss scale together.
+Otherwise SWIFT selects its loss scale from $h_0$ and
 the initial residual, independently of the width of the MMG refinement band.
 An MMG retry halves its requested size bounds; an explicitly supplied Welsch
 width remains fixed. Adaptation
-applies after every MMG cut or WNGIR fit, including the initial design:
+applies after every MMG cut or SWIFT fit, including the initial design:
 
 | Option | Meaning | Default |
 |---|---|---|
@@ -491,7 +491,7 @@ applies after every MMG cut or WNGIR fit, including the initial design:
 The requested interface and far-field sizes are $h_{\min}$ and $h_{\max}$.
 These are also MMG's size bounds; $h_{\min}$ need not equal the realized
 size of the classified interface triangles. The
-preceding MMG level-set cut uses the same bounds, except on a retry. The WNGIR
+preceding MMG level-set cut uses the same bounds, except on a retry. The SWIFT
 background uses the same bounds even when adaptation is off; its Hausdorff
 tolerance follows `--background-hausdorff`. The background
 is refreshed from the adapted fitted mesh between design iterations when
@@ -538,7 +538,7 @@ All MMG calls run
 with angle detection disabled, since the only sharp edges of the chamber are
 the protected intersections of its fixed faces.
 
-### WNGIR
+### SWIFT
 
 Rotated coupling drops quadrature points whose opposite fluid trace cannot
 be located. No matrix or load contribution is assembled at those points,
@@ -565,7 +565,7 @@ a face-area perimeter cost. The phase moment is
 $\tanh(\overline\phi_K/(1.25h_K))$ and the capacity on an internal face is
 $0.04\min(h_K,h_L)|F|$, where $h_K$ is the volume-equivalent regular
 tetrahedron edge length. This regularizes classification, not the target
-level set. WNGIR fits a fresh copy of the background so
+level set. SWIFT fits a fresh copy of the background so
 that this envelope reaches the zero level set. The fitted copy carries the
 state and shape computations. With `--mmg-adapt`, an MMG adaptation follows
 each fit, using the FMM distance to the fitted interface and the same Welsch
@@ -605,15 +605,15 @@ validation quadrature. It approximates distance to the target zero set; it is
 not a continuous Hausdorff certificate. Invalid or zero-gradient samples make
 validation fail rather than disappear from the maximum. Active RMS or Welsch
 energy alone cannot certify this target. The default budget is 30 outer iterations and
-15 inner hinge corrections. `--wngir-outer-iterations` is capped at 30;
-`--wngir-inner-iterations` is capped at 15.
+15 inner hinge corrections. `--swift-convergence-iterations-outer` and
+`--swift-convergence-iterations-inner` override these budgets.
 The inner relative stationarity-residual tolerance is $10^{-3}$.
 Linear steps default to MUMPS when available, otherwise SparseLU.
-`--wngir-linear-solver=cg` selects CG at relative tolerance $10^{-6}$,
+`--swift-linear-solver=cg` selects CG at relative tolerance $10^{-6}$,
 with at most 1000 iterations per solve. The active-residual convergence criteria are replaced
 by the full-interface supremum criterion; the absolute and accepted-step stopping
-thresholds are $10^{-3}h_0^2$. Per-iteration WNGIR diagnostics are printed by
-default; `--wngir-trace=0` disables them. Reaching the inner correction cap
+thresholds are $10^{-3}h_0^2$. Per-iteration SWIFT diagnostics are printed by
+default; `--swift-trace=0` disables them. Reaching the inner correction cap
 without certifying the stationarity residual stops fitting before accepting
 that direction. The default
 inner Newton corrections try full steps with backtracking on the frozen
@@ -621,17 +621,20 @@ inner merit. Directional Newton scales the predictor and frozen metric before
 the hinge solve; the outer energy/quality line search then backtracks the
 resulting physical increment.
 The fitting and centered distribution coefficients default to
-`--wngir-fit=1`, `--wngir-distribution-deviatoric=0.0001`, and
-`--wngir-distribution-divergence=0.01`. The dimensionless hinge strength
-is `--wngir-hinge=10`. Directional Newton is enabled without a predictor
-motion cap (`--wngir-max-step-over-h=0`). The Jacobian floor and distortion
-budget are `--wngir-jacobian=0.01` and `--wngir-distortion=10`.
+`--swift-model-fit=1`, `--swift-model-distribution-deviatoric=0.0001`, and
+`--swift-model-distribution-divergence=0.01`. The dimensionless hinge strength
+is `--swift-model-hinge=10`. Directional Newton is enabled without a predictor
+motion cap (`--swift-globalization-max-step-over-h=0`). The Jacobian floor and distortion
+budget are `--swift-model-jacobian=0.01` and `--swift-model-distortion=10`.
 KelvinBall retains its application-specific geometric target
 $0.1h_0^2$ and small-step thresholds $10^{-3}h_0^2$; the model coefficients
-and linear tolerance follow the shared WNGIR defaults.
+and linear tolerance follow the shared SWIFT defaults.
 The other fitting parameters
-use the common `--wngir-*` spellings of the WNGIR examples (see
-`KelvinBall --help`).
+use the hierarchical SWIFT controls with a `--swift-` prefix to distinguish
+them from optimization controls: for example, `--swift-model-fit=1`,
+`--swift-convergence-tolerance-geometric=0.001`, and
+`--swift-linear-threads=4` (see `KelvinBall --help`). Classification uses
+MinSTCut both for the initial design and for every reconstructed update.
 
 The fixed classified facet connectivity is not the triangulation of the
 target P1 zero set. Reducing its fitting error can therefore require strongly
@@ -658,9 +661,9 @@ B(v)=\frac{\mu}{2}\left[
 \delta_Q=g(Q_{\max}-1).
 $$
 
-Here $g$ is `--wngir-quality-guard` (default 0.1, strictly between zero
+Here $g$ is `--swift-model-quality-guard` (default 0.1, strictly between zero
 and one), and $\mu$ retains the existing model-decrease scaling controlled
-by `--wngir-mu-hat`. Thus the default soft thresholds are
+by `--swift-model-hinge`. Thus the default soft thresholds are
 $j_{\mathrm{soft}}=0.109$ and $Q_{\mathrm{soft}}=9.1$ when
 $j_{\mathrm{safe}}=0.01$ and $Q_{\max}=10$. The penalty Hessian is bounded
 for a fixed $\mu$ and guard, and is constant on each fixed active set.
@@ -764,13 +767,13 @@ KelvinBall restricts the local step matrices to the boundary-admissible
 space: zero motion on the outer
 sphere and tangential motion on the cuts.
 
-The old `--wngir-kappa-s`, `--wngir-kappa-bulk`, `--wngir-quality-metric*`,
-`--wngir-direct-step`, `--wngir-quadratic-penalty`,
-`--wngir-nonlinear-barrier` and `--wngir-undamped-inner` options are removed
+The old `--swift-kappa-s`, `--swift-kappa-bulk`, `--swift-quality-metric*`,
+`--swift-direct-step`, `--swift-quadratic-penalty`,
+`--swift-nonlinear-barrier` and `--swift-undamped-inner` options are removed
 and rejected, rather than silently ignored.
-The former `--wngir-kappa-f`, `--wngir-kappa-d`, `--wngir-mu-hat`,
-`--wngir-direct-solver`, `--wngir-steps`, and
-`--wngir-primal-barrier-iterations` spellings are also removed. Use the
+The former `--swift-kappa-f`, `--swift-kappa-d`, `--swift-mu-hat`,
+`--swift-direct-solver`, `--swift-steps`, and
+`--swift-primal-barrier-iterations` spellings are also removed. Use the
 canonical flags above; the two centered distribution weights cannot be
 represented by a single old distribution coefficient.
 
@@ -781,7 +784,7 @@ KelvinBall --n=20 --hmin-factor=0.1 --hmax-factor=10 --iterations=20
 KelvinBall --n=17 --iterations=20
 KelvinBall --h=0.125 --iterations=20
 KelvinBall --outer-radius=3 --h=0.1666666667 --iterations=2
-KelvinBall --n=25 --iterations=5 --reconstruction=wngir
+KelvinBall --n=25 --iterations=5 --reconstruction=swift
 KelvinBall --n=30 --iterations=20 --mmg-adapt
 KelvinBall --n=13 --iterations=5 --thickness-min=0.5
 ```
@@ -820,15 +823,15 @@ Each iterate is written to three XDMF series.
 - `KelvinBallSewed.xdmf` — the complete 24-copy design with the sewn distance
   and deformation, and a complete fluid grid carrying the six sewn velocities
   and pressures.
-- `KelvinBallMMG.xdmf` or `KelvinBallWNGIR.xdmf` — the reconstructed mesh,
+- `KelvinBallMMG.xdmf` or `KelvinBallSWIFT.xdmf` — the reconstructed mesh,
   with the initial design at time 0 and successive updates at times 1, 2, etc.,
   before the next finite-element spaces are built. Each snapshot is flushed
   immediately, including when using `--geometry-only` for the initial design.
 
-Post-WNGIR MMG adaptation is transactional. A failed adaptation or invalid
+Post-SWIFT MMG adaptation is transactional. A failed adaptation or invalid
 fixed-boundary projection discards the candidate, retains the fitted mesh and
 continues the optimisation with a warning. The rejected adaptation does not
-undo the WNGIR fit or accept invalid tetrahedra. Cell-count diagnostics record
+undo the SWIFT fit or accept invalid tetrahedra. Cell-count diagnostics record
 the unchanged fitted count for the skipped pass. The MMG reconstruction path
 retains its existing retry policy.
 

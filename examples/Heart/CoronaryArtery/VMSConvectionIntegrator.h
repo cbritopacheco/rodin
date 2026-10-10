@@ -765,9 +765,13 @@ namespace Rodin::Examples::Heart
         const auto Jref = basis.getJacobian()(rc);
         ScalarType div = 0;
         for (size_t c = 0; c < vdim; ++c)
+        {
           for (size_t r = 0; r < d; ++r)
+          {
             div += Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r)) *
               Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(c));
+          }
+        }
         return div;
       }
 

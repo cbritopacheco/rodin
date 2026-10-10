@@ -12,6 +12,30 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  TEST(Rodin_Variational_RealP1Element, PyramidApexGradientReproducesAffineFields)
+  {
+    const RealP1Element element(Polytope::Type::Pyramid);
+    const Polytope::Traits traits(Polytope::Type::Pyramid);
+    const Math::Vector<Real> apex{{0, 0, 1}};
+    const Math::Vector<Real> approach{{Real(0.125), Real(0.125), Real(0.75)}};
+    Math::Vector<Real> sum = Math::Vector<Real>::Zero(3);
+    Math::Matrix<Real> coordinates = Math::Matrix<Real>::Zero(3, 3);
+    for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+    {
+      const auto gradient = element.getBasis(vertex).getGradient();
+      const auto value = gradient(apex);
+      EXPECT_LT((value - gradient(approach)).norm(), Real(1e-14));
+      for (size_t d = 0; d < 3; ++d)
+      {
+        sum[d] += value[d];
+        for (size_t e = 0; e < 3; ++e)
+          coordinates(d, e) += traits.getVertex(vertex)[d] * value[e];
+      }
+    }
+    EXPECT_LT(sum.norm(), Real(1e-14));
+    EXPECT_LT((coordinates - Math::Matrix<Real>::Identity(3, 3)).norm(), Real(1e-14));
+  }
+
   /// @brief Verifies sanity test 1 D reference segment for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, SanityTest_1D_Reference_Segment)
   {
@@ -1303,9 +1327,13 @@ namespace Rodin::Tests::Unit
       }
 
       for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      {
         for (size_t derivative = 0; derivative < dimension; ++derivative)
+        {
           EXPECT_NEAR(gradient[coordinate][derivative],
             coordinate == derivative ? 1.0 : 0.0, tolerance);
+        }
+      }
     };
 
     checkReferenceGradient(Polytope::Type::Triangle, Math::SpatialPoint{{0.0, 1.0}}, 2);

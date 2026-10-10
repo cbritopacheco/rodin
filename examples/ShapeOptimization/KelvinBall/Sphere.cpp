@@ -14,7 +14,7 @@
 #include <vector>
 
 #include <Rodin/Distance/Eikonal.h>
-#include <Rodin/Adaptation/WNGIR/Loss.h>
+#include <Rodin/Adaptation/SWIFT/Loss.h>
 #include <Rodin/Variational.h>
 
 namespace KelvinBall
@@ -323,7 +323,7 @@ namespace KelvinBall
       {hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter}};
   }
 
-  SphereDiscretization Sphere::prepareWNGIRBackground(Real requestedWelschScale) const
+  SphereDiscretization Sphere::prepareSWIFTBackground(Real requestedWelschScale) const
   {
     MMG::Mesh mesh(makeUniformChamber());
     const Real h = m_configuration.getGridSpacing();
@@ -340,7 +340,7 @@ namespace KelvinBall
     {
       P1<Real, Mesh> sizeSpace(mesh);
       MMG::RealGridFunction size(sizeSpace);
-      const Adaptation::WNGIRLoss welsch(welschScale);
+      const Adaptation::SWIFT::Loss welsch(welschScale);
       for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
       {
         const Real distance =
@@ -390,7 +390,7 @@ namespace KelvinBall
     const Real farSize = m_configuration.hmax;
     const Real welschScale = requestedWelschScale > 0
       ? requestedWelschScale : Real(3) * h;
-    const Adaptation::WNGIRLoss welsch(welschScale);
+    const Adaptation::SWIFT::Loss welsch(welschScale);
 
     P1<Real, Mesh> sizeSpace(mesh);
     MMG::RealGridFunction size(sizeSpace);

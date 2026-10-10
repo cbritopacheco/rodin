@@ -12,6 +12,7 @@
  * @brief Defines the QuadratureFormulaBase abstract base class.
  */
 
+#include <atomic>
 #include <vector>
 #include <utility>
 
@@ -49,18 +50,42 @@ namespace Rodin::QF
   class QuadratureFormulaBase : public Copyable
   {
     public:
-      constexpr QuadratureFormulaBase() = default;
+      QuadratureFormulaBase() = default;
 
       /**
        * @brief Copy constructor.
        * @param other Another quadrature formula to copy from
        */
-      constexpr
-      QuadratureFormulaBase(const QuadratureFormulaBase& other) = default;
+      QuadratureFormulaBase(const QuadratureFormulaBase& other)
+        : Copyable(other)
+      {}
 
       /**
-       * @brief Virtual destructor.
+       * @brief Assignment invalidates caches of the previous rule contents.
+       * @param other Rule assigned to this formula.
+       * @returns Reference to this formula.
        */
+      QuadratureFormulaBase& operator=(const QuadratureFormulaBase& other)
+      {
+        if (this != &other)
+          m_identity = s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed);
+        return *this;
+      }
+
+      /**
+       * @brief Identity for caches of this quadrature formula.
+       *
+       * Construction, copying, and assignment receive a fresh identity, even
+       * when object storage is reused. Reading the identity requires no atomic
+       * operation. Nodes must remain fixed between these operations.
+       * @returns Unique lifetime and assignment identity of the rule.
+       */
+      size_t getCacheIdentity() const noexcept
+      {
+        return m_identity;
+      }
+
+      /// @brief Virtual destructor.
       virtual ~QuadratureFormulaBase() = default;
 
       /**
@@ -94,6 +119,10 @@ namespace Rodin::QF
        * returned pointer.
        */
       virtual QuadratureFormulaBase* copy() const noexcept override = 0;
+
+    private:
+      inline static std::atomic<size_t> s_nextCacheIdentity{0};
+      size_t m_identity = s_nextCacheIdentity.fetch_add(1, std::memory_order_relaxed);
   };
 }
 

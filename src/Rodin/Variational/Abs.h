@@ -98,7 +98,11 @@ namespace Rodin::Variational
         return Math::abs(getOperand().getValue(p));
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
         return GetOrderIfConstant(getOperand(), polytope);
@@ -127,13 +131,20 @@ namespace Rodin::Variational
       std::unique_ptr<OperandType> m_v;
   };
 
-  /// @brief Deduction guide for @c Abs.
+  /**
+   * @brief Deduction guide for @c Abs.
+   * @param v Function to take absolute value of
+   */
   template <class NestedDerived>
-  Abs(const FunctionBase<NestedDerived>&) -> Abs<FunctionBase<NestedDerived>>;
+  Abs(const FunctionBase<NestedDerived>& v) -> Abs<FunctionBase<NestedDerived>>;
 
   template <class NestedDerived>
   constexpr auto
-  /// @brief Builds the pointwise absolute value of a function expression.
+  /**
+   * @brief Builds the pointwise absolute value of a function expression.
+   * @param op Function operand.
+   * @returns Pointwise absolute-value expression.
+   */
   abs(const FunctionBase<NestedDerived>& op)
   {
     return Abs(op);

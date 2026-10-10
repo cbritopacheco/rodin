@@ -115,7 +115,10 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
         : Parent(other),
           m_law(other.m_law),
@@ -162,7 +165,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Sets the current polytope and assembles the element residual.
+      /**
+       * @brief Sets the current polytope and assembles the element residual.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWorkResidual& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -225,8 +232,10 @@ namespace Rodin::Solid
             const auto gradTest = testGradient.getBasis(te);
             ScalarType val = 0;
             for (size_t c = 0; c < vdim; ++c)
+            {
               for (size_t k = 0; k < d; ++k)
                 val += P(c, k) * gradTest(c, k);
+            }
             m_elemVec(te) += wq * distortion * val;
           }
         }
@@ -234,38 +243,58 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Returns an entry of the current element residual vector.
+      /**
+       * @brief Returns an entry of the current element residual vector.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t te) final override
       {
         return m_elemVec(te);
       }
 
-      /// @brief Returns the current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Polymorphically copies this residual integrator.
+      /**
+       * @brief Polymorphically copies this residual integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       InternalVirtualWorkResidual* copy() const noexcept final override
       {
         return new InternalVirtualWorkResidual(*this);
       }
 
-      /// @brief Returns the stored constitutive law.
+      /**
+       * @brief Returns the stored constitutive law.
+       * @returns The stored constitutive law.
+       */
       const LawType& getLaw() const
       {
         return m_law;
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& testFES = m_testfes.get();
@@ -353,7 +382,10 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
         : Parent(other),
           m_law(other.m_law),
@@ -414,7 +446,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Sets the current polytope and assembles the element residual.
+      /**
+       * @brief Sets the current polytope and assembles the element residual.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWorkResidual& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -483,8 +519,10 @@ namespace Rodin::Solid
             const auto gradTest = testGradient.getBasis(te);
             ScalarType val = 0;
             for (size_t c = 0; c < vdim; ++c)
+            {
               for (size_t k = 0; k < d; ++k)
                 val += (P(c, k) + p * J * FinvT(c, k)) * gradTest(c, k);
+            }
             m_elemVec(te) += wq * distortion * val;
           }
         }
@@ -492,38 +530,58 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Returns an entry of the current element residual vector.
+      /**
+       * @brief Returns an entry of the current element residual vector.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t te) final override
       {
         return m_elemVec(te);
       }
 
-      /// @brief Returns the current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Polymorphically copies this residual integrator.
+      /**
+       * @brief Polymorphically copies this residual integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       InternalVirtualWorkResidual* copy() const noexcept final override
       {
         return new InternalVirtualWorkResidual(*this);
       }
 
-      /// @brief Returns the stored constitutive law.
+      /**
+       * @brief Returns the stored constitutive law.
+       * @returns The stored constitutive law.
+       */
       const LawType& getLaw() const
       {
         return m_law;
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& testFES = m_testfes.get();
@@ -599,7 +657,10 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       InternalVirtualWorkResidualP(const InternalVirtualWorkResidualP& other)
         : Parent(other),
           m_test(other.m_test),
@@ -633,7 +694,11 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Sets the current polytope and assembles the element residual.
+      /**
+       * @brief Sets the current polytope and assembles the element residual.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       InternalVirtualWorkResidualP& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -688,32 +753,49 @@ namespace Rodin::Solid
         return *this;
       }
 
-      /// @brief Returns an entry of the current element residual vector.
+      /**
+       * @brief Returns an entry of the current element residual vector.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t te) final override
       {
         return m_elemVec(te);
       }
 
-      /// @brief Returns the current polytope.
+      /**
+       * @brief Returns the current polytope.
+       * @returns The current polytope.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
-      /// @brief Polymorphically copies this residual integrator.
+      /**
+       * @brief Polymorphically copies this residual integrator.
+       * @returns Pointer to a newly allocated copy; the caller owns the returned object.
+       */
       InternalVirtualWorkResidualP* copy() const noexcept final override
       {
         return new InternalVirtualWorkResidualP(*this);
       }
 
     private:
+      /**
+       * @brief Checks compatibility of the displacement and form spaces.
+       * @param displacement Displacement field defining the kinematic state.
+       */
       void checkCompatibility(const StateType& displacement) const
       {
         const auto& testFES = m_testfes.get();
@@ -734,24 +816,40 @@ namespace Rodin::Solid
       Math::Vector<ScalarType> m_elemVec;
   };
 
-  /// CTAD deduction guide for the displacement-only residual
+  /**
+   * CTAD deduction guide for the displacement-only residual
+   * @param law The constitutive law
+   * @param v The displacement test function
+   * @param displacement The current displacement state
+   */
   template <class LawDerived, class TestFunctionType, class DisplacementType>
-  InternalVirtualWorkResidual(
-    const LawDerived&, const TestFunctionType&, const DisplacementType&)
+  InternalVirtualWorkResidual(const LawDerived& law, const TestFunctionType& v,
+    const DisplacementType& displacement)
     -> InternalVirtualWorkResidual<LawDerived, std::decay_t<TestFunctionType>,
       std::decay_t<DisplacementType>>;
 
-  /// CTAD deduction guide for the mixed u-p momentum residual
+  /**
+   * CTAD deduction guide for the mixed u-p momentum residual
+   * @param law The isochoric constitutive law
+   * @param v The displacement test function
+   * @param displacement The current displacement state
+   * @param pressure The current pressure state
+   */
   template <class LawDerived, class TestFunctionType, class DisplacementType,
     class PressureType>
-  InternalVirtualWorkResidual(const LawDerived&, const TestFunctionType&,
-    const DisplacementType&, const PressureType&)
+  InternalVirtualWorkResidual(const LawDerived& law, const TestFunctionType& v,
+    const DisplacementType& displacement, const PressureType& pressure)
     -> InternalVirtualWorkResidual<LawDerived, std::decay_t<TestFunctionType>,
       std::decay_t<DisplacementType>, std::decay_t<PressureType>>;
 
-  /// CTAD deduction guide for the incompressibility constraint residual
+  /**
+   * CTAD deduction guide for the incompressibility constraint residual
+   * @param q The pressure test function
+   * @param displacement The current displacement state
+   */
   template <class TestPressFunctionType, class DisplacementType>
-  InternalVirtualWorkResidualP(const TestPressFunctionType&, const DisplacementType&)
+  InternalVirtualWorkResidualP(
+    const TestPressFunctionType& q, const DisplacementType& displacement)
     -> InternalVirtualWorkResidualP<std::decay_t<TestPressFunctionType>,
       std::decay_t<DisplacementType>>;
 }

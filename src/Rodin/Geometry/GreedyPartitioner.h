@@ -32,9 +32,7 @@ namespace Rodin::Geometry
   class GreedyPartitioner : public Partitioner
   {
     public:
-      /**
-       * @brief Type of mesh used by this partitioner.
-       */
+      /// @brief Type of mesh used by this partitioner.
       using MeshType = Geometry::Mesh<Context::Local>;
 
       /**
@@ -43,9 +41,7 @@ namespace Rodin::Geometry
        */
       GreedyPartitioner(const MeshType& mesh);
 
-      /**
-       * @brief Virtual destructor.
-       */
+      /// @brief Virtual destructor.
       virtual ~GreedyPartitioner() = default;
 
       /**

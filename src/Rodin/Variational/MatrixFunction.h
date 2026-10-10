@@ -26,8 +26,10 @@
 
 namespace Rodin::FormLanguage
 {
-  /// @brief Type traits for @c MatrixFunctionBase: exposes the scalar type and the
-  /// derived type.
+  /**
+   * @brief Type traits for @c MatrixFunctionBase: exposes the scalar type and the
+   * derived type.
+   */
   template <class Scalar, class Derived>
   struct Traits<Variational::MatrixFunctionBase<Scalar, Derived>>
   {
@@ -83,23 +85,27 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = FunctionBase<MatrixFunctionBase<ScalarType, Derived>>;
 
-      /// @brief Import traceOf methods from parent
+      // Import traceOf methods from parent.
       using Parent::traceOf;
 
-      /// @brief Import operator() from parent
+      // Import operator() from parent.
       using Parent::operator();
 
       /// @brief Default constructor
       MatrixFunctionBase() = default;
 
-      /// @brief Copy constructor
-      /// @param[in] other Matrix function to copy from
+      /**
+       * @brief Copy constructor
+       * @param[in] other Matrix function to copy from
+       */
       MatrixFunctionBase(const MatrixFunctionBase& other)
         : Parent(other)
       {}
 
-      /// @brief Move constructor
-      /// @param[in] other Matrix function to move from
+      /**
+       * @brief Move constructor
+       * @param[in] other Matrix function to move from
+       */
       MatrixFunctionBase(MatrixFunctionBase&& other)
         : Parent(std::move(other))
       {}
@@ -121,7 +127,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
-      /// @brief Evaluates the expression at an integration point.
+      /**
+       * @brief Evaluates the expression at an integration point.
+       * @param ip Integration point at which the expression is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -165,7 +175,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getColumns();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
       {
@@ -202,31 +216,46 @@ namespace Rodin::Variational
 
       using Parent::traceOf;
 
-      /// @brief Constructs the MatrixFunction from the given arguments.
+      /**
+       * @brief Constructs the MatrixFunction from the given arguments.
+       * @param matrix Matrix operand.
+       */
       MatrixFunction(const MatrixType& matrix)
         : m_matrix(matrix)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       MatrixFunction(const MatrixFunction& other)
         : Parent(other),
           m_matrix(other.m_matrix)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       MatrixFunction(MatrixFunction&& other)
         : Parent(std::move(other)),
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Evaluates the expression at a geometric point.
-      constexpr
-      MatrixType getValue(const Geometry::Point&) const
+      /**
+       * @brief Evaluates the expression at a geometric point.
+       * @returns Value of the expression at the supplied evaluation point.
+       * @param point Evaluation point; the result is independent of this argument.
+       */
+      constexpr MatrixType getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return m_matrix;
       }
 
-      /// @brief Gets the number of rows.
+      /**
+       * @brief Gets the number of rows.
+       * @returns The number of rows.
+       */
       constexpr
       size_t getRows() const
       {
@@ -243,9 +272,13 @@ namespace Rodin::Variational
         return m_matrix.cols();
       }
 
-      /// @brief Returns the polynomial order used on a mesh entity.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& ) const noexcept
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -259,10 +292,13 @@ namespace Rodin::Variational
       const MatrixType m_matrix;
   };
 
-  /// @brief Deduction guide for @c MatrixFunction.
+  /**
+   * @brief Deduction guide for @c MatrixFunction.
+   * @param matrix Matrix operand.
+   */
   template <class Scalar>
-  MatrixFunction(const Math::Matrix<Scalar>&)
-    -> MatrixFunction<Math::Matrix<Scalar>>;
+  MatrixFunction(
+    const Math::Matrix<Scalar>& matrix) -> MatrixFunction<Math::Matrix<Scalar>>;
 }
 
 namespace Rodin::Variational
@@ -284,30 +320,46 @@ namespace Rodin::Variational
 
       using Parent::traceOf;
 
-      /// @brief Constructs a constant or callable matrix coefficient, or copies its value.
+      /**
+       * @brief Constructs a constant or callable matrix coefficient, or copies its value.
+       * @param matrix Matrix operand.
+       */
       MatrixFunction(const MatrixType& matrix)
         : m_matrix(matrix)
       {}
 
-      /// @brief Constructs a constant or callable matrix coefficient, or copies its value.
+      /**
+       * @brief Constructs a constant or callable matrix coefficient, or copies its value.
+       * @param other Object to copy from.
+       */
       MatrixFunction(const MatrixFunction& other)
         : Parent(other),
           m_matrix(other.m_matrix)
       {}
 
-      /// @brief Constructs a constant or callable matrix coefficient, or copies its value.
+      /**
+       * @brief Constructs a constant or callable matrix coefficient, or copies its value.
+       * @param other Object to move from.
+       */
       MatrixFunction(MatrixFunction&& other)
         : Parent(std::move(other)),
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Evaluates the expression at the supplied physical or integration point.
-      constexpr MatrixType getValue(const Geometry::Point&) const
+      /**
+       * @brief Evaluates the expression at the supplied physical or integration point.
+       * @returns Value of the expression at the supplied evaluation point.
+       * @param point Evaluation point; the result is independent of this argument.
+       */
+      constexpr MatrixType getValue([[maybe_unused]] const Geometry::Point& point) const
       {
         return m_matrix;
       }
 
-      /// @brief Returns the number of matrix rows.
+      /**
+       * @brief Returns the number of matrix rows.
+       * @returns The number of matrix rows.
+       */
       constexpr size_t getRows() const
       {
         return m_matrix.rows();
@@ -322,8 +374,13 @@ namespace Rodin::Variational
         return m_matrix.cols();
       }
 
-      /// @brief Returns the polynomial order when it is known.
-      constexpr Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return 0;
       }
@@ -337,10 +394,13 @@ namespace Rodin::Variational
       const MatrixType m_matrix;
   };
 
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param matrix Matrix operand.
+   */
   template <class Scalar>
-  MatrixFunction(
-    const Math::SpatialMatrix<Scalar>&) -> MatrixFunction<Math::SpatialMatrix<Scalar>>;
+  MatrixFunction(const Math::SpatialMatrix<Scalar>& matrix)
+    -> MatrixFunction<Math::SpatialMatrix<Scalar>>;
 }
 
 namespace Rodin::Variational
@@ -363,7 +423,12 @@ namespace Rodin::Variational
       using RangeType = Math::SpatialMatrix<ScalarType>;
       /// @brief CRTP or finite element base class.
       using Parent = MatrixFunctionBase<ScalarType, MatrixFunction>;
-      /// @brief Constructs a constant or callable matrix coefficient, or copies its value.
+      /**
+       * @brief Constructs a constant or callable matrix coefficient, or copies its value.
+       * @param rows Number of rows.
+       * @param function Function to evaluate.
+       * @param columns Number of matrix columns.
+       */
       MatrixFunction(size_t rows, size_t columns, F function)
         : m_rows(rows),
           m_columns(columns),
@@ -374,7 +439,10 @@ namespace Rodin::Variational
           Alert::Exception() << "Invalid spatial matrix coefficient dimensions."
                              << Alert::Raise;
       }
-      /// @brief Constructs a constant or callable matrix coefficient, or copies its value.
+      /**
+       * @brief Constructs a constant or callable matrix coefficient, or copies its value.
+       * @param other Object to copy from.
+       */
       MatrixFunction(const MatrixFunction& other)
         : Parent(other),
           m_rows(other.m_rows),
@@ -382,7 +450,10 @@ namespace Rodin::Variational
           m_function(other.m_function),
           m_order(other.m_order)
       {}
-      /// @brief Constructs a constant or callable matrix coefficient, or copies its value.
+      /**
+       * @brief Constructs a constant or callable matrix coefficient, or copies its value.
+       * @param other Object to move from.
+       */
       MatrixFunction(MatrixFunction&& other)
         : Parent(std::move(other)),
           m_rows(other.m_rows),
@@ -390,7 +461,11 @@ namespace Rodin::Variational
           m_function(std::move(other.m_function)),
           m_order(other.m_order)
       {}
-      /// @brief Evaluates the expression at the supplied physical or integration point.
+      /**
+       * @brief Evaluates the expression at the supplied physical or integration point.
+       * @param point Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const Geometry::Point& point) const
       {
         const auto result = m_function(point);
@@ -399,29 +474,48 @@ namespace Rodin::Variational
                              << Alert::Raise;
         return RangeType(result);
       }
-      /// @brief Evaluates the expression at the supplied physical or integration point.
+      /**
+       * @brief Evaluates the expression at the supplied physical or integration point.
+       * @param point Point at which the operation is evaluated.
+       * @returns Value of the expression at the supplied evaluation point.
+       */
       RangeType getValue(const IntegrationPoint& point) const
       {
         return getValue(point.getPoint());
       }
-      /// @brief Returns the number of matrix rows.
+      /**
+       * @brief Returns the number of matrix rows.
+       * @returns The number of matrix rows.
+       */
       size_t getRows() const
       {
         return m_rows;
       }
-      /// @brief Returns the number of matrix columns.
+      /**
+       * @brief Returns the number of matrix columns.
+       * @returns The number of matrix columns.
+       */
       size_t getColumns() const
       {
         return m_columns;
       }
-      /// @brief Declares polynomial order for coefficient quadrature selection.
+      /**
+       * @brief Declares polynomial order for coefficient quadrature selection.
+       * @param order Polynomial order.
+       * @returns Reference to this object after the operation.
+       */
       MatrixFunction& setOrder(size_t order)
       {
         m_order = order;
         return *this;
       }
-      /// @brief Returns the polynomial order when it is known.
-      Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
+      /**
+       * @brief Returns the polynomial order when it is known.
+       * @returns Polynomial order on the entity, or an empty optional when no order is available.
+       * @param polytope Mesh entity; the reported order is independent of this argument.
+       */
+      Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
       {
         return m_order;
       }
@@ -435,9 +529,14 @@ namespace Rodin::Variational
       F m_function;
       Optional<size_t> m_order;
   };
-  /// @brief Deduces the matrix space or coefficient type from constructor arguments.
+  /**
+   * @brief Deduces the matrix space or coefficient type from constructor arguments.
+   * @param rows Number of rows.
+   * @param columns Number of matrix columns.
+   * @param function Function to evaluate.
+   */
   template <class F>
-  MatrixFunction(size_t, size_t, F) -> MatrixFunction<F>;
+  MatrixFunction(size_t rows, size_t columns, F function) -> MatrixFunction<F>;
 }
 
 #endif

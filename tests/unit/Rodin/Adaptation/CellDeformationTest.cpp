@@ -28,6 +28,38 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief One-dimensional deformation has scalar stretch and no shape distortion.
+  TEST(Rodin_Adaptation_CellDeformation, SegmentStretchAndDerivatives)
+  {
+    constexpr Real Tolerance = Real(1e-12);
+    CellDeformation deformation(1);
+    Math::SpatialMatrix<Real> gradient(1, 1), direction(1, 1);
+    gradient(0, 0) = Real(0.5);
+    direction(0, 0) = Real(0.3);
+    deformation.setDisplacementGradient(gradient);
+    EXPECT_EQ(deformation.getDimension(), 1u);
+    EXPECT_NEAR(deformation.getJacobian(), Real(1.5), Tolerance);
+    EXPECT_NEAR(deformation.getInverseTranspose()(0, 0), Real(2) / Real(3), Tolerance);
+    EXPECT_NEAR(deformation.getJacobianAction(direction), direction(0, 0), Tolerance);
+    EXPECT_NEAR(deformation.getJacobianSecondAction(direction, direction), 0, Tolerance);
+    EXPECT_NEAR(deformation.getRelativeDistortion(), 1, Tolerance);
+    EXPECT_NEAR(deformation.getRelativeDistortionGradient()(0, 0), 0, Tolerance);
+    EXPECT_NEAR(deformation.getRelativeDistortionAction(direction), 0, Tolerance);
+    EXPECT_NEAR(
+      deformation.getRelativeDistortionSecondAction(direction, direction), 0, Tolerance);
+
+    gradient(0, 0) = Real(-2);
+    deformation.setDeformationGradient(gradient);
+    EXPECT_FALSE(deformation.isAdmissible());
+    EXPECT_TRUE(deformation.isInvertible());
+    EXPECT_NEAR(deformation.getInverseTranspose()(0, 0), Real(-0.5), Tolerance);
+
+    gradient(0, 0) = 0;
+    deformation.setDeformationGradient(gradient);
+    EXPECT_FALSE(deformation.isAdmissible());
+    EXPECT_FALSE(deformation.isInvertible());
+  }
+
   /// @brief The Jacobian is the determinant of the deformation gradient.
   TEST(Rodin_Adaptation_CellDeformation, Jacobian_IsDeterminant)
   {
@@ -154,8 +186,8 @@ namespace Rodin::Tests::Unit
       Math::SpatialMatrix<Real> G = Math::SpatialMatrix<Real>::Identity(d, d);
       G(0, 1) = Real(0.3);
       const auto energy = [d](const Math::SpatialMatrix<Real>& matrix) {
-        return -std::log(matrix.determinant()) + Real(d) / Real(2) *
-          std::log(matrix.squaredNorm() / Real(d));
+        return -std::log(matrix.determinant()) +
+          Real(d) / Real(2) * std::log(matrix.squaredNorm() / Real(d));
       };
       CellDeformation deformation(d);
       deformation.setDeformationGradient(F);
@@ -171,8 +203,10 @@ namespace Rodin::Tests::Unit
       };
       EXPECT_NEAR(hessian(F), Real(0), Real(1e-13));
       constexpr Real eps = Real(1e-4);
-      const Real difference = (energy(Math::SpatialMatrix<Real>(F + eps * G)) -
-        Real(2) * energy(F) + energy(Math::SpatialMatrix<Real>(F - eps * G))) / (eps * eps);
+      const Real difference =
+        (energy(Math::SpatialMatrix<Real>(F + eps * G)) - Real(2) * energy(F) +
+          energy(Math::SpatialMatrix<Real>(F - eps * G))) /
+        (eps * eps);
       EXPECT_NEAR(hessian(G), difference, Real(1e-6));
       F(1, 1) = Real(1e-6);
       EXPECT_GT(energy(F), Real(5));

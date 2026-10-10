@@ -71,24 +71,22 @@ namespace Rodin::MMG
       /// Index set of required tetrahedra in the mesh.
       using RequiredTetrahedronIndex = IndexSet;
 
-      /**
-       * @brief Class used to build MMG::Mesh instances.
-       */
+      /// @brief Class used to build MMG::Mesh instances.
       class Builder : public Parent::Builder
       {
         public:
-          /**
-           * @brief Default constructor.
-           */
+          /// @brief Default constructor.
           Builder() = default;
 
           /**
            * @brief Deleted copy constructor.
+           * @param other Object whose copying or moving is disabled.
            */
-          Builder(const Builder&) = delete;
+          Builder(const Builder& other) = delete;
 
           /**
            * @brief Move constructor.
+           * @param other Object to move from.
            */
           Builder(Builder&& other)
             : Parent::Builder(std::move(other)),
@@ -102,6 +100,8 @@ namespace Rodin::MMG
 
           /**
            * @brief Move assignment.
+           * @param other Object to move from.
+           * @returns Reference to this object after the operation.
            */
           Builder& operator=(Builder&& other);
 
@@ -159,7 +159,7 @@ namespace Rodin::MMG
 
           /**
            * @brief Adds a vertex from a coordinate pointer.
-           * @param data Pointer to vertex coordinates.
+           * @param data Coordinates of the vertex.
            * @returns Reference to this builder.
            */
           Builder& vertex(const Real* data)
@@ -170,7 +170,7 @@ namespace Rodin::MMG
 
           /**
            * @brief Adds a vertex from a spatial point.
-           * @param x Vertex coordinates.
+           * @param x Coordinates of the vertex.
            * @returns Reference to this builder.
            */
           Builder& vertex(const Math::SpatialPoint& x)
@@ -182,7 +182,7 @@ namespace Rodin::MMG
           /**
            * @brief Adds a vertex from a fixed-size coordinate array.
            * @tparam Size Number of coordinates in the array.
-           * @param data Vertex coordinates.
+           * @param data Coordinates of the vertex.
            * @returns Reference to this builder.
            */
           template <size_t Size>
@@ -195,7 +195,7 @@ namespace Rodin::MMG
           /**
            * @brief Assigns an attribute to a mesh entity.
            * @param p Pair containing entity dimension and index.
-           * @param attr Optional attribute value.
+           * @param attr Attribute to assign, or an empty optional to remove the attribute.
            * @returns Reference to this builder.
            */
           Builder& attribute(
@@ -208,8 +208,8 @@ namespace Rodin::MMG
 
           /**
            * @brief Adds a polytope from an initializer list of vertex indices.
-           * @param t Polytope type.
-           * @param vs Vertex indices.
+           * @param t Type of polytope to construct.
+           * @param vs Vertex indices defining the polytope.
            * @returns Reference to this builder.
            */
           Builder& polytope(Geometry::Polytope::Type t, std::initializer_list<Index> vs)
@@ -220,8 +220,8 @@ namespace Rodin::MMG
 
           /**
            * @brief Adds a polytope from an index array.
-           * @param t Polytope type.
-           * @param vs Vertex indices.
+           * @param t Type of polytope to construct.
+           * @param vs Vertex indices defining the polytope.
            * @returns Reference to this builder.
            */
           Builder& polytope(Geometry::Polytope::Type t, const IndexArray& vs)
@@ -232,8 +232,8 @@ namespace Rodin::MMG
 
           /**
            * @brief Adds a polytope from a moved index array.
-           * @param t Polytope type.
-           * @param vs Vertex indices.
+           * @param t Type of polytope to construct.
+           * @param vs Vertex indices defining the polytope.
            * @returns Reference to this builder.
            */
           Builder& polytope(Geometry::Polytope::Type t, IndexArray&& vs)
@@ -315,13 +315,12 @@ namespace Rodin::MMG
         return MMG::Mesh::Builder();
       }
 
-      /**
-       * @brief Constructs an empty MMG mesh.
-       */
+      /// @brief Constructs an empty MMG mesh.
       Mesh() = default;
 
       /**
        * @brief Move-constructs from a base local mesh.
+       * @param other Object to move from.
        */
       Mesh(Parent&& other)
         : Parent(std::move(other))
@@ -329,6 +328,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Copy constructor.
+       * @param other Object to copy from.
        */
       Mesh(const Mesh& other)
         : Parent(other),
@@ -342,6 +342,7 @@ namespace Rodin::MMG
 
       /**
        * @brief Move constructor.
+       * @param other Object to move from.
        */
       Mesh(Mesh&& other)
         : Parent(std::move(other)),
@@ -355,6 +356,8 @@ namespace Rodin::MMG
 
       /**
        * @brief Move assignment.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
        */
       Mesh& operator=(Mesh&& other)
       {
@@ -372,11 +375,14 @@ namespace Rodin::MMG
        * @brief Copy assignment is deleted.
        *
        * Parent @ref Geometry::Mesh<Context::Local> deletes copy assignment.
+       * @param other Object to copy from.
        */
       Mesh& operator=(const Mesh& other) = delete;
 
       /**
        * @brief Move-assigns from a parent mesh, clearing MMG metadata.
+       * @param other Object to move from.
+       * @returns Reference to this object after the operation.
        */
       Mesh& operator=(Parent&& other)
       {

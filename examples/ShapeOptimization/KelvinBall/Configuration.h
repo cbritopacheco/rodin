@@ -28,10 +28,10 @@ namespace KelvinBall
       Real outerRadius = 2;
       Real nitschePenalty = DefaultNitschePenalty;
       Real stabilizationFactor = DefaultStabilizationFactor;
-      /// Settings of the initial WNGIR background preparation.
+      /// Settings of the initial SWIFT background preparation.
       Real backgroundHausdorff = 0.05;
       Real backgroundGradation = 2;
-      /// Optional MMG adaptation after each MMG cut or WNGIR fit, and during
+      /// Optional MMG adaptation after each MMG cut or SWIFT fit, and during
       /// initial background preparation. Its size map ranges from hmin to hmax.
       bool adapt = false;
       Real adaptGradation = 1.3;

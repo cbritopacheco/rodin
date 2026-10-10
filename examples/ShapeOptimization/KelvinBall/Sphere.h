@@ -64,16 +64,16 @@ namespace KelvinBall
         bool conformingCuts = false, Real requestedWelschScale = 0) const;
 
       /**
-       * @brief Prepares the fixed background mesh used by WNGIR.
+       * @brief Prepares the fixed background mesh used by SWIFT.
        *
        * MMG optimizes the interface-free background, or adapts it according to
        * the initial sphere's Welsch weight. Unless @p requestedWelschScale is
        * positive, its width is three times the fixed reference grid spacing.
        * The returned mesh contains no design interface and
-       * remains fixed during each WNGIR fit. With adaptation enabled, the
+       * remains fixed during each SWIFT fit. With adaptation enabled, the
        * adapted fitted mesh replaces it between design iterations.
        */
-      SphereDiscretization prepareWNGIRBackground(Real requestedWelschScale = 0) const;
+      SphereDiscretization prepareSWIFTBackground(Real requestedWelschScale = 0) const;
 
       /**
        * @brief Adapts a mesh fitted to Gamma to the prescribed size map.

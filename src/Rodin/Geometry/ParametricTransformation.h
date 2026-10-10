@@ -51,9 +51,13 @@ namespace Rodin::Geometry
       using Parent::jacobian;
       using Parent::inverse;
 
-      /// @brief Constructs the transformation from a control-point cloud and
-      /// a finite element (the control-point count must match the element's
-      /// node count).
+      /**
+       * @brief Constructs the transformation from a control-point cloud and
+       * a finite element (the control-point count must match the element's
+       * node count).
+       * @param pm Point at which the operation is evaluated.
+       * @param fe Finite element used by the operation.
+       */
       ParametricTransformation(Geometry::PointCloud&& pm, FE&& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
@@ -62,8 +66,12 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      /// @brief Constructs the transformation from a control-point cloud and
-      /// a finite element.
+      /**
+       * @brief Constructs the transformation from a control-point cloud and
+       * a finite element.
+       * @param pm Point at which the operation is evaluated.
+       * @param fe Finite element used by the operation.
+       */
       ParametricTransformation(const Geometry::PointCloud& pm, const FE& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
@@ -72,8 +80,12 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      /// @brief Constructs the transformation from a control-point cloud and
-      /// a finite element.
+      /**
+       * @brief Constructs the transformation from a control-point cloud and
+       * a finite element.
+       * @param pm Point at which the operation is evaluated.
+       * @param fe Finite element used by the operation.
+       */
       ParametricTransformation(Geometry::PointCloud&& pm, const FE& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
@@ -82,8 +94,12 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      /// @brief Constructs the transformation from a control-point cloud and
-      /// a finite element.
+      /**
+       * @brief Constructs the transformation from a control-point cloud and
+       * a finite element.
+       * @param pm Point at which the operation is evaluated.
+       * @param fe Finite element used by the operation.
+       */
       ParametricTransformation(const PointCloud& pm, FE&& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
@@ -92,7 +108,10 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       ParametricTransformation(const ParametricTransformation& other)
         : Parent(other),
           m_pm(other.m_pm),
@@ -101,7 +120,10 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       ParametricTransformation(ParametricTransformation&& other)
         : Parent(std::move(other)),
           m_pm(std::move(other.m_pm)),
@@ -115,8 +137,11 @@ namespace Rodin::Geometry
         return m_fe.getOrder();
       }
 
-      /// @brief Returns the element's factor degree when available, otherwise
-      /// the conservative total-degree bound of the transformation interface.
+      /**
+       * @brief Returns the element's factor degree when available, otherwise
+       * the conservative total-degree bound of the transformation interface.
+       * @returns The element's factor degree when available, otherwise the conservative total-degree bound of the transformation interface.
+       */
       size_t getFactorOrder() const override
       {
         if constexpr (requires { m_fe.getFactorOrder(); })
@@ -161,15 +186,22 @@ namespace Rodin::Geometry
         }
       }
 
-      /// @brief Gets the control-point coordinate matrix.
+      /**
+       * @brief Gets the control-point coordinate matrix.
+       * @returns The control-point coordinate matrix.
+       */
       const PointCloud& getPointMatrix() const
       {
         return m_pm;
       }
 
-      /// @brief Serializes the transformation (for boost::serialization).
+      /**
+       * @brief Serializes the transformation (for boost::serialization).
+       * @param ar Serialization archive.
+       * @param version Boost.Serialization class version; unused by this implementation.
+       */
       template <class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
       {
         ar& boost::serialization::base_object<PolytopeTransformation>(*this);
         ar & m_pm;

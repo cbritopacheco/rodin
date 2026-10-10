@@ -38,6 +38,31 @@ Pattern-stability regression tests:
 `tests/manufactured/Rodin/PETSc/TargetedAssemblyTest.cpp` (reuse keeps the
 sparsity pattern with 0 mallocs; structural zeros stay allocated).
 
+## Named bilinear forms
+
+`Rodin::Variational::MassForm`, `DiffusionForm`, `HelmholtzForm`, and
+`LinearElasticityForm` select `Mat` when their trial solution uses PETSc `Vec`
+storage. The mathematical kernels are shared with the Eigen implementation;
+PETSc Sequential, OpenMP, and MPI assemblers handle insertion and ownership.
+Include `Rodin/PETSc.h` before constructing a PETSc-backed named form, and
+include `Rodin/Solid/Linear/LinearElasticityForm.h` for elasticity.
+
+A named form owns its matrix. Copies duplicate its entries; moves transfer the
+handle. Trial/test functions and field coefficients remain borrowed and must
+outlive the form. Constructors assemble immediately. After changing a live
+coefficient, call `assemble()` to refresh the operator. The mesh connectivity
+and finite element spaces must remain fixed.
+
+Assembly retains every cell DOF pair, including zero contributions on excluded
+attributes, so changing coefficients or `.over(...)` reuses the sparsity graph.
+OpenMP evaluates worker-local kernels, buffers contributions, and calls PETSc
+matrix insertion on the caller thread. MPI evaluates owned cells and inserts
+contributions to globally numbered DOFs, including off-process rows.
+
+Regression coverage is in `tests/unit/Rodin/PETSc/NamedFormTest.cpp` and
+`MPIFormTest.cpp`: integral comparisons, reassembly/re-interpolation, matrix
+ownership, graph stability, and constrained `Problem` composition.
+
 ## Solver factor reuse depends on the sparsity pattern
 
 PETSc-backed direct solvers reuse factorizations only while the matrix
@@ -46,6 +71,6 @@ sparsity pattern is unchanged (`MatGetNonzeroState` /
 pattern silently invalidate factor reuse — treat pattern stability as
 part of the assembly contract (the regression tests above pin it).
 
-Note: further PETSc-backed adaptation solvers (e.g. for WNGIR in 3D)
+Note: further PETSc-backed adaptation solvers (e.g. for SWIFT in 3D)
 live on the `module/Adaptation` lineage, not on `develop` — verify
 presence before citing them.

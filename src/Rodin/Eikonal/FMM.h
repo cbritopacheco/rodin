@@ -94,6 +94,11 @@ namespace Rodin::Eikonal
       {
         Index nodeIndex;
         Real value;
+        /**
+         * @brief Compares priority-queue arrival values.
+         * @param other Object compared with this object.
+         * @returns True when this item has a larger arrival value than the other item.
+         */
         bool operator>(const PQItem& other) const { return value > other.value; }
       };
 
@@ -236,6 +241,13 @@ namespace Rodin::Eikonal
       }
 
     private:
+      /**
+       * @brief Computes the best local arrival-time update at a vertex.
+       * @param p Vertex being updated or physical point being assigned.
+       * @param u Current arrival-time solution.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @returns Minimum candidate arrival time from the incident accepted configurations.
+       */
       Real local(Index p, const SolutionType& u, const Mesh& mesh) const
       {
         Math::SpatialPoint dummy(mesh.getSpaceDimension());
@@ -316,6 +328,13 @@ namespace Rodin::Eikonal
         assert(!std::isnan(best));
         return best;
       }
+      /**
+       * @brief Measures distance between mesh vertices.
+       * @param a First vertex index.
+       * @param b Second vertex index.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @returns Euclidean distance between the vertex coordinates.
+       */
 
       static Real computeGeometricDistance(Index a, Index b, const Mesh& mesh)
       {
@@ -329,6 +348,13 @@ namespace Rodin::Eikonal
         assert(!std::isnan(distance));
         return distance;
       }
+      /**
+       * @brief Measures the geometric length between edge vertices.
+       * @param a First vertex index.
+       * @param b Second vertex index.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @returns Edge distance evaluated with the available geometric transformation.
+       */
 
       static Real computeEdgeDistance(Index a, Index b, const Mesh& mesh)
       {
@@ -360,6 +386,14 @@ namespace Rodin::Eikonal
         // // No direct edge, fallback to geometric distance
         // return computeGeometricDistance(a, b, mesh);
       }
+      /**
+       * @brief Measures the physical length of a mapped mesh edge.
+       * @param a First vertex index.
+       * @param b Second vertex index.
+       * @param edgeIdx Index of the mesh edge.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @returns Edge length obtained by quadrature along the mapped edge.
+       */
 
       static Real computeEdgeGeodesicDistance(
         Index a, Index b, Index edgeIdx, const Mesh& mesh)
@@ -369,7 +403,19 @@ namespace Rodin::Eikonal
         return computeGeometricDistance(a, b, mesh);
       }
 
-      // Surface triangle update - works for 2D triangles embedded in any dimension
+      /**
+       * @brief Computes an arrival-time update on a surface triangle.
+       *
+       * The update applies to two-dimensional triangles embedded in any dimension.
+       *
+       * @param p Vertex being updated or physical point being assigned.
+       * @param i Index of a supporting accepted vertex.
+       * @param j Index of a supporting accepted vertex.
+       * @param u Current arrival-time solution.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @param F Local propagation cost multiplying geometric distance.
+       * @returns Candidate arrival time obtained from the accepted supporting vertices.
+       */
       Real surfaceTriangleUpdate(Index p, Index i, Index j,
                                  const SolutionType& u, const Mesh& mesh, Real F) const
       {
@@ -438,7 +484,19 @@ namespace Rodin::Eikonal
         return t;
       }
 
-      // 3D volume element 2-neighbor update using geometric infrastructure
+      /**
+       * @brief Computes an arrival-time update in a volume cell.
+       *
+       * The update uses two accepted neighbors in a three-dimensional volume cell.
+       *
+       * @param p Vertex being updated or physical point being assigned.
+       * @param i Index of a supporting accepted vertex.
+       * @param j Index of a supporting accepted vertex.
+       * @param u Current arrival-time solution.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @param F Local propagation cost multiplying geometric distance.
+       * @returns Candidate arrival time obtained from the accepted supporting vertices.
+       */
       Real volumeTetrahedronUpdate(
           Index p, Index i, Index j,
           const SolutionType& u, const Mesh& mesh, Real F) const
@@ -510,9 +568,24 @@ namespace Rodin::Eikonal
         return t;
       }
 
-      // 3D volume element 3-neighbor update (tetra) with "inside-simplex" (upwind) check.
-      // If the 3-neighbor minimizer lies outside the tetrahedron (in barycentric sense),
-      // return +inf so caller naturally falls back to 2-neighbor / 1-neighbor updates.
+      /**
+       * @brief Computes an arrival-time update in a volume cell.
+       *
+       * The update uses three accepted neighbors in a tetrahedron and checks the
+       * upwind condition using barycentric coordinates.
+       *
+       * @note A minimizer outside the tetrahedron yields positive infinity,
+       * allowing the caller to use a two-neighbor or one-neighbor update.
+       *
+       * @param p Vertex being updated or physical point being assigned.
+       * @param i Index of a supporting accepted vertex.
+       * @param j Index of a supporting accepted vertex.
+       * @param k Index of a supporting accepted vertex.
+       * @param u Current arrival-time solution.
+       * @param mesh Mesh carrying the arrival-time solution.
+       * @param F Local propagation cost multiplying geometric distance.
+       * @returns Candidate arrival time obtained from the accepted supporting vertices.
+       */
       Real volumeTetrahedronUpdate(
           Index p, Index i, Index j, Index k,
           const SolutionType& u, const Mesh& mesh, Real F) const
@@ -625,6 +698,8 @@ namespace Rodin::Eikonal
    * @brief Deduction guide for FMM constructor.
    *
    * Allows template argument deduction when constructing FMM objects.
+   * @param speed Function operand.
+   * @param u Solution field updated by the fast marching method.
    */
   template <class Solution, class SpeedFunction>
   FMM(Solution& u, SpeedFunction&& speed) -> FMM<Solution, SpeedFunction>;

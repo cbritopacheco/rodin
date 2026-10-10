@@ -1,0 +1,1454 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ */
+#include <gtest/gtest.h>
+#include <functional>
+#include <sstream>
+#include <type_traits>
+
+#include "Rodin/Adaptation.h"
+#include "Rodin/Assembly.h"
+#include "Rodin/Geometry.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/Solver/CG.h"
+#include "Rodin/Variational.h"
+
+using namespace Rodin;
+using namespace Rodin::Adaptation;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
+
+namespace Rodin::Tests::Unit
+{
+  namespace
+  {
+    TEST(Rodin_Adaptation_SWIFTSolver, CanonicalDefaults)
+    {
+      const SWIFT::Parameters parameters;
+      EXPECT_EQ(parameters.model.fit, Real(1));
+      EXPECT_EQ(parameters.model.hinge, Real(10));
+      EXPECT_EQ(parameters.convergence.iterations.inner, 15);
+      EXPECT_EQ(parameters.convergence.tolerance.innerRelative, Real(1e-3));
+      EXPECT_EQ(parameters.convergence.iterations.linear, 1000);
+      EXPECT_EQ(parameters.model.distribution.deviatoric, Real(1e-4));
+      EXPECT_EQ(parameters.model.distribution.divergence, Real(1e-2));
+      EXPECT_EQ(parameters.model.distortion, Real(10));
+      EXPECT_EQ(parameters.model.jacobian, Real(1e-2));
+      EXPECT_EQ(parameters.linear.threads, 0u);
+      EXPECT_EQ(parameters.convergence.iterations.outer, 30);
+      EXPECT_TRUE(parameters.globalization.directionalNewton);
+      EXPECT_EQ(parameters.globalization.maxStepOverH, Real(0));
+      EXPECT_EQ(parameters.model.qualityGuard, Real(0.1));
+      EXPECT_EQ(parameters.convergence.tolerance.geometric, Real(0));
+      EXPECT_EQ(parameters.quadrature.validation, 0);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getCellOrder(0), 2);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getCellOrder(1), 2);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getCellOrder(2), 8);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getCellOrder(3), 8);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getCellOrder(1, 2), 8);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getInterfaceOrder(1), 8);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getInterfaceOrder(1, 2), 12);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getInterfaceOrder(2), 12);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getInterfaceOrder(3), 12);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getInterfaceOrder(7), 16);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getValidationOrder(1), 32);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getValidationOrder(2), 32);
+      EXPECT_EQ(SWIFT::Parameters::Quadrature::getValidationOrder(3), 32);
+    }
+
+    TEST(Rodin_Adaptation_SWIFTSolver, HierarchicalParametersAreCopiedBySolver)
+    {
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+      P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+      TrialFunction u(space);
+      TestFunction v(space);
+      SWIFT::Problem solver(u, v);
+      decltype(solver)::Parameters parameters;
+      static_assert(std::is_same_v<decltype(solver)::Parameters, SWIFT::Parameters>);
+      static_assert(std::is_same_v<decltype(solver)::Report, SWIFT::Report>);
+      parameters.model = {.h = Real(0.5),
+        .fit = Real(2),
+        .distribution = {.deviatoric = Real(0.01), .divergence = Real(0.02)},
+        .distortion = Real(5),
+        .jacobian = Real(0.02),
+        .hinge = Real(10)};
+      parameters.convergence.tolerance.geometric = Real(0.001);
+      parameters.convergence.iterations.outer = 20;
+      parameters.convergence.iterations.inner = 10;
+      parameters.linear.solver = SWIFT::Parameters::LinearSolver::SparseLU;
+      solver.setParameters(parameters);
+      parameters.model.fit = Real(3);
+      const auto& stored = solver.getParameters();
+      EXPECT_EQ(stored.model.h, Real(0.5));
+      EXPECT_EQ(stored.model.fit, Real(2));
+      EXPECT_EQ(stored.model.distribution.deviatoric, Real(0.01));
+      EXPECT_EQ(stored.model.distribution.divergence, Real(0.02));
+      EXPECT_EQ(stored.model.distortion, Real(5));
+      EXPECT_EQ(stored.model.jacobian, Real(0.02));
+      EXPECT_EQ(stored.model.hinge, Real(10));
+      EXPECT_EQ(stored.model.qualityGuard, Real(0.1));
+      EXPECT_EQ(stored.convergence.tolerance.geometric, Real(0.001));
+      EXPECT_EQ(stored.convergence.iterations.outer, 20u);
+      EXPECT_EQ(stored.convergence.iterations.inner, 10u);
+      EXPECT_EQ(stored.linear.solver, SWIFT::Parameters::LinearSolver::SparseLU);
+    }
+
+    TEST(Rodin_Adaptation_SWIFTSolver, IndependentQuadratureAndSamplingOverrides)
+    {
+      SWIFT::Parameters::Quadrature q;
+      SWIFT::Parameters::Sampling s;
+      EXPECT_EQ(q.getSurfaceOrder(2), 12);
+      EXPECT_EQ(q.getVolumeOrder(2), 8);
+      EXPECT_EQ(s.getSubdivision(2), 16);
+      EXPECT_EQ(q.getSurfaceOrder(1), 8);
+      EXPECT_EQ(q.getVolumeOrder(1), 2);
+      EXPECT_EQ(s.getSubdivision(1), 2);
+      EXPECT_EQ(q.getSurfaceOrder(1, 2), 12);
+      EXPECT_EQ(q.getVolumeOrder(1, 2), 8);
+      EXPECT_EQ(s.getSubdivision(1, 2), 16);
+      EXPECT_EQ(q.getSurfaceOrder(1, 1, false), 12);
+      EXPECT_EQ(q.getVolumeOrder(1, 1, false), 8);
+      EXPECT_EQ(s.getSubdivision(1, 1, false), 16);
+      q.order = 6;
+      EXPECT_EQ(q.getSurfaceOrder(2), 6);
+      EXPECT_EQ(q.getVolumeOrder(2), 6);
+      EXPECT_EQ(s.getSubdivision(2), 16);
+      EXPECT_EQ(s.getSubdivision(1), 2);
+      q.surface = 8;
+      q.volume = 2;
+      s.subdivision = 5;
+      EXPECT_EQ(q.getSurfaceOrder(2), 8);
+      EXPECT_EQ(q.getVolumeOrder(2), 2);
+      EXPECT_EQ(s.getSubdivision(2), 5);
+      EXPECT_EQ(s.getSubdivision(1), 5);
+      s.subdivision = 0;
+      EXPECT_EQ(s.getSubdivision(1), 2);
+      EXPECT_EQ(s.getSubdivision(2), 16);
+    }
+
+    TEST(Rodin_Adaptation_SWIFTSolver, DefaultCoveringDetectsVertexLocalInversion)
+    {
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      for (size_t from = 1; from <= 2; ++from)
+      {
+        for (size_t to = 0; to <= 2; ++to)
+        {
+          if (from != to)
+            mesh.getConnectivity().compute(from, to);
+        }
+      }
+      H1 space(std::integral_constant<size_t, 2>{}, mesh, 2);
+      TrialFunction trial(space);
+      TestFunction test(space);
+      trial.getSolution() = AnalyticVectorFunction(
+        [](const Point& point) {
+          Math::SpatialVector<Real> value(2);
+          value(0) = -Real(0.55) * point.x() * point.x();
+          value(1) = 0;
+          return value;
+        },
+        2);
+      for (auto face = mesh.getFace(); face; ++face)
+        mesh.setAttribute({1, face->getIndex()}, 10);
+      const RealFunction phi([](const Point& point) { return point.x() - Real(0.5); });
+      Math::Vector<Real> normal(2);
+      normal << 1, 0;
+      const VectorFunction gradient(normal);
+      SWIFT::Problem problem(trial, test);
+      SWIFT::Parameters p;
+      p.model.h = 1;
+      p.interfaceAttribute = 10;
+      p.quadrature.volume = 2;
+      problem.setParameters(p);
+      EXPECT_EQ(problem.solve(phi, gradient).reason,
+        SWIFT::Report::Reason::InvalidInitialGeometry);
+      p.sampling.subdivision = 1;
+      // A coarse covering is not a boundary-extremum certificate.
+      auto jacobian = Jacobian(trial.getSolution());
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        const SWIFT::QualitySamples samples(*cell, 2, p);
+        samples.forEach([&](const IntegrationPoint& ip, Real) {
+          CellDeformation deformation(2);
+          deformation.setDisplacementGradient(jacobian.getValue(ip));
+          EXPECT_GT(deformation.getJacobian(), p.model.jacobian);
+        });
+      }
+      EXPECT_EQ(p.quadrature.getVolumeOrder(2), 2);
+    }
+
+    TEST(Rodin_Adaptation_SWIFTSolver, SurfaceQuadratureSupportsHigherAccuracyOverride)
+    {
+      const auto integrate = [](size_t order) {
+        const auto& rule =
+          QF::PolytopeQuadratureFormula::get(order, Polytope::Type::Segment);
+        const SWIFT::Loss loss(Real(0.31927236562898026));
+        Math::Vector<Real> integral = Math::Vector<Real>::Zero(3);
+        for (size_t q = 0; q < rule.getSize(); ++q)
+        {
+          const Real t = rule.getPoint(q)(0);
+          const Real x = Real(0.73092457) * (1 - t) + Real(0.60939475) * t - Real(0.5);
+          const Real y = Real(0.59087505) * (1 - t) + Real(0.60939475) * t - Real(0.5);
+          const Real r = std::hypot(x, y), theta = std::atan2(y, x);
+          const Real residual = r - Real(0.24) - Real(0.08) * std::cos(Real(4) * theta);
+          const Real angular = Real(0.32) * std::sin(Real(4) * theta) / (r * r);
+          integral(0) += rule.getWeight(q) * loss.getValue(residual);
+          integral(1) +=
+            rule.getWeight(q) * loss.getInfluence(residual) * (x / r - angular * y);
+          integral(2) +=
+            rule.getWeight(q) * loss.getInfluence(residual) * (y / r + angular * x);
+        }
+        return integral;
+      };
+      SWIFT::Parameters::Quadrature parameters;
+      const auto reference = integrate(24),
+                 screening = integrate(parameters.getSurfaceOrder(1));
+      // This coarse analytic facet needs an explicit higher order for the
+      // historical 1e-4 accuracy requirement; the calibrated default screens at 1%.
+      constexpr Real screeningTolerance = Real(1e-2);
+      EXPECT_LT((screening - reference).norm() / reference.norm(), screeningTolerance);
+      EXPECT_LT(std::abs(screening(0) - reference(0)) / reference(0), screeningTolerance);
+      parameters.surface = 12;
+      const auto actual = integrate(parameters.getSurfaceOrder(1));
+      EXPECT_LT((actual - reference).norm() / reference.norm(), Real(1e-4));
+      EXPECT_LT(std::abs(actual(0) - reference(0)) / reference(0), Real(1e-4));
+      EXPECT_GT(std::abs(integrate(4)(0) - reference(0)) / reference(0), Real(0.1));
+    }
+
+    TEST(Rodin_Adaptation_SWIFTSolver, DirectionalNewtonParameters)
+    {
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+      P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, 2);
+      TrialFunction trial(fes);
+      TestFunction test(fes);
+      SWIFT::Problem solver(trial, test);
+      SWIFT::Parameters p;
+      EXPECT_NO_THROW(solver.setParameters(p));
+      for (const Real invalid : {Real(-1), std::numeric_limits<Real>::infinity(),
+             std::numeric_limits<Real>::quiet_NaN()})
+      {
+        p.globalization.maxStepOverH = invalid;
+        EXPECT_THROW(solver.setParameters(p), Alert::Exception);
+      }
+      p.globalization.maxStepOverH = Real(0.5);
+      EXPECT_NO_THROW(solver.setParameters(p));
+      p.globalization.directionalNewton = false;
+      EXPECT_NO_THROW(solver.setParameters(p));
+    }
+
+    constexpr Attribute Interface = 10;
+
+    struct SolveState
+    {
+        Math::Vector<Real> displacement;
+        SWIFT::Report report;
+        Real physicalNorm = 0;
+    };
+
+    template <std::size_t Order = 1, class Setup = std::nullptr_t>
+    SolveState solveTranslatedLine(Real levelSetScale, Real robustScale = 0,
+      bool trace = false, Real target = 0, bool partialGradient = false,
+      std::size_t cgCap = 1000, bool strictCG = false,
+      SWIFT::Parameters::LinearSolver linearSolver =
+        SWIFT::Parameters::LinearSolver::SparseLU,
+      bool flat = false, Real innerTolerance = Real(1e-3), Real muHat = Real(90),
+      const std::function<void(SWIFT::Parameters&)>& configure = {},
+      Setup setup = nullptr)
+    {
+      constexpr std::size_t n = 5;
+      constexpr Real h = Real(1) / Real(n - 1);
+      LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
+      mesh.scale(h);
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
+      mesh.getConnectivity().compute(1, 2);
+      if constexpr (Order > 1)
+        for (std::size_t from = 1; from <= 2; ++from)
+        {
+          for (std::size_t to = 0; to <= 2; ++to)
+          {
+            if (from != to)
+              mesh.getConnectivity().compute(from, to);
+          }
+        }
+
+      std::vector<Index> interfaceFacets;
+      for (auto face = mesh.getFace(); face; ++face)
+      {
+        bool onInterface = true;
+        for (const Index vertex : face->getVertices())
+        {
+          onInterface &=
+            std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+        }
+        if (onInterface)
+        {
+          interfaceFacets.push_back(face->getIndex());
+          mesh.setAttribute({1, face->getIndex()}, Interface);
+        }
+      }
+      EXPECT_FALSE(interfaceFacets.empty());
+
+      // Fix the two remote vertical boundaries so backend comparisons have
+      // a unique solution despite the centered metric's affine kernel.
+      constexpr Attribute fixedBoundary = 20;
+      for (auto face = mesh.getFace(); face; ++face)
+      {
+        bool left = true, right = true;
+        for (const Index vertex : face->getVertices())
+        {
+          left &= mesh.getVertexCoordinates(vertex)(0) == Real(0);
+          right &= mesh.getVertexCoordinates(vertex)(0) == Real(1);
+        }
+        if (left || right)
+          mesh.setAttribute({1, face->getIndex()}, fixedBoundary);
+      }
+
+      auto fes = [&] {
+        if constexpr (Order == 1)
+          return P1<Math::SpatialVector<Real>, LocalMesh>(mesh, 2);
+        else
+          return H1(std::integral_constant<std::size_t, Order>{}, mesh, 2);
+      }();
+      TrialFunction trial(fes);
+      TestFunction test(fes);
+      SWIFT::Problem solver(trial, test);
+      solver += DirichletBC(trial, VectorFunction(Real(0), Real(0))).on(fixedBoundary);
+      if constexpr (!std::is_same_v<Setup, std::nullptr_t>)
+        setup(solver, trial, test);
+      SWIFT::Parameters parameters;
+      // These historical algorithm regressions retain their explicit metric.
+      parameters.model.distribution = {.deviatoric = Real(1), .divergence = Real(1)};
+      parameters.model.h = h;
+      parameters.trace = trace;
+      parameters.traceQualityWitness = trace;
+      parameters.convergence.tolerance.geometric =
+        target == Real(0) ? Real(1e-3) : target;
+      parameters.linear.solver = linearSolver;
+      parameters.linear.threads = 2;
+      parameters.convergence.tolerance.innerRelative = innerTolerance;
+      parameters.model.hinge = muHat;
+      parameters.model.robustScale = robustScale;
+      parameters.interfaceAttribute = Interface;
+      parameters.convergence.iterations.outer = 12;
+      parameters.convergence.tolerance.stepOverH = 0;
+      parameters.convergence.tolerance.energy = 0;
+      parameters.quadrature.order = Order > 2 ? 0 : 2;
+      // A tight linear solve, so that the geometric-invariance assertion below
+      // measures the invariance and not the conjugate-gradient round-off.
+      parameters.convergence.tolerance.linearRelative = Real(1e-10);
+      parameters.convergence.iterations.linear = cgCap;
+      if (configure)
+        configure(parameters);
+      solver.setParameters(parameters);
+
+      RealFunction phi([levelSetScale, flat](const Point& point) {
+        return levelSetScale *
+          (point.x() - Real(0.55) +
+            (flat ? Real(0) : Real(0.02) * std::sin(Real(6) * point.y())));
+      });
+      AnalyticVectorFunction grad(
+        [levelSetScale, partialGradient, flat](const Point& point) {
+          Math::SpatialVector<Real> value(2);
+          value(0) = partialGradient && point.y() < Real(0.4) ? Real(0) : levelSetScale;
+          value(1) = flat || (partialGradient && point.y() < Real(0.4))
+            ? Real(0)
+            : levelSetScale * Real(0.12) * std::cos(Real(6) * point.y());
+          return value;
+        },
+        2);
+
+      const SWIFT::Report report = solver.solve(phi, grad);
+      Real physicalNorm = 0;
+      const auto& solution = trial.getSolution();
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        const Polytope::Traits traits(cell->getGeometry());
+        const auto measure = [&](const Point& point) {
+          const auto value = solution.getValue(point);
+          for (std::size_t component = 0; component < 2; ++component)
+            physicalNorm = std::max(physicalNorm, std::abs(value(component)));
+        };
+        for (std::size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+          measure(Point(*cell, traits.getVertex(vertex)));
+        const auto& qf = QF::PolytopeQuadratureFormula::get(
+          SWIFT::Parameters::Quadrature::getValidationOrder(Order), cell->getGeometry());
+        const auto& quadrature = cell->getQuadrature(qf);
+        for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          measure(quadrature.getPoint(q));
+      }
+      return {trial.getSolution().getData(), report, physicalNorm};
+    }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, CampaignLeaderDefaultsFitTranslatedLine)
+  {
+    const SWIFT::Parameters defaults;
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
+      SWIFT::Parameters::LinearSolver::SparseLU, true,
+      defaults.convergence.tolerance.innerRelative, defaults.model.hinge,
+      [&](SWIFT::Parameters& p) {
+        p.model.fit = defaults.model.fit;
+        p.model.distribution = defaults.model.distribution;
+        p.convergence.iterations.outer = defaults.convergence.iterations.outer;
+        p.convergence.iterations.inner = defaults.convergence.iterations.inner;
+      });
+    EXPECT_TRUE(state.report.qualityBudgetSatisfied);
+    EXPECT_LE(state.report.geometricSup, Real(1e-3));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, AddedMetricCancellationPreservesTheSolveP1P2P3)
+  {
+    const auto check = []<size_t Order>() {
+      const auto baseline = solveTranslatedLine<Order>(Real(1));
+      const auto extended = solveTranslatedLine<Order>(Real(1), 0, false, 0, false, 1000,
+        false, SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
+        [](auto& solver, auto& trial, auto& test) {
+          solver.getMetric() += Integral(Dot(trial, test));
+          solver.getMetric() -= Integral(Dot(trial, test));
+        });
+      EXPECT_LT((baseline.displacement - extended.displacement).norm(), Real(1e-8));
+      EXPECT_NEAR(baseline.report.energy, extended.report.energy, Real(1e-10));
+      EXPECT_EQ(baseline.report.iterations, extended.report.iterations);
+    };
+    check.template operator()<1>();
+    check.template operator()<2>();
+    check.template operator()<3>();
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, AddedMetricChangesTheSolve)
+  {
+    const auto oneStep = [](SWIFT::Parameters& p) { p.convergence.iterations.outer = 1; };
+    const auto baseline = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), oneStep);
+    const auto extended = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), oneStep,
+      [](auto& solver, auto& trial, auto& test) {
+        solver.getMetric() += Integral(Dot(RealFunction(Real(10)) * trial, test));
+      });
+    EXPECT_GT((baseline.displacement - extended.displacement).norm(), Real(1e-5));
+    EXPECT_EQ(extended.report.iterations, 1u);
+    EXPECT_TRUE(extended.report.qualityBudgetSatisfied);
+    EXPECT_TRUE(std::isfinite(extended.report.energy));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, HomogeneousBoundaryHoldsInitialPositionP1P2P3)
+  {
+    const auto check = []<size_t Order>() {
+      IndexMap<Real> initialBoundary;
+      const auto state = solveTranslatedLine<Order>(Real(1), 0, false, 0, false, 1000,
+        false, SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
+        [&](auto& solver, auto& trial, auto&) {
+          trial.getSolution() = VectorFunction(Real(0.01), Real(0.01));
+          auto boundary = DirichletBC(trial, VectorFunction(Real(0), Real(0)));
+          boundary.assemble();
+          for (const auto& [dof, value] :
+            std::get<typename DirichletBCBase<Real>::ValueDOFs>(boundary.getDOFs()))
+            initialBoundary[dof] = trial.getSolution().getData()(dof);
+          solver += boundary;
+        });
+      ASSERT_FALSE(initialBoundary.empty());
+      for (const auto& [dof, value] : initialBoundary)
+        EXPECT_NEAR(state.displacement(dof), value, Real(1e-10));
+      EXPECT_TRUE(state.report.qualityBudgetSatisfied);
+      EXPECT_GT(state.report.iterations, 0u)
+        << "Order " << Order << ": " << state.report.getReasonString();
+    };
+    check.template operator()<1>();
+    check.template operator()<2>();
+    check.template operator()<3>();
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, RejectsNonzeroAndIdentificationBoundaryIncrements)
+  {
+    EXPECT_THROW(
+      solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
+        SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
+        [](auto& solver, auto& trial, auto&) {
+          solver += DirichletBC(trial, VectorFunction(Real(1), Real(1)));
+        }),
+      Alert::Exception);
+    EXPECT_THROW(
+      solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
+        SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
+        [](auto& solver, auto& trial, auto&) { solver += DirichletBC(trial, trial); }),
+      Alert::Exception);
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, RejectsBoundaryForAnotherTrial)
+  {
+    EXPECT_THROW(
+      solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
+        SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
+        [](auto& solver, auto& trial, auto&) {
+          TrialFunction other(trial.getFiniteElementSpace());
+          solver += DirichletBC(other, VectorFunction(Real(0), Real(0)));
+        }),
+      Alert::Exception);
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, PreservesFixedAndSlipBoundaries)
+  {
+    constexpr Attribute Fixed = 20;
+    constexpr Attribute Slip = 21;
+    for (const size_t dimension : {2u, 3u})
+      for (const bool sliding : {false, true})
+      {
+        auto mesh = dimension == 2
+          ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {5, 5})
+          : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {5, 5, 5});
+        mesh.scale(Real(0.25));
+        mesh.getConnectivity().compute(dimension - 1, dimension);
+        std::vector<Index> interface;
+        for (auto face = mesh.getPolytope(dimension - 1); face; ++face)
+        {
+          bool onInterface = true;
+          bool onFixed = false;
+          for (const Index vertex : face->getVertices())
+            onInterface &=
+              std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+          if (onInterface)
+          {
+            mesh.setAttribute({dimension - 1, face->getIndex()}, Interface);
+            interface.push_back(face->getIndex());
+          }
+          const auto& incident = mesh.getConnectivity().getIncidence(
+            {dimension - 1, dimension}, face->getIndex());
+          if (incident.size() != 1)
+            continue;
+          for (const Real x : {Real(0), Real(1)})
+          {
+            bool onPlane = true;
+            for (const Index vertex : face->getVertices())
+              onPlane &= std::abs(mesh.getVertexCoordinates(vertex)(0) - x) < Real(1e-12);
+            onFixed |= onPlane;
+          }
+          mesh.setAttribute(
+            {dimension - 1, face->getIndex()}, !sliding || onFixed ? Fixed : Slip);
+        }
+        P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, dimension);
+        TrialFunction trial(fes);
+        TestFunction test(fes);
+        SWIFT::Problem solver(trial, test);
+        SWIFT::Parameters parameters;
+        parameters.model.h = Real(0.25);
+        // Require motion: the automatic h^2 target exceeds this initial offset.
+        parameters.convergence.tolerance.geometric = Real(1e-3);
+        parameters.interfaceAttribute = Interface;
+        parameters.fixedBoundaryAttributes = {Fixed};
+        if (sliding)
+          parameters.slipBoundaryAttributes = {Slip};
+        parameters.convergence.iterations.outer = 3;
+        parameters.convergence.tolerance.linearRelative = Real(1e-9);
+        parameters.linear.solver = SWIFT::Parameters::LinearSolver::SparseLU;
+        solver.setParameters(parameters);
+        RealFunction phi([](const Point& point) { return point.x() - Real(0.55); });
+        AnalyticVectorFunction grad(
+          [dimension](const Point&) {
+            Math::SpatialVector<Real> value(dimension);
+            value.setZero();
+            value(0) = Real(1);
+            return value;
+          },
+          dimension);
+        const auto report = solver.solve(phi, grad);
+        EXPECT_GT(report.iterations, 0u) << report.getReasonString();
+        EXPECT_GT(trial.getSolution().getData().norm(), Real(1e-5));
+        for (auto face = mesh.getPolytope(dimension - 1); face; ++face)
+        {
+          if (face->getAttribute() != Fixed && face->getAttribute() != Slip)
+            continue;
+          const auto& qf = QF::PolytopeQuadratureFormula::get(2, face->getGeometry());
+          const auto& quadrature = face->getQuadrature(qf);
+          for (size_t q = 0; q < quadrature.getSize(); ++q)
+          {
+            const auto& point = quadrature.getPoint(q);
+            const auto value = trial.getSolution().getValue(point);
+            if (face->getAttribute() == Fixed)
+              EXPECT_LT(value.norm(), Real(1e-10));
+            else
+              for (size_t component = 1; component < dimension; ++component)
+                if (std::abs(point.getCoordinates()(component)) < Real(1e-12) ||
+                  std::abs(point.getCoordinates()(component) - Real(1)) < Real(1e-12))
+                  EXPECT_LT(std::abs(value(component)), Real(1e-10));
+          }
+        }
+      }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, SmallDirectionCanProduceLargeAcceptedStep)
+  {
+    constexpr Real tolerance = Real(0.01);
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(0),
+      [](SWIFT::Parameters& p) {
+        p.model.fit = Real(100);
+        p.convergence.tolerance.step = tolerance;
+        p.convergence.iterations.outer = 1;
+      });
+    EXPECT_EQ(state.report.iterations, 1u);
+    EXPECT_LE(state.report.lastAlpha, Real(1));
+    EXPECT_GT(state.report.predictorScale, Real(1));
+    EXPECT_LT(state.report.acceptedStep / state.report.predictorScale, tolerance);
+    EXPECT_GT(state.report.acceptedStep, tolerance);
+    EXPECT_STRNE(state.report.getReasonString(), "best-effort-step-stagnation");
+    EXPECT_GT(state.report.minJ, Real(0.01));
+    EXPECT_LT(state.report.maxQRel, Real(10));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, AbsoluteStagnationUsesAcceptedStep)
+  {
+    constexpr Real tolerance = Real(1);
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(0),
+      [](SWIFT::Parameters& p) {
+        p.model.fit = Real(100);
+        p.convergence.tolerance.step = tolerance;
+        p.convergence.iterations.stagnation = 1;
+        p.convergence.tolerance.geometric = Real(1e-12);
+      });
+    EXPECT_EQ(state.report.iterations, 1u);
+    EXPECT_GT(state.report.acceptedStep, Real(0));
+    EXPECT_LE(state.report.acceptedStep, tolerance);
+    EXPECT_STREQ(state.report.getReasonString(), "best-effort-step-stagnation");
+    EXPECT_EQ((state.displacement.cwiseAbs().maxCoeff()), state.report.acceptedStep);
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, GeometricTargetPrecedesAbsoluteStagnation)
+  {
+    const auto state = solveTranslatedLine(Real(1), 0, false, Real(0.06), false, 1000,
+      true, SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(0),
+      [](SWIFT::Parameters& p) {
+        p.model.fit = Real(100);
+        p.convergence.tolerance.step = Real(1);
+      });
+    EXPECT_LE(state.report.iterations, 1u);
+    EXPECT_LE(state.report.acceptedStep, Real(1));
+    EXPECT_LE(state.report.geometricSup, Real(0.06));
+    EXPECT_STREQ(
+      state.report.getReasonString(), "full-interface-geometric-sup-converged");
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, SquaredObservationDropsOnlyLevelSetHessian)
+  {
+    for (const size_t dimension : {2u, 3u})
+    {
+      auto mesh = dimension == 2
+        ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3})
+        : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+      mesh.scale(Real(0.5));
+      P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, dimension);
+      GridFunction current(fes);
+      current.getData().setZero();
+      const Location::AABB<LocalMesh> locator(mesh);
+      auto cell = mesh.getCell();
+      const auto& qf = QF::PolytopeQuadratureFormula::get(2, cell->getGeometry());
+      const auto& point = cell->getQuadrature(qf).getPoint(0);
+      const IntegrationPoint ip(point, &qf, 0);
+      SWIFT::Parameters p;
+      for (const Real levelSetScale : {Real(1), Real(7)})
+      {
+        RealFunction phi([levelSetScale](const Point& x) {
+          return levelSetScale * (Real(2) + x.getCoordinates().squaredNorm());
+        });
+        AnalyticVectorFunction grad(
+          [levelSetScale](const Point& x) {
+            return Math::SpatialVector<Real>(
+              Real(2) * levelSetScale * x.getCoordinates());
+          },
+          dimension);
+        const Real normalization = Real(1) / (levelSetScale * levelSetScale);
+        SWIFT::FittingTensor coefficient(
+          grad, current, locator, p, normalization, dimension);
+        const auto actual = coefficient.getValue(ip);
+        const auto x = point.getCoordinates();
+        Math::SpatialMatrix<Real> expected(dimension, dimension);
+        for (size_t i = 0; i < dimension; ++i)
+        {
+          for (size_t j = 0; j < dimension; ++j)
+            expected(i, j) = Real(4) * x(i) * x(j);
+        }
+        EXPECT_LT((actual - expected).norm(), Real(1e-12));
+        Math::SpatialVector<Real> v(dimension);
+        for (size_t i = 0; i < dimension; ++i)
+          v(i) = Real(1);
+        Math::SpatialVector<Real> z = v;
+        z(0) = Real(0.3);
+        const auto energy = [&](const Math::SpatialVector<Real>& y) {
+          const Real residual = levelSetScale * (Real(2) + y.squaredNorm());
+          return Real(0.5) * normalization * residual * residual;
+        };
+        constexpr Real eps = Real(1e-4);
+        const Real mixed = (energy(Math::SpatialVector<Real>(x + eps * v + eps * z)) -
+                             energy(Math::SpatialVector<Real>(x + eps * v - eps * z)) -
+                             energy(Math::SpatialVector<Real>(x - eps * v + eps * z)) +
+                             energy(Math::SpatialVector<Real>(x - eps * v - eps * z))) /
+          (Real(4) * eps * eps);
+        const Real omitted = Real(2) * (Real(2) + x.squaredNorm()) * v.dot(z);
+        EXPECT_NEAR(v.dot(actual * z), mixed - omitted, Real(2e-6));
+        p.model.fit = Real(0.5);
+        EXPECT_LT((coefficient.getValue(ip) - Real(0.5) * expected).norm(), Real(1e-12));
+        p.model.fit = Real(1);
+      }
+    }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, FittingTensorPropagatesOnlyKnownComposedOrders)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+    GridFunction current(space);
+    current.getData().setZero();
+    const Location::AABB<LocalMesh> locator(mesh);
+    const SWIFT::Parameters parameters;
+    Math::Vector<Real> normal(2);
+    normal << 1, 0;
+    const VectorFunction constant(normal);
+    const SWIFT::FittingTensor tensor(constant, current, locator, parameters, 1, 2);
+    auto face = mesh.getFace();
+    ASSERT_TRUE(face);
+    EXPECT_EQ(tensor.getOrder(*face), Optional<size_t>(0));
+    const auto check = [&]<size_t Order>() {
+      H1 fe(std::integral_constant<size_t, Order>{}, mesh, 2);
+      TrialFunction u(fe);
+      TestFunction v(fe);
+      const auto integrand = Dot(tensor * u, v);
+      EXPECT_EQ(integrand.getOrder(*face), Optional<size_t>(2 * Order));
+      auto integral = FaceIntegral(integrand);
+      BilinearForm inferred(u, v), reference(u, v);
+      inferred = integral;
+      inferred.assemble();
+      integral.setOrder(12);
+      reference = integral;
+      reference.assemble();
+      EXPECT_LT((inferred.getOperator() - reference.getOperator()).norm(),
+        Real(1e-11) * std::max(Real(1), reference.getOperator().norm()));
+      integral.setOrder(9);
+      EXPECT_EQ(integral.getOrder(*face), Optional<size_t>(9));
+
+      H1 targetSpace(std::integral_constant<size_t, Order>{}, mesh);
+      GridFunction phi(targetSpace);
+      phi.getData().setZero();
+      const auto gradient = Grad(phi);
+      const SWIFT::FittingTensor piecewise(gradient, current, locator, parameters, 1, 2);
+      // Even P1 gradients can change when the moved facet crosses a cell.
+      EXPECT_EQ(piecewise.getOrder(*face), std::nullopt);
+    };
+    check.operator()<1>();
+    check.operator()<2>();
+    check.operator()<3>();
+    const AnalyticVectorFunction analytic(
+      [](const Point& point) {
+        return Math::SpatialVector<Real>(point.getPhysicalCoordinates());
+      },
+      2);
+    const SWIFT::FittingTensor unknown(analytic, current, locator, parameters, 1, 2);
+    EXPECT_EQ(unknown.getOrder(*face), std::nullopt);
+  }
+
+  /// @brief The default affine-hinge solve reduces fit while preserving geometry.
+  TEST(Rodin_Adaptation_SWIFTSolver, FitsAdmissibleWavyTarget)
+  {
+    const SolveState state = solveTranslatedLine(Real(1));
+    EXPECT_LT(state.report.residualRMS, Real(0.05));
+    EXPECT_GT(state.report.minJ, Real(1e-2));
+    EXPECT_LT(state.report.maxQRel, Real(10));
+    EXPECT_GE(state.report.maxJ, state.report.minJ);
+    EXPECT_GT(state.report.interfaceMeasure, Real(0));
+    EXPECT_TRUE(std::isfinite(state.report.geometricRMS));
+    EXPECT_TRUE(std::isfinite(state.report.geometricSup));
+    EXPECT_TRUE(std::isfinite(state.report.normalRMS));
+    EXPECT_GT(state.report.iterations, 0);
+    EXPECT_GT(state.report.linearSolveCount, 0);
+    EXPECT_LE(state.report.maxLinearIterations, 1000);
+    EXPECT_TRUE(std::isfinite(state.report.energy));
+  }
+
+  /// @brief Tracing preserves numerics and records each accepted geometry.
+  TEST(Rodin_Adaptation_SWIFTSolver,
+    TraceRecordsInnerAndAcceptedGeometryWithoutChangingSolve)
+  {
+    const SolveState base = solveTranslatedLine(Real(1));
+    testing::internal::CaptureStdout();
+    const SolveState traced = solveTranslatedLine(Real(1), Real(0), true);
+    const std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(base.report.iterations, traced.report.iterations);
+    EXPECT_EQ(base.report.innerIterations, traced.report.innerIterations);
+    EXPECT_EQ(base.report.energy, traced.report.energy);
+    EXPECT_EQ(base.report.geometricSup, traced.report.geometricSup);
+    EXPECT_EQ((base.displacement - traced.displacement).norm(), Real(0));
+    EXPECT_TRUE(output.find("hinge inner=") != std::string::npos ||
+      output.find("hinge skip:") != std::string::npos);
+    EXPECT_NE(output.find("swift directional:"), std::string::npos);
+    EXPECT_NE(output.find("swift quality witness:"), std::string::npos);
+    EXPECT_NE(output.find("metric LU:"), std::string::npos);
+    EXPECT_NE(output.find("rel="), std::string::npos);
+    std::istringstream lines(output);
+    std::string line;
+    std::size_t accepted = 0, initial = 0, final = 0;
+    while (std::getline(lines, line))
+    {
+      if (line.find("swift geometry:") == std::string::npos)
+        continue;
+      accepted += line.find("phase=accepted") != std::string::npos;
+      initial += line.find("phase=initial") != std::string::npos;
+      final += line.find("phase=final") != std::string::npos;
+      EXPECT_NE(line.find("inner_total="), std::string::npos);
+      EXPECT_NE(line.find("seconds="), std::string::npos);
+      EXPECT_NE(line.find("max_qrel="), std::string::npos);
+      const std::size_t constantStart = line.find("geom_c=");
+      ASSERT_NE(constantStart, std::string::npos);
+      const Real constant = std::stod(line.substr(constantStart + 7));
+      const std::size_t start = line.find("geom_sup=");
+      ASSERT_NE(start, std::string::npos);
+      const Real distance = std::stod(line.substr(start + 9));
+      EXPECT_TRUE(std::isfinite(distance));
+      EXPECT_DOUBLE_EQ(constant, distance / std::pow(Real(0.25), 2));
+      if (line.find("phase=final") != std::string::npos)
+      {
+        EXPECT_EQ(distance, traced.report.geometricSup);
+        EXPECT_EQ(constant, traced.report.geometricConstant);
+      }
+    }
+    EXPECT_EQ(initial, 1);
+    EXPECT_EQ(final, 1);
+    EXPECT_EQ(accepted, traced.report.iterations);
+  }
+
+  /// @brief Target stopping uses the whole interface, not only the robust active set.
+
+  /// @brief Target stopping uses the whole interface, not only the robust active set.
+  TEST(Rodin_Adaptation_SWIFTSolver, FullInterfaceTarget)
+  {
+    const auto initial = solveTranslatedLine(Real(1), 0, false, Real(0.1));
+    EXPECT_EQ(initial.report.iterations, 0);
+    EXPECT_LT(initial.report.geometricSup, Real(0.1));
+    EXPECT_STREQ(
+      initial.report.getReasonString(), "full-interface-geometric-sup-converged");
+    // A straight target is exactly representable, so this tests stopping rather
+    // than an unattainable maximum-error threshold for a curved P1 interface.
+    const auto fitted = solveTranslatedLine(Real(1), 0, false, Real(1e-3), false, 1000,
+      false, SWIFT::Parameters::LinearSolver::SparseLU, true);
+    EXPECT_GT(fitted.report.iterations, 0);
+    EXPECT_LE(fitted.report.geometricSup, Real(1e-3));
+    EXPECT_GT(fitted.report.minJ, Real(0.01));
+    EXPECT_LT(fitted.report.maxQRel, Real(10));
+    EXPECT_STREQ(
+      fitted.report.getReasonString(), "full-interface-geometric-sup-converged");
+    EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, Real(-1)), Alert::Exception);
+    const auto invalid = solveTranslatedLine(Real(1), 0, false, Real(0.1), true);
+    // Invalid gradients on part of the initial interface forbid an initial hit.
+    EXPECT_FALSE(invalid.report.geometricTargetReached);
+    EXPECT_FALSE(std::isfinite(invalid.report.geometricSup));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, GlobalizedInnerMeritDecreases)
+  {
+    {
+      testing::internal::CaptureStdout();
+      const SolveState state = solveTranslatedLine(Real(1), Real(0), true, Real(0), false,
+        1000, true, SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3),
+        Real(1000), [](SWIFT::Parameters& p) { p.model.qualityGuard = Real(0.95); });
+      const std::string output = testing::internal::GetCapturedStdout();
+      EXPECT_LT(state.report.geometricSup, Real(0.05));
+      EXPECT_GT(state.report.minJ, Real(0.01));
+      EXPECT_LT(state.report.maxQRel, Real(10));
+      EXPECT_GT(state.report.tInnerLineSearch, Real(0));
+      std::istringstream lines(output);
+      std::string line;
+      std::size_t merits = 0;
+      while (std::getline(lines, line))
+      {
+        if (line.find("hinge merit:") == std::string::npos)
+          continue;
+        ++merits;
+        const Real before = std::stod(line.substr(line.find("before=") + 7));
+        const Real after = std::stod(line.substr(line.find("after=") + 6));
+        EXPECT_TRUE(std::isfinite(before));
+        EXPECT_TRUE(std::isfinite(after));
+        EXPECT_LE(after, before + Real(1e-12) * std::max(std::abs(before), Real(1e-30)));
+        EXPECT_NE(line.find("accepted=1"), std::string::npos);
+      }
+      EXPECT_GT(merits, 0u);
+    }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, CanonicalMetricIsFrozenWithoutCompletion)
+  {
+    const auto state =
+      solveTranslatedLine(Real(1), Real(0), false, Real(0), false, 1000, true);
+    EXPECT_LT(state.report.geometricSup, Real(0.05));
+    EXPECT_GT(state.report.minJ, Real(0.01));
+    EXPECT_LT(state.report.maxQRel, Real(10));
+    EXPECT_TRUE(state.report.innerConverged);
+  }
+
+  /// @brief Direct and iterative solves agree on the observed metric.
+  TEST(Rodin_Adaptation_SWIFTSolver, DirectSolvePreservesCanonicalMetric)
+  {
+    const auto solve = [](SWIFT::Parameters::LinearSolver backend) {
+      return solveTranslatedLine(
+        Real(1), Real(0), false, Real(0), false, 1000, true, backend);
+    };
+    const auto cg = solve(SWIFT::Parameters::LinearSolver::CG);
+    const auto lu = solve(SWIFT::Parameters::LinearSolver::SparseLU);
+    EXPECT_EQ(cg.report.iterations, lu.report.iterations);
+    EXPECT_STREQ(cg.report.getReasonString(), lu.report.getReasonString());
+    EXPECT_NEAR((cg.displacement - lu.displacement).norm(), Real(0), Real(1e-8));
+    EXPECT_EQ(lu.report.linearIterations, 0u);
+    EXPECT_GT(lu.report.linearSolveCount, 0u);
+    EXPECT_LE(lu.report.linearError, Real(1e-10));
+  }
+
+#ifdef RODIN_USE_MUMPS
+  TEST(Rodin_Adaptation_SWIFTSolver, InactiveHingesSkipZeroCorrections)
+  {
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+      SWIFT::Parameters::LinearSolver::MUMPS, false, Real(1e-3), Real(0));
+    EXPECT_GT(state.report.inactiveHingeSkips, 0u);
+    EXPECT_EQ(state.report.innerIterations, 0u);
+    EXPECT_EQ(state.report.tInnerAssembly, Real(0));
+    EXPECT_EQ(state.report.tInnerSolve, Real(0));
+    EXPECT_TRUE(state.report.innerConverged);
+    EXPECT_LT(state.report.geometricSup, Real(0.05));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, RejectsDisabledInnerResidualTest)
+  {
+    EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+                   SWIFT::Parameters::LinearSolver::MUMPS, false, Real(0), Real(0)),
+      Alert::Exception);
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, MUMPSSolvePreservesCanonicalMetric)
+  {
+    const auto solve = [](SWIFT::Parameters::LinearSolver linearSolver) {
+      return solveTranslatedLine(
+        Real(1), Real(0), false, Real(0), false, 1000, true, linearSolver);
+    };
+    const auto lu = solve(SWIFT::Parameters::LinearSolver::SparseLU);
+    const auto mumps = solve(SWIFT::Parameters::LinearSolver::MUMPS);
+    EXPECT_EQ(lu.report.iterations, mumps.report.iterations);
+    EXPECT_STREQ(lu.report.getReasonString(), mumps.report.getReasonString());
+    EXPECT_NEAR((lu.displacement - mumps.displacement).norm(), Real(0), Real(1e-8));
+    EXPECT_EQ(mumps.report.linearIterations, 0u);
+    EXPECT_GT(mumps.report.linearSolveCount, 0u);
+    EXPECT_LE(mumps.report.linearError, Real(1e-10));
+    EXPECT_GT(mumps.report.directFactorizations, 0u);
+    // Changing geometry may change the sparse support.
+    EXPECT_LE(mumps.report.directAnalyses, mumps.report.directFactorizations);
+  }
+#endif
+
+  /// @brief Rescaling a level set leaves the geometric displacement unchanged.
+  TEST(Rodin_Adaptation_SWIFTSolver, LevelSetScalingIsGeometricallyInvariant)
+  {
+    const SolveState base = solveTranslatedLine(Real(1));
+    const SolveState scaled = solveTranslatedLine(Real(7));
+    ASSERT_EQ(base.displacement.size(), scaled.displacement.size());
+    EXPECT_NEAR((base.displacement - scaled.displacement).norm(), Real(0), Real(1e-8));
+    EXPECT_NEAR(scaled.report.sigma, Real(7) * base.report.sigma, Real(1e-12));
+    EXPECT_NEAR(scaled.report.levelSetGradientScale,
+      Real(7) * base.report.levelSetGradientScale, Real(1e-12));
+    EXPECT_NEAR(scaled.report.geometricRMS, base.report.geometricRMS, Real(1e-10));
+    EXPECT_NEAR(scaled.report.geometricSup, base.report.geometricSup, Real(1e-10));
+    EXPECT_NEAR(scaled.report.normalRMS, base.report.normalRMS, Real(1e-12));
+    EXPECT_EQ(base.report.iterations, scaled.report.iterations);
+    EXPECT_STREQ(base.report.getReasonString(), scaled.report.getReasonString());
+  }
+
+  /// @brief A vanishing sampled target gradient is reported before assembly.
+  TEST(Rodin_Adaptation_SWIFTSolver, RejectsDegenerateTargetGradient)
+  {
+    const SolveState state = solveTranslatedLine(Real(0));
+    EXPECT_STREQ(state.report.getReasonString(), "degenerate-target-gradient");
+    EXPECT_EQ(state.report.iterations, 0);
+    EXPECT_EQ(state.report.levelSetGradientScale, Real(0));
+  }
+
+  /// @brief Robust saturation never hides the complete geometric error.
+  TEST(Rodin_Adaptation_SWIFTSolver, SaturatedLossRetainsCompleteResidualDiagnostics)
+  {
+    const SolveState state = solveTranslatedLine(Real(1), Real(1e-6));
+    EXPECT_FALSE(state.report.geometricTargetReached);
+    EXPECT_GT(state.report.interfaceMeasure, Real(0));
+    EXPECT_TRUE(std::isfinite(state.report.residualRMS));
+    EXPECT_TRUE(std::isfinite(state.report.residualSup));
+    EXPECT_GT(state.report.geometricSup, Real(0.01));
+  }
+  /// @brief Compatible singular CG preserves the initial unresolved component.
+  TEST(Rodin_Adaptation_SWIFTSolver, LinearSolveDoesNotGaugeNullModes)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+    TrialFunction trial(space);
+    TestFunction test(space);
+    Problem problem(trial, test);
+    using LinearSystem = std::remove_reference_t<decltype(problem.getLinearSystem())>;
+    SWIFT::LinearSolver<LinearSystem> solver(problem);
+    SWIFT::Parameters parameters;
+    parameters.linear.solver = SWIFT::Parameters::LinearSolver::CG;
+    parameters.convergence.tolerance.linearRelative = Real(1e-12);
+    solver.setParameters(parameters);
+    auto& system = problem.getLinearSystem();
+    system.getOperator().resize(2, 2);
+    system.getOperator().insert(0, 0) = Real(1);
+    system.getOperator().makeCompressed();
+    system.getVector() = Math::Vector<Real>::Zero(2);
+    system.getVector()(0) = Real(1);
+    system.getSolution() = Math::Vector<Real>::Zero(2);
+    system.getSolution()(1) = Real(3);
+    const Math::SparseMatrix<Real> original = system.getOperator();
+    solver.solve(system);
+    ASSERT_TRUE(solver.success());
+    EXPECT_NEAR(system.getSolution()(0), Real(1), Real(1e-12));
+    EXPECT_EQ(system.getSolution()(1), Real(3));
+    EXPECT_EQ((system.getOperator() - original).norm(), Real(0));
+    EXPECT_LE((system.getOperator() * system.getSolution() - system.getVector()).norm(),
+      Real(1e-12));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, CenteredLinearSolveUsesThePhysicalOperator)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Math::SpatialVector<Real>, LocalMesh> space(mesh, 2);
+    TrialFunction trial(space);
+    TestFunction test(space);
+    Problem problem(trial, test);
+    using LinearSystem = std::remove_reference_t<decltype(problem.getLinearSystem())>;
+    for (const auto backend :
+      {SWIFT::Parameters::LinearSolver::CG, SWIFT::Parameters::LinearSolver::SparseLU
+#ifdef RODIN_USE_MUMPS
+        ,
+        SWIFT::Parameters::LinearSolver::MUMPS
+#endif
+      })
+    {
+      SWIFT::LinearSolver<LinearSystem> solver(problem);
+      SWIFT::Parameters parameters;
+      parameters.linear.solver = backend;
+      parameters.linear.threads = 1;
+      parameters.convergence.tolerance.linearRelative = Real(1e-12);
+      solver.setParameters(parameters);
+      auto& system = problem.getLinearSystem();
+      Math::Matrix<Real> centering(2, 1);
+      centering << Real(1), Real(0.5);
+      Math::Vector<Real> expected(2);
+      expected << Real(0.2), Real(0.4);
+      Math::Matrix<Real> core = Math::Matrix<Real>::Zero(2, 2);
+      core(0, 0) = 3;
+      core(1, 1) = 4;
+      const Math::Vector<Real> force =
+        (core - centering * centering.transpose()) * expected;
+      for (const Real scale : {Real(1), Real(0.2)})
+      {
+        system.getOperator() = (scale * core).sparseView();
+        system.getOperator().makeCompressed();
+        system.getVector() = force;
+        system.getSolution() = Math::Vector<Real>::Zero(2);
+        const Math::Matrix<Real> scaledCentering = std::sqrt(scale) * centering;
+        solver.setCentering(scaledCentering);
+        solver.solve(system);
+        ASSERT_TRUE(solver.success());
+        EXPECT_LT((system.getSolution() - expected / scale).norm(), Real(1e-11));
+        EXPECT_LE(solver.getError(), parameters.convergence.tolerance.linearRelative);
+        EXPECT_EQ((system.getOperator() - (scale * core).sparseView()).norm(), Real(0));
+      }
+    }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, CommonMetricScalePreservesTheHingeModelP1P2)
+  {
+    const auto check = []<size_t Order>() {
+      const auto solve = [](Real scale) {
+        return solveTranslatedLine<Order>(1, 0, false, 0, false, 1000, true,
+          SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-6), Real(1000),
+          [=](SWIFT::Parameters& p) {
+            p.model.fit = scale;
+            p.model.distribution = {.deviatoric = scale, .divergence = scale};
+            p.model.qualityGuard = Real(0.9);
+            p.convergence.iterations.outer = 3;
+          });
+      };
+      const auto reference = solve(1);
+      ASSERT_GT(reference.report.iterations, 0u);
+      for (const Real scale : {Real(1e-4), Real(1e3)})
+      {
+        const auto scaled = solve(scale);
+        EXPECT_EQ(reference.report.iterations, scaled.report.iterations);
+        EXPECT_EQ(reference.report.innerIterations, scaled.report.innerIterations);
+        EXPECT_STREQ(reference.report.getReasonString(), scaled.report.getReasonString());
+        EXPECT_NEAR((reference.displacement - scaled.displacement).norm(), 0, 1e-8);
+        EXPECT_NEAR(
+          reference.report.hingeCoefficient, scaled.report.hingeCoefficient, 1e-9);
+      }
+    };
+    check.template operator()<1>();
+    check.template operator()<2>();
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, InnerResidualUsesTheFixedForceScale)
+  {
+    testing::internal::CaptureStdout();
+    const auto state = solveTranslatedLine(1, 0, true, 0, false, 1000, true,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(1000),
+      [](SWIFT::Parameters& p) {
+        p.model.qualityGuard = Real(0.95);
+        p.convergence.iterations.outer = 1;
+      });
+    const auto output = testing::internal::GetCapturedStdout();
+    EXPECT_GT(state.report.innerIterations, 0u);
+    std::istringstream lines(output);
+    std::string line;
+    size_t checked = 0;
+    while (std::getline(lines, line))
+      if (line.find("hinge residual:") != std::string::npos)
+      {
+        const Real force = std::stod(line.substr(line.find("force_norm=") + 11));
+        const Real threshold = std::stod(line.substr(line.find("tolerance=") + 10));
+        EXPECT_NEAR(threshold, Real(1e-12) + Real(1e-3) * force, Real(1e-9) * force);
+        ++checked;
+      }
+    EXPECT_GT(checked, 1u);
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, RejectsInvalidCanonicalWeights)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, 2);
+    TrialFunction trial(fes);
+    TestFunction test(fes);
+    SWIFT::Problem solver(trial, test);
+    for (const Real invalid : {Real(0), Real(-1), std::numeric_limits<Real>::infinity(),
+           std::numeric_limits<Real>::quiet_NaN()})
+    {
+      SWIFT::Parameters p;
+      p.model.distribution.deviatoric = invalid;
+      if (invalid == Real(0))
+        EXPECT_NO_THROW(solver.setParameters(p));
+      else
+        EXPECT_THROW(solver.setParameters(p), Alert::Exception);
+      p = SWIFT::Parameters{};
+      p.model.distribution.divergence = invalid;
+      if (invalid == Real(0))
+        EXPECT_NO_THROW(solver.setParameters(p));
+      else
+        EXPECT_THROW(solver.setParameters(p), Alert::Exception);
+      p = SWIFT::Parameters{};
+      p.model.fit = invalid;
+      EXPECT_THROW(solver.setParameters(p), Alert::Exception);
+    }
+    for (const Real invalid : {Real(0), Real(1), std::numeric_limits<Real>::quiet_NaN()})
+    {
+      SWIFT::Parameters p;
+      p.model.qualityGuard = invalid;
+      EXPECT_THROW(solver.setParameters(p), Alert::Exception);
+    }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, StrictCGCapIsNotBypassed)
+  {
+    const auto state = solveTranslatedLine(
+      Real(1), 0, false, 0, false, 1, true, SWIFT::Parameters::LinearSolver::CG);
+    EXPECT_STREQ(state.report.getReasonString(), "solve-predictor-failed");
+    EXPECT_EQ(state.report.linearSolveCount, 1u);
+    EXPECT_LE(state.report.maxLinearIterations, 1u);
+    EXPECT_EQ(state.report.iterations, 0u);
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, UnmarkedInterfaceReturnsWithoutMoving)
+  {
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
+      [](SWIFT::Parameters& p) { p.interfaceAttribute = 999; });
+    EXPECT_STREQ(state.report.getReasonString(), "empty-interface");
+    EXPECT_EQ(state.report.iterations, 0u);
+    EXPECT_EQ(state.physicalNorm, Real(0));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, MissingInterfaceReturnsWithoutMoving)
+  {
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
+      [](SWIFT::Parameters& p) { p.interfaceAttribute.reset(); });
+    EXPECT_EQ(state.report.reason, SWIFT::Report::Reason::MissingInterface);
+    EXPECT_EQ(state.physicalNorm, Real(0));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, MonitorReportsAcceptedGeometry)
+  {
+    std::vector<SWIFT::Report> reports;
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
+      [&reports](auto& solver, auto&, auto&) {
+        solver.setMonitor(
+          [&reports](const SWIFT::Report& report) { reports.push_back(report); });
+      });
+    ASSERT_EQ(reports.size(), state.report.iterations + 1);
+    for (size_t i = 0; i < state.report.iterations; ++i)
+    {
+      EXPECT_EQ(reports[i].iterations, i + 1);
+      EXPECT_TRUE(std::isfinite(reports[i].geometricSup));
+      EXPECT_DOUBLE_EQ(
+        reports[i].geometricConstant, reports[i].geometricSup / std::pow(Real(0.25), 2));
+      EXPECT_TRUE(reports[i].qualityBudgetSatisfied);
+      EXPECT_GT(reports[i].interfaceMeasure, Real(0));
+      if (i > 0)
+      {
+        EXPECT_LT(reports[i].energy, reports[i - 1].energy);
+      }
+    }
+    EXPECT_EQ(reports.back().reason, state.report.reason);
+    EXPECT_EQ(reports.back().geometricSup, state.report.geometricSup);
+    EXPECT_EQ(reports.back().geometricConstant, state.report.geometricConstant);
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, GeometricConstantUsesBackgroundScaleAndFEOrder)
+  {
+    const auto check = [](const auto& state, std::size_t order) {
+      EXPECT_DOUBLE_EQ(state.report.geometricConstant,
+        state.report.geometricSup / std::pow(Real(0.25), order + 1));
+      EXPECT_NE(state.report.geometricSupTarget, std::pow(Real(0.25), order + 1));
+    };
+    // Stop at the initial state with a deliberately non-mesh-scaled target.
+    check(solveTranslatedLine<1>(Real(1), 0, false, Real(1)), 1);
+    check(solveTranslatedLine<2>(Real(1), 0, false, Real(1)), 2);
+    check(solveTranslatedLine<3>(Real(1), 0, false, Real(1)), 3);
+    EXPECT_TRUE(std::isinf(SWIFT::Report{}.geometricConstant));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, RepeatedSolveReassemblesAdditionalMetric)
+  {
+    solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90), {},
+      [](auto& solver, auto& trial, auto& test) {
+        SWIFT::Parameters p;
+        p.model.h = Real(0.25);
+        p.convergence.iterations.outer = 1;
+        p.convergence.tolerance.geometric = Real(1e-6);
+        p.linear.solver = SWIFT::Parameters::LinearSolver::SparseLU;
+        solver.setParameters(p).setInterfaceAttribute(Interface);
+        const auto& mesh = trial.getFiniteElementSpace().getMesh();
+        const auto originalVertex = mesh.getVertexCoordinates(0);
+        RealFunction phi([](const Point& point) {
+          return point.x() - Real(0.55) + Real(0.02) * std::sin(Real(6) * point.y());
+        });
+        AnalyticVectorFunction gradient(
+          [](const Point& point) {
+            return Math::SpatialVector<Real>{
+              Real(1), Real(0.12) * std::cos(Real(6) * point.y())};
+          },
+          2);
+        const auto first = solver.solve(phi, gradient);
+        const Math::Vector<Real> displacement = trial.getSolution().getData();
+        trial.getSolution() = VectorFunction(Real(0), Real(0));
+        solver.getMetric() += Integral(Dot(RealFunction(Real(10)) * trial, test));
+        const auto second = solver.solve(phi, gradient);
+        EXPECT_EQ(first.iterations, 1u);
+        EXPECT_EQ(second.iterations, 1u);
+        EXPECT_TRUE(second.qualityBudgetSatisfied);
+        EXPECT_GT((trial.getSolution().getData() - displacement).norm(), Real(1e-5));
+        EXPECT_EQ(solver.getReport().energy, second.energy);
+        EXPECT_EQ((mesh.getVertexCoordinates(0) - originalVertex).norm(), Real(0));
+        trial.getSolution() = VectorFunction(Real(0), Real(0));
+        solver.getMetric() -= Integral(Dot(RealFunction(Real(10)) * trial, test));
+        const auto restored = solver.solve(phi, gradient);
+        EXPECT_LT((trial.getSolution().getData() - displacement).norm(), Real(1e-8));
+        EXPECT_NEAR(restored.energy, first.energy, Real(1e-10));
+      });
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, SmallStepsRequireTheConfiguredPersistence)
+  {
+    const auto state = solveTranslatedLine(Real(1), 0, false, Real(1e-12), false, 1000,
+      true, SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(0),
+      [](SWIFT::Parameters& p) {
+        p.model.fit = Real(100);
+        p.convergence.tolerance.step = Real(1);
+        p.convergence.iterations.stagnation = 3;
+      });
+    EXPECT_EQ(state.report.iterations, 3u);
+    EXPECT_STREQ(state.report.getReasonString(), "best-effort-step-stagnation");
+    EXPECT_FALSE(state.report.geometricTargetReached);
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, InterfaceVerticesContributeToSupremum)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.scale(Real(0.5));
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    mesh.getConnectivity().compute(1, 2);
+    std::vector<Index> facets;
+    for (auto face = mesh.getFace(); face; ++face)
+    {
+      bool marked = true;
+      for (const Index vertex : face->getVertices())
+      {
+        marked &=
+          std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+      }
+      if (marked)
+      {
+        facets.push_back(face->getIndex());
+        mesh.setAttribute({1, face->getIndex()}, Interface);
+      }
+    }
+    P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, 2);
+    TrialFunction trial(fes);
+    TestFunction test(fes);
+    SWIFT::Problem solver(trial, test);
+    SWIFT::Parameters p;
+    p.model.h = Real(0.5);
+    p.interfaceAttribute = Interface;
+    p.convergence.tolerance.geometric = Real(0.1);
+    solver.setParameters(p);
+    RealFunction phi([](const Point& point) {
+      const Real y = Real(2) * point.y() - Real(1);
+      return point.x() - Real(0.5) + Real(0.05) * y * y;
+    });
+    AnalyticVectorFunction grad(
+      [](const Point& point) {
+        return Math::SpatialVector<Real>{
+          Real(1), Real(0.2) * (Real(2) * point.y() - Real(1))};
+      },
+      2);
+    const auto report = solver.solve(phi, grad);
+    EXPECT_EQ(report.iterations, 0u);
+    EXPECT_NEAR(report.geometricSup, Real(0.05) / std::sqrt(Real(1.04)), Real(1e-12));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, InvalidGeometryCannotReachAutomaticTarget)
+  {
+    const auto state = solveTranslatedLine(Real(1), 0, false, 0, true, 1000, true,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
+      [](SWIFT::Parameters& p) { p.convergence.tolerance.geometric = 0; });
+    EXPECT_STREQ(state.report.getReasonString(), "geometric-validation-failed");
+    EXPECT_FALSE(state.report.geometricTargetReached);
+    EXPECT_TRUE(std::isinf(state.report.geometricSup));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, ResidualCertifiesInactiveAndActiveInnerSolves)
+  {
+    for (const Real mu : {Real(0), Real(90)})
+    {
+      const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+        SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), mu,
+        [](SWIFT::Parameters& p) { p.convergence.iterations.outer = 1; });
+      ASSERT_TRUE(state.report.innerConverged);
+      EXPECT_LE(state.report.innerResidual, state.report.innerResidualTolerance);
+      EXPECT_LE(state.report.maxInnerIterations, 15u);
+    }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, NativeHingeProblemAssemblesCorrectionP1P2P3)
+  {
+    const auto check = []<size_t Order>() {
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      for (size_t from = 1; from <= 2; ++from)
+      {
+        for (size_t to = 0; to <= 2; ++to)
+        {
+          if (from != to)
+            mesh.getConnectivity().compute(from, to);
+        }
+      }
+      H1 fes(std::integral_constant<size_t, Order>{}, mesh, 2);
+      TrialFunction trial(fes);
+      TestFunction test(fes);
+      GridFunction state(fes);
+      state = VectorFunction(size_t(2),
+        [](const Point&) { return Math::SpatialVector<Real>{Real(0.3), Real(-0.2)}; });
+      SWIFT::HingeProblem problem(trial, test);
+      problem = Integral(Dot(trial, test));
+      problem.setState(state).assemble();
+      const auto& system = problem.getLinearSystem();
+      const Math::Vector<Real> expected = -system.getOperator() * state.getData();
+      EXPECT_LT((system.getVector() - expected).norm(), Real(1e-12));
+      SWIFT::LinearSolver<typename decltype(problem)::LinearSystemType> linear(problem);
+      SWIFT::Parameters parameters;
+      parameters.linear.solver = SWIFT::Parameters::LinearSolver::SparseLU;
+      linear.setParameters(parameters);
+      Solver::NewtonSolver newton(linear);
+      newton.setMaxIterations(2).setAbsoluteTolerance(Real(1e-12));
+      newton.solve(state);
+      ASSERT_TRUE(newton.converged());
+      EXPECT_EQ(newton.getReport().iterations, 1u);
+      EXPECT_LT(state.getData().norm(), Real(1e-10));
+    };
+    check.template operator()<1>();
+    check.template operator()<2>();
+    check.template operator()<3>();
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, P2AcceptedStepUsesPhysicalField)
+  {
+    const auto state = solveTranslatedLine<2>(Real(1), 0, false, Real(1e-12), false, 1000,
+      true, SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(0),
+      [](SWIFT::Parameters& p) {
+        p.convergence.iterations.outer = 1;
+        p.convergence.tolerance.linearRelative = Real(1e-8);
+        p.model.distribution = {.deviatoric = Real(1e-4), .divergence = Real(1e-4)};
+      });
+    ASSERT_EQ(state.report.iterations, 1u);
+    EXPECT_GT(state.report.acceptedStep, Real(0));
+    EXPECT_NEAR(state.report.acceptedStep, state.physicalNorm, Real(1e-12));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, P2PhysicalNormDetectsAnInteriorMaximum)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+    mesh.scale(Real(0.5));
+    for (std::size_t from = 1; from <= 2; ++from)
+    {
+      for (std::size_t to = 0; to <= 2; ++to)
+      {
+        if (from != to)
+          mesh.getConnectivity().compute(from, to);
+      }
+    }
+    H1 fes(std::integral_constant<std::size_t, 2>{}, mesh, 2);
+    GridFunction field(fes);
+    const auto cell = mesh.getCell();
+    const auto& qf = QF::PolytopeQuadratureFormula::get(8, cell->getGeometry());
+    const Real peak = cell->getQuadrature(qf).getPoint(0).x();
+    field = VectorFunction(std::size_t(2), [peak](const Point& point) {
+      const Real x = point.x() - peak;
+      return Math::SpatialVector<Real>{Real(1) - x * x, Real(0)};
+    });
+    std::vector<Index> cells;
+    for (auto current = mesh.getCell(); current; ++current)
+      cells.push_back(current->getIndex());
+    const Real norm = SWIFT::getPhysicalDisplacementNorm(mesh, fes, cells, field, 8);
+    EXPECT_NEAR(norm, Real(1), Real(1e-12));
+    EXPECT_LT(field.getData().cwiseAbs().maxCoeff(), norm - Real(1e-8));
+  }
+
+  TEST(Rodin_Adaptation_SWIFTSolver, RejectsInvalidHingeWeightsAndControls)
+  {
+    const std::function<Real&(SWIFT::Parameters&)> controls[] = {
+      [](SWIFT::Parameters& p) -> Real& { return p.model.jacobianWeight; },
+      [](SWIFT::Parameters& p) -> Real& { return p.model.distortionWeight; },
+      [](SWIFT::Parameters& p) -> Real& { return p.convergence.tolerance.innerRelative; },
+      [](SWIFT::Parameters& p) -> Real& { return p.convergence.tolerance.energy; }};
+    for (const auto& control : controls)
+    {
+      for (const Real invalid : {Real(-1), std::numeric_limits<Real>::infinity(),
+             std::numeric_limits<Real>::quiet_NaN()})
+      {
+        EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+                       SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3),
+                       Real(90), [=](SWIFT::Parameters& p) { control(p) = invalid; }),
+          Alert::Exception);
+      }
+    }
+    EXPECT_THROW(solveTranslatedLine(Real(1), 0, false, 0, false, 1000, true,
+                   SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
+                   [](SWIFT::Parameters& p) { p.model.h = 0; }),
+      Alert::Exception);
+  }
+
+}

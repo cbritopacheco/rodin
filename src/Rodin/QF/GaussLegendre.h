@@ -97,6 +97,10 @@ namespace Rodin::QF
       static void gj1dUnit(
         size_t n, size_t alpha, std::vector<Real>& x, std::vector<Real>& w);
 
+      /// @brief Gaussian rule for the weight @f$ (1-z)^\alpha z^\beta @f$.
+      static void gj1dUnit(size_t n, size_t alpha, size_t beta,
+        std::vector<Real>& x, std::vector<Real>& w);
+
       /**
        * @brief Computes 1D Gauss-Legendre nodes and weights on [0,1].
        * @param n Number of quadrature points
@@ -238,14 +242,10 @@ namespace Rodin::QF
       }
 
     private:
-      /**
-       * @brief Builds the quadrature rule for the selected geometry.
-       */
+      /// @brief Builds the quadrature rule for the selected geometry.
       void build();
 
-      /**
-       * @brief Builds quadrature for a point (0D).
-       */
+      /// @brief Builds quadrature for a point (0D).
       void buildPoint();
 
       /**

@@ -108,7 +108,10 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy()),
@@ -117,7 +120,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -126,7 +132,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -139,7 +148,10 @@ namespace Rodin::Variational
           m_vec(std::move(other.m_vec))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -147,14 +159,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         static_assert(std::is_same_v<IntegrandRangeType, ScalarType>);
@@ -207,13 +226,20 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element vector.
+      /**
+       * @brief Returns an entry of the element vector.
+       * @param local Index in the local numbering.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t local) final override
       {
         return m_vec(local);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -235,10 +261,14 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
+   * @param integrand Expression to integrate.
    */
   template <class NestedDerived, class Range, class Mesh>
-  QuadratureRule(const ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>&)
-    -> QuadratureRule<ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>>;
+  QuadratureRule(
+    const ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>&
+      integrand)
+    -> QuadratureRule<
+      ShapeFunctionBase<ShapeFunction<NestedDerived, P1<Range, Mesh>, TestSpace>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -320,7 +350,10 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLeaf()),
           m_integrand(integrand.copy()),
@@ -329,7 +362,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -338,7 +374,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -351,7 +390,10 @@ namespace Rodin::Variational
           m_vec(std::move(other.m_vec))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -359,14 +401,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         static thread_local LHSRangeType s_v;
@@ -452,13 +501,20 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element vector.
+      /**
+       * @brief Returns an entry of the element vector.
+       * @param local Index in the local numbering.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t local) final override
       {
         return m_vec(local);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -480,16 +536,14 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
+   * @param integrand Expression to integrate.
    */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(
-      const ShapeFunctionBase<
-        Dot<FunctionBase<LHSDerived>,
-        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    -> QuadratureRule<ShapeFunctionBase<
-        Dot<
-          FunctionBase<LHSDerived>,
-          ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+  QuadratureRule(const ShapeFunctionBase<Dot<FunctionBase<LHSDerived>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&
+      integrand)
+    -> QuadratureRule<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -563,21 +617,30 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       constexpr
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy())
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
           m_basis(other.m_basis)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -591,7 +654,10 @@ namespace Rodin::Variational
           m_geometry(std::move(other.m_geometry))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -599,13 +665,20 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         return m_polytope.value().get();
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -784,13 +857,21 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -810,18 +891,18 @@ namespace Rodin::Variational
       Optional<Geometry::Polytope::Type> m_geometry;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
   QuadratureRule(
-    const Dot<
-      ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>&)
+    const Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>&
+      integrand)
     -> QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-          ShapeFunctionBase<
-            ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>;
+      Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -925,7 +1006,10 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -934,7 +1018,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -943,7 +1030,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -957,7 +1047,10 @@ namespace Rodin::Variational
           m_basis(std::move(other.m_basis))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -965,14 +1058,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -1136,13 +1236,21 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -1162,26 +1270,22 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_basis;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
-  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number, class Mesh>
-  QuadratureRule(const
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Number, Mesh>, TrialSpace>>>>,
-      ShapeFunctionBase<
-        ShapeFunction<RHSDerived, P1<Number, Mesh>, TestSpace>>>&)
-  ->
-  QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Number, Mesh>, TrialSpace>>>>,
-      ShapeFunctionBase<
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number,
+    class Mesh>
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+      ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Number, Mesh>, TrialSpace>>>>,
+    ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Number, Mesh>, TestSpace>>>& integrand)
+    -> QuadratureRule<
+      Dot<ShapeFunctionBase<Mult<FunctionBase<CoefficientDerived>,
+            ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Number, Mesh>, TrialSpace>>>>,
+        ShapeFunctionBase<
 
-        ShapeFunction<RHSDerived, P1<Number, Mesh>, TestSpace>>>>;
+          ShapeFunction<RHSDerived, P1<Number, Mesh>, TestSpace>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1272,7 +1376,10 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<LHSOperandRangeType, ScalarType>);
       static_assert(std::is_same_v<RHSOperandRangeType, ScalarType>);
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1281,7 +1388,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -1290,7 +1400,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -1304,7 +1417,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -1312,14 +1428,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -1411,13 +1534,21 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -1438,15 +1569,18 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(
-      const Dot<
-        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
-        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    -> QuadratureRule<Dot<
-          ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
-          ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+    ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&
+      integrand)
+    -> QuadratureRule<
+      Dot<ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1560,7 +1694,10 @@ namespace Rodin::Variational
       static_assert(std::is_same_v<MultiplicandOperandRangeType, ScalarType>);
       static_assert(std::is_same_v<RHSOperandRangeType, ScalarType>);
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1569,7 +1706,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -1578,7 +1718,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -1593,7 +1736,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -1601,14 +1747,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -1749,9 +1902,13 @@ namespace Rodin::Variational
               }
 
               for (size_t i = 0; i < n; ++i)
+              {
                 for (size_t j = i + 1; j < n; ++j)
+                {
                   m_matrix(i, j) +=
                     wdet * Math::dot(cmv * (G * trialRefGrad[j]), trialRefGrad[i]);
+                }
+              }
             }
             else
             {
@@ -1759,9 +1916,13 @@ namespace Rodin::Variational
               const size_t nte = testRefGrad.size();
 
               for (size_t te = 0; te < nte; ++te)
+              {
                 for (size_t tr = 0; tr < ntr; ++tr)
+                {
                   m_matrix(te, tr) +=
                     wdet * Math::dot(cmv * (G * trialRefGrad[tr]), testRefGrad[te]);
+                }
+              }
             }
           }
           else
@@ -1783,13 +1944,21 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -1816,21 +1985,19 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
+   * @param integrand Expression to integrate.
    */
-  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(
-      const Dot<
-        ShapeFunctionBase<
-          Mult<
-            FunctionBase<LHSFunctionDerived>,
-            ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
-        ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    -> QuadratureRule<
-          Dot<ShapeFunctionBase<
-           Mult<
-             FunctionBase<LHSFunctionDerived>,
-             ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
-          ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+  template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Range,
+    class Mesh>
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+      ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
+    ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&
+      integrand)
+    -> QuadratureRule<Dot<
+      ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+        ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>>>,
+      ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -1904,7 +2071,10 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getRHS().getLHS().getLeaf(), integrand.getRHS().getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -1913,7 +2083,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -1922,7 +2095,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -1935,7 +2111,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -1943,14 +2122,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2042,13 +2228,21 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -2066,20 +2260,19 @@ namespace Rodin::Variational
       Math::Matrix<ScalarType> m_matrix;
   };
 
-  /// @brief Deduction guide for @c QuadratureRule.
-  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(
-    const Mult<
-      FunctionBase<CoefficientDerived>,
-      Dot<
-        ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    -> QuadratureRule<
-        Mult<
-          FunctionBase<CoefficientDerived>,
-          Dot<
-            ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
-            ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
+  template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range,
+    class Mesh>
+  QuadratureRule(const Mult<FunctionBase<CoefficientDerived>,
+    Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+      ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&
+      integrand)
+    -> QuadratureRule<Mult<FunctionBase<CoefficientDerived>,
+      Dot<ShapeFunctionBase<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>,
+        ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -2141,7 +2334,10 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -2150,7 +2346,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -2159,7 +2358,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -2170,11 +2372,14 @@ namespace Rodin::Variational
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
           m_refGrad(std::move(other.m_refGrad)),
-          m_testBasis(std::move(other.m_testBasis)),
+          m_test(std::move(other.m_test)),
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -2182,14 +2387,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2229,15 +2441,15 @@ namespace Rodin::Variational
           // at one point is exact only when the rule has a single point.
           const size_t nqp = m_qf->getSize();
 
-          m_testBasis.assign(nqp, {});
+          m_test.assign(nqp, {});
           m_refGrad.assign(nqp, {});
           for (size_t qp = 0; qp < nqp; ++qp)
           {
             const auto& rc = m_qf->getPoint(qp);
 
-            m_testBasis[qp].resize(testfe.getCount());
+            m_test[qp].resize(testfe.getCount());
             for (size_t i = 0; i < testfe.getCount(); ++i)
-              m_testBasis[qp][i] = testfe.getBasis(i)(rc);
+              m_test[qp][i] = testfe.getBasis(i)(rc);
 
             m_refGrad[qp].resize(trialfe.getCount());
             for (size_t i = 0; i < trialfe.getCount(); ++i)
@@ -2272,7 +2484,7 @@ namespace Rodin::Variational
 
           const auto& Jinv = p.getJacobianInverse();
           const auto& refGrad = m_refGrad[qp];
-          const auto& testBasis = m_testBasis[qp];
+          const auto& testBasis = m_test[qp];
           const size_t vdim = refGrad.empty() ? 0 : refGrad.front().size();
 
           for (size_t i = 0; i < refGrad.size(); ++i)
@@ -2295,13 +2507,21 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -2319,7 +2539,7 @@ namespace Rodin::Variational
       /// @brief Reference gradients per quadrature point, dof and component.
       std::vector<std::vector<std::vector<Math::SpatialVector<ScalarType>>>> m_refGrad;
       /// @brief Test basis values per quadrature point and dof.
-      std::vector<std::vector<ScalarType>> m_testBasis;
+      std::vector<std::vector<ScalarType>> m_test;
       Math::Matrix<ScalarType> m_matrix;
   };
 
@@ -2334,9 +2554,13 @@ namespace Rodin::Variational
         ShapeFunction<RHSDerived, P1<Real, RHSMesh>, TestSpace>,
         P1<Real, RHSMesh>, TestSpace>>;
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
-  QuadratureRule(const P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
+  QuadratureRule(
+    const P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>& integrand)
     -> QuadratureRule<P1DivTrialIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
 
   /**
@@ -2399,7 +2623,10 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -2408,7 +2635,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -2417,7 +2647,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -2432,7 +2665,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -2440,14 +2676,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2553,13 +2796,21 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -2592,9 +2843,13 @@ namespace Rodin::Variational
         Div<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>,
         P1<Math::SpatialVector<Real>, RHSMesh>, TestSpace>>;
 
-  /// @brief Deduction guide for @c QuadratureRule.
+  /**
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
+   */
   template <class LHSDerived, class RHSDerived, class LHSMesh, class RHSMesh>
-  QuadratureRule(const P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>&)
+  QuadratureRule(
+    const P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>& integrand)
     -> QuadratureRule<P1DivTestIntegrand<LHSDerived, RHSDerived, LHSMesh, RHSMesh>>;
 
   /**
@@ -2694,7 +2949,10 @@ namespace Rodin::Variational
       static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::Value);
       static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::Value);
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -2703,7 +2961,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -2712,7 +2973,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -2727,7 +2991,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -2735,14 +3002,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -2793,8 +3067,10 @@ namespace Rodin::Variational
               J.resize(trialfes.getVectorDimension(), d);
               const auto& basis = trialfe.getBasis(local);
               for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+              {
                 for (size_t j = 0; j < d; ++j)
                   J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+              }
             }
 
             if (trialfes == testfes)
@@ -2810,8 +3086,10 @@ namespace Rodin::Variational
                 J.resize(testfes.getVectorDimension(), d);
                 const auto& basis = testfe.getBasis(local);
                 for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+                {
                   for (size_t j = 0; j < d; ++j)
                     J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+                }
               }
             }
           }
@@ -2871,13 +3149,21 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -2903,21 +3189,17 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
+   * @param integrand Expression to integrate.
    */
   template <class LHSDerived, class RHSDerived, class Range, class Mesh>
-  QuadratureRule(const
-    Dot<
+  QuadratureRule(const Dot<
+    ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
+    ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&
+      integrand)
+    -> QuadratureRule<Dot<
+      ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
       ShapeFunctionBase<
-        Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>&)
-    ->
-      QuadratureRule<
-        Dot<
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+        Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -2989,7 +3271,10 @@ namespace Rodin::Variational
       /// @brief Marks this specialization for compile-time selection tests.
       static constexpr bool IsRankOneJacobianForm = true;
 
-      /// @brief Constructs an integrator for @p integrand.
+      /**
+       * @brief Constructs an integrator for @p integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -3000,7 +3285,10 @@ namespace Rodin::Variational
           m_order(0)
       {}
 
-      /// @brief Copy-constructs the integrator from @p other.
+      /**
+       * @brief Copy-constructs the integrator from @p other.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -3011,7 +3299,10 @@ namespace Rodin::Variational
           m_order(0)
       {}
 
-      /// @brief Move-constructs the integrator from @p other.
+      /**
+       * @brief Move-constructs the integrator from @p other.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -3026,7 +3317,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Returns the stored integrand.
+      /**
+       * @brief Returns the stored integrand.
+       * @returns The stored integrand.
+       */
       const IntegrandType& getIntegrand() const
       {
         assert(m_integrand);
@@ -3082,8 +3376,10 @@ namespace Rodin::Variational
             J.resize(trialfes.getVectorDimension(), d);
             const auto& basis = trialfe.getBasis(local);
             for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+            {
               for (size_t j = 0; j < d; ++j)
                 J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+            }
           }
           if (trialfes == testfes)
           {
@@ -3098,8 +3394,10 @@ namespace Rodin::Variational
               J.resize(testfes.getVectorDimension(), d);
               const auto& basis = testfe.getBasis(local);
               for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+              {
                 for (size_t j = 0; j < d; ++j)
                   J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+              }
             }
           }
         }
@@ -3338,7 +3636,10 @@ namespace Rodin::Variational
       static_assert(FormLanguage::IsVectorRange<LHSOperandRangeType>::Value);
       static_assert(FormLanguage::IsVectorRange<RHSOperandRangeType>::Value);
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -3347,7 +3648,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -3356,7 +3660,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -3371,7 +3678,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -3379,14 +3689,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -3438,8 +3755,10 @@ namespace Rodin::Variational
               J.resize(trialfes.getVectorDimension(), d);
               const auto& basis = trialfe.getBasis(local);
               for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+              {
                 for (size_t j = 0; j < d; ++j)
                   J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+              }
             }
 
             if (trialfes == testfes)
@@ -3455,8 +3774,10 @@ namespace Rodin::Variational
                 J.resize(testfes.getVectorDimension(), d);
                 const auto& basis = testfe.getBasis(local);
                 for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+                {
                   for (size_t j = 0; j < d; ++j)
                     J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+                }
               }
             }
           }
@@ -3530,9 +3851,13 @@ namespace Rodin::Variational
               }
 
               for (size_t i = 0; i < n; ++i)
+              {
                 for (size_t j = i + 1; j < n; ++j)
+                {
                   m_matrix(i, j) += wdet *
                     Math::dot(cmv * (trialRefJac[j] * Jinv), trialRefJac[i] * Jinv);
+                }
+              }
             }
             else
             {
@@ -3543,8 +3868,10 @@ namespace Rodin::Variational
               {
                 const auto Jte = testRefJac[te] * Jinv;
                 for (size_t tr = 0; tr < ntr; ++tr)
+                {
                   m_matrix(te, tr) +=
                     wdet * Math::dot(cmv * (trialRefJac[tr] * Jinv), Jte);
+                }
               }
             }
           }
@@ -3567,13 +3894,21 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;
@@ -3599,26 +3934,19 @@ namespace Rodin::Variational
   /**
    * @brief Deduction guide for @c QuadratureRule.
    * @ingroup RodinCTAD
+   * @param integrand Expression to integrate.
    */
   template <class LHSFunctionDerived, class LHSDerived, class RHSDerived, class Mesh>
-  QuadratureRule(const
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<LHSFunctionDerived>,
-          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>&)
-  ->
-  QuadratureRule<
-    Dot<
-      ShapeFunctionBase<
-        Mult<
-          FunctionBase<LHSFunctionDerived>,
-          ShapeFunctionBase<
-            Jacobian<ShapeFunction<LHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
-      ShapeFunctionBase<
-        Jacobian<ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>>;
+  QuadratureRule(const Dot<ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+                             ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                               P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
+    ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived,
+      P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>& integrand)
+    -> QuadratureRule<Dot<ShapeFunctionBase<Mult<FunctionBase<LHSFunctionDerived>,
+                            ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                              P1<Math::SpatialVector<Real>, Mesh>, TrialSpace>>>>>,
+      ShapeFunctionBase<Jacobian<
+        ShapeFunction<RHSDerived, P1<Math::SpatialVector<Real>, Mesh>, TestSpace>>>>>;
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -3707,7 +4035,10 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
           m_integrand(integrand.copy()),
@@ -3716,7 +4047,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
@@ -3725,7 +4059,10 @@ namespace Rodin::Variational
           m_geometry(Geometry::Polytope::Type::Point)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
@@ -3740,7 +4077,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -3748,14 +4088,21 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Returns the polytope the integrator is bound to.
+      /**
+       * @brief Returns the polytope the integrator is bound to.
+       * @returns The polytope the integrator is bound to.
+       */
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -3891,13 +4238,21 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
-      /// @brief Returns the integration region.
+      /**
+       * @brief Returns the integration region.
+       * @returns The integration region.
+       */
       virtual Geometry::Region getRegion() const override = 0;
       virtual QuadratureRule* copy() const noexcept override = 0;
 
@@ -3922,8 +4277,9 @@ namespace Rodin::Variational
 
   /**
    * @ingroup RodinCTAD
+   * @brief Deduction guide for @c QuadratureRule.
+   * @param integrand Expression to integrate.
    */
-  /// @brief Deduction guide for @c QuadratureRule.
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Range,
     class Mesh>
   QuadratureRule(
@@ -3933,7 +4289,7 @@ namespace Rodin::Variational
                                   FunctionBase<CoefficientDerived>>,
                 P1<Range, Mesh>, TrialSpace>,
       ShapeFunctionBase<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>,
-        P1<Range, Mesh>, TestSpace>>&)
+        P1<Range, Mesh>, TestSpace>>& integrand)
     -> QuadratureRule<
       Dot<ShapeFunctionBase<Mult<ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
                                                      P1<Range, Mesh>, TrialSpace>>,
@@ -4019,13 +4375,20 @@ namespace Rodin::Variational
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
-      /// @brief Constructs the expression from its left and right operands.
+      /**
+       * @brief Constructs the expression from its left and right operands.
+       * @param lhs Left operand.
+       * @param rhs Right operand.
+       */
       constexpr
       QuadratureRule(const LHSType& lhs, const RHSType& rhs)
         : QuadratureRule(Dot(lhs, rhs))
       {}
 
-      /// @brief Constructs the integrator for the given integrand.
+      /**
+       * @brief Constructs the integrator for the given integrand.
+       * @param integrand Expression to integrate.
+       */
       constexpr
       QuadratureRule(const IntegrandType& integrand)
         : Parent(integrand.getLHS().getOperand().getLeaf(), integrand.getRHS().getLeaf()),
@@ -4033,7 +4396,10 @@ namespace Rodin::Variational
           m_qfs(Geometry::Polytope::Type::Segment)
       {}
 
-      /// @brief Copy constructor.
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
       constexpr
       QuadratureRule(const QuadratureRule& other)
         : Parent(other),
@@ -4041,7 +4407,10 @@ namespace Rodin::Variational
           m_qfs(other.m_qfs)
       {}
 
-      /// @brief Move constructor.
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
       constexpr
       QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
@@ -4066,7 +4435,10 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
-      /// @brief Gets the integrand.
+      /**
+       * @brief Gets the integrand.
+       * @returns The integrand.
+       */
       constexpr
       const IntegrandType& getIntegrand() const
       {
@@ -4074,7 +4446,12 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      /// @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+      /**
+       * @brief Binds the integrator to a polytope and tabulates the quadrature on it.
+       * @param trp Mesh entity used by this operation.
+       * @param tep Mesh entity used by this operation.
+       * @returns Reference to this object after the operation.
+       */
       QuadratureRule& setPolytope(
         const Geometry::Polytope& trp, const Geometry::Polytope& tep) override
       {
@@ -4540,19 +4917,30 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns an entry of the element matrix.
+      /**
+       * @brief Returns an entry of the element matrix.
+       * @param tr Trial shape-function expression.
+       * @param te Test shape-function expression.
+       * @returns Integral computed by the quadrature rule.
+       */
       ScalarType integrate(size_t tr, size_t te) override
       {
         return m_distortion * m_weight * m_matrix(te, tr);
       }
 
-      /// @brief Returns the region the trial function is integrated over.
+      /**
+       * @brief Returns the region the trial function is integrated over.
+       * @returns The region the trial function is integrated over.
+       */
       Geometry::Region getTrialRegion() const override
       {
         return getIntegrand().getLHS().getRegion();
       }
 
-      /// @brief Returns the region the test function is integrated over.
+      /**
+       * @brief Returns the region the test function is integrated over.
+       * @returns The region the test function is integrated over.
+       */
       virtual Geometry::Region getTestRegion() const override = 0;
 
       virtual QuadratureRule* copy() const noexcept override = 0;

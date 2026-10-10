@@ -153,9 +153,7 @@ namespace Rodin::Solver
         : Parent(std::move(other))
       {}
 
-      /**
-       * @brief Default destructor.
-       */
+      /// @brief Default destructor.
       ~UMFPack() = default;
 
       /**

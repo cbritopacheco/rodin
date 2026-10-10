@@ -493,8 +493,10 @@ TEST_F(CommonTest, DotProductSpatialMatrix)
   z2(1, 1) = Complex(1, -2);
   Complex expected = 0;
   for (Eigen::Index i = 0; i < 2; ++i)
+  {
     for (Eigen::Index j = 0; j < 2; ++j)
       expected += z1(i, j) * std::conj(z2(i, j));
+  }
   EXPECT_EQ(dot(z1, z2), expected);
 }
 

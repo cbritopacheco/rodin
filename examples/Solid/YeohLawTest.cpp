@@ -59,8 +59,10 @@ namespace
     while (true)
     {
       for (size_t i = 0; i < d; ++i)
+      {
         for (size_t j = 0; j < d; ++j)
           H(i, j) = scale * dist(gen);
+      }
       Math::SpatialMatrix<Real> F = H;
       for (size_t i = 0; i < d; ++i)
         F(i, i) += 1.0;
@@ -157,9 +159,13 @@ namespace
   {
     Real maxErr = 0.0;
     for (int i = 0; i < A.rows(); ++i)
+    {
       for (int j = 0; j < A.cols(); ++j)
+      {
         maxErr =
           std::max(maxErr, std::abs(A(i, j) - B(i, j)) / (1.0 + std::abs(B(i, j))));
+      }
+    }
     return maxErr;
   }
 }

@@ -101,12 +101,14 @@ namespace Rodin::Solid
         using Type = Real;
     };
 
-    /// @brief Tag for the previous fiber strain @f$e_{1D}^n@f$.
-    ///
-    /// When present, the series law is evaluated at the midpoint fiber strain
-    /// @f$e_{1D}^{n+\frac{1}{2}}@f$, as in the compatible discretization of
-    /// Chapelle, Le Tallec, Moireau and Sorine (2012), eq. (26). When absent,
-    /// the series law falls back to the current fiber strain.
+    /**
+     * @brief Tag for the previous fiber strain @f$e_{1D}^n@f$.
+     *
+     * When present, the series law is evaluated at the midpoint fiber strain
+     * @f$e_{1D}^{n+\frac{1}{2}}@f$, as in the compatible discretization of
+     * Chapelle, Le Tallec, Moireau and Sorine (2012), eq. (26). When absent,
+     * the series law falls back to the current fiber strain.
+     */
     struct PreviousFiberStrain
     {
         /// @brief Stored value type for this tag.
@@ -248,16 +250,33 @@ namespace Rodin::Solid
         m_aux.reserve(ReservedTags);
       }
 
-      /// @brief Copy constructor.
-      ConstitutivePoint(const ConstitutivePoint&) = default;
-      /// @brief Move constructor.
-      ConstitutivePoint(ConstitutivePoint&&) = default;
-      /// @brief Copy assignment operator.
-      ConstitutivePoint& operator=(const ConstitutivePoint&) = default;
-      /// @brief Move assignment operator.
-      ConstitutivePoint& operator=(ConstitutivePoint&&) = default;
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      ConstitutivePoint(const ConstitutivePoint& other) = default;
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      ConstitutivePoint(ConstitutivePoint&& other) = default;
+      /**
+       * @brief Copy assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to copy from.
+       */
+      ConstitutivePoint& operator=(const ConstitutivePoint& other) = default;
+      /**
+       * @brief Move assignment operator.
+       * @returns Reference to this object after the operation.
+       * @param other Object to move from.
+       */
+      ConstitutivePoint& operator=(ConstitutivePoint&& other) = default;
 
-      /// @brief Gets the kinematic state.
+      /**
+       * @brief Gets the kinematic state.
+       * @returns The kinematic state.
+       */
       const KinematicState& getKinematicState() const { return m_state.get(); }
 
       /**

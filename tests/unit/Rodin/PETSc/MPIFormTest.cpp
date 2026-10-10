@@ -21,6 +21,8 @@
 #include <Rodin/MPI/Variational/P1.h>
 #include <Rodin/MPI/Variational/H1/H1.h>
 #include <Rodin/PETSc.h>
+#include <Rodin/Solid/Linear/LinearElasticityForm.h>
+#include <Rodin/Solid/Linear/LinearElasticityIntegral.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -57,15 +59,20 @@ namespace
     return sharder.gather(0);
   }
 
-  /** Partition the three-dimensional P2 regression mesh from rank zero. */
-  Mesh<Context::MPI> distributeP2Tetrahedron(const Context::MPI& ctx)
+  /**
+   * Partitions a tetrahedral regression mesh from rank zero.
+   * @param ctx Distributed execution context.
+   * @param nodeCount Number of grid nodes in each coordinate direction.
+   * @returns Distributed mesh with complete face and edge connectivity.
+   */
+  Mesh<Context::MPI> distributeP2Tetrahedron(const Context::MPI& ctx, size_t nodeCount)
   {
     const auto& comm = ctx.getCommunicator();
     Sharder<Context::MPI> sharder(ctx);
     if (comm.rank() == 0)
     {
-      auto mesh =
-        Mesh<Context::Local>::UniformGrid(Polytope::Type::Tetrahedron, {9, 9, 9});
+      auto mesh = Mesh<Context::Local>::UniformGrid(
+        Polytope::Type::Tetrahedron, {nodeCount, nodeCount, nodeCount});
       auto& connectivity = mesh.getConnectivity();
       connectivity.compute(3, 3);
       connectivity.compute(3, 0);
@@ -82,6 +89,134 @@ namespace
     return sharder.gather(0);
   }
 
+  /** Compares the full distributed operator, including off-process contributions. */
+  void expectNamedMatrixNear(::Mat actual, ::Mat expected)
+  {
+    ::Mat difference = nullptr;
+    ASSERT_EQ(MatDuplicate(actual, MAT_COPY_VALUES, &difference), PETSC_SUCCESS);
+    ASSERT_EQ(
+      MatAXPY(difference, -1, expected, DIFFERENT_NONZERO_PATTERN), PETSC_SUCCESS);
+    PetscReal error, norm;
+    ASSERT_EQ(MatNorm(difference, NORM_FROBENIUS, &error), PETSC_SUCCESS);
+    ASSERT_EQ(MatNorm(expected, NORM_FROBENIUS, &norm), PETSC_SUCCESS);
+    EXPECT_LE(error, 1e-11 * std::max(PetscReal(1), norm));
+    ASSERT_EQ(MatDestroy(&difference), PETSC_SUCCESS);
+  }
+
+  /**
+   * Checks scalar named forms with a live distributed coefficient.
+   * @tparam FES Distributed finite element space type.
+   * @param fes Scalar finite element space.
+   */
+  template <class FES>
+  void checkDistributedScalarNamedForms(FES& fes)
+  {
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    PETSc::Variational::GridFunction coefficient(fes);
+    coefficient = RealFunction(1.);
+    MassForm mass(coefficient, u, v);
+    DiffusionForm diffusion(coefficient, u, v);
+    HelmholtzForm helmholtz(coefficient, Real(2), u, v);
+    BilinearForm expected(u, v);
+    PetscObjectState pattern;
+    ASSERT_EQ(MatGetNonzeroState(mass.getOperator(), &pattern), PETSC_SUCCESS);
+    ASSERT_EQ(
+      MatSetOption(mass.getOperator(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE),
+      PETSC_SUCCESS);
+    for (const Real scale : {2., 5., 0.})
+    {
+      coefficient = RealFunction([scale](const Point& p) { return scale * (1 + p.x()); });
+      mass.assemble();
+      expected = Integral(coefficient * u, v);
+      expected.assemble();
+      expectNamedMatrixNear(mass.getOperator(), expected.getOperator());
+      diffusion.assemble();
+      expected = Integral(coefficient * Grad(u), Grad(v));
+      expected.assemble();
+      expectNamedMatrixNear(diffusion.getOperator(), expected.getOperator());
+      helmholtz.assemble();
+      expected = Integral(coefficient * Grad(u), Grad(v)) + Integral(Real(2) * u, v);
+      expected.assemble();
+      expectNamedMatrixNear(helmholtz.getOperator(), expected.getOperator());
+      PetscObjectState current;
+      ASSERT_EQ(MatGetNonzeroState(mass.getOperator(), &current), PETSC_SUCCESS);
+      EXPECT_EQ(current, pattern);
+    }
+    MPI_Comm comm;
+    ASSERT_EQ(
+      PetscObjectGetComm(reinterpret_cast<PetscObject>(mass.getOperator()), &comm),
+      PETSC_SUCCESS);
+    int size;
+    MPI_Comm_size(comm, &size);
+    EXPECT_EQ(size, g_world->size());
+    size_t begin, end;
+    fes.getOwnershipRange(begin, end);
+    PetscInt first, last;
+    ASSERT_EQ(MatGetOwnershipRange(mass.getOperator(), &first, &last), PETSC_SUCCESS);
+    EXPECT_EQ(first, static_cast<PetscInt>(begin));
+    EXPECT_EQ(last, static_cast<PetscInt>(end));
+    MassForm copied(mass);
+    EXPECT_NE(copied.getOperator(), mass.getOperator());
+    expectNamedMatrixNear(copied.getOperator(), mass.getOperator());
+
+    Problem actual(u, v);
+    actual = HelmholtzForm(Real(1), Real(2), u, v) - Integral(RealFunction(1.), v) +
+      DirichletBC(u, RealFunction(0));
+    actual.assemble();
+    Problem reference(u, v);
+    reference = Integral(Grad(u), Grad(v)) + Integral(Real(2) * u, v) -
+      Integral(RealFunction(1.), v) + DirichletBC(u, RealFunction(0));
+    reference.assemble();
+    expectNamedMatrixNear(
+      actual.getLinearSystem().getOperator(), reference.getLinearSystem().getOperator());
+  }
+
+  /**
+   * Checks distributed vector mass and elasticity operators.
+   * @tparam FES Distributed finite element space type.
+   * @param fes Vector finite element space.
+   */
+  template <class FES>
+  void checkDistributedVectorNamedForms(FES& fes)
+  {
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    MassForm mass(Real(2), u, v);
+    LinearElasticityForm elasticity(Real(2), Real(3), u, v);
+    BilinearForm expected(u, v);
+    for (size_t repeat = 0; repeat < 2; ++repeat)
+    {
+      mass.assemble();
+      expected = Integral(Real(2) * u, v);
+      expected.assemble();
+      expectNamedMatrixNear(mass.getOperator(), expected.getOperator());
+      elasticity.assemble();
+      expected = LinearElasticityIntegral(u, v)(Real(2), Real(3));
+      expected.assemble();
+      expectNamedMatrixNear(elasticity.getOperator(), expected.getOperator());
+    }
+  }
+
+  /** Checks distributed named forms on P1 and P2 tetrahedra. */
+  TEST(PETSc_MPI_Form, NamedScalarAndVectorP1AndP2MatchIntegrals)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    // Multiple cells, interior DOFs and partition interfaces are sufficient
+    // for these matrix comparisons; the legacy constraint regressions below
+    // retain their larger mesh. Keep the full P2 oracle affordable in Debug.
+    auto mesh = distributeP2Tetrahedron(ctx, 4);
+    P1 scalarLinear(mesh);
+    checkDistributedScalarNamedForms(scalarLinear);
+    H1 scalarQuadratic(std::integral_constant<size_t, 2>{}, mesh);
+    checkDistributedScalarNamedForms(scalarQuadratic);
+    P1 vectorLinear(mesh, mesh.getSpaceDimension());
+    checkDistributedVectorNamedForms(vectorLinear);
+    H1 vectorQuadratic(
+      std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+    checkDistributedVectorNamedForms(vectorQuadratic);
+  }
+
   /**
    * On the partition that lost four owner-side P2 constraints, prescribing
    * u = 1 and the mathematically equivalent affine identification u = -u + 2
@@ -91,7 +226,7 @@ namespace
   {
     const auto& world = *g_world;
     Context::MPI ctx(*g_env, world);
-    auto mesh = distributeP2Tetrahedron(ctx);
+    auto mesh = distributeP2Tetrahedron(ctx, 9);
     // MPI Mesh::getFaceCount() is global, while facet indices are shard-local.
     // The previous affine-defect loop used the former as a local loop bound.
     EXPECT_GT(mesh.getFaceCount(), mesh.getShard().getFaceCount());
@@ -209,6 +344,80 @@ namespace
     EXPECT_EQ(localCols, ownedSize);
     EXPECT_EQ(globalRows, static_cast<PetscInt>(fes.getSize()));
     EXPECT_EQ(globalCols, static_cast<PetscInt>(fes.getSize()));
+  }
+
+  /// @brief Generic coefficient binding and unchanged-mesh reassembly match specialized mass.
+  TEST(PETSc_MPI_Form, GenericCoefficientReassemblyMatchesSpecializedMass)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    Real scale = 2;
+    auto f = RealFunction([&](const Point& p) { return scale * (1 + p.x()); });
+    BilinearForm generic(u, v);
+    BilinearForm specialized(u, v);
+    generic = Integral(u, f * v);
+    specialized = Integral(f * u, v);
+    for (const Real value : {2.0, 5.0})
+    {
+      scale = value;
+      generic.assemble();
+      specialized.assemble();
+      ::Mat difference = nullptr;
+      PetscErrorCode ierr =
+        MatDuplicate(generic.getOperator(), MAT_COPY_VALUES, &difference);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = MatAXPY(difference, -1, specialized.getOperator(), SAME_NONZERO_PATTERN);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      PetscReal norm = 0;
+      ierr = MatNorm(difference, NORM_FROBENIUS, &norm);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_LE(norm, 1e-12);
+      ierr = MatDestroy(&difference);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+    }
+  }
+
+  /// @brief A borrowed expression updates distributed identification rows on reassembly.
+  TEST(PETSc_MPI_Form, IdentificationBorrowedExpressionReassembly)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeP2Tetrahedron(ctx, 9);
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TrialFunction master(fes);
+    Real scale = 2;
+    auto expression = RealFunction([&scale](const Point&) { return scale; }) * master;
+    DirichletBC dbc(u, expression);
+    using Input = typename decltype(dbc)::AssemblyType::InputType;
+    const FlatSet<Attribute> attributes;
+    const Input input(u, expression, attributes);
+    using Rows = DirichletBCBase<Real>::IdentifiedDOFs;
+    Rows rows;
+    FlatSet<Index> slaves;
+    for (const Real coefficient : {2., 5.})
+    {
+      scale = coefficient;
+      dbc.getAssembly().execute(rows, input);
+      const size_t count =
+        boost::mpi::all_reduce(world, rows.size(), std::plus<size_t>());
+      EXPECT_GT(count, 0u);
+      FlatSet<Index> currentSlaves;
+      for (const auto& [slave, row] : rows)
+      {
+        currentSlaves.insert(slave);
+        ASSERT_EQ(row.first.size(), 1);
+        EXPECT_EQ(row.first(0), slave);
+        EXPECT_DOUBLE_EQ(row.second(0), coefficient);
+      }
+      if (coefficient == 2)
+        slaves = currentSlaves;
+      else
+        EXPECT_EQ(currentSlaves, slaves);
+    }
   }
 
   /// @brief Verifies distributed identification projects owned slave row for PET sc MPI form by checking tolerance-based numerical results, exact expected values, true predicates.

@@ -55,9 +55,7 @@ namespace Rodin::Variational
       /// @brief Parent class type
       using Parent = FormLanguage::Base;
 
-      /**
-       * @brief Enumeration of integrator types.
-       */
+      /// @brief Enumeration of integrator types.
       enum class Type
       {
         Linear,   ///< Linear form integrator (load vector)
@@ -111,8 +109,10 @@ namespace Rodin::Variational
        *
        * State the order with @ref setOrder(size_t) whenever the degree the
        * integrand actually has is not the degree inference can see.
+       * @returns Reference to this object after the operation.
+       * @param automatic Tag selecting automatic quadrature-order inference.
        */
-      Integrator& setOrder(std::nullopt_t)
+      Integrator& setOrder([[maybe_unused]] std::nullopt_t automatic)
       {
         m_order = nullptr;
         return *this;
@@ -132,6 +132,7 @@ namespace Rodin::Variational
        * share one degree; prefer @ref setOrder(OrderType) otherwise.
        *
        * @param[in] order Integration order to use on every polytope
+       * @returns Reference to this object after the operation.
        */
       Integrator& setOrder(size_t order)
       {
@@ -151,6 +152,7 @@ namespace Rodin::Variational
        * meaningless and typically too low in both cases.
        *
        * @param[in] order Rule invoked with the polytope being integrated
+       * @returns Reference to this object after the operation.
        */
       Integrator& setOrder(OrderType order)
       {
