@@ -14,6 +14,7 @@ set(RodinAdaptation_HEADERS
   CellGeomCache.h
   SWIFT/Loss.h
   SWIFT/Parameters.h
+  SWIFT/QualitySamples.h
   SWIFT/HingeForce.h
   SWIFT/HingeMetric.h
   SWIFT/Hinge.h

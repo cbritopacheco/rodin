@@ -8,8 +8,8 @@
  * @file
  * @brief Axis-balanced lobed sphere target and its analytic gradient.
  */
-#ifndef RODIN_EXPERIMENTS_SWIFT_LOBEDSPHERELEVELSET_H
-#define RODIN_EXPERIMENTS_SWIFT_LOBEDSPHERELEVELSET_H
+#ifndef RODIN_SWIFT_LOBEDSPHERELEVELSET_H
+#define RODIN_SWIFT_LOBEDSPHERELEVELSET_H
 
 #include <Rodin/Math.h>
 

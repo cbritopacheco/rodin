@@ -67,3 +67,29 @@ gtest_discover_tests(RodinAdaptationSWIFTSolverTest
   PROPERTIES
     LABELS unit
 )
+
+if(TARGET SWIFT_ReconstructionP1)
+  add_executable(RodinAdaptationSWIFTOutputTest SWIFTOutputTest.cpp)
+  target_link_libraries(RodinAdaptationSWIFTOutputTest
+    PRIVATE GTest::gtest GTest::gtest_main Rodin::IO)
+  foreach(degree IN ITEMS 1 2 3)
+    add_dependencies(RodinAdaptationSWIFTOutputTest SWIFT_ReconstructionP${degree})
+    foreach(dimension IN ITEMS 2 3)
+      set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/swift-output-p${degree}-d${dimension}")
+      file(MAKE_DIRECTORY "${output_dir}")
+      set(fixture "SWIFT.Output.P${degree}.D${dimension}")
+      add_test(NAME ${fixture}.Generate
+        COMMAND $<TARGET_FILE:SWIFT_ReconstructionP${degree}>
+          --n=4 --dimension=${dimension} --swift-outer-iterations=1
+          --output=${output_dir}/reconstruction)
+      set_tests_properties(${fixture}.Generate PROPERTIES
+        LABELS unit FIXTURES_SETUP ${fixture} TIMEOUT 120
+        WORKING_DIRECTORY "${output_dir}"
+        ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1;VECLIB_MAXIMUM_THREADS=1")
+      add_test(NAME ${fixture}.Verify COMMAND RodinAdaptationSWIFTOutputTest)
+      set_tests_properties(${fixture}.Verify PROPERTIES
+        LABELS unit FIXTURES_REQUIRED ${fixture}
+        ENVIRONMENT "SWIFT_OUTPUT=${output_dir}/reconstruction;SWIFT_DIMENSION=${dimension}")
+    endforeach()
+  endforeach()
+endif()

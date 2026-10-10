@@ -25,7 +25,7 @@
 #include <Rodin/Variational.h>
 
 #include "Parameters.h"
-#include "LobedSphereLevelSet.h"
+#include "../../examples/Adaptation/SWIFT/LobedSphereLevelSet.h"
 
 #include <algorithm>
 #include <array>

@@ -2,20 +2,24 @@
 
 These self-contained examples demonstrate the Strain-distributed Welsch
 Implicit-interface Fitting Technique (SWIFT). A classified mesh interface is
-fitted to a circle in two dimensions or a sphere in three dimensions. The
+fitted to a circle or lobed circle in two dimensions, or a sphere or lobed
+sphere in three dimensions. The
 mesh topology is retained; the outer box boundary is held fixed.
 
 ## Examples
 
-| Source | Executable | Usage |
-|--------|------------|-------|
-| `ReconstructionP1.cpp` | `SWIFT_ReconstructionP1` | `SWIFT::Adapt` owns the solve and applies valid vertex displacement. |
-| `ReconstructionP2.cpp` | `SWIFT_ReconstructionP2` | `SWIFT::Problem` writes displacement; the application updates quadratic transformations. |
-| `ReconstructionP3.cpp` | `SWIFT_ReconstructionP3` | `SWIFT::Problem` writes displacement; the application updates cubic transformations. |
+| Source | Executable | Displacement and geometry degree |
+|--------|------------|----------------------------------|
+| `Reconstruction.cpp` | `SWIFT_ReconstructionP1` | \(P_1\) |
+| `Reconstruction.cpp` | `SWIFT_ReconstructionP2` | \(P_2\) |
+| `Reconstruction.cpp` | `SWIFT_ReconstructionP3` | \(P_3\) |
 
 All three examples support both spatial dimensions. The polynomial degree
 controls the displacement space and resulting geometric transformations,
-not the target geometry.
+not the target geometry. CMake compiles the same source three times with a
+different `RODIN_SWIFT_RECONSTRUCTION_DEGREE`. Parsing, classification,
+`SWIFT::Problem`, geometry application and diagnostics are shared; no separate
+degree-specific driver is maintained.
 
 ## Build
 
@@ -50,15 +54,27 @@ commands. Only the three named targets need to be built.
 The executable syntax is:
 
 ```text
-SWIFT_ReconstructionP1 [grid-points-per-axis] [dimension]
-SWIFT_ReconstructionP2 [grid-points-per-axis] [dimension]
-SWIFT_ReconstructionP3 [grid-points-per-axis] [dimension]
+SWIFT_ReconstructionP1 [--name=value | --name value]...
+SWIFT_ReconstructionP2 [--name=value | --name value]...
+SWIFT_ReconstructionP3 [--name=value | --name value]...
 ```
 
-| Argument | Meaning | Default | Accepted values |
-|----------|---------|---------|-----------------|
-| First | Number of grid points per axis, not the number of cells | `16` | Integer at least `4` |
-| Second | Spatial dimension | `2` | `2` or `3` |
+| Flag | Meaning | Default |
+|------|---------|---------|
+| `--n` | Grid points per axis, not cells; integer at least `4` | `16` |
+| `--dimension` | Spatial dimension: `2` or `3` | `2` |
+| `--lobes` | Angular frequency; nonnegative and integer in 2D | `0`: circle/sphere |
+| `--amp` | Radial perturbation amplitude, ignored when lobes is zero | `0.05` |
+| `--R0` | Base radius; must exceed amplitude | `0.25` |
+| `--phase` | Angular phase in radians; a rotation about the third axis in 3D | `0` |
+| `--cx`, `--cy`, `--cz` | Target-center coordinates; third coordinate used only in 3D | `0.5` each |
+| `--output` | Output stem without extension | `swift/ReconstructionP<degree>` |
+| `--help` | Print every flag, its meaning and current value, then exit | Off |
+
+Both `--name=value` and `--name value` are accepted. Boolean flags accept `0`
+or `1`, or enable their option when supplied without a value. Unknown flags,
+missing values, nonfinite/malformed numbers and unsupported solvers are
+rejected. The previous positional syntax is replaced by named flags.
 
 For example, run from a scratch directory so generated files remain outside
 the source tree. The following commands assume the shell initially starts at
@@ -70,14 +86,23 @@ mkdir -p /tmp/rodin-swift
 cd /tmp/rodin-swift
 
 # Reconstruct a circle with linear, quadratic and cubic displacement.
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP1" 16 2
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" 16 2
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP3" 16 2
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP1" --n=16 --dimension=2
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" --n=16 --dimension=2
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP3" --n=16 --dimension=2
 
 # Reconstruct a sphere on a smaller three-dimensional grid.
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP1" 8 3
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" 8 3
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP3" 8 3
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP1" --n=8 --dimension=3
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" --n=8 --dimension=3
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP3" --n=8 --dimension=3
+
+# Fit the same four-lobe target with explicit model weights and work budgets.
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" \
+  --n=16 --dimension=2 --lobes=4 --amp=0.05 --R0=0.25 \
+  --swift-fit=1 --swift-distribution-deviatoric=1e-4 \
+  --swift-distribution-divergence=1e-2 --swift-hinge=10 \
+  --swift-outer-iterations=30 --swift-inner-iterations=15 \
+  --swift-linear-solver=sparse-lu --swift-trace \
+  --output=results/lobed-p2
 ```
 
 Three-dimensional meshes and higher-order spaces require more memory and
@@ -85,8 +110,11 @@ factorization work. Start with a small grid. Runs of the same degree in the
 same working directory overwrite that degree's output; use separate working
 directories to retain several resolutions or dimensions.
 
-Only the two positional arguments are parsed. Model and solver controls are
-changed through the C++ parameter object, not command-line flags.
+Replace only the executable name to repeat a configuration with another
+degree. Model defaults are identical, while automatic quadrature and geometric
+target policies still depend on degree. These illustrative examples retain
+centroid classification and a fixed exterior boundary; they do not reproduce
+the historical calibration drivers' classifier or boundary setup.
 
 ## Geometry and Workflow
 
@@ -97,12 +125,31 @@ tetrahedralized from a uniform grid. Its fixed reference spacing is
 h=\frac{1}{n-1}.
 \]
 
-The target is the zero level set of the signed distance
+With `--lobes=0`, the target is the zero level set of the signed distance
 
 \[
 \phi(x)=\lVert x-c\rVert-R,
 \qquad c=(0.5,\ldots,0.5),\qquad R=0.25.
 \]
+
+For a positive lobe frequency in 2D, polar coordinates about the specified
+center define
+
+\[
+\phi(x)=r-R_0-a\cos\bigl(\ell(\theta-\theta_0)\bigr).
+\]
+
+In 3D, the axis-balanced target uses a unit radial direction rotated about the
+third axis by the negative phase, denoted by \(\widehat n\), and
+
+\[
+\phi(x)=r-R_0-\frac{a}{3}\sum_{i=1}^{3}\cos(\ell\widehat n_i).
+\]
+
+Both supply analytic gradients. In 3D, `--lobes` controls directional
+frequency, not an exact count of visible lobes. Lobed targets are implicit
+radial functions rather than exact signed distances. Keep the target inside
+the background box for a closed reconstruction.
 
 Cells are classified by the sign of the level set at their centroids. Facets
 separating the two cell attributes form the interface to fit. This classified
@@ -122,34 +169,17 @@ report, and writes the resulting geometry.
 
 ## API Usage and Ownership
 
-The linear example uses `SWIFT::Adapt`, which owns the displacement space and
-problem and applies a quality-valid displacement to the supplied mesh:
+Every executable uses `SWIFT::Problem` directly. The shared source selects
+the displacement degree at compilation:
 
 ```cpp
-// mesh, phi, gradient and facet attributes are prepared beforehand.
-Adaptation::SWIFT::Adapt fitting(mesh);
-Adaptation::SWIFT::Parameters parameters;
-parameters.model.h = h; // Keep the background reference scale fixed.
-fitting.setParameters(parameters).setInterfaceAttribute(Interface);
-
-// Keep the vector alive while the boundary expression is used.
-const Math::Vector<Real> zero = Math::Vector<Real>::Zero(dimension);
-auto& u = fitting.getTrialFunction();
-fitting.getProblem() += DirichletBC(u, VectorFunction(zero)).on(Boundary);
-const auto report = fitting.execute(phi, gradient); // Updates mesh when valid.
-```
-
-The quadratic and cubic examples use `SWIFT::Problem` directly. For example:
-
-```cpp
-// Choose degree 2 for quadratic displacement; use 3 for cubic displacement.
-H1 space(std::integral_constant<size_t, 2>{}, mesh, dimension);
+// Degree is 1, 2 or 3, selected by the executable's CMake target.
+H1 space(std::integral_constant<size_t, Degree>{}, mesh, dimension);
 TrialFunction u(space);
 TestFunction v(space);
 Adaptation::SWIFT::Problem fitting(u, v);
-Adaptation::SWIFT::Parameters parameters;
-parameters.model.h = h;
-fitting.setParameters(parameters).setInterfaceAttribute(Interface);
+// Named flags populate the same hierarchical parameter object for every degree.
+fitting.setParameters(options.parameters).setInterfaceAttribute(Interface);
 const Math::Vector<Real> zero = Math::Vector<Real>::Zero(dimension);
 fitting += DirichletBC(u, VectorFunction(zero)).on(Boundary);
 const auto report = fitting.solve(phi, gradient);
@@ -160,7 +190,7 @@ The mesh, space, trial and test functions must outlive the problem. The
 supplied gradient must differentiate the level set; its Hessian is not
 required. Homogeneous Dirichlet conditions constrain each increment.
 
-After a valid solve, the higher-order examples create a separate mesh and
+After a valid solve, all degrees create a separate mesh and
 evaluate the displacement at the original mesh's geometry nodes. They update
 both vertices and all positive-dimensional entity transformations with
 `ParametricTransformation`. Moving corner vertices alone would discard the
@@ -187,8 +217,29 @@ direction. Armijo backtracking accepts a trial only when energy decrease and
 the actual sampled Jacobian/distortion checks both pass. Quality is not a
 separate shape term in the metric.
 
-The examples change only `model.h`; all other values below are production
-defaults. Edit the parameter object before `setParameters()` to change them.
+The reference scale `model.h` is derived from `--n` and held fixed. All other
+values below start from production defaults and can be overridden by the
+named flags. The complete model/control mapping is:
+
+| Flag | C++ parameter |
+|------|---------------|
+| `--swift-fit` | `model.fit` |
+| `--swift-distribution-deviatoric` | `model.distribution.deviatoric` |
+| `--swift-distribution-divergence` | `model.distribution.divergence` |
+| `--swift-hinge` | `model.hinge` |
+| `--swift-jacobian` | `model.jacobian` |
+| `--swift-distortion` | `model.distortion` |
+| `--swift-quality-guard` | `model.qualityGuard` |
+| `--swift-jacobian-weight` | `model.jacobianWeight` |
+| `--swift-distortion-weight` | `model.distortionWeight` |
+| `--swift-robust-scale` | `model.robustScale` |
+| `--swift-directional-newton` | `globalization.directionalNewton` |
+| `--swift-max-step-over-h` | `globalization.maxStepOverH` |
+| `--swift-armijo` | `globalization.armijo` |
+| `--swift-linear-solver` | `linear.solver`: `cg`, `sparse-lu`, or compiled-in `mumps` |
+| `--swift-linear-threads` | `linear.threads` |
+| `--swift-trace`, `--trace` | `trace` |
+| `--swift-quality-witness` | `traceQualityWitness` |
 
 | C++ parameter | What it controls | Default |
 |---------------|------------------|---------|
@@ -219,6 +270,21 @@ parameters.linear.solver = Adaptation::SWIFT::Parameters::LinearSolver::SparseLU
 
 ### Convergence
 
+| Flag | C++ parameter under `convergence` |
+|------|----------------------------------|
+| `--swift-geometric-tolerance` | `tolerance.geometric` |
+| `--swift-inner-relative-tolerance` | `tolerance.innerRelative` |
+| `--swift-inner-absolute-tolerance` | `tolerance.innerAbsolute` |
+| `--swift-linear-relative-tolerance` | `tolerance.linearRelative` |
+| `--swift-energy-tolerance` | `tolerance.energy` |
+| `--swift-step-tolerance` | `tolerance.step` |
+| `--swift-step-over-h-tolerance` | `tolerance.stepOverH` |
+| `--swift-outer-iterations` | `iterations.outer` |
+| `--swift-inner-iterations` | `iterations.inner` |
+| `--swift-linear-iterations` | `iterations.linear` |
+| `--swift-backtracks` | `iterations.backtracks` |
+| `--swift-stagnation-iterations` | `iterations.stagnation` |
+
 | C++ parameter under `convergence` | Meaning | Default |
 |----------------------------------|---------|---------|
 | `tolerance.geometric` | Sampled maximum-error success target | `0`: automatic \(h^{p+1}\) for displacement degree \(p\) |
@@ -240,15 +306,34 @@ from geometric success.
 
 ### Quadrature and Validation
 
+| Flag | C++ parameter |
+|------|---------------|
+| `--quad-order` | `quadrature.order` |
+| `--surface-quadrature-order` | `quadrature.surface` |
+| `--volume-quadrature-order` | `quadrature.volume` |
+| `--quality-validation-order` | `quadrature.quality` |
+| `--geometric-validation-order` | `quadrature.validation` |
+
 | Displacement/geometry | Surface integration | Volume integration | Quality sampling | Geometric sampling |
 |-----------------------|---------------------|--------------------|------------------|--------------------|
-| Affine simplicial \(P_1\) | `8` | `2` | `2` plus vertices | `32` plus facet vertices |
-| These \(P_2/P_3\) examples | `12` | `8` | `16` plus vertices | `32` plus facet vertices |
+| Affine simplicial \(P_1\) | `8` | `2` | Lobatto degree `2` | `32` plus facet vertices |
+| These \(P_2/P_3\) examples | `12` | `8` | Lobatto degree `16` | `32` plus facet vertices |
 
 `quadrature.order` overrides common integration order; `quadrature.surface`
 and `quadrature.volume` override their respective integrations independently.
-`quadrature.quality` and `quadrature.validation` control independent quality
-and geometric sampling. All default to `0`, selecting the automatic policy.
+`quadrature.quality` selects the shared inner-hinge and actual-quality witnesses:
+positive boundary-inclusive Lobatto points, including vertices. Mapped
+quadrature weights determine each cell's mass. Separate adaptive Jacobian and
+distortion measures mix equal mass with normalized nonlinear guard penetration
+at the current and full-predictor geometries. These positive measures preserve
+cell mass and remain frozen throughout the inner solve, with the same weights
+in its energy, residual and tangent. The equal fraction is one half, risks are
+capped at 100, and an inverted predictor receives maximal distortion risk.
+Actual quality checks take unweighted extrema over all witnesses. Collapsed
+elements use Jacobi--Lobatto rules. The degree specifies reference polynomial
+exactness, not exact integration of nonlinear quality functions.
+`quadrature.validation` controls independent geometric sampling.
+All default to `0`, selecting the automatic policy.
 The higher-order policies are provisional, not exactness guarantees for
 non-polynomial level sets or nonlinear quality expressions.
 
@@ -262,8 +347,12 @@ Each run prints one summary with the following fields:
 | `energy` | Final robust fitting energy |
 | `D_inf` | Maximum sampled gradient-normalized level-set discrepancy |
 | `C` | Sampled geometric discrepancy divided by \(h^{p+1}\) |
+| `target`, `target_hit` | Actual geometric threshold and whether it was reached |
+| `quality_ok` | Whether the sampled quality budget is satisfied |
 | `outer` | Reported outer fitting iteration count |
 | `inner` | Accumulated inner Newton corrections across the solve |
+| `inner_max`, `inner_last` | Maximum and final corrections per outer step |
+| `inner_residual` | Final inner stationarity residual |
 | `min_j` | Minimum sampled relative Jacobian |
 | `max_Q` | Maximum sampled relative distortion |
 
@@ -272,20 +361,39 @@ distance to the circle or sphere at sampled points. It is not a certified
 continuous supremum or two-sided Hausdorff distance. A single target hit does
 not establish a refinement order.
 
-The program returns `1` for invalid argument ranges or an unsatisfied quality
+The program returns `1` for invalid arguments, caught solver/runtime errors or an unsatisfied quality
 budget. A quality-valid best-effort result is written and returns `0`, even if
 the geometric target was missed; inspect `exit` and `D_inf` to distinguish it
-from a target hit. Other invalid inputs or runtime errors may raise exceptions.
+from a target hit.
 
 | Degree | Mesh description | Mesh data |
 |--------|------------------|-----------|
-| \(P_1\) | `swift/ReconstructionP1.xdmf` | `swift/ReconstructionP1.mesh.h5` |
-| \(P_2\) | `swift/ReconstructionP2.xdmf` | `swift/ReconstructionP2.mesh.h5` |
-| \(P_3\) | `swift/ReconstructionP3.xdmf` | `swift/ReconstructionP3.mesh.h5` |
+| \(P_1\) | `swift/ReconstructionP1.xdmf` | `swift/ReconstructionP1.{background,moved}.mesh.h5` |
+| \(P_2\) | `swift/ReconstructionP2.xdmf` | `swift/ReconstructionP2.{background,moved}.mesh.h5` |
+| \(P_3\) | `swift/ReconstructionP3.xdmf` | `swift/ReconstructionP3.{background,moved}.mesh.h5` |
 
-Paths are relative to the working directory. Open the XDMF file in an
-XDMF-compatible viewer such as ParaView and keep its HDF5 companion alongside
-it. The examples write mesh geometry, not a campaign CSV or trajectory archive.
+Default paths are relative to the working directory; `--output` replaces the
+stem. Open the XDMF file in an XDMF-compatible viewer such as ParaView and keep
+all its HDF5 companions alongside it, including the field files. It contains
+two named blocks: `background` is the unchanged reference mesh, and `moved` is
+the fitted isoparametric mesh. Use **Extract Block** to select either one,
+then **Threshold** on `cell_label` (or `Attribute`) with value `1` for the
+inside domain or `2` for the outside domain. Classification is retained from
+the background; it is not recomputed after fitting.
+
+| Field on both blocks | Location | Interpretation |
+|----------------------|----------|----------------|
+| `Attribute`, `cell_label` | Cell | Original inside/outside classification |
+| `displacement` | Node | Accumulated displacement from the background configuration |
+| `phi` | Node | Target level set interpolated on the respective configuration |
+| `j` | Cell | Relative deformation Jacobian at the cell centroid |
+| `q_rel` | Cell | Relative deformation distortion at the cell centroid |
+
+The displacement on `moved` is the transported background field, not an
+additional deformation to apply. Both blocks carry the final deformation
+diagnostics. The cell-centered quality fields are centroid samples, not
+cellwise extrema or the solver's validation certificate. The examples do not
+write a campaign CSV or trajectory archive.
 
 ## Further Documentation
 

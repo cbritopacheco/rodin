@@ -14,6 +14,33 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  TEST(Rodin_Variational_H1_Jacobian, GridFunction_PointwiseIntegrationPoint)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    H1 space(std::integral_constant<size_t, 2>{}, mesh, size_t{2});
+    GridFunction field(space);
+    field = VectorFunction(size_t{2}, [](const Point& point) {
+      const auto& x = point.getCoordinates();
+      return Math::SpatialVector<Real>{x(0) * x(0), x(1) * x(1)};
+    });
+    auto jacobian = Jacobian(field);
+    const auto cell = mesh.getCell(0);
+    const Polytope::Traits traits(cell->getGeometry());
+    for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+    {
+      const Point point(*cell, traits.getVertex(vertex));
+      const IntegrationPoint ip(point);
+      const auto value = jacobian.getValue(ip);
+      const auto& x = point.getCoordinates();
+      EXPECT_NEAR(value(0, 0), Real(2) * x(0), Real(1e-12));
+      EXPECT_NEAR(value(1, 1), Real(2) * x(1), Real(1e-12));
+      EXPECT_NEAR(value(0, 1), Real(0), Real(1e-12));
+      EXPECT_NEAR(value(1, 0), Real(0), Real(1e-12));
+    }
+  }
+
   /// @brief Verifies shape function construction for variational H1 jacobian.
   TEST(Rodin_Variational_H1_Jacobian, ShapeFunction_Construction)
   {

@@ -563,12 +563,12 @@ namespace Rodin::Variational
           const auto& z = r.z();
           const auto q = 1 - z;
 
-          if (q == 0)
-          {
-            if (m_local == 4 && m_i == 2)
-              return 1;
-            return 0;
-          }
+          // At the apex use the symmetric centreline trace. Individual rational
+          // basis gradients have direction-dependent limits, but affine fields
+          // must reproduce their unique gradient, including at the apex.
+          constexpr Real centreline = Real(0.5);
+          const auto u = q == 0 ? centreline : x / q;
+          const auto v = q == 0 ? centreline : y / q;
 
           switch (m_local)
           {
@@ -576,15 +576,15 @@ namespace Rodin::Variational
             {
               if (m_i == 0)
               {
-                return -1 + y / q;
+                return -1 + v;
               }
               else if (m_i == 1)
               {
-                return -1 + x / q;
+                return -1 + u;
               }
               else if (m_i == 2)
               {
-                return -1 + x * y / (q * q);
+                return -1 + u * v;
               }
               else [[unlikely]]
               {
@@ -596,15 +596,15 @@ namespace Rodin::Variational
             {
               if (m_i == 0)
               {
-                return 1 - y / q;
+                return 1 - v;
               }
               else if (m_i == 1)
               {
-                return -x / q;
+                return -u;
               }
               else if (m_i == 2)
               {
-                return -x * y / (q * q);
+                return -u * v;
               }
               else [[unlikely]]
               {
@@ -616,15 +616,15 @@ namespace Rodin::Variational
             {
               if (m_i == 0)
               {
-                return y / q;
+                return v;
               }
               else if (m_i == 1)
               {
-                return x / q;
+                return u;
               }
               else if (m_i == 2)
               {
-                return x * y / (q * q);
+                return u * v;
               }
               else [[unlikely]]
               {
@@ -636,15 +636,15 @@ namespace Rodin::Variational
             {
               if (m_i == 0)
               {
-                return -y / q;
+                return -v;
               }
               else if (m_i == 1)
               {
-                return 1 - x / q;
+                return 1 - u;
               }
               else if (m_i == 2)
               {
-                return -x * y / (q * q);
+                return -u * v;
               }
               else [[unlikely]]
               {

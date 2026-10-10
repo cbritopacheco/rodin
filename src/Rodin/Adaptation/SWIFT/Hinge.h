@@ -54,9 +54,12 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Affine quality energy with the construction parameters, evaluated only on demand.
        * @param parameters Quality guards and relative hinge weights used at construction.
        * @param hingeCoefficient Effective penalty coefficient used at construction.
+       * @param weightJ Frozen Jacobian witness measure.
+       * @param weightQ Frozen distortion witness measure.
        * @returns The squared-hinge energy, or infinity for an inadmissible frozen state.
        */
-      Real getEnergy(const Parameters& parameters, Real hingeCoefficient) const
+      Real getEnergy(const Parameters& parameters, Real hingeCoefficient,
+        Real weightJ = Real(1), Real weightQ = Real(1)) const
       {
         if (!isAdmissible())
           return std::numeric_limits<Real>::infinity();
@@ -64,10 +67,10 @@ namespace Rodin::Adaptation::SWIFT
           const Real violation = std::max(Real(0), Real(1) - slack / delta);
           return Real(0.5) * hingeCoefficient * weight * violation * violation;
         };
-        return energy(m_jSlack,
+        return weightJ * energy(m_jSlack,
                  parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
                  parameters.model.jacobianWeight) +
-          energy(m_qSlack,
+          weightQ * energy(m_qSlack,
             parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
             parameters.model.distortionWeight);
       }

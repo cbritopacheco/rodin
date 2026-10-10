@@ -1,5 +1,12 @@
 # Canonical SWIFT Campaigns
 
+The proposed quality-certification and discrete hinge-weight comparison is
+recorded in [Quality validation and hinge weights](QUALITY_VALIDATION_AND_WEIGHTS.md).
+This plan does not change production defaults.
+The current fixed-point equal-weight comparison is specified separately in
+[Equal hinge weights](EQUAL_HINGE_WEIGHTS.md); certification and adaptive point
+selection are outside that experiment.
+
 Calibration drivers live here rather than in the production API examples.
 They are excluded from the default build and can be built explicitly:
 
@@ -257,3 +264,8 @@ of the 2D n=50, lobes=10 reference within 3e-14 on fit, geometry, quality and in
 counts. A one-step 3D n=8, lobes=4 smoke solve with the new all-one defaults
 accepted a valid update (minimum j=1.196, maximum Q=1.004); it is not a calibration
 or convergence result. The removed shared-bulk CLI flag is explicitly rejected.
+
+## Canonical adaptive-hinge calibration
+
+The proposed replacement grid and reporting protocol are in
+[ADAPTIVE_HINGE_CAMPAIGN.md](ADAPTIVE_HINGE_CAMPAIGN.md). It has not been launched.

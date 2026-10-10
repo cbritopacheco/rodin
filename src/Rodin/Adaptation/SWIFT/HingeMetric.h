@@ -7,6 +7,7 @@
 
 #include "../CellDeformation.h"
 #include "Hinge.h"
+#include "QualitySamples.h"
 
 namespace Rodin::Adaptation::SWIFT
 {
@@ -27,17 +28,19 @@ namespace Rodin::Adaptation::SWIFT
        * @param z Test function for the displacement correction.
        * @param current Frozen outer displacement.
        * @param inner Current inner displacement increment.
+       * @param predictor Frozen directionally scaled predictor.
        * @param parameters Quality budgets and hinge activation weights.
        * @param hingeCoefficient Effective hinge coefficient for this outer model.
        */
       HingeMetric(const TrialFunction& du, const TestFunction& z,
         const Displacement& current, const Displacement& inner,
-        const Parameters& parameters, Real hingeCoefficient)
+        const Displacement& predictor, const Parameters& parameters, Real hingeCoefficient)
         : Parent(du.getLeaf(), z.getLeaf()),
           m_du(du),
           m_z(z),
           m_current(current),
           m_inner(inner),
+          m_predictor(predictor),
           m_parameters(parameters),
           m_hingeCoefficient(hingeCoefficient)
       {}
@@ -73,12 +76,7 @@ namespace Rodin::Adaptation::SWIFT
         const auto& trialFE = trialFES.getFiniteElement(dim, index);
         const auto& testFE = testFES.getFiniteElement(dim, index);
         const auto& parameters = m_parameters.get();
-        const std::size_t order = parameters.quadrature.getVolumeOrder(trialFE.getOrder(),
-          polytope.getTransformation().getOrder(),
-          Geometry::Polytope::Traits(polytope.getGeometry()).getVertexCount() == dim + 1);
-        const auto& qf =
-          QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
-        const auto& quadrature = polytope.getQuadrature(qf);
+        const QualitySamples samples(polytope, trialFE.getOrder(), parameters);
         const std::size_t nTrial = trialFE.getCount();
         const std::size_t nTest = testFE.getCount();
 
@@ -94,16 +92,15 @@ namespace Rodin::Adaptation::SWIFT
         auto testJacobian = Variational::Jacobian(m_z.get());
         auto currentJacobian = Variational::Jacobian(m_current.get());
         auto innerJacobian = Variational::Jacobian(m_inner.get());
+        auto predictorJacobian = Variational::Jacobian(m_predictor.get());
         const bool sameSpace = trialFES == testFES;
         CellDeformation deformation(dim);
 
-        for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-        {
-          const auto& point = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(point, &qf, q);
+        samples.forEachHinge(currentJacobian, predictorJacobian,
+          [&](const Variational::IntegrationPoint& ip, Real measureJ, Real measureQ) {
           deformation.setDisplacementGradient(currentJacobian.getValue(ip));
           if (!deformation.isAdmissible())
-            continue;
+            return;
           const HingeState state(
             deformation, innerJacobian.getValue(ip), parameters, m_hingeCoefficient);
           trialJacobian.setIntegrationPoint(ip);
@@ -129,7 +126,6 @@ namespace Rodin::Adaptation::SWIFT
             }
           }
 
-          const Real weight = qf.getWeight(q) * point.getDistortion();
           const Real weightJ = state.getJacobianHessian();
           const Real weightQ = state.getDistortionHessian();
           for (std::size_t test = 0; test < nTest; ++test)
@@ -137,12 +133,12 @@ namespace Rodin::Adaptation::SWIFT
             for (std::size_t trial = 0; trial < nTrial; ++trial)
             {
               m_matrix(static_cast<Eigen::Index>(test),
-                static_cast<Eigen::Index>(trial)) += weight *
-                (weightJ * m_jTrial[trial] * m_jTest[test] +
-                  weightQ * m_qTrial[trial] * m_qTest[test]);
+                static_cast<Eigen::Index>(trial)) +=
+                measureJ * weightJ * m_jTrial[trial] * m_jTest[test] +
+                measureQ * weightQ * m_qTrial[trial] * m_qTest[test];
             }
           }
-        }
+        });
         return *this;
       }
 
@@ -181,6 +177,7 @@ namespace Rodin::Adaptation::SWIFT
       std::reference_wrapper<const TestFunction> m_z;
       std::reference_wrapper<const Displacement> m_current;
       std::reference_wrapper<const Displacement> m_inner;
+      std::reference_wrapper<const Displacement> m_predictor;
       std::reference_wrapper<const Parameters> m_parameters;
       Real m_hingeCoefficient;
       const Geometry::Polytope* m_polytope = nullptr;

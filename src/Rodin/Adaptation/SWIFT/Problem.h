@@ -345,12 +345,29 @@ namespace Rodin::Adaptation::SWIFT
    * @f]
    * With @f$(t)_+=\max(t,0)@f$, the affine squared-hinge penalty is
    * @f[
-   * B_k(v)=\frac{\mu_k}{2}\int_{\Omega_0}
-   *   \left[\kappa_J\left(1-\frac{s_J(v)}{\delta_J}\right)_+^2
-   *        +\kappa_Q\left(1-\frac{s_Q(v)}{\delta_Q}\right)_+^2\right]dx,
+   * B_k(v)=\frac{\mu_k}{2}\sum_K\sum_{s\in\mathcal S_K}
+   *   \left[w^J_{K,s}\kappa_J\left(1-\frac{s_J(v)}{\delta_J}\right)_+^2
+   *        +w^Q_{K,s}\kappa_Q\left(1-\frac{s_Q(v)}{\delta_Q}\right)_+^2\right]_{K,s},
    * \qquad \mu_k=\widehat\mu\frac{f_k[\bar p_k]}{2|\Omega_0|}.
    * @f]
-   * Here @f$\gamma\in(0,1)@f$ specifies the guard fraction. The inner problem is
+   * The set @f$\mathcal S_K@f$ contains the same boundary-inclusive Lobatto
+   * points as the actual-quality checks. For each constraint, @ref QualitySamples
+   * computes capped nonlinear guard penetration at the current geometry and
+   * the full physical predictor, retaining the larger risk @f$r^c_{K,s}@f$.
+   * With mapped cell mass @f$W_K@f$ and witness count @f$N_K@f$, it sets
+   * @f[
+   * w^c_{K,s}=\frac{W_K}{N_K}
+   * \left(\frac12+\frac{N_Kr^c_{K,s}}{2\sum_t r^c_{K,t}}\right),
+   * \qquad c\in\{J,Q\}.
+   * @f]
+   * If all risks vanish, weights are equal. Risks are capped at 100; an
+   * inverted predictor receives maximal distortion risk without evaluating
+   * distortion there. Both measures preserve cell mass and are strictly
+   * positive. They are frozen throughout the inner solve, not differentiated.
+   * Validation remains unweighted. This adaptive discrete penalty is not a
+   * quadrature approximation of a fixed volume penalty and does not certify
+   * quality between witnesses. Here @f$\gamma\in(0,1)@f$ specifies
+   * the guard fraction. The inner problem is
    * @f[
    * \min_{v\in V_h}\Psi_k(v),\qquad
    * \Psi_k(v)=\tfrac12\bar M_k[v,v]-f_k[v]+B_k(v).
@@ -1212,8 +1229,8 @@ namespace Rodin::Adaptation::SWIFT
             }
             if (!innerConverged)
             {
-              HingeMetric hingeMetric(m_duStep, m_vStep, u, vK, p, hingeCoefficient);
-              HingeForce hingeForce(m_vStep, u, vK, p, hingeCoefficient);
+              HingeMetric hingeMetric(m_duStep, m_vStep, u, vK, predictor, p, hingeCoefficient);
+              HingeForce hingeForce(m_vStep, u, vK, predictor, p, hingeCoefficient);
               typename ProblemType::ProblemBodyType body(m_distributionForm);
               body = body + m_fittingMetric + hingeMetric - m_fittingForce - hingeForce;
               m_hingeProblem = body;
@@ -1296,7 +1313,7 @@ namespace Rodin::Adaptation::SWIFT
                     const Real quadratic = Real(0.5) * increment.getData().dot(image);
                     const Real force = fixedForce.dot(increment.getData());
                     const Real quality = getHingeEnergy(mesh, fes, validationCells, u,
-                      increment, meshDim, hingeCoefficient);
+                      increment, predictor, meshDim, hingeCoefficient);
                     return std::pair<Real, Real>{quadratic - force + quality,
                       std::abs(quadratic) + std::abs(force) + std::abs(quality)};
                   };
@@ -1848,7 +1865,7 @@ namespace Rodin::Adaptation::SWIFT
       }
 
       /**
-       * @brief Detects active affine hinges at assembly quadrature points.
+       * @brief Detects active affine hinges at the actual-quality witnesses.
        * @param mesh Fixed reference mesh.
        * @param fes Displacement finite element space defining quadrature orders.
        * @param cells Reference cell indices included in the check.
@@ -1877,18 +1894,17 @@ namespace Rodin::Adaptation::SWIFT
           for (Index i = 0; i < static_cast<Index>(cells.size()); ++i)
           {
             const auto cell = mesh.getCell(cells[static_cast<std::size_t>(i)]);
-            const auto& qf = getQuadrature(*cell, fes);
-            const auto& quadrature = cell->getQuadrature(qf);
-            for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-            {
-              const Variational::IntegrationPoint ip(quadrature.getPoint(q), &qf, q);
+            const QualitySamples samples(*cell,
+              fes.getFiniteElement(dimension, cell->getIndex()).getOrder(), m_parameters);
+            samples.forEach(
+              [&](const Variational::IntegrationPoint& ip, Real) {
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
               const Hinge state(
                 deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
               active = active || !state.isAdmissible() ||
                 state.getJacobianHessian() != Real(0) ||
                 state.getDistortionHessian() != Real(0);
-            }
+            });
           }
         }
         return active;
@@ -1901,6 +1917,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param validationCells Reference cell indices included in the check.
        * @param current Frozen outer displacement.
        * @param inner Current inner increment.
+       * @param predictor Frozen directionally scaled predictor defining the weights.
        * @param dimension Spatial dimension.
        * @param coefficient Effective hinge penalty coefficient.
        * @returns The penalty energy of the current inner increment.
@@ -1908,7 +1925,8 @@ namespace Rodin::Adaptation::SWIFT
       template <class Mesh, class FES>
       Real getHingeEnergy(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& validationCells, const Displacement& current,
-        const Displacement& inner, std::size_t dimension, Real coefficient) const
+        const Displacement& inner, const Displacement& predictor,
+        std::size_t dimension, Real coefficient) const
       {
         Real energy = 0;
 #ifdef RODIN_USE_OPENMP
@@ -1924,18 +1942,16 @@ namespace Rodin::Adaptation::SWIFT
           for (Index i = 0; i < static_cast<Index>(validationCells.size()); ++i)
           {
             const auto cell = mesh.getCell(validationCells[static_cast<std::size_t>(i)]);
-            const auto& qf = getQuadrature(*cell, fes);
-            const auto& quadrature = cell->getQuadrature(qf);
-            for (std::size_t q = 0; q < quadrature.getSize(); ++q)
-            {
-              const auto& point = quadrature.getPoint(q);
-              const Variational::IntegrationPoint ip(point, &qf, q);
+            const QualitySamples samples(*cell,
+              fes.getFiniteElement(dimension, cell->getIndex()).getOrder(), m_parameters);
+            auto predictorJacobian = Variational::Jacobian(predictor);
+            samples.forEachHinge(currentJacobian, predictorJacobian,
+              [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
               const Hinge state(
                 deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
-              energy += qf.getWeight(q) * point.getDistortion() *
-                state.getEnergy(m_parameters, coefficient);
-            }
+              energy += state.getEnergy(m_parameters, coefficient, weightJ, weightQ);
+            });
           }
         }
         return energy;
@@ -1993,14 +2009,8 @@ namespace Rodin::Adaptation::SWIFT
             const Index cellIndex = validationCells[static_cast<std::size_t>(i)];
             const auto cell = mesh.getCell(cellIndex);
             const auto& fe = fes.getFiniteElement(dimension, cellIndex);
-            const auto& qf = QF::PolytopeQuadratureFormula::get(
-              m_parameters.quadrature.getQualityOrder(fe.getOrder(),
-                cell->getTransformation().getOrder(),
-                Geometry::Polytope::Traits(cell->getGeometry()).getVertexCount() ==
-                  dimension + 1),
-              cell->getGeometry());
-            const auto& quad = cell->getQuadrature(qf);
-            const auto evaluate = [&](const auto& ip) {
+            const QualitySamples samples(*cell, fe.getOrder(), m_parameters);
+            samples.forEach([&](const Variational::IntegrationPoint& ip, Real) {
               deformation.setDisplacementGradient(displacementJacobian.getValue(ip));
               const Real j = deformation.getJacobian();
               minJ = std::min(minJ, j);
@@ -2040,14 +2050,7 @@ namespace Rodin::Adaptation::SWIFT
                       cellIndex};
                 }
               }
-            };
-            for (std::size_t q = 0; q < quad.getSize(); ++q)
-              evaluate(Variational::IntegrationPoint(quad.getPoint(q), &qf, q));
-            {
-              const Geometry::Polytope::Traits traits(cell->getGeometry());
-              for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
-                evaluate(Geometry::Point(*cell, traits.getVertex(vertex)));
-            }
+            });
           }
         }
         AdmissibilityState result{

@@ -8,9 +8,11 @@
   Technique. Robust Welsch fitting drives the marked interface towards the
   target, while centered strain distributes the displacement through the mesh.
 
-  The self-contained `ReconstructionP1.cpp`, `ReconstructionP2.cpp` and
-  `ReconstructionP3.cpp` examples are collected in `examples/Adaptation/SWIFT`.
-  They fit a circle or sphere with the native API and write XDMF output.
+  The shared `Reconstruction.cpp` example in `examples/Adaptation/SWIFT` is
+  compiled as `SWIFT_ReconstructionP1`, `SWIFT_ReconstructionP2` and
+  `SWIFT_ReconstructionP3`. Only the displacement degree changes; named flags,
+  lobed circle/sphere targets, diagnostics and XDMF output share one implementation.
+  Use `--help` to list controls and `--n=16 --dimension=2 --lobes=4` for a 2D target.
   Calibration drivers and their command-line controls live separately in
   `experiments/swift_calibration` and are not built by default.
 
@@ -145,7 +147,17 @@
        \tfrac12\bar M_k[v,v]-f_k[v]+B_k(v)\right\},
   @f]
   where @f$B_k@f$ is the squared-hinge penalty on frozen Jacobian and distortion
-  slacks. Its stationarity residual controls inner convergence. The outer
+  slacks. The penalty and actual-quality checks use the same boundary-inclusive
+  Lobatto point set, including cell vertices. Separate positive Jacobian and
+  distortion weights mix equal mass with normalized nonlinear guard penetration
+  at the current and full-predictor geometries. Each family preserves mapped
+  cell mass, and its weights stay fixed during the inner solve. The equal
+  fraction is one half and dimensionless risks are capped at 100. Inverted
+  predictor points receive maximal distortion risk without evaluating distortion.
+  Validation checks every witness without weights. Reference quadrature weights
+  determine cell mass, not individual adaptive penalty weights; polynomial
+  exactness does not certify nonlinear quality between witnesses.
+  Its stationarity residual controls inner convergence. The outer
   Armijo search then decreases @f$E@f$ while enforcing the actual sampled
   quality budget. See the @ref Rodin::Adaptation::SWIFT::Problem "SWIFT class reference"
   for the slack definitions, penalty scaling, Newton system, line search and
@@ -221,8 +233,8 @@
   | @f$N_{\mathrm{stag}}@f$ | `convergence.iterations.stagnation` | Consecutive small steps or energy changes before stagnation exit | @f$5@f$ |
   | @f$q@f$ | `quadrature.order` | Common integration override | Automatic (`0`) |
   | @f$q_\Gamma@f$ | `quadrature.surface` | Surface energy, force and fitting integration; overrides the common order | Automatic (`0`) |
-  | @f$q_\Omega@f$ | `quadrature.volume` | Distribution and hinge integration; overrides the common order | Automatic (`0`) |
-  | @f$q_{j,Q}@f$ | `quadrature.quality` | Independent actual-quality sampling plus cell vertices | Automatic (`0`) |
+  | @f$q_\Omega@f$ | `quadrature.volume` | Distribution integration; overrides the common order | Automatic (`0`) |
+  | @f$q_{j,Q}@f$ | `quadrature.quality` | Shared boundary-inclusive Lobatto degree for hinges and actual quality | Automatic (`0`) |
   | @f$q_{\mathrm{geom}}@f$ | `quadrature.validation` | Independent geometric-response sampling plus facet vertices | Automatic (`0`) |
 
   MUMPS is the default when compiled in; otherwise SparseLU is selected.
@@ -231,8 +243,8 @@
 
   | Entity and displacement | Surface integration | Volume integration | Quality sampling | Geometric sampling |
   |-------------------------|---------------------|--------------------|------------------|--------------------|
-  | Affine simplicial @f$P_1@f$ | @f$8@f$ | @f$2@f$ | @f$2@f$ + vertices | @f$32@f$ + facet vertices |
-  | Curved or @f$P_2/P_3@f$ | @f$12@f$ | @f$8@f$ | @f$16@f$ + vertices | @f$32@f$ + facet vertices |
+  | Affine simplicial @f$P_1@f$ | @f$8@f$ | @f$2@f$ | Lobatto degree @f$2@f$ | @f$32@f$ + facet vertices |
+  | Curved or @f$P_2/P_3@f$ | @f$12@f$ | @f$8@f$ | Lobatto degree @f$16@f$ | @f$32@f$ + facet vertices |
 
   The affine @f$P_1@f$ policy is calibrated on the tested cases. Higher-order
   policies are provisional and require refinement checks, particularly when
