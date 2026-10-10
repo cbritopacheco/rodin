@@ -280,6 +280,16 @@ namespace Rodin::Examples::ViscoelasticFluids
           Real newtonMaxStep = 2.0;
           /// @brief Impose psi = 0 (relaxed fluid) on the inlet.
           bool inletConformation = true;
+          /// @brief Print the Newton history at every step, not only the first three.
+          bool traceNewton = false;
+
+          /// @brief Seed for non-axisymmetric instabilities: the inlet profile
+          ///        is multiplied by 1 + delta y/R during the first
+          ///        perturbationCycles cycles (the flow rate is unchanged, since
+          ///        the integral of y over the inlet disk vanishes), then the
+          ///        flow evolves freely. delta = 0 disables it.
+          Real inletPerturbation = 0.0;
+          Real perturbationCycles = 1.0;
 
           /// @brief Divergence guard: max|u| above this multiple of Ubar
           ///        stops the run.
@@ -453,6 +463,9 @@ namespace Rodin::Examples::ViscoelasticFluids
       ScalarGridFunctionType m_shearMagnitude;
       ScalarGridFunctionType m_tawss;
       ScalarGridFunctionType m_osi;
+      /// @brief TAWSS and OSI on the lesion wall (tag 5) only.
+      ScalarGridFunctionType m_tawssLesion;
+      ScalarGridFunctionType m_osiLesion;
 
       // ---- Fluxes ----------------------------------------------------------
       ScalarTestFunctionType m_qFlux;
@@ -479,6 +492,12 @@ namespace Rodin::Examples::ViscoelasticFluids
       Real m_qOut = 0.0;
       Real m_inletPressure = 0.0;
       Real m_outletMeanPressure = 0.0;
+      /// @brief Volume of the domain and the volume means of u_y, u_z over
+      ///        Ubar: zero for any axisymmetric flow, so their magnitude
+      ///        measures the azimuthal mode m = 1 (tilted or deflected jet).
+      Real m_volume = 1.0;
+      Real m_uyMean = 0.0;
+      Real m_uzMean = 0.0;
       Real m_speed = 0.0;
       /// @brief max |sigma_ij| (Pa), reported with the flow.
       Real m_stress = 0.0;

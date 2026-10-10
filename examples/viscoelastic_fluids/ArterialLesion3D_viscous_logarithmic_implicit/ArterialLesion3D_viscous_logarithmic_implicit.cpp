@@ -25,7 +25,12 @@
  *   outlet_pressure, vms_scale, graddiv_scale, pressure_scale,
  *   stress_div_scale, stress_scale, conformation_its, conformation_tol,
  *   newton_max_step, max_velocity_factor
- *   vms, inlet_conformation                        booleans
+ *   vms, inlet_conformation, trace_newton          booleans
+ *   inlet_perturbation, perturbation_cycles        m = 1 seed (see the header)
+ *
+ * The CSV ends with maxTAWSSLesion, maxOSILesion (tag 5 only) and uyMean,
+ * uzMean, the volume means of u_y and u_z over Ubar: both vanish for an
+ * axisymmetric flow, so they measure the m = 1 (deflected or tilted jet) mode.
  */
 #include <algorithm>
 #include <array>
@@ -290,6 +295,11 @@ namespace Rodin::Examples::ViscoelasticFluids
         std::array<std::array<Eigen::Matrix3d, 2>, 2> A;
         std::array<std::array<Eigen::Matrix3d, 3>, 2> P;
         std::array<Eigen::Vector3d, 2> r;
+        /// @brief V_m = sum_j (D2exp_{psi^k}[d_j psi^k, E_m]) e_j, m = 0..5:
+        ///        the derivative of div exp(psi) = sum_j Dexp_psi[d_j psi] e_j
+        ///        in psi beyond the one carried by d_j psi; Vk = sum_m V_m psi^k_m.
+        std::array<Eigen::Vector3d, 6> V;
+        Eigen::Vector3d Vk;
     };
 
     Eigen::Matrix3d nonlinearMap(
@@ -312,7 +322,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     enum LogPart : std::uint8_t
     {
       LogDexp = 1,
-      LogNewton = 2
+      LogNewton = 2,
+      LogD2 = 4       ///< V_m, Vk (second derivative of exp along d_j psi^k)
     };
 
     /// @brief exp(psi) and Dexp[E_j], from the eigen-decomposition of psi.
@@ -485,6 +496,33 @@ namespace Rodin::Examples::ViscoelasticFluids
                 L(a, b) = J(a, b);
             logPointNewton(e.value, eig, psi, L, s.model);
             e.have |= LogNewton;
+          }
+          if (need & LogD2 & ~e.have)
+          {
+            // d_j psi^k = sum_c GD(c, j) E_c + GO(c, j) E_{3+c}.
+            const auto GD = Jacobian(*s.psiD).getValue(p);
+            const auto GO = Jacobian(*s.psiO).getValue(p);
+            const auto& B = voigtBasisEigen();
+            std::array<Eigen::Matrix3d, 3> g;
+            for (int j = 0; j < 3; ++j)
+            {
+              g[j].setZero();
+              for (int k = 0; k < 3; ++k)
+                g[j] += GD(k, j) * B[k] + GO(k, j) * B[3 + k];
+            }
+            const Real h = 1.0e-6 * std::max<Real>(1.0, psi.cwiseAbs().maxCoeff());
+            const Real pk[6] = { psi(0, 0), psi(1, 1), psi(2, 2), psi(0, 1), psi(0, 2), psi(1, 2) };
+            e.value.Vk.setZero();
+            for (size_t m = 0; m < 6; ++m)
+            {
+              const LogEig ep = logEig(psi + h * B[m]);
+              const LogEig em = logEig(psi - h * B[m]);
+              e.value.V[m].setZero();
+              for (int j = 0; j < 3; ++j)
+                e.value.V[m] += ((ep.dexp(g[j]) - em.dexp(g[j])) / (2.0 * h)).col(j);
+              e.value.Vk += pk[m] * e.value.V[m];
+            }
+            e.have |= LogD2;
           }
           return e;
         }
@@ -666,6 +704,26 @@ namespace Rodin::Examples::ViscoelasticFluids
       };
       const auto gradOf = [&](size_t c) { return Mult(Transpose(Jacobian(psi)), unit(c)); };
       return Mult(D(0), gradOf(0)) + Mult(D(1), gradOf(1)) + Mult(D(2), gradOf(2));
+    }
+
+    /// @brief Newton on div exp(psi): divExpTrial carries Dexp_{psi^k}[d_j
+    ///        psi]; the dependence of Dexp on psi adds sum_m V_m psi_m - Vk
+    ///        (block B's part of the sum here, Vk in divExpKnownD2). Without
+    ///        it Newton converges only linearly once psi is large.
+    template <Block B, class GF, class S>
+    auto divExpTrialD2(const LogFields<GF>& s, const S& psi)
+    {
+      const auto V = [&](size_t c) {
+        const size_t m = voigtIndex(B, c);
+        return fromPointVector(s, LogD2, [m](const LogPoint& q) -> Eigen::Vector3d { return q.V[m]; });
+      };
+      return V(0) * Component(psi, 0) + V(1) * Component(psi, 1) + V(2) * Component(psi, 2);
+    }
+
+    template <class GF>
+    auto divExpKnownD2(const LogFields<GF>& s)
+    {
+      return fromPointVector(s, LogD2, [](const LogPoint& q) -> Eigen::Vector3d { return q.Vk; });
     }
 
     /// @brief The projections invert mass matrices: CG + Jacobi, never the
@@ -911,6 +969,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_shearMagnitude(m_sh),
       m_tawss(m_sh),
       m_osi(m_sh),
+      m_tawssLesion(m_sh),
+      m_osiLesion(m_sh),
       m_qFlux(m_sh),
       m_one(m_sh),
       m_flux(m_qFlux),
@@ -1181,6 +1241,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_shearMagnitude = Real(0);
     m_tawss = Real(0);
     m_osi = Real(0);
+    m_tawssLesion = Real(0);
+    m_osiLesion = Real(0);
     m_one = Real(1);
 
     configureMassSolver(m_vectorProjectionKSP, "al_vproj_");
@@ -1214,6 +1276,9 @@ namespace Rodin::Examples::ViscoelasticFluids
     // polygonal approximation of the circle.
     m_inletMeasure = boundaryMeasure(AttributeSet{m_cfg.labels.inlet});
     m_outletMeasure = boundaryMeasure(AttributeSet{m_cfg.labels.outlet});
+    m_flux = Integral(m_one, m_qFlux);
+    m_flux.assemble();
+    m_volume = std::max<Real>(m_flux(m_one), 1e-30);
 
     if (isRoot())
     {
@@ -1267,8 +1332,11 @@ namespace Rodin::Examples::ViscoelasticFluids
     VectorFunction inletVelocity(dim, [this](const Point& p) -> Math::SpatialVector<Real> {
       const auto& x = p.getPhysicalCoordinates();
       const Real r = std::sqrt(x(1) * x(1) + x(2) * x(2));
+      const Real R = 0.5 * m_cfg.diameter;
+      const Real seed = (m_cfg.inletPerturbation != 0.0 &&
+          m_t < m_cfg.perturbationCycles * m_period) ? 1.0 + m_cfg.inletPerturbation * x(1) / R : 1.0;
       return Math::SpatialVector<Real>{{
-        m_meanVelocity * ramp(m_t) * m_inflow.velocity(r, m_t), 0.0, 0.0 }};
+        m_meanVelocity * ramp(m_t) * m_inflow.velocity(r, m_t) * seed, 0.0, 0.0 }};
     });
 
     const auto streamV = Mult(Jacobian(m_v), m_uOld);  // (grad v) u^n
@@ -1354,6 +1422,12 @@ namespace Rodin::Examples::ViscoelasticFluids
       + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrial<O>(at, m_psiO), divergence<D>(m_chiD)))
       + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrial<D>(at, m_psiD), divergence<O>(m_chiO)))
       + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrial<O>(at, m_psiO), divergence<O>(m_chiO)))
+      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrialD2<D>(at, m_psiD), divergence<D>(m_chiD)))
+      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrialD2<O>(at, m_psiO), divergence<D>(m_chiD)))
+      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrialD2<D>(at, m_psiD), divergence<O>(m_chiO)))
+      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrialD2<O>(at, m_psiO), divergence<O>(m_chiO)))
+      - chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpKnownD2(at), divergence<D>(m_chiD)))
+      - chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpKnownD2(at), divergence<O>(m_chiO)))
       - chiScale * m_cfg.stressDivScale * Integral(m_alpha1 * m_piDivSigma.get(), divergence<D>(m_chiD))
       - chiScale * m_cfg.stressDivScale * Integral(m_alpha1 * m_piDivSigma.get(), divergence<O>(m_chiO))
 
@@ -1468,7 +1542,7 @@ namespace Rodin::Examples::ViscoelasticFluids
 
   bool ArterialLesion3DViscousLogImplicit::solveFlow()
   {
-    const bool trace = isRoot() && m_step < 3;
+    const bool trace = isRoot() && (m_step < 3 || m_cfg.traceNewton);
     const auto phase = [trace](const char* what) {
       if (trace)
       {
@@ -1688,6 +1762,19 @@ namespace Rodin::Examples::ViscoelasticFluids
 
     zeroWithGhosts(m_netShear.getData());
     zeroWithGhosts(m_absShear.getData());
+
+    // The same indices restricted to the lesion wall: the global maxima can
+    // sit at the inlet, where the imposed profile meets the discrete flow.
+    const auto onLesion = [this, faceDim](const Polytope& facet) {
+      const auto a = m_mesh.getAttribute(faceDim, facet.getIndex());
+      return a && *a == m_cfg.labels.lesion;
+    };
+    m_tawssLesion = Real(0);
+    m_osiLesion = Real(0);
+    m_tawssLesion.project(Region::Boundary,
+      RealFunction([this](const Point& p) -> Real { return m_tawss.getValue(p); }), onLesion);
+    m_osiLesion.project(Region::Boundary,
+      RealFunction([this](const Point& p) -> Real { return m_osi.getValue(p); }), onLesion);
   }
 
   void ArterialLesion3DViscousLogImplicit::computeFluxes()
@@ -1714,12 +1801,21 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_flux = BoundaryIntegral(m_p.getSolution(), m_qFlux).over(m_cfg.labels.outlet);
     m_flux.assemble();
     m_outletMeanPressure = m_flux(m_one) / m_outletMeasure;
+
+    // Volume means of the transverse velocity (m = 1 content), over Ubar.
+    const Real norm = m_volume * std::max<Real>(m_meanVelocity, 1e-30);
+    m_flux = Integral(Component(uSol, 1), m_qFlux);
+    m_flux.assemble();
+    m_uyMean = m_flux(m_one) / norm;
+    m_flux = Integral(Component(uSol, 2), m_qFlux);
+    m_flux.assemble();
+    m_uzMean = m_flux(m_one) / norm;
   }
 
   void ArterialLesion3DViscousLogImplicit::writeCSVHeader()
   {
     m_csv << "t,cycle,qTarget,qIn,qOut,pInletMean,pOutletMean,dp,maxU,maxSigma,"
-          << "newtonIts,dpsi,maxTAWSS,maxOSI\n";
+          << "newtonIts,dpsi,maxTAWSS,maxOSI,maxTAWSSLesion,maxOSILesion,uyMean,uzMean\n";
   }
 
   void ArterialLesion3DViscousLogImplicit::writeCSVRow(int cycle)
@@ -1727,6 +1823,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     // Reductions over the communicator, taken on all ranks first.
     const Real tawss = m_tawss.max();
     const Real osi = m_osi.max();
+    const Real tawssLesion = m_tawssLesion.max();
+    const Real osiLesion = m_osiLesion.max();
 
     if (!isRoot())
       return;
@@ -1737,7 +1835,7 @@ namespace Rodin::Examples::ViscoelasticFluids
           << m_inletPressure << ',' << m_outletMeanPressure << ','
           << (m_inletPressure - m_outletMeanPressure) << ',' << m_speed << ',' << m_stress
           << ',' << m_conformationIts << ',' << m_psiIncrement << ',' << tawss << ',' << osi
-          << '\n';
+          << ',' << tawssLesion << ',' << osiLesion << ',' << m_uyMean << ',' << m_uzMean << '\n';
     m_csv.flush();
   }
 
@@ -1791,9 +1889,12 @@ namespace Rodin::Examples::ViscoelasticFluids
 
         const Real maxTawss = m_tawss.max();
         const Real maxOsi = m_osi.max();
+        const Real lesionTawss = m_tawssLesion.max();
+        const Real lesionOsi = m_osiLesion.max();
         if (isRoot())
           Alert::Info() << "[cycle " << (cycle + 1) << "/" << m_cfg.cycles
                         << "] maxTAWSS=" << maxTawss << " Pa  maxOSI=" << maxOsi
+                        << "  lesion: maxTAWSS=" << lesionTawss << " Pa  maxOSI=" << lesionOsi
                         << Alert::Raise;
       }
 
@@ -1822,7 +1923,7 @@ namespace Rodin::Examples::ViscoelasticFluids
                       << " m^3/s  max|u|=" << m_speed << " m/s  max|sigma|=" << m_stress
                       << " Pa  dp=" << (m_inletPressure - m_outletMeanPressure)
                       << " Pa  newton=" << m_conformationIts << " (|dpsi|=" << m_psiIncrement
-                      << ")" << Alert::Raise;
+                      << ")  <uy,uz>/Ubar=(" << m_uyMean << ", " << m_uzMean << ")" << Alert::Raise;
         Alert::Info() << "[timing] vms=" << m_timing.vms << "  asm=" << m_timing.assembly
                       << "  ksp=" << m_timing.solve << "  wss=" << m_timing.shear
                       << "  flux=" << m_timing.fluxes << "  out=" << m_timing.output
@@ -1938,6 +2039,9 @@ int main(int argc, char** argv)
       getReal("-al_max_velocity_factor", cfg.maxVelocityFactor);
       getBool("-al_vms", cfg.useVMS);
       getBool("-al_inlet_conformation", cfg.inletConformation);
+      getBool("-al_trace_newton", cfg.traceNewton);
+      getReal("-al_inlet_perturbation", cfg.inletPerturbation);
+      getReal("-al_perturbation_cycles", cfg.perturbationCycles);
 
       // The XDMF and CSV writers do not create directories.
       if (world.rank() == 0)
