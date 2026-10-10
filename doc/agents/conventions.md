@@ -76,6 +76,18 @@ is an artefact, in which case the fix is to the measurement; or that it is
 real but out of scope, in which case it is recorded as its own item rather
 than folded into the current change.
 
+A large performance gap between dimensions or geometries requires investigation;
+dimension alone is not an explanation. Compare matched physical forms, field and
+geometry degrees, quadrature requirements, builds, backends, threads and ranks.
+Report raw timings together with cell, quadrature-point, local basis, global DOF
+and matrix-entry counts, and normalize by the work actually performed. Separate
+geometry evaluation, element kernels, insertion/finalization, constraints,
+solvers and error integration; record solver iterations and memory when relevant.
+Inspect profiles for the unexplained part of the gap and check cache order,
+allocation, communication and sanitizer effects. Do not weaken numerical
+requirements or classify a case as merely slow without this analysis. Preserve
+the reproducing benchmark and numerical regressions for any resulting repair.
+
 ## Error handling in PETSc-facing code
 
 **Use `assert(ierr == PETSC_SUCCESS)` after PETSc calls.** This is the
