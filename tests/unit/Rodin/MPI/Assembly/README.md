@@ -137,14 +137,17 @@ than replace, the larger tetrahedral ownership regression.
 
 Configure with MPI enabled, PETSc disabled, and unit tests enabled. Build
 RodinMPIAssemblyTest. The regular `RodinMPIAssemblyTest_np*` CTest entries
-exclude the four 3D affine-identification cases, the two tetrahedral
-boundary-incidence/constraint probes, the fixed-layout size-query tests and
+exclude the four 3D affine-identification cases, the three boundary-constraint,
+physical-incidence and SubMesh-boundary probes on every geometry, the
+fixed-layout size-query tests and
 the matrix-trace probes. The regular group has a 120-second limit.
 The four 3D affine-identification cases run on each of 1, 2, 3, 4, and 8 ranks as
 `RodinMPIAssemblyIdentificationSlowTest_np*` entries, labelled
 `unit;distributed;slow` with a 600-second limit. CI's Release slow job runs
-them separately. The two tetrahedral probes use
-`RodinMPIAssemblyGeometrySlowTest_np*` with a 600-second limit; fixed-layout
+them separately. The three boundary/geometry probes use one
+`RodinMPIAssemblyGeometrySlowTest_np*_<geometry>` registration for each of
+the seven positive-dimensional geometries, with a 600-second limit per
+geometry; fixed-layout
 size queries use `RodinMPISpaceSizeTest_np*` with a 30-second limit.
 No geometry or rank is omitted. Run the complete assembly and size-query matrix with
 `ctest --test-dir <build>/tests -R '^Rodin(MPIAssembly|MPISpaceSize)' --output-on-failure`.
