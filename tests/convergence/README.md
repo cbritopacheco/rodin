@@ -708,6 +708,28 @@ and unfinished PDE extensions; an entry in the workplan does not itself imply
 a passing test. Completion is assessed per formulation, space, geometry,
 refinement path, and backend, rather than by the presence of a directory.
 
+For a fixed, declared verification matrix $\mathcal C$, a coverage entry records
+the formulation, discrete space, geometry, refinement hierarchy, boundary data,
+scalar field, assembly configuration and MPI rank count. Let
+$\mathcal V\subseteq\mathcal C$ contain the entries whose complete acceptance
+checks have passed with source and build provenance applicable to the revision
+being certified. The numerical verification percentage is
+
+$$
+P_{\mathrm{verified}}=100\frac{|\mathcal V|}{|\mathcal C|}.
+$$
+
+Every rate entry requires its entire registered hierarchy and both adjacent
+rate intervals; an individual refinement level is not a completed entry.
+Implemented, queued, partially executed and historically passing entries with
+unresolved source changes are not counted in $\mathcal V$. Scoped batch
+percentages identify their own denominator and must not be presented as the
+overall percentage. A global percentage is reported only after the complete
+matrix and applicable evidence have been reconciled. Structural gates and
+hosted CI are additional completion requirements, reported separately from
+the rate-entry percentage. Benchmark registrations, sanity checks and timing
+samples do not increase convergence coverage.
+
 | Priority | Extension | Required evidence |
 | --- | --- | --- |
 | 1 | PETSc local and MPI PDE coverage: remaining boundary/refinement variants of Poisson, Helmholtz, conductivity, linear elasticity, Stokes, coupled reaction–diffusion, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
@@ -715,7 +737,7 @@ refinement path, and backend, rather than by the presence of a directory.
 | 3 | Exact-domain comparisons and further degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches. At geometry degree 2, Poisson, conductivity, complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson have represented-domain and lifted P1/P2 studies; Taylor–Hood Stokes has the P2/P1 study. Poisson/conductivity additionally have lifted affine studies at geometry degrees 1–3, with field degree $p=\max(2,q)$. Complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson additionally have matched affine studies at geometry degrees 1 and 3. Stokes additionally has affine shear studies at these geometry degrees with velocity/pressure degrees $k/(k-1)$, $k=\max(2,q)$. Further field/geometry degree combinations remain outside the currently verified matrix |
 | 4 | Maintain the implemented real/complex scalar/vector/matrix structural matrix for P0, P0g, P1 and H1 degrees one through six | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction; native and PETSc storage gates have separately stated scopes |
 | Last | Independent NAFEMS benchmarks, after the convergence/structural/backend batches | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |
-| Parallel verification track | Assembly performance across existing physical contexts, geometries, spaces, and backends (benchmark foundation imported from [PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Isolated stage timings, reproducible workload metadata, verified assembled operators, and controlled thread/rank scaling in `tests/benchmarks`; repair measured convergence-suite hotspots with correctness regressions and reproducing benchmarks |
+| After pre-NAFEMS convergence certification | Assembly performance across existing physical contexts, geometries, spaces, and backends (benchmark foundation imported from [PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Profile the certified convergence workloads, isolate measured hotspots, and establish before/after timings with correctness regressions; benchmark qualification does not count toward convergence coverage |
 
 ### Coupled reaction–diffusion batch and continuation
 
@@ -779,9 +801,12 @@ The curved complex Helmholtz batch supplies P1/P2 field rates on exact
 P2 maps, with native local and complex-PETSc local/MPI counterparts.
 Independent NAFEMS implementation is the last phase, after these
 verification batches. The benchmark foundation from PR #356 is now integrated
-in this branch. Performance repairs and reproducing benchmarks accompany
-convergence certification; completion of the independent extended benchmark
-matrix is not a prerequisite for implementing convergence suites.
+in this branch. Completion of the declared pre-NAFEMS convergence matrix takes
+precedence over extended benchmark studies. Once that matrix is certified,
+performance work profiles its slow workloads, including dimensional cost gaps,
+and qualifies each repair against correctness regressions and controlled
+before/after measurements. Benchmark sanity checks do not substitute for
+refinement-rate evidence or increase the convergence completion percentage.
 Each convergence batch still requires its own passing CI evidence
 before being described as CI-certified.
 
@@ -865,8 +890,9 @@ Performance or resource issues exposed by convergence studies are recorded
 with the exact test selection, refinement hierarchy, backend,
 build and thread/rank settings, observed timings or memory, and available
 stage evidence. End-to-end time and peak memory do not identify an assembly
-hotspot without stage-isolated measurements. Investigation and fixes may
-occur alongside convergence work. Each repair requires a reproducing benchmark,
+hotspot without stage-isolated measurements. Profiling and performance repairs
+follow completion of the declared pre-NAFEMS convergence matrix; recording a
+slow case does not certify it. Each repair requires a reproducing benchmark,
 benchmark correctness checks and affected numerical regressions. Performance
 thresholds require a controlled runner and established measurement variance.
 A resource-interrupted convergence run remains unverified;
