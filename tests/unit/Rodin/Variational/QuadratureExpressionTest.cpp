@@ -17,6 +17,7 @@
 #include "Rodin/Variational/H1.h"
 #include "Rodin/Variational/P0g.h"
 #include "../../../convergence/Convergence.h"
+#include "../../../convergence/CurvedGeometry.h"
 #include "../../../QuadratureReference.h"
 
 using namespace Rodin;
@@ -220,7 +221,145 @@ namespace Rodin::Tests::Unit
     }
 
     class QuadratureExpression : public ::testing::TestWithParam<Polytope::Type>
-    {};
+    {
+      protected:
+        /**
+         * @brief Compares reused expressions with independently constructed expressions.
+         *
+         * Reconstruction and assignment retain the formula address and point
+         * index while changing its logical identity. Every basis component is
+         * compared exactly; no coordinate tolerance is used as a cache key.
+         *
+         * @param space Space supplying scalar, vector, or matrix basis functions.
+         */
+        template <class FES>
+        void checkQuadratureLifetime(FES& space)
+        {
+          TestFunction u(space);
+          const auto cell = space.getMesh().getCell(0);
+          const auto exercise = [&](auto& cached, auto makeFresh) {
+            Optional<QF::GaussLegendre> formula;
+            formula.emplace(cell->getGeometry(), 1);
+            const auto* address = &*formula;
+            size_t identity = formula->getCacheIdentity();
+            for (size_t transition = 0; transition < 4; ++transition)
+            {
+              if (transition == 1)
+                formula.emplace(cell->getGeometry(), 4);
+              else if (transition == 2)
+                *formula = QF::GaussLegendre(cell->getGeometry(), 1);
+              else if (transition == 3)
+                formula.emplace(cell->getGeometry(), 4);
+              ASSERT_EQ(&*formula, address);
+              if (transition > 0)
+              {
+                ASSERT_NE(formula->getCacheIdentity(), identity);
+              }
+              identity = formula->getCacheIdentity();
+              Point point(*cell, formula->getPoint(0));
+              const IntegrationPoint ip(point, &*formula, 0);
+              TestFunction freshUnknown(space);
+              decltype(auto) fresh = makeFresh(freshUnknown);
+              cached.setIntegrationPoint(ip);
+              fresh.setIntegrationPoint(ip);
+              using Range = std::decay_t<decltype(cached.getBasis(size_t(0)))>;
+              for (size_t local = 0; local < cached.getDOFs(*cell); ++local)
+              {
+                const auto actual = cached.getBasis(local);
+                const auto expected = fresh.getBasis(local);
+                if constexpr (!FormLanguage::IsVectorRange<Range>::Value &&
+                  !FormLanguage::IsMatrixRange<Range>::Value)
+                {
+                  EXPECT_EQ(actual, expected) << "transition " << transition;
+                }
+                else if constexpr (FormLanguage::IsVectorRange<Range>::Value)
+                {
+                  ASSERT_EQ(actual.size(), expected.size());
+                  for (size_t component = 0; component < actual.size(); ++component)
+                  {
+                    EXPECT_EQ(actual(component), expected(component))
+                      << "transition " << transition << ", component " << component;
+                  }
+                }
+                else
+                {
+                  ASSERT_EQ(actual.rows(), expected.rows());
+                  ASSERT_EQ(actual.cols(), expected.cols());
+                  for (Eigen::Index row = 0; row < actual.rows(); ++row)
+                  {
+                    for (Eigen::Index column = 0; column < actual.cols(); ++column)
+                    {
+                      EXPECT_EQ(actual(row, column), expected(row, column))
+                        << "transition " << transition << ", entry " << row << ','
+                        << column;
+                    }
+                  }
+                }
+              }
+            }
+          };
+          exercise(u, [](auto& unknown) -> auto& { return unknown; });
+          using Range = typename FormLanguage::Traits<FES>::RangeType;
+          if constexpr (!FormLanguage::IsVectorRange<Range>::Value &&
+            !FormLanguage::IsMatrixRange<Range>::Value)
+          {
+            auto gradient = Grad(u);
+            exercise(gradient, [](auto& unknown) { return Grad(unknown); });
+          }
+          else if constexpr (FormLanguage::IsVectorRange<Range>::Value)
+          {
+            auto jacobian = Jacobian(u);
+            auto divergence = Div(u);
+            exercise(jacobian, [](auto& unknown) { return Jacobian(unknown); });
+            exercise(divergence, [](auto& unknown) { return Div(unknown); });
+          }
+        }
+    };
+
+    /**
+     * @brief Quadrature lifetimes invalidate shape and physical derivative caches.
+     *
+     * Quadratic geometry makes the physical derivatives depend on the reference
+     * point even for affine reference basis functions. Native P1 and degrees
+     * one through six of H1 are exercised over real and complex scalar, vector,
+     * and matrix ranges on every positive-dimensional reference geometry.
+     * Constant matrix spaces provide point-independent controls.
+     */
+    TEST_P(QuadratureExpression, ShapeAndDerivativeQuadratureLifetime)
+    {
+      auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(2);
+      Convergence::CurvedGeometry curvature(mesh);
+      curvature.template install<2>();
+      const size_t dimension = mesh.getDimension();
+      const auto ranges = [&]<class Scalar>() {
+        using Vector = Math::SpatialVector<Scalar>;
+        using Matrix = Math::SpatialMatrix<Scalar>;
+        P1<Scalar, LocalMesh> p1(mesh);
+        P1<Vector, LocalMesh> vectorP1(mesh, dimension);
+        P1<Matrix, LocalMesh> matrixP1(mesh, 2, 3);
+        P0<Matrix, LocalMesh> matrixP0(mesh, 2, 3);
+        P0g<Matrix, LocalMesh> matrixP0g(mesh, 2, 3);
+        checkQuadratureLifetime(p1);
+        checkQuadratureLifetime(vectorP1);
+        checkQuadratureLifetime(matrixP1);
+        checkQuadratureLifetime(matrixP0);
+        checkQuadratureLifetime(matrixP0g);
+        Utility::ForIndex<6>([&](auto order) {
+          constexpr size_t K = order.value + 1;
+          SCOPED_TRACE(::testing::Message() << "degree " << K);
+          H1<K, Scalar, LocalMesh> h1(std::integral_constant<size_t, K>{}, mesh);
+          H1<K, Vector, LocalMesh> vectorH1(
+            std::integral_constant<size_t, K>{}, mesh, dimension);
+          H1<K, Matrix, LocalMesh> matrixH1(
+            std::integral_constant<size_t, K>{}, mesh, 2, 3);
+          checkQuadratureLifetime(h1);
+          checkQuadratureLifetime(vectorH1);
+          checkQuadratureLifetime(matrixH1);
+        });
+      };
+      ranges.template operator()<Real>();
+      ranges.template operator()<Complex>();
+    }
 
     template <class F>
     void checkFunctionLifetime(const FunctionBase<F>& function, const ObservedMesh& mesh)
