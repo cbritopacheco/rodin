@@ -72,6 +72,7 @@ namespace Rodin::Geometry
   class PolytopeTransformation : public Copyable
   {
     friend class boost::serialization::access;
+    friend class PointBase;
 
     public:
       /**
@@ -230,6 +231,22 @@ namespace Rodin::Geometry
        * Derived classes must implement this to return a copy of their specific type.
        */
       virtual PolytopeTransformation* copy() const noexcept override = 0;
+
+    protected:
+      /**
+       * @brief Maps an owned reference sample using available reference data.
+       *
+       * Called only by a point whose constructor established the provenance
+       * of @p rc. Cache misses retain direct pointwise evaluation. The logical
+       * identity is a value, not a borrowed formula or table pointer.
+       *
+       * @param[out] pc Physical coordinates.
+       * @param rc Owned reference coordinates of the sample.
+       * @param identity Formula lifetime/assignment identity.
+       * @param qp Logical reference-sample index.
+       */
+      virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
+        size_t identity, size_t qp) const;
 
     private:
       size_t m_rdim; ///< Reference dimension @f$ k @f$

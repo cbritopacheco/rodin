@@ -10,16 +10,225 @@
 #include "Rodin/Geometry.h"
 #include "Rodin/Geometry/ForwardDecls.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/Variational/H1.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
 /**
- * @brief Preserves implicit Eigen coordinate construction alongside cached Jacobians.
+ * @brief Compares lazy physical maps with direct evaluation at every sample.
+ *
+ * ## Mathematical contract
+ *
+ * For the same control coefficients and reference point, the cached and direct
+ * sums defining @f$x_K(\hat x_q)@f$ must agree exactly, entry by entry. The test
+ * covers geometry degrees one through six, all eight reference geometries,
+ * every admissible embedding dimension through three, and quadrature orders
+ * eight, sixteen and eighteen. Alternating nonzero control coefficients avoid
+ * a vacuous zero-map check. No determinant or regular-domain claim is made
+ * for these deliberately algebraic maps.
+ */
+TEST(Geometry_Point, LazyPhysicalMapMatchesEveryDirectSample)
+{
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+  {
+    const Polytope::Traits traits(geometry);
+    const size_t dimension = traits.getDimension();
+    for (size_t embedding = std::max(size_t(1), dimension); embedding <= 3; ++embedding)
+    {
+      Mesh<Context::Local>::Builder builder;
+      builder.initialize(embedding).nodes(traits.getVertexCount());
+      IndexArray vertices(traits.getVertexCount());
+      for (size_t a = 0; a < traits.getVertexCount(); ++a)
+      {
+        Math::SpatialPoint vertex(static_cast<std::uint8_t>(embedding));
+        vertex.setZero();
+        const auto& reference = traits.getVertex(a);
+        for (size_t j = 0; j < dimension; ++j)
+          vertex(j) = reference(j);
+        builder.vertex(vertex);
+        vertices(a) = a;
+      }
+      if (dimension > 0)
+        builder.polytope(geometry, vertices);
+      auto mesh = builder.finalize();
+      const auto cell = *mesh.getPolytope(dimension, 0);
+      const auto check = [&]<size_t K>() {
+        SCOPED_TRACE(::testing::Message() << "geometry=" << int(geometry) << " embedding="
+                                          << embedding << " degree=" << K);
+        Variational::RealH1Element<K> element(geometry);
+        PointCloud controls(embedding, element.getCount());
+        for (size_t a = 0; a < element.getCount(); ++a)
+        {
+          for (size_t j = 0; j < embedding; ++j)
+          {
+            controls(j, a) =
+              Real((a + 1) * (j + 1)) / Real(element.getCount() + 1) * (a % 2 ? -1 : 1);
+          }
+        }
+        mesh.setPolytopeTransformation(
+          {dimension, 0}, new ParametricTransformation(controls, element));
+        for (const size_t order : {8u, 16u, 18u})
+        {
+          SCOPED_TRACE(order);
+          const QF::PolytopeQuadratureFormula formula(order, geometry);
+          const PolytopeQuadrature quadrature(cell, formula);
+          ASSERT_TRUE(element.findTabulation(formula.getCacheIdentity()));
+          for (size_t qp = 0; qp < formula.getSize(); ++qp)
+          {
+            SCOPED_TRACE(qp);
+            const Point direct(cell, formula.getPoint(qp));
+            const auto& expected = direct.getPhysicalCoordinates();
+            const auto& actual = quadrature.getPoint(qp).getPhysicalCoordinates();
+            ASSERT_EQ(actual.size(), expected.size());
+            for (size_t j = 0; j < embedding; ++j)
+              EXPECT_EQ(actual(j), expected(j));
+          }
+        }
+      };
+      check.template operator()<1>();
+      check.template operator()<2>();
+      check.template operator()<3>();
+      check.template operator()<4>();
+      check.template operator()<5>();
+      check.template operator()<6>();
+    }
+  }
+}
+
+/**
+ * @brief Preserves quadrature-point ownership on zero-dimensional polytopes.
+ *
+ * ## Mathematical contract
+ *
+ * A point embedded in @f$\mathbb R^s@f$ has a constant physical map and
+ * an @f$s\times0@f$ Jacobian. Its sole basis function is one, independently
+ * of the H1 degree. Formula destruction and reference-table eviction must not
+ * change the owned reference sample or the resulting physical coordinates.
+ */
+TEST(Geometry_Point, ZeroDimensionalQuadratureOwnsReferenceSample)
+{
+  for (size_t physicalDimension = 1; physicalDimension <= 3; ++physicalDimension)
+  {
+    SCOPED_TRACE(physicalDimension);
+    Mesh<Context::Local>::Builder builder;
+    builder.initialize(physicalDimension).nodes(1);
+    if (physicalDimension == 1)
+      builder.vertex({Real(1) / 4});
+    else if (physicalDimension == 2)
+      builder.vertex({Real(1) / 4, Real(1) / 2});
+    else
+      builder.vertex({Real(1) / 4, Real(1) / 2, Real(3) / 4});
+    auto mesh = builder.finalize();
+    const auto vertex = *mesh.getPolytope(0, 0);
+    const auto check = [&]<size_t K>() {
+      SCOPED_TRACE(K);
+      Variational::RealH1Element<K> element(Polytope::Type::Point);
+      ASSERT_EQ(element.getCount(), 1);
+      PointCloud controls(physicalDimension, 1);
+      for (size_t j = 0; j < physicalDimension; ++j)
+        controls(j, 0) = Real(j + 1) / 4;
+      mesh.setPolytopeTransformation(
+        {0, 0}, new ParametricTransformation(controls, element));
+      Optional<Point> retained;
+      size_t identity = 0;
+      {
+        QF::PolytopeQuadratureFormula formula(8, Polytope::Type::Point);
+        identity = formula.getCacheIdentity();
+        const PolytopeQuadrature quadrature(vertex, formula);
+        ASSERT_EQ(quadrature.getSize(), 1);
+        const auto& sample = quadrature.getPoint(0);
+        EXPECT_EQ(sample.getReferenceCoordinates().size(), 0);
+        EXPECT_EQ(sample.getJacobian().rows(), physicalDimension);
+        EXPECT_EQ(sample.getJacobian().cols(), 0);
+        ASSERT_TRUE(element.findTabulation(identity));
+        retained.emplace(sample);
+        for (size_t j = 0; j < physicalDimension; ++j)
+          EXPECT_EQ(sample.getPhysicalCoordinates()(j), controls(j, 0));
+      }
+      // Nine distinct insertions exceed the eight-entry reference cache.
+      for (size_t i = 0; i < 9; ++i)
+      {
+        QF::PolytopeQuadratureFormula replacement(8, Polytope::Type::Point);
+        static_cast<void>(element.getTabulation(replacement));
+      }
+      ASSERT_FALSE(element.findTabulation(identity));
+      const auto& coordinates = retained->getPhysicalCoordinates();
+      ASSERT_EQ(coordinates.size(), physicalDimension);
+      for (size_t j = 0; j < physicalDimension; ++j)
+        EXPECT_EQ(coordinates(j), controls(j, 0));
+      EXPECT_EQ(retained->getReferenceCoordinates().size(), 0);
+      EXPECT_EQ(retained->getJacobian().rows(), physicalDimension);
+      EXPECT_EQ(retained->getJacobian().cols(), 0);
+    };
+    check.template operator()<1>();
+    check.template operator()<2>();
+    check.template operator()<3>();
+    check.template operator()<4>();
+    check.template operator()<5>();
+    check.template operator()<6>();
+  }
+}
+
+/**
+ * @brief Checks reference-table presence without creating or borrowing formulas.
+ *
+ * All eight geometries and supported certification degrees are checked over
+ * real and complex scalar elements. A matching logical identity returns the
+ * original table; an absent identity or a different geometry returns absence.
+ * Order zero keeps this a logical-key test, not a convergence study.
+ */
+TEST(Geometry_Point, ReferenceTableLookupUsesIdentityAndGeometry)
+{
+  const auto check = []<size_t K, class Scalar>(Polytope::Type geometry) {
+    SCOPED_TRACE(K);
+    SCOPED_TRACE((std::is_same_v<Scalar, Complex>));
+    Variational::H1Element<K, Scalar> element(geometry);
+    const auto otherGeometry =
+      geometry == Polytope::Type::Point ? Polytope::Type::Segment : Polytope::Type::Point;
+    Variational::H1Element<K, Scalar> other(otherGeometry);
+    QF::PolytopeQuadratureFormula formula(0, geometry);
+    QF::PolytopeQuadratureFormula absent(0, geometry);
+    const auto& expected = element.getTabulation(formula);
+    const auto found = element.findTabulation(formula.getCacheIdentity());
+    ASSERT_TRUE(found);
+    EXPECT_EQ(&found->get(), &expected);
+    EXPECT_FALSE(element.findTabulation(absent.getCacheIdentity()));
+    EXPECT_FALSE(other.findTabulation(formula.getCacheIdentity()));
+  };
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    check.template operator()<1, Real>(geometry);
+    check.template operator()<2, Real>(geometry);
+    check.template operator()<3, Real>(geometry);
+    check.template operator()<4, Real>(geometry);
+    check.template operator()<5, Real>(geometry);
+    check.template operator()<6, Real>(geometry);
+    check.template operator()<1, Complex>(geometry);
+    check.template operator()<2, Complex>(geometry);
+    check.template operator()<3, Complex>(geometry);
+    check.template operator()<4, Complex>(geometry);
+    check.template operator()<5, Complex>(geometry);
+    check.template operator()<6, Complex>(geometry);
+  }
+}
+
+/**
+ * @brief Preserves implicit Eigen coordinate construction alongside cached
+ * Jacobians.
  *
  * Existing vector values and expressions must select the physical-coordinate
  * constructor unambiguously. The new Jacobian-first form is checked separately.
- * All positive-dimensional reference geometries are exercised with exact entries.
+ * All positive-dimensional reference geometries are exercised with exact
+ * entries.
  */
 TEST(Geometry_Point, EigenCoordinatesRemainUnambiguous)
 {
@@ -88,7 +297,8 @@ TEST(Geometry_Point, EigenCoordinatesRemainUnambiguous)
 
 // ==================== Basic Construction Tests ====================
 
-/// @brief Verifies basic construction 2 D triangle for geometry point by checking exact expected values.
+/// @brief Verifies basic construction 2 D triangle for geometry point by
+/// checking exact expected values.
 TEST(Geometry_Point, BasicConstruction_2D_Triangle)
 {
   // Create a simple 2D triangular mesh
@@ -121,7 +331,8 @@ TEST(Geometry_Point, BasicConstruction_2D_Triangle)
   EXPECT_EQ(p.getDimension(PointBase::Coordinates::Reference), 2);
 }
 
-/// @brief Verifies basic construction 3 D tetrahedron for geometry point by checking exact expected values.
+/// @brief Verifies basic construction 3 D tetrahedron for geometry point by
+/// checking exact expected values.
 TEST(Geometry_Point, BasicConstruction_3D_Tetrahedron)
 {
   // Create a simple 3D tetrahedral mesh
@@ -157,7 +368,8 @@ TEST(Geometry_Point, BasicConstruction_3D_Tetrahedron)
 
 // ==================== Copy and Move Semantics Tests ====================
 
-/// @brief Verifies copy construction for geometry point by checking tolerance-based numerical results, exact expected values, copy semantics.
+/// @brief Verifies copy construction for geometry point by checking
+/// tolerance-based numerical results, exact expected values, copy semantics.
 TEST(Geometry_Point, CopyConstruction)
 {
   Mesh mesh;
@@ -188,7 +400,8 @@ TEST(Geometry_Point, CopyConstruction)
   EXPECT_NEAR(p1.y(), p2.y(), 1e-10);
 }
 
-/// @brief Verifies move construction for geometry point by checking tolerance-based numerical results, move semantics.
+/// @brief Verifies move construction for geometry point by checking
+/// tolerance-based numerical results, move semantics.
 TEST(Geometry_Point, MoveConstruction)
 {
   Mesh mesh;
@@ -222,7 +435,8 @@ TEST(Geometry_Point, MoveConstruction)
 
 // ==================== Coordinate Access Tests ====================
 
-/// @brief Verifies coordinate access XYZ for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies coordinate access XYZ for geometry point by checking
+/// tolerance-based numerical results.
 TEST(Geometry_Point, CoordinateAccess_XYZ)
 {
   Mesh mesh;
@@ -259,7 +473,8 @@ TEST(Geometry_Point, CoordinateAccess_XYZ)
   EXPECT_NEAR(p(2), 0.25, 1e-10);
 }
 
-/// @brief Verifies coordinate access as vector for geometry point by checking tolerance-based numerical results, exact expected values.
+/// @brief Verifies coordinate access as vector for geometry point by checking
+/// tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, CoordinateAccess_AsVector)
 {
   Mesh mesh;
@@ -289,7 +504,8 @@ TEST(Geometry_Point, CoordinateAccess_AsVector)
   EXPECT_NEAR(vec(1), 1.0, 1e-10);
 }
 
-/// @brief Verifies get physical coordinates for geometry point by checking tolerance-based numerical results, exact expected values.
+/// @brief Verifies get physical coordinates for geometry point by checking
+/// tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, GetPhysicalCoordinates)
 {
   Mesh mesh;
@@ -319,7 +535,8 @@ TEST(Geometry_Point, GetPhysicalCoordinates)
   EXPECT_NEAR(pc(1), 1.0, 1e-10);
 }
 
-/// @brief Verifies get reference coordinates for geometry point by checking tolerance-based numerical results, exact expected values.
+/// @brief Verifies get reference coordinates for geometry point by checking
+/// tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, GetReferenceCoordinates)
 {
   Mesh mesh;
@@ -351,7 +568,8 @@ TEST(Geometry_Point, GetReferenceCoordinates)
 
 // ==================== Norm Tests ====================
 
-/// @brief Verifies norm calculations for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies norm calculations for geometry point by checking
+/// tolerance-based numerical results.
 TEST(Geometry_Point, NormCalculations)
 {
   Mesh mesh;
@@ -383,7 +601,8 @@ TEST(Geometry_Point, NormCalculations)
   EXPECT_NEAR(sqNorm, 9.0, 1e-10);
 }
 
-/// @brief Verifies norm 3 D for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies norm 3 D for geometry point by checking tolerance-based
+/// numerical results.
 TEST(Geometry_Point, Norm_3D)
 {
   Mesh mesh;
@@ -415,7 +634,8 @@ TEST(Geometry_Point, Norm_3D)
 
 // ==================== Jacobian Tests ====================
 
-/// @brief Verifies get jacobian 2 D for geometry point by checking tolerance-based numerical results, exact expected values.
+/// @brief Verifies get jacobian 2 D for geometry point by checking
+/// tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, GetJacobian_2D)
 {
   Mesh mesh;
@@ -476,7 +696,8 @@ TEST(Geometry_Point, GetJacobianDeterminant_2D)
   EXPECT_GT(det, 0.0);  // Should be positive for proper orientation
 }
 
-/// @brief Verifies get jacobian inverse 2 D for geometry point by checking tolerance-based numerical results, exact expected values.
+/// @brief Verifies get jacobian inverse 2 D for geometry point by checking
+/// tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, GetJacobianInverse_2D)
 {
   Mesh mesh;
@@ -546,7 +767,8 @@ TEST(Geometry_Point, GetDistortion_2D)
 
 // ==================== Comparison Tests ====================
 
-/// @brief Verifies lexicographical comparison for geometry point by checking true predicates.
+/// @brief Verifies lexicographical comparison for geometry point by checking
+/// true predicates.
 TEST(Geometry_Point, LexicographicalComparison)
 {
   Mesh mesh;
@@ -580,7 +802,8 @@ TEST(Geometry_Point, LexicographicalComparison)
 
 // ==================== SetPolytope Tests ====================
 
-/// @brief Verifies set polytope for geometry point by checking exact expected values.
+/// @brief Verifies set polytope for geometry point by checking exact expected
+/// values.
 TEST(Geometry_Point, SetPolytope)
 {
   Mesh mesh;
@@ -612,7 +835,8 @@ TEST(Geometry_Point, SetPolytope)
 
 // ==================== Arithmetic Operations Tests ====================
 
-/// @brief Verifies addition with vector for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies addition with vector for geometry point by checking
+/// tolerance-based numerical results.
 TEST(Geometry_Point, AdditionWithVector)
 {
   Mesh mesh;
@@ -645,7 +869,8 @@ TEST(Geometry_Point, AdditionWithVector)
   EXPECT_NEAR(result(1), p.y() + 2.0, 1e-10);
 }
 
-/// @brief Verifies subtraction with vector for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies subtraction with vector for geometry point by checking
+/// tolerance-based numerical results.
 TEST(Geometry_Point, SubtractionWithVector)
 {
   Mesh mesh;
@@ -678,7 +903,8 @@ TEST(Geometry_Point, SubtractionWithVector)
   EXPECT_NEAR(result(1), p.y() - 0.2, 1e-10);
 }
 
-/// @brief Verifies addition of points for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies addition of points for geometry point by checking
+/// tolerance-based numerical results.
 TEST(Geometry_Point, AdditionOfPoints)
 {
   Mesh mesh;
@@ -711,7 +937,8 @@ TEST(Geometry_Point, AdditionOfPoints)
   EXPECT_NEAR(result(1), p1.y() + p2.y(), 1e-10);
 }
 
-/// @brief Verifies subtraction of points for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies subtraction of points for geometry point by checking
+/// tolerance-based numerical results.
 TEST(Geometry_Point, SubtractionOfPoints)
 {
   Mesh mesh;
@@ -744,7 +971,8 @@ TEST(Geometry_Point, SubtractionOfPoints)
   EXPECT_NEAR(result(1), p1.y() - p2.y(), 1e-10);
 }
 
-/// @brief Verifies scalar multiplication for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies scalar multiplication for geometry point by checking
+/// tolerance-based numerical results.
 TEST(Geometry_Point, ScalarMultiplication)
 {
   Mesh mesh;
@@ -780,7 +1008,8 @@ TEST(Geometry_Point, ScalarMultiplication)
 
 // ==================== Edge Case Tests ====================
 
-/// @brief Verifies edge case point at vertex for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies edge case point at vertex for geometry point by checking
+/// tolerance-based numerical results.
 TEST(Geometry_Point, EdgeCase_PointAtVertex)
 {
   Mesh mesh;
@@ -808,7 +1037,8 @@ TEST(Geometry_Point, EdgeCase_PointAtVertex)
   EXPECT_NEAR(p.y(), 0.0, 1e-10);
 }
 
-/// @brief Verifies edge case point on edge for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies edge case point on edge for geometry point by checking
+/// tolerance-based numerical results.
 TEST(Geometry_Point, EdgeCase_PointOnEdge)
 {
   Mesh mesh;
@@ -868,7 +1098,8 @@ TEST(Geometry_Point, 3D_JacobianDeterminant)
   EXPECT_GT(det, 0.0);  // Should be positive
 }
 
-/// @brief Verifies 3 D jacobian inverse for geometry point by checking tolerance-based numerical results, exact expected values.
+/// @brief Verifies 3 D jacobian inverse for geometry point by checking
+/// tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, 3D_JacobianInverse)
 {
   Mesh mesh;
@@ -912,9 +1143,11 @@ TEST(Geometry_Point, 3D_JacobianInverse)
   }
 }
 
-// ==================== Construction with Physical Coordinates ====================
+// ==================== Construction with Physical Coordinates
+// ====================
 
-/// @brief Verifies construction with physical coordinates for geometry point by checking tolerance-based numerical results.
+/// @brief Verifies construction with physical coordinates for geometry point by
+/// checking tolerance-based numerical results.
 TEST(Geometry_Point, ConstructionWithPhysicalCoordinates)
 {
   Mesh mesh;
@@ -949,7 +1182,8 @@ TEST(Geometry_Point, ConstructionWithPhysicalCoordinates)
 
 // ==================== GetPolytope Tests ====================
 
-/// @brief Verifies get polytope valid reference for geometry point by checking exact expected values.
+/// @brief Verifies get polytope valid reference for geometry point by checking
+/// exact expected values.
 TEST(Geometry_Point, GetPolytope_ValidReference)
 {
   Mesh mesh;

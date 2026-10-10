@@ -54,7 +54,13 @@ compare coordinate/key sets in tests.
   transformation call and stores them in the points' existing owned caches.
   Parametric H1 geometry borrows its existing reference table only during this
   call; neither points nor transformations retain a table or formula pointer.
-  Physical coordinates and derived metric quantities remain lazy.
+  Physical coordinates and derived metric quantities remain lazy. Mapped points
+  own their reference coordinates and retain only the formula's logical identity
+  and sample index until physical evaluation. A parametric map may immediately
+  borrow an existing thread-local basis table by that identity; an absent or
+  evicted table uses direct evaluation at the owned reference point. Formula
+  destruction, assignment, cache eviction and transfer to another thread do not
+  invalidate the owned sample. Rebinding clears provenance and geometric caches.
   Variational rules own only their bound polytope's mapped points. The explicit
   mesh cache is retained for callers requiring borrowed quadratures whose
   lifetime extends until geometry is flushed; variational quadrature rules

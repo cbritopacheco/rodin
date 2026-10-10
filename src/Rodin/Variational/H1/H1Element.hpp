@@ -351,8 +351,7 @@ namespace Rodin::Variational
   };
 
   template <size_t K, class Scalar>
-  const typename H1Element<K, Scalar>::Tabulation&
-  H1Element<K, Scalar>::getTabulation(const QF::QuadratureFormulaBase& qf) const
+  auto& H1Element<K, Scalar>::getTabulationCache()
   {
     struct CacheEntry
     {
@@ -376,10 +375,35 @@ namespace Rodin::Variational
     struct Cache
     {
       std::array<CacheEntry, 8> e;
-      size_t next = 0; // eviction pointer
+      size_t next;
+
+      Cache()
+        : e(),
+          next(0)
+      {}
     };
 
     static thread_local Cache s_cache;
+    return s_cache;
+  }
+
+  template <size_t K, class Scalar>
+  Optional<std::reference_wrapper<const typename H1Element<K, Scalar>::Tabulation>>
+  H1Element<K, Scalar>::findTabulation(size_t identity) const
+  {
+    for (const auto& entry : getTabulationCache().e)
+    {
+      if (entry.valid && entry.identity == identity && entry.g == this->getGeometry())
+        return std::cref(entry.tab);
+    }
+    return {};
+  }
+
+  template <size_t K, class Scalar>
+  const typename H1Element<K, Scalar>::Tabulation& H1Element<K, Scalar>::getTabulation(
+    const QF::QuadratureFormulaBase& qf) const
+  {
+    auto& s_cache = getTabulationCache();
 
     const auto g   = this->getGeometry();
     const auto nqp = qf.getSize();
@@ -394,7 +418,7 @@ namespace Rodin::Variational
     }
 
     // 2) miss -> rebuild into an entry
-    CacheEntry& ce = s_cache.e[s_cache.next];
+    auto& ce = s_cache.e[s_cache.next];
     s_cache.next = (s_cache.next + 1) % s_cache.e.size();
 
     ce.valid = true;

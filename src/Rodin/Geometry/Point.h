@@ -16,12 +16,14 @@
 #include <iostream>
 #include <array>
 #include <optional>
+#include <variant>
 
 #include "Rodin/Configure.h"
 
 #include "Rodin/Array.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
+#include "Rodin/QF/ForwardDecls.h"
 
 #include "Polytope.h"
 #include "ForwardDecls.h"
@@ -62,6 +64,14 @@ namespace Rodin::Geometry
    * - Jacobian determinant @f$ |\mathbf{J}_x(r)| @f$
    * - Inverse Jacobian @f$ \mathbf{J}_x^{-1}(r) @f$
    * - Distortion measure
+   *
+   * ## Architecture
+   *
+   * Unevaluated physical coordinates optionally carry the logical identity and
+   * index of an owned reference sample. Evaluation replaces this state with
+   * owned physical coordinates. Neither state borrows a formula or reference
+   * table. A missing thread-local reference table uses direct evaluation;
+   * rebinding clears both the provenance and the geometric caches.
    *
    * # Thread Safety
    * This class is **not** thread-safe. Each thread should use its own Point instances.
@@ -292,10 +302,49 @@ namespace Rodin::Geometry
        */
       virtual const Math::SpatialVector<Real>& getReferenceCoordinates() const = 0;
 
+    protected:
+      /**
+       * @brief Constructs lazy coordinates with owned quadrature-sample provenance.
+       *
+       * The derived point must own the reference coordinates of sample @p qp.
+       * Only the formula identity and index are retained, never the formula.
+       *
+       * @param jacobian Geometric Jacobian evaluated at the sample.
+       * @param polytope Polytope whose map defines the point.
+       * @param qf Formula supplying the reference sample.
+       * @param qp Sample index in the formula.
+       */
+      PointBase(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope,
+        const QF::QuadratureFormulaBase& qf, size_t qp);
+
     private:
+      /**
+       * @brief Logical provenance of an owned reference sample.
+       */
+      struct ReferenceSample
+      {
+          /**
+           * @brief Records the logical formula identity and sample index.
+           * @param identity Formula lifetime/assignment identity.
+           * @param index Reference sample index.
+           */
+          ReferenceSample(size_t identity, size_t index)
+            : identity(identity),
+              index(index)
+          {}
+
+          size_t identity; ///< Formula lifetime/assignment identity.
+          size_t index; ///< Logical reference-sample index.
+      };
+
+      // The unevaluated state either has logical sample provenance or requests
+      // direct pointwise evaluation. Evaluated coordinates replace that state.
+      using PhysicalCoordinateState =
+        std::variant<Optional<ReferenceSample>, Math::SpatialPoint>;
+
       Polytope m_polytope;
 
-      mutable Optional<Math::SpatialVector<Real>> m_pc;
+      mutable PhysicalCoordinateState m_pc;
       mutable Optional<Math::SpatialMatrix<Real>> m_jacobian;
       mutable Optional<Math::SpatialMatrix<Real>> m_jacobianInverse;
       mutable Optional<Real>                      m_jacobianDeterminant;
@@ -370,6 +419,21 @@ namespace Rodin::Geometry
        */
       Point(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope,
         const Math::SpatialPoint& rc);
+
+      /**
+       * @brief Constructs an owned reference sample with lazy physical coordinates.
+       *
+       * Reference coordinates are copied from the formula, so their logical
+       * provenance is established by construction. A retained point remains
+       * valid after formula destruction or reference-table eviction.
+       *
+       * @param jacobian Geometric Jacobian at sample @p qp.
+       * @param polytope Polytope containing the mapped sample.
+       * @param qf Formula supplying the reference coordinates.
+       * @param qp Sample index in the formula.
+       */
+      Point(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope,
+        const QF::QuadratureFormulaBase& qf, size_t qp);
 
       /**
        * @brief Copy constructor.

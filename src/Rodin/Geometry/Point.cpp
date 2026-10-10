@@ -7,6 +7,7 @@
 #include <Eigen/Cholesky>
 
 #include "Rodin/Configure.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "Rodin/Variational/QuadratureRule.h"
 
@@ -20,18 +21,34 @@ namespace Rodin::Geometry
 {
   // ---- Point --------------------------------------------------------------
   PointBase::PointBase(const Polytope& polytope)
-    : m_polytope(polytope)
+    : m_polytope(polytope),
+      m_pc(std::in_place_type<Optional<ReferenceSample>>)
   {}
 
   PointBase::PointBase(const Polytope& polytope, const Math::SpatialPoint& pc)
-    : m_polytope(polytope), m_pc(pc)
+    : m_polytope(polytope),
+      m_pc(std::in_place_type<Math::SpatialPoint>, pc)
   {}
 
   PointBase::PointBase(
     const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope)
     : m_polytope(polytope),
+      m_pc(std::in_place_type<Optional<ReferenceSample>>),
       m_jacobian(jacobian)
   {
+    assert(
+      static_cast<size_t>(jacobian.rows()) == polytope.getMesh().getSpaceDimension());
+    assert(static_cast<size_t>(jacobian.cols()) == polytope.getDimension());
+  }
+
+  PointBase::PointBase(const Math::SpatialMatrix<Real>& jacobian,
+    const Polytope& polytope, const QF::QuadratureFormulaBase& qf, size_t qp)
+    : m_polytope(polytope),
+      m_pc(std::in_place_type<Optional<ReferenceSample>>, std::in_place,
+        qf.getCacheIdentity(), qp),
+      m_jacobian(jacobian)
+  {
+    assert(qp < qf.getSize());
     assert(
       static_cast<size_t>(jacobian.rows()) == polytope.getMesh().getSpaceDimension());
     assert(static_cast<size_t>(jacobian.cols()) == polytope.getDimension());
@@ -78,7 +95,7 @@ namespace Rodin::Geometry
   PointBase& PointBase::setPolytope(const Polytope& polytope)
   {
     m_polytope = polytope;
-    m_pc.reset();
+    m_pc.emplace<Optional<ReferenceSample>>();
     m_jacobian.reset();
     m_jacobianInverse.reset();
     m_jacobianDeterminant.reset();
@@ -101,12 +118,17 @@ namespace Rodin::Geometry
 
   const Math::SpatialVector<Real>& PointBase::getPhysicalCoordinates() const
   {
-    if (!m_pc)
-    {
-      auto& pc = m_pc.emplace();
-      this->getPolytope().getTransformation().transform(pc, this->getReferenceCoordinates());
-    }
-    return *m_pc;
+    if (const auto* pc = std::get_if<Math::SpatialPoint>(&m_pc))
+      return *pc;
+    const auto& sample = std::get<Optional<ReferenceSample>>(m_pc);
+    Math::SpatialPoint pc;
+    const auto& transformation = getPolytope().getTransformation();
+    if (sample)
+      transformation.transform(
+        pc, getReferenceCoordinates(), sample->identity, sample->index);
+    else
+      transformation.transform(pc, getReferenceCoordinates());
+    return m_pc.emplace<Math::SpatialPoint>(std::move(pc));
   }
 
   const Math::SpatialMatrix<Real>& PointBase::getJacobian() const
@@ -361,6 +383,12 @@ namespace Rodin::Geometry
   Point::Point(const Point& other)
     : PointBase(other),
       m_rc(other.m_rc)
+  {}
+
+  Point::Point(const Math::SpatialMatrix<Real>& jacobian, const Polytope& polytope,
+    const QF::QuadratureFormulaBase& qf, size_t qp)
+    : PointBase(jacobian, polytope, qf, qp),
+      m_rc(qf.getPoint(qp))
   {}
 
   Point::Point(Point&& other)

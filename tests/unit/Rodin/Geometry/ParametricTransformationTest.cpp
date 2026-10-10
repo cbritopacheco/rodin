@@ -3,13 +3,15 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <memory>
+#include <thread>
 #include <vector>
 
 #include <Rodin/Geometry.h>
-#include <Rodin/Variational/H1.h>
-#include <Rodin/Variational/P1.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/Test/Random/RandomPointOnTriangle.h>
+#include <Rodin/Variational/H1.h>
+#include <Rodin/Variational/P1.h>
 
 using namespace Rodin;
 using namespace Rodin::Test;
@@ -17,7 +19,8 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
-  /// @brief Verifies sanity test reference triangle for geometry parametric transformation by checking tolerance-based numerical results.
+/// @brief Verifies sanity test reference triangle for geometry parametric
+/// transformation by checking tolerance-based numerical results.
   TEST(Rodin_Geometry_ParametricTransformation, SanityTest_ReferenceTriangle)
   {
     constexpr const size_t sdim = 2;
@@ -46,7 +49,8 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Verifies sanity test triangle 1 for geometry parametric transformation by checking tolerance-based numerical results.
+/// @brief Verifies sanity test triangle 1 for geometry parametric
+/// transformation by checking tolerance-based numerical results.
   TEST(Rodin_Geometry_ParametricTransformation, SanityTest_Triangle_1)
   {
     constexpr const size_t rdim = 2;
@@ -185,7 +189,8 @@ namespace Rodin::Tests::Unit
     return pm;
   }
 
-  /// @brief Verifies P 2 curves interface edge for geometry parametric transformation by checking tolerance-based numerical results.
+/// @brief Verifies P 2 curves interface edge for geometry parametric
+/// transformation by checking tolerance-based numerical results.
   TEST(Rodin_Geometry_ParametricTransformation, P2CurvesInterfaceEdge)
   {
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
@@ -199,7 +204,8 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(std::abs(linearMidpoint.norm() - Real(1)), std::abs(x.norm() - Real(1)));
   }
 
-  /// @brief Verifies P 3 curved edge improves fit for geometry parametric transformation.
+/// @brief Verifies P 3 curved edge improves fit for geometry parametric
+/// transformation.
   TEST(Rodin_Geometry_ParametricTransformation, P3CurvedEdgeImprovesFit)
   {
     Variational::RealH1Element<3> fe(Polytope::Type::Triangle);
@@ -217,7 +223,8 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(maxError, std::abs(linearMidpoint.norm() - Real(1)));
   }
 
-  /// @brief Verifies curved triangle jacobian stays positive for geometry parametric transformation.
+/// @brief Verifies curved triangle jacobian stays positive for geometry
+/// parametric transformation.
   TEST(Rodin_Geometry_ParametricTransformation, CurvedTriangleJacobianStaysPositive)
   {
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
@@ -348,9 +355,10 @@ namespace Rodin::Tests::Unit
         }
       }
     }
-  }
+  } // namespace
 
-  /// @brief Checks exact agreement with scalar evaluation on all geometries and embeddings.
+/// @brief Checks exact agreement with scalar evaluation on all geometries and
+/// embeddings.
   TEST(
     Rodin_Geometry_ParametricTransformation, AllGeometryEvaluationMatchesScalarBaseline)
   {
@@ -367,7 +375,8 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Evaluates a basis derivative once, independently of physical dimension.
+/// @brief Evaluates a basis derivative once, independently of physical
+/// dimension.
   TEST(Rodin_Geometry_ParametricTransformation, JacobianEvaluatesDerivativeOnce)
   {
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
@@ -606,9 +615,132 @@ namespace Rodin::Tests::Unit
             ++*tableReads;
             return element.getTabulation(formula);
           }
+
+    /**
+     * @brief Observes lookup of an existing reference table.
+     * @param identity Logical formula identity, including zero.
+     * @returns Borrowed table when present on this thread.
+     */
+          auto findTabulation(size_t identity) const
+          {
+            ++*tableReads;
+            return element.findTabulation(identity);
+          }
       };
 
       /**
+   * @brief Certifies lazy coordinates and reference-sample ownership.
+   *
+   * ## Invariants
+   *
+   * Logical reference reuse must perform no direct basis reads. A missing
+   * table must evaluate the owned reference sample, never a surviving
+   * formula pointer or a table slot reused for another formula. Both paths
+   * preserve the scalar accumulation order exactly.
+   *
+   * @param geometry Positive-dimensional reference geometry.
+   */
+      void checkLazyCoordinates(Polytope::Type geometry)
+      {
+        const size_t dimension = Polytope::Traits(geometry).getDimension();
+        Array<size_t> shape(dimension);
+        shape.setConstant(3);
+        auto mesh = Mesh<Context::Local>::UniformGrid(geometry, shape);
+        const auto cell = *mesh.getPolytope(dimension, 0);
+        const auto otherCell = *mesh.getPolytope(dimension, 1);
+        size_t basisReads = 0, tableReads = 0;
+        ObservedElement element(geometry, basisReads, tableReads);
+        PointCloud controls(dimension, element.getCount());
+        for (size_t a = 0; a < element.getCount(); ++a)
+        {
+          Point direct(cell, element.element.getNode(a));
+          auto physical = direct.getPhysicalCoordinates();
+          physical(dimension - 1) += physical(0) * physical(0) / 8;
+          for (size_t j = 0; j < dimension; ++j)
+            controls(j, a) = physical(j);
+        }
+        ParametricTransformation map(controls, element);
+        ParametricTransformation baseline(controls, element.element);
+        mesh.setPolytopeTransformation({dimension, cell.getIndex()}, map.copy());
+        const PointCloud otherControls = 2 * controls;
+        ParametricTransformation otherMap(otherControls, element);
+        mesh.setPolytopeTransformation(
+          {dimension, otherCell.getIndex()}, otherMap.copy());
+
+        const auto reference = Polytope::Traits(geometry).getCentroid();
+        Math::SpatialPoint expected;
+        baseline.transform(expected, reference);
+        ASSERT_GT(expected.squaredNorm(), 0);
+        Optional<ObservedFormula> formula;
+        formula.emplace(reference);
+        std::vector<Math::SpatialMatrix<Real>> matrices;
+        map.jacobian(matrices, *formula);
+        const auto identity = formula->getCacheIdentity();
+        ASSERT_TRUE(element.element.findTabulation(identity));
+        Point pending(matrices[0], cell, *formula, 0);
+        Point retained(pending);
+        Point moved(std::move(retained));
+        EXPECT_EQ(basisReads, 0);
+        EXPECT_EQ(tableReads, 1);
+        const auto sameCoordinates = [&](const Math::SpatialPoint& actual) {
+          ASSERT_EQ(actual.size(), expected.size());
+          for (size_t j = 0; j < dimension; ++j)
+            EXPECT_EQ(actual(j), expected(j));
+        };
+        sameCoordinates(pending.getPhysicalCoordinates());
+        EXPECT_EQ(basisReads, 0);
+        EXPECT_EQ(tableReads, 2);
+        static_cast<void>(pending.getPhysicalCoordinates());
+        EXPECT_EQ(tableReads, 2);
+    // Assignment at the same address establishes a new logical sample.
+        *formula = ObservedFormula(Polytope::Traits(geometry).getVertex(0));
+        ASSERT_NE(formula->getCacheIdentity(), identity);
+        map.jacobian(matrices, *formula);
+        formula.reset();
+        sameCoordinates(moved.getPhysicalCoordinates());
+        EXPECT_EQ(basisReads, 0);
+    // A computed copy owns its physical coordinates and performs no lookup.
+        Point computedCopy(moved);
+        const auto reads = tableReads;
+        sameCoordinates(computedCopy.getPhysicalCoordinates());
+        EXPECT_EQ(tableReads, reads);
+
+        formula.emplace(reference);
+        map.jacobian(matrices, *formula);
+        Point evicted(matrices[0], cell, *formula, 0);
+        Point transferred(evicted);
+        const auto evictedIdentity = formula->getCacheIdentity();
+        formula.reset();
+    // Nine distinct insertions exceed the existing eight-entry cache.
+        std::vector<std::unique_ptr<ObservedFormula>> replacements;
+        for (size_t i = 0; i < 9; ++i)
+        {
+          replacements.emplace_back(
+            std::make_unique<ObservedFormula>(Polytope::Traits(geometry).getVertex(0)));
+          static_cast<void>(element.element.getTabulation(*replacements.back()));
+        }
+        ASSERT_FALSE(element.element.findTabulation(evictedIdentity));
+        const auto basisBefore = basisReads;
+        sameCoordinates(evicted.getPhysicalCoordinates());
+        EXPECT_EQ(basisReads, basisBefore + element.getCount());
+        Math::SpatialPoint threadCoordinates;
+        std::thread worker([&, point = std::move(transferred)]() mutable {
+          threadCoordinates = point.getPhysicalCoordinates();
+        });
+        worker.join();
+        sameCoordinates(threadCoordinates);
+        EXPECT_EQ(basisReads, basisBefore + 2 * element.getCount());
+
+    // Rebinding discards provenance even when the reference sample is equal.
+        const auto lookupBefore = tableReads;
+        pending.setPolytope(otherCell);
+        const auto& rebound = pending.getPhysicalCoordinates();
+        for (size_t j = 0; j < dimension; ++j)
+          EXPECT_EQ(rebound(j), 2 * expected(j));
+        EXPECT_EQ(tableReads, lookupBefore);
+      }
+
+  /**
        * @brief Certifies reference-only reuse and formula lifetime invalidation.
        * @param geometry Reference polytope type.
        */
@@ -858,7 +990,8 @@ namespace Rodin::Tests::Unit
       }
   };
 
-  /// @brief Compares bulk and pointwise Jacobians exactly on every reference geometry.
+  /// @brief Compares bulk and pointwise Jacobians exactly on every reference
+  /// geometry.
   TEST_F(QuadratureTransformationTest, AllGeometriesOrdersAndEmbeddings)
   {
     for (const auto geometry :
@@ -888,7 +1021,8 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Verifies owned mapped points survive source lifetimes and invalidate on rebinding.
+  /// @brief Verifies owned mapped points survive source lifetimes and invalidate
+  /// on rebinding.
   TEST_F(QuadratureTransformationTest, PointOwnershipCopyMoveAndRebinding)
   {
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
@@ -899,4 +1033,19 @@ namespace Rodin::Tests::Unit
       checkPointOwnership(geometry);
     }
   }
-}
+
+  /**
+ * @brief Verifies lazy reference reuse, eviction, lifetimes and thread
+ * transfer.
+ */
+  TEST_F(QuadratureTransformationTest, LazyCoordinatesOwnReferenceSamples)
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      checkLazyCoordinates(geometry);
+    }
+  }
+} // namespace Rodin::Tests::Unit

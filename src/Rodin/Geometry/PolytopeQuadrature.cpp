@@ -19,6 +19,6 @@ namespace Rodin::Geometry
     assert(jacobians.size() == qf.getSize());
     m_ps.reserve(qf.getSize());
     for (size_t qp = 0; qp < qf.getSize(); ++qp)
-      m_ps.emplace_back(jacobians[qp], polytope, qf.getPoint(qp));
+      m_ps.emplace_back(jacobians[qp], polytope, qf, qp);
   }
 }

@@ -265,6 +265,40 @@ namespace Rodin::Geometry
         return new ParametricTransformation(*this);
       }
 
+    protected:
+      /**
+       * @brief Maps a logical reference sample without retaining reference storage.
+       *
+       * When its existing table is present, @f$x_K(\hat x_q)=
+       * \sum_a X_{K,a}\phi_a(\hat x_q)@f$ is accumulated in pointwise order.
+       * Table eviction, another thread, and generic elements use direct
+       * evaluation at the point's owned coordinates instead.
+       *
+       * @param[out] pc Physical coordinates.
+       * @param rc Owned reference sample coordinates.
+       * @param identity Formula lifetime/assignment identity.
+       * @param qp Logical sample index established by point construction.
+       */
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
+        size_t identity, size_t qp) const override
+      {
+        if constexpr (requires { m_fe.findTabulation(identity); })
+        {
+          if (const auto found = m_fe.findTabulation(identity))
+          {
+            const auto& table = found->get();
+            assert(table.ndof == m_fe.getCount());
+            assert(qp < table.nqp);
+            pc.resize(getPhysicalDimension());
+            pc.setZero();
+            for (size_t local = 0; local < m_fe.getCount(); ++local)
+              pc += m_pm[local] * table.getBasis(qp, local);
+            return;
+          }
+        }
+        transform(pc, rc);
+      }
+
     private:
       // Boost constructs this empty state before loading all serialized fields.
       ParametricTransformation()
