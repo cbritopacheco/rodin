@@ -5,6 +5,7 @@
 #include <Rodin/Adaptation.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/XDMF.h>
+#include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/Variational.h>
 
 #include <filesystem>
@@ -81,22 +82,43 @@ int main(int argc, char** argv)
       return value;
     });
 
-    // Classify cells by their centroids, then mark the separating mesh facets.
-    for (auto cell = mesh.getCell(); cell; ++cell)
+    // Average a smooth phase indicator, then minimize the binary Potts energy.
+    constexpr Real PhaseScaleOverH = Real(1.25);
+    constexpr size_t ClassificationOrder = 2;
+    MinSTCut classifier(mesh);
+    decltype(classifier)::Parameters classificationParameters;
+    classificationParameters.fidelity = options.classification.fidelity;
+    const Real smoothing = h * options.classification.smoothing;
+    classificationParameters.smoothing = [smoothing](const Polytope&) {
+      return smoothing;
+    };
+    classifier.setParameters(classificationParameters);
+    const auto classified = classifier.classify([&](const Polytope& cell) -> Real
     {
-      const Point centroid(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
-      mesh.setAttribute(
-        {dimension, cell->getIndex()}, phi(centroid) < Real(0) ? Inside : Outside);
-    }
+      const auto& formula =
+        QF::PolytopeQuadratureFormula::get(ClassificationOrder, cell.getGeometry());
+      const auto& quadrature = cell.getQuadrature(formula);
+      Real moment = 0;
+      for (size_t q = 0; q < quadrature.getSize(); ++q)
+      {
+        const auto& point = quadrature.getPoint(q);
+        moment += formula.getWeight(q) * point.getDistortion() *
+          std::tanh(phi(point) / (PhaseScaleOverH * h));
+      }
+      return moment / cell.getMeasure();
+    });
+    for (const Index cell : classified.inside)
+      mesh.setAttribute({dimension, cell}, Inside);
+    for (const Index cell : classified.outside)
+      mesh.setAttribute({dimension, cell}, Outside);
+    for (const Index face : classified.cut)
+      mesh.setAttribute({dimension - 1, face}, Interface);
     for (auto face = mesh.getFace(); face; ++face)
     {
       const auto& cells =
         mesh.getConnectivity().getIncidence({dimension - 1, dimension}, face->getIndex());
       if (cells.size() == 1)
         mesh.setAttribute({dimension - 1, face->getIndex()}, Boundary);
-      else if (mesh.getAttribute(dimension, cells[0]) !=
-        mesh.getAttribute(dimension, cells[1]))
-        mesh.setAttribute({dimension - 1, face->getIndex()}, Interface);
     }
 
     // The only degree-dependent choice: all spaces use the same SWIFT problem.

@@ -16,7 +16,8 @@ using namespace Rodin;
 TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionNamedOptions)
 {
   std::vector<std::string> arguments = {"SWIFT_ReconstructionP2", "--n", "8",
-    "--dimension=3", "--lobes=4", "--amp=0.03", "--R0=0.2", "--phase=0.4", "--cx=0.4",
+    "--dimension=3", "--classification-fidelity=2", "--classification-smoothing=0.02",
+    "--lobes=4", "--amp=0.03", "--R0=0.2", "--phase=0.4", "--cx=0.4",
     "--cy=0.6", "--cz=0.3", "--output=results/test", "--model-fit=2",
     "--model-distribution-deviatoric=0.001", "--model-distribution-divergence=0.01",
     "--model-hinge=100", "--model-jacobian=0.02", "--model-distortion=8",
@@ -33,6 +34,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionNamedOptions)
   const auto& p = options.parameters;
   EXPECT_EQ(options.n, 8u);
   EXPECT_EQ(options.dimension, 3u);
+  EXPECT_EQ(options.classification.fidelity, Real(2));
+  EXPECT_EQ(options.classification.smoothing, Real(0.02));
   EXPECT_EQ(options.lobes, 4);
   EXPECT_EQ(options.amplitude, Real(0.03));
   EXPECT_EQ(options.radius, Real(0.2));
@@ -68,7 +71,9 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionRejectsMalformedOpti
 {
   for (const char* invalid :
     {"--n", "--n=", "--n=-1", "--n=3", "--n=8junk", "--n=184467440737095516160",
-      "--dimension=4", "--model-fit=nan", "--model-fit=inf", "--model-fit=1bad",
+      "--dimension=4", "--classification-fidelity=-1", "--classification-smoothing=-1",
+      "--classification-fidelity=nan", "--classification-smoothing=inf",
+      "--model-fit=nan", "--model-fit=inf", "--model-fit=1bad",
       "--trace=2", "--linear-solver=unknown", "--wngir-fit=1", "--unknown=1",
       "--lobes=2.5", "--amp=-0.1", "--R0=0.01", "16",
       "--swift-equal-hinge-weights", "--swift-stratified-hinge-weights",
@@ -134,6 +139,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionInheritsProductionDe
   const Adaptation::SWIFT::Parameters defaults;
   EXPECT_EQ(options.n, 16u);
   EXPECT_EQ(options.dimension, 2u);
+  EXPECT_EQ(options.classification.fidelity, Real(1));
+  EXPECT_EQ(options.classification.smoothing, Real(1));
   EXPECT_EQ(options.lobes, 0);
   EXPECT_EQ(options.parameters.model.h, Real(1) / Real(15));
   EXPECT_EQ(options.parameters.model.fit, defaults.model.fit);

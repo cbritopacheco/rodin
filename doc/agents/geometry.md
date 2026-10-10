@@ -86,8 +86,22 @@ Scotch provides a graph-partitioner implementation).
 
 ## Classification and location utilities
 
-- `MinSTCut` — serial binary Potts classifier via s-t min cut (converting
-  a level set into discrete cell labels with perimeter regularization).
+- `MinSTCut<MeshType>` — mesh-aware binary Potts classifier, deduced from the
+  constructor's mesh argument. Only the local specialization is implemented;
+  the primary template is declaration-only, so MPI meshes have no serial
+  fallback. Construct with a borrowed local mesh; explicitly compute
+  face-to-cell incidence first.
+  `classify(average)` evaluates a caller-supplied cell-average function once
+  per cell and obtains volumes and interior-facet measures through
+  `Polytope::getMeasure` and adjacency through `Connectivity`. `Parameters`
+  are owned and configured with chainable `setParameters`; `fidelity` scales
+  unary costs, and `smoothing(const Polytope&)` multiplies each interior
+  facet's measure (default one, capturing lambdas supported). Results contain
+  mesh-indexed `inside`, `outside`, and `cut`; applying attributes
+  remains the caller's responsibility. The graph and Dinic solver are private.
+  Cell values are averages, not integrals: volumes multiply them once.
+  Boundary facets add no penalty; all labels are free. Nonmanifold facets
+  are unsupported.
 - `Location::AABB` — BVH point locator for point-in-mesh queries.
 
 Mesh *optimization/remeshing* on this branch is MMG-based

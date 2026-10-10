@@ -294,15 +294,6 @@ namespace
     return cells;
   }
 
-  Real facetLength(const LocalMesh& mesh, Index facet)
-  {
-    const auto face = mesh.getFace(facet);
-    const auto& vertices = face->getVertices();
-    const Vec2 a = mesh.getVertexCoordinates(vertices[0]);
-    const Vec2 b = mesh.getVertexCoordinates(vertices[1]);
-    return (b - a).norm();
-  }
-
   void clearXDMFRegionAttributes(LocalMesh& mesh)
   {
     const std::size_t D = mesh.getDimension();
@@ -486,56 +477,34 @@ int main(int argc, char** argv)
       mesh, [&](const Vec2& p) { return levelSet.phi(p); }, epsilon);
 
     std::unordered_map<Index, std::size_t> cellToLocal;
-    std::vector<Index> localToCell;
     cellToLocal.reserve(cellMoments.size());
-    localToCell.reserve(cellMoments.size());
     for (std::size_t local = 0; local < cellMoments.size(); ++local)
     {
       cellToLocal[cellMoments[local].index] = local;
-      localToCell.push_back(cellMoments[local].index);
     }
 
-    std::vector<Real> volumes(cellMoments.size());
-    std::vector<Real> moments(cellMoments.size());
-    for (std::size_t local = 0; local < cellMoments.size(); ++local)
+    std::vector<Real> moments(mesh.getCellCount());
+    for (const auto& cell : cellMoments)
+      moments[cell.index] = cell.moment;
+
+    MinSTCut<LocalMesh>::Parameters classification;
+    classification.smoothing = [lambdaC](const Geometry::Polytope&) { return lambdaC; };
+    MinSTCut cut(mesh);
+    cut.setParameters(classification);
+    const auto classified = cut.classify([&](const Geometry::Polytope& cell)
     {
-      volumes[local] = cellMoments[local].area;
-      moments[local] = cellMoments[local].moment;
-    }
+      return moments[cell.getIndex()];
+    });
+    const auto& interfaceFacets = classified.cut;
 
-    std::vector<MinSTCut::Edge> graphEdges;
-    for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
+    std::vector<Real> cellPhase(mesh.getCellCount(), Real(1));
+    for (const Index cellIdx : classified.inside)
     {
-      const Index facet = faceIt->getIndex();
-      const auto& incident = mesh.getConnectivity().getIncidence({1, 2}, facet);
-      if (incident.size() != 2)
-        continue;
-      const auto itA = cellToLocal.find(incident[0]);
-      const auto itB = cellToLocal.find(incident[1]);
-      if (itA == cellToLocal.end() || itB == cellToLocal.end())
-        continue;
-      graphEdges.push_back({static_cast<Index>(itA->second),
-        static_cast<Index>(itB->second), lambdaC * facetLength(mesh, facet), facet});
+      cellPhase[cellIdx] = -1;
+      mesh.setAttribute({mesh.getDimension(), cellIdx}, interiorAttribute);
     }
-
-    const MinSTCut cut;
-    const MinSTCut::Result classified = cut.classify(volumes, moments, graphEdges);
-
-    std::vector<Index> interfaceFacets;
-    interfaceFacets.reserve(classified.cutEdges.size());
-    for (const MinSTCut::Edge& edge : classified.cutEdges)
-    {
-      if (edge.index != MinSTCut::InvalidIndex)
-        interfaceFacets.push_back(edge.index);
-    }
-
-    for (std::size_t local = 0; local < classified.labels.size(); ++local)
-    {
-      const Index cellIdx = localToCell[local];
-      mesh.setAttribute({mesh.getDimension(), cellIdx},
-        classified.labels[local] == MinSTCut::Inside ? interiorAttribute
-                                                     : exteriorAttribute);
-    }
+    for (const Index cellIdx : classified.outside)
+      mesh.setAttribute({mesh.getDimension(), cellIdx}, exteriorAttribute);
     for (const Index facet : interfaceFacets)
       mesh.setAttribute({mesh.getDimension() - 1, facet}, interfaceAttribute);
 
@@ -602,15 +571,9 @@ int main(int argc, char** argv)
     Real interfaceFit = computeInterfaceFit();
     if (verbose)
     {
-      std::size_t insideCount = 0;
-      for (int lbl : classified.labels)
-      {
-        if (lbl == MinSTCut::Inside)
-          ++insideCount;
-      }
       std::cout << "    debug: facets=" << interfaceFacets.size()
-                << "  inside=" << insideCount
-                << "  outside=" << (classified.labels.size() - insideCount)
+                << "  inside=" << classified.inside.size()
+                << "  outside=" << classified.outside.size()
                 << "  fit0=" << interfaceFit << "\n";
     }
     Real bestFit = interfaceFit;
@@ -668,7 +631,7 @@ int main(int argc, char** argv)
       const Index cellIdx = cellIt->getIndex();
       const std::size_t local = cellToLocal.at(cellIdx);
       const Index dof = p0Fes.getGlobalIndex({D, cellIdx}, 0);
-      cellLabel.getData()(dof) = static_cast<Real>(classified.labels[local]);
+      cellLabel.getData()(dof) = cellPhase[cellIdx];
       phaseMoment.getData()(dof) = cellMoments[local].moment;
     }
 
@@ -705,7 +668,7 @@ int main(int argc, char** argv)
       const Math::SpatialMatrix<Real> F = dst.A * src.A.inverse();
       qRelMoved.getData()(dof) = F.squaredNorm() / (Real(2) * std::max(jK, Real(1e-30)));
       movedLabel.getData()(dof) =
-        static_cast<Real>(classified.labels[cellToLocal.at(cellIdx)]);
+        cellPhase[cellIdx];
     }
 
     phiMoved = [&](const Geometry::Point& p) -> Real {

@@ -29,6 +29,13 @@
   solving. The target gradient must be the derivative of the target level set
   at the displaced points; no target Hessian is required.
 
+  @ref Rodin::Geometry::MinSTCut is the canonical classifier used by the
+  reconstruction examples. It balances cell-average phase fidelity against
+  the measure of separating facets. Apply its @c inside and @c outside sets
+  to cell attributes and its @c cut set to interface facets before fitting.
+  Classification remains an explicit preparation step, not part of the SWIFT
+  optimization or a boundary condition.
+
   @code{.cpp}
   // mesh already has its interface facets marked with Interface.
   P1<Math::SpatialVector<Real>, Geometry::LocalMesh> space(mesh, 2);

@@ -29,6 +29,15 @@ namespace Rodin::Examples
       bool help = false;
       Adaptation::SWIFT::Parameters parameters;
 
+      /// Scalar command-line controls for the MinSTCut classifier.
+      struct Classification
+      {
+          /// Cell-average fidelity multiplier.
+          Real fidelity = 1;
+          /// Dimensionless smoothing; the driver supplies h times this weight.
+          Real smoothing = 1;
+      } classification;
+
       /**
        * @brief Parses the same named options for every reconstruction degree.
        * @param argc Number of command-line arguments.
@@ -58,6 +67,11 @@ namespace Rodin::Examples
           {"cz", {&cz, "Target center, third coordinate"}},
           {"output", {&output, "XDMF output stem (no extension); automatic if empty"}},
           {"help", {&help, "Print options and exit"}},
+          {"classification-fidelity",
+            {&classification.fidelity, "MinSTCut cell-average fidelity"}},
+          {"classification-smoothing",
+            {&classification.smoothing,
+              "Dimensionless smoothing; facet weight is h times this value"}},
           {"model-fit", {&p.model.fit, "Fitting stiffness"}},
           {"model-distribution-deviatoric",
             {&p.model.distribution.deviatoric, "Centered deviatoric-strain stiffness"}},
@@ -196,6 +210,12 @@ namespace Rodin::Examples
         }
         if (n < 4 || (dimension != 2 && dimension != 3))
           Alert::Exception() << "Expected n >= 4 and dimension 2 or 3." << Alert::Raise;
+        if (classification.fidelity < 0 || classification.smoothing < 0)
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Classification fidelity and smoothing must be nonnegative."
+            << Alert::Raise;
+        }
         if (lobes < 0 || (dimension == 2 && lobes != std::floor(lobes)) ||
           amplitude < 0 || !(radius > amplitude))
           Alert::Exception()

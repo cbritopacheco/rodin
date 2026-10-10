@@ -13,7 +13,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <gtest/gtest.h>
+#include <Rodin/Geometry.h>
 #include <Rodin/IO/HDF5.h>
+#include <Rodin/QF/PolytopeQuadratureFormula.h>
 
 namespace Rodin::Tests::Unit
 {
@@ -26,6 +28,38 @@ namespace Rodin::Tests::Unit
     ASSERT_NE(dimension, nullptr);
     const size_t d = std::stoul(dimension);
     ASSERT_TRUE(d == 2 || d == 3);
+    // Match the fixture's background and independently check minimum-cut labels.
+    constexpr size_t GridPoints = 4;
+    const Real h = Real(1) / Real(GridPoints - 1);
+    auto mesh = d == 2
+      ? Geometry::LocalMesh::UniformGrid(Geometry::Polytope::Type::Triangle,
+          {GridPoints, GridPoints})
+      : Geometry::LocalMesh::UniformGrid(Geometry::Polytope::Type::Tetrahedron,
+          {GridPoints, GridPoints, GridPoints});
+    mesh.scale(h);
+    mesh.getConnectivity().compute(d - 1, d);
+    Geometry::MinSTCut classifier(mesh);
+    decltype(classifier)::Parameters parameters;
+    parameters.smoothing = [d](const Geometry::Polytope&) {
+      return d == 2 ? Real(0.008) : Real(0.004);
+    };
+    classifier.setParameters(parameters);
+    const auto expected = classifier.classify([&](const Geometry::Polytope& cell) {
+      const auto& formula = QF::PolytopeQuadratureFormula::get(2, cell.getGeometry());
+      const auto& quadrature = cell.getQuadrature(formula);
+      Real integral = 0;
+      for (size_t q = 0; q < quadrature.getSize(); ++q)
+      {
+        const auto& point = quadrature.getPoint(q);
+        Math::SpatialVector<Real> radial(point.getPhysicalCoordinates());
+        for (size_t component = 0; component < d; ++component)
+          radial(component) -= Real(0.5);
+        const Real distance = radial.norm() - Real(0.25);
+        integral += formula.getWeight(q) * point.getDistortion() *
+          std::tanh(distance / (Real(1.25) * h));
+      }
+      return integral / cell.getMeasure();
+    });
     const std::string stem(output);
     ASSERT_TRUE(std::filesystem::exists(stem + ".xdmf"));
     boost::property_tree::ptree document;
@@ -77,6 +111,11 @@ namespace Rodin::Tests::Unit
       const auto labels = IO::HDF5::readVectorDataset<IO::HDF5::U64>(
         file.get(), IO::HDF5::attributePath(d));
       ASSERT_FALSE(labels.empty());
+      ASSERT_EQ(labels.size(), mesh.getCellCount());
+      for (const Index cell : expected.inside)
+        EXPECT_EQ(labels[cell], 1u);
+      for (const Index cell : expected.outside)
+        EXPECT_EQ(labels[cell], 2u);
       EXPECT_NE(std::find(labels.begin(), labels.end(), 1), labels.end());
       EXPECT_NE(std::find(labels.begin(), labels.end(), 2), labels.end());
       std::set<std::string> fields;
