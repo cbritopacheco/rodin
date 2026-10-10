@@ -127,7 +127,7 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(s.getSubdivision(2), 16);
     }
 
-    TEST(Rodin_Adaptation_SWIFTSolver, IndependentQualityChecksCatchVertexInversion)
+    TEST(Rodin_Adaptation_SWIFTSolver, DefaultCoveringDetectsVertexLocalInversion)
     {
       auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
       for (size_t from = 1; from <= 2; ++from)
@@ -164,9 +164,17 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(problem.solve(phi, gradient).reason,
         SWIFT::Report::Reason::InvalidInitialGeometry);
       p.sampling.subdivision = 1;
-      problem.setParameters(p);
-      EXPECT_EQ(problem.solve(phi, gradient).reason,
-        SWIFT::Report::Reason::InvalidInitialGeometry);
+      // A coarse covering is not a boundary-extremum certificate.
+      auto jacobian = Jacobian(trial.getSolution());
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        const SWIFT::QualitySamples samples(*cell, 2, p);
+        samples.forEach([&](const IntegrationPoint& ip, Real) {
+          CellDeformation deformation(2);
+          deformation.setDisplacementGradient(jacobian.getValue(ip));
+          EXPECT_GT(deformation.getJacobian(), p.model.jacobian);
+        });
+      }
       EXPECT_EQ(p.quadrature.getVolumeOrder(2), 2);
     }
 

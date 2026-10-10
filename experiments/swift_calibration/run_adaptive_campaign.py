@@ -105,9 +105,9 @@ class Campaign:
         repo = Path(__file__).resolve().parents[2]
         driver = (repo / 'examples/Adaptation/SWIFT/Reconstruction.cpp').read_text()
         sampling = (repo / 'src/Rodin/Adaptation/SWIFT/QualitySamples.h').read_text()
-        if ('DirichletBC' in driver or 'QualityLattice::get' not in sampling
+        if ('DirichletBC' in driver or 'QualityCovering::get' not in sampling
                 or 'QF::GaussLobatto::get' in sampling):
-            raise RuntimeError('Expected free boundaries and canonical uniform quality witnesses')
+            raise RuntimeError('Expected free boundaries and canonical closed-form quality coverings')
         self.output.mkdir(parents=True, exist_ok=False)
         (self.output / 'logs').mkdir()
         (self.output / 'scratch').mkdir()
@@ -149,7 +149,7 @@ class Campaign:
             order='dimension, n, lobes, dev, div, mu, kj, degree',
             maximum_concurrent_cases=1, warmups=0, repeats=0,
             boundary_conditions='none; free exterior boundary; no gauge',
-            quality_witnesses=dict(policy='uniform reference lattice; barycentric on simplices',
+            quality_witnesses=dict(policy='closed-form reference covering; homothetic on tetrahedra',
                 subdivisions={'1': 2, '2': 16},
                 simplex_counts={'triangle': {'1': 6, '2': 153},
                                 'tetrahedron': {'1': 10, '2': 969}},

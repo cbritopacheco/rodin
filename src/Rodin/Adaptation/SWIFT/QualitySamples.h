@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "Rodin/Variational/IntegrationPoint.h"
-#include "QualityLattice.h"
+#include "QualityCovering.h"
 #include "Parameters.h"
 #include "../CellDeformation.h"
 
@@ -18,7 +18,7 @@ namespace Rodin::Adaptation::SWIFT
   /**
    * @brief Common witnesses for affine hinges and actual quality checks.
    *
-   * Uniform reference lattices include vertices and boundary points. Hinges
+   * Closed-form reference coverings need not include vertices. Hinges
    * and actual quality checks use the same points. Equal positive reference
    * weights determine mapped cell mass; adaptive hinge weights redistribute
    * that mass. These witnesses are not degree-exact integration rules.
@@ -36,7 +36,7 @@ namespace Rodin::Adaptation::SWIFT
         const Parameters& parameters)
         : m_cell(cell),
           m_parameters(parameters),
-          m_formula(QualityLattice::get(cell.getGeometry(),
+          m_formula(QualityCovering::get(cell.getGeometry(),
             parameters.sampling.getSubdivision(order,
               cell.getTransformation().getOrder(),
               Geometry::Polytope::Traits(cell.getGeometry()).getVertexCount() ==
@@ -129,7 +129,7 @@ namespace Rodin::Adaptation::SWIFT
       static constexpr Real MaximumRisk = Real(100);
       std::reference_wrapper<const Geometry::Polytope> m_cell;
       std::reference_wrapper<const Parameters> m_parameters;
-      std::reference_wrapper<const QualityLattice> m_formula;
+      std::reference_wrapper<const QualityCovering> m_formula;
   };
 }
 

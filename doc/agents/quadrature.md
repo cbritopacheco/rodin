@@ -96,9 +96,10 @@ points than optimized tables.
   centreline trace at the apex, preserving affine reproduction. General rational
   fields can have direction-dependent apex limits; this trace does not certify
   all directional quality limits.
-- SWIFT uses its own cached `QualityLattice` for hinges and actual-quality
-  checks: uniform barycentric simplex lattices and uniform-grid counterparts
-  on other cells. `sampling.subdivision` counts reference-edge subdivisions.
+- SWIFT uses its own cached `QualityCovering` for hinges and actual-quality
+  checks: closed-form shifted/contracted reference lattices, with a homothetic
+  tetrahedral construction. `sampling.subdivision` selects the generating
+  lattice resolution; point counts are unchanged, but vertices are not retained.
   Equal positive base weights sum to reference volume; adaptive hinge weights
   preserve mapped discrete mass. This sampling policy makes no polynomial
   exactness or continuous quality-certification claim. It does not replace

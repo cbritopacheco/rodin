@@ -86,6 +86,10 @@ class Comparison:
         # Freeze all adaptation headers, including quoted relative includes.
         shutil.copytree(source, self.root / 'include/Rodin/Adaptation', dirs_exist_ok=True)
         shutil.copy2(self.repo / 'src/Rodin/Adaptation.h', self.root / 'include/Rodin/Adaptation.h')
+        # This historical comparison replaces the generating lattice directly.
+        # Bypass the production contraction only in the frozen experiment overlay.
+        sampling = self.root / 'include/Rodin/Adaptation/SWIFT/QualitySamples.h'
+        sampling.write_text(sampling.read_text().replace('QualityCovering', 'QualityLattice'))
         path = self.root / 'include/Rodin/Adaptation/SWIFT/QualityLattice.h'
         text = path.read_text().replace('#include <cassert>',
             '#include <cassert>\n#include <cstdlib>\n#include <fstream>\n#include <stdexcept>\n#include <Rodin/QF/GaussLobatto.h>')

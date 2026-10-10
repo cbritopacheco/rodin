@@ -189,7 +189,7 @@ namespace Rodin::Adaptation::SWIFT
       struct Sampling
       {
           /**
-           * @brief Independent quality-lattice subdivisions per reference edge.
+           * @brief Independent covering resolution from reference-edge subdivisions.
            * @param feOrder Displacement finite-element order.
            * @param transformationOrder Geometry transformation order.
            * @param simplex Whether the entity is a simplex.
@@ -206,7 +206,7 @@ namespace Rodin::Adaptation::SWIFT
           }
 
           std::size_t subdivision =
-            0; ///< Quality-lattice subdivisions; zero selects the automatic policy.
+            0; ///< Covering subdivisions; zero selects the automatic policy.
       };
 
       Model model; ///< Fitting, distribution and quality model.

@@ -267,7 +267,7 @@ TEST(Rodin_Adaptation_SWIFTAdmissibility, SamplingIsReadOnly)
     Alert::Exception);
 }
 
-TEST(Rodin_Adaptation_SWIFTAdmissibility, UsesSharedLatticeSubdivision)
+  TEST(Rodin_Adaptation_SWIFTAdmissibility, UsesSharedCoveringSubdivision)
 {
   using namespace Geometry;
   using namespace Variational;

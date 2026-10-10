@@ -16,12 +16,14 @@
 namespace Rodin::Adaptation::SWIFT
 {
   /**
-   * @brief Cached uniform reference witnesses with equal positive base weights.
+   * @brief Cached generating lattice for reference coverings and offline comparisons.
    *
    * Simplex points have barycentric coordinates in integer multiples of
    * @f$1/m@f$. Tensor cells use Cartesian grids, wedges use triangular grids
    * times segments, and pyramids use shrinking square layers. All vertices
    * are included without supplemental points. Weights sum to reference volume.
+   * SWIFT samples @ref QualityCovering instead; this lattice supplies its
+   * geometry-specific indices and supports offline covering comparisons.
    * The quadrature interface supplies mapped-point caching, not polynomial
    * exactness or a continuous quality certificate.
    */

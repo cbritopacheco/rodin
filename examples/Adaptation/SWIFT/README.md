@@ -321,16 +321,20 @@ maps to `--convergence-iterations-outer`. Previous flat flag names are rejected.
 
 | Displacement/geometry | Surface integration | Volume integration | Quality sampling | Geometric sampling |
 |-----------------------|---------------------|--------------------|------------------|--------------------|
-| Affine simplicial \(P_1\) | `8` | `2` | `2` lattice subdivisions | `32` plus facet vertices |
-| These \(P_2/P_3\) examples | `12` | `8` | `16` lattice subdivisions | `32` plus facet vertices |
+| Affine simplicial \(P_1\) | `8` | `2` | `2` covering subdivisions | `32` plus facet vertices |
+| These \(P_2/P_3\) examples | `12` | `8` | `16` covering subdivisions | `32` plus facet vertices |
 
 `quadrature.order` overrides common integration order; `quadrature.surface`
 and `quadrature.volume` override their respective integrations independently.
 `sampling.subdivision` selects the shared inner-hinge and actual-quality witnesses:
-uniform barycentric lattices on simplices, including vertices. Tensor cells use
-Cartesian grids, wedges use triangle-times-segment grids, and pyramids use
-shrinking square layers. No supplemental points are added. The setting counts
-subdivisions per reference edge, not polynomial degree. Equal positive reference
+closed-form shifted/contracted reference lattices, without supplemental points.
+The setting counts subdivisions of the generating lattice, not polynomial
+degree. Point counts are unchanged, but the covering does not retain vertices.
+Except on tetrahedra, sites are \((I+\tfrac12\boldsymbol1)/(m+1)\).
+Tetrahedra use \((I+a\boldsymbol1)/(m+3a)\), with \(a=1/3\) for \(m=1\)
+and \(a=1/(2\sqrt2)\) otherwise. These structured sets have known reference
+covering radii, not a general optimality or continuous-quality guarantee.
+Equal positive reference
 weights sum to reference volume; mapped weights determine each cell's discrete
 mass. Separate adaptive Jacobian and distortion measures mix equal mass with
 normalized nonlinear guard penetration

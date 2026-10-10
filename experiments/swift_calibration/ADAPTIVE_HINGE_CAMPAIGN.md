@@ -1,5 +1,11 @@
 # Adaptive affine-hinge calibration
 
+Implementation update after this relaunch: production now uses a cached
+closed-form reference covering with the same subdivision-based point counts.
+Future launches through the checkout runner record that policy. The active
+campaign below remains frozen to its uniform lattice; do not pool its results
+with closed-form covering runs or relabel its witnesses.
+
 Relaunch configuration dated 2026-10-10: canonical uniform witnesses.
 Replacement directory: `tmp/swift-barycentric-campaign-relaunch-20261010`.
 Stopped replacement directory: `tmp/swift-barycentric-free-campaign-20261010`.

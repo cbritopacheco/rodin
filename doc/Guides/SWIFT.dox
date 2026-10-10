@@ -147,9 +147,11 @@
        \tfrac12\bar M_k[v,v]-f_k[v]+B_k(v)\right\},
   @f]
   where @f$B_k@f$ is the squared-hinge penalty on frozen Jacobian and distortion
-  slacks. The penalty and actual-quality checks use the same boundary-inclusive
-  uniform reference lattice, including cell vertices. On simplices this is a
-  uniform barycentric lattice, without supplemental points. Separate positive Jacobian and
+  slacks. The penalty and actual-quality checks use the same cached closed-form
+  reference covering. The generating lattice is shifted and contracted without
+  changing its point count; vertices are not retained as supplemental points.
+  A known reference covering radius does not certify continuous mesh quality.
+  Separate positive Jacobian and
   distortion weights mix equal mass with normalized nonlinear guard penetration
   at the current and full-predictor geometries. Each family preserves mapped
   cell mass, and its weights stay fixed during the inner solve. The equal
@@ -157,7 +159,7 @@
   predictor points receive maximal distortion risk without evaluating distortion.
   Validation checks every witness without weights. Equal reference weights,
   normalized to reference volume and mapped to each cell, determine cell mass,
-  not individual adaptive penalty weights. Lattices are not degree-exact
+  not individual adaptive penalty weights. Coverings are not degree-exact
   quadrature rules and do not certify nonlinear quality between witnesses.
   Its stationarity residual controls inner convergence. The outer
   Armijo search then decreases @f$E@f$ while enforcing the actual sampled
@@ -236,7 +238,7 @@
   | @f$q@f$ | `quadrature.order` | Common integration override | Automatic (`0`) |
   | @f$q_\Gamma@f$ | `quadrature.surface` | Surface energy, force and fitting integration; overrides the common order | Automatic (`0`) |
   | @f$q_\Omega@f$ | `quadrature.volume` | Distribution integration; overrides the common order | Automatic (`0`) |
-  | @f$m_{j,Q}@f$ | `sampling.subdivision` | Uniform lattice subdivisions per reference edge, shared by hinges and actual quality | Automatic (`0`) |
+  | @f$m_{j,Q}@f$ | `sampling.subdivision` | Generating lattice subdivisions for the shared hinge/quality covering | Automatic (`0`) |
   | @f$q_{\mathrm{geom}}@f$ | `quadrature.validation` | Independent geometric-response sampling plus facet vertices | Automatic (`0`) |
 
   MUMPS is the default when compiled in; otherwise SparseLU is selected.
@@ -245,8 +247,8 @@
 
   | Entity and displacement | Surface integration | Volume integration | Quality sampling | Geometric sampling |
   |-------------------------|---------------------|--------------------|------------------|--------------------|
-  | Affine simplicial @f$P_1@f$ | @f$8@f$ | @f$2@f$ | @f$2@f$ lattice subdivisions | @f$32@f$ + facet vertices |
-  | Curved or @f$P_2/P_3@f$ | @f$12@f$ | @f$8@f$ | @f$16@f$ lattice subdivisions | @f$32@f$ + facet vertices |
+  | Affine simplicial @f$P_1@f$ | @f$8@f$ | @f$2@f$ | @f$2@f$ covering subdivisions | @f$32@f$ + facet vertices |
+  | Curved or @f$P_2/P_3@f$ | @f$12@f$ | @f$8@f$ | @f$16@f$ covering subdivisions | @f$32@f$ + facet vertices |
 
   The affine @f$P_1@f$ policy is calibrated on the tested cases. Higher-order
   policies are provisional and require refinement checks, particularly when
@@ -268,7 +270,7 @@
   controls geometric-response sampling and is not reduced by `--quadrature-order`.
   The surface and volume settings use `--quadrature-surface` and
   `--quadrature-volume`. Independent quality checks use
-  `--sampling-subdivision`, interpreted as lattice subdivisions, not
+  `--sampling-subdivision`, interpreted as generating lattice subdivisions, not
   polynomial exactness. Tensor cells use Cartesian grids, wedges use triangular
   grids times segments, and pyramids use shrinking square layers.
   Default triangle/tetrahedron counts are @f$6/10@f$ for affine @f$P_1@f$ and

@@ -40,7 +40,7 @@ namespace Rodin::Adaptation::SWIFT
    * @param u Displacement field to sample.
    * @param jacobian Lower admissible relative Jacobian bound.
    * @param subdivision Reference-edge subdivisions; zero selects the automatic sampling policy.
-   * @returns Jacobian, relative distortion and invalid-sample count on the quality lattice.
+   * @returns Jacobian, relative distortion and invalid-sample count on the reference covering.
    */
   AdmissibilityReport evaluateAdmissibility(
     const Displacement& u, Real jacobian, std::size_t subdivision = 0)

@@ -3,6 +3,7 @@
  * Distributed under the Boost Software License, Version 1.0.
  */
 #include <gtest/gtest.h>
+#include <limits>
 #include <tuple>
 
 #include "Rodin/Geometry.h"
@@ -52,16 +53,22 @@ namespace Rodin::Tests::Unit
       const SWIFT::QualitySamples samples(*cell, 2, p);
       Real measure = 0;
       size_t count = 0;
-      samples.forEach([&](const Variational::IntegrationPoint&, Real weight) {
+      std::vector<Math::SpatialVector<Real>> points;
+      samples.forEach([&](const Variational::IntegrationPoint& ip, Real weight) {
         measure += weight;
+        points.push_back(ip.getPoint().getReferenceCoordinates());
         ++count;
       });
       for (const bool zero : {false, true})
       {
         Real massJ = 0, massQ = 0;
         bool different = false;
+        size_t index = 0;
         samples.forEachHinge(Gradient{true}, Gradient{zero},
-          [&](const Variational::IntegrationPoint&, Real weightJ, Real weightQ) {
+          [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
+            ASSERT_LT(index, points.size());
+            EXPECT_DOUBLE_EQ(
+              (ip.getPoint().getReferenceCoordinates() - points[index++]).norm(), Real(0));
             EXPECT_TRUE(std::isfinite(weightJ));
             EXPECT_TRUE(std::isfinite(weightQ));
             EXPECT_GE(weightJ, Real(0.5) * measure / count);
@@ -77,6 +84,7 @@ namespace Rodin::Tests::Unit
           });
         EXPECT_NEAR(massJ, measure, Real(1e-12));
         EXPECT_NEAR(massQ, measure, Real(1e-12));
+        EXPECT_EQ(index, count);
         if (!zero && traits.getDimension() > 1)
           EXPECT_TRUE(different);
       }
@@ -84,7 +92,7 @@ namespace Rodin::Tests::Unit
   }
 
 
-  TEST(Rodin_Adaptation_SWIFTHingeState, UniformQualityLattices)
+  TEST(Rodin_Adaptation_SWIFTHingeState, ClosedFormQualityCoverings)
   {
     using G = Geometry::Polytope::Type;
     constexpr size_t subdivisions = 4;
@@ -98,24 +106,28 @@ namespace Rodin::Tests::Unit
       std::tuple{G::Wedge, 75u, Real(0.5)},
       std::tuple{G::Pyramid, 55u, Real(1) / 3}})
     {
-      const auto& lattice = SWIFT::QualityLattice::get(geometry, subdivisions);
-      EXPECT_EQ(&lattice, &SWIFT::QualityLattice::get(geometry, subdivisions));
-      EXPECT_NE(lattice.getCacheIdentity(),
-        SWIFT::QualityLattice::get(geometry, subdivisions + 1).getCacheIdentity());
-      ASSERT_EQ(lattice.getSize(), count);
+      const auto& covering = SWIFT::QualityCovering::get(geometry, subdivisions);
+      EXPECT_EQ(&covering, &SWIFT::QualityCovering::get(geometry, subdivisions));
+      EXPECT_NE(covering.getCacheIdentity(),
+        SWIFT::QualityCovering::get(geometry, subdivisions + 1).getCacheIdentity());
+      ASSERT_EQ(covering.getSize(), count);
+      const Real shift = geometry == G::Tetrahedron
+        ? Real(1) / (2 * std::sqrt(Real(2))) : Real(0.5);
+      const Real scale = geometry == G::Tetrahedron
+        ? subdivisions + 3 * shift : subdivisions + Real(1);
       for (size_t i = 0; i < count; ++i)
       {
-        EXPECT_DOUBLE_EQ(lattice.getWeight(i), volume / count);
-        const auto& point = lattice.getPoint(i);
+        EXPECT_DOUBLE_EQ(covering.getWeight(i), volume / count);
+        const auto& point = covering.getPoint(i);
         for (size_t d = 0; d < point.size(); ++d)
         {
           EXPECT_GE(point[d], Real(0));
           EXPECT_LE(point[d], Real(1));
-          EXPECT_NEAR(subdivisions * point[d],
-            std::round(subdivisions * point[d]), Real(1e-14));
+          const Real index = scale * point[d] - shift;
+          EXPECT_NEAR(index, std::round(index), Real(1e-14));
         }
         if (geometry == G::Triangle || geometry == G::Tetrahedron)
-          EXPECT_LE(point.getData().sum(), Real(1));
+          EXPECT_LE(point.getData().sum(), Real(1) + Real(1e-14));
         if (geometry == G::Wedge)
           EXPECT_LE(point[0] + point[1], Real(1));
         if (geometry == G::Pyramid)
@@ -124,13 +136,66 @@ namespace Rodin::Tests::Unit
           EXPECT_LE(point[1] + point[2], Real(1));
         }
         for (size_t j = 0; j < i; ++j)
-          EXPECT_GT((point - lattice.getPoint(j)).norm(), Real(1e-14));
+          EXPECT_GT((point - covering.getPoint(j)).norm(), Real(1e-14));
       }
     }
-    EXPECT_EQ(SWIFT::QualityLattice::get(G::Triangle, 2).getSize(), 6u);
-    EXPECT_EQ(SWIFT::QualityLattice::get(G::Tetrahedron, 2).getSize(), 10u);
-    EXPECT_EQ(SWIFT::QualityLattice::get(G::Triangle, 16).getSize(), 153u);
-    EXPECT_EQ(SWIFT::QualityLattice::get(G::Tetrahedron, 16).getSize(), 969u);
+    EXPECT_EQ(SWIFT::QualityCovering::get(G::Triangle, 2).getSize(), 6u);
+    EXPECT_EQ(SWIFT::QualityCovering::get(G::Tetrahedron, 2).getSize(), 10u);
+    EXPECT_EQ(SWIFT::QualityCovering::get(G::Triangle, 16).getSize(), 153u);
+    EXPECT_EQ(SWIFT::QualityCovering::get(G::Tetrahedron, 16).getSize(), 969u);
+  }
+
+  TEST(Rodin_Adaptation_SWIFTHingeState, ReferenceCoveringRadii)
+  {
+    using G = Geometry::Polytope::Type;
+    constexpr size_t resolution = 12;
+    for (const auto geometry : {G::Segment, G::Triangle, G::Quadrilateral,
+      G::Tetrahedron, G::Hexahedron, G::Wedge, G::Pyramid})
+    {
+      const Geometry::Polytope::Traits traits(geometry);
+      const size_t dimension = traits.getDimension();
+      for (const size_t m : {1u, 2u, 4u})
+      {
+        const auto& covering = SWIFT::QualityCovering::get(geometry, m);
+        const Real expected = geometry == G::Tetrahedron
+          ? m == 1 ? Real(1) / std::sqrt(Real(6))
+                   : std::sqrt(Real(3)) / (2 * m + 3 / std::sqrt(Real(2)))
+          : std::sqrt(Real(dimension)) / (2 * (m + 1));
+        EXPECT_DOUBLE_EQ(covering.getCoveringRadius(), expected);
+        const auto distance = [&](const Math::SpatialVector<Real>& point) {
+          Real nearest = std::numeric_limits<Real>::infinity();
+          for (size_t q = 0; q < covering.getSize(); ++q)
+            nearest = std::min(nearest, (point - covering.getPoint(q)).norm());
+          return nearest;
+        };
+        Real vertexMaximum = 0;
+        for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+          vertexMaximum = std::max(vertexMaximum, distance(traits.getVertex(vertex)));
+        EXPECT_NEAR(vertexMaximum, expected, Real(1e-14));
+        for (size_t k = 0; k <= (dimension == 3 ? resolution : 0); ++k)
+        {
+          for (size_t j = 0; j <= (dimension >= 2 ? resolution : 0); ++j)
+          {
+            for (size_t i = 0; i <= resolution; ++i)
+            {
+              if ((geometry == G::Triangle || geometry == G::Wedge) && i + j > resolution)
+                continue;
+              if (geometry == G::Tetrahedron && i + j + k > resolution)
+                continue;
+              if (geometry == G::Pyramid && (i + k > resolution || j + k > resolution))
+                continue;
+              Math::SpatialVector<Real> point(dimension);
+              point[0] = Real(i) / resolution;
+              if (dimension >= 2)
+                point[1] = Real(j) / resolution;
+              if (dimension == 3)
+                point[2] = Real(k) / resolution;
+              EXPECT_LE(distance(point), expected + Real(1e-14));
+            }
+          }
+        }
+      }
+    }
   }
 
   TEST(Rodin_Adaptation_SWIFTHingeState, QualityWitnessesAcrossGeometries)
@@ -163,7 +228,7 @@ namespace Rodin::Tests::Unit
           }
         });
         for (const bool included : vertices)
-          EXPECT_TRUE(included);
+          EXPECT_FALSE(included);
       }
       EXPECT_NEAR(mass, Real(1), Real(1e-12)) << static_cast<int>(geometry);
     }
@@ -318,7 +383,7 @@ namespace Rodin::Tests::Unit
     check.template operator()<2>();
   }
 
-  TEST(Rodin_Adaptation_SWIFTHingeState, P2VertexOnlyHingeIsAssembled)
+  TEST(Rodin_Adaptation_SWIFTHingeState, P2CoveringHingeIsAssembled)
   {
     using namespace Geometry;
     using namespace Variational;
@@ -333,14 +398,14 @@ namespace Rodin::Tests::Unit
     current = Math::SpatialVector<Real>{0, 0};
     inner = VectorFunction(size_t{2}, [](const Point& point) {
       const Real y = point.getCoordinates()(1);
-      return Math::SpatialVector<Real>{0, Real(-0.48) * y * y};
+      return Math::SpatialVector<Real>{0, Real(-0.64) * y * y};
     });
     SWIFT::Parameters parameters;
     parameters.sampling.subdivision = 1;
     parameters.quadrature.volume = 1;
     auto jacobian = Jacobian(inner);
     Real mass = 0;
-    bool vertexActive = false;
+    bool coveringActive = false;
     for (Index index = 0; index < mesh.getCellCount(); ++index)
     {
       const auto cell = mesh.getCell(index);
@@ -350,13 +415,11 @@ namespace Rodin::Tests::Unit
         mass += weight;
         CellDeformation deformation(2);
         const SWIFT::HingeState state(deformation, jacobian.getValue(ip), parameters, 1);
-        if (ip.getPoint().getCoordinates()(1) == Real(1))
-          vertexActive = vertexActive || state.getJacobianHessian() > 0;
-        else
-          EXPECT_EQ(state.getJacobianHessian(), Real(0));
+        EXPECT_LE(ip.getPoint().getCoordinates()(1), Real(1));
+        coveringActive = coveringActive || state.getJacobianHessian() > 0;
       });
     }
-    EXPECT_TRUE(vertexActive);
+    EXPECT_TRUE(coveringActive);
     EXPECT_NEAR(mass, Real(1), Real(1e-12));
     BilinearForm metric(trial, test);
     LinearForm force(test);
