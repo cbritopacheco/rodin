@@ -5,6 +5,7 @@
 #include <Rodin/Adaptation.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/XDMF.h>
+#include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/Variational.h>
 
 #include <filesystem>
@@ -81,44 +82,48 @@ int main(int argc, char** argv)
       return value;
     });
 
-    // Volume-weighted observations and the facet-perimeter term define the
-    // native graph-cut classifier, independently of the displacement degree.
-    // Heuristic sign smoothing and dimensionless Potts weight, independent of
-    // the fitting metric. The mild perimeter weight preserves coarse targets.
-    constexpr Real SignWidth = Real(1.25), PerimeterWeight = Real(0.004);
-    std::vector<Real> volumes(mesh.getCellCount()), moments(mesh.getCellCount());
-    for (auto cell = mesh.getCell(); cell; ++cell)
+    // Average a smooth phase indicator, then minimize the binary Potts energy.
+    constexpr Real PhaseScaleOverH = Real(1.25);
+    constexpr size_t ClassificationOrder = 2;
+    MinSTCut classifier(mesh);
+    decltype(classifier)::Parameters classificationParameters;
+    classificationParameters.fidelity = options.classification.fidelity;
+    const Real smoothing = h * options.classification.smoothing;
+    classificationParameters.smoothing = [smoothing](const Polytope&) {
+      return smoothing;
+    };
+    classifier.setParameters(classificationParameters);
+    const auto classified = classifier.classify([&](const Polytope& cell) -> Real
     {
-      const Index index = cell->getIndex();
-      volumes[index] = cell->getMeasure();
-      const auto& rule = QF::PolytopeQuadratureFormula::get(2, cell->getGeometry());
-      const auto& quadrature = cell->getQuadrature(rule);
-      Real integral = 0;
+      const auto& formula =
+        QF::PolytopeQuadratureFormula::get(ClassificationOrder, cell.getGeometry());
+      const auto& quadrature = cell.getQuadrature(formula);
+      Real moment = 0;
       for (size_t q = 0; q < quadrature.getSize(); ++q)
-        integral += rule.getWeight(q) * quadrature.getPoint(q).getDistortion() *
-          std::tanh(phi(quadrature.getPoint(q)) / (SignWidth * h));
-      moments[index] = integral / volumes[index];
-    }
-    std::vector<MinSTCut::Edge> edges;
+      {
+        const auto& point = quadrature.getPoint(q);
+        moment += formula.getWeight(q) * point.getDistortion() *
+          std::tanh(phi(point) / (PhaseScaleOverH * h));
+      }
+      return moment / cell.getMeasure();
+    });
+    for (const Index cell : classified.inside)
+      mesh.setAttribute({dimension, cell}, Inside);
+    for (const Index cell : classified.outside)
+      mesh.setAttribute({dimension, cell}, Outside);
+    for (const Index face : classified.cut)
+      mesh.setAttribute({dimension - 1, face}, Interface);
     for (auto face = mesh.getFace(); face; ++face)
     {
       const auto& cells =
         mesh.getConnectivity().getIncidence({dimension - 1, dimension}, face->getIndex());
       if (cells.size() == 1)
         mesh.setAttribute({dimension - 1, face->getIndex()}, Boundary);
-      else if (cells.size() == 2)
-        edges.push_back({cells[0], cells[1], PerimeterWeight * h * face->getMeasure(),
-          face->getIndex()});
     }
-    const auto partition = MinSTCut().classify(volumes, moments, edges);
-    for (Index cell = 0; cell < mesh.getCellCount(); ++cell)
-      mesh.setAttribute(
-        {dimension, cell}, partition.labels[cell] == MinSTCut::Inside ? Inside : Outside);
-    for (const auto& edge : partition.cutEdges)
-      mesh.setAttribute({dimension - 1, edge.index}, Interface);
-    Alert::Info() << "MinSTCut classification: " << partition.insideCells.size()
-                  << " solid cells, " << partition.outsideCells.size() << " fluid cells, "
-                  << partition.cutEdges.size() << " interface facets." << Alert::Raise;
+
+    Alert::Info() << "MinSTCut classification: " << classified.inside.size()
+                  << " solid cells, " << classified.outside.size() << " fluid cells, "
+                  << classified.cut.size() << " interface facets." << Alert::Raise;
 
     // The only degree-dependent choice: all spaces use the same SWIFT problem.
     H1 space(std::integral_constant<size_t, Degree>{}, mesh, dimension);

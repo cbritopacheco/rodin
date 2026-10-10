@@ -75,12 +75,19 @@ if(TARGET SWIFT_ReconstructionP1)
   foreach(degree IN ITEMS 1 2 3)
     add_dependencies(RodinAdaptationSWIFTOutputTest SWIFT_ReconstructionP${degree})
     foreach(dimension IN ITEMS 2 3)
+      # At n=4, h=1/3: retain physical smoothing 0.008 (2D) or 0.004 (3D).
+      if(dimension EQUAL 2)
+        set(classification_smoothing 0.024)
+      else()
+        set(classification_smoothing 0.012)
+      endif()
       set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/swift-output-p${degree}-d${dimension}")
       file(MAKE_DIRECTORY "${output_dir}")
       set(fixture "SWIFT.Output.P${degree}.D${dimension}")
       add_test(NAME ${fixture}.Generate
         COMMAND $<TARGET_FILE:SWIFT_ReconstructionP${degree}>
           --n=4 --dimension=${dimension} --convergence-iterations-outer=1
+          --classification-fidelity=1 --classification-smoothing=${classification_smoothing}
           --output=${output_dir}/reconstruction)
       set_tests_properties(${fixture}.Generate PROPERTIES
         LABELS unit FIXTURES_SETUP ${fixture} TIMEOUT 120

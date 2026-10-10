@@ -360,91 +360,104 @@ namespace KelvinBall
         MMG::Mesh classified(background);
         const auto& space = levelSet.getFiniteElementSpace();
         const auto& coefficients = levelSet.getData();
-        std::vector<Real> volumes(classified.getCellCount());
         std::vector<Real> moments(classified.getCellCount());
         std::vector<Real> sizes(classified.getCellCount());
-        MinSTCut::Options options;
-        options.cellInBand.resize(classified.getCellCount());
+        constexpr Real PhaseWidth = Real(1.25);
         for (auto cell = classified.getCell(); cell; ++cell)
         {
           const Index index = cell->getIndex();
           Real meanLevelSet = 0;
-          Real minimum = std::numeric_limits<Real>::infinity();
-          Real maximum = -std::numeric_limits<Real>::infinity();
           for (const Index vertex : cell->getVertices())
           {
             const auto& dofs = space.getDOFs(0, vertex);
             const Real value = coefficients(dofs[0]);
             meanLevelSet += value;
-            minimum = std::min(minimum, value);
-            maximum = std::max(maximum, value);
           }
           meanLevelSet /= static_cast<Real>(cell->getVertices().size());
-          volumes[index] = cell->getMeasure();
           sizes[index] = cellSize(*cell);
-          moments[index] = std::tanh(meanLevelSet / (Real(1.25) * sizes[index]));
-          options.cellInBand[index] = minimum <= 0 && maximum >= 0;
+          moments[index] = std::tanh(meanLevelSet / (PhaseWidth * sizes[index]));
         }
 
         classified.getConnectivity().compute(2, 3);
-        std::vector<MinSTCut::Edge> edges;
         for (auto face = classified.getFace(); face; ++face)
         {
           const auto& incident =
             classified.getConnectivity().getIncidence({2, 3}, face->getIndex());
           if (incident.size() != 2)
             continue;
-          const Real size = std::min(sizes[incident[0]], sizes[incident[1]]);
-          edges.push_back({incident[0], incident[1],
-            Real(0.04) * size * face->getMeasure(), face->getIndex()});
           classified.setAttribute({2, face->getIndex()}, {});
         }
-        // The Potts perimeter term suppresses folded cell-wise sign patterns.
-        // Cells whose vertices have one sign retain that phase exactly.
-        const auto partition = MinSTCut().classify(volumes, moments, edges, options);
+        const auto options = getReconstructionOptions(m_argc, m_argv);
+        MinSTCut classifier(static_cast<const KelvinBall::Mesh&>(classified));
+        decltype(classifier)::Parameters parameters;
+        parameters.fidelity = options.classification.fidelity;
+        parameters.smoothing = [&](const Polytope& face) {
+          const auto& cells =
+            classified.getConnectivity().getIncidence({2, 3}, face.getIndex());
+          return options.classification.smoothing *
+            std::min(sizes[cells[0]], sizes[cells[1]]);
+        };
+        classifier.setParameters(parameters);
+        const auto partition = classifier.classify(
+          [&](const Polytope& cell) { return moments[cell.getIndex()]; });
         Alert::Info() << substageHeading("MinSTCut classification") << Alert::NewLine
-                      << diagnosticLabel("Solid cells:")
-                      << Alert::Notation::Number(partition.insideCells.size())
+                      << diagnosticLabel("Fidelity:")
+                      << Alert::Notation::Number(options.classification.fidelity)
+                      << Alert::NewLine << diagnosticLabel("Smoothing / local cell size:")
+                      << Alert::Notation::Number(options.classification.smoothing)
+                      << Alert::NewLine << diagnosticLabel("Solid cells:")
+                      << Alert::Notation::Number(partition.inside.size())
                       << Alert::NewLine << diagnosticLabel("Fluid cells:")
-                      << Alert::Notation::Number(partition.outsideCells.size())
+                      << Alert::Notation::Number(partition.outside.size())
                       << Alert::NewLine << diagnosticLabel("Interface triangles:")
-                      << Alert::Notation::Number(partition.cutEdges.size())
-                      << Alert::Raise;
-        for (Index cell = 0; cell < classified.getCellCount(); ++cell)
-          classified.setAttribute(
-            {3, cell}, partition.labels[cell] == MinSTCut::Inside ? Obstacle : Fluid);
-        for (const auto& edge : partition.cutEdges)
-          classified.setAttribute({2, edge.index}, Gamma);
+                      << Alert::Notation::Number(partition.cut.size()) << Alert::Raise;
+        for (const Index cell : partition.inside)
+          classified.setAttribute({3, cell}, Obstacle);
+        for (const Index cell : partition.outside)
+          classified.setAttribute({3, cell}, Fluid);
+        for (const Index face : partition.cut)
+          classified.setAttribute({2, face}, Gamma);
         return classified;
       }
 
-      Adaptation::SWIFT::Parameters getFittingParameters(
-        Real referenceSpacing, int argc, char** argv) const
+      Rodin::Examples::ReconstructionOptions getReconstructionOptions(
+        int argc, char** argv) const
       {
-        std::vector<std::string> arguments{argv[0]};
-        FlatSet<std::string> specified;
+        // Retain KelvinBall's existing dimensionless perimeter weight.
+        std::vector<std::string> arguments{argv[0], "--classification-smoothing=0.04"};
         for (int i = 1; i < argc; ++i)
         {
           const std::string argument(argv[i]);
           if (!argument.starts_with("--swift-"))
             continue;
           const std::string option = "--" + argument.substr(8);
-          if (!option.starts_with("--model-") &&
-            !option.starts_with("--globalization-") && !option.starts_with("--linear-") &&
-            !option.starts_with("--convergence-") &&
+          if (!option.starts_with("--classification-") &&
+            !option.starts_with("--model-") && !option.starts_with("--globalization-") &&
+            !option.starts_with("--linear-") && !option.starts_with("--convergence-") &&
             !option.starts_with("--quadrature-") && !option.starts_with("--sampling-") &&
             option != "--trace" && !option.starts_with("--trace=") &&
             !option.starts_with("--trace-quality-witness"))
             throw std::runtime_error("Unknown SWIFT fitting option: " + argument);
-          specified.insert(option.substr(2, option.find('=') - 2));
           arguments.push_back(option);
         }
         std::vector<char*> pointers;
         for (auto& argument : arguments)
           pointers.push_back(argument.data());
-        auto parameters = Rodin::Examples::ReconstructionOptions(
-          static_cast<int>(pointers.size()), pointers.data())
-                            .parameters;
+        return Rodin::Examples::ReconstructionOptions(
+          static_cast<int>(pointers.size()), pointers.data());
+      }
+
+      Adaptation::SWIFT::Parameters getFittingParameters(
+        Real referenceSpacing, int argc, char** argv) const
+      {
+        auto parameters = getReconstructionOptions(argc, argv).parameters;
+        FlatSet<std::string> specified;
+        for (int i = 1; i < argc; ++i)
+        {
+          const std::string argument(argv[i]);
+          if (argument.starts_with("--swift-"))
+            specified.insert(argument.substr(8, argument.find('=') - 8));
+        }
         parameters.model.h = referenceSpacing;
         parameters.interfaceAttribute = Gamma;
         if (!specified.contains("convergence-tolerance-geometric"))
@@ -901,6 +914,12 @@ namespace KelvinBall
           << "                              iteration trace on; --swift-trace=0 disables;"
           << Alert::NewLine
           << "                              grouped model and convergence controls)."
+          << Alert::NewLine << Alert::Notation("--swift-classification-fidelity=<value>")
+          << "  MinSTCut fidelity (default: 1)." << Alert::NewLine
+          << Alert::Notation("--swift-classification-smoothing=<value>")
+          << "  MinSTCut dimensionless smoothing (default: 0.04);" << Alert::NewLine
+          << "                              facet weight = value times smaller incident "
+             "cell size."
           << Alert::NewLine << Alert::Notation("--swift-model-fit=<value>")
           << "  Fitting curvature weight (default: 1)." << Alert::NewLine
           << Alert::Notation("--swift-model-distribution-deviatoric=<value>")
@@ -910,7 +929,8 @@ namespace KelvinBall
           << Alert::Notation("--swift-linear-solver=<name>")
           << "  SWIFT linear backend: mumps, sparse-lu, or cg (default: MUMPS when "
              "built)."
-          << Alert::NewLine << Alert::Notation("--swift-globalization-directional-newton[=0|1]")
+          << Alert::NewLine
+          << Alert::Notation("--swift-globalization-directional-newton[=0|1]")
           << "  Scale the frozen model with directional Newton (default: 1)."
           << Alert::NewLine << Alert::Notation("--swift-model-hinge=<value>")
           << "  Dimensionless quadratic-hinge weight (default: 10)." << Alert::NewLine

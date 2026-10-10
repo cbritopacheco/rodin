@@ -7,228 +7,190 @@
 #include "MinSTCut.h"
 
 #include <algorithm>
+#include <cassert>
+#include <cmath>
 #include <deque>
-#include <stdexcept>
+#include <limits>
+
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Mesh.h"
 
 namespace Rodin::Geometry
 {
-  namespace
+  MinSTCut<LocalMesh>::Dinic::Dinic(Index count)
+    : m_graph(count),
+      m_level(count, -1),
+      m_next(count)
+  {}
+
+  void MinSTCut<LocalMesh>::Dinic::add(Index first, Index second, Real capacity, Type type)
   {
-    class Dinic
-    {
-      public:
-        struct Arc
-        {
-            Index to;
-            Index rev;
-            Real cap;
-        };
-
-        explicit Dinic(Index n)
-          : m_graph(n),
-            m_level(n),
-            m_next(n)
-        {}
-
-        void addDirected(Index from, Index to, Real capacity)
-        {
-          if (capacity < 0)
-            throw std::invalid_argument("MinSTCut received a negative graph capacity.");
-          Arc fwd{to, m_graph[to].size(), capacity};
-          Arc rev{from, m_graph[from].size(), 0};
-          m_graph[from].push_back(fwd);
-          m_graph[to].push_back(rev);
-        }
-
-        void addUndirected(Index a, Index b, Real capacity)
-        {
-          addDirected(a, b, capacity);
-          addDirected(b, a, capacity);
-        }
-
-        Real maxFlow(Index source, Index sink)
-        {
-          Real flow = 0;
-          while (buildLevelGraph(source, sink))
-          {
-            std::fill(m_next.begin(), m_next.end(), 0);
-            while (true)
-            {
-              const Real pushed =
-                augment(source, sink, std::numeric_limits<Real>::infinity());
-              if (pushed <= 0)
-                break;
-              flow += pushed;
-            }
-          }
-          return flow;
-        }
-
-        std::vector<Boolean> reachableFrom(Index source) const
-        {
-          std::vector<Boolean> seen(m_graph.size(), false);
-          std::deque<Index> queue;
-          seen[source] = true;
-          queue.push_back(source);
-          while (!queue.empty())
-          {
-            const Index current = queue.front();
-            queue.pop_front();
-            for (const auto& arc : m_graph[current])
-            {
-              if (arc.cap > 0 && !seen[arc.to])
-              {
-                seen[arc.to] = true;
-                queue.push_back(arc.to);
-              }
-            }
-          }
-          return seen;
-        }
-
-      private:
-        Boolean buildLevelGraph(Index source, Index sink)
-        {
-          std::fill(m_level.begin(), m_level.end(), -1);
-          std::deque<Index> queue;
-          m_level[source] = 0;
-          queue.push_back(source);
-          while (!queue.empty())
-          {
-            const Index current = queue.front();
-            queue.pop_front();
-            for (const auto& arc : m_graph[current])
-            {
-              if (arc.cap > 0 && m_level[arc.to] < 0)
-              {
-                m_level[arc.to] = m_level[current] + 1;
-                queue.push_back(arc.to);
-              }
-            }
-          }
-          return m_level[sink] >= 0;
-        }
-
-        Real augment(Index current, Index sink, Real amount)
-        {
-          if (current == sink)
-            return amount;
-          for (Index& i = m_next[current]; i < m_graph[current].size(); ++i)
-          {
-            Arc& arc = m_graph[current][i];
-            if (arc.cap <= 0 || m_level[arc.to] != m_level[current] + 1)
-              continue;
-            const Real pushed = augment(arc.to, sink, std::min(amount, arc.cap));
-            if (pushed > 0)
-            {
-              arc.cap -= pushed;
-              m_graph[arc.to][arc.rev].cap += pushed;
-              return pushed;
-            }
-          }
-          return 0;
-        }
-
-        std::vector<std::vector<Arc>> m_graph;
-        std::vector<Integer> m_level;
-        std::vector<Index> m_next;
-    };
+    assert(first < m_graph.size() && second < m_graph.size());
+    assert(std::isfinite(capacity) && capacity >= 0);
+    Arc forward{second, m_graph[second].size(), capacity};
+    Arc reverse{first, m_graph[first].size(), 0};
+    m_graph[first].push_back(forward);
+    m_graph[second].push_back(reverse);
+    if (type == Type::Undirected)
+      add(second, first, capacity, Type::Directed);
   }
 
-  Real MinSTCut::getInsideCost(Real volume, Real moment) noexcept
+  Real MinSTCut<LocalMesh>::Dinic::getMaximumFlow(Index source, Index sink)
   {
-    return volume * std::max<Real>(0, moment);
-  }
-
-  Real MinSTCut::getOutsideCost(Real volume, Real moment) noexcept
-  {
-    return volume * std::max<Real>(0, -moment);
-  }
-
-  MinSTCut::Result MinSTCut::classify(const std::vector<Real>& volumes,
-    const std::vector<Real>& moments, const std::vector<Edge>& edges) const
-  {
-    return classify(volumes, moments, edges, Options{});
-  }
-
-  MinSTCut::Result MinSTCut::classify(const std::vector<Real>& volumes,
-    const std::vector<Real>& moments, const std::vector<Edge>& edges,
-    const Options& options) const
-  {
-    if (volumes.size() != moments.size())
-      throw std::invalid_argument("MinSTCut volumes and moments have different sizes.");
-    if (!options.perEdgeLambda.empty() && options.perEdgeLambda.size() != edges.size())
-      throw std::invalid_argument(
-        "MinSTCut perEdgeLambda size does not match the number of edges.");
-    if (!options.cellInBand.empty() && options.cellInBand.size() != volumes.size())
-      throw std::invalid_argument(
-        "MinSTCut cellInBand size does not match the number of cells.");
-
-    // Finite pin penalty based on global unary and pairwise capacity sums.
-    // The multiplier is a heuristic margin, not an infinite-capacity guarantee
-    // for arbitrary per-edge scaling. The additive floor covers zero sums.
-    constexpr Real pinCostSafetyFactor = Real(1e3);
-    constexpr Real pinCostBaseCapacity = Real(1);
-    Real totalUnary = 0;
-    for (Index i = 0; i < volumes.size(); ++i)
+    assert(source < m_graph.size() && sink < m_graph.size() && source != sink);
+    Real flow = 0;
+    while (build(source, sink))
     {
-      if (volumes[i] < 0)
-        throw std::invalid_argument("MinSTCut received a negative cell volume.");
-      totalUnary +=
-        getInsideCost(volumes[i], moments[i]) + getOutsideCost(volumes[i], moments[i]);
-    }
-    Real totalPairwise = 0;
-    for (const Edge& e : edges)
-    {
-      if (e.capacity < 0)
-        throw std::invalid_argument("MinSTCut received a negative pairwise capacity.");
-      totalPairwise += e.capacity;
-    }
-    const Real pinCost = pinCostSafetyFactor *
-      (options.unaryScale * totalUnary +
-        std::max(options.lambdaScale, Real(1)) * totalPairwise + pinCostBaseCapacity);
-
-    std::vector<Real> insideCosts(volumes.size());
-    std::vector<Real> outsideCosts(volumes.size());
-    for (Index i = 0; i < volumes.size(); ++i)
-    {
-      insideCosts[i] = options.unaryScale * getInsideCost(volumes[i], moments[i]);
-      outsideCosts[i] = options.unaryScale * getOutsideCost(volumes[i], moments[i]);
-
-      const Boolean inBand = options.cellInBand.empty() ? true : options.cellInBand[i];
-      const Boolean farField = options.farFieldThreshold >= 0 &&
-        std::abs(moments[i]) >= options.farFieldThreshold;
-
-      if (!inBand || farField)
+      std::fill(m_next.begin(), m_next.end(), 0);
+      while (true)
       {
-        // Pin to sign(-moment): negative moment -> Inside, positive -> Outside.
-        // To pin Inside, make the cost of the Outside label dominant, and
-        // vice-versa.
-        if (moments[i] < 0)
-          outsideCosts[i] += pinCost;
-        else
-          insideCosts[i] += pinCost;
+        const Real pushed = augment(source, sink, std::numeric_limits<Real>::infinity());
+        if (pushed <= 0)
+          break;
+        flow += pushed;
+      }
+    }
+    return flow;
+  }
+
+  Boolean MinSTCut<LocalMesh>::Dinic::isReachable(Index vertex) const
+  {
+    assert(vertex < m_level.size());
+    return m_level[vertex] >= 0;
+  }
+
+  Boolean MinSTCut<LocalMesh>::Dinic::build(Index source, Index sink)
+  {
+    std::fill(m_level.begin(), m_level.end(), -1);
+    std::deque<Index> queue;
+    m_level[source] = 0;
+    queue.push_back(source);
+    while (!queue.empty())
+    {
+      const Index current = queue.front();
+      queue.pop_front();
+      for (const auto& arc : m_graph[current])
+      {
+        if (arc.capacity > 0 && m_level[arc.to] < 0)
+        {
+          m_level[arc.to] = m_level[current] + 1;
+          queue.push_back(arc.to);
+        }
+      }
+    }
+    return m_level[sink] >= 0;
+  }
+
+  Real MinSTCut<LocalMesh>::Dinic::augment(Index current, Index sink, Real amount)
+  {
+    if (current == sink)
+      return amount;
+    for (Index& i = m_next[current]; i < m_graph[current].size(); ++i)
+    {
+      Arc& arc = m_graph[current][i];
+      if (arc.capacity <= 0 || m_level[arc.to] != m_level[current] + 1)
+        continue;
+      const Real pushed = augment(arc.to, sink, std::min(amount, arc.capacity));
+      if (pushed > 0)
+      {
+        arc.capacity -= pushed;
+        m_graph[arc.to][arc.reverse].capacity += pushed;
+        return pushed;
+      }
+    }
+    return 0;
+  }
+
+  MinSTCut<LocalMesh>::MinSTCut(const MeshType& mesh)
+    : m_mesh(mesh)
+  {}
+
+  MinSTCut<LocalMesh>::Result MinSTCut<LocalMesh>::classify(
+    const std::function<Real(const Polytope&)>& average) const
+  {
+    const auto& mesh = getMesh();
+    const auto& parameters = getParameters();
+    const size_t d = mesh.getDimension();
+    const size_t cellCount = mesh.getCellCount();
+    if (d == 0 || cellCount == 0)
+      return {};
+    if (!average)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Cell average must be callable." << Alert::Raise;
+    }
+    if (!std::isfinite(parameters.fidelity) || parameters.fidelity < 0)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Fidelity must be finite and nonnegative." << Alert::Raise;
+    }
+    if (!parameters.smoothing)
+    {
+      Alert::MemberFunctionException(*this, __func__)
+        << "Smoothing must be callable." << Alert::Raise;
+    }
+    RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, d - 1, d);
+    const auto& incidence = mesh.getConnectivity().getIncidence(d - 1, d);
+    std::vector<Real> insideCosts(cellCount);
+    std::vector<Real> outsideCosts(cellCount);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Index i = cell->getIndex();
+      const Real volume = cell->getMeasure();
+      const Real value = average(*cell);
+      if (!std::isfinite(volume) || volume <= 0 || !std::isfinite(value))
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Positive finite cell measures and finite averages are required."
+          << Alert::Raise;
+      }
+      insideCosts[i] = parameters.fidelity * volume * std::max(Real(0), value);
+      outsideCosts[i] = parameters.fidelity * volume * std::max(Real(0), -value);
+      if (!std::isfinite(insideCosts[i]) || !std::isfinite(outsideCosts[i]))
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Nonfinite unary cost." << Alert::Raise;
       }
     }
 
-    std::vector<Edge> scaledEdges = edges;
-    for (Index e = 0; e < scaledEdges.size(); ++e)
+    std::vector<Edge> edges;
+    edges.reserve(mesh.getFaceCount());
+    for (auto face = mesh.getFace(); face; ++face)
     {
-      const Real lambda =
-        options.perEdgeLambda.empty() ? options.lambdaScale : options.perEdgeLambda[e];
-      if (lambda < 0)
-        throw std::invalid_argument("MinSTCut perEdgeLambda contains a negative value.");
-      scaledEdges[e].capacity *= lambda;
+      const auto& cells = incidence.at(face->getIndex());
+      if (cells.size() != 1 && cells.size() != 2)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "One or two cells must be incident to each facet."
+          << Alert::Raise;
+      }
+      if (cells.size() == 1)
+        continue;
+      const Real smoothing = parameters.smoothing(*face);
+      if (!std::isfinite(smoothing) || smoothing < 0)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Smoothing must be finite and nonnegative." << Alert::Raise;
+      }
+      // Codimension-one measure in 1D is counting measure, not vertex measure.
+      const Real measure = d == 1 ? Real(1) : face->getMeasure();
+      const Real capacity = measure * smoothing;
+      if (!std::isfinite(measure) || measure <= 0 || !std::isfinite(capacity))
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Invalid facet measure or capacity."
+          << Alert::Raise;
+      }
+      edges.push_back({cells[0], cells[1], capacity, face->getIndex()});
     }
 
-    return solve(insideCosts, outsideCosts, scaledEdges);
+    return solve(insideCosts, outsideCosts, edges);
   }
 
-  MinSTCut::Result MinSTCut::solve(const std::vector<Real>& insideCosts,
+  MinSTCut<LocalMesh>::Result MinSTCut<LocalMesh>::solve(const std::vector<Real>& insideCosts,
     const std::vector<Real>& outsideCosts, const std::vector<Edge>& edges) const
   {
-    if (insideCosts.size() != outsideCosts.size())
-      throw std::invalid_argument("MinSTCut unary cost arrays have different sizes.");
+    assert(insideCosts.size() == outsideCosts.size());
 
     const Index cellCount = insideCosts.size();
     const Index source = cellCount;
@@ -237,46 +199,40 @@ namespace Rodin::Geometry
     Dinic graph(cellCount + 2);
     for (Index i = 0; i < cellCount; ++i)
     {
-      if (insideCosts[i] < 0 || outsideCosts[i] < 0)
-        throw std::invalid_argument("MinSTCut received a negative unary cost.");
+      assert(insideCosts[i] >= 0 && outsideCosts[i] >= 0);
 
-      graph.addDirected(source, i, outsideCosts[i]);
-      graph.addDirected(i, sink, insideCosts[i]);
+      graph.add(source, i, outsideCosts[i], Dinic::Type::Directed);
+      graph.add(i, sink, insideCosts[i], Dinic::Type::Directed);
     }
 
     for (const Edge& edge : edges)
     {
-      if (edge.first >= cellCount || edge.second >= cellCount)
-        throw std::out_of_range("MinSTCut edge references a cell outside the graph.");
-      graph.addUndirected(edge.first, edge.second, edge.capacity);
+      assert(edge.first < cellCount && edge.second < cellCount);
+      graph.add(edge.first, edge.second, edge.capacity, Dinic::Type::Undirected);
     }
 
-    graph.maxFlow(source, sink);
-    const auto reachable = graph.reachableFrom(source);
+    graph.getMaximumFlow(source, sink);
 
     Result result;
-    result.labels.assign(cellCount, Outside);
     for (Index i = 0; i < cellCount; ++i)
     {
-      if (reachable[i])
+      if (graph.isReachable(i))
       {
-        result.labels[i] = Inside;
-        result.insideCells.push_back(i);
+        result.inside.push_back(i);
         result.energy += insideCosts[i];
       }
       else
       {
-        result.labels[i] = Outside;
-        result.outsideCells.push_back(i);
+        result.outside.push_back(i);
         result.energy += outsideCosts[i];
       }
     }
 
     for (const Edge& edge : edges)
     {
-      if (result.labels[edge.first] != result.labels[edge.second])
+      if (graph.isReachable(edge.first) != graph.isReachable(edge.second))
       {
-        result.cutEdges.push_back(edge);
+        result.cut.push_back(edge.face);
         result.energy += edge.capacity;
       }
     }

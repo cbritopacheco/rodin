@@ -86,18 +86,19 @@ mkdir -p /tmp/rodin-swift
 cd /tmp/rodin-swift
 
 # Reconstruct a circle with linear, quadratic and cubic displacement.
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP1" --n=16 --dimension=2
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" --n=16 --dimension=2
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP3" --n=16 --dimension=2
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP1" --n=16 --dimension=2 --classification-smoothing=0.12
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" --n=16 --dimension=2 --classification-smoothing=0.12
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP3" --n=16 --dimension=2 --classification-smoothing=0.12
 
 # Reconstruct a sphere on a smaller three-dimensional grid.
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP1" --n=8 --dimension=3
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" --n=8 --dimension=3
-"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP3" --n=8 --dimension=3
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP1" --n=8 --dimension=3 --classification-smoothing=0.028
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" --n=8 --dimension=3 --classification-smoothing=0.028
+"$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP3" --n=8 --dimension=3 --classification-smoothing=0.028
 
 # Fit the same four-lobe target with explicit model weights and work budgets.
 "$build_dir/examples/Adaptation/SWIFT/SWIFT_ReconstructionP2" \
   --n=16 --dimension=2 --lobes=4 --amp=0.05 --R0=0.25 \
+  --classification-smoothing=0.12 \
   --model-fit=1 --model-distribution-deviatoric=1e-4 \
   --model-distribution-divergence=1e-2 --model-hinge=10 \
   --convergence-iterations-outer=30 --convergence-iterations-inner=15 \
@@ -112,8 +113,9 @@ directories to retain several resolutions or dimensions.
 
 Replace only the executable name to repeat a configuration with another
 degree. Model defaults are identical, while automatic quadrature and geometric
-target policies still depend on degree. MinSTCut is the default classifier;
-these illustrative examples impose no exterior Dirichlet condition.
+target policies still depend on degree. All reconstruction examples use
+`Geometry::MinSTCut` and impose no exterior Dirichlet condition. Historical
+campaign data retain their original classification and boundary setup.
 
 ## Geometry and Workflow
 
@@ -150,16 +152,55 @@ frequency, not an exact count of visible lobes. Lobed targets are implicit
 radial functions rather than exact signed distances. Keep the target inside
 the background box for a closed reconstruction.
 
-Cells are classified by MinSTCut using volume-weighted smooth sign observations
-and a facet-perimeter regularizer.
-Facets separating the two cell attributes form the interface to fit. This classified
-interface is only an approximation to the target; no intersection cutting or
-remeshing is performed.
+`Geometry::MinSTCut` is the canonical classifier. Its data are cell averages
+of a smooth signed phase indicator:
+
+\[
+m_K=\frac{1}{|K|}\int_K\tanh\!\left(\frac{\phi(x)}{\varepsilon}\right)dx.
+\]
+
+The binary Potts objective balances agreement with these averages against
+the measure of separating facets. The returned `inside` and `outside` cell
+indices receive attributes; `cut` identifies the interface to fit. There is
+no centroid-sign alternative or sign pinning. This classified interface is
+only an approximation to the target; no intersection cutting or remeshing is
+performed. Classification precedes SWIFT and is independent of displacement
+degree.
+
+| Classifier Setting | Flag | Default |
+|--------------------|------|---------|
+| Fidelity | `--classification-fidelity` | \(1\) |
+| Dimensionless facet smoothing | `--classification-smoothing` | \(1\) |
+| Phase transition scale | Fixed policy | \(\varepsilon=1.25h\) |
+| Cell-average quadrature order | Fixed policy | \(2\) |
+
+The reconstruction driver converts the dimensionless smoothing coefficient
+\(\widehat s\) into the physical facet weight
+
+\[
+s=h\widehat s,\qquad h=\frac{1}{n-1}.
+\]
+
+MinSTCut itself performs no mesh scaling: it uses the supplied facet function
+directly. Increasing \(\widehat s\) relative to fidelity regularizes the
+classified interface more strongly. This scaling balances the cell and facet
+costs for mesh-scale label changes; it does not guarantee feature retention.
+Excessive smoothing can still remove small regions entirely.
+
+The flag previously supplied the physical weight \(s\). To reproduce an old
+run at the same resolution, now pass \(\widehat s=s/h\). For example, the
+previous 2D weight \(0.008\) at \(n=16\) becomes `--classification-smoothing=0.12`;
+the successful weight \(0.001\) at that resolution becomes
+`--classification-smoothing=0.015`. Both CLI defaults remain \(1\).
+
+The phase average is approximated by quadrature; the
+nonpolynomial integrand is not integrated exactly. Smoothing is a facet
+function in the MinSTCut API; these examples use a constant function.
 
 | Attribute | Value | Role |
 |-----------|-------|------|
-| `Inside` | `1` | Cells assigned to the negative phase by MinSTCut |
-| `Outside` | `2` | Cells assigned to the positive phase by MinSTCut |
+| `Inside` | `1` | Cells in the minimum-cut inside set |
+| `Outside` | `2` | Cells in the minimum-cut outside set |
 | `Interface` | `10` | Facets separating inside and outside cells |
 | `Boundary` | `20` | Exterior box facets; label only, with no prescribed displacement |
 

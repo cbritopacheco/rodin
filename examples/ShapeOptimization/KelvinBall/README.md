@@ -433,6 +433,17 @@ $0.1\,h_0^2$ and gradation 2, followed by an optimisation pass with the same
 settings. The labels and planarity of the outer boundary and the cuts are
 checked after every reconstruction.
 
+SWIFT fixes the outer boundary and constrains the displacement on each cut
+plane by $u\cdot n_{\mathrm{cut}}=0$. Its algebraic slip projector enforces this
+condition on both predictor and inner corrections, without a penalty. At an
+intersection of cuts the displacement satisfies every incident plane constraint,
+so motion is restricted to their intersection. The interface rim may move
+within a cut; this does not enforce rotational agreement between paired rims.
+The native homogeneous `DirichletBC(u, VectorFunction(0, 0, 0))` would instead
+freeze all components, including the interface rim. It is supported by SWIFT,
+but is not imposed on KelvinBall's cuts: freezing the rim changes the admissible
+design evolution. The current P1 space has only vertex degrees of freedom.
+
 Only the outer face, which $\Gamma$ never reaches, is required. The cut planes
 are not: $\Gamma$ meets them, and the cut must split their triangles there.
 When those triangles were required, the split left flat tetrahedra with all
@@ -635,6 +646,67 @@ them from optimization controls: for example, `--swift-model-fit=1`,
 `--swift-convergence-tolerance-geometric=0.001`, and
 `--swift-linear-threads=4` (see `KelvinBall --help`). Classification uses
 MinSTCut both for the initial design and for every reconstructed update.
+
+### Reference scale and current defaults
+
+The fitting reference is the fixed nominal spacing
+\(h_0=R_{\mathrm{out}}/(n-1)\), not the current mean edge length
+\(\bar h\), and not either MMG size bound. SWIFT receives
+`model.h = h0` at each reconstruction. The reported mean edge length is a
+mesh diagnostic; it does not rescale the fitting problem after adaptation.
+
+| Quantity | SWIFT default | KelvinBall policy |
+|----------|---------------|-------------------|
+| Fitting stiffness \(\kappa_F\) | \(1\) | Unchanged |
+| Distribution weights \((\kappa_{\rm dev},\kappa_{\rm div})\) | \((10^{-4},10^{-2})\) | Assembled with the common factor \(h_0\) |
+| Dimensionless hinge strength \(\widehat\mu\) | \(10\) | Unchanged |
+| Quality bounds \((j_{\rm safe},Q_{\max})\) | \((0.01,10)\) | Relative deformation invariants, independent of mesh size |
+| Guard fraction \(\gamma\) | \(0.1\) | Soft activation at \(j=0.109\), \(Q=9.1\) |
+| Geometric target | \(h^{p+1}\) | \(D_\infty\leq0.1h_0^2\) for P1 |
+| Inner stationarity tolerance | \(10^{-12}+10^{-3}\|f\|_2\) | Unchanged |
+| Linear relative tolerance | \(10^{-6}\) | Unchanged; MUMPS when available |
+| Iteration budgets | \(30\) outer, \(15\) inner, \(1000\) CG per solve | Overrideable with the corresponding SWIFT flags |
+
+The automatic Welsch scale is fixed at the start of each fit:
+
+\[
+G=\max_{\Gamma_0,\mathrm{samples}}\|\nabla\phi\|,
+\qquad
+\sigma=\max\{3h_0G,\operatorname{quantile}_{0.9}|\phi|\}.
+\]
+
+The fitting energy and force carry the normalization \(G^{-2}\).
+The effective hinge coefficient is not the dimensionless input itself:
+
+\[
+\mu_k=\widehat\mu\,\frac{\Delta m_k}{|D_0|},
+\qquad \Delta m_k=\tfrac12 f_k[\bar p_k].
+\]
+
+The small-step exit adds its absolute and relative allowances. KelvinBall
+sets each contribution to \(10^{-3}h_0^2\), so the effective threshold is
+\(2\times10^{-3}h_0^2\), required for five consecutive accepted steps.
+Five relative energy changes below \(10^{-8}\) also give a best-effort exit.
+Neither is a geometric-target certificate.
+
+MinSTCut uses fidelity one and the explicit KelvinBall smoothing default
+\(\widehat s=0.04\). On an interior facet between cells \(K\) and \(L\),
+the physical weight is
+\(s_{KL}=\widehat s\min\{h_K,h_L\}\), with \(h_K\) the local cell-size
+diagnostic. Thus its perimeter cost \(s_{KL}|K\cap L|\) has the same length
+scaling as the volume-weighted unary cost. The signed statistic remains
+\(m_K=\tanh(\overline\phi_K/(1.25h_K))\); for the P1 field,
+\(\overline\phi_K\) is its vertex average. All labels are now free, as in
+the published mesh-aware classifier; the former sign-pinning mask is absent.
+The controls are `--swift-classification-fidelity` and
+`--swift-classification-smoothing`. The standalone reconstruction examples
+instead default to \(\widehat s=1\) with physical weight \(h\widehat s\).
+
+These powers of \(h_0\) assume the unit-radius nondimensional geometry.
+In particular, the geometric target proportional to \(h_0^2\) is a
+refinement policy, not an absolute tolerance invariant under a change of
+physical length units. The optimizer also keeps Hilbert lengths and advection
+steps proportional to \(h_0\), while minimum thickness is an absolute length.
 
 The fixed classified facet connectivity is not the triangulation of the
 target P1 zero set. Reducing its fitting error can therefore require strongly
