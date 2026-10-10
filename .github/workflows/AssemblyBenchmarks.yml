@@ -1,0 +1,212 @@
+name: Assembly benchmark checks
+
+on:
+  pull_request:
+    branches: [develop, master]
+  push:
+    branches: [develop, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: AssemblyBenchmarks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  NumericalSmoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        openmp: [OFF, ON]
+    env:
+      OMP_NUM_THREADS: 2
+      OMP_DYNAMIC: "FALSE"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost-all-dev libeigen3-dev libscotch-dev libhdf5-dev
+      - name: Configure optimized numerical checks
+        run: >-
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DRODIN_BUILD_BENCHMARKS=ON -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_UNIT_TESTS=ON -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=OFF -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_USE_MCSS=OFF
+          -DRODIN_USE_MPI=OFF -DRODIN_USE_PETSC=OFF
+          -DRODIN_MULTITHREADED=${{ matrix.openmp }}
+          -DRODIN_USE_OPENMP=${{ matrix.openmp }}
+      - name: Build physics assembly benchmarks
+        run: >-
+          cmake --build build --target RodinPhysicsAssemblyBenchmarks
+          RodinPhysicsStageBenchmarks RodinQuadratureExpressionBenchmarks
+          RodinMassAssemblyBenchmarks
+          RodinConstrainedAssemblyBenchmarks
+          RodinVariationalQuadratureExpressionTest RodinMathSpatialScalarProductTest
+          RodinVariationalQuadratureRuleDispatchTest -j2
+      - name: Check expression reuse, complex promotion, and unchanged dispatch
+        run: >-
+          ctest --test-dir build/tests --output-on-failure
+          -R 'QuadratureExpression|SpatialMatrixRegression.MixedRealComplexScaling|SpatialScalarProductTest|QuadratureRuleDispatch'
+      - name: Check all contexts, degrees, and geometries on smallest meshes
+        # These are numerical smoke checks, not timing regression thresholds.
+        run: >-
+          build/tests/benchmarks/RodinPhysicsAssemblyBenchmarks
+          --benchmark_filter='/3/real_time$' --benchmark_min_time=0.01s
+          --benchmark_out=assembly-smoke.json --benchmark_out_format=json
+      - name: Check sequential stage oracles on all smallest meshes
+        run: >-
+          build/tests/benchmarks/RodinPhysicsStageBenchmarks
+          --benchmark_filter='/3/real_time$' --benchmark_min_time=0.01s
+          --benchmark_out=assembly-stages-smoke.json --benchmark_out_format=json
+      - name: Compare reused and original expression kernels
+        run: >-
+          build/tests/benchmarks/RodinQuadratureExpressionBenchmarks
+          --benchmark_filter='/2/real_time$' --benchmark_min_time=1x
+          --benchmark_out=assembly-expressions-smoke.json --benchmark_out_format=json
+      - name: Check full mass/reaction operators and projection loads
+        run: >-
+          build/tests/benchmarks/RodinMassAssemblyBenchmarks
+          --benchmark_filter='/3/real_time$' --benchmark_min_time=1x
+          --benchmark_out=assembly-mass-smoke.json --benchmark_out_format=json
+      - name: Check constrained physics operators, loads, and boundary updates
+        run: >-
+          build/tests/benchmarks/RodinConstrainedAssemblyBenchmarks
+          --benchmark_filter='/3/real_time$' --benchmark_min_time=1x
+          --benchmark_out=assembly-constrained-smoke.json --benchmark_out_format=json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assembly-smoke-openmp-${{ matrix.openmp }}
+          path: |
+            assembly-smoke.json
+            assembly-stages-smoke.json
+            assembly-expressions-smoke.json
+            assembly-mass-smoke.json
+            assembly-constrained-smoke.json
+
+  PETScNumericalSmoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        openmp: [OFF, ON]
+    env:
+      OMP_NUM_THREADS: 2
+      OMP_DYNAMIC: "FALSE"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost-all-dev libeigen3-dev libscotch-dev libhdf5-dev
+          petsc-dev mpi-default-dev mpi-default-bin
+      - name: Configure optimized PETSc benchmark checks
+        run: >-
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DRODIN_BUILD_BENCHMARKS=ON -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=OFF -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_USE_MCSS=OFF
+          -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
+          -DRODIN_MULTITHREADED=${{ matrix.openmp }}
+          -DRODIN_USE_OPENMP=${{ matrix.openmp }}
+      - name: Build PETSc physics benchmarks
+        run: >-
+          cmake --build build --target RodinPETScPhysicsAssemblyBenchmarks
+          RodinPETScMassAssemblyBenchmarks RodinPETScConstrainedAssemblyBenchmarks -j2
+      - name: Check local and distributed numerical oracles
+        run: |
+          executable=build/tests/benchmarks/RodinPETScPhysicsAssemblyBenchmarks
+          "$executable" --benchmark_filter='/3/iterations:3/manual_time$' \
+            --benchmark_out=assembly-petsc-local.json --benchmark_out_format=json
+          for np in 1 2 3 4; do
+            mpiexec --oversubscribe -n "$np" "$executable" --assembly_mpi \
+              --benchmark_filter='/3/iterations:3/manual_time$' \
+              --benchmark_out="assembly-petsc-np${np}.json" --benchmark_out_format=json
+          done
+      - name: Check PETSc mass/reaction operators and projection loads
+        run: |
+          executable=build/tests/benchmarks/RodinPETScMassAssemblyBenchmarks
+          "$executable" --benchmark_filter='/3/iterations:3/manual_time$' \
+            --benchmark_out=assembly-petsc-mass-local.json --benchmark_out_format=json
+          for np in 1 2 3 4; do
+            mpiexec --oversubscribe -n "$np" "$executable" --assembly_mpi \
+              --benchmark_filter='/3/iterations:3/manual_time$' \
+              --benchmark_out="assembly-petsc-mass-np${np}.json" --benchmark_out_format=json
+          done
+      - name: Check PETSc constrained operators, loads, and boundary updates
+        run: |
+          executable=build/tests/benchmarks/RodinPETScConstrainedAssemblyBenchmarks
+          "$executable" --benchmark_filter='/3/iterations:3/manual_time$' \
+            --benchmark_out=assembly-petsc-constrained-local.json --benchmark_out_format=json
+          for np in 1 2 3 4; do
+            mpiexec --oversubscribe -n "$np" "$executable" --assembly_mpi \
+              --benchmark_filter='/3/iterations:3/manual_time$' \
+              --benchmark_out="assembly-petsc-constrained-np${np}.json" --benchmark_out_format=json
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assembly-petsc-smoke-openmp-${{ matrix.openmp }}
+          path: assembly-petsc-*.json
+
+  PETScComplexConstrainedSmoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        openmp: [OFF, ON]
+    env:
+      OMP_NUM_THREADS: 2
+      OMP_DYNAMIC: "FALSE"
+      OPENBLAS_NUM_THREADS: 1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: false
+      - name: Install complex PETSc dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost-all-dev libeigen3-dev libscotch-dev libhdf5-dev
+          libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config
+      - name: Configure complex constrained benchmark
+        run: >-
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DRODIN_BUILD_BENCHMARKS=ON -DRODIN_BUILD_EXAMPLES=OFF
+          -DRODIN_BUILD_UNIT_TESTS=OFF -DRODIN_BUILD_MANUFACTURED_TESTS=OFF
+          -DRODIN_BUILD_CONVERGENCE_TESTS=OFF -DRODIN_BUILD_DOC=OFF
+          -DRODIN_INSTALL_RESOURCES=OFF -DRODIN_USE_MCSS=OFF
+          -DRODIN_USE_MPI=ON -DRODIN_USE_PETSC=ON
+          -DRODIN_MULTITHREADED=${{ matrix.openmp }}
+          -DRODIN_USE_OPENMP=${{ matrix.openmp }}
+          -DPETSc_DIR="$(pkg-config --variable=prefix PETSc)"
+      - name: Build complex constrained benchmark
+        run: >-
+          cmake --build build --target RodinPETScConstrainedAssemblyBenchmarks -j2
+      - name: Check complex local and distributed constrained problems
+        run: |
+          executable=build/tests/benchmarks/RodinPETScConstrainedAssemblyBenchmarks
+          "$executable" --benchmark_filter='/3/iterations:3/manual_time$' \
+            --benchmark_out=assembly-complex-constrained-local.json --benchmark_out_format=json
+          for np in 1 2 3 4; do
+            mpiexec --oversubscribe -n "$np" "$executable" --assembly_mpi \
+              --benchmark_filter='/3/iterations:3/manual_time$' \
+              --benchmark_out="assembly-complex-constrained-np${np}.json" --benchmark_out_format=json
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: assembly-complex-constrained-openmp-${{ matrix.openmp }}
+          path: assembly-complex-constrained-*.json

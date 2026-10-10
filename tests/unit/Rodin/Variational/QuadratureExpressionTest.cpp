@@ -32,7 +32,8 @@ namespace Rodin::Tests::Unit
     {
       public:
         explicit ObservedMesh(LocalMesh&& mesh)
-          : LocalMesh(std::move(mesh))
+          : LocalMesh(std::move(mesh)),
+            requests(0)
         {}
 
         const PolytopeQuadrature& getQuadrature(
@@ -42,7 +43,7 @@ namespace Rodin::Tests::Unit
           return LocalMesh::getQuadrature(d, i, qf);
         }
 
-        mutable size_t requests = 0;
+        mutable size_t requests;
     };
 
     /** @brief Original entry evaluation, independent of the production rule. */

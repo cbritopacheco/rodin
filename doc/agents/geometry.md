@@ -88,6 +88,19 @@ curved cells. See quadrature.md for the exact ranges and fallback formulas.
 and overlap metadata for distributed meshes (used by the MPI stack;
 Scotch provides a graph-partitioner implementation).
 
+A local mesh or shard has the maximum dimension of its actual entities,
+with dimension zero for an empty shard. A distributed mesh stores
+
+$$
+D = \max_r \dim S_r,
+$$
+
+where $S_r$ is the shard on rank $r$. Collective construction and loading
+establish $D$; `getDimension()`, copy/move, and geometry-only `flush()` do not
+communicate. Distributed submeshes use the same contract. Topology replacement
+must go through collective construction or loading. Empty ranks participate
+in reconciliation even when they have no local entities to reconcile.
+
 ## Classification and location utilities
 
 - `MinSTCut` — serial binary Potts classifier via s-t min cut (converting

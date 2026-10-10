@@ -62,6 +62,43 @@ static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
+  /// @brief Leaves rank zero empty while retaining the existing P0g DOF owner.
+  class EmptyRootPartitioner final : public Partitioner
+  {
+    public:
+      EmptyRootPartitioner(const Mesh<Context::Local>& mesh, size_t count)
+        : m_partitioner(mesh),
+          m_count(count)
+      {
+        m_partitioner.partition(count > 1 ? count - 1 : count);
+      }
+
+      const Mesh<Context::Local>& getMesh() const override
+      {
+        return m_partitioner.getMesh();
+      }
+
+      void partition(size_t count, size_t dimension) override
+      {
+        m_count = count;
+        m_partitioner.partition(count > 1 ? count - 1 : count, dimension);
+      }
+
+      size_t getCount() const override
+      {
+        return m_count;
+      }
+
+      size_t getPartition(Index index) const override
+      {
+        return m_partitioner.getPartition(index) + (m_count > 1);
+      }
+
+    private:
+      BalancedCompactPartitioner m_partitioner;
+      size_t m_count;
+  };
+
   // -------------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------------
@@ -110,6 +147,59 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 {
   // Alias to resolve the enclosing 'PETSc' namespace scope to Rodin::PETSc.
   namespace PETSc = ::Rodin::PETSc;
+
+  /**
+   * @brief Interpolation reaches the unique global-constant DOF owner even
+   *        when that owner has no entities on which to evaluate the function.
+   *
+   * The two-cell segment is assigned only to nonzero ranks. With four ranks,
+   * both the owner and one ghost holder have empty shards; the untouched ghost
+   * must not replace the interpolated coefficient. Scalar and vector constants
+   * are checked exactly on every copy. A subsequent empty selection must leave
+   * both fields unchanged.
+   */
+  TEST(PETSc_MPI_P0g, InterpolationWithEmptyOwner)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    Sharder<Context::MPI> sharder(ctx);
+    if (world.rank() == 0)
+    {
+      auto local = makeShardableMesh(Polytope::Type::Segment, {3});
+      EmptyRootPartitioner partitioner(local, static_cast<size_t>(world.size()));
+      sharder.shard(partitioner);
+      sharder.scatter(0);
+    }
+    auto mesh = sharder.gather(0);
+    if (world.size() > 1 && world.rank() == 0)
+      EXPECT_EQ(mesh.getShard().getVertexCount(), 0);
+
+    P0g<PetscScalar, decltype(mesh)> scalarSpace(mesh);
+    P0g<Math::SpatialVector<PetscScalar>, decltype(mesh)> vectorSpace(mesh, size_t(2));
+    PETSc::Variational::GridFunction scalar(scalarSpace);
+    PETSc::Variational::GridFunction vector(vectorSpace);
+    scalar = PetscScalar(-7);
+    vector = PetscScalar(-7);
+    scalar = RealFunction(3);
+    vector = VectorFunction(RealFunction(3), RealFunction(5));
+
+    const auto& scalarRead = scalar;
+    const auto& vectorRead = vector;
+    EXPECT_EQ(scalarRead[0], PetscScalar(3));
+    EXPECT_EQ(vectorRead[0], PetscScalar(3));
+    EXPECT_EQ(vectorRead[1], PetscScalar(5));
+    scalarRead.flush();
+    vectorRead.flush();
+
+    scalar.project(Region::Cells, RealFunction(11), [](const auto&) { return false; });
+    vector.project(Region::Cells, VectorFunction(RealFunction(11), RealFunction(13)),
+      [](const auto&) { return false; });
+    EXPECT_EQ(scalarRead[0], PetscScalar(3));
+    EXPECT_EQ(vectorRead[0], PetscScalar(3));
+    EXPECT_EQ(vectorRead[1], PetscScalar(5));
+    scalarRead.flush();
+    vectorRead.flush();
+  }
 
   // =========================================================================
   // P0 — GridFunction projection
