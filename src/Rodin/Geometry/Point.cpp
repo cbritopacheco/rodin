@@ -354,7 +354,7 @@ namespace Rodin::Geometry
       case Coordinates::Physical:
         return polytope.getMesh().getSpaceDimension();
       case Coordinates::Reference:
-        return polytope.getMesh().getDimension();
+        return polytope.getDimension();
       default:
       {
         assert(false);

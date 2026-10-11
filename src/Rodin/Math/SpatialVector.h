@@ -773,7 +773,7 @@ namespace Rodin::Math
       constexpr
       void normalize() noexcept
       {
-        ScalarType n = this->norm();
+        const auto n = this->norm();
         switch (m_size)
         {
           case 3:
@@ -794,22 +794,25 @@ namespace Rodin::Math
 
       /**
        * @brief Returns the squared Euclidean norm.
-       * @returns The squared Euclidean norm.
+       *
+       * The active components define @f$\|v\|_2^2=\sum_i |v_i|^2@f$ over
+       * either the real or complex scalar field. Inactive storage is excluded.
+       *
+       * @returns The nonnegative real squared norm.
        */
-      constexpr
-      auto squaredNorm() const noexcept
+      constexpr typename Eigen::NumTraits<ScalarType>::Real squaredNorm() const noexcept
       {
-        ScalarType s = ScalarType(0);
+        typename Eigen::NumTraits<ScalarType>::Real s = 0;
         switch (m_size)
         {
           case 3:
-            s += Math::pow2(m_data[2]);
+            s += Eigen::numext::abs2(m_data[2]);
             [[fallthrough]];
           case 2:
-            s += Math::pow2(m_data[1]);
+            s += Eigen::numext::abs2(m_data[1]);
             [[fallthrough]];
           case 1:
-            s += Math::pow2(m_data[0]);
+            s += Eigen::numext::abs2(m_data[0]);
             [[fallthrough]];
           case 0:
             break;
@@ -823,31 +826,39 @@ namespace Rodin::Math
        * @brief Returns the Euclidean norm computed with Eigen's stable algorithm.
        * @returns The Euclidean norm computed with Eigen's stable algorithm.
        */
-      constexpr
-      ScalarType stableNorm() const noexcept
+      constexpr typename Eigen::NumTraits<ScalarType>::Real stableNorm() const noexcept
       {
-        return m_data.stableNorm();
+        if (m_size == 0)
+          return 0;
+        return m_data.head(m_size).stableNorm();
       }
 
       /**
        * @brief Returns the Euclidean norm computed with Eigen's Blue algorithm.
        * @returns The Euclidean norm computed with Eigen's Blue algorithm.
        */
-      constexpr
-      ScalarType blueNorm() const noexcept
+      constexpr typename Eigen::NumTraits<ScalarType>::Real blueNorm() const noexcept
       {
-        return m_data.blueNorm();
+        if (m_size == 0)
+          return 0;
+        return m_data.head(m_size).blueNorm();
       }
 
       /**
        * @brief Returns the @f$ \ell^P @f$ norm of this vector.
-       * @returns The @f$ \ell^P @f$ norm of this vector.
+       *
+       * Only active components contribute to
+       * @f$\|v\|_P=(\sum_i |v_i|^P)^{1/P}@f$ over either scalar field.
+       *
+       * @tparam P Positive norm exponent.
+       * @returns The nonnegative real @f$\ell^P@f$ norm.
        */
       template <size_t P>
-      constexpr
-      ScalarType lpNorm() const noexcept
+      constexpr typename Eigen::NumTraits<ScalarType>::Real lpNorm() const noexcept
       {
-        ScalarType s = ScalarType(0);
+        static_assert(P > 0);
+        using RealScalar = typename Eigen::NumTraits<ScalarType>::Real;
+        RealScalar s = RealScalar(0);
         std::integral_constant<size_t, P> p;
         switch (m_size)
         {
@@ -865,7 +876,7 @@ namespace Rodin::Math
           default:
             assert(false);
         }
-        return Math::pow(s, ScalarType(1) / ScalarType(P));
+        return Math::pow(s, RealScalar(1) / RealScalar(P));
       }
 
       /**
@@ -884,27 +895,9 @@ namespace Rodin::Math
        * @brief Returns the Euclidean norm.
        * @returns The Euclidean norm.
        */
-      constexpr
-      ScalarType norm() const noexcept
+      constexpr typename Eigen::NumTraits<ScalarType>::Real norm() const noexcept
       {
-        ScalarType s = 0;
-        switch (m_size)
-        {
-          case 3:
-            s += Math::pow2(m_data[2]);
-            [[fallthrough]];
-          case 2:
-            s += Math::pow2(m_data[1]);
-            [[fallthrough]];
-          case 1:
-            s += Math::pow2(m_data[0]);
-            [[fallthrough]];
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return Math::sqrt(s);
+        return Math::sqrt(squaredNorm());
       }
 
       /**

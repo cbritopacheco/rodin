@@ -131,6 +131,12 @@ namespace Rodin::Geometry
 
       /**
        * @brief Gets the dimension of coordinates.
+       *
+       * For a bound entity @f$K^k\subset\mathbb{R}^s@f$, reference
+       * coordinates have dimension @f$k@f$ and physical coordinates have
+       * dimension @f$s@f$. The containing mesh dimension does not determine
+       * the reference dimension of a lower-dimensional entity.
+       *
        * @param[in] coords Type of coordinates (Reference or Physical)
        * @returns Dimension of the specified coordinate system
        */

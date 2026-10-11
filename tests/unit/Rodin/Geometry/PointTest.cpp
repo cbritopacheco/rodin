@@ -17,6 +17,73 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 
 /**
+ * @brief Distinguishes entity reference dimension from mesh and embedding dimensions.
+ *
+ * For every entity @f$K^k\subset\mathbb R^s@f$, reference coordinates have
+ * dimension @f$k@f$ and physical coordinates have dimension @f$s@f$.
+ * Every grade of all eight cell families is checked in every admissible
+ * embedding dimension through three. Copying preserves both dimensions;
+ * rebinding changes the reference dimension to that of the new entity.
+ * All comparisons concern exact logical dimensions, not coordinate tolerances.
+ */
+TEST(Geometry_Point, ReferenceDimensionFollowsBoundEntity)
+{
+  for (const auto geometry :
+    {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+  {
+    const Polytope::Traits traits(geometry);
+    const size_t dimension = traits.getDimension();
+    for (size_t embedding = std::max(size_t(1), dimension); embedding <= 3; ++embedding)
+    {
+      SCOPED_TRACE(::testing::Message()
+        << "geometry=" << int(geometry) << " embedding=" << embedding);
+      Mesh<Context::Local>::Builder builder;
+      builder.initialize(embedding).nodes(traits.getVertexCount());
+      IndexArray vertices(traits.getVertexCount());
+      for (size_t a = 0; a < traits.getVertexCount(); ++a)
+      {
+        Math::SpatialPoint vertex(static_cast<std::uint8_t>(embedding));
+        vertex.setZero();
+        for (size_t j = 0; j < dimension; ++j)
+          vertex(j) = traits.getVertex(a)(j);
+        builder.vertex(vertex);
+        vertices(a) = a;
+      }
+      if (dimension > 0)
+        builder.polytope(geometry, vertices);
+      auto mesh = builder.finalize();
+      for (size_t k = dimension; k > 0; --k)
+        mesh.getConnectivity().compute(k, k - 1);
+      const auto top = *mesh.getPolytope(dimension, 0);
+      for (size_t k = 0; k <= dimension; ++k)
+      {
+        SCOPED_TRACE(k);
+        ASSERT_GT(mesh.getPolytopeCount(k), 0);
+        for (Index i = 0; i < mesh.getPolytopeCount(k); ++i)
+        {
+          const auto entity = *mesh.getPolytope(k, i);
+          const Polytope::Traits entityTraits(entity.getGeometry());
+          Point point(entity, entityTraits.getCentroid());
+          EXPECT_EQ(point.getReferenceCoordinates().size(), k);
+          EXPECT_EQ(point.getDimension(PointBase::Coordinates::Reference), k);
+          EXPECT_EQ(point.getDimension(PointBase::Coordinates::Physical), embedding);
+          const Point copied(point);
+          EXPECT_EQ(copied.getDimension(PointBase::Coordinates::Reference), k);
+          EXPECT_EQ(copied.getDimension(PointBase::Coordinates::Physical), embedding);
+          point.setPolytope(top);
+          EXPECT_EQ(point.getDimension(PointBase::Coordinates::Reference), dimension);
+          point.setPolytope(entity);
+          EXPECT_EQ(point.getDimension(PointBase::Coordinates::Reference), k);
+          EXPECT_EQ(point.getDimension(PointBase::Coordinates::Physical), embedding);
+        }
+      }
+    }
+  }
+}
+
+/**
  * @brief Compares lazy physical maps with direct evaluation at every sample.
  *
  * ## Mathematical contract
