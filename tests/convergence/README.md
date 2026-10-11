@@ -247,6 +247,34 @@ the exact data, levels, acceptance bounds, and backend scope.
 Current implemented coverage is summarized below; a dash means that no suite
 exists yet.
 
+### Certified pre-NAFEMS scope
+
+The finite numerical matrix was reconciled on 11 October 2026 against
+revision `33ce084a65daf77804e2e5217ad6bbe322fbc6fb`:
+**41,568 of 41,568 applicable numerical case/configurations passed (100%)**.
+The evidence combines 234 successful convergence CI jobs with complete
+source-matched local reports, deduplicated by case, scalar/backend, thread
+configuration and execution context. Every credited rate study includes its
+complete registered hierarchy. MPI participant reports are not extra cases.
+The [certifying workflow](https://github.com/cbritopacheco/rodin/actions/runs/38144449798)
+passed; all 336 PR checks were green on this revision.
+
+The selected distributed structural/storage matrix also passed: **326 of
+326 registered gates**, reconciled from twelve successful CI jobs on the same
+revision without historical transfers. These gates are accounted for
+separately from numerical convergence. Neither that matrix nor the percentage
+above measures executable source-line coverage. Dedicated convergence jobs
+do not currently upload instrumented coverage to Codecov.
+
+Certification is restricted to the formulations, degrees, geometries,
+refinement levels, coefficient ranges and backend configurations specified
+below and in the suite specifications. It is not a claim about arbitrary
+orders, every field/geometry-degree combination, all partitions, physical-model
+validation or mesh-uniform mixed-space stability. Point spaces have structural
+and exact-value checks, not spatial convergence rates. NAFEMS and Darcy are
+excluded. Performance profiling and repairs are the next workstream; benchmarks
+remain opt-in and outside the CTest/CI convergence suite.
+
 | Context | h | p | hp | Isoparametric |
 | --- | --- | --- | --- | --- |
 | Poisson | P1–P3, boundary variants; PETSc local/MPI Dirichlet P1/P2 and mixed Neumann/Robin P1–P3; pure Neumann with MUMPS | P1/P2 patch; P1→P2→P3→P4 analytic; native and real-PETSc local/MPI | P1–P3; native and real-PETSc local/MPI | P1/P2 on exact P2 and approximated sine maps; lifted smooth P1–P3 on Q2 and affine P2 on Q1/Q2 and P3 on Q3; native local and real-PETSc local/MPI |
@@ -700,12 +728,13 @@ Their PETSc [p](p/PETScStokes/README.md) and
 acceptance bounds, globally reduced owned-cell norms, and ranks 1–4.
 The p suite also checks known P4/P3 norm values on sparse/empty partitions.
 
-## Verification workplan and remaining work
+## Verification workplan and continuation
 
 The coverage above includes the baseline merged in PR #333 and subsequent
-suite additions. The following priorities include implemented structural gates
-and unfinished PDE extensions; an entry in the workplan does not itself imply
-a passing test. Completion is assessed per formulation, space, geometry,
+suite additions. The declared pre-NAFEMS numerical matrix is complete within
+the certified scope above. The following workplan records its requirements and
+the separate continuation; an entry alone does not establish passing evidence.
+Completion is assessed per formulation, space, geometry,
 refinement path, and backend, rather than by the presence of a directory.
 
 For a fixed, declared verification matrix $\mathcal C$, a coverage entry records
@@ -750,9 +779,9 @@ sources rather than combined by an unchecked union of test names.
 
 | Priority | Extension | Required evidence |
 | --- | --- | --- |
-| 1 | PETSc local and MPI PDE coverage: remaining boundary/refinement variants of Poisson, Helmholtz, conductivity, linear elasticity, Stokes, coupled reaction–diffusion, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
+| 1 | Completed declared PETSc local and MPI boundary/refinement variants of Poisson, Helmholtz, conductivity, linear elasticity, Stokes, coupled reaction–diffusion, and nonlinear Poisson | Independently integrated field errors and expected rates on each meaningful geometry; supported scalar/backend configurations stated explicitly; owned-cell global norms in MPI |
 | 2 | Curved Poisson, conductivity, Helmholtz, linear-elasticity, Stokes, reaction–diffusion and nonlinear Poisson boundary/degree extensions | Physical-coordinate manufactured data, independent norm integration, regular maps, and case-specific field rates or exact reproduction |
-| 3 | Exact-domain comparisons and further degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches. At geometry degree 2, Poisson, conductivity, complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson have represented-domain and lifted P1/P2 studies; Taylor–Hood Stokes has the P2/P1 study. Poisson/conductivity additionally have lifted affine studies at geometry degrees 1–3, with field degree $p=\max(2,q)$. Complex Helmholtz, linear elasticity, coupled reaction–diffusion and nonlinear Poisson additionally have matched affine studies at geometry degrees 1 and 3. Stokes additionally has affine shear studies at these geometry degrees with velocity/pressure degrees $k/(k-1)$, $k=\max(2,q)$. Further field/geometry degree combinations remain outside the currently verified matrix |
+| 3 | Completed declared exact-domain comparisons and mixed degrees on approximated nonpolynomial geometry | Geometry degrees 1–3 have independent map/derivative rates and affine patches. At geometry degree 2, the scalar, complex, vector and coupled physics have represented-domain and lifted P1/P2 and smooth P3/Q2 studies; Stokes includes P2/P1 and smooth P3/P2 on Q2 with coupled and separated pressure checks. Matched affine studies at geometry degrees 1 and 3 retain their suite-specific field degrees. Arbitrary additional degree combinations are outside this finite matrix |
 | 4 | Maintain the implemented real/complex scalar/vector/matrix structural matrix for P0, P0g, P1 and H1 degrees one through six | Exact index round trips, unique ownership, halo/incidence completeness, boundary and identification selection, and SubMesh restriction; native and PETSc storage gates have separately stated scopes |
 | Last | Independent NAFEMS benchmarks, after the convergence/structural/backend batches | Authoritative specifications and usable reference data; independently defined quantities of interest, units, error budgets, and mesh studies in `tests/nafems` |
 | After pre-NAFEMS convergence certification | Assembly performance across existing physical contexts, geometries, spaces, and backends (benchmark foundation imported from [PR #356](https://github.com/cbritopacheco/rodin/pull/356)) | Profile the certified convergence workloads, isolate measured hotspots, and establish before/after timings with correctness regressions; benchmark qualification does not count toward convergence coverage |
@@ -843,9 +872,10 @@ storage. Scalar, three-component vector and non-square matrix representatives
 are exercised; this does not certify arbitrary component counts, every
 matrix shape, unbounded polynomial orders or every mesh partition. These
 fixed-mesh logical and reproduction gates are retained alongside the PDE
-studies, not substituted for refinement-rate evidence. The unfinished
-curved boundary and matched field/geometry-degree PDE matrices remain
-priorities 2 and 3; hosted CI evidence remains distinct from local verification.
+studies, not substituted for refinement-rate evidence. The declared curved
+boundary and matched field/geometry-degree PDE matrices have completed
+numerical certification; hosted CI and local evidence retain their distinct
+source/build provenance.
 For mixed spaces, pressure-nullspace and inf-sup verification remain
 distinct from convergence of selected manufactured fields. The Stokes
 coarse-space rank regression establishes an obstruction, not stability of
@@ -859,22 +889,23 @@ $P_2/P_1$ pair, six geometries, maps and levels in local contexts and at MPI
 ranks one through four, independently in both thread configurations. Its
 explicitly global oracle collects complete operators and integer boundary
 indices; it introduces no collectives into mesh queries or field evaluation.
-The finite matrix was locally verified with the previous dense oracle,
-not hosted-CI certified. Recertification with the
+The finite matrix is certified with the
 [bounded-workspace oracle](h/Stokes/README.md#bounded-workspace-spectral-construction)
-is pending.
-The native gate also previously verified the $P_3/P_2$ pair on affine and
+on the revision identified above.
+The native gate also verifies the $P_3/P_2$ pair on affine and
 quadratic maps at grid levels $3,4,5$ in both thread configurations,
 with the same independent spectra and missing-divergence control.
-The corresponding higher-order real-PETSc gate previously verified all six
+The corresponding higher-order real-PETSc gate verifies all six
 geometries and both maps at these levels in local and MPI rank 1–4 contexts,
 separately in sequential/OpenMP builds. Its spectral calculation is
 performed once on the matrix communicator and the result is distributed;
 pressure constants use interpolated coefficients, not an assumed nodal layout.
 The implemented $P_4/P_3$ extension retains all six geometries, both maps,
 grid levels $3,4,5$, local/MPI rank 1–4 contexts, and both thread configurations.
-Its numerical certification and recertification of the older pairs remain
-pending. The shared oracle preserves the independent Schur and singular-value
+Its numerical certification and recertification of the older pairs are
+complete, including all twelve native/real-PETSc, local/MPI and thread
+configurations of the pyramid hierarchy. The shared oracle preserves the
+independent Schur and singular-value
 routes with separately bounded pressure matrices and velocity-column blocks;
 it does not replace numerical spectra with a dimension count.
 These finite gates do not establish mesh-uniform stability or stability of
