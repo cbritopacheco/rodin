@@ -23,7 +23,6 @@
 #include "QuadratureFormula.h"
 #include "GaussLegendre.h"
 
-
 namespace Rodin::QF
 {
   /**
@@ -200,9 +199,13 @@ namespace Rodin::QF
        * Interior nodes and weights come from Gaussian quadrature for
        * @f$ x(1-x)^{\alpha+1} @f$. Closed-form endpoint weights avoid
        * subtractive cancellation at the collapsed vertex.
+       * @param n Number of quadrature points, including both endpoints; at least two.
+       * @param alpha Exponent of the @f$ (1-x) @f$ weight.
+       * @param x Output nodes on the unit interval, including both endpoints.
+       * @param w Output weights, summing to @f$ 1/(\alpha+1) @f$.
        */
-      static void gjl1dUnit(size_t n, size_t alpha,
-        std::vector<Real>& x, std::vector<Real>& w)
+      static void gjl1dUnit(
+        size_t n, size_t alpha, std::vector<Real>& x, std::vector<Real>& w)
       {
         assert(n >= 2);
         x.resize(n);
@@ -212,9 +215,9 @@ namespace Rodin::QF
         const Real count = static_cast<Real>(n);
         const Real a = static_cast<Real>(alpha);
         w.front() = Real(1) / ((count - 1) * (count + a));
-        w.back() = std::exp(std::lgamma(a + 1) + std::lgamma(a + 2) +
-          std::lgamma(count - 1) + std::lgamma(count) -
-          std::lgamma(count + a) - std::lgamma(count + a + 1));
+        w.back() =
+          std::exp(std::lgamma(a + 1) + std::lgamma(a + 2) + std::lgamma(count - 1) +
+            std::lgamma(count) - std::lgamma(count + a) - std::lgamma(count + a + 1));
         if (n > 2)
         {
           std::vector<Real> interior, weights;
@@ -395,9 +398,9 @@ namespace Rodin::QF
             break;
         }
         if (getGeometry() == Geometry::Polytope::Type::Triangle ||
-            getGeometry() == Geometry::Polytope::Type::Tetrahedron ||
-            getGeometry() == Geometry::Polytope::Type::Wedge ||
-            getGeometry() == Geometry::Polytope::Type::Pyramid)
+          getGeometry() == Geometry::Polytope::Type::Tetrahedron ||
+          getGeometry() == Geometry::Polytope::Type::Wedge ||
+          getGeometry() == Geometry::Polytope::Type::Pyramid)
           mergeCollapsedPoints();
       }
 
@@ -490,7 +493,7 @@ namespace Rodin::QF
             const Real s = (1.0 - u[i]) * v[j];
             Math::SpatialVector<Real> p; p.resize(2); p[0]=r; p[1]=s;
             m_points.push_back(std::move(p));
-            m_weights[k++] = wu[i]*wv[j];
+            m_weights[k++] = wu[i] * wv[j];
           }
         }
       }
@@ -529,7 +532,7 @@ namespace Rodin::QF
               const Real t = (1.0 - u[i]) * (1.0 - v[j]) * w[kk];
               Math::SpatialVector<Real> p; p.resize(3); p[0]=r; p[1]=s; p[2]=t;
               m_points.push_back(std::move(p));
-              m_weights[k++] = wu[i]*wv[j]*ww[kk];
+              m_weights[k++] = wu[i] * wv[j] * ww[kk];
             }
           }
         }
@@ -566,7 +569,7 @@ namespace Rodin::QF
               const Real t = z[kk];
               Math::SpatialVector<Real> p; p.resize(3); p[0]=r; p[1]=s; p[2]=t;
               m_points.push_back(std::move(p));
-              m_weights[k++] = wu[i]*wv[j]*wz[kk];
+              m_weights[k++] = wu[i] * wv[j] * wz[kk];
             }
           }
         }

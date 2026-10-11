@@ -1469,7 +1469,8 @@ namespace Rodin::Variational
         : m_scalar(ScalarSpace(degree, mesh)),
           m_rows(rows),
           m_cols(cols),
-          m_shard(degree, mesh.getShard(), rows, cols)
+          m_shard(degree, mesh.getShard(), rows, cols),
+          m_size(0)
       {
         if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
           cols > RODIN_MAXIMAL_SPACE_DIMENSION)
@@ -1659,7 +1660,7 @@ namespace Rodin::Variational
       size_t m_rows, m_cols;
       FESType m_shard;
       std::map<Index, Index> m_globalToLocal;
-      size_t m_size = 0;
+      size_t m_size;
       std::vector<std::vector<IndexArray>> m_dofs;
       std::map<Geometry::Polytope::Type, ElementType> m_elements;
   };

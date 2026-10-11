@@ -19,7 +19,8 @@ namespace Rodin::QF
     static thread_local std::array<const GaussLobatto*, HotCapacity> hot{};
     static thread_local size_t next = 0;
     static FlatMap<std::pair<Geometry::Polytope::Type, size_t>,
-      std::unique_ptr<const GaussLobatto>> pool;
+      std::unique_ptr<const GaussLobatto>>
+      pool;
     static std::mutex mutex;
 
     for (const auto* rule : hot)

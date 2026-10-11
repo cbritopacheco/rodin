@@ -252,7 +252,7 @@ namespace Rodin::Variational
        *
        * Computes @f$ a(u, v) = \mathbf{v}^* A \mathbf{u} @f$ by
        * performing a matrix–vector product `MatMult(A, u, tmp)` followed
-       * by `VecDot(v, tmp, &result)`.
+       * by `VecDot(tmp, v, &result)`; PETSc conjugates the second operand.
        *
        * @param[in] u Trial grid function @f$ u @f$.
        * @param[in] v Test grid function @f$ v @f$.
@@ -272,7 +272,7 @@ namespace Rodin::Variational
         ierr = MatMult(this->getOperator(), u.getData(), tmp);
         assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecDot(v.getData(), tmp, &result);
+        ierr = VecDot(tmp, v.getData(), &result);
         assert(ierr == PETSC_SUCCESS);
 
         ierr = VecDestroy(&tmp);

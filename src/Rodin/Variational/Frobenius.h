@@ -13,8 +13,8 @@
  *
  * Computes the Frobenius norm (Euclidean norm) of vectors and matrices:
  * - For scalars: @f$ \|x\| = |x| @f$
- * - For vectors: @f$ \|\mathbf{v}\| = \sqrt{\sum_i v_i^2} @f$
- * - For matrices: @f$ \|A\|_F = \sqrt{\sum_{ij} A_{ij}^2} @f$
+ * - For vectors: @f$ \|\mathbf{v}\| = \sqrt{\sum_i |v_i|^2} @f$
+ * - For matrices: @f$ \|A\|_F = \sqrt{\sum_{ij} |A_{ij}|^2} @f$
  */
 
 #include "Rodin/Math/Common.h"
@@ -36,14 +36,15 @@ namespace Rodin::Variational
    * @brief Frobenius norm of a function.
    *
    * Computes the Frobenius (Euclidean) norm:
-   * - For scalars: @f$ \|\cdot\| : \mathbb{R} \to \mathbb{R}, \quad \|x\| = |x| @f$
-   * - For vectors @f$ \mathbf{v} \in \mathbb{R}^n @f$:
+   * The scalar field is @f$\mathbb{K}=\mathbb{R}@f$ or @f$\mathbb{C}@f$.
+   * - For scalars: @f$ \|\cdot\| : \mathbb{K} \to \mathbb{R}, \quad \|x\| = |x| @f$
+   * - For vectors @f$ \mathbf{v} \in \mathbb{K}^n @f$:
    *   @f[
-   *      \|\mathbf{v}\| = \sqrt{\sum_{i=1}^{n} v_i^2}
+   *      \|\mathbf{v}\| = \sqrt{\sum_{i=1}^{n} |v_i|^2}
    *   @f]
-   * - For matrices @f$ A \in \mathbb{R}^{m \times n} @f$:
+   * - For matrices @f$ A \in \mathbb{K}^{m \times n} @f$:
    *   @f[
-   *      \|A\|_F = \sqrt{\sum_{i=1}^{m}\sum_{j=1}^{n} A_{ij}^2}
+   *      \|A\|_F = \sqrt{\sum_{i=1}^{m}\sum_{j=1}^{n} |A_{ij}|^2}
    *   @f]
    *
    * @tparam NestedDerived Type of the function to take the norm of
@@ -62,7 +63,7 @@ namespace Rodin::Variational
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
       /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
+      using ScalarType = Real;
 
       /// @brief Parent class type.
       using Parent = RealFunctionBase<Frobenius<OperandType>>;
@@ -101,7 +102,8 @@ namespace Rodin::Variational
       template <class Point>
       auto getValue(const Point& p) const
       {
-        if constexpr (std::is_same_v<OperandRangeType, Real>)
+        if constexpr (std::is_same_v<OperandRangeType, Real> ||
+          std::is_same_v<OperandRangeType, Complex>)
         {
           return Math::abs(this->getOperand().getValue(p));
         }

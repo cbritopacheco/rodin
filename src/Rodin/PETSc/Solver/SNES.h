@@ -25,6 +25,7 @@
 
 #include <functional>
 #include <petscsystypes.h>
+#include <utility>
 
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/PETSc/Object.h"
@@ -63,6 +64,15 @@ namespace Rodin::Solver
    *
    * Supports both programmatic configuration (`setType`, `setTolerances`)
    * and PETSc command-line overrides (`-snes_type`, `-snes_rtol`, …).
+   *
+   * @par Architecture
+   * The state callback synchronizes the variational fields from the iterate;
+   * targeted assembly then evaluates the residual or Jacobian. With PETSc
+   * 3.20 and newer, synchronization is keyed by the unique vector object ID
+   * and its change counter. A changed key invalidates both assembly caches:
+   * equal counters on different vectors do not denote the same iterate.
+   * PETSc 3.19 uses uncached synchronization and assembly. Each solve resets
+   * these caches and synchronizes the final state before returning.
    *
    * @see <a href="class_rodin_1_1_solver_1_1_k_s_p.html">Rodin::Solver::KSP</a>
    * @see <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html">Rodin::Solver::NewtonSolverBase</a>
@@ -282,7 +292,8 @@ namespace Rodin::Solver
       StateUpdate m_update; ///< Optional state synchronization callback.
       Optional<::PetscObjectState> m_lhsAssembled;
       Optional<::PetscObjectState> m_rhsAssembled;
-      Optional<::PetscObjectState> m_updated;
+      // Object state is a per-object counter, not an iterate identity.
+      Optional<std::pair<::PetscObjectId, ::PetscObjectState>> m_updated;
   };
 }
 

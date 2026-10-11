@@ -54,13 +54,24 @@ namespace Rodin::Variational
           struct Key
           {
           /// @brief Geometry of the cached polytope.
-              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+          Geometry::Polytope::Type geom;
           /// @brief Quadrature formula the cached tabulation belongs to.
-              const QF::QuadratureFormulaBase* qf = nullptr;
+          const QF::QuadratureFormulaBase* qf;
+          /// @brief Logical lifetime and assignment identity of the formula.
+          size_t identity;
           /// @brief Index of the quadrature point.
-              size_t qp = 0;
+          size_t qp;
           /// @brief Whether the key holds a cached entry.
-              bool valid = false;
+          bool valid;
+
+          /// @brief Constructs an invalid quadrature cache key.
+          Key()
+            : geom(Geometry::Polytope::Type::Point),
+              qf(nullptr),
+              identity(0),
+              qp(0),
+              valid(false)
+          {}
 
           /**
            * @brief Tests whether the key holds a cached entry.
@@ -80,7 +91,8 @@ namespace Rodin::Variational
               {
                 if (!valid || !o.valid)
                   return false;
-                return geom == o.geom && qf == o.qf && qp == o.qp;
+                return geom == o.geom && qf == o.qf && identity == o.identity &&
+                  qp == o.qp;
               }
 
           /**
@@ -92,6 +104,7 @@ namespace Rodin::Variational
                 valid = false;
                 geom = Geometry::Polytope::Type::Point;
                 qf = nullptr;
+                identity = 0;
                 qp = 0;
               }
         };
@@ -177,6 +190,7 @@ namespace Rodin::Variational
         typename Cache::Key key;
         key.geom  = geom;
         key.qf = qf;
+        key.identity = qf ? qf->getCacheIdentity() : 0;
         key.qp    = qp;
         key.valid = true;
 
@@ -287,15 +301,27 @@ namespace Rodin::Variational
           struct Key
           {
               /// @brief Geometry of the cached polytope.
-              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+              Geometry::Polytope::Type geom;
               /// @brief Quadrature formula the cached tabulation belongs to.
-              const QF::QuadratureFormulaBase* qf = nullptr;
+              const QF::QuadratureFormulaBase* qf;
+              /// @brief Logical lifetime and assignment identity of the formula.
+              size_t identity;
               /// @brief Index of the quadrature point.
-              size_t qp = 0;
+              size_t qp;
               /// @brief Vector dimension of the finite element space.
-              size_t vdim = 0;
+              size_t vdim;
               /// @brief Whether the key holds a cached entry.
-              bool valid = false;
+              bool valid;
+
+              /// @brief Constructs an invalid quadrature cache key.
+              Key()
+                : geom(Geometry::Polytope::Type::Point),
+                  qf(nullptr),
+                  identity(0),
+                  qp(0),
+                  vdim(0),
+                  valid(false)
+              {}
 
               /**
                * @brief Tests whether the key holds a cached entry.
@@ -315,7 +341,8 @@ namespace Rodin::Variational
               {
                 if (!valid || !o.valid)
                   return false;
-                return geom == o.geom && qf == o.qf && qp == o.qp && vdim == o.vdim;
+                return geom == o.geom && qf == o.qf && identity == o.identity &&
+                  qp == o.qp && vdim == o.vdim;
               }
 
               /**
@@ -327,6 +354,7 @@ namespace Rodin::Variational
                 valid = false;
                 geom = Geometry::Polytope::Type::Point;
                 qf = nullptr;
+                identity = 0;
                 qp = 0;
                 vdim = 0;
               }
@@ -418,6 +446,7 @@ namespace Rodin::Variational
         typename Cache::Key key;
         key.geom  = geom;
         key.qf = qf;
+        key.identity = qf ? qf->getCacheIdentity() : 0;
         key.qp    = qp;
         key.vdim  = vdim;
         key.valid = true;
@@ -526,21 +555,36 @@ namespace Rodin::Variational
        * @param fes Finite element space.
        */
       explicit ShapeFunction(const FES& fes)
-        : Parent(fes)
+        : Parent(fes),
+          m_ip(nullptr),
+          m_qf(nullptr),
+          m_qfIdentity(0),
+          m_qp(0),
+          m_geometry(Geometry::Polytope::Type::Point)
       {}
       /**
        * @brief Constructs matrix basis tabulation on the supplied finite element space.
        * @param other Object to copy from.
        */
       ShapeFunction(const ShapeFunction& other)
-        : Parent(other)
+        : Parent(other),
+          m_ip(nullptr),
+          m_qf(nullptr),
+          m_qfIdentity(0),
+          m_qp(0),
+          m_geometry(Geometry::Polytope::Type::Point)
       {}
       /**
        * @brief Constructs matrix basis tabulation on the supplied finite element space.
        * @param other Object to move from.
        */
       ShapeFunction(ShapeFunction&& other)
-        : Parent(std::move(other))
+        : Parent(std::move(other)),
+          m_ip(nullptr),
+          m_qf(nullptr),
+          m_qfIdentity(0),
+          m_qp(0),
+          m_geometry(Geometry::Polytope::Type::Point)
       {}
 
       /**
@@ -577,6 +621,7 @@ namespace Rodin::Variational
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(
           poly.getDimension(), poly.getIndex());
         if (!ip.getQuadratureFormula() || m_qf != ip.getQuadratureFormula() ||
+          m_qfIdentity != ip.getQuadratureFormula()->getCacheIdentity() ||
           m_qp != ip.getIndex() || m_geometry != poly.getGeometry())
         {
           m_basis.resize(fe.getCount());
@@ -595,6 +640,7 @@ namespace Rodin::Variational
             }
           }
           m_qf = ip.getQuadratureFormula();
+          m_qfIdentity = m_qf ? m_qf->getCacheIdentity() : 0;
           m_qp = ip.getIndex();
           m_geometry = poly.getGeometry();
         }
@@ -636,10 +682,11 @@ namespace Rodin::Variational
       }
 
     private:
-      const IntegrationPoint* m_ip = nullptr;
-      const QF::QuadratureFormulaBase* m_qf = nullptr;
-      size_t m_qp = 0;
-      Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
+      const IntegrationPoint* m_ip;
+      const QF::QuadratureFormulaBase* m_qf;
+      size_t m_qfIdentity;
+      size_t m_qp;
+      Geometry::Polytope::Type m_geometry;
       std::vector<RangeType> m_basis;
   };
 }

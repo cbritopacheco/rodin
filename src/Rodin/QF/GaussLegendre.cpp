@@ -269,8 +269,8 @@ namespace Rodin::QF
     gj1dUnit(n, alpha, 0, x, w);
   }
 
-  void GaussLegendre::gj1dUnit(size_t n, size_t alpha, size_t beta,
-    std::vector<Real>& x, std::vector<Real>& w)
+  void GaussLegendre::gj1dUnit(
+    size_t n, size_t alpha, size_t beta, std::vector<Real>& x, std::vector<Real>& w)
   {
     assert(n > 0);
     // Golub-Welsch: the nodes are the eigenvalues of the Jacobi matrix of the
@@ -300,8 +300,9 @@ namespace Rodin::QF
 
     Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> es(J);
     assert(es.info() == Eigen::Success);
-    const Real measure = beta == 0 ? Real(1) / (a + 1) :
-      std::exp(std::lgamma(a + 1) + std::lgamma(b + 1) - std::lgamma(a + b + 2));
+    const Real measure = beta == 0
+      ? Real(1) / (a + 1)
+      : std::exp(std::lgamma(a + 1) + std::lgamma(b + 1) - std::lgamma(a + b + 2));
 
     x.resize(n);
     w.resize(n);

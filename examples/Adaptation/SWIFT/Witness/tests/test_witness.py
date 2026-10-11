@@ -59,7 +59,7 @@ class WitnessTests(unittest.TestCase):
             self.assertNotIn('CGAL_DIR:', (root/'build/CMakeCache.txt').read_text())
 
     def test_reference_geometry_and_wireframe(self):
-        records = self.execute('3', '--geometry', 'all', '--iterations', '0')
+        records = self.execute('1', '--geometry', 'all', '--iterations', '0')
         self.assertEqual(len(records), 8)
         edges = {'point': 0, 'segment': 1, 'triangle': 3, 'quadrilateral': 4,
                  'tetrahedron': 6, 'pyramid': 8, 'hexahedron': 12, 'wedge': 9}
@@ -67,12 +67,13 @@ class WitnessTests(unittest.TestCase):
             name = record['geometry']
             np.testing.assert_array_equal(record['reference_vertices'], Reference.VERTICES[name])
             self.assertEqual(len(record['reference_edges']), edges[name])
-            self.assertEqual(record['count'], 1 if name == 'point' else 3)
+            self.assertEqual(record['count'], len(Reference.VERTICES[name]))
             self.assertIsInstance(record['covering_radius'], (int, float))
 
     def test_analytic_interval(self):
-        for count in (1, 3, 16):
-            record = self.execute(count, '--geometry', 'segment')
+        for subdivisions in (1, 3, 16):
+            count = subdivisions+1
+            record = self.execute(subdivisions, '--geometry', 'segment')
             np.testing.assert_allclose(record['points'], ((np.arange(count)+.5)/count)[:, None])
             self.assertAlmostEqual(record['covering_radius'], 1/(2*count), places=12)
 
@@ -82,10 +83,10 @@ class WitnessTests(unittest.TestCase):
                     ('pyramid', 14, 2), ('hexahedron', 27, 2), ('wedge', 18, 2)]
         for geometry, count, resolution in fixtures:
             with self.subTest(geometry=geometry):
-                record = self.execute(count, '--geometry', geometry, '--iterations', 0)
+                record = self.execute(resolution, '--geometry', geometry, '--iterations', 0)
                 initial = np.asarray(record['initial_points'])
                 self.assertEqual(record['initialization'], {
-                    'method': 'complete_uniform_lattice', 'resolution': resolution,
+                    'method': 'complete_uniform_lattice', 'subdivisions': resolution,
                     'lattice_size': count})
                 self.assertEqual(len(np.unique(initial, axis=0)), count)
                 np.testing.assert_allclose(initial*resolution, np.round(initial*resolution))
@@ -93,15 +94,14 @@ class WitnessTests(unittest.TestCase):
                 self.assertTrue(all(any(np.array_equal(v, p) for p in initial) for v in vertices))
 
     def test_lattice_count_and_sampling_independence(self):
-        first = self.execute(16, '--iterations', 0, '--resolution', 4)
-        second = self.execute(16, '--iterations', 0, '--resolution', 12)
+        first = self.execute(4, '--iterations', 0, '--resolution', 4)
+        second = self.execute('--subdivisions', 4, '--iterations', 0, '--resolution', 12)
         np.testing.assert_array_equal(first['initial_points'], second['initial_points'])
         self.assertEqual(first['initialization'], {
-            'method': 'uniform_lattice_farthest_subset', 'resolution': 5, 'lattice_size': 21})
-        self.assertEqual(len(np.unique(first['initial_points'], axis=0)), 16)
+            'method': 'complete_uniform_lattice', 'subdivisions': 4, 'lattice_size': 15})
+        self.assertEqual(len(np.unique(first['initial_points'], axis=0)), 15)
         for record in self.execute(1, '--geometry', 'all', '--iterations', 0):
-            np.testing.assert_allclose(record['initial_points'][0],
-                                       np.mean(record['reference_vertices'], axis=0))
+            self.assertEqual(sorted(record['initial_points']), sorted(record['reference_vertices']))
 
     def test_triangle_six_equispaced(self):
         record = self.execute(supplied={'geometry': 'triangle', 'points':
@@ -130,7 +130,7 @@ class WitnessTests(unittest.TestCase):
         np.testing.assert_array_equal(first['points'], second['points'])
         self.assertLessEqual(first['covering_radius'], first['initial_radius'])
         self.assertEqual(first['optimality'], 'not_certified')
-        limited = self.execute('16', '--max-evaluations', '3')
+        limited = self.execute('4', '--max-evaluations', '3')
         self.assertEqual(limited['search']['evaluations'], 3)
         self.assertEqual(limited['search']['termination'], 'evaluation_limit')
         self.assertEqual(limited['search']['implementation'], 'checked_enclosing_ball')
@@ -139,22 +139,14 @@ class WitnessTests(unittest.TestCase):
         self.assertTrue(all(b <= a+1e-10 for a, b in zip(radii, radii[1:])))
 
     def test_canonical_enclosing_ball_all_geometries(self):
-        records = self.execute(16, '--geometry', 'all')
-        path = os.environ.get('SWIFT_WITNESS_COMPARISON_RESULTS')
-        historical = json.loads(Path(path).read_text()) if path else []
+        records = self.execute(2, '--geometry', 'all')
         for record in records:
             with self.subTest(geometry=record['geometry']):
                 radius = Reference(record['geometry']).radius(np.array(record['points']))
                 self.assertAlmostEqual(radius, record['covering_radius'], places=9)
                 self.assertLessEqual(radius, record['initial_radius']+1e-10)
-                previous = next((r for r in historical if r['geometry'] == record['geometry']
-                                 and r['method'] == 'miniball'), None)
-                if previous:
-                    self.assertAlmostEqual(radius, previous['covering_radius'], places=6)
-                if record['geometry'] == 'triangle':
-                    self.assertLess(radius, .14)
                 if record['geometry'] == 'quadrilateral':
-                    self.assertAlmostEqual(radius, np.sqrt(2)/8, places=5)
+                    self.assertAlmostEqual(radius, np.sqrt(2)/6, places=5)
 
     def test_before_after_plot_all_geometries(self):
         records = self.execute('3', '--geometry', 'all', '--iterations', '0')
@@ -200,9 +192,10 @@ class WitnessTests(unittest.TestCase):
                     self.assertGreaterEqual(len(disks), 2)
 
     def test_invalid_input(self):
-        for arguments in (('0',), ('2', '--geometry', 'point'), ('--resolution', '0'),
+        for arguments in (('0',), ('--resolution', '0'), ('2', '--subdivisions', '3'),
                           ('--geometry', 'unknown'), ('--objective', 'unknown'),
-                          ('--step-tolerance', 'nan'), ('--n', '4x')):
+                          ('--step-tolerance', 'nan'), ('--subdivisions', '4x'), ('--n', '4'),
+                          ('16', '--lobatto-order', '2')):
             with tempfile.TemporaryDirectory() as directory:
                 process = subprocess.run([str(self.binary), *arguments], cwd=directory,
                     capture_output=True, text=True, timeout=10)

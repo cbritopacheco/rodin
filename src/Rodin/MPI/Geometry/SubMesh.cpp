@@ -518,7 +518,6 @@ namespace Rodin::Geometry
     SubMesh result(parentMesh);
     result.Parent::operator=(meshBuilder.finalize());
     result.m_s2ps = std::move(m_s2ps);
-    result.m_dimension = m_dimension;
     return result;
   }
 
@@ -542,16 +541,14 @@ namespace Rodin::Geometry
     : Parent(other),
       m_parent(other.m_parent),
       m_s2ps(other.m_s2ps),
-      m_ancestors(other.m_ancestors),
-      m_dimension(other.m_dimension)
+      m_ancestors(other.m_ancestors)
   {}
 
   SubMesh<Context::MPI>::SubMesh(SubMesh&& other)
     : Parent(std::move(other)),
       m_parent(std::move(other.m_parent)),
       m_s2ps(std::move(other.m_s2ps)),
-      m_ancestors(std::move(other.m_ancestors)),
-      m_dimension(other.m_dimension)
+      m_ancestors(std::move(other.m_ancestors))
   {}
 
   const Mesh<Context::MPI>& SubMesh<Context::MPI>::getParent() const

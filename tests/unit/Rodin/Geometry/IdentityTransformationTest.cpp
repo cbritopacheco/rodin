@@ -83,6 +83,36 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /**
+   * @brief Sizes identity Jacobians independently of caller storage.
+   *
+   * Both empty and incorrectly sized output matrices must become the identity
+   * on the transformation's actual reference domain, including dimension zero.
+   * Exact dimensions and entries are checked without a numerical tolerance.
+   */
+  TEST(Geometry_IdentityTransformation, JacobianResizesCallerStorage)
+  {
+    for (size_t dimension = 0; dimension <= 3; ++dimension)
+    {
+      SCOPED_TRACE(dimension);
+      IdentityTransformation transformation(dimension);
+      Math::SpatialPoint reference(dimension);
+      reference.setZero();
+      for (const size_t initialDimension : {size_t(0), size_t(1), size_t(3)})
+      {
+        Math::SpatialMatrix<Real> matrix(initialDimension, initialDimension);
+        transformation.jacobian(matrix, reference);
+        ASSERT_EQ(static_cast<size_t>(matrix.rows()), dimension);
+        ASSERT_EQ(static_cast<size_t>(matrix.cols()), dimension);
+        for (size_t j = 0; j < dimension; ++j)
+        {
+          for (size_t i = 0; i < dimension; ++i)
+            EXPECT_EQ(matrix(j, i), Real(j == i));
+        }
+      }
+    }
+  }
+
   /// @brief Verifies copy for geometry identity transformation by checking tolerance-based numerical results, exact expected values, copy semantics.
   TEST(Geometry_IdentityTransformation, Copy)
   {

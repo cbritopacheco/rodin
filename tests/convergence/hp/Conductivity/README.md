@@ -4,7 +4,7 @@ The coefficient and manufactured field are
 
 $$
 \gamma(x)=1+\sum_{j=1}^{d}x_j,\qquad
-u(x)=\exp\!\left(\sum_{j=1}^{d}x_j\right),\qquad
+u(x)=\exp\negthinspace \left(\sum_{j=1}^{d}x_j\right),\qquad
 f=-\nabla\cdot(\gamma\nabla u)=-d(1+\gamma)u.
 $$
 
@@ -16,7 +16,7 @@ $1,1/2,1/4$ while the polynomial degree also increases.
 
 The independently integrated errors
 $E_{0,i}=\lVert u-u_i\rVert_{L^2(\Omega)}$ and
-$E_{1,i}=|u-u_i|_{H^1(\Omega)}$ must strictly decrease. Each adjacent
+$E_{1,i}=|u-u_i\rvert_{H^1(\Omega)}$ must strictly decrease. Each adjacent
 ratio $\log(E_{j,i-1}/E_{j,i})/\log(h_{i-1}/h_i)$ must exceed $1.9$ in
 $L^2$ and $0.9$ in the $H^1$ seminorm. These conservative bounds compare
 the combined path with the minimum P1 h-only orders; the ratios are not

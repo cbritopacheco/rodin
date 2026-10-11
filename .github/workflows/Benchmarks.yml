@@ -65,7 +65,7 @@ jobs:
           -DRODIN_BUILD_BENCHMARKS=ON
           -DRODIN_MULTITHREADED=NO
       - name: Build
-        run: cmake --build ${{github.workspace}}/build
+        run: cmake --build ${{github.workspace}}/build --target RodinBenchmarks
       - name: Run benchmarks
         # A fifth of a second a case rather than the default second. The
         # reported numbers are per iteration, so this changes their precision

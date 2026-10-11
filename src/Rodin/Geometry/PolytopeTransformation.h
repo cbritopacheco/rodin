@@ -7,6 +7,8 @@
 #ifndef RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
 #define RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
 
+#include <vector>
+
 /**
  * @file
  * @brief Base class for polytope geometric transformations.
@@ -21,6 +23,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Geometry/Polytope.h"
+#include "Rodin/QF/ForwardDecls.h"
 
 #include "ForwardDecls.h"
 
@@ -69,49 +72,49 @@ namespace Rodin::Geometry
   class PolytopeTransformation : public Copyable
   {
     friend class boost::serialization::access;
+    friend class PointBase;
 
-    public:
+  public:
       /**
        * @brief Constructs a transformation with given dimensions.
        * @param[in] rdim Reference dimension @f$ k @f$
        * @param[in] pdim Physical dimension @f$ s @f$
        */
-      constexpr
-      PolytopeTransformation(size_t rdim, size_t pdim)
-        : m_rdim(rdim), m_pdim(pdim)
-      {}
+    constexpr PolytopeTransformation(size_t rdim, size_t pdim)
+      : m_rdim(rdim),
+        m_pdim(pdim)
+    {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr PolytopeTransformation(const PolytopeTransformation& other) = default;
+    constexpr PolytopeTransformation(const PolytopeTransformation& other) = default;
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      constexpr PolytopeTransformation(PolytopeTransformation&& other) = default;
+    constexpr PolytopeTransformation(PolytopeTransformation&& other) = default;
 
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
        * @param other Object to move from.
        */
-      PolytopeTransformation& operator=(PolytopeTransformation&& other) = default;
+    PolytopeTransformation& operator=(PolytopeTransformation&& other) = default;
 
       /// @brief Virtual destructor.
-      virtual ~PolytopeTransformation() = default;
+    virtual ~PolytopeTransformation() = default;
 
       /**
        * @brief Gets the reference dimension @f$ k @f$.
        * @returns Reference dimension (topological dimension of reference element)
        */
-      constexpr
-      size_t getReferenceDimension() const
-      {
-        return m_rdim;
-      }
+    constexpr size_t getReferenceDimension() const
+    {
+      return m_rdim;
+    }
 
       /**
        * @brief Gets the physical dimension @f$ s @f$.
@@ -180,6 +183,20 @@ namespace Rodin::Geometry
       virtual void jacobian(Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const = 0;
 
       /**
+       * @brief Computes the Jacobians at a reference quadrature's points.
+       *
+       * The output contains @f$J_x(\hat x_q)@f$ in formula order. The default
+       * implementation evaluates the pointwise operation. Parametric elements
+       * may reuse their reference tabulation while retaining cell-dependent
+       * control points. This bulk operation is local and stores no cache.
+       *
+       * @param[out] jacobians Jacobian matrices, resized to the formula size.
+       * @param[in] qf Reference quadrature formula defining the points.
+       */
+      virtual void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
+        const QF::QuadratureFormulaBase& qf) const;
+
+      /**
        * @brief Computes the reference coordinates from physical coordinates.
        * @param[out] rc Reference coordinates @f$ r @f$ (resized automatically)
        * @param[in] pc Physical coordinates @f$ p \in \tau @f$
@@ -213,6 +230,22 @@ namespace Rodin::Geometry
        * Derived classes must implement this to return a copy of their specific type.
        */
       virtual PolytopeTransformation* copy() const noexcept override = 0;
+
+    protected:
+      /**
+       * @brief Maps an owned reference sample using available reference data.
+       *
+       * Called only by a point whose constructor established the provenance
+       * of @p rc. Cache misses retain direct pointwise evaluation. The logical
+       * identity is a value, not a borrowed formula or table pointer.
+       *
+       * @param[out] pc Physical coordinates.
+       * @param rc Owned reference coordinates of the sample.
+       * @param identity Formula lifetime/assignment identity.
+       * @param qp Logical reference-sample index.
+       */
+      virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
+        size_t identity, size_t qp) const;
 
     private:
       size_t m_rdim; ///< Reference dimension @f$ k @f$

@@ -280,19 +280,21 @@ namespace Rodin::Variational
         const Real a = r.x() / q;
         const Real b = r.y() / q;
 
-        const Real Ba = BernsteinPyramid<K>::getBasis(n, i, a);
-        const Real Bb = BernsteinPyramid<K>::getBasis(n, j, b);
         const Real Bz = BernsteinPyramid<K>::getBasis(K, k, z);
-        const Real dBa = BernsteinPyramid<K>::getDerivative(n, i, a);
-        const Real dBb = BernsteinPyramid<K>::getDerivative(n, j, b);
-        const Real dBz = BernsteinPyramid<K>::getDerivative(K, k, z);
-
         if (deriv == 0)
-          return dBa * Bb * Bz / q;
+          return BernsteinPyramid<K>::getDerivative(n, i, a) *
+            BernsteinPyramid<K>::getBasis(n, j, b) * Bz / q;
+        const Real Ba = BernsteinPyramid<K>::getBasis(n, i, a);
+        const Real dBb = BernsteinPyramid<K>::getDerivative(n, j, b);
         if (deriv == 1)
           return Ba * dBb * Bz / q;
         if (deriv == 2)
+        {
+          const Real Bb = BernsteinPyramid<K>::getBasis(n, j, b);
+          const Real dBa = BernsteinPyramid<K>::getDerivative(n, i, a);
+          const Real dBz = BernsteinPyramid<K>::getDerivative(K, k, z);
           return (dBa * (a / q) * Bb + Ba * dBb * (b / q)) * Bz + Ba * Bb * dBz;
+        }
         return 0;
       }
   };
@@ -349,12 +351,12 @@ namespace Rodin::Variational
   };
 
   template <size_t K, class Scalar>
-  const typename H1Element<K, Scalar>::Tabulation&
-  H1Element<K, Scalar>::getTabulation(const QF::QuadratureFormulaBase& qf) const
+  auto& H1Element<K, Scalar>::getTabulationCache()
   {
     struct CacheEntry
     {
       const QF::QuadratureFormulaBase* qf;
+      size_t identity;
       Geometry::Polytope::Type g;
       size_t nqp;
       bool valid;
@@ -362,6 +364,7 @@ namespace Rodin::Variational
 
       CacheEntry()
         : qf(nullptr),
+          identity(0),
           g(Geometry::Polytope::Type::Point),
           nqp(0),
           valid(false),
@@ -372,27 +375,55 @@ namespace Rodin::Variational
     struct Cache
     {
       std::array<CacheEntry, 8> e;
-      size_t next = 0; // eviction pointer
+      size_t next;
+
+      Cache()
+        : e(),
+          next(0)
+      {}
     };
 
     static thread_local Cache s_cache;
+    return s_cache;
+  }
+
+  template <size_t K, class Scalar>
+  Optional<std::reference_wrapper<const typename H1Element<K, Scalar>::Tabulation>>
+  H1Element<K, Scalar>::findTabulation(size_t identity) const
+  {
+    for (const auto& entry : getTabulationCache().e)
+    {
+      if (entry.valid && entry.identity == identity && entry.g == this->getGeometry())
+        return std::cref(entry.tab);
+    }
+    return {};
+  }
+
+  template <size_t K, class Scalar>
+  const typename H1Element<K, Scalar>::Tabulation& H1Element<K, Scalar>::getTabulation(
+    const QF::QuadratureFormulaBase& qf) const
+  {
+    auto& cache = getTabulationCache();
 
     const auto g   = this->getGeometry();
     const auto nqp = qf.getSize();
+    const auto identity = qf.getCacheIdentity();
 
     // 1) lookup
-    for (auto& ce : s_cache.e)
+    for (auto& ce : cache.e)
     {
-      if (ce.valid && ce.qf == &qf && ce.g == g && ce.nqp == nqp)
+      if (ce.valid && ce.qf == &qf && ce.identity == identity && ce.g == g &&
+        ce.nqp == nqp)
         return ce.tab;
     }
 
     // 2) miss -> rebuild into an entry
-    CacheEntry& ce = s_cache.e[s_cache.next];
-    s_cache.next = (s_cache.next + 1) % s_cache.e.size();
+    auto& ce = cache.e[cache.next];
+    cache.next = (cache.next + 1) % cache.e.size();
 
     ce.valid = true;
     ce.qf = &qf;
+    ce.identity = identity;
     ce.g = g;
     ce.nqp = nqp;
 

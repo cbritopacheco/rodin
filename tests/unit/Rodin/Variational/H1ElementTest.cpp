@@ -9,7 +9,10 @@
 #pragma GCC diagnostic ignored "-Warray-bounds"
 #endif
 
+#include <array>
 #include <complex>
+
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 #include "Rodin/Variational/P0/P0Element.h"
 #include "Rodin/Variational/P1/P1Element.h"
@@ -27,6 +30,167 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  namespace
+  {
+    /**
+     * @brief Counts reference-point reads for quadrature cache lifetime tests.
+     *
+     * A one-point rule isolates cache reuse from quadrature exactness. Copying,
+     * assignment, and reconstruction change the inherited logical identity.
+     */
+    class ObservedH1Formula final : public QF::QuadratureFormulaBase
+    {
+      public:
+        /**
+         * @brief Constructs a rule with one reference point.
+         * @param point Reference point returned by the rule.
+         */
+        explicit ObservedH1Formula(const Math::SpatialPoint& point)
+          : m_point(point),
+            m_requests(0)
+        {}
+
+        /**
+         * @brief Copies a rule with an independent read counter.
+         * @param other Rule to copy.
+         */
+        ObservedH1Formula(const ObservedH1Formula& other)
+          : QF::QuadratureFormulaBase(other),
+            m_point(other.m_point),
+            m_requests(0)
+        {}
+
+        /**
+         * @brief Assigns rule contents and invalidates its previous identity.
+         * @param other Rule supplying the new reference point.
+         * @returns This rule after assignment.
+         */
+        ObservedH1Formula& operator=(const ObservedH1Formula& other)
+        {
+          if (this != &other)
+          {
+            QF::QuadratureFormulaBase::operator=(other);
+            m_point = other.m_point;
+            m_requests = 0;
+          }
+          return *this;
+        }
+
+        /**
+         * @brief Returns the number of points.
+         * @returns One.
+         */
+        size_t getSize() const override
+        {
+          return 1;
+        }
+
+        /**
+         * @brief Returns the test rule's weight.
+         * @param index Point index, unused because the weight is constant.
+         * @returns Unit weight.
+         */
+        Real getWeight([[maybe_unused]] size_t index) const override
+        {
+          return 1;
+        }
+
+        /**
+         * @brief Records a reference-point access.
+         * @param index Index of the only reference point.
+         * @returns The stored reference point.
+         */
+        const Math::SpatialPoint& getPoint([[maybe_unused]] size_t index) const override
+        {
+          assert(index == 0);
+          ++m_requests;
+          return m_point;
+        }
+
+        /**
+         * @brief Returns the number of reference-point accesses.
+         * @returns Integer access count since construction or assignment.
+         */
+        size_t getRequests() const
+        {
+          return m_requests;
+        }
+
+        /**
+         * @brief Creates an independently identified copy.
+         * @returns Owned copy of this rule.
+         */
+        ObservedH1Formula* copy() const noexcept override
+        {
+          return new ObservedH1Formula(*this);
+        }
+
+      private:
+        Math::SpatialPoint m_point;
+        mutable size_t m_requests;
+    };
+  }
+
+  /**
+   * @brief Tabulation follows logical quadrature lifetimes, not reused addresses.
+   *
+   * Degrees one through four and real and complex scalar bases are exercised
+   * on every reference geometry. Integer read counts certify cache hits and
+   * invalidation; exact comparisons certify values and directional derivatives
+   * against direct basis evaluation. No coordinate tolerance defines identity.
+   */
+  TEST(Rodin_Variational_RealH1Element, TabulationQuadratureLifetimeAndAssignment)
+  {
+    Utility::ForIndex<4>([&](auto order) {
+      constexpr size_t K = order.value + 1;
+      const auto checkScalar = [&]<class Scalar>() {
+        for (const auto geometry :
+          {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+            Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+        {
+          SCOPED_TRACE(::testing::Message()
+            << "degree " << K << ", geometry " << static_cast<int>(geometry));
+          H1Element<K, Scalar> element(geometry);
+          Optional<ObservedH1Formula> formula;
+          const auto centroid = Polytope::Traits(geometry).getCentroid();
+          formula.emplace(centroid);
+          const auto* address = &*formula;
+          const auto check = [&](const Math::SpatialPoint& point) {
+            const auto& table = element.getTabulation(*formula);
+            EXPECT_EQ(formula->getRequests(), 1);
+            EXPECT_EQ(&element.getTabulation(*formula), &table);
+            EXPECT_EQ(formula->getRequests(), 1);
+            for (size_t local = 0; local < element.getCount(); ++local)
+            {
+              const auto& basis = element.getBasis(local);
+              EXPECT_EQ(table.getBasis(0, local), basis(point));
+              for (size_t d = 0; d < Polytope::Traits(geometry).getDimension(); ++d)
+              {
+                EXPECT_EQ(table.template getDerivative<1>(0, local, d),
+                  basis.template getDerivative<1>(d)(point));
+              }
+            }
+          };
+          check(centroid);
+          const auto previousIdentity = formula->getCacheIdentity();
+          const Math::SpatialPoint replacement = centroid * Real(0.5);
+          formula.emplace(replacement);
+          ASSERT_EQ(&*formula, address);
+          ASSERT_NE(formula->getCacheIdentity(), previousIdentity);
+          check(replacement);
+          const auto reconstructedIdentity = formula->getCacheIdentity();
+          *formula = ObservedH1Formula(centroid);
+          ASSERT_EQ(&*formula, address);
+          ASSERT_NE(formula->getCacheIdentity(), reconstructedIdentity);
+          check(centroid);
+        }
+      };
+      checkScalar.template operator()<Real>();
+      checkScalar.template operator()<Complex>();
+    });
+  }
+
   /// @brief Verifies linear form triangle must be nodal for variational real H1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealH1Element, LinearForm_Triangle_MustBeNodal)
   {
@@ -3572,6 +3736,62 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /**
+   * @brief Preserves the evaluated pyramid modal derivative across orders.
+   *
+   * The unpruned tensor-product expression is compared exactly with each
+   * directional evaluation at quadrature points, vertices and near-apex
+   * points. This checks arithmetic preservation, not a convergence rate.
+   * Independent polynomial and near-apex derivative tests remain separate.
+   */
+  TEST(Rodin_Variational_RealH1Element, PyramidDirectionalDerivativesPreserveArithmetic)
+  {
+    Rodin::Utility::ForIndex<6>([](auto order) {
+      constexpr size_t K = order.value + 1;
+      const auto check = [K](const Math::SpatialPoint& point) {
+        for (size_t mode = 0; mode < PyramidIndex<K>::Count; ++mode)
+        {
+          size_t i, j, k;
+          PyramidIndex<K>::decode(mode, i, j, k);
+          const Real z = point.z(), q = Real(1) - z;
+          std::array<Real, 4> expected{};
+          if (q != 0)
+          {
+            const size_t n = K - k;
+            const Real a = point.x() / q, b = point.y() / q;
+            const Real Ba = BernsteinPyramid<K>::getBasis(n, i, a);
+            const Real Bb = BernsteinPyramid<K>::getBasis(n, j, b);
+            const Real Bz = BernsteinPyramid<K>::getBasis(K, k, z);
+            const Real dBa = BernsteinPyramid<K>::getDerivative(n, i, a);
+            const Real dBb = BernsteinPyramid<K>::getDerivative(n, j, b);
+            const Real dBz = BernsteinPyramid<K>::getDerivative(K, k, z);
+            expected[0] = dBa * Bb * Bz / q;
+            expected[1] = Ba * dBb * Bz / q;
+            expected[2] = (dBa * (a / q) * Bb + Ba * dBb * (b / q)) * Bz + Ba * Bb * dBz;
+          }
+          for (size_t direction = 0; direction < expected.size(); ++direction)
+          {
+            EXPECT_EQ(
+              PyramidModal<K>::getDerivative(mode, direction, point), expected[direction])
+              << "degree " << K << ", mode " << mode << ", direction " << direction;
+          }
+        }
+      };
+      for (const size_t quadratureOrder : {size_t(8), size_t(16)})
+      {
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(quadratureOrder, Polytope::Type::Pyramid);
+        for (size_t point = 0; point < qf.getSize(); ++point)
+          check(qf.getPoint(point));
+      }
+      const Polytope::Traits traits(Polytope::Type::Pyramid);
+      for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+        check(traits.getVertex(vertex));
+      const Real z = Real(1) - 1e-15, q = Real(1) - z;
+      check(Math::SpatialPoint{{q / 4, 3 * q / 4, z}});
+    });
+  }
+
   /// @brief Verifies rational pyramid modal gradients retain directional limits near the apex.
   TEST(Rodin_Variational_RealH1Element, PyramidModalGradientNearApexAcrossOrders)
   {
@@ -3621,7 +3841,7 @@ namespace Rodin::Tests::Unit
         for (size_t local = 0; local < element.getCount(); ++local)
         {
           xDx += element.getNode(local).x() *
-            element.getBasis(local).getDerivative<1>(0)(Math::SpatialPoint{{x}});
+            element.getBasis(local).getDerivative<1>(0)(Math::SpatialPoint{x});
         }
         EXPECT_NEAR(xDx, 1.0, RODIN_FUZZY_CONSTANT);
       }

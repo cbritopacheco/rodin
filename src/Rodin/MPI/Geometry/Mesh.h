@@ -44,6 +44,15 @@ namespace Rodin::Geometry
    * Stores the rank-local shard of a partitioned mesh together with the MPI
    * context and global/local index mappings needed for distributed assembly.
    *
+   * @par Architecture
+   * The distributed topological dimension is
+   * @f$ D = \max_r \dim S_r @f$, where @f$ S_r @f$ is the local shard.
+   * Collective construction and loading establish this value once; queries,
+   * copying, and moving do not communicate. A shard retains its actual local
+   * dimension, with dimension zero for an empty shard. Topology replacement
+   * requires collective construction or loading of a new distributed mesh;
+   * computing incidences and changing geometry do not change @f$ D @f$.
+   *
    * @see <a href="class_rodin_1_1_geometry_1_1_mesh_base.html">MeshBase</a>
    * @see <a href="_m_p_i_2_geometry_2_mesh_8h.html">Mesh.h</a>
    */
@@ -76,8 +85,8 @@ namespace Rodin::Geometry
           /**
            * @brief Finalizes the builder and returns the distributed mesh.
            *
-           * The resulting mesh stores the shard previously provided to the builder and
-           * is associated with the MPI context used to construct the builder.
+           * Collective over the associated communicator. The resulting mesh
+           * stores the shard and the maximum shard dimension across ranks.
            *
            * @return Distributed mesh containing the stored shard.
            */
@@ -121,7 +130,8 @@ namespace Rodin::Geometry
        * @param[in] context MPI context associated with the mesh.
        */
       Mesh(const Context::MPI& context)
-        : m_context(context)
+        : m_context(context),
+          m_dimension(0)
       {}
 
       /**
@@ -152,6 +162,8 @@ namespace Rodin::Geometry
        *
        * The shard contains the local portion of the distributed mesh, including
        * owned and ghost polytopes, local geometry, attributes, and connectivity.
+       * Topology replacement must use collective construction or loading so
+       * that the distributed dimension is established on every rank.
        *
        * @return Reference to the local mesh shard.
        */
@@ -239,8 +251,10 @@ namespace Rodin::Geometry
       /**
        * @brief Returns the topological dimension of the distributed mesh.
        *
-       * The dimension corresponds to the dimension of the underlying mesh
-       * shard, which is identical across all MPI ranks.
+       * Returns the cached value @f$ D = \max_r \dim S_r @f$ established
+       * during collective construction or loading. This query does not
+       * communicate. An empty local shard has dimension zero independently
+       * of the distributed mesh dimension.
        *
        * @return Topological dimension of the mesh.
        */
@@ -700,7 +714,8 @@ namespace Rodin::Geometry
       /**
        * @brief Loads the local shard of the distributed mesh from a file.
        *
-       * Each MPI rank loads its own shard from the given file.
+       * Each MPI rank loads its own shard from the given file. This operation
+       * is collective and establishes the maximum shard dimension.
        *
        * @param[in] filename Path to the input file.
        * @param[in] fmt File format used to read the mesh.
@@ -860,6 +875,9 @@ namespace Rodin::Geometry
        * entities of dimension @p d. Interior entities remain purely local.
        *
        * Only shard metadata is modified; the local mesh topology is unchanged.
+       * All ranks participate, including ranks with no entities of dimension
+       * @p d, because convergence checks and distributed numbering are
+       * collective.
        *
        * @param[in] d Topological dimension of the entities to reconcile.
        * @param[in] options Reconciliation controls. When
@@ -882,6 +900,8 @@ namespace Rodin::Geometry
       Context::MPI m_context;
       /// Rank-local shard containing geometry, topology, and ownership metadata.
       Shard m_shard;
+      /// Maximum shard dimension established during collective construction.
+      size_t m_dimension;
       /// Mesh-level quadrature cache whose points are attached to this MPI mesh.
       mutable PolytopeQuadratureIndex m_quadratures;
   };

@@ -10,6 +10,11 @@ gtest_discover_tests(RodinVariationalWeightedComplexQuadratureTest
 # Add H1 subdirectory for H1Element component tests
 add_subdirectory(H1)
 
+add_executable(RodinVariationalQuadratureExpressionTest QuadratureExpressionTest.cpp)
+target_link_libraries(RodinVariationalQuadratureExpressionTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalQuadratureExpressionTest PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalP1ElementTest P1ElementTest.cpp)
 target_link_libraries(RodinVariationalP1ElementTest
   PUBLIC

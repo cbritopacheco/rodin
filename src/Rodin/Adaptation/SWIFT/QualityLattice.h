@@ -34,9 +34,10 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Gets immutable witnesses retained until program termination.
        * @param geometry Reference-cell geometry.
        * @param subdivisions Positive number of subdivisions per reference edge.
+       * @returns Cached generating lattice for this geometry and subdivision count.
        */
-      static const QualityLattice& get(Geometry::Polytope::Type geometry,
-        size_t subdivisions)
+      static const QualityLattice& get(
+        Geometry::Polytope::Type geometry, size_t subdivisions)
       {
         assert(subdivisions > 0);
         using Key = std::pair<Geometry::Polytope::Type, size_t>;
@@ -50,21 +51,50 @@ namespace Rodin::Adaptation::SWIFT
         return *formula;
       }
 
-      /// @brief Gets the number of distinct witnesses.
-      size_t getSize() const override { return m_points.size(); }
+      /**
+       * @brief Gets the number of distinct witnesses.
+       * @returns Number of generating lattice points.
+       */
+      size_t getSize() const override
+      {
+        return m_points.size();
+      }
 
-      /// @brief Gets the reference coordinates of a witness.
+      /**
+       * @brief Gets the reference coordinates of a witness.
+       * @param i Index of the generating lattice point.
+       * @returns Reference coordinates of the indexed point.
+       */
       const Math::SpatialVector<Real>& getPoint(size_t i) const override
-      { return m_points[i]; }
+      {
+        return m_points[i];
+      }
 
-      /// @brief Gets the equal reference penalty weight.
-      Real getWeight(size_t) const override { return m_weight; }
+      /**
+       * @brief Gets the equal reference penalty weight.
+       * @param i Point index, unused because all points have equal weights.
+       * @returns Reference volume divided by the number of lattice points.
+       */
+      Real getWeight([[maybe_unused]] size_t i) const override
+      {
+        return m_weight;
+      }
 
-      /// @brief Copies the witness set with a fresh cache identity.
+      /**
+       * @brief Copies the witness set with a fresh cache identity.
+       * @returns Newly allocated copy owned by the caller.
+       */
       QualityLattice* copy() const noexcept override
-      { return new QualityLattice(*this); }
+      {
+        return new QualityLattice(*this);
+      }
 
     private:
+      /**
+       * @brief Constructs a complete uniform reference lattice.
+       * @param geometry Reference-cell geometry.
+       * @param m Positive number of subdivisions per reference edge.
+       */
       QualityLattice(Geometry::Polytope::Type geometry, size_t m)
       {
         using G = Geometry::Polytope::Type;
@@ -72,23 +102,34 @@ namespace Rodin::Adaptation::SWIFT
         Real volume = 1;
         switch (geometry)
         {
-          case G::Triangle: volume = Real(1) / 2; break;
-          case G::Tetrahedron: volume = Real(1) / 6; break;
-          case G::Wedge: volume = Real(1) / 2; break;
-          case G::Pyramid: volume = Real(1) / 3; break;
-          default: break;
+          case G::Triangle:
+            volume = Real(1) / 2;
+            break;
+          case G::Tetrahedron:
+            volume = Real(1) / 6;
+            break;
+          case G::Wedge:
+            volume = Real(1) / 2;
+            break;
+          case G::Pyramid:
+            volume = Real(1) / 3;
+            break;
+          default:
+            break;
         }
         const size_t zMax = dimension == 3 ? m : 0;
         for (size_t k = 0; k <= zMax; ++k)
         {
-          const size_t yMax = dimension < 2 ? 0
-            : geometry == G::Tetrahedron || geometry == G::Pyramid ? m - k : m;
+          const size_t yMax = dimension < 2                        ? 0
+            : geometry == G::Tetrahedron || geometry == G::Pyramid ? m - k
+                                                                   : m;
           for (size_t j = 0; j <= yMax; ++j)
           {
-            const size_t xMax = dimension == 0 ? 0
+            const size_t xMax = dimension == 0                  ? 0
               : geometry == G::Triangle || geometry == G::Wedge ? m - j
-              : geometry == G::Tetrahedron ? m - j - k
-              : geometry == G::Pyramid ? m - k : m;
+              : geometry == G::Tetrahedron                      ? m - j - k
+              : geometry == G::Pyramid                          ? m - k
+                                                                : m;
             for (size_t i = 0; i <= xMax; ++i)
             {
               Math::SpatialVector<Real> point(dimension);

@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <array>
+#include <cmath>
 
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
@@ -523,6 +525,109 @@ TEST_F(VectorTest, SpatialVectorNorms)
   EXPECT_DOUBLE_EQ(v.norm(), 5.0);
   EXPECT_NEAR(v.stableNorm(), 5.0, 1e-10);
   EXPECT_NEAR(v.blueNorm(), 5.0, 1e-10);
+}
+
+/**
+ * @brief Complex Euclidean norms cannot cancel nonzero components.
+ *
+ * For @f$z=(1,i)@f$, the bilinear square is zero whereas
+ * @f$\|z\|_2^2=|1|^2+|i|^2=2@f$. This distinguishes the Hermitian
+ * Euclidean norm from the square root of a bilinear self-contraction.
+ */
+TEST_F(VectorTest, ComplexSpatialVectorNormDoesNotCancel)
+{
+  SpatialVector<Complex> value({Complex(1, 0), Complex(0, 1)});
+  EXPECT_TRUE((std::is_same_v<decltype(value.squaredNorm()), Real>));
+  EXPECT_TRUE((std::is_same_v<decltype(value.norm()), Real>));
+  EXPECT_TRUE((std::is_same_v<decltype(value.stableNorm()), Real>));
+  EXPECT_TRUE((std::is_same_v<decltype(value.blueNorm()), Real>));
+  EXPECT_DOUBLE_EQ(std::real(value.squaredNorm()), 2);
+  EXPECT_DOUBLE_EQ(std::imag(value.squaredNorm()), 0);
+  EXPECT_DOUBLE_EQ(std::real(value.norm()), std::sqrt(Real(2)));
+  EXPECT_DOUBLE_EQ(std::imag(value.norm()), 0);
+}
+
+/**
+ * @brief Normalization uses the positive real norm of a complex vector.
+ *
+ * Normalization must preserve the relative complex phases and must not
+ * mutate the source when a normalized copy is requested.
+ */
+TEST_F(VectorTest, ComplexSpatialVectorNormalizationPreservesPhases)
+{
+  const SpatialVector<Complex> source({Complex(1, 0), Complex(0, 1)});
+  const auto normalized = source.normalized();
+  auto inPlace = source;
+  inPlace.normalize();
+  const Real inverseNorm = Real(1) / std::sqrt(Real(2));
+  for (size_t component = 0; component < source.size(); ++component)
+  {
+    EXPECT_EQ(normalized(component), inverseNorm * source(component));
+    EXPECT_EQ(inPlace(component), normalized(component));
+  }
+  EXPECT_DOUBLE_EQ(std::real(normalized.norm()), 1);
+  EXPECT_EQ(source(0), Complex(1, 0));
+  EXPECT_EQ(source(1), Complex(0, 1));
+}
+
+/**
+ * @brief Spatial-vector norm algorithms use only the active components.
+ *
+ * Shrinking the logical dimension retains inactive storage. All norm
+ * algorithms must nevertheless agree with the active Eigen-vector view,
+ * including the empty vector, for real and complex component fields.
+ */
+TEST_F(VectorTest, SpatialVectorNormsRespectLogicalDimension)
+{
+  const auto check = []<class Scalar>(SpatialVector<Scalar> value) {
+    for (size_t dimension = 0; dimension <= SpatialVector<Scalar>::MaxSize; ++dimension)
+    {
+      SCOPED_TRACE(dimension);
+      value.resize(dimension);
+      const auto active = value.getData().head(dimension);
+      EXPECT_DOUBLE_EQ(std::real(value.squaredNorm()), active.squaredNorm());
+      EXPECT_DOUBLE_EQ(std::imag(value.squaredNorm()), 0);
+      EXPECT_DOUBLE_EQ(std::real(value.norm()), active.norm());
+      EXPECT_DOUBLE_EQ(std::imag(value.norm()), 0);
+      const Real stable = dimension == 0 ? Real(0) : active.stableNorm();
+      const Real blue = dimension == 0 ? Real(0) : active.blueNorm();
+      EXPECT_DOUBLE_EQ(std::real(value.stableNorm()), stable);
+      EXPECT_DOUBLE_EQ(std::imag(value.stableNorm()), 0);
+      EXPECT_DOUBLE_EQ(std::real(value.blueNorm()), blue);
+      EXPECT_DOUBLE_EQ(std::imag(value.blueNorm()), 0);
+    }
+  };
+  check(SpatialVector<Real>({3, 4, 12}));
+  check(SpatialVector<Complex>({Complex(3, 4), Complex(0, 12), Complex(8, 0)}));
+}
+
+/**
+ * @brief Complex component magnitudes define real spatial-vector norms.
+ *
+ * For @f$z=(3+4i,5+12i,8+15i)@f$, the component magnitudes are
+ * @f$(5,13,17)@f$. Each logical prefix is checked, including the empty
+ * vector; inactive storage must not contribute to @f$\|z\|_1@f$ or
+ * @f$\|z\|_2@f$.
+ */
+TEST_F(VectorTest, ComplexSpatialVectorLpNormRespectsLogicalDimension)
+{
+  const Math::SpatialVector<Complex> source(
+    {Complex(3, 4), Complex(5, 12), Complex(8, 15)});
+  const std::array<Real, 4> expectedL1{0, 5, 18, 35};
+  const std::array<Real, 4> expectedSquaredL2{0, 25, 194, 483};
+  for (size_t dimension = 0; dimension <= source.MaxSize; ++dimension)
+  {
+    SCOPED_TRACE(dimension);
+    auto value = source;
+    value.resize(dimension);
+    EXPECT_TRUE((std::is_same_v<decltype(value.lpNorm<1>()), Real>));
+    EXPECT_TRUE((std::is_same_v<decltype(value.lpNorm<2>()), Real>));
+    EXPECT_DOUBLE_EQ(std::real(value.lpNorm<1>()), expectedL1[dimension]);
+    EXPECT_DOUBLE_EQ(std::imag(value.lpNorm<1>()), 0);
+    EXPECT_DOUBLE_EQ(
+      std::real(value.lpNorm<2>()), std::sqrt(expectedSquaredL2[dimension]));
+    EXPECT_DOUBLE_EQ(std::imag(value.lpNorm<2>()), 0);
+  }
 }
 
 /// @brief Verifies spatial vector lp norm for vector test by checking tolerance-based numerical results.

@@ -86,7 +86,6 @@ namespace Rodin::Geometry
   class MinSTCut<Mesh<Context::Local>> final
   {
     public:
-
       /// @brief Mesh type supported by this serial classifier.
       using MeshType = Mesh<Context::Local>;
 
@@ -115,8 +114,9 @@ namespace Rodin::Geometry
            * lambdas are supported. Reference captures must remain valid for
            * every classification using these parameters.
            */
-          std::function<Real(const Polytope&)> smoothing =
-            [](const Polytope&) -> Real { return 1; };
+          std::function<Real(const Polytope&)> smoothing = [](const Polytope&) -> Real {
+            return 1;
+          };
       };
 
       /**

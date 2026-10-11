@@ -67,10 +67,12 @@ namespace Rodin::Adaptation::SWIFT
           const Real violation = std::max(Real(0), Real(1) - slack / delta);
           return Real(0.5) * hingeCoefficient * weight * violation * violation;
         };
-        return weightJ * energy(m_jSlack,
-                 parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
-                 parameters.model.jacobianWeight) +
-          weightQ * energy(m_qSlack,
+        return weightJ *
+          energy(m_jSlack,
+            parameters.model.qualityGuard * (Real(1) - parameters.model.jacobian),
+            parameters.model.jacobianWeight) +
+          weightQ *
+          energy(m_qSlack,
             parameters.model.qualityGuard * (parameters.model.distortion - Real(1)),
             parameters.model.distortionWeight);
       }
