@@ -3,10 +3,11 @@
  * Distributed under the Boost Software License, Version 1.0.
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
- *
+ */
+
+/**
  * @file MPISubMeshGridFunctionTest.cpp
- * @brief PETSc distributed GridFunction tests for P0 and P1 FES on
- *        SubMesh<Context::MPI> and cross-mesh evaluation.
+ * @brief PETSc distributed SubMesh GridFunction tests for configured scalar spaces.
  *
  * These tests verify GridFunction projection and numerical integration when
  * the FES is defined on a distributed SubMesh (both boundary skin and
@@ -14,18 +15,21 @@
  * from a distributed cell SubMesh (inclusion and restriction paths).  They
  * mirror the local-context tests in
  * tests/unit/Rodin/Variational/SubMeshGridFunctionTest.cpp but use
- * distributed meshes and the PETSc vector backend.
+ * distributed meshes and the PETSc vector backend. The finite-element scalar
+ * type follows PetscScalar, so the same cases compile in real and complex
+ * configurations. Scalar errors are measured by their magnitude, including
+ * the imaginary component in complex configurations.
  *
  * ## Test groups
  *
  *  1. P0 FES on boundary SubMesh — constant projection, owned DOF check.
- *  2. P0 FES on boundary SubMesh — integral \int_\partial\Omega 1 d\Gamma = |\partial\Omega| = 4.
+ *  2. P0 FES on boundary SubMesh — integral @f$ \int_{\partial\Omega} 1\,d\Gamma = |\partial\Omega| = 4 @f$.
  *  3. P1 FES on boundary SubMesh — constant projection, owned DOF check.
- *  4. P1 FES on boundary SubMesh — integral \int_\partial\Omega 1 d\Gamma = 4.
+ *  4. P1 FES on boundary SubMesh — integral @f$ \int_{\partial\Omega} 1\,d\Gamma = 4 @f$.
  *  5. P0 FES on cell SubMesh — constant projection, owned DOF check.
- *  6. P0 FES on cell SubMesh — integral \int_\Omega c d\Omega = c.
+ *  6. P0 FES on cell SubMesh — integral @f$ \int_\Omega c\,d\Omega = c @f$.
  *  7. P1 FES on cell SubMesh — constant projection, owned DOF check.
- *  8. P1 FES on cell SubMesh — integral \int_\Omega c d\Omega = c.
+ *  8. P1 FES on cell SubMesh — integral @f$ \int_\Omega c\,d\Omega = c @f$.
  *  9. Inclusion path: parent-mesh P0/P1 GridFunction evaluated at SubMesh
  *     quadrature points via TestFunction on the cell SubMesh.
  * 10. Restriction path: SubMesh P0/P1 GridFunction evaluated at parent-mesh
@@ -36,6 +40,7 @@
  */
 
 #include <cmath>
+#include <type_traits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -131,6 +136,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 {
   namespace PETSc = ::Rodin::PETSc;
 
+  using PETScScalarFunction = std::conditional_t<std::is_same_v<PetscScalar, Complex>,
+    ComplexFunction<PetscScalar>, RealFunction<PetscScalar>>;
+
   // ==========================================================================
   // Group 1 — P0 on boundary SubMesh: constant projection, owned DOF check
   // ==========================================================================
@@ -149,12 +157,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeBoundarySubMesh(mesh);
 
-    P0g<Real, Mesh<Context::MPI>> fes(sub);
+    P0g<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(c);
+    u = PETScScalarFunction(c);
 
-    const Real total = Integral(u).compute();
-    EXPECT_NEAR(total, 4.0 * c, 1e-9);
+    const PetscScalar total = Integral(u).compute();
+    EXPECT_NEAR(std::abs(total - PetscScalar(4.0 * c)), 0.0, 1e-9);
   }
 
   /// @brief Verifies cell sub mesh inclusion and restriction paths triangle for PET sc MPI P0 g sub mesh by checking tolerance-based numerical results, form assembly, MPI behavior.
@@ -172,31 +180,31 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeCellSubMesh(mesh);
 
-    P0g<Real, Mesh<Context::MPI>> parentFes(mesh);
+    P0g<PetscScalar, Mesh<Context::MPI>> parentFes(mesh);
     GridFunction<decltype(parentFes), ::Vec> parentGF(parentFes);
-    parentGF = RealFunction(parentValue);
+    parentGF = PETScScalarFunction(parentValue);
 
-    P0g<Real, Mesh<Context::MPI>> subFes(sub);
+    P0g<PetscScalar, Mesh<Context::MPI>> subFes(sub);
     PETSc::Variational::TestFunction subTest(subFes);
     LinearForm inclusion(subTest);
     inclusion = Integral(parentGF, subTest);
     inclusion.assemble();
 
-    PetscReal inclusionSum = 0.0;
+    PetscScalar inclusionSum = 0.0;
     VecSum(inclusion.getVector(), &inclusionSum);
-    EXPECT_NEAR(static_cast<Real>(inclusionSum), parentValue, 1e-9);
+    EXPECT_NEAR(std::abs(inclusionSum - PetscScalar(parentValue)), 0.0, 1e-9);
 
     GridFunction<decltype(subFes), ::Vec> subGF(subFes);
-    subGF = RealFunction(subValue);
+    subGF = PETScScalarFunction(subValue);
 
     PETSc::Variational::TestFunction parentTest(parentFes);
     LinearForm restriction(parentTest);
     restriction = Integral(subGF, parentTest);
     restriction.assemble();
 
-    PetscReal restrictionSum = 0.0;
+    PetscScalar restrictionSum = 0.0;
     VecSum(restriction.getVector(), &restrictionSum);
-    EXPECT_NEAR(static_cast<Real>(restrictionSum), subValue, 1e-9);
+    EXPECT_NEAR(std::abs(restrictionSum - PetscScalar(subValue)), 0.0, 1e-9);
   }
 
   /// @brief Verifies boundary sub mesh constant projection integral triangle for PET sc MPI H1 sub mesh by checking tolerance-based numerical results, MPI behavior.
@@ -211,12 +219,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeBoundarySubMesh(mesh);
 
-    H1<1, Real, Mesh<Context::MPI>> fes(std::integral_constant<size_t, 1>{}, sub);
+    H1<1, PetscScalar, Mesh<Context::MPI>> fes(std::integral_constant<size_t, 1>{}, sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(1.0);
+    u = PETScScalarFunction(1.0);
 
-    const Real total = Integral(u).compute();
-    EXPECT_NEAR(total, 4.0, 1e-9);
+    const PetscScalar total = Integral(u).compute();
+    EXPECT_NEAR(std::abs(total - PetscScalar(4.0)), 0.0, 1e-9);
   }
 
   /**
@@ -235,15 +243,15 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
     auto sub = makeBoundarySubMesh(mesh);
 
-    P0<Real, Mesh<Context::MPI>> fes(sub);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(c);
+    u = PETScScalarFunction(c);
 
     Index begin = 0, end = 0;
     fes.getOwnershipRange(begin, end);
 
     for (Index i = begin; i < end; ++i)
-      EXPECT_NEAR(PetscRealPart(u[i]), c, 1e-10);
+      EXPECT_NEAR(std::abs(u[i] - PetscScalar(c)), 0.0, 1e-10);
     u.flush();
   }
 
@@ -266,12 +274,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeBoundarySubMesh(mesh);
 
-    P0<Real, Mesh<Context::MPI>> fes(sub);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(1.0);
+    u = PETScScalarFunction(1.0);
 
-    const Real total = Integral(u).compute();
-    EXPECT_NEAR(total, 4.0, 1e-9);
+    const PetscScalar total = Integral(u).compute();
+    EXPECT_NEAR(std::abs(total - PetscScalar(4.0)), 0.0, 1e-9);
   }
 
   // ==========================================================================
@@ -294,15 +302,15 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
     auto sub = makeCellSubMesh(mesh);
 
-    P0<Real, Mesh<Context::MPI>> fes(sub);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(c);
+    u = PETScScalarFunction(c);
 
     Index begin = 0, end = 0;
     fes.getOwnershipRange(begin, end);
 
     for (Index i = begin; i < end; ++i)
-      EXPECT_NEAR(PetscRealPart(u[i]), c, 1e-10);
+      EXPECT_NEAR(std::abs(u[i] - PetscScalar(c)), 0.0, 1e-10);
     u.flush();
   }
 
@@ -327,12 +335,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeCellSubMesh(mesh);
 
-    P0<Real, Mesh<Context::MPI>> fes(sub);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(c);
+    u = PETScScalarFunction(c);
 
-    const Real total = Integral(u).compute();
-    EXPECT_NEAR(total, c, 1e-9);
+    const PetscScalar total = Integral(u).compute();
+    EXPECT_NEAR(std::abs(total - PetscScalar(c)), 0.0, 1e-9);
   }
 
   // ==========================================================================
@@ -353,12 +361,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Quadrilateral, {6, 6}, Real(1) / Real(5));
     auto sub = makeBoundarySubMesh(mesh);
 
-    P0<Real, Mesh<Context::MPI>> fes(sub);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(1.0);
+    u = PETScScalarFunction(1.0);
 
-    const Real total = Integral(u).compute();
-    EXPECT_NEAR(total, 4.0, 1e-9);
+    const PetscScalar total = Integral(u).compute();
+    EXPECT_NEAR(std::abs(total - PetscScalar(4.0)), 0.0, 1e-9);
   }
 
   /**
@@ -377,12 +385,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Quadrilateral, {6, 6}, Real(1) / Real(5));
     auto sub = makeCellSubMesh(mesh);
 
-    P0<Real, Mesh<Context::MPI>> fes(sub);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(c);
+    u = PETScScalarFunction(c);
 
-    const Real total = Integral(u).compute();
-    EXPECT_NEAR(total, c, 1e-9);
+    const PetscScalar total = Integral(u).compute();
+    EXPECT_NEAR(std::abs(total - PetscScalar(c)), 0.0, 1e-9);
   }
 
   // ==========================================================================
@@ -405,15 +413,15 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
     auto sub = makeBoundarySubMesh(mesh);
 
-    P1<Real, Mesh<Context::MPI>> fes(sub);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(c);
+    u = PETScScalarFunction(c);
 
     Index begin = 0, end = 0;
     fes.getOwnershipRange(begin, end);
 
     for (Index i = begin; i < end; ++i)
-      EXPECT_NEAR(PetscRealPart(u[i]), c, 1e-10);
+      EXPECT_NEAR(std::abs(u[i] - PetscScalar(c)), 0.0, 1e-10);
     u.flush();
   }
 
@@ -436,12 +444,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeBoundarySubMesh(mesh);
 
-    P1<Real, Mesh<Context::MPI>> fes(sub);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(1.0);
+    u = PETScScalarFunction(1.0);
 
-    const Real total = Integral(u).compute();
-    EXPECT_NEAR(total, 4.0, 1e-9);
+    const PetscScalar total = Integral(u).compute();
+    EXPECT_NEAR(std::abs(total - PetscScalar(4.0)), 0.0, 1e-9);
   }
 
   // ==========================================================================
@@ -464,15 +472,15 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
     auto sub = makeCellSubMesh(mesh);
 
-    P1<Real, Mesh<Context::MPI>> fes(sub);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(c);
+    u = PETScScalarFunction(c);
 
     Index begin = 0, end = 0;
     fes.getOwnershipRange(begin, end);
 
     for (Index i = begin; i < end; ++i)
-      EXPECT_NEAR(PetscRealPart(u[i]), c, 1e-10);
+      EXPECT_NEAR(std::abs(u[i] - PetscScalar(c)), 0.0, 1e-10);
     u.flush();
   }
 
@@ -497,12 +505,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeCellSubMesh(mesh);
 
-    P1<Real, Mesh<Context::MPI>> fes(sub);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(c);
+    u = PETScScalarFunction(c);
 
-    const Real total = Integral(u).compute();
-    EXPECT_NEAR(total, c, 1e-9);
+    const PetscScalar total = Integral(u).compute();
+    EXPECT_NEAR(std::abs(total - PetscScalar(c)), 0.0, 1e-9);
   }
 
   // ==========================================================================
@@ -534,20 +542,20 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeCellSubMesh(mesh);
 
-    P0<Real, Mesh<Context::MPI>> parentFes(mesh);
+    P0<PetscScalar, Mesh<Context::MPI>> parentFes(mesh);
     GridFunction<decltype(parentFes), ::Vec> parentGF(parentFes);
-    parentGF = RealFunction(c);
+    parentGF = PETScScalarFunction(c);
 
-    P0<Real, Mesh<Context::MPI>> subFes(sub);
+    P0<PetscScalar, Mesh<Context::MPI>> subFes(sub);
     PETSc::Variational::TestFunction v(subFes);
 
     LinearForm lf(v);
     lf = Integral(parentGF, v);
     lf.assemble();
 
-    PetscReal sum = 0.0;
+    PetscScalar sum = 0.0;
     VecSum(lf.getVector(), &sum);
-    EXPECT_NEAR(static_cast<Real>(sum), c, 1e-9);
+    EXPECT_NEAR(std::abs(sum - PetscScalar(c)), 0.0, 1e-9);
   }
 
   /**
@@ -567,20 +575,20 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeCellSubMesh(mesh);
 
-    P1<Real, Mesh<Context::MPI>> parentFes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> parentFes(mesh);
     GridFunction<decltype(parentFes), ::Vec> parentGF(parentFes);
-    parentGF = RealFunction(c);
+    parentGF = PETScScalarFunction(c);
 
-    P1<Real, Mesh<Context::MPI>> subFes(sub);
+    P1<PetscScalar, Mesh<Context::MPI>> subFes(sub);
     PETSc::Variational::TestFunction v(subFes);
 
     LinearForm lf(v);
     lf = Integral(parentGF, v);
     lf.assemble();
 
-    PetscReal sum = 0.0;
+    PetscScalar sum = 0.0;
     VecSum(lf.getVector(), &sum);
-    EXPECT_NEAR(static_cast<Real>(sum), c, 1e-9);
+    EXPECT_NEAR(std::abs(sum - PetscScalar(c)), 0.0, 1e-9);
   }
 
   // ==========================================================================
@@ -612,20 +620,20 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeCellSubMesh(mesh);
 
-    P0<Real, Mesh<Context::MPI>> subFes(sub);
+    P0<PetscScalar, Mesh<Context::MPI>> subFes(sub);
     GridFunction<decltype(subFes), ::Vec> subGF(subFes);
-    subGF = RealFunction(c);
+    subGF = PETScScalarFunction(c);
 
-    P0<Real, Mesh<Context::MPI>> parentFes(mesh);
+    P0<PetscScalar, Mesh<Context::MPI>> parentFes(mesh);
     PETSc::Variational::TestFunction v(parentFes);
 
     LinearForm lf(v);
     lf = Integral(subGF, v);
     lf.assemble();
 
-    PetscReal sum = 0.0;
+    PetscScalar sum = 0.0;
     VecSum(lf.getVector(), &sum);
-    EXPECT_NEAR(static_cast<Real>(sum), c, 1e-9);
+    EXPECT_NEAR(std::abs(sum - PetscScalar(c)), 0.0, 1e-9);
   }
 
   /**
@@ -644,20 +652,20 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Triangle, {6, 6}, Real(1) / Real(5));
     auto sub = makeCellSubMesh(mesh);
 
-    P1<Real, Mesh<Context::MPI>> subFes(sub);
+    P1<PetscScalar, Mesh<Context::MPI>> subFes(sub);
     GridFunction<decltype(subFes), ::Vec> subGF(subFes);
-    subGF = RealFunction(c);
+    subGF = PETScScalarFunction(c);
 
-    P1<Real, Mesh<Context::MPI>> parentFes(mesh);
+    P1<PetscScalar, Mesh<Context::MPI>> parentFes(mesh);
     PETSc::Variational::TestFunction v(parentFes);
 
     LinearForm lf(v);
     lf = Integral(subGF, v);
     lf.assemble();
 
-    PetscReal sum = 0.0;
+    PetscScalar sum = 0.0;
     VecSum(lf.getVector(), &sum);
-    EXPECT_NEAR(static_cast<Real>(sum), c, 1e-9);
+    EXPECT_NEAR(std::abs(sum - PetscScalar(c)), 0.0, 1e-9);
   }
 
   // ==========================================================================
@@ -679,15 +687,15 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Quadrilateral, {4, 4});
     auto sub = makeBoundarySubMesh(mesh);
 
-    P0<Real, Mesh<Context::MPI>> fes(sub);
+    P0<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(c);
+    u = PETScScalarFunction(c);
 
     Index begin = 0, end = 0;
     fes.getOwnershipRange(begin, end);
 
     for (Index i = begin; i < end; ++i)
-      EXPECT_NEAR(PetscRealPart(u[i]), c, 1e-10);
+      EXPECT_NEAR(std::abs(u[i] - PetscScalar(c)), 0.0, 1e-10);
     u.flush();
   }
 
@@ -707,12 +715,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
       distributeFromRoot(ctx, Polytope::Type::Quadrilateral, {6, 6}, Real(1) / Real(5));
     auto sub = makeCellSubMesh(mesh);
 
-    P1<Real, Mesh<Context::MPI>> fes(sub);
+    P1<PetscScalar, Mesh<Context::MPI>> fes(sub);
     GridFunction<decltype(fes), ::Vec> u(fes);
-    u = RealFunction(c);
+    u = PETScScalarFunction(c);
 
-    const Real total = Integral(u).compute();
-    EXPECT_NEAR(total, c, 1e-9);
+    const PetscScalar total = Integral(u).compute();
+    EXPECT_NEAR(std::abs(total - PetscScalar(c)), 0.0, 1e-9);
   }
 }
 
