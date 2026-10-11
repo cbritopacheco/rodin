@@ -91,9 +91,7 @@ TEST(GaussLobatto, CacheSurvivesHotEvictionAndConcurrentAccess)
   std::array<std::thread, 4> threads;
   for (size_t i = 0; i < threads.size(); ++i)
   {
-    threads[i] = std::thread([&, i] {
-      rules[i] = &QF::GaussLobatto::get(geometry, 21);
-    });
+    threads[i] = std::thread([&, i] { rules[i] = &QF::GaussLobatto::get(geometry, 21); });
   }
   for (auto& thread : threads)
     thread.join();
@@ -101,22 +99,19 @@ TEST(GaussLobatto, CacheSurvivesHotEvictionAndConcurrentAccess)
     EXPECT_EQ(rule, rules.front());
 }
 
-INSTANTIATE_TEST_SUITE_P(AllGeometries, GaussLobattoTest, ::testing::Values(
-  Geometry::Polytope::Type::Point,
-  Geometry::Polytope::Type::Segment,
-  Geometry::Polytope::Type::Triangle,
-  Geometry::Polytope::Type::Quadrilateral,
-  Geometry::Polytope::Type::Tetrahedron,
-  Geometry::Polytope::Type::Hexahedron,
-  Geometry::Polytope::Type::Wedge,
-  Geometry::Polytope::Type::Pyramid));
+INSTANTIATE_TEST_SUITE_P(AllGeometries, GaussLobattoTest,
+  ::testing::Values(Geometry::Polytope::Type::Point, Geometry::Polytope::Type::Segment,
+    Geometry::Polytope::Type::Triangle, Geometry::Polytope::Type::Quadrilateral,
+    Geometry::Polytope::Type::Tetrahedron, Geometry::Polytope::Type::Hexahedron,
+    Geometry::Polytope::Type::Wedge, Geometry::Polytope::Type::Pyramid));
 
 TEST(GaussLobatto, SeparateTriangleOrdersAreRespected)
 {
   const QF::GaussLobatto rule(Geometry::Polytope::Type::Triangle, 3, 5);
   EXPECT_EQ(rule.getSize(), size_t(11));
-  EXPECT_LT(Tests::QF::exactnessSweep(rule,
-    Geometry::Polytope::Type::Triangle, 3).worstRelativeError, Real(1e-12));
+  EXPECT_LT(Tests::QF::exactnessSweep(rule, Geometry::Polytope::Type::Triangle, 3)
+              .worstRelativeError,
+    Real(1e-12));
 }
 
 TEST(GaussLobatto, WeightedGaussianInteriorMoments)

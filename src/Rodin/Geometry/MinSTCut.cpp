@@ -17,13 +17,14 @@
 
 namespace Rodin::Geometry
 {
-  MinSTCut<LocalMesh>::Dinic::Dinic(Index count)
+  MinSTCut<Mesh<Context::Local>>::Dinic::Dinic(Index count)
     : m_graph(count),
       m_level(count, -1),
       m_next(count)
   {}
 
-  void MinSTCut<LocalMesh>::Dinic::add(Index first, Index second, Real capacity, Type type)
+  void MinSTCut<Mesh<Context::Local>>::Dinic::add(
+    Index first, Index second, Real capacity, Type type)
   {
     assert(first < m_graph.size() && second < m_graph.size());
     assert(std::isfinite(capacity) && capacity >= 0);
@@ -35,7 +36,7 @@ namespace Rodin::Geometry
       add(second, first, capacity, Type::Directed);
   }
 
-  Real MinSTCut<LocalMesh>::Dinic::getMaximumFlow(Index source, Index sink)
+  Real MinSTCut<Mesh<Context::Local>>::Dinic::getMaximumFlow(Index source, Index sink)
   {
     assert(source < m_graph.size() && sink < m_graph.size() && source != sink);
     Real flow = 0;
@@ -53,13 +54,13 @@ namespace Rodin::Geometry
     return flow;
   }
 
-  Boolean MinSTCut<LocalMesh>::Dinic::isReachable(Index vertex) const
+  Boolean MinSTCut<Mesh<Context::Local>>::Dinic::isReachable(Index vertex) const
   {
     assert(vertex < m_level.size());
     return m_level[vertex] >= 0;
   }
 
-  Boolean MinSTCut<LocalMesh>::Dinic::build(Index source, Index sink)
+  Boolean MinSTCut<Mesh<Context::Local>>::Dinic::build(Index source, Index sink)
   {
     std::fill(m_level.begin(), m_level.end(), -1);
     std::deque<Index> queue;
@@ -81,7 +82,8 @@ namespace Rodin::Geometry
     return m_level[sink] >= 0;
   }
 
-  Real MinSTCut<LocalMesh>::Dinic::augment(Index current, Index sink, Real amount)
+  Real MinSTCut<Mesh<Context::Local>>::Dinic::augment(
+    Index current, Index sink, Real amount)
   {
     if (current == sink)
       return amount;
@@ -101,11 +103,11 @@ namespace Rodin::Geometry
     return 0;
   }
 
-  MinSTCut<LocalMesh>::MinSTCut(const MeshType& mesh)
+  MinSTCut<Mesh<Context::Local>>::MinSTCut(const MeshType& mesh)
     : m_mesh(mesh)
   {}
 
-  MinSTCut<LocalMesh>::Result MinSTCut<LocalMesh>::classify(
+  MinSTCut<Mesh<Context::Local>>::Result MinSTCut<Mesh<Context::Local>>::classify(
     const std::function<Real(const Polytope&)>& average) const
   {
     const auto& mesh = getMesh();
@@ -161,8 +163,7 @@ namespace Rodin::Geometry
       if (cells.size() != 1 && cells.size() != 2)
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "One or two cells must be incident to each facet."
-          << Alert::Raise;
+          << "One or two cells must be incident to each facet." << Alert::Raise;
       }
       if (cells.size() == 1)
         continue;
@@ -178,8 +179,7 @@ namespace Rodin::Geometry
       if (!std::isfinite(measure) || measure <= 0 || !std::isfinite(capacity))
       {
         Alert::MemberFunctionException(*this, __func__)
-          << "Invalid facet measure or capacity."
-          << Alert::Raise;
+          << "Invalid facet measure or capacity." << Alert::Raise;
       }
       edges.push_back({cells[0], cells[1], capacity, face->getIndex()});
     }
@@ -187,8 +187,9 @@ namespace Rodin::Geometry
     return solve(insideCosts, outsideCosts, edges);
   }
 
-  MinSTCut<LocalMesh>::Result MinSTCut<LocalMesh>::solve(const std::vector<Real>& insideCosts,
-    const std::vector<Real>& outsideCosts, const std::vector<Edge>& edges) const
+  MinSTCut<Mesh<Context::Local>>::Result MinSTCut<Mesh<Context::Local>>::solve(
+    const std::vector<Real>& insideCosts, const std::vector<Real>& outsideCosts,
+    const std::vector<Edge>& edges) const
   {
     assert(insideCosts.size() == outsideCosts.size());
 

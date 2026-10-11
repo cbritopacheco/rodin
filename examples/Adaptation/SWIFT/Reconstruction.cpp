@@ -89,12 +89,10 @@ int main(int argc, char** argv)
     decltype(classifier)::Parameters classificationParameters;
     classificationParameters.fidelity = options.classification.fidelity;
     const Real smoothing = h * options.classification.smoothing;
-    classificationParameters.smoothing = [smoothing](const Polytope&) {
-      return smoothing;
-    };
+    classificationParameters.smoothing = [smoothing](
+                                           const Polytope&) { return smoothing; };
     classifier.setParameters(classificationParameters);
-    const auto classified = classifier.classify([&](const Polytope& cell) -> Real
-    {
+    const auto classified = classifier.classify([&](const Polytope& cell) -> Real {
       const auto& formula =
         QF::PolytopeQuadratureFormula::get(ClassificationOrder, cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(formula);

@@ -39,8 +39,8 @@ namespace Rodin::Tests::Unit
         }
     };
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
     {
       const Polytope::Traits traits(geometry);
       Array<size_t> shape(traits.getDimension());
@@ -68,7 +68,8 @@ namespace Rodin::Tests::Unit
           [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
             ASSERT_LT(index, points.size());
             EXPECT_DOUBLE_EQ(
-              (ip.getPoint().getReferenceCoordinates() - points[index++]).norm(), Real(0));
+              (ip.getPoint().getReferenceCoordinates() - points[index++]).norm(),
+              Real(0));
             EXPECT_TRUE(std::isfinite(weightJ));
             EXPECT_TRUE(std::isfinite(weightQ));
             EXPECT_GE(weightJ, Real(0.5) * measure / count);
@@ -86,35 +87,33 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(massQ, measure, Real(1e-12));
         EXPECT_EQ(index, count);
         if (!zero && traits.getDimension() > 1)
+        {
           EXPECT_TRUE(different);
+        }
       }
     }
   }
-
 
   TEST(Rodin_Adaptation_SWIFTHingeState, ClosedFormQualityCoverings)
   {
     using G = Geometry::Polytope::Type;
     constexpr size_t subdivisions = 4;
-    for (const auto [geometry, count, volume] : {
-      std::tuple{G::Point, 1u, Real(1)},
-      std::tuple{G::Segment, 5u, Real(1)},
-      std::tuple{G::Triangle, 15u, Real(0.5)},
-      std::tuple{G::Quadrilateral, 25u, Real(1)},
-      std::tuple{G::Tetrahedron, 35u, Real(1) / 6},
-      std::tuple{G::Hexahedron, 125u, Real(1)},
-      std::tuple{G::Wedge, 75u, Real(0.5)},
-      std::tuple{G::Pyramid, 55u, Real(1) / 3}})
+    for (const auto& [geometry, count, volume] : {std::tuple{G::Point, 1u, Real(1)},
+           std::tuple{G::Segment, 5u, Real(1)}, std::tuple{G::Triangle, 15u, Real(0.5)},
+           std::tuple{G::Quadrilateral, 25u, Real(1)},
+           std::tuple{G::Tetrahedron, 35u, Real(1) / 6},
+           std::tuple{G::Hexahedron, 125u, Real(1)}, std::tuple{G::Wedge, 75u, Real(0.5)},
+           std::tuple{G::Pyramid, 55u, Real(1) / 3}})
     {
       const auto& covering = SWIFT::QualityCovering::get(geometry, subdivisions);
       EXPECT_EQ(&covering, &SWIFT::QualityCovering::get(geometry, subdivisions));
       EXPECT_NE(covering.getCacheIdentity(),
         SWIFT::QualityCovering::get(geometry, subdivisions + 1).getCacheIdentity());
       ASSERT_EQ(covering.getSize(), count);
-      const Real shift = geometry == G::Tetrahedron
-        ? Real(1) / (2 * std::sqrt(Real(2))) : Real(0.5);
-      const Real scale = geometry == G::Tetrahedron
-        ? subdivisions + 3 * shift : subdivisions + Real(1);
+      const Real shift =
+        geometry == G::Tetrahedron ? Real(1) / (2 * std::sqrt(Real(2))) : Real(0.5);
+      const Real scale =
+        geometry == G::Tetrahedron ? subdivisions + 3 * shift : subdivisions + Real(1);
       for (size_t i = 0; i < count; ++i)
       {
         EXPECT_DOUBLE_EQ(covering.getWeight(i), volume / count);
@@ -127,9 +126,13 @@ namespace Rodin::Tests::Unit
           EXPECT_NEAR(index, std::round(index), Real(1e-14));
         }
         if (geometry == G::Triangle || geometry == G::Tetrahedron)
+        {
           EXPECT_LE(point.getData().sum(), Real(1) + Real(1e-14));
+        }
         if (geometry == G::Wedge)
+        {
           EXPECT_LE(point[0] + point[1], Real(1));
+        }
         if (geometry == G::Pyramid)
         {
           EXPECT_LE(point[0] + point[2], Real(1));
@@ -149,8 +152,8 @@ namespace Rodin::Tests::Unit
   {
     using G = Geometry::Polytope::Type;
     constexpr size_t resolution = 12;
-    for (const auto geometry : {G::Segment, G::Triangle, G::Quadrilateral,
-      G::Tetrahedron, G::Hexahedron, G::Wedge, G::Pyramid})
+    for (const auto geometry : {G::Segment, G::Triangle, G::Quadrilateral, G::Tetrahedron,
+           G::Hexahedron, G::Wedge, G::Pyramid})
     {
       const Geometry::Polytope::Traits traits(geometry);
       const size_t dimension = traits.getDimension();
@@ -202,8 +205,8 @@ namespace Rodin::Tests::Unit
   {
     using namespace Geometry;
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
     {
       const Polytope::Traits traits(geometry);
       Array<size_t> shape(traits.getDimension());
@@ -224,7 +227,8 @@ namespace Rodin::Tests::Unit
           {
             const Point point(*cell, traits.getVertex(vertex));
             vertices[vertex] = vertices[vertex] ||
-              (point.getCoordinates() - ip.getPoint().getCoordinates()).norm() < Real(1e-14);
+              (point.getCoordinates() - ip.getPoint().getCoordinates()).norm() <
+                Real(1e-14);
           }
         });
         for (const bool included : vertices)
@@ -312,15 +316,14 @@ namespace Rodin::Tests::Unit
       TestFunction test(fes);
       GridFunction current(fes), inner(fes), direction(fes), predictor(fes);
       current = VectorFunction(std::size_t{2}, [](const Point& p) {
-        return Math::SpatialVector<Real>{
-          Real(0.4) * p.getCoordinates()(0) +
+        return Math::SpatialVector<Real>{Real(0.4) * p.getCoordinates()(0) +
             (Order > 1 ? Real(0.05) * p.getCoordinates()(0) * p.getCoordinates()(0)
                        : Real(0)),
           Real(-0.3) * p.getCoordinates()(1)};
       });
       inner = VectorFunction(std::size_t{2}, [](const Point& p) {
-        return Math::SpatialVector<Real>{
-          Real(0.5) * p.getCoordinates()(0), Real(-0.9) * p.getCoordinates()(1) +
+        return Math::SpatialVector<Real>{Real(0.5) * p.getCoordinates()(0),
+          Real(-0.9) * p.getCoordinates()(1) +
             (Order > 1 ? Real(0.03) * p.getCoordinates()(1) * p.getCoordinates()(1)
                        : Real(0))};
       });
@@ -335,7 +338,8 @@ namespace Rodin::Tests::Unit
       BilinearForm metric(trial, test);
       LinearForm force(test);
       const auto residual = [&]() {
-        metric = SWIFT::HingeMetric(trial, test, current, inner, predictor, p, Real(0.02));
+        metric =
+          SWIFT::HingeMetric(trial, test, current, inner, predictor, p, Real(0.02));
         force = SWIFT::HingeForce(test, current, inner, predictor, p, Real(0.02));
         metric.assemble();
         force.assemble();
@@ -355,12 +359,12 @@ namespace Rodin::Tests::Unit
           const SWIFT::QualitySamples samples(*cell, Order, p);
           samples.forEachHinge(currentJacobian, predictorJacobian,
             [&](const IntegrationPoint& ip, Real weightJ, Real weightQ) {
-            CellDeformation deformation(2);
-            deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-            const SWIFT::HingeState state(
-              deformation, innerJacobian.getValue(ip), p, Real(0.02));
-            value += state.getEnergy(p, Real(0.02), weightJ, weightQ);
-          });
+              CellDeformation deformation(2);
+              deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+              const SWIFT::HingeState state(
+                deformation, innerJacobian.getValue(ip), p, Real(0.02));
+              value += state.getEnergy(p, Real(0.02), weightJ, weightQ);
+            });
         }
         return value;
       };

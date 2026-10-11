@@ -17,8 +17,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionNamedOptions)
 {
   std::vector<std::string> arguments = {"SWIFT_ReconstructionP2", "--n", "8",
     "--dimension=3", "--classification-fidelity=2", "--classification-smoothing=0.02",
-    "--lobes=4", "--amp=0.03", "--R0=0.2", "--phase=0.4", "--cx=0.4",
-    "--cy=0.6", "--cz=0.3", "--output=results/test", "--model-fit=2",
+    "--lobes=4", "--amp=0.03", "--R0=0.2", "--phase=0.4", "--cx=0.4", "--cy=0.6",
+    "--cz=0.3", "--output=results/test", "--model-fit=2",
     "--model-distribution-deviatoric=0.001", "--model-distribution-divergence=0.01",
     "--model-hinge=100", "--model-jacobian=0.02", "--model-distortion=8",
     "--convergence-iterations-outer=20", "--convergence-iterations-inner=10",
@@ -69,16 +69,15 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionNamedOptions)
 
 TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionRejectsMalformedOptions)
 {
-  for (const char* invalid :
-    {"--n", "--n=", "--n=-1", "--n=3", "--n=8junk", "--n=184467440737095516160",
-      "--dimension=4", "--classification-fidelity=-1", "--classification-smoothing=-1",
-      "--classification-fidelity=nan", "--classification-smoothing=inf",
-      "--model-fit=nan", "--model-fit=inf", "--model-fit=1bad",
-      "--trace=2", "--linear-solver=unknown", "--wngir-fit=1", "--unknown=1",
-      "--lobes=2.5", "--amp=-0.1", "--R0=0.01", "16",
-      "--swift-equal-hinge-weights", "--swift-stratified-hinge-weights",
-      "--swift-critical-fraction=0.5", "--swift-adaptive-hinge-weights",
-      "--swift-nonlinear-hinges", "--quality-validation-order=16"})
+  for (const char* invalid : {"--n", "--n=", "--n=-1", "--n=3", "--n=8junk",
+         "--n=184467440737095516160", "--dimension=4", "--classification-fidelity=-1",
+         "--classification-smoothing=-1", "--classification-fidelity=nan",
+         "--classification-smoothing=inf", "--model-fit=nan", "--model-fit=inf",
+         "--model-fit=1bad", "--trace=2", "--linear-solver=unknown", "--wngir-fit=1",
+         "--unknown=1", "--lobes=2.5", "--amp=-0.1", "--R0=0.01", "16",
+         "--swift-equal-hinge-weights", "--swift-stratified-hinge-weights",
+         "--swift-critical-fraction=0.5", "--swift-adaptive-hinge-weights",
+         "--swift-nonlinear-hinges", "--quality-validation-order=16"})
   {
     SCOPED_TRACE(invalid);
     std::string executable = "SWIFT_ReconstructionP1", argument = invalid;
@@ -89,40 +88,21 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionRejectsMalformedOpti
 
 TEST(Rodin_Adaptation_SWIFTExampleParameters, FlatParameterFlagsAreRejected)
 {
-  for (const char* option : {
-    "--swift-fit=1",
-    "--swift-distribution-deviatoric=1",
-    "--swift-distribution-divergence=1",
-    "--swift-hinge=1",
-    "--swift-jacobian=1",
-    "--swift-distortion=1",
-    "--swift-quality-guard=1",
-    "--swift-jacobian-weight=1",
-    "--swift-distortion-weight=1",
-    "--swift-robust-scale=1",
-    "--swift-directional-newton=1",
-    "--swift-max-step-over-h=1",
-    "--swift-armijo=1",
-    "--swift-linear-threads=1",
-    "--swift-geometric-tolerance=1",
-    "--swift-inner-relative-tolerance=1",
-    "--swift-inner-absolute-tolerance=1",
-    "--swift-linear-relative-tolerance=1",
-    "--swift-energy-tolerance=1",
-    "--swift-step-tolerance=1",
-    "--swift-step-over-h-tolerance=1",
-    "--swift-outer-iterations=1",
-    "--swift-inner-iterations=1",
-    "--swift-linear-iterations=1",
-    "--swift-backtracks=1",
-    "--swift-stagnation-iterations=1",
-    "--quad-order=1",
-    "--surface-quadrature-order=1",
-    "--volume-quadrature-order=1",
-    "--geometric-validation-order=1",
-    "--swift-trace=1",
-    "--swift-quality-witness=1",
-    "--swift-linear-solver=1"})
+  for (const char* option :
+    {"--swift-fit=1", "--swift-distribution-deviatoric=1",
+      "--swift-distribution-divergence=1", "--swift-hinge=1", "--swift-jacobian=1",
+      "--swift-distortion=1", "--swift-quality-guard=1", "--swift-jacobian-weight=1",
+      "--swift-distortion-weight=1", "--swift-robust-scale=1",
+      "--swift-directional-newton=1", "--swift-max-step-over-h=1", "--swift-armijo=1",
+      "--swift-linear-threads=1", "--swift-geometric-tolerance=1",
+      "--swift-inner-relative-tolerance=1", "--swift-inner-absolute-tolerance=1",
+      "--swift-linear-relative-tolerance=1", "--swift-energy-tolerance=1",
+      "--swift-step-tolerance=1", "--swift-step-over-h-tolerance=1",
+      "--swift-outer-iterations=1", "--swift-inner-iterations=1",
+      "--swift-linear-iterations=1", "--swift-backtracks=1",
+      "--swift-stagnation-iterations=1", "--quad-order=1", "--surface-quadrature-order=1",
+      "--volume-quadrature-order=1", "--geometric-validation-order=1", "--swift-trace=1",
+      "--swift-quality-witness=1", "--swift-linear-solver=1"})
   {
     std::string executable = "SWIFT_ReconstructionP1", argument = option;
     char* argv[] = {executable.data(), argument.data()};
@@ -274,7 +254,7 @@ TEST(Rodin_Adaptation_SWIFTAdmissibility, SamplingIsReadOnly)
     Alert::Exception);
 }
 
-  TEST(Rodin_Adaptation_SWIFTAdmissibility, UsesSharedCoveringSubdivision)
+TEST(Rodin_Adaptation_SWIFTAdmissibility, UsesSharedCoveringSubdivision)
 {
   using namespace Geometry;
   using namespace Variational;
@@ -288,10 +268,10 @@ TEST(Rodin_Adaptation_SWIFTAdmissibility, SamplingIsReadOnly)
     value(1) = 0;
     return value;
   });
-  const auto automatic = Adaptation::SWIFT::evaluateAdmissibility(
-    std::as_const(displacement), Real(0.01));
-  const auto explicitSampling = Adaptation::SWIFT::evaluateAdmissibility(
-    std::as_const(displacement), Real(0.01), 3);
+  const auto automatic =
+    Adaptation::SWIFT::evaluateAdmissibility(std::as_const(displacement), Real(0.01));
+  const auto explicitSampling =
+    Adaptation::SWIFT::evaluateAdmissibility(std::as_const(displacement), Real(0.01), 3);
   EXPECT_EQ(automatic.inadmissibleCount, 6u * mesh.getCellCount());
   EXPECT_EQ(explicitSampling.inadmissibleCount, 10u * mesh.getCellCount());
   EXPECT_NEAR(explicitSampling.minJ, Real(-1), Real(1e-12));

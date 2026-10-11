@@ -32,10 +32,10 @@ namespace Rodin::Tests::Unit
     constexpr size_t GridPoints = 4;
     const Real h = Real(1) / Real(GridPoints - 1);
     auto mesh = d == 2
-      ? Geometry::LocalMesh::UniformGrid(Geometry::Polytope::Type::Triangle,
-          {GridPoints, GridPoints})
-      : Geometry::LocalMesh::UniformGrid(Geometry::Polytope::Type::Tetrahedron,
-          {GridPoints, GridPoints, GridPoints});
+      ? Geometry::LocalMesh::UniformGrid(
+          Geometry::Polytope::Type::Triangle, {GridPoints, GridPoints})
+      : Geometry::LocalMesh::UniformGrid(
+          Geometry::Polytope::Type::Tetrahedron, {GridPoints, GridPoints, GridPoints});
     mesh.scale(h);
     mesh.getConnectivity().compute(d - 1, d);
     Geometry::MinSTCut classifier(mesh);

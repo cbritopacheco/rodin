@@ -32,13 +32,12 @@ namespace Rodin::Adaptation::SWIFT
        * @param order Displacement finite-element order.
        * @param parameters Quality sampling policy.
        */
-      QualitySamples(const Geometry::Polytope& cell, size_t order,
-        const Parameters& parameters)
+      QualitySamples(
+        const Geometry::Polytope& cell, size_t order, const Parameters& parameters)
         : m_cell(cell),
           m_parameters(parameters),
           m_formula(QualityCovering::get(cell.getGeometry(),
-            parameters.sampling.getSubdivision(order,
-              cell.getTransformation().getOrder(),
+            parameters.sampling.getSubdivision(order, cell.getTransformation().getOrder(),
               Geometry::Polytope::Traits(cell.getGeometry()).getVertexCount() ==
                 cell.getDimension() + 1)))
       {}
@@ -91,15 +90,16 @@ namespace Rodin::Adaptation::SWIFT
           {
             state.setDisplacementGradient(
               Math::SpatialMatrix<Real>(current + alpha * predictor));
-            jRisk = std::max(jRisk, std::clamp(
-              Real(1) - (state.getJacobian() - model.jacobian) / deltaJ,
-              Real(0), MaximumRisk));
+            jRisk = std::max(jRisk,
+              std::clamp(Real(1) - (state.getJacobian() - model.jacobian) / deltaJ,
+                Real(0), MaximumRisk));
             // Distortion is undefined at inverted predictor witnesses.
-            qRisk = std::max(qRisk, state.isAdmissible()
-              ? std::clamp(Real(1) -
-                  (model.distortion - state.getRelativeDistortion()) / deltaQ,
-                  Real(0), MaximumRisk)
-              : MaximumRisk);
+            qRisk = std::max(qRisk,
+              state.isAdmissible()
+                ? std::clamp(
+                    Real(1) - (model.distortion - state.getRelativeDistortion()) / deltaQ,
+                    Real(0), MaximumRisk)
+                : MaximumRisk);
           }
           riskJ[index] = jRisk;
           riskQ[index] = qRisk;
@@ -110,10 +110,9 @@ namespace Rodin::Adaptation::SWIFT
         });
         const Real equalWeight = measure / count;
         const auto weight = [&](Real risk, Real sum) {
-          return sum > Real(0)
-            ? equalWeight * (Real(1) - AdaptiveFraction +
-                AdaptiveFraction * count * risk / sum)
-            : equalWeight;
+          return sum > Real(0) ? equalWeight *
+              (Real(1) - AdaptiveFraction + AdaptiveFraction * count * risk / sum)
+                               : equalWeight;
         };
         index = 0;
         forEach([&](const Variational::IntegrationPoint& ip, Real) {

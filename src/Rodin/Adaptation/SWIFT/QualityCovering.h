@@ -41,8 +41,8 @@ namespace Rodin::Adaptation::SWIFT
        * @param subdivisions Positive number of subdivisions per reference edge.
        * @returns The immutable cached covering.
        */
-      static const QualityCovering& get(Geometry::Polytope::Type geometry,
-        size_t subdivisions)
+      static const QualityCovering& get(
+        Geometry::Polytope::Type geometry, size_t subdivisions)
       {
         assert(subdivisions > 0);
         using Key = std::pair<Geometry::Polytope::Type, size_t>;
@@ -60,7 +60,10 @@ namespace Rodin::Adaptation::SWIFT
        * @brief Gets the number of distinct witnesses.
        * @returns The covering cardinality.
        */
-      size_t getSize() const override { return m_points.size(); }
+      size_t getSize() const override
+      {
+        return m_points.size();
+      }
 
       /**
        * @brief Gets the reference coordinates of a witness.
@@ -68,27 +71,37 @@ namespace Rodin::Adaptation::SWIFT
        * @returns Reference coordinates retained by this covering.
        */
       const Math::SpatialVector<Real>& getPoint(size_t i) const override
-      { return m_points[i]; }
+      {
+        return m_points[i];
+      }
 
       /**
        * @brief Gets the equal reference penalty weight.
        * @param i Witness index; unused because base weights are equal.
        * @returns Reference-cell volume divided by covering cardinality.
        */
-      Real getWeight([[maybe_unused]] size_t i) const override { return m_weight; }
+      Real getWeight([[maybe_unused]] size_t i) const override
+      {
+        return m_weight;
+      }
 
       /**
        * @brief Gets the Euclidean covering radius in reference coordinates.
        * @returns The exact radius of this structured construction.
        */
-      Real getCoveringRadius() const { return m_radius; }
+      Real getCoveringRadius() const
+      {
+        return m_radius;
+      }
 
       /**
        * @brief Copies the witness set with a fresh cache identity.
        * @returns An owning pointer to the copy.
        */
       QualityCovering* copy() const noexcept override
-      { return new QualityCovering(*this); }
+      {
+        return new QualityCovering(*this);
+      }
 
     private:
       /**
@@ -106,7 +119,7 @@ namespace Rodin::Adaptation::SWIFT
           : Real(0.5);
         const Real scale = tetrahedron ? m + 3 * shift : m + Real(1);
         m_radius = tetrahedron && m == 1 ? Real(1) / std::sqrt(Real(6))
-          : std::sqrt(Real(dimension)) / (2 * scale);
+                                         : std::sqrt(Real(dimension)) / (2 * scale);
         const auto& lattice = QualityLattice::get(geometry, m);
         m_points.reserve(lattice.getSize());
         for (size_t q = 0; q < lattice.getSize(); ++q)

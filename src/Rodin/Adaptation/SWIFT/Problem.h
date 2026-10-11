@@ -1229,7 +1229,8 @@ namespace Rodin::Adaptation::SWIFT
             }
             if (!innerConverged)
             {
-              HingeMetric hingeMetric(m_duStep, m_vStep, u, vK, predictor, p, hingeCoefficient);
+              HingeMetric hingeMetric(
+                m_duStep, m_vStep, u, vK, predictor, p, hingeCoefficient);
               HingeForce hingeForce(m_vStep, u, vK, predictor, p, hingeCoefficient);
               typename ProblemType::ProblemBodyType body(m_distributionForm);
               body = body + m_fittingMetric + hingeMetric - m_fittingForce - hingeForce;
@@ -1896,8 +1897,7 @@ namespace Rodin::Adaptation::SWIFT
             const auto cell = mesh.getCell(cells[static_cast<std::size_t>(i)]);
             const QualitySamples samples(*cell,
               fes.getFiniteElement(dimension, cell->getIndex()).getOrder(), m_parameters);
-            samples.forEach(
-              [&](const Variational::IntegrationPoint& ip, Real) {
+            samples.forEach([&](const Variational::IntegrationPoint& ip, Real) {
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
               const Hinge state(
                 deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
@@ -1925,8 +1925,8 @@ namespace Rodin::Adaptation::SWIFT
       template <class Mesh, class FES>
       Real getHingeEnergy(const Mesh& mesh, const FES& fes,
         const std::vector<Index>& validationCells, const Displacement& current,
-        const Displacement& inner, const Displacement& predictor,
-        std::size_t dimension, Real coefficient) const
+        const Displacement& inner, const Displacement& predictor, std::size_t dimension,
+        Real coefficient) const
       {
         Real energy = 0;
 #ifdef RODIN_USE_OPENMP
@@ -1947,11 +1947,11 @@ namespace Rodin::Adaptation::SWIFT
             auto predictorJacobian = Variational::Jacobian(predictor);
             samples.forEachHinge(currentJacobian, predictorJacobian,
               [&](const Variational::IntegrationPoint& ip, Real weightJ, Real weightQ) {
-              deformation.setDisplacementGradient(currentJacobian.getValue(ip));
-              const Hinge state(
-                deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
-              energy += state.getEnergy(m_parameters, coefficient, weightJ, weightQ);
-            });
+                deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+                const Hinge state(
+                  deformation, innerJacobian.getValue(ip), m_parameters, coefficient);
+                energy += state.getEnergy(m_parameters, coefficient, weightJ, weightQ);
+              });
           }
         }
         return energy;
