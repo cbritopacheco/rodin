@@ -139,15 +139,20 @@ Configure with MPI enabled, PETSc disabled, and unit tests enabled. Build
 RodinMPIAssemblyTest. The regular `RodinMPIAssemblyTest_np*` CTest entries
 exclude the four 3D affine-identification cases, the three boundary-constraint,
 physical-incidence and SubMesh-boundary probes on every geometry, the
-fixed-layout size-query tests and
-the matrix-trace probes. The regular group has a 120-second limit.
+point and positive-dimensional SubMesh value-type probes, the fixed-layout
+size-query tests and the matrix-trace probes. The regular group has a
+120-second limit.
 The four 3D affine-identification cases run on each of 1, 2, 3, 4, and 8 ranks as
 `RodinMPIAssemblyIdentificationSlowTest_np*` entries, labelled
 `unit;distributed;slow` with a 600-second limit. CI's Release slow job runs
-them separately. The three boundary/geometry probes use one
+them separately. These five boundary/geometry/SubMesh probes use one
 `RodinMPIAssemblyGeometrySlowTest_np*_<geometry>` registration for each of
 the seven positive-dimensional geometries, with a 600-second limit per
 geometry; fixed-layout
 size queries use `RodinMPISpaceSizeTest_np*` with a 30-second limit.
+The SubMesh probes are separated because their combined Debug eight-rank
+execution exhausted the regular registration's budget while cases were still
+passing. Partitioning preserves every case, geometry, rank and sanitizer
+configuration; it does not establish a performance improvement.
 No geometry or rank is omitted. Run the complete assembly and size-query matrix with
 `ctest --test-dir <build>/tests -R '^Rodin(MPIAssembly|MPISpaceSize)' --output-on-failure`.
