@@ -120,7 +120,7 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionInheritsProductionDe
   EXPECT_EQ(options.n, 16u);
   EXPECT_EQ(options.dimension, 2u);
   EXPECT_EQ(options.classification.fidelity, Real(1));
-  EXPECT_EQ(options.classification.smoothing, Real(1));
+  EXPECT_EQ(options.classification.smoothing, Real(0.01));
   EXPECT_EQ(options.lobes, 0);
   EXPECT_EQ(options.parameters.model.h, Real(1) / Real(15));
   EXPECT_EQ(options.parameters.model.fit, defaults.model.fit);
@@ -129,6 +129,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionInheritsProductionDe
   EXPECT_EQ(options.parameters.model.distribution.divergence,
     defaults.model.distribution.divergence);
   EXPECT_EQ(options.parameters.model.hinge, defaults.model.hinge);
+  EXPECT_EQ(options.parameters.model.jacobianWeight, defaults.model.jacobianWeight);
+  EXPECT_EQ(options.parameters.model.distortionWeight, defaults.model.distortionWeight);
   EXPECT_EQ(options.parameters.convergence.iterations.outer,
     defaults.convergence.iterations.outer);
   EXPECT_EQ(options.parameters.convergence.iterations.inner,
@@ -142,8 +144,10 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, CalibratedDefaultsAreInherited)
   const auto p = Examples::makeSWIFTParameters(1, argv, Real(0.1), 10);
   EXPECT_EQ(p.model.fit, Real(1));
   EXPECT_EQ(p.model.distribution.deviatoric, Real(1e-4));
-  EXPECT_EQ(p.model.distribution.divergence, Real(1e-2));
-  EXPECT_EQ(p.model.hinge, Real(10));
+  EXPECT_EQ(p.model.distribution.divergence, Real(1e-4));
+  EXPECT_EQ(p.model.hinge, Real(100));
+  EXPECT_EQ(p.model.jacobianWeight, Real(0.1));
+  EXPECT_EQ(p.model.distortionWeight, Real(1));
   EXPECT_EQ(p.convergence.iterations.outer, 30u);
   EXPECT_EQ(p.convergence.iterations.inner, 15u);
   EXPECT_EQ(p.quadrature.getSurfaceOrder(1), 8u);

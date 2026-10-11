@@ -100,7 +100,7 @@ cd /tmp/rodin-swift
   --n=16 --dimension=2 --lobes=4 --amp=0.05 --R0=0.25 \
   --classification-smoothing=0.12 \
   --model-fit=1 --model-distribution-deviatoric=1e-4 \
-  --model-distribution-divergence=1e-2 --model-hinge=10 \
+  --model-distribution-divergence=1e-4 --model-hinge=100 \
   --convergence-iterations-outer=30 --convergence-iterations-inner=15 \
   --linear-solver=sparse-lu --trace \
   --output=results/lobed-p2
@@ -170,7 +170,7 @@ degree.
 | Classifier Setting | Flag | Default |
 |--------------------|------|---------|
 | Fidelity | `--classification-fidelity` | \(1\) |
-| Dimensionless facet smoothing | `--classification-smoothing` | \(1\) |
+| Dimensionless facet smoothing | `--classification-smoothing` | \(0.01\) |
 | Phase transition scale | Fixed policy | \(\varepsilon=1.25h\) |
 | Cell-average quadrature order | Fixed policy | \(2\) |
 
@@ -191,7 +191,8 @@ The flag previously supplied the physical weight \(s\). To reproduce an old
 run at the same resolution, now pass \(\widehat s=s/h\). For example, the
 previous 2D weight \(0.008\) at \(n=16\) becomes `--classification-smoothing=0.12`;
 the successful weight \(0.001\) at that resolution becomes
-`--classification-smoothing=0.015`. Both CLI defaults remain \(1\).
+`--classification-smoothing=0.015`. Fidelity defaults to \(1\); dimensionless
+smoothing defaults to \(0.01\). MinSTCut's own default facet function remains one.
 
 The phase average is approximated by quadrature; the
 nonpolynomial integrand is not integrated exactly. Smoothing is a facet
@@ -287,12 +288,13 @@ named flags. The complete model/control mapping is:
 | `model.h` | Fixed background reference spacing | Required; set to \(1/(n-1)\) |
 | `model.fit` | Target-normal fitting stiffness, not a force multiplier | `1` |
 | `model.distribution.deviatoric` | Globally centered deviatoric-strain stiffness | `1e-4` |
-| `model.distribution.divergence` | Globally centered divergence stiffness, normalized by dimension | `1e-2` |
-| `model.hinge` | Hinge strength relative to predicted fitting improvement | `10` |
+| `model.distribution.divergence` | Globally centered divergence stiffness, normalized by dimension | `1e-4` |
+| `model.hinge` | Hinge strength relative to predicted fitting improvement | `100` |
 | `model.distortion` | Spendable relative-distortion budget | `10` |
 | `model.jacobian` | Relative Jacobian floor | `1e-2` |
 | `model.qualityGuard` | Fraction of identity margins used for hinge activation | `0.1` |
-| `model.jacobianWeight`, `model.distortionWeight` | Relative weights of the two hinge rows | `1` each |
+| `model.jacobianWeight` | Relative Jacobian-hinge row weight | `0.1` |
+| `model.distortionWeight` | Relative distortion-hinge row weight | `1` |
 | `model.robustScale` | Fixed Welsch scale when positive | `0`: automatic |
 | `globalization.directionalNewton` | Predictor/model directional scaling | `true` |
 | `globalization.maxStepOverH` | Optional predictor-motion cap divided by reference spacing | `0`: unrestricted |
@@ -301,6 +303,10 @@ named flags. The complete model/control mapping is:
 | `linear.threads` | Backend thread policy | `0`: unchanged |
 | `trace` | Iteration diagnostics | `false` |
 | `traceQualityWitness` | Limiting-cell predicted/actual quality diagnostics | `false` |
+
+These model and classifier defaults follow the current shared leader of the
+ongoing 2D calibration. They remain provisional until the campaign, including
+its 3D stage, finishes. Work budgets, tolerances and sampling policies are unchanged.
 
 For example, enable tracing or select an available backend through the API:
 
