@@ -86,6 +86,24 @@ points than optimized tables.
 - `XiaoGimbutas` and `WitherdenVincent` expose immutable tabulated rules.
 - `GaussLegendre` constructs one-dimensional Gaussian rules and the weighted
   conical products.
+- `GaussLobatto` includes element boundaries with positive weights, using
+  Jacobi--Lobatto conical products on collapsed elements and merging coincident
+  nodes. Its constructor takes a point count, with exactness `2*n-3`.
+- `GaussLobatto::get(geometry, count)` caches canonical rules directly by
+  geometry and point count. The generic dispatcher remains unchanged.
+  Positive reference weights require a nonsingular physical mapping at the nodes
+  to remain positive after mapping. P1 pyramid gradients use the symmetric
+  centreline trace at the apex, preserving affine reproduction. General rational
+  fields can have direction-dependent apex limits; this trace does not certify
+  all directional quality limits.
+- SWIFT uses its own cached `QualityCovering` for hinges and actual-quality
+  checks: closed-form shifted/contracted reference lattices, with a homothetic
+  tetrahedral construction. `sampling.subdivision` selects the generating
+  lattice resolution; point counts are unchanged, but vertices are not retained.
+  Equal positive base weights sum to reference volume; adaptive hinge weights
+  preserve mapped discrete mass. This sampling policy makes no polynomial
+  exactness or continuous quality-certification claim. It does not replace
+  ordinary surface/volume integration rules.
 - `TensorProduct` composes two or three formulas and multiplies their weights.
 - `GrundmannMoller` remains an explicitly selectable simplex family. It is not
   a default because its weights are signed above degree one.

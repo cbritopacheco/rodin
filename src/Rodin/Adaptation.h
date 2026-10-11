@@ -11,15 +11,15 @@
  * @file
  * @brief Top level include for Rodin adaptation utilities.
  *
- * Provides WNGIR (Welsch natural-gradient interface registration) utilities
- * and sampled deformation-admissibility diagnostics.
+ * Provides SWIFT (Strain-distributed Welsch Implicit-interface Fitting Technique)
+ * utilities and sampled deformation-admissibility diagnostics.
  */
 
 #include "Adaptation/AnalyticFunctionAdapters.h"
 #include "Adaptation/CellDeformation.h"
 #include "Adaptation/CellGeomCache.h"
 #include "Adaptation/DeformationMap.h"
-#include "Adaptation/WNGIR.h"
-#include "Adaptation/WNGIRAdmissibility.h"
+#include "Adaptation/SWIFT.h"
+#include "Adaptation/SWIFT/Admissibility.h"
 
 #endif

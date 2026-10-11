@@ -132,7 +132,7 @@ rather than extended:
   instead of threading them through free functions. A free function is
   appropriate for a standalone operation with its own contract and no shared
   class context.
-- **New solvers are expressed IN the form language, not beside it.** WNGIR
+- **New solvers are expressed IN the form language, not beside it.** SWIFT
   is built from `Problem` + `Integral`/`FaceIntegral` + custom integrators
   that slot into the existing assembly — a sentence in the language, not a
   parallel framework. If you need something new, add the minimal node (a

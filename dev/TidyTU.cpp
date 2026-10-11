@@ -37,7 +37,7 @@
 #include <Rodin/Serialization/Export.h>
 #include <Rodin/Advection/Lagrangian.h>
 #include <Rodin/Eikonal/FMM.h>
-#include <Rodin/Adaptation/WNGIR.h>
+#include <Rodin/Adaptation/SWIFT.h>
 #include <Rodin/MMG.h>
 
 #ifdef RODIN_USE_MPI

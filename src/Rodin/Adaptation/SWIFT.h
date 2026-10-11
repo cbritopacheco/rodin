@@ -1,0 +1,20 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_ADAPTATION_SWIFT_H
+#define RODIN_ADAPTATION_SWIFT_H
+
+/**
+ * @file
+ * @brief Public include for robust natural-gradient interface fitting.
+ */
+
+#include "SWIFT/Parameters.h"
+#include "SWIFT/Report.h"
+#include "SWIFT/Problem.h"
+#include "SWIFT/Adapt.h"
+
+#endif

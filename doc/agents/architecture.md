@@ -109,7 +109,7 @@ Assembly 7, FormLanguage 6, Distance 6, Test 6.
   distance models (Eikonal, Poisson, SignedPoisson, Rvachev,
   SpaldingTucker), FMM fast marching, Lagrangian advection, H¹
   extension-regularization (`H1a`). → physics.md
-- **Adaptation/** — moving-interface mesh adaptation: the WNGIR module
+- **Adaptation/** — moving-interface mesh adaptation: the SWIFT module
   (Welsch natural-gradient interface fitting) plus analytic-function
   adapters and a per-cell geometry cache. Related work (TMOP-style target
   matrix optimization, native remeshers) lives on other branches — verify

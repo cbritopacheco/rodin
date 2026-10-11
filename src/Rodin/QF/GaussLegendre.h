@@ -98,6 +98,17 @@ namespace Rodin::QF
         size_t n, size_t alpha, std::vector<Real>& x, std::vector<Real>& w);
 
       /**
+       * @brief Gaussian rule for the weight @f$ (1-z)^\alpha z^\beta @f$.
+       * @param n Positive number of quadrature points.
+       * @param alpha Exponent of the @f$ (1-z) @f$ factor.
+       * @param beta Exponent of the @f$ z @f$ factor.
+       * @param x Output nodes on the unit interval.
+       * @param w Output weights, summing to @f$ B(\beta+1,\alpha+1) @f$.
+       */
+      static void gj1dUnit(
+        size_t n, size_t alpha, size_t beta, std::vector<Real>& x, std::vector<Real>& w);
+
+      /**
        * @brief Computes 1D Gauss-Legendre nodes and weights on [0,1].
        * @param n Number of quadrature points
        * @param x Output vector for quadrature point coordinates

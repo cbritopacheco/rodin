@@ -174,6 +174,11 @@ namespace Rodin::Variational
       void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
+        if (!ip.getQuadratureFormula())
+        {
+          interpolate(out, p);
+          return;
+        }
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
         const Index i = polytope.getIndex();

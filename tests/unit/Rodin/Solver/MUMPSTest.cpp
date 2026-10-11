@@ -161,6 +161,32 @@ namespace Rodin::Tests::Unit::Solver
     expectSolution(system, expected);
   }
 
+  TEST(Rodin_Solver_MUMPS, DefaultWorkspaceMarginIsPreservedAndRestored)
+  {
+    auto mesh = makeMesh(Polytope::Type::Segment);
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    Problem problem(u, v);
+    MUMPSSolver solver(problem);
+    auto system = makeUnsymmetricSystem();
+    solver.factorize(system);
+    ASSERT_TRUE(solver.success());
+    const auto margin = solver.getResources().instance.icntl[13];
+    EXPECT_GT(margin, 0);
+    solver.setWorkspacePercentage(120).factorize(system);
+    ASSERT_TRUE(solver.success());
+    EXPECT_EQ(solver.getResources().instance.icntl[13], 120);
+    solver.setWorkspacePercentage(0).factorize(system);
+    ASSERT_TRUE(solver.success());
+    EXPECT_EQ(solver.getResources().instance.icntl[13], margin);
+    solver.solve(system);
+    EXPECT_TRUE(solver.success());
+    Math::Vector<Real> exact(3);
+    exact << 1, 2, 3;
+    expectSolution(system, exact);
+  }
+
   TEST(Rodin_Solver_MUMPS, UnsymmetricLifecycleTracksRetainedStages)
   {
     Mesh mesh;

@@ -94,6 +94,9 @@
 
   Higher-level functionality built on the variational core:
 
+  - @subpage guides-swift - Marked-interface mesh fitting, quality budgets,
+    solver controls, diagnostics, and metric extension points
+
   - @subpage guides-shape-optimization — Shape derivatives, Hilbertian
     regularization (@ref Rodin::Hilbert::H1a "H1a"), level-set evolution,
     redistancing, and the shape optimization loop
