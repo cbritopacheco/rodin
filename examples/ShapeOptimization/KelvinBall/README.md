@@ -28,6 +28,24 @@ available as diagnostics, but there is no scalar trace-penalty projection
 in redistancing or transport. Transport uses Rodin's characteristic flow and
 RK4 integrator, followed by nodal evaluation with a retain-on-failure policy.
 
+## User-reported working configuration
+
+On 11 October 2026, the following SWIFT configuration was reported to produce
+good designs. This records a working optimisation configuration, not a
+quantitative convergence or accuracy validation. Run from a dedicated output
+directory; the chamber and sewn XDMF files and CSV history are written there.
+
+```sh
+OMP_NUM_THREADS=4 /Users/carlos/Projects/rodin.worktrees/KelvinBall/build-kelvin/examples/ShapeOptimization/KelvinBall/KelvinBall \
+  --n=10 --iterations=200 --outer-radius=2 \
+  --hmin-factor=0.1 --hmax-factor=10 \
+  --regularization=20 --step=0.2 \
+  --reconstruction=swift --mmg-adapt --thickness-min=0.05 \
+  --swift-linear-solver=mumps --swift-linear-threads=4 \
+  --swift-convergence-iterations-outer=30 \
+  --swift-convergence-iterations-inner=15
+```
+
 ## The problem
 
 ### Geometry and Stokes states
