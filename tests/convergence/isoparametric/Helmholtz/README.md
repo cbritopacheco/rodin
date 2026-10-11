@@ -1,0 +1,484 @@
+# Complex Helmholtz on exact and approximated geometry
+
+This suite isolates field approximation on curved cells from approximation
+of the physical domain. Let $Q=(0,1)^d$, $d\in\lbrace 1,2,3\rbrace$, and define
+
+$$
+\Phi(\xi)=\xi+a\xi_0^2e_{d-1},\qquad a=0.1,\qquad \Omega=\Phi(Q).
+$$
+
+The shared `CurvedGeometry` retains original grid vertices, maps geometry
+control points once, and installs degree-two `ParametricTransformation`s
+on every positive-dimensional entity, including boundary and halo entities.
+The map belongs exactly to each cell's degree-two geometry family. Topology,
+logical indices, and MPI ownership are unchanged; identical maps are evaluated
+locally on shared entities after partitioning the unwarped grid.
+Mesh entity iterators enumerate the local entities and halos used by these
+setters. Global MPI entity counts are not local-index bounds.
+The workload dimension is that of the prescribed grid (equivalently its
+ambient dimension here), including on empty shards. Physical references
+and the dimension passed to `getMeasure` are not inferred from the highest
+dimension of an empty local incidence complex.
+
+For $d\ge2$, $D\Phi=I+2a\xi_0e_{d-1}\otimes e_0$ and
+$\det D\Phi=1$. In one dimension, $\Phi'=1+2a\xi_0\ge1$.
+Thus the map is regular, and $|\Omega|=1$ for $d\ge2$, whereas
+$\Omega=(0,1.1)$ and $|\Omega|=1.1$ for $d=1$. Geometry degree two
+is held fixed at all refinement levels: there is no changing-domain error.
+With field degree one this is a superparametric study; with field degree
+two it is isoparametric in the strict sense.
+
+## Continuous problem and manufactured data
+
+The nondimensional complex Dirichlet problem is
+
+$$
+-\Delta u-\kappa^2u=f\quad\text{in }\Omega,\qquad
+u=g\quad\text{on }\partial\Omega,\qquad \kappa^2=\frac14.
+$$
+
+The smooth physical field, source, gradient, and trace are
+
+$$
+s(x)=\sum_{j=0}^{d-1}x_j,\qquad u_\ast(x)=e^{is(x)},\qquad
+f(x)=\left(d-\frac14\right)u_\ast(x),\qquad
+\nabla_xu_\ast=iu_\ast(1,\ldots,1)^T,\qquad g=u_\ast\rvert_{\partial\Omega}.
+$$
+
+`HelmholtzData` evaluates these quantities in physical coordinates, not
+reference coordinates. In trial-first, test-second convention, the form is
+
+$$
+a(u,v)=\int_\Omega\nabla u\cdot\overline{\nabla v}\thinspace dx
+-\frac14\int_\Omega u\overline v\thinspace dx,
+\qquad \ell(v)=\int_\Omega f\overline v\thinspace dx.
+$$
+
+The negative mass term does not make this selected workload indefinite.
+Indeed, $\Omega\subset B=(0,1)^{d-1}\times(0,1.1)$ and zero extension
+of $H_0^1(\Omega)$ functions into $B$ gives
+
+$$
+\lambda_1(\Omega)\ge\lambda_1(B)
+=\pi^2\left(d-1+\frac1{1.1^2}\right)>\frac14.
+$$
+
+Consequently, $a(v,v)\ge(1-\kappa^2/\lambda_1(B))\lVert\nabla v\rVert_{L^2(\Omega)}^2$
+on homogeneous traces.
+The Hermitian positive-definite constrained system is solved by CG;
+this argument does not cover arbitrary wave numbers or resonance.
+
+## Spaces, mesh levels, and field errors
+
+The native degree-one path uses complex `P1`; degree two uses complex
+`H1<2>`. PETSc local/MPI paths use complex `H1<1>` and `H1<2>`.
+Each denotes its cell-appropriate scalar conforming family, rather than
+total-degree simplex polynomials on every geometry. Fresh spaces and
+linear systems are constructed per solve; assembled matrices are not resized.
+`DirichletBC` applies the field-space DOF functionals to the analytic trace;
+the discrete trace is $g_h=I_h^{\partial\Omega}g$. A nonpolynomial boundary
+function is not claimed to belong exactly to the finite-element trace space.
+
+With $n$ grid points per coordinate axis and nominal spacing $h=1/(n-1)$,
+all seven positive-dimensional geometries use the same three-level paths:
+
+| Field degree | $n$ | $h$ | Nominal $L^2/H^1$ orders |
+| --- | --- | --- | --- |
+| 1 | $5\to9\to17$ | $1/4\to1/8\to1/16$ | $2/1$ |
+| 2 | $3\to5\to9$ | $1/2\to1/4\to1/8$ | $3/2$ |
+
+The fixed regular map makes physical element diameters uniformly comparable
+to this spacing. Independent physical-cell integration measures
+
+$$
+E_{0,h}=\lVert u_\ast-u_h\rVert_{L^2(\Omega;\mathbb C)},\qquad
+E_{1,h}=\lVert\nabla_xu_\ast-\nabla_xu_h\rVert_{L^2(\Omega;\mathbb C^d)}.
+$$
+
+Both errors must be finite, positive, and strictly decrease on each of the
+two adjacent intervals. The observed rates
+$r_{j,i}=\log(E_{j,i-1}/E_{j,i})/\log(h_{i-1}/h_i)$ must satisfy
+
+$$
+\begin{array}{c|cc}
+\text{degree}&r_{0,i}&r_{1,i}\cr \hline
+1&(1.65,2.35)&(0.75,1.25)\cr
+2&(2.45,3.55)&(1.55,2.45)
+\end{array}
+\qquad i\in\lbrace 1,2\rbrace.
+$$
+
+Mapped-element approximation and coercivity provide the expected
+$E_{1,h}=O(h^k)$; the usual $E_{0,h}=O(h^{k+1})$ estimate additionally
+requires the relevant dual regularity. These finite smooth-data checks do
+not prove domain regularity for arbitrary curved maps or certify all
+Helmholtz regimes.
+
+Assembly uses quadrature order 11, and field norms use order 13. The pyramid
+dispatcher selects a positive conical product rule above order 10; order 11
+uses $6^3=216$ points per cell, compared with $7^3=343$ at order 12.
+Pyramid basis functions are rational, so polynomial exactness alone does
+not establish mapped-integrand accuracy. The separate order-16 sensitivity
+control below is required; an order-eight baseline does not satisfy its
+$10^{-6}$ budget and is not used. Native CG
+uses relative tolerance $10^{-13}$ and at most 20000 iterations. PETSc CG
+uses relative tolerance $10^{-13}$, absolute tolerance $10^{-14}$,
+divergence threshold $10^5$, and the same iteration limit. Solver success
+or a positive PETSc convergence reason is required, together with an
+independently recomputed finite coefficient residual
+$\lVert Ax-b\rVert_2/\max(1,\lVert b\rVert_2)<10^{-11}$.
+
+## Independent controls
+
+- At $n=3$, degree one reproduces $u_\ast=1+2i$, with zero gradient and
+  $f=-u_\ast/4$. Degree two reproduces the physical affine patch
+  $u_\ast=1+2i+(1+i/2)s(x)$, whose quadratic pullback is exactly representable
+  on the degree-two geometry. Both field errors must be below $10^{-9}$.
+  A physical quadratic field is not claimed to lie in this curved P2 space.
+- At $n=5$, the affine P2 source and trace are retained while the mass term
+  is omitted. The physical-field oracle must reject the changed equation:
+  $E_0>10^{-3}$ and $E_1>10^{-2}$, even though its algebraic solve succeeds.
+- For each field degree at $n=5$, assembly/norm quadrature is raised
+  independently from $11/13$ to $16/18$, and solver relative tolerance is
+  separately tightened to $10^{-14}$ at the baseline quadrature. Each change
+  must alter both measured errors by less than $10^{-6}$ relatively.
+- At $n=2$, every positive-dimensional entity is checked against the
+  independent analytic map at order-four reference quadrature points.
+  Map discrepancies must be below $10^{-11}$; metric factors must be finite
+  and positive. The known physical volume is checked within $10^{-12}$.
+  This is a map/metric diagnostic, not an index-ownership comparison.
+- The additional MPI P2 norm diagnostic sets $u_h=0$ and reference
+  $u=1+i$, so $E_0=\sqrt{2|\Omega|}$ and $E_1=0$ on $n=2$ meshes.
+  The absolute L2 budget is $10^{-12}$. Owned-cell squared contributions
+  are globally reduced before the square root; halo copies do not add volume.
+  Several geometry/rank pairs include ranks without owned cells.
+
+These are nondimensional numerical budgets. Polynomial reproduction,
+geometry checks, and sensitivity controls are distinct from the three-level
+nonpolynomial field-rate studies.
+
+## Execution and exclusions
+
+Segment, triangle, quadrilateral, tetrahedron, pyramid, hexahedron, and
+wedge cases are registered for native local assembly and, with complex PETSc,
+local and MPI ranks 1–4. Sequential and OpenMP configurations are distinct
+verification paths. Real-scalar PETSc is explicitly excluded by the shared
+CMake scalar-capability check. Point geometry has no positive-dimensional
+Helmholtz gradient-refinement problem and is excluded.
+
+Native and PETSc drivers retain their solver/storage policies; the
+`HelmholtzTest` fixture shares geometry, rate, patch, negative-control, and
+sensitivity assertions across them. CI builds the complex PETSc target
+explicitly. Each geometry entry is labelled `convergence;slow`, with
+additional PETSc/distributed labels and MPI processor counts where relevant,
+and a 600-second limit, extended to 1800 seconds for curved pyramids. Run
+`ctest --test-dir build/tests -R 'RodinConvergenceIsoparametric.*Helmholtz' --output-on-failure`.
+Curved-pyramid entries share the CTest resource lock
+`curved_helmholtz_pyramid`, preventing simultaneous memory-heavy mapped
+quadrature workloads within one CTest run. This scheduling policy does not
+change mesh levels, quadrature, solver settings, or numerical acceptance.
+The larger pyramid limit accommodates repeated parametric-Jacobian
+evaluation on the finest grid; it is not a relaxed field-error budget.
+
+## Nonpolynomial geometry and exact-domain comparisons
+
+A separate hierarchy replaces the quadratic map by
+
+$$
+\Phi(\xi)=\xi+a\sin(\pi\xi_0)e_{d-1},\qquad a=0.1,
+\qquad \Omega=\Phi(Q),\qquad \Omega_h=\Phi_h(Q),
+$$
+
+where $\Phi_h$ is the degree-two nodal geometry interpolant on the
+original grid. The same physical Helmholtz data are evaluated on
+$\Omega_h$; the discrete equation is solved there, not on an implicitly
+identified exact domain. For $d=1$, $|a|\pi<1$ ensures regularity of the
+exact map; in higher dimensions its determinant equals one. Positive
+represented-cell metric factors are required by norm integration.
+For $d\ge2$, the unchanged first coordinate is exactly reproduced by
+geometry interpolation. Thus $\Omega_h$ lies in the slab
+$(0,1)\times\mathbb R^{d-1}$; one-dimensional Poincaré inequalities on
+zero-extended slices give $\lambda_1(\Omega_h)\ge\pi^2>1/4$,
+without a claim about interpolation overshoot in the last coordinate.
+In one dimension, the derivative of a quadratic sine interpolant is
+linear on each interval. Each endpoint derivative is twice a half-interval
+secant minus the full-interval secant, hence its magnitude is at most
+$3\pi$. Therefore $\Phi_h'\ge1-3a\pi>0$, and its unchanged endpoints
+give $\Omega_h=(0,1)$ and the same eigenvalue bound. These bounds justify
+CG in this selected regime. Geometry interpolation, rather than the
+Helmholtz scalar range, changes the domain.
+
+The shared `LiftedErrorNorm` uses the unchanged logical cell and ordered
+vertex indices of the original and represented meshes. No coordinate
+matching or inverse point location is involved. At matching chart points,
+write $x=\Phi(\xi)$, $x_h=\Phi_h(\xi)$ and
+
+$$
+u_h^\ell(x)=u_h(x_h),\qquad
+B(\xi)=D\Phi(\xi)^{-T}D\Phi_h(\xi)^T.
+$$
+
+The three complex defects are
+
+$$
+e_F(x)=u_h(x_h)-u_\ast(x_h),\qquad
+e_G(x)=u_\ast(x_h)-u_\ast(x),\qquad
+e_T=e_F+e_G.
+$$
+
+Their gradients are respectively $B(\nabla u_h(x_h)-\nabla u_\ast(x_h))$,
+$B\nabla u_\ast(x_h)-\nabla u_\ast(x)$ and
+$B\nabla u_h(x_h)-\nabla u_\ast(x)$. Norms are integrated over
+$\Omega$ with exact-map determinant weights. Complex magnitudes satisfy
+$|z|^2=z\overline z$ and $|w|^2=\sum_jw_j\overline{w_j}$;
+discarding imaginary components is not admissible.
+The represented-domain field error is also measured independently.
+For both $L^2$ and the $H^1$ seminorm, the measured components must satisfy
+the triangle and reverse-triangle inequalities within $10^{-11}$.
+
+For smooth $u_\ast=e^{is(x)}$, the expected orders are
+
+| Quantity | $L^2$ order | $H^1$-seminorm order |
+| --- | --- | --- |
+| Represented-domain field error and lifted field defect | $k+1$ | $k$ |
+| Lifted geometry defect, geometry degree two | $3$ | $2$ |
+| Lifted total error | $\min(k,2)+1$ | $\min(k,2)$ |
+
+Approximation estimates provide upper bounds under regularity and
+uniform-map assumptions; they do not preclude cancellation or prove a
+lower error bound. Thus the total rate is measured directly, not inferred
+by adding component norms. Every adjacent interval requires positive,
+finite, decreasing errors and rates within $0.55$ of the stated $L^2$
+order and $0.45$ of the stated gradient order.
+Degree-one levels are $n=5,9,17$; degree-two levels are $n=3,5,9$,
+except the segment hierarchy uses $n=5,9,17,33$ to resolve the sine
+parametrization. These are finite-workload observations, not a uniform
+Helmholtz convergence theorem.
+
+Separate order-11 assembly, order-13 norm, and relative solver-tolerance
+$10^{-13}$ baselines are used. At $n=5$, assembly order is raised to
+16 while norm order remains 13; norm order is independently raised to
+18; solver tolerance is independently tightened to $10^{-14}$.
+All four norm pairs must change by less than $10^{-6}$ relatively.
+The physical affine P2 patch has represented and lifted field errors
+below $10^{-9}$. Omitting the mass term, while retaining its source and
+trace, must produce represented and lifted field errors above
+$10^{-3}$ in $L^2$ and $10^{-2}$ in the gradient seminorm. Its total
+errors must exceed twice the correct total errors, whereas its geometry
+errors must remain exactly unchanged.
+
+An independent metric oracle uses the identity represented map, the exact
+sine map above, and $u_\ast=1+2i+c\sum_jx_j$, $c=1+i/2$. Hence
+
+$$
+E_{G,0}=|c|\frac{a}{\sqrt2},\qquad |c|=\frac{\sqrt5}{2},
+\qquad
+E_{G,1}=
+\begin{cases}
+|c|\sqrt{(1-(a\pi)^2)^{-1/2}-1},&d=1,\cr
+|c|a\pi/\sqrt2,&d\in\lbrace 2,3\rbrace.
+\end{cases}
+$$
+
+The exactly reproduced affine field makes the total norms equal to these
+geometry norms within $10^{-9}$, at $n=3$ and norm order 18. This oracle
+checks the inverse-transpose lift, exact-domain measure and imaginary
+components independently of the smooth-field rate study. MPI sums
+owned-cell squared contributions before taking square roots, including
+empty partitions. The six additional tests per geometry run separately
+under names containing `Approximated`, with a 1800-second limit and the
+same pyramid resource lock. Native and complex-PETSc local/MPI ranks 1–4
+are registered; real PETSc does not register the complex tests.
+
+### Linear and cubic geometry with a representable complex field
+
+Additional fixtures use geometry degree $q\in\lbrace 1,3\rbrace$
+and field degree $k=\max(2,q)$. The physical affine field
+$u_\ast(x)=1+2i+c\sum_jx_j$, $c=1+i/2$, has a pullback in the
+represented geometry family. Its source is $f=-u_\ast/4$.
+Thus field reproduction can be required independently of the geometry
+interpolation error; a small total error alone is not sufficient.
+
+The same exact sine map and logical-cell lift are retained. For
+$x_h=\Phi_h(\xi)$ and $x=\Phi(\xi)$, the isolated defect is
+
+$$
+e_G(x)=c\sum_j\bigl((x_h)_j-x_j\bigr),\qquad
+e_T=e_G+e_F.
+$$
+
+Both the represented-domain field errors and the lifted field defects
+must be below $10^{-9}$. The total and geometry norms must agree within
+the same absolute budget. Every adjacent refinement interval checks
+finite, positive, decreasing geometry and total errors, with observed
+$L^2$ rates in $(q+1-0.55,q+1+0.55)$ and gradient rates in
+$(q-0.45,q+0.45)$. These bands describe the finite sine-map experiment,
+not an assertion that every interpolation error has a nonzero leading term.
+
+| Geometry degree $q$ | Field degree $k$ | Grid points $n$ | Nominal geometry $L^2/H^1$ orders |
+| --- | --- | --- | --- |
+| 1 | 2 | $3\to5\to9$; segment $5\to9\to17$ | $2/1$ |
+| 3 | 3 | $3\to5\to9$; segment $5\to9\to17$ | $4/3$ |
+
+At $n=5$, assembly order $11\to16$, norm order $13\to18$,
+and solver tolerance $10^{-13}\to10^{-14}$ are varied separately.
+Field reproduction remains required in all four solves, and geometry
+and total norms must change by less than $10^{-6}$ relatively.
+The quadratic-geometry omitted-mass and independent complex metric
+controls remain separate from these new degree studies.
+
+For the one-dimensional paths, $h\le1/4$. A linear interpolant of
+$\sin(\pi\xi)$ has derivative magnitude at most $\pi$.
+For a cubic nodal interpolant on an interval of length $h$, Newton
+divided differences and the bounds on the first three sine derivatives give
+
+$$
+\lVert (I_h^3\sin(\pi\xi))'\rVert_\infty
+\le\pi+h\pi^2+\frac12h^2\pi^3
+\le\pi+\frac{\pi^2}{4}+\frac{\pi^3}{32}<10.
+$$
+
+Therefore the represented segment maps have positive derivatives for
+$a=0.1$ and unchanged endpoints; their physical domain is $(0,1)$.
+The lifted geometry defect in one dimension measures the prescribed
+parametrization comparison, not a changing physical interval. In higher
+dimensions the unchanged first coordinate gives the slab Poincaré
+bound stated above, subject to regular represented cells.
+
+All seven positive-dimensional geometries are registered for native local
+and complex-PETSc local/MPI ranks one through four. Sequential and OpenMP
+executions are distinct gates. The degree-specific entries have
+1800-second watchdogs, slow labels, MPI processor counts and the shared
+pyramid resource lock. Registration is not evidence of numerical completion.
+
+Arbitrary field/geometry degrees, complex material coefficients, and resonant
+or high-frequency Helmholtz workloads remain outside this suite's claim.
+
+## Mixed Neumann and impedance data on exact quadratic geometry
+
+The complex-PETSc boundary target uses the fixed exact quadratic domain
+above, with $\Gamma_D=\Phi(\lbrace \xi_0=0\rbrace)$ and
+$\Gamma_N=\partial\Omega\setminus\Gamma_D$. Reference-face attributes
+are assigned before partitioning and mapping. Manufactured physical data are
+
+$$
+u=u_\ast\quad\text{on }\Gamma_D,\qquad
+\partial_nu+i\beta u=g_N\quad\text{on }\Gamma_N,\qquad
+g_N=\nabla u_\ast\cdot n+i\beta u_\ast,\qquad \beta\in\lbrace 0,1\rbrace.
+$$
+
+The normal contraction does not conjugate the complex gradient. The
+trial-first sesquilinear form and load are
+
+$$
+a_\beta(u,v)=\int_\Omega\nabla u\cdot\overline{\nabla v}\thinspace dx
+-\frac14\int_\Omega u\overline v\thinspace dx
++i\beta\int_{\Gamma_N}u\overline v\thinspace ds,\qquad
+\ell_\beta(v)=\int_\Omega f\overline v\thinspace dx
++\int_{\Gamma_N}g_N\overline v\thinspace ds.
+$$
+
+Here $\beta=0$ gives mixed Neumann data and $\beta=1$ impedance data.
+The mapped-boundary metric and outward normal are evaluated physically.
+Pullback to the reference box gives a conservative mixed Poincaré bound:
+$\Vert D\Phi\Vert_2\le1.2$ and $1\le\det D\Phi\le1.2$ imply
+
+$$
+\lambda_{\mathrm{mix}}(\Omega)\ge
+\frac{\pi^2}{4(1.2)^3}>\frac14.
+$$
+
+Thus the real part of $a_\beta(v,v)$ is coercive on the homogeneous
+essential-trace space. Mixed Neumann uses Hermitian CG; the non-Hermitian
+impedance form uses GMRES with Jacobi preconditioning. This bound concerns
+the stated map and wave number, not an arbitrary mixed Helmholtz problem.
+
+Both conditions use smooth $u_\ast=e^{is(x)}$ at field degrees one through
+three: $n=5,9,17$ for P1 and $n=3,5,9$ for P2/P3. Every adjacent
+interval must decrease and exceed L2/H1-seminorm floors
+$1.65/0.75$, $2.45/1.55$, and $3.45/2.55$, respectively, under the
+regularity and stable-approximation hypotheses stated above.
+Constant P1, physical-affine P2 and physical-quadratic P4 patches use
+$u_\ast=1+2i$, $1+2i+(1+i/2)s$, and $1+2i+(1+i/2)s^2$.
+Their pullbacks have degrees zero, two and four; both physical error norms
+must be below $10^{-9}$.
+
+Two independent controls retain the correct manufactured source and trace.
+Omitting the volume mass term on the affine P2 patch must give
+$E_0>10^{-3}$ and $E_1>10^{-2}$. Omitting only the normal flux, while
+retaining the impedance exact-value load, must give both errors above
+$10^{-3}$ and more than five times their correct patch counterparts.
+This representable-field control does not rely on a coarse smooth-field
+error being small. Assembly order $16\to18$, norm order $18\to20$,
+and solver tolerance $10^{-13}\to10^{-14}$ are varied independently;
+both smooth P2 error norms must change relatively by less than $10^{-6}$.
+The independent coefficient-residual budget remains $10^{-11}$.
+
+The target registers all seven positive-dimensional geometries locally and
+at MPI ranks one through four, separately in sequential/OpenMP builds.
+Real PETSc is excluded. Global assembly, solution and norm reductions require
+all ranks; geometry installation and pointwise manufactured data are local.
+The existing shared registration helper places each of the six boundary/order
+rate hierarchies in its own process and groups the twelve fixed-mesh controls
+separately. Each hierarchy retains all three levels and both adjacent intervals;
+no numerical assertion is omitted or changed. The groups retain slow labels,
+MPI processor counts, 1800-second watchdogs and a common pyramid resource lock.
+This partition bounds process lifetime rather than total computational work.
+The former combined pyramid registration exceeded its watchdog although the
+completed individual rate cases did not. These scheduling declarations are
+not numerical or performance certificates; runtime verification remains separate.
+
+The local verification of this partition completed all 490 process groups:
+1260 case configurations and 2772 rank reports, covering every boundary case
+on all seven geometries in local and MPI ranks one through four, separately
+in sequential and OpenMP builds. Compiler-dependency checks and exact test-name
+inventories were audited independently. This is finite local runtime evidence
+for the stated cases; it is not a hosted-CI result or a performance benchmark.
+
+## Cubic fields on quadratic approximated geometry
+
+The `ApproximatedP3Q2` extension uses the existing complex smooth field,
+manufactured source and essential trace on the represented sine-map domain,
+with field degree $p=3$ and geometry degree $q=2$. Three levels are
+$n=3,5,9$, except Segment ($n=5,9,17$). The represented-domain error and
+the lifted field, geometry and total defects are measured independently.
+Under the preceding approximation and regularity hypotheses, the expected
+$L^2/H^1$ orders are $4/3$ for field errors and $3/2$ for geometry errors.
+These are conditional estimates, not a two-sided asymptotic equivalence for
+the total error.
+
+`LiftedConvergence::expectMixedRates` checks the independent component-rate
+windows and both norm triangle inequalities. For norm index
+$j\in\lbrace 0,1\rbrace$, adjacent spacing ratio $\rho=h_f/h_c<1$,
+and field, geometry and total errors $F_j,G_j,T_j$, its total-error rule is
+
+$$
+T_{j,f}<T_{j,c},\qquad
+T_{j,f}\le F_{j,c}\rho^{4-j-\delta_j}
+             +G_{j,c}\rho^{3-j-\delta_j}+10^{-11},
+\qquad \delta_0=0.55,\quad\delta_1=0.45.
+$$
+
+The margins and dimensionless roundoff floor are the existing acceptance
+policies. The sum envelope does not assume that geometry already dominates
+the total error; monotonicity is an additional finite-hierarchy policy.
+Assembly order $11\to16$, norm order $13\to18$, and solver tolerance
+$10^{-13}\to10^{-14}$ are varied separately at $n=5$, retaining the
+$10^{-6}$ relative budget for every positive error component. A physical
+affine cubic-field patch remains representable on quadratic geometry and
+retains the $10^{-9}$ absolute reproduction budget. Omitting the mass term
+while retaining its source and trace must violate the existing field-error
+floors and increase total errors by a factor greater than two; geometry
+errors must remain unchanged.
+
+Separate registrations cover seven geometries, native and complex-PETSc
+local execution, MPI ranks one through four, and both thread configurations.
+They retain slow labels, 1800-second watchdogs and pyramid locks, excluding
+these cases from the older approximated-geometry groups. The complete finite
+matrix has been verified locally: 84 registrations select 252 configurations,
+with 504 successful rank-level reports. Both thread configurations have been
+built with Clang and syntax-checked with GCC. The registration inventory and
+runtime reports have been checked independently, including source identity,
+case selection, watchdogs, processor counts and resource locks. Sampled RSS
+guards do not establish continuous peak-memory bounds. Hosted CI verification
+and convergence beyond these finite hierarchies remain separate obligations.

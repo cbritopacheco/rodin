@@ -34,13 +34,26 @@ namespace
     return id;
   }
 
-  /// @brief Explicit references to PETSc wrappers keep borrowing the live field.
+  /**
+   * @brief Explicit PETSc wrapper references and clones borrow the live field.
+   *
+   * The space scalar matches the configured PETSc storage scalar. Complex
+   * builds use nonzero imaginary constants so discarding their imaginary
+   * parts cannot satisfy the value comparison after either assignment.
+   */
   TEST(PETSc_GridFunction, ExplicitWrapperReferenceAndClone)
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     PETSc::Variational::GridFunction field(fes);
-    field = RealFunction(2.);
+#if defined(PETSC_USE_COMPLEX)
+    const ComplexFunction initial(PetscScalar(2, 3));
+    const ComplexFunction updated(PetscScalar(5, -2));
+#else
+    const RealFunction initial(2.);
+    const RealFunction updated(5.);
+#endif
+    field = initial;
     using Reference = GridFunctionBaseReference<decltype(field)>;
     Reference reference(std::cref(field));
     std::unique_ptr<Reference> clone(reference.copy());
@@ -48,17 +61,17 @@ namespace
     EXPECT_EQ(reference.getSize(), field.getSize());
     EXPECT_EQ(&reference.getFiniteElementSpace(), &fes);
     EXPECT_EQ(reference.getData(), field.getData());
-    EXPECT_NEAR(reference(p), 2., 1e-14);
-    field = RealFunction(5.);
-    EXPECT_NEAR(reference(p), 5., 1e-14);
-    EXPECT_NEAR((*clone)(p), 5., 1e-14);
+    EXPECT_NEAR(std::abs(reference(p) - initial(p)), 0., 1e-14);
+    field = updated;
+    EXPECT_NEAR(std::abs(reference(p) - updated(p)), 0., 1e-14);
+    EXPECT_NEAR(std::abs((*clone)(p)-updated(p)), 0., 1e-14);
   }
 
   /// @brief Verifies sequential operator bracket read write for PET sc grid function by checking tolerance-based numerical results.
   TEST(PETSc_GridFunction, SequentialOperatorBracketReadWrite)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     for (Index i = 0; i < gf.getSize(); ++i)
@@ -79,7 +92,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialVecSetKeepsOperatorBracketReadable)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, { 3, 3 });
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     gf = static_cast<PetscScalar>(7.0);
@@ -98,7 +111,7 @@ namespace
     mesh.getConnectivity().compute(1, 0);
     mesh.getConnectivity().compute(2, 0);
     mesh.getConnectivity().compute(3, 0);
-    P1 fes(mesh, 3);
+    P1<Math::SpatialVector<PetscScalar>> fes(mesh, 3);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     for (Index i = 0; i < gf.getSize(); ++i)
@@ -122,7 +135,14 @@ namespace
     }
 
     const auto value = cgf(p);
-    EXPECT_NEAR((value - expected).norm(), 0, 1e-14);
+    ASSERT_EQ(value.size(), expected.size());
+    Real squaredError = 0;
+    for (size_t component = 0; component < value.size(); ++component)
+    {
+      const Real error = std::abs(value(component) - expected(component));
+      squaredError += error * error;
+    }
+    EXPECT_NEAR(std::sqrt(squaredError), 0, 1e-14);
     cgf.flush();
   }
 
@@ -130,7 +150,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialMinReturnsValueAndIndex)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     for (Index i = 0; i < gf.getSize(); ++i)
@@ -150,7 +170,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialMaxReturnsValueAndIndex)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     for (Index i = 0; i < gf.getSize(); ++i)
@@ -171,7 +191,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialSyncReleasesReadAndWriteAccess)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     gf[0] = static_cast<PetscScalar>(2.0);
@@ -203,7 +223,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialReductionsSynchronizePendingWrites)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     gf = static_cast<PetscScalar>(0.0);
@@ -225,7 +245,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialAxpyAccumulatesScaledGridFunction)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction y(fes);
     Rodin::PETSc::Variational::GridFunction x(fes);
 
@@ -258,7 +278,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialAxpyFlushesPendingWrites)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction y(fes);
     Rodin::PETSc::Variational::GridFunction x(fes);
 
@@ -284,7 +304,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialPlusEqualsAndMinusEqualsAgreeWithAxpy)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, {3, 3});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction viaOperators(fes);
     Rodin::PETSc::Variational::GridFunction viaAxpy(fes);
     Rodin::PETSc::Variational::GridFunction x(fes);
@@ -321,7 +341,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialNormMatchesHandComputedValues)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     gf = static_cast<PetscScalar>(0.0);
@@ -339,7 +359,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialNormOfZeroVanishes)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
     gf = static_cast<PetscScalar>(0.0);
     EXPECT_DOUBLE_EQ(gf.norm(), 0.0);
@@ -350,7 +370,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialCopyAssignmentReusesVectorHandle)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction source(fes);
     Rodin::PETSc::Variational::GridFunction destination(fes);
 
@@ -378,7 +398,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialCopyAssignmentIsDeep)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction source(fes);
     Rodin::PETSc::Variational::GridFunction destination(fes);
 
@@ -400,7 +420,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialCopyAssignmentFlushesPendingWrites)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction source(fes);
     Rodin::PETSc::Variational::GridFunction destination(fes);
 
@@ -426,7 +446,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialCopyAssignmentIntoMovedFromAllocates)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction source(fes);
     source = static_cast<PetscScalar>(4.5);
 
@@ -449,7 +469,7 @@ namespace
   TEST(PETSc_GridFunction, SequentialSelfAssignmentIsANoOp)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
     Rodin::PETSc::Variational::GridFunction gf(fes);
     gf = static_cast<PetscScalar>(8.0);
 

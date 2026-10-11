@@ -22,6 +22,14 @@ target_link_libraries(RodinMPIP0gTest
   Rodin::Variational
   Rodin::MPI)
 
+add_executable(RodinMPIInterpolationTest InterpolationTest.cpp)
+target_link_libraries(RodinMPIInterpolationTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::MPI)
+
 # Detect Open MPI for --oversubscribe flag (not supported by MPICH).
 set(_RODIN_MPI_OVERSUBSCRIBE_FLAG "")
 if (MPIEXEC_EXECUTABLE)
@@ -37,10 +45,22 @@ endif()
 
 foreach(np 1 2 3 4)
   add_test(
+    NAME RodinMPIInterpolationTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPIInterpolationTest>)
+  set_tests_properties(RodinMPIInterpolationTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+    TIMEOUT 60
+  )
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIInterpolationTest_np${np})
+
+  add_test(
     NAME RodinMPISubMeshGridFunctionTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
             ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinMPISubMeshGridFunctionTest>)
+            $<TARGET_FILE:RodinMPISubMeshGridFunctionTest>
+            "--gtest_filter=-MPISubMeshH1.ExplicitRestriction_AllOrdersAllRangesAllGeometries")
   set_tests_properties(RodinMPISubMeshGridFunctionTest_np${np} PROPERTIES
     LABELS "unit;distributed"
     TIMEOUT 30
@@ -66,6 +86,22 @@ foreach(np 1 2 3 4)
     LABELS "unit;distributed"
   )
   rodin_suppress_external_mpi_lsan_for_test(RodinMPIP0gTest_np${np})
+endforeach()
+
+# Keep the order/range restriction matrix separate from the short legacy
+# checks. The affine/curved six-range gate takes about three minutes locally.
+# Allow oversubscribed hosted ranks headroom: this is a protocol watchdog,
+# not a polynomial-error or convergence-rate criterion.
+# Eight ranks also exercise empty holders on the single-cell families.
+foreach(np 1 2 3 4 8)
+  add_test(NAME RodinMPIH1SubMeshRestrictionTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+      ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+      $<TARGET_FILE:RodinMPISubMeshGridFunctionTest>
+      "--gtest_filter=MPISubMeshH1.ExplicitRestriction_AllOrdersAllRangesAllGeometries")
+  set_tests_properties(RodinMPIH1SubMeshRestrictionTest_np${np} PROPERTIES
+    LABELS "unit;distributed;slow" TIMEOUT 1200 PROCESSORS ${np})
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPIH1SubMeshRestrictionTest_np${np})
 endforeach()
 
 add_executable(RodinMPIMatrixRangeTest MatrixRangeTest.cpp)

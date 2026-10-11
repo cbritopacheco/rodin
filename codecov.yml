@@ -2,6 +2,10 @@ coverage:
   status:
     project:
       default:
+        # Compare library sources on both sides, matching RodinCoverage's
+        # existing exclusion of test bodies and third-party dependencies.
+        paths:
+          - "src/"
         # Keep project coverage enforced, but allow tiny report jitter from
         # documentation/comment-heavy changes and coverage upload variance.
         threshold: 0.05%

@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include "Convergence.h"
+#include "../../StokesProblem.h"
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver/SparseLU.h"
 
@@ -28,134 +29,11 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Convergence::H::Stokes
 {
-  using VectorCallable = std::function<Math::SpatialVector<Real>(const Point&)>;
-  using ScalarCallable = std::function<Real(const Point&)>;
-  using MatrixCallable = std::function<Math::SpatialMatrix<Real>(const Point&)>;
-  using VectorField = VectorFunction<VectorCallable>;
-  using ScalarField = RealFunction<ScalarCallable>;
-
-  struct ManufacturedSolution
-  {
-      VectorField velocity;
-      ScalarField pressure;
-      VectorField forcing;
-      MatrixCallable velocityJacobian;
-      VectorField pressureGradient;
-  };
-
-  ManufacturedSolution makeAffineSolution(size_t dim)
-  {
-    return {VectorField(dim, VectorCallable([dim](const Point& p) {
-              Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-              value.setZero();
-              value(0) = p(1);
-              return value;
-            })),
-      ScalarField(ScalarCallable([](const Point& p) { return p(0) - 0.5; })),
-      VectorField(dim, VectorCallable([dim](const Point&) {
-        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-        value.setZero();
-        value(0) = 1;
-        return value;
-      })),
-      MatrixCallable([dim](const Point&) {
-        Math::SpatialMatrix<Real> value(
-          static_cast<std::uint8_t>(dim), static_cast<std::uint8_t>(dim));
-        value.setZero();
-        value(0, 1) = 1;
-        return value;
-      }),
-      VectorField(dim, VectorCallable([dim](const Point&) {
-        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-        value.setZero();
-        value(0) = 1;
-        return value;
-      }))};
-  }
-
-  ManufacturedSolution makePolynomialSolution(size_t dim)
-  {
-    return {VectorField(dim, VectorCallable([dim](const Point& p) {
-              Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-              value.setZero();
-              value(0) = p(1) * p(1) * p(1);
-              return value;
-            })),
-      ScalarField(
-        ScalarCallable([](const Point& p) { return p(0) * p(0) - Real(1) / 3; })),
-      VectorField(dim, VectorCallable([dim](const Point& p) {
-        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-        value.setZero();
-        value(0) = -6 * p(1) + 2 * p(0);
-        return value;
-      })),
-      MatrixCallable([dim](const Point& p) {
-        Math::SpatialMatrix<Real> value(
-          static_cast<std::uint8_t>(dim), static_cast<std::uint8_t>(dim));
-        value.setZero();
-        value(0, 1) = 3 * p(1) * p(1);
-        return value;
-      }),
-      VectorField(dim, VectorCallable([dim](const Point& p) {
-        Math::SpatialVector<Real> value(static_cast<std::uint8_t>(dim));
-        value.setZero();
-        value(0) = 2 * p(0);
-        return value;
-      }))};
-  }
-
-  struct StokesErrors
-  {
-      ErrorNorms velocity;
-      ErrorNorms pressure;
-      Real divergence;
-  };
-
-  StokesErrors solve(const UniformGridHierarchy& hierarchy, size_t pointsPerAxis,
-    const ManufacturedSolution& data)
+  StokesErrors solve(
+    const UniformGridHierarchy& hierarchy, size_t pointsPerAxis, const StokesData& data)
   {
     auto mesh = hierarchy.makeMesh(pointsPerAxis);
-    const size_t dim = mesh.getSpaceDimension();
-    constexpr size_t quadratureOrder = 12;
-
-    H1 velocitySpace(std::integral_constant<size_t, 2>{}, mesh, dim);
-    H1 pressureSpace(std::integral_constant<size_t, 1>{}, mesh);
-    P0g meanSpace(mesh);
-
-    TrialFunction u(velocitySpace);
-    TrialFunction p(pressureSpace);
-    TrialFunction lambda(meanSpace);
-    TestFunction v(velocitySpace);
-    TestFunction q(pressureSpace);
-    TestFunction mu(meanSpace);
-
-    auto viscosity = Integral(Jacobian(u), Jacobian(v));
-    auto pressureVelocity = Integral(p, Div(v));
-    auto incompressibility = Integral(Div(u), q);
-    auto gaugePressure = Integral(lambda, q);
-    auto gaugeMean = Integral(p, mu);
-    auto body = Integral(data.forcing, v);
-    viscosity.setOrder(quadratureOrder);
-    pressureVelocity.setOrder(quadratureOrder);
-    incompressibility.setOrder(quadratureOrder);
-    gaugePressure.setOrder(quadratureOrder);
-    gaugeMean.setOrder(quadratureOrder);
-    body.setOrder(quadratureOrder);
-
-    Problem stokes(u, p, lambda, v, q, mu);
-    stokes = viscosity - pressureVelocity + incompressibility + gaugePressure +
-      gaugeMean - body + DirichletBC(u, data.velocity);
-
-    SparseLU solver(stokes);
-    solver.solve();
-
-    const auto velocity = ErrorNorm::computeVector(
-      mesh, u.getSolution(), data.velocity, data.velocityJacobian, quadratureOrder);
-    const auto pressure = ErrorNorm::compute(
-      mesh, p.getSolution(), data.pressure, data.pressureGradient, quadratureOrder);
-    const Real divergenceError =
-      ErrorNorm::computeDivergenceL2(mesh, u.getSolution(), quadratureOrder);
-    return {velocity, pressure, divergenceError};
+    return StokesProblem(mesh, data, 12).solve<2>();
   }
 
   void expectRates(const ErrorHistory& velocity, const ErrorHistory& pressure)
@@ -206,7 +84,8 @@ namespace Rodin::Tests::Convergence::H::Stokes
   TEST_P(StokesHConvergenceTest, AffineDivergenceFreeSolutionIsExact)
   {
     const UniformGridHierarchy hierarchy(GetParam(), {3});
-    const auto error = solve(hierarchy, 3, makeAffineSolution(hierarchy.getDimension()));
+    const auto error = solve(
+      hierarchy, 3, StokesData(hierarchy.getDimension(), StokesData::Field::Affine));
     EXPECT_LT(error.velocity.getL2(), 1e-10);
     EXPECT_LT(error.velocity.getH1Seminorm(), 1e-10);
     EXPECT_LT(error.pressure.getL2(), 1e-10);
@@ -218,7 +97,7 @@ namespace Rodin::Tests::Convergence::H::Stokes
   TEST_P(StokesHConvergenceTest, PolynomialDivergenceFreeSolutionHasOptimalRates)
   {
     const UniformGridHierarchy hierarchy(GetParam(), {3, 5, 9});
-    const auto data = makePolynomialSolution(hierarchy.getDimension());
+    const StokesData data(hierarchy.getDimension(), StokesData::Field::Cubic);
     ErrorHistory velocity;
     ErrorHistory pressure;
     for (const size_t level : hierarchy.getLevels())

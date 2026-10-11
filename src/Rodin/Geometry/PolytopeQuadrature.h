@@ -104,6 +104,16 @@ namespace Rodin::Geometry
    * Its purpose is to cache the geometric realization of a quadrature formula
    * on a polytope so that repeated integration passes can reuse mapped
    * @ref Rodin::Geometry::Point objects.
+   *
+   * ## Architecture
+   *
+   * Construction evaluates the transformation's quadrature Jacobians in one
+   * bulk call and places each matrix in its point's existing owned cache.
+   * Parametric transformations can therefore reuse reference derivatives
+   * without retaining mapped geometry for previously traversed cells. Physical
+   * coordinates and derived inverse, determinant and distortion remain lazy.
+   * No point borrows a formula or element table. Temporary Jacobian storage
+   * and retained points are both bounded by the current formula's size.
    */
   class PolytopeQuadrature
   {
@@ -147,7 +157,7 @@ namespace Rodin::Geometry
       }
 
     private:
-      const QF::QuadratureFormulaBase* m_qf = nullptr; ///< Source quadrature formula
+      const QF::QuadratureFormulaBase* m_qf; ///< Source quadrature formula
       std::vector<Point> m_ps;                         ///< Mapped quadrature points
   };
 

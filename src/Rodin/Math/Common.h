@@ -41,6 +41,19 @@ namespace Rodin::Math
   }
 
   /**
+   * @brief Computes the real magnitude of a complex scalar.
+   *
+   * For @f$z=a+ib@f$, the magnitude is @f$|z|=\sqrt{a^2+b^2}@f$.
+   *
+   * @param x Complex scalar whose magnitude is evaluated.
+   * @returns The nonnegative real magnitude.
+   */
+  inline Real abs(const Complex& x)
+  {
+    return std::abs(x);
+  }
+
+  /**
    * @brief Computes the exponential function.
    *
    * Returns @f$ e^x @f$ where @f$ e \approx 2.71828 @f$ is Euler's number.

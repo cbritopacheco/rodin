@@ -24,6 +24,7 @@
  */
 
 #include <cstddef>
+#include <functional>
 #include <array>
 #include <span>
 #include <vector>
@@ -148,11 +149,11 @@ namespace Rodin::Variational
       struct Tabulation
       {
         /// @brief Number of quadrature points tabulated.
-          size_t nqp = 0;
+        size_t nqp;
         /// @brief Number of degrees of freedom tabulated.
-          size_t ndof = 0;
+        size_t ndof;
         /// @brief Spatial dimension.
-          size_t dim = 0;
+        size_t dim;
 
         // qp-major storage
         // phi[(qp*ndof) + a]
@@ -163,6 +164,15 @@ namespace Rodin::Variational
         // dphi[((qp*ndof + a)*dim) + i]
         /// @brief Tabulated basis derivatives.
           std::vector<Scalar> dphi;
+
+          /// @brief Constructs an empty reference tabulation.
+          Tabulation()
+            : nqp(0),
+              ndof(0),
+              dim(0),
+              phi(),
+              dphi()
+          {}
 
         // ---------- fast path (tight loops) ----------
         /// @brief Gets the basis function of a local degree of freedom.
@@ -436,10 +446,28 @@ namespace Rodin::Variational
 
       /**
        * @brief Tabulates the basis on a quadrature formula.
-       * @returns The tabulation.
+       *
+       * Thread-local entries are identified by the reference geometry and the
+       * quadrature formula's logical lifetime and assignment identity. Reusing
+       * formula storage does not reuse tabulation of its previous contents.
+       *
+       * @returns The tabulation for the current formula contents.
        * @param qf Quadrature formula defining the evaluation points.
        */
       const Tabulation& getTabulation(const QF::QuadratureFormulaBase& qf) const;
+
+      /**
+       * @brief Borrows an existing reference table by logical formula identity.
+       *
+       * This lookup neither creates a table nor dereferences a formula. An
+       * absent or evicted table, including on another thread, returns no value.
+       * The borrowed result must not escape the immediate evaluation call.
+       *
+       * @param identity Formula lifetime/assignment identity.
+       * @returns The matching table in this thread, or no value.
+       */
+      Optional<std::reference_wrapper<const Tabulation>> findTabulation(
+        size_t identity) const;
 
       /**
        * @brief Builds the high-order stable nodes for the element geometry.
@@ -836,6 +864,13 @@ namespace Rodin::Variational
       {
         ar & boost::serialization::base_object<Parent>(*this);
       }
+
+    private:
+      /**
+       * @brief Gets the single thread-local reference-tabulation store.
+       * @returns The bounded store shared by construction and lookup.
+       */
+      static auto& getTabulationCache();
   };
 
   /**

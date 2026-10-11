@@ -367,19 +367,32 @@ namespace Rodin::Variational
           struct Key
           {
               /// @brief Geometry of the cached polytope.
-              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
+              Geometry::Polytope::Type geom;
               /// @brief Spatial dimension.
-              size_t dim = 0;
+              size_t dim;
               /// @brief Cached cell tabulation.
-              Index cell = 0;
+              Index cell;
 
               /// @brief Quadrature formula the cached tabulation belongs to.
-              const QF::QuadratureFormulaBase* qf = nullptr;
+              const QF::QuadratureFormulaBase* qf;
+              /// @brief Logical lifetime and assignment identity of the formula.
+              size_t identity;
               /// @brief Index of the quadrature point.
-              size_t qp = 0;
+              size_t qp;
 
               /// @brief Whether the key holds a cached entry.
-              bool valid = false;
+              bool valid;
+
+              /// @brief Constructs an invalid quadrature cache key.
+              Key()
+                : geom(Geometry::Polytope::Type::Point),
+                  dim(0),
+                  cell(0),
+                  qf(nullptr),
+                  identity(0),
+                  qp(0),
+                  valid(false)
+              {}
 
               /**
                * @brief Tests whether the key holds a cached entry.
@@ -400,7 +413,7 @@ namespace Rodin::Variational
                 if (!valid || !o.valid)
                   return false;
                 return geom == o.geom && dim == o.dim && cell == o.cell && qf == o.qf &&
-                  qp == o.qp;
+                  identity == o.identity && qp == o.qp;
               }
 
               /// @brief Invalidates the cached tabulation.
@@ -411,6 +424,7 @@ namespace Rodin::Variational
                 dim = 0;
                 cell = 0;
                 qf = nullptr;
+                identity = 0;
                 qp = 0;
               }
         };
@@ -529,6 +543,7 @@ namespace Rodin::Variational
         key.dim   = d;
         key.cell  = cell;
         key.qf = qf;
+        key.identity = qf ? qf->getCacheIdentity() : 0;
         key.qp    = qp;
         key.valid = true;
 

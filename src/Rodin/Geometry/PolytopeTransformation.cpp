@@ -7,6 +7,7 @@
 #include <Eigen/Dense>
 
 #include "Rodin/Variational/FiniteElement.h"
+#include "Rodin/QF/QuadratureFormula.h"
 
 #include "Mesh.h"
 #include "Polytope.h"
@@ -15,6 +16,21 @@
 
 namespace Rodin::Geometry
 {
+  void PolytopeTransformation::transform(Math::SpatialPoint& pc,
+    const Math::SpatialPoint& rc, [[maybe_unused]] size_t identity,
+    [[maybe_unused]] size_t qp) const
+  {
+    transform(pc, rc);
+  }
+
+  void PolytopeTransformation::jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
+    const QF::QuadratureFormulaBase& qf) const
+  {
+    jacobians.resize(qf.getSize());
+    for (size_t qp = 0; qp < jacobians.size(); ++qp)
+      jacobian(jacobians[qp], qf.getPoint(qp));
+  }
+
   void PolytopeTransformation::inverse(Math::SpatialVector<Real>& rc, const Math::SpatialVector<Real>& pc) const
   {
     const size_t pdim = this->getPhysicalDimension();

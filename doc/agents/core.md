@@ -86,6 +86,10 @@ Small single-purpose template utilities used across the library:
   dimension-generic (1/2/3D) geometry code. Caveats: no no-arg
   `Identity()`, no `Zero()`, no `M/scalar`, no Eigen comma-init — size
   explicitly (`Identity(2,2)`), write `(1/s)*M`.
+  Spatial-vector norms use only the active components. For complex entries,
+  the squared Euclidean norm is $\sum_i |v_i|^2$, not $\sum_i v_i^2$;
+  norm methods return the corresponding real scalar type. Stable and Blue
+  norms exclude inactive capacity, including after shrinking the vector.
 - `Math::LinearSystem<Matrix, Vector>` — the Ax=b abstraction the solvers
   and Problem operate on; supports DOF elimination (essential BCs).
 - `Rad`/`Deg` — CRTP unit types (`Math::Unit`) with conversions; angles in

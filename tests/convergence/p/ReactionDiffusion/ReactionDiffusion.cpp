@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 
 #include "Convergence.h"
+#include "FieldConvergence.h"
+#include "ReactionDiffusion.h"
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver/CG.h"
 
@@ -32,13 +34,14 @@ namespace Rodin::Tests::Convergence::P::ReactionDiffusion
     class GradientU, class GradientW>
   std::pair<ErrorNorms, ErrorNorms> solve(const LocalMesh& mesh, const ExactU& exactU,
     const ExactW& exactW, const SourceU& sourceU, const SourceW& sourceW,
-    const GradientU& gradientU, const GradientW& gradientW)
+    const GradientU& gradientU, const GradientW& gradientW, Real diffusionW = 1,
+    size_t normOrder = 16)
   {
     H1 space(std::integral_constant<size_t, K>{}, mesh);
     TrialFunction u(space), w(space);
     TestFunction v(space), z(space);
     auto aUU = Integral(Grad(u), Grad(v));
-    auto aWW = Integral(Grad(w), Grad(z));
+    auto aWW = Integral(diffusionW * Grad(w), Grad(z));
     auto rUU = Integral(u, v);
     auto rWW = Integral(w, z);
     auto rUW = Integral(alpha * w, v);
@@ -59,12 +62,34 @@ namespace Rodin::Tests::Convergence::P::ReactionDiffusion
     CG solver(problem);
     solver.setTolerance(1e-13).setMaxIterations(20000).solve();
     EXPECT_TRUE(solver.success());
-    return {ErrorNorm::compute(mesh, u.getSolution(), exactU, gradientU, 16),
-      ErrorNorm::compute(mesh, w.getSolution(), exactW, gradientW, 16)};
+    return {ErrorNorm::compute(mesh, u.getSolution(), exactU, gradientU, normOrder),
+      ErrorNorm::compute(mesh, w.getSolution(), exactW, gradientW, normOrder)};
   }
 
   class ReactionDiffusionTest : public ::testing::TestWithParam<Polytope::Type>
   {};
+
+  TEST_P(ReactionDiffusionTest, UnequalDiffusionBothFieldsConvergeWithDegree)
+  {
+    const auto mesh = UniformGrid(GetParam()).makeMesh(2);
+    const ReactionDiffusionData data(
+      mesh.getDimension(), ReactionDiffusionData::Field::Smooth);
+    FieldConvergence<2> history;
+    const auto append = [&](size_t degree, const auto& errors) {
+      history.append(Real(degree), {errors.first, errors.second});
+    };
+    const auto measure = [&]<size_t K>() {
+      return solve<K>(mesh, data.getSolution(0), data.getSolution(1), data.getSource(0),
+        data.getSource(1), data.getGradient(0), data.getGradient(1), 2, 18);
+    };
+    append(1, measure.template operator()<1>());
+    append(2, measure.template operator()<2>());
+    append(3, measure.template operator()<3>());
+    append(4, measure.template operator()<4>());
+    constexpr Real DegreeFloor = 0.25; // Finite-resolution analytic decay policy.
+    ASSERT_EQ(history.getSize(), 4u);
+    history.expectExponentialFloor({DegreeFloor, DegreeFloor});
+  }
 
   TEST_P(ReactionDiffusionTest, BothFieldsConvergeWithDegree)
   {

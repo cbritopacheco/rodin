@@ -50,6 +50,21 @@ compare coordinate/key sets in tests.
 - `PointCloud` — sdim × n coordinate container with Eigen views, the input
   for parametric transformations.
 - `PolytopeQuadrature` caches quadrature data attached to mesh polytopes.
+  Construction evaluates the cell's quadrature Jacobians in one bulk
+  transformation call and stores them in the points' existing owned caches.
+  Parametric H1 geometry borrows its existing reference table only during this
+  call; neither points nor transformations retain a table or formula pointer.
+  Physical coordinates and derived metric quantities remain lazy. Mapped points
+  own their reference coordinates and retain only the formula's logical identity
+  and sample index until physical evaluation. A parametric map may immediately
+  borrow an existing thread-local basis table by that identity; an absent or
+  evicted table uses direct evaluation at the owned reference point. Formula
+  destruction, assignment, cache eviction and transfer to another thread do not
+  invalidate the owned sample. Rebinding clears provenance and geometric caches.
+  Variational rules own only their bound polytope's mapped points. The explicit
+  mesh cache is retained for callers requiring borrowed quadratures whose
+  lifetime extends until geometry is flushed; variational quadrature rules
+  do not populate it.
 
 ## Mesh algebra
 
@@ -83,6 +98,19 @@ curved cells. See quadrature.md for the exact ranges and fallback formulas.
 `BalancedCompactPartitioner`; `Sharder`/`Shard` carry partition, ownership
 and overlap metadata for distributed meshes (used by the MPI stack;
 Scotch provides a graph-partitioner implementation).
+
+A local mesh or shard has the maximum dimension of its actual entities,
+with dimension zero for an empty shard. A distributed mesh stores
+
+$$
+D = \max_r \dim S_r,
+$$
+
+where $S_r$ is the shard on rank $r$. Collective construction and loading
+establish $D$; `getDimension()`, copy/move, and geometry-only `flush()` do not
+communicate. Distributed submeshes use the same contract. Topology replacement
+must go through collective construction or loading. Empty ranks participate
+in reconciliation even when they have no local entities to reconcile.
 
 ## Classification and location utilities
 

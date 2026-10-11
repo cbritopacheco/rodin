@@ -17,7 +17,7 @@ L2 and H1-seminorm error.
 For the analytic manufactured solution
 
 $$
-  u(x)=\exp\!\left(\sum_{i=1}^d x_i\right),
+  u(x)=\exp\negthinspace \left(\sum_{i=1}^d x_i\right),
   \qquad f=-\Delta u=-d u,
   \qquad \nabla u=(u,\ldots,u),
 $$
@@ -25,13 +25,13 @@ $$
 the exact trace is imposed on the whole boundary. Analytic regularity permits
 exponential best-approximation decay with degree, subject to the fixed mesh,
 geometry, quadrature, and floating-point regime. With $u_K$ denoting the
-discrete degree-$K$ solution on the fixed mesh, the test measures
+discrete solution of degree $K$ on the fixed mesh, the test measures
 $E_{0,K}=\lVert u-u_K\rVert_{L^2(\Omega)}$ and
-$E_{1,K}=|u-u_K|_{H^1(\Omega)}$ independently at every degree
-$K=1,2,3,4$. For $j\in\{0,1\}$ and each $K=2,3,4$, it computes
+$E_{1,K}=|u-u_K\rvert_{H^1(\Omega)}$ independently at every degree
+$K=1,2,3,4$. For $j\in\lbrace 0,1\rbrace$ and each $K=2,3,4$, it computes
 
 $$
-  \alpha_{j,K}=\log\!\left(\frac{E_{j,K-1}}{E_{j,K}}\right),
+  \alpha_{j,K}=\log\negthinspace \left(\frac{E_{j,K-1}}{E_{j,K}}\right),
 $$
 
 and requires strict error reduction and $\alpha_{j,K}>0.25$ in both norms.

@@ -32,6 +32,25 @@ tolerances or factors, from one named constant so they cannot drift apart.
 Literal coordinate indices, zero and one, and explicit mathematical identities
 do not need artificial names.
 
+## Optional state and sentinels
+
+Represent absence explicitly with `Optional<T>` rather than reserving a valid
+value of `T` as a sentinel. Use semantic type aliases where appropriate. For
+example, prefer:
+
+```cpp
+using Rank = int;
+Optional<Rank> m_source;
+```
+
+over `int m_sourceRank = -1;`. Initialize members in constructors rather than
+in declarations. A sentinel representation requires a demonstrated performance
+improvement over explicit optional state in a representative benchmark; presumed
+overhead is not sufficient justification. Document the reserved value, its
+exclusion from valid inputs, and the measured benefit. When an external API
+requires a sentinel, translate it at the interface rather than propagating it
+through internal state.
+
 ## Anomalies
 
 **An unexplained measurement is a finding, not a footnote. Do not ship a
@@ -57,6 +76,18 @@ is an artefact, in which case the fix is to the measurement; or that it is
 real but out of scope, in which case it is recorded as its own item rather
 than folded into the current change.
 
+A large performance gap between dimensions or geometries requires investigation;
+dimension alone is not an explanation. Compare matched physical forms, field and
+geometry degrees, quadrature requirements, builds, backends, threads and ranks.
+Report raw timings together with cell, quadrature-point, local basis, global DOF
+and matrix-entry counts, and normalize by the work actually performed. Separate
+geometry evaluation, element kernels, insertion/finalization, constraints,
+solvers and error integration; record solver iterations and memory when relevant.
+Inspect profiles for the unexplained part of the gap and check cache order,
+allocation, communication and sanitizer effects. Do not weaken numerical
+requirements or classify a case as merely slow without this analysis. Preserve
+the reproducing benchmark and numerical regressions for any resulting repair.
+
 ## Error handling in PETSc-facing code
 
 **Use `assert(ierr == PETSC_SUCCESS)` after PETSc calls.** This is the
@@ -64,6 +95,16 @@ uniform house idiom. Do not introduce a checking macro, and do not convert
 existing asserts to one. Better still: backend-independent code (form
 language, `Problem`, `LinearSolverBase`) should not touch PETSc at all —
 keep PETSc calls inside `src/Rodin/PETSc/`.
+
+## MPI collectives
+
+Use a collective only when the operation's mathematical or distributed-state
+contract is global, and document that requirement at the public entry point.
+Do not introduce collectives into local evaluation, accessors, copying, or
+rank-local Shard operations. Establish necessary global metadata during an
+explicitly collective construction or reconstruction phase and retain it for
+non-collective queries. A collective must not conceal missing connectivity,
+ownership metadata, or an incorrect caller protocol.
 
 ## Implementation locality
 

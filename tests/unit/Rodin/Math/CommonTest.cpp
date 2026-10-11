@@ -44,6 +44,35 @@ TEST_F(CommonTest, AbsFunction)
   EXPECT_FLOAT_EQ(abs(-2.5f), 2.5f);
 }
 
+/**
+ * @brief Complex absolute values are nonnegative real magnitudes.
+ *
+ * The four sign combinations of @f$3+4i@f$ have magnitude @f$5@f$.
+ * Real and imaginary axes and the origin are checked separately. Qualified
+ * calls exercise Rodin's implementation rather than argument-dependent
+ * lookup of the standard-library overload.
+ */
+TEST_F(CommonTest, ComplexAbsoluteValue)
+{
+  for (const Real real : {Real(-3), Real(3)})
+  {
+    for (const Real imaginary : {Real(-4), Real(4)})
+    {
+      const Complex value(real, imaginary);
+      EXPECT_TRUE((std::is_same_v<decltype(Math::abs(value)), Real>));
+      EXPECT_DOUBLE_EQ(std::real(Math::abs(value)), 5);
+      EXPECT_DOUBLE_EQ(std::imag(Math::abs(value)), 0);
+    }
+  }
+  for (const Complex value :
+    {Complex(0, 0), Complex(5, 0), Complex(-5, 0), Complex(0, 5), Complex(0, -5)})
+  {
+    const Real expected = value == Complex(0, 0) ? Real(0) : Real(5);
+    EXPECT_DOUBLE_EQ(std::real(Math::abs(value)), expected);
+    EXPECT_DOUBLE_EQ(std::imag(Math::abs(value)), 0);
+  }
+}
+
 // Test exp function
 /// @brief Test exp for various values.
 TEST_F(CommonTest, ExpFunction)

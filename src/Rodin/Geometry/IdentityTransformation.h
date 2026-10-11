@@ -36,6 +36,7 @@ namespace Rodin::Geometry
     public:
       /// @brief Parent class type.
       using Parent = PolytopeTransformation;
+      using Parent::jacobian;
 
       /**
        * @brief Constructs an identity transformation.
@@ -93,6 +94,7 @@ namespace Rodin::Geometry
        */
       void jacobian(Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const override
       {
+        jacobian.resize(getPhysicalDimension(), getReferenceDimension());
         jacobian.setIdentity();
       }
 

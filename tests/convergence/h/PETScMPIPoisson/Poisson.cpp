@@ -22,6 +22,7 @@
 #include <boost/serialization/vector.hpp>
 
 #include "Convergence.h"
+#include "MPIConvergence.h"
 #include "Rodin/Assembly.h"
 #include "Rodin/PETSc.h"
 #include "Rodin/MPI/Context/MPI.h"
@@ -44,55 +45,14 @@ namespace Rodin::Tests::Convergence::H::PETScMPIPoisson
   Mesh<Context::MPI> distribute(
     const Context::MPI& context, Polytope::Type geometry, size_t level)
   {
-    Sharder<Context::MPI> sharder(context);
-    if (world->rank() == 0)
-    {
-      auto mesh = UniformGrid(geometry).makeMesh(level);
-      const size_t dim = mesh.getDimension();
-      mesh.getConnectivity().compute(dim, dim);
-      mesh.getConnectivity().compute(dim, 0);
-      mesh.getConnectivity().compute(dim, dim - 1);
-      mesh.getConnectivity().compute(dim - 1, dim);
-      mesh.getConnectivity().compute(dim - 1, 0);
-      BalancedCompactPartitioner partitioner(mesh);
-      partitioner.partition(static_cast<size_t>(world->size()));
-      sharder.shard(partitioner);
-      sharder.scatter(0);
-    }
-    return sharder.gather(0);
+    return DistributedUniformGrid(context, geometry).makeMesh(level);
   }
 
   template <class GF, class Exact, class Gradient>
   ErrorNorms globalError(const Mesh<Context::MPI>& mesh, const GF& uh, const Exact& exact,
     const Gradient& exactGradient)
   {
-    const auto& shard = mesh.getShard();
-    const size_t dim = shard.getDimension();
-    const auto discreteGradient = Grad(uh);
-    Real localL2 = 0;
-    Real localH1 = 0;
-    for (Index i = 0; i < shard.getCellCount(); ++i)
-    {
-      if (!shard.isOwned(dim, i))
-        continue;
-      const auto cell = shard.getCell(i);
-      const auto& qf = QF::PolytopeQuadratureFormula::get(12, cell->getGeometry());
-      const auto& quadrature = cell->getQuadrature(qf);
-      for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
-      {
-        const auto& p = quadrature.getPoint(qp);
-        const IntegrationPoint ip(p, &qf, qp);
-        const Real weight = qf.getWeight(qp) * p.getDistortion();
-        const Real valueError = uh(ip) - exact(p);
-        localL2 += weight * valueError * valueError;
-        const auto gradientError = discreteGradient(ip) - exactGradient(p);
-        for (size_t d = 0; d < dim; ++d)
-          localH1 += weight * gradientError(d) * gradientError(d);
-      }
-    }
-    const Real totalL2 = boost::mpi::all_reduce(*world, localL2, std::plus<Real>());
-    const Real totalH1 = boost::mpi::all_reduce(*world, localH1, std::plus<Real>());
-    return {std::sqrt(totalL2), std::sqrt(totalH1)};
+    return ErrorNorm::compute(mesh, uh, exact, exactGradient, 12);
   }
 
   class PETScMPIPoissonTest : public ::testing::TestWithParam<Polytope::Type>
