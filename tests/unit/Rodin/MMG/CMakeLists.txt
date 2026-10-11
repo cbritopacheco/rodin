@@ -24,6 +24,7 @@ gtest_discover_tests(KelvinBallCutCoverageTest
 
 add_executable(KelvinBallFixedGeometryTest
   KelvinBallFixedGeometryTest.cpp
+  ${PROJECT_SOURCE_DIR}/examples/ShapeOptimization/KelvinBall/LaplacianSmoothing.cpp
   ${PROJECT_SOURCE_DIR}/examples/ShapeOptimization/KelvinBall/Common.cpp
   ${PROJECT_SOURCE_DIR}/examples/ShapeOptimization/KelvinBall/Configuration.cpp
   ${PROJECT_SOURCE_DIR}/examples/ShapeOptimization/KelvinBall/Sphere.cpp)

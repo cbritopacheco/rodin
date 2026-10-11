@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include "KelvinBallOptimization.h"
+#include "LaplacianSmoothing.h"
 
 #include <algorithm>
 #include <array>
@@ -41,7 +42,7 @@
 #include "Configuration.h"
 #include "Metrics.h"
 #include "RotatedCharacteristicContinuation.h"
-#include "TransportProjection.h"
+#include "NodalTransport.h"
 #include "RotatedNitscheIntegrator.h"
 #include "SewedOutput.h"
 #include "Thickness.h"
@@ -84,17 +85,15 @@ namespace KelvinBall
           Real regularizationFactor = 4;
           Real normalRegularizationFactor = 1;
           Real stepFactor = 0.1;
-          Real levelSetPenalty = 1;
           Real minimumThickness = 0;
           Math::SpatialVector<Real> motionForce;
-          size_t advectionQuadratureOrder = 8;
           std::string reconstructionMethod = "swift";
 
           bool parse(int argc, char** argv)
           {
             for (int argument = 1; argument < argc; ++argument)
             {
-              const std::string_view mode(argv[argument]);
+              const StringView mode(argv[argument]);
               if (configuration.parse(mode))
                 continue;
               if (mode.rfind("--iterations=", 0) == 0)
@@ -105,8 +104,6 @@ namespace KelvinBall
                 normalRegularizationFactor = std::stod(std::string(mode.substr(24)));
               else if (mode.rfind("--step=", 0) == 0)
                 stepFactor = std::stod(std::string(mode.substr(7)));
-              else if (mode.rfind("--level-set-penalty=", 0) == 0)
-                levelSetPenalty = std::stod(std::string(mode.substr(20)));
               else if (mode.rfind("--thickness-min=", 0) == 0)
                 minimumThickness = std::stod(std::string(mode.substr(16)));
               else if (mode.rfind("--motion-force=", 0) == 0)
@@ -121,8 +118,6 @@ namespace KelvinBall
                   motionForce(i) = std::stod(component);
                 }
               }
-              else if (mode.rfind("--advection-quadrature=", 0) == 0)
-                advectionQuadratureOrder = std::stoul(std::string(mode.substr(23)));
               else if (mode.rfind("--reconstruction=", 0) == 0)
                 reconstructionMethod = std::string(mode.substr(17));
               else if (mode.rfind("--swift-", 0) == 0)
@@ -154,15 +149,10 @@ namespace KelvinBall
                 "The normal regularization factor must be positive.");
             if (!(stepFactor > 0))
               throw std::runtime_error("The advection step factor must be positive.");
-            if (!(levelSetPenalty > 0))
-              throw std::runtime_error("The level-set trace penalty must be positive.");
             if (!std::isfinite(minimumThickness) || minimumThickness < 0)
               throw std::runtime_error("--thickness-min must be nonnegative.");
             if (!std::isfinite(motionForce.norm()) || !(motionForce.norm() > 0))
               throw std::runtime_error("The motion force must be finite and nonzero.");
-            if (advectionQuadratureOrder == 0)
-              throw std::runtime_error(
-                "The advection quadrature order must be positive.");
             if (reconstructionMethod != "mmg" && reconstructionMethod != "swift")
               throw std::runtime_error("The reconstruction method must be mmg or swift.");
             if (configuration.mmgSnap > 0 && reconstructionMethod != "mmg")
@@ -594,45 +584,75 @@ namespace KelvinBall
             diagnostics.cells, diagnostics.cells}};
       }
 
-      void adaptSWIFT(SphereDiscretization& fitted, const Sphere& sphere,
-        const Configuration& configuration, Real requestedWelschScale)
+      void smoothReconstruction(Mesh& mesh)
       {
-        const auto before = getMeshDiagnostics(fitted.mesh);
+        const auto before = getMeshDiagnostics(mesh);
+        const size_t accepted = LaplacianSmoothing().execute(mesh);
+        const auto after = getMeshDiagnostics(mesh);
+        Alert::Info() << substageHeading("Laplacian mesh smoothing") << Alert::NewLine
+                      << diagnosticLabel("Accepted passes:")
+                      << Alert::Notation::Number(accepted) << Alert::NewLine
+                      << diagnosticLabel("Minimum quality:")
+                      << Alert::Notation::Number(before.minimumQuality) << " -> "
+                      << Alert::Notation::Number(after.minimumQuality) << Alert::NewLine
+                      << diagnosticLabel("Mean quality:")
+                      << Alert::Notation::Number(before.meanQuality) << " -> "
+                      << Alert::Notation::Number(after.meanQuality) << Alert::Raise;
+      }
+
+      template <class LevelSet>
+      MMG::Mesh adaptSWIFTBackground(const MMG::Mesh& background,
+        const LevelSet& target, const Sphere& sphere, Real requestedWelschScale)
+      {
+        const auto& configuration = m_options.configuration;
+        const auto before = getMeshDiagnostics(background, false);
+        const Real width = requestedWelschScale > 0 ? requestedWelschScale :
+          Real(3) * configuration.getGridSpacing();
+        const Adaptation::SWIFT::Loss welsch(width);
+        P1<Real, Mesh> sizeSpace(background);
+        MMG::RealGridFunction size(sizeSpace);
+        for (Index vertex = 0; vertex < background.getVertexCount(); ++vertex)
+        {
+          const auto& dofs = target.getFiniteElementSpace().getDOFs(0, vertex);
+          size[vertex] = configuration.hmax - (configuration.hmax - configuration.hmin)
+            * welsch.getWeight(std::abs(target.getData()(dofs[0])));
+        }
+        MMG::Mesh adapted;
         try
         {
-          sphere.adapt(fitted.mesh, requestedWelschScale);
+          adapted = sphere.adaptBackground(background, size);
         }
         catch (const std::exception& error)
         {
-          fitted.diagnostics.cellsBefore = before.cells;
-          fitted.diagnostics.cellsAfter = before.cells;
-          Alert::Warning() << "Skipped MMG adaptation after SWIFT reconstruction: "
+          Alert::Warning() << "MMG background adaptation before classification failed: "
                            << error.what() << Alert::NewLine
-                           << "Retaining the SWIFT-fitted mesh with "
-                           << Alert::Notation::Number(before.cells)
-                           << " cells and continuing optimization." << Alert::Raise;
-          return;
+                           << "Retrying from the unchanged background with required "
+                              "chamber-cut triangles." << Alert::Raise;
+          try
+          {
+            adapted = sphere.adaptBackground(background, size, true);
+            Alert::Info() << substageHeading("MMG adaptation recovery")
+                          << Alert::NewLine
+                          << "Required-cut retry accepted." << Alert::Raise;
+          }
+          catch (const std::exception& retryError)
+          {
+            Alert::Warning() << "Skipped MMG adaptation after required-cut retry: "
+                             << retryError.what() << Alert::NewLine
+                             << "Retaining the previous background with "
+                             << Alert::Notation::Number(before.cells)
+                             << " cells for classification and fitting." << Alert::Raise;
+            return MMG::Mesh(background);
+          }
         }
-        // MMG preserves the material partition, but may change the internal
-        // face references. Gamma is the boundary between the two materials.
-        fitted.mesh.getConnectivity().compute(2, 3);
-        fitted.mesh.trace({{{Obstacle, Fluid}, Gamma}});
-        const auto after = getMeshDiagnostics(fitted.mesh);
-        fitted.diagnostics.minimumSize = configuration.hmin;
-        fitted.diagnostics.maximumSize = configuration.hmax;
-        fitted.diagnostics.hausdorffTolerance =
-          Real(0.1) * configuration.getGridSpacing() * configuration.getGridSpacing();
-        fitted.diagnostics.cellsBefore = before.cells;
-        fitted.diagnostics.cellsAfter = after.cells;
-        fitted.diagnostics.requiredBoundaryTriangles =
-          sphere.protectFixedGeometry(fitted.mesh, false);
-        Alert::Info() << substageHeading("MMG adaptation after SWIFT reconstruction")
+        const auto after = getMeshDiagnostics(adapted, false);
+        Alert::Info() << substageHeading("MMG background adaptation before classification")
                       << Alert::NewLine << diagnosticLabel("Cell count:")
                       << Alert::Notation::Number(before.cells) << " -> "
                       << Alert::Notation::Number(after.cells) << Alert::NewLine
-                      << diagnosticLabel("Interface triangles:")
-                      << Alert::Notation::Number(before.interfaceTriangles) << " -> "
-                      << Alert::Notation::Number(after.interfaceTriangles)
+                      << diagnosticLabel("Material interfaces retained:") << 0
+                      << Alert::NewLine << diagnosticLabel("Welsch size-map scale:")
+                      << Alert::Notation::Number(width)
                       << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
                       << Alert::Notation::Number(before.minimumQuality) << " -> "
                       << Alert::Notation::Number(after.minimumQuality) << Alert::NewLine
@@ -642,6 +662,7 @@ namespace KelvinBall
                       << diagnosticLabel("Mean tetra edge length h:")
                       << Alert::Notation::Number(before.meanElementSize) << " -> "
                       << Alert::Notation::Number(after.meanElementSize) << Alert::Raise;
+        return adapted;
       }
 
       void reportConfiguration(Real requestedWelschScale)
@@ -682,11 +703,6 @@ namespace KelvinBall
                           << Alert::Notation::Number(m_options.normalRegularizationFactor)
                           << " h0" << Alert::NewLine << diagnosticLabel("Advection step:")
                           << Alert::Notation::Number(m_options.stepFactor) << " h0"
-                          << Alert::NewLine << diagnosticLabel("Level-set trace penalty:")
-                          << Alert::Notation::Number(m_options.levelSetPenalty)
-                          << Alert::NewLine
-                          << diagnosticLabel("Advection quadrature order:")
-                          << Alert::Notation::Number(m_options.advectionQuadratureOrder)
                           << Alert::NewLine << diagnosticLabel("Transport velocity:")
                           << "Full shape direction" << Alert::NewLine
                           << diagnosticLabel("Reconstruction method:")
@@ -788,22 +804,13 @@ namespace KelvinBall
             classifyLevelSetForSWIFT(*swiftBackground, sphereLevelSet);
           SphereDiscretization fitted =
             fitLevelSetSWIFT(classified, sphereLevelSet, backgroundH, outerRadius);
-          if (m_options.configuration.adapt)
-          {
-            adaptSWIFT(fitted, sphere, m_options.configuration, requestedWelschScale);
-            reconstruction = fitted.diagnostics;
-          }
           mesh = std::move(fitted.mesh);
         }
         else
         {
           mesh = std::move(initial.mesh);
         }
-        if (swiftBackground && m_options.configuration.adapt)
-        {
-          swiftBackground.emplace(mesh);
-          backgroundH = meanElementSize(*swiftBackground);
-        }
+        smoothReconstruction(mesh);
         return {std::move(mesh), std::move(swiftBackground), backgroundH, reconstruction};
       }
 
@@ -835,14 +842,12 @@ namespace KelvinBall
           << " Thickness-normal smoothing length in h0 (default: 1)." << Alert::NewLine
           << Alert::Notation("--step=<value>")
           << "             Advection time step in multiples of h0 (default: 0.1)."
-          << Alert::NewLine << Alert::Notation("--level-set-penalty=<value>")
-          << " Rotated trace penalty of the level set (default: 1)." << Alert::NewLine
+          << Alert::NewLine
           << Alert::Notation("--thickness-min=<value>")
           << "      Absolute minimum body thickness (default: 0, off)." << Alert::NewLine
           << Alert::Notation("--motion-force=<fx,fy,fz>")
           << "  Force for the Motion field at each iterate (default: 1,0,0)."
-          << Alert::NewLine << Alert::Notation("--advection-quadrature=<order>")
-          << " Quadrature order for the transported distance (default: 8)."
+
           << Alert::NewLine << Alert::Notation("--reconstruction=<method>")
           << "  Interface reconstruction: swift or mmg (default: swift)." << Alert::NewLine
           << Alert::Notation("--background-hausdorff=<value>")
@@ -850,10 +855,10 @@ namespace KelvinBall
           << Alert::NewLine << Alert::Notation("--background-gradation=<value>")
           << " SWIFT background gradation (default: 2)." << Alert::NewLine
           << Alert::Notation("--mmg-adapt")
-          << "                Adapt near the interface after each reconstruction:"
+          << "                Adapt near the target interface:"
           << Alert::NewLine
-          << "                              MMG cut or SWIFT fit, including the initial "
-             "design."
+          << "                              After an MMG cut; before SWIFT classification "
+             "and fitting."
           << Alert::NewLine
           << "                              Adaptation uses the fixed size factors times "
              "h0."
@@ -995,7 +1000,7 @@ namespace KelvinBall
             ++diagnostics.obstacleCells;
           else if (cell->getAttribute() == Fluid)
             ++diagnostics.fluidCells;
-          else
+          else if (requireCompletePartition || cell->getAttribute())
             throw std::runtime_error("A cell has an unexpected material attribute.");
 
           const auto& vertices = cell->getVertices();
@@ -1462,7 +1467,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   history.precision(17);
   history << "iteration,outer_radius,initial_grid_spacing,hmin_factor,hmax_factor,"
              "requested_hmin,requested_hmax,"
-             "h,dt,advection_quadrature_order,"
+             "h,dt,"
              "regularization_length,nitsche_penalty,"
              "stabilization_factor,assembly_backend,direct_solver,"
              "vertices,cells,obstacle_cells,fluid_cells,"
@@ -1483,7 +1488,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
              "stage_9_seconds,"
              "translational_mobility,coupling_mobility,rotational_mobility,"
              "revolution_period,pitch,resistance_radius,"
-             "level_set_penalty,thickness_min,normal_smoothing_length,"
+             "thickness_min,normal_smoothing_length,"
              "thickness_penalty,thickness_nominal_penalty,thickness_guard_distance,"
              "thickness_active_multiplier,thickness_active_feasible,"
              "thickness_violating_rays,"
@@ -1499,12 +1504,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
              "thickness_ray_seam_jump,"
              "thickness_seam_samples,thickness_seam_unmatched,"
              "actual_delta_thickness,predicted_delta_thickness,d_thickness_theta,"
-             "eikonal_rotated_jump,projected_rotated_jump,distance_correction,"
-             "interface_shift_max,advection_increment,advected_rotated_jump,"
+             "eikonal_rotated_jump,advection_increment,advected_rotated_jump,"
              "min_crossing_fraction,snapped_vertices,reconstruction_scale,"
              "z_x,z_y,z_z,omega_x,omega_y,omega_z,"
-             "transport_attempted_points,transport_omitted_points,"
-             "transport_omitted_weight_fraction,transport_fallback_cells,"
+             "transport_attempted_vertices,transport_fallback_vertices,"
              "motion_force_x,motion_force_y,motion_force_z\n";
   IO::XDMF xdmf("KelvinBall");
   auto chamber = xdmf.grid("Chamber");
@@ -1520,6 +1523,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   Optional<Real> predictedThicknessChange;
   Optional<Real> predictedVolumeChange;
   Optional<MMG::Mesh> nextMesh;
+  Optional<MMG::Mesh> nextBackground;
 
   for (size_t iteration = 0; iteration < m_options.maxIterations; ++iteration)
   {
@@ -1531,11 +1535,12 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     {
       mesh = std::move(*nextMesh);
       nextMesh.reset();
-      if (swiftBackground && m_options.configuration.adapt)
+      if (nextBackground)
       {
         // Refresh only between iterations, after the previous spaces and
         // fields have expired. The background is fixed during each fit.
-        swiftBackground.emplace(mesh);
+        swiftBackground.emplace(std::move(*nextBackground));
+        nextBackground.reset();
         backgroundH = meanElementSize(*swiftBackground);
       }
     }
@@ -1652,15 +1657,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         Real predictedThicknessChange = std::numeric_limits<Real>::quiet_NaN();
         Real dThicknessTheta = std::numeric_limits<Real>::quiet_NaN();
         Real eikonalJump = std::numeric_limits<Real>::quiet_NaN();
-        Real projectedJump = std::numeric_limits<Real>::quiet_NaN();
-        Real distanceCorrection = std::numeric_limits<Real>::quiet_NaN();
-        Real interfaceShift = std::numeric_limits<Real>::quiet_NaN();
         Real advectionIncrement = std::numeric_limits<Real>::quiet_NaN();
         Real advectedJump = std::numeric_limits<Real>::quiet_NaN();
         Real transportAttempted = std::numeric_limits<Real>::quiet_NaN();
-        Real transportOmitted = std::numeric_limits<Real>::quiet_NaN();
-        Real transportOmittedFraction = std::numeric_limits<Real>::quiet_NaN();
-        Real transportFallbackCells = std::numeric_limits<Real>::quiet_NaN();
+        Real transportFallback = std::numeric_limits<Real>::quiet_NaN();
     } stageDiagnostics;
     const auto writeHistory = [&](Real nullSpaceMultiplier, Real xiRhoInfinityNorm,
                                 Real thetaInfinityNorm, Real dRhoTheta, Real dVolumeTheta,
@@ -1671,7 +1671,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << m_options.configuration.hminFactor << ','
               << m_options.configuration.hmaxFactor << ',' << m_options.configuration.hmin
               << ',' << m_options.configuration.hmax << ',' << h << ',' << dt << ','
-              << m_options.advectionQuadratureOrder << ',' << hilbertLength << ','
+              << hilbertLength << ','
               << nitschePenalty << ',' << stabilizationFactor << ',' << assemblyBackend
               << ',' << KelvinBall::DirectSolverName << ',' << meshDiagnostics.vertices
               << ',' << meshDiagnostics.cells << ',' << meshDiagnostics.obstacleCells
@@ -1704,7 +1704,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << k / determinant << ','
               << (c != 0 ? 2 * M_PI / motionAngular.norm() : nan) << ','
               << (c != 0 ? 2 * M_PI * q / std::abs(c) : nan) << ',' << std::sqrt(q / k)
-              << ',' << m_options.levelSetPenalty << ',' << m_options.minimumThickness
+              << ',' << m_options.minimumThickness
               << ',' << normalLength << ',' << stageDiagnostics.thicknessPenalty << ','
               << stageDiagnostics.thicknessNominalPenalty << ','
               << stageDiagnostics.thicknessGuardDistance << ','
@@ -1734,10 +1734,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << stageDiagnostics.actualThicknessChange << ','
               << stageDiagnostics.predictedThicknessChange << ','
               << stageDiagnostics.dThicknessTheta << ',' << stageDiagnostics.eikonalJump
-              << ',' << stageDiagnostics.projectedJump << ','
-              << stageDiagnostics.distanceCorrection << ','
-              << stageDiagnostics.interfaceShift << ','
-              << stageDiagnostics.advectionIncrement << ','
+              << ',' << stageDiagnostics.advectionIncrement << ','
               << stageDiagnostics.advectedJump << ',' << reconstruction.minimumCrossing
               << ',' << reconstruction.snappedVertices << ',' << reconstruction.scale;
       // Z and omega for the supplied force, including its magnitude.
@@ -1746,9 +1743,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       for (Eigen::Index component = 0; component < 3; ++component)
         history << ',' << motionAngular(component);
       history << ',' << stageDiagnostics.transportAttempted << ','
-              << stageDiagnostics.transportOmitted << ','
-              << stageDiagnostics.transportOmittedFraction << ','
-              << stageDiagnostics.transportFallbackCells;
+              << stageDiagnostics.transportFallback;
       for (Eigen::Index component = 0; component < 3; ++component)
         history << ',' << m_options.motionForce(component);
       history << '\n';
@@ -2161,79 +2156,16 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     previousVolume = volume;
     predictedVolumeChange = dt * dVolumeTheta;
     GridFunction distance(levelSetSpace);
-    {
-      GridFunction eikonalDistance(levelSetSpace);
-      Distance::Eikonal(eikonalDistance)
-        .setInterior(Obstacle)
-        .setInterface(Gamma)
-        .solve()
-        .sign();
-      TrialFunction periodicDistance(levelSetSpace);
-      TestFunction distanceTest(levelSetSpace);
-      Problem distanceProjection(periodicDistance, distanceTest);
-      auto eikonalDistanceLoad = Integral(eikonalDistance, distanceTest);
-      eikonalDistanceLoad.setOrder(2);
-    // The projection only reconciles the traces on the cuts: Gamma is pinned,
-    // so it cannot move the interface the transport starts from.
-      distanceProjection = Integral(periodicDistance, distanceTest) +
-        shapeCoupling.scalarTrace(
-          periodicDistance, distanceTest, m_options.levelSetPenalty) -
-        eikonalDistanceLoad + DirichletBC(periodicDistance, RealFunction(0)).on(Gamma);
-      Solver::CG(distanceProjection).solve();
-      distance = periodicDistance.getSolution();
-      const auto& distanceSystem = distanceProjection.getLinearSystem();
-      const Real distanceProjectionResidual =
-        (distanceSystem.getOperator() * distanceSystem.getSolution() -
-          distanceSystem.getVector())
-          .norm() /
-        std::max(distanceSystem.getVector().norm(), Real(1));
-      const Real distanceProjectionCorrection =
-        (distance.getData() - eikonalDistance.getData()).lpNorm<Eigen::Infinity>();
-    // The Eikonal distance vanishes on Gamma, so the projected value at an
-    // interface vertex is how far the projection moves the interface there.
-      std::vector<char> onInterface(mesh.getVertexCount(), 0);
-      for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
-      {
-        if (face->getAttribute() == Gamma)
-          for (const Index vertex : face->getVertices())
-            onInterface[vertex] = 1;
-      }
-      Real interfaceShiftMaximum = 0;
-      Real interfaceShiftSquares = 0;
-      size_t interfaceVertices = 0;
-      for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
-      {
-        if (!onInterface[vertex])
-          continue;
-        const Real shift = std::abs(distance[vertex]);
-        interfaceShiftMaximum = std::max(interfaceShiftMaximum, shift);
-        interfaceShiftSquares += shift * shift;
-        ++interfaceVertices;
-      }
-      const Real interfaceShiftRMS = interfaceVertices
-        ? std::sqrt(interfaceShiftSquares / static_cast<Real>(interfaceVertices))
-        : Real(0);
-      stageDiagnostics.eikonalJump = shapeCoupling.scalarJump(eikonalDistance);
-      stageDiagnostics.projectedJump = shapeCoupling.scalarJump(distance);
-      stageDiagnostics.distanceCorrection = distanceProjectionCorrection;
-      stageDiagnostics.interfaceShift = interfaceShiftMaximum;
-      Alert::Info() << substageHeading("Distance trace projection") << Alert::NewLine
-                    << diagnosticLabel("Linear residual:")
-                    << Alert::Notation::Number(distanceProjectionResidual)
-                    << Alert::NewLine << diagnosticLabel("Eikonal rotated jump:")
-                    << Alert::Notation::Number(stageDiagnostics.eikonalJump)
-                    << Alert::NewLine << diagnosticLabel("Projected rotated jump:")
-                    << Alert::Notation::Number(stageDiagnostics.projectedJump)
-                    << Alert::NewLine << diagnosticLabel("Infinity correction:")
-                    << Alert::Notation::Number(distanceProjectionCorrection)
-                    << Alert::NewLine << diagnosticLabel("Interface shift maximum:")
-                    << Alert::Notation::Number(interfaceShiftMaximum) << " = "
-                    << Alert::Notation::Number(interfaceShiftMaximum / h) << " h"
-                    << Alert::NewLine << diagnosticLabel("Interface shift RMS:")
-                    << Alert::Notation::Number(interfaceShiftRMS) << " = "
-                    << Alert::Notation::Number(interfaceShiftRMS / h) << " h"
-                    << Alert::Raise;
-    }
+    Distance::Eikonal(distance)
+      .setInterior(Obstacle)
+      .setInterface(Gamma)
+      .solve()
+      .sign();
+    stageDiagnostics.eikonalJump = shapeCoupling.scalarJump(distance);
+    Alert::Info() << substageHeading("Eikonal redistancing") << Alert::NewLine
+                  << diagnosticLabel("Rotated distance jump:")
+                  << Alert::Notation::Number(stageDiagnostics.eikonalJump)
+                  << Alert::Raise;
 
     stageSeconds[5] = elapsedSeconds(stage6Start);
     reportStageTiming(6, stageSeconds[5]);
@@ -2542,55 +2474,19 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       KelvinBall::RotatedNitscheIntegrator advectionCoupling(advectionMesh,
         FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
         rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
-      TrialFunction advected(advectionLevelSetSpace);
-      TestFunction test(advectionLevelSetSpace);
       KelvinBall::RotatedCharacteristicContinuation rotationalContinuation(
         -dt, advectionMesh, advectionCoupling.getLocator(), RotationPairs);
-      Problem transport(advected, test);
       const auto characteristic = Flow(-dt, advectionDistance, advectionDirection,
         Math::RungeKutta::RK4{}, rotationalContinuation);
-    // P1 mass products are quadratic. A lower-order sampling rule cannot
-    // determine all local coefficients, even with complete coverage.
-      const size_t transportQuadratureOrder =
-        std::max(size_t(2), m_options.advectionQuadratureOrder);
-      const KelvinBall::TransportProjection projection(
-        advectionMesh, advectionDistance, characteristic, transportQuadratureOrder);
-      const RealFunction retained(
-        [&](const Geometry::Point& point) { return projection.mask(point); });
-      const RealFunction transported(
-        [&](const Geometry::Point& point) { return projection.value(point); });
-      auto mass = Integral(retained * advected, test);
-      mass.setOrder(transportQuadratureOrder);
-      auto transportedDistance = Integral(transported, test);
-      transportedDistance.setOrder(transportQuadratureOrder);
-      transport = mass +
-        advectionCoupling.scalarTrace(advected, test, m_options.levelSetPenalty) -
-        transportedDistance;
-      // Project the transported field toward a zero periodic jump. Adding the
-      // old jump to the load would preserve an existing mismatch instead.
-      Solver::CG(transport).solve();
-      stageDiagnostics.transportAttempted = projection.getAttemptedCount();
-      stageDiagnostics.transportOmitted = projection.getOmittedCount();
-      stageDiagnostics.transportOmittedFraction = projection.getOmittedWeightFraction();
-      stageDiagnostics.transportFallbackCells = projection.getFallbackCellCount();
+      const KelvinBall::NodalTransport transport(
+        advectionMesh, advectionDistance, characteristic, advectedDistance);
+      stageDiagnostics.transportAttempted = transport.getAttemptedCount();
+      stageDiagnostics.transportFallback = transport.getFallbackCount();
       Alert::Info() << substageHeading("Transport coverage") << Alert::NewLine
-                    << diagnosticLabel("Projection quadrature order:")
-                    << transportQuadratureOrder << Alert::NewLine
-                    << diagnosticLabel("Attempted quadrature points:")
-                    << projection.getAttemptedCount() << Alert::NewLine
-                    << diagnosticLabel("Omitted quadrature points:")
-                    << projection.getOmittedCount() << Alert::NewLine
-                    << diagnosticLabel("Omitted integration fraction:")
-                    << projection.getOmittedWeightFraction() << Alert::NewLine
-                    << diagnosticLabel("Previous-distance fallback cells:")
-                    << projection.getFallbackCellCount() << Alert::Raise;
-      advectedDistance = advected.getSolution();
-      const auto& transportSystem = transport.getLinearSystem();
-      const Real transportResidual =
-        (transportSystem.getOperator() * transportSystem.getSolution() -
-          transportSystem.getVector())
-          .norm() /
-        std::max(transportSystem.getVector().norm(), Real(1));
+                    << diagnosticLabel("Attempted vertices:")
+                    << transport.getAttemptedCount() << Alert::NewLine
+                    << diagnosticLabel("Previous-distance fallback vertices:")
+                    << transport.getFallbackCount() << Alert::Raise;
       const Real advectionIncrement =
         (advectedDistance.getData() - advectionDistance.getData())
           .lpNorm<Eigen::Infinity>();
@@ -2600,8 +2496,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       stageDiagnostics.advectedJump = advectedJump;
       Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
                     << diagnosticLabel("Advection step:") << Alert::Notation::Number(dt)
-                    << Alert::NewLine << diagnosticLabel("Linear residual:")
-                    << Alert::Notation::Number(transportResidual) << Alert::NewLine
+                    << Alert::NewLine
                     << diagnosticLabel("Minimum:")
                     << Alert::Notation::Number(advectedDistance.min()) << Alert::NewLine
                     << diagnosticLabel("Maximum:")
@@ -2640,12 +2535,44 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     SphereDiscretization result = [&]() {
       if (m_options.reconstructionMethod == "swift")
       {
+        if (m_options.configuration.adapt)
+        {
+          auto adapted = adaptSWIFTBackground(*swiftBackground, advectedDistance,
+            sphere, requestedWelschScale);
+          // The old target and its space stay on the unchanged source mesh.
+          // Re-evaluate it spatially; nodal copying across MMG is invalid.
+          P1<Real, Mesh> targetSpace(adapted);
+          GridFunction target(targetSpace);
+          const Location::AABB<MMG::Mesh> sourceLocator(*swiftBackground);
+          target = RealFunction([&](const Geometry::Point& point) {
+            const auto source = sourceLocator.locate(3, point.getPhysicalCoordinates());
+            if (!source)
+              throw std::runtime_error("An adapted background vertex is outside the source chamber.");
+            return advectedDistance.getValue(*source);
+          });
+          const Real adaptedH = meanElementSize(adapted);
+          MMG::Mesh classified = classifyLevelSetForSWIFT(adapted, target);
+          auto fitted = fitLevelSetSWIFT(classified, target, adaptedH, outerRadius);
+          fitted.diagnostics.cellsBefore = swiftBackground->getCellCount();
+          fitted.diagnostics.cellsAfter = fitted.mesh.getCellCount();
+          fitted.diagnostics.minimumSize = m_options.configuration.hmin;
+          fitted.diagnostics.maximumSize = m_options.configuration.hmax;
+          fitted.diagnostics.hausdorffTolerance = Real(0.1) * initialGridSpacing *
+            initialGridSpacing;
+          fitted.diagnostics.backgroundMeanElementSize = adaptedH;
+          fitted.diagnostics.welschScale = requestedWelschScale > 0 ?
+            requestedWelschScale : Real(3) * initialGridSpacing;
+          fitted.diagnostics.requiredBoundaryTriangles =
+            adapted.getRequiredTriangles().size();
+          // Commit the next background only after fitting succeeds. Its old
+          // spaces expire before replacement at the next iteration boundary.
+          nextBackground.emplace(std::move(adapted));
+          return fitted;
+        }
         MMG::Mesh classified =
           classifyLevelSetForSWIFT(*swiftBackground, advectedDistance);
         auto fitted = fitLevelSetSWIFT(classified, advectedDistance, backgroundH,
           outerRadius);
-        if (m_options.configuration.adapt)
-          adaptSWIFT(fitted, sphere, m_options.configuration, requestedWelschScale);
         return fitted;
       }
       // A failed MMG stage is retried on the same advected level set with
@@ -2686,6 +2613,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         }
       }
     }();
+    smoothReconstruction(result.mesh);
     reconstruction = result.diagnostics;
     if (reconstructionXdmf)
     {

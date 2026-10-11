@@ -80,7 +80,7 @@ int KelvinBall::SphereValidation::run()
   bool saveMesh = false;
   for (int argument = 1; argument < argc; ++argument)
   {
-    const std::string_view option(argv[argument]);
+    const StringView option(argv[argument]);
     if (configuration.parse(option))
       continue;
     if (option == "--save-mesh")

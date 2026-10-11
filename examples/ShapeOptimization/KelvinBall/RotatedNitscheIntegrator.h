@@ -108,6 +108,7 @@ namespace KelvinBall
    * The integrator owns the AABB map of the master cuts. Each assembly method
    * traverses slave quadrature points, locates the rotated master trace, and
    * inserts the resulting nonlocal coupling into the supplied linear system.
+   * This example uses P1 velocity, pressure and extension fields only.
    */
   class RotatedNitscheIntegrator
   {
@@ -128,16 +129,6 @@ namespace KelvinBall
        * boundary conditions in Problem, so Assembly owns all elimination.
        * No global all-pairs traversal is introduced.
        */
-      template <class Trial, class Test>
-      auto scalarTrace(const Trial& u, const Test& v, Real penalty) const
-      {
-        BilinearForm form(u, v);
-        auto system = makeSystem(u.getFiniteElementSpace().getSize());
-        assembleScalarTracePenalty(u.getFiniteElementSpace(), system, penalty);
-        form.getOperator() = std::move(system.getOperator());
-        return form;
-      }
-
       template <class Trial, class Test>
       auto vectorTrace(const Trial& u, const Test& v, Real diffusion, Real penalty) const
       {
@@ -161,7 +152,7 @@ namespace KelvinBall
           size += trial.get().getFiniteElementSpace().getSize();
         });
         auto system = makeSystem(size);
-        assembleStokes<1>(trials.template get<0>().get().getFiniteElementSpace(),
+        assembleStokes(trials.template get<0>().get().getFiniteElementSpace(),
           trials.template get<1>().get().getFiniteElementSpace(), offsets, system,
           viscosity, penalty, pressureDiffusion);
         ProblemBody<Math::SparseMatrix<Real>, Math::Vector<Real>, Real> result;
@@ -183,7 +174,7 @@ namespace KelvinBall
       // load terms. Trace diagnostics use only the located overlap; coverage
       // is reported separately by Metrics, not interpreted as a zero jump.
 
-      template <size_t VelocityOrder, class VelocitySpace, class PressureSpace,
+      template <class VelocitySpace, class PressureSpace,
         class Offsets, class LinearSystem>
       void assembleStokes(const VelocitySpace& velocity, const PressureSpace& pressure,
         const Offsets& offsets, LinearSystem& system, Real viscosity, Real penalty,
@@ -192,15 +183,6 @@ namespace KelvinBall
       template <class VectorSpace, class LinearSystem>
       void assembleVector(const VectorSpace& space, LinearSystem& system, Real diffusion,
         Real penalty) const;
-
-      /**
-       * Add @f$\gamma h_\Sigma\int_{\Sigma_-}[u]_R[v]_R@f$ to the
-       * scalar operator, with zero jump as its target. The load is unchanged:
-       * an existing jump must be corrected, not transported as a datum.
-       */
-      template <class ScalarSpace, class LinearSystem>
-      void assembleScalarTracePenalty(
-        const ScalarSpace& space, LinearSystem& system, Real penalty) const;
 
       template <class U>
       Real vectorJump(const U& field) const;
@@ -298,7 +280,7 @@ namespace KelvinBall
         return incidence[0];
       }
 
-      template <size_t Order, class Space>
+      template <class Space>
       static ScalarCellBasis evaluateScalarBasis(
         const Space& space, const Polytope& face, const Math::SpatialPoint& physical)
       {
@@ -311,7 +293,7 @@ namespace KelvinBall
         Math::SpatialPoint reference;
         cell.getTransformation().inverse(reference, physical);
         const Geometry::Point point(cell, std::cref(reference), physical);
-        const H1Element<Order, Real> element(cell.getGeometry());
+        const H1Element<1, Real> element(cell.getGeometry());
         ScalarCellBasis result;
         const auto dofs = space.getDOFs(cell.getDimension(), cell.getIndex());
         result.dofs.assign(dofs.begin(), dofs.end());
@@ -364,7 +346,7 @@ namespace KelvinBall
       }
   };
 
-  template <size_t VelocityOrder, class VelocitySpace, class PressureSpace, class Offsets,
+  template <class VelocitySpace, class PressureSpace, class Offsets,
     class LinearSystem>
   void RotatedNitscheIntegrator::assembleStokes(const VelocitySpace& velocity,
     const PressureSpace& pressure, const Offsets& offsets, LinearSystem& system,
@@ -399,14 +381,14 @@ namespace KelvinBall
             ++skippedPoints;
             continue;
           }
-          const auto slaveVelocity = Internal::evaluateScalarBasis<VelocityOrder>(
+          const auto slaveVelocity = Internal::evaluateScalarBasis(
             velocity, *face, slavePoint.getPhysicalCoordinates());
-          const auto slavePressure = Internal::evaluateScalarBasis<1>(
+          const auto slavePressure = Internal::evaluateScalarBasis(
             pressure, *face, slavePoint.getPhysicalCoordinates());
           const auto& masterFace = mapped->getPolytope();
-          const auto masterVelocity = Internal::evaluateScalarBasis<VelocityOrder>(
+          const auto masterVelocity = Internal::evaluateScalarBasis(
             velocity, masterFace, mapped->getPhysicalCoordinates());
-          const auto masterPressure = Internal::evaluateScalarBasis<1>(
+          const auto masterPressure = Internal::evaluateScalarBasis(
             pressure, masterFace, mapped->getPhysicalCoordinates());
           const Math::SpatialVector<Real> slaveNormal = normal.getValue(slavePoint);
           const Math::SpatialVector<Real> masterNormal = normal.getValue(*mapped);
@@ -562,9 +544,9 @@ namespace KelvinBall
             m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
           if (!mapped)
             continue;
-          const auto slave = Internal::evaluateScalarBasis<1>(
+          const auto slave = Internal::evaluateScalarBasis(
             space, *face, slavePoint.getPhysicalCoordinates());
-          const auto master = Internal::evaluateScalarBasis<1>(
+          const auto master = Internal::evaluateScalarBasis(
             space, mapped->getPolytope(), mapped->getPhysicalCoordinates());
           const Math::SpatialVector<Real> slaveNormal = normal.getValue(slavePoint);
           const Math::SpatialVector<Real> masterNormal = normal.getValue(*mapped);
@@ -604,55 +586,6 @@ namespace KelvinBall
                   stabilization * trial.jump.dot(test.jump));
               if (std::abs(coefficient) > 1e-14)
                 entries.emplace_back(test.dof, trial.dof, coefficient);
-            }
-          }
-        }
-      }
-      Internal::addEntries(system, entries);
-    }
-  }
-
-  template <class ScalarSpace, class LinearSystem>
-  void RotatedNitscheIntegrator::assembleScalarTracePenalty(
-    const ScalarSpace& space, LinearSystem& system, Real penalty) const
-  {
-    const auto& mesh = space.getMesh();
-    const size_t faceDimension = mesh.getDimension() - 1;
-    for (const RotationPair& pair : RotationPairs)
-    {
-      std::vector<Eigen::Triplet<Real>> entries;
-      for (auto face = mesh.getPolytope(faceDimension); face; ++face)
-      {
-        if (face->getAttribute() != pair.slave)
-          continue;
-        const auto& qf = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
-        const auto& quadrature = face->getQuadrature(qf);
-        for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
-        {
-          const auto& slavePoint = quadrature.getPoint(qp);
-          const auto mapped =
-            m_locator.locate(pair.master, pair.rotation * slavePoint.vector());
-          if (!mapped)
-            continue;
-          const auto slave = Internal::evaluateScalarBasis<1>(
-            space, *face, slavePoint.getPhysicalCoordinates());
-          const auto master = Internal::evaluateScalarBasis<1>(
-            space, mapped->getPolytope(), mapped->getPhysicalCoordinates());
-          std::vector<std::pair<Index, Real>> basis;
-          basis.reserve(master.values.size() + slave.values.size());
-          for (size_t node = 0; node < master.values.size(); ++node)
-            basis.emplace_back(master.dofs[node], master.values[node]);
-          for (size_t node = 0; node < slave.values.size(); ++node)
-            basis.emplace_back(slave.dofs[node], -slave.values[node]);
-          const Real weight = qf.getWeight(qp) * slavePoint.getDistortion() * penalty *
-            Internal::diameter(*face);
-          for (const auto& [testDOF, testJump] : basis)
-          {
-            for (const auto& [trialDOF, trialJump] : basis)
-            {
-              const Real coefficient = weight * testJump * trialJump;
-              if (std::abs(coefficient) > 1e-14)
-                entries.emplace_back(testDOF, trialDOF, coefficient);
             }
           }
         }

@@ -326,6 +326,8 @@ namespace KelvinBall
   SphereDiscretization Sphere::prepareSWIFTBackground(Real requestedWelschScale) const
   {
     MMG::Mesh mesh(makeUniformChamber());
+    for (auto cell = mesh.getCell(); cell; ++cell)
+      mesh.setAttribute({3, cell->getIndex()}, {});
     const Real h = m_configuration.getGridSpacing();
     const Real interfaceSize = m_configuration.hmin;
     const Real farSize = m_configuration.hmax;
@@ -372,6 +374,9 @@ namespace KelvinBall
     splitSelfPairedCut(mesh);
     const size_t requiredTriangles = protectFixedGeometry(mesh, !m_configuration.adapt);
 
+    for (auto cell = mesh.getCell(); cell; ++cell)
+      mesh.setAttribute({3, cell->getIndex()}, {});
+
     const size_t cellsAfter = mesh.getCellCount();
     ReconstructionDiagnostics diagnostics{
       hmin, hmax, hausdorff, requiredTriangles, cellsBefore, cellsAfter};
@@ -380,7 +385,51 @@ namespace KelvinBall
     return {std::move(mesh), diagnostics};
   }
 
-  void Sphere::adapt(MMG::Mesh& fitted, Real requestedWelschScale) const
+  MMG::Mesh Sphere::adaptBackground(const MMG::Mesh& background,
+    const MMG::RealGridFunction& sizeMap, bool requiredCuts) const
+  {
+    MMG::Mesh mesh(background);
+    mesh.getConnectivity().compute(2, 3);
+    // Empty cell references export as zero. Clearing old feature metadata is
+    // essential: an unlabelled but required entity would still reach MMG.
+    mesh.getRequiredVertices().clear();
+    mesh.getRequiredEdges().clear();
+    mesh.getRequiredTriangles().clear();
+    mesh.getRequiredTetrahedra().clear();
+    mesh.getRidges().clear();
+    mesh.getCorners().clear();
+    for (size_t dimension = 0; dimension <= 3; ++dimension)
+    {
+      for (auto entity = mesh.getPolytope(dimension); entity; ++entity)
+      {
+        if (dimension == 2 && mesh.isBoundary(entity->getIndex()))
+          continue;
+        mesh.setAttribute({dimension, entity->getIndex()}, {});
+      }
+    }
+    P1<Real, Mesh> sizeSpace(mesh);
+    MMG::RealGridFunction size(sizeSpace);
+    size.getData() = sizeMap.getData();
+    protectFixedGeometry(mesh, requiredCuts);
+    MMG::Adapt()
+      .setHMin(m_configuration.hmin)
+      .setHMax(m_configuration.hmax)
+      .setHausdorff(Real(0.1) * m_configuration.getGridSpacing() *
+        m_configuration.getGridSpacing())
+      .setGradation(m_configuration.adaptGradation)
+      .setAngleDetection(false)
+      .adapt(mesh, size);
+    projectFixedGeometry(mesh);
+    splitSelfPairedCut(mesh);
+    // Native MMG returns reference zero as an explicit attribute. Keep the
+    // background genuinely unclassified in Rodin as well.
+    for (auto cell = mesh.getCell(); cell; ++cell)
+      mesh.setAttribute({3, cell->getIndex()}, {});
+    return mesh;
+  }
+
+  void Sphere::adapt(
+    MMG::Mesh& fitted, Real requestedWelschScale, bool requiredCuts) const
   {
     // MMG and the subsequent exact-boundary projection operate on a candidate.
     // Any exception leaves the fitted geometry, topology and MMG tags intact.
@@ -404,7 +453,7 @@ namespace KelvinBall
         * welsch.getWeight(std::abs(distance[vertex]));
     }
 
-    protectFixedGeometry(mesh, false);
+    protectFixedGeometry(mesh, requiredCuts);
     MMG::Adapt()
       .setHMin(interfaceSize)
       .setHMax(farSize)

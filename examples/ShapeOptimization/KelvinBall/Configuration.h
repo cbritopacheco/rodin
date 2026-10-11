@@ -31,8 +31,8 @@ namespace KelvinBall
       /// Settings of the initial SWIFT background preparation.
       Real backgroundHausdorff = 0.05;
       Real backgroundGradation = 2;
-      /// Optional MMG adaptation after each MMG cut or SWIFT fit, and during
-      /// initial background preparation. Its size map ranges from hmin to hmax.
+      /// Optional MMG adaptation after an MMG cut or before SWIFT classification
+      /// and fitting. Its background size map ranges from hmin to hmax.
       bool adapt = false;
       Real adaptGradation = 1.3;
       /// Crossing fraction below which the MMG cut snaps the near endpoint of
@@ -44,7 +44,7 @@ namespace KelvinBall
       bool pointsSpecified = false;
       bool gridSpacingSpecified = false;
 
-      bool parse(std::string_view option);
+      bool parse(StringView option);
 
       void finalize();
 

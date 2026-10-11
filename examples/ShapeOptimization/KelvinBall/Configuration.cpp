@@ -12,7 +12,7 @@
 
 namespace KelvinBall
 {
-  bool Configuration::parse(std::string_view option)
+  bool Configuration::parse(StringView option)
   {
     if (option.rfind("--n=", 0) == 0)
     {

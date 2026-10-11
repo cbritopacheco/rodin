@@ -6,10 +6,9 @@
  */
 #include <gtest/gtest.h>
 #include <Rodin/Assembly.h>
-#include <Rodin/Solver/CG.h>
 
 #include "examples/ShapeOptimization/KelvinBall/RotatedNitscheIntegrator.h"
-#include "examples/ShapeOptimization/KelvinBall/TransportProjection.h"
+#include "examples/ShapeOptimization/KelvinBall/NodalTransport.h"
 #include "examples/ShapeOptimization/KelvinBall/HilbertIdentification.h"
 #include "examples/ShapeOptimization/KelvinBall/Thickness.h"
 #include "examples/ShapeOptimization/KelvinBall/RotatedCharacteristicContinuation.h"
@@ -22,10 +21,12 @@ namespace KelvinBall
       struct SamplingFlow
       {
           Real cutoff;
+          Real correction = 0;
           struct Trace
           {
               const Geometry::Point& point;
               bool failed;
+              Real correction;
               bool exited() const
               {
                 return failed;
@@ -36,12 +37,12 @@ namespace KelvinBall
               }
               Real getCorrection() const
               {
-                return 0;
+                return correction;
               }
           };
           Trace trace(const Geometry::Point& point) const
           {
-            return {point, point.getReferenceCoordinates()(0) < cutoff};
+            return {point, point.getReferenceCoordinates()(0) < cutoff, correction};
           }
       };
       Mesh makeMesh(Real shift)
@@ -125,77 +126,52 @@ namespace KelvinBall
     EXPECT_TRUE(checked);
   }
 
-  TEST_F(CutCoverageTest, TransportCompleteCoverageKeepsAllSamples)
+  TEST_F(CutCoverageTest, NodalTransportPreservesConstantWithCompleteCoverage)
   {
     auto mesh = makeMesh(0);
     P1 space(mesh);
-    GridFunction distance(space);
+    GridFunction distance(space), result(space);
     distance = Real(3);
-    TransportProjection projection(mesh, distance, SamplingFlow{-1}, 2);
-    EXPECT_EQ(projection.getOmittedCount(), 0);
-    EXPECT_EQ(projection.getFallbackCellCount(), 0);
-    EXPECT_EQ(projection.getOmittedWeightFraction(), 0);
-    for (auto cell = mesh.getPolytope(3); cell; ++cell)
-    {
-      const auto& formula = QF::PolytopeQuadratureFormula::get(2, cell->getGeometry());
-      const auto& quadrature = cell->getQuadrature(formula);
-      for (size_t q = 0; q < quadrature.getSize(); ++q)
-      {
-        EXPECT_EQ(projection.mask(quadrature.getPoint(q)), 1);
-        EXPECT_NEAR(projection.value(quadrature.getPoint(q)), 3, 1e-14);
-      }
-    }
+    NodalTransport transport(mesh, distance, SamplingFlow{-1}, result);
+    EXPECT_EQ(transport.getAttemptedCount(), mesh.getVertexCount());
+    EXPECT_EQ(transport.getFallbackCount(), 0);
+    EXPECT_LT((result.getData() - distance.getData()).norm(), 1e-14);
   }
 
-  TEST_F(CutCoverageTest, TransportMissingSamplesRetainPreviousDistanceWhenRankDeficient)
+  TEST_F(CutCoverageTest, NodalTransportRetainsPreviousValuesOnFailedTraces)
   {
     auto mesh = makeMesh(0);
     P1 space(mesh);
-    GridFunction distance(space);
+    GridFunction distance(space), result(space);
     distance = RealFunction(
       [](const Geometry::Point& p) { return Real(2) + p.getPhysicalCoordinates()(0); });
-    TransportProjection projection(mesh, distance, SamplingFlow{2}, 2);
-    EXPECT_EQ(projection.getOmittedCount(), projection.getAttemptedCount());
-    EXPECT_EQ(projection.getFallbackCellCount(), mesh.getCellCount());
-    EXPECT_NEAR(projection.getOmittedWeightFraction(), 1, 1e-14);
-    for (auto cell = mesh.getPolytope(3); cell; ++cell)
-    {
-      const auto& formula = QF::PolytopeQuadratureFormula::get(2, cell->getGeometry());
-      const auto& quadrature = cell->getQuadrature(formula);
-      for (size_t q = 0; q < quadrature.getSize(); ++q)
-      {
-        const auto& p = quadrature.getPoint(q);
-        EXPECT_EQ(projection.mask(p), 1);
-        EXPECT_NEAR(projection.value(p), distance.getValue(p), 1e-14);
-      }
-    }
+    NodalTransport transport(mesh, distance, SamplingFlow{2}, result);
+    EXPECT_EQ(transport.getFallbackCount(), mesh.getVertexCount());
+    EXPECT_LT((result.getData() - distance.getData()).norm(), 1e-14);
   }
 
-  TEST_F(CutCoverageTest, TransportPartialOmissionUsesIdenticalMassAndLoadMasks)
+  TEST_F(CutCoverageTest, NodalTransportHandlesPartialCoverageWithoutChangingConstants)
   {
     auto mesh = makeMesh(0);
     P1 space(mesh);
-    GridFunction distance(space);
+    GridFunction distance(space), result(space);
     distance = Real(3);
-    TransportProjection projection(mesh, distance, SamplingFlow{0.03}, 4);
-    EXPECT_GT(projection.getOmittedCount(), 0);
-    EXPECT_LT(projection.getOmittedCount(), projection.getAttemptedCount());
-    EXPECT_EQ(projection.getFallbackCellCount(), 0);
-    TrialFunction u(space);
-    TestFunction v(space);
-    RealFunction mask([&](const Geometry::Point& p) { return projection.mask(p); });
-    RealFunction value([&](const Geometry::Point& p) { return projection.value(p); });
-    auto mass = Integral(mask * u, v);
-    auto load = Integral(value, v);
-    mass.setOrder(4);
-    load.setOrder(4);
-    Problem problem(u, v);
-    problem = mass - load;
-    problem.assemble();
-    const auto& system = problem.getLinearSystem();
-    const auto constant = Math::Vector<Real>::Constant(space.getSize(), 3);
-    EXPECT_LT((system.getOperator() * constant - system.getVector()).norm(), 1e-12);
-    EXPECT_GT(system.getOperator().norm(), 0);
+    NodalTransport transport(mesh, distance, SamplingFlow{0.03}, result);
+    EXPECT_GT(transport.getFallbackCount(), 0);
+    EXPECT_LT(transport.getFallbackCount(), transport.getAttemptedCount());
+    EXPECT_LT((result.getData() - distance.getData()).norm(), 1e-14);
+  }
+
+  TEST_F(CutCoverageTest, NodalTransportAppliesCharacteristicCorrectionOnlyOnSuccess)
+  {
+    auto mesh = makeMesh(0);
+    P1 space(mesh);
+    GridFunction distance(space), result(space);
+    distance = Real(3);
+    NodalTransport successful(mesh, distance, SamplingFlow{-1, 2}, result);
+    EXPECT_LT((result.getData().array() - 5).matrix().norm(), 1e-14);
+    NodalTransport failed(mesh, distance, SamplingFlow{2, 2}, result);
+    EXPECT_LT((result.getData() - distance.getData()).norm(), 1e-14);
   }
 
   TEST_F(CutCoverageTest, CompletelyMissingTraceAddsNeitherMatrixNorLoad)
@@ -207,10 +183,6 @@ namespace KelvinBall
     reference = RealFunction(
       [](const Geometry::Point& p) { return p.getPhysicalCoordinates()(0); });
     RotatedNitscheIntegrator coupling(mesh);
-    auto scalarSystem = makeSystem(scalar.getSize());
-    EXPECT_NO_THROW(coupling.assembleScalarTracePenalty(scalar, scalarSystem, 1));
-    EXPECT_EQ(scalarSystem.getOperator().norm(), 0);
-    EXPECT_EQ(scalarSystem.getVector().norm(), 0);
     auto vectorSystem = makeSystem(vector.getSize());
     EXPECT_NO_THROW(coupling.assembleVector(vector, vectorSystem, 1, 10));
     EXPECT_EQ(vectorSystem.getOperator().norm(), 0);
@@ -219,7 +191,7 @@ namespace KelvinBall
       block + vector.getSize(), 2 * block, 2 * block + vector.getSize()};
     auto stokesSystem = makeSystem(3 * block);
     EXPECT_NO_THROW(
-      coupling.assembleStokes<1>(vector, scalar, offsets, stokesSystem, 1, 10, 0.05));
+      coupling.assembleStokes(vector, scalar, offsets, stokesSystem, 1, 10, 0.05));
     EXPECT_EQ(stokesSystem.getOperator().norm(), 0);
     EXPECT_EQ(stokesSystem.getVector().norm(), 0);
     GridFunction v(vector);
@@ -229,66 +201,22 @@ namespace KelvinBall
     EXPECT_NO_THROW(coupling.familyJump(v, v, v));
   }
 
-  TEST_F(CutCoverageTest, ZeroStepProjectionRepairsExistingPeriodicMismatch)
+  TEST_F(CutCoverageTest, ScalarJumpDetectsMismatchAndPreservesConstants)
   {
     auto mesh = makeMesh(0);
     P1 space(mesh);
-    GridFunction previous(space);
-    previous = RealFunction([](const Geometry::Point& p) { return p.z(); });
+    GridFunction distance(space);
     RotatedNitscheIntegrator coupling(mesh);
-    const Real initialJump = coupling.scalarJump(previous);
-    ASSERT_GT(initialJump, Real(1e-3));
-    Real lastJump = initialJump;
-    for (const Real penalty : {Real(1), Real(100)})
-    {
-      TrialFunction projected(space);
-      TestFunction test(space);
-      Problem projection(projected, test);
-      auto mass = Integral(projected, test);
-      auto load = Integral(previous, test);
-      mass.setOrder(2);
-      load.setOrder(2);
-      projection = mass + coupling.scalarTrace(projected, test, penalty) - load;
-      projection.assemble();
-      auto& system = projection.getLinearSystem();
-      const Math::Vector<Real> originalLoad = system.getVector();
-      // The old increment penalty instead adds the old jump to this load.
-      EXPECT_EQ((system.getVector() - originalLoad).norm(), Real(0));
-      Solver::CG(projection).solve();
-      const auto& result = projected.getSolution();
-      const Real jump = coupling.scalarJump(result);
-      EXPECT_LT(jump, lastJump);
-      EXPECT_LT(
-        (system.getOperator() * result.getData() - originalLoad).norm(), Real(1e-10));
-      EXPECT_GT((result.getData() - previous.getData()).norm(), Real(1e-3));
-      lastJump = jump;
-    }
-    EXPECT_LT(lastJump, Real(0.01) * initialJump);
-  }
-
-  TEST_F(CutCoverageTest, ZeroJumpProjectionPreservesPeriodicConstant)
-  {
-    auto mesh = makeMesh(0);
-    P1 space(mesh);
-    GridFunction previous(space);
-    previous = Real(3);
-    TrialFunction projected(space);
-    TestFunction test(space);
-    Problem projection(projected, test);
-    RotatedNitscheIntegrator coupling(mesh);
-    projection = Integral(projected, test) + coupling.scalarTrace(projected, test, 10) -
-      Integral(previous, test);
-    projection.assemble();
-    Solver::CG(projection).solve();
-    EXPECT_LT(
-      (projected.getSolution().getData() - previous.getData()).norm(), Real(1e-10));
-    EXPECT_LT(coupling.scalarJump(projected.getSolution()), Real(1e-10));
+    distance = RealFunction([](const Geometry::Point& p) { return p.z(); });
+    EXPECT_GT(coupling.scalarJump(distance), Real(1e-3));
+    distance = Real(3);
+    EXPECT_LT(coupling.scalarJump(distance), Real(1e-14));
   }
 
   TEST_F(CutCoverageTest, PartialOverlapRetainsSymmetricNonzeroCoupling)
   {
     auto mesh = makeMesh(0.3);
-    P1 scalar(mesh);
+    P1 vector(mesh, 3);
     RotatedNitscheIntegrator coupling(mesh);
     size_t matched = 0, missed = 0;
     for (const auto& pair : RotationPairs)
@@ -311,17 +239,18 @@ namespace KelvinBall
     }
     ASSERT_GT(matched, 0);
     ASSERT_GT(missed, 0);
-    auto system = makeSystem(scalar.getSize());
-    EXPECT_NO_THROW(coupling.assembleScalarTracePenalty(scalar, system, 1));
+    auto system = makeSystem(vector.getSize());
+    EXPECT_NO_THROW(coupling.assembleVector(vector, system, 1, 320));
     EXPECT_GT(system.getOperator().norm(), 0);
     EXPECT_LT(
       (system.getOperator() - Math::SparseMatrix<Real>(system.getOperator().transpose()))
         .norm(),
       1e-12);
-    Math::Vector<Real> ones = Math::Vector<Real>::Ones(scalar.getSize());
-    EXPECT_LT((system.getOperator() * ones).norm(), 1e-12);
+    GridFunction invariant(vector);
+    invariant = VectorFunction(1.0, 0.0, 0.0);
+    EXPECT_LT((system.getOperator() * invariant.getData()).norm(), 1e-12);
   }
-  TEST_F(CutCoverageTest, NativeTraceEliminatesNonzeroDirichletColumns)
+  TEST_F(CutCoverageTest, NativeVectorTraceEliminatesNonzeroDirichletColumns)
   {
     auto mesh = makeMesh(0);
     bool fixedFace = false;
@@ -331,13 +260,13 @@ namespace KelvinBall
         mesh.setAttribute({2, face->getIndex()}, fixedFace ? Gamma : Outer);
         fixedFace = true;
       }
-    P1 space(mesh);
+    P1 space(mesh, 3);
     TrialFunction u(space);
     TestFunction v(space);
     RotatedNitscheIntegrator coupling(mesh);
-    auto trace = coupling.scalarTrace(u, v, 10);
+    auto trace = coupling.vectorTrace(u, v, 1, 320);
     Problem unconstrained(u, v);
-    unconstrained = Integral(u, v) + trace - Integral(RealFunction{1}, v);
+    unconstrained = Integral(u, v) + trace - Integral(VectorFunction(1.0, 1.0, 1.0), v);
     unconstrained.assemble();
     Math::Matrix<Real> expected = unconstrained.getLinearSystem().getOperator();
     Math::Vector<Real> rhs = unconstrained.getLinearSystem().getVector();
@@ -357,8 +286,8 @@ namespace KelvinBall
       rhs(dof) = 2;
     }
     Problem constrained(u, v);
-    constrained = Integral(u, v) + trace - Integral(RealFunction{1}, v) +
-      DirichletBC(u, RealFunction{2}).on(Outer);
+    constrained = Integral(u, v) + trace - Integral(VectorFunction(1.0, 1.0, 1.0), v) +
+      DirichletBC(u, VectorFunction(2.0, 2.0, 2.0)).on(Outer);
     constrained.assemble();
     const auto& system = constrained.getLinearSystem();
     EXPECT_LT((Math::Matrix<Real>(system.getOperator()) - expected).norm(), 1e-12);

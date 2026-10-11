@@ -71,9 +71,23 @@ namespace KelvinBall
        * positive, its width is three times the fixed reference grid spacing.
        * The returned mesh contains no design interface and
        * remains fixed during each SWIFT fit. With adaptation enabled, the
-       * adapted fitted mesh replaces it between design iterations.
+       * interface-free background is remeshed before the next classification.
        */
       SphereDiscretization prepareSWIFTBackground(Real requestedWelschScale = 0) const;
+
+      /**
+       * @brief Remeshes an interface-free background before classification.
+       *
+       * Material, internal-face and old feature attributes are removed from
+       * a candidate. Only chamber boundary labels and their geometric features
+       * are handed to MMG. The input and its fields remain valid on failure.
+       * @param[in] background Unchanged source mesh defining the size map.
+       * @param[in] sizeMap Nodal target sizes on the source background.
+       * @param[in] requiredCuts Whether every cut triangle is required on retry.
+       * @returns Remeshed, unclassified chamber with no material interface.
+       */
+      MMG::Mesh adaptBackground(const MMG::Mesh& background,
+        const MMG::RealGridFunction& sizeMap, bool requiredCuts = false) const;
 
       /**
        * @brief Adapts a mesh fitted to Gamma to the prescribed size map.
@@ -88,8 +102,15 @@ namespace KelvinBall
        * Adaptation is transactional: the candidate is committed only after
        * fixed-boundary projection and cut splitting succeed. An exception
        * leaves the supplied mesh unchanged, including its MMG feature tags.
+       * @param[in,out] mesh Fitted mesh, replaced only by a valid candidate.
+       * @param[in] requestedWelschScale Positive band-width override, or zero
+       * for the reference-spacing default.
+       * @param[in] requiredCuts Protects every cut triangle during this pass.
+       * Used for the single recovery attempt after ordinary adaptation fails;
+       * it does not constrain subsequent SWIFT displacement solves.
        */
-      void adapt(MMG::Mesh& mesh, Real requestedWelschScale = 0) const;
+      void adapt(MMG::Mesh& mesh, Real requestedWelschScale = 0,
+        bool requiredCuts = false) const;
 
       /**
        * @brief Marks the fixed boundary for MMG and returns the number of

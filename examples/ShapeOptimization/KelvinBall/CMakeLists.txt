@@ -1,6 +1,7 @@
 add_library(KelvinBallSupport STATIC EXCLUDE_FROM_ALL
   Common.cpp
   Configuration.cpp
+  LaplacianSmoothing.cpp
   Metrics.cpp
   RotatedNitscheIntegrator.cpp
   SewedOutput.cpp

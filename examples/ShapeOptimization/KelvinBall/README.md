@@ -22,6 +22,11 @@ normal/curvature diagnostics and the sphere validation do not change this model.
 SWIFT fitting uses Rodin's `SWIFT::Adapt`; material interfaces are restored
 with `Mesh::trace`. One dissipation bilinear form evaluates all resistance
 products, and SWIFT options are parsed once per run.
+The mapped Nitsche assembly is restricted to these P1 spaces; it does not
+provide a separate higher-order Stokes path. Scalar trace jumps remain
+available as diagnostics, but there is no scalar trace-penalty projection
+in redistancing or transport. Transport uses Rodin's characteristic flow and
+RK4 integrator, followed by nodal evaluation with a retain-on-failure policy.
 
 ## The problem
 
@@ -380,46 +385,23 @@ recorded in `kelvin-ball.csv`.
 ### Transport on the chamber
 
 The level set is invariant rather than equivariant, $\phi(Gx) = \phi(x)$, so its
-jump across a pair of cuts is $[r]_G(x) = r(Gx) - r(x)$. The Eikonal distance is
-projected into $W_h$ with the penalty
-
-```math
-j_h(r, s) = \gamma_\phi\, h_\Sigma \int_{\Sigma_{\mathrm{s}}} [r]_G\,[s]_G\,dS ,
-```
-
-with $\gamma_\phi$ = `--level-set-penalty` (default 1), to reduce the
-distance mismatch between the paired cuts before transport. The Eikonal distance is computed on the chamber
-alone and misses the interface in the neighbouring copies, so near the cuts the
-correction reaches a third of $h$. The distance is therefore held at zero on
-$\Gamma$ during the projection: the correction only reconciles the traces
-away from the interface and never moves the interface the transport starts
-from. The printout reports this as the interface shift, which is zero.
-
-The penalty only balances a mass term, so it is of order one, unlike the
-velocity penalty `--penalty`. The two triangulations of a pair of cuts differ,
-and a large $\gamma_\phi$ asks two independent piecewise-linear traces to
-agree pointwise, which only traces that barely change can do: it froze the
-level set on the cuts, and the interface there moved by 31–67% of the
-prescribed motion at $\gamma_\phi = 320$ against 92–102% at
-$\gamma_\phi = 1$. A characteristic that reaches a cut continues
-from its rotated partner. The transported field $\phi^\star$ is projected by
+jump across a pair of cuts is $[r]_G(x) = r(Gx) - r(x)$. The signed Eikonal
+distance is used directly for transport, without a post-redistancing projection.
+Its rotated trace jump is reported. At each mesh vertex $x_i$, RK4 traces the
+characteristic backward and the previous P1 distance is evaluated at its foot:
 
 $$
-(\phi^{n+1},v)_D+j_h(\phi^{n+1},v)=(\phi^\star,v)_D.
+\phi^{n+1}(x_i)=\phi^n(X(-\Delta t;x_i)).
 $$
 
-The volume integrals use the retained characteristic samples and the
-previous-distance fallback in cells with insufficient coverage. The periodic
-jump target is zero: no old-jump term is added to the load. Even at zero
-advection time, an existing trace mismatch is corrected; a constant periodic
-field is unchanged. This is a finite-penalty projection, not exact trace
-identification. It does not guarantee matching reconstructed zero contours.
-The preceding distance projection still pins the current design interface
-and therefore cannot repair an already incompatible rim without moving it.
+A characteristic reaching a cut continues from its rotated partner. This is
+nodal interpolation, without a mass solve or a periodic trace penalty. If a
+characteristic cannot be localized, its vertex retains the previous distance;
+the number of such fallbacks is reported in the terminal and CSV. Rotational
+continuation does not enforce identical discrete traces on nonmatching cuts,
+and does not guarantee matching reconstructed zero contours.
 
-The transported distance is integrated with order 8 by default
-(`--advection-quadrature`); the composition with the characteristic flow is not
-polynomial, so a low order under-integrates it.
+Transport has no quadrature-order or level-set-penalty parameter.
 
 ## Reconstruction
 
@@ -503,7 +485,8 @@ Otherwise SWIFT selects its loss scale from $h_0$ and
 the initial residual, independently of the width of the MMG refinement band.
 An MMG retry halves its requested size bounds; an explicitly supplied Welsch
 width remains fixed. Adaptation
-applies after every MMG cut or SWIFT fit, including the initial design:
+applies after every MMG cut, or to the interface-free background before
+classification and fitting with SWIFT, including the initial design:
 
 | Option | Meaning | Default |
 |---|---|---|
@@ -516,8 +499,8 @@ size of the classified interface triangles. The
 preceding MMG level-set cut uses the same bounds, except on a retry. The SWIFT
 background uses the same bounds even when adaptation is off; its Hausdorff
 tolerance follows `--background-hausdorff`. The background
-is refreshed from the adapted fitted mesh between design iterations when
-adaptation is enabled, so the refinement band follows the current interface.
+is remeshed without materials before classification when adaptation is enabled,
+so the refinement band follows the advected target level set.
 This range can refine the interface substantially; the reported cell count
 should be checked before running a long optimisation.
 
@@ -588,12 +571,30 @@ $0.04\min(h_K,h_L)|F|$, where $h_K$ is the volume-equivalent regular
 tetrahedron edge length. This regularizes classification, not the target
 level set. SWIFT fits a fresh copy of the background so
 that this envelope reaches the zero level set. The fitted copy carries the
-state and shape computations. With `--mmg-adapt`, an MMG adaptation follows
-each fit, using the FMM distance to the fitted interface and the same Welsch
-size map as MMG reconstruction. The adapted mesh becomes the background for
-the next design iteration. Spaces and fields are rebuilt on this mesh; no
-coefficients are copied across the remeshing operation. Without adaptation,
+state and shape computations. With `--mmg-adapt`, MMG first remeshes the
+background using the Welsch size map of the advected target level set:
+$s_i=h_{\max}-(h_{\max}-h_{\min})\exp[-(\phi_i/\sigma)^2]$.
+The target is distance-like after redistancing and transport; its transported
+values, not a new FMM solve on the old interface, define this band.
+Cell references, internal-face labels and old MMG feature metadata are removed
+before adaptation. Chamber boundary labels and their geometric features remain.
+The target field is evaluated on the remeshed background with AABB point
+location, then MinSTCut classifies it and SWIFT fits the selected envelope.
+The unclassified adapted mesh becomes the next background; the fitted copy
+is used for the state computations. No MMG adaptation occurs after this fit.
+Spaces and fields are rebuilt; no coefficients are copied across remeshing.
+Without adaptation,
 the initial background remains fixed throughout the run.
+
+After reconstruction (and post-cut adaptation on the MMG path), two
+half-relaxed Laplacian smoothing passes are attempted on the tetrahedral mesh.
+Each vertex moves toward the arithmetic mean of its unique edge neighbours.
+The design interface and container wall remain fixed. Cut vertices move only
+within all incident cut planes. Bounded backtracking accepts a pass only if
+cell orientations are preserved and neither minimum nor mean tetrahedron
+mean-ratio quality decreases. A rejected pass leaves the mesh unchanged.
+This stage changes only the volume-mesh parametrization, not the fitted design;
+it precedes output and rebuilding the next iteration's finite-element spaces.
 
 The boundary is treated by what it must preserve:
 
@@ -903,12 +904,16 @@ Each iterate is written to the chamber and sewn XDMF series.
 
 SWIFT reconstruction does not write a separate reconstruction-only series.
 
-Post-SWIFT MMG adaptation is transactional. A failed adaptation or invalid
-fixed-boundary projection discards the candidate, retains the fitted mesh and
-continues the optimisation with a warning. The rejected adaptation does not
-undo the SWIFT fit or accept invalid tetrahedra. Cell-count diagnostics record
-the unchanged fitted count for the skipped pass. The MMG reconstruction path
-retains its existing retry policy.
+Pre-classification MMG background adaptation is transactional. A failed adaptation or invalid
+fixed-boundary projection discards the candidate and triggers one retry from
+the untouched background, with every chamber-cut triangle marked required.
+The retry preserves the existing cut triangulations while allowing interior
+remeshing; it does not freeze tangential cut motion in subsequent SWIFT fits.
+If the retry also fails, the previous background is retained and classification
+and fitting continue with a warning. Neither rejection accepts invalid
+tetrahedra. The old mesh and target field remain unchanged through both attempts.
+No additional flag is needed. The MMG reconstruction path retains
+its existing retry policy.
 
 Every design snapshot includes a vector field `Motion` for the force
 $F$ = `--motion-force` (default $e_x$), without applied torque. Since
@@ -946,9 +951,8 @@ wall-clock time of each stage. They are followed by:
   the geometric-normal, projected-normal, and ray-direction cut jumps and
   sample counts, and predicted versus
   actual change of the thickness penalty;
-- the identification across the cuts: the rotated jump of the Eikonal
-  distance and of its projection, the largest projection correction and the
-  interface shift;
+- the identification across the cuts: the rotated jump of the signed Eikonal
+  distance before transport;
 - the transport: the largest change of the level set and the rotated jump
   after transport. A change well above the step flags a faulty
   characteristic;
@@ -968,6 +972,9 @@ reconstruction, since the last design is not reconstructed.
 | `Metrics` | Stabilised Stokes families and the resistance |
 | `RotatedNitscheIntegrator` | AABB trace map and all rotated-cut kernels |
 | `RotatedCharacteristicContinuation` | Characteristics across the cuts |
+| `NodalTransport` | P1 characteristic evaluation and failed-trace fallback |
+| `HilbertIdentification` | One Riesz operator and retained factorization per design |
+| `LaplacianSmoothing` | Quality-preserving mesh smoothing with fixed interface |
 | `SewedOutput` | 24-copy reconstruction and field transport |
 | `KelvinBallOptimization` | The staged optimisation loop |
 | `Thickness` | Minimum-thickness penalty and its derivative |
