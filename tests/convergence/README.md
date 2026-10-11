@@ -984,6 +984,41 @@ requires baseline-equivalent numerical behavior, including solver iterations
 and residuals. Performance regression thresholds are introduced only after
 repeatability and variance have been established on a controlled runner.
 
+### Pressure-oracle profiling
+
+`RodinPressureOracleBenchmarks` isolates the complete finite-mesh pressure
+oracle from FE assembly. It consumes fixed velocity-energy, divergence and
+pressure-mass operators, logical velocity constraints and an interpolated
+pressure constant. Each timed iteration includes operator reduction,
+factorization, blocked solves, incremental QR, both spectral routes and
+residual diagnostics. Mesh/space construction, FE assembly, warmup and repeat
+checks are outside timing. This is a global-reference calculation, not a
+distributed solver or partitioning benchmark.
+
+The opt-in target covers the six applicable geometries, affine/exact quadratic
+maps, and P2/P1, P3/P2 and P4/P3 pairs. Levels are 2, 3, 5 for P2/P1 and
+3, 4, 5 for the higher pairs, with quadrature orders 16 and 20: 216 selectable
+measurements. It has no CTest registration or CI/publication invocation.
+For an initial small fixed-input measurement:
+
+```sh
+cmake -S . -B build -DRODIN_BUILD_BENCHMARKS=ON
+cmake --build build --target RodinPressureOracleBenchmarks -j 1
+build/tests/benchmarks/RodinPressureOracleBenchmarks \
+  --benchmark_filter='^Stokes/PressureOracle/Affine/P4P3/Triangle/3/16/real_time$' \
+  --benchmark_min_time=1x --benchmark_repetitions=3 \
+  --benchmark_out=pressure-oracle.json --benchmark_out_format=json
+```
+
+Report cell counts, full/free velocity DOFs, full/zero-mean pressure DOFs,
+matrix nonzeros, quadrature points, degrees and build configuration alongside
+timings. Equal grid sizes do not imply equal work across dimensions. Before
+attributing distributed CPU imbalance to partitioning, time owned-cell
+assembly separately from global operator collection and the root-only oracle.
+The existing spectral consistency and repeated-spectrum guards qualify these
+measurements; they add no convergence-credit entries. No speedup follows from
+adding the harness alone.
+
 Darcy remains deferred. Fixed-degree P0 has no p-refinement family; P0g has
 no nonconstant approximation rate. These are mathematical exclusions, not
 missing certification tasks. Additional physics can be added after the

@@ -48,6 +48,11 @@ add_executable(RodinMassAssemblyBenchmarks MassAssembly.cpp)
 target_link_libraries(RodinMassAssemblyBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
 
+# Local pressure-oracle profiling only: no CTest or publication registration.
+add_executable(RodinPressureOracleBenchmarks EXCLUDE_FROM_ALL PressureOracle.cpp)
+target_link_libraries(RodinPressureOracleBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark GTest::gtest)
+
 add_executable(RodinConstrainedAssemblyBenchmarks ConstrainedAssembly.cpp)
 target_link_libraries(RodinConstrainedAssemblyBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
