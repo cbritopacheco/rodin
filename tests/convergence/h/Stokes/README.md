@@ -148,6 +148,32 @@ algebraic cases alone. Identity rotations are skipped only for exact
 zero entries. Rectangular zero padding depends on $n_v$ and $n_p-1$,
 not on a numerical rank threshold.
 
+The upper factor $U=L^\mathsf{T}$ is materialized once in column-major sparse
+storage before solving $UD_I=E_I$. Eigen's column-oriented substitution skips
+updates for exactly zero coefficients of the coordinate right-hand sides;
+the transposed row-oriented factor instead visits every row. No drop tolerance
+or numerical rank decision is introduced. This traversal changes summation
+order, so the independently computed singular-value consistency defect need
+not be bitwise identical; its original acceptance bound remains unchanged.
+The Schur route and its eigenvalues are unaffected by this storage choice.
+
+The QR accumulator and working rows use row-major storage because the Givens
+updates traverse trailing row entries. The block product is first evaluated in
+its original column-major representation, then copied to contiguous working
+rows; no accumulation-order change is introduced by that copy. The invariant
+norms $\|S_0\|_F$ and $\|M_0\|_F$ are evaluated once, rather than for each
+eigenpair residual. These changes retain the full spectrum, both independent
+spectral routes, all mesh levels and numerical criteria. They do not change
+the worst-case $O(n_v(n_p-1)^2)$ work of the incremental QR algorithm.
+
+The coupled-energy algebraic regression constructs $A=LL^\mathsf{T}$ and
+$B=[DL^\mathsf{T};0]$ from a non-diagonal banded factor. With the final
+pressure coordinate removed by its interpolated constant, $D_{jj}=j+1$ and
+$M_{jj}=2j+1$ give the analytic spectrum
+$\lambda_j=(j+1)^2/(2j+1)$ for zero-based indices. Three velocity-factor
+scales leave that spectrum unchanged, exercising sparse ordering and
+substitution without imposing wall-clock assertions on the test suite.
+
 Each rotation is constructed by Eigen's scaled Givens algorithm. For
 subnormal entries $a,b$, forming $r=\operatorname{hypot}(a,b)$ first and
 then taking $c=a/r$, $s=b/r$ can lose the identity $c^2+s^2=1$ through

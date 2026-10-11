@@ -1444,6 +1444,9 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           files: ${{ github.workspace }}/build/RodinCoverage.info
+          # Upload only the LCOV report filtered by RodinCoverage. Automatic
+          # discovery also uploads raw gcov files, undoing its exclusions.
+          disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }}
           name: cov-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}

@@ -5,7 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Native finite-mesh Stokes pressure stability independent of a solve. */
+/**
+ * @file
+ * @brief Native finite-mesh Stokes pressure stability independent of a solve.
+ */
 #include "Rodin/Assembly.h"
 #include <limits>
 #include "../../Convergence.h"
@@ -89,6 +92,61 @@ namespace Rodin::Tests::Convergence::H::Stokes
     // Mean=(2,-3), T=(3,2)^T: Schur=49/4 and mass=21.
     EXPECT_NEAR(
       result.eigenvalues(0), Real(7) / 12, MixedStability::ConsistencyTolerance);
+  }
+
+  /**
+   * @brief Checks a coupled velocity energy against an analytic pressure spectrum.
+   *
+   * With @f$ A=LL^T @f$ and @f$ B=[DL^T;0] @f$, the pressure Schur
+   * complement is @f$ DD^T @f$. The pressure constant removes the last
+   * coordinate, while @f$ M_{jj}=2j+1 @f$ and @f$ D_{jj}=j+1 @f$ give
+   * @f$ \lambda_j=(j+1)^2/(2j+1) @f$ for zero-based indices. A banded,
+   * non-diagonal velocity factor exercises sparse permutations and triangular
+   * substitution. Scaling both @f$ L @f$ and @f$ B @f$ leaves the spectrum
+   * unchanged. No wall-clock acceptance condition is imposed.
+   */
+  TEST(MixedStabilityTest, CoupledVelocityKnownSpectrum)
+  {
+    constexpr Eigen::Index VelocitySize = 17, PressureSize = 12;
+    for (Real scale : {Real(0.001), Real(1), Real(1000)})
+    {
+      SCOPED_TRACE(::testing::Message() << "velocity-factor scale=" << scale);
+      Math::Matrix<Real> L = Math::Matrix<Real>::Zero(VelocitySize, VelocitySize);
+      for (Eigen::Index row = 0; row < VelocitySize; ++row)
+      {
+        L(row, row) = scale * (1 + Real(row) / 16);
+        if (row >= 1)
+          L(row, row - 1) = -scale / 4;
+        if (row >= 3)
+          L(row, row - 3) = scale / 8;
+      }
+      const Math::Matrix<Real> energy = L * L.transpose();
+      Math::Matrix<Real> divergence =
+        Math::Matrix<Real>::Zero(PressureSize, VelocitySize);
+      Math::SparseMatrix<Real> M(PressureSize, PressureSize);
+      for (Eigen::Index row = 0; row < PressureSize; ++row)
+      {
+        M.insert(row, row) = 2 * Real(row) + 1;
+        if (row < PressureSize - 1)
+          divergence.row(row) = (Real(row) + 1) * L.transpose().row(row);
+      }
+      const Math::SparseMatrix<Real> A = energy.sparseView();
+      const Math::SparseMatrix<Real> B = divergence.sparseView();
+      MixedStability::Result result;
+      MixedStability::compute(
+        result, A, B, M, {}, Math::Vector<Real>::Unit(PressureSize, PressureSize - 1));
+      ASSERT_FALSE(::testing::Test::HasFatalFailure());
+      MixedStability::expectConsistent(result);
+      ASSERT_EQ(result.freeVelocity, VelocitySize);
+      ASSERT_EQ(result.zeroMeanPressure, PressureSize - 1);
+      EXPECT_TRUE(MixedStability::hasResolvedPositiveSpectrum(result));
+      for (Eigen::Index i = 0; i < PressureSize - 1; ++i)
+      {
+        const Real expected = (Real(i) + 1) * (Real(i) + 1) / (2 * Real(i) + 1);
+        EXPECT_NEAR(result.eigenvalues(i), expected,
+          expected * MixedStability::ConsistencyTolerance);
+      }
+    }
   }
 
   TEST(MixedStabilityTest, RectangularObstructionAndZeroDivergence)

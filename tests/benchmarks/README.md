@@ -57,6 +57,13 @@ track complements convergence certification: timings do not replace accuracy,
 rate, or backend-equivalence checks. The initial suite introduces no assembly
 optimization; later comparisons must retain the same mathematical workload.
 
+These standalone assembly executables are opt-in local profiling tools, not
+CTest tests or CI gates. Build them explicitly with
+`RODIN_BUILD_BENCHMARKS=ON` and the desired target. Their internal checks guard
+local measurements; they do not contribute to convergence certification.
+The historical `RodinBenchmarks` publication workflow remains separate and
+does not build these standalone assembly targets.
+
 ## Implemented workload
 
 `RodinPhysicsAssemblyBenchmarks` measures warmed real `H1<1>` and `H1<2>`
@@ -167,8 +174,8 @@ Counters report cells, DOFs, nonzeros, local-entry count summed across terms,
 stored triplets, components, degree, quadrature order, and points per cell.
 All stages are warmed; repeated Triplets retains vector capacity. Initial allocation,
 mesh/space construction, constraints, PETSc insertion, and MPI communication
-remain outside this executable's coverage. CI exercises all 168 smallest-mesh
-stage cases without timing thresholds.
+remain outside this executable's coverage. The 168 smallest-mesh stage cases
+are available for opt-in local runs, without timing thresholds.
 
 ```sh
 cmake --build build --target RodinPhysicsStageBenchmarks -j4
@@ -219,8 +226,8 @@ mpiexec -n 4 build/tests/benchmarks/RodinPETScPhysicsAssemblyBenchmarks \
   --benchmark_out_format=json
 ```
 
-Dedicated PR smoke jobs run local and MPI (1–4 ranks) smallest-mesh cases in
-sequential/OpenMP builds and archive JSON without timing thresholds. Full
+Opt-in local runs support local and MPI (1–4 ranks) smallest-mesh cases in
+sequential/OpenMP builds and JSON output without timing thresholds. Full
 three-size registrations support fixed-global-work comparisons across ranks;
 no weak-scaling sequence or speedup claim follows merely from registration.
 
@@ -247,8 +254,8 @@ fields, all seven geometries, and `n=2,3,5`: 1008 registrations. Vector P1/H1
 uses the compound symmetric-gradient form; scalar and constant spaces use
 compound mass forms. Scalar constant cases have $n_r=1$ and are explicit
 overhead controls rather than expected evaluation-count improvements. These
-are sequential kernel measurements even in an OpenMP build. CI checks all
-336 smallest-mesh registrations without timing thresholds.
+are sequential kernel measurements even in an OpenMP build. The 336
+smallest-mesh registrations are available for opt-in local measurements.
 
 The unit regression suite compares local entries against the original loop,
 assembled operators through logical DOF maps, and exact integer callback
@@ -347,9 +354,10 @@ PETSc build must be compiled and tested separately. P0g here uses per-cell
 integrals assembled into shared global constant DOFs; it does not cover the
 separate global-integrator lists or mixed multiplier couplings.
 
-CI runs all 672 smallest-mesh Eigen cases and all 336 native-scalar PETSc
-cases locally and at 1–4 MPI ranks, in both OpenMP configurations. These are
-numerical smoke gates with no timing thresholds. Larger-size runs should use
+Smallest-mesh filters support opt-in local Eigen and native-scalar PETSc runs
+locally and at MPI ranks one through four, in both OpenMP configurations.
+These runs are not CI gates; registrations do not establish passing results
+or three-size performance qualification. Larger-size runs should use
 `--benchmark_min_time=1x` for numerical checks, or controlled repeated timings
 for performance studies; H1 P3 vector reference matrices can be costly.
 
@@ -426,8 +434,8 @@ $s$ changes from $1$ to $1.5$ and $t$ from $1$ to $2$, exercising both
 coefficient re-evaluation and changing essential data. Quadrature order is
 eight at degree one and twelve otherwise; these choices are part of the
 workload and are reported, not a blanket exactness claim on rational bases.
-CI checks every smallest-mesh registration, including PETSc local and MPI
-at one through four ranks in both OpenMP configurations. Small segment
+Opt-in local runs cover the smallest-mesh registrations, including PETSc local
+and MPI at one through four ranks in both OpenMP configurations. Small segment
 partitions include empty shards. An empty benchmark filter or failed oracle
 returns nonzero. Performance claims require separate isolated repeated runs.
 
@@ -485,8 +493,8 @@ residual and tangent scopes exclude source terms, natural-boundary integrals,
 constraints, SNES/KSP, and error norms. PETSc/MPI parity and separate timings for those excluded operations
 remain required before attributing a full distributed solve's cost to this
 benchmark. Counters report cells, global native DOFs, nonzeros, field and geometry degrees,
-quadrature order and points per cell. CI executes all smallest-mesh cases as
-numerical checks, without timing thresholds.
+quadrature order and points per cell. Smallest-mesh cases are available for
+opt-in local numerical checks, without timing thresholds.
 
 ### Physical-coordinate-dependent source
 

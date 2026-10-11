@@ -20,21 +20,30 @@
 
 namespace Rodin::Tests::Convergence
 {
-  /** @brief Independent finite-dimensional mixed-operator stability measurements.
-   * @par Contract
+  /**
+   * @brief Independent finite-dimensional mixed-operator stability measurements.
+   *
+   * ## Contract
+   *
    * The caller supplies velocity energy, divergence and pressure mass matrices,
    * logical essential-DOF indices, and coefficients of the pressure constant.
    * Boundary elimination and the zero-mean pressure basis are constructed
    * independently of a saddle-point solve. Generalized Schur eigenvalues are
    * compared with squared singular values from independent LLT whitening.
-   * @par Architecture
+   *
+   * ## Architecture
+   *
    * The reduced divergence remains sparse. LDLT solves construct the Schur
    * complement in pressure-column blocks. Independent LLT dual solves supply
    * rows of the whitened divergence to incremental Givens QR; only its
    * pressure-sized triangular factor is retained for the singular-value
-   * calculation. No full dense velocity-pressure coupling is allocated.
+   * calculation. Column-major sparse upper-factor storage permits exact-zero
+   * coordinate updates to be skipped; row-major QR storage makes trailing
+   * updates contiguous. No full dense velocity-pressure coupling is allocated.
    * These finite spectra do not prove mesh-uniform inf-sup stability.
-   * @par Distribution
+   *
+   * ## Distribution
+   *
    * Inputs are complete matrices on one process. This measurement introduces
    * no collectives; distributed callers must explicitly provide global inputs.
    */
@@ -163,16 +172,24 @@ namespace Rodin::Tests::Convergence
         // Z=L^-1 P B^T T. For a block of coordinate columns E,
         // E^T Z=(T^T B P^T L^-T E)^T. Z=Q R then preserves singular
         // values after pressure whitening: Z C^-T=Q (R C^-T).
-        Math::Matrix<Real> R = Math::Matrix<Real>::Zero(np - 1, np - 1);
+        // Materialize U in column-major sparse storage. Coordinate right-hand
+        // sides contain exact zeros; column-oriented substitution skips their
+        // identity updates without introducing a numerical sparsity threshold.
+        const Math::SparseMatrix<Real> upper = cholesky.matrixU();
+        using RowMajorMatrix =
+          Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+        RowMajorMatrix R = RowMajorMatrix::Zero(np - 1, np - 1);
         for (Eigen::Index first = 0; first < nv; first += blockSize)
         {
           const Eigen::Index count = std::min(blockSize, nv - first);
           Math::Matrix<Real> coordinates = Math::Matrix<Real>::Zero(nv, count);
           for (Eigen::Index col = 0; col < count; ++col)
             coordinates(first + col, col) = 1;
-          const Math::Matrix<Real> dual = cholesky.matrixU().solve(coordinates);
-          Math::Matrix<Real> rows =
+          const Math::Matrix<Real> dual =
+            upper.triangularView<Eigen::Upper>().solve(coordinates);
+          const Math::Matrix<Real> columnRows =
             (T.transpose() * (B * (cholesky.permutationPinv() * dual))).transpose();
+          RowMajorMatrix rows = columnRows;
           for (Eigen::Index row = 0; row < count; ++row)
           {
             for (Eigen::Index column = 0; column < np - 1; ++column)
@@ -215,13 +232,14 @@ namespace Rodin::Tests::Convergence
         // rank threshold. A coarse pressure dimension may exceed velocity's.
         const Real scale = std::max(spectrum.eigenvalues().cwiseAbs().maxCoeff(),
           squaredSingular.cwiseAbs().maxCoeff());
+        const Real schurNorm = S0.norm(), pressureNorm = M0.norm();
         Real maximumResidual = 0;
         for (Eigen::Index i = 0; i < spectrum.eigenvalues().size(); ++i)
         {
           const Real lambda = spectrum.eigenvalues()(i);
           const auto vector = spectrum.eigenvectors().col(i);
           const Real denominator =
-            (S0.norm() + std::abs(lambda) * M0.norm()) * vector.norm();
+            (schurNorm + std::abs(lambda) * pressureNorm) * vector.norm();
           const Real residual = (S0 * vector - lambda * M0 * vector).norm();
           maximumResidual = std::max(
             maximumResidual, denominator > 0 ? residual / denominator : residual);
@@ -256,7 +274,9 @@ namespace Rodin::Tests::Convergence
         }
       }
 
-      /** @brief Resolve positivity above the algebraic consistency scale.
+      /**
+       * @brief Resolve positivity above the algebraic consistency scale.
+       *
        * This finite-spectrum predicate is not a numerical ownership/rank test
        * and supplies no mesh-independent lower bound for the inf-sup constant.
        */

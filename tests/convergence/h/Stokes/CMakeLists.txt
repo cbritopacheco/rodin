@@ -42,7 +42,7 @@ foreach(geometry Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
       COMMAND $<TARGET_FILE:RodinConvergenceHStokesStability>
         "--gtest_filter=AllGeometries/StokesStabilityTest.${_case}/${geometry}")
     set(_timeout 1800)
-    # The P4/P3 pyramid hierarchy exceeded 30 minutes; a sample identified SVD work.
+    # The complete P4/P3 pyramid spectral hierarchy exceeded 30 minutes.
     # One hour is an execution allowance, not a measured upper bound.
     if (geometry STREQUAL "Pyramid" AND group STREQUAL "Rates")
       set(_timeout 3600)
