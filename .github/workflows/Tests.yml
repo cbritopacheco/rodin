@@ -330,7 +330,23 @@ jobs:
             if [ "${{ matrix.suite }}" = pressure_light ]; then utility_pattern="|Utility_np${rank}"; fi
             pattern="^RodinConvergenceHPETScMPIStokesStability_((P4P3_)?np${rank}_((Rates|Controls)_)?${geometry_pattern}${utility_pattern})$"
           fi
-          ctest --test-dir build/tests -R "$pattern" \
+          # Record existing placement without changing binding or thread policy.
+          lscpu
+          grep '^Cpus_allowed_list:' /proc/self/status
+          printf 'OMP_NUM_THREADS=%s OPENBLAS_NUM_THREADS=%s\n' \
+            "${OMP_NUM_THREADS:-unset}" "${OPENBLAS_NUM_THREADS:-unset}"
+          ctest --test-dir build/tests -R "$pattern" --show-only=json-v1 \
+            | jq '[.tests[] | {name, command}]'
+          mpi_executable=$(sed -n 's/^MPIEXEC_EXECUTABLE:FILEPATH=//p' build/CMakeCache.txt)
+          if [ "${{ matrix.context }}" != local ] && [ -n "$mpi_executable" ] \
+              && "$mpi_executable" --version | grep -Eq 'Open MPI|OpenRTE'; then
+            if ! "$mpi_executable" -n "$rank" --oversubscribe --report-bindings \
+                /bin/sh -c 'printf "MPI rank=%s " "$OMPI_COMM_WORLD_RANK"; grep "^Cpus_allowed_list:" /proc/self/status'; then
+              printf '::warning::MPI placement probe failed; numerical tests still run.\n'
+            fi
+          fi
+          # This is a process resource report, not summed MPI peak memory or a benchmark.
+          /usr/bin/time --verbose ctest --test-dir build/tests -R "$pattern" \
             --output-on-failure --no-tests=error -j 1
 
       - name: Build PETSc Poisson boundary convergence suite
