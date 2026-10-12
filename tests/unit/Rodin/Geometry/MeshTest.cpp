@@ -20,6 +20,51 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Boundary trace remaps selected exterior faces and preserves the interface.
+  TEST(Rodin_Geometry_Mesh, BoundaryAttributeTraceHonorsSelection)
+  {
+    auto mesh = LocalMesh::Builder()
+                  .initialize(2)
+                  .nodes(4)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .vertex({1, 1})
+                  .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                  .polytope(Polytope::Type::Triangle, {1, 3, 2})
+                  .finalize();
+    mesh.getConnectivity().compute(1, 2);
+    mesh.setAttribute({2, 0}, 17);
+    mesh.setAttribute({2, 1}, 23);
+    for (auto face = mesh.getFace(); face; ++face)
+    {
+      const Point center(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+      const bool lowerOrLeft = center.x() == 0 || center.y() == 0;
+      mesh.setAttribute(
+        {1, face->getIndex()}, face->isBoundary() ? (lowerOrLeft ? 31 : 37) : 41);
+    }
+    const Map<Attribute, Attribute> mapping{{17, 71}, {23, 73}};
+    EXPECT_EQ(&mesh.trace(mapping, FlatSet<Attribute>{31}), &mesh);
+    for (auto face = mesh.getFace(); face; ++face)
+    {
+      const Point center(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+      const bool lowerOrLeft = center.x() == 0 || center.y() == 0;
+      EXPECT_EQ(face->getAttribute(), face->isBoundary() ? (lowerOrLeft ? 71 : 37) : 41);
+    }
+    for (size_t repetition = 0; repetition < 2; ++repetition)
+    {
+      mesh.trace(mapping);
+      mesh.trace(Map<Attribute, Attribute>{{999, 101}});
+      for (auto face = mesh.getFace(); face; ++face)
+      {
+        const Point center(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+        const bool lowerOrLeft = center.x() == 0 || center.y() == 0;
+        EXPECT_EQ(
+          face->getAttribute(), face->isBoundary() ? (lowerOrLeft ? 71 : 73) : 41);
+      }
+    }
+  }
+
   /// @brief Attribute-restricted measures recover half-unit-box volumes and boundaries.
   TEST(Rodin_Geometry_Mesh, AttributeRestrictedUnitBoxMeasures)
   {

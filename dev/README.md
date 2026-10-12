@@ -125,6 +125,10 @@ geometry, and backend variants explicitly. Current audit findings include:
   empty and missing attribute sets. Local and MPI suites pass; the distributed
   checks include an empty root at two/four ranks. Both tests reject doubled
   production measure accumulation.
+- Boundary attribute tracing: selected exterior faces inherit mapped cell
+  attributes while unselected and interior faces retain theirs. Repeated
+  tracing and missing mappings preserve the result; an incorrect mapped
+  attribute is rejected by the exact oracle.
 - Hilbert H1 extension: scalar/vector P1 cosine manufactured solutions with
   homogeneous Neumann data, scalar refinement, and exact affine Dirichlet
   data through repeated solves. Instantiation exposed an obsolete problem
