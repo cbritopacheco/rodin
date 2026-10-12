@@ -67,6 +67,16 @@ geometry, and backend variants explicitly. Current audit findings include:
 - P1 scalar derivatives: real/complex affine fields on every geometry,
   including face traces. Instantiation exposed obsolete basis, coefficient,
   and optional-attribute APIs, now covered by numerical regressions.
+- Distinct trial/test spaces: 21 quadrature cases check every mass and
+  derivative entry against the independent generic evaluator for real/complex
+  scalar/vector P1 and quadratic H1 spaces on all seven geometries. Quadratic
+  H1 trials with linear tests also exercise rectangular operators. Bound-cell
+  accessors retain the supplied cell. Targeted coefficient mutations fail all
+  seven P1 and seven mixed-order H1 cases; seven unaffected same-order H1 cases
+  remain green. All 51 existing quadrature-expression tests also pass.
+  Real coefficients are checked in both scalar fields; complex coefficients
+  use complex-valued spaces. Complex coefficients on real-valued spaces are
+  rejected by existing static checks and are not certified by these tests.
 - Periodic constraint assembly: real/complex partition-of-unity weights and
   preservation of assembled maps through copy and move. These tests check the
   constraint API; they do not certify periodic enforcement in a PDE solver.

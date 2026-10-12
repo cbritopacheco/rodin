@@ -1,5 +1,12 @@
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
+add_executable(RodinVariationalDistinctSpaceQuadratureTest
+  DistinctSpaceQuadratureTest.cpp)
+target_link_libraries(RodinVariationalDistinctSpaceQuadratureTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalDistinctSpaceQuadratureTest
+  PROPERTIES LABELS unit TIMEOUT 300)
+
 add_executable(RodinVariationalWeightedComplexQuadratureTest
   WeightedComplexQuadratureTest.cpp)
 target_link_libraries(RodinVariationalWeightedComplexQuadratureTest
