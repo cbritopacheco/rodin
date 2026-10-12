@@ -60,6 +60,8 @@ namespace Rodin::Variational
    * | @ref UnaryMinus "UnaryMinus<FormLanguage::List<LinearFormIntegratorBase<Number>>>" | Negation of a list of linear-form integrators. |
    * | @ref UnaryMinus "UnaryMinus<LocalBilinearFormIntegratorBase<Number>>" | Negation of a local bilinear-form integrator. |
    * | @ref UnaryMinus "UnaryMinus<FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>>" | Negation of a list of local bilinear-form integrators. |
+   * | @ref UnaryMinus "UnaryMinus<GlobalBilinearFormIntegratorBase<Number>>" | Negation of a global bilinear-form integrator. |
+   * | @ref UnaryMinus "UnaryMinus<FormLanguage::List<GlobalBilinearFormIntegratorBase<Number>>>" | Negation of a list of global bilinear-form integrators. |
    */
 
   /**
@@ -770,6 +772,213 @@ namespace Rodin::Variational
   constexpr
   auto
   operator-(const FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>& op)
+  {
+    return UnaryMinus(op);
+  }
+  /**
+   * @ingroup UnaryMinusSpecializations
+   * @brief Negation of a bilinear form integrator.
+   */
+  template <class Number>
+  class UnaryMinus<GlobalBilinearFormIntegratorBase<Number>>
+    : public GlobalBilinearFormIntegratorBase<Number>
+  {
+    public:
+      /// @brief Scalar value type.
+      using ScalarType = Number;
+
+      /// @brief Operand type.
+      using OperandType = GlobalBilinearFormIntegratorBase<ScalarType>;
+
+      /// @brief Parent class type.
+      using Parent = GlobalBilinearFormIntegratorBase<ScalarType>;
+
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param op Operand expression.
+       */
+      UnaryMinus(const OperandType& op)
+        : Parent(op),
+          m_op(op.copy())
+      {}
+
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      UnaryMinus(const UnaryMinus& other)
+        : Parent(other),
+          m_op(other.m_op->copy())
+      {}
+
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      UnaryMinus(UnaryMinus&& other)
+        : Parent(std::move(other)),
+          m_op(std::move(other.m_op))
+      {}
+
+      /**
+       * @brief Gets the operand function.
+       * @returns The operand function.
+       */
+      const OperandType& getOperand() const
+      {
+        assert(m_op);
+        return *m_op;
+      }
+
+      /**
+       * @brief Returns the trial integration region.
+       * @returns Region used by the operand trial function.
+       */
+      Geometry::Region getTrialRegion() const override
+      {
+        return getOperand().getTrialRegion();
+      }
+
+      /**
+       * @brief Returns the test integration region.
+       * @returns Region used by the operand test function.
+       */
+      Geometry::Region getTestRegion() const override
+      {
+        return getOperand().getTestRegion();
+      }
+
+      /**
+       * @brief Binds both integration entities.
+       * @param trial Trial integration entity.
+       * @param test Test integration entity.
+       * @returns Reference to this expression.
+       */
+      UnaryMinus& setPolytope(
+        const Geometry::Polytope& trial, const Geometry::Polytope& test) override
+      {
+        m_op->setPolytope(trial, test);
+        return *this;
+      }
+
+      /**
+       * @brief Integrates the negated bilinear form.
+       * @param tr Trial DOF index
+       * @param te Test DOF index
+       * @returns Negated integral value
+       */
+      ScalarType integrate(size_t tr, size_t te) override
+      {
+        return -m_op->integrate(tr, te);
+      }
+
+      /**
+       * @brief Creates an independently owned polymorphic copy.
+       * @returns Newly allocated expression owned by the caller.
+       */
+      UnaryMinus* copy() const noexcept override
+      {
+        return new UnaryMinus(*this);
+      }
+
+    private:
+      /// @brief Independently owned operand integrator.
+      std::unique_ptr<OperandType> m_op;
+  };
+
+  /**
+   * @brief Deduction guide for UnaryMinus of GlobalBilinearFormIntegratorBase.
+   * @param op Operand expression.
+   */
+  template <class Number>
+  UnaryMinus(const GlobalBilinearFormIntegratorBase<Number>& op)
+    -> UnaryMinus<GlobalBilinearFormIntegratorBase<Number>>;
+
+  /**
+   * @brief Applies unary minus to a bilinear form integrator.
+   * @param op Bilinear form integrator to negate
+   * @returns Negated bilinear form integrator
+   */
+  template <class Number>
+  constexpr auto operator-(const GlobalBilinearFormIntegratorBase<Number>& op)
+  {
+    return UnaryMinus(op);
+  }
+
+  /**
+   * @ingroup UnaryMinusSpecializations
+   * @brief Negation of a list of bilinear form integrators.
+   */
+  template <class Number>
+  class UnaryMinus<FormLanguage::List<GlobalBilinearFormIntegratorBase<Number>>>
+    : public FormLanguage::List<GlobalBilinearFormIntegratorBase<Number>>
+  {
+    public:
+      /// @brief Scalar value type.
+      using ScalarType = Number;
+
+      /// @brief Global bilinear form integrator base type.
+      using GlobalBilinearFormIntegratorBaseType =
+        GlobalBilinearFormIntegratorBase<ScalarType>;
+
+      /// @brief Operand type.
+      using OperandType = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
+
+      /// @brief Parent class type.
+      using Parent = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
+
+      /**
+       * @brief Constructs the expression from its operand.
+       * @param op Operand expression.
+       */
+      UnaryMinus(const OperandType& op)
+      {
+        for (const auto& p : op)
+          this->add(UnaryMinus<GlobalBilinearFormIntegratorBaseType>(p));
+      }
+
+      /**
+       * @brief Copy constructor.
+       * @param other Object to copy from.
+       */
+      UnaryMinus(const UnaryMinus& other)
+        : Parent(other)
+      {}
+
+      /**
+       * @brief Move constructor.
+       * @param other Object to move from.
+       */
+      UnaryMinus(UnaryMinus&& other)
+        : Parent(std::move(other))
+      {}
+
+      /**
+       * @brief Creates an independently owned polymorphic copy.
+       * @returns Newly allocated expression owned by the caller.
+       */
+      UnaryMinus* copy() const noexcept override
+      {
+        return new UnaryMinus(*this);
+      }
+  };
+
+  /**
+   * @brief Deduction guide for UnaryMinus of List<GlobalBilinearFormIntegratorBase>.
+   * @param op Operand expression.
+   */
+  template <class Number>
+  UnaryMinus(const FormLanguage::List<GlobalBilinearFormIntegratorBase<Number>>& op)
+    -> UnaryMinus<FormLanguage::List<GlobalBilinearFormIntegratorBase<Number>>>;
+
+  /**
+   * @brief Applies unary minus to a list of bilinear form integrators.
+   * @param op List to negate
+   * @returns Negated integrator list
+   */
+  template <class Number>
+  constexpr auto operator-(
+    const FormLanguage::List<GlobalBilinearFormIntegratorBase<Number>>& op)
   {
     return UnaryMinus(op);
   }

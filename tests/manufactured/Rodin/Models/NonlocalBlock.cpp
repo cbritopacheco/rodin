@@ -4,7 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Manufactured mixed nonlocal solves for real/complex dense/sparse systems. */
+/**
+ * @file
+ * @brief Manufactured mixed nonlocal solves for real/complex dense/sparse systems.
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Variational.h"
 #include "Rodin/Solver/SparseLU.h"
@@ -146,4 +149,73 @@ namespace Rodin::Tests::Manufactured
   {
     checkManufacturedNonlocalBlock<Complex, Math::Matrix<Complex>>(true);
   }
+}
+
+namespace
+{
+  /// @brief Subtracting a constant nonlocal kernel retains an exact constant solution.
+  template <class Scalar>
+  void checkSubtractedNonlocalMass()
+  {
+    const Scalar coefficient = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(0.125, 0.25);
+      else
+        return Scalar(0.125);
+    }();
+    const Scalar exact = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(2, -3);
+      else
+        return Scalar(2);
+    }();
+    const auto kernel = [coefficient](const Point&, const Point&) { return coefficient; };
+    const auto load = [exact, coefficient] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return ComplexFunction(exact * (Scalar(1) - coefficient));
+      else
+        return RealFunction(exact * (Scalar(1) - coefficient));
+    }();
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      for (const size_t nodes : {size_t(2), size_t(3)})
+      {
+        auto mesh =
+          LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, nodes));
+        mesh.scale(Real(1) / (nodes - 1));
+        P1<Scalar> space(mesh);
+        TrialFunction u(space);
+        TestFunction v(space);
+        BilinearForm form(u, v);
+        form = Integral(u, v);
+        form -= Integral(Potential(kernel, u), v);
+        form.assemble();
+        Problem problem(u, v);
+        typename decltype(problem)::ProblemBodyType body;
+        body.getBFs().add(form);
+        body.getLFIs().add(-Integral(load, v));
+        problem = body;
+        Solver::SparseLU solver(problem);
+        solver.solve();
+        ASSERT_TRUE(solver.success());
+        const auto& solution = u.getSolution();
+        for (size_t i = 0; i < solution.getSize(); ++i)
+          EXPECT_LT(std::abs(solution[i] - exact), 1e-10);
+      }
+    }
+  }
+}
+
+TEST(Rodin_Manufactured_NonlocalSubtraction, RealConstantSolution)
+{
+  checkSubtractedNonlocalMass<Real>();
+}
+
+TEST(Rodin_Manufactured_NonlocalSubtraction, ComplexConstantSolution)
+{
+  checkSubtractedNonlocalMass<Complex>();
 }

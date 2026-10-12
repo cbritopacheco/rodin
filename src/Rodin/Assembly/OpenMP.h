@@ -340,6 +340,72 @@ namespace Rodin::Assembly
             }
           } // end parallel
         }
+
+        for (auto& bfi : input.getGlobalBFIs())
+        {
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs = bfi.getTestAttributes();
+          OpenMPIteration testseq(mesh, bfi.getTestRegion());
+          const Index td = testseq.getDimension();
+          const Index count = testseq.getCount();
+          const int tc = static_cast<int>(getThreadCount());
+          std::vector<OperatorType> chunks(static_cast<size_t>(tc));
+
+#pragma omp parallel num_threads(tc)
+          {
+            const int tid = omp_get_thread_num();
+            std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+            OperatorType local;
+            OpenMPIteration trialseq(mesh, integrator->getTrialRegion());
+            const Index rd = trialseq.getDimension();
+            const Index rcount = trialseq.getCount();
+
+#pragma omp for
+            for (Index te = 0; te < count; ++te)
+            {
+              if (!testseq.filter(te))
+                continue;
+              if (!testAttrs.empty())
+              {
+                const auto attribute = mesh.getAttribute(td, te);
+                if (!attribute || !testAttrs.contains(*attribute))
+                  continue;
+              }
+              const auto testPolytope = testseq.getPolytope(te);
+              // A subsequent DOF lookup may reuse the same scratch storage.
+              const auto rows = input.getTestFES().getDOFs(td, te);
+              for (Index tr = 0; tr < rcount; ++tr)
+              {
+                if (!trialseq.filter(tr))
+                  continue;
+                if (!trialAttrs.empty())
+                {
+                  const auto attribute = mesh.getAttribute(rd, tr);
+                  if (!attribute || !trialAttrs.contains(*attribute))
+                    continue;
+                }
+                const auto trialPolytope = trialseq.getPolytope(tr);
+                integrator->setPolytope(trialPolytope, testPolytope);
+                const auto& cols = input.getTrialFES().getDOFs(rd, tr);
+                for (Eigen::Index r = 0; r < rows.size(); ++r)
+                {
+                  for (Eigen::Index c = 0; c < cols.size(); ++c)
+                  {
+                    const ScalarType value = integrator->integrate(c, r);
+                    if (value != ScalarType(0))
+                      local.emplace_back(rows(r), cols(c), value);
+                  }
+                }
+              }
+            }
+            chunks[static_cast<size_t>(tid)] = std::move(local);
+          }
+          for (auto& chunk : chunks)
+          {
+            res.insert(res.end(), std::make_move_iterator(chunk.begin()),
+              std::make_move_iterator(chunk.end()));
+          }
+        }
       }
 
       /**

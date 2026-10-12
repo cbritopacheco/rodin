@@ -86,6 +86,19 @@ geometry, and backend variants explicitly. Current audit findings include:
   restriction, copying, moving and polymorphic cloning. Excluded parent faces
   and unrelated coincident meshes are rejected. A halved normal fails the
   independent coordinate-plane oracle. All seven boundary-normal tests pass.
+- Global integrator negation: real/complex constant kernels produce the exact
+  negative outer product of independently integrated nodal basis functions.
+  Direct expressions, lists, copy/move/clone and bilinear-form subtraction
+  preserve this matrix and trial/test attribute restrictions. Instantiation
+  exposed missing global negation wrappers; OpenMP execution then exposed
+  omitted global contributions in standalone sparse forms. Both repairs are
+  covered by failing regressions. Constant manufactured solutions on two
+  meshes of every geometry pass in serial and with one/four OpenMP threads.
+  Lost negation signs and doubled OpenMP accumulation fail the numerical tests.
+- Foreign form functions: real/complex local and global contributions with
+  mismatched trial/test identities are rejected before changing integrator
+  lists or assembled operators/vectors. Named and unnamed foreign trials
+  exercise the diagnostic metadata paths.
 - Grid-function failure contracts: scalar/vector MFEM and MEDIT failed opens
   preserve every coefficient and create no output directory. Geometrically
   coincident but unrelated mesh points are rejected through both geometric
