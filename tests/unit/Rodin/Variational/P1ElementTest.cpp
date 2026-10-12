@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
+#include <array>
 #include <complex>
 #include "Rodin/Variational/P1.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
@@ -19,6 +20,51 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /**
+   * @brief Preserves immutable borrowed descriptors across mixed-geometry access.
+   *
+   * Real and complex descriptors retain their reference geometry and vertex
+   * index after other elements are queried and the originating element is
+   * reassigned. At every reference vertex the Kronecker values are compared
+   * exactly. Initialization cost is checked separately by the opt-in binary
+   * diagnostic; no wall-clock threshold is added to the numerical suite.
+   */
+  TEST(Rodin_Variational_RealP1Element, BorrowedBasisSurvivesMixedGeometryAccess)
+  {
+    const auto check = []<class Scalar>() {
+      const std::array geometries = {Polytope::Type::Point, Polytope::Type::Segment,
+        Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid,
+        Polytope::Type::Wedge};
+      for (const auto geometry : geometries)
+      {
+        SCOPED_TRACE(static_cast<int>(geometry));
+        P1Element<Scalar> origin(geometry);
+        const Polytope::Traits traits(geometry);
+        for (size_t a = 0; a < traits.getVertexCount(); ++a)
+        {
+          const auto& borrowed = origin.getBasis(a);
+          for (const auto otherGeometry : geometries)
+          {
+            P1Element<Scalar> other(otherGeometry);
+            for (size_t b = 0; b < other.getCount(); ++b)
+            {
+              EXPECT_EQ(
+                &other.getBasis(b), &P1Element<Scalar>(otherGeometry).getBasis(b));
+            }
+            origin = other;
+            for (size_t b = 0; b < traits.getVertexCount(); ++b)
+              EXPECT_EQ(borrowed(traits.getVertex(b)), Scalar(a == b ? 1 : 0));
+          }
+          origin = P1Element<Scalar>(geometry);
+          EXPECT_EQ(&borrowed, &origin.getBasis(a));
+        }
+      }
+    };
+    check.template operator()<Real>();
+    check.template operator()<Complex>();
+  }
+
   /**
    * @brief Compares real and complex reference tables with the P1 basis exactly.
    *

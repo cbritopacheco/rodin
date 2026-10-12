@@ -147,10 +147,17 @@ lookup ramp as geometry-dependent work.
 
 ```sh
 cmake --build build --target RodinReferenceElementBenchmarks -j1
+python3 dev/check_p1_descriptor_initialization.py \
+  build/tests/benchmarks/RodinReferenceElementBenchmarks
 build/tests/benchmarks/RodinReferenceElementBenchmarks \
   --benchmark_filter='ReferenceElement/P1/Real/(Values|PrefetchedValues)/Pyramid/8/' \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
+
+The initialization diagnostic requires an unstripped binary and GNU/LLVM-style
+demangled `nm` output. It checks all 66 real/complex P1 descriptor objects and
+rejects runtime initialization guards; it is a logical binary-contract check,
+not a timing threshold or a replacement for numerical tests.
 
 # Spatial value benchmarks
 
