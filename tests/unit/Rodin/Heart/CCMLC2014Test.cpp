@@ -826,7 +826,7 @@ namespace
         Rheology::flowLaw(dp - step, length, radius, resistance, input).first) /
       (2 * step);
     EXPECT_NEAR(derivative / finiteDifference, 1, relativeTolerance);
-    for (const auto [invalidLength, invalidRadius] :
+    for (const auto& [invalidLength, invalidRadius] :
       {std::pair<Real, Real>{0, radius}, {length, 0}, {-length, radius}})
     {
       const auto fallback =

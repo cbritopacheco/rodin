@@ -514,7 +514,7 @@ namespace Rodin::Geometry
   {
     const size_t D = getDimension();
     const auto& p = *m_index[D].left[i];
-    switch (m_geometry[D][i])
+    switch (getGeometry(D, i))
     {
       case Polytope::Type::Point:
       {
