@@ -62,6 +62,12 @@ geometry, and backend variants explicitly. Current audit findings include:
   separated double integrals with independent trial/test attribute restrictions.
   Dense and complex multi-field problems currently lack sequential backend
   specializations; the single-field tests do not certify those variants.
+- Affine cell geometry cache: exact skew-triangle Jacobians, inverses, metrics
+  and P1 gradients in both orientations, independent per-cell measures and
+  index maps, singular-cell rejection, and enforcement of the documented
+  planar-triangle scope. Including this previously absent header exposed
+  silent acceptance of quadrilateral cells; a failing regression preceded
+  the input validation fix.
 - Eigen 3.4 MINRES does not compile for complex scalars. The Rodin header's
   generic scalar documentation does not establish dependency support.
 - IDRstab's wrapper names `Eigen::IDRSTABL`, which is absent in Eigen 3.4's

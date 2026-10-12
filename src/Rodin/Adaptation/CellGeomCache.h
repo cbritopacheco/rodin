@@ -79,6 +79,7 @@ namespace Rodin::Adaptation
    * index; the second returned map gives the parent-index -> local-index
    * translation for use by the rest of the pipeline.
    *
+   * Throws std::invalid_argument for nonplanar meshes or nontriangle cells.
    * Throws if A_K(xhat_q) is singular at any quadrature point, or if the
    * branch sign sigma_K(xhat_q) is inconsistent across quadrature points
    * (which would mean a curved or inverted element; this 2D affine
@@ -89,6 +90,9 @@ namespace Rodin::Adaptation
   inline std::pair<std::vector<CellGeomCache>, std::unordered_map<Index, size_t>>
   precomputeCellGeometry(const Geometry::Mesh<Rodin::Context::Local>& mesh)
   {
+    if (mesh.getDimension() != 2 || mesh.getSpaceDimension() != 2)
+      throw std::invalid_argument("precomputeCellGeometry: expected a planar 2D mesh.");
+
     std::vector<CellGeomCache> cache;
     cache.reserve(mesh.getCellCount());
     std::unordered_map<Index, size_t> cellToLocal;
@@ -97,6 +101,8 @@ namespace Rodin::Adaptation
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
     {
       const auto& cell = *cellIt;
+      if (cell.getGeometry() != Geometry::Polytope::Type::Triangle)
+        throw std::invalid_argument("precomputeCellGeometry: expected triangle cells.");
       const auto& vertices = cell.getVertices();
       CellGeomCache c;
       c.index = cell.getIndex();
