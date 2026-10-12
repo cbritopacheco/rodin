@@ -102,7 +102,7 @@ that this performance matrix has been profiled.
 | Scatter / Assembly, PETSc | Sequential triplets; complete native/PETSc insertion consumers | Isolated OpenMP buffers/merge, PETSc insertion and ownership-dependent MPI work |
 | Constraints and completion / Assembly, PETSc | Constrained scalar assembly and fixed-system solves | Vector/mixed constraints, identification, finalization and communication attribution |
 | Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson | Helmholtz, coupled reaction–diffusion, Stokes, boundary variants and remaining degrees/backends |
-| Solvers / Solver, PETSc | Fixed-system constrained solves; projection CG profile | Setup versus iteration/factorization, mixed systems, backend scaling and memory |
+| Solvers / Solver, PETSc | Real/complex fixed-system constrained CG solves; projection CG profile | Setup versus iteration/factorization, indefinite/mixed systems, backend scaling and memory |
 | Complete workflows / owning modules | Consumer-level interpolation/projection and assembly profiles | Matched setup/assembly/solve/postprocessing accounting across physical contexts |
 
 The required axes are scalar field (real/complex), supported scalar/vector/matrix
@@ -512,6 +512,73 @@ build/tests/benchmarks/RodinSpatialVectorStorageBenchmarks \
   --benchmark_filter='SpatialVectorStorage/(TemporaryFillAppend|DirectFillAppend)/Real/3/' \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
+
+### Fixed-system scalar solver protocol
+
+`RodinConstrainedSolveBenchmarks`, owned by `Solver`, retains manufactured
+Poisson, variable-conductivity and scalar reaction–diffusion systems. Real and
+complex H1 degrees one through three, all seven mesh geometries, and grids with
+3, 5 and 9 points per axis give 378 selectable measurements. Complex fields use
+the same positive real coefficients; these are Hermitian positive-definite CG
+problems, not indefinite Helmholtz or mixed Stokes systems.
+
+Assembly and its original-kernel reference are untimed. Each measured public
+solve includes preconditioner setup and CG iterations, but excludes zeroing the
+initial guess, field writeback and verification. Every repetition starts from
+zero; a warmup fixes the expected iteration count. The retained diagnostics are
+
+$$
+r=\frac{\lVert Ax-b\rVert_2}{\max(1,\lVert b\rVert_2)},
+\qquad
+e=\frac{\lVert x-x_\star\rVert_2}{\max(1,\lVert x_\star\rVert_2)}.
+$$
+
+For complex coefficients these norms include both components. The requested
+CG tolerance is $10^{-13}$; acceptance budgets are $r<10^{-11}$ and
+$e<10^{-9}$, with unchanged operator/load comparisons against the reference.
+A deliberately wrong field must have a detectable residual. Timings carry
+cells, DOFs, matrix rows, nonzeros and reported iterations, so a dimensional
+comparison can distinguish larger systems from more expensive iterations.
+These algebraic guards do not replace continuous convergence certification.
+No CTest registration or CI timing gate is added.
+
+All 378 selections passed in the native and two-thread OpenMP-enabled optimized
+builds. Maximum residuals were below $10^{-13}$ and maximum coefficient error
+below $2.0\times10^{-12}$. Iteration counts are required to remain fixed within
+each measured case, not across compilers or assembly reductions: two of the
+378 cross-build comparisons differed by one iteration while satisfying the
+same numerical budgets. This qualification is not an OpenMP solver speedup
+claim or coverage of PETSc/MPI, indefinite systems or higher degrees.
+
+A native five-repetition Poisson degree-two comparison gave the following
+median public-solve times. The maximum timing variation coefficient was 3.2%.
+
+| Geometry | Points per axis | DOFs | Nonzeros | Reported CG iterations | Real, microseconds | Complex, microseconds |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Triangle | 3 | 25 | 61 | 4 | 1.87 | 2.84 |
+| Triangle | 5 | 81 | 437 | 22 | 9.82 | 23.52 |
+| Triangle | 9 | 289 | 2,293 | 61 | 105.30 | 249.52 |
+| Tetrahedron | 3 | 125 | 369 | 10 | 6.39 | 15.13 |
+| Tetrahedron | 5 | 729 | 6,721 | 40 | 230.03 | 502.21 |
+| Tetrahedron | 9 | 4,913 | 80,721 | 82 | 5,060.07 | 9,575.76 |
+
+At the largest level, the real solve ratio is 48.1, while the sparse-work proxy
+$\operatorname{nnz}(A)\,k$ gives a ratio of 47.3. The proxy is not an exact
+operation count: reported iterations can omit the converging update, and setup
+and vector operations are also timed. The complex ratio is 38.4, illustrating
+that constants and storage effects differ. Equal points per axis do not mean
+equal algebraic problem size; these samples do not establish a pathological
+dimension-specific solver slowdown or MPI imbalance.
+
+Four matched Instruments captures at the largest level place sparse-product
+source frames on approximately 71%/83% of selected CG sample weight for real
+triangle/tetrahedron solves and 69%/81% for complex solves. Complex leaf samples
+often resolve to standard-library multiplication/conversion helpers nested in
+those products; leaf names alone must not be interpreted as a separate stage.
+These inclusive fractions are source attribution, not stage timings or a proof
+that setup has zero cost. Sparse products, reductions and preconditioner setup
+remain candidates for isolated Math/Solver measurements. No solver source or
+floating-point arithmetic policy was changed in this batch.
 
 # Spatial value benchmarks
 

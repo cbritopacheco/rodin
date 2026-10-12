@@ -45,9 +45,15 @@ namespace Rodin::Tests::Benchmarks
    * Poisson, conductivity and scalar reaction--diffusion are covered here;
    * the coupled reaction--diffusion convergence context is not represented.
    *
-   * @tparam K Degree of the real H1 space.
+   * Complex cases use the same real positive diffusion and reaction
+   * coefficients, yielding Hermitian positive-definite systems. They are not
+   * indefinite Helmholtz solves. Both real and imaginary manufactured
+   * components are checked through the complex residual and coefficient norm.
+   *
+   * @tparam K Degree of the H1 space.
+   * @tparam Scalar Real or complex coefficient field.
    */
-  template <size_t K>
+  template <size_t K, class Scalar>
   class ConstrainedSolve
   {
     public:
@@ -74,10 +80,10 @@ namespace Rodin::Tests::Benchmarks
       benchmark::State& state, Geometry::Polytope::Type geometry, unsigned physics)
     {
       using namespace Variational;
-      using Workload = ConstrainedWorkload<K, Real>;
+      using Workload = ConstrainedWorkload<K, Scalar>;
       auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
       const size_t dim = mesh.getDimension();
-      H1<K, Real> space(std::integral_constant<size_t, K>{}, mesh);
+      H1<K, Scalar> space(std::integral_constant<size_t, K>{}, mesh);
       TrialFunction u(space);
       TestFunction v(space);
       Problem problem(u, v), reference(u, v);
@@ -85,7 +91,7 @@ namespace Rodin::Tests::Benchmarks
       Workload::configure(u, v, problem, dim, physics, operatorScale, boundaryScale);
       Workload::template configure<true>(
         u, v, reference, dim, physics, operatorScale, boundaryScale);
-      const Math::Vector<Real> exact = u.getSolution().getData();
+      const Math::Vector<Scalar> exact = u.getSolution().getData();
       u.getSolution().getData().setZero();
       reference.assemble();
       problem.assemble();
@@ -115,7 +121,7 @@ namespace Rodin::Tests::Benchmarks
           (system.getVector() - baseline.getVector()).norm() <
           AssemblyTolerance * rhsScale;
       };
-      const Math::Vector<Real> wrong = exact.array() + Real(1);
+      const Math::Vector<Scalar> wrong = exact.array() + Scalar(1);
       const Real sensitivity =
         (system.getOperator() * wrong - system.getVector()).norm() / rhsScale;
       if (!valid() || !(sensitivity > SensitivityFloor))
@@ -168,14 +174,15 @@ namespace Rodin::Tests::Benchmarks
 
   /**
    * @brief Reuses the assembly matrix, names and three grid sizes for solves.
-   * @tparam K Degree of the real H1 space.
+   * @tparam K Degree of the H1 space.
+   * @tparam Scalar Real or complex coefficient field.
    */
-  template <size_t K>
+  template <size_t K, class Scalar>
   void registerConstrainedSolves()
   {
-    ConstrainedWorkload<K, Real>::registerCases(
+    ConstrainedWorkload<K, Scalar>::registerCases(
       [](auto& state, auto geometry, auto physics) {
-        ConstrainedSolve<K>::run(state, geometry, physics);
+        ConstrainedSolve<K, Scalar>::run(state, geometry, physics);
       },
       false);
   }
@@ -184,9 +191,12 @@ namespace Rodin::Tests::Benchmarks
 int main(int argc, char** argv)
 {
   using namespace Rodin::Tests::Benchmarks;
-  registerConstrainedSolves<1>();
-  registerConstrainedSolves<2>();
-  registerConstrainedSolves<3>();
+  registerConstrainedSolves<1, Rodin::Real>();
+  registerConstrainedSolves<2, Rodin::Real>();
+  registerConstrainedSolves<3, Rodin::Real>();
+  registerConstrainedSolves<1, Rodin::Complex>();
+  registerConstrainedSolves<2, Rodin::Complex>();
+  registerConstrainedSolves<3, Rodin::Complex>();
   benchmark::Initialize(&argc, argv);
   if (benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;
