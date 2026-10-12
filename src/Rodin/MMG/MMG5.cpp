@@ -269,12 +269,22 @@ namespace Rodin::MMG
       dst->info.invmat.lookup = nullptr;
 
     // char* : mesh->namein
-    MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein) + 1, char, /* No op */);
-    std::strcpy(dst->namein, src->namein);
+    if (src->namein)
+    {
+      MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein) + 1, char, /* No op */);
+      std::strcpy(dst->namein, src->namein);
+    }
+    else
+      dst->namein = nullptr;
 
     // char* : mesh->nameout
-    MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout) + 1, char, /* No op */);
-    std::strcpy(dst->nameout, src->nameout);
+    if (src->nameout)
+    {
+      MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout) + 1, char, /* No op */);
+      std::strcpy(dst->nameout, src->nameout);
+    }
+    else
+      dst->nameout = nullptr;
   }
 
   MMG5_pSol MMG5::createSolution(MMG5_pMesh mesh, size_t vdim)

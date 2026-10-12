@@ -102,6 +102,46 @@ TEST(Rodin_PETSc_SNESState, DistinctIteratesWithEqualCountersAreNotCachedTogethe
   EXPECT_EQ(VecDestroy(&first), PETSC_SUCCESS);
 }
 
+/// @brief A manufactured constant root exercises the complete nonlinear solve.
+TEST(Rodin_PETSc_SNESState, CubicManufacturedRootAndWarmStart)
+{
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {3});
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::GridFunction state(space);
+  state = Zero();
+  PETSc::Variational::TrialFunction du(space);
+  PETSc::Variational::TestFunction v(space);
+  Problem problem(du, v);
+#ifdef PETSC_USE_COMPLEX
+  const auto one = ComplexFunction(1);
+#else
+  const auto one = RealFunction(1);
+#endif
+  problem = Integral((one + 3 * state * state) * du, v) +
+    Integral(state + state * state * state - 2 * one, v);
+  problem.assemble();
+  Solver::KSP ksp(problem);
+  Solver::SNES snes(ksp);
+  snes.setType(SNESNEWTONLS).setTolerances(1e-12, 1e-12, 1e-12, 30, 200);
+  snes.setStateUpdate([&](const PETSc::Math::Vector& x) { state.setData(x); });
+  snes.solve();
+  EXPECT_TRUE(snes.converged());
+  EXPECT_GT(snes.getConvergedReason(), 0);
+  EXPECT_GT(snes.getIterationNumber(), 0);
+  ::Vec error = nullptr;
+  const auto solution = problem.getLinearSystem().getSolution();
+  ASSERT_EQ(VecDuplicate(solution, &error), PETSC_SUCCESS);
+  ASSERT_EQ(VecCopy(solution, error), PETSC_SUCCESS);
+  ASSERT_EQ(VecShift(error, -1), PETSC_SUCCESS);
+  PetscReal norm = 0;
+  ASSERT_EQ(VecNorm(error, NORM_INFINITY, &norm), PETSC_SUCCESS);
+  EXPECT_LT(norm, 1e-10);
+  EXPECT_EQ(VecDestroy(&error), PETSC_SUCCESS);
+  snes.solve();
+  EXPECT_TRUE(snes.converged());
+  EXPECT_EQ(snes.getIterationNumber(), 0);
+}
+
 int main(int argc, char** argv)
 {
   if (PetscInitialize(&argc, &argv, nullptr, nullptr) != PETSC_SUCCESS)

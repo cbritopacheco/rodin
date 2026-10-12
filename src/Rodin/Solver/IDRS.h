@@ -121,9 +121,13 @@ namespace Rodin::Solver
        * @param other Object to move from.
        */
       IDRS(IDRS&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+        : Parent(std::move(other))
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+        setS(other.m_shadowSpace);
+      }
 
       /// @brief Destructor.
       ~IDRS() = default;
@@ -146,6 +150,7 @@ namespace Rodin::Solver
        */
       IDRS& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -164,6 +169,7 @@ namespace Rodin::Solver
        */
       IDRS& setS(size_t s)
       {
+        m_shadowSpace = s;
         m_solver.setS(s);
         return *this;
       }
@@ -200,6 +206,8 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t> m_maxIterations;
+      size_t m_shadowSpace = 4;
       Eigen::IDRS<OperatorType> m_solver;
   };
 
@@ -242,18 +250,26 @@ namespace Rodin::Solver
        * @param other Object to copy from.
        */
       IDRS(const IDRS& other)
-        : Parent(other),
-          m_solver(other.m_solver)
-      {}
+        : Parent(other)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+        setS(other.m_shadowSpace);
+      }
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
       IDRS(IDRS&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+        : Parent(std::move(other))
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+        setS(other.m_shadowSpace);
+      }
 
       /// @brief Destructor.
       ~IDRS() = default;
@@ -276,6 +292,7 @@ namespace Rodin::Solver
        */
       IDRS& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -287,6 +304,7 @@ namespace Rodin::Solver
        */
       IDRS& setS(size_t s)
       {
+        m_shadowSpace = s;
         m_solver.setS(s);
         return *this;
       }
@@ -323,6 +341,8 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t> m_maxIterations;
+      size_t m_shadowSpace = 4;
       Eigen::IDRS<OperatorType> m_solver;
   };
 }

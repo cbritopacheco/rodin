@@ -16,6 +16,7 @@
 
 #include <Eigen/Core>
 
+#include "Rodin/Types.h"
 #include "ForwardDecls.h"
 
 namespace Rodin::Geometry::Euclidean

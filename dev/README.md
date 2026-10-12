@@ -15,6 +15,43 @@ Use this directory when you need to answer one of these questions:
 
 ## Ratchets and Baselines
 
+### Production Coverage and Template Audit
+
+`RodinCoverage` merges a zero-hit baseline from compiler notes with runtime
+hits, then extracts only `src/Rodin/` records. Compiled source units that no
+test executes remain in the denominator. Tests, benchmarks,
+examples, and dependencies may execute production code but never enter the
+coverage denominator. The regular and slow CI reports are merged by Codecov.
+
+```sh
+cmake --build build --target RodinCoverage
+python3 dev/audit_coverage.py build/RodinCoverage.info --output build/coverage-audit.json
+```
+
+The audit unions line hits across input reports, rejects nonproduction
+records, lists uncovered production lines, and inventories source files absent
+from the report, with template declaration locations. CI uploads this JSON
+for each coverage configuration. Absence is a review candidate: declarations,
+static tables, disabled optional modules, and never-instantiated templates can
+all be absent. The reported percentage alone cannot distinguish them.
+
+Numerical specialization tests must instantiate supported scalar, storage,
+geometry, and backend variants explicitly. Current audit findings include:
+
+- Spatial matrices: real and complex arithmetic for all nonempty shapes and
+  compatible products through dimension three, plus rectangular pseudoinverses.
+- Iterative solvers: dense/sparse real MINRES, and dense/sparse real/complex
+  least-squares CG and IDRS, with cold and nonzero initial guesses.
+- Eigen 3.4 MINRES does not compile for complex scalars. The Rodin header's
+  generic scalar documentation does not establish dependency support.
+- IDRstab's wrapper names `Eigen::IDRSTABL`, which is absent in Eigen 3.4's
+  unsupported iterative solver module. This remains an API/dependency gap,
+  rather than a variant certified by the runtime coverage percentage.
+
+These findings are not exclusions from production coverage. A complete
+template audit requires checking the supported variants, not merely adding
+header includes or explicit instantiations without numerical assertions.
+
 Several checks use a ratchet pattern. A ratchet records the current known
 backlog in a committed baseline file, compares the current run against that
 baseline, and fails only on new findings. When old findings are fixed, rerun

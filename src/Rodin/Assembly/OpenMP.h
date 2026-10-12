@@ -691,7 +691,8 @@ namespace Rodin::Assembly
                 const auto trialPolytope = trialseq.getPolytope(tr);
                 gbfi->setPolytope(trialPolytope, testPolytope);
 
-                const auto& rows = input.getTestFES().getDOFs(d, i);
+                // Preserve test indices: getDOFs may reuse scratch storage on the next call.
+                const auto rows = input.getTestFES().getDOFs(d, i);
                 const auto& cols = input.getTrialFES().getDOFs(rd, tr);
                 for (Eigen::Index r = 0; r < rows.size(); ++r)
                 {
@@ -1302,7 +1303,7 @@ namespace Rodin::Assembly
                   if (!a || !testAttrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto rowsDOF = testFES.getDOFs(td, te);
                 const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
@@ -1571,7 +1572,7 @@ namespace Rodin::Assembly
                   if (!a || !testAttrs.contains(*a)) continue; // or testAttrs.count(*a)==0
                 }
 
-                const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto rowsDOF = testFES.getDOFs(td, te);
                 const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
@@ -2161,7 +2162,7 @@ namespace Rodin::Assembly
                     if (!a || !testAttrs.contains(*a)) continue;
                   }
 
-                  const auto& rows = vFES.getDOFs(td, te);
+                  const auto rows = vFES.getDOFs(td, te);
                   const auto testPolytope = testseq.getPolytope(te);
 
                   const Index rd = trialseq.getDimension();

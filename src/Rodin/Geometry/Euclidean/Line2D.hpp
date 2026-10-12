@@ -210,7 +210,7 @@ namespace Rodin::Geometry::Euclidean
     }
     else if (discriminant == T{0}) // Tangent line
     {
-      return other.center() + Point2D<T>(a() * cp, b() * cp);
+      return other.center() + Point2D<T>(a() * cp, b() * cp) / (a() * a() + b() * b());
     }
     else // No intersections
       return std::nullopt;
@@ -222,17 +222,15 @@ namespace Rodin::Geometry::Euclidean
   Optional<LineSegment2D<T>> Line2D<T>::connect(const Circle<T>& other) const
   {
     // Compute line segment from line to center
-    auto ls = connect(other.center());
+    auto ls = other.center().connect(*this);
 
     if (ls)
     {
-      if (other(ls->start()) > T{0}) // Closest point is outside the circle
+      if (other(ls->end()) > T{0}) // Closest point is outside the circle
       {
         // Line segment goes from the closest point on the line to the circle
         return LineSegment2D<T>(
-            ls->start(),
-            other.center() - other.radius() * ls->direction()
-            );
+          ls->end(), other.center() + other.radius() * ls->direction());
       }
       else // Point is inside circle, line touches circle
       {

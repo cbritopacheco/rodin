@@ -684,3 +684,122 @@ TEST_F(MatrixTest, SpatialMatrixBinarySubtractNonSquare)
   EXPECT_DOUBLE_EQ(c(1, 1), 3.0);
   EXPECT_DOUBLE_EQ(c(1, 2), 5.0);
 }
+
+namespace
+{
+  template <class Scalar>
+  Matrix<Scalar> dense(const SpatialMatrix<Scalar>& value)
+  {
+    return value.getData().topLeftCorner(value.rows(), value.cols());
+  }
+
+  template <class Scalar>
+  void checkSpatialMatrixShapes()
+  {
+    constexpr Real tolerance = 1e-12;
+    for (size_t rows = 0; rows <= 3; ++rows)
+    {
+      for (size_t cols = 0; cols <= 3; ++cols)
+      {
+        SCOPED_TRACE(::testing::Message() << rows << "x" << cols);
+        Matrix<Scalar> a(rows, cols), b(rows, cols);
+        for (size_t i = 0; i < rows; ++i)
+        {
+          for (size_t j = 0; j < cols; ++j)
+          {
+            a(i, j) = Scalar(1 + 2 * i + j);
+            b(i, j) = Scalar(3 + i + 4 * j);
+            if constexpr (std::is_same_v<Scalar, Complex>)
+            {
+              a(i, j) += Complex(0, Real(i) - Real(j) + 0.5);
+              b(i, j) += Complex(0, Real(i) + Real(j) - 0.25);
+            }
+          }
+        }
+        SpatialMatrix<Scalar> sa, sb;
+        sa = a;
+        sb = b;
+        EXPECT_LE((dense(sa) - a).norm(), tolerance);
+        EXPECT_LE((dense(sa + sb) - (a + b)).norm(), tolerance);
+        EXPECT_LE((dense(sa - sb) - (a - b)).norm(), tolerance);
+        EXPECT_LE((dense(-sa) + a).norm(), tolerance);
+        EXPECT_LE((dense(sa.transpose()) - a.transpose()).norm(), tolerance);
+        EXPECT_LE((dense(sa.adjoint()) - a.adjoint()).norm(), tolerance);
+        EXPECT_NEAR(sa.squaredNorm(), a.squaredNorm(), tolerance);
+        EXPECT_NEAR(
+          std::abs(sa.dot(sb) - (a.cwiseProduct(b.conjugate())).sum()), 0, tolerance);
+        auto accumulated = sa;
+        accumulated += sb;
+        EXPECT_LE((dense(accumulated) - (a + b)).norm(), tolerance);
+        accumulated = sa;
+        accumulated *= Scalar(2);
+        EXPECT_LE((dense(accumulated) - 2 * a).norm(), tolerance);
+        SpatialVector<Scalar> x(cols);
+        Vector<Scalar> ex(cols);
+        for (size_t j = 0; j < cols; ++j)
+          x(j) = ex(j) = Scalar(j + 1);
+        const auto y = sa * x;
+        EXPECT_LE((y.getData().head(y.size()) - a * ex).norm(), tolerance);
+
+        for (size_t outCols = 0; outCols <= 3; ++outCols)
+        {
+          Matrix<Scalar> right(cols, outCols);
+          for (size_t i = 0; i < cols; ++i)
+          {
+            for (size_t j = 0; j < outCols; ++j)
+              right(i, j) = Scalar(2 + i + 3 * j);
+          }
+          SpatialMatrix<Scalar> sr(right);
+          const Matrix<Scalar> expected = a * right;
+          EXPECT_LE((dense(sa * sr) - expected).norm(), tolerance);
+          auto inPlace = sa;
+          inPlace *= sr;
+          EXPECT_EQ(inPlace.rows(), rows);
+          EXPECT_EQ(inPlace.cols(), outCols);
+          EXPECT_LE((dense(inPlace) - expected).norm(), tolerance);
+        }
+        if (rows == cols)
+        {
+          auto aliased = sa;
+          aliased *= aliased;
+          EXPECT_LE((dense(aliased) - a * a).norm(), tolerance);
+        }
+      }
+    }
+  }
+}
+
+/// @brief Checks every active matrix shape against independent Eigen arithmetic.
+TEST_F(MatrixTest, SpatialMatrixAllShapesRealAndComplex)
+{
+  checkSpatialMatrixShapes<Real>();
+  checkSpatialMatrixShapes<Complex>();
+}
+
+/// @brief Checks full-rank rectangular pseudoinverses through Moore-Penrose identities.
+TEST_F(MatrixTest, SpatialMatrixRectangularPseudoInverse)
+{
+  constexpr Real tolerance = 1e-12;
+  for (size_t rows = 1; rows <= 3; ++rows)
+  {
+    for (size_t cols = 1; cols <= 3; ++cols)
+    {
+      SCOPED_TRACE(::testing::Message() << rows << "x" << cols);
+      RealMatrix a = RealMatrix::Constant(rows, cols, 0.125);
+      for (size_t i = 0; i < std::min(rows, cols); ++i)
+        a(i, i) += 1;
+      SpatialMatrix<Real> sa(a);
+      const RealMatrix inverse = dense(sa.pseudoInverse());
+      EXPECT_LE((a * inverse * a - a).norm(), tolerance);
+      EXPECT_LE((inverse * a * inverse - inverse).norm(), tolerance);
+      EXPECT_LE((a * inverse - (a * inverse).transpose()).norm(), tolerance);
+      EXPECT_LE((inverse * a - (inverse * a).transpose()).norm(), tolerance);
+      if (rows == cols)
+      {
+        EXPECT_NEAR(sa.determinant(), a.determinant(), tolerance);
+        EXPECT_LE(
+          (dense(sa.inverse()) * a - RealMatrix::Identity(rows, rows)).norm(), tolerance);
+      }
+    }
+  }
+}

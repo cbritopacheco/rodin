@@ -576,7 +576,8 @@ namespace Rodin::Assembly
               }
 
               const auto testPolytope = testseq.getPolytope(te);
-              const auto& rows = input.getTestFES().getDOFs(tdim, te);
+              // Preserve test indices: getDOFs may reuse scratch storage on the next call.
+              const auto rows = input.getTestFES().getDOFs(tdim, te);
 
               for (PetscInt tr = 0; tr < rcnt; ++tr)
               {
@@ -1093,7 +1094,7 @@ namespace Rodin::Assembly
                 }
 
                 const auto testPolytope = testseq.getPolytope(te);
-                const auto& rowsDOF = testFES.getDOFs(tdim, te);
+                const auto rowsDOF = testFES.getDOFs(tdim, te);
 
                 for (PetscInt tr = 0; tr < rcnt; ++tr)
                 {
@@ -1964,7 +1965,7 @@ namespace Rodin::Assembly
               {
                 withTestFES(vUUID, [&](const auto& vFES)
                 {
-                  const auto& rows = vFES.getDOFs(tdim, te);
+                  const auto rows = vFES.getDOFs(tdim, te);
 
                   for (PetscInt tr = 0; tr < rcnt; ++tr)
                   {

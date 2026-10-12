@@ -324,3 +324,24 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(loaded(i), static_cast<Index>(i));
   }
 }
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Seven-vertex keys retain multiset identity through permutations and duplicates.
+  TEST(Geometry_PolytopeKey, SevenVertexPermutationAndMultiplicity)
+  {
+    const Polytope::Key original{9, 3, 7, 1, 5, 11, 3};
+    Polytope::Key permuted = original;
+    const Polytope::Key::SymmetricEquality equal;
+    const Polytope::Key::SymmetricHash hash;
+    std::sort(permuted.begin(), permuted.end());
+    do
+    {
+      EXPECT_TRUE(equal(original, permuted));
+      EXPECT_EQ(hash(original), hash(permuted));
+    } while (std::next_permutation(permuted.begin(), permuted.end()));
+    const Polytope::Key different{9, 3, 7, 1, 5, 11, 5};
+    EXPECT_FALSE(equal(original, different));
+    EXPECT_FALSE(equal(original, Polytope::Key{9, 3, 7, 1, 5, 11}));
+  }
+}

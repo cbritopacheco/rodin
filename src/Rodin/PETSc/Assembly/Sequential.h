@@ -323,7 +323,8 @@ namespace Rodin::Assembly
                   continue;
               }
               bfi.setPolytope(*trIt, *teIt);
-              const auto& rows = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
+              // Preserve test indices: getDOFs may reuse scratch storage on the next call.
+              const auto rows = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
               const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
               for (PetscInt i = 0; i < rows.size(); ++i)
               {
@@ -654,7 +655,7 @@ namespace Rodin::Assembly
                   continue;
               }
 
-              const auto& rowsDOF =
+              const auto rowsDOF =
                 testFES.getDOFs(teIt->getDimension(), teIt->getIndex());
 
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
@@ -1313,7 +1314,7 @@ namespace Rodin::Assembly
                       continue;
                   }
 
-                  const auto& rows = vFES.getDOFs(teIt.getDimension(), teIt->getIndex());
+                  const auto rows = vFES.getDOFs(teIt.getDimension(), teIt->getIndex());
 
                   for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
                   {

@@ -1,3 +1,10 @@
+add_executable(RodinIterativeSolverTest IterativeSolverTest.cpp)
+target_link_libraries(RodinIterativeSolverTest
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+gtest_discover_tests(RodinIterativeSolverTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES LABELS unit)
+
 add_executable(RodinNewtonSolverTest NewtonSolverTest.cpp)
 target_link_libraries(RodinNewtonSolverTest
   PUBLIC

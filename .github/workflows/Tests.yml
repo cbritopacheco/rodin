@@ -1274,6 +1274,7 @@ jobs:
       MAKEFLAGS: "-j2"
       OMP_NUM_THREADS: 2
       CTEST_PARALLEL_LEVEL: 1
+      GCOV: gcov-14
 
     steps:
       - uses: actions/checkout@v4
@@ -1311,6 +1312,10 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
+          -DRODIN_USE_SCOTCH=ON
+          -DRODIN_USE_UMFPACK=ON
+          -DRODIN_USE_CHOLMOD=ON
+          -DRODIN_USE_SPQR=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -1321,7 +1326,8 @@ jobs:
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_UNIT_TESTS=ON
           -DRODIN_BUILD_MANUFACTURED_TESTS=ON
-          -DRODIN_CODE_COVERAGE=OFF
+          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
+          -DRODIN_CODE_COVERAGE=ON
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
 
       - name: Build
@@ -1343,6 +1349,31 @@ jobs:
           -L slow
           -E '^RodinMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
           --rerun-failed -V --output-on-failure
+
+      - name: Make slow-test coverage
+        run: cmake --build ${{ github.workspace }}/build --target RodinCoverage
+
+      - name: Audit production sources and absent template headers
+        run: >-
+          python3 dev/audit_coverage.py build/RodinCoverage.info
+          --output build/coverage-audit.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-audit-slow-mt${{ matrix.multithreaded }}
+          path: build/coverage-audit.json
+
+      - name: Upload slow-test coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ github.workspace }}/build/RodinCoverage.info
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }}
+          name: cov-slow-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}
+          root_dir: ${{ github.workspace }}
+          use_pypi: true
+          fail_ci_if_error: true
 
   Coverage:
     runs-on: ubuntu-latest
@@ -1399,6 +1430,10 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
+          -DRODIN_USE_SCOTCH=ON
+          -DRODIN_USE_UMFPACK=ON
+          -DRODIN_USE_CHOLMOD=ON
+          -DRODIN_USE_SPQR=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -1439,6 +1474,16 @@ jobs:
 
       - name: Make coverage
         run: cmake --build ${{ github.workspace }}/build --target RodinCoverage
+
+      - name: Audit production sources and absent template headers
+        run: >-
+          python3 dev/audit_coverage.py build/RodinCoverage.info
+          --output build/coverage-audit.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-audit-regular-mt${{ matrix.multithreaded }}
+          path: build/coverage-audit.json
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5

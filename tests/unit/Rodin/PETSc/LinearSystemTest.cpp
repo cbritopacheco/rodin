@@ -103,3 +103,52 @@ int main(int argc, char** argv)
   PetscFinalize();
   return result;
 }
+
+/// @brief Raw PETSc systems share referenced handles on copy and transfer them on move.
+TEST(PETSc_LinearSystem, RawHandleCopyMoveAndAssignmentLifetime)
+{
+  using System = Rodin::Math::LinearSystem<::Mat, ::Vec>;
+  ::Mat matrix = nullptr;
+  ::Vec solution = nullptr;
+  System survivor(PETSC_COMM_SELF);
+  {
+    System original(PETSC_COMM_SELF);
+    matrix = original.getOperator();
+    solution = original.getSolution();
+    ASSERT_EQ(MatSetSizes(matrix, PETSC_DECIDE, PETSC_DECIDE, 2, 2), PETSC_SUCCESS);
+    ASSERT_EQ(MatSetType(matrix, MATSEQAIJ), PETSC_SUCCESS);
+    ASSERT_EQ(MatSetUp(matrix), PETSC_SUCCESS);
+    ASSERT_EQ(VecSetSizes(solution, PETSC_DECIDE, 2), PETSC_SUCCESS);
+    ASSERT_EQ(VecSetType(solution, VECSEQ), PETSC_SUCCESS);
+    ASSERT_EQ(VecSet(solution, 7), PETSC_SUCCESS);
+    System copied(original);
+    EXPECT_EQ(copied.getOperator(), matrix);
+    EXPECT_EQ(copied.getSolution(), solution);
+    EXPECT_EQ(copied.getVector(), original.getVector());
+    System moved(std::move(copied));
+    EXPECT_EQ(moved.getOperator(), matrix);
+    EXPECT_EQ(copied.getOperator(), nullptr);
+    EXPECT_EQ(copied.getSolution(), nullptr);
+    EXPECT_EQ(copied.getVector(), nullptr);
+    survivor = moved;
+    auto& same = survivor;
+    survivor = same;
+    EXPECT_EQ(survivor.getOperator(), matrix);
+    System assigned(PETSC_COMM_SELF);
+    assigned = std::move(moved);
+    EXPECT_EQ(moved.getOperator(), nullptr);
+    EXPECT_EQ(assigned.getOperator(), matrix);
+    survivor = std::move(assigned);
+    EXPECT_EQ(assigned.getSolution(), nullptr);
+  }
+  EXPECT_EQ(survivor.getOperator(), matrix);
+  EXPECT_EQ(survivor.getSolution(), solution);
+  PetscReal norm = 0;
+  ASSERT_EQ(VecNorm(survivor.getSolution(), NORM_INFINITY, &norm), PETSC_SUCCESS);
+  EXPECT_DOUBLE_EQ(norm, 7);
+  System movedAgain(std::move(survivor));
+  System copiedFromEmpty(survivor);
+  EXPECT_EQ(copiedFromEmpty.getOperator(), nullptr);
+  EXPECT_EQ(copiedFromEmpty.getSolution(), nullptr);
+  EXPECT_EQ(copiedFromEmpty.getVector(), nullptr);
+}

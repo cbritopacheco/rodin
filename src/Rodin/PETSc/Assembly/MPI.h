@@ -694,7 +694,8 @@ namespace Rodin::Assembly
                   continue;
               }
 
-              const auto& rowsDOF = testFES.getDOFs(td, tidx);
+              // Preserve test indices: getDOFs may reuse scratch storage on the next call.
+              const auto rowsDOF = testFES.getDOFs(td, tidx);
 
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
@@ -1449,7 +1450,7 @@ namespace Rodin::Assembly
                   continue;
               }
 
-              const auto& rows = vFES.getDOFs(td, tidx);
+              const auto rows = vFES.getDOFs(td, tidx);
 
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {

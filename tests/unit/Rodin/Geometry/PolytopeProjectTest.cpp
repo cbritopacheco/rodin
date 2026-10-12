@@ -283,3 +283,80 @@ namespace Rodin::Tests::Unit
     EXPECT_LE(out(0) + out(1), 1.0 + 1e-14);
   }
 }
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Reference vertices are fixed points of cell and boundary projections.
+  TEST(Geometry_PolytopeProject, EveryReferenceVertexIsFixed)
+  {
+    constexpr Real tolerance = 1e-13;
+    for (auto geometry : Polytope::Types)
+    {
+      const Polytope::Traits traits(geometry);
+      const Polytope::Project project(geometry);
+      for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+      {
+        SCOPED_TRACE(::testing::Message() << static_cast<int>(geometry) << ":" << vertex);
+        const auto& expected = traits.getVertex(vertex);
+        Math::SpatialPoint cell, boundary;
+        project.cell(cell, expected);
+        project.boundary(boundary, expected);
+        ASSERT_EQ(cell.size(), expected.size());
+        ASSERT_EQ(boundary.size(), expected.size());
+        for (size_t axis = 0; axis < expected.size(); ++axis)
+        {
+          EXPECT_NEAR(cell(axis), expected(axis), tolerance);
+          EXPECT_NEAR(boundary(axis), expected(axis), tolerance);
+        }
+      }
+    }
+  }
+
+  /// @brief Projection fixes feasible points and returns feasible, idempotent results.
+  TEST(Geometry_PolytopeProject, ExteriorPointsReturnToReferenceCells)
+  {
+    constexpr Real tolerance = 1e-12;
+    for (auto geometry : Polytope::Types)
+    {
+      const Polytope::Traits traits(geometry);
+      const size_t dimension = traits.getDimension();
+      if (dimension == 0)
+        continue;
+      const Polytope::Project project(geometry);
+      const auto& halfSpace = traits.getHalfSpace();
+      for (Real first : {-2.0, 0.2, 0.8, 2.0})
+      {
+        for (Real second : {-1.0, 0.3, 1.5})
+        {
+          for (Real third : {-1.0, 0.4, 2.0})
+          {
+            SCOPED_TRACE(::testing::Message() << static_cast<int>(geometry) << ":"
+                                              << first << "," << second << "," << third);
+            Math::SpatialPoint input(dimension);
+            input(0) = first;
+            if (dimension >= 2)
+              input(1) = second;
+            if (dimension == 3)
+              input(2) = third;
+            Math::SpatialPoint cell, boundary, repeated;
+            project.cell(cell, input);
+            project.boundary(boundary, input);
+            for (const auto& result : {cell, boundary})
+            {
+              const Math::Vector<Real> residual =
+                halfSpace.matrix * result.getData().head(dimension) - halfSpace.vector;
+              EXPECT_LE(residual.maxCoeff(), tolerance);
+            }
+            project.cell(repeated, cell);
+            EXPECT_LE((repeated - cell).norm(), tolerance);
+            project.boundary(repeated, boundary);
+            EXPECT_LE((repeated - boundary).norm(), tolerance);
+            const Math::Vector<Real> boundaryResidual =
+              halfSpace.matrix * boundary.getData().head(dimension) - halfSpace.vector;
+            EXPECT_LE(boundaryResidual.cwiseAbs().minCoeff(), tolerance);
+          }
+        }
+      }
+    }
+  }
+}

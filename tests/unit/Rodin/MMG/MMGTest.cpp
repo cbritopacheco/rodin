@@ -17,6 +17,78 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Native mesh copies own their arrays and survive source destruction.
+TEST(MMG5Lifecycle, MeshCopyIsIndependent)
+{
+  using Native = MMG::MMG5;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  for (auto type : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    const bool volume = type == Polytope::Type::Tetrahedron;
+    auto mesh = volume ? LocalMesh::UniformGrid(type, {2, 2, 2})
+                       : LocalMesh::UniformGrid(type, {2, 2});
+    Owner source(Native::rodinToMesh(mesh), Native::destroyMesh);
+    Owner copy(
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+    ASSERT_NE(copy, nullptr);
+    Native::copyMesh(source.get(), copy.get());
+    EXPECT_EQ(copy->np, source->np);
+    EXPECT_EQ(copy->nt, source->nt);
+    EXPECT_EQ(copy->ne, source->ne);
+    EXPECT_NE(copy->point, source->point);
+    if (source->namein)
+      EXPECT_NE(copy->namein, source->namein);
+    EXPECT_STREQ(copy->namein, source->namein);
+    EXPECT_STREQ(copy->nameout, source->nameout);
+    for (int i = 1; i <= source->np; ++i)
+      for (int axis = 0; axis < 3; ++axis)
+        EXPECT_EQ(copy->point[i].c[axis], source->point[i].c[axis]);
+    const auto coordinate = copy->point[1].c[0];
+    source->point[1].c[0] += 10;
+    EXPECT_EQ(copy->point[1].c[0], coordinate);
+    source.reset();
+    auto restored = Native::meshToRodin(copy.get());
+    EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
+  }
+}
+
+/// @brief Scalar/vector native solution copies and swaps preserve ownership.
+TEST(MMG5Lifecycle, SolutionCopyAndSwap)
+{
+  using Native = MMG::MMG5;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> native(
+    Native::rodinToMesh(mesh), Native::destroyMesh);
+  using Owner = std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)>;
+  EXPECT_EQ(Native::createSolution(native.get(), 0), nullptr);
+  EXPECT_EQ(Native::createSolution(native.get(), 4), nullptr);
+  for (size_t dimension : {1, 2, 3})
+  {
+    Owner source(
+      Native::createSolution(native.get(), dimension), Native::destroySolution);
+    Owner copy(
+      static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), Native::destroySolution);
+    ASSERT_NE(source, nullptr);
+    ASSERT_NE(copy, nullptr);
+    const size_t count = dimension * (source->np + 1);
+    for (size_t i = 0; i < count; ++i)
+      source->m[i] = 0.25 + i;
+    Native::copySolution(source.get(), copy.get());
+    EXPECT_NE(copy->m, source->m);
+    for (size_t i = 0; i < count; ++i)
+      EXPECT_EQ(copy->m[i], source->m[i]);
+    source->m[1] = -100;
+    EXPECT_EQ(copy->m[1], 1.25);
+    Native::swapSolution(source.get(), copy.get());
+    EXPECT_EQ(source->m[1], 1.25);
+    EXPECT_EQ(copy->m[1], -100);
+    source.reset();
+    EXPECT_EQ(copy->m[count - 1], 0.25 + count - 1);
+  }
+  Native::destroySolution(nullptr);
+}
+
 namespace Rodin::Tests::Unit
 {
   static Index getFirstBoundaryTriangleIndex(MMG::Mesh& mesh)

@@ -801,3 +801,102 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossDataScales)
     EXPECT_LT(relativeError, 3e-3);
   }
 }
+
+namespace
+{
+  template <class Rheology>
+  void checkBranchFlowDerivative(const Model::Input& input, Real dp)
+  {
+    constexpr Real length = 0.1;
+    constexpr Real radius = 0.004;
+    constexpr Real resistance = 1e8;
+    constexpr Real relativeStep = 1e-5;
+    constexpr Real relativeTolerance = 1e-5;
+    const auto [flow, derivative] =
+      Rheology::flowLaw(dp, length, radius, resistance, input);
+    const auto [reverseFlow, reverseDerivative] =
+      Rheology::flowLaw(-dp, length, radius, resistance, input);
+    ASSERT_GT(flow, 0);
+    ASSERT_GT(derivative, 0);
+    EXPECT_DOUBLE_EQ(reverseFlow, -flow);
+    EXPECT_DOUBLE_EQ(reverseDerivative, derivative);
+    const Real step = relativeStep * dp;
+    const Real finiteDifference =
+      (Rheology::flowLaw(dp + step, length, radius, resistance, input).first -
+        Rheology::flowLaw(dp - step, length, radius, resistance, input).first) /
+      (2 * step);
+    EXPECT_NEAR(derivative / finiteDifference, 1, relativeTolerance);
+    for (const auto [invalidLength, invalidRadius] :
+      {std::pair<Real, Real>{0, radius}, {length, 0}, {-length, radius}})
+    {
+      const auto fallback =
+        Rheology::flowLaw(dp, invalidLength, invalidRadius, resistance, input);
+      EXPECT_DOUBLE_EQ(fallback.first, dp / resistance);
+      EXPECT_DOUBLE_EQ(fallback.second, 1 / resistance);
+    }
+  }
+}
+
+/// @brief Checks power-law flow against Poiseuille's law and a nonlinear derivative.
+TEST(CCMLC2014Test, PowerLawBranchFlowAndNewtonianLimit)
+{
+  using Law = Heart::CCMLC2014::Physics::Rheology::PowerLaw;
+  Model::Input input;
+  input.m = 0.004;
+  input.n = 1;
+  constexpr Real length = 0.1;
+  constexpr Real radius = 0.004;
+  constexpr Real pressure = 1000;
+  constexpr Real fallbackResistance = 1e8;
+  const Real conductance =
+    std::numbers::pi_v<Real> * std::pow(radius, 4) / (8 * input.m * length);
+  const auto result = Law::flowLaw(pressure, length, radius, fallbackResistance, input);
+  EXPECT_NEAR(result.first / (conductance * pressure), 1, 1e-12);
+  EXPECT_NEAR(result.second / conductance, 1, 1e-12);
+  input.n = 0.75;
+  checkBranchFlowDerivative<Law>(input, pressure);
+  const auto zero = Law::flowLaw(0, length, radius, fallbackResistance, input);
+  EXPECT_EQ(zero.first, 0);
+  EXPECT_EQ(zero.second, 1 / fallbackResistance);
+}
+
+/// @brief Checks Cross flow symmetry, derivative and its constant-viscosity limit.
+TEST(CCMLC2014Test, CrossBranchFlowAndNewtonianLimit)
+{
+  using Law = Heart::CCMLC2014::Physics::Rheology::Cross;
+  Model::Input input;
+  input.mu_0 = 0.02;
+  input.mu_Inf = 0.004;
+  input.lambda = 1;
+  input.n = 0.6;
+  checkBranchFlowDerivative<Law>(input, 1000);
+  input.mu_0 = input.mu_Inf;
+  constexpr Real length = 0.1;
+  constexpr Real radius = 0.004;
+  const Real conductance =
+    std::numbers::pi_v<Real> * std::pow(radius, 4) / (8 * input.mu_0 * length);
+  const auto result = Law::flowLaw(1000, length, radius, 1e8, input);
+  EXPECT_NEAR(result.first / (1000 * conductance), 1, 1e-7);
+  EXPECT_NEAR(result.second / conductance, 1, 1e-7);
+  const auto zero = Law::flowLaw(0, length, radius, 1e8, input);
+  EXPECT_EQ(zero.first, 0);
+  EXPECT_NEAR(zero.second / conductance, 1, 1e-12);
+}
+
+/// @brief Checks both Quemada pressure regimes and the near-zero linear fallback.
+TEST(CCMLC2014Test, QuemadaBranchFlowDerivativeAcrossPressureRegimes)
+{
+  using Law = Heart::CCMLC2014::Physics::Rheology::Quemada;
+  Model::Input input;
+  input.k_0 = 3.5;
+  input.k_Inf = 2;
+  input.phi_quemada = 0.45;
+  input.gamma_c = 10;
+  input.mu_plasma = 0.0012;
+  input.mu_Inf = 0.004;
+  checkBranchFlowDerivative<Law>(input, 0.1);
+  checkBranchFlowDerivative<Law>(input, 1000);
+  const auto zero = Law::flowLaw(0, 0.1, 0.004, 1e8, input);
+  EXPECT_EQ(zero.first, 0);
+  EXPECT_EQ(zero.second, 1e-8);
+}

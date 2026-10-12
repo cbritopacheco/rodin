@@ -1468,3 +1468,141 @@ namespace
       return "Dim" + std::to_string(info.param) + "D";
     });
 }
+
+namespace Rodin::Tests::Unit
+{
+  class HDF5InvalidPayload : public ::testing::Test
+  {
+    protected:
+      boost::filesystem::path filename;
+
+      void SetUp() override
+      {
+        filename = boost::filesystem::temp_directory_path() /
+          boost::filesystem::unique_path("rodin-invalid-%%%%-%%%%.h5");
+      }
+
+      void TearDown() override
+      {
+        boost::filesystem::remove(filename);
+      }
+
+      template <class T>
+      void replace(const std::string& path, const std::vector<T>& values)
+      {
+        auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
+        ASSERT_TRUE(file);
+        ASSERT_GE(H5Ldelete(file.get(), path.c_str(), H5P_DEFAULT), 0);
+        HDF5::writeVectorDataset(file.get(), path, values);
+      }
+  };
+
+  /// @brief Truncated connectivity and attribute arrays are rejected during mesh loading.
+  TEST_F(HDF5InvalidPayload, TruncatedMeshDatasets)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 2);
+    mesh.setAttribute({2, 0}, 7);
+    const std::vector<std::string> paths{HDF5::Path::MeshGeometryVertices,
+      HDF5::Path::MeshConnectivityCountsByDimension, HDF5::entityTypesPath(2),
+      HDF5::entityOffsetsPath(2), HDF5::Path::MeshConnectivityStatePresent,
+      HDF5::Path::MeshConnectivityStateDirty, HDF5::incidenceOffsetsPath(2, 1),
+      HDF5::attributePath(2)};
+    for (const auto& path : paths)
+    {
+      SCOPED_TRACE(path);
+      mesh.save(filename, FileFormat::HDF5);
+      replace<HDF5::U64>(path, {});
+      LocalMesh loaded;
+      EXPECT_THROW(loaded.load(filename, FileFormat::HDF5), Alert::Exception);
+    }
+  }
+
+  /// @brief CSR rows extending beyond their payload are rejected before indexing.
+  TEST_F(HDF5InvalidPayload, OutOfBoundsConnectivityOffsets)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    for (const auto& path :
+      {HDF5::entityOffsetsPath(2), HDF5::incidenceOffsetsPath(2, 1)})
+    {
+      SCOPED_TRACE(path);
+      mesh.save(filename, FileFormat::HDF5);
+      auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+      auto offsets = HDF5::readVectorDataset<HDF5::U64>(file.get(), path);
+      file.reset();
+      ASSERT_GT(offsets.size(), 1);
+      offsets[1] = std::numeric_limits<HDF5::U64>::max();
+      replace(path, offsets);
+      LocalMesh loaded;
+      EXPECT_THROW(loaded.load(filename, FileFormat::HDF5), Alert::Exception);
+    }
+  }
+
+  /// @brief Raw field payload, DOF count and vector dimension must agree with the space.
+  TEST_F(HDF5InvalidPayload, InconsistentFieldMetadata)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh);
+    GridFunction field(fes), loaded(fes);
+    field = RealFunction(3);
+    for (const auto* path : {HDF5::Path::GridFunctionValuesData,
+           HDF5::Path::GridFunctionMetaSize, HDF5::Path::GridFunctionMetaDimension})
+    {
+      SCOPED_TRACE(path);
+      field.save(filename, FileFormat::HDF5);
+      replace<HDF5::U64>(path, {999});
+      EXPECT_THROW(loaded.load(filename, FileFormat::HDF5), Alert::Exception);
+    }
+  }
+
+  /// @brief Complex coefficients cannot silently lose their imaginary component.
+  TEST_F(HDF5InvalidPayload, ComplexFieldCannotBeLoadedAsReal)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Complex> complexSpace(mesh);
+    P1 realSpace(mesh);
+    GridFunction complexField(complexSpace);
+    GridFunction realField(realSpace);
+    complexField = Complex(2, 3);
+    complexField.save(filename, FileFormat::HDF5);
+    EXPECT_THROW(realField.load(filename, FileFormat::HDF5), Alert::Exception);
+    replace<HDF5::F64>("/GridFunction/Values/ImaginaryData", {});
+    EXPECT_THROW(complexField.load(filename, FileFormat::HDF5), Alert::Exception);
+  }
+
+  /// @brief A matrix field with equal component count still requires the correct shape.
+  TEST_F(HDF5InvalidPayload, MatrixFieldShapeMismatch)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh, 2, 3);
+    GridFunction field(fes);
+    field = Math::SpatialMatrix<Real>::Identity(2, 3);
+    field.save(filename, FileFormat::HDF5);
+    replace<HDF5::U64>("/GridFunction/Meta/Rows", {3});
+    replace<HDF5::U64>("/GridFunction/Meta/Columns", {2});
+    EXPECT_THROW(field.load(filename, FileFormat::HDF5), Alert::Exception);
+  }
+
+  /// @brief File-only HDF5 operations reject streams and missing files.
+  TEST_F(HDF5InvalidPayload, FileOnlyInterfacesRejectInvalidInputs)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 fes(mesh);
+    GridFunction field(fes);
+    std::stringstream stream;
+    MeshLoader<FileFormat::HDF5, Context::Local> meshLoader(mesh);
+    MeshPrinter<FileFormat::HDF5, Context::Local> meshPrinter(mesh);
+    GridFunctionLoader<FileFormat::HDF5, decltype(fes), Math::Vector<Real>> fieldLoader(
+      field);
+    GridFunctionPrinter<FileFormat::HDF5, decltype(fes), Math::Vector<Real>> fieldPrinter(
+      field);
+    EXPECT_THROW(meshLoader.load(stream), Alert::Exception);
+    EXPECT_THROW(meshPrinter.print(stream), Alert::Exception);
+    EXPECT_THROW(fieldLoader.load(stream), Alert::Exception);
+    EXPECT_THROW(fieldPrinter.print(stream), Alert::Exception);
+    EXPECT_THROW(mesh.load(filename, FileFormat::HDF5), Alert::Exception);
+    EXPECT_THROW(field.load(filename, FileFormat::HDF5), Alert::Exception);
+  }
+}

@@ -315,3 +315,8 @@ gtest_discover_tests(RodinGeometryMinSTCutTest
   PROPERTIES
     LABELS unit
 )
+add_executable(RodinGeometryEuclideanTest EuclideanTest.cpp)
+target_link_libraries(RodinGeometryEuclideanTest GTest::gtest_main Rodin::Geometry)
+gtest_discover_tests(RodinGeometryEuclideanTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES LABELS unit)

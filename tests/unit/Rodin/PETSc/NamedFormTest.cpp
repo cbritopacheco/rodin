@@ -251,6 +251,28 @@ namespace
   }
 }
 
+/// @brief Nonlocal assembly must retain test DOFs while visiting other trial cells.
+TEST(Rodin_PETSc_NamedForm, NonlocalConstantKernelMatchesExactRankOneMatrix)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::TrialFunction u(space);
+  PETSc::Variational::TestFunction v(space);
+  auto kernel = [](const Point&, const Point&) { return PetscScalar(2); };
+  Problem problem(u, v);
+  problem = Integral(Potential(kernel, u), v);
+  problem.assemble();
+  const PetscInt indices[] = {0, 1, 2};
+  const PetscReal moments[] = {0.5, 1, 0.5};
+  PetscScalar entries[9];
+  ASSERT_EQ(MatGetValues(problem.getLinearSystem().getOperator(),
+    3, indices, 3, indices, entries), PETSC_SUCCESS);
+  for (size_t row = 0; row < 3; ++row)
+    for (size_t col = 0; col < 3; ++col)
+      EXPECT_LT(PetscAbsScalar(entries[3 * row + col] -
+        2 * moments[row] * moments[col]), 1e-12);
+}
+
 int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, nullptr, nullptr);
