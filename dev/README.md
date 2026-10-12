@@ -75,6 +75,12 @@ geometry, and backend variants explicitly. Current audit findings include:
   Lifecycle regressions also exposed nonassignable backend state and loss of
   the formulation on copy/move, now retained explicitly. This does not extend
   the separate direct tuple-assembly API beyond its existing specializations.
+- Distance wrappers: real local P1 signed/unsigned Eikonal intervals, missing
+  interfaces, exact P1 Poisson nodal values and quadratic refinement, P2 H1
+  exact quadratic recovery, region-restricted signed Poisson overloads, and
+  analytic affine Rvachev/Spalding-Tucker normalization. Rvachev instantiation
+  exposed an obsolete gradient-output API; the repaired call passes physical
+  value checks. Perturbed signs, loads and normalization factors are rejected.
 - Affine cell geometry cache: exact skew-triangle Jacobians, inverses, metrics
   and P1 gradients in both orientations, independent per-cell measures and
   index maps, singular-cell rejection, and enforcement of the documented

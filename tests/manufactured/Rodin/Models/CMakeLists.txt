@@ -19,3 +19,8 @@ add_executable(RodinManufacturedNonlocalBlockTest NonlocalBlock.cpp)
 target_link_libraries(RodinManufacturedNonlocalBlockTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
 gtest_discover_tests(RodinManufacturedNonlocalBlockTest PROPERTIES LABELS manufactured)
+
+add_executable(RodinManufacturedDistanceTest Distance.cpp)
+target_link_libraries(RodinManufacturedDistanceTest
+  PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+gtest_discover_tests(RodinManufacturedDistanceTest PROPERTIES LABELS manufactured)
