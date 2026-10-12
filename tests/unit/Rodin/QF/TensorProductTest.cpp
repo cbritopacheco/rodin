@@ -183,6 +183,39 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Construction and copying retain zeroed inactive fixed capacity.
+  TEST(TensorProduct, InactiveCapacityIsZero)
+  {
+    for (const auto [leftDimension, rightDimension] : {std::pair{0u, 0u}, {0u, 1u},
+           {1u, 0u}, {0u, 2u}, {1u, 1u}, {2u, 0u}, {1u, 2u}, {2u, 1u}})
+    {
+      SCOPED_TRACE(leftDimension);
+      SCOPED_TRACE(rightDimension);
+      const size_t dimension = leftDimension + rightDimension;
+      Math::SpatialPoint leftPoint(leftDimension), rightPoint(rightDimension);
+      for (size_t j = 0; j < leftDimension; ++j)
+        leftPoint(j) = Real(j + 1) / 7;
+      for (size_t j = 0; j < rightDimension; ++j)
+        rightPoint(j) = Real(j + 2) / 11;
+      const ObservedProductFactor left({leftPoint}, {1}), right({rightPoint}, {1});
+      using G = Geometry::Polytope::Type;
+      const auto geometry = dimension == 0 ? G::Point
+        : dimension == 1                   ? G::Segment
+        : dimension == 2                   ? G::Quadrilateral
+                                           : G::Hexahedron;
+      const QF::TensorProduct product(geometry, left, right);
+      const QF::TensorProduct copy(product);
+      for (const auto* rule : {&product, &copy})
+      {
+        ASSERT_EQ(rule->getSize(), 1u);
+        const auto& point = rule->getPoint(0);
+        ASSERT_EQ(point.size(), dimension);
+        for (size_t j = dimension; j < Math::SpatialPoint::MaxSize; ++j)
+          EXPECT_EQ(point.getData()(j), Real(0));
+      }
+    }
+  }
+
   /// @brief Aliased factors preserve three-factor order and owned copies.
   TEST(TensorProduct, AliasedThreeFactorProductAndOwnedCopy)
   {

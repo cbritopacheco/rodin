@@ -445,6 +445,27 @@ size access ceased to be a leading frame. Point movement/copying and storage
 initialization are now exposed as follow-up source hotspots. Profile fractions
 describe attribution within each capture, not absolute elapsed-time ratios.
 
+A subsequent placement repair constructs each zero-initialized point directly
+in its reserved owning slot rather than filling and moving a temporary. Relative
+to the factor-access repair above, matched five-repetition measurements reduced
+order-16 hexahedron construction from 6.305 to 3.361 microseconds (1.88 times)
+and order-16 wedge construction from 4.274 to 2.514 microseconds (1.70 times).
+The order-51 wedge fallback improved from 159.634 to 97.401 microseconds;
+triangle and pyramid controls remained essentially unchanged. Repeat variation
+coefficients were below 1.7%. These are incremental construction results, not
+whole-workflow speedups.
+
+The 1,423,992-byte rule snapshot remained identical. All 135 benchmark guards,
+four tensor-product unit tests and 14 quadrature exactness tests passed in both
+optimized builds; 14 native Poisson p-convergence tests also passed. The added
+inactive-capacity regression passes before and after placement and rejects an
+isolated padding corruption. Zero initialization, including unused capacity,
+is retained; the change removes movement, not initialization or ownership.
+The matched hexahedron Instruments capture no longer has memory-copy or
+fixed-matrix move frames among its leading samples. Gaussian factor generation
+now accounts for about 15% of selected source sample weight, with `append`
+itself about 39%; these fractions identify remaining work, not elapsed gains.
+
 ```sh
 cmake --build build --target RodinReferenceQuadratureBenchmarks -j1
 build/tests/benchmarks/RodinReferenceQuadratureBenchmarks \

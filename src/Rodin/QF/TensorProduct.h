@@ -101,6 +101,8 @@ namespace Rodin::QF
      * References are borrowed only during construction; the product owns all
      * coordinates and weights. Concatenation order and floating-point weight
      * multiplication are unchanged, including for aliased factors.
+     * Each point is zero-constructed in its final owning slot before filling
+     * active coordinates, avoiding a temporary fixed-capacity vector move.
      *
      * @param left Left quadrature formula.
      * @param right Right quadrature formula.
@@ -121,12 +123,11 @@ namespace Rodin::QF
         {
           const auto& rightPoint = right.getPoint(j);
           const auto rightDimension = rightPoint.size();
-          Math::SpatialVector<Real> p(leftDimension + rightDimension);
+          auto& p = m_points.emplace_back(leftDimension + rightDimension);
           for (Eigen::Index k = 0; k < leftDimension; ++k)
             p[k] = leftPoint[k];
           for (Eigen::Index k = 0; k < rightDimension; ++k)
             p[leftDimension + k] = rightPoint[k];
-          m_points.push_back(std::move(p));
           m_weights.push_back(leftWeight * right.getWeight(j));
         }
       }
