@@ -20,12 +20,14 @@ namespace Rodin::Tests::Manufactured
    * @brief Two exact constant fields solve a mass-plus-global-coupling system.
    * @tparam Scalar Real or complex coefficient type.
    * @tparam Operator Dense or sparse matrix storage.
+   * @param preassembledConstrained Use preassembled local forms and exact boundary data.
    */
   template <class Scalar, class Operator>
-  void checkManufacturedNonlocalBlock()
+  void checkManufacturedNonlocalBlock(bool preassembledConstrained = false)
   {
     constexpr Real Tolerance = Real(1e-11);
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    mesh.getConnectivity().compute(0, 1);
     P1<Scalar> fes(mesh);
     TrialFunction u(fes), p(fes);
     TestFunction v(fes), q(fes);
@@ -54,8 +56,36 @@ namespace Rodin::Tests::Manufactured
     // The interval has length two: integrating either exact field gives twice its value.
     const Scalar loadU = exactU + Scalar(2) * (c00 * exactU + c01 * exactP);
     const Scalar loadP = exactP + Scalar(2) * (c10 * exactU + c11 * exactP);
-    auto body = Integral(u, v) + Integral(p, q) - Integral(constant(loadU), v) -
-      Integral(constant(loadP), q);
+    typename decltype(problem)::ProblemBodyType body;
+    if (preassembledConstrained)
+    {
+      using Form = BilinearForm<typename decltype(u)::SolutionType, decltype(fes),
+        decltype(fes), Operator>;
+      Form massU(u, v), massP(p, q), coupling(p, v);
+      massU = Integral(u, v);
+      massP = Integral(p, q);
+      coupling = Integral(Scalar(2) * p, v);
+      massU.assemble();
+      massP.assemble();
+      coupling.assemble();
+      LinearForm loadFirst(v), loadSecond(q);
+      loadFirst = Integral(constant(loadU + Scalar(2) * exactP), v);
+      loadSecond = Integral(constant(loadP), q);
+      loadFirst.assemble();
+      loadSecond.assemble();
+      body.getBFs().add(massU);
+      body.getLFs().add(loadFirst);
+      body.getLFs().add(loadSecond);
+      body.getDBCs().add(DirichletBC(u, constant(exactU)));
+      body.getDBCs().add(DirichletBC(p, constant(exactP)));
+      body.getBFs().add(massP);
+      body.getBFs().add(coupling);
+    }
+    else
+    {
+      body = Integral(u, v) + Integral(p, q) - Integral(constant(loadU), v) -
+        Integral(constant(loadP), q);
+    }
     // Potential borrows its kernel callable; retain all four until the solve completes.
     const auto k00 = kernel(c00), k01 = kernel(c01), k10 = kernel(c10), k11 = kernel(c11);
     body.getGlobalBFIs().add(Integral(Potential(k00, u), v));
@@ -104,5 +134,16 @@ namespace Rodin::Tests::Manufactured
   TEST(Rodin_Manufactured_NonlocalBlock, DenseComplex)
   {
     checkManufacturedNonlocalBlock<Complex, Math::Matrix<Complex>>();
+  }
+  /// @brief Dense real preassembled blocks and loads retain exact boundary elimination.
+  TEST(Rodin_Manufactured_NonlocalBlock, DenseRealPreassembledBoundary)
+  {
+    checkManufacturedNonlocalBlock<Real, Math::Matrix<Real>>(true);
+  }
+
+  /// @brief Dense complex preassembled blocks preserve nonreal boundary values and coupling.
+  TEST(Rodin_Manufactured_NonlocalBlock, DenseComplexPreassembledBoundary)
+  {
+    checkManufacturedNonlocalBlock<Complex, Math::Matrix<Complex>>(true);
   }
 }

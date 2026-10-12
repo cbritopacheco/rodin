@@ -45,8 +45,12 @@ geometry, and backend variants explicitly. Current audit findings include:
   least-squares CG and IDRS, with cold and nonzero initial guesses.
 - Optional direct solvers: locally configured UMFPACK, CHOLMOD and SPQR.
   CHOLMOD/SPQR tests instantiate real and complex Hermitian systems and verify
-  fresh solves after copy, move and polymorphic clone. These checks do not
-  certify disabled MUMPS or ParU builds.
+  fresh solves after copy, move and polymorphic clone. MUMPS and ParU also
+  pass their real sparse numerical and lifecycle suites, including assembled
+  problems on all seven supported cell geometries. MUMPS checks retained
+  symbolic/numeric stages and symmetric factorization; ParU checks index
+  conversion and repeated right-hand sides. Both also rebuild independent
+  resources after copy, move and polymorphic clone while preserving settings.
 - P1 scalar derivatives: real/complex affine fields on every geometry,
   including face traces. Instantiation exposed obsolete basis, coefficient,
   and optional-attribute APIs, now covered by numerical regressions.
@@ -62,6 +66,9 @@ geometry, and backend variants explicitly. Current audit findings include:
   checked against exact separated double integrals with independent trial/test
   restrictions, repeated assembly, copy/move/assignment and polymorphic clone.
   Four manufactured mass-plus-nonlocal solves recover prescribed constant fields.
+  Two additional dense real/complex solves combine preassembled diagonal and
+  off-diagonal blocks, preassembled loads, nonlocal couplings and exact boundary
+  elimination; both reject an injected preassembled-matrix coefficient error.
   These checks run through sequential and OpenMP backends. Constructor
   instantiation exposed unused real-only tuple assembler allocations; removing
   those obsolete private caches enables the existing generic assembler paths.
