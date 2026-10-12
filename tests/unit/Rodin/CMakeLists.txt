@@ -123,3 +123,5 @@ endif()
 if (RODIN_USE_PETSC)
   add_subdirectory(PETSc)
 endif()
+
+add_subdirectory(Solid)

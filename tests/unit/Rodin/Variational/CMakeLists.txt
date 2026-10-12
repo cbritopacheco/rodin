@@ -772,3 +772,18 @@ add_executable(RodinVariationalCoefficientEvaluationTest CoefficientEvaluationTe
 target_link_libraries(RodinVariationalCoefficientEvaluationTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalCoefficientEvaluationTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalFaceNormalTest FaceNormalTest.cpp)
+target_link_libraries(RodinVariationalFaceNormalTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalFaceNormalTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalP1DerivativeTest P1DerivativeTest.cpp)
+target_link_libraries(RodinVariationalP1DerivativeTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalP1DerivativeTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalPeriodicBCTest PeriodicBCTest.cpp)
+target_link_libraries(RodinVariationalPeriodicBCTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalPeriodicBCTest PROPERTIES LABELS unit)

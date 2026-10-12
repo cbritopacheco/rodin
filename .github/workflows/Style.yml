@@ -58,6 +58,8 @@ jobs:
           lfs: false
       - name: Test house-style linter
         run: python3 -m unittest discover -s dev -p test_style_lint.py -v
+      - name: Test production coverage auditor
+        run: python3 -m unittest discover -s dev -p test_audit_coverage.py -v
       - name: Run house-style linter
         run: python3 dev/style_lint.py
 

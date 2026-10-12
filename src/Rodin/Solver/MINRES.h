@@ -205,7 +205,7 @@ namespace Rodin::Solver
       }
 
     private:
-      Optional<size_t> m_maxIterations;
+      Optional<size_t> m_maxIterations; ///< Explicit iteration limit, if set.
       Eigen::MINRES<OperatorType> m_solver;
   };
 
@@ -325,7 +325,7 @@ namespace Rodin::Solver
       }
 
     private:
-      Optional<size_t> m_maxIterations;
+      Optional<size_t> m_maxIterations; ///< Explicit iteration limit, if set.
       Eigen::MINRES<OperatorType> m_solver;
   };
 }

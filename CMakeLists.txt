@@ -233,6 +233,7 @@ if(RODIN_CODE_COVERAGE)
             --directory ${CMAKE_BINARY_DIR}
             --base-directory ${CMAKE_SOURCE_DIR}
             --include "${PROJECT_SOURCE_DIR}/src/Rodin/*"
+            --exclude "${PROJECT_SOURCE_DIR}/src/Rodin/Test/*"
             --output-file RodinCoverage.initial.info
     COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
             --gcov-tool ${GCOV}
@@ -240,6 +241,7 @@ if(RODIN_CODE_COVERAGE)
             --directory ${CMAKE_BINARY_DIR}
             --base-directory ${CMAKE_SOURCE_DIR}
             --include "${PROJECT_SOURCE_DIR}/src/Rodin/*"
+            --exclude "${PROJECT_SOURCE_DIR}/src/Rodin/Test/*"
             --output-file RodinCoverage.runtime.info
     COMMAND ${LCOV} ${RODIN_LCOV_FLAGS_LIST}
             --add-tracefile RodinCoverage.initial.info
@@ -249,6 +251,7 @@ if(RODIN_CODE_COVERAGE)
             --gcov-tool ${GCOV}
             --extract RodinCoverage.base.info
             "${PROJECT_SOURCE_DIR}/src/Rodin/*"
+            --exclude "${PROJECT_SOURCE_DIR}/src/Rodin/Test/*"
             --output-file RodinCoverage.info
     COMMAND ${CMAKE_COMMAND} -E rm -f RodinCoverage.base.info
             RodinCoverage.initial.info RodinCoverage.runtime.info

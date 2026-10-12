@@ -26,7 +26,10 @@ def audit(root, reports):
                     path = root / path
                 path = path.resolve()
                 try:
-                    current = str(path.relative_to(source))
+                    relative = path.relative_to(source)
+                    if relative.parts[0] == "Test":
+                        raise ValueError("Library-side test helper")
+                    current = str(relative)
                 except ValueError:
                     foreign.add(str(path))
                     current = None
@@ -41,6 +44,8 @@ def audit(root, reports):
     files = []
     absent = []
     for path in sorted(source.rglob("*")):
+        if path.relative_to(source).parts[0] == "Test":
+            continue
         if path.suffix not in {".h", ".hpp", ".cpp"}:
             continue
         name = str(path.relative_to(source))

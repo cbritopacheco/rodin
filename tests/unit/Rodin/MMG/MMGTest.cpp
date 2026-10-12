@@ -41,8 +41,10 @@ TEST(MMG5Lifecycle, MeshCopyIsIndependent)
     EXPECT_STREQ(copy->namein, source->namein);
     EXPECT_STREQ(copy->nameout, source->nameout);
     for (int i = 1; i <= source->np; ++i)
+    {
       for (int axis = 0; axis < 3; ++axis)
         EXPECT_EQ(copy->point[i].c[axis], source->point[i].c[axis]);
+    }
     const auto coordinate = copy->point[1].c[0];
     source->point[1].c[0] += 10;
     EXPECT_EQ(copy->point[1].c[0], coordinate);

@@ -324,7 +324,8 @@ namespace Rodin::Assembly
               }
               bfi.setPolytope(*trIt, *teIt);
               // Preserve test indices: getDOFs may reuse scratch storage on the next call.
-              const auto rows = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
+              const auto rows =
+                input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
               const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
               for (PetscInt i = 0; i < rows.size(); ++i)
               {

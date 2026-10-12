@@ -206,8 +206,8 @@ namespace Rodin::Solver
       }
 
     private:
-      Optional<size_t> m_maxIterations;
-      size_t m_shadowSpace = 4;
+      Optional<size_t> m_maxIterations; ///< Explicit iteration limit, if set.
+      size_t m_shadowSpace = 4; ///< Requested shadow-space dimension.
       Eigen::IDRS<OperatorType> m_solver;
   };
 
@@ -341,8 +341,8 @@ namespace Rodin::Solver
       }
 
     private:
-      Optional<size_t> m_maxIterations;
-      size_t m_shadowSpace = 4;
+      Optional<size_t> m_maxIterations; ///< Explicit iteration limit, if set.
+      size_t m_shadowSpace = 4; ///< Requested shadow-space dimension.
       Eigen::IDRS<OperatorType> m_solver;
   };
 }

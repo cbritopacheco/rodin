@@ -20,7 +20,8 @@ Use this directory when you need to answer one of these questions:
 `RodinCoverage` merges a zero-hit baseline from compiler notes with runtime
 hits, then extracts only `src/Rodin/` records. Compiled source units that no
 test executes remain in the denominator. Tests, benchmarks,
-examples, and dependencies may execute production code but never enter the
+examples, library-side test helpers (`src/Rodin/Test/`), and dependencies
+may execute production code but never enter the
 coverage denominator. The regular and slow CI reports are merged by Codecov.
 
 ```sh
@@ -38,10 +39,21 @@ all be absent. The reported percentage alone cannot distinguish them.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
-- Spatial matrices: real and complex arithmetic for all nonempty shapes and
+- Spatial matrices: real and complex arithmetic for all shapes, including empty matrices, and
   compatible products through dimension three, plus rectangular pseudoinverses.
 - Iterative solvers: dense/sparse real MINRES, and dense/sparse real/complex
   least-squares CG and IDRS, with cold and nonzero initial guesses.
+- P1 scalar derivatives: real/complex affine fields on every geometry,
+  including face traces. Instantiation exposed obsolete basis, coefficient,
+  and optional-attribute APIs, now covered by numerical regressions.
+- Periodic constraint assembly: real/complex partition-of-unity weights and
+  preservation of assembled maps through copy and move. These tests check the
+  constraint API; they do not certify periodic enforcement in a PDE solver.
+- Face normals: boundary orientation and both interior traces in two and three
+  dimensions; missing and nonmatching trace attributes raise exceptions.
+- Solid mechanics: Yeoh energy/stress/tangent checks in two and three
+  dimensions, and P1 follower-pressure residual/tangent checks on segment and
+  triangle faces. Higher-order pressure spaces are not claimed by this API.
 - Eigen 3.4 MINRES does not compile for complex scalars. The Rodin header's
   generic scalar documentation does not establish dependency support.
 - IDRstab's wrapper names `Eigen::IDRSTABL`, which is absent in Eigen 3.4's
