@@ -88,7 +88,7 @@ that this performance matrix has been profiled.
 
 | Layer / owning module | Available measurement | Remaining qualification or isolation |
 | --- | --- | --- |
-| Spatial values / Math | Real/complex vector, matrix and tensor arithmetic; spatial dot | Consumer attribution beyond the qualified dot repair; controlled scaling baselines |
+| Spatial values / Math | Real/complex vector, matrix and tensor arithmetic; spatial dot; fixed-capacity construction/copy/assignment and temporary/direct array fill | Remaining arithmetic consumer attribution and controlled scaling baselines beyond selected storage scopes |
 | Reference metadata / Geometry | Topology, connectivity and reference transformation consumers | Isolated metadata access, embedding and shape-dependent work accounting |
 | Reference elements / Variational | Scalar P0/P0g/P1 and H1 degrees 1–6; values, derivatives, prefetched descriptors | Vector/matrix component expansion, DOF functionals and first-use initialization |
 | Reference quadrature / QF | Owned construction/copy, polynomial traversal, controlled eight-key hot and nine-key canonical-pool sweeps; table/fallback boundaries | Process-first allocation, concurrent pool contention and profiles beyond selected orders |
@@ -449,6 +449,46 @@ describe attribution within each capture, not absolute elapsed-time ratios.
 cmake --build build --target RodinReferenceQuadratureBenchmarks -j1
 build/tests/benchmarks/RodinReferenceQuadratureBenchmarks \
   --benchmark_filter='ReferenceQuadrature/(OwnedBuild|OwnedCopy|Traversal)/Pyramid/16/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+```
+
+### Spatial-vector storage protocol
+
+`RodinSpatialVectorStorageBenchmarks`, owned by `Math`, isolates zero
+construction, default-construction followed by logical resize, copying into a
+reserved array, copy assignment, temporary-fill-then-move and direct fill in the
+owning slot. Allocation and input preparation are excluded. Append scopes clear
+the preceding batch; assignment retains the destination array size. The operation
+is fixed at compile time so per-vector runtime dispatch is not measured.
+Input pointers and memory barriers prevent invariant-result hoisting.
+
+Real and complex scalars, dimensions zero through three, and batch sizes 32,
+256 and 2,048 give 144 selections. Every logical size and every fixed-capacity
+component is checked exactly, including inactive zeros; deliberately corrupting
+an active or inactive component must fail. The storage count is
+$N\operatorname{sizeof}(\mathrm{SpatialVector})$, whereas the active entry count
+is $Nd$ and capacity is $3N$. Thus a zero-dimensional vector still has storage
+and initialization cost; it does not represent a missing physical component.
+
+All selections passed in both optimized builds. In a native five-repetition
+256-vector study, real zero construction remained approximately 0.74 ns per
+vector across logical dimensions. Real three-dimensional temporary-fill/move
+and direct-fill scopes measured about 3.66 and 2.33 ns per vector; complex
+three-dimensional scopes measured about 4.61 and 2.53 ns. These are complete
+reserved-array operation scopes, not isolated move-instruction latencies.
+The largest variation coefficient in this focused study was about 2.7%.
+
+Instruments profiles at 2,048 real three-dimensional vectors attributed about
+73% of temporary-fill source sample weight to memory-copy frames. Direct fill
+instead concentrated sampled work in the inlined fill/storage loop. This
+supports investigating point placement in the tensor-product consumer, but
+does not by itself establish a quadrature or assembly speedup. The zeroed
+inactive-storage contract must remain intact in any subsequent change.
+
+```sh
+cmake --build build --target RodinSpatialVectorStorageBenchmarks -j1
+build/tests/benchmarks/RodinSpatialVectorStorageBenchmarks \
+  --benchmark_filter='SpatialVectorStorage/(TemporaryFillAppend|DirectFillAppend)/Real/3/' \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
 
