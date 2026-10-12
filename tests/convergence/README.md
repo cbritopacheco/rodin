@@ -984,6 +984,48 @@ requires baseline-equivalent numerical behavior, including solver iterations
 and residuals. Performance regression thresholds are introduced only after
 repeatability and variance have been established on a controlled runner.
 
+### Paired constrained assembly and solving
+
+`RodinConstrainedSolveBenchmarks` reuses `ConstrainedWorkload` from the
+assembly measurements rather than defining another forcing term or boundary
+condition. The initial solve scope is real scalar Poisson, variable
+conductivity and scalar reaction–diffusion on affine unit-box meshes, using
+`H1<1>`, `H1<2>` and `H1<3>`. Seven positive-dimensional geometries and
+`n=3,5,9` grid points per axis give 189 selectable solve measurements. Scalar
+reaction–diffusion is not the coupled reaction–diffusion convergence context;
+`H1<1>` does not certify performance of the distinct `P1` implementation.
+
+For the assembled constrained system $Ax=b$, the manufactured coefficient
+vector $x_\star$ supplies an algebraic oracle. The diagnostics are
+$r=\|Ax-b\|_2/\max(1,\|b\|_2)$ and
+$e=\|x-x_\star\|_2/\max(1,\|x_\star\|_2)$. These are not continuous
+finite-element error norms. The CG tolerance is $10^{-13}$, with the same
+20,000-iteration cap as native Poisson convergence; acceptance budgets are
+$r<10^{-11}$ and $e<10^{-9}$ to allow roundoff and conditioning. Operator and
+load comparisons against original-kernel assembly remain outside timing.
+
+| Measurement | Timed scope | Excluded scope |
+| --- | --- | --- |
+| Existing constrained assembly executable | Public matrix/load assembly, constraints and finalization | Setup, solves and numerical guards |
+| Constrained solve executable | Public CG linear-system solve, including diagonal-preconditioner setup and Krylov iterations | Setup, assembly, initial-guess reset, field writeback and numerical guards |
+
+Each solve starts from zero; reusing a converged guess would measure a
+different operation. Warmup and repeated solves must retain the reported
+iteration count and satisfy the same algebraic checks. The reported Eigen
+iteration count is not reinterpreted: some versions report zero when the
+first update converges. Benchmark names and grid sizes match the assembly
+executable, and JSON context identifies the timed operation. These two
+scopes can be compared on matched inputs but do not sum to complete PDE
+runtime, since setup and field/error evaluation remain excluded.
+
+The solve executable is explicitly built with
+`cmake --build build --target RodinConstrainedSolveBenchmarks`. It is excluded
+from the default build, CTest and benchmark publication. Available selections
+do not imply measured coverage; a small-mesh smoke run does not qualify larger
+levels, other backends, curved maps or other physical contexts. PETSc/MPI,
+complex solves, coupled systems and nonlinear solve stages remain separate
+performance batches. Numerical convergence certification is unchanged.
+
 ### Pressure-oracle profiling
 
 `RodinPressureOracleBenchmarks` isolates the complete finite-mesh pressure

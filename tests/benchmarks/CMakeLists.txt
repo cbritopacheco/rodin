@@ -57,6 +57,11 @@ add_executable(RodinConstrainedAssemblyBenchmarks ConstrainedAssembly.cpp)
 target_link_libraries(RodinConstrainedAssemblyBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
 
+# Opt-in solve measurements paired with the existing constrained assembly forms.
+add_executable(RodinConstrainedSolveBenchmarks EXCLUDE_FROM_ALL ConstrainedSolve.cpp)
+target_link_libraries(RodinConstrainedSolveBenchmarks PRIVATE
+  Rodin::Variational Rodin::Solver benchmark::benchmark)
+
 if (RODIN_USE_MPI)
   add_executable(RodinMPIAABBBenchmarks MPIAABB.cpp)
   target_link_libraries(RodinMPIAABBBenchmarks PRIVATE
