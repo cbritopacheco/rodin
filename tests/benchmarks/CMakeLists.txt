@@ -66,6 +66,11 @@ add_executable(RodinConstrainedAssemblyBenchmarks ConstrainedAssembly.cpp)
 target_link_libraries(RodinConstrainedAssemblyBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
 
+# Opt-in field operations with untimed analytic and algebraic oracles.
+add_executable(RodinFieldOperationBenchmarks EXCLUDE_FROM_ALL FieldOperations.cpp)
+target_link_libraries(RodinFieldOperationBenchmarks PRIVATE
+  Rodin::Variational Rodin::Solver benchmark::benchmark)
+
 # Opt-in solve measurements paired with the existing constrained assembly forms.
 add_executable(RodinConstrainedSolveBenchmarks EXCLUDE_FROM_ALL ConstrainedSolve.cpp)
 target_link_libraries(RodinConstrainedSolveBenchmarks PRIVATE

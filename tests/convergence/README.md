@@ -1052,6 +1052,59 @@ levels, other backends, curved maps or other physical contexts. PETSc/MPI,
 complex solves, coupled systems and nonlinear solve stages remain separate
 performance batches. Numerical convergence certification is unchanged.
 
+### Interpolation and orthogonal projection measurements
+
+The opt-in `RodinFieldOperationBenchmarks` target measures distinct `P1`,
+`H1<1>` and `H1<2>` implementations with real/complex scalar and vector
+fields. Seven positive-dimensional affine geometries, three grid sizes
+`n=3,5,9` and four operations give 1,008 selectable measurements. Point
+geometry, curved maps, P0/P0g and distributed projection are not included in
+this initial feature harness. Available selections are not measured coverage.
+
+For $g(x)=1+\sum_{j=0}^{d-1}(j+1)x_j$, the scalar oracle is $f=\alpha g$
+and the vector oracle has components $f_j=(j+1)\alpha g$, with
+$\alpha=1$ or $1+i/2$. These fields are representable in every selected
+space. In addition to analytic point-value checks on every cell, projection
+checks the independently integrated mass energy. With
+$S_1=d(d+1)/2$ and $S_2=d(d+1)(2d+1)/6$,
+
+$$
+\int_{[0,1]^d}|g|^2\,dx
+=1+S_1+\frac{S_1^2}{4}+\frac{S_2}{12}.
+$$
+
+Scalar energy multiplies this expression by $|\alpha|^2$; vector energy
+also multiplies it by $S_2$. The mass projection solves $Mc=b$ without
+boundary constraints, with CG tolerance $10^{-13}$. Residual and coefficient
+budgets are $10^{-11}$ and $10^{-9}$, respectively. Analytic point values
+and relative mass energy use a $10^{-10}$ roundoff budget. A wrong-field
+control must produce an algebraic residual above $10^{-4}$.
+
+| Operation | Timed scope |
+| --- | --- |
+| Interpolation | DOF-functional assignment with an alternating additive field offset |
+| ProjectionAssembly | Public mass/load problem assembly, including finalization |
+| ProjectionSolve | CG setup and iterations on the fixed assembled mass system |
+| AssemblyAndSolve | Public assembly followed by CG setup and iterations |
+
+Mesh/space setup, warmup, initial-guess reset, field writeback and numerical
+oracles are excluded. Solves always start from zero. Order-eight quadrature
+is held fixed and reported. The executable returns nonzero on any failed
+oracle, including optimized builds, and remains outside CTest and benchmark
+publication. It can contribute executed source coverage in a separately
+instrumented build, not a convergence-rate certification.
+Assembly-only cases perform a verification solve after timing: reassembly
+imports the trial field as its initial guess, rather than preserving a
+solution obtained by directly solving the linear system. Operator and load
+snapshots check repeat assembly; a deliberately perturbed interpolation
+coefficient and a wrong projection vector check oracle sensitivity.
+
+Build explicitly with `cmake --build build --target RodinFieldOperationBenchmarks`.
+For example, select `Field/ProjectionSolve/H1/P2/Real/Scalar/Pyramid/9/`
+for a solve profile and the corresponding `ProjectionAssembly` selection
+for an assembly profile. Numerical smoke selections at `n=3` do not qualify
+timings at larger sizes or other backends.
+
 ### Reference-geometry derivative reuse
 
 For control coordinates $X_{K,ja}$ and scalar reference basis $\phi_a$, mapped
