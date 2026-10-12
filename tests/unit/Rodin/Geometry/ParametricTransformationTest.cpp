@@ -25,8 +25,10 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
-/// @brief Verifies sanity test reference triangle for geometry parametric
-/// transformation by checking tolerance-based numerical results.
+  /**
+   * @brief Verifies sanity test reference triangle for geometry parametric
+   * transformation by checking tolerance-based numerical results.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, SanityTest_ReferenceTriangle)
   {
     constexpr const size_t sdim = 2;
@@ -55,8 +57,10 @@ namespace Rodin::Tests::Unit
     }
   }
 
-/// @brief Verifies sanity test triangle 1 for geometry parametric
-/// transformation by checking tolerance-based numerical results.
+  /**
+   * @brief Verifies sanity test triangle 1 for geometry parametric
+   * transformation by checking tolerance-based numerical results.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, SanityTest_Triangle_1)
   {
     constexpr const size_t rdim = 2;
@@ -195,8 +199,10 @@ namespace Rodin::Tests::Unit
     return pm;
   }
 
-/// @brief Verifies P 2 curves interface edge for geometry parametric
-/// transformation by checking tolerance-based numerical results.
+  /**
+   * @brief Verifies P 2 curves interface edge for geometry parametric
+   * transformation by checking tolerance-based numerical results.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, P2CurvesInterfaceEdge)
   {
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
@@ -210,8 +216,10 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(std::abs(linearMidpoint.norm() - Real(1)), std::abs(x.norm() - Real(1)));
   }
 
-/// @brief Verifies P 3 curved edge improves fit for geometry parametric
-/// transformation.
+  /**
+   * @brief Verifies P 3 curved edge improves fit for geometry parametric
+   * transformation.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, P3CurvedEdgeImprovesFit)
   {
     Variational::RealH1Element<3> fe(Polytope::Type::Triangle);
@@ -229,8 +237,10 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(maxError, std::abs(linearMidpoint.norm() - Real(1)));
   }
 
-/// @brief Verifies curved triangle jacobian stays positive for geometry
-/// parametric transformation.
+  /**
+   * @brief Verifies curved triangle jacobian stays positive for geometry
+   * parametric transformation.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, CurvedTriangleJacobianStaysPositive)
   {
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
@@ -363,8 +373,10 @@ namespace Rodin::Tests::Unit
     }
   } // namespace
 
-/// @brief Checks exact agreement with scalar evaluation on all geometries and
-/// embeddings.
+  /**
+   * @brief Checks exact agreement with scalar evaluation on all geometries and
+   * embeddings.
+   */
   TEST(
     Rodin_Geometry_ParametricTransformation, AllGeometryEvaluationMatchesScalarBaseline)
   {
@@ -381,8 +393,10 @@ namespace Rodin::Tests::Unit
     }
   }
 
-/// @brief Evaluates a basis derivative once, independently of physical
-/// dimension.
+  /**
+   * @brief Evaluates a basis derivative once, independently of physical
+   * dimension.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, JacobianEvaluatesDerivativeOnce)
   {
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
@@ -563,76 +577,81 @@ namespace Rodin::Tests::Unit
       template <class Element = Variational::RealH1Element<2>>
       struct ObservedElement
       {
-          using RangeType = Real;
-          Element element;
-          size_t* basisReads;
-          size_t* tableReads;
-          /**
+        using RangeType = Real;
+        Element element;
+        size_t* basisReads;
+        size_t* tableReads;
+        size_t* countReads;
+        /**
          * @brief Observes an H1 geometry element's evaluation entry points.
          * @param geometry Reference geometry type.
          * @param basis Counter for direct basis access.
          * @param table Counter for reference-table access.
+         * @param count Counter for basis-count queries.
          */
-          ObservedElement(Polytope::Type geometry, size_t& basis, size_t& table)
-            : element(geometry),
-              basisReads(&basis),
-              tableReads(&table)
-          {}
-          /**
+        ObservedElement(
+          Polytope::Type geometry, size_t& basis, size_t& table, size_t& count)
+          : element(geometry),
+            basisReads(&basis),
+            tableReads(&table),
+            countReads(&count)
+        {}
+        /**
          * @brief Gets the underlying reference geometry.
          * @returns The element geometry type.
          */
-          auto getGeometry() const
-          {
-            return element.getGeometry();
-          }
-          /**
+        auto getGeometry() const
+        {
+          return element.getGeometry();
+        }
+        /**
          * @brief Gets the underlying basis count.
          * @returns Number of scalar basis functions.
          */
-          size_t getCount() const
-          {
-            return element.getCount();
-          }
-          /**
+        size_t getCount() const
+        {
+          ++*countReads;
+          return element.getCount();
+        }
+        /**
          * @brief Gets the geometry element order.
          * @returns The element order.
          */
-          size_t getOrder() const
-          {
-            return element.getOrder();
-          }
-          /**
+        size_t getOrder() const
+        {
+          return element.getOrder();
+        }
+        /**
          * @brief Counts direct scalar basis access.
          * @param i Local scalar basis index.
          * @returns The underlying basis function.
          */
-          decltype(auto) getBasis(size_t i) const
-          {
-            ++*basisReads;
-            return element.getBasis(i);
-          }
-          /**
+        decltype(auto) getBasis(size_t i) const
+        {
+          ++*basisReads;
+          return element.getBasis(i);
+        }
+        /**
          * @brief Counts access to the existing shared reference table.
          * @param formula Formula defining the reference sample set.
          * @returns The underlying element tabulation.
          */
-          const auto& getTabulation(const QF::QuadratureFormulaBase& formula) const
-          {
-            ++*tableReads;
-            return element.getTabulation(formula);
-          }
+        const auto& getTabulation(const QF::QuadratureFormulaBase& formula) const
+        {
+          ++*tableReads;
+          return element.getTabulation(formula);
+        }
 
-    /**
-     * @brief Observes lookup of an existing reference table.
-     * @param identity Logical formula identity, including zero.
-     * @returns Borrowed table when present on this thread.
-     */
-          auto findTabulation(size_t identity) const
-          {
-            ++*tableReads;
-            return element.findTabulation(identity);
-          }
+        /**
+         * @brief Observes lookup of an existing reference table.
+         * @param identity Logical formula identity, including zero.
+         * @returns Borrowed table when present on this thread.
+         */
+        auto findTabulation(size_t identity) const
+        {
+          ++*tableReads;
+          return element.findTabulation(identity);
+        }
       };
 
       /**
@@ -656,8 +675,8 @@ namespace Rodin::Tests::Unit
         auto mesh = Mesh<Context::Local>::UniformGrid(geometry, shape);
         const auto cell = *mesh.getPolytope(dimension, 0);
         const auto otherCell = *mesh.getPolytope(dimension, 1);
-        size_t basisReads = 0, tableReads = 0;
-        ObservedElement<Element> element(geometry, basisReads, tableReads);
+        size_t basisReads = 0, tableReads = 0, countReads = 0;
+        ObservedElement<Element> element(geometry, basisReads, tableReads, countReads);
         PointCloud controls(dimension, element.getCount());
         for (size_t a = 0; a < element.getCount(); ++a)
         {
@@ -695,7 +714,13 @@ namespace Rodin::Tests::Unit
           for (size_t j = 0; j < dimension; ++j)
             EXPECT_EQ(actual(j), expected(j));
         };
+        const size_t countBeforeCoordinates = countReads;
         sameCoordinates(pending.getPhysicalCoordinates());
+#ifdef NDEBUG
+        EXPECT_EQ(countReads, countBeforeCoordinates);
+#else
+        EXPECT_EQ(countReads, countBeforeCoordinates + 1);
+#endif
         EXPECT_EQ(basisReads, 0);
         EXPECT_EQ(tableReads, 2);
         static_cast<void>(pending.getPhysicalCoordinates());
@@ -758,8 +783,8 @@ namespace Rodin::Tests::Unit
         const Polytope::Traits traits(geometry);
         const auto centroid = traits.getCentroid();
         const auto vertex = traits.getVertex(0);
-        size_t basisReads = 0, tableReads = 0;
-        ObservedElement<Element> element(geometry, basisReads, tableReads);
+        size_t basisReads = 0, tableReads = 0, countReads = 0;
+        ObservedElement<Element> element(geometry, basisReads, tableReads, countReads);
         PointCloud first(3, element.getCount()), second(3, element.getCount());
         for (size_t a = 0; a < element.getCount(); ++a)
         {
@@ -775,7 +800,14 @@ namespace Rodin::Tests::Unit
         const auto* address = &*formula;
         const auto initialIdentity = formula->getCacheIdentity();
         std::vector<Math::SpatialMatrix<Real>> firstMatrices, secondMatrices;
+        const size_t countBefore = countReads;
         firstMap.jacobian(firstMatrices, *formula);
+        // Only the debug compatibility assertion may query the basis count.
+#ifdef NDEBUG
+        EXPECT_EQ(countReads, countBefore);
+#else
+        EXPECT_EQ(countReads, countBefore + 1);
+#endif
         ASSERT_EQ(formula->getReads(), 1);
         secondMap.jacobian(secondMatrices, *formula);
         EXPECT_EQ(formula->getReads(), 1);
@@ -999,8 +1031,10 @@ namespace Rodin::Tests::Unit
       }
   };
 
-  /// @brief Compares bulk and pointwise Jacobians exactly on every reference
-  /// geometry.
+  /**
+   * @brief Compares bulk and pointwise Jacobians exactly on every reference
+   * geometry.
+   */
   TEST_F(QuadratureTransformationTest, AllGeometriesOrdersAndEmbeddings)
   {
     for (const auto geometry :
@@ -1031,8 +1065,10 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Verifies owned mapped points survive source lifetimes and invalidate
-  /// on rebinding.
+  /**
+   * @brief Verifies owned mapped points survive source lifetimes and invalidate
+   * on rebinding.
+   */
   TEST_F(QuadratureTransformationTest, PointOwnershipCopyMoveAndRebinding)
   {
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,

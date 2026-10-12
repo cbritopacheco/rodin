@@ -921,11 +921,37 @@ detect the targeted defect and that numerical integration or algebraic error
 does not determine the observed rate. Expensive resolved hierarchies belong
 in explicitly timed slow tests with the required backend coverage retained.
 
-### Assembly performance workplan
+### Library performance workplan
 
 The benchmark foundation from [PR #356](https://github.com/cbritopacheco/rodin/pull/356)
 is integrated in this branch, in the existing `tests/benchmarks` module.
 Performance measurements remain separate from numerical convergence assertions.
+The objective is to measure assembly, solving, interpolation, projection and
+the supporting library operations across the convergence workloads. The
+performance matrix therefore distinguishes the physical context, space,
+degree, range, geometry, refinement level and backend, as well as the timed
+operation. A profile of one Poisson assembly does not qualify solving,
+projection or a different physical context.
+
+Qualification requires an untimed numerical oracle before and after the
+timed operation, with a failing oracle making the executable return nonzero.
+These checks contribute correctness evidence for the executed workload;
+instrumented benchmark executions may also contribute source-line and branch
+coverage. Neither benchmark registrations nor successful timing runs alone
+establish source coverage or convergence certification. Timing remains opt-in,
+outside CTest and CI performance gates.
+Source-coverage runs use a separate `RODIN_CODE_COVERAGE=ON` build, explicitly
+execute the selected benchmark targets and then capture `RodinCoverage`.
+Instrumented timings are not compared with optimized performance baselines.
+
+Nodal interpolation $I_h f$ and the $L^2$ projection $P_h f$ are distinct:
+the latter satisfies $(P_h f,v_h)_{L^2}=(f,v_h)_{L^2}$ for every test function
+$v_h$ in the discrete space. Projection measurements separate mass/load
+assembly from the projection solve; interpolation measurements distinguish
+initial construction, changing-field updates and point evaluation. Supporting
+scopes include reference tabulation, mapped quadrature and Jacobians, norms,
+mesh/space setup and communication where they occur in the measured workflow.
+
 The following describes the intended final scope of the performance matrix,
 not a claim of complete implemented coverage. The physical contexts are
 Poisson, variable conductivity, complex Helmholtz, vector linear elasticity,
