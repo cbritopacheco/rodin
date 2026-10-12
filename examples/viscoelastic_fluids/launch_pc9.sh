@@ -12,12 +12,14 @@
 #    3d   with run_3d.sh, 30 ranks each:
 #         S75 Re 600 N, then S75 Re 300 N | S75 Re 600 D | A200 Re 600 N then D
 #                                                                       -> 90 cores
-#  Usage: bash launch_pc9.sh [all | axi | 3d | 3d-restart | 3d-one]   (default all)
+#  Usage: bash launch_pc9.sh [all | axi | 3d | 3d-restart | 3d-one | 3d-a200]   (default all)
 #         3d-restart stops the running 3D jobs (only those) and relaunches them
 #         from scratch with the current code; finished 3D cases (DONE) are kept.
 #         3d-one stops the running 3D jobs and launches only the key case,
 #         S75 Re 600 viscoelastic (D, Wi 2), with NP3D=60 ranks, CYCLES=3 and
 #         GMRES (falls back to MUMPS by itself if GMRES fails).
+#         3d-a200 adds (stops nothing) A200 Re 600 viscoelastic, same settings
+#         as 3d-one: the aneurysm counterpart of the S75 case.
 #  Environment: BUILD=build-gcc12  OUT=$HOME/Results/axi_jfm  CORES=200
 #               FORCE=1 launches even if the machine looks busy
 #  Logs: $OUT/logs/*.log ; per case: <case folder>/run.log, case.csv
@@ -25,10 +27,12 @@
 # =============================================================================
 set -u
 WHAT="${1:-all}"
-case "$WHAT" in all|axi|3d|3d-restart|3d-one) ;; *) sed -n '2,30p' "$0"; exit 1 ;; esac
+case "$WHAT" in all|axi|3d|3d-restart|3d-one|3d-a200) ;; *) sed -n '2,32p' "$0"; exit 1 ;; esac
 RESTART=0; ONE=0
 if [[ "$WHAT" == 3d-restart ]]; then WHAT=3d; RESTART=1; fi
 if [[ "$WHAT" == 3d-one ]]; then WHAT=3d; RESTART=1; ONE=1; fi
+GEO1=S75
+if [[ "$WHAT" == 3d-a200 ]]; then WHAT=3d; ONE=1; GEO1=A200; fi
 NP3D="${NP3D:-60}"
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -135,8 +139,8 @@ fi
 
 # ---- 3D -------------------------------------------------------------------------
 if [[ "$WHAT" != axi && $ONE == 1 ]]; then
-  echo "== 3D, only S75 Re 600 viscoelastic: $NP3D ranks, ${CYCLES:-3} cycles, ${SOLVER:-gmres}"
-  launch 3D_S75_Re600_D env FLUIDS=D NP="$NP3D" CYCLES="${CYCLES:-3}" SOLVER="${SOLVER:-gmres}" bash "$S3" 600 S75
+  echo "== 3D, $GEO1 Re 600 viscoelastic: $NP3D ranks, ${CYCLES:-3} cycles, ${SOLVER:-gmres}"
+  launch "3D_${GEO1}_Re600_D" env FLUIDS=D NP="$NP3D" CYCLES="${CYCLES:-3}" SOLVER="${SOLVER:-gmres}" bash "$S3" 600 "$GEO1"
 elif [[ "$WHAT" != axi ]]; then
   echo "== 3D (30 ranks each)"
   launch 3D_S75_N           bash -c "FLUIDS=N NP=30 bash '$S3' 600 S75; FLUIDS=N NP=30 bash '$S3' 300 S75"
@@ -148,8 +152,8 @@ sleep 5
 echo
 echo "== running solver processes now: $(pgrep -f "ArterialLesion(Axi|3D)_viscous_logarithmic_implicit -al_" | wc -l)"
 if [[ $ONE == 1 ]]; then
-  echo "Follow:   tail -f $LOG/3D_S75_Re600_D.log"
-  echo "3D ETA:   grep -E 'timing|ETA' $OUT/3D/Re600_Wo5.5/S75/Wi2/run.log | tail -2     (after ~15 min)"
+  echo "Follow:   tail -f $LOG/3D_${GEO1}_Re600_D.log"
+  echo "3D ETA:   grep -E 'timing|ETA' $OUT/3D/Re600_Wo5.5/$GEO1/Wi2/run.log | tail -2     (after ~15 min)"
 else
   echo "Follow:   tail -f $LOG/3D_S75_N.log"
   echo "3D ETA:   grep ETA $OUT/3D/Re600_Wo5.5/S75/N/run.log | tail -1     (after ~15 min)"
