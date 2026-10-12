@@ -148,6 +148,16 @@ geometry, and backend variants explicitly. Current audit findings include:
   attributes while unselected and interior faces retain theirs. Repeated
   tracing and missing mappings preserve the result; an incorrect mapped
   attribute is rejected by the exact oracle.
+- MMG mesh-copy policies: sizing parameters, level-set base references,
+  material split rules and their inverse lookup, and input/output names retain
+  independent ownership after source mutation and destruction. Native material
+  queries recover the prescribed parent and split references. All 110 MMG
+  tests pass; copied sizing and material-reference mutations fail the new test.
+- Flow boundary starts: signed inward characteristics on every boundary face
+  of all seven positive-dimensional cell geometries agree with exact constant
+  velocity trajectories. Outward starts stop immediately at the same physical
+  point with the full remaining time. Zero-time interior-face starts also
+  preserve the input point.
 - Hilbert H1 extension: scalar/vector P1 cosine manufactured solutions with
   homogeneous Neumann data, scalar refinement, and exact affine Dirichlet
   data through repeated solves. Instantiation exposed an obsolete problem

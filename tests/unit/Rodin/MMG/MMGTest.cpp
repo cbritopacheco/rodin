@@ -60,6 +60,76 @@ TEST(MMG5Lifecycle, MeshCopyIsIndependent)
   }
 }
 
+/// @brief Mesh copies retain independently owned remeshing and material policies.
+TEST(MMG5Lifecycle, MeshCopyPreservesMaterialPoliciesAfterSourceDestruction)
+{
+  using Native = MMG::MMG5;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  Owner source(Native::rodinToMesh(mesh), Native::destroyMesh);
+  ASSERT_EQ(MMG3D_Set_inputMeshName(source.get(), "source.mesh"), 1);
+  ASSERT_EQ(MMG3D_Set_outputMeshName(source.get(), "adapted.mesh"), 1);
+  ASSERT_EQ(
+    MMG3D_Set_iparameter(source.get(), nullptr, MMG3D_IPARAM_numberOfLocalParam, 1), 1);
+  ASSERT_EQ(MMG3D_Set_localParameter(
+              source.get(), nullptr, MMG5_Tetrahedron, 17, 0.125, 0.75, 0.0625),
+    1);
+  ASSERT_EQ(
+    MMG3D_Set_iparameter(source.get(), nullptr, MMG3D_IPARAM_numberOfLSBaseReferences, 1),
+    1);
+  ASSERT_EQ(MMG3D_Set_lsBaseReference(source.get(), nullptr, 31), 1);
+  ASSERT_EQ(MMG3D_Set_iparameter(source.get(), nullptr, MMG3D_IPARAM_numberOfMat, 2), 1);
+  ASSERT_EQ(MMG3D_Set_multiMat(source.get(), nullptr, 17, MMG5_MMAT_Split, 71, 73), 1);
+  ASSERT_EQ(MMG3D_Set_multiMat(source.get(), nullptr, 23, MMG5_MMAT_NoSplit, 23, 23), 1);
+  Owner copy(
+    static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+  ASSERT_NE(copy, nullptr);
+  Native::copyMesh(source.get(), copy.get());
+  ASSERT_NE(source->info.par, nullptr);
+  ASSERT_NE(source->info.br, nullptr);
+  ASSERT_NE(source->info.mat, nullptr);
+  ASSERT_NE(source->info.invmat.lookup, nullptr);
+  ASSERT_NE(copy->info.par, nullptr);
+  ASSERT_NE(copy->info.br, nullptr);
+  ASSERT_NE(copy->info.mat, nullptr);
+  ASSERT_NE(copy->info.invmat.lookup, nullptr);
+  EXPECT_NE(copy->info.par, source->info.par);
+  EXPECT_NE(copy->info.br, source->info.br);
+  EXPECT_NE(copy->info.mat, source->info.mat);
+  EXPECT_NE(copy->info.invmat.lookup, source->info.invmat.lookup);
+  EXPECT_NE(copy->namein, source->namein);
+  EXPECT_NE(copy->nameout, source->nameout);
+  source->info.par[0].hmin = 0.25;
+  source->info.mat[0].rin = 79;
+  ASSERT_EQ(MMG3D_Set_inputMeshName(source.get(), "changed.mesh"), 1);
+  ASSERT_EQ(MMG3D_Set_outputMeshName(source.get(), "changed-output.mesh"), 1);
+  source.reset();
+  EXPECT_STREQ(copy->namein, "source.mesh");
+  EXPECT_STREQ(copy->nameout, "adapted.mesh");
+  ASSERT_EQ(copy->info.npar, 1);
+  EXPECT_EQ(copy->info.par[0].elt, MMG5_Tetrahedron);
+  EXPECT_EQ(copy->info.par[0].ref, 17);
+  EXPECT_DOUBLE_EQ(copy->info.par[0].hmin, 0.125);
+  EXPECT_DOUBLE_EQ(copy->info.par[0].hmax, 0.75);
+  EXPECT_DOUBLE_EQ(copy->info.par[0].hausd, 0.0625);
+  ASSERT_EQ(copy->info.nbr, 1);
+  EXPECT_EQ(copy->info.br[0], 31);
+  MMG5_int interior = 0, exterior = 0;
+  EXPECT_EQ(MMG5_isSplit(copy.get(), 17, &interior, &exterior), 1);
+  EXPECT_EQ(interior, 71);
+  EXPECT_EQ(exterior, 73);
+  EXPECT_EQ(MMG5_isSplit(copy.get(), 23, &interior, &exterior), 0);
+  MMG5_int parent = 0;
+  ASSERT_EQ(MMG5_getStartRef(copy.get(), 71, &parent), 1);
+  EXPECT_EQ(parent, 17);
+  ASSERT_EQ(MMG5_getStartRef(copy.get(), 73, &parent), 1);
+  EXPECT_EQ(parent, 17);
+  const auto restored = Native::meshToRodin(copy.get());
+  EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
+  EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
+  EXPECT_NEAR(restored.getVolume(), 1, 1e-12);
+}
+
 /// @brief Scalar/vector native solution copies and swaps preserve ownership.
 TEST(MMG5Lifecycle, SolutionCopyAndSwap)
 {

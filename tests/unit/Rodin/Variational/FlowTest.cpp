@@ -297,7 +297,7 @@ TEST(Rodin_Variational_Flow, InteriorFaceStartChoosesTheUpwindCell)
         center.getPhysicalCoordinates() - start.getPhysicalCoordinates();
       const auto operand = RealFunction([](const Point& p) { return 1 + p(0); });
       const auto velocity = [direction](const Point&) { return direction; };
-      for (const Real time : {-0.1, 0.1})
+      for (const Real time : {-0.1, 0.0, 0.1})
       {
         Flow flow(time, operand, velocity);
         const auto trace = flow.trace(start);
@@ -312,5 +312,56 @@ TEST(Rodin_Variational_Flow, InteriorFaceStartChoosesTheUpwindCell)
       break;
     }
     EXPECT_TRUE(checked);
+  }
+}
+
+/// @brief Boundary-face starts trace inward and stop immediately when directed outward.
+TEST(Rodin_Variational_Flow, BoundaryFaceStartsRespectSignedCharacteristics)
+{
+  for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    auto mesh = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+    mesh.getConnectivity().compute(dimension - 1, dimension);
+    const auto& adjacent = mesh.getConnectivity().getIncidence(dimension - 1, dimension);
+    size_t checked = 0;
+    for (auto face = mesh.getBoundary(); face; ++face)
+    {
+      SCOPED_TRACE(face->getIndex());
+      const Point start(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+      const auto cell = mesh.getCell(adjacent.at(face->getIndex())[0]);
+      const Point center(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      const Math::SpatialVector<Real> direction =
+        center.getPhysicalCoordinates() - start.getPhysicalCoordinates();
+      const auto operand = RealFunction([](const Point& p) { return 2 + 3 * p(0); });
+      for (const Real sign : {-1.0, 1.0})
+      {
+        const auto velocity = [direction, sign](const Point&) {
+          return Math::SpatialVector<Real>(sign * direction);
+        };
+        Flow inward(sign * 0.1, operand, velocity);
+        const auto trace = inward.trace(start);
+        ASSERT_FALSE(trace.exited());
+        EXPECT_NEAR(trace.getTime(), 0, 1e-12);
+        EXPECT_LT((trace.getPoint().getPhysicalCoordinates() -
+                    (start.getPhysicalCoordinates() + 0.1 * direction))
+                    .norm(),
+          1e-6);
+        EXPECT_NEAR(inward(start), 2 + 3 * (start(0) + 0.1 * direction(0)), 1e-6);
+        Flow outward(-sign * 0.1, operand, velocity);
+        const auto stopped = outward.trace(start);
+        EXPECT_TRUE(stopped.exited());
+        EXPECT_NEAR(stopped.getTime(), 0.1, 1e-12);
+        EXPECT_LT(
+          (stopped.getPoint().getPhysicalCoordinates() - start.getPhysicalCoordinates())
+            .norm(),
+          1e-6);
+      }
+      ++checked;
+    }
+    EXPECT_GT(checked, 0u);
   }
 }
