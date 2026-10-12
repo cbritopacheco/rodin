@@ -1551,6 +1551,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   Optional<Real> predictedVolumeChange;
   Optional<MMG::Mesh> nextMesh;
   Optional<MMG::Mesh> nextBackground;
+  Optional<Location::AABB<MMG::Mesh>> backgroundLocator;
+  Optional<KelvinBall::RotatedNitscheIntegrator> backgroundCoupling;
 
   for (size_t iteration = 0; iteration < m_options.maxIterations; ++iteration)
   {
@@ -1566,6 +1568,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       {
         // Refresh only between iterations, after the previous spaces and
         // fields have expired. The background is fixed during each fit.
+        backgroundCoupling.reset();
+        backgroundLocator.reset();
         swiftBackground.emplace(std::move(*nextBackground));
         nextBackground.reset();
         backgroundH = meanElementSize(*swiftBackground);
@@ -2192,6 +2196,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     stageSeconds[5] = elapsedSeconds(stage6Start);
     reportStageTiming(6, stageSeconds[5]);
     MMG::Mesh& advectionMesh = swiftBackground ? *swiftBackground : mesh;
+    // Retain background locators between iterations without adaptation.
+    // Replacement above invalidates both caches before changing the mesh.
+    Optional<Location::AABB<MMG::Mesh>> chamberLocator;
     P1 advectionLevelSetSpace(advectionMesh);
     GridFunction advectedDistance(advectionLevelSetSpace);
     // Only the transported scalar survives this scope. In particular, the
@@ -2437,6 +2444,15 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       reportStageTiming(7, stageSeconds[6]);
       const auto stage8Start = Clock::now();
       announce("Stage 8: Advecting the level set.");
+      if (swiftBackground)
+      {
+        if (!backgroundLocator)
+          backgroundLocator.emplace(advectionMesh);
+      }
+      else
+        chamberLocator.emplace(advectionMesh);
+      const auto& advectionLocator =
+        swiftBackground ? *backgroundLocator : *chamberLocator;
       auto& advectionConnectivity = advectionMesh.getConnectivity();
       advectionConnectivity.discover(3, 2);
       advectionConnectivity.discover(3, 1);
@@ -2497,15 +2513,22 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         advectionDistance.getData() = distance.getData();
         advectionDirection.getData() = theta.getData();
       }
-      KelvinBall::RotatedNitscheIntegrator advectionCoupling(advectionMesh,
-        FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
-        rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
+      // MMG transport uses the shape mesh, whose cut locator is already built.
+      // SWIFT transport uses a distinct background and needs its own locator.
+      if (swiftBackground && !backgroundCoupling)
+      {
+        backgroundCoupling.emplace(advectionMesh,
+          FlatSet<Attribute>{SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus},
+          rotatedTracePhysicalTolerance, rotatedTraceReferenceTolerance);
+      }
+      const auto& advectionCoupling =
+        backgroundCoupling ? *backgroundCoupling : shapeCoupling;
       KelvinBall::RotatedCharacteristicContinuation rotationalContinuation(
         -dt, advectionMesh, advectionCoupling.getLocator(), RotationPairs);
       const auto characteristic = Flow(-dt, advectionDistance, advectionDirection,
         Math::RungeKutta::RK4{}, rotationalContinuation);
-      const KelvinBall::NodalTransport transport(
-        advectionMesh, advectionDistance, characteristic, advectedDistance);
+      const KelvinBall::NodalTransport transport(advectionMesh, advectionLocator,
+        advectionDistance, characteristic, advectedDistance);
       stageDiagnostics.transportAttempted = transport.getAttemptedCount();
       stageDiagnostics.transportFallback = transport.getFallbackCount();
       Alert::Info() << substageHeading("Transport coverage") << Alert::NewLine
@@ -2568,9 +2591,9 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
           // Re-evaluate it spatially; nodal copying across MMG is invalid.
           P1<Real, Mesh> targetSpace(adapted);
           GridFunction target(targetSpace);
-          const Location::AABB<MMG::Mesh> sourceLocator(*swiftBackground);
           target = RealFunction([&](const Geometry::Point& point) {
-            const auto source = sourceLocator.locate(3, point.getPhysicalCoordinates());
+            const auto source =
+              backgroundLocator->locate(3, point.getPhysicalCoordinates());
             if (!source)
               throw std::runtime_error(
                 "An adapted background vertex is outside the source chamber.");

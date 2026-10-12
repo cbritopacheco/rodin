@@ -132,7 +132,8 @@ namespace KelvinBall
     P1 space(mesh);
     GridFunction distance(space), result(space);
     distance = Real(3);
-    NodalTransport transport(mesh, distance, SamplingFlow{-1}, result);
+    const Location::AABB locator(mesh);
+    NodalTransport transport(mesh, locator, distance, SamplingFlow{-1}, result);
     EXPECT_EQ(transport.getAttemptedCount(), mesh.getVertexCount());
     EXPECT_EQ(transport.getFallbackCount(), 0);
     EXPECT_LT((result.getData() - distance.getData()).norm(), 1e-14);
@@ -145,7 +146,8 @@ namespace KelvinBall
     GridFunction distance(space), result(space);
     distance = RealFunction(
       [](const Geometry::Point& p) { return Real(2) + p.getPhysicalCoordinates()(0); });
-    NodalTransport transport(mesh, distance, SamplingFlow{2}, result);
+    const Location::AABB locator(mesh);
+    NodalTransport transport(mesh, locator, distance, SamplingFlow{2}, result);
     EXPECT_EQ(transport.getFallbackCount(), mesh.getVertexCount());
     EXPECT_LT((result.getData() - distance.getData()).norm(), 1e-14);
   }
@@ -156,7 +158,8 @@ namespace KelvinBall
     P1 space(mesh);
     GridFunction distance(space), result(space);
     distance = Real(3);
-    NodalTransport transport(mesh, distance, SamplingFlow{0.03}, result);
+    const Location::AABB locator(mesh);
+    NodalTransport transport(mesh, locator, distance, SamplingFlow{0.03}, result);
     EXPECT_GT(transport.getFallbackCount(), 0);
     EXPECT_LT(transport.getFallbackCount(), transport.getAttemptedCount());
     EXPECT_LT((result.getData() - distance.getData()).norm(), 1e-14);
@@ -168,10 +171,61 @@ namespace KelvinBall
     P1 space(mesh);
     GridFunction distance(space), result(space);
     distance = Real(3);
-    NodalTransport successful(mesh, distance, SamplingFlow{-1, 2}, result);
+    const Location::AABB locator(mesh);
+    NodalTransport successful(mesh, locator, distance, SamplingFlow{-1, 2}, result);
     EXPECT_LT((result.getData().array() - 5).matrix().norm(), 1e-14);
-    NodalTransport failed(mesh, distance, SamplingFlow{2, 2}, result);
+    NodalTransport failed(mesh, locator, distance, SamplingFlow{2, 2}, result);
     EXPECT_LT((result.getData() - distance.getData()).norm(), 1e-14);
+  }
+
+  TEST_F(CutCoverageTest, SharedTransportLocatorTransfersAffineFieldToAnotherMesh)
+  {
+    auto source = makeMesh(0);
+    auto target = makeMesh(0);
+    P1 sourceSpace(source), targetSpace(target);
+    GridFunction distance(sourceSpace), transported(sourceSpace),
+      transferred(targetSpace);
+    distance = RealFunction([](const Geometry::Point& point) {
+      const auto& x = point.getPhysicalCoordinates();
+      return Real(2) + x(0) + Real(3) * x(1) - x(2);
+    });
+    const Location::AABB locator(source);
+    NodalTransport transport(source, locator, distance, SamplingFlow{-1, 2}, transported);
+    transferred = RealFunction([&](const Geometry::Point& point) {
+      const auto located = locator.locate(point.getPhysicalCoordinates());
+      if (!located)
+        throw std::runtime_error("A regression transfer point was not located.");
+      return transported.getValue(*located);
+    });
+    EXPECT_LT(
+      ((transferred.getData() - distance.getData()).array() - 2).matrix().norm(), 1e-13);
+    EXPECT_EQ(transport.getFallbackCount(), 0);
+  }
+
+  TEST_F(CutCoverageTest, RebuiltLocatorsFollowReplacementGeometryWithSameCellCount)
+  {
+    for (const Real shift : {Real(0), Real(2)})
+    {
+      auto mesh = makeMesh(shift);
+      const Location::AABB locator(mesh);
+      AttributeFaceLocator cuts(mesh, FlatSet<Attribute>{SigmaPlus, SigmaMinus});
+      Math::SpatialPoint interior(3), trace(3);
+      interior(0) = shift + Real(0.3);
+      interior(1) = Real(0.375);
+      interior(2) = Real(0.25);
+      trace(0) = shift + Real(1) / Real(3);
+      trace(1) = Real(1) / Real(3);
+      trace(2) = Real(1) / Real(3);
+      const auto located = locator.locate(interior);
+      ASSERT_TRUE(located);
+      EXPECT_EQ(located->getPolytope().getIndex(), 1);
+      for (size_t repeat = 0; repeat < 3; ++repeat)
+      {
+        const auto mapped = cuts.locate(SigmaPlus, trace);
+        ASSERT_TRUE(mapped);
+        EXPECT_LT((mapped->getPhysicalCoordinates() - trace).norm(), 1e-13);
+      }
+    }
   }
 
   TEST_F(CutCoverageTest, CompletelyMissingTraceAddsNeitherMatrixNorLoad)

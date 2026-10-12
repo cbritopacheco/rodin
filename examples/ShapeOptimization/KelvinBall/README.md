@@ -604,6 +604,14 @@ Spaces and fields are rebuilt; no coefficients are copied across remeshing.
 Without adaptation,
 the initial background remains fixed throughout the run.
 
+Point-location trees follow the lifetime of their source geometry. Transport
+and transfer to an adapted background share the same volume locator. SWIFT
+background volume and cut locators persist while that background is unchanged;
+both are discarded before its replacement. On the MMG path, transport reuses
+the shape stage's cut locator. Fitted and fluid meshes retain separate locators
+because their geometry or selected faces differ. Strict-first and relaxed
+fallback queries retain their separate tolerance configurations.
+
 After reconstruction (and post-cut adaptation on the MMG path), two
 half-relaxed Laplacian smoothing passes are attempted on the tetrahedral mesh.
 Each vertex moves toward the arithmetic mean of its unique edge neighbours.

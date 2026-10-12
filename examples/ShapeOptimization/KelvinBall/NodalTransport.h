@@ -16,21 +16,22 @@ namespace KelvinBall
    * @brief P1 nodal characteristic transport without a variational projection.
    * Failed characteristics retain the previous nodal value. Each vertex is
    * evaluated once, independently of the ordering of its incident cells.
+   * The caller owns the locator and must rebuild it when the mesh changes.
    */
   class NodalTransport
   {
     public:
       /**
        * @param mesh Chamber mesh shared by both scalar fields.
+       * @param locator Shared locator on the unchanged chamber mesh.
        * @param distance Previous scalar field, distinct from result.
        * @param flow Characteristic tracer including the boundary policy.
        * @param[out] result Transported P1 scalar field.
        */
       template <class Mesh, class Distance, class Flow, class Result>
-      NodalTransport(
-        const Mesh& mesh, const Distance& distance, const Flow& flow, Result& result)
+      NodalTransport(const Mesh& mesh, const Rodin::Location::AABB<Mesh>& locator,
+        const Distance& distance, const Flow& flow, Result& result)
       {
-        const Rodin::Location::AABB<Mesh> locator(mesh);
         for (auto vertex = mesh.getVertex(); vertex; ++vertex)
         {
           const auto point =
