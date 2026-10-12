@@ -125,6 +125,15 @@ geometry, and backend variants explicitly. Current audit findings include:
   empty and missing attribute sets. Local and MPI suites pass; the distributed
   checks include an empty root at two/four ranks. Both tests reject doubled
   production measure accumulation.
+- MPI uniform-grid validation: inconsistent shape dimensions and zero/one
+  vertex extents are rejected on every rank. A uniform point grid retains one
+  global owner and zero-dimensional ghost replicas. The nine-test mesh suite
+  passes at one, two and four ranks.
+- XDMF reference-node vocabulary: linear nodes agree with the geometry module's
+  reference vertices for all positive-dimensional cells; point nodes have no
+  reference coordinates. Point topology metadata and invalid-geometry rejection
+  are checked explicitly. All 97 HDF5 tests pass, and displaced reference nodes
+  fail the new oracle.
 - Boundary attribute tracing: selected exterior faces inherit mapped cell
   attributes while unselected and interior faces retain theirs. Repeated
   tracing and missing mappings preserve the result; an incorrect mapped

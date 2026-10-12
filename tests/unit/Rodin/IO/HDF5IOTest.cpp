@@ -28,6 +28,45 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Linear visualization nodes match reference vertices for every supported geometry.
+  TEST(Rodin_IO_HDF5, VisualizationReferenceNodesAndGeometryValidation)
+  {
+    for (const auto geometry : Polytope::Types)
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const Polytope::Traits traits(geometry);
+      for (const size_t order : {0u, 1u})
+      {
+        const auto nodes = HDF5::getXDMFReferenceNodes(geometry, order);
+        ASSERT_EQ(nodes.size(), traits.getVertexCount());
+        if (geometry == Polytope::Type::Point)
+        {
+          EXPECT_EQ(nodes[0].size(), 0);
+          continue;
+        }
+        for (size_t vertex = 0; vertex < nodes.size(); ++vertex)
+        {
+          const auto& expected = traits.getVertex(vertex);
+          ASSERT_EQ(nodes[vertex].size(), expected.size());
+          for (Index component = 0; component < expected.size(); ++component)
+            EXPECT_EQ(nodes[vertex][component], expected[component]);
+        }
+      }
+    }
+    const auto pointNodes = HDF5::getXDMFReferenceNodes(Polytope::Type::Point, 2);
+    ASSERT_EQ(pointNodes.size(), 1u);
+    EXPECT_EQ(pointNodes[0].size(), 0);
+    EXPECT_EQ(HDF5::getXDMFQuadraticMixedTopologyId(Polytope::Type::Point), 1u);
+    EXPECT_STREQ(HDF5::getXDMFQuadraticTopologyName(Polytope::Type::Point), "Polyvertex");
+
+    const auto invalid = static_cast<Polytope::Type>(255);
+    EXPECT_THROW(HDF5::getXDMFMixedTopologyId(invalid), Alert::Exception);
+    EXPECT_THROW(HDF5::getXDMFQuadraticMixedTopologyId(invalid), Alert::Exception);
+    EXPECT_THROW(HDF5::getXDMFQuadraticTopologyName(invalid), Alert::Exception);
+    EXPECT_THROW(HDF5::getXDMFReferenceNodes(invalid, 1), Alert::Exception);
+    EXPECT_THROW(HDF5::getXDMFReferenceNodes(invalid, 2), Alert::Exception);
+  }
+
   /// @brief Verifies mesh round trip for IO HDF 5 by checking exact expected values.
   TEST(Rodin_IO_HDF5, MeshRoundTrip)
   {

@@ -198,6 +198,48 @@ TEST(MPI_Geometry_Mesh, DimensionWithEmptyRootAcrossGeometries)
   }
 }
 
+/// @brief Invalid grid shapes are rejected consistently on every rank.
+TEST(MPI_Geometry_Mesh, UniformGridRejectsInvalidShapes)
+{
+  const Context::MPI context(*environment, *world);
+  EXPECT_THROW(Mesh<Context::MPI>::UniformGrid(
+                 context, Polytope::Type::Point, Array<size_t>::Constant(1, 2)),
+    Alert::Exception);
+  for (const auto geometry : geometries)
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    EXPECT_THROW(Mesh<Context::MPI>::UniformGrid(
+                   context, geometry, Array<size_t>::Constant(dimension + 1, 2)),
+      Alert::Exception);
+    for (size_t component = 0; component < dimension; ++component)
+    {
+      for (const size_t count : {0u, 1u})
+      {
+        Array<size_t> shape = Array<size_t>::Constant(dimension, 2);
+        shape[component] = count;
+        EXPECT_THROW(
+          Mesh<Context::MPI>::UniformGrid(context, geometry, shape), Alert::Exception);
+      }
+    }
+  }
+}
+
+/// @brief A uniform point grid has one global owner and valid ghost replicas.
+TEST(MPI_Geometry_Mesh, UniformPointGridOwnership)
+{
+  const Context::MPI context(*environment, *world);
+  const auto mesh =
+    Mesh<Context::MPI>::UniformGrid(context, Polytope::Type::Point, Array<size_t>(0));
+  EXPECT_EQ(mesh.getDimension(), 0u);
+  EXPECT_EQ(mesh.getSpaceDimension(), 0u);
+  EXPECT_EQ(mesh.getVertexCount(), 1u);
+  const auto& shard = mesh.getShard();
+  ASSERT_EQ(shard.getVertexCount(), 1u);
+  EXPECT_EQ(shard.isOwned(0, 0), world->rank() == 0);
+  EXPECT_EQ(shard.getVertexCoordinates(0).size(), 0);
+}
+
 /// @brief Uniform-grid construction reports the same dimension on empty ranks.
 TEST(MPI_Geometry_Mesh, UniformGridDimensionAcrossGeometries)
 {
