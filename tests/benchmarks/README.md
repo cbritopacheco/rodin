@@ -103,7 +103,7 @@ that this performance matrix has been profiled.
 | Scatter / Assembly, PETSc | Sequential triplets; complete native/PETSc insertion consumers | Isolated OpenMP buffers/merge, PETSc insertion and ownership-dependent MPI work |
 | Constraints and completion / Assembly, PETSc | Constrained scalar assembly and fixed-system solves | Vector/mixed constraints, identification, finalization and communication attribution |
 | Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson | Helmholtz, coupled reaction–diffusion, Stokes, boundary variants and remaining degrees/backends |
-| Solvers / Solver, PETSc | Real/complex fixed-system constrained CG solves; projection CG profile | Setup versus iteration/factorization, indefinite/mixed systems, backend scaling and memory |
+| Solvers / Solver, PETSc | Real/complex fixed-system CG; isolated diagonal compute/apply; projection CG profile | Direct factorization stages, remaining setup/lifetimes, indefinite/mixed systems, backend scaling and memory |
 | Complete workflows / owning modules | Consumer-level interpolation/projection and assembly profiles | Matched setup/assembly/solve/postprocessing accounting across physical contexts |
 
 The required axes are scalar field (real/complex), supported scalar/vector/matrix
@@ -664,6 +664,62 @@ build/tests/benchmarks/RodinSparseAlgebraBenchmarks \
   --benchmark_filter='^SparseAlgebra/(Product|TransposeProduct)/Poisson/H1/P2/(Real|Complex)/Tetrahedron/' \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
+
+### Diagonal-preconditioner protocol
+
+`RodinDiagonalPreconditionerBenchmarks`, owned by `Solver`, isolates the
+diagonal preconditioner selected by the current native CG backend. It uses the
+same constrained manufactured operators as the sparse-algebra and CG scopes.
+This is backend-stage attribution, not an additional Rodin solver or inspection
+API. With $D=\operatorname{diag}(A)$, application computes
+
+$$
+y=D^{-1}x,\qquad y_j=\frac{x_j}{A_{jj}}.
+$$
+
+| Scope | Timed work | Excluded |
+| --- | --- | --- |
+| `OwnedCompute` | New instance, diagonal compute and destruction | FE assembly, inputs, verification |
+| `RetainedCompute` | Diagonal recomputation with retained, already-sized storage | Initial allocation, application |
+| `Apply` | Preconditioner application into a preallocated vector | Compute, output allocation |
+
+Owned construction is not a process-first or allocator-cold guarantee. Setup
+scopes do not include CG matrix binding, stopping logic or iterations. Independent
+componentwise division verifies the result with a $10^{-11}$ relative budget and
+unit scale floor. Fresh/retained instances are checked outside timing; the last
+timed application is checked before its output is overwritten. Wrong outputs
+are rejected. Recomputing on $1.5A$ must yield $y/1.5$, then recomputing on $A$
+must restore $y$. This tests changed numerical state, not only repeated setup
+on an immutable matrix.
+
+Three lifetimes across real/complex degrees one through three, seven geometries,
+three scalar equations and three grid levels give 1,134 selections. All 378
+smallest-grid cases passed in both optimized builds; maximum relative error
+was below $6.8\times10^{-17}$. Reports distinguish matrix stored entries from
+`diagonal_search_entries`, the entries visited through each column's diagonal,
+and inverse-diagonal storage bytes. These are work/storage counts, not traffic
+or instruction counts. Zero/missing-diagonal fallback, mixed/block operators,
+higher degrees and PETSc/MPI preconditioners remain separate workloads.
+
+A pre-integration native baseline contains 36 five-repetition Poisson
+degree-two measurements across triangle/tetrahedron meshes and three levels.
+At the largest level, retained real setup measured approximately 21–23
+microseconds in tetrahedra; complex setup was approximately 62 microseconds.
+Application measured approximately 0.84 microseconds real and 2.6 microseconds
+complex. Compared with the corresponding fixed-system CG measurements, setup
+is below 1% of the solve cost. These are separately measured scopes, not an
+exact additive time decomposition.
+
+Initial variation reached 9%; longer repeats of six noisy largest-level cases
+still reached about 9% and showed drift. Raw runs are retained, and no precise
+owned-versus-retained speedup or source optimization is claimed. Six Instruments
+captures isolate real/complex retained setup in both dimensions and application
+in tetrahedra. Setup resolves to compressed-column diagonal lookup and division;
+the complex division runtime helper accounts for about 61%/48% of selected
+setup samples in triangle/tetrahedron cases. Application is predominantly the
+dense packet assignment loop. Kernel-stack selection excludes untimed FE setup.
+Owned construction/destruction attribution and full larger-grid qualification
+remain pending; the baseline predates the subsequent `develop` integration.
 
 # Spatial value benchmarks
 
