@@ -29,6 +29,7 @@ artifacts in GitHub Actions for inspection and offline merging.
 ```sh
 cmake --build build --target RodinCoverage
 python3 dev/audit_coverage.py build/RodinCoverage.info --output build/coverage-audit.json
+python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-functions.json
 ```
 
 The audit unions line hits across input reports, rejects nonproduction
@@ -37,6 +38,13 @@ from the report, with template declaration locations. CI uploads this JSON
 for each coverage configuration. Absence is a review candidate: declarations,
 static tables, disabled optional modules, and never-instantiated templates can
 all be absent. The reported percentage alone cannot distinguish them.
+
+The optional `--functions` inventory merges function execution counters by
+production file and symbol, supporting both `FN`/`FNDA` and `FNL`/`FNA` LCOV
+records. Zero-count functions are candidates for inspection when shared line
+coverage hides a compiled variant. Optimization and inlining affect these
+counters; they do not establish whether a never-instantiated variant works.
+This inventory does not change the measured line denominator.
 
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:

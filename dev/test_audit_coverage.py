@@ -57,6 +57,51 @@ class CoverageAuditTest(unittest.TestCase):
         self.assertEqual(result["hits"], 1)
         self.assertFalse(result["nonproduction_records"])
 
+    def test_shared_line_hits_do_not_hide_zero_count_function_variants(self):
+        report = self.report("functions.info",
+            "SF:src/Rodin/Example.h\nFNL:0,1,1\n"
+            "FNA:0,7,answer<Real>\nFNA:0,0,answer<Complex>\nDA:1,7\nend_of_record\n")
+        result = audit(self.root, [report], include_functions=True)
+        self.assertEqual(result["coverage_percent"], 100)
+        self.assertEqual(result["recorded_functions"], {"observed": 2, "hit": 1})
+        self.assertEqual(result["zero_hit_functions"], [
+            {"file": "src/Rodin/Example.h", "symbol": "answer<Complex>", "line": 1}])
+        self.assertNotIn("zero_hit_functions", audit(self.root, [report]))
+
+    def test_function_union_supports_old_and_new_lcov_and_names_with_commas(self):
+        first = self.report("old.info", "SF:src/Rodin/Example.h\n"
+            "FN:1,1,answer<Real,2>\nFNDA:0,answer<Real,2>\n"
+            "FN:1,answer<Complex,2>\nFNDA:0,answer<Complex,2>\nDA:1,0\nend_of_record\n")
+        second = self.report("new.info", f"SF:{self.source / 'Example.h'}\n"
+            "FNL:17,1,1\nFNA:17,4,answer<Real,2>\nDA:1,4\nend_of_record\n")
+        result = audit(self.root, [first, second], include_functions=True)
+        self.assertEqual(result["lines"], 1)
+        self.assertEqual(result["hits"], 1)
+        self.assertEqual(result["recorded_functions"], {"observed": 2, "hit": 1})
+        self.assertEqual(result["zero_hit_functions"][0]["symbol"], "answer<Complex,2>")
+        self.assertEqual(result["zero_hit_functions"][0]["line"], 1)
+        reverse = audit(self.root, [second, first], include_functions=True)
+        self.assertEqual(reverse["recorded_functions"], result["recorded_functions"])
+        self.assertEqual(reverse["zero_hit_functions"], result["zero_hit_functions"])
+
+    def test_function_indices_and_names_are_scoped_to_the_production_file(self):
+        (self.source / "Other.h").write_text("inline int answer() { return 7; }\n")
+        report = self.report("scopes.info", "SF:src/Rodin/Example.h\n"
+            "FNL:0,1,1\nFNA:0,2,answer\nDA:1,2\nend_of_record\n"
+            "SF:src/Rodin/Other.h\nFNL:0,9,10\nFNA:0,0,answer\nDA:1,0\nend_of_record\n"
+            "SF:tests/Test.cpp\nFN:1,answer\nFNDA:9,answer\nDA:1,9\nend_of_record\n")
+        result = audit(self.root, [report], include_functions=True)
+        self.assertEqual(result["recorded_functions"], {"observed": 2, "hit": 1})
+        self.assertEqual(result["zero_hit_functions"], [
+            {"file": "src/Rodin/Other.h", "symbol": "answer", "line": 9}])
+        self.assertEqual(len(result["nonproduction_records"]), 1)
+
+    def test_function_count_without_a_location_remains_an_audit_candidate(self):
+        report = self.report("missing-location.info",
+            "SF:src/Rodin/Example.h\nFNDA:0,answer\nDA:1,1\nend_of_record\n")
+        result = audit(self.root, [report], include_functions=True)
+        self.assertEqual(result["zero_hit_functions"][0]["line"], None)
+
 
 if __name__ == "__main__":
     unittest.main()
