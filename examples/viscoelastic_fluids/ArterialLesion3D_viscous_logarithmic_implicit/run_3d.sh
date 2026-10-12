@@ -29,7 +29,17 @@
 #     CYCLES=4        cycle 1: ramp + seed; cycles 2-4 free
 #     PERTURB=0.01    seed amplitude delta (0: no seed)
 #     AMP=0.5  PTT_EPS=0.1  OUTPUT_EVERY=40  MESH_LEVEL=medium  NEWTON_ITS=8
-#     RETRY=1         a diverged case is re-run once with 2x STEPS (<case>_dt2)
+#     PSI_ORDER=2     quadrature degree of the log-conformation integrals
+#                     (2: 4 points per tetrahedron; 4: 11 points, slower)
+#     NEWTON_TOL=5e-4 Newton stops when max|dpsi|/max(1,|psi|) < NEWTON_TOL;
+#                     Newton is quadratic, so the error left is ~NEWTON_TOL^2
+#     PETSC_EXTRA=""  extra PETSc options, e.g. MUMPS block low-rank:
+#                     "-mat_mumps_icntl_35 1 -mat_mumps_cntl_7 1e-10"
+#     SOLVER=gmres    linear solver of each Newton iteration:
+#                       gmres  GMRES + additive Schwarz (overlap 1) + ILU(1)
+#                       mumps  direct LU (MUMPS), the driver's default
+#     RETRY=1         a failed case is re-run: with gmres, first with mumps
+#                     (<case>_lu); then with mumps and 2x STEPS (<case>_dt2)
 #     OUT3D=<dir>     default $OUT/3D (OUT as for run_axi_re.sh: $HOME/Results/axi_jfm)
 #     MPIRUN=mpirun   EXE3D=...   MESHDIR=...
 #
@@ -66,7 +76,12 @@ PTT_EPS="${PTT_EPS:-0.1}"
 OUTPUT_EVERY="${OUTPUT_EVERY:-40}"
 MESH_LEVEL="${MESH_LEVEL:-medium}"
 NEWTON_ITS="${NEWTON_ITS:-8}"
+PSI_ORDER="${PSI_ORDER:-2}"
+NEWTON_TOL="${NEWTON_TOL:-5e-4}"
+PETSC_EXTRA="${PETSC_EXTRA:-}"
 RETRY="${RETRY:-1}"
+SOLVER="${SOLVER:-gmres}"
+GMRES_OPTS="-ksp_type gmres -ksp_gmres_restart 200 -ksp_max_it 2000 -ksp_rtol 1e-8 -pc_type asm -pc_asm_overlap 1 -sub_pc_type ilu -sub_pc_factor_levels 1"
 OUT="${OUT3D:-${OUT:-$HOME/Results/axi_jfm}/3D}/Re${RE}_Wo${WO}"   # never inside the axisymmetric folders
 MESH="$MESHDIR/${GEO}_pipe_${MESH_LEVEL}.mesh"
 
@@ -85,8 +100,8 @@ mkdir -p "$OUT"
 SUMMARY="$OUT/summary.csv"
 [[ -f "$SUMMARY" ]] || echo "geometry,Re,Wo,fluid,Wi,steps_per_cycle,cycles,status,minutes,folder" > "$SUMMARY"
 
-run_case() {   # fluid steps dir
-  local fluid="$1" steps="$2" dir="$3" wi fargs
+run_case() {   # fluid steps dir solver
+  local fluid="$1" steps="$2" dir="$3" solver="$4" wi fargs
   case "$fluid" in
     N) wi=0.01 ;;
     D) wi="$WI" ;;
@@ -100,11 +115,15 @@ run_case() {   # fluid steps dir
     -al_mesh "$MESH" -al_xdmf case -al_csv case.csv
     -al_re "$RE" -al_wo "$WO" -al_amplitude "$AMP" -al_wi "$wi" -al_ptt_epsilon "$PTT_EPS"
     -al_cycles "$CYCLES" -al_steps_per_cycle "$steps" -al_output_every "$OUTPUT_EVERY"
-    -al_conformation_its "$NEWTON_ITS"
+    -al_conformation_its "$NEWTON_ITS" -al_conformation_tol "$NEWTON_TOL" -al_psi_order "$PSI_ORDER"
     -al_inlet_perturbation "$PERTURB" -al_perturbation_cycles 1)
+  # shellcheck disable=SC2206
+  [[ "$solver" == gmres ]] && cmd+=($GMRES_OPTS)
+  # shellcheck disable=SC2206
+  [[ -n "$PETSC_EXTRA" ]] && cmd+=($PETSC_EXTRA)
   printf '%q ' "${cmd[@]}" > "$dir/params.txt"; echo >> "$dir/params.txt"
 
-  echo "[run ] $(date '+%a %d %H:%M')  3D $GEO $fluid Wi=$wi Re=$RE Wo=$WO steps/cycle=$steps cycles=$CYCLES NP=$NP -> $dir"
+  echo "[run ] $(date '+%a %d %H:%M')  3D $GEO $fluid Wi=$wi Re=$RE Wo=$WO steps/cycle=$steps cycles=$CYCLES NP=$NP $solver -> $dir"
   local t0=$SECONDS
   ( cd "$dir" && "${cmd[@]}" > run.log 2>&1 )
   local status=$?
@@ -125,11 +144,16 @@ echo "3D Re=$RE Wo=$WO $GEO  fluids: $FLUIDS  steps/cycle: $STEPS  cycles: $CYCL
 for fluid in $FLUIDS; do
   if [[ "$fluid" == "D" ]]; then sub="Wi${WI}"; else sub="$fluid"; fi
   dir="$OUT/$GEO/$sub"
-  run_case "$fluid" "$STEPS" "$dir"
+  run_case "$fluid" "$STEPS" "$dir" "$SOLVER"
   st=$?
+  if [[ $st -ne 0 && $st -ne 2 && "$RETRY" == "1" && "$SOLVER" == gmres ]]; then
+    echo "[retry] $GEO $fluid with the direct solver (mumps)"
+    run_case "$fluid" "$STEPS" "${dir}_lu" mumps
+    st=$?
+  fi
   if [[ $st -ne 0 && $st -ne 2 && "$RETRY" == "1" ]]; then
-    echo "[retry] $GEO $fluid with $(( 2 * STEPS )) steps/cycle"
-    run_case "$fluid" "$(( 2 * STEPS ))" "${dir}_dt2"
+    echo "[retry] $GEO $fluid with $(( 2 * STEPS )) steps/cycle (mumps)"
+    run_case "$fluid" "$(( 2 * STEPS ))" "${dir}_dt2" mumps
   fi
 done
 echo "3D Re=$RE $GEO finished $(date). Summary: $SUMMARY"

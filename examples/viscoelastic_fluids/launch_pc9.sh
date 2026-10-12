@@ -12,7 +12,12 @@
 #    3d   with run_3d.sh, 30 ranks each:
 #         S75 Re 600 N, then S75 Re 300 N | S75 Re 600 D | A200 Re 600 N then D
 #                                                                       -> 90 cores
-#  Usage: bash launch_pc9.sh [all | axi | 3d]        (default all)
+#  Usage: bash launch_pc9.sh [all | axi | 3d | 3d-restart | 3d-one]   (default all)
+#         3d-restart stops the running 3D jobs (only those) and relaunches them
+#         from scratch with the current code; finished 3D cases (DONE) are kept.
+#         3d-one stops the running 3D jobs and launches only the key case,
+#         S75 Re 600 viscoelastic (D, Wi 2), with NP3D=60 ranks, CYCLES=3 and
+#         GMRES (falls back to MUMPS by itself if GMRES fails).
 #  Environment: BUILD=build-gcc12  OUT=$HOME/Results/axi_jfm  CORES=200
 #               FORCE=1 launches even if the machine looks busy
 #  Logs: $OUT/logs/*.log ; per case: <case folder>/run.log, case.csv
@@ -20,7 +25,11 @@
 # =============================================================================
 set -u
 WHAT="${1:-all}"
-case "$WHAT" in all|axi|3d) ;; *) sed -n '2,24p' "$0"; exit 1 ;; esac
+case "$WHAT" in all|axi|3d|3d-restart|3d-one) ;; *) sed -n '2,30p' "$0"; exit 1 ;; esac
+RESTART=0; ONE=0
+if [[ "$WHAT" == 3d-restart ]]; then WHAT=3d; RESTART=1; fi
+if [[ "$WHAT" == 3d-one ]]; then WHAT=3d; RESTART=1; ONE=1; fi
+NP3D="${NP3D:-60}"
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$HERE/../.." && pwd)"
@@ -80,10 +89,23 @@ if [[ "$WHAT" != axi ]]; then
   fi
 fi
 
+# ---- stop the running 3D jobs (3d-restart) ------------------------------------------
+if [[ $RESTART == 1 ]]; then
+  echo "== stopping the running 3D jobs ..."
+  pkill -f "run_3d\.sh" ; sleep 2
+  pkill -f "ArterialLesion3D_viscous_logarithmic_implicit -al_" ; sleep 10
+  pkill -9 -f "ArterialLesion3D_viscous_logarithmic_implicit -al_" 2> /dev/null; sleep 2
+  for d in "$OUT"/3D/Re*/*/*; do
+    [[ -d "$d" && ! -f "$d/DONE" ]] && rm -f "$d/FAILED" && sed -i '/,FAILED,/d' "$(dirname "$(dirname "$d")")/summary.csv" 2> /dev/null
+  done
+fi
+
 # ---- free cores -----------------------------------------------------------------
 want=0
 [[ "$WHAT" != 3d ]] && want=$(( want + 96 ))
-[[ "$WHAT" != axi ]] && want=$(( want + 90 ))
+if [[ "$WHAT" != axi ]]; then
+  if [[ $ONE == 1 ]]; then want=$(( want + NP3D )); else want=$(( want + 90 )); fi
+fi
 busy=$(pgrep -f "ArterialLesion(Axi|3D)_viscous_logarithmic_implicit -al_" | wc -l)
 echo "== solver processes already running: $busy ; this launch adds $want ranks ; cores: $CORES"
 if (( busy + want > CORES )) && [[ "${FORCE:-0}" != 1 ]]; then
@@ -112,7 +134,10 @@ if [[ "$WHAT" != 3d ]]; then
 fi
 
 # ---- 3D -------------------------------------------------------------------------
-if [[ "$WHAT" != axi ]]; then
+if [[ "$WHAT" != axi && $ONE == 1 ]]; then
+  echo "== 3D, only S75 Re 600 viscoelastic: $NP3D ranks, ${CYCLES:-3} cycles, ${SOLVER:-gmres}"
+  launch 3D_S75_Re600_D env FLUIDS=D NP="$NP3D" CYCLES="${CYCLES:-3}" SOLVER="${SOLVER:-gmres}" bash "$S3" 600 S75
+elif [[ "$WHAT" != axi ]]; then
   echo "== 3D (30 ranks each)"
   launch 3D_S75_N           bash -c "FLUIDS=N NP=30 bash '$S3' 600 S75; FLUIDS=N NP=30 bash '$S3' 300 S75"
   launch 3D_S75_Re600_D     env FLUIDS=D NP=30 bash "$S3" 600 S75
@@ -122,6 +147,11 @@ fi
 sleep 5
 echo
 echo "== running solver processes now: $(pgrep -f "ArterialLesion(Axi|3D)_viscous_logarithmic_implicit -al_" | wc -l)"
-echo "Follow:   tail -f $LOG/3D_S75_N.log"
-echo "3D ETA:   grep ETA $OUT/3D/Re600_Wo5.5/S75/N/run.log | tail -1     (after ~15 min)"
+if [[ $ONE == 1 ]]; then
+  echo "Follow:   tail -f $LOG/3D_S75_Re600_D.log"
+  echo "3D ETA:   grep -E 'timing|ETA' $OUT/3D/Re600_Wo5.5/S75/Wi2/run.log | tail -2     (after ~15 min)"
+else
+  echo "Follow:   tail -f $LOG/3D_S75_N.log"
+  echo "3D ETA:   grep ETA $OUT/3D/Re600_Wo5.5/S75/N/run.log | tail -1     (after ~15 min)"
+fi
 echo "Summary:  cat $OUT/Re*/summary.csv $OUT/3D/Re*/summary.csv"

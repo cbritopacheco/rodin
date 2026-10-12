@@ -282,6 +282,14 @@ namespace Rodin::Examples::ViscoelasticFluids
           bool inletConformation = true;
           /// @brief Print the Newton history at every step, not only the first three.
           bool traceNewton = false;
+          /// @brief Keep the D2exp part of the S1 div sigma linearisation
+          ///        (quadratic Newton). Without it the converged solution is the
+          ///        same, Newton converges linearly, and each iteration costs
+          ///        less (four bilinear and two linear integrals fewer).
+          bool newtonD2 = true;
+          /// @brief Quadrature degree of the integrals that read the pointwise
+          ///        log-conformation data (tetrahedra: 2 -> 4 points, 4 -> 11).
+          int psiQuadratureOrder = 4;
 
           /// @brief Seed for non-axisymmetric instabilities: the inlet profile
           ///        is multiplied by 1 + delta y/R during the first

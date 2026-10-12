@@ -27,6 +27,7 @@
  *   newton_max_step, max_velocity_factor
  *   vms, inlet_conformation, trace_newton          booleans
  *   inlet_perturbation, perturbation_cycles        m = 1 seed (see the header)
+ *   newton_d2 (bool), psi_order (int)              Newton D2exp term; psi quadrature degree
  *
  * The CSV ends with maxTAWSSLesion, maxOSILesion (tag 5 only) and uyMean,
  * uzMean, the volume means of u_y and u_z over Ubar: both vanish for an
@@ -1376,8 +1377,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     // none, which gives the known terms a one-point rule). One rule also lets
     // LogStore compute each point once. 4 integrates the order-2 pointwise
     // data against P1 x P1.
-    constexpr size_t psiOrder = 4;
-    const auto withOrder = [](auto integral) {
+    const size_t psiOrder = static_cast<size_t>(std::max(1, m_cfg.psiQuadratureOrder));
+    const auto withOrder = [psiOrder](auto integral) {
       integral.setOrder(psiOrder);
       return integral;
     };
@@ -1422,12 +1423,6 @@ namespace Rodin::Examples::ViscoelasticFluids
       + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrial<O>(at, m_psiO), divergence<D>(m_chiD)))
       + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrial<D>(at, m_psiD), divergence<O>(m_chiO)))
       + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrial<O>(at, m_psiO), divergence<O>(m_chiO)))
-      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrialD2<D>(at, m_psiD), divergence<D>(m_chiD)))
-      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrialD2<O>(at, m_psiO), divergence<D>(m_chiD)))
-      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrialD2<D>(at, m_psiD), divergence<O>(m_chiO)))
-      + chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpTrialD2<O>(at, m_psiO), divergence<O>(m_chiO)))
-      - chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpKnownD2(at), divergence<D>(m_chiD)))
-      - chiScale * m_cfg.stressDivScale * s * withOrder(Integral(m_alpha1 * divExpKnownD2(at), divergence<O>(m_chiO)))
       - chiScale * m_cfg.stressDivScale * Integral(m_alpha1 * m_piDivSigma.get(), divergence<D>(m_chiD))
       - chiScale * m_cfg.stressDivScale * Integral(m_alpha1 * m_piDivSigma.get(), divergence<O>(m_chiO))
 
@@ -1452,12 +1447,28 @@ namespace Rodin::Examples::ViscoelasticFluids
       + DirichletBC(m_u, Zero(dim)).on(m_wallSet);
 
     // The psi equation is hyperbolic in psi: relaxed fluid enters at the inlet.
-    if (m_cfg.inletConformation)
-      m_flow = body
-        + DirichletBC(m_psiD, Zero(size_t(3))).on(m_cfg.labels.inlet)
-        + DirichletBC(m_psiO, Zero(size_t(3))).on(m_cfg.labels.inlet);
+    const auto finish = [&](const auto& form) {
+      if (m_cfg.inletConformation)
+        m_flow = form
+          + DirichletBC(m_psiD, Zero(size_t(3))).on(m_cfg.labels.inlet)
+          + DirichletBC(m_psiO, Zero(size_t(3))).on(m_cfg.labels.inlet);
+      else
+        m_flow = form;
+    };
+    if (m_cfg.newtonD2)
+    {
+      // S1, the D2exp part of the Newton linearisation of div exp(psi).
+      const Real k1 = chiScale * m_cfg.stressDivScale * s;
+      finish(body
+        + k1 * withOrder(Integral(m_alpha1 * divExpTrialD2<D>(at, m_psiD), divergence<D>(m_chiD)))
+        + k1 * withOrder(Integral(m_alpha1 * divExpTrialD2<O>(at, m_psiO), divergence<D>(m_chiD)))
+        + k1 * withOrder(Integral(m_alpha1 * divExpTrialD2<D>(at, m_psiD), divergence<O>(m_chiO)))
+        + k1 * withOrder(Integral(m_alpha1 * divExpTrialD2<O>(at, m_psiO), divergence<O>(m_chiO)))
+        - k1 * withOrder(Integral(m_alpha1 * divExpKnownD2(at), divergence<D>(m_chiD)))
+        - k1 * withOrder(Integral(m_alpha1 * divExpKnownD2(at), divergence<O>(m_chiO))));
+    }
     else
-      m_flow = body;
+      finish(body);
   }
 
   void ArterialLesion3DViscousLogImplicit::setupWallShear()
@@ -2040,6 +2051,8 @@ int main(int argc, char** argv)
       getBool("-al_vms", cfg.useVMS);
       getBool("-al_inlet_conformation", cfg.inletConformation);
       getBool("-al_trace_newton", cfg.traceNewton);
+      getBool("-al_newton_d2", cfg.newtonD2);
+      getInt("-al_psi_order", cfg.psiQuadratureOrder);
       getReal("-al_inlet_perturbation", cfg.inletPerturbation);
       getReal("-al_perturbation_cycles", cfg.perturbationCycles);
 
