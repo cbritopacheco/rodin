@@ -1026,6 +1026,36 @@ levels, other backends, curved maps or other physical contexts. PETSc/MPI,
 complex solves, coupled systems and nonlinear solve stages remain separate
 performance batches. Numerical convergence certification is unchanged.
 
+### Reference-geometry derivative reuse
+
+For control coordinates $X_{K,ja}$ and scalar reference basis $\phi_a$, mapped
+Jacobian entries are
+
+$$
+J_{K,ji}(\widehat x_q)=\sum_a X_{K,ja}\,\partial_i\phi_a(\widehat x_q).
+$$
+
+Only the reference values and derivatives can be shared across cells.
+`ReferenceTabulation<Element, Scalar>` supplies the same bounded, thread-local,
+logical-identity store to P1 and H1 geometry; each retains its own basis and
+ordering. Physical Jacobians remain cell-specific, and physical coordinates
+remain lazy. No coordinate tolerance, mapped-data cache or collective is added.
+
+The opt-in `RodinReferenceGeometryBenchmarks` target compares table-based bulk
+Jacobians with the original pointwise fallback on all eight reference
+geometries at quadrature orders 8, 12 and 20. Exact entry comparisons precede
+and follow timing. Output storage is reused; cold table construction, assembly
+and solves are excluded. This executable is not registered in CTest or CI.
+Point geometry is retained as a zero-dimensional control, not a speedup case.
+
+Production impact is measured separately using the existing constrained
+assembly executable. Before/after comparisons retain the physical form,
+geometry, field degree, mesh, quadrature and build configuration. Original
+executables are retained for repeat measurements. The paired solve matrix
+checks identical iteration counts, residuals and coefficient errors; native
+and parallel numerical regressions remain correctness gates rather than
+timing thresholds.
+
 ### Pressure-oracle profiling
 
 `RodinPressureOracleBenchmarks` isolates the complete finite-mesh pressure

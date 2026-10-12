@@ -34,6 +34,7 @@
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
+#include "Rodin/Variational/ReferenceTabulation.h"
 
 #include "ForwardDecls.h"
 
@@ -100,6 +101,35 @@ namespace Rodin::Variational
 
       /// Type of range
       using RangeType = ScalarType;
+
+      /// @brief Reference values and derivatives in this element's vertex order.
+      using Tabulation = typename ReferenceTabulation<P1Element<Scalar>, Scalar>::Table;
+
+      /**
+       * @brief Reuses the element's own basis at quadrature reference samples.
+       *
+       * The canonical reference store is shared across cells on this thread.
+       * Tensor-product, wedge and rational pyramid basis formulas are retained;
+       * no H1 basis or coefficient-order conversion is performed.
+       *
+       * @param formula Reference samples with a logical lifetime/assignment identity.
+       * @returns A table borrowed until a later insertion evicts its slot.
+       */
+      const Tabulation& getTabulation(const QF::QuadratureFormulaBase& formula) const
+      {
+        return ReferenceTabulation<P1Element<Scalar>, Scalar>::get(*this, formula);
+      }
+
+      /**
+       * @brief Borrows an existing table without reading its source formula.
+       * @param identity Logical formula lifetime/assignment identity.
+       * @returns The matching table on this thread, or no value after eviction.
+       */
+      Optional<std::reference_wrapper<const Tabulation>> findTabulation(
+        size_t identity) const
+      {
+        return ReferenceTabulation<P1Element<Scalar>, Scalar>::find(*this, identity);
+      }
 
       /// @brief Represents a linear form of a P1 scalar element.
       class LinearForm

@@ -1,8 +1,15 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
 #include <complex>
 #include "Rodin/Variational/P1.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -12,6 +19,56 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /**
+   * @brief Compares real and complex reference tables with the P1 basis exactly.
+   *
+   * Every reference geometry, including the point, is exercised at two
+   * quadrature orders. Values, first derivatives and gradient spans must retain
+   * the element's vertex ordering. Repeated lookup must return the same table.
+   */
+  TEST(Rodin_Variational_RealP1Element, ReferenceTabulationAllGeometriesAndScalars)
+  {
+    const auto check = []<class Scalar>() {
+      for (const auto geometry :
+        {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+          Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+          Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+      {
+        SCOPED_TRACE(static_cast<int>(geometry));
+        P1Element<Scalar> element(geometry);
+        for (const size_t order : {size_t(8), size_t(16)})
+        {
+          SCOPED_TRACE(order);
+          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+          const auto& table = element.getTabulation(formula);
+          ASSERT_EQ(&element.getTabulation(formula), &table);
+          ASSERT_EQ(table.nqp, formula.getSize());
+          ASSERT_EQ(table.ndof, element.getCount());
+          ASSERT_EQ(table.dim, Polytope::Traits(geometry).getDimension());
+          for (size_t qp = 0; qp < formula.getSize(); ++qp)
+          {
+            for (size_t a = 0; a < element.getCount(); ++a)
+            {
+              const auto basis = element.getBasis(a);
+              EXPECT_EQ(table.getBasis(qp, a), basis(formula.getPoint(qp)));
+              const auto gradient = table.getGradient(qp, a);
+              ASSERT_EQ(gradient.size(), table.dim);
+              for (size_t i = 0; i < table.dim; ++i)
+              {
+                const auto expected =
+                  basis.template getDerivative<1>(i)(formula.getPoint(qp));
+                EXPECT_EQ(table.template getDerivative<1>(qp, a, i), expected);
+                EXPECT_EQ(gradient[i], expected);
+              }
+            }
+          }
+        }
+      }
+    };
+    check.template operator()<Real>();
+    check.template operator()<Complex>();
+  }
+
   /// @brief Verifies sanity test 1 D reference segment for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, SanityTest_1D_Reference_Segment)
   {

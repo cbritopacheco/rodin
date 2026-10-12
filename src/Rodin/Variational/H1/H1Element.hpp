@@ -351,120 +351,17 @@ namespace Rodin::Variational
   };
 
   template <size_t K, class Scalar>
-  auto& H1Element<K, Scalar>::getTabulationCache()
-  {
-    struct CacheEntry
-    {
-      const QF::QuadratureFormulaBase* qf;
-      size_t identity;
-      Geometry::Polytope::Type g;
-      size_t nqp;
-      bool valid;
-      Tabulation tab;
-
-      CacheEntry()
-        : qf(nullptr),
-          identity(0),
-          g(Geometry::Polytope::Type::Point),
-          nqp(0),
-          valid(false),
-          tab()
-      {}
-    };
-
-    struct Cache
-    {
-      std::array<CacheEntry, 8> e;
-      size_t next;
-
-      Cache()
-        : e(),
-          next(0)
-      {}
-    };
-
-    static thread_local Cache s_cache;
-    return s_cache;
-  }
-
-  template <size_t K, class Scalar>
   Optional<std::reference_wrapper<const typename H1Element<K, Scalar>::Tabulation>>
   H1Element<K, Scalar>::findTabulation(size_t identity) const
   {
-    for (const auto& entry : getTabulationCache().e)
-    {
-      if (entry.valid && entry.identity == identity && entry.g == this->getGeometry())
-        return std::cref(entry.tab);
-    }
-    return {};
+    return ReferenceTabulation<H1Element<K, Scalar>, Scalar>::find(*this, identity);
   }
 
   template <size_t K, class Scalar>
   const typename H1Element<K, Scalar>::Tabulation& H1Element<K, Scalar>::getTabulation(
     const QF::QuadratureFormulaBase& qf) const
   {
-    auto& cache = getTabulationCache();
-
-    const auto g   = this->getGeometry();
-    const auto nqp = qf.getSize();
-    const auto identity = qf.getCacheIdentity();
-
-    // 1) lookup
-    for (auto& ce : cache.e)
-    {
-      if (ce.valid && ce.qf == &qf && ce.identity == identity && ce.g == g &&
-        ce.nqp == nqp)
-        return ce.tab;
-    }
-
-    // 2) miss -> rebuild into an entry
-    auto& ce = cache.e[cache.next];
-    cache.next = (cache.next + 1) % cache.e.size();
-
-    ce.valid = true;
-    ce.qf = &qf;
-    ce.identity = identity;
-    ce.g = g;
-    ce.nqp = nqp;
-
-    Tabulation& t = ce.tab;
-
-    const size_t dim  = Geometry::Polytope::Traits(g).getDimension();
-    const size_t ndof = this->getCount();
-
-    t.nqp  = nqp;
-    t.ndof = ndof;
-    t.dim  = dim;
-
-    t.phi.resize(nqp * ndof);
-    t.dphi.resize(nqp * ndof * dim);
-
-    // Cache basis handles (cheap, avoids repeated getBasis(a) calls)
-    std::vector<std::reference_wrapper<const BasisFunction>> bf;
-    bf.reserve(ndof);
-    for (size_t a = 0; a < ndof; ++a)
-      bf.emplace_back(this->getBasis(a));
-
-    for (size_t qp = 0; qp < nqp; ++qp)
-    {
-      const auto& rc = qf.getPoint(qp);
-
-      Scalar* phi_row  = t.phi.data()  + qp * ndof;
-      Scalar* dphiRow = t.dphi.data() + qp * ndof * dim;
-
-      for (size_t a = 0; a < ndof; ++a)
-      {
-        const auto& bfa = bf[a].get();
-
-        phi_row[a] = bfa(rc);
-
-        Scalar* d = dphiRow + a * dim;
-        for (size_t i = 0; i < dim; ++i)
-          d[i] = bfa.template getDerivative<1>(i)(rc);
-      }
-    }
-
-    return t;
+    return ReferenceTabulation<H1Element<K, Scalar>, Scalar>::get(*this, qf);
   }
 
   template <size_t K, class Scalar>

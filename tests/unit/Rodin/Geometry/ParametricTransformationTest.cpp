@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -427,11 +433,11 @@ namespace Rodin::Tests::Unit
        * @tparam K Geometry element degree.
        * @param geometry Reference polytope type.
        */
-      template <size_t K>
+      template <size_t K, class Element = Variational::RealH1Element<K>>
       void checkEvaluation(Polytope::Type geometry)
       {
         SCOPED_TRACE(K);
-        Variational::RealH1Element<K> element(geometry);
+        Element element(geometry);
         const size_t rdim = Polytope::Traits(geometry).getDimension();
         for (const size_t order : {size_t(8), size_t(16)})
         {
@@ -554,10 +560,11 @@ namespace Rodin::Tests::Unit
           mutable size_t m_reads;
       };
 
+      template <class Element = Variational::RealH1Element<2>>
       struct ObservedElement
       {
           using RangeType = Real;
-          Variational::RealH1Element<2> element;
+          Element element;
           size_t* basisReads;
           size_t* tableReads;
           /**
@@ -600,7 +607,7 @@ namespace Rodin::Tests::Unit
          * @param i Local scalar basis index.
          * @returns The underlying basis function.
          */
-          const auto& getBasis(size_t i) const
+          decltype(auto) getBasis(size_t i) const
           {
             ++*basisReads;
             return element.getBasis(i);
@@ -640,6 +647,7 @@ namespace Rodin::Tests::Unit
    *
    * @param geometry Positive-dimensional reference geometry.
    */
+      template <class Element = Variational::RealH1Element<2>>
       void checkLazyCoordinates(Polytope::Type geometry)
       {
         const size_t dimension = Polytope::Traits(geometry).getDimension();
@@ -649,7 +657,7 @@ namespace Rodin::Tests::Unit
         const auto cell = *mesh.getPolytope(dimension, 0);
         const auto otherCell = *mesh.getPolytope(dimension, 1);
         size_t basisReads = 0, tableReads = 0;
-        ObservedElement element(geometry, basisReads, tableReads);
+        ObservedElement<Element> element(geometry, basisReads, tableReads);
         PointCloud controls(dimension, element.getCount());
         for (size_t a = 0; a < element.getCount(); ++a)
         {
@@ -744,13 +752,14 @@ namespace Rodin::Tests::Unit
        * @brief Certifies reference-only reuse and formula lifetime invalidation.
        * @param geometry Reference polytope type.
        */
+      template <class Element = Variational::RealH1Element<2>>
       void checkReuse(Polytope::Type geometry)
       {
         const Polytope::Traits traits(geometry);
         const auto centroid = traits.getCentroid();
         const auto vertex = traits.getVertex(0);
         size_t basisReads = 0, tableReads = 0;
-        ObservedElement element(geometry, basisReads, tableReads);
+        ObservedElement<Element> element(geometry, basisReads, tableReads);
         PointCloud first(3, element.getCount()), second(3, element.getCount());
         for (size_t a = 0; a < element.getCount(); ++a)
         {
@@ -1000,6 +1009,7 @@ namespace Rodin::Tests::Unit
         Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(static_cast<int>(geometry));
+      checkEvaluation<1, Variational::P1Element<Real>>(geometry);
       checkEvaluation<1>(geometry);
       checkEvaluation<2>(geometry);
       checkEvaluation<3>(geometry);
@@ -1046,6 +1056,26 @@ namespace Rodin::Tests::Unit
     {
       SCOPED_TRACE(static_cast<int>(geometry));
       checkLazyCoordinates(geometry);
+    }
+  }
+
+  /**
+   * @brief Certifies P1 reference reuse, invalidation and safe lazy fallbacks.
+   *
+   * Integer access counts distinguish shared reference tables from pointwise
+   * evaluation. Exact Jacobian and coordinate comparisons cover all supported
+   * positive-dimensional geometries, including rational pyramids, as well as
+   * formula destruction, eviction, rebinding and cross-thread point transfer.
+   */
+  TEST_F(QuadratureTransformationTest, P1ReferenceReuseAndOwnedSamples)
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      checkReuse<Variational::P1Element<Real>>(geometry);
+      checkLazyCoordinates<Variational::P1Element<Real>>(geometry);
     }
   }
 } // namespace Rodin::Tests::Unit

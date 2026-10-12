@@ -52,7 +52,7 @@ compare coordinate/key sets in tests.
 - `PolytopeQuadrature` caches quadrature data attached to mesh polytopes.
   Construction evaluates the cell's quadrature Jacobians in one bulk
   transformation call and stores them in the points' existing owned caches.
-  Parametric H1 geometry borrows its existing reference table only during this
+  Parametric P1 and H1 geometry borrow their reference tables only during this
   call; neither points nor transformations retain a table or formula pointer.
   Physical coordinates and derived metric quantities remain lazy. Mapped points
   own their reference coordinates and retain only the formula's logical identity

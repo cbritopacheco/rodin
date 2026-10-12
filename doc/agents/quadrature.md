@@ -112,6 +112,13 @@ Temporary matrix storage is proportional to the current formula size, not
 the number of mesh cells. Copying or moving a point preserves its owned
 geometry, and rebinding it invalidates that geometry normally.
 
+`ReferenceTabulation<Element, Scalar>` owns the common bounded thread-local
+store used by scalar P1 and H1 elements. Each element type retains its own basis
+formulas and ordering, including the rational pyramid basis. The stored arrays
+contain only reference values and first derivatives; physical Jacobians are
+recomputed from each cell's control coordinates. The eight-entry eviction policy
+and logical formula identities apply equally to both element families.
+
 Physical-coordinate evaluation reuses the basis values from the same reference
 table without making coordinates eager. A mapped point owns its reference
 coordinates and stores only the formula identity and quadrature index. The
