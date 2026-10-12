@@ -64,17 +64,28 @@ geometry, and backend variants explicitly. Current audit findings include:
   symbolic/numeric stages and symmetric factorization; ParU checks index
   conversion and repeated right-hand sides. Both also rebuild independent
   resources after copy, move and polymorphic clone while preserving settings.
-- P1 scalar derivatives: real/complex affine fields on every geometry,
-  including face traces. Instantiation exposed obsolete basis, coefficient,
-  and optional-attribute APIs, now covered by numerical regressions.
+- P1/quadratic H1 scalar coordinate derivatives: real/complex affine fields
+  on every geometry, including face traces. Direct and scalar-base expression
+  views report the geometry-dependent total derivative degree. Instantiation
+  exposed obsolete basis/coefficient APIs, missing P1 order metadata and
+  missing shared-base order forwarding; compiler failures preceded the repairs.
+  Manufactured mass solves with coordinate-derivative loads recover exact
+  constants on two meshes for every geometry, including complex coefficients
+  and OpenMP with one/four threads. Doubled derivatives fail both solves.
 - P1/quadratic H1 one-sided gradient/Jacobian/divergence traces: a continuous piecewise
   affine field has different prescribed derivatives on either side of an
   aligned interface. Real and complex scalar/vector cases recover both traces
   on all seven geometries, including boundary faces, and reject missing trace
   attributes. Always choosing the first neighbor fails all three numerical
   oracles in both scalar fields and element families. All four cases in the
-  dedicated trace executable pass. The two existing coordinate-derivative
-  tests remain separate.
+  dedicated trace executable pass. Coordinate derivatives, including copied,
+  moved and cloned expressions, also recover the selected one-sided trace and
+  reject first-neighbor mutations. The affine/order tests remain separate.
+- Boundary-normal point transport: exact outward normals on retained half-box
+  submeshes across all six 2D/3D geometries survive parent inclusion and
+  restriction, copying, moving and polymorphic cloning. Excluded parent faces
+  and unrelated coincident meshes are rejected. A halved normal fails the
+  independent coordinate-plane oracle. All seven boundary-normal tests pass.
 - Grid-function failure contracts: scalar/vector MFEM and MEDIT failed opens
   preserve every coefficient and create no output directory. Geometrically
   coincident but unrelated mesh points are rejected through both geometric
