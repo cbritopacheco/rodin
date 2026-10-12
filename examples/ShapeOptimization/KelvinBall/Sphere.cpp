@@ -264,8 +264,10 @@ namespace KelvinBall
           "Fixed-boundary projection would invert or degenerate a tetrahedron.");
     }
     for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+    {
       if (constraints[vertex])
         mesh.setVertexCoordinates(vertex, coordinates[vertex]);
+    }
     Alert::Text<Alert::YellowT> heading(Alert::Yellow, "Fixed-boundary projection");
     Alert::Info() << heading.setBold() << Alert::NewLine
                   << "Corrected vertices:                 "
@@ -274,8 +276,8 @@ namespace KelvinBall
                   << Alert::Notation::Number(maximumCorrection) << Alert::Raise;
   }
 
-  SphereDiscretization Sphere::discretize(bool conformingCuts,
-    Real requestedWelschScale) const
+  SphereDiscretization Sphere::discretize(
+    bool conformingCuts, Real requestedWelschScale) const
   {
     MMG::Mesh mesh(makeUniformChamber());
     const Real h = m_configuration.getGridSpacing();
@@ -335,8 +337,8 @@ namespace KelvinBall
     const Real hmax = m_configuration.hmax;
     const Real hausdorff = m_configuration.backgroundHausdorff * h;
     const Real backgroundMeanElementSize = meanElementSize(mesh);
-    const Real welschScale = requestedWelschScale > 0
-      ? requestedWelschScale : Real(3) * h;
+    const Real welschScale =
+      requestedWelschScale > 0 ? requestedWelschScale : Real(3) * h;
     const size_t cellsBefore = mesh.getCellCount();
     if (m_configuration.adapt)
     {
@@ -347,8 +349,7 @@ namespace KelvinBall
       {
         const Real distance =
           std::abs(mesh.getVertexCoordinates(vertex).norm() - Real(1));
-        size[vertex] =
-          farSize - (farSize - interfaceSize) * welsch.getWeight(distance);
+        size[vertex] = farSize - (farSize - interfaceSize) * welsch.getWeight(distance);
       }
       protectFixedGeometry(mesh, false);
       MMG::Adapt()
@@ -414,8 +415,8 @@ namespace KelvinBall
     MMG::Adapt()
       .setHMin(m_configuration.hmin)
       .setHMax(m_configuration.hmax)
-      .setHausdorff(Real(0.1) * m_configuration.getGridSpacing() *
-        m_configuration.getGridSpacing())
+      .setHausdorff(
+        Real(0.1) * m_configuration.getGridSpacing() * m_configuration.getGridSpacing())
       .setGradation(m_configuration.adaptGradation)
       .setAngleDetection(false)
       .adapt(mesh, size);
@@ -437,8 +438,8 @@ namespace KelvinBall
     const Real h = m_configuration.getGridSpacing();
     const Real interfaceSize = m_configuration.hmin;
     const Real farSize = m_configuration.hmax;
-    const Real welschScale = requestedWelschScale > 0
-      ? requestedWelschScale : Real(3) * h;
+    const Real welschScale =
+      requestedWelschScale > 0 ? requestedWelschScale : Real(3) * h;
     const Adaptation::SWIFT::Loss welsch(welschScale);
 
     P1<Real, Mesh> sizeSpace(mesh);
@@ -449,8 +450,8 @@ namespace KelvinBall
     Distance::Eikonal(distance).setInterior(Obstacle).setInterface(Gamma).solve();
     for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
     {
-      size[vertex] = farSize - (farSize - interfaceSize)
-        * welsch.getWeight(std::abs(distance[vertex]));
+      size[vertex] = farSize -
+        (farSize - interfaceSize) * welsch.getWeight(std::abs(distance[vertex]));
     }
 
     protectFixedGeometry(mesh, requiredCuts);

@@ -15,7 +15,6 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <map>
 #include <memory>
 #include <type_traits>
 #include <utility>
@@ -860,11 +859,6 @@ namespace Rodin::Adaptation::SWIFT
           Alert::Exception() << "SWIFT requires a finite positive reference mesh size."
                              << Alert::Raise;
         assembleBoundaryConditions();
-        buildBoundaryConstraints(mesh);
-        for (const Index dof : m_pinnedDofs)
-          m_fixedIncrementDOFs[dof] = Real(0);
-        m_hingeProblem.setSystemTransform(
-          [this](LinearSystemType& system) { applySlipConstraint(system); });
         const Real acceptedJacobianFloor = p.model.jacobian;
         const Real stepTol = p.convergence.tolerance.step;
         using Clock = std::chrono::steady_clock;
@@ -1116,9 +1110,6 @@ namespace Rodin::Adaptation::SWIFT
           m_centering = distribution.getCentering();
           for (const auto& [dof, value] : m_fixedIncrementDOFs)
             m_centering.row(dof).setZero();
-          // Restrict the low-rank subtraction together with the sparse metric.
-          if (!m_slipNodes.empty())
-            m_centering = (m_slipProjector.transpose() * m_centering).eval();
           m_linearSolver.setCentering(m_centering);
           m_fittingForce = surfaceForce;
           m_fittingForce.assemble();
@@ -2536,199 +2527,6 @@ namespace Rodin::Adaptation::SWIFT
         return {sigma, gradientScale};
       }
 
-      struct SlipNode
-      {
-          std::vector<Index> dofs;
-          Math::Matrix<Real> complement;
-      };
-
-      template <class MeshType>
-      void buildBoundaryConstraints(const MeshType& mesh)
-      {
-        m_slipNodes.clear();
-        m_pinnedDofs.clear();
-        const auto& fes = m_duStep.getFiniteElementSpace();
-        const auto size = static_cast<Eigen::Index>(fes.getSize());
-        const std::size_t meshDim = mesh.getDimension();
-        const auto& parameters = m_parameters;
-
-        std::map<Index, std::vector<Math::SpatialVector<Real>>> normals;
-        for (auto face = mesh.getPolytope(meshDim - 1); face; ++face)
-        {
-          const auto attribute = face->getAttribute();
-          if (!attribute)
-            continue;
-          if (parameters.fixedBoundaryAttributes.contains(*attribute))
-          {
-            for (const Index vertex : face->getVertices())
-            {
-              const auto& dofs = fes.getDOFs(0, vertex);
-              for (Eigen::Index k = 0; k < dofs.size(); ++k)
-                m_pinnedDofs.insert(static_cast<Index>(dofs(k)));
-            }
-          }
-          if (!parameters.slipBoundaryAttributes.contains(*attribute))
-            continue;
-          const auto& vertices = face->getVertices();
-          if (vertices.size() < meshDim)
-            continue;
-          Math::SpatialVector<Real> normal(meshDim);
-          normal.setZero();
-          const auto x0 = mesh.getVertexCoordinates(vertices[0]);
-          if (meshDim == 3)
-          {
-            const Math::SpatialVector<Real> a =
-              mesh.getVertexCoordinates(vertices[1]) - x0;
-            const Math::SpatialVector<Real> b =
-              mesh.getVertexCoordinates(vertices[2]) - x0;
-            normal(0) = a(1) * b(2) - a(2) * b(1);
-            normal(1) = a(2) * b(0) - a(0) * b(2);
-            normal(2) = a(0) * b(1) - a(1) * b(0);
-          }
-          else
-          {
-            const Math::SpatialVector<Real> a =
-              mesh.getVertexCoordinates(vertices[1]) - x0;
-            normal(0) = -a(1);
-            normal(1) = a(0);
-          }
-          const Real length = normal.norm();
-          if (!(length > Real(0)))
-            continue;
-          normal /= length;
-          for (const Index vertex : vertices)
-            normals[vertex].push_back(normal);
-        }
-
-        if (normals.empty())
-        {
-          m_slipProjector.resize(0, 0);
-          return;
-        }
-
-        std::vector<Math::SparseTriplet<Real>> entries;
-        entries.reserve(static_cast<std::size_t>(size) + 9 * normals.size());
-        std::vector<char> constrained(static_cast<std::size_t>(size), 0);
-        for (const auto& [vertex, facetNormals] : normals)
-        {
-          const auto& dofs = fes.getDOFs(0, vertex);
-          const auto components = static_cast<Eigen::Index>(dofs.size());
-          Math::Matrix<Real> complement(components, components);
-          complement.setZero();
-          // Gram--Schmidt over the facet normals gives an orthonormal basis of
-          // the forbidden subspace, whose rank is one, two, or three.
-          std::vector<Math::SpatialVector<Real>> basis;
-          for (const auto& candidate : facetNormals)
-          {
-            Math::SpatialVector<Real> q = candidate;
-            for (const auto& previous : basis)
-              q -= previous.dot(q) * previous;
-            const Real norm = q.norm();
-            if (norm > Real(1e-8))
-              basis.push_back(q / norm);
-          }
-          for (const auto& q : basis)
-          {
-            for (Eigen::Index i = 0; i < components; ++i)
-              for (Eigen::Index j = 0; j < components; ++j)
-                complement(i, j) += q(i) * q(j);
-          }
-
-          SlipNode node;
-          node.complement = complement;
-          node.dofs.reserve(static_cast<std::size_t>(components));
-          for (Eigen::Index k = 0; k < components; ++k)
-          {
-            const auto dof = static_cast<Index>(dofs(k));
-            node.dofs.push_back(dof);
-            constrained[static_cast<std::size_t>(dof)] = 1;
-          }
-          for (Eigen::Index i = 0; i < components; ++i)
-          {
-            for (Eigen::Index j = 0; j < components; ++j)
-            {
-              const Real value = (i == j ? Real(1) : Real(0)) - complement(i, j);
-              if (value != Real(0))
-                entries.emplace_back(
-                  static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(i)]),
-                  static_cast<Math::SparseIndex>(node.dofs[static_cast<std::size_t>(j)]),
-                  value);
-            }
-          }
-          m_slipNodes.push_back(std::move(node));
-        }
-        for (Eigen::Index dof = 0; dof < size; ++dof)
-        {
-          if (!constrained[static_cast<std::size_t>(dof)])
-            entries.emplace_back(static_cast<Math::SparseIndex>(dof),
-              static_cast<Math::SparseIndex>(dof), Real(1));
-        }
-        m_slipProjector.resize(size, size);
-        m_slipProjector.setFromTriplets(entries.begin(), entries.end());
-        m_slipProjector.makeCompressed();
-      }
-
-      /**
-       * @brief Restricts an assembled step to the slip-admissible subspace.
-       *
-       * With @f$ P @f$ the projector onto that subspace and @f$ Q=I-P @f$, the
-       * step solves @f$ (PAP + \alpha Q)u = Pb @f$. Its solution satisfies
-       * @f$ Qu=0 @f$ exactly and @f$ P(Au-b)=0 @f$, so the facets keep their
-       * surface to roundoff rather than to a penalty. The diagonal of the
-       * eliminated block carries the scale of the row it replaces.
-       */
-      void applySlipConstraint(LinearSystemType& axb) const
-      {
-        if (m_slipNodes.empty())
-          return;
-        if constexpr (std::is_same_v<
-                        typename FormLanguage::Traits<LinearSystemType>::OperatorType,
-                        Math::SparseMatrix<Real>>)
-        {
-          auto& A = axb.getOperator();
-          auto& b = axb.getVector();
-          if (A.rows() != m_slipProjector.rows())
-            return;
-          A.makeCompressed();
-
-          std::vector<Math::SparseTriplet<Real>> eliminated;
-          eliminated.reserve(9 * m_slipNodes.size());
-          for (const auto& node : m_slipNodes)
-          {
-            Real scale = 0;
-            for (const Index dof : node.dofs)
-              scale += std::abs(
-                A.coeff(static_cast<Eigen::Index>(dof), static_cast<Eigen::Index>(dof)));
-            scale /= static_cast<Real>(node.dofs.size());
-            if (!(scale > Real(0)))
-              scale = Real(1);
-            const auto components = static_cast<Eigen::Index>(node.dofs.size());
-            for (Eigen::Index i = 0; i < components; ++i)
-            {
-              for (Eigen::Index j = 0; j < components; ++j)
-              {
-                const Real value = scale * node.complement(i, j);
-                if (value != Real(0))
-                  eliminated.emplace_back(static_cast<Math::SparseIndex>(
-                                            node.dofs[static_cast<std::size_t>(i)]),
-                    static_cast<Math::SparseIndex>(
-                      node.dofs[static_cast<std::size_t>(j)]),
-                    value);
-              }
-            }
-          }
-          Math::SparseMatrix<Real> complement(A.rows(), A.cols());
-          complement.setFromTriplets(eliminated.begin(), eliminated.end());
-
-          Math::SparseMatrix<Real> restricted =
-            (m_slipProjector.transpose() * A * m_slipProjector).eval();
-          restricted = (restricted + complement).eval();
-          restricted.makeCompressed();
-          A = std::move(restricted);
-          b = m_slipProjector.transpose() * b;
-        }
-      }
-
       void assembleBoundaryConditions()
       {
         m_fixedIncrementDOFs.clear();
@@ -2764,7 +2562,6 @@ namespace Rodin::Adaptation::SWIFT
             (Real(0.5) * (matrix + Math::SparseMatrix<Real>(matrix.transpose()))).eval();
           if (!m_fixedIncrementDOFs.empty())
             m_metricProblem.getLinearSystem().eliminate(m_fixedIncrementDOFs);
-          applySlipConstraint(m_metricProblem.getLinearSystem());
           matrix.makeCompressed();
         }
       }
@@ -2825,9 +2622,6 @@ namespace Rodin::Adaptation::SWIFT
       BilinearFormType m_additionalMetric;
       Variational::EssentialBoundary<Real> m_boundaryConditions;
       IndexMap<Real> m_fixedIncrementDOFs;
-      std::vector<SlipNode> m_slipNodes;
-      FlatSet<Index> m_pinnedDofs;
-      Math::SparseMatrix<Real> m_slipProjector;
       Parameters m_parameters;
       Report m_report;
       Optional<Monitor> m_monitor;

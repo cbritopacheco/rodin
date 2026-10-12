@@ -33,25 +33,34 @@ namespace KelvinBall
         const Rodin::Location::AABB<Mesh> locator(mesh);
         for (auto vertex = mesh.getVertex(); vertex; ++vertex)
         {
-          const auto point = locator.locate(mesh.getDimension(), vertex->getCoordinates());
+          const auto point =
+            locator.locate(mesh.getDimension(), vertex->getCoordinates());
           if (!point)
             throw std::runtime_error("A transport vertex is outside its chamber mesh.");
           ++m_attempted;
           const auto trace = flow.trace(*point);
-          const auto value = trace.exited() ? distance.getValue(*point) :
-            distance.getValue(trace.getPoint()) + trace.getCorrection();
+          const auto value = trace.exited()
+            ? distance.getValue(*point)
+            : distance.getValue(trace.getPoint()) + trace.getCorrection();
           if (trace.exited())
             ++m_fallback;
-          result.project({0, vertex->getIndex()}, Rodin::Variational::RealFunction(
-            [value](const Rodin::Geometry::Point&) { return value; }));
+          result.project({0, vertex->getIndex()},
+            Rodin::Variational::RealFunction(
+              [value](const Rodin::Geometry::Point&) { return value; }));
         }
       }
 
       /** @returns Number of traced vertices. */
-      size_t getAttemptedCount() const { return m_attempted; }
+      size_t getAttemptedCount() const
+      {
+        return m_attempted;
+      }
 
       /** @returns Number of vertices retaining their previous distance. */
-      size_t getFallbackCount() const { return m_fallback; }
+      size_t getFallbackCount() const
+      {
+        return m_fallback;
+      }
 
     private:
       size_t m_attempted = 0;

@@ -92,11 +92,12 @@ namespace KelvinBall
           for (size_t j = i + 1; j < 4; ++j)
           {
             squaredEdges += (input.getVertexCoordinates(vertices[i]) -
-              input.getVertexCoordinates(vertices[j])).squaredNorm();
+              input.getVertexCoordinates(vertices[j]))
+                              .squaredNorm();
           }
         }
-        const Real quality = 12 * std::pow(std::abs(determinant) / 2,
-          Real(2) / 3) / squaredEdges;
+        const Real quality =
+          12 * std::pow(std::abs(determinant) / 2, Real(2) / 3) / squaredEdges;
         values.emplace_back(determinant, quality);
       }
       return values;

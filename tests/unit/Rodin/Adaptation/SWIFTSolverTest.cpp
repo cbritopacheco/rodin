@@ -488,13 +488,15 @@ namespace Rodin::Tests::Unit
       Alert::Exception);
   }
 
-  TEST(Rodin_Adaptation_SWIFTSolver, PreservesFixedAndSlipBoundaries)
+  TEST(Rodin_Adaptation_SWIFTSolver, FixedBoundaryAndPenalizedTangency)
   {
     constexpr Attribute Fixed = 20;
     constexpr Attribute Slip = 21;
     for (const size_t dimension : {2u, 3u})
-      for (const bool sliding : {false, true})
+    {
+      for (const Real tangencyPenalty : {Real(-1), Real(0), Real(1e7)})
       {
+        const bool sliding = tangencyPenalty >= Real(0);
         auto mesh = dimension == 2
           ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {5, 5})
           : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {5, 5, 5});
@@ -506,8 +508,10 @@ namespace Rodin::Tests::Unit
           bool onInterface = true;
           bool onFixed = false;
           for (const Index vertex : face->getVertices())
+          {
             onInterface &=
               std::abs(mesh.getVertexCoordinates(vertex)(0) - Real(0.5)) < Real(1e-12);
+          }
           if (onInterface)
           {
             mesh.setAttribute({dimension - 1, face->getIndex()}, Interface);
@@ -527,6 +531,13 @@ namespace Rodin::Tests::Unit
           mesh.setAttribute(
             {dimension - 1, face->getIndex()}, !sliding || onFixed ? Fixed : Slip);
         }
+        // An oblique cut exercises coupled components, not coordinate pinning.
+        for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+        {
+          Math::SpatialPoint x = mesh.getVertexCoordinates(vertex);
+          x(1) += Real(0.3) * x(0);
+          mesh.setVertexCoordinates(vertex, x);
+        }
         P1<Math::SpatialVector<Real>, LocalMesh> fes(mesh, dimension);
         TrialFunction trial(fes);
         TestFunction test(fes);
@@ -536,13 +547,19 @@ namespace Rodin::Tests::Unit
         // Require motion: the automatic h^2 target exceeds this initial offset.
         parameters.convergence.tolerance.geometric = Real(1e-3);
         parameters.interfaceAttribute = Interface;
-        parameters.fixedBoundaryAttributes = {Fixed};
-        if (sliding)
-          parameters.slipBoundaryAttributes = {Slip};
         parameters.convergence.iterations.outer = 3;
-        parameters.convergence.tolerance.linearRelative = Real(1e-9);
         parameters.linear.solver = SWIFT::Parameters::LinearSolver::SparseLU;
         solver.setParameters(parameters);
+        const Math::Vector<Real> zero = Math::Vector<Real>::Zero(dimension);
+        solver += DirichletBC(trial, VectorFunction(zero)).on(Fixed);
+        if (tangencyPenalty > Real(0))
+        {
+          const FaceNormal normal(mesh);
+          solver.getMetric() +=
+            FaceIntegral((tangencyPenalty / parameters.model.h) * Dot(normal, trial),
+              Dot(normal, test))
+              .over(Slip);
+        }
         RealFunction phi([](const Point& point) { return point.x() - Real(0.55); });
         AnalyticVectorFunction grad(
           [dimension](const Point&) {
@@ -555,6 +572,7 @@ namespace Rodin::Tests::Unit
         const auto report = solver.solve(phi, grad);
         EXPECT_GT(report.iterations, 0u) << report.getReasonString();
         EXPECT_GT(trial.getSolution().getData().norm(), Real(1e-5));
+        Real maximumNormal = 0;
         for (auto face = mesh.getPolytope(dimension - 1); face; ++face)
         {
           if (face->getAttribute() != Fixed && face->getAttribute() != Slip)
@@ -566,15 +584,30 @@ namespace Rodin::Tests::Unit
             const auto& point = quadrature.getPoint(q);
             const auto value = trial.getSolution().getValue(point);
             if (face->getAttribute() == Fixed)
+            {
               EXPECT_LT(value.norm(), Real(1e-10));
+            }
             else
-              for (size_t component = 1; component < dimension; ++component)
-                if (std::abs(point.getCoordinates()(component)) < Real(1e-12) ||
-                  std::abs(point.getCoordinates()(component) - Real(1)) < Real(1e-12))
-                  EXPECT_LT(std::abs(value(component)), Real(1e-10));
+            {
+              maximumNormal = std::max(
+                maximumNormal, std::abs(FaceNormal(mesh).getValue(point).dot(value)));
+            }
+          }
+        }
+        if (sliding)
+        {
+          if (tangencyPenalty > Real(0))
+          {
+            EXPECT_LT(maximumNormal, Real(1e-6));
+          }
+          else
+          {
+            // Without the penalty, this oblique cut has non-tangential motion.
+            EXPECT_GT(maximumNormal, Real(1e-5));
           }
         }
       }
+    }
   }
 
   TEST(Rodin_Adaptation_SWIFTSolver, SmallDirectionCanProduceLargeAcceptedStep)

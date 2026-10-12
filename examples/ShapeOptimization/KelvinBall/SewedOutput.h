@@ -102,8 +102,10 @@ namespace KelvinBall
                 family[sourceLoad]->getFiniteElementSpace().getDOFs(0, source.vertex);
               Math::SpatialVector<Real> chamberValue(3);
               for (size_t component = 0; component < 3; ++component)
+              {
                 chamberValue(component) =
                   family[sourceLoad]->getData()(sourceDOFs(component));
+              }
               value += rotation(load, sourceLoad) * rotation * chamberValue;
             }
           }

@@ -109,8 +109,8 @@ namespace KelvinBall
        * Used for the single recovery attempt after ordinary adaptation fails;
        * it does not constrain subsequent SWIFT displacement solves.
        */
-      void adapt(MMG::Mesh& mesh, Real requestedWelschScale = 0,
-        bool requiredCuts = false) const;
+      void adapt(
+        MMG::Mesh& mesh, Real requestedWelschScale = 0, bool requiredCuts = false) const;
 
       /**
        * @brief Marks the fixed boundary for MMG and returns the number of

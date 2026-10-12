@@ -31,7 +31,8 @@ namespace KelvinBall
     MMG::MMG5::destroyMesh(native);
   }
 
-  TEST(KelvinBallBackground, AdaptationRemovesMaterialsAndOldInterfaceWithoutMutatingSource)
+  TEST(
+    KelvinBallBackground, AdaptationRemovesMaterialsAndOldInterfaceWithoutMutatingSource)
   {
     Configuration configuration;
     configuration.points = 5;
@@ -44,8 +45,8 @@ namespace KelvinBall
     source.getConnectivity().compute(2, 3);
     for (auto cell = source.getCell(); cell; ++cell)
     {
-      source.setAttribute({3, cell->getIndex()},
-        centroid(source, *cell).norm() < 1 ? Obstacle : Fluid);
+      source.setAttribute(
+        {3, cell->getIndex()}, centroid(source, *cell).norm() < 1 ? Obstacle : Fluid);
     }
     source.trace({{{Obstacle, Fluid}, Gamma}});
     source.setRequiredTetrahedron(0);
@@ -63,13 +64,13 @@ namespace KelvinBall
     EXPECT_EQ(source.getRequiredTetrahedra(), original.getRequiredTetrahedra());
     for (auto cell = source.getCell(); cell; ++cell)
     {
-      EXPECT_EQ(cell->getAttribute(),
-        original.getPolytope(3, cell->getIndex())->getAttribute());
+      EXPECT_EQ(
+        cell->getAttribute(), original.getPolytope(3, cell->getIndex())->getAttribute());
     }
     for (Index i = 0; i < source.getVertexCount(); ++i)
     {
-      EXPECT_EQ((source.getVertexCoordinates(i) -
-        original.getVertexCoordinates(i)).norm(), 0);
+      EXPECT_EQ(
+        (source.getVertexCoordinates(i) - original.getVertexCoordinates(i)).norm(), 0);
     }
   }
 
@@ -79,8 +80,8 @@ namespace KelvinBall
     mesh.getConnectivity().compute(2, 3);
     for (auto face = mesh.getBoundary(); face; ++face)
     {
-      mesh.setAttribute({2, face->getIndex()},
-        centroid(mesh, *face)(0) == 0 ? Gamma : Outer);
+      mesh.setAttribute(
+        {2, face->getIndex()}, centroid(mesh, *face)(0) == 0 ? Gamma : Outer);
     }
     Index interior = mesh.getVertexCount();
     Math::SpatialPoint center(3);
@@ -105,8 +106,8 @@ namespace KelvinBall
     {
       if (i != interior)
       {
-        EXPECT_EQ((mesh.getVertexCoordinates(i) -
-          original.getVertexCoordinates(i)).norm(), 0);
+        EXPECT_EQ(
+          (mesh.getVertexCoordinates(i) - original.getVertexCoordinates(i)).norm(), 0);
       }
     }
     Real volumeAfter = 0;
@@ -123,8 +124,8 @@ namespace KelvinBall
     for (auto face = mesh.getBoundary(); face; ++face)
     {
       const auto x = centroid(mesh, *face);
-      mesh.setAttribute({2, face->getIndex()}, x(0) == 0 ? SigmaXYPlus :
-        (x(1) == 0 ? SigmaPlus : Outer));
+      mesh.setAttribute(
+        {2, face->getIndex()}, x(0) == 0 ? SigmaXYPlus : (x(1) == 0 ? SigmaPlus : Outer));
     }
     const Mesh original(mesh);
     LaplacianSmoothing().execute(mesh);
@@ -132,8 +133,8 @@ namespace KelvinBall
     {
       for (const Index vertex : face->getVertices())
       {
-        const auto delta = mesh.getVertexCoordinates(vertex) -
-          original.getVertexCoordinates(vertex);
+        const auto delta =
+          mesh.getVertexCoordinates(vertex) - original.getVertexCoordinates(vertex);
         if (face->getAttribute() == SigmaXYPlus)
           EXPECT_NEAR(delta(0) - delta(1), 0, 1e-14);
         else if (face->getAttribute() == SigmaPlus)
@@ -161,8 +162,7 @@ namespace KelvinBall
     size_t interface = 0;
     for (auto face = mesh.getFace(); face; ++face)
     {
-      const auto& cells =
-        mesh.getConnectivity().getIncidence({2, 3}, face->getIndex());
+      const auto& cells = mesh.getConnectivity().getIncidence({2, 3}, face->getIndex());
       if (cells.size() == 1)
         EXPECT_EQ(face->getAttribute(), SigmaPlus);
       else if (mesh.getPolytope(3, cells[0])->getAttribute() !=
@@ -237,12 +237,16 @@ namespace KelvinBall
     Sphere sphere(configuration);
     sphere.projectFixedGeometry(mesh);
     for (Index v = 0; v < 4; ++v)
+    {
       for (size_t i = 0; i < 3; ++i)
         EXPECT_NEAR(mesh.getVertexCoordinates(v)(i), points[v][i], 1e-14);
+    }
     sphere.projectFixedGeometry(mesh);
     for (Index v = 0; v < 4; ++v)
+    {
       for (size_t i = 0; i < 3; ++i)
         EXPECT_NEAR(mesh.getVertexCoordinates(v)(i), points[v][i], 1e-14);
+    }
   }
 
   TEST_F(FixedGeometryTest, SingleCutProjectionLeavesInteriorVertexUnchanged)
@@ -277,9 +281,11 @@ namespace KelvinBall
     EXPECT_FALSE(mesh.getRequiredTriangles().empty());
     EXPECT_GT(mesh.getCellCount(), 0);
     for (auto face = mesh.getFace(); face; ++face)
+    {
       if (face->getAttribute() == Outer)
         for (const Index vertex : face->getVertices())
           EXPECT_NEAR(mesh.getVertexCoordinates(vertex)(0), 2, 1e-14);
+    }
   }
 
   TEST_F(FixedGeometryTest, FailedAdaptationRetainsFittedMeshAndFeatureTags)
@@ -310,13 +316,17 @@ namespace KelvinBall
     EXPECT_EQ(mesh.getRidges(), original.getRidges());
     EXPECT_EQ(mesh.getRequiredTriangles(), original.getRequiredTriangles());
     for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+    {
       EXPECT_EQ(
         (mesh.getVertexCoordinates(vertex) - original.getVertexCoordinates(vertex))
           .norm(),
         0);
+    }
     for (auto face = mesh.getFace(); face; ++face)
+    {
       EXPECT_EQ(
         face->getAttribute(), original.getPolytope(2, face->getIndex())->getAttribute());
+    }
   }
 
   TEST_F(FixedGeometryTest, RequiredCutAdaptationPreservesCutTriangulations)
@@ -387,7 +397,8 @@ namespace KelvinBall
     for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
     {
       EXPECT_EQ(
-        (mesh.getVertexCoordinates(vertex) - original.getVertexCoordinates(vertex)).norm(),
+        (mesh.getVertexCoordinates(vertex) - original.getVertexCoordinates(vertex))
+          .norm(),
         0);
     }
     for (auto face = mesh.getFace(); face; ++face)

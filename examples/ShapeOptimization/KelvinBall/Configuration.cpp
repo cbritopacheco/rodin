@@ -65,9 +65,10 @@ namespace KelvinBall
       points = static_cast<size_t>(std::ceil(outerRadius / requestedGridSpacing)) + 1;
     }
     if (points < 5)
-      throw std::runtime_error("The chamber uniform grid requires at least five points per edge.");
-    if (!std::isfinite(hminFactor) || !std::isfinite(hmaxFactor) ||
-        !(hminFactor > 0) || !(hmaxFactor >= hminFactor))
+      throw std::runtime_error(
+        "The chamber uniform grid requires at least five points per edge.");
+    if (!std::isfinite(hminFactor) || !std::isfinite(hmaxFactor) || !(hminFactor > 0) ||
+      !(hmaxFactor >= hminFactor))
       throw std::runtime_error(
         "The size factors must satisfy 0 < --hmin-factor <= --hmax-factor.");
     hmin = hminFactor * getGridSpacing();

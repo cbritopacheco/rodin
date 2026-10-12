@@ -255,11 +255,13 @@ namespace KelvinBall
     auto mesh = makeMesh(0);
     bool fixedFace = false;
     for (auto face = mesh.getBoundary(); face; ++face)
+    {
       if (face->getAttribute() == Outer)
       {
         mesh.setAttribute({2, face->getIndex()}, fixedFace ? Gamma : Outer);
         fixedFace = true;
       }
+    }
     P1 space(mesh, 3);
     TrialFunction u(space);
     TestFunction v(space);
@@ -272,9 +274,11 @@ namespace KelvinBall
     Math::Vector<Real> rhs = unconstrained.getLinearSystem().getVector();
     IndexSet fixed;
     for (auto face = mesh.getBoundary(); face; ++face)
+    {
       if (face->getAttribute() == Outer)
         for (const auto dof : space.getDOFs(2, face->getIndex()))
           fixed.insert(dof);
+    }
     ASSERT_FALSE(fixed.empty());
     for (const auto dof : fixed)
       rhs -= Real(2) * expected.col(dof);
@@ -318,11 +322,13 @@ namespace KelvinBall
     auto mesh = makeMesh(0);
     bool fixedFace = false;
     for (auto face = mesh.getBoundary(); face; ++face)
+    {
       if (face->getAttribute() == Outer)
       {
         mesh.setAttribute({2, face->getIndex()}, fixedFace ? Gamma : Outer);
         fixedFace = true;
       }
+    }
     VelocitySpace space(mesh, 3);
     RotatedNitscheIntegrator coupling(mesh);
     HilbertIdentification reused(space, coupling, Real(0.3), 320);
@@ -342,12 +348,16 @@ namespace KelvinBall
     Math::Vector<Real> additional = Math::Vector<Real>::Zero(space.getSize());
     IndexSet fixed;
     for (auto face = mesh.getBoundary(); face; ++face)
+    {
       if (face->getAttribute() == Outer)
         for (const auto dof : space.getDOFs(2, face->getIndex()))
           fixed.insert(dof);
+    }
     for (Index dof = 0; dof < space.getSize(); ++dof)
+    {
       if (!fixed.contains(dof))
         additional(dof) = Real(0.1) * (dof + 1);
+    }
     ASSERT_GT(additional.norm(), 0);
     HilbertIdentification fresh(space, coupling, Real(0.3), 320);
     reused.identify(RealFunction{0}, actual, &additional);

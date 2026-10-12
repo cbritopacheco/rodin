@@ -262,9 +262,11 @@ namespace KelvinBall
       {
         std::vector<bool> interfaceVertices(mesh.getVertexCount(), false);
         for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+        {
           if (face->getAttribute() == Gamma)
             for (const Index vertex : face->getVertices())
               interfaceVertices[vertex] = true;
+        }
 
         InterfaceSeamJump jump;
         for (const auto& pair : RotationPairs)
@@ -480,17 +482,35 @@ namespace KelvinBall
         fitting.setParameters(m_fittingParameters);
         const auto& parameters = fitting.getParameters();
 
+        auto& displacement = fitting.getTrialFunction();
+        auto& test = fitting.getTestFunction();
+        fitting.getProblem() +=
+          DirichletBC(displacement, VectorFunction(Real(0), Real(0), Real(0))).on(Outer);
+        // Penalize only normal increments: tangential sliding remains free.
+        // This supplements the fitting metric, not the fitting objective.
+        // The dimensionless coefficient is a heuristic compromise between
+        // cut-plane accuracy and conditioning of the direct linear solves.
+        constexpr Real tangencyPenalty = Real(1e7);
+        const Real penalty = tangencyPenalty / parameters.model.h;
+        const FaceNormal normal(moved);
+        fitting.getProblem().getMetric() +=
+          FaceIntegral(penalty * Dot(normal, displacement), Dot(normal, test))
+            .over({SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus});
+
         RealFunction target(
           [&](const Geometry::Point& point) { return targetLevelSet.getValue(point); });
         const auto report = fitting.execute(target, targetGradient);
         if (!report.qualityBudgetSatisfied)
-          throw std::runtime_error("The SWIFT fit did not satisfy its mesh quality budget.");
+          throw std::runtime_error(
+            "The SWIFT fit did not satisfy its mesh quality budget.");
         Alert::Info()
           << substageHeading("SWIFT reconstruction") << Alert::NewLine
           << diagnosticLabel("Background mean edge h:")
           << Alert::Notation::Number(backgroundH) << Alert::NewLine
           << diagnosticLabel("Fitting reference spacing h0:")
           << Alert::Notation::Number(parameters.model.h) << Alert::NewLine
+          << diagnosticLabel("Cut tangency penalty:")
+          << Alert::Notation::Number(tangencyPenalty) << Alert::NewLine
           << diagnosticLabel("Mean interface triangle size:")
           << Alert::Notation::Number(meanInterfaceSize) << Alert::NewLine
           << diagnosticLabel("Outer iteration cap:")
@@ -576,12 +596,15 @@ namespace KelvinBall
           << diagnosticLabel("Total linear iterations:")
           << Alert::Notation::Number(report.linearIterations) << Alert::Raise;
 
-        checkFixedGeometry(moved, outerRadius);
-        checkMaterials(moved);
-        const MeshDiagnostics diagnostics = getMeshDiagnostics(moved);
-        return {MMG::Mesh(std::move(moved)),
-          {backgroundH, backgroundH, 0, parameters.fixedBoundaryAttributes.size(),
-            diagnostics.cells, diagnostics.cells}};
+        // Finite penalties leave small normal drift. Restore the known chamber
+        // planes before strict point-location and rotated coupling checks.
+        MMG::Mesh fitted(std::move(moved));
+        Sphere(m_options.configuration).projectFixedGeometry(fitted);
+        checkFixedGeometry(fitted, outerRadius);
+        checkMaterials(fitted);
+        const MeshDiagnostics diagnostics = getMeshDiagnostics(fitted);
+        return {std::move(fitted),
+          {backgroundH, backgroundH, 0, 0, diagnostics.cells, diagnostics.cells}};
       }
 
       void smoothReconstruction(Mesh& mesh)
@@ -601,21 +624,23 @@ namespace KelvinBall
       }
 
       template <class LevelSet>
-      MMG::Mesh adaptSWIFTBackground(const MMG::Mesh& background,
-        const LevelSet& target, const Sphere& sphere, Real requestedWelschScale)
+      MMG::Mesh adaptSWIFTBackground(const MMG::Mesh& background, const LevelSet& target,
+        const Sphere& sphere, Real requestedWelschScale)
       {
         const auto& configuration = m_options.configuration;
         const auto before = getMeshDiagnostics(background, false);
-        const Real width = requestedWelschScale > 0 ? requestedWelschScale :
-          Real(3) * configuration.getGridSpacing();
+        const Real width = requestedWelschScale > 0
+          ? requestedWelschScale
+          : Real(3) * configuration.getGridSpacing();
         const Adaptation::SWIFT::Loss welsch(width);
         P1<Real, Mesh> sizeSpace(background);
         MMG::RealGridFunction size(sizeSpace);
         for (Index vertex = 0; vertex < background.getVertexCount(); ++vertex)
         {
           const auto& dofs = target.getFiniteElementSpace().getDOFs(0, vertex);
-          size[vertex] = configuration.hmax - (configuration.hmax - configuration.hmin)
-            * welsch.getWeight(std::abs(target.getData()(dofs[0])));
+          size[vertex] = configuration.hmax -
+            (configuration.hmax - configuration.hmin) *
+              welsch.getWeight(std::abs(target.getData()(dofs[0])));
         }
         MMG::Mesh adapted;
         try
@@ -627,12 +652,12 @@ namespace KelvinBall
           Alert::Warning() << "MMG background adaptation before classification failed: "
                            << error.what() << Alert::NewLine
                            << "Retrying from the unchanged background with required "
-                              "chamber-cut triangles." << Alert::Raise;
+                              "chamber-cut triangles."
+                           << Alert::Raise;
           try
           {
             adapted = sphere.adaptBackground(background, size, true);
-            Alert::Info() << substageHeading("MMG adaptation recovery")
-                          << Alert::NewLine
+            Alert::Info() << substageHeading("MMG adaptation recovery") << Alert::NewLine
                           << "Required-cut retry accepted." << Alert::Raise;
           }
           catch (const std::exception& retryError)
@@ -646,14 +671,15 @@ namespace KelvinBall
           }
         }
         const auto after = getMeshDiagnostics(adapted, false);
-        Alert::Info() << substageHeading("MMG background adaptation before classification")
+        Alert::Info() << substageHeading(
+                           "MMG background adaptation before classification")
                       << Alert::NewLine << diagnosticLabel("Cell count:")
                       << Alert::Notation::Number(before.cells) << " -> "
                       << Alert::Notation::Number(after.cells) << Alert::NewLine
                       << diagnosticLabel("Material interfaces retained:") << 0
                       << Alert::NewLine << diagnosticLabel("Welsch size-map scale:")
-                      << Alert::Notation::Number(width)
-                      << Alert::NewLine << diagnosticLabel("Minimum tetrahedron quality:")
+                      << Alert::Notation::Number(width) << Alert::NewLine
+                      << diagnosticLabel("Minimum tetrahedron quality:")
                       << Alert::Notation::Number(before.minimumQuality) << " -> "
                       << Alert::Notation::Number(after.minimumQuality) << Alert::NewLine
                       << diagnosticLabel("Mean tetrahedron quality:")
@@ -842,22 +868,21 @@ namespace KelvinBall
           << " Thickness-normal smoothing length in h0 (default: 1)." << Alert::NewLine
           << Alert::Notation("--step=<value>")
           << "             Advection time step in multiples of h0 (default: 0.1)."
-          << Alert::NewLine
-          << Alert::Notation("--thickness-min=<value>")
+          << Alert::NewLine << Alert::Notation("--thickness-min=<value>")
           << "      Absolute minimum body thickness (default: 0, off)." << Alert::NewLine
           << Alert::Notation("--motion-force=<fx,fy,fz>")
           << "  Force for the Motion field at each iterate (default: 1,0,0)."
 
           << Alert::NewLine << Alert::Notation("--reconstruction=<method>")
-          << "  Interface reconstruction: swift or mmg (default: swift)." << Alert::NewLine
-          << Alert::Notation("--background-hausdorff=<value>")
+          << "  Interface reconstruction: swift or mmg (default: swift)."
+          << Alert::NewLine << Alert::Notation("--background-hausdorff=<value>")
           << " SWIFT background Hausdorff tolerance, in h0 (default: 0.05)."
           << Alert::NewLine << Alert::Notation("--background-gradation=<value>")
           << " SWIFT background gradation (default: 2)." << Alert::NewLine
           << Alert::Notation("--mmg-adapt")
-          << "                Adapt near the target interface:"
-          << Alert::NewLine
-          << "                              After an MMG cut; before SWIFT classification "
+          << "                Adapt near the target interface:" << Alert::NewLine
+          << "                              After an MMG cut; before SWIFT "
+             "classification "
              "and fitting."
           << Alert::NewLine
           << "                              Adaptation uses the fixed size factors times "
@@ -1064,8 +1089,10 @@ namespace KelvinBall
       {
         std::set<Index> vertices;
         for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+        {
           if (face->getAttribute() == Gamma)
             vertices.insert(face->getVertices().begin(), face->getVertices().end());
+        }
         Real squared = 0;
         Real supremum = 0;
         for (const Index vertex : vertices)
@@ -1127,9 +1154,9 @@ namespace KelvinBall
       }
 
       template <class LevelSet>
-      SphereDiscretization discretizeLevelSetMMG(MMG::Mesh& mesh, const LevelSet& levelSet,
-        Real targetSize, Real hmin, Real hmax, const Sphere& sphere, bool adapt,
-        Real snap, Real requestedWelschScale)
+      SphereDiscretization discretizeLevelSetMMG(MMG::Mesh& mesh,
+        const LevelSet& levelSet, Real targetSize, Real hmin, Real hmax,
+        const Sphere& sphere, bool adapt, Real snap, Real requestedWelschScale)
       {
         const size_t previousCells = mesh.getCellCount();
         const Real hausdorff = 0.1 * targetSize * targetSize;
@@ -1208,6 +1235,7 @@ namespace KelvinBall
           {
             const auto& vertices = cell->getVertices();
             for (size_t a = 0; a < vertices.size(); ++a)
+            {
               for (size_t b = a + 1; b < vertices.size(); ++b)
               {
                 const Real t = crossingFraction(vertices[a], vertices[b]);
@@ -1219,6 +1247,7 @@ namespace KelvinBall
                 if (distanceToVertex < Real(1e-3))
                   ++nearVertex;
               }
+            }
           }
           return std::tuple{edges, nearVertex, minimum};
         };
@@ -1241,6 +1270,7 @@ namespace KelvinBall
           {
             const auto& vertices = cell->getVertices();
             for (size_t a = 0; a < vertices.size(); ++a)
+            {
               for (size_t b = a + 1; b < vertices.size(); ++b)
               {
                 const Index i = vertices[a], j = vertices[b];
@@ -1252,10 +1282,13 @@ namespace KelvinBall
                 else if (t > 1 - snap)
                   snapped[j] = 1;
               }
+            }
           }
           for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+          {
             if (snapped[vertex])
               sanitized[vertex] = 0;
+          }
           // MMG requires every tetrahedron to keep a vertex off the level set;
           // the vertex farthest from it keeps its value.
           size_t restored = 0;
@@ -1419,17 +1452,11 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
   m_reconstructionOptions.emplace(getReconstructionOptions(argc, argv));
   m_fittingParameters =
     getFittingParameters(m_options.configuration.getGridSpacing(), argc, argv);
-  // The physical container wall is fixed; each artificial cut admits motion
-  // within its plane. Intersections carry all incident cut constraints.
-  m_fittingParameters.fixedBoundaryAttributes = {Outer};
-  m_fittingParameters.slipBoundaryAttributes = {
-    SigmaPlus, SigmaMinus, SigmaXYPlus, SigmaXYMinus};
   const Real outerRadius = m_options.configuration.outerRadius;
   const Real nitschePenalty = m_options.configuration.nitschePenalty;
   const Real stabilizationFactor = m_options.configuration.stabilizationFactor;
   const Real initialGridSpacing = m_options.configuration.getGridSpacing();
-  const Real requestedWelschScale =
-    m_fittingParameters.model.robustScale;
+  const Real requestedWelschScale = m_fittingParameters.model.robustScale;
   reportConfiguration(requestedWelschScale);
   const Real nan = std::numeric_limits<Real>::quiet_NaN();
   const auto stage1Start = Clock::now();
@@ -1671,11 +1698,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << m_options.configuration.hminFactor << ','
               << m_options.configuration.hmaxFactor << ',' << m_options.configuration.hmin
               << ',' << m_options.configuration.hmax << ',' << h << ',' << dt << ','
-              << hilbertLength << ','
-              << nitschePenalty << ',' << stabilizationFactor << ',' << assemblyBackend
-              << ',' << KelvinBall::DirectSolverName << ',' << meshDiagnostics.vertices
-              << ',' << meshDiagnostics.cells << ',' << meshDiagnostics.obstacleCells
-              << ',' << meshDiagnostics.fluidCells << ','
+              << hilbertLength << ',' << nitschePenalty << ',' << stabilizationFactor
+              << ',' << assemblyBackend << ',' << KelvinBall::DirectSolverName << ','
+              << meshDiagnostics.vertices << ',' << meshDiagnostics.cells << ','
+              << meshDiagnostics.obstacleCells << ',' << meshDiagnostics.fluidCells << ','
               << meshDiagnostics.interfaceTriangles << ','
               << meshDiagnostics.minimumQuality << ',' << meshDiagnostics.meanQuality
               << ',' << meshDiagnostics.maximumQuality << ',' << backgroundH << ','
@@ -1704,8 +1730,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
               << k / determinant << ','
               << (c != 0 ? 2 * M_PI / motionAngular.norm() : nan) << ','
               << (c != 0 ? 2 * M_PI * q / std::abs(c) : nan) << ',' << std::sqrt(q / k)
-              << ',' << m_options.minimumThickness
-              << ',' << normalLength << ',' << stageDiagnostics.thicknessPenalty << ','
+              << ',' << m_options.minimumThickness << ',' << normalLength << ','
+              << stageDiagnostics.thicknessPenalty << ','
               << stageDiagnostics.thicknessNominalPenalty << ','
               << stageDiagnostics.thicknessGuardDistance << ','
               << stageDiagnostics.thicknessActiveMultiplier << ','
@@ -2156,11 +2182,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
     previousVolume = volume;
     predictedVolumeChange = dt * dVolumeTheta;
     GridFunction distance(levelSetSpace);
-    Distance::Eikonal(distance)
-      .setInterior(Obstacle)
-      .setInterface(Gamma)
-      .solve()
-      .sign();
+    Distance::Eikonal(distance).setInterior(Obstacle).setInterface(Gamma).solve().sign();
     stageDiagnostics.eikonalJump = shapeCoupling.scalarJump(distance);
     Alert::Info() << substageHeading("Eikonal redistancing") << Alert::NewLine
                   << diagnosticLabel("Rotated distance jump:")
@@ -2185,8 +2207,10 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       SubMesh<Context::Local>::Builder interfaceBuilder;
       interfaceBuilder.initialize(mesh);
       for (auto face = mesh.getPolytope(mesh.getDimension() - 1); face; ++face)
+      {
         if (face->getAttribute() == Gamma)
           interfaceBuilder.include(mesh.getDimension() - 1, face->getIndex());
+      }
       SubMesh<Context::Local> interfaceMesh = interfaceBuilder.finalize();
       P1 interfaceVectorSpace(interfaceMesh, 3);
       P1 interfaceScalarSpace(interfaceMesh);
@@ -2284,10 +2308,12 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       sewedInterfaceBuilder.initialize(sewedDesign.getMesh());
       for (auto face =
              sewedDesign.getMesh().getPolytope(sewedDesign.getMesh().getDimension() - 1);
-        face; ++face)
+           face; ++face)
+      {
         if (face->getAttribute() == Gamma)
           sewedInterfaceBuilder.include(
             sewedDesign.getMesh().getDimension() - 1, face->getIndex());
+      }
       SubMesh<Context::Local> sewedInterfaceMesh = sewedInterfaceBuilder.finalize();
       P1 sewedInterfaceVectorSpace(sewedInterfaceMesh, 3);
       P1 sewedInterfaceScalarSpace(sewedInterfaceMesh);
@@ -2460,7 +2486,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
           << substageHeading("Fitted-to-background transfer") << Alert::NewLine
           << diagnosticLabel("Nodal-copy error (distance):")
           << Alert::Notation::Number((advectionDistance.getData() - distance.getData())
-                 .lpNorm<Eigen::Infinity>())
+                                       .lpNorm<Eigen::Infinity>())
           << Alert::NewLine << diagnosticLabel("Nodal-copy error (direction):")
           << Alert::Notation::Number(
                (advectionDirection.getData() - theta.getData()).lpNorm<Eigen::Infinity>())
@@ -2496,8 +2522,7 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       stageDiagnostics.advectedJump = advectedJump;
       Alert::Info() << substageHeading("Advected distance") << Alert::NewLine
                     << diagnosticLabel("Advection step:") << Alert::Notation::Number(dt)
-                    << Alert::NewLine
-                    << diagnosticLabel("Minimum:")
+                    << Alert::NewLine << diagnosticLabel("Minimum:")
                     << Alert::Notation::Number(advectedDistance.min()) << Alert::NewLine
                     << diagnosticLabel("Maximum:")
                     << Alert::Notation::Number(advectedDistance.max()) << Alert::NewLine
@@ -2537,8 +2562,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
       {
         if (m_options.configuration.adapt)
         {
-          auto adapted = adaptSWIFTBackground(*swiftBackground, advectedDistance,
-            sphere, requestedWelschScale);
+          auto adapted = adaptSWIFTBackground(
+            *swiftBackground, advectedDistance, sphere, requestedWelschScale);
           // The old target and its space stay on the unchanged source mesh.
           // Re-evaluate it spatially; nodal copying across MMG is invalid.
           P1<Real, Mesh> targetSpace(adapted);
@@ -2547,7 +2572,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
           target = RealFunction([&](const Geometry::Point& point) {
             const auto source = sourceLocator.locate(3, point.getPhysicalCoordinates());
             if (!source)
-              throw std::runtime_error("An adapted background vertex is outside the source chamber.");
+              throw std::runtime_error(
+                "An adapted background vertex is outside the source chamber.");
             return advectedDistance.getValue(*source);
           });
           const Real adaptedH = meanElementSize(adapted);
@@ -2557,11 +2583,12 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
           fitted.diagnostics.cellsAfter = fitted.mesh.getCellCount();
           fitted.diagnostics.minimumSize = m_options.configuration.hmin;
           fitted.diagnostics.maximumSize = m_options.configuration.hmax;
-          fitted.diagnostics.hausdorffTolerance = Real(0.1) * initialGridSpacing *
-            initialGridSpacing;
+          fitted.diagnostics.hausdorffTolerance =
+            Real(0.1) * initialGridSpacing * initialGridSpacing;
           fitted.diagnostics.backgroundMeanElementSize = adaptedH;
-          fitted.diagnostics.welschScale = requestedWelschScale > 0 ?
-            requestedWelschScale : Real(3) * initialGridSpacing;
+          fitted.diagnostics.welschScale = requestedWelschScale > 0
+            ? requestedWelschScale
+            : Real(3) * initialGridSpacing;
           fitted.diagnostics.requiredBoundaryTriangles =
             adapted.getRequiredTriangles().size();
           // Commit the next background only after fitting succeeds. Its old
@@ -2571,8 +2598,8 @@ int KelvinBall::KelvinBallOptimization::Implementation::run()
         }
         MMG::Mesh classified =
           classifyLevelSetForSWIFT(*swiftBackground, advectedDistance);
-        auto fitted = fitLevelSetSWIFT(classified, advectedDistance, backgroundH,
-          outerRadius);
+        auto fitted =
+          fitLevelSetSWIFT(classified, advectedDistance, backgroundH, outerRadius);
         return fitted;
       }
       // A failed MMG stage is retried on the same advected level set with

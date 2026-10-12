@@ -24,14 +24,15 @@ namespace KelvinBall
   {
     auto coefficient = coefficients.begin();
     for (size_t row = 0; row < 3; ++row)
+    {
       for (size_t column = 0; column < 3; ++column)
         rotation(row, column) = *coefficient++;
+    }
   }
 
   Math::SpatialPoint centroid(const Mesh&, const Polytope& face)
   {
-    const Geometry::Point point(
-      face, Polytope::Traits(face.getGeometry()).getCentroid());
+    const Geometry::Point point(face, Polytope::Traits(face.getGeometry()).getCentroid());
     return point.getPhysicalCoordinates();
   }
 
@@ -51,9 +52,14 @@ namespace KelvinBall
       if (vertices.size() != 4)
         throw std::runtime_error("Mean element size requires tetrahedra.");
       for (size_t i = 0; i < vertices.size(); ++i)
+      {
         for (size_t j = i + 1; j < vertices.size(); ++j)
+        {
           sum += (mesh.getVertexCoordinates(vertices[i]) -
-            mesh.getVertexCoordinates(vertices[j])).norm();
+            mesh.getVertexCoordinates(vertices[j]))
+                   .norm();
+        }
+      }
     }
     if (mesh.getCellCount() == 0)
       throw std::runtime_error("Mean element size requires a nonempty mesh.");

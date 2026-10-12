@@ -216,10 +216,6 @@ namespace Rodin::Adaptation::SWIFT
       Quadrature quadrature; ///< Integration and validation orders.
       Sampling sampling; ///< Shared hinge and actual-quality witnesses.
       Optional<Geometry::Attribute> interfaceAttribute; ///< Marked facets to fit.
-      /// Boundary vertices fixed in every displacement component.
-      FlatSet<Geometry::Attribute> fixedBoundaryAttributes;
-      /// Planar boundary vertices restricted to their tangent subspace (P1).
-      FlatSet<Geometry::Attribute> slipBoundaryAttributes;
       bool trace = false; ///< Print diagnostics; accepted geometry is always validated.
       bool traceQualityWitness =
         false; ///< Record same-point quality predictions at each trial's limiting cell.

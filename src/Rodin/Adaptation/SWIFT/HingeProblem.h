@@ -6,7 +6,6 @@
 #define RODIN_ADAPTATION_SWIFT_HINGEPROBLEM_H
 
 #include <chrono>
-#include <functional>
 #include <type_traits>
 #include <utility>
 #include "Rodin/Assembly.h"
@@ -94,8 +93,6 @@ namespace Rodin::Adaptation::SWIFT
           (Real(0.5) * (matrix + Math::SparseMatrix<Real>(matrix.transpose()))).eval();
         if (m_boundaryDOFs && !m_boundaryDOFs->empty())
           system.eliminate(*m_boundaryDOFs);
-        if (m_systemTransform)
-          m_systemTransform(system);
         matrix.makeCompressed();
         system.getVector() -= matrix * m_state->getData();
         if (m_centering.size() != 0)
@@ -115,14 +112,6 @@ namespace Rodin::Adaptation::SWIFT
         return m_assemblySeconds;
       }
 
-      /// Apply the same admissible-subspace restriction as the predictor.
-      HingeProblem& setSystemTransform(
-        std::function<void(typename Parent::LinearSystemType&)> transform)
-      {
-        m_systemTransform = std::move(transform);
-        return *this;
-      }
-
       /**
        * @brief Clones the problem while retaining its referenced state.
        * @returns A newly allocated copy owned by the caller.
@@ -137,7 +126,6 @@ namespace Rodin::Adaptation::SWIFT
       const IndexMap<Real>* m_boundaryDOFs = nullptr;
       Math::Matrix<Real> m_centering;
       Real m_assemblySeconds = 0;
-      std::function<void(typename Parent::LinearSystemType&)> m_systemTransform;
   };
 }
 #endif
