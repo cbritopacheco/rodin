@@ -125,3 +125,7 @@ if (RODIN_USE_PETSC)
 endif()
 
 add_subdirectory(Solid)
+
+if (RODIN_USE_SCOTCH)
+  add_subdirectory(Scotch)
+endif()

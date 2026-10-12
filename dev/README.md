@@ -73,6 +73,12 @@ geometry, and backend variants explicitly. Current audit findings include:
   data through repeated solves. Instantiation exposed an obsolete problem
   signature, solver construction and vector range; the repair uses the
   stored trial/test functions and preserves added boundary conditions.
+- Scotch partitioning: valid assignments for cells and faces, repeated
+  repartitioning, empty/unused lifetimes, invalid count/dimension checks,
+  and independently owned custom strategies. An unused partitioner was
+  observed aborting before the lifecycle repair. Graph/strategy resources
+  now belong to each call; a saved strategy string preserves value semantics
+  rather than aliasing the caller's opaque C allocation.
 - Eigen 3.4 MINRES does not compile for complex scalars. The Rodin header's
   generic scalar documentation does not establish dependency support.
 - IDRstab's wrapper names `Eigen::IDRSTABL`, which is absent in Eigen 3.4's
