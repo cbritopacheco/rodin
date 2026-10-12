@@ -12,6 +12,12 @@ gtest_discover_tests(RodinCentroidTest
     LABELS unit
 )
 
+# Cartesian-product ordering and invariant factor access
+add_executable(RodinTensorProductTest TensorProductTest.cpp)
+target_link_libraries(RodinTensorProductTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::QF)
+gtest_discover_tests(RodinTensorProductTest PROPERTIES LABELS unit)
+
 # GaussLegendre tests
 add_executable(RodinGaussLegendreTest GaussLegendreTest.cpp)
 target_link_libraries(RodinGaussLegendreTest

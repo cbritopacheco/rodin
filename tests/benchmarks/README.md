@@ -415,6 +415,36 @@ paths, not lock contention: only one caller executes. The focused study retained
 one noisy copy selection with an elapsed-time outlier; an isolated repeat had
 about 1% variation. Raw results are retained separately from the profile captures.
 
+The resulting `TensorProduct::append` repair reads factor counts once, borrows
+left coordinates/weight once per outer iteration, and borrows each right point
+and its dimension once per product entry. Ownership, coordinate ordering and
+weight-product association are unchanged. Empty products read no samples;
+aliased factors remain valid. Deterministic query-count regressions failed on
+the original implementation and pass after the repair, alongside exact output,
+copy-lifetime and three-factor ordering checks.
+
+Matched native five-repetition owned-construction measurements were:
+
+| Rule | Points | Before, microseconds | After repeat, microseconds | Speedup |
+| --- | ---: | ---: | ---: | ---: |
+| Quadrilateral, order 16 | 81 | 1.659 | 1.231 | 1.35 |
+| Hexahedron, order 16 | 729 | 11.037 | 6.298 | 1.75 |
+| Wedge, order 51 | 17,576 | 254.260 | 159.430 | 1.59 |
+
+Triangle and pyramid controls remained essentially unchanged. The original
+and repaired rule snapshots were byte-identical for all eight families through
+order 20 and the triangle/wedge order-51 fallbacks. Both builds passed all 135
+benchmark guards and 14 quadrature exactness tests with unchanged counts and
+moment diagnostics; the three new unit tests passed in both builds. Fourteen
+native Poisson p-convergence tests passed over all seven mesh geometries.
+No solver or whole-assembly speedup is inferred from these construction results.
+
+A matched post-repair Instruments capture reduced `append` plus point-vector
+access from approximately 68% to 26% of selected source sample weight; repeated
+size access ceased to be a leading frame. Point movement/copying and storage
+initialization are now exposed as follow-up source hotspots. Profile fractions
+describe attribution within each capture, not absolute elapsed-time ratios.
+
 ```sh
 cmake --build build --target RodinReferenceQuadratureBenchmarks -j1
 build/tests/benchmarks/RodinReferenceQuadratureBenchmarks \
