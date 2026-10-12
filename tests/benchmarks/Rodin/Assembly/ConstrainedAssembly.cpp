@@ -21,91 +21,88 @@ namespace Rodin::Tests::Benchmarks
   class ConstrainedAssembly
   {
     public:
-      static void run(
-        benchmark::State& state, Geometry::Polytope::Type geometry, unsigned physics)
+    static void run(
+      benchmark::State& state, Geometry::Polytope::Type geometry, unsigned physics)
+    {
+      using namespace Variational;
+      using Workload = ConstrainedWorkload<K, Scalar>;
+      auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
+      const size_t dim = mesh.getDimension();
+      H1<K, Scalar> space(std::integral_constant<size_t, K>{}, mesh);
+      TrialFunction u(space);
+      TestFunction v(space);
+      Problem problem(u, v), baseline(u, v);
+      Real operatorScale = 1, boundaryScale = 1;
+      Workload::configure(u, v, problem, dim, physics, operatorScale, boundaryScale);
+      Workload::template configure<true>(
+        u, v, baseline, dim, physics, operatorScale, boundaryScale);
+      baseline.assemble();
+      problem.assemble();
+      const auto valid = [&]() {
+        const auto& system = problem.getLinearSystem();
+        const auto& reference = baseline.getLinearSystem();
+        const auto& matrix = system.getOperator();
+        const auto& rhs = system.getVector();
+        const auto& exact = u.getSolution().getData();
+        const Real denominator = std::max(Real(1), rhs.norm());
+        const Real residual = (matrix * exact - rhs).norm() / denominator;
+        const Math::Vector<Scalar> wrong = exact.array() + Scalar(1);
+        const Real sensitivity = (matrix * wrong - rhs).norm() / denominator;
+        if (!std::isfinite(residual) || residual >= 1e-10)
+          std::cerr << "patch=" << residual << " sensitivity=" << sensitivity
+                    << " matrix_difference=" << (matrix - reference.getOperator()).norm()
+                    << " load_difference=" << (rhs - reference.getVector()).norm()
+                    << '\n';
+        return std::isfinite(residual) && residual < 1e-10 && sensitivity > 1e-4 &&
+          (matrix - reference.getOperator()).norm() <
+          1e-11 * std::max(Real(1), reference.getOperator().norm()) &&
+          (rhs - reference.getVector()).norm() < 1e-11 * denominator;
+      };
+      problem.assemble();
+      if (!valid())
       {
-        using namespace Variational;
-        using Workload = ConstrainedWorkload<K, Scalar>;
-        auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
-        const size_t dim = mesh.getDimension();
-        H1<K, Scalar> space(std::integral_constant<size_t, K>{}, mesh);
-        TrialFunction u(space);
-        TestFunction v(space);
-        Problem problem(u, v), baseline(u, v);
-        Real operatorScale = 1, boundaryScale = 1;
-        Workload::configure(u, v, problem, dim, physics, operatorScale, boundaryScale);
-        Workload::template configure<true>(
-          u, v, baseline, dim, physics, operatorScale, boundaryScale);
-        baseline.assemble();
-        problem.assemble();
-        const auto valid = [&]() {
-          const auto& system = problem.getLinearSystem();
-          const auto& reference = baseline.getLinearSystem();
-          const auto& matrix = system.getOperator();
-          const auto& rhs = system.getVector();
-          const auto& exact = u.getSolution().getData();
-          const Real denominator = std::max(Real(1), rhs.norm());
-          const Real residual = (matrix * exact - rhs).norm() / denominator;
-          const Math::Vector<Scalar> wrong = exact.array() + Scalar(1);
-          const Real sensitivity = (matrix * wrong - rhs).norm() / denominator;
-          if (!std::isfinite(residual) || residual >= 1e-10)
-            std::cerr << "patch=" << residual << " sensitivity=" << sensitivity
-                      << " matrix_difference="
-                      << (matrix - reference.getOperator()).norm()
-                      << " load_difference=" << (rhs - reference.getVector()).norm()
-                      << '\n';
-          return std::isfinite(residual) && residual < 1e-10 && sensitivity > 1e-4 &&
-            (matrix - reference.getOperator()).norm() <
-            1e-11 * std::max(Real(1), reference.getOperator().norm()) &&
-            (rhs - reference.getVector()).norm() < 1e-11 * denominator;
-        };
-        problem.assemble();
-        if (!valid())
-        {
-          constrainedCheckFailed = true;
-          state.SkipWithError(
-            "Constrained matrix/load/patch or sensitivity check failed");
-          return;
-        }
-        for (auto _ : state)
-        {
-          problem.assemble();
-          benchmark::DoNotOptimize(problem.getLinearSystem().getOperator().nonZeros());
-          benchmark::ClobberMemory();
-        }
-        bool ok = valid();
-        operatorScale = 1.5;
-        boundaryScale = 2;
-        u.getSolution() = Workload::field(dim, boundaryScale);
-        baseline.assemble();
-        problem.assemble();
-        ok = valid() && ok;
-        if (!ok)
-        {
-          constrainedCheckFailed = true;
-          state.SkipWithError("Timed assembly or coefficient/boundary update failed");
-        }
-        const size_t cells = mesh.getPolytopeCount(dim);
-        size_t localEntries = 0;
-        for (size_t cell = 0; cell < cells; ++cell)
-        {
-          const size_t count = space.getDOFs(dim, cell).size();
-          localEntries += count * count;
-        }
-        state.counters["dimension"] = dim;
-        state.counters["cells"] = cells;
-        state.counters["local_basis_per_cell"] = space.getDOFs(dim, 0).size();
-        state.counters["local_entries_per_operator_term"] = localEntries;
-        state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(Workload::quadratureOrder, geometry)
-            .getSize();
-        state.counters["dofs"] = space.getSize();
-        state.counters["nnz"] = problem.getLinearSystem().getOperator().nonZeros();
-        state.counters["degree"] = K;
-        state.counters["quadrature_order"] = Workload::quadratureOrder;
-        state.counters["cells_per_second"] =
-          benchmark::Counter(cells, benchmark::Counter::kIsIterationInvariantRate);
+        constrainedCheckFailed = true;
+        state.SkipWithError("Constrained matrix/load/patch or sensitivity check failed");
+        return;
       }
+      for (auto _ : state)
+      {
+        problem.assemble();
+        benchmark::DoNotOptimize(problem.getLinearSystem().getOperator().nonZeros());
+        benchmark::ClobberMemory();
+      }
+      bool ok = valid();
+      operatorScale = 1.5;
+      boundaryScale = 2;
+      u.getSolution() = Workload::field(dim, boundaryScale);
+      baseline.assemble();
+      problem.assemble();
+      ok = valid() && ok;
+      if (!ok)
+      {
+        constrainedCheckFailed = true;
+        state.SkipWithError("Timed assembly or coefficient/boundary update failed");
+      }
+      const size_t cells = mesh.getPolytopeCount(dim);
+      size_t localEntries = 0;
+      for (size_t cell = 0; cell < cells; ++cell)
+      {
+        const size_t count = space.getDOFs(dim, cell).size();
+        localEntries += count * count;
+      }
+      state.counters["dimension"] = dim;
+      state.counters["cells"] = cells;
+      state.counters["local_basis_per_cell"] = space.getDOFs(dim, 0).size();
+      state.counters["local_entries_per_operator_term"] = localEntries;
+      state.counters["quadrature_points_per_cell"] =
+        QF::PolytopeQuadratureFormula::get(Workload::quadratureOrder, geometry).getSize();
+      state.counters["dofs"] = space.getSize();
+      state.counters["nnz"] = problem.getLinearSystem().getOperator().nonZeros();
+      state.counters["degree"] = K;
+      state.counters["quadrature_order"] = Workload::quadratureOrder;
+      state.counters["cells_per_second"] =
+        benchmark::Counter(cells, benchmark::Counter::kIsIterationInvariantRate);
+    }
   };
 
   template <size_t K, class Scalar>

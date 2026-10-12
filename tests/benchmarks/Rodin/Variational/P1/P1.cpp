@@ -29,45 +29,44 @@ namespace Rodin::Tests::Benchmarks
   struct P1Benchmark : public benchmark::Fixture
   {
     public:
-      using MeshType = LocalMesh;
+    using MeshType = LocalMesh;
 
-      void SetUp(const benchmark::State&)
-      {
-        square2d = MeshType::Builder()
-        .initialize(2)
-        .nodes(4)
-        .vertex({0, 0})
-        .vertex({1, 0})
-        .vertex({0, 1})
-        .vertex({1, 1})
-        .polytope(Polytope::Type::Triangle, {0, 1, 2})
-        .polytope(Polytope::Type::Triangle, {1, 3, 2})
-        .finalize();
+    void SetUp(const benchmark::State&)
+    {
+      square2d = MeshType::Builder()
+                   .initialize(2)
+                   .nodes(4)
+                   .vertex({0, 0})
+                   .vertex({1, 0})
+                   .vertex({0, 1})
+                   .vertex({1, 1})
+                   .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                   .polytope(Polytope::Type::Triangle, {1, 3, 2})
+                   .finalize();
 
-        uniformTriangularMesh16 =
-          LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+      uniformTriangularMesh16 =
+        LocalMesh::UniformGrid(Polytope::Type::Triangle, {16, 16});
 
-        uniformTriangularMesh32 =
-          LocalMesh::UniformGrid(Polytope::Type::Triangle, { 32, 32 });
+      uniformTriangularMesh32 =
+        LocalMesh::UniformGrid(Polytope::Type::Triangle, {32, 32});
 
-        uniformTriangularMesh32 =
-          LocalMesh::UniformGrid(Polytope::Type::Triangle, { 32, 32 });
+      uniformTriangularMesh32 =
+        LocalMesh::UniformGrid(Polytope::Type::Triangle, {32, 32});
 
-        uniformTriangularMesh64 =
-          LocalMesh::UniformGrid(Polytope::Type::Triangle, { 64, 64 });
+      uniformTriangularMesh64 =
+        LocalMesh::UniformGrid(Polytope::Type::Triangle, {64, 64});
 
-        uniformTriangularMesh128 =
-          LocalMesh::UniformGrid(Polytope::Type::Triangle, { 128, 128 });
-      }
+      uniformTriangularMesh128 =
+        LocalMesh::UniformGrid(Polytope::Type::Triangle, {128, 128});
+    }
 
-      void TearDown(const benchmark::State&)
-      {}
+    void TearDown(const benchmark::State&) {}
 
-      MeshType square2d;
-      MeshType uniformTriangularMesh16;
-      MeshType uniformTriangularMesh32;
-      MeshType uniformTriangularMesh64;
-      MeshType uniformTriangularMesh128;
+    MeshType square2d;
+    MeshType uniformTriangularMesh16;
+    MeshType uniformTriangularMesh32;
+    MeshType uniformTriangularMesh64;
+    MeshType uniformTriangularMesh128;
   };
 
   /// @brief Measures construction of a P1 space on a 16x16 triangular mesh.
@@ -120,29 +119,31 @@ namespace Rodin::Tests::Benchmarks
   {
     P1 fes(square2d);
     GridFunction gf(fes);
-    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); });
     for (auto _ : st)
       gf.project(Region::Cells, c);
   }
 
   /// @brief Measures scalar grid-function projection of x+y on a 16x16 triangular mesh.
-  BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Real_SumOfComponents)
+  BENCHMARK_F(
+    P1Benchmark, UniformTriangular16_GridFunction_Projection_Real_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(uniformTriangularMesh16);
     GridFunction gf(fes);
-    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); });
     for (auto _ : st)
       gf.project(Region::Cells, c);
   }
 
   /// @brief Measures scalar grid-function projection of x+y on a 32x32 triangular mesh.
-  BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Real_SumOfComponents)
+  BENCHMARK_F(
+    P1Benchmark, UniformTriangular32_GridFunction_Projection_Real_SumOfComponents)
   (benchmark::State& st)
   {
     P1 fes(uniformTriangularMesh32);
     GridFunction gf(fes);
-    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); } );
+    RealFunction c([](const Geometry::Point& p) { return p.x() + p.y(); });
     for (auto _ : st)
       gf.project(Region::Cells, c);
   }

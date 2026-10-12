@@ -26,94 +26,94 @@ namespace Rodin::Tests::Benchmarks
   class MassAssembly
   {
     public:
-      static void run(benchmark::State& state, Geometry::Polytope::Type geometry,
-        bool reaction, bool rhs)
+    static void run(
+      benchmark::State& state, Geometry::Polytope::Type geometry, bool reaction, bool rhs)
+    {
+      using namespace Variational;
+      using Workload = MassWorkload<K, Scalar, Vector, Family>;
+      auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
+      const size_t dim = mesh.getDimension();
+      auto space = Workload::makeSpace(mesh, dim);
+      TrialFunction u(space);
+      TestFunction v(space);
+      BilinearForm matrix(u, v);
+      LinearForm load(v);
+      Real scale = 1;
+      const Scalar expected =
+        Workload::configure(u, v, matrix, load, dim, reaction, scale);
+      matrix.assemble();
+      load.assemble();
+      BilinearForm reference(u, v);
+      LinearForm referenceLoad(v);
+      Workload::template configure<true>(
+        u, v, reference, referenceLoad, dim, reaction, scale);
+      reference.assemble();
+      const auto baseline = reference.getOperator();
+      const auto baselineLoad = load.getVector();
+      const auto& c = u.getSolution().getData();
+      const auto valid = [&]() {
+        const auto& a = matrix.getOperator();
+        const auto& b = load.getVector();
+        const Scalar energy = c.dot(a * c);
+        return std::isfinite(std::abs(energy)) &&
+          std::abs(energy / (scale * expected) - Scalar(1)) < 1e-10 &&
+          (a - scale * baseline).norm() <
+          1e-11 * std::max(Real(1), baseline.norm() * scale) &&
+          (a * c - b).norm() < 1e-11 * std::max(Real(1), b.norm()) &&
+          (b - scale * baselineLoad).norm() < 1e-11 * std::max(Real(1), b.norm());
+      };
+      matrix.assemble();
+      load.assemble();
+      if (!valid())
       {
-        using namespace Variational;
-        using Workload = MassWorkload<K, Scalar, Vector, Family>;
-        auto mesh = Convergence::UniformGrid(geometry).makeMesh(state.range(0));
-        const size_t dim = mesh.getDimension();
-        auto space = Workload::makeSpace(mesh, dim);
-        TrialFunction u(space);
-        TestFunction v(space);
-        BilinearForm matrix(u, v);
-        LinearForm load(v);
-        Real scale = 1;
-        const Scalar expected =
-          Workload::configure(u, v, matrix, load, dim, reaction, scale);
-        matrix.assemble();
-        load.assemble();
-        BilinearForm reference(u, v);
-        LinearForm referenceLoad(v);
-        Workload::template configure<true>(
-          u, v, reference, referenceLoad, dim, reaction, scale);
-        reference.assemble();
-        const auto baseline = reference.getOperator();
-        const auto baselineLoad = load.getVector();
-        const auto& c = u.getSolution().getData();
-        const auto valid = [&]() {
-          const auto& a = matrix.getOperator();
-          const auto& b = load.getVector();
-          const Scalar energy = c.dot(a * c);
-          return std::isfinite(std::abs(energy)) &&
-            std::abs(energy / (scale * expected) - Scalar(1)) < 1e-10 &&
-            (a - scale * baseline).norm() <
-            1e-11 * std::max(Real(1), baseline.norm() * scale) &&
-            (a * c - b).norm() < 1e-11 * std::max(Real(1), b.norm()) &&
-            (b - scale * baselineLoad).norm() < 1e-11 * std::max(Real(1), b.norm());
-        };
-        matrix.assemble();
-        load.assemble();
-        if (!valid())
+        massCheckFailed = true;
+        state.SkipWithError("Mass/reaction operator, load, or analytic oracle failed");
+        return;
+      }
+      for (auto _ : state)
+      {
+        if (rhs)
         {
-          massCheckFailed = true;
-          state.SkipWithError("Mass/reaction operator, load, or analytic oracle failed");
-          return;
-        }
-        for (auto _ : state)
-        {
-          if (rhs)
-          {
-            load.assemble();
-            benchmark::DoNotOptimize(load.getVector().data());
-          }
-          else
-          {
-            matrix.assemble();
-            benchmark::DoNotOptimize(matrix.getOperator().nonZeros());
-          }
-          benchmark::ClobberMemory();
-        }
-        if (!valid())
-        {
-          massCheckFailed = true;
-          state.SkipWithError("Timed assembly changed operator or load");
-        }
-        if (reaction)
-        {
-          scale = 2;
-          matrix.assemble();
           load.assemble();
-          if (!valid())
-          {
-            massCheckFailed = true;
-            state.SkipWithError("Coefficient update did not replace operator and load");
-          }
+          benchmark::DoNotOptimize(load.getVector().data());
         }
-        state.counters["cells"] = mesh.getPolytopeCount(dim);
-        state.counters["dofs"] = space.getSize();
-        state.counters["nnz"] = matrix.getOperator().nonZeros();
-        state.counters["degree"] = K;
-        state.counters["components"] = Vector ? dim : 1;
-        state.counters["quadrature_order"] = 8;
-        state.counters["quadrature_points_per_cell"] =
-          QF::PolytopeQuadratureFormula::get(8, geometry).getSize();
+        else
+        {
+          matrix.assemble();
+          benchmark::DoNotOptimize(matrix.getOperator().nonZeros());
+        }
+        benchmark::ClobberMemory();
       }
-
-      static void registerCases()
+      if (!valid())
       {
-        MassWorkload<K, Scalar, Vector, Family>::registerCases(run, false);
+        massCheckFailed = true;
+        state.SkipWithError("Timed assembly changed operator or load");
       }
+      if (reaction)
+      {
+        scale = 2;
+        matrix.assemble();
+        load.assemble();
+        if (!valid())
+        {
+          massCheckFailed = true;
+          state.SkipWithError("Coefficient update did not replace operator and load");
+        }
+      }
+      state.counters["cells"] = mesh.getPolytopeCount(dim);
+      state.counters["dofs"] = space.getSize();
+      state.counters["nnz"] = matrix.getOperator().nonZeros();
+      state.counters["degree"] = K;
+      state.counters["components"] = Vector ? dim : 1;
+      state.counters["quadrature_order"] = 8;
+      state.counters["quadrature_points_per_cell"] =
+        QF::PolytopeQuadratureFormula::get(8, geometry).getSize();
+    }
+
+    static void registerCases()
+    {
+      MassWorkload<K, Scalar, Vector, Family>::registerCases(run, false);
+    }
   };
 
   template <class Scalar, bool Vector>

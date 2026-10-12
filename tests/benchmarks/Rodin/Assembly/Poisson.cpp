@@ -31,24 +31,23 @@ namespace Rodin::Tests::Benchmarks
   struct Poisson_UniformGrid_16x16 : public benchmark::Fixture
   {
     public:
-      using MeshType = Mesh<Context::Local>;
-      using FESType = P1<Real, MeshType>;
+    using MeshType = Mesh<Context::Local>;
+    using FESType = P1<Real, MeshType>;
 
-      static constexpr const Geometry::Attribute dirichletAttr = 1;
+    static constexpr const Geometry::Attribute dirichletAttr = 1;
 
-      void SetUp(const benchmark::State&)
-      {
-        mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
-        mesh.getConnectivity().compute(1, 2);
-        vhPtr.reset(new FESType(mesh));
-      }
+    void SetUp(const benchmark::State&)
+    {
+      mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
+      mesh.getConnectivity().compute(1, 2);
+      vhPtr.reset(new FESType(mesh));
+    }
 
-      void TearDown(const benchmark::State&)
-      {}
+    void TearDown(const benchmark::State&) {}
 
-      boost::filesystem::path meshfile;
-      MeshType mesh;
-      std::unique_ptr<FESType> vhPtr;
+    boost::filesystem::path meshfile;
+    MeshType mesh;
+    std::unique_ptr<FESType> vhPtr;
   };
 
   /// @brief Measures P1 Poisson assembly with unit diffusion and constant source on a 16x16 triangular grid.
@@ -59,13 +58,12 @@ namespace Rodin::Tests::Benchmarks
     assert(vhPtr);
     const auto& vh = *vhPtr;
     TrialFunction u(vh);
-    TestFunction  v(vh);
+    TestFunction v(vh);
     RealFunction f(1.0);
     RealFunction zero(0.0);
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, zero).on(dirichletAttr);
+    poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) +
+      DirichletBC(u, zero).on(dirichletAttr);
 
     for (auto _ : st)
       poisson.assemble();
@@ -80,14 +78,13 @@ namespace Rodin::Tests::Benchmarks
     assert(vhPtr);
     const auto& vh = *vhPtr;
     TrialFunction u(vh);
-    TestFunction  v(vh);
+    TestFunction v(vh);
     RealFunction gamma(1.0);
     RealFunction f(1.0);
     RealFunction zero(0.0);
     Problem poisson(u, v);
-    poisson = Integral(gamma * Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, zero).on(dirichletAttr);
+    poisson = Integral(gamma * Grad(u), Grad(v)) - Integral(f, v) +
+      DirichletBC(u, zero).on(dirichletAttr);
 
     for (auto _ : st)
       poisson.assemble();

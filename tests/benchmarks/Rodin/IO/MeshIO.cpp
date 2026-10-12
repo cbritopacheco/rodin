@@ -26,11 +26,9 @@ namespace Rodin::Tests::Benchmarks
   struct MeshIO : public benchmark::Fixture
   {
     public:
-      void SetUp(const benchmark::State&)
-      {}
+    void SetUp(const benchmark::State&) {}
 
-      void TearDown(const benchmark::State&)
-      {}
+    void TearDown(const benchmark::State&) {}
   };
 
   /// @brief Measures repeated MEDIT loading of the square 2D resource mesh.

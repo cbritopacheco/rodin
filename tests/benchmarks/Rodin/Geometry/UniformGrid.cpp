@@ -26,45 +26,43 @@ namespace Rodin::Tests::Benchmarks
   struct UniformGrid : public benchmark::Fixture
   {
     public:
-      void SetUp(const benchmark::State&)
-      {}
+    void SetUp(const benchmark::State&) {}
 
-      void TearDown(const benchmark::State&)
-      {}
+    void TearDown(const benchmark::State&) {}
   };
 
   /// @brief Measures construction of a 16x16 triangular uniform grid.
   BENCHMARK_F(UniformGrid, Triangular_16x16)(benchmark::State& st)
   {
     for (auto _ : st)
-      LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+      LocalMesh::UniformGrid(Polytope::Type::Triangle, {16, 16});
   }
 
   /// @brief Measures construction of a 64x64 triangular uniform grid.
   BENCHMARK_F(UniformGrid, Triangular_64x64)(benchmark::State& st)
   {
     for (auto _ : st)
-      LocalMesh::UniformGrid(Polytope::Type::Triangle, { 64, 64 });
+      LocalMesh::UniformGrid(Polytope::Type::Triangle, {64, 64});
   }
 
   /// @brief Measures construction of a 128x128 triangular uniform grid.
   BENCHMARK_F(UniformGrid, Triangular_128x128)(benchmark::State& st)
   {
     for (auto _ : st)
-      LocalMesh::UniformGrid(Polytope::Type::Triangle, { 128, 128 });
+      LocalMesh::UniformGrid(Polytope::Type::Triangle, {128, 128});
   }
 
   /// @brief Measures construction of a 256x256 triangular uniform grid.
   BENCHMARK_F(UniformGrid, Triangular_256x256)(benchmark::State& st)
   {
     for (auto _ : st)
-      LocalMesh::UniformGrid(Polytope::Type::Triangle, { 256, 256 });
+      LocalMesh::UniformGrid(Polytope::Type::Triangle, {256, 256});
   }
 
   /// @brief Measures construction of a 512x512 triangular uniform grid.
   BENCHMARK_F(UniformGrid, Triangular_512x512)(benchmark::State& st)
   {
     for (auto _ : st)
-      LocalMesh::UniformGrid(Polytope::Type::Triangle, { 512, 512 });
+      LocalMesh::UniformGrid(Polytope::Type::Triangle, {512, 512});
   }
 }

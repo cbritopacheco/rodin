@@ -29,14 +29,14 @@ namespace Rodin::Tests::Benchmarks
 
   struct GridFunctionEvaluationBenchmark : public benchmark::Fixture
   {
-      void SetUp(const benchmark::State&)
-      {
-        mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
-        mesh.getConnectivity().compute(2, 1);
-        mesh.getConnectivity().compute(1, 0);
-      }
+    void SetUp(const benchmark::State&)
+    {
+      mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
+    }
 
-      LocalMesh mesh;
+    LocalMesh mesh;
   };
 
   BENCHMARK_F(GridFunctionEvaluationBenchmark, P1VectorExpansion)

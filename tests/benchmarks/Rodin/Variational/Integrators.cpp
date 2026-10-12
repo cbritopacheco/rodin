@@ -38,37 +38,37 @@ namespace Rodin::Tests::Benchmarks
     template <size_t Order>
     struct H1Family
     {
-        template <class Range>
-        using FES = H1<Order, Range, LocalMesh>;
+      template <class Range>
+      using FES = H1<Order, Range, LocalMesh>;
 
-        static FES<Real> scalar(const LocalMesh& mesh)
-        {
-          return FES<Real>(std::integral_constant<size_t, Order>{}, mesh);
-        }
+      static FES<Real> scalar(const LocalMesh& mesh)
+      {
+        return FES<Real>(std::integral_constant<size_t, Order>{}, mesh);
+      }
 
-        static FES<Math::SpatialVector<Real>> vector(
-          const LocalMesh& mesh, size_t dimension)
-        {
-          return FES<Math::SpatialVector<Real>>(
-            std::integral_constant<size_t, Order>{}, mesh, dimension);
-        }
+      static FES<Math::SpatialVector<Real>> vector(
+        const LocalMesh& mesh, size_t dimension)
+      {
+        return FES<Math::SpatialVector<Real>>(
+          std::integral_constant<size_t, Order>{}, mesh, dimension);
+      }
     };
 
     struct P1Family
     {
-        template <class Range>
-        using FES = P1<Range, LocalMesh>;
+      template <class Range>
+      using FES = P1<Range, LocalMesh>;
 
-        static FES<Real> scalar(const LocalMesh& mesh)
-        {
-          return FES<Real>(mesh);
-        }
+      static FES<Real> scalar(const LocalMesh& mesh)
+      {
+        return FES<Real>(mesh);
+      }
 
-        static FES<Math::SpatialVector<Real>> vector(
-          const LocalMesh& mesh, size_t dimension)
-        {
-          return FES<Math::SpatialVector<Real>>(mesh, dimension);
-        }
+      static FES<Math::SpatialVector<Real>> vector(
+        const LocalMesh& mesh, size_t dimension)
+      {
+        return FES<Math::SpatialVector<Real>>(mesh, dimension);
+      }
     };
 
     template <size_t Dimension>

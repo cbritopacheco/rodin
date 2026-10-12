@@ -81,9 +81,9 @@ namespace
 
   struct Queries
   {
-      std::vector<Math::SpatialPoint> interior;
-      std::vector<Math::SpatialPoint> shared;
-      std::vector<Math::SpatialPoint> miss;
+    std::vector<Math::SpatialPoint> interior;
+    std::vector<Math::SpatialPoint> shared;
+    std::vector<Math::SpatialPoint> miss;
   };
 
   Queries makeQueries(
