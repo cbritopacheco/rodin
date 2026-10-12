@@ -16,6 +16,97 @@ using namespace Rodin::Advection;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief The inward shift and Taylor correction recover exact affine boundary data.
+  TEST(Rodin_Advection_TaylorBoundaryShift, AffineBoundaryRecoveryOnEveryGeometry)
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      auto mesh = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+      mesh.getConnectivity().compute(dimension - 1, dimension);
+      mesh.getConnectivity().compute(dimension, dimension - 1);
+      P1 space(mesh);
+      GridFunction field(space);
+      const auto exact = [dimension](const Point& p) {
+        Real value = 2;
+        for (size_t axis = 0; axis < dimension; ++axis)
+          value += (axis + 1) * p(axis);
+        return value;
+      };
+      field = exact;
+      size_t checked = 0;
+      for (auto face = mesh.getBoundary(); face; ++face)
+      {
+        SCOPED_TRACE(face->getIndex());
+        const Point boundary(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+        Math::SpatialVector<Real> normal(dimension);
+        normal.setZero();
+        size_t normalAxes = 0;
+        for (size_t axis = 0; axis < dimension; ++axis)
+        {
+          if (std::abs(boundary(axis)) < 1e-12)
+          {
+            normal(axis) = -1;
+            ++normalAxes;
+          }
+          else if (std::abs(boundary(axis) - 1) < 1e-12)
+          {
+            normal(axis) = 1;
+            ++normalAxes;
+          }
+        }
+        ASSERT_EQ(normalAxes, 1u);
+        const Index originalCell = mesh.getConnectivity()
+                                     .getIncidence(dimension - 1, dimension)
+                                     .at(face->getIndex())[0];
+        const auto& faces =
+          mesh.getConnectivity().getIncidence(dimension, dimension - 1).at(originalCell);
+        size_t localFace = 0;
+        while (localFace < faces.size() && faces[localFace] != face->getIndex())
+          ++localFace;
+        ASSERT_LT(localFace, faces.size());
+        const auto cell = mesh.getCell(originalCell);
+        for (const Real timeStep : {1.0, 0.2, -0.2})
+        {
+          SCOPED_TRACE(timeStep);
+          constexpr Real requestedOffset = 0.0625;
+          const Real offset = std::min(requestedOffset, Real(0.1) * std::abs(timeStep));
+          TaylorBoundaryShiftPolicy policy(timeStep, mesh, field, requestedOffset);
+          Real remaining = 0.3;
+          Index currentCell = originalCell;
+          Math::SpatialPoint reference;
+          cell->getTransformation().inverse(reference, boundary.getPhysicalCoordinates());
+          Real correction = 1.25;
+          BoundaryHit hit{remaining, currentCell, reference, localFace, correction};
+          EXPECT_TRUE(policy(hit));
+          EXPECT_DOUBLE_EQ(remaining, 0);
+          EXPECT_EQ(currentCell, originalCell);
+          const Point shifted(*cell, reference);
+          EXPECT_LT((shifted.getPhysicalCoordinates() -
+                      (boundary.getPhysicalCoordinates() - offset * normal))
+                      .norm(),
+            1e-10);
+          Real normalDerivative = 0;
+          for (size_t axis = 0; axis < dimension; ++axis)
+            normalDerivative += (axis + 1) * normal(axis);
+          EXPECT_NEAR(correction, 1.25 + offset * normalDerivative, 1e-10);
+          EXPECT_NEAR(
+            field.getValue(shifted) + correction, exact(boundary) + 1.25, 1e-10);
+          const auto previousReference = reference;
+          const Real previousCorrection = correction;
+          EXPECT_TRUE(policy(hit));
+          EXPECT_LT((reference - previousReference).norm(), 1e-12);
+          EXPECT_DOUBLE_EQ(correction, previousCorrection);
+        }
+        ++checked;
+      }
+      EXPECT_GT(checked, 0u);
+    }
+  }
+
   /**
    * @brief Unit tests for Lagrangian class basic functionality
    */

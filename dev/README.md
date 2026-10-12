@@ -85,6 +85,11 @@ geometry, and backend variants explicitly. Current audit findings include:
   partially read vertex section is also rejected. Coordinates, topology and
   attributes of the destination remain unchanged; premature replacement is
   rejected by both new tests. All 30 mesh-loader tests pass.
+- Taylor boundary-shift policy: real affine P1 fields recover exact boundary
+  values after inward shifts on every boundary face of all seven geometries.
+  Physical offsets, signed time-step caps, accumulated correction and repeated
+  completed hits are checked independently. All nine Lagrangian tests pass;
+  outward nudges, reversed correction and enlarged time caps are rejected.
 - Distinct trial/test spaces: 21 quadrature cases check every mass and
   derivative entry against the independent generic evaluator for real/complex
   scalar/vector P1 and quadratic H1 spaces on all seven geometries. Quadratic
