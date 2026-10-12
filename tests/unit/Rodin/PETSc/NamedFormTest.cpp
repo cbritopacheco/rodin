@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <memory>
+#include <utility>
 #include <type_traits>
 #include <vector>
 #include <Rodin/Geometry.h>
@@ -395,6 +397,66 @@ TEST(Rodin_PETSc_NamedForm, StandaloneNonlocalFormsMatchRestrictedMoments)
   };
   P1<PetscScalar> linearTrial(mesh);
   check(linearTrial, {0.5, 1, 0.5}, {0.5, 0.5, 0});
+}
+
+/// @brief Mixed PETSc constraints and copied formulations recover prescribed constant fields.
+TEST(Rodin_PETSc_NamedForm, MixedAffineConstraintsSurviveProblemLifecycle)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  mesh.getConnectivity().compute(0, 1);
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::TrialFunction u(space), p(space);
+  PETSc::Variational::TestFunction v(space), q(space);
+  Problem problem(u, v, p, q);
+  const auto k00 = [](const Point&, const Point&) { return PetscScalar(2); };
+  const auto k01 = [](const Point&, const Point&) { return PetscScalar(-3); };
+  const auto k10 = [](const Point&, const Point&) { return PetscScalar(0.5); };
+  const auto k11 = [](const Point&, const Point&) { return PetscScalar(4); };
+  for (const auto& constants : {std::pair<Real, Real>{1, 2}, {-2, 3}})
+  {
+    const auto [a, b] = constants;
+    SCOPED_TRACE(a);
+    SCOPED_TRACE(b);
+    // On [0,2], the nonlocal integrals of constant fields are 2a and 2b.
+    problem = Integral(u, v) + Integral(p, q) + Integral(Potential(k00, u), v) +
+      Integral(Potential(k01, p), v) + Integral(Potential(k10, u), q) +
+      Integral(Potential(k11, p), q) - Integral(RealFunction(5 * a - 6 * b), v) -
+      Integral(RealFunction(a + 9 * b), q) + DirichletBC(u, -p, RealFunction(a + b)) +
+      DirichletBC(p, RealFunction(b));
+    const auto check = [&](auto& candidate) {
+      candidate.assemble();
+      PETSc::Solver::KSP solver(candidate);
+      solver.setType(KSPPREONLY);
+      ::PC preconditioner = nullptr;
+      ASSERT_EQ(KSPGetPC(solver.getHandle(), &preconditioner), PETSC_SUCCESS);
+      ASSERT_EQ(PCSetType(preconditioner, PCLU), PETSC_SUCCESS);
+      solver.solve();
+      const PetscInt indices[] = {0, 1, 2};
+      PetscScalar first[3], second[3];
+      ASSERT_EQ(
+        VecGetValues(u.getSolution().getData(), 3, indices, first), PETSC_SUCCESS);
+      ASSERT_EQ(
+        VecGetValues(p.getSolution().getData(), 3, indices, second), PETSC_SUCCESS);
+      for (size_t i = 0; i < 3; ++i)
+      {
+        EXPECT_LT(PetscAbsScalar(first[i] - a), 1e-11);
+        EXPECT_LT(PetscAbsScalar(second[i] - b), 1e-11);
+      }
+    };
+    check(problem);
+    auto copied = problem;
+    check(copied);
+    auto moved = std::move(copied);
+    check(moved);
+    decltype(problem) assigned(u, v, p, q);
+    assigned = moved;
+    check(assigned);
+    decltype(problem) moveAssigned(u, v, p, q);
+    moveAssigned = std::move(assigned);
+    check(moveAssigned);
+    std::unique_ptr<decltype(problem)> clone(moveAssigned.copy());
+    check(*clone);
+  }
 }
 
 int main(int argc, char** argv)

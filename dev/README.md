@@ -96,6 +96,13 @@ geometry, and backend variants explicitly. Current audit findings include:
   isolated self communicators, including concurrent execution on two ranks;
   they certify that specialization, not complete-domain nonlocal integration
   across arbitrary distributed shards.
+- PETSc mixed problem lifecycle: constrained mass-plus-nonlocal systems
+  recover exact constant fields after copy, move, assignment and polymorphic
+  cloning in sequential, OpenMP and isolated MPI contexts. Affine manufactured
+  fields are recovered on three interval meshes. Instantiation exposed deleted
+  base/backend assignment calls; mixed problems now independently own and copy
+  their assembly strategy. Sequential and OpenMP numerical tests reject an
+  injected nonlocal coefficient error.
 - Standalone cardiac physics evaluators: exact midpoint kinematics, passive
   stress chain-rule differentiation with respect to the new displacement,
   viscous stress and its midpoint derivative, and every current/previous valve

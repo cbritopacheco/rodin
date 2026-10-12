@@ -900,11 +900,6 @@ namespace
     const auto k01 = [](const Point&, const Point&) { return PetscScalar(-3); };
     const auto k10 = [](const Point&, const Point&) { return PetscScalar(0.5); };
     const auto k11 = [](const Point&, const Point&) { return PetscScalar(4); };
-    PETSc::Solver::KSP solver(problem);
-    solver.setType(KSPPREONLY);
-    ::PC preconditioner = nullptr;
-    ASSERT_EQ(KSPGetPC(solver.getHandle(), &preconditioner), PETSC_SUCCESS);
-    ASSERT_EQ(PCSetType(preconditioner, PCLU), PETSC_SUCCESS);
     for (const auto& constants : {std::pair<Real, Real>{1, 2}, {-2, 3}})
     {
       const auto [a, b] = constants;
@@ -916,18 +911,39 @@ namespace
         Integral(Potential(k11, p), q) - Integral(RealFunction(5 * a - 6 * b), v) -
         Integral(RealFunction(a + 9 * b), q) + DirichletBC(u, -p, RealFunction(a + b)) +
         DirichletBC(p, RealFunction(b));
-      solver.solve();
-      const PetscInt indices[] = {0, 1, 2};
-      PetscScalar first[3], second[3];
-      ASSERT_EQ(
-        VecGetValues(u.getSolution().getData(), 3, indices, first), PETSC_SUCCESS);
-      ASSERT_EQ(
-        VecGetValues(p.getSolution().getData(), 3, indices, second), PETSC_SUCCESS);
-      for (size_t i = 0; i < 3; ++i)
-      {
-        EXPECT_LT(PetscAbsScalar(first[i] - a), 1e-11);
-        EXPECT_LT(PetscAbsScalar(second[i] - b), 1e-11);
-      }
+      const auto check = [&](auto& candidate) {
+        candidate.assemble();
+        PETSc::Solver::KSP solver(candidate);
+        solver.setType(KSPPREONLY);
+        ::PC preconditioner = nullptr;
+        ASSERT_EQ(KSPGetPC(solver.getHandle(), &preconditioner), PETSC_SUCCESS);
+        ASSERT_EQ(PCSetType(preconditioner, PCLU), PETSC_SUCCESS);
+        solver.solve();
+        const PetscInt indices[] = {0, 1, 2};
+        PetscScalar first[3], second[3];
+        ASSERT_EQ(
+          VecGetValues(u.getSolution().getData(), 3, indices, first), PETSC_SUCCESS);
+        ASSERT_EQ(
+          VecGetValues(p.getSolution().getData(), 3, indices, second), PETSC_SUCCESS);
+        for (size_t i = 0; i < 3; ++i)
+        {
+          EXPECT_LT(PetscAbsScalar(first[i] - a), 1e-11);
+          EXPECT_LT(PetscAbsScalar(second[i] - b), 1e-11);
+        }
+      };
+      check(problem);
+      auto copied = problem;
+      check(copied);
+      auto moved = std::move(copied);
+      check(moved);
+      decltype(problem) assigned(u, v, p, q);
+      assigned = moved;
+      check(assigned);
+      decltype(problem) moveAssigned(u, v, p, q);
+      moveAssigned = std::move(assigned);
+      check(moveAssigned);
+      std::unique_ptr<decltype(problem)> clone(moveAssigned.copy());
+      check(*clone);
     }
   }
 
