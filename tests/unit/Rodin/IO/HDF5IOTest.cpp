@@ -1605,4 +1605,188 @@ namespace Rodin::Tests::Unit
     EXPECT_THROW(mesh.load(filename, FileFormat::HDF5), Alert::Exception);
     EXPECT_THROW(field.load(filename, FileFormat::HDF5), Alert::Exception);
   }
+  /// @brief Moved HDF5 handles transfer ownership and close the replaced identifier.
+  TEST_F(HDF5InvalidPayload, HandleOwnershipTransfer)
+  {
+    const hid_t first = H5Screate(H5S_SCALAR);
+    const hid_t second = H5Screate(H5S_SCALAR);
+    ASSERT_GE(first, 0);
+    ASSERT_GE(second, 0);
+    HDF5::Handle owner = HDF5::Space(first);
+    HDF5::Handle moved(std::move(owner));
+    EXPECT_FALSE(owner);
+    EXPECT_EQ(moved.get(), first);
+    HDF5::Handle replacement = HDF5::Space(second);
+    replacement = std::move(moved);
+    EXPECT_FALSE(moved);
+    EXPECT_EQ(H5Iis_valid(second), 0);
+    EXPECT_GT(H5Iis_valid(first), 0);
+    auto& alias = replacement;
+    replacement = std::move(alias);
+    EXPECT_EQ(replacement.get(), first);
+    replacement.reset();
+    EXPECT_EQ(H5Iis_valid(first), 0);
+    replacement.reset();
+    EXPECT_FALSE(replacement);
+  }
+
+  /// @brief Scalar and matrix readers reject absent datasets and incorrect ranks/cardinalities.
+  TEST_F(HDF5InvalidPayload, DatasetShapeContracts)
+  {
+    auto file =
+      HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    HDF5::writeVectorDataset<HDF5::I32>(file.get(), "/Vector", {1, -2});
+    HDF5::writeMatrixDataset<HDF5::F64>(
+      file.get(), "/Tensor", {1, 2, 3, 4, 5, 6}, 1, 2, 3);
+    EXPECT_THROW(
+      HDF5::readScalarDataset<HDF5::I32>(file.get(), "/Vector"), Alert::Exception);
+    EXPECT_THROW(HDF5::readMatrixShape(file.get(), "/Vector"), Alert::Exception);
+    EXPECT_THROW(HDF5::readMatrixShape(file.get(), "/Tensor"), Alert::Exception);
+    EXPECT_THROW(HDF5::readMatrixShape(file.get(), "/Missing"), Alert::Exception);
+    EXPECT_THROW(HDF5::readDatasetShape(file.get(), "/Missing"), Alert::Exception);
+    EXPECT_THROW(
+      HDF5::readVectorDataset<HDF5::F64>(file.get(), "/Missing"), Alert::Exception);
+    EXPECT_EQ(
+      HDF5::readDatasetShape(file.get(), "/Tensor"), (std::vector<hsize_t>{1, 2, 3}));
+    EXPECT_THROW(HDF5::writeMatrixDataset<HDF5::F64>(file.get(), "/Bad", {1}, 2, 3),
+      Alert::Exception);
+    EXPECT_THROW(HDF5::writeMatrixDataset<HDF5::F64>(file.get(), "/Bad", {1, 2}, 1, 1, 3),
+      Alert::Exception);
+    EXPECT_THROW(
+      HDF5::writeVectorDataset<HDF5::I32>(file.get(), "/Vector", {3}), Alert::Exception);
+    EXPECT_THROW(HDF5::writeMatrixDataset<HDF5::F64>(file.get(), "/Tensor", {1}, 1, 1),
+      Alert::Exception);
+    HDF5::writeVectorDataset<HDF5::U8>(file.get(), "/Empty", {});
+    EXPECT_TRUE(HDF5::readVectorDataset<HDF5::U8>(file.get(), "/Empty").empty());
+    const auto scalarSpace = HDF5::Space(H5Screate(H5S_SCALAR));
+    const auto scalar = HDF5::DataSet(H5Dcreate2(file.get(), "/Scalar", H5T_NATIVE_UINT64,
+      scalarSpace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+    EXPECT_TRUE(HDF5::readDatasetShape(file.get(), "/Scalar").empty());
+  }
+
+  /// @brief Read-only files reject writes, and nonnumeric datasets reject numeric reads.
+  TEST_F(HDF5InvalidPayload, DatasetAccessContracts)
+  {
+    {
+      auto file =
+        HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      ASSERT_TRUE(file);
+      const auto space = HDF5::Space(H5Screate(H5S_SCALAR));
+      const auto text = HDF5::DataSet(H5Dcreate2(file.get(), "/Text", H5T_C_S1,
+        space.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+      ASSERT_TRUE(text);
+      const char value = 'x';
+      ASSERT_GE(H5Dwrite(text.get(), H5T_C_S1, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value), 0);
+      EXPECT_THROW(
+        HDF5::readVectorDataset<HDF5::F64>(file.get(), "/Text"), Alert::Exception);
+    }
+    auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    EXPECT_THROW(
+      HDF5::writeVectorDataset<HDF5::F64>(file.get(), "/New", {1}), Alert::Exception);
+    EXPECT_THROW(HDF5::writeMatrixDataset<HDF5::F64>(file.get(), "/New", {1}, 1, 1),
+      Alert::Exception);
+  }
+
+  void expectRawAttribute(const boost::filesystem::path& path,
+    const std::vector<hsize_t>& shape, const std::vector<Real>& expected)
+  {
+    auto file = HDF5::File(H5Fopen(path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    const auto dataset =
+      HDF5::DataSet(H5Dopen2(file.get(), "/GridFunction/Values/Data", H5P_DEFAULT));
+    ASSERT_TRUE(dataset);
+    const auto space = HDF5::Space(H5Dget_space(dataset.get()));
+    ASSERT_EQ(H5Sget_simple_extent_ndims(space.get()), static_cast<int>(shape.size()));
+    std::vector<hsize_t> actual(shape.size());
+    ASSERT_GE(H5Sget_simple_extent_dims(space.get(), actual.data(), nullptr), 0);
+    ASSERT_EQ(actual, shape);
+    ASSERT_EQ(
+      static_cast<size_t>(H5Sget_simple_extent_npoints(space.get())), expected.size());
+    std::vector<Real> values(expected.size());
+    ASSERT_GE(H5Dread(dataset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                values.data()),
+      0);
+    for (size_t i = 0; i < values.size(); ++i)
+      EXPECT_NEAR(values[i], expected[i], 1e-12) << "entry=" << i;
+  }
+
+  /// @brief Vector visualization uses evaluated node/cell values and entity-major component layout.
+  TEST_F(HDF5InvalidPayload, VectorVisualizationValuesAndLayout)
+  {
+    for (bool quadratic : {false, true})
+    {
+      auto mesh = LocalMesh::Builder()
+                    .initialize(2)
+                    .nodes(3)
+                    .vertex({0, 0})
+                    .vertex({2, 0})
+                    .vertex({0, 3})
+                    .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                    .finalize();
+      if (quadratic)
+        setQuadraticCellTransformations(mesh);
+      P1<Math::SpatialVector<Real>> space(mesh, 2);
+      GridFunction field(space);
+      field = [](const Point& p) {
+        Math::SpatialVector<Real> value(2);
+        value[0] = 1 + 2 * p.x() + 3 * p.y();
+        value[1] = -2 - p.x() + 4 * p.y();
+        return value;
+      };
+      const std::vector<Real> nodal = quadratic
+        ? std::vector<Real>{1, -2, 5, -4, 10, 10, 3, -3, 7.5, 3, 5.5, 4}
+        : std::vector<Real>{1, -2, 5, -4, 10, 10};
+      HDF5::writeXDMFNodeAttribute(field, mesh, filename);
+      expectRawAttribute(filename, {quadratic ? 6u : 3u, 2}, nodal);
+      HDF5::writeXDMFCellAttribute(field, mesh, filename);
+      expectRawAttribute(filename, {1, 2}, {16.0 / 3, 4.0 / 3});
+    }
+  }
+
+  /// @brief Matrix visualization preserves rectangular rank-three layout and row-major components.
+  TEST_F(HDF5InvalidPayload, MatrixVisualizationValuesAndLayout)
+  {
+    for (bool quadratic : {false, true})
+    {
+      auto mesh = LocalMesh::Builder()
+                    .initialize(2)
+                    .nodes(3)
+                    .vertex({0, 0})
+                    .vertex({2, 0})
+                    .vertex({0, 3})
+                    .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                    .finalize();
+      if (quadratic)
+        setQuadraticCellTransformations(mesh);
+      P1<Math::SpatialMatrix<Real>> space(mesh, 2, 3);
+      GridFunction field(space);
+      field = [](const Point& p) {
+        Math::SpatialMatrix<Real> value(2, 3);
+        for (size_t r = 0; r < 2; ++r)
+        {
+          for (size_t c = 0; c < 3; ++c)
+            value(r, c) = 10 * r + c + p.x() + 2 * p.y();
+        }
+        return value;
+      };
+      // Values at vertices and edge midpoints of the physical triangle.
+      const Real affineValues[] = {0, 2, 6, 1, 4, 3};
+      std::vector<Real> nodal, cell;
+      const Real offsets[] = {0, 1, 2, 10, 11, 12};
+      for (size_t node = 0; node < (quadratic ? 6u : 3u); ++node)
+      {
+        for (Real offset : offsets)
+          nodal.push_back(offset + affineValues[node]);
+      }
+      for (Real offset : offsets)
+        cell.push_back(offset + 8.0 / 3);
+      HDF5::writeXDMFNodeAttribute(field, mesh, filename);
+      expectRawAttribute(filename, {quadratic ? 6u : 3u, 2, 3}, nodal);
+      HDF5::writeXDMFCellAttribute(field, mesh, filename);
+      expectRawAttribute(filename, {1, 2, 3}, cell);
+    }
+  }
+
 }
