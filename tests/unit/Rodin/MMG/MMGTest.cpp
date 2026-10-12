@@ -8,6 +8,9 @@
 #include <sstream>
 #include <cmath>
 #include <vector>
+#include <array>
+#include <algorithm>
+#include <set>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -91,6 +94,122 @@ TEST(MMG5Lifecycle, SolutionCopyAndSwap)
     EXPECT_EQ(copy->m[count - 1], 0.25 + count - 1);
   }
   Native::destroySolution(nullptr);
+}
+
+/// @brief Surface conversion retains coordinates, triangles and attributed edge references.
+TEST(MMG5Lifecycle, SurfaceConversionPreservesGeometryAndAttributes)
+{
+  using Native = MMG::MMG5;
+  auto volume = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  volume.getConnectivity().compute(2, 3);
+  auto surface = volume.skin();
+  surface.getConnectivity().compute(1, 2);
+  for (auto cell = surface.getCell(); cell; ++cell)
+    surface.setAttribute({2, cell->getIndex()}, 17);
+  size_t attributedEdges = 0;
+  for (auto edge = surface.getFace(); edge; ++edge)
+  {
+    if (edge->getIndex() % 2 == 0)
+    {
+      surface.setAttribute({1, edge->getIndex()}, 23);
+      ++attributedEdges;
+    }
+  }
+  std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> native(
+    Native::rodinToMesh(surface), Native::destroyMesh);
+  ASSERT_TRUE(Native::isSurfaceMesh(native.get()));
+  EXPECT_EQ(native->np, surface.getVertexCount());
+  EXPECT_EQ(native->nt, surface.getCellCount());
+  EXPECT_EQ(native->na, attributedEdges);
+  for (int i = 1; i <= native->nt; ++i)
+    EXPECT_EQ(native->tria[i].ref, 17);
+  for (int i = 1; i <= native->na; ++i)
+    EXPECT_EQ(native->edge[i].ref, 23);
+  auto restored = Native::meshToRodin(native.get());
+  EXPECT_EQ(restored.getDimension(), 2u);
+  EXPECT_EQ(restored.getSpaceDimension(), 3u);
+  EXPECT_EQ(restored.getVertexCount(), surface.getVertexCount());
+  EXPECT_EQ(restored.getCellCount(), surface.getCellCount());
+  std::set<std::array<Real, 3>> expected, actual;
+  for (auto vertex = surface.getVertex(); vertex; ++vertex)
+  {
+    const auto& x = vertex->getCoordinates();
+    expected.insert({x[0], x[1], x[2]});
+  }
+  for (auto vertex = restored.getVertex(); vertex; ++vertex)
+  {
+    const auto& x = vertex->getCoordinates();
+    actual.insert({x[0], x[1], x[2]});
+  }
+  EXPECT_EQ(actual, expected);
+  for (auto cell = restored.getCell(); cell; ++cell)
+    EXPECT_EQ(cell->getAttribute(), Optional<Attribute>(17));
+  restored.getConnectivity().compute(1, 2);
+  size_t restoredReferences = 0;
+  for (auto edge = restored.getFace(); edge; ++edge)
+  {
+    if (edge->getAttribute() == Optional<Attribute>(23))
+      ++restoredReferences;
+  }
+  EXPECT_EQ(restoredReferences, attributedEdges);
+  const auto keys = [](const LocalMesh& mesh, size_t dimension, Attribute attribute) {
+    std::set<std::vector<std::array<Real, 3>>> result;
+    for (auto polytope = mesh.getPolytope(dimension); polytope; ++polytope)
+    {
+      if (polytope->getAttribute() != Optional<Attribute>(attribute))
+        continue;
+      std::vector<std::array<Real, 3>> vertices;
+      for (const auto index : polytope->getVertices())
+      {
+        const auto& x = mesh.getVertexCoordinates(index);
+        vertices.push_back({x[0], x[1], x[2]});
+      }
+      std::sort(vertices.begin(), vertices.end());
+      result.insert(std::move(vertices));
+    }
+    return result;
+  };
+  EXPECT_EQ(keys(restored, 2, 17), keys(surface, 2, 17));
+  EXPECT_EQ(keys(restored, 1, 23), keys(surface, 1, 23));
+}
+
+/// @brief All three native backends receive the configured remeshing parameters.
+TEST(MMG5Lifecycle, ParameterForwardingMatchesEveryBackend)
+{
+  /// @brief Exposes parameter forwarding without invoking a remeshing algorithm.
+  class Parameters : public MMG::MMG5
+  {
+    public:
+      using MMG::MMG5::setParameters;
+  };
+  using Native = MMG::MMG5;
+  auto planar = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  auto volume = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  volume.getConnectivity().compute(2, 3);
+  auto surface = volume.skin();
+  surface.getConnectivity().compute(1, 2);
+  const auto check = [](const LocalMesh& mesh) {
+    std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> native(
+      Native::rodinToMesh(mesh), Native::destroyMesh);
+    Parameters parameters;
+    parameters.setHMin(0.125)
+      .setHMax(0.75)
+      .setHausdorff(0.0625)
+      .setGradation(1.75)
+      .setAngleDetection(false);
+    EXPECT_EQ(&parameters.setParameters(native.get()), &parameters);
+    EXPECT_DOUBLE_EQ(native->info.hmin, 0.125);
+    EXPECT_DOUBLE_EQ(native->info.hmax, 0.75);
+    EXPECT_DOUBLE_EQ(native->info.hausd, 0.0625);
+    EXPECT_NEAR(native->info.hgrad, std::log(1.75), 1e-14);
+    EXPECT_EQ(native->info.dhd, -1);
+    parameters.setAngleDetection(true);
+    parameters.setParameters(native.get());
+    EXPECT_GT(native->info.dhd, 0);
+  };
+  check(planar);
+  check(surface);
+  check(volume);
 }
 
 namespace Rodin::Tests::Unit
