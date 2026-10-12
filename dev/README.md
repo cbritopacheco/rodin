@@ -67,6 +67,14 @@ geometry, and backend variants explicitly. Current audit findings include:
 - P1 scalar derivatives: real/complex affine fields on every geometry,
   including face traces. Instantiation exposed obsolete basis, coefficient,
   and optional-attribute APIs, now covered by numerical regressions.
+- P1/quadratic H1 one-sided gradient/Jacobian/divergence traces: a continuous piecewise
+  affine field has different prescribed derivatives on either side of an
+  aligned interface. Real and complex scalar/vector cases recover both traces
+  on all seven geometries, including boundary faces, and reject missing trace
+  attributes. Always choosing the first neighbor fails all three numerical
+  oracles in both scalar fields and element families. All four cases in the
+  dedicated trace executable pass. The two existing coordinate-derivative
+  tests remain separate.
 - Distinct trial/test spaces: 21 quadrature cases check every mass and
   derivative entry against the independent generic evaluator for real/complex
   scalar/vector P1 and quadratic H1 spaces on all seven geometries. Quadratic

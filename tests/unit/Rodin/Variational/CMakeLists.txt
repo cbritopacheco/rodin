@@ -790,6 +790,11 @@ target_link_libraries(RodinVariationalP1DerivativeTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalP1DerivativeTest PROPERTIES LABELS unit)
 
+add_executable(RodinVariationalDerivativeTraceTest DerivativeTraceTest.cpp)
+target_link_libraries(RodinVariationalDerivativeTraceTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalDerivativeTraceTest PROPERTIES LABELS unit TIMEOUT 300)
+
 add_executable(RodinVariationalPeriodicBCTest PeriodicBCTest.cpp)
 target_link_libraries(RodinVariationalPeriodicBCTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
