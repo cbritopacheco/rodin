@@ -10,7 +10,7 @@ Why the extra full-file cross-check:
 
   ``git clang-format`` reformats only the changed line *ranges*. With a
   partial range clang-format lacks the surrounding scope context, so with
-  options like ``IndentAccessModifiers: true`` it mis-computes indentation
+  nested declarations it can mis-compute indentation
   and proposes changes to lines that are in fact already correct. The result
   is base-dependent false positives — a file "fails" against one base and
   passes against another with byte-identical content.
