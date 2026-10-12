@@ -8,3 +8,7 @@ target_link_libraries(RodinGeometryBenchmarks PRIVATE
 add_executable(RodinReferenceGeometryBenchmarks EXCLUDE_FROM_ALL ReferenceGeometry.cpp)
 target_link_libraries(RodinReferenceGeometryBenchmarks PRIVATE
   Rodin::Geometry Rodin::Variational benchmark::benchmark)
+
+add_executable(RodinMappedPointBenchmarks EXCLUDE_FROM_ALL MappedPoint.cpp)
+target_link_libraries(RodinMappedPointBenchmarks PRIVATE
+  Rodin::Geometry Rodin::Variational benchmark::benchmark)

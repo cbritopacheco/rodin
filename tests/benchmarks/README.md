@@ -93,7 +93,7 @@ that this performance matrix has been profiled.
 | Reference elements / Variational | Scalar P0/P0g/P1 and H1 degrees 1–6; values, derivatives, prefetched descriptors | Vector/matrix component expansion, DOF functionals and first-use initialization |
 | Reference quadrature / QF | Dispatcher lookup and numerical sweep; reference-element cache hit/rebuild | Owned rule construction, cold allocation, eviction order and high-order fallback profiles |
 | Transformations / Geometry | Pointwise/bulk Jacobians; pointwise map consumer profiles | Independent geometry degree, curvature, embeddings and inverse-map stage matrix |
-| Mapped points / Geometry | Consumer profiles from field and assembly operations | Isolated construction, lazy coordinates, inverse Jacobian, distortion and rebinding |
+| Mapped points / Geometry | Isolated warm/rebound coordinates, Jacobian, inverse and measure; mapped-quadrature construction; field consumer profiles | General curved embeddings, cache-miss provenance, controlled timings and profiles beyond selected cases |
 | Space setup / Variational, MPI | P1 construction and distributed construction | P0/P0g/H1 setup, DOF lookup/restriction, reconciliation and degree scaling |
 | Fields / Variational | Interpolation and true mass projection; 1,008 native and OpenMP selections qualified; point/integration-point sweeps | P0/P0g, higher degrees, matrix evaluation, point cells, norms and boundary restriction |
 | Expressions / Variational | Generic expressions, coefficients and named forms | Cold expression construction, binding, changes of state and complete range/backend matrix |
@@ -236,6 +236,74 @@ build/tests/benchmarks/RodinH1PyramidBenchmarks \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 build/tests/benchmarks/RodinFieldOperationBenchmarks \
   --benchmark_filter='Field/(PointEvaluation|IntegrationPointEvaluation)/H1/P2/Real/Scalar/Pyramid/5/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+```
+
+### Mapped-point protocol
+
+`RodinMappedPointBenchmarks`, owned by Geometry, separates physical coordinates,
+Jacobians, left inverses and measure factors. `Warm` sweeps reuse each selected
+point cache. `Rebound` sweeps call `setPolytope` before each access, including
+cache invalidation and lazy computation but excluding point allocation. Both
+write preallocated outputs; their times are not pure accessor latencies. The
+points in these scopes do not carry formula provenance, so rebound map and
+Jacobian evaluation are pointwise rather than reference-table operations.
+
+`Construction` measures fresh owned `PolytopeQuadrature` allocation, bulk
+Jacobians and destruction/replacement with warmed reference tables.
+`ConstructionAndCoordinates` additionally consumes all lazy physical
+coordinates. These are separate scopes, not independent additive costs.
+Mesh-owned cache lookup, first-use basis initialization, reference-table
+eviction, assembly and solving are excluded. Zero-dimensional cases check
+empty Jacobian dimensions and unit measure; their inverse sweeps are omitted.
+
+Geometry degrees one through six, all eight reference families, every
+admissible embedding through dimension three, and orders 2, 4 and 8 are
+registered. Each workload has one cell; quadrature-order sweeps are sample-count
+studies, not mesh refinement. Affine maps use $\alpha=0$, and quadratic maps use
+$\alpha=1/8$ at degrees two through six. Quadratic maps are omitted for point
+cells, leaving 4,062 registrations. The independent analytic map is
+
+$$
+x_j(\widehat x)=
+\begin{cases}
+\widehat x_j+\alpha\widehat x_j^2,&j<d,\\
+(j+1)/4,&d\le j<s.
+\end{cases}
+$$
+
+Its Jacobian is diagonal in the first $d$ rows, with entries
+$1+2\alpha\widehat x_j>0$. The left inverse has reciprocal diagonal entries;
+the measure is their original diagonal product. Geometry coefficients are
+obtained through the finite-element DOF functionals. Every sampled result is
+checked against these expressions, with a declared dimensionless roundoff
+budget and deliberate output-perturbation rejection. Extra embedding coordinates
+are constant: this does not certify general curved embedded surfaces or
+ill-conditioned inverse maps. Those remain separate profiling workloads.
+Both map policies use `ParametricTransformation` with H1 geometry; the affine
+label describes the represented map, not the default affine transformation
+implementation. Holding that map fixed while raising its representation degree
+isolates degree-dependent evaluation overhead.
+
+An optimized native study at quadratic map degree six and order eight measured
+about 826 ns per pyramid sample and 2,008 ns per hexahedron sample for warmed
+mapped-quadrature construction. Their basis counts are 140 and 343: the costs
+normalize to 5.90 and 5.86 ns per basis/sample, respectively. An Instruments
+profile attributed about 91% of selected source CPU sample weight to the bulk
+Jacobian contraction and reference-gradient access. Initial table-building
+samples were also captured outside benchmark timing and are not warm-path
+modal recomputation. In contrast, rebound pointwise pyramid Jacobians measured
+about 1.1 ms per sample at degree six. These are different operation scopes,
+not interchangeable assembly timings or a newly achieved speedup. The broad
+five-repetition study contained three noisy selections; isolated process repeats
+reduced their coefficients of variation to approximately 0.8–1.6%. The retained
+raw results distinguish elapsed time from CPU time rather than silently dropping
+the original samples.
+
+```sh
+cmake --build build --target RodinMappedPointBenchmarks -j1
+build/tests/benchmarks/RodinMappedPointBenchmarks \
+  --benchmark_filter='MappedPoint/(Construction|Jacobian/Rebound)/Quadratic/P2/Pyramid/3/8/' \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
 
