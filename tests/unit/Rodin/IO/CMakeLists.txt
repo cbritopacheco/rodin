@@ -65,3 +65,8 @@ add_executable(RodinIOSpatialMatrixTest SpatialMatrixTest.cpp)
 target_link_libraries(RodinIOSpatialMatrixTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::IO Rodin::Variational)
 gtest_discover_tests(RodinIOSpatialMatrixTest PROPERTIES LABELS unit)
+
+add_executable(RodinIOXDMFTest XDMFTest.cpp)
+target_link_libraries(RodinIOXDMFTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::IO Rodin::Variational)
+gtest_discover_tests(RodinIOXDMFTest PROPERTIES LABELS unit)
