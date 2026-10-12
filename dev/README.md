@@ -37,7 +37,10 @@ records, lists uncovered production lines, and inventories source files absent
 from the report, with template declaration locations. CI uploads this JSON
 for each coverage configuration. Absence is a review candidate: declarations,
 static tables, disabled optional modules, and never-instantiated templates can
-all be absent. The reported percentage alone cannot distinguish them.
+all be absent. Constant evaluation and optimization can also remove runtime
+records from tested helpers. Check test registrations and instantiations
+before interpreting an absent record as missing tests. The reported percentage
+alone cannot distinguish these cases.
 
 The optional `--functions` inventory merges function execution counters by
 production file and symbol, supporting both `FN`/`FNDA` and `FNL`/`FNA` LCOV
@@ -85,6 +88,14 @@ geometry, and backend variants explicitly. Current audit findings include:
   Lifecycle regressions also exposed nonassignable backend state and loss of
   the formulation on copy/move, now retained explicitly. This does not extend
   the separate direct tuple-assembly API beyond its existing specializations.
+- PETSc MPI mixed nonlocal problems: exact four-block P1 matrices with
+  independent trial/test attribute restrictions, missing attributes and
+  repeated assembly. Coupled mass-plus-nonlocal solves recover two prescribed
+  pairs of constant fields with affine cross-field boundary constraints.
+  Both tests reject an injected nonlocal coefficient error. These checks use
+  isolated self communicators, including concurrent execution on two ranks;
+  they certify that specialization, not complete-domain nonlocal integration
+  across arbitrary distributed shards.
 - Standalone cardiac physics evaluators: exact midpoint kinematics, passive
   stress chain-rule differentiation with respect to the new displacement,
   viscous stress and its midpoint derivative, and every current/previous valve
