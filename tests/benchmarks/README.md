@@ -336,6 +336,24 @@ regressions, not timing gates. All 24 tests passed against the original source;
 the retained exact-comparison test failed against the isolated prototype.
 Future reuse changes must pass this gate without weakening arithmetic policy.
 
+An integer-only lookup-table prototype was also evaluated and rejected. At
+degrees two, four and six, isolated decoding sweeps improved from approximately
+14.7, 70.7 and 201 ns to 11.8, 35.8 and 89.0 ns. Modal sweeps did not show a
+consistent improvement. In alternating original/prototype process runs, real
+scalar degree-two pyramid point-evaluation sweeps instead increased from
+21.4–21.5 ms to 22.1–22.3 ms; integration-point sweeps increased from
+22.1–22.2 ms to about 22.7 ms. Each sweep evaluated 18,048 points with 14 scalar
+basis functions. Thus the isolated decoding result did not transfer to its
+consumer and does not justify adding the table. These are native optimized
+five-repetition measurements, not a backend-wide conclusion.
+
+The original and prototype basis/derivative snapshots were byte-identical
+across both scalar fields, degrees one through six and all eight reference
+families. `RodinVariationalH1PyramidIndexTest` separately checks layer enumeration,
+inverse indexing and invalid-index compatibility through degree ten using exact
+logical comparisons. Its sensitivity was confirmed with an isolated perturbed
+decoder. No lookup table or source arithmetic change was retained.
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`

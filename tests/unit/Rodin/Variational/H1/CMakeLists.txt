@@ -15,6 +15,12 @@ target_link_libraries(RodinVariationalH1TabulationTest
 gtest_discover_tests(RodinVariationalH1TabulationTest
   PROPERTIES LABELS unit)
 
+add_executable(RodinVariationalH1PyramidIndexTest PyramidIndexTest.cpp)
+target_link_libraries(RodinVariationalH1PyramidIndexTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1PyramidIndexTest
+  PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalH1JacobiPolynomialTest JacobiPolynomialTest.cpp)
 target_link_libraries(RodinVariationalH1JacobiPolynomialTest
   PUBLIC
