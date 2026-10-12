@@ -12,7 +12,9 @@
  *   mpirun -n 8 ./examples/Heart/Atrium -atrium_mesh <path> -atrium_dt 1e-3
  *
  * Options: -atrium_mesh, -atrium_mesh_scale, -atrium_dt, -atrium_flow_cycles,
- *          -atrium_species_cycles, -atrium_pin.
+ *          -atrium_species_cycles, -atrium_pin, -atrium_output_every,
+ *          -atrium_vms_scale, -atrium_graddiv_scale, -atrium_pspg_scale,
+ *          -atrium_species_temam, -atrium_vms, -atrium_kinetics.
  */
 #include <algorithm>
 #include <cassert>
@@ -532,8 +534,17 @@ namespace Rodin::Examples::Heart
     const auto uNormal = Dot(m_u, normal) * normal;
     const auto uTangential = m_u - uNormal;
 
+    // The incoming-kinetic-energy branch is max(-u.n, 0) on EVERY pressure
+    // boundary, inlets included. With the OUTWARD normal, taking v = u in the
+    // convective pair leaves (rho/2) int_G (u^n.n)|u|^2 on the left, so
+    // wherever fluid ENTERS (u.n < 0) that is a positive, cubic, unbounded
+    // energy source. max(+u.n, 0) arms the branch that is already dissipative
+    // and leaves the dangerous one untouched: over a whole filling phase it is
+    // identically zero. What kept this from showing here is the inlet
+    // impedance, which supplies a bound of its own -- and therefore also sets
+    // the inflow rate.
     const auto inletBackflow =
-      0.5 * rho * m_cfg.inletBackflowStabilization * Max(Dot(m_uOld, normal), 0.0);
+      0.5 * rho * m_cfg.inletBackflowStabilization * Max(-Dot(m_uOld, normal), 0.0);
     const auto outletBackflow =
       0.5 * rho * m_cfg.outletBackflowStabilization * Max(-Dot(m_uOld, normal), 0.0);
 
@@ -596,6 +607,7 @@ namespace Rodin::Examples::Heart
     const Real Dfg = m_cfg.thrombosis.diffusivityFibrinogen;
     const Real Dfn = m_cfg.thrombosis.diffusivityFibrin;
     const Real keff = m_cfg.thrombosis.reactionRate;
+    const Real temam = 0.5 * m_cfg.speciesTemamScale;
     const Real scale = m_cfg.thrombosis.stabilizationScale;
     const Real dt = m_cfg.dt;
     const Real fg0 =
@@ -644,16 +656,23 @@ namespace Rodin::Examples::Heart
     const auto pFg = Dot(m_uOld, Grad(m_vfg));
     const auto pFn = Dot(m_uOld, Grad(m_vfn));
 
+    // Temam correction of the transport, one per species. It is a discrete
+    // correction and not part of the strong residual, so it stays out of the
+    // SUPG and crosswind residuals below, exactly as the momentum equation
+    // keeps its own Temam term out of the VMS residual.
+    const auto divU = Div(m_uOld);
+
     m_species = (1.0 / dt) * Integral(m_th, m_vth) -
       (1.0 / dt) * Integral(m_thCur, m_vth) + Dth * Integral(Grad(m_th), Grad(m_vth)) +
-      Integral(Dot(m_uOld, Grad(m_th)), m_vth)
+      Integral(Dot(m_uOld, Grad(m_th)), m_vth) + temam * Integral(divU * m_th, m_vth)
 
       + (1.0 / dt) * Integral(m_fg, m_vfg) - (1.0 / dt) * Integral(m_fgCur, m_vfg) +
       Dfg * Integral(Grad(m_fg), Grad(m_vfg)) + Integral(Dot(m_uOld, Grad(m_fg)), m_vfg) +
-      keff * Integral(m_thCur * m_fg, m_vfg)
+      temam * Integral(divU * m_fg, m_vfg) + keff * Integral(m_thCur * m_fg, m_vfg)
 
       + (1.0 / dt) * Integral(m_fn, m_vfn) - (1.0 / dt) * Integral(m_fnCur, m_vfn) +
-      Dfn * Integral(Grad(m_fn), Grad(m_vfn)) + Integral(Dot(m_uOld, Grad(m_fn)), m_vfn) -
+      Dfn * Integral(Grad(m_fn), Grad(m_vfn)) + Integral(Dot(m_uOld, Grad(m_fn)), m_vfn) +
+      temam * Integral(divU * m_fn, m_vfn) -
       keff * Integral(m_thCur * m_fg, m_vfn)
 
       // Endothelial thrombin flux: a surface flux, armed by the cycle indices.
@@ -864,7 +883,39 @@ namespace Rodin::Examples::Heart
 
     m_wssProjection.assemble();
     m_wssProjection.solve(m_wssKSP);
-    m_wss.setData(m_wssTrial.getSolution().getData());
+
+    // Keep only the wall. tau_w is an L2 projection, not a nodal quantity, and
+    // the operator is (M_wall + reg M_vol). ON the wall the boundary mass
+    // dominates by reg*h ~ 5e-7, so the recovered traction there is exact --
+    // that part is sound. OFF the wall the only equation a node has is
+    // reg M x = 0, and for a consistent P1 mass matrix that forces
+    // x_i = -(1/M_ii) sum_j M_ij x_j with every M_ij > 0: the tail ALTERNATES
+    // IN SIGN from node to node, decaying by about a quarter per layer. A
+    // sign-alternating field is exactly what renders as dots rather than as a
+    // field, and it is what put a 0/0 inside OSI. It is not a solver failure:
+    // after Jacobi the operator has a condition number of about 3.
+    //
+    // Zeroing it leaves the wall untouched, makes the two cycle accumulators
+    // identically zero off the wall, and costs one nodal pass.
+    const size_t sdim = m_mesh.getSpaceDimension();
+    const size_t wallFaceDim = m_mesh.getDimension() - 1;
+    const auto onWallFacet = [this, wallFaceDim](const Polytope& facet) {
+      const auto a = m_mesh.getAttribute(wallFaceDim, facet.getIndex());
+      return a && *a == m_cfg.wall;
+    };
+
+    const auto& wssSol = m_wssTrial.getSolution();
+    m_wss = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+    m_wss.project(Region::Boundary,
+      VectorFunction(sdim,
+        [&wssSol, sdim](const Point& p) -> Math::SpatialVector<Real> {
+          const auto w = wssSol.getValue(p);
+          Math::SpatialVector<Real> out(sdim);
+          for (Index c = 0; c < static_cast<Index>(sdim); ++c)
+            out(c) = w(c);
+          return out;
+        }),
+      onWallFacet);
 
     // Cycle accumulators. Two are needed and they are not interchangeable: the
     // vector integral measures how much net direction survives, the scalar one
@@ -887,41 +938,69 @@ namespace Rodin::Examples::Heart
     if (elapsed <= 0.0)
       return;
 
-    // TAWSS = (1/T) int |tau_w| dt. An exact scaling of the accumulator: no
-    // projection, no interpolation, no way to change its sign.
-    PetscErrorCode ierr = VecCopy(m_absShear.getData(), m_tawss.getData());
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecScale(m_tawss.getData(), 1.0 / elapsed);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecGhostUpdateBegin(m_tawss.getData(), INSERT_VALUES, SCATTER_FORWARD);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecGhostUpdateEnd(m_tawss.getData(), INSERT_VALUES, SCATTER_FORWARD);
-    assert(ierr == PETSC_SUCCESS);
-    (void)ierr;
+    // The three indices live ON THE WALL and nowhere else.
+    //
+    // Projecting them over the whole domain is not merely untidy: off the wall
+    // tau_w decays to zero, so TAWSS -> 0, the activation logistic SATURATES at
+    // its ceiling 1/(1+exp(-tau_a/w)) = 0.935, and OSI becomes
+    // |int tau dt| / int |tau| dt with both accumulators vanishing -- a 0/0
+    // that drifts to 1/2. The product is 0.935 * 1 = 0.933, so the maximum of
+    // the whole field sits in the middle of the cavity, where there is no
+    // endothelium at all, and maxOSI is reported as 0.499. The 2D counterpart
+    // reproduced both numbers to five figures before this was restricted.
+    //
+    // The wall flux itself is unaffected -- BoundaryIntegral(...).over(wall)
+    // only ever reads wall nodes, whose TAWSS and OSI are genuine -- so this
+    // changes the diagnostics and the XDMF fields, not the physics. What it
+    // does change is the reported maxima, which were interior artefacts.
+    const size_t faceDim = m_mesh.getDimension() - 1;
+    const auto onWall = [this, faceDim](const Polytope& facet) {
+      const auto a = m_mesh.getAttribute(faceDim, facet.getIndex());
+      return a && *a == m_cfg.wall;
+    };
+
+    // Zeroed first, so a node off the wall carries 0 rather than whatever the
+    // previous cycle left there.
+    m_tawss = Real(0);
+    m_osi = Real(0);
+    m_activation = Real(0);
+
+    // TAWSS = (1/T) int |tau_w| dt. Still an exact scaling of the accumulator,
+    // node by node: evaluating a P1 field at its own node returns the nodal
+    // value, so nothing here can change its sign.
+    m_tawss.project(Region::Boundary,
+      RealFunction([this, elapsed](const Point& p) -> Real {
+        return m_absShear.getValue(p) / elapsed;
+      }),
+      onWall);
 
     // OSI = (1/2)[1 - |int tau_w dt| / int |tau_w| dt]. Both accumulators are
     // built from the same nodal values, so the triangle inequality holds node
     // by node and OSI lands in [0, 1/2] on its own; the clamp is insurance.
-    m_osi.project(RealFunction([this](const Point& p) -> Real {
+    m_osi.project(Region::Boundary, RealFunction([this](const Point& p) -> Real {
       const Real abs = m_absShear.getValue(p);
       if (abs <= 0.0)
         return 0.0;
       const auto net = m_netShear.getValue(p);
       const Real mag = std::sqrt(Math::dot(net, net));
       return std::clamp<Real>(0.5 * (1.0 - mag / abs), 0.0, 0.5);
-    }));
+    }),
+      onWall);
 
     // Smooth, bounded activation: a logistic in the measured shear threshold
     // times the oscillatory index mapped onto [0,1]. Clamped to [0,1] so the
     // endothelial thrombin flux can never turn into a sink -- a negative
     // activation is what drives thrombin, and with it fibrin, negative.
+    // Reads the two fields written just above, so it must come last.
     const Real tauA = m_cfg.thrombosis.activationShearStress;
     const Real width = std::max<Real>(m_cfg.thrombosis.activationShearWidth, 1e-12);
-    m_activation.project(RealFunction([this, tauA, width](const Point& p) -> Real {
-      const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
-      const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
-      return std::clamp<Real>(low * osi, 0.0, 1.0);
-    }));
+    m_activation.project(Region::Boundary,
+      RealFunction([this, tauA, width](const Point& p) -> Real {
+        const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
+        const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
+        return std::clamp<Real>(low * osi, 0.0, 1.0);
+      }),
+      onWall);
 
     // The ghost entries must be zeroed too, or the next accumulation reads a
     // stale halo.
@@ -1236,6 +1315,12 @@ int main(int argc, char** argv)
         PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_pspg_scale", &real, &got);
       if (got)
         cfg.pspgScale = real;
+
+      got = PETSC_FALSE;
+      PetscOptionsGetReal(
+        PETSC_NULLPTR, PETSC_NULLPTR, "-atrium_species_temam", &real, &got);
+      if (got)
+        cfg.speciesTemamScale = real;
 
       PetscBool flag = PETSC_FALSE;
       got = PETSC_FALSE;

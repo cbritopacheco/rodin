@@ -5,6 +5,13 @@ target_link_libraries(CCMLC2014_0D
   Rodin::Alert
   )
 
+add_executable(PoroelasticSphere_0D PoroelasticSphere_0D.cpp)
+target_link_libraries(PoroelasticSphere_0D
+  PUBLIC
+  Rodin::Heart
+  Rodin::Alert
+  )
+
 add_executable(CoronarySolid CoronarySolid.cpp)
 target_link_libraries(CoronarySolid
   PUBLIC
@@ -88,6 +95,19 @@ if (RODIN_USE_PETSC)
     Rodin::Geometry
     Rodin::Assembly)
 
+  # Closed-loop coronary FSI: P1/P1 explicit ALE FSI coupled (staggered) to
+  # the 0D poroelastic left ventricle.  Sequential, PETSc only.
+  add_executable(CoronaryArtery_Explicit_PoroElastic CoronaryArtery_Explicit_PoroElastic.cpp)
+  target_link_libraries(CoronaryArtery_Explicit_PoroElastic
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+
   # Coagulation-kinetics testbed on a simplified geometry: one inlet, one
   # outlet, an R_mu-Windkessel outlet and an ectatic segment that provides the
   # recirculation the kinetics need. Sequential and PETSc-only, like the P1/P1
@@ -131,6 +151,32 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
   target_include_directories(Atrium PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
   if (RODIN_USE_SCOTCH)
     target_link_libraries(Atrium PUBLIC Rodin::Scotch)
+  endif()
+
+  # Two-dimensional left atrium with a rectangular appendage. Same stabilised
+  # P1/P1 formulation and coagulation kinetics as Atrium, but driven by the two
+  # measured pressure waveforms in resources/examples/Heart rather than by a 0D
+  # ventricle. The mesh must be flattened once before the first run:
+  #   python3 examples/Heart/LeftAtrium2D/make_la2d_mesh.py \
+  #           resources/examples/Heart/LeftAtrium2D/RectLAA.mesh \
+  #           resources/examples/Heart/LeftAtrium2D/RectLAA2D.mesh
+  # RectLAA.mesh is stored as MEDIT "Dimension 3" with z = 0, and Rodin
+  # reads the space dimension from that keyword, so loading it unchanged would
+  # give a three-component velocity on a surface.
+  add_executable(LeftAtrium2D LeftAtrium2D.cpp)
+  target_link_libraries(LeftAtrium2D
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(LeftAtrium2D PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(LeftAtrium2D PUBLIC Rodin::Scotch)
   endif()
 
   add_executable(CoronaryArtery
