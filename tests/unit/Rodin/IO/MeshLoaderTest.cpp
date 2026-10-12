@@ -293,6 +293,57 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  namespace
+  {
+    /// @brief A failed MEDIT parse must not commit its partially constructed mesh.
+    void expectPreservedMEDITFailure(const std::string& input)
+    {
+      auto expected = makeAttributeRegressionMesh(2);
+      computeAllIncidences(expected);
+      auto mesh = expected;
+      std::stringstream stream(input);
+      MeshLoader<FileFormat::MEDIT, Context::Local> loader(mesh);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      ASSERT_EQ(mesh.getSpaceDimension(), expected.getSpaceDimension());
+      ASSERT_EQ(mesh.getDimension(), expected.getDimension());
+      for (size_t d = 0; d <= expected.getDimension(); ++d)
+        ASSERT_EQ(mesh.getPolytopeCount(d), expected.getPolytopeCount(d));
+      expectSameMeshWithAttributes(mesh, expected);
+    }
+  }
+
+  /// @brief Missing or malformed numeric headers leave the destination intact.
+  TEST(Rodin_IO_MeshLoader, MEDITRejectsMalformedHeaders)
+  {
+    for (const std::string input :
+      {"", "MeshVersionFormatted invalid\ninvalid\n", "MeshVersionFormatted 2\n",
+        "MeshVersionFormatted 2\nDimension invalid\ninvalid\n"})
+    {
+      SCOPED_TRACE(input);
+      expectPreservedMEDITFailure(input);
+    }
+  }
+
+  /// @brief Every entity reader rejects malformed counts, invalid records and truncation.
+  TEST(Rodin_IO_MeshLoader, MEDITRejectsMalformedAndTruncatedEntities)
+  {
+    const std::string header = "MeshVersionFormatted 2\nDimension 3\n";
+    const std::string vertices = "Vertices\n8\n0 0 0 0\n1 0 0 0\n1 1 0 0\n0 1 0 0\n"
+                                 "0 0 1 0\n1 0 1 0\n1 1 1 0\n0 1 1 0\n";
+    for (const std::string entity : {"Vertices", "Edges", "Triangles", "Quadrilaterals",
+           "Tetrahedra", "Hexahedra", "Wedges", "Pyramids"})
+    {
+      for (const std::string suffix : {"invalid\n", "1\ninvalid\n", "1\n"})
+      {
+        const std::string input =
+          header + (entity == "Vertices" ? "" : vertices) + entity + "\n" + suffix;
+        SCOPED_TRACE(input);
+        expectPreservedMEDITFailure(input);
+      }
+    }
+    expectPreservedMEDITFailure(header + "Vertices\n2\n0 0 0 0\n");
+  }
+
   class MeshFormatCoverage : public ::testing::TestWithParam<Polytope::Type>
   {};
 

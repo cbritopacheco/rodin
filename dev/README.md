@@ -80,6 +80,11 @@ geometry, and backend variants explicitly. Current audit findings include:
   coincident but unrelated mesh points are rejected through both geometric
   and integration-point evaluation; valid local evaluation and coefficients
   remain intact. All 38 grid-function tests pass.
+- MEDIT malformed-input validation: numeric headers, entity counts, invalid
+  records and truncation are rejected for all eight entity sections. A
+  partially read vertex section is also rejected. Coordinates, topology and
+  attributes of the destination remain unchanged; premature replacement is
+  rejected by both new tests. All 30 mesh-loader tests pass.
 - Distinct trial/test spaces: 21 quadrature cases check every mass and
   derivative entry against the independent generic evaluator for real/complex
   scalar/vector P1 and quadratic H1 spaces on all seven geometries. Quadratic
