@@ -89,7 +89,7 @@ that this performance matrix has been profiled.
 | Layer / owning module | Available measurement | Remaining qualification or isolation |
 | --- | --- | --- |
 | Spatial values / Math | Real/complex vector, matrix and tensor arithmetic; spatial dot; fixed-capacity construction/copy/assignment and temporary/direct array fill | Remaining arithmetic consumer attribution and controlled scaling baselines beyond selected storage scopes |
-| Sparse algebra / Math | Sparse products, Hermitian dot products and squared norms on constrained scalar FE systems | Larger-level qualification, preconditioner separation, mixed operators, remaining degrees and distributed representations |
+| Sparse algebra / Math | Direct/transpose sparse products, Hermitian dots and squared norms; 1,512 selections qualified in both builds with selected source profiles | P0/P0g mass operators, mixed operators, remaining degrees and distributed representations |
 | Reference metadata / Geometry | Topology, connectivity and reference transformation consumers | Isolated metadata access, embedding and shape-dependent work accounting |
 | Reference elements / Variational | Scalar P0/P0g/P1 and H1 degrees 1–6; values, derivatives, prefetched descriptors | Vector/matrix component expansion, DOF functionals and first-use initialization |
 | Reference quadrature / QF | Owned construction/copy, polynomial traversal, controlled eight-key hot and nine-key canonical-pool sweeps; table/fallback boundaries | Process-first allocation, concurrent pool contention and profiles beyond selected orders |
@@ -618,12 +618,13 @@ including any explicit zeros retained by assembly. Source profiles and numerical
 qualification must be distinguished from this availability count. This does not cover P0/P0g mass
 operators, mixed systems, degrees four through six or PETSc/MPI sparse algebra.
 
-All 504 smallest-grid selections passed in the native and two-thread
-OpenMP-enabled optimized builds. Product checks matched the independent
-traversal exactly on those cases; maximum relative dot/norm differences were
-below $10^{-15}$ and $2.8\times10^{-15}$, respectively. This qualification does
-not imply that all larger levels have run, or that OpenMP accelerates these
-isolated arithmetic operations.
+All 1,512 selections passed in the native and two-thread OpenMP-enabled
+optimized builds, with identical case lists and three fixed iterations per
+case. Product checks matched the independent traversal exactly; maximum
+relative dot/norm differences were below $3.2\times10^{-14}$ and
+$5.4\times10^{-14}$, respectively. Fixed-iteration qualification samples are
+not performance baselines. They do not establish an OpenMP speedup or complete
+the remaining space/operator/backend axes listed above.
 
 A native five-repetition study covers all four operations over three Poisson
 degree-two grid levels in triangle and tetrahedron meshes. Largest-level
