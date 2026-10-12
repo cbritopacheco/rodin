@@ -320,3 +320,8 @@ target_link_libraries(RodinGeometryEuclideanTest GTest::gtest_main Rodin::Geomet
 gtest_discover_tests(RodinGeometryEuclideanTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES LABELS unit)
+
+add_executable(RodinGeometryGreedyPartitionerTest GreedyPartitionerTest.cpp)
+target_link_libraries(RodinGeometryGreedyPartitionerTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Geometry)
+gtest_discover_tests(RodinGeometryGreedyPartitionerTest PROPERTIES LABELS unit)
