@@ -7,6 +7,7 @@
 #include "Rodin/Math/Vector.h"
 #include <fstream>
 #include <gtest/gtest.h>
+#include <boost/filesystem.hpp>
 
 #include <Rodin/IO.h>
 #include <Rodin/IO/MEDIT.h>
@@ -20,6 +21,33 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Failed file opens preserve mesh state and create no output.
+  TEST(Rodin_Geometry_Mesh, FileOpenFailuresPreserveMeshAndFilesystem)
+  {
+    const auto missingDirectory = boost::filesystem::temp_directory_path() /
+      boost::filesystem::unique_path("rodin-missing-mesh-%%%%-%%%%-%%%%");
+    const auto missingFile = missingDirectory / "mesh";
+    ASSERT_FALSE(boost::filesystem::exists(missingDirectory));
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.setAttribute({2, 0}, 17);
+    const auto vertices = mesh.getVertices();
+    for (const auto format : {FileFormat::MFEM, FileFormat::MEDIT})
+    {
+      SCOPED_TRACE(static_cast<int>(format));
+      EXPECT_THROW(mesh.load(missingFile, format), Alert::Exception);
+      EXPECT_THROW(mesh.save(missingFile, format), Alert::Exception);
+      EXPECT_EQ(mesh.getCellCount(), 2u);
+      EXPECT_EQ(mesh.getAttribute(2, 0), 17);
+      ASSERT_EQ(mesh.getVertexCount(), vertices.getCount());
+      for (size_t vertex = 0; vertex < vertices.getCount(); ++vertex)
+      {
+        for (size_t component = 0; component < vertices.getDimension(); ++component)
+          EXPECT_EQ(mesh.getVertices()(component, vertex), vertices(component, vertex));
+      }
+      EXPECT_FALSE(boost::filesystem::exists(missingDirectory));
+    }
+  }
+
   /// @brief Boundary trace remaps selected exterior faces and preserves the interface.
   TEST(Rodin_Geometry_Mesh, BoundaryAttributeTraceHonorsSelection)
   {
