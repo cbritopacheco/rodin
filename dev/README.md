@@ -110,6 +110,10 @@ geometry, and backend variants explicitly. Current audit findings include:
 - IDRstab's wrapper names `Eigen::IDRSTABL`, which is absent in Eigen 3.4's
   unsupported iterative solver module. This remains an API/dependency gap,
   rather than a variant certified by the runtime coverage percentage.
+- Nonlocal `Potential` quadrature currently specializes matching P1 trial/test
+  families. Instantiating a P0 trial with a P1 test fails because its
+  `QuadratureRule` is undefined; mixed P0/P1 nonlocal forms are an API gap,
+  rather than a variant certified by the existing P1 nonlocal tests.
 
 These findings are not exclusions from production coverage. A complete
 template audit requires checking the supported variants, not merely adding

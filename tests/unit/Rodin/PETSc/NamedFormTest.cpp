@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 #include <type_traits>
+#include <vector>
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/Solid/Linear/LinearElasticityForm.h>
@@ -336,6 +337,64 @@ TEST(Rodin_PETSc_NamedForm, NonlocalBlocksMatchExactRestrictedMoments)
       }
     }
   }
+}
+
+/// @brief Standalone PETSc nonlocal forms preserve independent trial/test cell moments.
+TEST(Rodin_PETSc_NamedForm, StandaloneNonlocalFormsMatchRestrictedMoments)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  mesh.setAttribute({1, 0}, 7);
+  mesh.setAttribute({1, 1}, 8);
+  P1<PetscScalar> testSpace(mesh);
+  const auto check = [&](auto& trialSpace, const std::vector<PetscReal>& fullMoments,
+                       const std::vector<PetscReal>& leftMoments) {
+    PETSc::Variational::TrialFunction u(trialSpace);
+    PETSc::Variational::TestFunction v(testSpace);
+    const auto kernel = [](const Point&, const Point&) { return PetscScalar(2); };
+    const PetscInt indices[] = {0, 1, 2};
+    for (size_t restriction = 0; restriction < 5; ++restriction)
+    {
+      SCOPED_TRACE(restriction);
+      const bool restrictTrial = restriction == 1 || restriction >= 3;
+      const bool restrictTest = restriction >= 2;
+      auto integral = Integral(Potential(kernel, u), v);
+      if (restrictTrial)
+      {
+        integral.setTrialAttributes({restriction == 4 ? 999u : 7u});
+      }
+      if (restrictTest)
+      {
+        integral.setTestAttributes({restriction == 4 ? 999u : 8u});
+      }
+      BilinearForm form(u, v);
+      form += integral;
+      const auto& trialMoments = restrictTrial ? leftMoments : fullMoments;
+      const PetscReal testMoments[] = {
+        restrictTest ? 0 : 0.5, restrictTest ? 0.5 : 1, 0.5};
+      const PetscInt columns = static_cast<PetscInt>(trialMoments.size());
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
+        SCOPED_TRACE(repeat);
+        form.assemble();
+        PetscScalar entries[9];
+        ASSERT_EQ(MatGetValues(form.getOperator(), 3, indices, columns, indices, entries),
+          PETSC_SUCCESS);
+        for (size_t row = 0; row < 3; ++row)
+        {
+          for (size_t col = 0; col < trialMoments.size(); ++col)
+          {
+            const PetscScalar expected = restriction == 4
+              ? PetscScalar(0)
+              : 2 * testMoments[row] * trialMoments[col];
+            EXPECT_LT(PetscAbsScalar(entries[row * columns + col] - expected), 1e-12)
+              << "row=" << row << ", col=" << col;
+          }
+        }
+      }
+    }
+  };
+  P1<PetscScalar> linearTrial(mesh);
+  check(linearTrial, {0.5, 1, 0.5}, {0.5, 0.5, 0});
 }
 
 int main(int argc, char** argv)
