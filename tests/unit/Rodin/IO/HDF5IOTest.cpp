@@ -837,8 +837,10 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove_all(testDir);
   }
 
-  /// @brief Verifies disabling mesh attribute export omits the built-in cell-centered mesh
-  /// attribute field from generated XDMF output for IO HDF 5.
+  /**
+   * @brief Verifies disabling mesh attribute export omits the built-in cell-centered mesh
+   * attribute field from generated XDMF output for IO HDF 5.
+   */
   TEST(Rodin_IO_HDF5, XDMFMeshAttributeCanBeDisabled)
   {
     const boost::filesystem::path testDir = "/tmp/rodin_xdmf_no_mesh_attribute";
@@ -1779,7 +1781,11 @@ namespace Rodin::Tests::Unit
         : std::vector<Real>{1, -2, 5, -4, 10, 10};
       HDF5::writeXDMFNodeAttribute(field, mesh, filename);
       expectRawAttribute(filename, {quadratic ? 6u : 3u, 2}, nodal);
+      HDF5::writeXDMFNodeAttribute(field, filename);
+      expectRawAttribute(filename, {quadratic ? 6u : 3u, 2}, nodal);
       HDF5::writeXDMFCellAttribute(field, mesh, filename);
+      expectRawAttribute(filename, {1, 2}, {16.0 / 3, 4.0 / 3});
+      HDF5::writeXDMFCellAttribute(field, filename);
       expectRawAttribute(filename, {1, 2}, {16.0 / 3, 4.0 / 3});
     }
   }
@@ -1823,9 +1829,78 @@ namespace Rodin::Tests::Unit
         cell.push_back(offset + 8.0 / 3);
       HDF5::writeXDMFNodeAttribute(field, mesh, filename);
       expectRawAttribute(filename, {quadratic ? 6u : 3u, 2, 3}, nodal);
+      HDF5::writeXDMFNodeAttribute(field, filename);
+      expectRawAttribute(filename, {quadratic ? 6u : 3u, 2, 3}, nodal);
       HDF5::writeXDMFCellAttribute(field, mesh, filename);
+      expectRawAttribute(filename, {1, 2, 3}, cell);
+      HDF5::writeXDMFCellAttribute(field, filename);
       expectRawAttribute(filename, {1, 2, 3}, cell);
     }
   }
 
+}
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Scalar convenience exporters preserve affine values and curved node counts.
+  TEST_F(HDF5InvalidPayload, ScalarConvenienceVisualizationValues)
+  {
+    for (const bool quadratic : {false, true})
+    {
+      auto mesh = LocalMesh::Builder()
+                    .initialize(2)
+                    .nodes(3)
+                    .vertex({0, 0})
+                    .vertex({2, 0})
+                    .vertex({0, 3})
+                    .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                    .finalize();
+      if (quadratic)
+        setQuadraticCellTransformations(mesh);
+      P1<Real> space(mesh);
+      GridFunction field(space);
+      field = [](const Point& p) { return 1 + 2 * p(0) + 3 * p(1); };
+      const std::vector<Real> nodal = quadratic ? std::vector<Real>{1, 5, 10, 3, 7.5, 5.5}
+                                                : std::vector<Real>{1, 5, 10};
+      HDF5::writeXDMFNodeAttribute(field, filename);
+      expectRawAttribute(filename, {quadratic ? 6u : 3u}, nodal);
+      HDF5::writeXDMFCellAttribute(field, filename);
+      expectRawAttribute(filename, {1}, {16.0 / 3});
+    }
+  }
+
+  /// @brief Missing output parents reject persistence and visualization without side effects.
+  TEST_F(HDF5InvalidPayload, FailedOutputOpensPreserveFieldsAndFilesystem)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1<Real> scalarSpace(mesh);
+    P1<Math::SpatialVector<Real>> vectorSpace(mesh, 2);
+    GridFunction scalar(scalarSpace);
+    GridFunction vector(vectorSpace);
+    scalar = [](const Point& point) { return 1 + point(0) - 2 * point(1); };
+    vector = [](const Point& point) {
+      Math::SpatialVector<Real> value(2);
+      value[0] = 1 + point(0);
+      value[1] = -2 + 3 * point(1);
+      return value;
+    };
+    const auto scalarBefore = scalar.getData().eval();
+    const auto vectorBefore = vector.getData().eval();
+    const auto missing = filename / "missing-parent";
+    const auto output = missing / "output.h5";
+    ASSERT_FALSE(boost::filesystem::exists(filename));
+    EXPECT_THROW(mesh.save(output, FileFormat::HDF5), Alert::Exception);
+    EXPECT_THROW(scalar.save(output, FileFormat::HDF5), Alert::Exception);
+    EXPECT_THROW(vector.save(output, FileFormat::HDF5), Alert::Exception);
+    EXPECT_THROW(HDF5::writeXDMFMesh(output, mesh), Alert::Exception);
+    EXPECT_THROW(HDF5::writeXDMFNodeAttribute(scalar, output), Alert::Exception);
+    EXPECT_THROW(HDF5::writeXDMFCellAttribute(scalar, output), Alert::Exception);
+    EXPECT_THROW(HDF5::writeXDMFNodeAttribute(vector, output), Alert::Exception);
+    EXPECT_THROW(HDF5::writeXDMFCellAttribute(vector, output), Alert::Exception);
+    EXPECT_EQ((scalar.getData() - scalarBefore).norm(), 0);
+    EXPECT_EQ((vector.getData() - vectorBefore).norm(), 0);
+    EXPECT_FALSE(boost::filesystem::exists(filename));
+    EXPECT_FALSE(boost::filesystem::exists(missing));
+    EXPECT_FALSE(boost::filesystem::exists(output));
+  }
 }
