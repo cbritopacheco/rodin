@@ -925,6 +925,11 @@ in explicitly timed slow tests with the required backend coverage retained.
 
 The benchmark foundation from [PR #356](https://github.com/cbritopacheco/rodin/pull/356)
 is integrated in this branch, in the existing `tests/benchmarks` module.
+Library benchmarks follow `tests/benchmarks/Rodin/<Module>/`, including
+the MPI and PETSc module mirrors. Shared mathematical workloads live in
+`Workloads/`; verification-support profilers remain separate in
+`tests/benchmarks/convergence/`. The benchmark README describes module targets
+and the compatibility publication executable.
 Performance measurements remain separate from numerical convergence assertions.
 The objective is to measure assembly, solving, interpolation, projection and
 the supporting library operations across the convergence workloads. The

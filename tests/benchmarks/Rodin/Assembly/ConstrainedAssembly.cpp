@@ -7,7 +7,7 @@
 /** @file @brief Warmed constrained Eigen problem assembly with manufactured oracles. */
 #include "Rodin/Assembly.h"
 #include <iostream>
-#include "ConstrainedWorkload.h"
+#include "Workloads/ConstrainedWorkload.h"
 #ifdef RODIN_USE_OPENMP
 #include <omp.h>
 #endif

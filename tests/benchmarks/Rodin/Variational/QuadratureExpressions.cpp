@@ -8,8 +8,8 @@
 #include <benchmark/benchmark.h>
 #include "Rodin/Variational/H1.h"
 #include "Rodin/Variational/P0g.h"
-#include "../convergence/Convergence.h"
-#include "../QuadratureReference.h"
+#include "convergence/Convergence.h"
+#include "QuadratureReference.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;

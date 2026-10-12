@@ -14,8 +14,8 @@
 #include "Rodin/MPI/Variational/H1/H1.h"
 #include "Rodin/MPI/Geometry/Sharder.h"
 #include "Rodin/Geometry/BalancedCompactPartitioner.h"
-#include "../convergence/Convergence.h"
-#include "PhysicsForm.h"
+#include "convergence/Convergence.h"
+#include "Workloads/PhysicsForm.h"
 
 #ifdef RODIN_USE_OPENMP
 #include <omp.h>

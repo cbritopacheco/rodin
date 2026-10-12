@@ -12,9 +12,9 @@
 #include <array>
 #include <string>
 #include "Rodin/Assembly.h"
-#include "../convergence/Convergence.h"
-#include "../convergence/CurvedGeometry.h"
-#include "../convergence/MixedStability.h"
+#include "convergence/Convergence.h"
+#include "convergence/CurvedGeometry.h"
+#include "convergence/MixedStability.h"
 
 namespace Rodin::Tests::Benchmarks
 {

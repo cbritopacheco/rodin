@@ -4,15 +4,19 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_TESTS_BENCHMARKS_PHYSICSFORM_H
-#define RODIN_TESTS_BENCHMARKS_PHYSICSFORM_H
+/**
+ * @file
+ * @brief Shared physical forms and affine-field energy oracles.
+ */
+#ifndef RODIN_WORKLOADS_PHYSICSFORM_H
+#define RODIN_WORKLOADS_PHYSICSFORM_H
 
 #include "Rodin/Variational.h"
-#include "../QuadratureReference.h"
+#include "QuadratureReference.h"
 
 namespace Rodin::Tests::Benchmarks
 {
-  /** Defines the same physical form and analytic affine-field energy for every backend. */
+  /// @brief Defines the same physical form and affine-field energy for every backend.
   template <bool Elasticity>
   class PhysicsForm
   {

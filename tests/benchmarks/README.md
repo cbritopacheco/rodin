@@ -1,3 +1,80 @@
+# Benchmark module architecture
+
+Library benchmarks mirror the owning source module under
+`tests/benchmarks/Rodin/<Module>/`. MPI and PETSc specializations retain
+their source-side hierarchy rather than being mixed into the local module.
+Placement follows the operation being measured: spatial-value arithmetic is
+in Math, while matrix-valued finite-element assembly is in Assembly.
+
+```text
+tests/benchmarks/
+├── CMakeLists.txt
+├── README.md
+├── Workloads/                  Shared forms and numerical oracles
+├── Rodin/
+│   ├── Math/                   Spatial arithmetic and contractions
+│   ├── QF/                     Reference quadrature
+│   ├── Geometry/               Meshes, connectivity and transformations
+│   ├── Variational/
+│   │   └── P1/                 P1-specific space operations
+│   ├── Location/               AABB construction and queries
+│   ├── IO/                     Mesh loading
+│   ├── Assembly/               Local/global assembly and physical workloads
+│   ├── Solver/                 Solves on fixed assembled systems
+│   ├── MPI/
+│   │   ├── Geometry/           Distributed construction
+│   │   └── Location/           Distributed location
+│   └── PETSc/
+│       └── Assembly/           PETSc local/distributed assembly
+└── convergence/                Verification-support profiling, not library kernels
+```
+
+Each module owns its CMake targets. The independently selectable
+`RodinMathBenchmarks`, `RodinQFBenchmarks`, `RodinGeometryBenchmarks`,
+`RodinVariationalBenchmarks`, `RodinLocationBenchmarks`,
+`RodinIOBenchmarks` and `RodinAssemblyBenchmarks` partition the historical
+registration set. Component profilers retain their existing target names.
+For example, `RodinFieldOperationBenchmarks` belongs to Variational and
+`RodinConstrainedSolveBenchmarks` belongs to Solver.
+
+All module and component executables are opt-in (`EXCLUDE_FROM_ALL`), with
+no CTest registration. The compatibility executable `RodinBenchmarks`
+retains the original source ordering, benchmark names and publication
+workflow; new standalone profilers are not added to that workflow.
+Executables retain their default `build/tests/benchmarks/` output location,
+independently of source placement. An explicitly configured runtime output
+directory is respected.
+
+A module executable has its own registration and cache-initialization history.
+Timing comparisons must retain the executable, selection order and cold/warm
+protocol; a module timing is not automatically comparable with a historical
+aggregate timing.
+
+For example:
+
+```sh
+cmake --build build --target RodinGeometryBenchmarks -j1
+build/tests/benchmarks/RodinGeometryBenchmarks --benchmark_list_tests=true
+cmake --build build --target RodinFieldOperationBenchmarks -j1
+build/tests/benchmarks/RodinFieldOperationBenchmarks \
+  --benchmark_filter='Field/Interpolation/H1/P2/Real/Scalar/Pyramid/9/'
+```
+
+Shared workloads contain mathematical forms and oracles, not assembly-backend
+policy. References from `tests/convergence` remain test-only dependencies.
+The pressure-spectrum oracle profiler is kept under `convergence/` because
+its implementation belongs to verification support, not to `src/Rodin`.
+Future benchmark directories should follow newly measured source components;
+empty directories do not imply performance coverage.
+
+Profiling proceeds from spatial algebra, reference elements and quadrature
+through mapped geometry, fields, expressions and element integrators to
+global assembly. Solving is measured separately on the assembled operators.
+An isolated improvement is checked again through its consuming library
+operation. Correctness regressions remain in unit/manufactured/convergence
+suites; benchmark numerical guards and separately instrumented source coverage
+do not replace convergence certification.
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`

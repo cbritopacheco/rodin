@@ -6,7 +6,7 @@
  */
 /** @file @brief Full Eigen mass/reaction operator and projection-load assembly. */
 #include "Rodin/Assembly.h"
-#include "MassWorkload.h"
+#include "Workloads/MassWorkload.h"
 #ifdef RODIN_USE_OPENMP
 #include <omp.h>
 #endif

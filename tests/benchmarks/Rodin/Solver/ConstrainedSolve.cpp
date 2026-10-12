@@ -11,7 +11,7 @@
 #include <benchmark/benchmark.h>
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver/CG.h"
-#include "ConstrainedWorkload.h"
+#include "Workloads/ConstrainedWorkload.h"
 
 #ifdef RODIN_USE_OPENMP
 #include <omp.h>

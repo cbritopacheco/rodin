@@ -12,9 +12,9 @@
 #include <benchmark/benchmark.h>
 
 #include "Rodin/Variational/H1.h"
-#include "../convergence/Convergence.h"
-#include "../convergence/CurvedGeometry.h"
-#include "../QuadratureReference.h"
+#include "convergence/Convergence.h"
+#include "convergence/CurvedGeometry.h"
+#include "QuadratureReference.h"
 #ifdef RODIN_USE_OPENMP
 #include <omp.h>
 #endif

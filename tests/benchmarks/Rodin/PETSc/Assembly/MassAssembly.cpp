@@ -12,7 +12,7 @@
 #include "Rodin/MPI/Variational.h"
 #include "Rodin/MPI/Geometry/Sharder.h"
 #include "Rodin/Geometry/BalancedCompactPartitioner.h"
-#include "MassWorkload.h"
+#include "Workloads/MassWorkload.h"
 #ifdef RODIN_USE_OPENMP
 #include <omp.h>
 #endif

@@ -11,8 +11,8 @@
 
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational/H1.h"
-#include "../convergence/Convergence.h"
-#include "PhysicsForm.h"
+#include "convergence/Convergence.h"
+#include "Workloads/PhysicsForm.h"
 
 #ifdef RODIN_USE_OPENMP
 #include <omp.h>

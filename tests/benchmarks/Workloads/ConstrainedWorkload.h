@@ -4,13 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_CONSTRAINEDWORKLOAD_H
-#define RODIN_CONSTRAINEDWORKLOAD_H
+#ifndef RODIN_WORKLOADS_CONSTRAINEDWORKLOAD_H
+#define RODIN_WORKLOADS_CONSTRAINEDWORKLOAD_H
 
 #include <benchmark/benchmark.h>
 #include "Rodin/Variational/H1.h"
-#include "../convergence/Convergence.h"
-#include "../QuadratureReference.h"
+#include "convergence/Convergence.h"
+#include "QuadratureReference.h"
 
 namespace Rodin::Tests::Benchmarks
 {

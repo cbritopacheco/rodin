@@ -15,7 +15,7 @@
 #include <type_traits>
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver/CG.h"
-#include "../convergence/Convergence.h"
+#include "convergence/Convergence.h"
 #ifdef RODIN_USE_OPENMP
 #include <omp.h>
 #endif

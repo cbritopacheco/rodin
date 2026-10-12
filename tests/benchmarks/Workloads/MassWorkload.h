@@ -4,15 +4,15 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MASSWORKLOAD_H
-#define RODIN_MASSWORKLOAD_H
+#ifndef RODIN_WORKLOADS_MASSWORKLOAD_H
+#define RODIN_WORKLOADS_MASSWORKLOAD_H
 
 /** @file @brief Backend-independent mass/reaction workloads and constant-field oracles. */
 #include <benchmark/benchmark.h>
 #include "Rodin/Variational/H1.h"
 #include "Rodin/Variational/P0g.h"
-#include "../convergence/Convergence.h"
-#include "../QuadratureReference.h"
+#include "convergence/Convergence.h"
+#include "QuadratureReference.h"
 
 namespace Rodin::Tests::Benchmarks
 {

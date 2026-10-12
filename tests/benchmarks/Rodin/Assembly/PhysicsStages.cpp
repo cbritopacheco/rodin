@@ -11,8 +11,8 @@
 #include "Rodin/Assembly.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Variational/H1.h"
-#include "../convergence/Convergence.h"
-#include "PhysicsForm.h"
+#include "convergence/Convergence.h"
+#include "Workloads/PhysicsForm.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
