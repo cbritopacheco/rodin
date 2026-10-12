@@ -41,8 +41,8 @@ namespace Rodin::Distance
    * the interface.
    *
    * ## Variants
-   * This class provides two operator() overloads:
-   * 1. Unsigned distance (full domain)
+   * Two mathematical variants are available:
+   * 1. Negative interior approximation (full domain)
    * 2. Signed distance (with specified interior/interface regions)
    *
    * ## Usage Example
@@ -57,10 +57,10 @@ namespace Rodin::Distance
   {
     public:
       /**
-       * @brief Computes the unsigned Poisson-based distance approximation.
+       * @brief Computes the negative full-domain Poisson approximation.
        *
        * Solves the Poisson equation over the entire domain with uniform
-       * forcing term.
+       * forcing term @f$ -\Delta u = -1 @f$ and zero boundary values.
        *
        * @tparam FES Finite element space type
        * @param[in] fes Finite element space on which to solve
