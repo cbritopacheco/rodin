@@ -120,6 +120,11 @@ geometry, and backend variants explicitly. Current audit findings include:
   planar-triangle scope. Including this previously absent header exposed
   silent acceptance of quadrilateral cells; a failing regression preceded
   the input validation fix.
+- Attribute-restricted mesh measures: analytic half-unit-box area, volume and
+  exterior measures for all six 2D/3D cell geometries, including combined,
+  empty and missing attribute sets. Local and MPI suites pass; the distributed
+  checks include an empty root at two/four ranks. Both tests reject doubled
+  production measure accumulation.
 - Hilbert H1 extension: scalar/vector P1 cosine manufactured solutions with
   homogeneous Neumann data, scalar refinement, and exact affine Dirichlet
   data through repeated solves. Instantiation exposed an obsolete problem

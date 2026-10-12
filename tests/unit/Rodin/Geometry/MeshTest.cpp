@@ -20,6 +20,63 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Attribute-restricted measures recover half-unit-box volumes and boundaries.
+  TEST(Rodin_Geometry_Mesh, AttributeRestrictedUnitBoxMeasures)
+  {
+    for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+           Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      const Array<size_t> shape = Array<size_t>::Constant(dimension, 3);
+      auto mesh = LocalMesh::UniformGrid(geometry, shape);
+      mesh.scale(0.5);
+      mesh.getConnectivity().compute(dimension - 1, dimension);
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        const Point center(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+        mesh.setAttribute({dimension, cell->getIndex()}, center.x() < 0.5 ? 17 : 23);
+      }
+      for (auto face = mesh.getBoundary(); face; ++face)
+      {
+        const Point center(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+        mesh.setAttribute({dimension - 1, face->getIndex()}, center.x() < 0.5 ? 31 : 37);
+      }
+
+      for (const Attribute attribute : {17, 23})
+      {
+        EXPECT_NEAR(mesh.getMeasure(dimension, attribute), 0.5, 1e-13);
+        EXPECT_NEAR(
+          mesh.getMeasure(dimension, FlatSet<Attribute>{attribute}), 0.5, 1e-13);
+        if (dimension == 2)
+        {
+          EXPECT_NEAR(mesh.getArea(attribute), 0.5, 1e-13);
+          EXPECT_NEAR(mesh.getArea(FlatSet<Attribute>{attribute}), 0.5, 1e-13);
+        }
+        else
+        {
+          EXPECT_NEAR(mesh.getVolume(attribute), 0.5, 1e-13);
+          EXPECT_NEAR(mesh.getVolume(FlatSet<Attribute>{attribute}), 0.5, 1e-13);
+        }
+      }
+      EXPECT_NEAR(mesh.getMeasure(dimension, FlatSet<Attribute>{17, 23, 999}), 1, 1e-13);
+      EXPECT_EQ(mesh.getMeasure(dimension, Attribute(999)), 0);
+      EXPECT_EQ(mesh.getMeasure(dimension, FlatSet<Attribute>{}), 0);
+      EXPECT_EQ(mesh.getMeasure(dimension, FlatSet<Attribute>{999}), 0);
+      // A half of the unit square/cube's exterior has measure 2/3.
+      for (const Attribute attribute : {31, 37})
+      {
+        EXPECT_NEAR(mesh.getPerimeter(attribute), dimension, 1e-13);
+        EXPECT_NEAR(mesh.getPerimeter(FlatSet<Attribute>{attribute}), dimension, 1e-13);
+      }
+      EXPECT_NEAR(
+        mesh.getPerimeter(FlatSet<Attribute>{31, 37, 999}), 2 * dimension, 1e-13);
+      EXPECT_EQ(mesh.getPerimeter(Attribute(999)), 0);
+      EXPECT_EQ(mesh.getPerimeter(FlatSet<Attribute>{}), 0);
+    }
+  }
+
   /// @brief Verifies 2 D square build for geometry mesh by checking exact expected values.
   TEST(Rodin_Geometry_Mesh, 2D_Square_Build)
   {
