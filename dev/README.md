@@ -95,6 +95,12 @@ geometry, and backend variants explicitly. Current audit findings include:
   covered by failing regressions. Constant manufactured solutions on two
   meshes of every geometry pass in serial and with one/four OpenMP threads.
   Lost negation signs and doubled OpenMP accumulation fail the numerical tests.
+- Single-pair PETSc MPI assembly: an isolated communicator recovers exact
+  restricted nonlocal nodal moments and a preassembled restricted load.
+  Repeated assembly replaces prior output; targeted operator/vector updates
+  preserve the opposite side. All 13 MPI form cases pass on two ranks, and
+  tripled nonlocal contributions fail the independent matrix oracle. This
+  does not establish full-domain nonlocal integration across arbitrary shards.
 - Mixed affine identification: real/complex dense/sparse mass systems recover
   prescribed constant fields with nonzero affine defects and fixed master
   data on all seven geometries and two mesh sizes. Repeated, copied and moved

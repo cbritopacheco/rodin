@@ -878,6 +878,108 @@ namespace
     }
   }
 
+  /// @brief Single-pair MPI assembly preserves restricted nonlocal moments and targeted state.
+  TEST(PETSc_MPI_Form, IsolatedSinglePairNonlocalMomentsAndTargetedAssembly)
+  {
+    boost::mpi::communicator self(MPI_COMM_SELF, boost::mpi::comm_attach);
+    Context::MPI ctx(*g_env, self);
+    auto local = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    local.setAttribute({1, 0}, 7);
+    local.setAttribute({1, 1}, 8);
+    local.getConnectivity().compute(1, 1);
+    BalancedCompactPartitioner partitioner(local);
+    partitioner.partition(1);
+    Sharder<Context::MPI> sharder(ctx);
+    sharder.shard(partitioner);
+    sharder.scatter(0);
+    auto mesh = sharder.gather(0);
+    P1<PetscScalar, Mesh<Context::MPI>> space(mesh);
+    PETSc::Variational::TrialFunction u(space);
+    PETSc::Variational::TestFunction v(space);
+    Problem problem(u, v);
+    LinearForm load(v);
+    load = Integral(PetscScalar(3) * v).over(7);
+    load.assemble();
+    const auto kernel = [](const Point&, const Point&) { return PetscScalar(2); };
+    const PetscInt indices[] = {0, 1, 2};
+    ASSERT_EQ(space.getSize(), 3u);
+    for (size_t restriction = 0; restriction < 5; ++restriction)
+    {
+      SCOPED_TRACE(restriction);
+      const bool restrictTrial = restriction == 1 || restriction >= 3;
+      const bool restrictTest = restriction >= 2;
+      typename decltype(problem)::ProblemBodyType body;
+      body.getGlobalBFIs().add(Integral(Potential(kernel, u), v));
+      body.getLFs().add(load);
+      for (auto& integral : body.getGlobalBFIs())
+      {
+        if (restrictTrial)
+          integral.setTrialAttributes({restriction == 4 ? 999u : 7u});
+        if (restrictTest)
+          integral.setTestAttributes({restriction == 4 ? 999u : 8u});
+      }
+      problem = body;
+      PetscScalar trialMoments[3] = {};
+      PetscScalar testMoments[3] = {};
+      PetscScalar loadValues[3] = {};
+      for (auto vertex = mesh.getShard().getVertex(); vertex; ++vertex)
+      {
+        const Point point(*vertex, Math::SpatialPoint{});
+        const PetscInt dof = space.getDOFs(0, vertex->getIndex())[0];
+        ASSERT_GE(dof, 0);
+        ASSERT_LT(dof, 3);
+        const Real x = point.x();
+        trialMoments[dof] = restrictTrial ? (x < 2 ? 0.5 : 0) : (x == 1 ? 1 : 0.5);
+        testMoments[dof] = restrictTest ? (x > 0 ? 0.5 : 0) : (x == 1 ? 1 : 0.5);
+        loadValues[dof] = x < 2 ? 1.5 : 0;
+      }
+      const auto checkMatrix = [&](PetscScalar scale) {
+        PetscScalar entries[9];
+        ASSERT_EQ(MatGetValues(problem.getLinearSystem().getOperator(), 3, indices, 3,
+                    indices, entries),
+          PETSC_SUCCESS);
+        for (size_t row = 0; row < 3; ++row)
+        {
+          for (size_t col = 0; col < 3; ++col)
+          {
+            const PetscScalar expected = restriction == 4
+              ? PetscScalar(0)
+              : scale * PetscScalar(2) * testMoments[row] * trialMoments[col];
+            EXPECT_LT(PetscAbsScalar(entries[3 * row + col] - expected), 1e-12)
+              << "row=" << row << ", col=" << col;
+          }
+        }
+      };
+      const auto checkVector = [&](bool sentinel) {
+        PetscScalar entries[3];
+        ASSERT_EQ(
+          VecGetValues(problem.getLinearSystem().getVector(), 3, indices, entries),
+          PETSC_SUCCESS);
+        for (size_t row = 0; row < 3; ++row)
+        {
+          EXPECT_LT(
+            PetscAbsScalar(entries[row] - (sentinel ? PetscScalar(11) : loadValues[row])),
+            1e-12);
+        }
+      };
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
+        SCOPED_TRACE(repeat);
+        problem.assemble();
+        checkMatrix(1);
+        checkVector(false);
+      }
+      ASSERT_EQ(VecSet(problem.getLinearSystem().getVector(), 11), PETSC_SUCCESS);
+      problem.assemble(AssemblyTarget::LHS);
+      checkMatrix(1);
+      checkVector(true);
+      ASSERT_EQ(MatScale(problem.getLinearSystem().getOperator(), 3), PETSC_SUCCESS);
+      problem.assemble(AssemblyTarget::RHS);
+      checkMatrix(3);
+      checkVector(false);
+    }
+  }
+
   /// @brief Affine cross-field constraints recover independently prescribed constant fields.
   TEST(PETSc_MPI_Form, IsolatedMixedAffineConstraintsRecoverConstantFields)
   {
