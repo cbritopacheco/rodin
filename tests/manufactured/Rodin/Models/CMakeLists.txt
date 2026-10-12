@@ -24,3 +24,9 @@ add_executable(RodinManufacturedDistanceTest Distance.cpp)
 target_link_libraries(RodinManufacturedDistanceTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
 gtest_discover_tests(RodinManufacturedDistanceTest PROPERTIES LABELS manufactured)
+
+add_executable(RodinManufacturedDerivativeLoadTest DerivativeLoad.cpp)
+target_link_libraries(RodinManufacturedDerivativeLoadTest
+  PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+gtest_discover_tests(RodinManufacturedDerivativeLoadTest
+  PROPERTIES LABELS manufactured TIMEOUT 300)

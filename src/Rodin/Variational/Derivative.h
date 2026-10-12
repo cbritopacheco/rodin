@@ -268,6 +268,17 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when unavailable.
+       */
+      constexpr Optional<size_t> getOrder(
+        const Geometry::Polytope& polytope) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(polytope);
+      }
+
+      /**
        * @brief Copy function to be overriden in Derived type.
        * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */

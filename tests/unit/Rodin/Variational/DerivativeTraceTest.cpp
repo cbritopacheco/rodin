@@ -105,6 +105,16 @@ namespace
           {
             EXPECT_LT(
               std::abs(g(row) - factor * Scalar(row == 0 ? slope : row + 1)), 1e-10);
+            const Scalar expectedPartial = factor * Scalar(row == 0 ? slope : row + 1);
+            Derivative partial(row, scalarField);
+            partial.traceOf(index + 1);
+            EXPECT_LT(std::abs(partial.getValue(point) - expectedPartial), 1e-10);
+            auto copiedPartial = partial;
+            auto movedPartial = std::move(copiedPartial);
+            EXPECT_LT(std::abs(movedPartial.getValue(point) - expectedPartial), 1e-10);
+            std::unique_ptr<decltype(partial)> clonedPartial(partial.copy());
+            EXPECT_EQ(&clonedPartial->getOperand(), &scalarField);
+            EXPECT_LT(std::abs(clonedPartial->getValue(point) - expectedPartial), 1e-10);
             for (size_t column = 0; column < dimension; ++column)
             {
               const Scalar expected = factor *
@@ -132,6 +142,12 @@ namespace
           EXPECT_THROW(gradient.getValue(point), Alert::Exception);
           EXPECT_THROW(jacobian.getValue(point), Alert::Exception);
           EXPECT_THROW(divergence.getValue(point), Alert::Exception);
+          for (size_t axis = 0; axis < dimension; ++axis)
+          {
+            Derivative partial(axis, scalarField);
+            partial.traceOf(absent);
+            EXPECT_THROW(partial.getValue(point), Alert::Exception);
+          }
           checkedMissingTrace = true;
         }
       }

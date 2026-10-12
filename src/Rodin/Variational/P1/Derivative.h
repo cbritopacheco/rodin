@@ -224,6 +224,17 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order of the derivative on the entity.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
+      }
+
+      /**
        * @brief Creates a polymorphic copy.
        * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
