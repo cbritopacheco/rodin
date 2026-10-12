@@ -19,6 +19,10 @@ target_link_libraries(RodinTensorProductTest
 gtest_discover_tests(RodinTensorProductTest PROPERTIES LABELS unit)
 
 # GaussLegendre tests
+add_executable(RodinGaussLobattoTest GaussLobattoTest.cpp)
+target_link_libraries(RodinGaussLobattoTest PUBLIC GTest::gtest GTest::gtest_main Rodin::Rodin Rodin::QF)
+gtest_discover_tests(RodinGaussLobattoTest PROPERTIES LABELS unit)
+
 add_executable(RodinGaussLegendreTest GaussLegendreTest.cpp)
 target_link_libraries(RodinGaussLegendreTest
   PUBLIC

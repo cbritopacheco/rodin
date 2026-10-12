@@ -1650,8 +1650,8 @@
 
   The Adaptation module provides tools for fitting and adapting meshes to
   moving interfaces described by level set functions. Its centerpiece is
-  WNGIR (Welsch natural-gradient interface registration): a variational
-  method that displaces mesh vertices so that a discrete interface tracks
+  SWIFT (Strain-distributed Welsch Implicit-interface Fitting Technique):
+  a variational method that displaces mesh vertices so that a discrete interface tracks
   the zero set of a level set function @f$ \phi @f$, while preserving
   element quality.
 
@@ -1663,23 +1663,35 @@
   - **Classification** converts @f$ \phi @f$ into discrete cell attributes
     (see @ref Rodin::Geometry "Geometry" utilities such as the min s-t cut
     classifier).
-  - **Geometry fitting** (WNGIR) moves and curves the mesh. It never
+  - **Geometry fitting** (SWIFT) moves and curves the mesh. It never
     decides topology.
 
-  The WNGIR step solves a metric-preconditioned (natural-gradient) problem
+  The SWIFT step solves a metric-preconditioned (natural-gradient) problem
   built entirely in the variational form language: a surface force
   (the Welsch first variation, assembled on interface facets) balanced
-  against bulk, observation, and admissibility metrics. Hard admissibility
+  against fitting and centered distribution metrics. Affine quadratic hinges
+  recover quality in the direction problem. Hard admissibility
   (element validity) is enforced by a nonlinear line search.
 
   ## Key classes
-  - WNGIRParameters — solve configuration (budgets, tolerances, weights)
-  - WNGIRReport — per-solve diagnostics
-  - WNGIRSolver — backend-independent solver driver
+  - @ref Rodin::Adaptation::SWIFT::Parameters — budgets, tolerances and weights
+  - @ref Rodin::Adaptation::SWIFT::Report — per-solve diagnostics
+  - @ref Rodin::Adaptation::SWIFT::Problem — local fitting without mesh mutation
+  - @ref Rodin::Adaptation::SWIFT::Adapt — owned P1 setup and in-place displacement
 
   @note Interface-fitting constraints are formulated as smooth penalties;
   the module deliberately avoids hard geometric projections inside the
   solve, which break line-search continuity.
+ */
+
+/**
+  @namespace Rodin::Adaptation::SWIFT
+  @brief Robust interface fitting with a fitting--distribution metric.
+
+  @ref Rodin::Adaptation::SWIFT::Problem computes displacement using
+  @f$M=F+D@f$, quadratic affine quality hinges and Armijo globalization.
+  @ref Rodin::Adaptation::SWIFT::Adapt owns a local P1 setup and applies valid
+  results to affine simplicial meshes. MPI/PETSc execution is not implemented.
  */
 
 /**

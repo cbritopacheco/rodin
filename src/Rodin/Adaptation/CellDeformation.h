@@ -46,12 +46,12 @@ namespace Rodin::Adaptation
     public:
       /**
        * @brief Constructs an undeformed state of the given spatial dimension.
-       * @param d Topological dimension of the entity.
+       * @param d Spatial dimension, from one to three.
        */
       explicit CellDeformation(std::size_t d)
         : m_d(d)
       {
-        assert(d == 2 || d == 3);
+        assert(d >= 1 && d <= 3);
         m_F = Math::SpatialMatrix<Real>::Identity(
           static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
       }
@@ -205,6 +205,21 @@ namespace Rodin::Adaptation
       }
 
       /**
+       * @brief Mixed second variation of the Jacobian; requires an invertible state.
+       * @param G First deformation-gradient perturbation.
+       * @param H Second deformation-gradient perturbation.
+       * @returns The mixed determinant derivative in the two directions.
+       */
+      Real getJacobianSecondAction(
+        const Math::SpatialMatrix<Real>& G, const Math::SpatialMatrix<Real>& H) const
+      {
+        const auto inverse = getInverseTranspose().transpose();
+        return getJacobian() *
+          (getInverseTranspose().dot(G) * getInverseTranspose().dot(H) -
+            (inverse * G * inverse * H).trace());
+      }
+
+      /**
        * @brief The linearised action of the relative distortion,
        * @f$a_Q(G)=\partial_F Q_{\operatorname{rel}}:G@f$; requires
        * @ref isAdmissible.
@@ -214,6 +229,27 @@ namespace Rodin::Adaptation
       Real getRelativeDistortionAction(const Math::SpatialMatrix<Real>& G) const
       {
         return getRelativeDistortionGradient().dot(G);
+      }
+
+      /**
+       * @brief Mixed second variation of relative distortion; requires a positive Jacobian.
+       * @param G First deformation-gradient perturbation.
+       * @param H Second deformation-gradient perturbation.
+       * @returns The mixed relative-distortion derivative in the two directions.
+       */
+      Real getRelativeDistortionSecondAction(
+        const Math::SpatialMatrix<Real>& G, const Math::SpatialMatrix<Real>& H) const
+      {
+        assert(isAdmissible());
+        const Real d = static_cast<Real>(m_d);
+        const Real a = Real(2) / d;
+        const auto inverse = getInverseTranspose().transpose();
+        const Real traceG = getInverseTranspose().dot(G);
+        const Real traceH = getInverseTranspose().dot(H);
+        return std::pow(getJacobian(), -a) *
+          (a * G.dot(H) - a * a * (m_F.dot(G) * traceH + m_F.dot(H) * traceG) +
+            (m_F.squaredNorm() / d) *
+              (a * a * traceG * traceH + a * (inverse * G * inverse * H).trace()));
       }
 
     private:

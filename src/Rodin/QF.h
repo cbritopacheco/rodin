@@ -28,7 +28,7 @@
  * @see <a href="class_rodin_1_1_q_f_1_1_xiao_gimbutas.html">Rodin::QF::XiaoGimbutas</a>
  * @see <a href="class_rodin_1_1_q_f_1_1_witherden_vincent.html">Rodin::QF::WitherdenVincent</a>
  * @see <a href="class_rodin_1_1_q_f_1_1_tensor_product.html">Rodin::QF::TensorProduct</a>
- * @see <a href="class_rodin_1_1_q_f_1_1_gauss_lobatto.html">Rodin::QF::GaussLobatto</a> header-only, include QF/GaussLobato.h separately
+ * @see <a href="class_rodin_1_1_q_f_1_1_gauss_lobatto.html">Rodin::QF::GaussLobatto</a>
  */
 
 #include "QF/QuadratureFormula.h"

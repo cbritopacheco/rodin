@@ -8,7 +8,9 @@
 #define RODIN_ADAPTATION_DEFORMATIONMAP_H
 
 #include "Rodin/Geometry/Point.h"
+#include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Types.h"
+#include "Rodin/Variational/IntegrationPoint.h"
 
 namespace Rodin::Adaptation
 {
@@ -64,7 +66,8 @@ namespace Rodin::Adaptation
       Math::SpatialVector<Real> getDisplacementValue(
         const Geometry::Point& pt, const Variational::IntegrationPoint& ip) const
       {
-        const auto uq = m_u.get().getValue(ip);
+        const auto uq =
+          ip.getQuadratureFormula() ? m_u.get().getValue(ip) : m_u.get().getValue(pt);
         Math::SpatialVector<Real> displacement(pt.getPolytope().getMesh().getDimension());
         displacement.setZero();
         for (std::size_t r = 0; r < static_cast<std::size_t>(displacement.size()); ++r)
@@ -75,19 +78,21 @@ namespace Rodin::Adaptation
       /**
        * @brief The moved point @f$\Phi(x)=x+u(x)@f$, located in the mesh.
        *
-       * Cached: consecutive calls with the same polytope and quadrature index
-       * return the previously located point without repeating the search.
+       * Cached: consecutive calls with the same polytope, quadrature formula
+       * and quadrature index return the previously located point. Generic
+       * pointwise evaluations have no quadrature identity and are not cached.
        *
        * @param ip Integration point on the reference configuration; its
-       * polytope and quadrature index form the cache key.
-       * @returns The moved point.
+       * polytope, quadrature formula and quadrature index form the cache key.
+       * @returns Located point in the deformed configuration.
        */
       const Geometry::Point& getMovedPoint(const Variational::IntegrationPoint& ip) const
       {
         const auto& pt = ip.getPoint();
         const auto& polytope = pt.getPolytope();
-        const Key key{polytope.getDimension(), polytope.getIndex(), ip.getIndex()};
-        if (!m_moved || !m_key || !(*m_key == key))
+        const Key key{polytope.getDimension(), polytope.getIndex(),
+          ip.getQuadratureFormula(), ip.getIndex()};
+        if (!ip.getQuadratureFormula() || !m_moved || !m_key || !(*m_key == key))
         {
             // Geometry::Point is constructible but not assignable, so the slot
             // is re-emplaced rather than overwritten.
@@ -145,6 +150,7 @@ namespace Rodin::Adaptation
       {
           std::size_t dimension;
           Index index;
+          const QF::QuadratureFormulaBase* quadrature;
           std::size_t qp;
           /**
            * @brief Compares the operands for equality.
@@ -154,7 +160,8 @@ namespace Rodin::Adaptation
 
           bool operator==(const Key& other) const
           {
-            return dimension == other.dimension && index == other.index && qp == other.qp;
+            return dimension == other.dimension && index == other.index &&
+              quadrature == other.quadrature && qp == other.qp;
           }
       };
 
