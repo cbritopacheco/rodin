@@ -890,9 +890,9 @@ namespace Rodin::Variational
       ProblemUsBase(U1& u1, U2& u2, U3& u3, Us&... us)
         : m_assembled(false),
           m_us(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-              .template filter<IsTrialFunctionReferenceWrapper>()),
+                 .template filter<IsTrialFunctionReferenceWrapper>()),
           m_vs(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-              .template filter<IsTestFunctionReferenceWrapper>()),
+                 .template filter<IsTestFunctionReferenceWrapper>()),
           m_assembly(std::make_unique<AssemblyType>())
       {
         m_us.iapply([&](size_t i, const auto& u) {
