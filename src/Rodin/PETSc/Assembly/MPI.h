@@ -242,6 +242,9 @@ namespace Rodin::Assembly
    * Each MPI rank assembles contributions from its owned polytopes into
    * the distributed PETSc matrix.
    *
+   * @note Global integrators visit the trial entities held by each shard.
+   * Full-domain nonlocal integration requires the shard to hold that domain.
+   *
    * @tparam Solution Solution type.
    * @tparam TrialFES Trial finite element space type.
    * @tparam TestFES  Test finite element space type.
@@ -337,6 +340,55 @@ namespace Rodin::Assembly
                 ierr = MatSetValue(res, r, c, v, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
                 (void)ierr;
+              }
+            }
+          }
+        }
+
+        // Match problem assembly: owned test entities couple to held trial entities.
+        // A full-domain nonlocal kernel requires the shard to hold its trial domain.
+        for (auto& bfi : input.getGlobalBFIs())
+        {
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs = bfi.getTestAttributes();
+          MPIIteration trialSequence(mesh, bfi.getTrialRegion());
+          MPIIteration testSequence(mesh, bfi.getTestRegion());
+          for (auto test = testSequence.getIterator(); test; ++test)
+          {
+            const size_t testDimension = test->getDimension();
+            const Index testIndex = test->getIndex();
+            if (!shard.isOwned(testDimension, testIndex))
+              continue;
+            if (!testAttrs.empty())
+            {
+              const auto attribute = test->getAttribute();
+              if (!attribute || !testAttrs.count(*attribute))
+                continue;
+            }
+            // Preserve test indices across scratch-buffer reuse by the trial lookup.
+            const auto rows = testFES.getDOFs(testDimension, testIndex);
+            for (auto trial = trialSequence.getIterator(); trial; ++trial)
+            {
+              const size_t trialDimension = trial->getDimension();
+              const Index trialIndex = trial->getIndex();
+              if (!trialAttrs.empty())
+              {
+                const auto attribute = trial->getAttribute();
+                if (!attribute || !trialAttrs.count(*attribute))
+                  continue;
+              }
+              const auto& cols = trialFES.getDOFs(trialDimension, trialIndex);
+              bfi.setPolytope(*trial, *test);
+              for (Index i = 0; i < static_cast<Index>(rows.size()); ++i)
+              {
+                const PetscInt row = static_cast<PetscInt>(rows[i]);
+                for (Index j = 0; j < static_cast<Index>(cols.size()); ++j)
+                {
+                  const PetscInt col = static_cast<PetscInt>(cols[j]);
+                  ierr = MatSetValue(res, row, col, bfi.integrate(j, i), ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
+                  (void)ierr;
+                }
               }
             }
           }

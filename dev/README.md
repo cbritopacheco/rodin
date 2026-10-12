@@ -101,6 +101,14 @@ geometry, and backend variants explicitly. Current audit findings include:
   preserve the opposite side. All 13 MPI form cases pass on two ranks, and
   tripled nonlocal contributions fail the independent matrix oracle. This
   does not establish full-domain nonlocal integration across arbitrary shards.
+- Standalone PETSc MPI global integrators: an independent restricted-moment
+  test exposed omitted nonlocal contributions. The repaired path retains test
+  DOFs across trial lookups and respects both attribute filters. Exact matrices
+  survive repeated assembly and copied/moved/cloned assemblers. All 14 MPI
+  form cases pass on two ranks; a Release manufactured constant solution also
+  passes on all seven geometries and two mesh sizes, with repeated and
+  copied/moved forms. Tripled contributions fail both oracles. These nonlocal
+  tests use isolated communicators and do not certify arbitrary-shard quadrature.
 - Mixed affine identification: real/complex dense/sparse mass systems recover
   prescribed constant fields with nonzero affine defects and fixed master
   data on all seven geometries and two mesh sizes. Repeated, copied and moved

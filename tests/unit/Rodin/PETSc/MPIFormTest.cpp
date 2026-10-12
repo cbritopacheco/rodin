@@ -980,6 +980,89 @@ namespace
     }
   }
 
+  /// @brief Standalone MPI forms assemble restricted global contributions after cloning.
+  TEST(PETSc_MPI_Form, IsolatedStandaloneNonlocalFormsMatchRestrictedMoments)
+  {
+    boost::mpi::communicator self(MPI_COMM_SELF, boost::mpi::comm_attach);
+    Context::MPI ctx(*g_env, self);
+    auto local = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    local.setAttribute({1, 0}, 7);
+    local.setAttribute({1, 1}, 8);
+    local.getConnectivity().compute(1, 1);
+    BalancedCompactPartitioner partitioner(local);
+    partitioner.partition(1);
+    Sharder<Context::MPI> sharder(ctx);
+    sharder.shard(partitioner);
+    sharder.scatter(0);
+    auto mesh = sharder.gather(0);
+    P1<PetscScalar, Mesh<Context::MPI>> space(mesh);
+    PETSc::Variational::TrialFunction u(space);
+    PETSc::Variational::TestFunction v(space);
+    const auto kernel = [](const Point&, const Point&) { return PetscScalar(2); };
+    const PetscInt indices[] = {0, 1, 2};
+    ASSERT_EQ(space.getSize(), 3u);
+    for (size_t restriction = 0; restriction < 5; ++restriction)
+    {
+      SCOPED_TRACE(restriction);
+      const bool restrictTrial = restriction == 1 || restriction >= 3;
+      const bool restrictTest = restriction >= 2;
+      auto integral = Integral(Potential(kernel, u), v);
+      if (restrictTrial)
+        integral.setTrialAttributes({restriction == 4 ? 999u : 7u});
+      if (restrictTest)
+        integral.setTestAttributes({restriction == 4 ? 999u : 8u});
+      BilinearForm form(u, v);
+      form += integral;
+      PetscScalar trialMoments[3] = {};
+      PetscScalar testMoments[3] = {};
+      for (auto vertex = mesh.getShard().getVertex(); vertex; ++vertex)
+      {
+        const Point point(*vertex, Math::SpatialPoint{});
+        const PetscInt dof = space.getDOFs(0, vertex->getIndex())[0];
+        ASSERT_GE(dof, 0);
+        ASSERT_LT(dof, 3);
+        const Real x = point.x();
+        trialMoments[dof] = restrictTrial ? (x < 2 ? 0.5 : 0) : (x == 1 ? 1 : 0.5);
+        testMoments[dof] = restrictTest ? (x > 0 ? 0.5 : 0) : (x == 1 ? 1 : 0.5);
+      }
+      const auto checkMatrix = [&](::Mat matrix) {
+        PetscScalar entries[9];
+        ASSERT_EQ(MatGetValues(matrix, 3, indices, 3, indices, entries), PETSC_SUCCESS);
+        for (size_t row = 0; row < 3; ++row)
+        {
+          for (size_t col = 0; col < 3; ++col)
+          {
+            const PetscScalar expected = restriction == 4
+              ? PetscScalar(0)
+              : PetscScalar(2) * testMoments[row] * trialMoments[col];
+            EXPECT_LT(PetscAbsScalar(entries[3 * row + col] - expected), 1e-12)
+              << "row=" << row << ", col=" << col;
+          }
+        }
+      };
+      Assembly::MPI<::Mat, decltype(form)> assembler;
+      const typename decltype(assembler)::InputType input{
+        space, space, form.getLocalIntegrators(), form.getGlobalIntegrators()};
+      auto copied = assembler;
+      auto moved = std::move(copied);
+      std::unique_ptr<Assembly::AssemblyBase<::Mat, decltype(form)>> clone(
+        assembler.copy());
+      ::Mat matrix = nullptr;
+      ASSERT_EQ(MatCreate(MPI_COMM_SELF, &matrix), PETSC_SUCCESS);
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
+        SCOPED_TRACE(repeat);
+        form.assemble();
+        checkMatrix(form.getOperator());
+        moved.execute(matrix, input);
+        checkMatrix(matrix);
+        clone->execute(matrix, input);
+        checkMatrix(matrix);
+      }
+      ASSERT_EQ(MatDestroy(&matrix), PETSC_SUCCESS);
+    }
+  }
+
   /// @brief Affine cross-field constraints recover independently prescribed constant fields.
   TEST(PETSc_MPI_Form, IsolatedMixedAffineConstraintsRecoverConstantFields)
   {
