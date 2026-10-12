@@ -108,12 +108,12 @@ namespace Rodin::FormLanguage
        * @param function Function whose base parameter is deduced.
        * @returns A pointer to the deduced derived type.
        */
-      template <class D>
-      static D* deduce(const Variational::FunctionBase<D>& function);
+    template <class D>
+    static D* deduce(const Variational::FunctionBase<D>& function);
 
     public:
       /// @brief The FunctionBase parameter of @c T.
-      using Type = std::remove_pointer_t<decltype(deduce(std::declval<const T&>()))>;
+    using Type = std::remove_pointer_t<decltype(deduce(std::declval<const T&>()))>;
   };
 
   /**

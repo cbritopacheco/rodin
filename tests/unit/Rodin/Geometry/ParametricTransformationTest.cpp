@@ -433,50 +433,50 @@ namespace Rodin::Tests::Unit
        * @tparam K Geometry element degree.
        * @param geometry Reference polytope type.
        */
-      template <size_t K, class Element = Variational::RealH1Element<K>>
-      void checkEvaluation(Polytope::Type geometry)
+    template <size_t K, class Element = Variational::RealH1Element<K>>
+    void checkEvaluation(Polytope::Type geometry)
+    {
+      SCOPED_TRACE(K);
+      Element element(geometry);
+      const size_t rdim = Polytope::Traits(geometry).getDimension();
+      for (const size_t order : {size_t(8), size_t(16)})
       {
-        SCOPED_TRACE(K);
-        Element element(geometry);
-        const size_t rdim = Polytope::Traits(geometry).getDimension();
-        for (const size_t order : {size_t(8), size_t(16)})
+        SCOPED_TRACE(order);
+        const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+        for (size_t pdim = std::max(size_t(1), rdim); pdim <= 3; ++pdim)
         {
-          SCOPED_TRACE(order);
-          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
-          for (size_t pdim = std::max(size_t(1), rdim); pdim <= 3; ++pdim)
+          for (size_t cell = 0; cell < 2; ++cell)
           {
-            for (size_t cell = 0; cell < 2; ++cell)
+            PointCloud controls(pdim, element.getCount());
+            for (size_t a = 0; a < element.getCount(); ++a)
             {
-              PointCloud controls(pdim, element.getCount());
-              for (size_t a = 0; a < element.getCount(); ++a)
+              for (size_t j = 0; j < pdim; ++j)
               {
-                for (size_t j = 0; j < pdim; ++j)
-                {
-                  controls(j, a) = Real((a + 1) * (j + 1) + cell) /
-                    Real(element.getCount() + cell + 1) * (a % 2 ? -1 : 1);
-                }
+                controls(j, a) = Real((a + 1) * (j + 1) + cell) /
+                  Real(element.getCount() + cell + 1) * (a % 2 ? -1 : 1);
               }
-              ParametricTransformation transformation(controls, element);
-              const PolytopeTransformation& polymorphic = transformation;
-              std::vector<Math::SpatialMatrix<Real>> matrices;
-              polymorphic.jacobian(matrices, formula);
-              ASSERT_EQ(matrices.size(), formula.getSize());
-              for (size_t qp = 0; qp < matrices.size(); ++qp)
+            }
+            ParametricTransformation transformation(controls, element);
+            const PolytopeTransformation& polymorphic = transformation;
+            std::vector<Math::SpatialMatrix<Real>> matrices;
+            polymorphic.jacobian(matrices, formula);
+            ASSERT_EQ(matrices.size(), formula.getSize());
+            for (size_t qp = 0; qp < matrices.size(); ++qp)
+            {
+              Math::SpatialMatrix<Real> expected;
+              transformation.jacobian(expected, formula.getPoint(qp));
+              ASSERT_EQ(matrices[qp].rows(), expected.rows());
+              ASSERT_EQ(matrices[qp].cols(), expected.cols());
+              for (size_t j = 0; j < pdim; ++j)
               {
-                Math::SpatialMatrix<Real> expected;
-                transformation.jacobian(expected, formula.getPoint(qp));
-                ASSERT_EQ(matrices[qp].rows(), expected.rows());
-                ASSERT_EQ(matrices[qp].cols(), expected.cols());
-                for (size_t j = 0; j < pdim; ++j)
-                {
-                  for (size_t i = 0; i < rdim; ++i)
-                    EXPECT_EQ(matrices[qp](j, i), expected(j, i));
-                }
+                for (size_t i = 0; i < rdim; ++i)
+                  EXPECT_EQ(matrices[qp](j, i), expected(j, i));
               }
             }
           }
         }
       }
+    }
 
       class ObservedFormula final : public QF::QuadratureFormulaBase
       {
