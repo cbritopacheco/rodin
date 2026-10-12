@@ -75,6 +75,11 @@ geometry, and backend variants explicitly. Current audit findings include:
   oracles in both scalar fields and element families. All four cases in the
   dedicated trace executable pass. The two existing coordinate-derivative
   tests remain separate.
+- Grid-function failure contracts: scalar/vector MFEM and MEDIT failed opens
+  preserve every coefficient and create no output directory. Geometrically
+  coincident but unrelated mesh points are rejected through both geometric
+  and integration-point evaluation; valid local evaluation and coefficients
+  remain intact. All 38 grid-function tests pass.
 - Distinct trial/test spaces: 21 quadrature cases check every mass and
   derivative entry against the independent generic evaluator for real/complex
   scalar/vector P1 and quadratic H1 spaces on all seven geometries. Quadratic

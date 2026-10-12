@@ -31,6 +31,69 @@ namespace Rodin::FormLanguage
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Failed file opens preserve scalar/vector coefficients and create no directory.
+  TEST(Rodin_Variational_GridFunction, FileOpenFailuresPreserveCoefficientsAndFilesystem)
+  {
+    const auto missingDirectory = boost::filesystem::temp_directory_path() /
+      boost::filesystem::unique_path("rodin-missing-field-%%%%-%%%%-%%%%");
+    const auto missingFile = missingDirectory / "field";
+    ASSERT_FALSE(boost::filesystem::exists(missingDirectory));
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    const auto check = [&](const auto& space) {
+      GridFunction field(space);
+      for (Index i = 0; i < field.getSize(); ++i)
+        field.getData()(i) = 1 + Real(i) / 7;
+      const auto expected = field.getData().eval();
+      for (const auto format : {FileFormat::MFEM, FileFormat::MEDIT})
+      {
+        SCOPED_TRACE(static_cast<int>(format));
+        EXPECT_THROW(field.load(missingFile, format), Alert::Exception);
+        EXPECT_THROW(field.save(missingFile, format), Alert::Exception);
+        ASSERT_EQ(field.getData().size(), expected.size());
+        for (Eigen::Index i = 0; i < expected.size(); ++i)
+          EXPECT_EQ(field.getData()(i), expected(i));
+        EXPECT_FALSE(boost::filesystem::exists(missingDirectory));
+      }
+    };
+    P1 scalarSpace(mesh);
+    P1 vectorSpace(mesh, 2);
+    check(scalarSpace);
+    check(vectorSpace);
+  }
+
+  /// @brief Geometrically coincident meshes retain distinct point ownership.
+  TEST(Rodin_Variational_GridFunction, UnrelatedMeshPointsAreRejected)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    auto unrelated = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    const auto& quadrature =
+      QF::PolytopeQuadratureFormula::get(1, Polytope::Type::Triangle);
+    const Point local(*mesh.getCell(0), quadrature.getPoint(0));
+    const Point foreign(*unrelated.getCell(0), quadrature.getPoint(0));
+    const IntegrationPoint foreignIntegrationPoint(foreign, &quadrature, 0);
+    const auto check = [&](const auto& space) {
+      GridFunction field(space);
+      field.getData().setConstant(2);
+      EXPECT_THROW(field.getValue(foreign), Alert::Exception);
+      EXPECT_THROW(field.getValue(foreignIntegrationPoint), Alert::Exception);
+      const auto value = field.getValue(local);
+      if constexpr (std::is_arithmetic_v<decltype(value)>)
+        EXPECT_NEAR(value, 2, 1e-12);
+      else
+      {
+        ASSERT_EQ(value.size(), 2);
+        for (Eigen::Index i = 0; i < value.size(); ++i)
+          EXPECT_NEAR(value(i), 2, 1e-12);
+      }
+      for (Eigen::Index i = 0; i < field.getData().size(); ++i)
+        EXPECT_DOUBLE_EQ(field.getData()(i), 2);
+    };
+    P1 scalarSpace(mesh);
+    P1 vectorSpace(mesh, 2);
+    check(scalarSpace);
+    check(vectorSpace);
+  }
+
   class RangeTransformingSpace final
     : public FiniteElementSpace<LocalMesh, RangeTransformingSpace>
   {
