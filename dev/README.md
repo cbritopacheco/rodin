@@ -43,6 +43,10 @@ geometry, and backend variants explicitly. Current audit findings include:
   compatible products through dimension three, plus rectangular pseudoinverses.
 - Iterative solvers: dense/sparse real MINRES, and dense/sparse real/complex
   least-squares CG and IDRS, with cold and nonzero initial guesses.
+- Optional direct solvers: locally configured UMFPACK, CHOLMOD and SPQR.
+  CHOLMOD/SPQR tests instantiate real and complex Hermitian systems and verify
+  fresh solves after copy, move and polymorphic clone. These checks do not
+  certify disabled MUMPS or ParU builds.
 - P1 scalar derivatives: real/complex affine fields on every geometry,
   including face traces. Instantiation exposed obsolete basis, coefficient,
   and optional-attribute APIs, now covered by numerical regressions.
@@ -54,6 +58,10 @@ geometry, and backend variants explicitly. Current audit findings include:
 - Solid mechanics: Yeoh energy/stress/tangent checks in two and three
   dimensions, and P1 follower-pressure residual/tangent checks on segment and
   triangle faces. Higher-order pressure spaces are not claimed by this API.
+- Nonlocal multi-field assembly: real sparse blocks, checked against exact
+  separated double integrals with independent trial/test attribute restrictions.
+  Dense and complex multi-field problems currently lack sequential backend
+  specializations; the single-field tests do not certify those variants.
 - Eigen 3.4 MINRES does not compile for complex scalars. The Rodin header's
   generic scalar documentation does not establish dependency support.
 - IDRstab's wrapper names `Eigen::IDRSTABL`, which is absent in Eigen 3.4's

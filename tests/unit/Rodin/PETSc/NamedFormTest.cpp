@@ -278,6 +278,66 @@ TEST(Rodin_PETSc_NamedForm, NonlocalConstantKernelMatchesExactRankOneMatrix)
   }
 }
 
+/// @brief Every PETSc nonlocal block matches exact, independently restricted cell moments.
+TEST(Rodin_PETSc_NamedForm, NonlocalBlocksMatchExactRestrictedMoments)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  mesh.setAttribute({1, 0}, 7);
+  mesh.setAttribute({1, 1}, 8);
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::TrialFunction u(space), p(space);
+  PETSc::Variational::TestFunction v(space), q(space);
+  Problem problem(u, v, p, q);
+  const auto k00 = [](const Point&, const Point&) { return PetscScalar(2); };
+  const auto k01 = [](const Point&, const Point&) { return PetscScalar(-3); };
+  const auto k10 = [](const Point&, const Point&) { return PetscScalar(0.5); };
+  const auto k11 = [](const Point&, const Point&) { return PetscScalar(4); };
+  const PetscScalar coefficients[2][2] = {{2, -3}, {0.5, 4}};
+  const PetscInt indices[] = {0, 1, 2, 3, 4, 5};
+  for (size_t restriction = 0; restriction < 5; ++restriction)
+  {
+    const bool restrictTrial = restriction == 1 || restriction >= 3;
+    const bool restrictTest = restriction >= 2;
+    typename decltype(problem)::ProblemBodyType body;
+    body.getGlobalBFIs().add(Integral(Potential(k00, u), v));
+    body.getGlobalBFIs().add(Integral(Potential(k01, p), v));
+    body.getGlobalBFIs().add(Integral(Potential(k10, u), q));
+    body.getGlobalBFIs().add(Integral(Potential(k11, p), q));
+    for (auto& integral : body.getGlobalBFIs())
+    {
+      if (restrictTrial)
+        integral.setTrialAttributes({restriction == 4 ? 999u : 7u});
+      if (restrictTest)
+        integral.setTestAttributes({restriction == 4 ? 999u : 8u});
+    }
+    problem = body;
+    const PetscReal trialMoments[] = {
+      0.5, restrictTrial ? 0.5 : 1, restrictTrial ? 0 : 0.5};
+    const PetscReal testMoments[] = {restrictTest ? 0 : 0.5, restrictTest ? 0.5 : 1, 0.5};
+    for (size_t repeat = 0; repeat < 2; ++repeat)
+    {
+      SCOPED_TRACE(restriction);
+      SCOPED_TRACE(repeat);
+      problem.assemble();
+      PetscScalar entries[36];
+      ASSERT_EQ(MatGetValues(problem.getLinearSystem().getOperator(), 6, indices, 6,
+                  indices, entries),
+        PETSC_SUCCESS);
+      for (size_t row = 0; row < 6; ++row)
+      {
+        for (size_t col = 0; col < 6; ++col)
+        {
+          const PetscScalar expected = restriction == 4 ? PetscScalar(0)
+                                                        : coefficients[row / 3][col / 3] *
+              testMoments[row % 3] * trialMoments[col % 3];
+          EXPECT_LT(PetscAbsScalar(entries[6 * row + col] - expected), 1e-12)
+            << "row=" << row << ", col=" << col;
+        }
+      }
+    }
+  }
+}
+
 int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, nullptr, nullptr);

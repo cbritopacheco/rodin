@@ -787,3 +787,8 @@ add_executable(RodinVariationalPeriodicBCTest PeriodicBCTest.cpp)
 target_link_libraries(RodinVariationalPeriodicBCTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalPeriodicBCTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalNonlocalBlockTest NonlocalBlockTest.cpp)
+target_link_libraries(RodinVariationalNonlocalBlockTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalNonlocalBlockTest PROPERTIES LABELS unit)
