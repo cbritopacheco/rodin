@@ -78,7 +78,8 @@ namespace Rodin::Tests::Unit
       }
     };
     check.template operator()<Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>>();
-    using RowMajorMatrix = Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+    using RowMajorMatrix =
+      Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
     check.template operator()<RowMajorMatrix>();
     check.template operator()<Eigen::Matrix<Complex, Eigen::Dynamic, Eigen::Dynamic>>();
   }
