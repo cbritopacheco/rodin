@@ -9,6 +9,12 @@ gtest_discover_tests(RodinVariationalH1LegendrePolynomialTest
     LABELS unit
 )
 
+add_executable(RodinVariationalH1TabulationTest TabulationTest.cpp)
+target_link_libraries(RodinVariationalH1TabulationTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1TabulationTest
+  PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalH1JacobiPolynomialTest JacobiPolynomialTest.cpp)
 target_link_libraries(RodinVariationalH1JacobiPolynomialTest
   PUBLIC

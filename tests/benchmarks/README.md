@@ -307,6 +307,35 @@ build/tests/benchmarks/RodinMappedPointBenchmarks \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
 
+### Arithmetic-preservation gate for pyramid reuse
+
+Pyramid nodal functions contract modal values with inverse Vandermonde columns.
+For basis index $a$ and reference point $r$, the computed expression is
+
+$$
+\phi_a(r)=\sum_m (V^{-1})_{ma}\psi_m(r).
+$$
+
+Materializing each modal value once per point avoids repeated modal evaluation,
+but preserving the written summation order alone does not guarantee identical
+floating-point results. An isolated prototype passed polynomial reproduction
+while failing exact direct-versus-table comparisons in eight of twelve
+real/complex degree combinations under the optimized native build. Disabling
+floating-point contraction in a diagnostic build removed those discrepancies.
+Neither the prototype nor a floating-point flag change was retained; no
+performance gain is claimed for that rejected implementation.
+
+`RodinVariationalH1TabulationTest` now compares every cached value and first
+derivative with direct evaluation for degrees one through six, both scalar
+fields and all eight reference families. Samples include vertices, centroids
+and order-eight interiors, including the existing pyramid-apex convention.
+Separate tests reconstruct a degree-dependent polynomial through public DOF
+functionals at orders two, four and eight, with a dimensionless
+$10^{-8}\max(1,|q_{\mathrm{ref}}|)$ roundoff allowance. These are numerical
+regressions, not timing gates. All 24 tests passed against the original source;
+the retained exact-comparison test failed against the isolated prototype.
+Future reuse changes must pass this gate without weakening arithmetic policy.
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`
