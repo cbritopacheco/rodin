@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Adaptation::WNGIR::AdmissibilityState struct | Rodin</title>
+  <title>Rodin::FormLanguage::Traits&lt;Adaptation::SWIFT::LinearSolver&lt;LinearSystem&gt;&gt; struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,39 +75,28 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_adaptation_1_1_w_n_g_i_r.html">WNGIR</a>::<wbr/></span>AdmissibilityState <span class="m-thin">struct</span>
+          <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>Traits&lt;Adaptation::SWIFT::LinearSolver&lt;LinearSystem&gt;&gt; <span class="m-thin">struct</span>
         </h1>
-        <p>Mesh-validity summary of a displacement.</p>
+        <p>Native solver traits for the SWIFT linear adapter.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#pub-attribs">Public variables</a></li>
+                <li><a href="#pub-types">Public types</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-        <section id="pub-attribs">
-          <h2><a href="#pub-attribs">Public variables</a></h2>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="ad9a6957217b6c51fc64476238a49029d">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ad9a6957217b6c51fc64476238a49029d" class="m-doc-self">minJ</a>
+            <dt id="aa3ecd362e0c7ed70bca40b2b444218d5">
+              using <a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc-self">LinearSystemType</a> = LinearSystem
             </dt>
-            <dd>Smallest Jacobian over all cell quadrature points.</dd>
-            <dt id="a4619798d2041e4e20432099dcfb79711">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a4619798d2041e4e20432099dcfb79711" class="m-doc-self">maxJ</a>
-            </dt>
-            <dd>Largest Jacobian over all cell quadrature points.</dd>
-            <dt id="a4da96c6e0f73b9f92eab72dd92229837">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a4da96c6e0f73b9f92eab72dd92229837" class="m-doc-self">maxQ</a>
-            </dt>
-            <dd>Largest relative distortion over the non-inverted points.</dd>
-            <dt id="abea764aaed5fd4b248215765e59089f8">
-              std::size_t <a href="#abea764aaed5fd4b248215765e59089f8" class="m-doc-self">inadmissibleCount</a>
-            </dt>
-            <dd>Number of quadrature points at or below the Jacobian floor.</dd>
+            <dd>Linear system assembled by the variational problem.</dd>
           </dl>
         </section>
       </div>

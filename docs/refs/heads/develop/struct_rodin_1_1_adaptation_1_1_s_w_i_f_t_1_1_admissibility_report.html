@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Adaptation::WNGIR::RigidModeState struct | Rodin</title>
+  <title>Rodin::Adaptation::SWIFT::AdmissibilityReport struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,9 +75,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_adaptation_1_1_w_n_g_i_r.html">WNGIR</a>::<wbr/></span>RigidModeState <span class="m-thin">struct</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>AdmissibilityReport <span class="m-thin">struct</span>
         </h1>
-        <p>Observation coercivity restricted to rigid displacements.</p>
+        <p>Sampled geometric admissibility diagnostics.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -92,18 +92,18 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="aa652cd7724476a70f5d6609dedeb91bd">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#aa652cd7724476a70f5d6609dedeb91bd" class="m-doc-self">minimum</a>
+            <dt id="ad9a6957217b6c51fc64476238a49029d">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ad9a6957217b6c51fc64476238a49029d" class="m-doc-self">minJ</a>
             </dt>
-            <dd>Smallest generalized observation eigenvalue.</dd>
-            <dt id="a3da8b51475a8dd83ddfff170202f8fc6">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a3da8b51475a8dd83ddfff170202f8fc6" class="m-doc-self">ratio</a>
+            <dd>Minimum sampled Jacobian determinant.</dd>
+            <dt id="abea764aaed5fd4b248215765e59089f8">
+              std::size_t <a href="#abea764aaed5fd4b248215765e59089f8" class="m-doc-self">inadmissibleCount</a>
             </dt>
-            <dd>Ratio of the smallest to largest generalized eigenvalue.</dd>
-            <dt id="abff335c7f1beb764d72da4b45b5519fa">
-              std::size_t <a href="#abff335c7f1beb764d72da4b45b5519fa" class="m-doc-self">dimension</a>
+            <dd>Number of failed Jacobian or distortion validity checks.</dd>
+            <dt id="a6c9841ddd60ea8068c4007151159b726">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a6c9841ddd60ea8068c4007151159b726" class="m-doc-self">maxQRel</a>
             </dt>
-            <dd>Dimension of the rigid-motion space tested.</dd>
+            <dd>Maximum finite sampled relative distortion.</dd>
           </dl>
         </section>
       </div>

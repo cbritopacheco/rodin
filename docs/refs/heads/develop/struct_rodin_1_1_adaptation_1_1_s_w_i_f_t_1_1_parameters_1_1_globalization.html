@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Geometry::MinSTCut::Result struct | Rodin</title>
+  <title>Rodin::Adaptation::SWIFT::Parameters::Globalization struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,9 +75,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_min_s_t_cut.html">MinSTCut</a>::<wbr/></span>Result <span class="m-thin">struct</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span><span class="m-breadcrumb"><a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html">Parameters</a>::<wbr/></span>Globalization <span class="m-thin">struct</span>
         </h1>
-        <p>Result of a classification: per-cell labels and cut data.</p>
+        <p>Directional scaling and actual trial acceptance.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -92,26 +92,18 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="aa2216f914f151c96b807ce7d0497dc6f">
-              std::vector&lt;int&gt; <a href="#aa2216f914f151c96b807ce7d0497dc6f" class="m-doc-self">labels</a>
+            <dt id="af4259e369793b5d356c6c992463dc248">
+              bool <a href="#af4259e369793b5d356c6c992463dc248" class="m-doc-self">directionalNewton</a>
             </dt>
-            <dd>Per-cell label (Inside or Outside).</dd>
-            <dt id="abc27f1b623ea1cba8c09ac714284903c">
-              std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#abc27f1b623ea1cba8c09ac714284903c" class="m-doc-self">insideCells</a>
+            <dd>Scale the model without a level-set Hessian.</dd>
+            <dt id="ab0033a68a033d2319483ee6c674c2939">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ab0033a68a033d2319483ee6c674c2939" class="m-doc-self">maxStepOverH</a>
             </dt>
-            <dd>Indices of the cells labeled Inside.</dd>
-            <dt id="a5e17aa1ff8ead4a22071209b7c5be92e">
-              std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; <a href="#a5e17aa1ff8ead4a22071209b7c5be92e" class="m-doc-self">outsideCells</a>
+            <dd>Positive caps predictor motion/h; zero is unrestricted.</dd>
+            <dt id="a6fdc378218f4740e9954867020704dcd">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a6fdc378218f4740e9954867020704dcd" class="m-doc-self">armijo</a>
             </dt>
-            <dd>Indices of the cells labeled Outside.</dd>
-            <dt id="a750aa6e726d29217af303f52c67b8429">
-              std::vector&lt;<a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_edge.html" class="m-doc">Edge</a>&gt; <a href="#a750aa6e726d29217af303f52c67b8429" class="m-doc-self">cutEdges</a>
-            </dt>
-            <dd>Edges crossing the cut (the interface skeleton).</dd>
-            <dt id="a6ccecf169e044f4f450c9464a7b78234">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a6ccecf169e044f4f450c9464a7b78234" class="m-doc-self">energy</a>
-            </dt>
-            <dd>Total energy (cut cost) of the solution.</dd>
+            <dd>Armijo sufficient-decrease coefficient.</dd>
           </dl>
         </section>
       </div>

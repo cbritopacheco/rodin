@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Adaptation::WNGIRAdmissibilityReport struct | Rodin</title>
+  <title>Rodin::Adaptation::SWIFT::Parameters struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,35 +75,95 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>WNGIRAdmissibilityReport <span class="m-thin">struct</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>Parameters <span class="m-thin">struct</span>
         </h1>
-        <p>Sampled geometric admissibility diagnostics.</p>
+        <p>Runtime parameters controlling SWIFT assembly and iteration.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence.html" class="m-doc">Convergence</a>
+            </dt>
+            <dd>Accuracy requirements and independent work budgets.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_globalization.html" class="m-doc">Globalization</a>
+            </dt>
+            <dd>Directional scaling and actual trial acceptance.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_linear.html" class="m-doc">Linear</a>
+            </dt>
+            <dd>Linear backend selection and thread policy.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_model.html" class="m-doc">Model</a>
+            </dt>
+            <dd>Coefficients, reference scale and admissible geometry of the model.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_quadrature.html" class="m-doc">Quadrature</a>
+            </dt>
+            <dd>Integration and independent geometry-validation orders.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_sampling.html" class="m-doc">Sampling</a>
+            </dt>
+            <dd>Shared reference witnesses for hinges and actual-quality checks.</dd>
+            <dt id="a1a6a4776314a0843143e5631c3ce21a7">
+              <span class="m-doc-wrap-bumper">enum class <a href="#a1a6a4776314a0843143e5631c3ce21a7" class="m-doc-self">LinearSolver</a> { </span><span class="m-doc-wrap"><a href="#a1a6a4776314a0843143e5631c3ce21a7a5202c6586cac8bee468e86d1ff854231" class="m-doc">CG</a>,
+              <a href="#a1a6a4776314a0843143e5631c3ce21a7a9418c6817420fdb8ecbe739ef378aec1" class="m-doc">SparseLU</a>,
+              <a href="#a1a6a4776314a0843143e5631c3ce21a7a5b5b599bb971af81cb5858ba63d08033" class="m-doc">MUMPS</a> }</span>
+            </dt>
+            <dd>Available local linear-solver backends.</dd>
+          </dl>
+        </section>
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="ad9a6957217b6c51fc64476238a49029d">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ad9a6957217b6c51fc64476238a49029d" class="m-doc-self">minJ</a>
+            <dt id="aa7373a131d63421e546eaa40689df69d">
+              <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_model.html" class="m-doc">Model</a> <a href="#aa7373a131d63421e546eaa40689df69d" class="m-doc-self">model</a>
             </dt>
-            <dd>Minimum sampled Jacobian determinant.</dd>
-            <dt id="abea764aaed5fd4b248215765e59089f8">
-              std::size_t <a href="#abea764aaed5fd4b248215765e59089f8" class="m-doc-self">inadmissibleCount</a>
+            <dd>Fitting, distribution and quality model.</dd>
+            <dt id="a061a9a0c17130f89d008e373c590a973">
+              <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence.html" class="m-doc">Convergence</a> <a href="#a061a9a0c17130f89d008e373c590a973" class="m-doc-self">convergence</a>
             </dt>
-            <dd>Number of sampled points below the admissibility floor.</dd>
-            <dt id="a6c9841ddd60ea8068c4007151159b726">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a6c9841ddd60ea8068c4007151159b726" class="m-doc-self">maxQRel</a>
+            <dd>Tolerances and work budgets.</dd>
+            <dt id="ac383e016ca128da7fabb82de7c71d1e7">
+              <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_globalization.html" class="m-doc">Globalization</a> <a href="#ac383e016ca128da7fabb82de7c71d1e7" class="m-doc-self">globalization</a>
             </dt>
-            <dd>Maximum sampled relative distortion.</dd>
+            <dd>Predictor scaling and outer acceptance.</dd>
+            <dt id="ae1f70285396745a697bec4e3d561abc2">
+              <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_linear.html" class="m-doc">Linear</a> <a href="#ae1f70285396745a697bec4e3d561abc2" class="m-doc-self">linear</a>
+            </dt>
+            <dd>Linear backend and thread policy.</dd>
+            <dt id="a6e6c474c9eedb0961390091003af5685">
+              <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_quadrature.html" class="m-doc">Quadrature</a> <a href="#a6e6c474c9eedb0961390091003af5685" class="m-doc-self">quadrature</a>
+            </dt>
+            <dd>Integration and validation orders.</dd>
+            <dt id="ac529df572fca22fc7b905624ac493f93">
+              <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_sampling.html" class="m-doc">Sampling</a> <a href="#ac529df572fca22fc7b905624ac493f93" class="m-doc-self">sampling</a>
+            </dt>
+            <dd>Shared hinge and actual-quality witnesses.</dd>
+            <dt id="aaa0b93c2e356b8a294c1e5f15f740e2a">
+              <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt; <a href="#aaa0b93c2e356b8a294c1e5f15f740e2a" class="m-doc-self">interfaceAttribute</a>
+            </dt>
+            <dd>Marked facets to fit.</dd>
+            <dt id="a7b36472a0720086e00a542efeb6f5f7a">
+              bool <a href="#a7b36472a0720086e00a542efeb6f5f7a" class="m-doc-self">trace</a>
+            </dt>
+            <dd>Print diagnostics; accepted geometry is always validated.</dd>
+            <dt id="a899f94e3a06800d31aa3201090d72122">
+              bool <a href="#a899f94e3a06800d31aa3201090d72122" class="m-doc-self">traceQualityWitness</a>
+            </dt>
+            <dd>Record same-point quality predictions at each trial&#x27;s limiting cell.</dd>
           </dl>
         </section>
       </div>

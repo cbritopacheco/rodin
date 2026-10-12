@@ -95,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p>This specialization evaluates scalar-valued function integrals on a single polytope using a quadrature formula and the corresponding mapped geometric quadrature points cached on the mesh.</p>
+<p>This specialization evaluates scalar-valued function integrals on a single polytope using a quadrature formula and the corresponding mapped geometric quadrature points owned by the rule.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -308,7 +308,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>If no explicit quadrature formula was set previously, a default generic polytope quadrature of order 1 is selected for the polytope geometry. The corresponding mapped quadrature is then retrieved from the mesh.</p>
+<p>If no explicit quadrature formula was set previously, a default generic polytope quadrature of order 1 is selected for the polytope geometry. The corresponding mapped quadrature is owned until the next bind.</p>
           </div></section>
           <section class="m-doc-details" id="a353d9754ac67af541c2d4a35118aa535"><div>
             <h3>

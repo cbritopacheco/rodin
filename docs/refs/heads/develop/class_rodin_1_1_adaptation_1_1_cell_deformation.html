@@ -583,6 +583,11 @@ $a_j(G)=\partial_F(\det F):G=j\,F^{-\top}\!:G$
 </g>
 </svg>.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abc403eaab3fe4b24499cd08ef71d8bcb" class="m-doc">getJacobianSecondAction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; G,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; H) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Mixed second variation of the Jacobian; requires an invertible state.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a6b00d6814fe0eb58636102eb5e3bb058" class="m-doc">getRelativeDistortionAction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; G) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>The linearised action of the relative distortion, <svg class="m-math" style="width: 10.304em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 98.913817 12.309385">
@@ -621,6 +626,11 @@ $a_Q(G)=\partial_F Q_{\operatorname{rel}}:G$
 <use x='89.680194' y='0' xlink:href='#eq32-g1-71'/>
 </g>
 </svg>; requires <a href="#a4047b202ac9d86aa68d25c14e693be17" class="m-doc">isAdmissible</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0f94bdc39ec04b09cbe7e634672184c5" class="m-doc">getRelativeDistortionSecondAction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; G,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; H) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Mixed second variation of relative distortion; requires a positive Jacobian.</dd>
           </dl>
         </section>
         <section>
@@ -637,7 +647,7 @@ $a_Q(G)=\partial_F Q_{\operatorname{rel}}:G$
               <tbody>
                 <tr>
                   <td style="width: 1%">d</td>
-                  <td>Topological dimension of the entity.</td>
+                  <td>Spatial dimension, from one to three.</td>
                 </tr>
               </tbody>
             </table>
@@ -1146,6 +1156,34 @@ $G=\nabla v$
 </g>
 </svg>, and requires only <a href="#a99f6140e47d28ca9a0f3fad0848f149c" class="m-doc">isInvertible</a>.</p>
           </div></section>
+          <section class="m-doc-details" id="abc403eaab3fe4b24499cd08ef71d8bcb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />CellDeformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc403eaab3fe4b24499cd08ef71d8bcb" class="m-doc-self">getJacobianSecondAction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; G,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; H) const</span></span>
+            </h3>
+            <p>Mixed second variation of the Jacobian; requires an invertible state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">G</td>
+                  <td>First deformation-gradient perturbation.</td>
+                </tr>
+                <tr>
+                  <td>H</td>
+                  <td>Second deformation-gradient perturbation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The mixed determinant derivative in the two directions.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a6b00d6814fe0eb58636102eb5e3bb058"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />CellDeformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b00d6814fe0eb58636102eb5e3bb058" class="m-doc-self">getRelativeDistortionAction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; G) const</span></span>
@@ -1200,6 +1238,34 @@ $a_Q(G)=\partial_F Q_{\operatorname{rel}}:G$
                 <tr>
                   <th>Returns</th>
                   <td>The relative distortion action.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0f94bdc39ec04b09cbe7e634672184c5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />CellDeformation::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f94bdc39ec04b09cbe7e634672184c5" class="m-doc-self">getRelativeDistortionSecondAction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; G,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; H) const</span></span>
+            </h3>
+            <p>Mixed second variation of relative distortion; requires a positive Jacobian.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">G</td>
+                  <td>First deformation-gradient perturbation.</td>
+                </tr>
+                <tr>
+                  <td>H</td>
+                  <td>Second deformation-gradient perturbation.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The mixed relative-distortion derivative in the two directions.</td>
                 </tr>
               </tfoot>
             </table>

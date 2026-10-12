@@ -84,9 +84,9 @@
           <h3>Contents</h3>
           <ul>
             <li>
-              <a href="#autotoc_md179">Usage</a>
+              <a href="#autotoc_md184">Usage</a>
               <ul>
-                <li><a href="#autotoc_md180">Creating a distributed boundary submesh:</a></li>
+                <li><a href="#autotoc_md185">Creating a distributed boundary submesh:</a></li>
               </ul>
             </li>
             <li>
@@ -100,7 +100,7 @@
             </li>
           </ul>
         </nav>
-<p>A <code>SubMesh&lt;Context::MPI&gt;</code> is an MPI mesh that represents a subset of polytopes from a parent <code>Mesh&lt;Context::MPI&gt;</code>, maintaining bidirectional index mappings between submesh-local shard indices and parent-local shard indices.</p><p>Each rank independently builds its portion of the submesh by including entities from its parent shard. The submesh keeps a collective logical dimension, so ranks that select no local top-dimensional entities still agree on the dimension of the distributed submesh.</p><p>The submesh initially inherits ownership metadata from the parent shard. Finalization reconciles selected shared entities because the parent owner of an entity need not participate in a strict submesh such as a boundary skin.</p><section id="autotoc_md179"><h2><a href="#autotoc_md179">Usage</a></h2><section id="autotoc_md180"><h3><a href="#autotoc_md180">Creating a distributed boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<p>A <code>SubMesh&lt;Context::MPI&gt;</code> is an MPI mesh that represents a subset of polytopes from a parent <code>Mesh&lt;Context::MPI&gt;</code>, maintaining bidirectional index mappings between submesh-local shard indices and parent-local shard indices.</p><p>Each rank independently builds its portion of the submesh by including entities from its parent shard. The submesh keeps a collective logical dimension, so ranks that select no local top-dimensional entities still agree on the dimension of the distributed submesh.</p><p>The submesh initially inherits ownership metadata from the parent shard. Finalization reconciles selected shared entities because the parent owner of an entity need not participate in a strict submesh such as a boundary skin.</p><section id="autotoc_md184"><h2><a href="#autotoc_md184">Usage</a></h2><section id="autotoc_md185"><h3><a href="#autotoc_md185">Creating a distributed boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
 <span class="n">builder</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">);</span>
 
 <span class="c1">// Include all owned boundary faces on this rank</span>
@@ -176,10 +176,6 @@
               <span class="m-doc-wrap-bumper">auto <a href="#adcd0454751e26563bc6a51046718bea0" class="m-doc">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; bool <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Checks whether a point is local to this submesh or its shard.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
-            </dt>
-            <dd>Gets the collective topological dimension of the distributed submesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ae9d744e767d9fc546ca3f3e666554b3b" class="m-doc">getParent</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -378,24 +374,6 @@
                 </tr>
               </tfoot>
             </table>
-          </div></section>
-          <section class="m-doc-details" id="a6f7b22045efba4c92b80c545b2100c1f"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f7b22045efba4c92b80c545b2100c1f" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
-            </h3>
-            <p>Gets the collective topological dimension of the distributed submesh.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Collective topological dimension.</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>This is the maximum included entity dimension across all ranks, not the dimension of the rank-local shard. Empty ranks therefore report the same logical submesh dimension as ranks that own selected entities.</p>
           </div></section>
           <section class="m-doc-details" id="ae9d744e767d9fc546ca3f3e666554b3b"><div>
             <h3>

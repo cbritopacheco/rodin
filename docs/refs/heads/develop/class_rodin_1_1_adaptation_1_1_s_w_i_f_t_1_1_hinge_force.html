@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Adaptation::Detail::WNGIRPrimalBarrierMetric class | Rodin</title>
+  <title>Rodin::Adaptation::SWIFT::HingeForce class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,10 +75,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class TrialFunction, class TestFunction, class Displacement&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_detail.html">Detail</a>::<wbr/></span>WNGIRPrimalBarrierMetric <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <div class="m-doc-template">template&lt;class TestFunction, class Displacement&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>HingeForce <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Newton Hessian of the primal barrier for the linearized QP.</p>
+        <p>Hinge contribution to the next primal Newton iterate.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -98,20 +98,20 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Number&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase&lt;TrialFunction::ScalarType&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase&lt;TestFunction::ScalarType&gt;</a>
             </dt>
-            <dd>Base class for bilinear form integrators whose trial and test functions live on the same polytope.</dd>
+            <dd>Base class for linear form integrators.</dd>
           </dl>
         </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="aa03555b90a716baf6922955960a4bf2f">
-              using <a href="#aa03555b90a716baf6922955960a4bf2f" class="m-doc-self">ScalarType</a> = typename TrialFunction::ScalarType
+            <dt id="ada32025f6754e15e87b32d9aed396d47">
+              using <a href="#ada32025f6754e15e87b32d9aed396d47" class="m-doc-self">ScalarType</a> = typename TestFunction::ScalarType
             </dt>
             <dd>Scalar value type.</dd>
-            <dt id="ad4f06128fbc842efed38cb41fa6de0ec">
-              using <a href="#ad4f06128fbc842efed38cb41fa6de0ec" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">Variational::<wbr />LocalBilinearFormIntegratorBase</a>&lt;<a href="#aa03555b90a716baf6922955960a4bf2f" class="m-doc">ScalarType</a>&gt;
+            <dt id="a8bd3d3e6195bf81621f00edb6b12b5e2">
+              using <a href="#a8bd3d3e6195bf81621f00edb6b12b5e2" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">Variational::<wbr />LinearFormIntegratorBase</a>&lt;<a href="#ada32025f6754e15e87b32d9aed396d47" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -120,16 +120,16 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a9d77a798a807b766ff6a0451a6e97cc0" class="m-doc">WNGIRPrimalBarrierMetric</a>(</span><span class="m-doc-wrap">const TrialFunction&amp; du,
-              const TestFunction&amp; z,
+              <span class="m-doc-wrap-bumper"><a href="#a898f2b095698f06d27e5dc76d7097322" class="m-doc">HingeForce</a>(</span><span class="m-doc-wrap">const TestFunction&amp; z,
               const Displacement&amp; current,
               const Displacement&amp; inner,
-              const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; parameters,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> barrierCoefficient)</span>
+              const Displacement&amp; predictor,
+              const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hingeCoefficient)</span>
             </dt>
-            <dd>Constructs the w n g i r primal barrier metric.</dd>
+            <dd>Constructs the affine quadratic hinge load.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a6f3ca272546bbc862c08cde4cdbbbc40" class="m-doc">WNGIRPrimalBarrierMetric</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_metric.html" class="m-doc">WNGIRPrimalBarrierMetric</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#abc5f58fd69f6be8811225d73f4a5fadd" class="m-doc">HingeForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_force.html" class="m-doc">HingeForce</a>&amp; other) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -142,12 +142,11 @@
             </dt>
             <dd>Returns the current polytope.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a33ce11956a257d8c00974cdf20f216f6" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_metric.html" class="m-doc">WNGIRPrimalBarrierMetric</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0faa0b49281b9fbf75e5c080ab32b55d" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_force.html" class="m-doc">HingeForce</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
-            <dd>Binds to a polytope and assembles the local system.</dd>
+            <dd>Binds to a polytope and assembles the local load.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4d71d8b5925ca43cde29663e65900b34" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">std::size_t trial,
-              std::size_t test) -&gt; <a href="#aa03555b90a716baf6922955960a4bf2f" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad02a55ad5d67f11ac55a049c8a0e6baf" class="m-doc">integrate</a>(</span><span class="m-doc-wrap">std::size_t local) -&gt; <a href="#ada32025f6754e15e87b32d9aed396d47" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
             </dt>
             <dd>Returns an entry of the assembled local system.</dd>
             <dt>
@@ -155,64 +154,64 @@
             </dt>
             <dd>Returns the integration region.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2286b54bbf3c037b4485fd65f4d64cfc" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_metric.html" class="m-doc">WNGIRPrimalBarrierMetric</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af684b4d7d13c4fc05c7abf1bb0dbcbd1" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_force.html" class="m-doc">HingeForce</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Clones this object.</dd>
+            <dd>Clones this integrator.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a9d77a798a807b766ff6a0451a6e97cc0"><div>
+          <section class="m-doc-details" id="a898f2b095698f06d27e5dc76d7097322"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction, class Displacement&gt;
+                template&lt;class TestFunction, class Displacement&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierMetric&lt;TrialFunction, TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d77a798a807b766ff6a0451a6e97cc0" class="m-doc-self">WNGIRPrimalBarrierMetric</a>(</span><span class="m-doc-wrap">const TrialFunction&amp; du,
-              const TestFunction&amp; z,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a898f2b095698f06d27e5dc76d7097322" class="m-doc-self">HingeForce</a>(</span><span class="m-doc-wrap">const TestFunction&amp; z,
               const Displacement&amp; current,
               const Displacement&amp; inner,
-              const <a href="struct_rodin_1_1_adaptation_1_1_w_n_g_i_r_parameters.html" class="m-doc">WNGIRParameters</a>&amp; parameters,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> barrierCoefficient)</span></span>
+              const Displacement&amp; predictor,
+              const <a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> hingeCoefficient)</span></span>
             </h3>
-            <p>Constructs the w n g i r primal barrier metric.</p>
+            <p>Constructs the affine quadratic hinge load.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">du</td>
-                  <td>Function operand.</td>
-                </tr>
-                <tr>
-                  <td>z</td>
-                  <td>Function operand.</td>
+                  <td style="width: 1%">z</td>
+                  <td>Test function for the displacement increment.</td>
                 </tr>
                 <tr>
                   <td>current</td>
-                  <td>Current displacement field.</td>
+                  <td>Frozen outer displacement.</td>
                 </tr>
                 <tr>
                   <td>inner</td>
-                  <td>Inner displacement field.</td>
+                  <td>Current inner displacement increment.</td>
+                </tr>
+                <tr>
+                  <td>predictor</td>
+                  <td>Frozen directionally scaled predictor.</td>
                 </tr>
                 <tr>
                   <td>parameters</td>
-                  <td>Parameters configuring the operation.</td>
+                  <td>Quality budgets and hinge activation weights.</td>
                 </tr>
                 <tr>
-                  <td>barrierCoefficient</td>
-                  <td>Coefficient multiplying the determinant barrier.</td>
+                  <td>hingeCoefficient</td>
+                  <td>Effective hinge coefficient for this outer model.</td>
                 </tr>
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a6f3ca272546bbc862c08cde4cdbbbc40"><div>
+          <section class="m-doc-details" id="abc5f58fd69f6be8811225d73f4a5fadd"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction, class Displacement&gt;
+                template&lt;class TestFunction, class Displacement&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierMetric&lt;TrialFunction, TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f3ca272546bbc862c08cde4cdbbbc40" class="m-doc-self">WNGIRPrimalBarrierMetric</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_metric.html" class="m-doc">WNGIRPrimalBarrierMetric</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abc5f58fd69f6be8811225d73f4a5fadd" class="m-doc-self">HingeForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_force.html" class="m-doc">HingeForce</a>&amp; other) <span class="m-label m-info">defaulted</span></span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -222,7 +221,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td>Object to copy from.</td>
+                  <td>Integrator to copy, retaining its field references.</td>
                 </tr>
               </tbody>
             </table>
@@ -230,9 +229,9 @@
           <section class="m-doc-details" id="a07a0ed42183d01cb7d7a5e5edf3caba3"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction, class Displacement&gt;
+                template&lt;class TestFunction, class Displacement&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierMetric&lt;TrialFunction, TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Returns the current polytope.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -244,14 +243,14 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a33ce11956a257d8c00974cdf20f216f6"><div>
+          <section class="m-doc-details" id="a0faa0b49281b9fbf75e5c080ab32b55d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction, class Displacement&gt;
+                template&lt;class TestFunction, class Displacement&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_metric.html" class="m-doc">WNGIRPrimalBarrierMetric</a>&amp; Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierMetric&lt;TrialFunction, TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33ce11956a257d8c00974cdf20f216f6" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_force.html" class="m-doc">HingeForce</a>&amp; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0faa0b49281b9fbf75e5c080ab32b55d" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) <span class="m-label m-warning">final</span></span></span>
             </h3>
-            <p>Binds to a polytope and assembles the local system.</p>
+            <p>Binds to a polytope and assembles the local load.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -259,24 +258,23 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">polytope</td>
-                  <td>Mesh entity used by this operation.</td>
+                  <td>Cell to integrate.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Reference to this object after the operation.</td>
+                  <td>This integrator after binding and assembly.</td>
                 </tr>
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a4d71d8b5925ca43cde29663e65900b34"><div>
+          <section class="m-doc-details" id="ad02a55ad5d67f11ac55a049c8a0e6baf"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction, class Displacement&gt;
+                template&lt;class TestFunction, class Displacement&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#aa03555b90a716baf6922955960a4bf2f" class="m-doc">ScalarType</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierMetric&lt;TrialFunction, TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d71d8b5925ca43cde29663e65900b34" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">std::size_t trial,
-              std::size_t test) <span class="m-label m-warning">final</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ada32025f6754e15e87b32d9aed396d47" class="m-doc">ScalarType</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad02a55ad5d67f11ac55a049c8a0e6baf" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">std::size_t local) <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Returns an entry of the assembled local system.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -285,12 +283,8 @@
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">trial</td>
-                  <td>Local trial basis index.</td>
-                </tr>
-                <tr>
-                  <td>test</td>
-                  <td>Local test basis index.</td>
+                  <td style="width: 1%">local</td>
+                  <td>Index in the local numbering.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -304,9 +298,9 @@
           <section class="m-doc-details" id="aba6371885ea424dd84df03d85fcb0706"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction, class Displacement&gt;
+                template&lt;class TestFunction, class Displacement&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierMetric&lt;TrialFunction, TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span></span></span>
             </h3>
             <p>Returns the integration region.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -318,19 +312,19 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a2286b54bbf3c037b4485fd65f4d64cfc"><div>
+          <section class="m-doc-details" id="af684b4d7d13c4fc05c7abf1bb0dbcbd1"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class TrialFunction, class TestFunction, class Displacement&gt;
+                template&lt;class TestFunction, class Displacement&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_primal_barrier_metric.html" class="m-doc">WNGIRPrimalBarrierMetric</a>* Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRPrimalBarrierMetric&lt;TrialFunction, TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2286b54bbf3c037b4485fd65f4d64cfc" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_hinge_force.html" class="m-doc">HingeForce</a>* Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />HingeForce&lt;TestFunction, Displacement&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af684b4d7d13c4fc05c7abf1bb0dbcbd1" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Clones this object.</p>
+            <p>Clones this integrator.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                  <td>Newly allocated copy owned by the caller.</td>
                 </tr>
               </tfoot>
             </table>

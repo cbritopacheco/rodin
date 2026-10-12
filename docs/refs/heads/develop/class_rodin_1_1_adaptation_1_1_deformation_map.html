@@ -367,17 +367,17 @@ $\Phi(x)=x+u(x)$
               <tbody>
                 <tr>
                   <td style="width: 1%">ip</td>
-                  <td>Integration point on the reference configuration; its polytope and quadrature index form the cache key.</td>
+                  <td>Integration point on the reference configuration; its polytope, quadrature formula and quadrature index form the cache key.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>The moved point.</td>
+                  <td>Located point in the deformed configuration.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Cached: consecutive calls with the same polytope and quadrature index return the previously located point without repeating the search.</p>
+<p>Cached: consecutive calls with the same polytope, quadrature formula and quadrature index return the previously located point. Generic pointwise evaluations have no quadrature identity and are not cached.</p>
           </div></section>
         </section>
       </div>

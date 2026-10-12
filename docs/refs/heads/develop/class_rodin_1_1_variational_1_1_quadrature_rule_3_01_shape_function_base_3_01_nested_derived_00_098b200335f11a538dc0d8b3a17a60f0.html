@@ -119,7 +119,7 @@
 <use x='204.560425' y='-10.793007' xlink:href='#eq1-g2-100'/>
 <use x='210.643117' y='-10.793007' xlink:href='#eq1-g2-120'/>
 </g>
-</svg></div><p>or a more general integrand of the same expression-template type.</p>
+</svg></div><p>or a more general integrand of the same expression-template type.</p><aside class="m-note m-default"><h4>Architecture</h4><p>The rule owns its mapped quadrature and the integration-point context borrowed by its expression tree. The context is updated in place between samples and cell binds; a move transfers its stable address. Copies are unbound and construct an independent context on their first bind.</p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

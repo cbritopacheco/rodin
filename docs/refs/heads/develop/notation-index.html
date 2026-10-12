@@ -1126,7 +1126,7 @@ $ c $
 <g id='eq66-page1'>
 <use x='0' y='0' xlink:href='#eq66-g0-99'/>
 </g>
-</svg> nor the trial function is conjugated. An explicit <code>Conjugate</code> expression may be used when a different mathematical form is required.</p><p>Eigen expresses the assembled action as <code>v.dot(A * u)</code>, and PETSc expresses it as <code>VecDot(v, A * u)</code>. Both backend functions conjugate their first operand, producing the same <svg class="m-math" style="width: 2.944em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 28.264822 8.169366">
+</svg> nor the trial function is conjugated. An explicit <code>Conjugate</code> expression may be used when a different mathematical form is required.</p><p>Eigen expresses the assembled action as <code>v.dot(A * u)</code>, and PETSc expresses it as <code>VecDot(A * u, v)</code>. Eigen conjugates its first operand, whereas PETSc conjugates its second operand. The differing argument orders produce the same <svg class="m-math" style="width: 2.944em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 28.264822 8.169366">
 <title>
 $ \mathbf{v}^* A \mathbf{u} $
 </title>

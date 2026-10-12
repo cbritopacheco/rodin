@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Adaptation::Detail::WNGIRSurfaceForceCoefficient class | Rodin</title>
+  <title>Rodin::Adaptation::SWIFT::FittingForce class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -76,7 +76,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_detail.html">Detail</a>::<wbr/></span>WNGIRSurfaceForceCoefficient <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>FittingForce <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>Negative first-variation coefficient of the robust interface energy.</p>
         <nav class="m-block m-default">
@@ -98,7 +98,7 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;Real, WNGIRSurfaceForceCoefficient&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;&gt;</a>
+              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase&lt;Real, FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;&gt;</a>
             </dt>
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
           </dl>
@@ -114,8 +114,8 @@
               using <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Range (evaluation value) type.</dd>
-            <dt id="a1b6a307f3798888bafbd36f50ee1c568">
-              using <a href="#a1b6a307f3798888bafbd36f50ee1c568" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_surface_force_coefficient.html" class="m-doc">WNGIRSurfaceForceCoefficient</a>&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;&gt;
+            <dt id="a8fcca051abb8a8ef01c71324b9693fe5">
+              using <a href="#a8fcca051abb8a8ef01c71324b9693fe5" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Variational::<wbr />VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html" class="m-doc">FittingForce</a>&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="ae66af3353f74105ab2520183cee7a10e">
@@ -132,17 +132,17 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a4689370816ffe78c519419fe04c0578c" class="m-doc">WNGIRSurfaceForceCoefficient</a>(</span><span class="m-doc-wrap">const <a href="#ae66af3353f74105ab2520183cee7a10e" class="m-doc">PhiType</a>&amp; phi,
+              <span class="m-doc-wrap-bumper"><a href="#a7cd2e04f1788a11850e992e446b71d7b" class="m-doc">FittingForce</a>(</span><span class="m-doc-wrap">const <a href="#ae66af3353f74105ab2520183cee7a10e" class="m-doc">PhiType</a>&amp; phi,
               const <a href="#a1280d0b23415d003ac43144770628a32" class="m-doc">GradType</a>&amp; grad,
               const Displacement&amp; current,
               const LocatorType&amp; locator,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> sigma2,
+              const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_loss.html" class="m-doc">Loss</a>&amp; loss,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> normalization,
               std::size_t dimension)</span>
             </dt>
-            <dd>Constructs the WNGIR surface force coefficient.</dd>
+            <dd>Constructs the robust fitting force coefficient.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a68cba5053aded159536fd11bb2814698" class="m-doc">WNGIRSurfaceForceCoefficient</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_surface_force_coefficient.html" class="m-doc">WNGIRSurfaceForceCoefficient</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a02b42a74d643b8998d17bcb03860811a" class="m-doc">FittingForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html" class="m-doc">FittingForce</a>&amp; other)</span>
             </dt>
             <dd>Copy constructor.</dd>
           </dl>
@@ -163,27 +163,27 @@
             </dt>
             <dd>Reports no intrinsic polynomial order.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1e5b856d55b65243907999879d5850f5" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_surface_force_coefficient.html" class="m-doc">WNGIRSurfaceForceCoefficient</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3c3191a65529002f4227be8235f4bca3" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html" class="m-doc">FittingForce</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Polymorphically copies the derived function.</dd>
+            <dd>Clones this coefficient.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a4689370816ffe78c519419fe04c0578c"><div>
+          <section class="m-doc-details" id="a7cd2e04f1788a11850e992e446b71d7b"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRSurfaceForceCoefficient&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4689370816ffe78c519419fe04c0578c" class="m-doc-self">WNGIRSurfaceForceCoefficient</a>(</span><span class="m-doc-wrap">const <a href="#ae66af3353f74105ab2520183cee7a10e" class="m-doc">PhiType</a>&amp; phi,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7cd2e04f1788a11850e992e446b71d7b" class="m-doc-self">FittingForce</a>(</span><span class="m-doc-wrap">const <a href="#ae66af3353f74105ab2520183cee7a10e" class="m-doc">PhiType</a>&amp; phi,
               const <a href="#a1280d0b23415d003ac43144770628a32" class="m-doc">GradType</a>&amp; grad,
               const Displacement&amp; current,
               const LocatorType&amp; locator,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> sigma2,
+              const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_loss.html" class="m-doc">Loss</a>&amp; loss,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> normalization,
               std::size_t dimension)</span></span>
             </h3>
-            <p>Constructs the WNGIR surface force coefficient.</p>
+            <p>Constructs the robust fitting force coefficient.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -191,11 +191,11 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">phi</td>
-                  <td>Observation field.</td>
+                  <td>Target level set.</td>
                 </tr>
                 <tr>
                   <td>grad</td>
-                  <td>Gradient of the observation field.</td>
+                  <td>Gradient of the target level set.</td>
                 </tr>
                 <tr>
                   <td>current</td>
@@ -203,15 +203,15 @@
                 </tr>
                 <tr>
                   <td>locator</td>
-                  <td>Point locator used to find mesh entities.</td>
+                  <td>Locator for deformed evaluation points.</td>
                 </tr>
                 <tr>
-                  <td>sigma2</td>
-                  <td>Variance used to scale the observation residual.</td>
+                  <td>loss</td>
+                  <td>Robust residual loss.</td>
                 </tr>
                 <tr>
                   <td>normalization</td>
-                  <td>Normalization factor.</td>
+                  <td>Fixed gradient-scale normalization.</td>
                 </tr>
                 <tr>
                   <td>dimension</td>
@@ -220,12 +220,12 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a68cba5053aded159536fd11bb2814698"><div>
+          <section class="m-doc-details" id="a02b42a74d643b8998d17bcb03860811a"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRSurfaceForceCoefficient&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68cba5053aded159536fd11bb2814698" class="m-doc-self">WNGIRSurfaceForceCoefficient</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_surface_force_coefficient.html" class="m-doc">WNGIRSurfaceForceCoefficient</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a02b42a74d643b8998d17bcb03860811a" class="m-doc-self">FittingForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html" class="m-doc">FittingForce</a>&amp; other)</span></span>
             </h3>
             <p>Copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -235,7 +235,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td>Object to copy from.</td>
+                  <td>Coefficient to copy, cloning its target expressions.</td>
                 </tr>
               </tbody>
             </table>
@@ -245,7 +245,7 @@
               <div class="m-doc-template">
                 template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a> Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRSurfaceForceCoefficient&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2cf7231deca5d00bdaddf77168dca3a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">Variational::<wbr />IntegrationPoint</a>&amp; ip) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2cf7231deca5d00bdaddf77168dca3a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">Variational::<wbr />IntegrationPoint</a>&amp; ip) const</span></span>
             </h3>
             <p>Evaluates the coefficient at a point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -271,7 +271,7 @@
               <div class="m-doc-template">
                 template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::size_t Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRSurfaceForceCoefficient&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70c730dbc037bcdddbe14d018c6e4165" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">std::size_t Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70c730dbc037bcdddbe14d018c6e4165" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Dimension of the vector value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -288,7 +288,7 @@
               <div class="m-doc-template">
                 template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRSurfaceForceCoefficient&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1277221b2d1c2fcb12361d7957fbb9c5" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;std::size_t&gt; Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1277221b2d1c2fcb12361d7957fbb9c5" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Reports no intrinsic polynomial order.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -309,19 +309,19 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a1e5b856d55b65243907999879d5850f5"><div>
+          <section class="m-doc-details" id="a3c3191a65529002f4227be8235f4bca3"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class PhiDerived, class GradDerived, class Displacement, class LocatorType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_detail_1_1_w_n_g_i_r_surface_force_coefficient.html" class="m-doc">WNGIRSurfaceForceCoefficient</a>* Rodin::<wbr />Adaptation::<wbr />Detail::<wbr />WNGIRSurfaceForceCoefficient&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1e5b856d55b65243907999879d5850f5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_fitting_force.html" class="m-doc">FittingForce</a>* Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />FittingForce&lt;PhiDerived, GradDerived, Displacement, LocatorType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c3191a65529002f4227be8235f4bca3" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Polymorphically copies the derived function.</p>
+            <p>Clones this coefficient.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to a newly allocated copy; the caller owns the returned object.</td>
+                  <td>Newly allocated copy owned by the caller.</td>
                 </tr>
               </tfoot>
             </table>

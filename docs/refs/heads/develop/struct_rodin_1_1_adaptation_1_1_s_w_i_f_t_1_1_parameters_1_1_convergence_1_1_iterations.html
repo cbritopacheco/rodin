@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Adaptation::WNGIR::SurfaceState struct | Rodin</title>
+  <title>Rodin::Adaptation::SWIFT::Parameters::Convergence::Iterations struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,9 +75,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_adaptation_1_1_w_n_g_i_r.html">WNGIR</a>::<wbr/></span>SurfaceState <span class="m-thin">struct</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span><span class="m-breadcrumb"><a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters.html">Parameters</a>::<wbr/></span><span class="m-breadcrumb"><a href="struct_rodin_1_1_adaptation_1_1_s_w_i_f_t_1_1_parameters_1_1_convergence.html">Convergence</a>::<wbr/></span>Iterations <span class="m-thin">struct</span>
         </h1>
-        <p>Interface-fit summary of a displacement.</p>
+        <p>Independent limits for fitting, Newton, linear solves and searches.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -92,26 +92,26 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="a6ccecf169e044f4f450c9464a7b78234">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a6ccecf169e044f4f450c9464a7b78234" class="m-doc-self">energy</a>
+            <dt id="ae9cb9e692e3597404b5aba564de06cee">
+              std::size_t <a href="#ae9cb9e692e3597404b5aba564de06cee" class="m-doc-self">outer</a>
             </dt>
-            <dd>Robust energy of the interface residual.</dd>
-            <dt id="aa64f6fe2d7a11141ea237c11ec7c9d87">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#aa64f6fe2d7a11141ea237c11ec7c9d87" class="m-doc-self">activeLen</a>
+            <dd>Maximum outer fitting iterations.</dd>
+            <dt id="a82374a8d2078b5b47831fb8401c5ec06">
+              std::size_t <a href="#a82374a8d2078b5b47831fb8401c5ec06" class="m-doc-self">inner</a>
             </dt>
-            <dd>Measure carrying a non-negligible robust weight.</dd>
-            <dt id="a0d81b18e05ca4402054b58fd0fff1ce2">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a0d81b18e05ca4402054b58fd0fff1ce2" class="m-doc-self">totalLen</a>
+            <dd>Maximum Newton corrections per outer iteration.</dd>
+            <dt id="a0d27191dc995b2d82c5c556e338acdd6">
+              std::size_t <a href="#a0d27191dc995b2d82c5c556e338acdd6" class="m-doc-self">linear</a>
             </dt>
-            <dd>Measure of the whole interface.</dd>
-            <dt id="a7b9a84907ecb774b2f296effc9a13279">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a7b9a84907ecb774b2f296effc9a13279" class="m-doc-self">activeRMS</a>
+            <dd>Maximum iterations per CG solve only.</dd>
+            <dt id="af160ddacc7b8f271fdc4773c5253243f">
+              std::size_t <a href="#af160ddacc7b8f271fdc4773c5253243f" class="m-doc-self">backtracks</a>
             </dt>
-            <dd>Root-mean-square residual over the active part.</dd>
-            <dt id="a7b3d807fbe8df2748e2a425cf8ec75b1">
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a7b3d807fbe8df2748e2a425cf8ec75b1" class="m-doc-self">activeSup</a>
+            <dd>Maximum outer trial halvings.</dd>
+            <dt id="acb95bb1630f49eed8c0f62fb76ad3dc8">
+              std::size_t <a href="#acb95bb1630f49eed8c0f62fb76ad3dc8" class="m-doc-self">stagnation</a>
             </dt>
-            <dd>Supremum residual over the active part.</dd>
+            <dd>Consecutive small steps or energy changes.</dd>
           </dl>
         </section>
       </div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Adaptation::WNGIRLoss class | Rodin</title>
+  <title>Rodin::Adaptation::SWIFT::Loss class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -75,9 +75,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>WNGIRLoss <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation_1_1_s_w_i_f_t.html">SWIFT</a>::<wbr/></span>Loss <span class="m-thin">class</span>
         </h1>
-        <p>Fixed-scale Welsch loss and its consistent IRLS weight.</p>
+        <p>Fixed-scale Welsch loss with consistent influence and curvature.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -126,12 +126,12 @@ $\rho&#x27;(r)=w(r)r$
 <use x='58.126576' y='0' xlink:href='#eq2-g2-41'/>
 <use x='62.678902' y='0' xlink:href='#eq2-g1-114'/>
 </g>
-</svg>. The same loss is used by the objective, first variation, and observation metric throughout one nonlinear solve.</p>
+</svg>. The same loss is used by the objective, first variation, and directional curvature throughout one nonlinear solve. The canonical observation metric is unweighted squared-fit curvature.</p>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a28af304d69e139f5532422dcdb02aec7" class="m-doc">WNGIRLoss</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> scale) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a6e3e891a680296bd338f1c0e26309940" class="m-doc">Loss</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> scale) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs a Welsch loss with positive scale.</dd>
           </dl>
@@ -139,6 +139,10 @@ $\rho&#x27;(r)=w(r)r$
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7a2d1cefb7dd7583ee8182b22ea41bab" class="m-doc">getScaleSquared</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the squared robust residual scale.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a3307c70dd2435dce243f76b94d1b300b" class="m-doc">getValue</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> residual) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
@@ -162,7 +166,7 @@ $\rho(r)$
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac01610c6c697e01d413309b3d7f68d88" class="m-doc">getWeight</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> residual) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Evaluates the Welsch weight <svg class="m-math" style="width: 7.722em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 74.132366 11.955168">
+            <dd>Evaluates the weight <svg class="m-math" style="width: 7.722em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 74.132366 11.955168">
 <title>
 $w(r)=\rho&#x27;(r)/r$
 </title>
@@ -213,13 +217,17 @@ $\rho&#x27;(r)$
 <use x='18.985601' y='0' xlink:href='#eq5-g2-41'/>
 </g>
 </svg>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0807de4b5b57ef20e894fdbc6ca4b4d2" class="m-doc">getCurvature</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> residual) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Second derivative in the scalar residual, without level-set Hessian.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a28af304d69e139f5532422dcdb02aec7"><div>
+          <section class="m-doc-details" id="a6e3e891a680296bd338f1c0e26309940"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />WNGIRLoss::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a28af304d69e139f5532422dcdb02aec7" class="m-doc-self">WNGIRLoss</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> scale) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Loss::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e3e891a680296bd338f1c0e26309940" class="m-doc-self">Loss</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> scale) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Constructs a Welsch loss with positive scale.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -234,9 +242,23 @@ $\rho&#x27;(r)$
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a7a2d1cefb7dd7583ee8182b22ea41bab"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Loss::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7a2d1cefb7dd7583ee8182b22ea41bab" class="m-doc-self">getScaleSquared</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the squared robust residual scale.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The fixed squared scale.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a3307c70dd2435dce243f76b94d1b300b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />WNGIRLoss::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3307c70dd2435dce243f76b94d1b300b" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> residual) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Loss::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3307c70dd2435dce243f76b94d1b300b" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> residual) const</span></span>
             </h3>
             <p>Evaluates <svg class="m-math" style="width: 2.161em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 20.742851 11.955168">
 <title>
@@ -262,22 +284,22 @@ $\rho(r)$
               <tbody>
                 <tr>
                   <td style="width: 1%">residual</td>
-                  <td>Residual to evaluate.</td>
+                  <td>Signed level-set residual.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Value of the expression at the supplied evaluation point.</td>
+                  <td>The Welsch loss value.</td>
                 </tr>
               </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="ac01610c6c697e01d413309b3d7f68d88"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />WNGIRLoss::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac01610c6c697e01d413309b3d7f68d88" class="m-doc-self">getWeight</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> residual) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Loss::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac01610c6c697e01d413309b3d7f68d88" class="m-doc-self">getWeight</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> residual) const</span></span>
             </h3>
-            <p>Evaluates the Welsch weight <svg class="m-math" style="width: 7.722em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 74.132366 11.955168">
+            <p>Evaluates the weight <svg class="m-math" style="width: 7.722em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 74.132366 11.955168">
 <title>
 $w(r)=\rho&#x27;(r)/r$
 </title>
@@ -313,20 +335,20 @@ $w(r)=\rho&#x27;(r)/r$
               <tbody>
                 <tr>
                   <td style="width: 1%">residual</td>
-                  <td>Residual to evaluate.</td>
+                  <td>Signed level-set residual.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>The weight.</td>
+                  <td>The robust influence weight, including its limit at zero.</td>
                 </tr>
               </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="ad0fd424f1ad53deaa61820a730e9a93b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />WNGIRLoss::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0fd424f1ad53deaa61820a730e9a93b" class="m-doc-self">getInfluence</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> residual) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Loss::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad0fd424f1ad53deaa61820a730e9a93b" class="m-doc-self">getInfluence</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> residual) const</span></span>
             </h3>
             <p>Evaluates the influence <svg class="m-math" style="width: 2.452em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 23.537927 11.955168">
 <title>
@@ -361,6 +383,29 @@ $\rho&#x27;(r)$
                 <tr>
                   <th>Returns</th>
                   <td>The influence.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0807de4b5b57ef20e894fdbc6ca4b4d2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Adaptation::<wbr />SWIFT::<wbr />Loss::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0807de4b5b57ef20e894fdbc6ca4b4d2" class="m-doc-self">getCurvature</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> residual) const</span></span>
+            </h3>
+            <p>Second derivative in the scalar residual, without level-set Hessian.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">residual</td>
+                  <td>Signed level-set residual.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The scalar Welsch curvature, which may be negative.</td>
                 </tr>
               </tfoot>
             </table>
