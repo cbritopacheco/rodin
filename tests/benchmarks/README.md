@@ -75,6 +75,83 @@ operation. Correctness regressions remain in unit/manufactured/convergence
 suites; benchmark numerical guards and separately instrumented source coverage
 do not replace convergence certification.
 
+## Hierarchical profiling ledger
+
+Benchmark availability, numerical qualification, repeatable measurement and
+source profiling are separate deliverables. Registration counts are not a
+percentage of this workplan. A row is complete only when its applicable cases
+have qualified numerical guards, controlled measurements, attributed profiles,
+and consumer-level confirmation of any repaired hotspot. The existing
+pre-NAFEMS convergence certification is a correctness foundation, not evidence
+that this performance matrix has been profiled.
+
+| Layer / owning module | Available measurement | Remaining qualification or isolation |
+| --- | --- | --- |
+| Spatial values / Math | Real/complex vector, matrix and tensor arithmetic; spatial dot | Consumer attribution beyond the qualified dot repair; controlled scaling baselines |
+| Reference metadata / Geometry | Topology, connectivity and reference transformation consumers | Isolated metadata access, embedding and shape-dependent work accounting |
+| Reference elements / Variational | Scalar P0/P0g/P1 and H1 degrees 1–6; values, derivatives, prefetched descriptors | Vector/matrix component expansion, DOF functionals and first-use initialization |
+| Reference quadrature / QF | Dispatcher lookup and numerical sweep; reference-element cache hit/rebuild | Owned rule construction, cold allocation, eviction order and high-order fallback profiles |
+| Transformations / Geometry | Pointwise/bulk Jacobians; pointwise map consumer profiles | Independent geometry degree, curvature, embeddings and inverse-map stage matrix |
+| Mapped points / Geometry | Consumer profiles from field and assembly operations | Isolated construction, lazy coordinates, inverse Jacobian, distortion and rebinding |
+| Space setup / Variational, MPI | P1 construction and distributed construction | P0/P0g/H1 setup, DOF lookup/restriction, reconciliation and degree scaling |
+| Fields / Variational | Interpolation and true mass projection; 1,008 native and OpenMP selections qualified | P0/P0g, higher degrees, vector/matrix evaluation, norms and boundary restriction |
+| Expressions / Variational | Generic expressions, coefficients and named forms | Cold expression construction, binding, changes of state and complete range/backend matrix |
+| Local integrators / Variational | Volume entry kernels and reference-loop comparisons | Boundary/interface kernels; mixed blocks and nonlinear residual/tangent stages |
+| Operator setup / Assembly | Public repeated assembly and sequential stage scopes | Sparsity discovery, allocation and replacement separated from kernels |
+| Scatter / Assembly, PETSc | Sequential triplets; complete native/PETSc insertion consumers | Isolated OpenMP buffers/merge, PETSc insertion and ownership-dependent MPI work |
+| Constraints and completion / Assembly, PETSc | Constrained scalar assembly and fixed-system solves | Vector/mixed constraints, identification, finalization and communication attribution |
+| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson | Helmholtz, coupled reaction–diffusion, Stokes, boundary variants and remaining degrees/backends |
+| Solvers / Solver, PETSc | Fixed-system constrained solves; projection CG profile | Setup versus iteration/factorization, mixed systems, backend scaling and memory |
+| Complete workflows / owning modules | Consumer-level interpolation/projection and assembly profiles | Matched setup/assembly/solve/postprocessing accounting across physical contexts |
+
+The required axes are scalar field (real/complex), supported scalar/vector/matrix
+range, P0/P0g/P1 and H1 degrees 1–6, reference-cell family, field and geometry
+degree, embedding dimension, and native/OpenMP/PETSc/MPI execution. Applicability
+is mathematical: point cells do not have reference derivative sweeps, global
+constants do not support diffusion solves, and Taylor–Hood requires a stable
+mixed pair. Unsupported Cartesian products are not missing measurements.
+At least three sizes are required for mesh-based scaling; reference-element
+sweeps instead use three quadrature orders. Cold/warm cache state and changing
+coefficient state are distinct experiments. Darcy and NAFEMS remain deferred.
+
+For a sample count $N_q$, basis count $N_b$ and reference dimension $d$,
+value and derivative sweeps write $N_qN_b$ and $dN_qN_b$ scalar entries,
+respectively. Timings are reported alongside these counts, not interpreted as
+dimension costs in isolation. Assembly additionally records cells, global DOFs,
+local entry count and nonzeros; solver comparisons retain residuals and iteration
+counts. A before/after repair must preserve the numerical observations and be
+checked in its consuming operation, not only in an isolated microbenchmark.
+
+### Scalar reference-element protocol
+
+`RodinReferenceElementBenchmarks` measures all eight reference geometries for
+real/complex P0, P0g, P1 and H1 degrees 1–6 at orders 2, 4 and 8. The two derivative
+sweeps are omitted on points, leaving 2,484 registrations. P0/P0g use the common
+reference-table utility explicitly; this does not imply that their production
+integrators consume that cache. Direct and prefetched output entries are compared
+exactly. An independent affine/constant reproduction check applies each family's
+public DOF functionals instead of assuming that coefficients are nodal values.
+
+`Values` and `Derivatives` include descriptor lookup in the sample loop;
+`PrefetchedValues` and `PrefetchedDerivatives` exclude that lookup.
+`WarmTable` measures lookup alone. `CapacityWarmMiss` cycles nine formula
+identities through the eight-slot cache after allocation warmup: it measures
+rebuilding, not process-cold initialization. The cache-hit case is warmed after
+the eviction sequence. Output buffers, input formulas and reference guards are
+outside timing. Derivative tables include reference derivatives, not mapped ones.
+The untimed miss protocol verifies absence by logical formula identity before
+each rebuild. Complex reconstruction uses a nonzero imaginary amplitude.
+Warm lookup costs depend on cache-slot history; isolated process selections
+must be used for matched comparisons rather than interpreting a full-suite
+lookup ramp as geometry-dependent work.
+
+```sh
+cmake --build build --target RodinReferenceElementBenchmarks -j1
+build/tests/benchmarks/RodinReferenceElementBenchmarks \
+  --benchmark_filter='ReferenceElement/P1/Real/(Values|PrefetchedValues)/Pyramid/8/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+```
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`

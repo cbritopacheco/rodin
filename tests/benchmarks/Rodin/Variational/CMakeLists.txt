@@ -25,3 +25,7 @@ target_link_libraries(RodinQuadratureExpressionBenchmarks PRIVATE
 add_executable(RodinFieldOperationBenchmarks EXCLUDE_FROM_ALL FieldOperations.cpp)
 target_link_libraries(RodinFieldOperationBenchmarks PRIVATE
   Rodin::Variational Rodin::Solver benchmark::benchmark)
+
+add_executable(RodinReferenceElementBenchmarks EXCLUDE_FROM_ALL ReferenceElement.cpp)
+target_link_libraries(RodinReferenceElementBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
