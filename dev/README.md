@@ -23,6 +23,8 @@ test executes remain in the denominator. Tests, benchmarks,
 examples, library-side test helpers (`src/Rodin/Test/`), and dependencies
 may execute production code but never enter the
 coverage denominator. The regular and slow CI reports are merged by Codecov.
+Optimized optional-backend unit jobs also save audited production coverage
+artifacts in GitHub Actions for inspection and offline merging.
 
 ```sh
 cmake --build build --target RodinCoverage

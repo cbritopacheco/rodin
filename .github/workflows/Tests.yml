@@ -1000,9 +1000,13 @@ jobs:
       fail-fast: false
 
     env:
-      MAKEFLAGS: "-j2"
+      # Instrumented SWIFT compilations exceeded 6 GiB with two compiler processes.
+      MAKEFLAGS: ${{ matrix.build_type == 'Release' && matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && '-j1' || '-j2' }}
       OMP_NUM_THREADS: 2
       CTEST_PARALLEL_LEVEL: 2
+      GCOV: gcov-14
+      # Collect optional-backend coverage in the optimized, unsanitized runs.
+      RODIN_COVERAGE: ${{ matrix.build_type == 'Release' && matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && 'ON' || 'OFF' }}
       # A standalone Ubuntu/Open MPI repro reports PMIx leaks under ASan even
       # without MUMPS, including when MPI_Finalize is called. Keep MUMPS out
       # of ASan jobs while testing it under UBSan and the SuiteSparse solvers
@@ -1099,7 +1103,8 @@ jobs:
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_UNIT_TESTS=ON
           -DRODIN_BUILD_MANUFACTURED_TESTS=ON
-          -DRODIN_CODE_COVERAGE=OFF
+          -DRODIN_CODE_COVERAGE=${{ env.RODIN_COVERAGE }}
+          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
 
       - name: Build
@@ -1152,6 +1157,22 @@ jobs:
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow -R '^RodinMPIAssemblyGeometrySlowTest_np(1|2|3|4|8)_(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)$'
           --rerun-failed -V --output-on-failure
+
+      - name: Capture optional-backend production coverage
+        if: env.RODIN_COVERAGE == 'ON'
+        run: |
+          cmake --build build --target RodinCoverage
+          python3 dev/audit_coverage.py build/RodinCoverage.info --output build/coverage-audit.json
+
+      - name: Save optional-backend coverage audit
+        if: env.RODIN_COVERAGE == 'ON'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-audit-optional-mt${{ matrix.multithreaded }}
+          path: |
+            build/coverage-audit.json
+            build/RodinCoverage.info
+
 
   Manufactured:
     runs-on: ubuntu-latest
