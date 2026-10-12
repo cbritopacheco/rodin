@@ -16,7 +16,8 @@ tests/benchmarks/
 │   ├── QF/                     Reference quadrature
 │   ├── Geometry/               Meshes, connectivity and transformations
 │   ├── Variational/
-│   │   └── P1/                 P1-specific space operations
+│   │   ├── P1/                 P1-specific space operations
+│   │   └── H1/                 High-order reference kernels
 │   ├── Location/               AABB construction and queries
 │   ├── IO/                     Mesh loading
 │   ├── Assembly/               Local/global assembly and physical workloads
@@ -94,7 +95,7 @@ that this performance matrix has been profiled.
 | Transformations / Geometry | Pointwise/bulk Jacobians; pointwise map consumer profiles | Independent geometry degree, curvature, embeddings and inverse-map stage matrix |
 | Mapped points / Geometry | Consumer profiles from field and assembly operations | Isolated construction, lazy coordinates, inverse Jacobian, distortion and rebinding |
 | Space setup / Variational, MPI | P1 construction and distributed construction | P0/P0g/H1 setup, DOF lookup/restriction, reconciliation and degree scaling |
-| Fields / Variational | Interpolation and true mass projection; 1,008 native and OpenMP selections qualified | P0/P0g, higher degrees, vector/matrix evaluation, norms and boundary restriction |
+| Fields / Variational | Interpolation and true mass projection; 1,008 native and OpenMP selections qualified; point/integration-point sweeps | P0/P0g, higher degrees, matrix evaluation, point cells, norms and boundary restriction |
 | Expressions / Variational | Generic expressions, coefficients and named forms | Cold expression construction, binding, changes of state and complete range/backend matrix |
 | Local integrators / Variational | Volume entry kernels and reference-loop comparisons | Boundary/interface kernels; mixed blocks and nonlinear residual/tangent stages |
 | Operator setup / Assembly | Public repeated assembly and sequential stage scopes | Sparsity discovery, allocation and replacement separated from kernels |
@@ -158,6 +159,85 @@ The initialization diagnostic requires an unstripped binary and GNU/LLVM-style
 demangled `nm` output. It checks all 66 real/complex P1 descriptor objects and
 rejects runtime initialization guards; it is a logical binary-contract check,
 not a timing threshold or a replacement for numerical tests.
+
+### Field evaluation and pyramid attribution
+
+`RodinFieldOperationBenchmarks` additionally measures `PointEvaluation` and
+`IntegrationPointEvaluation`. The two scopes use P1 and H1 degrees one/two,
+real/complex scalar/vector ranges, all seven positive-dimensional geometries
+and grid sizes 3, 5 and 9: 504 additional selections, or 1,512 in total.
+Both sweep the same preconstructed mapped samples, coefficients and output
+buffers through the public `GridFunction::getValue` interface. Analytic field
+values and physical-coordinate caches are prepared outside timing. Sample
+construction, interpolation, assembly, solving and numerical checks are not
+timed. Changing coefficients while preserving sample identities is checked
+before timing, and a perturbed result must be rejected.
+
+The integration-point sweep carries formula provenance but visits successive
+points and cells; it is not a warm repeated-point cache-hit test. The point path
+uses structured component contractions where the element provides them, whereas
+the current integration-point cache constructs full range-valued basis entries.
+`point_evaluations`, `scalar_basis_evaluations_per_point` and
+`scalar_output_entries` make these different work counts visible. The scope is
+local field evaluation even in an OpenMP-enabled build, not parallel evaluation
+or distributed ghost synchronization.
+
+`RodinH1PyramidBenchmarks`, owned by `Variational/H1`, isolates index decoding,
+binomial coefficients, Bernstein values/derivatives and modal values/derivatives
+at degrees one through six. The four sampled scopes use quadrature orders 2, 4
+and 8; the two metadata scopes use their degree-dependent index sets, giving
+84 selections. These are intrinsic real kernels also consumed by complex fields.
+No nodal Vandermonde contraction, reference-table lookup, mesh or assembly is
+timed. They complement, rather than replace, the nodal reference-element and
+complete field-evaluation measurements. Mode indices and Bernstein arguments
+are read from runtime arrays exposed through compiler barriers, preventing
+compile-time loop bounds from folding metadata into precomputed outputs.
+Reported sweeps include those barriers, argument reads and output writes;
+they are not isolated instruction latencies.
+
+The independent oracle uses Pascal addition for binomial coefficients and
+polynomial powers for
+$B_i^n(t)=\binom{n}{i}t^i(1-t)^{n-i}$. For $q=1-z$, $a=x/q$ and $b=y/q$,
+the pyramid modal value is
+$B_i^{K-k}(a)B_j^{K-k}(b)B_k^K(z)$; reference derivatives are obtained by
+the chain rule. Sampled quadrature points are interior, so $q>0$. Mode triples
+are enumerated independently in layer order. Metadata is checked exactly;
+floating values use the stated dimensionless roundoff budget, with explicit
+perturbation rejection. Raw times must be interpreted alongside output counts.
+
+An optimized Apple LLVM 21 local measurement at H1 degree two and grid size
+five illustrates the required accounting. At order eight, triangle, hexahedron
+and pyramid sweeps visit 512, 8,000 and 18,048 points, with 6, 27 and 14 scalar
+basis functions per point. Scalar point evaluation measured approximately
+76, 199 and 1,190 ns per point, respectively, in five repetitions. Thus the
+roughly 554-fold pyramid/triangle sweep-time ratio combines 35.25-fold sample
+growth with approximately 15.7-fold per-point cost; neither ratio is a universal
+dimension penalty. An Instruments profile of the pyramid consumer attributed
+about 86% of selected CPU sample weight to modal evaluation, Bernstein factors,
+binomial coefficients and index decoding. Each nodal basis currently evaluates
+all $N_b$ modes independently, producing $N_b^2$ modal evaluations per point.
+This identifies a source-level reuse investigation, not a completed repair or
+an assembly/solver speedup. Warm reference-table consumers have a different
+cost model and must be profiled separately.
+
+The corresponding vector integration-point sweep measured about 3,773 ns per
+pyramid point versus 1,217 ns for vector point evaluation. Its profile placed
+about 79% of selected CPU sample weight in the same modal/Bernstein/index work.
+The integration-point path evaluates 42 component bases where the structured
+point path evaluates 14 scalar bases. This is a consumer-specific duplication,
+not evidence for slow mapping, MPI sharding or a solver bottleneck. Profile
+percentages describe selected source CPU samples, including untimed guards
+executing those kernels, and must not be interpreted as end-to-end speedups.
+
+```sh
+cmake --build build --target RodinH1PyramidBenchmarks -j1
+build/tests/benchmarks/RodinH1PyramidBenchmarks \
+  --benchmark_filter='H1/Pyramid/(BernsteinDerivatives|ModalDerivatives)/P2/8/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+build/tests/benchmarks/RodinFieldOperationBenchmarks \
+  --benchmark_filter='Field/(PointEvaluation|IntegrationPointEvaluation)/H1/P2/Real/Scalar/Pyramid/5/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+```
 
 # Spatial value benchmarks
 

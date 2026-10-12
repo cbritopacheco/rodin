@@ -6,7 +6,7 @@
  */
 /**
  * @file
- * @brief Paired interpolation and L2 projection feature measurements.
+ * @brief Interpolation, point evaluation and L2 projection feature measurements.
  */
 #include <benchmark/benchmark.h>
 #include <cmath>
@@ -47,6 +47,12 @@ namespace Rodin::Tests::Benchmarks
    * cell, coefficient error, residual, analytic mass energy and sensitivity to
    * a wrong coefficient vector. Projection checks do not assume a DOF layout.
    * This executable is opt-in and is not a CTest or CI timing gate.
+   * PointEvaluation and IntegrationPointEvaluation sweep preconstructed mapped
+   * samples through the public GridFunction interface. Physical maps and
+   * analytic values are warmed before timing. The integration-point variant
+   * carries formula provenance but changes point/cell throughout the sweep;
+   * it is not a repeated-point cache-hit measurement. Guards also change the
+   * coefficients without changing the space or sample identities.
    *
    * @tparam K Degree of H1, or one for the distinct P1 implementation.
    * @tparam Scalar Real or complex scalar field.
@@ -78,7 +84,7 @@ namespace Rodin::Tests::Benchmarks
      * @brief Measures one field feature on an affine mesh.
      * @param state Grid points per axis and benchmark iterations.
      * @param geometry Reference-cell family.
-     * @param operation Interpolation, assembly, solve or combined stage index.
+     * @param operation Interpolation, projection or point-evaluation stage index.
      */
     static void run(
       benchmark::State& state, Geometry::Polytope::Type geometry, size_t operation)
@@ -164,6 +170,87 @@ namespace Rodin::Tests::Benchmarks
       state.counters["components"] = Vector ? dim : 1;
       state.counters["oracle_quadrature_order"] = QuadratureOrder;
       state.counters["oracle_points_per_cell"] = formula.getSize();
+      if (operation == 4 || operation == 5)
+      {
+        std::vector<IntegrationPoint> points;
+        std::vector<Range> exact, measured;
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const auto& quadrature = cell->getQuadrature(formula);
+          for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
+          {
+            points.emplace_back(quadrature.getPoint(qp), &formula, qp);
+            exact.emplace_back(field(quadrature.getPoint(qp)));
+          }
+        }
+        measured.resize(points.size());
+        const auto evaluate = [&]() {
+          for (size_t i = 0; i < points.size(); ++i)
+          {
+            measured[i] = operation == 4 ? expected.getValue(points[i].getPoint())
+                                         : expected.getValue(points[i]);
+          }
+        };
+        const auto error = [&]() {
+          Real maximum = 0;
+          for (size_t i = 0; i < points.size(); ++i)
+          {
+            const Real difference = [&]() {
+              if constexpr (Vector)
+                return (measured[i] - exact[i]).norm();
+              else
+                return std::abs(measured[i] - exact[i]);
+            }();
+            if (!std::isfinite(difference))
+              return std::numeric_limits<Real>::infinity();
+            maximum = std::max(maximum, difference);
+          }
+          return maximum;
+        };
+        evaluate();
+        const Real before = error();
+        if constexpr (Vector)
+          measured.front()(0) += Scalar(1);
+        else
+          measured.front() += Scalar(1);
+        const Real sensitivity = error();
+        offset = 1;
+        expected = field;
+        evaluate();
+        for (size_t i = 0; i < points.size(); ++i)
+          exact[i] = field(points[i].getPoint());
+        const Real changed = error();
+        offset = 0;
+        expected = field;
+        for (size_t i = 0; i < points.size(); ++i)
+          exact[i] = field(points[i].getPoint());
+        evaluate();
+        if (before > FieldTolerance || changed > FieldTolerance ||
+          error() > FieldTolerance || !(sensitivity > SensitivityFloor))
+        {
+          fieldOperationFailed = true;
+          state.SkipWithError("Point-evaluation oracle or coefficient refresh failed");
+          return;
+        }
+        for (auto _ : state)
+        {
+          evaluate();
+          benchmark::DoNotOptimize(measured.data());
+          benchmark::ClobberMemory();
+        }
+        const Real after = error();
+        state.counters["absolute_field_error"] = after;
+        state.counters["point_evaluations"] = points.size();
+        state.counters["scalar_basis_evaluations_per_point"] =
+          space.getDOFs(dim, 0).size() / (operation == 4 && Vector ? dim : 1);
+        state.counters["scalar_output_entries"] = points.size() * (Vector ? dim : 1);
+        if (after > FieldTolerance)
+        {
+          fieldOperationFailed = true;
+          state.SkipWithError("Timed point evaluation changed the represented field");
+        }
+        return;
+      }
       if (operation == 0)
       {
         GridFunction measured(space);
@@ -288,13 +375,14 @@ namespace Rodin::Tests::Benchmarks
       state.counters["absolute_field_error"] = error;
     }
 
-    /// @brief Registers four operations at three mesh sizes on seven geometries.
+    /// @brief Registers six operations at three mesh sizes on seven geometries.
     static void registerCases()
     {
       using G = Geometry::Polytope::Type;
-      const char* operations[] = {
-        "Interpolation", "ProjectionAssembly", "ProjectionSolve", "AssemblyAndSolve"};
-      for (size_t operation = 0; operation < 4; ++operation)
+      const char* operations[] = {"Interpolation", "ProjectionAssembly",
+        "ProjectionSolve", "AssemblyAndSolve", "PointEvaluation",
+        "IntegrationPointEvaluation"};
+      for (size_t operation = 0; operation < std::size(operations); ++operation)
       {
         for (auto geometry : {G::Segment, G::Triangle, G::Quadrilateral, G::Tetrahedron,
                G::Pyramid, G::Hexahedron, G::Wedge})
