@@ -9,3 +9,7 @@ target_link_libraries(RodinSpatialDotBenchmarks PRIVATE
 add_executable(RodinSpatialVectorStorageBenchmarks EXCLUDE_FROM_ALL SpatialVectorStorage.cpp)
 target_link_libraries(RodinSpatialVectorStorageBenchmarks PRIVATE
   Rodin::Rodin benchmark::benchmark)
+
+add_executable(RodinSparseAlgebraBenchmarks EXCLUDE_FROM_ALL SparseAlgebra.cpp)
+target_link_libraries(RodinSparseAlgebraBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)

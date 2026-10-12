@@ -89,6 +89,7 @@ that this performance matrix has been profiled.
 | Layer / owning module | Available measurement | Remaining qualification or isolation |
 | --- | --- | --- |
 | Spatial values / Math | Real/complex vector, matrix and tensor arithmetic; spatial dot; fixed-capacity construction/copy/assignment and temporary/direct array fill | Remaining arithmetic consumer attribution and controlled scaling baselines beyond selected storage scopes |
+| Sparse algebra / Math | Sparse products, Hermitian dot products and squared norms on constrained scalar FE systems | Larger-level qualification, preconditioner separation, mixed operators, remaining degrees and distributed representations |
 | Reference metadata / Geometry | Topology, connectivity and reference transformation consumers | Isolated metadata access, embedding and shape-dependent work accounting |
 | Reference elements / Variational | Scalar P0/P0g/P1 and H1 degrees 1–6; values, derivatives, prefetched descriptors | Vector/matrix component expansion, DOF functionals and first-use initialization |
 | Reference quadrature / QF | Owned construction/copy, polynomial traversal, controlled eight-key hot and nine-key canonical-pool sweeps; table/fallback boundaries | Process-first allocation, concurrent pool contention and profiles beyond selected orders |
@@ -579,6 +580,89 @@ These inclusive fractions are source attribution, not stage timings or a proof
 that setup has zero cost. Sparse products, reductions and preconditioner setup
 remain candidates for isolated Math/Solver measurements. No solver source or
 floating-point arithmetic policy was changed in this batch.
+
+### Sparse algebra protocol
+
+`RodinSparseAlgebraBenchmarks`, owned by `Math`, isolates $y\leftarrow Ax$,
+$y\leftarrow A^Tx$, $x^*z$ and $\lVert x\rVert_2^2$ on the same manufactured
+constrained operators
+used by the assembly and CG workloads. The matrix is the actual compressed
+column-major `Math::SparseMatrix`; no alternative storage or synthetic stencil
+is substituted. Input vectors vary by entry, with non-collinear real/imaginary
+parts so complex reductions exercise conjugation. Products overwrite an already
+allocated output. Mesh/space setup, assembly, input/output allocation and
+verification are excluded; these are warmed arithmetic scopes, not cold
+allocation or complete solver measurements.
+
+The installed Eigen full-matrix CG uses a transpose view for real column-major
+operators and a direct view for complex operators. Both product paths therefore
+have distinct scopes. `TransposeProduct` is a plain transpose, not an adjoint;
+its independent oracle swaps row/column accumulation indices. No owning layout
+conversion is performed, and no equivalence is assumed for arbitrary matrices.
+
+Independent scalar traversals check all products and reductions, using
+`long double` accumulators. The precision is reported as
+`reference_mantissa_bits`: on the native Apple ARM build it is 53, so extended
+precision must not be assumed. An original-kernel matrix/load comparison and
+the manufactured equation separately guard the input operator. Wrong products,
+zero dot products and zero norms must be rejected. Acceptance uses a relative
+budget of $10^{-11}$ with a unit scale floor; the manufactured patch uses
+$10^{-10}$. These checks are untimed and are not timing gates.
+
+Four operations, three scalar equations, real/complex H1 degrees one through
+three, seven mesh geometries and three grid levels give 1,512 selections.
+Reports include cells, matrix rows/nonzeros, scalar size and compressed storage
+bytes. The latter counts values and indices, not allocator overhead, resident
+memory or memory traffic. The `nnz` counter is Eigen's stored-entry count,
+including any explicit zeros retained by assembly. Source profiles and numerical
+qualification must be distinguished from this availability count. This does not cover P0/P0g mass
+operators, mixed systems, degrees four through six or PETSc/MPI sparse algebra.
+
+All 504 smallest-grid selections passed in the native and two-thread
+OpenMP-enabled optimized builds. Product checks matched the independent
+traversal exactly on those cases; maximum relative dot/norm differences were
+below $10^{-15}$ and $2.8\times10^{-15}$, respectively. This qualification does
+not imply that all larger levels have run, or that OpenMP accelerates these
+isolated arithmetic operations.
+
+A native five-repetition study covers all four operations over three Poisson
+degree-two grid levels in triangle and tetrahedron meshes. Largest-level
+medians, in microseconds, are:
+
+| Geometry / field | Product | Transpose product | Hermitian dot | Squared norm |
+| --- | ---: | ---: | ---: | ---: |
+| Triangle / real | 1.455 | 1.199 | 0.051 | 0.045 |
+| Tetrahedron / real | 43.360 | 48.881 | 1.184 | 1.154 |
+| Triangle / complex | 2.751 | 3.237 | 0.171 | 0.214 |
+| Tetrahedron / complex | 90.029 | 101.685 | 2.899 | 4.746 |
+
+The short complex triangle dot initially varied by about 7%; an isolated
+seven-repetition, longer-duration repeat retained the median with 0.7%
+variation. All other initial selections varied by at most 2.9%. Both raw runs
+are retained. Direct and transpose paths are not interchangeable performance
+models: even their relative costs differ between the selected 2D/3D systems.
+
+Six Instruments captures distinguish the real-CG transpose products, complex
+direct products, and complex reductions. Attribution selects stacks containing
+the operation's kernel, excluding untimed FE fixture construction visible in
+the raw captures. About 86%/88% of selected real product sample weight lies in
+Eigen's row traversal for triangle/tetrahedron cases; about 83%/89% of complex
+product sample weight lies in standard-library multiply/conversion helpers
+nested in the sparse product. Dot and squared-norm profiles instead expose
+conjugating packet reductions and real/imaginary component access. These are
+source hotspots to investigate, not evidence that replacing standard complex
+arithmetic or changing floating-point policy would preserve correctness.
+The native binary has no standalone definitions of those complex
+multiply/conversion helpers: sampled inline source frames must not be mistaken
+for out-of-line function-call overhead. Nor does a transpose view uniformly
+improve throughput; the measured tetrahedral direct products were faster.
+
+```sh
+cmake --build build --target RodinSparseAlgebraBenchmarks -j1
+build/tests/benchmarks/RodinSparseAlgebraBenchmarks \
+  --benchmark_filter='^SparseAlgebra/(Product|TransposeProduct)/Poisson/H1/P2/(Real|Complex)/Tetrahedron/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+```
 
 # Spatial value benchmarks
 
