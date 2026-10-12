@@ -8,6 +8,8 @@
 /** @file @brief Exact real/complex scalar promotion for spatial objects. */
 
 #include <limits>
+#include <cstring>
+#include <random>
 #include <type_traits>
 #include <gtest/gtest.h>
 #include "Rodin/Math/SpatialVector.h"
@@ -18,6 +20,88 @@ using namespace Rodin::Math;
 
 namespace Rodin::Tests::Unit
 {
+  /**
+   * @brief Retains the original spatial dot reduction and ignores inactive storage.
+   *
+   * Real, complex and both mixed scalar orders are compared bit-for-bit with
+   * the original dynamic Eigen reduction in dimensions zero through three.
+   * Random non-dyadic values expose rounding changes; cancellation distinguishes
+   * left-associated and reassociated sums. NaN padding detects inactive reads.
+   */
+  TEST(SpatialScalarProductTest, SpatialDotMatchesOriginalReductionExactly)
+  {
+    const auto check = []<class LHS, class RHS>() {
+      SCOPED_TRACE((std::is_same_v<LHS, Complex> ? "Complex" : "Real"));
+      SCOPED_TRACE((std::is_same_v<RHS, Complex> ? "Complex" : "Real"));
+      std::mt19937 generator(3107);
+      std::uniform_real_distribution<Real> sample(-10, 10);
+      const auto value = [&]<class Scalar>() {
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return Scalar(sample(generator), sample(generator));
+        else
+          return sample(generator);
+      };
+      const auto sameBits = [](const auto& actual, const auto& expected) {
+        const auto scalar = [](Real a, Real b) {
+          if (std::isnan(b))
+            EXPECT_TRUE(std::isnan(a));
+          else
+            EXPECT_EQ(std::memcmp(&a, &b, sizeof(Real)), 0) << a << " != " << b;
+        };
+        if constexpr (std::is_same_v<std::decay_t<decltype(actual)>, Complex>)
+        {
+          scalar(actual.real(), expected.real());
+          scalar(actual.imag(), expected.imag());
+        }
+        else
+          scalar(actual, expected);
+      };
+      for (std::uint8_t dim = 0; dim <= 3; ++dim)
+      {
+        SCOPED_TRACE(static_cast<unsigned>(dim));
+        SpatialVector<LHS> lhs(dim);
+        SpatialVector<RHS> rhs(dim);
+        lhs.getData().setConstant(LHS(std::numeric_limits<Real>::quiet_NaN()));
+        rhs.getData().setConstant(RHS(std::numeric_limits<Real>::quiet_NaN()));
+        const auto compare = [&]() {
+          const auto n = static_cast<Eigen::Index>(dim);
+          const auto original = Math::dot(lhs.getData().head(n), rhs.getData().head(n));
+          sameBits(Math::dot(lhs, rhs), original);
+        };
+        for (size_t trial = 0; trial < 1000; ++trial)
+        {
+          for (size_t i = 0; i < dim; ++i)
+          {
+            lhs(i) = value.template operator()<LHS>();
+            rhs(i) = value.template operator()<RHS>();
+          }
+          compare();
+        }
+        if (dim == 3)
+        {
+          lhs(0) = LHS(1e16);
+          lhs(1) = LHS(-1e16);
+          lhs(2) = LHS(1);
+          rhs.getData().setConstant(RHS(1));
+          compare();
+        }
+        for (Real boundary : {Real(0), -Real(0), std::numeric_limits<Real>::infinity()})
+        {
+          for (size_t i = 0; i < dim; ++i)
+          {
+            lhs(i) = LHS(boundary);
+            rhs(i) = RHS(1);
+          }
+          compare();
+        }
+      }
+    };
+    check.template operator()<Real, Real>();
+    check.template operator()<Real, Complex>();
+    check.template operator()<Complex, Real>();
+    check.template operator()<Complex, Complex>();
+  }
+
   template <class Coefficient, class Value>
   concept ScalesSpatial = requires(const Coefficient& coefficient, const Value& value) {
     coefficient* value;

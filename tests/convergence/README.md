@@ -1056,6 +1056,30 @@ checks identical iteration counts, residuals and coefficient errors; native
 and parallel numerical regressions remain correctness gates rather than
 timing thresholds.
 
+### Element-kernel scalar contractions
+
+Diffusion kernels repeatedly evaluate the active spatial contraction
+
+$$
+c_d(u,v)=\sum_{i=0}^{d-1}u_i\overline{v_i},\qquad 0\le d\le3.
+$$
+
+Matching scalar types use fixed-extent reductions. For three entries, the
+first two are reduced before adding the third, preserving the original
+accumulation grouping. Mixed real/complex operands retain the dynamic Eigen
+reduction: changing its block extent can change packetization and floating-point
+contraction under GCC. Inactive storage is excluded, and the empty contraction
+is zero. The unconjugated `SpatialVector::dot` member is a different operation
+and is not substituted for the free `Math::dot` function.
+
+The opt-in `RodinSpatialDotBenchmarks` target compares the public operation
+with the original dynamic reduction for every dimension and scalar pairing.
+It is excluded from the default build, CTest and benchmark publication.
+Bitwise unit comparisons include non-dyadic randomized operands, cancellation,
+signed zero and poisoned inactive storage. Production acceptance additionally
+requires paired assembly measurements and unchanged solve diagnostics;
+isolated contraction timings do not establish an assembly speedup.
+
 ### Pressure-oracle profiling
 
 `RodinPressureOracleBenchmarks` isolates the complete finite-mesh pressure

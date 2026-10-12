@@ -86,7 +86,19 @@ namespace Rodin::Tests::Benchmarks
           state.SkipWithError("Timed assembly or coefficient/boundary update failed");
         }
         const size_t cells = mesh.getPolytopeCount(dim);
+        size_t localEntries = 0;
+        for (size_t cell = 0; cell < cells; ++cell)
+        {
+          const size_t count = space.getDOFs(dim, cell).size();
+          localEntries += count * count;
+        }
+        state.counters["dimension"] = dim;
         state.counters["cells"] = cells;
+        state.counters["local_basis_per_cell"] = space.getDOFs(dim, 0).size();
+        state.counters["local_entries_per_operator_term"] = localEntries;
+        state.counters["quadrature_points_per_cell"] =
+          QF::PolytopeQuadratureFormula::get(Workload::quadratureOrder, geometry)
+            .getSize();
         state.counters["dofs"] = space.getSize();
         state.counters["nnz"] = problem.getLinearSystem().getOperator().nonZeros();
         state.counters["degree"] = K;

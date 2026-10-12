@@ -620,6 +620,15 @@ namespace Rodin::Math
   /**
    * @brief Computes the dot product of two SpatialVector objects.
    *
+   * For logical dimension @f$d\le3@f$, computes
+   * @f$\sum_{i=0}^{d-1}u_i\overline{v_i}@f$. Fixed-extent Eigen blocks avoid
+   * a dynamic reduction for same-scalar bounded vectors. Mixed scalar products
+   * retain the dynamic reduction: fixed blocks can change their packetization
+   * and floating-point contraction on GCC. Three same-scalar entries are grouped
+   * as the first two followed by the third, retaining the dynamic reduction's
+   * accumulation order rather than introducing a reassociated three-term sum.
+   * Inactive storage is never read; the empty product is zero.
+   *
    * @tparam LHSScalar Scalar type of left-hand side
    * @tparam RHSScalar Scalar type of right-hand side
    * @param[in] lhs Left-hand side SpatialVector
@@ -627,12 +636,35 @@ namespace Rodin::Math
    * @return Dot product (scalar)
    */
   template <class LHSScalar, class RHSScalar>
-  constexpr
-  auto dot(const SpatialVector<LHSScalar>& lhs, const SpatialVector<RHSScalar>& rhs)
+  constexpr auto dot(
+    const SpatialVector<LHSScalar>& lhs, const SpatialVector<RHSScalar>& rhs)
   {
     assert(lhs.size() == rhs.size());
-    const auto size = static_cast<Eigen::Index>(lhs.size());
-    return dot(lhs.getData().head(size), rhs.getData().head(size));
+    if constexpr (!std::is_same_v<LHSScalar, RHSScalar>)
+    {
+      const auto size = static_cast<Eigen::Index>(lhs.size());
+      return dot(lhs.getData().head(size), rhs.getData().head(size));
+    }
+    else
+    {
+      using Result =
+        decltype(dot(lhs.getData().template head<1>(), rhs.getData().template head<1>()));
+      switch (lhs.size())
+      {
+        case 0:
+          return Result(0);
+        case 1:
+          return dot(lhs.getData().template head<1>(), rhs.getData().template head<1>());
+        case 2:
+          return dot(lhs.getData().template head<2>(), rhs.getData().template head<2>());
+        case 3:
+          return dot(lhs.getData().template head<2>(), rhs.getData().template head<2>()) +
+            dot(lhs.getData().template tail<1>(), rhs.getData().template tail<1>());
+        default:
+          assert(false);
+          return Result(0);
+      }
+    }
   }
 
   /**
