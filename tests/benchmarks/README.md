@@ -91,7 +91,7 @@ that this performance matrix has been profiled.
 | Spatial values / Math | Real/complex vector, matrix and tensor arithmetic; spatial dot | Consumer attribution beyond the qualified dot repair; controlled scaling baselines |
 | Reference metadata / Geometry | Topology, connectivity and reference transformation consumers | Isolated metadata access, embedding and shape-dependent work accounting |
 | Reference elements / Variational | Scalar P0/P0g/P1 and H1 degrees 1–6; values, derivatives, prefetched descriptors | Vector/matrix component expansion, DOF functionals and first-use initialization |
-| Reference quadrature / QF | Dispatcher lookup and numerical sweep; reference-element cache hit/rebuild | Owned rule construction, cold allocation, eviction order and high-order fallback profiles |
+| Reference quadrature / QF | Owned construction/copy, polynomial traversal, controlled eight-key hot and nine-key canonical-pool sweeps; table/fallback boundaries | Process-first allocation, concurrent pool contention and profiles beyond selected orders |
 | Transformations / Geometry | Pointwise/bulk Jacobians; pointwise map consumer profiles | Independent geometry degree, curvature, embeddings and inverse-map stage matrix |
 | Mapped points / Geometry | Isolated warm/rebound coordinates, Jacobian, inverse and measure; mapped-quadrature construction; field consumer profiles | General curved embeddings, cache-miss provenance, controlled timings and profiles beyond selected cases |
 | Space setup / Variational, MPI | P1 construction and distributed construction | P0/P0g/H1 setup, DOF lookup/restriction, reconciliation and degree scaling |
@@ -353,6 +353,74 @@ families. `RodinVariationalH1PyramidIndexTest` separately checks layer enumerati
 inverse indexing and invalid-index compatibility through degree ten using exact
 logical comparisons. Its sensitivity was confirmed with an isolated perturbed
 decoder. No lookup table or source arithmetic change was retained.
+
+### Reference-quadrature protocol
+
+`RodinReferenceQuadratureBenchmarks`, owned by `QF`, separates owned rule
+construction/destruction, polymorphic copying/destruction, traversal, and
+canonical access. All eight reference families are exercised at orders two,
+eight and sixteen; triangle and wedge additionally use order 51, and pyramid
+uses order 11. Thus the first conical-product fallback is explicit for each
+tabulated factor family. Order is a degree of exactness, not a point count.
+
+For a rule $Q_p(f)=\sum_q w_qf(x_q)$, the numerical guards compare all monomial
+moments of total degree at most two with closed-form integrals from the existing
+quadrature verification helper. The dimensionless acceptance budget is
+$10^{-12}\max(1,|I(f)|)$. Positive finite weights, finite coordinates and
+closed-cell membership are checked; deliberately perturbing a weight must fail.
+Closed-cell membership is intentional: the published degree-six pyramid table
+contains boundary nodes. No quadrature coefficients or moment tolerances are
+changed. These low-degree guards do not replace the full exactness unit suite.
+The timed traversal integrates
+
+$$
+f(x)=1+\sum_{j=1}^{d}(x_j+x_j^2).
+$$
+
+Owned construction is repeated after library initialization. It is not a
+process-first allocation experiment. Traversal includes a compiler memory
+barrier to prevent hoisting an invariant result out of the timing loop.
+
+The current canonical dispatcher has an eight-entry round-robin thread-local
+cache backed by a locked process-wide pool. Untimed disjoint point-rule keys
+first remove prior hot entries. An eight-key measured working set then visits
+all cache positions once per sweep, so insertion rotation cannot masquerade as
+a geometry cost. A nine-key cyclic working set instead misses the hot cache on
+every access while retaining canonical pool objects. Pointer identity is
+checked after eviction; no private cache-reset API is added. Cache-capacity
+changes require revisiting this explicitly source-dependent protocol.
+Both scopes include size access and report requests and points in the working
+set; their per-sweep timings are not directly comparable per-request costs.
+
+All 135 selections passed the guards in the native optimized build and the
+LLVM OpenMP-enabled build. These scopes execute locally; enabling OpenMP does
+not make this evidence of concurrent lookup throughput or MPI scaling.
+
+In a native five-repetition study, order-sixteen owned construction measured
+approximately 0.187 microseconds on triangles (53 points), 6.58 microseconds on
+pyramids (729 points) and 11.14 microseconds on hexahedra (729 points). Traversal
+normalized to about 3.13, 4.31 and 4.33 ns per point, respectively. Construction
+has different algorithms and cannot be explained by dimension or point count
+alone. Instruments attributed about 81% of selected hexahedron source sample
+weight to `TensorProduct::append` and repeated point-vector/size access. The
+pyramid profile instead includes Gaussian root generation and the Jacobi
+eigensolve; the order-51 triangle fallback is dominated by those factor stages.
+These profiles motivate a separate factor-access investigation, not an already
+achieved source speedup.
+
+The hot-cache profile contains thread-local access and key comparisons; the
+nine-key pool profile additionally contains flat-map lookup and mutex operations
+(about 33% inclusive sample weight). This confirms the intended experimental
+paths, not lock contention: only one caller executes. The focused study retained
+one noisy copy selection with an elapsed-time outlier; an isolated repeat had
+about 1% variation. Raw results are retained separately from the profile captures.
+
+```sh
+cmake --build build --target RodinReferenceQuadratureBenchmarks -j1
+build/tests/benchmarks/RodinReferenceQuadratureBenchmarks \
+  --benchmark_filter='ReferenceQuadrature/(OwnedBuild|OwnedCopy|Traversal)/Pyramid/16/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+```
 
 # Spatial value benchmarks
 
