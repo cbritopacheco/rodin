@@ -59,7 +59,9 @@ TEST(Rodin_Variational_FaceNormal, BoundaryOrientationAndInteriorTraceAcrossGeom
       {
         ASSERT_EQ(cells.size(), 2);
         if (interior == 0)
+        {
           EXPECT_THROW(normal.getValue(point), Alert::Exception);
+        }
         auto first = normal;
         first.traceOf(cells[0] + 1);
         auto second = normal;
