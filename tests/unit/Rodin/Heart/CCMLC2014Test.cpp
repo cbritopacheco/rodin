@@ -6,6 +6,9 @@
 
 #include "Rodin/Heart/CCMLC2014.h"
 #include "Rodin/Heart/CCMLC2014/Numerics/DynamicSystem.h"
+#include "Rodin/Heart/CCMLC2014/Physics/Kinematics.h"
+#include "Rodin/Heart/CCMLC2014/Physics/PassiveStress.h"
+#include "Rodin/Heart/CCMLC2014/Physics/ValveLaw.h"
 
 using namespace Rodin;
 
@@ -899,4 +902,149 @@ TEST(CCMLC2014Test, QuemadaBranchFlowDerivativeAcrossPressureRegimes)
   const auto zero = Law::flowLaw(0, 0.1, 0.004, 1e8, input);
   EXPECT_EQ(zero.first, 0);
   EXPECT_EQ(zero.second, 1e-8);
+}
+
+namespace
+{
+  /// @brief Minimal evaluation record consumed by the standalone physics evaluators.
+  struct PhysicsEvaluation
+  {
+      Real y, yPrev, yMid, pv, pvPrev, pvMid, par, parPrev, parMid, pd, pdPrev, pdMid;
+      Real dt, vel, sqrtC, C, strain1D, diffGreen;
+      Real stressPassive, diffStressPassive, stressViscous, diffStressViscous;
+      Real pAtCur, pAtPrev, cavityFluxCur, cavityFluxPrev;
+      Real dCavityFluxCur_dPv, dCavityFluxCur_dPar;
+  };
+}
+
+/// @brief Midpoint kinematics satisfy displacement, pressure and strain identities.
+TEST(CCMLC2014Test, StandaloneMidpointKinematics)
+{
+  auto input = makeGenericCardiacInput();
+  input.R0 = 2;
+  PhysicsEvaluation data{};
+  data.y = 0.4;
+  data.yPrev = 0.1;
+  data.pv = 6;
+  data.pvPrev = 2;
+  data.par = 8;
+  data.parPrev = 4;
+  data.pd = 10;
+  data.pdPrev = 2;
+  data.dt = 0.3;
+  Heart::CCMLC2014::Physics::MidpointKinematics model(input);
+  model.evaluate(data);
+  EXPECT_DOUBLE_EQ(data.yMid, 0.25);
+  EXPECT_DOUBLE_EQ(data.pvMid, 4);
+  EXPECT_DOUBLE_EQ(data.parMid, 6);
+  EXPECT_DOUBLE_EQ(data.pdMid, 6);
+  EXPECT_NEAR(data.vel, 1, 1e-14);
+  EXPECT_DOUBLE_EQ(data.sqrtC, 1.125);
+  EXPECT_DOUBLE_EQ(data.C, 1.265625);
+  EXPECT_DOUBLE_EQ(data.strain1D, 0.1328125);
+  EXPECT_DOUBLE_EQ(data.diffGreen, 0.5625);
+}
+
+/// @brief Passive stress's stored tangent differentiates with respect to the new displacement.
+TEST(CCMLC2014Test, StandalonePassiveStressChainRule)
+{
+  auto input = makeGenericCardiacInput();
+  input.R0 = 2;
+  PhysicsEvaluation data{};
+  data.y = 0.4;
+  data.yPrev = 0.1;
+  data.dt = 0.3;
+  Heart::CCMLC2014::Physics::MidpointKinematics kinematics(input);
+  Heart::CCMLC2014::Physics::PassiveStressEvaluator<PassiveLaw, Model::Input> stress(
+    input);
+  auto evaluate = [&](PhysicsEvaluation& state) {
+    kinematics.evaluate(state);
+    stress.evaluate(state);
+  };
+  evaluate(data);
+  constexpr Real Step = 1e-6;
+  auto plus = data, minus = data;
+  plus.y += Step;
+  minus.y -= Step;
+  evaluate(plus);
+  evaluate(minus);
+  const Real derivative = (plus.stressPassive - minus.stressPassive) / (2 * Step);
+  EXPECT_GT(std::abs(data.stressPassive), 1);
+  EXPECT_GT(std::abs(derivative), 1);
+  EXPECT_NEAR(data.diffStressPassive / derivative, 1, 1e-7);
+}
+
+/// @brief Viscous stress and its midpoint derivative agree with an independent scalar law.
+TEST(CCMLC2014Test, StandaloneViscousStressMidpointDerivative)
+{
+  auto input = makeGenericCardiacInput();
+  input.R0 = 2;
+  input.eta = 0.7;
+  PhysicsEvaluation data{};
+  data.y = 0.4;
+  data.yPrev = 0.1;
+  data.dt = 0.3;
+  Heart::CCMLC2014::Physics::MidpointKinematics kinematics(input);
+  Heart::CCMLC2014::Physics::ViscousStressEvaluator stress(input);
+  kinematics.evaluate(data);
+  stress.evaluate(data);
+  const Real stretch = 1.125;
+  const Real exact = 2 * input.eta / input.R0 * (stretch + 2 * std::pow(stretch, -11));
+  EXPECT_NEAR(data.stressViscous, exact, 1e-12);
+  constexpr Real Step = 1e-6;
+  auto value = [&](Real midpoint) {
+    const Real s = 1 + midpoint / input.R0;
+    const Real velocity = 2 * (midpoint - data.yPrev) / data.dt;
+    return 2 * input.eta / input.R0 * (s + 2 * std::pow(s, -11)) * velocity;
+  };
+  const Real derivative =
+    (value(data.yMid + Step) - value(data.yMid - Step)) / (2 * Step);
+  EXPECT_NEAR(data.diffStressViscous, derivative, 1e-8);
+}
+
+/// @brief Current and previous valve branches are independent and retain exact pressure slopes.
+TEST(CCMLC2014Test, StandaloneValveBranchTransitions)
+{
+  auto input = makeGenericCardiacInput();
+  input.Kat = 3;
+  input.Kp = 0.2;
+  input.Kar = 1.7;
+  Heart::CCMLC2014::Physics::CavityFluxEvaluator model(input);
+  constexpr std::array<Real, 5> Pressure{1, 2, 3, 5, 6};
+  constexpr std::array<Real, 5> Flux{-3, 0, 0.2, 0.6, 2.3};
+  constexpr std::array<Real, 5> VentricularSlope{3, 3, 0.2, 0.2, 1.7};
+  constexpr std::array<Real, 5> ArterialSlope{0, 0, 0, 0, -1.5};
+  for (size_t current = 0; current < Pressure.size(); ++current)
+  {
+    for (size_t previous = 0; previous < Pressure.size(); ++previous)
+    {
+      PhysicsEvaluation data{};
+      data.pAtCur = data.pAtPrev = 2;
+      data.par = data.parPrev = 5;
+      data.pv = Pressure[current];
+      data.pvPrev = Pressure[previous];
+      model.evaluate(data);
+      EXPECT_NEAR(data.cavityFluxCur, Flux[current], 1e-14);
+      EXPECT_NEAR(data.cavityFluxPrev, Flux[previous], 1e-14);
+      EXPECT_DOUBLE_EQ(data.dCavityFluxCur_dPv, VentricularSlope[current]);
+      EXPECT_DOUBLE_EQ(data.dCavityFluxCur_dPar, ArterialSlope[current]);
+      if (current == 1 || current == 3)
+        continue;
+      constexpr Real Step = 1e-5;
+      auto plus = data, minus = data;
+      plus.pv += Step;
+      minus.pv -= Step;
+      model.evaluate(plus);
+      model.evaluate(minus);
+      EXPECT_NEAR((plus.cavityFluxCur - minus.cavityFluxCur) / (2 * Step),
+        data.dCavityFluxCur_dPv, 1e-9);
+      plus = minus = data;
+      plus.par += Step;
+      minus.par -= Step;
+      model.evaluate(plus);
+      model.evaluate(minus);
+      EXPECT_NEAR((plus.cavityFluxCur - minus.cavityFluxCur) / (2 * Step),
+        data.dCavityFluxCur_dPar, 1e-9);
+    }
+  }
 }

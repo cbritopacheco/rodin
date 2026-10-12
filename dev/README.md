@@ -75,6 +75,11 @@ geometry, and backend variants explicitly. Current audit findings include:
   Lifecycle regressions also exposed nonassignable backend state and loss of
   the formulation on copy/move, now retained explicitly. This does not extend
   the separate direct tuple-assembly API beyond its existing specializations.
+- Standalone cardiac physics evaluators: exact midpoint kinematics, passive
+  stress chain-rule differentiation with respect to the new displacement,
+  viscous stress and its midpoint derivative, and every current/previous valve
+  branch including transition equalities. Independent finite differences and
+  analytic identities reject velocity, tangent and valve-slope perturbations.
 - Distance wrappers: real local P1 signed/unsigned Eikonal intervals, missing
   interfaces, exact P1 Poisson nodal values and quadratic refinement, P2 H1
   exact quadratic recovery, region-restricted signed Poisson overloads, and
