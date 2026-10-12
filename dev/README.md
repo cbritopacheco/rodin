@@ -116,6 +116,14 @@ geometry, and backend variants explicitly. Current audit findings include:
   persistence and visualization opens preserve fields and leave missing
   directories absent. Substituting node output for cell output fails all three
   numerical exporters. All 99 HDF5 tests pass.
+- PETSc HDF5 checkpoints: matrix-valued P1 fields retain independent coefficient
+  values and range metadata on all seven geometries. Equal-size transposed
+  ranges, incompatible coefficient counts and unsupported complex payloads
+  are rejected before changing destination data. Scalar/vector/matrix fields
+  also retain values after failed opens and unsupported streams, and accept
+  legacy real-only files. All 18 tests pass with real PETSc; removing matrix
+  shape validation fails on every geometry. Complex-specific assertions are
+  conditional and require a complex PETSc configuration for execution.
 - Foreign form functions: real/complex local and global contributions with
   mismatched trial/test identities are rejected before changing integrator
   lists or assembled operators/vectors. Named and unnamed foreign trials
