@@ -30,3 +30,9 @@ target_link_libraries(RodinManufacturedDerivativeLoadTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
 gtest_discover_tests(RodinManufacturedDerivativeLoadTest
   PROPERTIES LABELS manufactured TIMEOUT 300)
+
+add_executable(RodinManufacturedAffineIdentificationTest AffineIdentification.cpp)
+target_link_libraries(RodinManufacturedAffineIdentificationTest
+  PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+gtest_discover_tests(RodinManufacturedAffineIdentificationTest
+  PROPERTIES LABELS manufactured TIMEOUT 300)

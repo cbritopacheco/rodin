@@ -95,6 +95,21 @@ geometry, and backend variants explicitly. Current audit findings include:
   covered by failing regressions. Constant manufactured solutions on two
   meshes of every geometry pass in serial and with one/four OpenMP threads.
   Lost negation signs and doubled OpenMP accumulation fail the numerical tests.
+- Mixed affine identification: real/complex dense/sparse mass systems recover
+  prescribed constant fields with nonzero affine defects and fixed master
+  data on all seven geometries and two mesh sizes. Repeated, copied and moved
+  problems agree. All four manufactured cases pass in serial and with one/four
+  OpenMP threads; discarding the defect fails all four cases.
+- Sequential assembler lifecycle: real/complex dense, sparse, triplet and
+  vector outputs retain exact two-cell mass/load values after copy, move and
+  polymorphic cloning. Repeated execution replaces prior output. Both lifecycle
+  cases and all 72 existing sequential tests pass; doubled assembly fails each
+  storage and lifecycle oracle.
+- HDF5 convenience exporters: scalar/vector/matrix values and dataset shapes
+  agree with independent affine data on linear and curved meshes. Failed
+  persistence and visualization opens preserve fields and leave missing
+  directories absent. Substituting node output for cell output fails all three
+  numerical exporters. All 99 HDF5 tests pass.
 - Foreign form functions: real/complex local and global contributions with
   mismatched trial/test identities are rejected before changing integrator
   lists or assembled operators/vectors. Named and unnamed foreign trials
@@ -189,7 +204,7 @@ geometry, and backend variants explicitly. Current audit findings include:
 - XDMF reference-node vocabulary: linear nodes agree with the geometry module's
   reference vertices for all positive-dimensional cells; point nodes have no
   reference coordinates. Point topology metadata and invalid-geometry rejection
-  are checked explicitly. All 97 HDF5 tests pass, and displaced reference nodes
+  are checked explicitly. All 99 HDF5 tests pass, and displaced reference nodes
   fail the new oracle.
 - Boundary attribute tracing: selected exterior faces inherit mapped cell
   attributes while unselected and interior faces retain theirs. Repeated

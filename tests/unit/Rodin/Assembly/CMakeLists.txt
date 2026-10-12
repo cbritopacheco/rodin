@@ -27,3 +27,8 @@ if (RODIN_USE_OPENMP)
       LABELS unit
   )
 endif()
+
+add_executable(RodinAssemblyLifecycleTest LifecycleTest.cpp)
+target_link_libraries(RodinAssemblyLifecycleTest
+  PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+gtest_discover_tests(RodinAssemblyLifecycleTest PROPERTIES LABELS unit TIMEOUT 300)
