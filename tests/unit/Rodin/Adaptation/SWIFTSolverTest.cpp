@@ -958,6 +958,7 @@ namespace Rodin::Tests::Unit
       {
         system.getOperator() = (scale * core).sparseView();
         system.getOperator().makeCompressed();
+        const Math::SparseMatrix<Real> original = system.getOperator();
         system.getVector() = force;
         system.getSolution() = Math::Vector<Real>::Zero(2);
         const Math::Matrix<Real> scaledCentering = std::sqrt(scale) * centering;
@@ -966,7 +967,7 @@ namespace Rodin::Tests::Unit
         ASSERT_TRUE(solver.success());
         EXPECT_LT((system.getSolution() - expected / scale).norm(), Real(1e-11));
         EXPECT_LE(solver.getError(), parameters.convergence.tolerance.linearRelative);
-        EXPECT_EQ((system.getOperator() - (scale * core).sparseView()).norm(), Real(0));
+        EXPECT_EQ((system.getOperator() - original).norm(), Real(0));
       }
     }
   }
