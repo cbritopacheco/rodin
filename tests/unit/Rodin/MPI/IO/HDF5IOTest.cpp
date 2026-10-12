@@ -79,6 +79,79 @@ namespace
       / (stem + "_r" + std::to_string(worldRank()));
   }
 
+  /// @brief MPI HDF5 stream overloads reject operations requiring a file path.
+  TEST(ShardMetadata, RejectsStreamPersistence)
+  {
+    boost::mpi::environment environment;
+    boost::mpi::communicator communicator(MPI_COMM_SELF, boost::mpi::comm_attach);
+    const Context::MPI context(environment, communicator);
+    Geometry::Mesh<Context::MPI> mesh(context);
+    MeshLoader<FileFormat::HDF5, Context::MPI> loader(mesh);
+    MeshPrinter<FileFormat::HDF5, Context::MPI> printer(mesh);
+    std::stringstream stream;
+    EXPECT_THROW(loader.load(stream), Alert::Exception);
+    EXPECT_THROW(printer.print(stream), Alert::Exception);
+  }
+
+  /// @brief Malformed shard state, maps, ownership and halo CSR data are rejected on load.
+  TEST(ShardMetadata, RejectsMalformedMetadata)
+  {
+    boost::mpi::environment environment;
+    boost::mpi::communicator communicator(MPI_COMM_SELF, boost::mpi::comm_attach);
+    const Context::MPI context(environment, communicator);
+    auto mesh =
+      Geometry::Mesh<Context::MPI>::UniformGrid(context, Polytope::Type::Segment, {3});
+    for (int corruption = 0; corruption < 5; ++corruption)
+    {
+      SCOPED_TRACE(corruption);
+      const auto path = rankTempPath("rodin-malformed-shard.h5");
+      mesh.save(path, FileFormat::HDF5);
+      Geometry::Mesh<Context::MPI> restored(context);
+      MeshLoader<FileFormat::HDF5, Context::MPI> validLoader(restored);
+      validLoader.load(path);
+      ASSERT_EQ(restored.getDimension(), mesh.getDimension());
+      ASSERT_EQ(restored.getVertexCount(), mesh.getVertexCount());
+      ASSERT_EQ(restored.getCellCount(), mesh.getCellCount());
+      {
+        const auto file = HDF5::File(H5Fopen(path.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
+        ASSERT_TRUE(file);
+        const auto replace = [&]<class T>(
+                               const std::string& dataset, const std::vector<T>& values) {
+          ASSERT_GE(H5Ldelete(file.get(), dataset.c_str(), H5P_DEFAULT), 0);
+          HDF5::writeVectorDataset(file.get(), dataset, values);
+        };
+        if (corruption == 0)
+        {
+          replace(HDF5::shardStatePath(0), std::vector<HDF5::U8>{});
+        }
+        else if (corruption == 1)
+        {
+          replace(HDF5::shardPolytopeMapLeftPath(0), std::vector<HDF5::U64>{});
+        }
+        else if (corruption == 2)
+        {
+          replace(HDF5::shardOwnerGroupPath(0) + "/Values",
+            std::vector<HDF5::U64>(mesh.getVertexCount() + 1, 0));
+        }
+        else if (corruption == 3)
+        {
+          replace(HDF5::shardHaloGroupPath(0) + "/Offsets", std::vector<HDF5::U64>{});
+        }
+        else
+        {
+          replace(HDF5::shardHaloGroupPath(0) + "/Keys", std::vector<HDF5::U64>{0});
+          replace(HDF5::shardHaloGroupPath(0) + "/Offsets", std::vector<HDF5::U64>{0, 1});
+          replace(HDF5::shardHaloGroupPath(0) + "/Indices", std::vector<HDF5::U64>{});
+        }
+      }
+      Geometry::Mesh<Context::MPI> loaded(context);
+      MeshLoader<FileFormat::HDF5, Context::MPI> loader(loaded);
+      EXPECT_THROW(loader.load(path), Alert::Exception);
+      EXPECT_EQ(loaded.getDimension(), 0u);
+      boost::filesystem::remove(path);
+    }
+  }
+
   // Parameterized test fixture
   class MPIMeshHDF5 : public ::testing::TestWithParam<Polytope::Type> {};
 
