@@ -80,7 +80,9 @@ namespace Rodin::Tests::Manufactured
       error = std::sqrt(error);
       EXPECT_LT(error, CoarseErrorTolerance);
       if (previous > 0)
+      {
         EXPECT_LT(error, MaxRefinementRatio * previous);
+      }
       previous = error;
     }
   }

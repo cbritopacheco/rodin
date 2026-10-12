@@ -56,7 +56,9 @@ namespace
     system.getVector() = matrix * expected;
     solver.solve(system);
     if constexpr (requires { solver.success(); })
+    {
       EXPECT_TRUE(solver.success());
+    }
     EXPECT_LT((system.getSolution() - expected).norm(), 1e-9);
     std::unique_ptr<Algorithm<System>> clone(solver.copy());
     system.getSolution().resize(0);
@@ -70,7 +72,9 @@ namespace
     system.getSolution().setConstant(Scalar(0.25));
     solver.solve(system);
     if constexpr (requires { solver.success(); })
+    {
       EXPECT_TRUE(solver.success());
+    }
     EXPECT_LT((system.getSolution() - expected).norm(), 1e-9);
   }
 

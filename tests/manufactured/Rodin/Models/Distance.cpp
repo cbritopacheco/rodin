@@ -104,7 +104,9 @@ namespace Rodin::Tests::Manufactured
       const Real h = Real(1) / (count - 1);
       EXPECT_NEAR(error, h * h / 8, 1e-12);
       if (previousError > 0)
+      {
         EXPECT_NEAR(previousError / error, 4, 1e-10);
+      }
       previousError = error;
     }
   }

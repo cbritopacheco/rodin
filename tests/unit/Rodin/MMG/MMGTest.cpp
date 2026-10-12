@@ -37,7 +37,9 @@ TEST(MMG5Lifecycle, MeshCopyIsIndependent)
     EXPECT_EQ(copy->ne, source->ne);
     EXPECT_NE(copy->point, source->point);
     if (source->namein)
+    {
       EXPECT_NE(copy->namein, source->namein);
+    }
     EXPECT_STREQ(copy->namein, source->namein);
     EXPECT_STREQ(copy->nameout, source->nameout);
     for (int i = 1; i <= source->np; ++i)
