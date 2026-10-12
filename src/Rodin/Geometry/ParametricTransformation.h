@@ -164,7 +164,8 @@ namespace Rodin::Geometry
       assert(static_cast<size_t>(rc.size()) == getReferenceDimension());
       pc.resize(pdim);
       pc.setZero();
-      for (size_t local = 0; local < m_fe.getCount(); local++)
+      const size_t count = m_fe.getCount();
+      for (size_t local = 0; local < count; local++)
       {
         assert(pc.size() == m_pm[local].size());
         pc += m_pm[local] * m_fe.getBasis(local)(rc);
@@ -179,7 +180,8 @@ namespace Rodin::Geometry
       const size_t pdim = getPhysicalDimension();
       pc.resize(pdim, rdim);
       pc.setZero();
-      for (size_t local = 0; local < m_fe.getCount(); local++)
+      const size_t count = m_fe.getCount();
+      for (size_t local = 0; local < count; local++)
       {
         const auto& basis = m_fe.getBasis(local);
         for (size_t i = 0; i < rdim; i++)

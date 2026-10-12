@@ -654,6 +654,74 @@ namespace Rodin::Tests::Unit
         }
       };
 
+    /**
+     * @brief Certifies bounded pointwise metadata access and exact evaluation.
+     *
+     * The basis count is invariant during one map evaluation. Each operation
+     * must query it once, independently of the number of basis functions.
+     * Exact comparisons retain the reference accumulation order for every
+     * admissible physical embedding, including zero-dimensional points.
+     *
+     * @param geometry Reference polytope type.
+     */
+    template <class Element>
+    void checkPointwiseCount(Polytope::Type geometry)
+    {
+      const Polytope::Traits traits(geometry);
+      size_t basisReads = 0, tableReads = 0, countReads = 0;
+      ObservedElement<Element> element(geometry, basisReads, tableReads, countReads);
+      const size_t count = element.element.getCount();
+      for (size_t dimension = traits.getDimension(); dimension <= 3; ++dimension)
+      {
+        SCOPED_TRACE(dimension);
+        PointCloud controls(dimension, count);
+        for (size_t a = 0; a < count; ++a)
+        {
+          for (size_t j = 0; j < dimension; ++j)
+            controls(j, a) = Real((a + 1) * (j + 1)) / count;
+        }
+        ParametricTransformation observed(controls, element);
+        for (const auto& reference : {traits.getCentroid(), traits.getVertex(0)})
+        {
+          Math::SpatialPoint actual, expected(dimension);
+          expected.setZero();
+          for (size_t a = 0; a < count; ++a)
+            expected += controls[a] * element.element.getBasis(a)(reference);
+          const size_t beforeTransform = countReads;
+          observed.transform(actual, reference);
+          EXPECT_EQ(countReads - beforeTransform, 1);
+          ASSERT_EQ(actual.size(), expected.size());
+          for (size_t j = 0; j < dimension; ++j)
+            EXPECT_EQ(actual(j), expected(j));
+
+          Math::SpatialMatrix<Real> jacobian,
+            expectedJacobian(dimension, traits.getDimension());
+          expectedJacobian.setZero();
+          for (size_t a = 0; a < count; ++a)
+          {
+            for (size_t i = 0; i < traits.getDimension(); ++i)
+            {
+              const Real derivative =
+                element.element.getBasis(a).template getDerivative<1>(i)(reference);
+              for (size_t j = 0; j < dimension; ++j)
+                expectedJacobian(j, i) += controls(j, a) * derivative;
+            }
+          }
+          const size_t beforeJacobian = countReads;
+          observed.jacobian(jacobian, reference);
+          EXPECT_EQ(countReads - beforeJacobian, 1);
+          ASSERT_EQ(jacobian.rows(), expectedJacobian.rows());
+          ASSERT_EQ(jacobian.cols(), expectedJacobian.cols());
+          for (size_t j = 0; j < dimension; ++j)
+          {
+            for (size_t i = 0; i < traits.getDimension(); ++i)
+              EXPECT_EQ(jacobian(j, i), expectedJacobian(j, i));
+          }
+        }
+      }
+      EXPECT_EQ(tableReads, 0);
+    }
+
       /**
    * @brief Certifies lazy coordinates and reference-sample ownership.
    *
@@ -1050,6 +1118,30 @@ namespace Rodin::Tests::Unit
       checkEvaluation<4>(geometry);
       checkEvaluation<5>(geometry);
       checkEvaluation<6>(geometry);
+    }
+  }
+
+  /**
+   * @brief Checks pointwise metadata access for P1 and H1 orders one to six.
+   *
+   * All eight reference geometries and physical dimensions up to three are
+   * evaluated at the centroid and a vertex with exact arithmetic oracles.
+   */
+  TEST_F(QuadratureTransformationTest, PointwiseCountIsIndependentOfBasisSize)
+  {
+    for (const auto geometry :
+      {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+        Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+        Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      checkPointwiseCount<Variational::P1Element<Real>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<1>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<2>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<3>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<4>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<5>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<6>>(geometry);
     }
   }
 

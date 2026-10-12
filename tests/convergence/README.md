@@ -1127,6 +1127,15 @@ and follow timing. Output storage is reused; cold table construction, assembly
 and solves are excluded. This executable is not registered in CTest or CI.
 Point geometry is retained as a zero-dimensional control, not a speedup case.
 
+Pointwise transformation evaluates the same sum without a quadrature table.
+Its basis count is read once per coordinate or Jacobian evaluation, rather
+than once per loop condition. This does not cache physical data or change
+the accumulation order. A logical access-count regression covers P1 and H1
+degrees one through six, all eight reference geometries and admissible
+physical embeddings through dimension three. Exact entry comparisons accompany
+the access-count checks; interpolation timings measure the production impact
+separately from the table-backed quadrature path.
+
 Production impact is measured separately using the existing constrained
 assembly executable. Before/after comparisons retain the physical form,
 geometry, field degree, mesh, quadrature and build configuration. Original
