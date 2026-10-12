@@ -58,10 +58,16 @@ geometry, and backend variants explicitly. Current audit findings include:
 - Solid mechanics: Yeoh energy/stress/tangent checks in two and three
   dimensions, and P1 follower-pressure residual/tangent checks on segment and
   triangle faces. Higher-order pressure spaces are not claimed by this API.
-- Nonlocal multi-field assembly: real sparse blocks, checked against exact
-  separated double integrals with independent trial/test attribute restrictions.
-  Dense and complex multi-field problems currently lack sequential backend
-  specializations; the single-field tests do not certify those variants.
+- Nonlocal multi-field Eigen problems: real/complex dense/sparse storage,
+  checked against exact separated double integrals with independent trial/test
+  restrictions, repeated assembly, copy/move/assignment and polymorphic clone.
+  Four manufactured mass-plus-nonlocal solves recover prescribed constant fields.
+  These checks run through sequential and OpenMP backends. Constructor
+  instantiation exposed unused real-only tuple assembler allocations; removing
+  those obsolete private caches enables the existing generic assembler paths.
+  Lifecycle regressions also exposed nonassignable backend state and loss of
+  the formulation on copy/move, now retained explicitly. This does not extend
+  the separate direct tuple-assembly API beyond its existing specializations.
 - Affine cell geometry cache: exact skew-triangle Jacobians, inverses, metrics
   and P1 gradients in both orientations, independent per-cell measures and
   index maps, singular-cell rejection, and enforcement of the documented

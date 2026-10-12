@@ -16,20 +16,30 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  template <class Scalar = Real, class Operator = Math::SparseMatrix<Scalar>>
   void checkNonlocalBlocks(
     bool restrictTrial = false, bool restrictTest = false, bool missingAttribute = false)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
     mesh.setAttribute({1, 0}, 7);
     mesh.setAttribute({1, 1}, 8);
-    P1<Real> fes(mesh);
+    P1<Scalar> fes(mesh);
     TrialFunction u(fes);
     TrialFunction p(fes);
     TestFunction v(fes);
     TestFunction q(fes);
-    Problem problem(u, v, p, q);
-    const Real coefficients[2][2] = {{2, -3}, {0.5, 4}};
-    auto kernel = [](Real value) {
+    using System = Math::LinearSystem<Operator, Math::Vector<Scalar>>;
+    Problem<System, decltype(u), decltype(v), decltype(p), decltype(q)> problem(
+      u, v, p, q);
+    const Scalar factor = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(1, -2);
+      else
+        return Scalar(1);
+    }();
+    const Scalar coefficients[2][2] = {
+      {Real(2) * factor, Real(-3) * factor}, {Real(0.5) * factor, Real(4) * factor}};
+    auto kernel = [](Scalar value) {
       return [value](const Point&, const Point&) { return value; };
     };
     const auto k00 = kernel(coefficients[0][0]);
@@ -55,24 +65,38 @@ namespace Rodin::Tests::Unit
     const Real trialMoments[] = {
       0.5, restrictTrial ? 0.5 : 1.0, restrictTrial ? 0.0 : 0.5};
     const Real testMoments[] = {restrictTest ? 0.0 : 0.5, restrictTest ? 0.5 : 1.0, 0.5};
-    for (size_t assembly = 0; assembly < 2; ++assembly)
-    {
-      problem.assemble();
-      const auto& matrix = problem.getLinearSystem().getOperator();
+    auto check = [&](auto& instance, size_t stage) {
+      instance.assemble();
+      const auto& matrix = instance.getLinearSystem().getOperator();
       ASSERT_EQ(matrix.rows(), 6);
       ASSERT_EQ(matrix.cols(), 6);
       for (size_t row = 0; row < 6; ++row)
       {
         for (size_t col = 0; col < 6; ++col)
         {
-          const Real expected = missingAttribute ? Real(0)
-                                                 : coefficients[row / 3][col / 3] *
+          const Scalar expected = missingAttribute ? Scalar(0)
+                                                   : coefficients[row / 3][col / 3] *
               testMoments[row % 3] * trialMoments[col % 3];
           EXPECT_NEAR(std::abs(matrix.coeff(row, col) - expected), 0.0, 1e-12)
-            << "row=" << row << ", col=" << col << ", assembly=" << assembly;
+            << "row=" << row << ", col=" << col << ", assembly=" << stage;
         }
       }
-    }
+    };
+    for (size_t stage = 0; stage < 2; ++stage)
+      check(problem, stage);
+    auto copied = problem;
+    check(copied, 2);
+    auto moved = std::move(copied);
+    check(moved, 3);
+    auto assigned = problem;
+    assigned = problem;
+    check(assigned, 4);
+    auto moveSource = problem;
+    auto moveAssigned = problem;
+    moveAssigned = std::move(moveSource);
+    check(moveAssigned, 5);
+    std::unique_ptr<decltype(problem)> clone(problem.copy());
+    check(*clone, 6);
   }
 
   /// @brief Checks every sparse block against exact double integrals.
@@ -103,6 +127,30 @@ namespace Rodin::Tests::Unit
   TEST(NonlocalBlock, MissingAttributes)
   {
     checkNonlocalBlocks(true, true, true);
+  }
+
+  /// @brief Dense real mixed assembly uses every nonlocal block and both independent regions.
+  TEST(NonlocalBlock, DenseReal)
+  {
+    checkNonlocalBlocks<Real, Math::Matrix<Real>>();
+    checkNonlocalBlocks<Real, Math::Matrix<Real>>(true, true);
+    checkNonlocalBlocks<Real, Math::Matrix<Real>>(true, true, true);
+  }
+
+  /// @brief Dense complex mixed assembly preserves the kernel's nonreal coefficient.
+  TEST(NonlocalBlock, DenseComplex)
+  {
+    checkNonlocalBlocks<Complex, Math::Matrix<Complex>>();
+    checkNonlocalBlocks<Complex, Math::Matrix<Complex>>(true, true);
+    checkNonlocalBlocks<Complex, Math::Matrix<Complex>>(true, true, true);
+  }
+
+  /// @brief Sparse complex mixed assembly agrees with exact separated double integrals.
+  TEST(NonlocalBlock, SparseComplex)
+  {
+    checkNonlocalBlocks<Complex>();
+    checkNonlocalBlocks<Complex>(true, true);
+    checkNonlocalBlocks<Complex>(true, true, true);
   }
 
 }
