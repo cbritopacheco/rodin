@@ -493,6 +493,43 @@ namespace Rodin::Tests::Unit
       return meditGeometryName(info.param);
     });
 
+  /// @brief Loads both MFEM vector orderings from independently constructed coefficients.
+  TEST(Rodin_IO_MFEM_P1_GridFunction, VectorCoefficientOrderings)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    using FES = P1<Math::SpatialVector<Real>>;
+    FES fes(mesh, 3);
+    const size_t vertexCount = mesh.getVertexCount();
+    for (const int ordering : {0, 1})
+    {
+      SCOPED_TRACE(ordering);
+      std::stringstream stream;
+      stream << "# Independent vector fixture\n\nFiniteElementSpace\n"
+             << "FiniteElementCollection: H1_2D_P1\nVDim: 3\nOrdering: " << ordering
+             << "\n\n# Coefficients\n";
+      for (size_t i = 0; i < 3 * vertexCount; ++i)
+      {
+        const size_t vertex = ordering == 0 ? i % vertexCount : i / 3;
+        const size_t component = ordering == 0 ? i / vertexCount : i % 3;
+        stream << 100 * component + vertex + 1 << '\n';
+      }
+
+      GridFunction<FES, Math::Vector<Real>> loaded(fes);
+      loaded.getData().setConstant(-1.0);
+      GridFunctionLoader<FileFormat::MFEM, FES, Math::Vector<Real>> loader(loaded);
+      loader.load(stream);
+      ASSERT_EQ(loaded.getSize(), 3 * vertexCount);
+      for (size_t component = 0; component < 3; ++component)
+      {
+        for (size_t vertex = 0; vertex < vertexCount; ++vertex)
+        {
+          EXPECT_DOUBLE_EQ(loaded[vertex + component * vertexCount],
+            static_cast<Real>(100 * component + vertex + 1));
+        }
+      }
+    }
+  }
+
   /// @brief Verifies vector 3 D round trip for IO MEDIT P1 grid function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_IO_MEDIT_P1_GridFunction, Vector3DRoundTrip)
   {
