@@ -22,6 +22,44 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Rejects malformed MFEM headers and dimensions without replacing the destination.
+  TEST(Rodin_IO_MeshLoader, MFEMRejectsMalformedHeader)
+  {
+    for (const std::string input :
+      {"not an MFEM mesh\n", "MFEM mesh v1.0\ndimension\nnotanumber\n"})
+    {
+      SCOPED_TRACE(input);
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      const auto vertexCount = mesh.getVertexCount();
+      const auto cellCount = mesh.getCellCount();
+      std::stringstream stream(input);
+      MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      EXPECT_EQ(mesh.getVertexCount(), vertexCount);
+      EXPECT_EQ(mesh.getCellCount(), cellCount);
+    }
+  }
+
+  /// @brief Rejects malformed and truncated MFEM sections before committing a partial mesh.
+  TEST(Rodin_IO_MeshLoader, MFEMRejectsMalformedSections)
+  {
+    for (const std::string section : {"!\n", "unknown\n", "dimension\n2\n",
+           "elements\ninvalid\n", "elements\n1\ninvalid\n", "elements\n1\n",
+           "boundary\ninvalid\n", "boundary\n1\ninvalid\n", "boundary\n1\n",
+           "vertices\ninvalid\n", "vertices\n1\n2\ninvalid\n", "vertices\n1\n2\n"})
+    {
+      SCOPED_TRACE(section);
+      Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      const auto vertexCount = mesh.getVertexCount();
+      const auto cellCount = mesh.getCellCount();
+      std::stringstream stream("MFEM mesh v1.0\ndimension\n2\n" + section);
+      MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      EXPECT_EQ(mesh.getVertexCount(), vertexCount);
+      EXPECT_EQ(mesh.getCellCount(), cellCount);
+    }
+  }
+
   namespace
   {
     Mesh<Context::Local> makePointMesh()
