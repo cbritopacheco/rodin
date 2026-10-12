@@ -68,6 +68,11 @@ geometry, and backend variants explicitly. Current audit findings include:
   planar-triangle scope. Including this previously absent header exposed
   silent acceptance of quadrilateral cells; a failing regression preceded
   the input validation fix.
+- Hilbert H1 extension: scalar/vector P1 cosine manufactured solutions with
+  homogeneous Neumann data, scalar refinement, and exact affine Dirichlet
+  data through repeated solves. Instantiation exposed an obsolete problem
+  signature, solver construction and vector range; the repair uses the
+  stored trial/test functions and preserves added boundary conditions.
 - Eigen 3.4 MINRES does not compile for complex scalars. The Rodin header's
   generic scalar documentation does not establish dependency support.
 - IDRstab's wrapper names `Eigen::IDRSTABL`, which is absent in Eigen 3.4's
