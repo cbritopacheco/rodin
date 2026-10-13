@@ -1005,6 +1005,17 @@ namespace Rodin::Variational
     }
     else
     {
+      if (m_g == Geometry::Polytope::Type::Pyramid && m_i == 2 && m_local < 4)
+      {
+        const Real q = 1 - r.z();
+        if (q != 0)
+        {
+          Real value = r.x() * r.y() / q;
+          for (size_t order = 0; order < Order; ++order)
+            value *= Real(order + 1) / q;
+          return m_local % 2 == 0 ? value : -value;
+        }
+      }
       return 0;
     }
   }

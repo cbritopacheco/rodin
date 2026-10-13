@@ -400,3 +400,9 @@ be committed.
 Every resource file belongs under `resources/` and must be tracked through Git
 LFS. Before committing a new resource file, check `git check-attr filter --
 <path>` and confirm the intended state with `git lfs status`.
+
+## Follow-up work
+
+- Rework `Geometry::Euclidean` to use `Math::Spatial*` types for geometric
+  storage and arithmetic. Audit and eliminate dynamic allocations where they
+  occur while preserving the geometric operations and their numerical contracts.

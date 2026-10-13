@@ -1,3 +1,9 @@
+add_executable(RodinAlertFormattingTest FormattingTest.cpp)
+target_link_libraries(RodinAlertFormattingTest
+  PRIVATE GTest::gtest_main Rodin::Alert)
+gtest_discover_tests(RodinAlertFormattingTest
+  PROPERTIES LABELS unit TIMEOUT 30)
+
 add_executable(RodinAlertExceptionTest ExceptionTest.cpp)
 target_link_libraries(RodinAlertExceptionTest
   PUBLIC

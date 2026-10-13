@@ -12,20 +12,20 @@
  * @brief P1 (piecewise linear) finite element implementation.
  *
  * This file provides the P1Element class template for continuous piecewise
- * linear finite elements. P1 elements have:
+ * first-order finite elements. P1 elements have:
  * - One DOF per vertex
- * - Linear basis functions: @f$ \phi_i(x_j) = \delta_{ij} @f$ (Lagrange property)
- * - Constant gradient per element: @f$ \nabla \phi_i|_K = \text{const} @f$
+ * - Nodal basis functions: @f$ \phi_i(x_j) = \delta_{ij} @f$ (Lagrange property)
+ * - Affine simplex, tensor-product, wedge, or rational pyramid bases
  *
- * P1 elements are the most common finite elements, providing first-order
- * convergence (@f$ O(h) @f$ for L² norm, @f$ O(h^2) @f$ for energy norm) and
- * forming the foundation for many FEM applications.
+ * Simplex basis gradients are constant. Tensor-product, wedge, and rational
+ * pyramid basis gradients generally depend on the reference point.
  */
 
 #include <utility>
 
 #include <boost/serialization/access.hpp>
 
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Math/Vector.h"
@@ -75,8 +75,8 @@ namespace Rodin::Variational
    *
    * The P1Element provides a first-order finite element with:
    * - **DOF count**: One per vertex (@f$ n_v @f$ total)
-   * - **Basis functions**: Linear functions satisfying @f$ \phi_i(x_j) = \delta_{ij} @f$
-   * - **Gradient**: Constant on each element, @f$ \nabla \phi_i|_K = \text{const} @f$
+   * - **Basis functions**: Nodal functions satisfying @f$ \phi_i(x_j) = \delta_{ij} @f$
+   * - **Gradient**: Constant on simplices; generally variable on other geometries
    * - **Continuity**: Global C⁰ continuity across element interfaces
    *
    * P1 elements provide first-order convergence and are the standard choice
@@ -141,13 +141,14 @@ namespace Rodin::Variational
       /**
        * @brief Represents a piecewise linear basis function of a P1 scalar element.
        *
-       * P1 basis functions are linear polynomials satisfying the Lagrange property:
+       * P1 basis functions satisfy the Lagrange property:
        * @f$ \phi_i(x_j) = \delta_{ij} @f$ where x_j are the vertices of the element.
        *
        * ## Properties
        * - **Lagrange property**: φ_i = 1 at vertex i, φ_i = 0 at other vertices
-       * - **Linear**: Each basis function is a linear combination of coordinates
-       * - **Gradient**: @f$ \nabla \phi_i @f$ is constant on each element
+       * - **Basis family**: Affine on simplices, tensor-product on quadrilaterals
+       *   and hexahedra, triangle-by-segment on wedges, and rational on pyramids
+       * - **Gradient**: @f$ \nabla \phi_i @f$ is constant on simplices
        * - **Partition of unity**: @f$ \sum_i \phi_i(x) = 1 @f$ for all x in element
        * - **Continuity**: C⁰ continuous across element interfaces
        *
@@ -162,8 +163,14 @@ namespace Rodin::Variational
           /**
            * @brief Represents a partial derivative of a P1 basis function.
            *
-           * For P1 elements, the gradient is constant on each element, so derivatives
-           * are piecewise constant functions.
+           * Computes the pure reference-coordinate derivative
+           * @f$ \partial_i^{\mathrm{Order}} \phi @f$. Nonpyramid bases are linear
+           * in each coordinate separately, so pure derivatives of order two or
+           * greater vanish. The four pyramid base functions contain
+           * @f$ \pm xy/(1-z) @f$, giving
+           * @f$ \partial_z^n \phi = \pm n!xy/(1-z)^{n+1} @f$ for @f$ n\ge2 @f$.
+           * At the pyramid apex, higher derivatives retain the zero convention;
+           * this value is not a continuous extension of the interior derivatives.
            *
            * @tparam Order Order of differentiation (typically 1 for first derivative)
            */
@@ -191,7 +198,7 @@ namespace Rodin::Variational
               /**
                * @brief Evaluates the derivative at a spatial point.
                * @param r Reference coordinates at which to evaluate the basis.
-               * @return Value of derivative (constant for P1)
+               * @return Value of the pure reference-coordinate derivative.
                */
               constexpr
               ReturnType operator()(const Math::SpatialPoint& r) const;
@@ -208,7 +215,8 @@ namespace Rodin::Variational
            * The gradient is a vector of first-order partial derivatives:
            * @f$ \nabla \phi = (\partial\phi/\partial x, \partial\phi/\partial y, \partial\phi/\partial z) @f$
            *
-           * For P1 elements, the gradient is constant on each element.
+           * The gradient is constant on simplices and generally depends on the
+           * reference point for tensor-product, wedge, and pyramid bases.
            */
           class GradientFunction
           {
@@ -971,7 +979,7 @@ namespace Rodin::Variational
    * Vector-valued P1 element with:
    * - **DOF count**: @f$ d \cdot n_v @f$ where @f$ d @f$ is vector dimension, @f$ n_v @f$ is vertex count
    * - **Basis functions**: @f$ \boldsymbol{\phi}_{i,j}(x) = \phi_i(x) \mathbf{e}_j @f$
-   * - **Jacobian**: @f$ \mathbf{J}_{i,j} = \partial u_i/\partial x_j @f$ constant per element
+   * - **Jacobian**: @f$ \mathbf{J}_{i,j} = \partial u_i/\partial x_j @f$, constant on simplices
    * - **Continuity**: C⁰ continuous vector field
    *
    * Used for elasticity, fluid mechanics, and vector-valued PDEs. Each component
@@ -1122,7 +1130,16 @@ namespace Rodin::Variational
                 }
                 else
                 {
-                  return 0;
+                  if (m_i == m_local % m_vdim)
+                  {
+                    return P1Element<ScalarType>(m_g)
+                      .getBasis(m_local / m_vdim)
+                      .template getDerivative<Order>(m_j)(rc);
+                  }
+                  else
+                  {
+                    return 0;
+                  }
                 }
               }
 

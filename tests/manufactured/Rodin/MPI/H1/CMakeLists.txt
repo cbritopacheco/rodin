@@ -96,16 +96,23 @@ foreach(np 1 2 3 4 6)
     RodinManufacturedMPIH1PoissonTest_np${np}
     "HDF5_USE_FILE_LOCKING=FALSE")
 
-  add_test(
-    NAME RodinManufacturedMPIH1PoissonTest_slow_np${np}
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinManufacturedMPIH1PoissonTest>)
-  set_tests_properties(RodinManufacturedMPIH1PoissonTest_slow_np${np} PROPERTIES
-    LABELS "manufactured;petsc;distributed;slow"
-    TIMEOUT 900
-  )
-  rodin_suppress_external_mpi_lsan_for_test(
-    RodinManufacturedMPIH1PoissonTest_slow_np${np}
-    "HDF5_USE_FILE_LOCKING=FALSE")
+  # Each workflow retains all geometries and degrees. Keeping the three
+  # construction workflows separate prevents their combined high-order hex
+  # assembly costs from exhausting one test's runtime budget.
+  foreach(workflow 1 2 3)
+    add_test(
+      NAME RodinManufacturedMPIH1PoissonTest_slow_workflow${workflow}_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinManufacturedMPIH1PoissonTest>
+              --gtest_filter=AllGeometriesAndDegrees/H1Poisson*D_Workflow${workflow}.*)
+    set_tests_properties(
+      RodinManufacturedMPIH1PoissonTest_slow_workflow${workflow}_np${np} PROPERTIES
+      LABELS "manufactured;petsc;distributed;slow"
+      TIMEOUT 900
+    )
+    rodin_suppress_external_mpi_lsan_for_test(
+      RodinManufacturedMPIH1PoissonTest_slow_workflow${workflow}_np${np}
+      "HDF5_USE_FILE_LOCKING=FALSE")
+  endforeach()
 endforeach()

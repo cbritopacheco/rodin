@@ -4,7 +4,7 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/** @file @brief Independent energy and finite-difference oracles for Yeoh material. */
+/// @file @brief Independent energy and finite-difference oracles for Yeoh material.
 #include <gtest/gtest.h>
 #include "Rodin/Solid/Constitutive/Yeoh.h"
 
@@ -19,7 +19,7 @@ namespace
       Math::SpatialMatrix<Real> stress, tangent;
   };
 
-  Response evaluate(const Yeoh& law, const Math::SpatialMatrix<Real>& h,
+  Response evaluate(const HyperElasticLaw<Yeoh>& law, const Math::SpatialMatrix<Real>& h,
     const Math::SpatialMatrix<Real>& increment)
   {
     KinematicState state(h.rows());

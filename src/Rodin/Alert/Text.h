@@ -247,7 +247,7 @@ namespace Rodin::Alert
        */
       Text& setDark()
       {
-        setAttribute(Attribute::Bold);
+        setAttribute(Attribute::Dark);
         return *this;
       }
 
