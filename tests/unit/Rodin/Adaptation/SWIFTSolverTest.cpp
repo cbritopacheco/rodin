@@ -27,12 +27,14 @@ namespace Rodin::Tests::Unit
     {
       const SWIFT::Parameters parameters;
       EXPECT_EQ(parameters.model.fit, Real(1));
-      EXPECT_EQ(parameters.model.hinge, Real(10));
+      EXPECT_EQ(parameters.model.hinge, Real(100));
       EXPECT_EQ(parameters.convergence.iterations.inner, 15);
       EXPECT_EQ(parameters.convergence.tolerance.innerRelative, Real(1e-3));
       EXPECT_EQ(parameters.convergence.iterations.linear, 1000);
       EXPECT_EQ(parameters.model.distribution.deviatoric, Real(1e-4));
-      EXPECT_EQ(parameters.model.distribution.divergence, Real(1e-2));
+      EXPECT_EQ(parameters.model.distribution.divergence, Real(1e-4));
+      EXPECT_EQ(parameters.model.jacobianWeight, Real(0.1));
+      EXPECT_EQ(parameters.model.distortionWeight, Real(1));
       EXPECT_EQ(parameters.model.distortion, Real(10));
       EXPECT_EQ(parameters.model.jacobian, Real(1e-2));
       EXPECT_EQ(parameters.linear.threads, 0u);
@@ -141,14 +143,12 @@ namespace Rodin::Tests::Unit
       H1 space(std::integral_constant<size_t, 2>{}, mesh, 2);
       TrialFunction trial(space);
       TestFunction test(space);
-      trial.getSolution() = AnalyticVectorFunction(
-        [](const Point& point) {
-          Math::SpatialVector<Real> value(2);
-          value(0) = -Real(0.55) * point.x() * point.x();
-          value(1) = 0;
-          return value;
-        },
-        2);
+      trial.getSolution() = VectorFunction(size_t(2), [](const Point& point) {
+        Math::SpatialVector<Real> value(2);
+        value(0) = -Real(0.55) * point.x() * point.x();
+        value(1) = 0;
+        return value;
+      });
       for (auto face = mesh.getFace(); face; ++face)
         mesh.setAttribute({1, face->getIndex()}, 10);
       const RealFunction phi([](const Point& point) { return point.x() - Real(0.5); });
@@ -348,16 +348,15 @@ namespace Rodin::Tests::Unit
           (point.x() - Real(0.55) +
             (flat ? Real(0) : Real(0.02) * std::sin(Real(6) * point.y())));
       });
-      AnalyticVectorFunction grad(
-        [levelSetScale, partialGradient, flat](const Point& point) {
+      VectorFunction grad(
+        size_t(2), [levelSetScale, partialGradient, flat](const Point& point) {
           Math::SpatialVector<Real> value(2);
           value(0) = partialGradient && point.y() < Real(0.4) ? Real(0) : levelSetScale;
           value(1) = flat || (partialGradient && point.y() < Real(0.4))
             ? Real(0)
             : levelSetScale * Real(0.12) * std::cos(Real(6) * point.y());
           return value;
-        },
-        2);
+        });
 
       const SWIFT::Report report = solver.solve(phi, grad);
       Real physicalNorm = 0;
@@ -563,12 +562,9 @@ namespace Rodin::Tests::Unit
         RealFunction phi([levelSetScale](const Point& x) {
           return levelSetScale * (Real(2) + x.getCoordinates().squaredNorm());
         });
-        AnalyticVectorFunction grad(
-          [levelSetScale](const Point& x) {
-            return Math::SpatialVector<Real>(
-              Real(2) * levelSetScale * x.getCoordinates());
-          },
-          dimension);
+        VectorFunction grad(dimension, [levelSetScale](const Point& x) {
+          return Math::SpatialVector<Real>(Real(2) * levelSetScale * x.getCoordinates());
+        });
         const Real normalization = Real(1) / (levelSetScale * levelSetScale);
         SWIFT::FittingTensor coefficient(
           grad, current, locator, p, normalization, dimension);
@@ -651,11 +647,9 @@ namespace Rodin::Tests::Unit
     check.operator()<1>();
     check.operator()<2>();
     check.operator()<3>();
-    const AnalyticVectorFunction analytic(
-      [](const Point& point) {
-        return Math::SpatialVector<Real>(point.getPhysicalCoordinates());
-      },
-      2);
+    const VectorFunction analytic(size_t(2), [](const Point& point) {
+      return Math::SpatialVector<Real>(point.getPhysicalCoordinates());
+    });
     const SWIFT::FittingTensor unknown(analytic, current, locator, parameters, 1, 2);
     EXPECT_EQ(unknown.getOrder(*face), std::nullopt);
   }
@@ -671,7 +665,6 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(state.report.interfaceMeasure, Real(0));
     EXPECT_TRUE(std::isfinite(state.report.geometricRMS));
     EXPECT_TRUE(std::isfinite(state.report.geometricSup));
-    EXPECT_TRUE(std::isfinite(state.report.normalRMS));
     EXPECT_GT(state.report.iterations, 0);
     EXPECT_GT(state.report.linearSolveCount, 0);
     EXPECT_LE(state.report.maxLinearIterations, 1000);
@@ -866,7 +859,6 @@ namespace Rodin::Tests::Unit
       Real(7) * base.report.levelSetGradientScale, Real(1e-12));
     EXPECT_NEAR(scaled.report.geometricRMS, base.report.geometricRMS, Real(1e-10));
     EXPECT_NEAR(scaled.report.geometricSup, base.report.geometricSup, Real(1e-10));
-    EXPECT_NEAR(scaled.report.normalRMS, base.report.normalRMS, Real(1e-12));
     EXPECT_EQ(base.report.iterations, scaled.report.iterations);
     EXPECT_STREQ(base.report.getReasonString(), scaled.report.getReasonString());
   }
@@ -1148,12 +1140,10 @@ namespace Rodin::Tests::Unit
         RealFunction phi([](const Point& point) {
           return point.x() - Real(0.55) + Real(0.02) * std::sin(Real(6) * point.y());
         });
-        AnalyticVectorFunction gradient(
-          [](const Point& point) {
-            return Math::SpatialVector<Real>{
-              Real(1), Real(0.12) * std::cos(Real(6) * point.y())};
-          },
-          2);
+        VectorFunction gradient(size_t(2), [](const Point& point) {
+          return Math::SpatialVector<Real>{
+            Real(1), Real(0.12) * std::cos(Real(6) * point.y())};
+        });
         const auto first = solver.solve(phi, gradient);
         const Math::Vector<Real> displacement = trial.getSolution().getData();
         trial.getSolution() = VectorFunction(Real(0), Real(0));
@@ -1222,12 +1212,10 @@ namespace Rodin::Tests::Unit
       const Real y = Real(2) * point.y() - Real(1);
       return point.x() - Real(0.5) + Real(0.05) * y * y;
     });
-    AnalyticVectorFunction grad(
-      [](const Point& point) {
-        return Math::SpatialVector<Real>{
-          Real(1), Real(0.2) * (Real(2) * point.y() - Real(1))};
-      },
-      2);
+    VectorFunction grad(size_t(2), [](const Point& point) {
+      return Math::SpatialVector<Real>{
+        Real(1), Real(0.2) * (Real(2) * point.y() - Real(1))};
+    });
     const auto report = solver.solve(phi, grad);
     EXPECT_EQ(report.iterations, 0u);
     EXPECT_NEAR(report.geometricSup, Real(0.05) / std::sqrt(Real(1.04)), Real(1e-12));
