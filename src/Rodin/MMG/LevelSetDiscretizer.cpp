@@ -212,6 +212,7 @@ namespace Rodin::MMG
   void LevelSetDiscretizer::generateUniqueSplit(const FlatSet<Geometry::Attribute>& attrs)
   {
     m_uniqueSplit.clear();
+    m_g2om.clear();
 
     // Compute existing attributes
     FlatSet<Geometry::Attribute> existingAttributes;

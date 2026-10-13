@@ -53,6 +53,18 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- MMG affine cuts: a planar surface retains unit area and a unit-length
+  isovalue contour. A unit-cube cut checks both material volumes, every
+  interface coordinate and unit interface area while changing labels and
+  switching them back on the same discretizer. Reuse retained stale generated
+  label mappings before repair; the derived mapping is now cleared per call.
+  All 112 MMG cases pass serially; shifting the production cutting level
+  rejects the physical-coordinate and measure oracles.
+- Unresolved solver-template audit: standalone inclusion of
+  `Solver/IDRSTABL.h` fails with the configured Eigen 3.4 dependency because
+  that dependency does not define `Eigen::IDRSTABL`. Its absent LCOV record
+  does not establish tested support. No solver substitution or coverage
+  exclusion was introduced for this finding.
 - PETSc single-field affine identifications: linear and quadratic vector spaces
   on triangles and quadrilaterals recover an exact constant mass solution and
   the independent admissible-direction energy. Real sequential and OpenMP

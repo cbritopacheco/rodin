@@ -3347,3 +3347,111 @@ namespace Rodin::Tests::Unit
     }
   }
 }
+
+/// @brief Reusing a volume cutter applies the current labels and exact affine interface.
+TEST(Rodin_MMG_LevelSetDiscretizer, ReusedAffineVolumeCutUsesCurrentMaterialLabels)
+{
+  constexpr Attribute material = 17;
+  constexpr Attribute boundary = 71;
+  constexpr Real isovalue = 0.37;
+  MMG::Mesh mesh;
+  mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+  mesh.scale(0.5);
+  for (auto cell = mesh.getCell(); cell; ++cell)
+    mesh.setAttribute({3, cell->getIndex()}, material);
+  P1 space(mesh);
+  MMG::RealGridFunction levelSet(space);
+  levelSet = [](const Point& point) { return point.x(); };
+  MMG::LevelSetDiscretizer cutter;
+  cutter.setLevelSet(isovalue)
+    .setBoundaryReference(boundary)
+    .setRMC(0)
+    .setBaseReferences(material)
+    .setHMax(0.4);
+  for (const auto labels : {MMG::Split{41, 42}, MMG::Split{51, 52}, MMG::Split{41, 42}})
+  {
+    cutter.setSplit({{material, labels}});
+    auto result = cutter.discretize(levelSet);
+    ASSERT_FALSE(result.isEmpty());
+    EXPECT_EQ(result.getDimension(), 3);
+    Real inside = 0, outside = 0, interfaceArea = 0;
+    for (auto cell = result.getCell(); cell; ++cell)
+    {
+      const auto attribute = cell->getAttribute();
+      ASSERT_TRUE(attribute);
+      const Real measure = cell->getMeasure();
+      if (*attribute == labels.interior)
+      {
+        inside += measure;
+        for (const auto vertex : cell->getVertices())
+          EXPECT_LE(result.getVertexCoordinates(vertex).x(), isovalue + 1e-10);
+      }
+      else
+      {
+        EXPECT_EQ(*attribute, labels.exterior);
+        outside += measure;
+        for (const auto vertex : cell->getVertices())
+          EXPECT_GE(result.getVertexCoordinates(vertex).x(), isovalue - 1e-10);
+      }
+    }
+    for (auto face = result.getFace(); face; ++face)
+    {
+      if (face->getAttribute() != boundary)
+        continue;
+      interfaceArea += face->getMeasure();
+      for (const auto vertex : face->getVertices())
+        EXPECT_NEAR(result.getVertexCoordinates(vertex).x(), isovalue, 1e-10);
+    }
+    EXPECT_NEAR(inside, isovalue, 1e-10);
+    EXPECT_NEAR(outside, 1 - isovalue, 1e-10);
+    EXPECT_NEAR(interfaceArea, 1, 1e-10);
+  }
+}
+
+/// @brief Surface cutting preserves a planar square and emits the exact affine contour.
+TEST(Rodin_MMG_LevelSetDiscretizer, AffineSurfaceCutPreservesAreaAndContour)
+{
+  constexpr Attribute boundary = 71;
+  constexpr Real isovalue = 0.37;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  mesh.scale(0.5);
+  Mesh<Context::Local>::Builder builder;
+  builder.initialize(3).nodes(mesh.getVertexCount());
+  for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+  {
+    const auto& coordinates = vertex->getCoordinates();
+    builder.vertex({coordinates.x(), coordinates.y(), 0});
+  }
+  for (auto cell = mesh.getCell(); cell; ++cell)
+  {
+    const auto& vertices = cell->getVertices();
+    builder.polytope(Polytope::Type::Triangle, {vertices[0], vertices[1], vertices[2]});
+  }
+  auto surface = builder.finalize();
+  surface.getConnectivity().compute(1, 2);
+  P1 space(surface);
+  MMG::RealGridFunction levelSet(space);
+  levelSet = [](const Point& point) { return point.x(); };
+  auto result = MMG::LevelSetDiscretizer()
+                  .setLevelSet(isovalue)
+                  .setBoundaryReference(boundary)
+                  .setHMax(0.3)
+                  .discretize(levelSet);
+  ASSERT_FALSE(result.isEmpty());
+  EXPECT_TRUE(result.isSurface());
+  Real area = 0, contourLength = 0;
+  for (auto cell = result.getCell(); cell; ++cell)
+    area += cell->getMeasure();
+  for (auto edge = result.getFace(); edge; ++edge)
+  {
+    if (edge->getAttribute() != boundary)
+      continue;
+    contourLength += edge->getMeasure();
+    for (const auto vertex : edge->getVertices())
+      EXPECT_NEAR(result.getVertexCoordinates(vertex).x(), isovalue, 1e-10);
+  }
+  for (auto vertex = result.getVertex(); vertex; ++vertex)
+    EXPECT_NEAR(vertex->getCoordinates().z(), 0, 1e-10);
+  EXPECT_NEAR(area, 1, 1e-10);
+  EXPECT_NEAR(contourLength, 1, 1e-10);
+}
