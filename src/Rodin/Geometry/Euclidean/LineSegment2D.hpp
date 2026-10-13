@@ -11,7 +11,7 @@
 #ifndef RODIN_GEOMETRY_EUCLIDEAN_LINESEGMENT2D_HPP
 #define RODIN_GEOMETRY_EUCLIDEAN_LINESEGMENT2D_HPP
 
-#include <Eigen/Core>
+#include "Rodin/Math/SpatialVector.h"
 
 #include "Point2D.h"
 #include "Circle.h"
@@ -47,9 +47,7 @@ namespace Rodin::Geometry::Euclidean
   }
 
   template <class T>
-  inline
-  constexpr
-  Eigen::Vector2<T> LineSegment2D<T>::direction() const
+  inline constexpr Math::SpatialVector<T> LineSegment2D<T>::direction() const
   {
     return (m_end - m_start).normalized();
   }

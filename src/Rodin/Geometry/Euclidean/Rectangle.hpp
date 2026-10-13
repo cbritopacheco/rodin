@@ -47,11 +47,11 @@ namespace Rodin::Geometry::Euclidean
     }
     else if constexpr (c == BottomRight)
     {
-      return m_bottomLeft + Eigen::Vector2<T>(m_topRight.x() - m_bottomLeft.x(), 0);
+      return Point2D<T>(m_topRight.x(), m_bottomLeft.y());
     }
     else if constexpr (c == TopLeft)
     {
-      return m_bottomLeft + Eigen::Vector2<T>(0, m_topRight.y() - m_bottomLeft.y());
+      return Point2D<T>(m_bottomLeft.x(), m_topRight.y());
     }
     else if constexpr (c == TopRight)
     {

@@ -6,6 +6,11 @@
  */
 /** @file @brief Analytic contracts for the Euclidean primitive templates. */
 #include <gtest/gtest.h>
+#include <type_traits>
+#include <utility>
+#include "Rodin/Alert/Exception.h"
+#include "Rodin/Math/SpatialVector.h"
+#include "Rodin/Geometry/Euclidean/Common.h"
 #include "Rodin/Geometry/Euclidean/Point2D.h"
 #include "Rodin/Geometry/Euclidean/Rectangle.h"
 
@@ -113,4 +118,129 @@ TEST(Rodin_Geometry_Euclidean, RectangleCornersAndInclusiveContainment)
   EXPECT_TRUE(rectangle.contains({2, 3}));
   EXPECT_FALSE(rectangle.contains({0, 3}));
   EXPECT_FALSE(rectangle.contains({2, 7}));
+}
+
+namespace Rodin::Tests::Unit
+{
+  template <class Scalar>
+  class EuclideanSpatialStorage : public ::testing::Test
+  {};
+
+  using EuclideanScalars = ::testing::Types<Float, Real>;
+  TYPED_TEST_SUITE(EuclideanSpatialStorage, EuclideanScalars);
+
+  /// @brief Coordinates and directions use fixed-capacity spatial storage with value semantics.
+  TYPED_TEST(EuclideanSpatialStorage, CoordinatesAndValueSemantics)
+  {
+    using Scalar = TypeParam;
+    using Point = Point2D<Scalar>;
+    using Vector = Math::SpatialVector<Scalar>;
+    static_assert(
+      std::is_same_v<std::remove_cvref_t<decltype(std::declval<Point>().asVector())>,
+        Vector>);
+    static_assert(
+      std::is_same_v<decltype(std::declval<LineSegment2D<Scalar>>().direction()),
+        Vector>);
+    static_assert(Vector::Data::RowsAtCompileTime == 3);
+    Point origin;
+    EXPECT_EQ(origin.asVector().size(), 2);
+    EXPECT_EQ(origin.x(), Scalar(0));
+    EXPECT_EQ(origin.y(), Scalar(0));
+    Point point(Scalar(3), Scalar(4));
+    EXPECT_EQ(point.asVector().size(), 2);
+    EXPECT_EQ(point.norm(), Scalar(5));
+    Point copied(point);
+    copied.asVector()[0] = Scalar(8);
+    EXPECT_EQ(point.x(), Scalar(3));
+    Point moved(std::move(copied));
+    EXPECT_EQ(moved.x(), Scalar(8));
+    Point assigned;
+    assigned = point;
+    assigned.y() = Scalar(9);
+    EXPECT_EQ(point.y(), Scalar(4));
+    assigned = Vector{Scalar(-2), Scalar(7)};
+    EXPECT_EQ(assigned, Point(Scalar(-2), Scalar(7)));
+    EXPECT_THROW((assigned = Vector{Scalar(1)}), Alert::Exception);
+    EXPECT_EQ(assigned, Point(Scalar(-2), Scalar(7)));
+    EXPECT_THROW((Point(Vector{})), Alert::Exception);
+    EXPECT_THROW((Point(Vector{Scalar(1), Scalar(2), Scalar(3)})), Alert::Exception);
+    EXPECT_THROW((Point({Scalar(1)})), Alert::Exception);
+  }
+
+  /// @brief Spatial arithmetic preserves affine combinations and segment parameterization.
+  TYPED_TEST(EuclideanSpatialStorage, AffineArithmeticAndInterpolation)
+  {
+    using Scalar = TypeParam;
+    using Point = Point2D<Scalar>;
+    using Vector = Math::SpatialVector<Scalar>;
+    constexpr Real tolerance = std::is_same_v<Scalar, Float> ? 1e-5 : 1e-12;
+    const Point first(Scalar(1), Scalar(2)), last(Scalar(4), Scalar(6));
+    static_assert(std::is_same_v<decltype(last - first), Vector>);
+    const Vector displacement = last - first;
+    EXPECT_EQ(displacement.size(), 2);
+    EXPECT_EQ(displacement[0], Scalar(3));
+    EXPECT_EQ(displacement[1], Scalar(4));
+    EXPECT_EQ(first + displacement, last);
+    EXPECT_EQ(displacement + first, last);
+    EXPECT_EQ(last - displacement, first);
+    EXPECT_EQ((Scalar(2) * first) / Scalar(2), first);
+    const LineSegment2D<Scalar> segment(first, last);
+    EXPECT_NEAR(segment.direction()[0], Real(0.6), tolerance);
+    EXPECT_NEAR(segment.direction()[1], Real(0.8), tolerance);
+    EXPECT_NEAR(segment.direction().norm(), 1, tolerance);
+    EXPECT_NEAR(segment(Scalar(0.25)).x(), Real(1.75), tolerance);
+    EXPECT_NEAR(segment(Scalar(0.25)).y(), 3, tolerance);
+    EXPECT_EQ(segment(Scalar(0)), first);
+    EXPECT_EQ(segment(Scalar(1)), last);
+    EXPECT_LT((segment.reverse().direction() + segment.direction()).norm(), tolerance);
+    const Point center = barycenter(Point(Scalar(0), Scalar(0)),
+      Point(Scalar(2), Scalar(0)), Point(Scalar(1), Scalar(2)));
+    EXPECT_NEAR(center.x(), 1, tolerance);
+    EXPECT_NEAR(center.y(), Real(2) / Real(3), tolerance);
+  }
+
+  /// @brief Projection and intersection results satisfy independent geometric equations.
+  TYPED_TEST(EuclideanSpatialStorage, ProjectionIntersectionsAndCorners)
+  {
+    using Scalar = TypeParam;
+    using Point = Point2D<Scalar>;
+    constexpr Real tolerance = std::is_same_v<Scalar, Float> ? 1e-4 : 1e-12;
+    const Line2D<Scalar> line(Scalar(3), Scalar(4), Scalar(5));
+    const Point source(Scalar(2), Scalar(3));
+    const auto projection = source.connect(line);
+    ASSERT_TRUE(projection);
+    EXPECT_NEAR(projection->end().x(), Real(11) / Real(25), tolerance);
+    EXPECT_NEAR(projection->end().y(), Real(23) / Real(25), tolerance);
+    EXPECT_NEAR(line(projection->end()), 0, tolerance);
+    EXPECT_NEAR(projection->length(), Real(13) / Real(5), tolerance);
+    Circle<Scalar> circle(Point(Scalar(1), Scalar(-2)), Scalar(5));
+    const auto closest = Point(Scalar(7), Scalar(6)).connect(circle);
+    ASSERT_TRUE(closest);
+    EXPECT_LT((closest->end() - Point(Scalar(4), Scalar(2))).norm(), tolerance);
+    EXPECT_NEAR(closest->length(), 5, tolerance);
+    using Pair = std::pair<Point, Point>;
+    const auto secant =
+      Line2D<Scalar>(Scalar(3), Scalar(4), Scalar(-5)).intersect(circle);
+    ASSERT_TRUE(std::holds_alternative<Pair>(secant));
+    const auto& endpoints = std::get<Pair>(secant);
+    EXPECT_NEAR((endpoints.first - endpoints.second).norm(), 10, tolerance);
+    for (const auto& point : {endpoints.first, endpoints.second})
+    {
+      EXPECT_NEAR(circle(point), 0, tolerance);
+      EXPECT_NEAR(Scalar(3) * point.x() + Scalar(4) * point.y(), -5, tolerance);
+    }
+    const auto tangent =
+      Line2D<Scalar>(Scalar(-6), Scalar(-8), Scalar(-40)).intersect(circle);
+    ASSERT_TRUE(std::holds_alternative<Point>(tangent));
+    EXPECT_LT((std::get<Point>(tangent) - Point(Scalar(4), Scalar(2))).norm(), tolerance);
+    using Rect = Rectangle<Scalar>;
+    const Rect rectangle(Point(Scalar(-2), Scalar(1)), Point(Scalar(3), Scalar(5)));
+    EXPECT_EQ(
+      rectangle.template getCorner<Rect::BottomRight>(), Point(Scalar(3), Scalar(1)));
+    EXPECT_EQ(
+      rectangle.template getCorner<Rect::TopLeft>(), Point(Scalar(-2), Scalar(5)));
+    EXPECT_EQ(rectangle.area(), Scalar(20));
+    EXPECT_TRUE(rectangle.contains(Point(Scalar(-2), Scalar(5))));
+    EXPECT_FALSE(rectangle.contains(Point(Scalar(4), Scalar(5))));
+  }
 }

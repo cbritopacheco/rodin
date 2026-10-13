@@ -53,7 +53,7 @@ namespace Rodin::Geometry::Euclidean
   constexpr
   Optional<LineSegment2D<T>> Point2D<T>::connect(const Circle<T>& other) const
   {
-    const Eigen::Vector2<T> radial = this->asVector() - other.center().asVector();
+    const Math::SpatialVector<T> radial = this->asVector() - other.center().asVector();
     const auto length = radial.norm();
     if (length == T{0} || other(*this) == T{0})
       return {};

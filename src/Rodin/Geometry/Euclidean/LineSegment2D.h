@@ -12,7 +12,7 @@
  * @brief Line segment in 2D Euclidean space.
  */
 
-#include <optional>
+#include "Rodin/Math/SpatialVector.h"
 
 #include "ForwardDecls.h"
 #include "Base.h"
@@ -89,9 +89,7 @@ namespace Rodin::Geometry::Euclidean
      *   \frac{(x_1, y_1) - (x_0, y_0)}{\|(x_1, y_1) - (x_0, y_0)\|}
      * @f]
      */
-    inline
-    constexpr
-    Eigen::Vector2<T> direction() const;
+    inline constexpr Math::SpatialVector<T> direction() const;
 
     /**
      * @brief Gets the start point.

@@ -53,6 +53,16 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Euclidean primitives: `Point2D` owns a two-component `Math::SpatialVector`,
+  and displacements and segment directions use the same fixed-capacity type.
+  The previous `Eigen::Vector2` storage was already fixed-size; this change
+  standardizes the spatial API rather than claiming an allocation reduction.
+  Float and real tests cover value semantics, invalid coordinate dimensions
+  through native Alert exceptions, affine arithmetic, segment interpolation,
+  barycenters, projections, circle intersections and rectangle corners.
+  A doubled segment direction is rejected by the interpolation test.
+  Direct Eigen inheritance and expression APIs are replaced by the point's
+  coordinate accessors, spatial-vector view and owned arithmetic results.
 - Form ownership: real/complex P1 and quadratic H1 forms reject foreign trial
   and test contributions without changing the assembled mass operator or load.
   Addition/subtraction and linear assignment exercise named-trial and unnamed
@@ -413,9 +423,3 @@ be committed.
 Every resource file belongs under `resources/` and must be tracked through Git
 LFS. Before committing a new resource file, check `git check-attr filter --
 <path>` and confirm the intended state with `git lfs status`.
-
-## Follow-up work
-
-- Rework `Geometry::Euclidean` to use `Math::Spatial*` types for geometric
-  storage and arithmetic. Audit and eliminate dynamic allocations where they
-  occur while preserving the geometric operations and their numerical contracts.
