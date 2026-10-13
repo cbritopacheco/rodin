@@ -53,6 +53,13 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Constraint maps: real/complex affine chains carry both coefficients and
+  offsets, including elimination of fixed masters and cancellation of repeated
+  masters. Finalization is idempotent, and copied maps remain independent.
+  The affine-offset and fixed-master oracles failed before their repair.
+  Invalid indices, conflicting and singular rows, and cycles are rejected;
+  reset restores usable state. Region iteration matches indexed selection for
+  cells, faces, boundary facets and interior interfaces on a two-dimensional mesh.
 - Preassembled value constraints: real/complex dense/sparse P1 and quadratic H1 vector
   mass/load forms satisfy independent projector/lifting matrix and RHS
   identities with nonzero affine boundary values. Full solves recover the

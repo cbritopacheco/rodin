@@ -269,6 +269,7 @@ namespace Rodin::Assembly
           state[idx] = State::Visiting;
 
           Expansion flattened;
+          Scalar value = m_identificationValues[idx];
           for (const auto& e : m_expansions[idx])
           {
             check(e.index);
@@ -277,6 +278,12 @@ namespace Rodin::Assembly
               continue;
 
             const Expansion masterExpansion = self(self, e.index);
+            if (isFixed(e.index))
+            {
+              value += e.coefficient * getFixedValue(e.index);
+              continue;
+            }
+            value += e.coefficient * getIdentificationValue(e.index);
             for (const auto& me : masterExpansion)
             {
               if (me.coefficient == Scalar(0))
@@ -286,6 +293,7 @@ namespace Rodin::Assembly
             }
           }
 
+          m_identificationValues[idx] = value;
           canonicalize(i, flattened);
 
           state[idx] = State::Done;
@@ -477,6 +485,7 @@ namespace Rodin::Assembly
       void canonicalize(Index slave, Expansion& expansion)
       {
         Scalar value = m_identificationValues[static_cast<size_t>(slave)];
+        m_isIdentified[static_cast<size_t>(slave)] = false;
         Expansion canonical = canonicalize(slave, expansion, value);
 
         if (canonical.empty())

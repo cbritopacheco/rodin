@@ -32,3 +32,8 @@ add_executable(RodinAssemblyLifecycleTest LifecycleTest.cpp)
 target_link_libraries(RodinAssemblyLifecycleTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
 gtest_discover_tests(RodinAssemblyLifecycleTest PROPERTIES LABELS unit TIMEOUT 300)
+
+add_executable(RodinAssemblyContractsTest ContractsTest.cpp)
+target_link_libraries(RodinAssemblyContractsTest
+  PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinAssemblyContractsTest PROPERTIES LABELS unit)
