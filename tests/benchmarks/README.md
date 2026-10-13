@@ -385,6 +385,82 @@ build/tests/benchmarks/RodinBulkP1JacobianBenchmarks \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
 
+### Local quadrature binding and physical assembly
+
+`RodinQuadratureBindingBenchmarks`, under `Rodin/Variational`, measures public
+`Integral::setPolytope` sweeps for the four distinct operator expressions in
+the coupled reaction-diffusion consumer:
+
+$$
+m(u,v)=\int_\Omega uv\,\mathrm{d}x,\qquad
+m_\alpha(u,v)=\int_\Omega(\alpha u)v\,\mathrm{d}x,\qquad
+a(u,v)=\int_\Omega\nabla u\cdot\nabla v\,\mathrm{d}x,\qquad
+a_2(u,v)=\int_\Omega(2\nabla u)\cdot\nabla v\,\mathrm{d}x,
+\quad \alpha=0.2.
+$$
+
+Complex cases use the same Rodin expressions, not an assumed replacement by
+a sesquilinear form. Each scope includes mesh traversal, formula selection,
+owned mapped-quadrature construction, basis preparation and local contraction.
+Reading one prepared entry prevents dead-code elimination. Global scatter,
+boundary constraints and solving are excluded; complete physical assembly
+remains in its Assembly-owned benchmark. Geometry remains native P1, while
+field H1 degrees one through three, real/complex scalars, seven volume families
+and sizes 3, 5 and 9 give 504 registered selections. This registration count is
+not a claim that every selection has been profiled or numerically qualified.
+
+Before timing, every cell matrix is checked against the retained original
+entry-loop algorithm with the existing relative budget $10^{-11}$ and scale
+$\max(1,\|M_{\mathrm{ref}}\|_F)$. Deliberately perturbing one entry by that
+scale must fail. An untimed sweep after timing must reproduce every initially
+retained entry exactly. The entry-loop oracle shares mapped geometry; it is
+not an independent mapping certification. Reference-table initialization,
+oracle evaluation and retained-matrix allocation are excluded from timing.
+
+The initial qualification covered all 56 degree-two real/complex cases at
+size 3 in both native and OpenMP-enabled optimized builds. Local binding is
+sequential in both builds; this is not a parallel scaling study.
+Selected size-5 real studies used five repetitions. Initial CPU
+medians on triangle/tetrahedron meshes were respectively 0.100/29.113 ms for
+mass, 0.122/38.871 ms for weighted mass, 0.108/33.540 ms for diffusion and
+0.116/43.219 ms for weighted diffusion. An elapsed-time variability anomaly in
+the initial mass sweep prompted isolated fixed-work repeats, rather than a
+source-performance conclusion. Those repeats measured 0.090/27.011 ms for
+mass and 38.539 ms for tetrahedral weighted mass, with CPU coefficients of
+variation 0.56%, 1.18% and 0.65%, respectively; elapsed coefficients were
+0.62%, 1.57% and 0.75%. The original samples are retained. No speedup is claimed
+between these unchanged-source runs.
+
+At size 5, triangles contain 32 cells with 53 quadrature points and six field
+basis functions per cell; tetrahedra contain 384 cells with 729 points and ten
+functions. The local matrix accumulation proxy
+$N_{\mathrm{cells}}N_qn_b^2$ is about 458.5 times larger on tetrahedra. The
+observed real CPU ratios, approximately 300--372 depending on the operator
+and process repeat, do not demonstrate an additional dimension-only penalty.
+This proxy excludes mapped geometry, gradient transforms, traversal and
+allocation, so equal normalized values are not expected.
+
+Separate Instruments captures of size-5 tetrahedral weighted mass and
+diffusion selected stacks containing both the benchmark owner and
+`QuadratureRule::setPolytope`. Weighted mass placed 72.0% of selected CPU
+sample weight in the local preparation/contraction method itself and 16.7%
+inclusively in bulk P1 Jacobians. Diffusion placed 52.5% in its own method,
+19.4% inclusively in bulk Jacobians, and 5.9% in spatial dot products.
+Allocation-related frames contributed less than 0.6% in either capture.
+Inlined operations remain attributed to their enclosing method; these
+profiles do not yet separate every source expression inside that method.
+Untimed guards also invoke production kernels, so selected CPU samples are
+source attribution, not timed-stage fractions. The next investigation concerns
+the scalar local contraction and gradient-transform loops, with arithmetic
+preservation and complete-assembly measurements required before any repair.
+
+```sh
+cmake --build build --target RodinQuadratureBindingBenchmarks -j1
+build/tests/benchmarks/RodinQuadratureBindingBenchmarks \
+  --benchmark_filter='CoupledReactionDiffusion/Binding/.*/H1/P2/Real/Tetrahedron/5/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+```
+
 ### Mapped-point protocol
 
 `RodinMappedPointBenchmarks`, owned by Geometry, separates physical coordinates,
