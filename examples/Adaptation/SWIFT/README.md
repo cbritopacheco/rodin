@@ -471,6 +471,5 @@ write a campaign CSV or trajectory archive.
 - [Adapt workflow](../../../src/Rodin/Adaptation/SWIFT/Adapt.h): owned linear
   displacement and in-place mesh adaptation.
 
-Campaign parsing, response extraction and trajectory drivers remain in
-[`experiments/swift_calibration`](../../../experiments/swift_calibration),
-outside these examples and excluded from the default build.
+Parameter studies use these same reconstruction executables and named controls,
+without a separate reconstruction or trajectory implementation.

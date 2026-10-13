@@ -13,8 +13,8 @@
   `SWIFT_ReconstructionP3`. Only the displacement degree changes; named flags,
   lobed circle/sphere targets, diagnostics and XDMF output share one implementation.
   Use `--help` to list controls and `--n=16 --dimension=2 --lobes=4` for a 2D target.
-  Calibration drivers and their command-line controls live separately in
-  `experiments/swift_calibration` and are not built by default.
+  Calibration uses these same reconstruction executables and named controls;
+  there is no separate fitting implementation for parameter studies.
 
   @section guides-swift-setup Setup and ownership
 

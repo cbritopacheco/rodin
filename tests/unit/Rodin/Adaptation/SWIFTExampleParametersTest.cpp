@@ -7,8 +7,8 @@
 #include <utility>
 #include "Rodin/Adaptation/SWIFT/Admissibility.h"
 #include "Rodin/Adaptation/SWIFT/HingeProblem.h"
+#include "Rodin/Adaptation/SWIFT/Report.h"
 #include "Rodin/Variational.h"
-#include "../../../../experiments/swift_calibration/Parameters.h"
 #include "../../../../examples/Adaptation/SWIFT/Options.h"
 
 using namespace Rodin;
@@ -107,7 +107,6 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, FlatParameterFlagsAreRejected)
     std::string executable = "SWIFT_ReconstructionP1", argument = option;
     char* argv[] = {executable.data(), argument.data()};
     EXPECT_THROW(Examples::ReconstructionOptions(2, argv), Alert::Exception);
-    EXPECT_THROW(Examples::makeSWIFTParameters(2, argv, Real(0.1), 10), Alert::Exception);
   }
 }
 
@@ -141,7 +140,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, CalibratedDefaultsAreInherited)
 {
   std::string name = "example";
   char* argv[] = {name.data()};
-  const auto p = Examples::makeSWIFTParameters(1, argv, Real(0.1), 10);
+  const Examples::ReconstructionOptions options(1, argv);
+  const auto& p = options.parameters;
   EXPECT_EQ(p.model.fit, Real(1));
   EXPECT_EQ(p.model.distribution.deviatoric, Real(1e-4));
   EXPECT_EQ(p.model.distribution.divergence, Real(1e-4));
@@ -161,7 +161,7 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, CalibratedDefaultsAreInherited)
 
 TEST(Rodin_Adaptation_SWIFTExampleParameters, CanonicalNamesMapToHierarchicalParameters)
 {
-  std::vector<std::string> arguments = {"example", "--model-fit=2",
+  std::vector<std::string> arguments = {"example", "--n=11", "--model-fit=2",
     "--model-distribution-deviatoric=0.0003", "--model-distribution-divergence=0.0004",
     "--model-hinge=10", "--model-jacobian=0.02", "--model-distortion=5",
     "--convergence-iterations-outer=20", "--convergence-iterations-inner=10",
@@ -171,7 +171,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, CanonicalNamesMapToHierarchicalPar
   std::vector<char*> argv;
   for (auto& argument : arguments)
     argv.push_back(argument.data());
-  const auto p = Examples::makeSWIFTParameters(argv.size(), argv.data(), Real(0.1), 10);
+  const Examples::ReconstructionOptions options(argv.size(), argv.data());
+  const auto& p = options.parameters;
   EXPECT_EQ(p.model.h, Real(0.1));
   EXPECT_EQ(p.model.fit, Real(2));
   EXPECT_EQ(p.model.distribution.deviatoric, Real(0.0003));
@@ -197,7 +198,7 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, RemovedOptionsAreRejected)
   {
     std::string name = "example", argument = option;
     char* argv[] = {name.data(), argument.data()};
-    EXPECT_THROW(Examples::makeSWIFTParameters(2, argv, Real(0.1), 10), Alert::Exception);
+    EXPECT_THROW(Examples::ReconstructionOptions(2, argv), Alert::Exception);
   }
 }
 
@@ -205,7 +206,7 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, PreviousMethodOptionsAreRejected)
 {
   std::string name = "example", argument = "--wngir-fit=2";
   char* argv[] = {name.data(), argument.data()};
-  EXPECT_THROW(Examples::makeSWIFTParameters(2, argv, Real(0.1), 10), Alert::Exception);
+  EXPECT_THROW(Examples::ReconstructionOptions(2, argv), Alert::Exception);
 }
 
 TEST(Rodin_Adaptation_SWIFTHingeProblem, CenteringEntersTheStationarityResidual)
