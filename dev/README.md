@@ -53,6 +53,18 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Zero-dimensional projection: a point reference vertex now has zero active
+  coordinates, matching its centroid and reference dimension. The CI Debug
+  assertion in `EveryReferenceVertexIsFixed` was reproduced before repair;
+  the test now explicitly checks every geometry's vertex dimensions. All 22
+  projection cases pass serially with assertions enabled and in Release.
+- SWIFT termination: a rejected line-search trial and an insufficient active
+  hinge Newton budget preserve the accepted displacement and cannot report
+  geometric success. The inner limit retains its final stationarity residual
+  and typed stopping reason. Selecting unavailable MUMPS now identifies
+  `setParameters` and preserves existing controls; its diagnostic regression
+  fails before repair. The complete configured solver executable passes
+  with every case run separately.
 - Native single-field nonlocal assembly: sparse/dense real/complex systems
   combine constant-kernel double integrals with closed-form interval mass
   matrices and load moments. All trial/test region combinations include

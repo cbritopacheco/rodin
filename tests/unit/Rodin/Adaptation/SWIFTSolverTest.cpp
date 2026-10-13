@@ -1351,4 +1351,70 @@ namespace Rodin::Tests::Unit
       Alert::Exception);
   }
 
+  /// @brief A rejected outer trial preserves the accepted displacement.
+  TEST(Rodin_Adaptation_SWIFTSolver, RejectedLineSearchTrialPreservesAcceptedState)
+  {
+    const auto state = solveTranslatedLine(Real(1), 0, true, 0, false, 1000, true,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
+      [](SWIFT::Parameters& p) {
+        p.convergence.iterations.backtracks = 1;
+        p.globalization.armijo = Real(0.99);
+      });
+    EXPECT_EQ(state.report.reason, SWIFT::Report::Reason::LineSearchFailure);
+    EXPECT_STREQ(state.report.getReasonString(), "line-search-failure");
+    EXPECT_EQ(state.report.iterations, 0u);
+    EXPECT_FALSE(state.report.geometricTargetReached);
+    EXPECT_EQ(state.displacement.norm(), Real(0));
+    EXPECT_EQ(state.physicalNorm, Real(0));
+  }
+
+  /// @brief One insufficient Newton correction cannot certify or accept an outer step.
+  TEST(Rodin_Adaptation_SWIFTSolver, InnerBudgetRequiresStationarityBeforeAcceptance)
+  {
+    const auto state = solveTranslatedLine(Real(1), 0, true, 0, false, 1000, true,
+      SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-14), Real(90),
+      [](SWIFT::Parameters& p) {
+        p.convergence.iterations.inner = 1;
+        p.convergence.tolerance.innerAbsolute = 0;
+        p.model.jacobian = Real(0.99);
+        p.model.distortion = Real(1.001);
+      });
+    EXPECT_EQ(state.report.reason, SWIFT::Report::Reason::InnerIterationLimit);
+    EXPECT_STREQ(state.report.getReasonString(), "inner-iteration-limit");
+    EXPECT_EQ(state.report.iterations, 0u);
+    EXPECT_EQ(state.report.lastInnerIterations, 1u);
+    EXPECT_FALSE(state.report.innerConverged);
+    EXPECT_GT(state.report.innerResidual, state.report.innerResidualTolerance);
+    EXPECT_FALSE(state.report.geometricTargetReached);
+    EXPECT_EQ(state.displacement.norm(), Real(0));
+    EXPECT_EQ(state.physicalNorm, Real(0));
+  }
+
+#ifndef RODIN_USE_MUMPS
+  /// @brief An unavailable direct backend is rejected before changing solver controls.
+  TEST(Rodin_Adaptation_SWIFTSolver, UnavailableMUMPSHasMemberContext)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P1 space(mesh, 2);
+    TrialFunction u(space);
+    TestFunction v(space);
+    SWIFT::Problem solver(u, v);
+    const auto before = solver.getParameters().linear.solver;
+    auto parameters = solver.getParameters();
+    parameters.linear.solver = SWIFT::Parameters::LinearSolver::MUMPS;
+    try
+    {
+      solver.setParameters(parameters);
+      FAIL() << "Unavailable MUMPS must be rejected.";
+    }
+    catch (const Alert::Exception& error)
+    {
+      const std::string message = error.what();
+      EXPECT_NE(message.find("setParameters"), std::string::npos);
+      EXPECT_NE(message.find("class"), std::string::npos);
+      EXPECT_NE(message.find("RODIN_USE_MUMPS"), std::string::npos);
+    }
+    EXPECT_EQ(solver.getParameters().linear.solver, before);
+  }
+#endif
 }

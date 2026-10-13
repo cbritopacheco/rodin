@@ -7,6 +7,7 @@
 #ifndef RODIN_ADAPTATION_SWIFT_PROBLEM_H
 #define RODIN_ADAPTATION_SWIFT_PROBLEM_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -744,8 +745,8 @@ namespace Rodin::Adaptation::SWIFT
       {
 #ifndef RODIN_USE_MUMPS
         if (parameters.linear.solver == Parameters::LinearSolver::MUMPS)
-          Alert::Exception() << "SWIFT MUMPS solves require RODIN_USE_MUMPS."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT MUMPS solves require RODIN_USE_MUMPS." << Alert::Raise;
 #endif
         if (!std::isfinite(parameters.model.fit) || !(parameters.model.fit > Real(0)))
           Alert::Exception() << "SWIFT requires a finite positive fitting weight."
