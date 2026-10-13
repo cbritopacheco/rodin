@@ -53,6 +53,9 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Contextual Alert exceptions: class, member-function and namespace payloads
+  retain exact unformatted messages and captured output. Literal and owned
+  function-name variants propagate through the native exception base.
 - Spatial matrices: real and complex arithmetic for all shapes, including empty matrices, and
   compatible products through dimension three, plus rectangular pseudoinverses.
 - Iterative solvers: dense/sparse real MINRES, and dense/sparse real/complex
