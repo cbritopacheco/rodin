@@ -191,7 +191,7 @@ jobs:
       - name: Run complete native MPI restriction matrix
         run: >-
           ctest --test-dir build/tests
-          -R '^RodinMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
+          -R '^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$'
           --no-tests=error --output-on-failure -j 1
 
   PETScConvergence:
@@ -1359,7 +1359,7 @@ jobs:
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow
-          -E '^RodinMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
+          -E '^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$'
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -1368,7 +1368,7 @@ jobs:
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow
-          -E '^RodinMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
+          -E '^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$'
           --rerun-failed -V --output-on-failure
 
       - name: Make slow-test coverage
