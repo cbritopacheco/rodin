@@ -20,6 +20,102 @@ using namespace Rodin::Variational;
 
 namespace
 {
+  /// @brief Preassembled forms obey independent projection and lifting identities for value constraints.
+  template <class Operator>
+  void checkPreassembledValueConstraints()
+  {
+    for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      auto mesh = LocalMesh::UniformGrid(geometry, {3, 3});
+      mesh.getConnectivity().compute(1, 0);
+      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      auto check = [&](auto& space) {
+        TrialFunction u(space);
+        TestFunction v(space);
+        const auto prescribed = VectorFunction(size_t(2), [](const Point& point) {
+          return Math::SpatialVector<Real>{
+            1 + point.x() + 2 * point.y(), -2 + 0.5 * point.x() - point.y()};
+        });
+        GridFunction exact(space);
+        exact = prescribed;
+        using Form = BilinearForm<typename decltype(u)::SolutionType,
+          std::decay_t<decltype(space)>, std::decay_t<decltype(space)>, Operator>;
+        Form mass(u, v);
+        // A Q2 tensor-product mass integrand has total degree eight.
+        constexpr size_t QuadratureOrder = 8;
+        auto massIntegral = Integral(u, v);
+        massIntegral.setOrder(QuadratureOrder);
+        mass = massIntegral;
+        mass.assemble();
+        LinearForm load(v);
+        auto loadIntegral = Integral(prescribed, v);
+        loadIntegral.setOrder(QuadratureOrder);
+        load = loadIntegral;
+        load.assemble();
+        auto boundary = DirichletBC(u, prescribed);
+        boundary.assemble();
+        const auto& fixed =
+          std::get<DirichletBCBase<Real>::ValueDOFs>(boundary.getDOFs());
+        ASSERT_FALSE(fixed.empty());
+        const Index size = static_cast<Index>(space.getSize());
+        const Math::Matrix<Real> unconstrained = mass.getOperator();
+        EXPECT_LT((unconstrained * exact.getData() - load.getVector()).norm(), 1e-11);
+        Math::Matrix<Real> projection = Math::Matrix<Real>::Identity(size, size);
+        Math::Vector<Real> lifting = Math::Vector<Real>::Zero(size);
+        for (const auto& [index, value] : fixed)
+        {
+          EXPECT_NEAR(value, exact.getData()[index], 1e-12);
+          projection(index, index) = 0;
+          lifting[index] = value;
+        }
+        EXPECT_GT(projection.trace(), 0);
+        const Math::Matrix<Real> identity = Math::Matrix<Real>::Identity(size, size);
+        const Math::Matrix<Real> expectedMatrix =
+          projection * unconstrained * projection + identity - projection;
+        const Math::Vector<Real> expectedRHS =
+          projection * (load.getVector() - unconstrained * lifting) + lifting;
+        using System = Math::LinearSystem<Operator, Math::Vector<Real>>;
+        Problem<System, decltype(u), decltype(v)> problem(u, v);
+        problem = mass + boundary - load;
+        for (size_t repeat = 0; repeat < 2; ++repeat)
+        {
+          problem.assemble();
+          const auto& system = std::as_const(problem).getLinearSystem();
+          const Math::Matrix<Real> matrix = system.getOperator();
+          EXPECT_LT((matrix - expectedMatrix).norm(), 1e-12);
+          EXPECT_LT((system.getVector() - expectedRHS).norm(), 1e-11);
+          const Math::Vector<Real> recovered =
+            matrix.fullPivLu().solve(system.getVector());
+          EXPECT_LT((recovered - exact.getData()).norm(), 1e-10);
+        }
+        for (const auto target : {AssemblyTarget::LHS, AssemblyTarget::RHS})
+        {
+          problem.assemble();
+          problem.assemble(target);
+          Math::Matrix<Real> targetMatrix = expectedMatrix;
+          Math::Vector<Real> targetRHS = expectedRHS;
+#ifndef RODIN_USE_OPENMP
+          if (target == AssemblyTarget::LHS)
+            targetMatrix = projection * unconstrained + identity - projection;
+          else
+            targetRHS = projection * load.getVector() + lifting;
+#endif
+          const auto& system = std::as_const(problem).getLinearSystem();
+          EXPECT_LT(
+            (Math::Matrix<Real>(system.getOperator()) - targetMatrix).norm(), 1e-12);
+          EXPECT_LT((system.getVector() - targetRHS).norm(), 1e-11);
+        }
+      };
+      P1<Math::SpatialVector<Real>> linear(mesh, 2);
+      check(linear);
+      H1<2, Math::SpatialVector<Real>> quadratic(
+        std::integral_constant<size_t, 2>{}, mesh, 2);
+      check(quadratic);
+    }
+  }
+
   /// @brief Within-field affine ties preserve the physical mass equation and admissible energy.
   template <class Operator>
   void checkSingleFieldAffineIdentification()
@@ -205,4 +301,14 @@ TEST(Rodin_Assembly_SequentialLifecycle, DenseSingleFieldAffineIdentification)
 TEST(Rodin_Assembly_SequentialLifecycle, SparseSingleFieldAffineIdentification)
 {
   checkSingleFieldAffineIdentification<Math::SparseMatrix<Real>>();
+}
+
+TEST(Rodin_Assembly_SequentialLifecycle, DensePreassembledValueConstraints)
+{
+  checkPreassembledValueConstraints<Math::Matrix<Real>>();
+}
+
+TEST(Rodin_Assembly_SequentialLifecycle, SparsePreassembledValueConstraints)
+{
+  checkPreassembledValueConstraints<Math::SparseMatrix<Real>>();
 }

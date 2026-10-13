@@ -53,6 +53,14 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Preassembled value constraints: dense/sparse P1 and quadratic H1 vector
+  mass/load forms satisfy independent projector/lifting matrix and RHS
+  identities with nonzero affine boundary values. Full solves recover the
+  interpolated affine field, and targeted assembly preserves the unrequested
+  side according to each backend's contract. Sequential and OpenMP one/four
+  thread runs use explicit polynomial-exact quadrature; callable coefficients
+  have unknown order, so the unconstrained mass/load identity is checked too.
+  Reversing the dense Dirichlet lifting sign fails the RHS oracle.
 - Single-field affine identification: dense/sparse P1 and quadratic H1 vector
   problems recover a prescribed constant field subject to an affine component
   tie on triangle and quadrilateral meshes. An admissible affine perturbation
