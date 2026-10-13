@@ -176,3 +176,186 @@ TEST(Rodin_Variational_DerivativeTrace, H1QuadraticComplexGradientJacobianAndDiv
 {
   checkPiecewiseAffineTraces<Complex, true>();
 }
+
+namespace
+{
+  /// @brief Matrix derivatives resolve volume-side traces and transported points consistently.
+  template <class Scalar, size_t Family>
+  void checkMatrixDerivativeTraces()
+  {
+    using Matrix = Math::SpatialMatrix<Scalar>;
+    const Scalar factor = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(2, -3);
+      else
+        return Scalar(2);
+    }();
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      auto mesh = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 3));
+      auto connect = [dimension](auto& domain) {
+        for (size_t d = 1; d <= dimension; ++d)
+        {
+          domain.getConnectivity().compute(dimension, d);
+          for (size_t lower = 0; lower < d; ++lower)
+            domain.getConnectivity().compute(d, lower);
+        }
+        domain.getConnectivity().compute(dimension - 1, dimension);
+      };
+      connect(mesh);
+      for (auto cell = mesh.getCell(); cell; ++cell)
+        mesh.setAttribute(cell.key(), cell->getIndex() + 1);
+      auto makeSpace = [](const auto& domain) {
+        if constexpr (Family == 0)
+          return P0<Matrix>(domain, 2, 3);
+        else if constexpr (Family == 1)
+          return P0g<Matrix, LocalMesh>(domain, 2, 3);
+        else if constexpr (Family == 2)
+          return P1<Matrix>(domain, 2, 3);
+        else
+          return H1<2, Matrix>(std::integral_constant<size_t, 2>{}, domain, 2, 3);
+      };
+      const auto value = [factor, dimension](const Point& p) {
+        Matrix result(2, 3);
+        for (size_t row = 0; row < 2; ++row)
+        {
+          for (size_t column = 0; column < 3; ++column)
+          {
+            Scalar entry = Scalar(1 + row + column);
+            if constexpr (Family != 1)
+            {
+              for (size_t axis = 0; axis < dimension; ++axis)
+                entry += Scalar((row + 1) * (column + 2) * (axis + 1)) * p(axis);
+            }
+            result(row, column) = factor * entry;
+          }
+        }
+        return result;
+      };
+      auto space = makeSpace(mesh);
+      GridFunction field(space);
+      field = value;
+      auto verify = [=](const auto& gradient, const auto& context) {
+        const auto result = gradient.getValue(context);
+        for (size_t row = 0; row < 2; ++row)
+        {
+          for (size_t column = 0; column < 3; ++column)
+          {
+            for (size_t axis = 0; axis < dimension; ++axis)
+            {
+              const Scalar expected = Family < 2
+                ? Scalar(0)
+                : Scalar(factor * Scalar((row + 1) * (column + 2) * (axis + 1)));
+              EXPECT_LT(std::abs(result(row, column, axis) - expected), 1e-10);
+            }
+          }
+        }
+      };
+      auto reject = [](const auto& gradient, const Point& point) {
+        try
+        {
+          gradient.getValue(point);
+          FAIL() << "An unresolved derivative trace must be rejected.";
+        }
+        catch (const Alert::Exception& error)
+        {
+          const std::string message = error.what();
+          EXPECT_NE(message.find("getDerivativePoint"), std::string::npos);
+          EXPECT_NE(message.find("class"), std::string::npos);
+        }
+      };
+      size_t interior = 0, boundary = 0;
+      for (auto face = mesh.getFace(); face; ++face)
+      {
+        const Point point(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+        const auto& adjacent = mesh.getConnectivity().getIncidence(
+          {dimension - 1, dimension}, face->getIndex());
+        if (adjacent.size() == 1)
+        {
+          verify(Grad(field), point);
+          ++boundary;
+        }
+        else
+        {
+          if (interior++ == 0)
+          {
+            reject(Grad(field), point);
+            reject(Grad(field).traceOf(mesh.getCellCount() + 1), point);
+          }
+          for (const auto cell : adjacent)
+          {
+            auto gradient = Grad(field);
+            gradient.traceOf(cell + 1);
+            verify(gradient, point);
+            verify(gradient, IntegrationPoint(point));
+            auto copied(gradient);
+            auto moved(std::move(copied));
+            verify(moved, point);
+            std::unique_ptr<decltype(gradient)> clone(gradient.copy());
+            EXPECT_EQ(&clone->getOperand(), &field);
+            verify(*clone, point);
+          }
+        }
+      }
+      EXPECT_GT(interior, 0u);
+      EXPECT_GT(boundary, 0u);
+      auto retained = mesh.keep(1);
+      connect(retained);
+      auto childSpace = makeSpace(retained);
+      GridFunction child(childSpace);
+      child = value;
+      for (auto cell = retained.getCell(); cell; ++cell)
+      {
+        const Point point(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+        const auto included = mesh.inclusion(point);
+        ASSERT_TRUE(included);
+        verify(Grad(field), point);
+        verify(Grad(child), *included);
+        verify(Grad(child), IntegrationPoint(*included));
+      }
+      auto unrelated =
+        LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+      auto cell = unrelated.getCell();
+      const Point foreign(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      reject(Grad(field), foreign);
+      reject(Grad(child), foreign);
+    }
+  }
+}
+
+TEST(Rodin_Variational_DerivativeTrace, RealMatrixP0)
+{
+  checkMatrixDerivativeTraces<Real, 0>();
+}
+TEST(Rodin_Variational_DerivativeTrace, ComplexMatrixP0)
+{
+  checkMatrixDerivativeTraces<Complex, 0>();
+}
+TEST(Rodin_Variational_DerivativeTrace, RealMatrixP0g)
+{
+  checkMatrixDerivativeTraces<Real, 1>();
+}
+TEST(Rodin_Variational_DerivativeTrace, ComplexMatrixP0g)
+{
+  checkMatrixDerivativeTraces<Complex, 1>();
+}
+TEST(Rodin_Variational_DerivativeTrace, RealMatrixP1)
+{
+  checkMatrixDerivativeTraces<Real, 2>();
+}
+TEST(Rodin_Variational_DerivativeTrace, ComplexMatrixP1)
+{
+  checkMatrixDerivativeTraces<Complex, 2>();
+}
+TEST(Rodin_Variational_DerivativeTrace, RealMatrixH1)
+{
+  checkMatrixDerivativeTraces<Real, 3>();
+}
+TEST(Rodin_Variational_DerivativeTrace, ComplexMatrixH1)
+{
+  checkMatrixDerivativeTraces<Complex, 3>();
+}

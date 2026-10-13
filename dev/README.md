@@ -53,6 +53,15 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Matrix derivative traces: real/complex matrix P0, P0g, P1 and quadratic
+  H1 fields exercise boundaries, independently selected interior sides,
+  copies, moves, clones and parent/submesh transport on all seven cell
+  geometries. Analytic affine gradients and zero constant-space gradients
+  agree entry by entry. Missing trace domains and unrelated meshes are
+  rejected with member-function context; all eight diagnostic regressions
+  fail before the contextual exception change. Perturbing a returned
+  production gradient entry fails every matrix oracle. All twelve registered
+  scalar/vector/matrix trace cases pass serially.
 - Rank-one Jacobian forms: real and complex P1 and quadratic H1 retain
   analytic contractions through copies, moves, rebinding and polymorphic
   clones on intervals and triangles. Both shared and distinct finite-element
