@@ -114,22 +114,21 @@ namespace Rodin::Variational
       /**
        * @brief Interpolates J(u) at point p (always zero for P0g).
        *
-       * The output matrix is sized (vdim x d), where:
-       * - vdim = vector dimension of the FE space (typically mesh dim)
-       * - d    = dimension of the polytope we are evaluating on (cell or face)
+       * The zero matrix has one row per field component and one column per
+       * ambient coordinate, including on embedded cells, faces and points.
        * @param out Storage for the computed result.
        * @param p Point at which the operation is evaluated.
        */
       void interpolate(SpatialMatrixType& out, const Geometry::Point& p) const
       {
         const auto& poly = p.getPolytope();
-        const size_t d = poly.getDimension();
+        const size_t spaceDimension = poly.getMesh().getSpaceDimension();
 
         const auto& gf  = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
 
-        out.resize(vdim, d);
+        out.resize(vdim, spaceDimension);
         out.setZero();
       }
 
@@ -254,22 +253,23 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets the integration point the expression is evaluated at.
+       *
+       * Only this expression's cursor and zero storage change. The borrowed
+       * constant operand has no derivative-evaluation state to synchronize.
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
       Jacobian& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        // keep operand aligned
-        m_u.get().setIntegrationPoint(ip);
         m_ip = &ip;
 
         const auto& poly = ip.getPoint().getPolytope();
-        const size_t d = poly.getDimension();
+        const size_t spaceDimension = poly.getMesh().getSpaceDimension();
 
         const auto& fes  = this->getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
 
-        m_zero.resize(vdim, d);
+        m_zero.resize(vdim, spaceDimension);
         m_zero.setZero();
 
         return *this;
@@ -278,7 +278,8 @@ namespace Rodin::Variational
       /**
        * @brief Returns the Jacobian of the local basis function (always zero).
        *
-       * ShapeFunction Jacobian basis is a matrix (vdim x d).
+       * The matrix has shape @f$m\times s@f$ for @f$m@f$ field components
+       * and ambient dimension @f$s@f$.
        * @param local Index in the local numbering.
        * @returns Value of the selected local basis function at the evaluation point.
        */

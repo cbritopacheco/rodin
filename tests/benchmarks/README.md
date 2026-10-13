@@ -301,6 +301,22 @@ is the largest of these three terms. Its current source still prepares separate
 trial and test physical gradients even for identical borrowed reference tables;
 measuring reuse is the next experiment, not a speedup established by this batch.
 
+Embedded-cell qualification is a separate prerequisite for this reuse experiment.
+It exposed ambient-column truncation in H1 vector Jacobian evaluation and P1
+shape Jacobians, as well as incorrectly shaped global-constant zero derivatives.
+The generic expression oracle must retain the same ambient derivatives as the
+specialized integrator before it can qualify an embedded performance change.
+The physical dimension contract is stated in
+[the numerical contracts](../../doc/agents/numerical-contracts.md#physical-differential-dimensions).
+Analytic tangent-projector regressions cover real/complex P1, H1 degrees 1–6 and
+global constants with component counts 1–3, on embedded segments, triangles,
+quadrilaterals and points. A separate all-entry quadrature regression includes
+all volume families, both mixed-degree directions and curved embedded triangles.
+These checks were observed failing before repair. They establish correctness
+outside the previous volume benchmark matrix; they are not a speedup or a new
+performance-coverage percentage. Full-dimensional contraction arithmetic and
+specialized assembly kernels remain unchanged.
+
 ### Scalar reference-element protocol
 
 `RodinReferenceElementBenchmarks` measures all eight reference geometries for

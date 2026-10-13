@@ -112,6 +112,32 @@ Warm starts are intentional. Reassembly zeroes the operator and right-hand
 side as needed but preserves the solution vector where the backend contract
 does so.
 
+## Physical differential dimensions
+
+Let a reference cell have dimension $d$, its physical embedding have dimension
+$s$, and a vector field have $m$ components. The geometric inverse has shape
+$d\times s$. Physical scalar gradients and vector Jacobians therefore have
+shapes $s$ and $m\times s$, respectively:
+
+$$
+\nabla_K u=(J_K^{\dagger})^T\widehat\nabla u,
+\qquad J_K(u)=\widehat J(u)J_K^{\dagger}.
+$$
+
+For an embedded cell these are tangential derivatives expressed in ambient
+coordinates. Reference-coordinate contractions still have $d$ terms; derivative
+outputs retain all $s$ ambient entries. Neither the field component count nor
+the integration entity's topological dimension determines the output width.
+Constant-space derivatives obey the same shape contract even though all entries
+are zero. On a point embedded in $\mathbb{R}^s$, the empty reference contraction
+produces a correctly shaped ambient zero, not an empty physical differential.
+Direct point evaluation, indexed integration points, shape-function evaluation
+and specialized local integrators must agree on these dimensions.
+
+Global-constant derivative nodes borrow immutable operands and update only their
+own cursor and zero storage. Their derivative does not require mutating the
+operand's evaluation cursor.
+
 ## Quadrature and exactness
 
 Quadrature order is a numerical contract, not only a performance knob. A form

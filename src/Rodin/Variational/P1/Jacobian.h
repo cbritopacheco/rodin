@@ -303,7 +303,12 @@ namespace Rodin::Variational
 
   /**
    * @ingroup JacobianSpecializations
-   * @brief Jacobian of an P1 ShapeFunction object.
+   * @brief Jacobian of a P1 ShapeFunction object.
+   *
+   * On a cell of reference dimension @f$d@f$ embedded in @f$\mathbb{R}^s@f$,
+   * each basis Jacobian has shape @f$m\times s@f$, where @f$m@f$ is the field
+   * component count. All columns of @f$\widehat J J_K^{\dagger}@f$ are retained;
+   * the reference derivative contraction still has @f$d@f$ terms.
    */
   template <class ShapeFunctionDerived, class Range, class Mesh,
     ShapeFunctionSpaceType Space>
@@ -569,6 +574,7 @@ namespace Rodin::Variational
         const auto& mesh = poly.getMesh();
 
         const size_t d    = poly.getDimension();
+        const size_t spaceDimension = mesh.getSpaceDimension();
         const Index  i    = poly.getIndex();
         const auto   geom = poly.getGeometry();
 
@@ -600,8 +606,7 @@ namespace Rodin::Variational
           m_cache.jac.resize(count);
           for (auto& J : m_cache.jac)
           {
-            // Jacobian is (vdim x d)
-            J.resize(vdim, d);
+            J.resize(vdim, spaceDimension);
             J.setZero();
           }
         }
@@ -665,8 +670,8 @@ namespace Rodin::Variational
 
               // row c of Jhat is ghat[v]^T, so
               // row c of Jphys = ghat[v]^T * Jinv
-              // i.e. (1 x d) * (d x d) -> (1 x d)
-              for (size_t col = 0; col < d; ++col)
+              // The inverse has one column per ambient coordinate.
+              for (size_t col = 0; col < spaceDimension; ++col)
               {
                 ScalarType s = ScalarType(0);
                 for (size_t k = 0; k < d; ++k)
