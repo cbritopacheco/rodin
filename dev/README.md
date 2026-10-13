@@ -53,6 +53,15 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Matrix-space lifecycle: real/complex P0, P0g, P1 and quadratic H1 copies
+  retain owned DOF and element maps after source destruction. Copy/move
+  assignment replaces a different mesh and matrix shape consistently; later
+  source reassignment leaves the copy independent. Interpolated constant
+  matrix fields recover every entry, and public local/global DOF mappings
+  agree. Zero/oversized row and column counts now identify the constructor
+  and class through native member-function exceptions; the diagnostic checks
+  failed before this change. Doubling production matrix-field evaluation is
+  rejected in both scalar configurations.
 - Embedded-surface face normals: affine, vertical-edge and folded patches
   select the outward conormal in each incident cell's tangent plane. A curved
   quadratic patch checks unit length and orthogonality to independently known

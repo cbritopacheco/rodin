@@ -817,3 +817,8 @@ add_executable(RodinVariationalNonlocalBlockTest NonlocalBlockTest.cpp)
 target_link_libraries(RodinVariationalNonlocalBlockTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalNonlocalBlockTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalSpaceLifecycleTest SpaceLifecycleTest.cpp)
+target_link_libraries(RodinVariationalSpaceLifecycleTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinVariationalSpaceLifecycleTest PROPERTIES LABELS unit)
