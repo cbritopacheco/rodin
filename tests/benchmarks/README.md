@@ -157,11 +157,11 @@ that this performance matrix has been profiled.
 | Space setup / Variational, MPI | P1 construction and distributed construction | P0/P0g/H1 setup, DOF lookup/restriction, reconciliation and degree scaling |
 | Fields / Variational | Interpolation and true mass projection; 1,008 native and OpenMP selections qualified; point/integration-point sweeps | P0/P0g, higher degrees, matrix evaluation, point cells, norms and boundary restriction |
 | Expressions / Variational | Generic expressions, coefficients and named forms; native real/complex sparse/dense coupled Problem lifetimes at degree two | Cold expression construction, remaining degrees, changes of state and complete range/backend matrix |
-| Local integrators / Variational | Volume entry kernels and reference-loop comparisons; mixed Stokes vector diffusion and both pressure/divergence orientations, with 42 selections qualified per build | Remaining mixed degrees/geometries/sizes, boundary/interface kernels and nonlinear residual/tangent stages |
+| Local integrators / Variational | Volume entry kernels and reference-loop comparisons; mixed Stokes vector diffusion and both pressure/divergence orientations, with 42 selections qualified per build; separate weighted-viscosity binding scopes | Remaining mixed degrees/geometries/sizes, boundary/interface kernels and nonlinear residual/tangent stages |
 | Operator setup / Assembly | Public repeated assembly and sequential stage scopes | Sparsity discovery, allocation and replacement separated from kernels |
 | Scatter / Assembly, PETSc | Sequential triplets; complete native/PETSc insertion consumers | Isolated OpenMP buffers/merge, PETSc insertion and ownership-dependent MPI work |
 | Constraints and completion / Assembly, PETSc | Constrained scalar assembly and fixed-system solves | Vector/mixed constraints, identification, finalization and communication attribution |
-| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson; complex Helmholtz and real/complex coupled reaction–diffusion, each with 126 cases qualified in each build and selected native profiles; mixed Stokes with 20 selections qualified in native and two-thread OpenMP assembly | Stokes mesh/backend expansion, boundary variants and remaining degrees/backends; constructor/lifecycle isolation |
+| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson; complex Helmholtz and real/complex coupled reaction–diffusion, each with 126 cases qualified in each build and selected native profiles; mixed Stokes with 20 selections qualified in native and two-thread OpenMP assembly, plus explicit weighted-viscosity scopes | Stokes mesh/backend expansion, boundary variants and remaining degrees/backends; constructor/lifecycle isolation |
 | Solvers / Solver, PETSc | Real/complex fixed-system CG; isolated diagonal compute/apply; projection CG profile; complex Helmholtz GMRES and coupled reaction–diffusion CG, each with 126 cases qualified in each build and selected native profiles; native fixed-system Stokes SparseLU with 20 selections qualified | Direct factorization stages, remaining setup/lifetimes, mixed-system mesh/backend expansion, backend scaling and memory; repeatable 3D GMRES baselines |
 | Complete workflows / owning modules | Consumer-level interpolation/projection and assembly profiles | Matched setup/assembly/solve/postprocessing accounting across physical contexts |
 
@@ -204,8 +204,12 @@ both a wrong coefficient vector and the operator missing the momentum pressure
 term. Those guards are outside timing and do not replace mixed-space convergence
 or stability certification. The pressure-spectrum oracle is not timed here.
 
-Each executable registers 54 opt-in selections: six two-/three-dimensional
-cell families, three degree pairs and $n\in\{3,5,9\}$ points per axis.
+Each executable registers 108 opt-in selections: six two-/three-dimensional
+cell families, three degree pairs, $n\in\{3,5,9\}$ points per axis and two
+expression dispatches. Names containing `WeightedViscosity` explicitly multiply
+the trial Jacobian by unit viscosity; the original names retain the unweighted
+expression. Although the forms are mathematically identical, their specialized
+local kernels differ and their costs must be measured independently.
 Assembly includes public repeated assembly, constraints and completion. Solving
 uses the fixed assembled operator and public SparseLU, including a fresh
 factorization and one residual correction on every iteration. It excludes
@@ -260,8 +264,10 @@ unit-weighted pressure-expression experiments are not its baseline.
 volume operators consumed by Stokes assembly: vector diffusion
 $(\nabla u_h,\nabla v_h)$, divergence $(\nabla\cdot u_h,q_h)$ and pressure
 $(p_h,\nabla\cdot v_h)$. Both mixed orientations are measured independently.
-The 162 registrations span three terms, three degree pairs, six geometries
-and $n\in\{3,5,9\}$. Formula order 16, spaces and geometry match the complete
+An explicit unit-viscosity diffusion expression selects a fourth kernel under
+`WeightedVectorDiffusion`. The 216 registrations span four terms, three degree
+pairs, six geometries and $n\in\{3,5,9\}$. Formula order 16, spaces and geometry
+match the complete
 assembly consumer. Each timed sweep includes cell traversal, owned mapped
 quadrature construction, physical basis preparation, eager local contraction
 and one entry read, but no insertion, constraints or solver work.
@@ -352,14 +358,80 @@ These weights are not elapsed timings and include matching untimed binds.
 The timed complete consumer is the public unit-viscosity Stokes expression with
 an **unweighted** Jacobian integral. The configurable-viscosity convergence helper
 uses an explicitly weighted Jacobian expression, even at unit viscosity; its
-separate specialization is not modified and no speedup is claimed for it here.
-Weighted vector-Jacobian profiling remains a separate workplan item. Serial local
+separate specialization was not modified by this gradient-sharing change and no
+speedup is claimed for it here. Its separate measurement protocol follows below.
+Serial local
 binding in the LLVM 19 OpenMP-enabled build improves by 1.12–1.21 times. The
 two-worker whole-assembly measurements do not establish a parallel gain or
 regression: substantial elapsed variability coincides with competing SWIFT and
 Docker CPU workloads. An unchanged-binary control also changes substantially
 under that contention. Parallel scaling needs a quieter-host remeasurement;
 local OpenMP-build qualification is not evidence of parallel speedup.
+
+### Weighted vector-Jacobian contract and measurement
+
+The weighted scopes retain the same spaces, meshes, formula order, analytic
+patch data and qualification guards as their unweighted controls. Their local
+operator is
+
+$$
+A_{(b,i),(a,j)}
+=\sum_q w_q\,\delta_K(\widehat x_q)\,
+C_{ij}(x_q)\,\nabla_K\phi_a(x_q)\cdot\overline{\nabla_K\psi_b(x_q)}.
+$$
+
+Here $C=cI$ for a scalar viscosity, and $\delta_K$ is the mapped measure
+factor. For a reference dimension $d$ and ambient dimension $s$, the physical
+gradients retain all $s$ components of $(J_K^\dagger)^T\widehat\nabla\phi$.
+Point cells have zero derivatives. A general component matrix $C$ does not
+justify triangular mirroring; only equal-basis scalar-coefficient operators
+use that reduction. These logical contracts are independently regressed for
+real/complex fields, equal and mixed degrees, volume and embedded geometries,
+curved triangles and point cells. Before repair the entry oracle rejects the
+embedded and nonsymmetric-matrix operators, while assertion-enabled point
+binding aborts. No performance improvement is inferred from correcting an
+incorrect operator. Full-dimensional scalar controls retain their original
+contraction arithmetic.
+
+The initial weighted qualification selects 14 local bindings in each build:
+all six geometries at $P_2/P_1$, $n=3$, and all three degree pairs on triangles
+at $n=3,5,9$, counting overlapping selections once. Complete native assembly
+and SparseLU each qualify 20 selections: all degree pairs and geometries at
+$n=3$, plus the $P_2/P_1$ triangle at $n=5,9$. The same 20 assembly selections
+qualify with two OpenMP workers. These are 88 selected scope/build combinations,
+not qualification of every registered size or backend. The correctness checks
+also pass 11 new geometry cases in native, assertion-enabled and OpenMP builds,
+seven existing weighted-complex regressions and seven native Stokes
+exactness/convergence tests. The assertion-enabled check recompiles the test
+translation unit with `-UNDEBUG`, not the complete library in Debug mode.
+
+Corrected native local-binding medians for $P_2/P_1$, $n=3$ are shown below.
+Each measurement has three repetitions of three sweeps; these short controls
+are not a claimed optimization or parallel-scaling result.
+
+| Geometry | Cells | Points per cell | Vector local rows | Binding sweep |
+| --- | ---: | ---: | ---: | ---: |
+| Triangle | 8 | 53 | 12 | 0.0382 ms |
+| Quadrilateral | 4 | 81 | 18 | 0.0480 ms |
+| Tetrahedron | 48 | 729 | 30 | 7.2922 ms |
+| Pyramid | 48 | 729 | 42 | 12.1257 ms |
+| Hexahedron | 8 | 729 | 81 | 6.2197 ms |
+| Wedge | 16 | 477 | 54 | 4.0486 ms |
+
+The tetrahedral sweep performs $48\times729$ mapped-point visits, compared
+with $8\times53$ on triangles: an 82.5-fold count ratio before accounting
+for larger bases and component counts. The scalar gradient-dot work proxy
+$N_KN_qN_b(N_b+1)d/2$ has a 324.2-fold ratio, whereas the observed sweep-time
+ratio is 190.9. This proxy excludes mapping and scatter and is not an exact
+instruction count. A matching 800-sweep tetrahedral Instruments capture selects
+5.635 seconds of sampled CPU weight in the weighted binding call tree: 57.1%
+is attributed directly to `QuadratureRule::setPolytope`, 21.0% inclusively to
+mapped-quadrature/Jacobian operations, and 16.2% inclusively to spatial dot
+products. Inlined gradient preparation and contraction still require finer
+source attribution. These categories can overlap; samples include matching
+untimed binds and are not a partition of benchmark elapsed time. The raw
+before/after controls, regressions and capture are retained in
+`build-convergence/certification/weighted-jacobian-20261013/`.
 
 ### Scalar reference-element protocol
 

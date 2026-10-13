@@ -36,8 +36,9 @@ namespace Rodin::Tests::Benchmarks
    * missing-pressure-gradient control qualify the mixed operator.
    *
    * @tparam K Velocity degree; pressure has degree K-1.
+   * @tparam Weighted Whether explicit unit viscosity selects the weighted kernel.
    */
-  template <size_t K>
+  template <size_t K, bool Weighted = false>
   class StokesWorkload
   {
     public:
@@ -61,7 +62,12 @@ namespace Rodin::Tests::Benchmarks
       const Convergence::StokesData& data, bool omitPressure = false)
     {
       using namespace Variational;
-      auto diffusion = Integral(Jacobian(u), Jacobian(v));
+      auto diffusion = [&]() {
+        if constexpr (Weighted)
+          return Integral(Real(1) * Jacobian(u), Jacobian(v));
+        else
+          return Integral(Jacobian(u), Jacobian(v));
+      }();
       auto momentum = Integral(p, Div(v));
       auto divergence = Integral(Div(u), q);
       auto gaugePressure = Integral(lambda, q);
@@ -174,6 +180,7 @@ namespace Rodin::Tests::Benchmarks
       state.counters["velocity_dofs"] = velocitySpace.getSize();
       state.counters["pressure_dofs"] = pressureSpace.getSize();
       state.counters["mean_dofs"] = meanSpace.getSize();
+      state.counters["explicit_unit_viscosity"] = Weighted;
       state.counters["rows"] = system.getOperator().rows();
       state.counters["nnz"] = system.getOperator().nonZeros();
       state.counters["quadrature_order"] = QuadratureOrder;
@@ -202,8 +209,8 @@ namespace Rodin::Tests::Benchmarks
              Polytope::Type::Hexahedron, Polytope::Type::Wedge})
       {
         const std::string name = std::string("Stokes/") +
-          (Solve ? "SparseLU/" : "Assembly/") + "H1/P" + std::to_string(K) + "P" +
-          std::to_string(K - 1) + "/Real/" +
+          (Solve ? "SparseLU/" : "Assembly/") + (Weighted ? "WeightedViscosity/" : "") +
+          "H1/P" + std::to_string(K) + "P" + std::to_string(K - 1) + "/Real/" +
           std::string(Convergence::UniformGrid::getGeometryName(geometry));
         benchmark::RegisterBenchmark(name.c_str(),
           [geometry, &failed](auto& state) { run<Solve>(state, geometry, failed); })

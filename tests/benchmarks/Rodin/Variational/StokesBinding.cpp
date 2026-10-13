@@ -30,7 +30,8 @@ namespace Rodin::Tests::Benchmarks
    * Both mixed orientations are measured rather than inferred from transposition.
    *
    * @tparam K Velocity degree, at least two.
-   * @tparam Term Zero for vector diffusion, one for divergence, two for pressure.
+   * @tparam Term Zero for vector diffusion, one for divergence, two for pressure,
+   * or three for explicitly unit-weighted vector diffusion.
    */
   template <size_t K, size_t Term>
   class StokesBinding
@@ -62,8 +63,10 @@ namespace Rodin::Tests::Benchmarks
           return Dot(Jacobian(u), Jacobian(v));
         else if constexpr (Term == 1)
           return Dot(Div(u), q);
-        else
+        else if constexpr (Term == 2)
           return Dot(p, Div(v));
+        else
+          return Dot(Real(1) * Jacobian(u), Jacobian(v));
       }();
       Integral integral(integrand);
       integral.setOrder(QuadratureOrder);
@@ -154,7 +157,8 @@ namespace Rodin::Tests::Benchmarks
         const std::string name = std::string("Stokes/Binding/") +
           (Term == 0      ? "VectorDiffusion/"
               : Term == 1 ? "Divergence/"
-                          : "Pressure/") +
+              : Term == 2 ? "Pressure/"
+                          : "WeightedVectorDiffusion/") +
           "H1/P" + std::to_string(K) + "P" + std::to_string(K - 1) + "/Real/" +
           std::string(Convergence::UniformGrid::getGeometryName(geometry));
         benchmark::RegisterBenchmark(
@@ -175,6 +179,7 @@ int main(int argc, char** argv)
     StokesBinding<K, 0>::registerCases();
     StokesBinding<K, 1>::registerCases();
     StokesBinding<K, 2>::registerCases();
+    StokesBinding<K, 3>::registerCases();
   };
   registerDegree.template operator()<2>();
   registerDegree.template operator()<3>();

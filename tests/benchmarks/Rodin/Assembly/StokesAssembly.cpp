@@ -16,6 +16,9 @@ int main(int argc, char** argv)
   StokesWorkload<2>::registerCases<false>(failed);
   StokesWorkload<3>::registerCases<false>(failed);
   StokesWorkload<4>::registerCases<false>(failed);
+  StokesWorkload<2, true>::registerCases<false>(failed);
+  StokesWorkload<3, true>::registerCases<false>(failed);
+  StokesWorkload<4, true>::registerCases<false>(failed);
   benchmark::Initialize(&argc, argv);
   if (benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;
