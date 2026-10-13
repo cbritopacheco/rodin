@@ -20,9 +20,9 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionNamedOptions)
     "--lobes=4", "--amp=0.03", "--R0=0.2", "--phase=0.4", "--cx=0.4", "--cy=0.6",
     "--cz=0.3", "--output=results/test", "--model-fit=2",
     "--model-distribution-deviatoric=0.001", "--model-distribution-divergence=0.01",
-    "--model-hinge=100", "--model-jacobian=0.02", "--model-distortion=8",
-    "--convergence-iterations-outer=20", "--convergence-iterations-inner=10",
-    "--linear-solver=cg", "--linear-threads=2",
+    "--model-hinge-jacobian=10", "--model-hinge-distortion=100", "--model-jacobian=0.02",
+    "--model-distortion=8", "--convergence-iterations-outer=20",
+    "--convergence-iterations-inner=10", "--linear-solver=cg", "--linear-threads=2",
     "--convergence-tolerance-linear-relative=1e-9", "--convergence-iterations-linear=500",
     "--quadrature-order=6", "--quadrature-surface=8", "--quadrature-volume=4",
     "--sampling-subdivision=16", "--quadrature-validation=32",
@@ -48,7 +48,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionNamedOptions)
   EXPECT_EQ(p.model.fit, 2);
   EXPECT_EQ(p.model.distribution.deviatoric, Real(0.001));
   EXPECT_EQ(p.model.distribution.divergence, Real(0.01));
-  EXPECT_EQ(p.model.hinge, 100);
+  EXPECT_EQ(p.model.hinge.jacobian, Real(10));
+  EXPECT_EQ(p.model.hinge.distortion, Real(100));
   EXPECT_EQ(p.model.jacobian, Real(0.02));
   EXPECT_EQ(p.model.distortion, 8);
   EXPECT_EQ(p.convergence.iterations.outer, 20u);
@@ -77,7 +78,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionRejectsMalformedOpti
          "--unknown=1", "--lobes=2.5", "--amp=-0.1", "--R0=0.01", "16",
          "--swift-equal-hinge-weights", "--swift-stratified-hinge-weights",
          "--swift-critical-fraction=0.5", "--swift-adaptive-hinge-weights",
-         "--swift-nonlinear-hinges", "--quality-validation-order=16"})
+         "--swift-nonlinear-hinges", "--quality-validation-order=16", "--model-hinge=100",
+         "--model-jacobian-weight=0.1", "--model-distortion-weight=1"})
   {
     SCOPED_TRACE(invalid);
     std::string executable = "SWIFT_ReconstructionP1", argument = invalid;
@@ -127,9 +129,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionInheritsProductionDe
     defaults.model.distribution.deviatoric);
   EXPECT_EQ(options.parameters.model.distribution.divergence,
     defaults.model.distribution.divergence);
-  EXPECT_EQ(options.parameters.model.hinge, defaults.model.hinge);
-  EXPECT_EQ(options.parameters.model.jacobianWeight, defaults.model.jacobianWeight);
-  EXPECT_EQ(options.parameters.model.distortionWeight, defaults.model.distortionWeight);
+  EXPECT_EQ(options.parameters.model.hinge.jacobian, defaults.model.hinge.jacobian);
+  EXPECT_EQ(options.parameters.model.hinge.distortion, defaults.model.hinge.distortion);
   EXPECT_EQ(options.parameters.convergence.iterations.outer,
     defaults.convergence.iterations.outer);
   EXPECT_EQ(options.parameters.convergence.iterations.inner,
@@ -145,9 +146,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, CalibratedDefaultsAreInherited)
   EXPECT_EQ(p.model.fit, Real(1));
   EXPECT_EQ(p.model.distribution.deviatoric, Real(1e-4));
   EXPECT_EQ(p.model.distribution.divergence, Real(1e-4));
-  EXPECT_EQ(p.model.hinge, Real(100));
-  EXPECT_EQ(p.model.jacobianWeight, Real(0.1));
-  EXPECT_EQ(p.model.distortionWeight, Real(1));
+  EXPECT_EQ(p.model.hinge.jacobian, Real(10));
+  EXPECT_EQ(p.model.hinge.distortion, Real(100));
   EXPECT_EQ(p.convergence.iterations.outer, 30u);
   EXPECT_EQ(p.convergence.iterations.inner, 15u);
   EXPECT_EQ(p.quadrature.getSurfaceOrder(1), 8u);
@@ -163,11 +163,12 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, CanonicalNamesMapToHierarchicalPar
 {
   std::vector<std::string> arguments = {"example", "--n=11", "--model-fit=2",
     "--model-distribution-deviatoric=0.0003", "--model-distribution-divergence=0.0004",
-    "--model-hinge=10", "--model-jacobian=0.02", "--model-distortion=5",
-    "--convergence-iterations-outer=20", "--convergence-iterations-inner=10",
-    "--linear-solver=cg", "--convergence-tolerance-linear-relative=1e-9",
-    "--quadrature-order=12", "--quadrature-surface=8", "--quadrature-volume=2",
-    "--sampling-subdivision=16", "--quadrature-validation=32"};
+    "--model-hinge-jacobian=1", "--model-hinge-distortion=10", "--model-jacobian=0.02",
+    "--model-distortion=5", "--convergence-iterations-outer=20",
+    "--convergence-iterations-inner=10", "--linear-solver=cg",
+    "--convergence-tolerance-linear-relative=1e-9", "--quadrature-order=12",
+    "--quadrature-surface=8", "--quadrature-volume=2", "--sampling-subdivision=16",
+    "--quadrature-validation=32"};
   std::vector<char*> argv;
   for (auto& argument : arguments)
     argv.push_back(argument.data());
@@ -177,7 +178,8 @@ TEST(Rodin_Adaptation_SWIFTExampleParameters, CanonicalNamesMapToHierarchicalPar
   EXPECT_EQ(p.model.fit, Real(2));
   EXPECT_EQ(p.model.distribution.deviatoric, Real(0.0003));
   EXPECT_EQ(p.model.distribution.divergence, Real(0.0004));
-  EXPECT_EQ(p.model.hinge, Real(10));
+  EXPECT_EQ(p.model.hinge.jacobian, Real(1));
+  EXPECT_EQ(p.model.hinge.distortion, Real(10));
   EXPECT_EQ(p.model.jacobian, Real(0.02));
   EXPECT_EQ(p.model.distortion, Real(5));
   EXPECT_EQ(p.convergence.iterations.outer, 20u);

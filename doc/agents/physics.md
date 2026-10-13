@@ -82,7 +82,8 @@ couple elements. With both distribution coefficients positive, distribution
 controls \(H^1\) modulo global affine fields on a fixed connected Lipschitz domain;
 it is not a full-space norm or an unconditional uniform refinement bound.
 The defaults are `model.fit = 1`, `model.distribution.deviatoric = 1e-4`,
-`model.distribution.divergence = 1e-2` and `model.hinge = 10`.
+`model.distribution.divergence = 1e-4` and
+`model.hinge = {.jacobian = 10, .distortion = 100}`.
 D retains the mesh factor \(h\); there is no shape or constraint Hessian in the metric.
 The fitting energy/force remain robust Welsch. Minimizing this integral is not
 equivalent to minimizing the maximum geometric residual. Power-loss experiments

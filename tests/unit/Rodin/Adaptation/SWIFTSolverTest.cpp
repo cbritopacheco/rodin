@@ -27,14 +27,13 @@ namespace Rodin::Tests::Unit
     {
       const SWIFT::Parameters parameters;
       EXPECT_EQ(parameters.model.fit, Real(1));
-      EXPECT_EQ(parameters.model.hinge, Real(100));
       EXPECT_EQ(parameters.convergence.iterations.inner, 15);
       EXPECT_EQ(parameters.convergence.tolerance.innerRelative, Real(1e-3));
       EXPECT_EQ(parameters.convergence.iterations.linear, 1000);
       EXPECT_EQ(parameters.model.distribution.deviatoric, Real(1e-4));
       EXPECT_EQ(parameters.model.distribution.divergence, Real(1e-4));
-      EXPECT_EQ(parameters.model.jacobianWeight, Real(0.1));
-      EXPECT_EQ(parameters.model.distortionWeight, Real(1));
+      EXPECT_EQ(parameters.model.hinge.jacobian, Real(10));
+      EXPECT_EQ(parameters.model.hinge.distortion, Real(100));
       EXPECT_EQ(parameters.model.distortion, Real(10));
       EXPECT_EQ(parameters.model.jacobian, Real(1e-2));
       EXPECT_EQ(parameters.linear.threads, 0u);
@@ -74,7 +73,7 @@ namespace Rodin::Tests::Unit
         .distribution = {.deviatoric = Real(0.01), .divergence = Real(0.02)},
         .distortion = Real(5),
         .jacobian = Real(0.02),
-        .hinge = Real(10)};
+        .hinge = {.jacobian = Real(1), .distortion = Real(10)}};
       parameters.convergence.tolerance.geometric = Real(0.001);
       parameters.convergence.iterations.outer = 20;
       parameters.convergence.iterations.inner = 10;
@@ -88,7 +87,8 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(stored.model.distribution.divergence, Real(0.02));
       EXPECT_EQ(stored.model.distortion, Real(5));
       EXPECT_EQ(stored.model.jacobian, Real(0.02));
-      EXPECT_EQ(stored.model.hinge, Real(10));
+      EXPECT_EQ(stored.model.hinge.jacobian, Real(1));
+      EXPECT_EQ(stored.model.hinge.distortion, Real(10));
       EXPECT_EQ(stored.model.qualityGuard, Real(0.1));
       EXPECT_EQ(stored.convergence.tolerance.geometric, Real(0.001));
       EXPECT_EQ(stored.convergence.iterations.outer, 20u);
@@ -328,7 +328,7 @@ namespace Rodin::Tests::Unit
       parameters.linear.solver = linearSolver;
       parameters.linear.threads = 2;
       parameters.convergence.tolerance.innerRelative = innerTolerance;
-      parameters.model.hinge = muHat;
+      parameters.model.hinge = {.jacobian = Real(0.1) * muHat, .distortion = muHat};
       parameters.model.robustScale = robustScale;
       parameters.interfaceAttribute = Interface;
       parameters.convergence.iterations.outer = 12;
@@ -386,7 +386,7 @@ namespace Rodin::Tests::Unit
     const SWIFT::Parameters defaults;
     const auto state = solveTranslatedLine(Real(1), 0, false, 0, false, 1000, false,
       SWIFT::Parameters::LinearSolver::SparseLU, true,
-      defaults.convergence.tolerance.innerRelative, defaults.model.hinge,
+      defaults.convergence.tolerance.innerRelative, defaults.model.hinge.distortion,
       [&](SWIFT::Parameters& p) {
         p.model.fit = defaults.model.fit;
         p.model.distribution = defaults.model.distribution;
@@ -1331,8 +1331,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_SWIFTSolver, RejectsInvalidHingeWeightsAndControls)
   {
     const std::function<Real&(SWIFT::Parameters&)> controls[] = {
-      [](SWIFT::Parameters& p) -> Real& { return p.model.jacobianWeight; },
-      [](SWIFT::Parameters& p) -> Real& { return p.model.distortionWeight; },
+      [](SWIFT::Parameters& p) -> Real& { return p.model.hinge.jacobian; },
+      [](SWIFT::Parameters& p) -> Real& { return p.model.hinge.distortion; },
       [](SWIFT::Parameters& p) -> Real& { return p.convergence.tolerance.innerRelative; },
       [](SWIFT::Parameters& p) -> Real& { return p.convergence.tolerance.energy; }};
     for (const auto& control : controls)

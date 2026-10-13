@@ -114,7 +114,7 @@ namespace Rodin::Adaptation::SWIFT
       std::size_t energyRejections = 0;
       /// @brief Last accepted line-search factor.
       Real lastAlpha = 0;
-      /// @brief Effective per-volume coefficient assembled for the last hinge QP.
+      /// @brief Predicted decrease per volume, before the two hinge strengths.
       Real hingeCoefficient = 0;
       /// @brief Last inner Newton correction relative to the current iterate.
       Real innerRelativeCorrection = 0;

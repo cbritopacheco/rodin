@@ -169,7 +169,7 @@ namespace Rodin::Adaptation::SWIFT
    * parameters.model.fit = 1;
    * parameters.model.distribution.deviatoric = Real(1e-4);
    * parameters.model.distribution.divergence = Real(1e-2);
-   * parameters.model.hinge = 10;
+   * parameters.model.hinge = {.jacobian = 1, .distortion = 10};
    * parameters.model.distortion = 10;
    * parameters.model.jacobian = Real(0.01);
    * // These are work budgets; zero geometric tolerance selects the automatic target.
@@ -344,10 +344,10 @@ namespace Rodin::Adaptation::SWIFT
    * @f]
    * With @f$(t)_+=\max(t,0)@f$, the affine squared-hinge penalty is
    * @f[
-   * B_k(v)=\frac{\mu_k}{2}\sum_K\sum_{s\in\mathcal S_K}
-   *   \left[w^J_{K,s}\kappa_J\left(1-\frac{s_J(v)}{\delta_J}\right)_+^2
-   *        +w^Q_{K,s}\kappa_Q\left(1-\frac{s_Q(v)}{\delta_Q}\right)_+^2\right]_{K,s},
-   * \qquad \mu_k=\widehat\mu\frac{f_k[\bar p_k]}{2|\Omega_0|}.
+   * B_k(v)=\frac{\gamma_k}{2}\sum_K\sum_{s\in\mathcal S_K}
+   *   \left[w^J_{K,s}\mu_j\left(1-\frac{s_J(v)}{\delta_J}\right)_+^2
+   *        +w^Q_{K,s}\mu_Q\left(1-\frac{s_Q(v)}{\delta_Q}\right)_+^2\right]_{K,s},
+   * \qquad \gamma_k=\frac{f_k[\bar p_k]}{2|\Omega_0|}.
    * @f]
    * The set @f$\mathcal S_K@f$ contains the same closed-form reference covering
    * points as the actual-quality checks. For each constraint, @ref QualitySamples
@@ -422,9 +422,8 @@ namespace Rodin::Adaptation::SWIFT
    * | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness, not a force multiplier | @f$1@f$ |
    * | @f$\kappa_{\rm dev}@f$ | `model.distribution.deviatoric` | Cost of deviatoric-strain variation about its global mean | @f$10^{-4}@f$ |
    * | @f$\kappa_{\rm div}@f$ | `model.distribution.divergence` | Cost of divergence variation about its global mean, normalized by @f$d@f$ | @f$10^{-4}@f$ |
-   * | @f$\widehat\mu@f$ | `model.hinge` | Hinge strength relative to predicted fitting improvement | @f$100@f$ |
-   * | @f$\kappa_J@f$ | `model.jacobianWeight` | Relative Jacobian-hinge row weight | @f$0.1@f$ |
-   * | @f$\kappa_Q@f$ | `model.distortionWeight` | Relative distortion-hinge row weight | @f$1@f$ |
+   * | @f$\mu_j@f$ | `model.hinge.jacobian` | Jacobian recovery strength | @f$10@f$ |
+   * | @f$\mu_Q@f$ | `model.hinge.distortion` | Distortion recovery strength | @f$100@f$ |
    * | @f$\gamma@f$ | `model.qualityGuard` | Guard fraction defining hinge activation margins | @f$0.1@f$ |
    * | @f$j_{\mathrm{safe}}@f$ | `model.jacobian` | Relative Jacobian floor in the hinge and actual acceptance checks | @f$10^{-2}@f$ |
    * | @f$Q_{\max}@f$ | `model.distortion` | Maximum admissible relative distortion | @f$10@f$ |
@@ -469,15 +468,15 @@ namespace Rodin::Adaptation::SWIFT
    * automatic scale, which remains fixed during the solve.
    *
    * @subsection swift-quality-controls Quality recovery and admissibility
-   * @ref Parameters::Model::hinge scales the finite hinge penalty relative to
-   * the predicted fitting improvement. Increasing @f$\widehat\mu@f$ strengthens
+   * @ref Parameters::Model::Hinge sets the two independent penalty strengths
+   * relative to predicted fitting improvement. Increasing either strengthens
    * recovery when hinges are active; it has no effect on inactive hinges and
    * does not guarantee nonlinear feasibility.
    * @ref Parameters::Model::qualityGuard sets their activation margins relative
    * to the identity margins. A wider guard reacts earlier, but also changes
    * the slack normalization and hence the penalty curvature.
-   * @ref Parameters::Model::jacobianWeight and @ref Parameters::Model::distortionWeight set the
-   * relative importance of the Jacobian and distortion hinge rows.
+   * @ref Parameters::Model::Hinge::jacobian and @ref Parameters::Model::Hinge::distortion set the
+   * Jacobian and distortion recovery strengths, respectively.
    *
    * @ref Parameters::Model::distortion is a spendable distortion budget, not a
    * quantity that must be minimized. @ref Parameters::Model::jacobian protects
@@ -751,7 +750,7 @@ namespace Rodin::Adaptation::SWIFT
           Alert::Exception() << "SWIFT requires a finite positive fitting weight."
                              << Alert::Raise;
         for (const Real value :
-          {parameters.model.jacobianWeight, parameters.model.distortionWeight,
+          {parameters.model.hinge.jacobian, parameters.model.hinge.distortion,
             parameters.model.distribution.deviatoric,
             parameters.model.distribution.divergence,
             parameters.convergence.tolerance.innerAbsolute,
@@ -785,7 +784,6 @@ namespace Rodin::Adaptation::SWIFT
           !(parameters.model.jacobian > Real(0) && parameters.model.jacobian < Real(1)) ||
           !(parameters.model.distortion > Real(1)) ||
           !std::isfinite(parameters.model.distortion) ||
-          !std::isfinite(parameters.model.hinge) || parameters.model.hinge < Real(0) ||
           !std::isfinite(parameters.convergence.tolerance.geometric) ||
           parameters.convergence.tolerance.geometric < Real(0))
           Alert::Exception()
@@ -1172,9 +1170,8 @@ namespace Rodin::Adaptation::SWIFT
 
           {
             const Real modelDecrease = Real(0.5) * std::max(Real(0), predictorAction);
-            const Real hingeCoefficient = domainMeasure > Real(0)
-              ? p.model.hinge * modelDecrease / domainMeasure
-              : Real(0);
+            const Real hingeCoefficient =
+              domainMeasure > Real(0) ? modelDecrease / domainMeasure : Real(0);
             rep.hingeCoefficient = hingeCoefficient;
             const size_t innerIterations = p.convergence.iterations.inner;
             const Real predictorNorm =
@@ -1366,7 +1363,7 @@ namespace Rodin::Adaptation::SWIFT
                             << "  rel=" << relativeCorrection << "  alpha=" << innerAlpha
                             << "  linear_ok=1  cg_it=" << linearIterations
                             << "  cg_err=" << linearError
-                            << "  mu_eff=" << hingeCoefficient << std::endl;
+                            << "  hinge_scale=" << hingeCoefficient << std::endl;
                   std::cout.precision(precision);
                 }
                 scratch *= innerAlpha;
