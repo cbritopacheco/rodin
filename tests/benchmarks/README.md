@@ -147,7 +147,7 @@ that this performance matrix has been profiled.
 
 | Layer / owning module | Available measurement | Remaining qualification or isolation |
 | --- | --- | --- |
-| Spatial values / Math | Real/complex vector, matrix and tensor arithmetic; spatial dot; fixed-capacity construction/copy/assignment and temporary/direct array fill | Remaining arithmetic consumer attribution and controlled scaling baselines beyond selected storage scopes |
+| Spatial values / Math | Real/complex vector, matrix and tensor arithmetic; single/batched spatial dot; fixed-capacity construction/copy/assignment and temporary/direct array fill | Remaining arithmetic consumer attribution and controlled scaling baselines beyond selected storage scopes |
 | Sparse algebra / Math | Direct/transpose sparse products, Hermitian dots and squared norms; 1,512 selections qualified in both builds with selected source profiles | P0/P0g mass operators, mixed operators, remaining degrees and distributed representations |
 | Reference metadata / Geometry | Topology, connectivity and reference transformation consumers | Isolated metadata access, embedding and shape-dependent work accounting |
 | Reference elements / Variational | Scalar P0/P0g/P1 and H1 degrees 1–6; values, derivatives, prefetched descriptors | Vector/matrix component expansion, DOF functionals and first-use initialization |
@@ -859,6 +859,67 @@ build/tests/benchmarks/RodinPhysicalGradientBenchmarks \
   --benchmark_filter='PhysicalGradient/H1/P2/Real/Tetrahedron/16/' \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
+
+### Spatial dot batch protocol
+
+`RodinSpatialDotBenchmarks` retains its 32 single-contraction scopes and adds
+192 paired batch scopes. Both scalar orders over $\mathbb R$ and $\mathbb C$,
+logical dimensions $d\in\{0,1,2,3\}$ and vector counts $N\in\{4,16,64\}$
+are represented. Each batch stores
+
+$$
+D_{ba}=\sum_{j=0}^{d-1}u_{bj}\overline{v_{aj}}.
+$$
+
+`Full` evaluates $N^2$ pairs and `Lower` evaluates $N(N+1)/2$ pairs. The latter
+is a loop shape, not a symmetry assumption: left and right arrays differ, and
+no omitted entries are reconstructed by mirroring. Barriers surround the whole
+batch, permitting normal caller optimization within the pair loop. Vector
+construction, allocation and reference checks are outside timing; pair-loop
+control and output stores remain included. This is a Math operation benchmark,
+not a replacement for mapped-gradient, weighted-kernel or assembly measurements.
+
+The historical dynamic reduction and its reference use the same const Eigen
+view types as the original public implementation, and obtain dimension from
+the left operand rather than a separately supplied loop constant. Mutable views
+produce different Eigen expression types even when their numerical values agree.
+Compile-time guards reject that comparator drift; a deliberately mutable view
+was observed failing compilation before restoration. Inactive vector entries
+are poisoned with NaNs. All output entries must equal the dynamic reference
+before and after timing, and changing one entry must be rejected, including
+empty contractions. Existing scalar-product unit regressions additionally
+retain bitwise, cancellation, signed-zero and infinity checks.
+
+All 224 scopes qualify in both native and LLVM 19 OpenMP-enabled builds: 448
+scope/build combinations, with seven scalar-product regression tests passing
+in each build. The Math batches themselves remain serial and opt-in, without
+new CTest or publication-workflow registrations. Counters distinguish vector
+count, active pair count, field-scalar product terms, retained input/output
+bytes and bytes written; field-scalar terms are not a real-flop count.
+
+For $N=64$, the lower real/real batch has 2,080 pairs. Selected medians, in
+nanoseconds per pair, compare the existing public operation with the historical
+dynamic reduction; they are not a speedup from a new library repair:
+
+| Build | Dimension | Public | Dynamic reference |
+| --- | ---: | ---: | ---: |
+| Native Apple LLVM 21 | 2 | 0.615 | 1.130 |
+| Native Apple LLVM 21 | 3 | 0.797 | 1.519 |
+| LLVM 19, OpenMP enabled | 2 | 0.613 | 1.154 |
+| LLVM 19, OpenMP enabled | 3 | 0.827 | 1.489 |
+
+These use five repetitions with a 20 ms minimum timing window. Isolated
+per-pair timings are not additive fractions of separately compiled assembly.
+In particular, the weighted Stokes profile's Eigen `coeff` label resolves,
+after checking the image UUID and rebasing its address, to an inline
+third-component load inside `QuadratureRule::setPolytope`, not a separate
+function call. A method-shaped profile label alone does not justify forced
+inlining or an interposition repair. Raw traces, generated instructions,
+compiler optimization records and the explicitly noncanonical initial
+mutable-view measurements are retained in
+`build-convergence/certification/spatial-dot-batches-20261014/`.
+The one-component complex dispatch tradeoff remains a separate open source
+investigation; no production arithmetic is changed by this batch.
 
 ### Spatial matrix-vector initialization and its assembly consumer
 
