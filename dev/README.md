@@ -53,6 +53,14 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Native single-field nonlocal assembly: sparse/dense real/complex systems
+  combine constant-kernel double integrals with closed-form interval mass
+  matrices and load moments. All trial/test region combinations include
+  unrestricted, selected, unmatched and absent cell attributes. Repeated
+  execution through runtime assembler clones survives destruction of their
+  original owners; targeted updates preserve the other side of the system.
+  Sequential and OpenMP variants pass serially, with one and four OpenMP
+  threads. Bypassing production trial-region filters fails the new oracles.
 - Matrix derivative traces: real/complex matrix P0, P0g, P1 and quadratic
   H1 fields exercise boundaries, independently selected interior sides,
   copies, moves, clones and parent/submesh transport on all seven cell

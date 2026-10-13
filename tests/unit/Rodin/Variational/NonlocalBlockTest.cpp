@@ -5,6 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <array>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
@@ -154,3 +158,201 @@ namespace Rodin::Tests::Unit
   }
 
 }
+
+namespace
+{
+  /// @brief Closed-form interval moments check independent region filters and targeted assembly.
+  template <class Scalar, class Operator, template <class, class> class Assembler>
+  void checkSingleFieldRestrictions()
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    mesh.setAttribute({1, 0}, 3);
+    mesh.setAttribute({1, 1}, 5);
+    P1<Scalar> space(mesh);
+    TrialFunction u(space);
+    TestFunction v(space);
+    using System = Math::LinearSystem<Operator, Math::Vector<Scalar>>;
+    using ProblemType = Problem<System, decltype(u), decltype(v)>;
+    using Body = typename ProblemType::ProblemBodyType;
+    using Base = Assembly::AssemblyBase<System, ProblemType>;
+    const Scalar factor = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(2, -3);
+      else
+        return Scalar(2);
+    }();
+    const auto one = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return ComplexFunction(Scalar(1));
+      else
+        return RealFunction(Scalar(1));
+    }();
+    GridFunction trialField(space), testField(space);
+    trialField = [](const Point& p) { return Scalar(1 + p.x()); };
+    testField = [](const Point& p) { return Scalar(3 + 2 * p.x()); };
+    const auto kernel = [factor](const Point&, const Point&) { return factor; };
+    bool missingSecondAttribute = false;
+    auto selected = [&](Optional<Attribute> attribute, size_t cell) {
+      return !attribute ||
+        ((cell == 0 || !missingSecondAttribute) && *attribute == (cell == 0 ? 3 : 5));
+    };
+    auto moments = [&](Optional<Attribute> attribute) {
+      Math::Vector<Scalar> result = Math::Vector<Scalar>::Zero(space.getSize());
+      for (size_t cell = 0; cell < 2; ++cell)
+      {
+        if (!selected(attribute, cell))
+          continue;
+        const auto& dofs = space.getDOFs(1, cell);
+        for (const auto dof : dofs)
+          result[dof] += Scalar(0.5);
+      }
+      return result;
+    };
+    auto mass = [&](Optional<Attribute> attribute) {
+      Math::Matrix<Scalar> result =
+        Math::Matrix<Scalar>::Zero(space.getSize(), space.getSize());
+      for (size_t cell = 0; cell < 2; ++cell)
+      {
+        if (!selected(attribute, cell))
+          continue;
+        const auto& dofs = space.getDOFs(1, cell);
+        for (size_t row = 0; row < 2; ++row)
+        {
+          for (size_t column = 0; column < 2; ++column)
+            result(dofs[row], dofs[column]) +=
+              Scalar(row == column ? Real(1) / 3 : Real(1) / 6);
+        }
+      }
+      return result;
+    };
+    auto exactMoment = [&](Optional<Attribute> attribute, bool trial) -> Real {
+      if (!attribute)
+        return trial ? 4 : 10;
+      if (*attribute == 3)
+        return trial ? 1.5 : 4;
+      if (*attribute == 5 && !missingSecondAttribute)
+        return trial ? 2.5 : 6;
+      return 0;
+    };
+    std::vector<std::unique_ptr<Base>> assemblers;
+    {
+      Assembler<System, ProblemType> original;
+      auto copied(original);
+      auto moved(std::move(copied));
+      assemblers.emplace_back(moved.copy());
+    }
+    assemblers.emplace_back(assemblers.front()->copy());
+    Assembler<System, ProblemType> targeted;
+    System system;
+    const std::array<Optional<Attribute>, 4> attributes = {std::nullopt, 3, 5, 999};
+    for (const bool missing : {false, true})
+    {
+      SCOPED_TRACE(missing);
+      missingSecondAttribute = missing;
+      mesh.setAttribute({1, 1}, missing ? Optional<Attribute>{} : Optional<Attribute>{5});
+      for (const auto trialAttribute : attributes)
+      {
+        for (const auto testAttribute : attributes)
+        {
+          SCOPED_TRACE(trialAttribute ? std::to_string(*trialAttribute) : "all");
+          SCOPED_TRACE(testAttribute ? std::to_string(*testAttribute) : "all");
+          auto integral = Integral(Potential(kernel, u), v);
+          if (trialAttribute)
+            integral.setTrialAttributes({*trialAttribute});
+          if (testAttribute)
+            integral.setTestAttributes({*testAttribute});
+          auto local = Integral(u, v);
+          if (trialAttribute)
+            local.over(*trialAttribute);
+          auto load = Integral(one, v);
+          if (testAttribute)
+            load.over(*testAttribute);
+          Body body(integral);
+          body.getLocalBFIs().add(local);
+          body.getLFIs().add(UnaryMinus(load));
+          Assembly::ProblemAssemblyInput<Body, decltype(u), decltype(v)> input(
+            body, u, v);
+          const auto trialMoments = moments(trialAttribute);
+          const auto testMoments = moments(testAttribute);
+          const Math::Matrix<Scalar> expected =
+            factor * testMoments * trialMoments.transpose() + mass(trialAttribute);
+          auto verify = [&] {
+            const Math::Matrix<Scalar> actual = system.getOperator();
+            EXPECT_LT((actual - expected).norm(), 1e-11);
+            EXPECT_LT((system.getVector() - testMoments).norm(), 1e-11);
+            Real massAction = 0;
+            for (size_t cell = 0; cell < 2; ++cell)
+            {
+              if (selected(trialAttribute, cell))
+                massAction += cell == 0 ? Real(37) / 6 : Real(91) / 6;
+            }
+            const Scalar exact = factor *
+                Scalar(
+                  exactMoment(trialAttribute, true) * exactMoment(testAttribute, false)) +
+              Scalar(massAction);
+            EXPECT_LT(
+              std::abs(testField.getData().dot(actual * trialField.getData()) - exact),
+              1e-10);
+            EXPECT_LT(std::abs(testField.getData().dot(system.getVector()) -
+                        Scalar(exactMoment(testAttribute, false))),
+              1e-10);
+          };
+          for (auto& assembler : assemblers)
+          {
+            assembler->execute(system, input);
+            verify();
+            assembler->execute(system, input);
+            verify();
+          }
+          system.getVector().setConstant(Scalar(17));
+          const Math::Vector<Scalar> savedVector = system.getVector();
+          targeted.execute(system, input, AssemblyTarget::LHS);
+          EXPECT_LT(
+            (Math::Matrix<Scalar>(system.getOperator()) - expected).norm(), 1e-11);
+          EXPECT_EQ((system.getVector() - savedVector).norm(), 0);
+          system.getOperator() *= Scalar(7);
+          const Operator savedOperator = system.getOperator();
+          targeted.execute(system, input, AssemblyTarget::RHS);
+          EXPECT_EQ((system.getOperator() - savedOperator).norm(), 0);
+          EXPECT_LT((system.getVector() - testMoments).norm(), 1e-11);
+        }
+      }
+    }
+  }
+}
+
+TEST(NonlocalSingleField, SequentialSparseReal)
+{
+  checkSingleFieldRestrictions<Real, Math::SparseMatrix<Real>, Assembly::Sequential>();
+}
+TEST(NonlocalSingleField, SequentialDenseReal)
+{
+  checkSingleFieldRestrictions<Real, Math::Matrix<Real>, Assembly::Sequential>();
+}
+TEST(NonlocalSingleField, SequentialSparseComplex)
+{
+  checkSingleFieldRestrictions<Complex, Math::SparseMatrix<Complex>,
+    Assembly::Sequential>();
+}
+TEST(NonlocalSingleField, SequentialDenseComplex)
+{
+  checkSingleFieldRestrictions<Complex, Math::Matrix<Complex>, Assembly::Sequential>();
+}
+#ifdef RODIN_USE_OPENMP
+TEST(NonlocalSingleField, OpenMPSparseReal)
+{
+  checkSingleFieldRestrictions<Real, Math::SparseMatrix<Real>, Assembly::OpenMP>();
+}
+TEST(NonlocalSingleField, OpenMPDenseReal)
+{
+  checkSingleFieldRestrictions<Real, Math::Matrix<Real>, Assembly::OpenMP>();
+}
+TEST(NonlocalSingleField, OpenMPSparseComplex)
+{
+  checkSingleFieldRestrictions<Complex, Math::SparseMatrix<Complex>, Assembly::OpenMP>();
+}
+TEST(NonlocalSingleField, OpenMPDenseComplex)
+{
+  checkSingleFieldRestrictions<Complex, Math::Matrix<Complex>, Assembly::OpenMP>();
+}
+#endif
