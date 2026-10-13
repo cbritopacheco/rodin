@@ -299,6 +299,92 @@ build/tests/benchmarks/RodinFieldOperationBenchmarks \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
 
+### Native P1 bulk Jacobians and their assembly consumer
+
+`RodinBulkP1JacobianBenchmarks`, under `Rodin/Geometry`, isolates the native
+`RealP1Element` transformation used by mesh geometry. This is not an H1 element
+of degree one. For control coefficients $X_{ja}$, reference basis functions
+$\phi_a$, reference dimension $d$ and embedding dimension $s$, it computes
+
+$$
+J_{ji}(\widehat x_q)=\sum_{a=0}^{n_b-1}
+X_{ja}\,\partial_i\phi_a(\widehat x_q),
+\qquad 0\le j<s,\quad 0\le i<d.
+$$
+
+`BulkJacobian` overwrites retained output matrices through the public bulk
+transformation method, including the existing table lookup, vector resize,
+zeroing and contraction. `OwnedQuadrature` constructs/replaces an owned
+`PolytopeQuadrature`, including allocation, bulk Jacobians and point-cache
+initialization. Coordinates, inverses and measures remain lazy and are not
+included in this construction scope. Neither scope includes setup, first-use
+reference tabulation, guards, assembly or solving.
+
+All eight reference families, all admissible embeddings through dimension
+three, orders 2, 8 and 16, and affine/perturbed control clouds are registered:
+168 selections. Each workload contains one cell. Controls are obtained through
+the element DOF functionals. Affine cases represent $x=b+A\widehat x$ with mixed
+components; perturbed simplex P1 maps remain affine, whereas no constant-Jacobian
+assumption is made for tensor-product, wedge or pyramid maps. Every active
+entry must agree exactly with the unchanged pointwise contraction. Affine cases
+also reproduce $A$ within a dimensionless absolute roundoff budget of
+$10^{-12}$. Deliberately wrong entries or dimensions must be rejected.
+
+An Apple LLVM 21 optimized native study used five repetitions per selection.
+The following order-16 CPU medians exclude setup and guards. The last column
+normalizes the bulk time by $N_q n_b d s$ scalar products; it is a work proxy,
+not an instruction count.
+
+| Geometry / embedding | $N_q$ | $n_b$ | Bulk, ns | Owned quadrature, ns | Bulk ns/product |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Triangle / 2 | 53 | 3 | 537 | 1,084 | 0.845 |
+| Tetrahedron / 3 | 729 | 4 | 14,947 | 23,662 | 0.570 |
+| Pyramid / 3 | 729 | 5 | 18,427 | 26,847 | 0.562 |
+| Hexahedron / 3 | 729 | 8 | 29,776 | 39,183 | 0.567 |
+| Wedge / 3 | 477 | 6 | 14,400 | 20,087 | 0.559 |
+
+The tetrahedral raw bulk cost is about 27.8 times the triangular cost, while
+the scalar-product proxy is about 41.3 times larger. This comparison does not
+establish dimension-dependent inefficiency: the selected three-dimensional
+families have similar normalized costs. An Instruments capture selected by
+both benchmark owner and bulk-kernel frames attributed 88.2% of selected CPU
+sample weight to the contraction method itself and 9.6% to reference-gradient
+access. The warmed table lookup contributed less than 0.1%; a second cache is
+not motivated by this profile.
+
+The existing Assembly-owned coupled reaction-diffusion benchmark supplies the
+consumer comparison: two real H1 degree-two fields, two diffusion terms, four
+reaction terms, native P1 geometry, order 16, and grid sizes 3, 5 and 9. Native
+assembly CPU medians were 0.220, 0.889 and 3.551 ms on triangles, versus 30.202,
+254.350 and 1,959.505 ms on tetrahedra. At size 9, the latter contains 3,072
+cells, 729 points per cell and 10 local field functions, versus 128 cells,
+53 points and 6 functions on triangles. The approximately 552-fold raw ratio
+therefore combines different cell, quadrature and local-matrix counts, rather
+than isolating spatial dimension. A size-5 tetrahedral Instruments capture
+selected within actual assembly attributed 20.2% inclusively to bulk P1
+Jacobians, including 16.5% leaf weight in the contraction method. This confirms
+an assembly consumer of the measured kernel; inclusive weights are not additive
+or predictions of end-to-end speedups.
+
+Two candidate changes were rejected. Copying packed controls once per local
+basis preserved exact numerics but increased triangular order-16 bulk CPU time
+from 537 to 595 ns, with essentially unchanged tetrahedral time. An Eigen
+column update failed exact bulk/pointwise equality in four geometry regression
+tests and was not timed as an eligible repair. The canonical production kernel
+is unchanged; no source or assembly speedup is claimed. The retained regression
+poisons packed input padding and output storage, varies dimensions and formula
+sizes, and enforces exact active entries and zero inactive output storage.
+All 168 selections and all 14 geometry unit tests passed in both native and
+OpenMP-enabled optimized builds. The 42 real/complex degree-two assembly
+consumer selections retained exactly the native baseline numerical/work counters.
+
+```sh
+cmake --build build --target RodinBulkP1JacobianBenchmarks -j1
+build/tests/benchmarks/RodinBulkP1JacobianBenchmarks \
+  --benchmark_filter='BulkP1Geometry/(BulkJacobian|OwnedQuadrature)/Affine/Tetrahedron/3/16/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+```
+
 ### Mapped-point protocol
 
 `RodinMappedPointBenchmarks`, owned by Geometry, separates physical coordinates,
