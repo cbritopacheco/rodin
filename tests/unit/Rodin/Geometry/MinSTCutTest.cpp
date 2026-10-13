@@ -10,6 +10,7 @@
 #include <Rodin/Alert/Exception.h>
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <limits>
 #include <type_traits>
@@ -63,6 +64,35 @@ namespace Rodin::Tests::Unit
       EXPECT_DOUBLE_EQ(result.energy, 0);
       EXPECT_EQ(result.inside.size(), sign < 0 ? m_mesh.getCellCount() : 0);
       EXPECT_EQ(result.outside.size(), sign > 0 ? m_mesh.getCellCount() : 0);
+    }
+  }
+
+  TEST_P(MinSTCutMeshTest, LengthScaledSmoothingPreservesClassification)
+  {
+    constexpr Real Smoothing = Real(0.01);
+    std::vector<Real> values(m_mesh.getCellCount());
+    for (Index i = 0; i < values.size(); ++i)
+      values[i] = i % 2 ? Real(0.6) : Real(-0.2);
+    MinSTCut reference(m_mesh);
+    decltype(reference)::Parameters parameters;
+    parameters.smoothing = [](const Polytope&) { return Smoothing; };
+    reference.setParameters(parameters);
+    const auto expected = reference.classify(average(values));
+    ASSERT_FALSE(expected.inside.empty());
+    ASSERT_FALSE(expected.outside.empty());
+    for (const Real scale : {Real(0.01), Real(10), Real(100)})
+    {
+      LocalMesh scaled(m_mesh);
+      scaled.scale(scale);
+      MinSTCut classifier(scaled);
+      parameters.smoothing = [scale](const Polytope&) { return scale * Smoothing; };
+      classifier.setParameters(parameters);
+      const auto result = classifier.classify(average(values));
+      EXPECT_EQ(result.inside, expected.inside);
+      EXPECT_EQ(result.outside, expected.outside);
+      EXPECT_EQ(result.cut, expected.cut);
+      const Real volumeScale = std::pow(scale, m_mesh.getDimension());
+      EXPECT_NEAR(result.energy / volumeScale, expected.energy, Real(1e-10));
     }
   }
 

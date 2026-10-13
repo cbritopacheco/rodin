@@ -11,7 +11,7 @@
 #include <mutex>
 #include <vector>
 
-#include "QualityLattice.h"
+#include "WitnessLattice.h"
 
 namespace Rodin::Adaptation::SWIFT
 {
@@ -120,7 +120,7 @@ namespace Rodin::Adaptation::SWIFT
         const Real scale = tetrahedron ? m + 3 * shift : m + Real(1);
         m_radius = tetrahedron && m == 1 ? Real(1) / std::sqrt(Real(6))
                                          : std::sqrt(Real(dimension)) / (2 * scale);
-        const auto& lattice = QualityLattice::get(geometry, m);
+        const auto& lattice = WitnessLattice::get(geometry, m);
         m_points.reserve(lattice.getSize());
         for (size_t q = 0; q < lattice.getSize(); ++q)
         {

@@ -50,7 +50,7 @@ build/examples/Adaptation/SWIFT/Witness/SWIFT_Witness 2 \
 ```
 
 The positional argument is the positive number of subdivisions per reference
-edge, not the point count. The complete Rodin `QualityLattice` initializes the
+edge, not the point count. The complete Rodin `WitnessLattice` initializes the
 search. Its vertices are included initially but are not fixed during refinement.
 The point geometry always has one witness. Both `--name value` and
 `--name=value` are supported; the former `--n` option is removed.
@@ -93,7 +93,7 @@ For a reference polytope \(K\), the covering objective is
 \eta_K(X)=\max_{x\in K}\min_{\xi\in X}\|x-\xi\|_2.
 \]
 
-Initialization directly reuses Rodin's cached `SWIFT::QualityLattice` with the
+Initialization directly reuses Rodin's cached `SWIFT::WitnessLattice` with the
 requested subdivisions. Simplices use barycentric lattices; boxes use
 tensor-product lattices; wedges use triangle lattices times a segment; pyramids
 use shrinking square layers. No subset selection is performed. The resulting
