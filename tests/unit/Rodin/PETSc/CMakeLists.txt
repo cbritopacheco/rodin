@@ -253,3 +253,11 @@ add_test(NAME RodinPETScSingleFieldConstraintTest
 set_tests_properties(RodinPETScSingleFieldConstraintTest PROPERTIES
   LABELS "unit;petsc" TIMEOUT 120)
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScSingleFieldConstraintTest)
+
+add_executable(RodinPETScRestrictedNonlocalTest RestrictedNonlocalTest.cpp)
+target_link_libraries(RodinPETScRestrictedNonlocalTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScRestrictedNonlocalTest
+  COMMAND $<TARGET_FILE:RodinPETScRestrictedNonlocalTest>)
+set_tests_properties(RodinPETScRestrictedNonlocalTest PROPERTIES LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScRestrictedNonlocalTest)

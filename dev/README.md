@@ -53,6 +53,17 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- PETSc single-field nonlocal restrictions: real and complex P1 kernels
+  reproduce the outer product of independently assembled restricted moments
+  and the exact action on two different affine fields. All combinations of
+  unrestricted, selected and unmatched trial/test attributes are checked,
+  including zero operators and repeated full assembly. Sequential and OpenMP
+  variants are instantiated explicitly; OpenMP runs at one and four threads.
+- Higher-order nonlocal audit: `Integral(Potential(kernel, u), v)` does not
+  compile for quadratic H1 because the existing nonlocal `QuadratureRule`
+  specialization accepts only P1 spaces. This is an absent capability,
+  not runtime coverage of a supported H1 variant; no new quadrature algorithm
+  or coverage exclusion was introduced for the finding.
 - Locator reference clipping: near-boundary queries on all seven
   positive-dimensional cell families return contained reference coordinates
   whose remapped physical residual satisfies the configured tolerance.
