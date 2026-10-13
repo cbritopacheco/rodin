@@ -132,6 +132,12 @@ geometry, and backend variants explicitly. Current audit findings include:
   legacy real-only files. All 18 tests pass with real PETSc; removing matrix
   shape validation fails on every geometry. Complex-specific assertions are
   conditional and require a complex PETSc configuration for execution.
+- Shard-builder contracts: uninitialized/incompatible operations and missing
+  vertices are rejected. Invalid direct connectivity preserves pending entities,
+  insertion indices and topology; duplicate insertion preserves original state.
+  Owner/halo views and attribute overrides survive finalization without mutating
+  the parent. All three contract cases and all 31 existing shard tests pass;
+  compiled corrupted attributes fail both direct and parent metadata oracles.
 - Foreign form functions: real/complex local and global contributions with
   mismatched trial/test identities are rejected before changing integrator
   lists or assembled operators/vectors. Named and unnamed foreign trials
