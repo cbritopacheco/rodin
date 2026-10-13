@@ -156,7 +156,7 @@ that this performance matrix has been profiled.
 | Mapped points / Geometry | Isolated warm/rebound coordinates, Jacobian, inverse and measure; mapped-quadrature construction; field consumer profiles | General curved embeddings, cache-miss provenance, controlled timings and profiles beyond selected cases |
 | Space setup / Variational, MPI | P1 construction and distributed construction | P0/P0g/H1 setup, DOF lookup/restriction, reconciliation and degree scaling |
 | Fields / Variational | Interpolation and true mass projection; 1,008 native and OpenMP selections qualified; point/integration-point sweeps | P0/P0g, higher degrees, matrix evaluation, point cells, norms and boundary restriction |
-| Expressions / Variational | Generic expressions, coefficients and named forms | Cold expression construction, binding, changes of state and complete range/backend matrix |
+| Expressions / Variational | Generic expressions, coefficients and named forms; native real/complex sparse/dense coupled Problem lifetimes at degree two | Cold expression construction, remaining degrees, changes of state and complete range/backend matrix |
 | Local integrators / Variational | Volume entry kernels and reference-loop comparisons | Boundary/interface kernels; mixed blocks and nonlinear residual/tangent stages |
 | Operator setup / Assembly | Public repeated assembly and sequential stage scopes | Sparsity discovery, allocation and replacement separated from kernels |
 | Scatter / Assembly, PETSc | Sequential triplets; complete native/PETSc insertion consumers | Isolated OpenMP buffers/merge, PETSc insertion and ownership-dependent MPI work |
@@ -1040,6 +1040,76 @@ H1 degrees and seven geometries, including logical block offsets, independent
 mass blocks, repeated assembly, true residuals and component solution scatter.
 No alternate complex assembler, numerical tolerance change or speedup claim
 is introduced by this construction repair.
+
+### Problem construction and assignment lifetimes
+
+`RodinProblemLifecycleBenchmarks` belongs to Variational and is opt-in, outside
+CTest and benchmark publication. It uses the same degree-two real/complex
+coupled reaction–diffusion formulation as the assembly and CG targets, with
+sparse and dense native storage. Seven geometries, three sizes (2, 3 and 4
+points per axis), four field/storage combinations and six lifetimes provide
+504 selections. All 504 passed in each optimized native/OpenMP build (1,008
+operation/build selections). This is degree-two native lifetime coverage, not qualification
+of the remaining degree, vector-range or PETSc/MPI matrix.
+
+Empty construction includes destruction; Defined additionally clones the
+formulation body. Copy copies an already assembled body and system, including
+their destruction. Move transfers a fresh untimed staging copy and times result
+destruction. CopyAssignment and MoveAssignment retain an existing destination;
+copy assignment can reuse fixed-size system buffers, whereas move assignment
+replaces the previous value. Staging copies and moved-from cleanup are excluded.
+The allocator is warmed; none of these scopes is process-first allocation.
+Untimed guards require exact operator/load reproduction after reassembly and
+reject a wrong body through logical integrator counts. Assignment also checks
+the actual final timed destination before and after reassembly. Source spaces
+and mesh setup, interpolation and PDE assembly remain outside timing.
+
+The original four-lifetime executable is preserved locally. All its 336
+selections passed. The applicable repaired numerical/work counters match those
+controls exactly; object size is intentionally different. In the native Apple
+LLVM build, removing two unused
+linear forms and four unused bilinear forms reduces the two-field object from
+1,888 to 720 bytes for sparse storage and from 1,648 to 672 bytes for dense
+storage. Those forms contained initially empty matrices/vectors: this is not
+removal of dense per-block matrix allocations or a total-memory measurement.
+
+Matched five-repetition native real/sparse measurements at all three sizes on
+triangles and tetrahedra observed empty-construction CPU medians of
+0.527–0.546 microseconds before and 0.232–0.235 microseconds after repair.
+The ratio was 2.25–2.35. Definition and assembled-copy changes were smaller;
+no complete-workflow or solver speedup follows from the construction result.
+Four Instruments captures compare empty construction and assembled copy at
+fixed iteration counts. Residual empty-construction samples locate allocation,
+deallocation and identity work; samples do not count allocations. Copy samples
+remain dominated by memory copying (47–48%) and owned cloning (23–24%), with
+overlapping categories. Their similar sampled CPU totals do not establish a
+whole-copy gain. Matching untimed preparation can remain selected; sampled
+CPU weights are not elapsed-time fractions.
+
+Move timings include a substantial timer-transition floor. An offline control
+of the same two pause/resume pairs measured a CPU median of 1.258 microseconds,
+with 1.6% variation. It is not a Rodin benchmark or a CI test. Raw move numbers
+are retained, but are not reported as isolated move latency; subtracting this
+control would not establish a precise kernel time. Batched instrumentation
+remains a separate measurement improvement before fine-grained move claims.
+The installed Boost 1.88 bimap also exposes copy construction/assignment, not
+move overloads: the logical UUID maps are copied even when passed through
+`std::move`. Thus a public problem move is not a constant-time pointer transfer.
+This source finding is separate from timer overhead; batched move attribution
+and map-lifetime measurements are the next isolation step, not an adopted
+container replacement.
+
+The assignment repair retains destination identity, transfers the owned body,
+system, borrowed function bindings and execution policy, and initializes mixed
+offsets from logical space sizes at construction. Only complete-problem
+assembler bases support identity-preserving assignment; FormLanguage root
+assignment remains deleted. The original assignment fails to compile, so there
+is no valid original assignment timing or assignment speedup claim. Logical
+regressions reject stale bodies and zeroed cumulative offsets, alongside exact
+reassembly and initial-guess gathering across P0/H1 degrees one through three,
+all seven geometries and real/complex sparse/dense storage. Remaining work
+includes other degrees/ranges, backend-specific handle lifetimes and the
+unmeasured physical-context matrix.
 
 # Spatial value benchmarks
 

@@ -159,6 +159,17 @@ solution back into each `TrialFunction` (`u.getSolution()`).
 Signs follow the math: `Integral(Grad(u), Grad(v)) - Integral(f, v)`
 states a(u,v) − L(v) = 0.
 
+Native single-field and mixed problems own the body and linear system while
+borrowing trial/test functions. Copy/move assignment replaces the body, system,
+bindings and assembly state but retains the destination problem identity.
+Complete-problem assembler assignment similarly retains destination identity;
+the base has no execution state, and concrete assemblers transfer their own
+policy, including the OpenMP thread setting. This does not enable assignment
+of `FormLanguage::Base` or arbitrary expression nodes. Mixed cumulative offsets
+are valid from construction, derived from the ordered space sizes, and refreshed
+by assembly. No unused per-block form tuple is constructed. These native lifetime
+contracts do not establish PETSc handle-copy or MPI collective semantics.
+
 `ProblemBase` and its concrete single/mixed-field problems also support
 `+=` and `-=` for terms supported by the existing `ProblemBody` arithmetic:
 

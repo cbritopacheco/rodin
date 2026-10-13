@@ -28,7 +28,7 @@ using namespace Rodin::Variational;
  * @f$\det R=2-|\beta|^2>0@f$, CG is applicable to both coefficient fields.
  * Three H1 degrees and all seven cell families exercise both
  * sparse and dense system representations, including repeated assembly and
- * solution scatter. Copy/move construction must retain the
+ * solution scatter. Copy/move construction and assignment must retain the
  * owned formulation, block offsets and assembled system; explicit reassembly
  * must reproduce the original operator and load exactly.
  * Separate scalar mass forms determine every matrix block.
@@ -109,6 +109,13 @@ void checkMixedBlockProblem()
       const Math::Vector<Scalar> exactW = w.getSolution().getData();
       Problem<System, decltype(u), decltype(v), decltype(w), decltype(z)> problem(
         u, v, w, z);
+      EXPECT_EQ(problem.getTrialOffsets()[0], 0);
+      EXPECT_EQ(problem.getTrialOffsets()[1], low.getSize());
+      EXPECT_EQ(problem.getTestOffsets(), problem.getTrialOffsets());
+      auto unassembledCopy(problem);
+      auto unassembledMove(std::move(unassembledCopy));
+      EXPECT_EQ(unassembledMove.getTrialOffsets(), problem.getTrialOffsets());
+      EXPECT_EQ(unassembledMove.getTestOffsets(), problem.getTestOffsets());
       auto aUU = Integral(u, v);
       auto aWW = Integral(Real(2) * w, z);
       auto aUW = Integral(coupling * w, v);
@@ -181,10 +188,12 @@ void checkMixedBlockProblem()
         EXPECT_EQ(
           (Math::Matrix<Scalar>(transferredSystem.getOperator()) - assembled).norm(), 0);
         EXPECT_EQ((transferredSystem.getVector() - load).norm(), 0);
+        EXPECT_EQ((transferredSystem.getSolution() - exact).norm(), 0);
         transferred.assemble();
         EXPECT_EQ(
           (Math::Matrix<Scalar>(transferredSystem.getOperator()) - assembled).norm(), 0);
         EXPECT_EQ((transferredSystem.getVector() - load).norm(), 0);
+        EXPECT_EQ((transferredSystem.getSolution() - exact).norm(), 0);
       };
       auto copied(problem);
       {
@@ -196,6 +205,60 @@ void checkMixedBlockProblem()
         SCOPED_TRACE("move construction");
         checkTransferred(moved);
       }
+      TrialFunction otherU(low);
+      TrialFunction otherW(high);
+      TestFunction otherV(low);
+      TestFunction otherZ(high);
+      decltype(problem) assigned(otherU, otherV, otherW, otherZ);
+      assigned = Integral(otherU, otherV);
+      const auto assignedUUID = assigned.getUUID();
+      assigned = problem;
+      EXPECT_EQ(assigned.getUUID(), assignedUUID);
+      {
+        SCOPED_TRACE("copy assignment replaces body and function identities");
+        checkTransferred(assigned);
+      }
+      decltype(problem) moveAssigned(otherU, otherV, otherW, otherZ);
+      moveAssigned = Integral(otherW, otherZ);
+      const auto moveAssignedUUID = moveAssigned.getUUID();
+      moveAssigned = std::move(assigned);
+      EXPECT_EQ(moveAssigned.getUUID(), moveAssignedUUID);
+      {
+        SCOPED_TRACE("move assignment replaces body and function identities");
+        checkTransferred(moveAssigned);
+      }
+      auto* self = &moveAssigned;
+      moveAssigned = *self;
+      moveAssigned = std::move(*self);
+      {
+        SCOPED_TRACE("self assignment retains the formulation");
+        checkTransferred(moveAssigned);
+      }
+      using ScalarProblem = Problem<System, decltype(w), decltype(z)>;
+      ScalarProblem scalar(w, z), scalarAssigned(otherW, otherZ);
+      scalar = aWW - bW;
+      scalar.assemble();
+      const Math::Matrix<Scalar> scalarMatrix = scalar.getLinearSystem().getOperator();
+      const Math::Vector<Scalar> scalarLoad = scalar.getLinearSystem().getVector();
+      const auto scalarUUID = scalarAssigned.getUUID();
+      scalarAssigned = scalar;
+      EXPECT_EQ(scalarAssigned.getUUID(), scalarUUID);
+      scalarAssigned.assemble();
+      EXPECT_EQ((Math::Matrix<Scalar>(scalarAssigned.getLinearSystem().getOperator()) -
+                  scalarMatrix)
+                  .norm(),
+        0);
+      EXPECT_EQ((scalarAssigned.getLinearSystem().getVector() - scalarLoad).norm(), 0);
+      ScalarProblem scalarMoved(otherW, otherZ);
+      const auto scalarMovedUUID = scalarMoved.getUUID();
+      scalarMoved = std::move(scalarAssigned);
+      EXPECT_EQ(scalarMoved.getUUID(), scalarMovedUUID);
+      scalarMoved.assemble();
+      EXPECT_EQ(
+        (Math::Matrix<Scalar>(scalarMoved.getLinearSystem().getOperator()) - scalarMatrix)
+          .norm(),
+        0);
+      EXPECT_EQ((scalarMoved.getLinearSystem().getVector() - scalarLoad).norm(), 0);
       system.getSolution().setZero();
       Solver::CG solver(problem);
       solver.setTolerance(solverTolerance).setMaxIterations(maximumIterations);
@@ -234,6 +297,29 @@ TEST(Rodin_Variational_Problem, MixedRealDenseP0H1)
 TEST(Rodin_Variational_Problem, MixedComplexDenseP0H1)
 {
   checkMixedBlockProblem<Complex, Math::Matrix<Complex>>();
+}
+
+TEST(Rodin_Variational_Problem, CompleteAssemblerAssignmentRetainsIdentity)
+{
+  static_assert(!std::is_copy_assignable_v<FormLanguage::Base>);
+  static_assert(!std::is_move_assignable_v<FormLanguage::Base>);
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  P1 space(mesh);
+  TrialFunction u(space), w(space);
+  TestFunction v(space), z(space);
+  Problem scalar(u, v);
+  Problem mixed(u, w, v, z);
+  const auto check = []<class Assembly>() {
+    Assembly source, destination;
+    const auto identity = destination.getUUID();
+    EXPECT_NE(identity, source.getUUID());
+    destination = source;
+    EXPECT_EQ(destination.getUUID(), identity);
+    destination = std::move(source);
+    EXPECT_EQ(destination.getUUID(), identity);
+  };
+  check.template operator()<decltype(scalar)::AssemblyType>();
+  check.template operator()<decltype(mixed)::AssemblyType>();
 }
 
 TEST(Rodin_Variational_Problem, BodylessAdaptersRejectCompoundAssignment)
