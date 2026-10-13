@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <cstdint>
 #include <functional>
 #include <iomanip>
 #include <iostream>
@@ -422,9 +421,9 @@ namespace Rodin::Adaptation::SWIFT
    * | @f$h@f$ | `model.h` | Background reference size; scales distribution, motion limit and geometric target | Required |
    * | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness, not a force multiplier | @f$1@f$ |
    * | @f$\kappa_{\rm dev}@f$ | `model.distribution.deviatoric` | Cost of deviatoric-strain variation about its global mean | @f$10^{-4}@f$ |
-   * | @f$\kappa_{\rm div}@f$ | `model.distribution.divergence` | Cost of divergence variation about its global mean, normalized by @f$d@f$ | @f$10^{-2}@f$ |
-   * | @f$\widehat\mu@f$ | `model.hinge` | Hinge strength relative to predicted fitting improvement | @f$10@f$ |
-   * | @f$\kappa_J@f$ | `model.jacobianWeight` | Relative Jacobian-hinge row weight | @f$1@f$ |
+   * | @f$\kappa_{\rm div}@f$ | `model.distribution.divergence` | Cost of divergence variation about its global mean, normalized by @f$d@f$ | @f$10^{-4}@f$ |
+   * | @f$\widehat\mu@f$ | `model.hinge` | Hinge strength relative to predicted fitting improvement | @f$100@f$ |
+   * | @f$\kappa_J@f$ | `model.jacobianWeight` | Relative Jacobian-hinge row weight | @f$0.1@f$ |
    * | @f$\kappa_Q@f$ | `model.distortionWeight` | Relative distortion-hinge row weight | @f$1@f$ |
    * | @f$\gamma@f$ | `model.qualityGuard` | Guard fraction defining hinge activation margins | @f$0.1@f$ |
    * | @f$j_{\mathrm{safe}}@f$ | `model.jacobian` | Relative Jacobian floor in the hinge and actual acceptance checks | @f$10^{-2}@f$ |
@@ -656,21 +655,6 @@ namespace Rodin::Adaptation::SWIFT
           Real residualSup = 0;
       };
 
-      /**
-       * @brief Kink of the discrete interface across facet boundaries.
-       *
-       * These statistics describe the classified interface only; they do not
-       * alter the geometric target or the solver tolerances.
-       */
-      struct NormalJump
-      {
-          /// @brief Measure-weighted RMS angle between adjacent facet normals.
-          Real rms = 0;
-
-          /// @brief Largest angle between adjacent facet normals.
-          Real max = 0;
-      };
-
     public:
       /**
        * @brief Constructs the fitting problem from trial and test functions.
@@ -899,9 +883,6 @@ namespace Rodin::Adaptation::SWIFT
           rep.reason = Report::Reason::EmptyInterface;
           return finish(rep);
         }
-        const auto normalJump = getNormalJump(mesh, fes, interfaceFacets, meshDim);
-        rep.normalJumpRMS = normalJump.rms;
-        rep.normalJumpMax = normalJump.max;
         const Real geometricScale = std::pow(
           h, fes.getFiniteElement(meshDim - 1, interfaceFacets.front()).getOrder() + 1);
         const Real geometricTarget = p.convergence.tolerance.geometric > Real(0)
@@ -2324,142 +2305,6 @@ namespace Rodin::Adaptation::SWIFT
         return {std::sqrt(std::max(Real(0), total.squaredDistance) / total.measure),
           total.maximumDistance,
           std::sqrt(std::max(Real(0), total.squaredNormal) / total.measure)};
-      }
-
-      /**
-       * @brief Normal-jump statistics of the discrete interface.
-       *
-       * Facets are adjacent when they share a vertex in two dimensions or an
-       * edge in three, and each adjacent pair contributes the angle between its
-       * normals weighted by the mean of the two facet measures. Normals are
-       * compared up to sign, since facet orientation is not consistent across
-       * the interface.
-       */
-      /**
-       * @brief Computes jumps between averaged adjacent interface normals.
-       * @param mesh Fixed reference mesh.
-       * @param fes Displacement finite element space defining quadrature orders.
-       * @param interfaceFacets Indices of the classified interface facets.
-       * @param dimension Spatial dimension.
-       * @returns Measure-weighted RMS and maximum normal-angle jumps.
-       */
-      template <class Mesh, class FES>
-      NormalJump getNormalJump(const Mesh& mesh, const FES& fes,
-        const std::vector<Index>& interfaceFacets, std::size_t dimension) const
-      {
-        // Averaged unit normal and measure of each facet. The normal is the
-        // quadrature average of the pointwise unit normals, so a curved facet
-        // contributes its mean orientation; a facet degenerate throughout
-        // falls back to a fixed direction rather than a null vector.
-        constexpr Real degenerate = Real(1e-30);
-        std::vector<Math::SpatialVector<Real>> normals(interfaceFacets.size());
-        std::vector<Real> measures(interfaceFacets.size(), Real(0));
-
-        for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-        {
-          const auto face = mesh.getFace(interfaceFacets[i]);
-          const auto& qf = getQuadrature(*face, fes);
-          const auto& quad = face->getQuadrature(qf);
-
-          Math::SpatialVector<Real> n = Math::SpatialVector<Real>::Zero(dimension);
-          Real measure = 0;
-          for (std::size_t q = 0; q < quad.getSize(); ++q)
-          {
-            const auto& pt = quad.getPoint(q);
-            const Real w = qf.getWeight(q) * pt.getDistortion();
-            const auto& J = pt.getJacobian();
-            // The facet normal: in 2D the tangent rotated a quarter turn, in
-            // 3D the cross product of the two tangents.
-            Math::SpatialVector<Real> nq;
-            if (dimension == 2)
-            {
-              nq.resize(2);
-              nq(0) = J(1, 0);
-              nq(1) = -J(0, 0);
-            }
-            else
-            {
-              Math::SpatialVector<Real> a = Math::SpatialVector<Real>::Zero(dimension);
-              Math::SpatialVector<Real> b = Math::SpatialVector<Real>::Zero(dimension);
-              for (std::size_t r = 0; r < dimension; ++r)
-              {
-                a(static_cast<Eigen::Index>(r)) = J(r, 0);
-                b(static_cast<Eigen::Index>(r)) = J(r, 1);
-              }
-              nq = a.cross(b);
-            }
-            const Real norm = nq.norm();
-            if (norm > degenerate)
-            {
-              n += w * (nq / norm);
-              measure += w;
-            }
-          }
-
-          if (n.norm() <= degenerate)
-          {
-            n.setZero();
-            n(0) = Real(1);
-          }
-          else
-          {
-            n /= n.norm();
-          }
-          measures[i] = measure;
-          normals[i] = n;
-        }
-
-        const auto edgeKey = [](Index a, Index b) -> std::uint64_t {
-          const auto lo = static_cast<std::uint64_t>(std::min(a, b));
-          const auto hi = static_cast<std::uint64_t>(std::max(a, b));
-          return (lo << 32) ^ hi;
-        };
-
-        // Facets sharing an incidence, keyed by the shared entity.
-        UnorderedMap<std::uint64_t, std::vector<std::size_t>> incident;
-        if (dimension == 2)
-        {
-          incident.reserve(2 * interfaceFacets.size());
-          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-          {
-            for (const Index v : mesh.getFace(interfaceFacets[i])->getVertices())
-              incident[static_cast<std::uint64_t>(v)].push_back(i);
-          }
-        }
-        else if (dimension == 3)
-        {
-          incident.reserve(3 * interfaceFacets.size());
-          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-          {
-            const auto& vv = mesh.getFace(interfaceFacets[i])->getVertices();
-            incident[edgeKey(vv[0], vv[1])].push_back(i);
-            incident[edgeKey(vv[1], vv[2])].push_back(i);
-            incident[edgeKey(vv[2], vv[0])].push_back(i);
-          }
-        }
-
-        NormalJump jump;
-        Real squared = 0;
-        Real weight = 0;
-        for (const auto& [key, faces] : incident)
-        {
-          (void)key;
-          for (std::size_t a = 0; a < faces.size(); ++a)
-          {
-            for (std::size_t b = a + 1; b < faces.size(); ++b)
-            {
-              const auto ia = faces[a], ib = faces[b];
-              const Real dot = std::abs(normals[ia].dot(normals[ib]));
-              const Real theta = std::acos(std::max(Real(-1), std::min(Real(1), dot)));
-              const Real w = Real(0.5) * (measures[ia] + measures[ib]);
-              squared += w * theta * theta;
-              weight += w;
-              jump.max = std::max(jump.max, theta);
-            }
-          }
-        }
-        jump.rms = weight > Real(0) ? std::sqrt(squared / weight) : Real(0);
-        return jump;
       }
 
       /**
