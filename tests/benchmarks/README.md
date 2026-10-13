@@ -433,6 +433,68 @@ untimed binds and are not a partition of benchmark elapsed time. The raw
 before/after controls, regressions and capture are retained in
 `build-convergence/certification/weighted-jacobian-20261013/`.
 
+### Weighted physical-gradient reuse
+
+The weighted Jacobian kernel now applies the same reference-table identity
+criterion as the unweighted kernel. If both borrowed tables are the same
+object, trial and test physical-gradient scratch aliases within the current
+quadrature point, and the duplicate test-gradient map is omitted. Different
+tables retain independent storage. No new cache, retained table pointer,
+coordinate comparison or collective is introduced. Coefficient evaluation,
+matrix contraction and accumulation order are unchanged.
+
+The all-entry regression additionally covers both $P_2/P_3$ orientations for
+real and complex fields. Forcing reuse across different tables was observed
+failing before restoring the identity predicate. Native, assertion-enabled
+and OpenMP regressions pass, as do the selected weighted-complex and native
+Stokes convergence controls: 47 test executions in total. Before/after
+qualification covers 14 bindings and 20 complete assemblies per build, with
+two workers for OpenMP assembly. Selected numerical and work counters match
+exactly; this is 68 scope/build combinations, not full backend certification.
+
+Native $P_2/P_1$, $n=3$ three-dimensional medians are:
+
+| Geometry | Binding before / after | Assembly before / after |
+| --- | ---: | ---: |
+| Tetrahedron | 7.177 / 6.856 ms | 23.572 / 22.862 ms |
+| Pyramid | 11.976 / 11.502 ms | 34.287 / 32.871 ms |
+| Hexahedron | 6.129 / 6.052 ms | 14.787 / 14.211 ms |
+| Wedge | 3.996 / 3.880 ms | 10.719 / 10.406 ms |
+
+These measurements use five repetitions of ten sweeps. Repeating the unchanged
+baseline after the candidate yields assembly median drift of 0.8–2.0% on these
+four geometries. The observed gains are modest and do not resolve the larger
+three-dimensional cost. Longer low-degree 2D binding windows, with 10,000
+sweeps per repetition, give 0.03615 / 0.03297 ms on triangles and
+0.04398 / 0.04069 ms on quadrilaterals. No material 2D whole-assembly gain is
+established. Two initial higher-degree 2D control windows, only 1–2.5 ms long,
+contained large wall/CPU timing outliers; they are not used as stable controls.
+Repeating those cases with 1,000 sweeps reduces elapsed variability below 1.4%
+and shows about 1–2% differences. Short-window noise must not be interpreted as
+a higher-degree optimization. Serial local binding in the LLVM 19 OpenMP build
+shows 1.02–1.09-fold changes across the selected cases; this is not a parallel
+speedup claim.
+
+The broad sweep initially measured a 3.4% slowdown for $P_4/P_3$ wedge
+assembly. A focused five-repetition comparison gives 161.03 / 162.01 ms,
+with elapsed coefficients of variation of 0.54% / 0.96%. The unchanged
+baseline also shifts relative to the broad sweep. No material regression or
+gain is established for that case; its original and focused observations
+remain in the artifacts rather than being replaced by a favorable selection.
+
+Matching 800-sweep native tetrahedral captures select 5.635 seconds before
+and 5.468 seconds after in the weighted binding call tree. These are sampled
+CPU weights, not elapsed timings. Matching 250-assembly captures select
+1.813 / 1.698 seconds specifically in the consuming weighted kernel. Profiles
+include matching untimed binds, and changing inlining can change operation
+labels; absent named frames do not imply absent arithmetic. Exported kernel
+source-line metadata collapses
+the inlined body to one line; it cannot independently split the gradient loops.
+The isolated source change and matched consumer measurements test the reuse
+hypothesis without inferring those missing source-line fractions. Profiles and
+controls are retained under
+`build-convergence/certification/weighted-gradient-sharing-20261013/`.
+
 ### Scalar reference-element protocol
 
 `RodinReferenceElementBenchmarks` measures all eight reference geometries for

@@ -2452,6 +2452,10 @@ namespace Rodin::Variational
    * and test bases, including complex scalars because the basis is real.
    * Matrix coefficients act on field components and need not be symmetric;
    * their complete component blocks are retained without mirroring.
+   * When both borrowed reference tables are the same object, physical-gradient
+   * scratch is shared within the current quadrature point. Otherwise separate
+   * trial/test storage is used. Gradients are recomputed for every point and
+   * polytope; no table pointer or physical derivative is cached across binds.
    *
    * Judgement
    * ---------
@@ -2660,9 +2664,12 @@ namespace Rodin::Variational
 
         const auto& trTabS = trialScalarElement.getTabulation(*m_qf);
         const auto& teTabS = testScalarElement .getTabulation(*m_qf);
+        const bool sharedGradients =
+          static_cast<const void*>(&trTabS) == static_cast<const void*>(&teTabS);
 
         static thread_local std::vector<Math::SpatialVector<ScalarType>> GtrS;
-        static thread_local std::vector<Math::SpatialVector<ScalarType>> GteS;
+        static thread_local std::vector<Math::SpatialVector<ScalarType>> GteStorage;
+        auto& GteS = sharedGradients ? GtrS : GteStorage;
 
         if (GtrS.size() < trialScalarCount) GtrS.resize(trialScalarCount);
         if (GteS.size() < testScalarCount)  GteS.resize(testScalarCount);
@@ -2695,7 +2702,7 @@ namespace Rodin::Variational
                   GtrS[a][axis] += Jinv(ref, axis) * g[ref];
               }
             }
-            for (size_t b = 0; b < testScalarCount; ++b)
+            for (size_t b = 0; !sharedGradients && b < testScalarCount; ++b)
             {
               const auto g = teTabS.getGradient(qp, b);
               GteS[b].setZero();
@@ -2720,7 +2727,7 @@ namespace Rodin::Variational
               GtrS[a][1] = a01*gx + a11*gy + a21*gz;
               GtrS[a][2] = a02*gx + a12*gy + a22*gz;
             }
-            for (size_t b = 0; b < testScalarCount; ++b)
+            for (size_t b = 0; !sharedGradients && b < testScalarCount; ++b)
             {
               const auto g = teTabS.getGradient(qp, b);
               const ScalarType gx = g[0], gy = g[1], gz = g[2];
@@ -2741,7 +2748,7 @@ namespace Rodin::Variational
               GtrS[a][0] = a00*gx + a10*gy;
               GtrS[a][1] = a01*gx + a11*gy;
             }
-            for (size_t b = 0; b < testScalarCount; ++b)
+            for (size_t b = 0; !sharedGradients && b < testScalarCount; ++b)
             {
               const auto g = teTabS.getGradient(qp, b);
               const ScalarType gx = g[0], gy = g[1];
@@ -2757,7 +2764,7 @@ namespace Rodin::Variational
               const auto g = trTabS.getGradient(qp, a);
               GtrS[a][0] = a00 * g[0];
             }
-            for (size_t b = 0; b < testScalarCount; ++b)
+            for (size_t b = 0; !sharedGradients && b < testScalarCount; ++b)
             {
               const auto g = teTabS.getGradient(qp, b);
               GteS[b][0] = a00 * g[0];

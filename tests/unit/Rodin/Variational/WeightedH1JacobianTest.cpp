@@ -145,10 +145,14 @@ namespace Rodin::Tests::Unit
     check<2, 2, Real>(mesh);
     check<1, 2, Real>(mesh);
     check<2, 1, Real>(mesh);
+    check<2, 3, Real>(mesh);
+    check<3, 2, Real>(mesh);
     check<1, 1, Complex>(mesh);
     check<2, 2, Complex>(mesh);
     check<1, 2, Complex>(mesh);
     check<2, 1, Complex>(mesh);
+    check<2, 3, Complex>(mesh);
+    check<3, 2, Complex>(mesh);
   }
 
   using G = Polytope::Type;
