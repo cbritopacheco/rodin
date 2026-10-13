@@ -15,9 +15,7 @@
  * utilities and sampled deformation-admissibility diagnostics.
  */
 
-#include "Adaptation/AnalyticFunctionAdapters.h"
 #include "Adaptation/CellDeformation.h"
-#include "Adaptation/CellGeomCache.h"
 #include "Adaptation/DeformationMap.h"
 #include "Adaptation/SWIFT.h"
 #include "Adaptation/SWIFT/Admissibility.h"

@@ -29,7 +29,7 @@ namespace Rodin::Adaptation::SWIFT
        * @param inner Current inner displacement increment.
        * @param predictor Frozen directionally scaled predictor.
        * @param parameters Quality budgets and hinge activation weights.
-       * @param hingeCoefficient Effective hinge coefficient for this outer model.
+       * @param hingeCoefficient Predicted decrease per volume, before constraint strengths.
        */
       HingeForce(const TestFunction& z, const Displacement& current,
         const Displacement& inner, const Displacement& predictor,

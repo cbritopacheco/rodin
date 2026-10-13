@@ -238,60 +238,111 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(Rodin_Adaptation_SWIFTHingeState, AffineHingeDerivatives2D3D)
+  TEST(Rodin_Adaptation_SWIFTHingeState, ProductStrengthsPreserveEnergyAndNewtonSystem)
   {
     for (const std::size_t dimension : {2u, 3u})
     {
-      for (const Real amplitude : {Real(0), Real(1)})
+      CellDeformation deformation(dimension);
+      Math::SpatialMatrix<Real> F =
+        Math::SpatialMatrix<Real>::Identity(dimension, dimension);
+      F(0, 0) = Real(1.4);
+      F(1, 1) = Real(0.7);
+      deformation.setDeformationGradient(F);
+      Math::SpatialMatrix<Real> gradient(dimension, dimension);
+      gradient.setZero();
+      gradient(0, 0) = Real(0.5);
+      gradient(1, 1) = Real(-0.9);
+      for (const Real overall : {Real(0), Real(1), Real(100)})
       {
-        CellDeformation deformation(dimension);
-        Math::SpatialMatrix<Real> F =
-          Math::SpatialMatrix<Real>::Identity(dimension, dimension);
-        F(0, 0) = Real(1.4);
-        F(1, 1) = Real(0.7);
-        deformation.setDeformationGradient(F);
-        Math::SpatialMatrix<Real> inner(dimension, dimension);
-        inner.setZero();
-        inner(0, 0) = amplitude * Real(0.5);
-        inner(1, 1) = amplitude * Real(-0.9);
-        Math::SpatialMatrix<Real> direction =
-          Math::SpatialMatrix<Real>::Identity(dimension, dimension);
-        direction(0, 1) = Real(0.2);
-        SWIFT::Parameters p;
-        p.model.distortion = Real(1.4);
-        constexpr Real mu = Real(0.02), eps = Real(1e-6);
-        const Real rowJ = -deformation.getJacobianAction(direction);
-        const Real rowQ = deformation.getRelativeDistortionAction(direction);
-        const auto scalarEnergy = [&](Real slack, Real delta) {
-          const Real violation = std::max(Real(0), Real(1) - slack / delta);
-          return mu * Real(0.5) * violation * violation;
-        };
-        const auto energy = [&](const Math::SpatialMatrix<Real>& v) {
-          SWIFT::HingeState s(deformation, v, p, mu);
-          const Real expected = scalarEnergy(s.getJacobianSlack(),
-                                  p.model.qualityGuard * (Real(1) - p.model.jacobian)) +
-            scalarEnergy(s.getDistortionSlack(),
-              p.model.qualityGuard * (p.model.distortion - Real(1)));
-          EXPECT_NEAR(s.getEnergy(p, mu), expected, Real(1e-12));
-          return s.getEnergy(p, mu);
-        };
-        const auto derivative = [&](const Math::SpatialMatrix<Real>& v) {
-          SWIFT::HingeState s(deformation, v, p, mu);
-          return (s.getJacobianHessian() * s.getJacobianAction() - s.getJacobianForce()) *
-            rowJ +
-            (s.getDistortionHessian() * s.getDistortionAction() -
-              s.getDistortionForce()) *
-            rowQ;
-        };
-        SWIFT::HingeState s(deformation, inner, p, mu);
-        ASSERT_TRUE(s.isAdmissible());
-        const Math::SpatialMatrix<Real> plus(inner + eps * direction),
-          minus(inner - eps * direction);
-        EXPECT_NEAR(derivative(inner), (energy(plus) - energy(minus)) / (Real(2) * eps),
-          Real(1e-7));
+        SWIFT::Parameters rows;
+        rows.model.distortion = Real(1.4);
+        rows.model.hinge = {.jacobian = Real(0.1), .distortion = Real(1)};
+        auto products = rows;
+        products.model.hinge.jacobian *= overall;
+        products.model.hinge.distortion *= overall;
+        constexpr Real scale = Real(0.02);
+        const SWIFT::HingeState previous(deformation, gradient, rows, scale * overall);
+        const SWIFT::HingeState current(deformation, gradient, products, scale);
+        EXPECT_NEAR(previous.getEnergy(rows, scale * overall),
+          current.getEnergy(products, scale), Real(1e-10));
         EXPECT_NEAR(
-          s.getJacobianHessian() * rowJ * rowJ + s.getDistortionHessian() * rowQ * rowQ,
-          (derivative(plus) - derivative(minus)) / (Real(2) * eps), Real(1e-7));
+          previous.getJacobianHessian(), current.getJacobianHessian(), Real(1e-10));
+        EXPECT_NEAR(
+          previous.getDistortionHessian(), current.getDistortionHessian(), Real(1e-10));
+        EXPECT_NEAR(previous.getJacobianForce(), current.getJacobianForce(), Real(1e-10));
+        EXPECT_NEAR(
+          previous.getDistortionForce(), current.getDistortionForce(), Real(1e-10));
+      }
+    }
+  }
+
+  TEST(Rodin_Adaptation_SWIFTHingeState, AffineHingeDerivatives2D3D)
+  {
+    const SWIFT::Parameters defaults;
+    for (const std::size_t dimension : {2u, 3u})
+    {
+      for (const auto& [weightJ, weightQ] :
+        {std::pair{defaults.model.hinge.jacobian, defaults.model.hinge.distortion},
+          std::pair{Real(1), Real(1)}, std::pair{Real(1), Real(0.25)},
+          std::pair{Real(0), Real(1)}, std::pair{Real(1), Real(0)}})
+      {
+        for (const Real amplitude : {Real(0), Real(1)})
+        {
+          CellDeformation deformation(dimension);
+          Math::SpatialMatrix<Real> F =
+            Math::SpatialMatrix<Real>::Identity(dimension, dimension);
+          F(0, 0) = Real(1.4);
+          F(1, 1) = Real(0.7);
+          deformation.setDeformationGradient(F);
+          Math::SpatialMatrix<Real> inner(dimension, dimension);
+          inner.setZero();
+          inner(0, 0) = amplitude * Real(0.5);
+          inner(1, 1) = amplitude * Real(-0.9);
+          Math::SpatialMatrix<Real> direction =
+            Math::SpatialMatrix<Real>::Identity(dimension, dimension);
+          direction(0, 1) = Real(0.2);
+          SWIFT::Parameters p;
+          p.model.distortion = Real(1.4);
+          p.model.hinge.jacobian = weightJ;
+          p.model.hinge.distortion = weightQ;
+          // Retain the pre-reparameterization finite-difference energy scale.
+          constexpr Real mu = Real(0.0002), eps = Real(1e-6);
+          const Real rowJ = -deformation.getJacobianAction(direction);
+          const Real rowQ = deformation.getRelativeDistortionAction(direction);
+          const auto scalarEnergy = [&](Real slack, Real delta) {
+            const Real violation = std::max(Real(0), Real(1) - slack / delta);
+            return mu * Real(0.5) * violation * violation;
+          };
+          const auto energy = [&](const Math::SpatialMatrix<Real>& v) {
+            SWIFT::HingeState s(deformation, v, p, mu);
+            const Real expected = p.model.hinge.jacobian *
+                scalarEnergy(s.getJacobianSlack(),
+                  p.model.qualityGuard * (Real(1) - p.model.jacobian)) +
+              p.model.hinge.distortion *
+                scalarEnergy(s.getDistortionSlack(),
+                  p.model.qualityGuard * (p.model.distortion - Real(1)));
+            EXPECT_NEAR(s.getEnergy(p, mu), expected, Real(1e-12));
+            return s.getEnergy(p, mu);
+          };
+          const auto derivative = [&](const Math::SpatialMatrix<Real>& v) {
+            SWIFT::HingeState s(deformation, v, p, mu);
+            return (s.getJacobianHessian() * s.getJacobianAction() -
+                     s.getJacobianForce()) *
+              rowJ +
+              (s.getDistortionHessian() * s.getDistortionAction() -
+                s.getDistortionForce()) *
+              rowQ;
+          };
+          SWIFT::HingeState s(deformation, inner, p, mu);
+          ASSERT_TRUE(s.isAdmissible());
+          const Math::SpatialMatrix<Real> plus(inner + eps * direction),
+            minus(inner - eps * direction);
+          EXPECT_NEAR(derivative(inner), (energy(plus) - energy(minus)) / (Real(2) * eps),
+            Real(1e-7));
+          EXPECT_NEAR(
+            s.getJacobianHessian() * rowJ * rowJ + s.getDistortionHessian() * rowQ * rowQ,
+            (derivative(plus) - derivative(minus)) / (Real(2) * eps), Real(1e-7));
+        }
       }
     }
   }
@@ -335,12 +386,14 @@ namespace Rodin::Tests::Unit
       predictor = inner;
       SWIFT::Parameters p;
       p.model.distortion = Real(1.4);
+      // Product strengths are 100 times the former relative row weights.
+      constexpr Real hingeScale = Real(0.0002);
       BilinearForm metric(trial, test);
       LinearForm force(test);
       const auto residual = [&]() {
         metric =
-          SWIFT::HingeMetric(trial, test, current, inner, predictor, p, Real(0.02));
-        force = SWIFT::HingeForce(test, current, inner, predictor, p, Real(0.02));
+          SWIFT::HingeMetric(trial, test, current, inner, predictor, p, hingeScale);
+        force = SWIFT::HingeForce(test, current, inner, predictor, p, hingeScale);
         metric.assemble();
         force.assemble();
         return Math::Vector<Real>(
@@ -362,8 +415,8 @@ namespace Rodin::Tests::Unit
               CellDeformation deformation(2);
               deformation.setDisplacementGradient(currentJacobian.getValue(ip));
               const SWIFT::HingeState state(
-                deformation, innerJacobian.getValue(ip), p, Real(0.02));
-              value += state.getEnergy(p, Real(0.02), weightJ, weightQ);
+                deformation, innerJacobian.getValue(ip), p, hingeScale);
+              value += state.getEnergy(p, hingeScale, weightJ, weightQ);
             });
         }
         return value;

@@ -29,16 +29,20 @@ namespace Rodin::Adaptation::SWIFT
           {
               Real deviatoric = Real(1e-4); ///< @f$\kappa_{\rm dev}@f$.
               Real divergence =
-                Real(1e-2); ///< @f$\kappa_{\rm div}@f$, with 1/d normalization.
+                Real(1e-4); ///< @f$\kappa_{\rm div}@f$, with 1/d normalization.
           };
           Distribution distribution; ///< Centered current-strain distribution.
           Real distortion = 10; ///< @f$Q_{\max}@f$, relative-distortion budget.
           Real jacobian =
             Real(1e-2); ///< @f$j_{\mathrm{safe}}@f$, relative Jacobian floor.
-          Real hinge = Real(10); ///< @f$\widehat\mu@f$, hinge/model-decrease ratio.
+          /// @brief Independent constraint strengths relative to predicted decrease.
+          struct Hinge
+          {
+              Real jacobian = 10; ///< @f$\mu_j@f$, Jacobian recovery strength.
+              Real distortion = 100; ///< @f$\mu_Q@f$, distortion recovery strength.
+          };
+          Hinge hinge; ///< Adaptive affine quadratic-hinge strengths.
           Real qualityGuard = Real(0.1); ///< Guard fraction of the identity margins.
-          Real jacobianWeight = 1; ///< Relative Jacobian-hinge row weight.
-          Real distortionWeight = 1; ///< Relative distortion-hinge row weight.
           Real robustScale =
             0; ///< Positive fixes Welsch scale; zero selects it automatically.
       };
