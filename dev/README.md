@@ -53,6 +53,15 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Polymorphic finite-element spaces: runtime collections contain scalar,
+  vector and matrix P0, P0g, P1 and quadratic H1 variants in both real and
+  complex configurations. Public virtual metadata agrees with independent
+  topology-based dimensions; every local/global DOF map agrees, contains
+  distinct in-range entries and collectively covers the global index set.
+  Supported traces and object-identity comparisons are checked through the
+  base interface without assuming a high-order coefficient layout. Shifting
+  the production global index by one fails both scalar configurations; all
+  six registered lifecycle/interface cases pass serially.
 - Local quadrature ownership: real/complex P1 and quadratic H1 rules retain
   explicit order and current polytope bindings through copies, moves and
   polymorphic clones. Eleven scalar/vector mass, gradient, Jacobian,
