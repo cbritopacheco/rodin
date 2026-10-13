@@ -53,6 +53,13 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Linear elasticity: distinct trial/test space instances and shared spaces
+  reproduce analytic affine strain work for real/complex P1 and quadratic H1
+  fields on all seven cell geometries. Field interpolation avoids coefficient
+  layout assumptions, and repeated assembly preserves the result. Complex
+  instantiation exposed eight unsupported mixed-scalar in-place spatial-matrix
+  products; assigning the promoted product repairs both integrator families.
+  Doubling the generic distinct-space shear term fails the strain-work oracle.
 - Cardiac recruitment: all five linear/constant segments and the two inactive
   tails satisfy independent active-stiffness and active-stress residual and
   tangent formulas. The instantaneous relaxation limit checks its algebraic

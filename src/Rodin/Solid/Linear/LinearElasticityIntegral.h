@@ -232,7 +232,7 @@ namespace Rodin::Variational
                 for (size_t c = 0; c < d; ++c)
                   jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
               }
-              jacI *= p.getJacobianInverse();
+              jacI = jacI * p.getJacobianInverse();
 
               const auto symI = jacI + jacI.adjoint();
               const ScalarType divI = jacI.trace();
@@ -252,7 +252,7 @@ namespace Rodin::Variational
                   for (size_t c = 0; c < d; ++c)
                     jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
                 }
-                jacJ *= p.getJacobianInverse();
+                jacJ = jacJ * p.getJacobianInverse();
 
                 const auto symJ = jacJ + jacJ.adjoint();
                 const ScalarType divJ = jacJ.trace();
@@ -292,7 +292,7 @@ namespace Rodin::Variational
                 for (size_t c = 0; c < d; ++c)
                   jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
               }
-              jacI *= p.getJacobianInverse();
+              jacI = jacI * p.getJacobianInverse();
 
               const auto symI = jacI + jacI.adjoint();
               const ScalarType divI = jacI.trace();
@@ -308,7 +308,7 @@ namespace Rodin::Variational
                   for (size_t c = 0; c < d; ++c)
                     jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
                 }
-                jacJ *= p.getJacobianInverse();
+                jacJ = jacJ * p.getJacobianInverse();
 
                 const auto symJ = jacJ + jacJ.adjoint();
                 const ScalarType divJ = jacJ.trace();
