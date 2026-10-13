@@ -157,11 +157,11 @@ that this performance matrix has been profiled.
 | Space setup / Variational, MPI | P1 construction and distributed construction | P0/P0g/H1 setup, DOF lookup/restriction, reconciliation and degree scaling |
 | Fields / Variational | Interpolation and true mass projection; 1,008 native and OpenMP selections qualified; point/integration-point sweeps | P0/P0g, higher degrees, matrix evaluation, point cells, norms and boundary restriction |
 | Expressions / Variational | Generic expressions, coefficients and named forms; native real/complex sparse/dense coupled Problem lifetimes at degree two | Cold expression construction, remaining degrees, changes of state and complete range/backend matrix |
-| Local integrators / Variational | Volume entry kernels and reference-loop comparisons | Boundary/interface kernels; mixed blocks and nonlinear residual/tangent stages |
+| Local integrators / Variational | Volume entry kernels and reference-loop comparisons; mixed Stokes vector diffusion and both pressure/divergence orientations, with 42 selections qualified per build | Remaining mixed degrees/geometries/sizes, boundary/interface kernels and nonlinear residual/tangent stages |
 | Operator setup / Assembly | Public repeated assembly and sequential stage scopes | Sparsity discovery, allocation and replacement separated from kernels |
 | Scatter / Assembly, PETSc | Sequential triplets; complete native/PETSc insertion consumers | Isolated OpenMP buffers/merge, PETSc insertion and ownership-dependent MPI work |
 | Constraints and completion / Assembly, PETSc | Constrained scalar assembly and fixed-system solves | Vector/mixed constraints, identification, finalization and communication attribution |
-| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson; complex Helmholtz and real/complex coupled reaction–diffusion, each with 126 cases qualified in each build and selected native profiles; native mixed Stokes with 20 selections qualified | Stokes mesh/backend expansion, boundary variants and remaining degrees/backends; constructor/lifecycle isolation |
+| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson; complex Helmholtz and real/complex coupled reaction–diffusion, each with 126 cases qualified in each build and selected native profiles; mixed Stokes with 20 selections qualified in native and two-thread OpenMP assembly | Stokes mesh/backend expansion, boundary variants and remaining degrees/backends; constructor/lifecycle isolation |
 | Solvers / Solver, PETSc | Real/complex fixed-system CG; isolated diagonal compute/apply; projection CG profile; complex Helmholtz GMRES and coupled reaction–diffusion CG, each with 126 cases qualified in each build and selected native profiles; native fixed-system Stokes SparseLU with 20 selections qualified | Direct factorization stages, remaining setup/lifetimes, mixed-system mesh/backend expansion, backend scaling and memory; repeatable 3D GMRES baselines |
 | Complete workflows / owning modules | Consumer-level interpolation/projection and assembly profiles | Matched setup/assembly/solve/postprocessing accounting across physical contexts |
 
@@ -253,6 +253,53 @@ include matching untimed qualification calls and are not elapsed-time fractions.
 The retained raw captures and JSON summaries are local certification artifacts;
 only files prefixed `final-` represent the canonical Stokes expression. Earlier
 unit-weighted pressure-expression experiments are not its baseline.
+
+### Mixed Stokes local-kernel isolation
+
+`RodinStokesBindingBenchmarks` belongs to Variational and isolates the three
+volume operators consumed by Stokes assembly: vector diffusion
+$(\nabla u_h,\nabla v_h)$, divergence $(\nabla\cdot u_h,q_h)$ and pressure
+$(p_h,\nabla\cdot v_h)$. Both mixed orientations are measured independently.
+The 162 registrations span three terms, three degree pairs, six geometries
+and $n\in\{3,5,9\}$. Formula order 16, spaces and geometry match the complete
+assembly consumer. Each timed sweep includes cell traversal, owned mapped
+quadrature construction, physical basis preparation, eager local contraction
+and one entry read, but no insertion, constraints or solver work.
+
+Before timing, every matrix entry on every selected cell is compared with
+`QuadratureReference`, the original generic expression-entry loop. This oracle
+also accepts a directly supplied expression: the vector-Jacobian specialization
+does not expose its owned integrand, and no production accessor is added merely
+for instrumentation. Perturbing an entry must fail qualification. A final sweep
+must reproduce all initially retained entries exactly. Reference-loop work and
+retained qualification matrices are outside timing; they remain part of process
+memory and must not be interpreted as production assembly storage.
+
+The first qualification covers $P_2/P_1$ on all geometries at $n=3$ and all
+three degree pairs on triangles at $n=3,5,9$: 42 selections in each of the
+native and OpenMP-enabled builds. The matching 20 complete assembly selections
+also qualify with two OpenMP workers. Local sweeps remain serial in both builds;
+OpenMP-build qualification is not a parallel speedup measurement. Five-repeat
+native $P_2/P_1$, $n=3$ medians are:
+
+| Geometry | Vector diffusion | Divergence | Pressure |
+| --- | --- | --- | --- |
+| Triangle | 0.0504 ms | 0.0306 ms | 0.0285 ms |
+| Quadrilateral | 0.0596 ms | 0.0346 ms | 0.0320 ms |
+| Tetrahedron | 11.090 ms | 4.853 ms | 5.085 ms |
+| Pyramid | 17.317 ms | 7.177 ms | 7.279 ms |
+| Hexahedron | 7.963 ms | 3.270 ms | 3.210 ms |
+| Wedge | 5.529 ms | 2.271 ms | 2.198 ms |
+
+These are isolated baselines, not additive stage fractions of a separately
+measured assembly. Local rows, columns, total dense entries, cells and quadrature
+points are reported with the timings. Dense-entry counts include structural
+component zeros and are not a count of executed multiply-adds. The triangle and
+tetrahedron have respectively $12\times12$ and $30\times30$ vector matrices,
+in addition to the cell/quadrature differences stated above. Vector diffusion
+is the largest of these three terms. Its current source still prepares separate
+trial and test physical gradients even for identical borrowed reference tables;
+measuring reuse is the next experiment, not a speedup established by this batch.
 
 ### Scalar reference-element protocol
 

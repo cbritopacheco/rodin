@@ -2,6 +2,10 @@ add_executable(RodinQuadratureBindingBenchmarks EXCLUDE_FROM_ALL QuadratureBindi
 target_link_libraries(RodinQuadratureBindingBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
 
+add_executable(RodinStokesBindingBenchmarks EXCLUDE_FROM_ALL StokesBinding.cpp)
+target_link_libraries(RodinStokesBindingBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
 add_executable(RodinProblemLifecycleBenchmarks EXCLUDE_FROM_ALL ProblemLifecycle.cpp)
 target_link_libraries(RodinProblemLifecycleBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
