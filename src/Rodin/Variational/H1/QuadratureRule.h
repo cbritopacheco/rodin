@@ -3682,7 +3682,7 @@ namespace Rodin::Variational
    *
    * Assembles
    * @f[
-   *   \int_K (A : \mathbf{J}\,u)\,(B : \mathbf{J}\,v)\,dx.
+   *   \int_K (A : \mathbf{J}\,u)\,\overline{(B : \mathbf{J}\,v)}\,dx.
    * @f]
    * Each coefficient is evaluated once per quadrature point. The
    * reference gradients of the scalar H1 basis are obtained from the shared
@@ -3909,7 +3909,7 @@ namespace Rodin::Variational
             {
               for (size_t test = 0; test < nTest; ++test)
               {
-                const ScalarType scaledTest = weight * m_trialAction[test];
+                const ScalarType scaledTest = weight * Math::conj(m_trialAction[test]);
                 for (size_t trial = 0; trial <= test; ++trial)
                   m_matrix(test, trial) += scaledTest * m_trialAction[trial];
               }
@@ -3918,7 +3918,7 @@ namespace Rodin::Variational
             {
               for (size_t test = 0; test < nTest; ++test)
               {
-                const ScalarType scaledTest = weight * m_testAction[test];
+                const ScalarType scaledTest = weight * Math::conj(m_testAction[test]);
                 for (size_t trial = 0; trial < nTrial; ++trial)
                   m_matrix(test, trial) += scaledTest * m_trialAction[trial];
               }
@@ -3928,7 +3928,7 @@ namespace Rodin::Variational
           if (trialfes == testfes && sharedCoefficient)
           {
             m_matrix.template triangularView<Eigen::Upper>() =
-              m_matrix.transpose().template triangularView<Eigen::Upper>();
+              m_matrix.adjoint().template triangularView<Eigen::Upper>();
           }
 
           return *this;

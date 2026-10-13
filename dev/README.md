@@ -53,6 +53,16 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Rank-one Jacobian forms: real and complex P1 and quadratic H1 retain
+  analytic contractions through copies, moves, rebinding and polymorphic
+  clones on intervals and triangles. Both shared and distinct finite-element
+  spaces are checked. Complex coefficient regressions failed before repair:
+  the test action now uses conjugation, and the shared-coefficient matrix
+  uses an adjoint when completing its upper triangle. All four lifecycle
+  cases and eleven existing real-valued rank-one cases pass serially. A real
+  matrix coefficient with a complex Jacobian is rejected earlier by the
+  current `Dot` range-type contract; this unsupported combination was audited
+  separately and did not motivate a broader expression-language change.
 - Runtime-polymorphic local quadrature: independently owned linear and
   bilinear integrator collections retain their cell bindings, explicit orders
   and analytic field contractions after their original concrete owners are

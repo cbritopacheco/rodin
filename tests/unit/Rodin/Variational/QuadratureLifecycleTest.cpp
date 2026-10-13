@@ -204,6 +204,58 @@ namespace
       return Scalar(
         divergence * amplitude * (1 + p.x() + (dimension == 2 ? 2 * p.y() : 0)));
     });
+    const auto rankOneCoefficient =
+      MatrixFunction(dimension, dimension, [dimension](const Point& p) {
+        Math::SpatialMatrix<Real> value(dimension, dimension);
+        value(0, 0) = 1 + p.x();
+        if (dimension == 2)
+        {
+          value(0, 1) = 2;
+          value(1, 0) = 3;
+          value(1, 1) = 4;
+        }
+        return value;
+      });
+    if constexpr (std::is_same_v<Scalar, Real>)
+    {
+      auto density = [=](const Point& p) {
+        const Real action = dimension == 1 ? 3 * (1 + p.x()) : 23 + 3 * p.x();
+        return Scalar(amplitude * action * action);
+      };
+      bilinear(Integral(Dot(rankOneCoefficient, Jacobian(w)),
+                 Dot(rankOneCoefficient, Jacobian(z))),
+        vectorField, vectorField, density);
+      bilinear(Integral(Dot(rankOneCoefficient, Jacobian(w)),
+                 Dot(rankOneCoefficient, Jacobian(otherZ))),
+        vectorField, otherVectorField, density);
+    }
+    if constexpr (std::is_same_v<Scalar, Complex>)
+    {
+      const auto complexCoefficient =
+        MatrixFunction(dimension, dimension, [dimension](const Point& p) {
+          Math::SpatialMatrix<Scalar> value(dimension, dimension);
+          value(0, 0) = Scalar(0.5, 0.25) * (1 + p.x());
+          if (dimension == 2)
+          {
+            value(0, 1) = Scalar(-0.5, 0.25);
+            value(1, 0) = Scalar(0.375, -0.75);
+            value(1, 1) = Scalar(1, -2);
+          }
+          return value;
+        });
+      auto density = [=](const Point& p) {
+        const Scalar action = dimension == 1
+          ? Scalar(1.5, 0.75) * (1 + p.x())
+          : Scalar(6.75 + 1.5 * p.x(), -9 + 0.75 * p.x());
+        return Scalar(amplitude * std::norm(action));
+      };
+      bilinear(Integral(Dot(complexCoefficient, Jacobian(w)),
+                 Dot(complexCoefficient, Jacobian(z))),
+        vectorField, vectorField, density);
+      bilinear(Integral(Dot(complexCoefficient, Jacobian(w)),
+                 Dot(complexCoefficient, Jacobian(otherZ))),
+        vectorField, otherVectorField, density);
+    }
     linear(Integral(scalarFunction, v), scalarField, scalarMass);
     linear(Integral(vectorFunction, z), vectorField, vectorMass);
     auto checkRuntimeRules = [&](auto& rules) {
