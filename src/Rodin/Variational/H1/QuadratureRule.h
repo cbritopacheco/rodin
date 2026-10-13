@@ -3355,6 +3355,18 @@ namespace Rodin::Variational
    * @f]
    * where @f$u@f$ and @f$v@f$ are vector-valued H1 shape functions.
    *
+   * ## Physical-gradient preparation
+   *
+   * The scalar basis gradients are mapped at the current physical sample by
+   * @f$G_{aj}=\sum_{r=0}^{d-1}\partial_r\widehat\phi_a\,(J_K^{\dagger})_{rj}@f$.
+   * If both operands borrow the same reference-table object, these images
+   * share one scratch buffer. Distinct tables retain separate buffers even
+   * when their sizes agree. Identity is checked during the current borrow;
+   * no table pointer is retained and physical gradients are never reused
+   * across binds. Each cell and quadrature point recomputes its physical
+   * gradients. Mapping expressions and local-entry summation order remain
+   * unchanged.
+   *
    * Judgement
    * ---------
    *
@@ -3539,9 +3551,12 @@ namespace Rodin::Variational
           // Use scalar tabulations (fast, cached in H1Element<K, Scalar>::getTabulation)
           const auto& trTabS = trialScalarElement.getTabulation(*m_qf);
           const auto& teTabS = testScalarElement.getTabulation(*m_qf);
+          const bool sharedGradients =
+            static_cast<const void*>(&trTabS) == static_cast<const void*>(&teTabS);
 
           static thread_local std::vector<Math::SpatialVector<ScalarType>> GtrS;
-          static thread_local std::vector<Math::SpatialVector<ScalarType>> GteS;
+          static thread_local std::vector<Math::SpatialVector<ScalarType>> GteStorage;
+          auto& GteS = sharedGradients ? GtrS : GteStorage;
 
           if (GtrS.size() < trialScalarCount)
             GtrS.resize(trialScalarCount);
@@ -3573,7 +3588,7 @@ namespace Rodin::Variational
                   value += trTabS.getGradient(qp, a)[r] * Jinv(r, axis);
                 GtrS[a][axis] = value;
               }
-              for (size_t b = 0; b < testScalarCount; ++b)
+              for (size_t b = 0; !sharedGradients && b < testScalarCount; ++b)
               {
                 ScalarType value = 0;
                 for (size_t r = 0; r < d; ++r)

@@ -297,9 +297,8 @@ points are reported with the timings. Dense-entry counts include structural
 component zeros and are not a count of executed multiply-adds. The triangle and
 tetrahedron have respectively $12\times12$ and $30\times30$ vector matrices,
 in addition to the cell/quadrature differences stated above. Vector diffusion
-is the largest of these three terms. Its current source still prepares separate
-trial and test physical gradients even for identical borrowed reference tables;
-measuring reuse is the next experiment, not a speedup established by this batch.
+is the largest of these three terms. Its unweighted kernel now shares physical
+gradient scratch only for identical borrowed reference tables, as described below.
 
 Embedded-cell qualification is a separate prerequisite for this reuse experiment.
 It exposed ambient-column truncation in H1 vector Jacobian evaluation and P1
@@ -314,8 +313,53 @@ quadrilaterals and points. A separate all-entry quadrature regression includes
 all volume families, both mixed-degree directions and curved embedded triangles.
 These checks were observed failing before repair. They establish correctness
 outside the previous volume benchmark matrix; they are not a speedup or a new
-performance-coverage percentage. Full-dimensional contraction arithmetic and
-specialized assembly kernels remain unchanged.
+performance-coverage percentage. That correctness repair did not change
+full-dimensional contraction arithmetic or specialized assembly kernels.
+
+### Shared vector-Jacobian preparation
+
+Unweighted H1 vector-Jacobian binding compares the two borrowed reference-table
+object identities during each bind. Identical tables imply identical gradients
+under the current geometric inverse and share one existing scratch buffer;
+distinct tables retain independent buffers. Physical gradients are recomputed
+on every cell and quadrature point, with unchanged mapping expressions and
+entry-summation order. No reference-table pointer survives the bind and no new
+cross-cell cache is introduced. The original entry-loop oracle checks every
+matrix entry. Mixed-degree regressions include both $P_1/P_2$ and $P_2/P_3$
+directions, real/complex fields, changed orders and curved embedded cells.
+Forcing unconditional sharing was observed to fail the regression before the
+identity guard was restored.
+
+Fresh before/after Apple LLVM 21 RelWithDebInfo measurements use five repetitions,
+$P_2/P_1$, $n=3$ and quadrature order 16. Both executables retain their
+independent numerical qualifications outside timing:
+
+| Geometry | Local before (ms) | Local after (ms) | Assembly before (ms) | Assembly after (ms) |
+| --- | --- | --- | --- | --- |
+| Triangle | 0.0504 | 0.0437 | 0.1790 | 0.1688 |
+| Quadrilateral | 0.0597 | 0.0530 | 0.1886 | 0.1835 |
+| Tetrahedron | 11.1589 | 8.6975 | 26.8680 | 25.1601 |
+| Pyramid | 16.9699 | 14.4913 | 38.4778 | 36.1106 |
+| Hexahedron | 7.9732 | 6.9986 | 16.3942 | 15.2367 |
+| Wedge | 5.5219 | 4.6350 | 12.0195 | 11.1148 |
+
+The selected local-binding speedup is 1.13–1.28 times; complete native assembly
+speedup is 1.03–1.08 times, with the smallest changes requiring cautious
+interpretation. Matching Instruments captures perform 800 tetrahedral local
+sweeps: selected kernel CPU sample weight decreases from 8.851 to 6.901 seconds.
+These weights are not elapsed timings and include matching untimed binds.
+
+The timed complete consumer is the public unit-viscosity Stokes expression with
+an **unweighted** Jacobian integral. The configurable-viscosity convergence helper
+uses an explicitly weighted Jacobian expression, even at unit viscosity; its
+separate specialization is not modified and no speedup is claimed for it here.
+Weighted vector-Jacobian profiling remains a separate workplan item. Serial local
+binding in the LLVM 19 OpenMP-enabled build improves by 1.12–1.21 times. The
+two-worker whole-assembly measurements do not establish a parallel gain or
+regression: substantial elapsed variability coincides with competing SWIFT and
+Docker CPU workloads. An unchanged-binary control also changes substantially
+under that contention. Parallel scaling needs a quieter-host remeasurement;
+local OpenMP-build qualification is not evidence of parallel speedup.
 
 ### Scalar reference-element protocol
 

@@ -71,11 +71,15 @@ namespace Rodin::Tests::Unit
       check.template operator()<3, 3, Real>();
       check.template operator()<1, 2, Real>();
       check.template operator()<2, 1, Real>();
+      check.template operator()<2, 3, Real>();
+      check.template operator()<3, 2, Real>();
       check.template operator()<1, 1, Complex>();
       check.template operator()<2, 2, Complex>();
       check.template operator()<3, 3, Complex>();
       check.template operator()<1, 2, Complex>();
       check.template operator()<2, 1, Complex>();
+      check.template operator()<2, 3, Complex>();
+      check.template operator()<3, 2, Complex>();
     };
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
            Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
