@@ -53,6 +53,11 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Form ownership: real/complex P1 and quadratic H1 forms reject foreign trial
+  and test contributions without changing the assembled mass operator or load.
+  Addition/subtraction and linear assignment exercise named-trial and unnamed
+  test UUID diagnostics; P1 also checks global nonlocal contributions. Constant
+  field interpolation supplies the independent unit-interval action oracle.
 - Contextual Alert exceptions: class, member-function and namespace payloads
   retain exact unformatted messages and captured output. Literal and owned
   function-name variants propagate through the native exception base.

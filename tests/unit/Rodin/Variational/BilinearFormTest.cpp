@@ -1,4 +1,7 @@
 #include <gtest/gtest.h>
+#include <sstream>
+#include <string>
+#include <type_traits>
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
@@ -338,5 +341,73 @@ namespace Rodin::Tests::Unit
 
     EXPECT_NEAR(
       std::abs(form.getOperator().sum() - Complex(0.5) * coefficient), 0.0, 1e-14);
+  }
+}
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Rejected foreign contributions preserve the assembled mass operator.
+  TEST(FormOwnership, BilinearContributionsPreserveOperator)
+  {
+    auto checkScalar = []<class Scalar>() {
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+      mesh.scale(Real(0.5));
+      auto checkSpace = [&](const auto& space) {
+        TrialFunction u(space), foreignU(space);
+        TestFunction v(space), foreignV(space);
+        foreignU.setName("foreign-trial");
+        BilinearForm form(u, v);
+        form = Integral(u, v);
+        form.assemble();
+        const Math::SparseMatrix<Scalar> original = form.getOperator();
+        u.getSolution() = Scalar(1);
+        const Math::Vector<Scalar> constant = u.getSolution().getData();
+        EXPECT_NEAR(std::abs(constant.dot(original * constant) - Scalar(1)), 0, 1e-12);
+        auto reject = [&](
+                        auto&& operation, const char* kind, const std::string& identity) {
+          try
+          {
+            operation();
+            FAIL() << "A foreign function contribution must be rejected.";
+          }
+          catch (const Alert::Exception& error)
+          {
+            const std::string message = error.what();
+            EXPECT_NE(message.find(kind), std::string::npos);
+            EXPECT_NE(message.find(identity), std::string::npos);
+            EXPECT_NE(
+              message.find("does not appear in the declaration"), std::string::npos);
+          }
+          EXPECT_EQ(form.getLocalIntegrators().size(), 1u);
+          EXPECT_TRUE(form.getGlobalIntegrators().empty());
+          form.assemble();
+          EXPECT_NEAR((form.getOperator() - original).norm(), 0, 1e-12);
+        };
+        std::ostringstream uuid;
+        uuid << foreignV.getUUID();
+        const auto foreignTrial = Integral(foreignU, v);
+        const auto foreignTest = Integral(u, foreignV);
+        reject([&] { form += foreignTrial; }, "TrialFunction", "foreign-trial");
+        reject([&] { form -= foreignTrial; }, "TrialFunction", "foreign-trial");
+        reject([&] { form += foreignTest; }, "TestFunction", uuid.str());
+        reject([&] { form -= foreignTest; }, "TestFunction", uuid.str());
+        if constexpr (std::is_same_v<std::remove_cvref_t<decltype(space)>, P1<Scalar>>)
+        {
+          const auto kernel = [](const Point&, const Point&) { return Scalar(1); };
+          const auto foreignGlobalTrial = Integral(Potential(kernel, foreignU), v);
+          const auto foreignGlobalTest = Integral(Potential(kernel, u), foreignV);
+          reject([&] { form += foreignGlobalTrial; }, "TrialFunction", "foreign-trial");
+          reject([&] { form -= foreignGlobalTrial; }, "TrialFunction", "foreign-trial");
+          reject([&] { form += foreignGlobalTest; }, "TestFunction", uuid.str());
+          reject([&] { form -= foreignGlobalTest; }, "TestFunction", uuid.str());
+        }
+      };
+      const P1<Scalar> p1(mesh);
+      const H1<2, Scalar> h1(std::integral_constant<size_t, 2>{}, mesh);
+      checkSpace(p1);
+      checkSpace(h1);
+    };
+    checkScalar.operator()<Real>();
+    checkScalar.operator()<Complex>();
   }
 }

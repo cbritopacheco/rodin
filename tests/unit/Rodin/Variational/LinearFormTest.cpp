@@ -1,4 +1,7 @@
 #include <gtest/gtest.h>
+#include <sstream>
+#include <string>
+#include <type_traits>
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
@@ -178,5 +181,57 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(lf.getIntegrators().empty());
     lf = Integral(v);  // This should clear and add new integrator
     EXPECT_FALSE(lf.getIntegrators().empty());
+  }
+}
+
+namespace Rodin::Tests::Unit
+{
+  /// @brief Rejected assignment, addition and subtraction preserve the assembled load.
+  TEST(FormOwnership, LinearContributionsPreserveLoad)
+  {
+    auto checkScalar = []<class Scalar>() {
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+      mesh.scale(Real(0.5));
+      auto checkSpace = [&](const auto& space) {
+        TestFunction v(space), foreignV(space);
+        LinearForm form(v);
+        form = Integral(v);
+        form.assemble();
+        const Math::Vector<Scalar> original = form.getVector();
+        GridFunction constant(space);
+        constant = Scalar(1);
+        EXPECT_NEAR(std::abs(constant.getData().dot(original) - Scalar(1)), 0, 1e-12);
+        const auto foreign = Integral(foreignV);
+        std::ostringstream uuid;
+        uuid << foreignV.getUUID();
+        auto reject = [&](auto&& operation) {
+          try
+          {
+            operation();
+            FAIL() << "A foreign test-function contribution must be rejected.";
+          }
+          catch (const Alert::Exception& error)
+          {
+            const std::string message = error.what();
+            EXPECT_NE(message.find("TestFunction"), std::string::npos);
+            EXPECT_NE(message.find(uuid.str()), std::string::npos);
+            EXPECT_NE(
+              message.find("does not appear in the declaration"), std::string::npos);
+          }
+          EXPECT_EQ(form.getIntegrators().size(), 1u);
+          form.assemble();
+          EXPECT_NEAR((form.getVector() - original).norm(), 0, 1e-12);
+        };
+        reject([&] { form = foreign; });
+        reject([&] { form += foreign; });
+        reject([&] { form -= foreign; });
+      };
+      const P1<Scalar> p1(mesh);
+      const H1<2, Scalar> h1(std::integral_constant<size_t, 2>{}, mesh);
+      checkSpace(p1);
+      checkSpace(h1);
+    };
+    checkScalar.operator()<Real>();
+    checkScalar.operator()<Complex>();
   }
 }
