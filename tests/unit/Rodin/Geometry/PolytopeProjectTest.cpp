@@ -298,6 +298,7 @@ namespace Rodin::Tests::Unit
       {
         SCOPED_TRACE(::testing::Message() << static_cast<int>(geometry) << ":" << vertex);
         const auto& expected = traits.getVertex(vertex);
+        ASSERT_EQ(expected.size(), traits.getDimension());
         Math::SpatialPoint cell, boundary;
         project.cell(cell, expected);
         project.boundary(boundary, expected);
