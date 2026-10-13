@@ -161,8 +161,8 @@ that this performance matrix has been profiled.
 | Operator setup / Assembly | Public repeated assembly and sequential stage scopes | Sparsity discovery, allocation and replacement separated from kernels |
 | Scatter / Assembly, PETSc | Sequential triplets; complete native/PETSc insertion consumers | Isolated OpenMP buffers/merge, PETSc insertion and ownership-dependent MPI work |
 | Constraints and completion / Assembly, PETSc | Constrained scalar assembly and fixed-system solves | Vector/mixed constraints, identification, finalization and communication attribution |
-| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson; complex Helmholtz and real/complex coupled reaction–diffusion, each with 126 cases qualified in each build and selected native profiles | Stokes, boundary variants and remaining degrees/backends; constructor/lifecycle isolation |
-| Solvers / Solver, PETSc | Real/complex fixed-system CG; isolated diagonal compute/apply; projection CG profile; complex Helmholtz GMRES and coupled reaction–diffusion CG, each with 126 cases qualified in each build and selected native profiles | Direct factorization stages, remaining setup/lifetimes, mixed saddle-point systems, backend scaling and memory; repeatable 3D GMRES baselines |
+| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson; complex Helmholtz and real/complex coupled reaction–diffusion, each with 126 cases qualified in each build and selected native profiles; native mixed Stokes with 20 selections qualified | Stokes mesh/backend expansion, boundary variants and remaining degrees/backends; constructor/lifecycle isolation |
+| Solvers / Solver, PETSc | Real/complex fixed-system CG; isolated diagonal compute/apply; projection CG profile; complex Helmholtz GMRES and coupled reaction–diffusion CG, each with 126 cases qualified in each build and selected native profiles; native fixed-system Stokes SparseLU with 20 selections qualified | Direct factorization stages, remaining setup/lifetimes, mixed-system mesh/backend expansion, backend scaling and memory; repeatable 3D GMRES baselines |
 | Complete workflows / owning modules | Consumer-level interpolation/projection and assembly profiles | Matched setup/assembly/solve/postprocessing accounting across physical contexts |
 
 The required axes are scalar field (real/complex), supported scalar/vector/matrix
@@ -182,6 +182,77 @@ dimension costs in isolation. Assembly additionally records cells, global DOFs,
 local entry count and nonzeros; solver comparisons retain residuals and iteration
 counts. A before/after repair must preserve the numerical observations and be
 checked in its consuming operation, not only in an isolated microbenchmark.
+
+### Mixed Stokes measurement protocol
+
+`RodinStokesAssemblyBenchmarks` and `RodinStokesSolveBenchmarks` share
+`Workloads/StokesWorkload.h`. For velocity degree $k\in\{2,3,4\}$, pressure
+degree $k-1$ and one global $P_0^g$ multiplier, they retain the certified form
+
+$$
+(\nabla u_h,\nabla v_h)-(p_h,\nabla\cdot v_h)
++(\nabla\cdot u_h,q_h)+\lambda_h(1,q_h)+\mu_h(p_h,1)
+=(f,v_h).
+$$
+
+On the unit box, $u=x_1e_0$, $p=x_0-1/2$ and $f=e_0$ supply independent
+analytic data, with prescribed velocity traces and zero pressure mean.
+Public field interpolation and Problem's block gathering provide the exact
+coefficient vector; no interleaved DOF numbering is assumed. Qualification
+checks the patch residual, solved coefficients and true residual, and rejects
+both a wrong coefficient vector and the operator missing the momentum pressure
+term. Those guards are outside timing and do not replace mixed-space convergence
+or stability certification. The pressure-spectrum oracle is not timed here.
+
+Each executable registers 54 opt-in selections: six two-/three-dimensional
+cell families, three degree pairs and $n\in\{3,5,9\}$ points per axis.
+Assembly includes public repeated assembly, constraints and completion. Solving
+uses the fixed assembled operator and public SparseLU, including a fresh
+factorization and one residual correction on every iteration. It excludes
+assembly, field scatter and norm integration; no triangular-solve-only timing
+is claimed. Cells, separate velocity/pressure/mean DOFs, nonzeros and quadrature
+points accompany the measurements. Larger registered cases are not implicitly
+qualified by a smaller run.
+
+The initial native qualification covers all degree pairs and geometries at
+$n=3$, plus the $P_2/P_1$ triangle at $n=5,9$: 40 distinct assembly/solve
+selections. Five-repeat native $P_2/P_1$ medians at $n=3$ are:
+
+| Geometry | Assembly | SparseLU, solve and correction |
+| --- | --- | --- |
+| Triangle | 0.179 ms | 0.0191 ms |
+| Quadrilateral | 0.194 ms | 0.0164 ms |
+| Tetrahedron | 27.54 ms | 0.201 ms |
+| Pyramid | 39.78 ms | 1.654 ms |
+| Hexahedron | 16.52 ms | 0.155 ms |
+| Wedge | 12.07 ms | 0.191 ms |
+
+These Apple LLVM 21 RelWithDebInfo baselines are not portable timing thresholds.
+Assembly coefficients of variation range from 0.24% to 5.06%, and solving
+from 0.27% to 5.19%. Matching triangular levels $n=3,5,9$ have assembly medians
+0.179, 0.720 and 2.861 ms and solve medians 0.0191, 0.238 and 1.496 ms.
+The tetrahedron/triangle assembly ratio must retain the work counts: 48 versus
+8 cells and 729 versus 53 quadrature points per cell at order 16, as well as
+different vector and pressure basis sizes. It is not an isolated dimension
+penalty. Remaining qualifications include larger three-dimensional meshes,
+OpenMP and distributed/PETSc scopes, direct-solver stage isolation and curved
+or boundary variants. No production repair or speedup is claimed by this batch.
+
+Matching Instruments captures select the workload and executing assembly or
+SparseLU method together. Of selected assembly CPU samples, `setPolytope`
+accounts for 88.39% on triangles and 97.73% on tetrahedra; this method includes
+eager element-matrix construction, not merely cursor binding. Bulk geometric
+Jacobians account for 17.14% and 17.00%, respectively, inside that work.
+`setFromTriplets` accounts for 1.82% and 0.16%. Tetrahedral leaf samples identify
+vector-Jacobian local construction (28.66%), bulk geometric Jacobians (13.68%)
+and divergence/pressure local construction (12.43%) as the next isolation targets.
+The corresponding solve captures attribute 54.68%/62.72% to numeric factorization,
+23.73%/24.11% to symbolic analysis and 11.44%/7.72% to substitution, for
+triangle/tetrahedron. These are inclusive CPU-sample categories, can overlap,
+include matching untimed qualification calls and are not elapsed-time fractions.
+The retained raw captures and JSON summaries are local certification artifacts;
+only files prefixed `final-` represent the canonical Stokes expression. Earlier
+unit-weighted pressure-expression experiments are not its baseline.
 
 ### Scalar reference-element protocol
 

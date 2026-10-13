@@ -33,3 +33,7 @@ target_link_libraries(RodinConstrainedAssemblyBenchmarks PRIVATE
 add_executable(RodinSpatialMatrixBenchmarks EXCLUDE_FROM_ALL SpatialMatrix.cpp)
 target_link_libraries(RodinSpatialMatrixBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark benchmark::benchmark_main)
+
+add_executable(RodinStokesAssemblyBenchmarks EXCLUDE_FROM_ALL StokesAssembly.cpp)
+target_link_libraries(RodinStokesAssemblyBenchmarks PRIVATE
+  Rodin::Variational Rodin::Solver benchmark::benchmark)

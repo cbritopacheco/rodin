@@ -13,3 +13,7 @@ target_link_libraries(RodinConstrainedSolveBenchmarks PRIVATE
 add_executable(RodinDiagonalPreconditionerBenchmarks EXCLUDE_FROM_ALL DiagonalPreconditioner.cpp)
 target_link_libraries(RodinDiagonalPreconditionerBenchmarks PRIVATE
   Rodin::Variational Rodin::Solver benchmark::benchmark)
+
+add_executable(RodinStokesSolveBenchmarks EXCLUDE_FROM_ALL StokesSolve.cpp)
+target_link_libraries(RodinStokesSolveBenchmarks PRIVATE
+  Rodin::Variational Rodin::Solver benchmark::benchmark)
