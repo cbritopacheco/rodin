@@ -76,6 +76,39 @@ operation. Correctness regressions remain in unit/manufactured/convergence
 suites; benchmark numerical guards and separately instrumented source coverage
 do not replace convergence certification.
 
+Exported Instruments `time-profile` XML can be summarized with
+`dev/summarize_xctrace.py`. Repeated stack selectors are combined by logical
+AND, so an owning workload frame and the relevant source kernel can both be
+required. A process selector distinguishes MPI participants or unrelated
+processes. For example:
+
+```sh
+python3 dev/summarize_xctrace.py profile.xml \
+  --process 'RodinHelmholtzSolveBenchmarks' \
+  --require 'HelmholtzSolve<.*::run\(' \
+  --require 'Eigen::internal::gmres<' \
+  --category 'sparse-product=sparse_time_dense_product' \
+  --category 'orthogonalization=Householder' \
+  --limit 12
+```
+
+The report retains its process, stack and category selectors, weighted sample
+counts, leaf attribution and inclusive categories. Inclusive categories may
+overlap; their percentages are
+not additive. Sampled CPU weights are not elapsed timings, and stack selection
+is not a timed-region boundary: untimed warmup calls to the same kernel can
+remain selected. Fixture kernels without the required solver frame are excluded.
+For assembly captures, `--exclude 'ReferenceIntegral|QuadratureReference'` removes
+the original-reference kernel stacks; this still is not timed-region bracketing.
+The parser retains referenced weights even when first defined in a row without
+a stack, rejects unresolved references and discards processed XML rows. Its
+offline parser checks are not benchmark tests, timing gates or CI registrations.
+Category patterns must identify executing methods, not merely a type appearing
+in a demangled template argument. For example, `DiagonalPreconditioner` also
+appears in GMRES expression signatures; its method pattern
+`Eigen::DiagonalPreconditioner<.*>::(factorize|_solve_impl)<` distinguishes setup
+and application from this incidental type occurrence.
+
 ## Hierarchical profiling ledger
 
 Benchmark availability, numerical qualification, repeatable measurement and
@@ -102,8 +135,8 @@ that this performance matrix has been profiled.
 | Operator setup / Assembly | Public repeated assembly and sequential stage scopes | Sparsity discovery, allocation and replacement separated from kernels |
 | Scatter / Assembly, PETSc | Sequential triplets; complete native/PETSc insertion consumers | Isolated OpenMP buffers/merge, PETSc insertion and ownership-dependent MPI work |
 | Constraints and completion / Assembly, PETSc | Constrained scalar assembly and fixed-system solves | Vector/mixed constraints, identification, finalization and communication attribution |
-| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson | Helmholtz, coupled reaction–diffusion, Stokes, boundary variants and remaining degrees/backends |
-| Solvers / Solver, PETSc | Real/complex fixed-system CG; isolated diagonal compute/apply; projection CG profile | Direct factorization stages, remaining setup/lifetimes, indefinite/mixed systems, backend scaling and memory |
+| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson; complex Helmholtz low-wave/shifted forms, 126 cases qualified in each build and selected native profiles | Coupled reaction–diffusion, Stokes, boundary variants and remaining degrees/backends |
+| Solvers / Solver, PETSc | Real/complex fixed-system CG; isolated diagonal compute/apply; projection CG profile; complex Helmholtz GMRES, 126 cases qualified in each build and selected native profiles | Direct factorization stages, remaining setup/lifetimes, mixed systems, backend scaling and memory; repeatable 3D GMRES baselines |
 | Complete workflows / owning modules | Consumer-level interpolation/projection and assembly profiles | Matched setup/assembly/solve/postprocessing accounting across physical contexts |
 
 The required axes are scalar field (real/complex), supported scalar/vector/matrix
@@ -718,8 +751,130 @@ in tetrahedra. Setup resolves to compressed-column diagonal lookup and division;
 the complex division runtime helper accounts for about 61%/48% of selected
 setup samples in triangle/tetrahedron cases. Application is predominantly the
 dense packet assignment loop. Kernel-stack selection excludes untimed FE setup.
-Owned construction/destruction attribution and full larger-grid qualification
-remain pending; the baseline predates the subsequent `develop` integration.
+Owned construction/destruction attribution remains pending; the baseline
+predates the subsequent `develop` integration. After that integration, all
+1,134 selections passed in each optimized build, with maximum relative error
+below $1.1\times10^{-16}$. All 164
+affected numerical tests passed in each build, including reference-element,
+quadrature, pyramid-apex and Poisson degree-refinement regressions.
+
+### Matched Helmholtz assembly and GMRES protocol
+
+`RodinHelmholtzAssemblyBenchmarks` and `RodinHelmholtzSolveBenchmarks` belong
+to Assembly and Solver, respectively. `Workloads/HelmholtzWorkload.h` defines
+their common equation on the unit box:
+
+$$
+-\Delta u+\alpha u=f,\qquad u|_{\partial\Omega}=u_\star.
+$$
+
+The affine and quadratic fields from convergence certification are used for
+degree one and higher degrees, respectively. The source is shifted analytically
+from the existing Helmholtz source, not obtained by multiplying a fabricated
+coefficient vector by the assembled matrix. The two mass coefficients are
+$\alpha=-1/4$ and $\alpha=-64+i$. The first matches the low-wave-number
+convergence context; the continuous real part of the second is indefinite in
+dimensions one through three. This does not assert that every coarse discrete
+interior block has eigenvalues of both signs.
+
+Assembly measures warmed full `Problem::assemble`, including the matrix, load
+and Dirichlet processing but excluding setup and solving. GMRES measures its
+public fixed-system solve, including diagonal-preconditioner setup and restarted
+Householder iterations. Zero initial guesses are restored outside timing. The
+restart is fixed at 50, the requested tolerance at $10^{-13}$ and the iteration
+cap at 20,000; no geometry-specific tuning is performed. The true residual is
+checked independently of the backend's reported error estimate:
+
+$$
+r=\frac{\|Ax-b\|_2}{\max(1,\|b\|_2)},\qquad
+e=\frac{\|x-x_\star\|_2}{\max(1,\|x_\star\|_2)}.
+$$
+
+The solver budgets are $r<10^{-11}$ and $e<10^{-9}$. Assembly compares full
+operators and loads with the original local kernels at a $10^{-11}$ relative
+budget and checks the manufactured patch at $10^{-10}$. Wrong coefficients
+must be rejected. The solver additionally checks an omitted mass action and
+records a smooth probe's real Rayleigh quotient. Matrix rows/nonzeros, local
+entry counts, quadrature points, solver iterations and restart are reported
+together; nonzeros alone do not account for GMRES's dense Householder sweeps.
+
+For the mass-omission control, let $I$ be the free DOF index set obtained from
+the assembled boundary constraints and let $\widetilde M$ retain the $I\times I$
+mass block with zeros elsewhere. The deliberately wrong operator is
+$A-\alpha\widetilde M$. With the nonzero action
+$q=\alpha\widetilde M x_\star$, its sensitivity is
+
+$$
+s_M=\frac{\|Ax_\star-b-q\|_2}{\|q\|_2}>10^{-4}.
+$$
+
+This denominator measures the term deliberately removed, rather than the
+boundary-dominated load. The earlier load-normalized guard falsely rejected
+five fine-grid low-wave-number cases despite residuals below
+$3.7\times10^{-14}$. The corrected control retains the rejection threshold
+and uses logical DOF indices, not coordinate comparisons or matrix-entry
+thresholds. On those five cases, $s_M$ differs from one by less than
+$8\times10^{-12}$; the solver residual and coefficient budgets are unchanged.
+
+Each executable registers complex H1 degrees one through three on all seven
+mesh geometries at 3, 5 and 9 points per axis: 126 selections per operation.
+All 126 selections passed in each native and two-thread OpenMP build for both
+operations: 504 qualified operation/build selections. The largest true solver
+residual was $3.3\times10^{-13}$ and the largest coefficient error was
+$6.1\times10^{-11}$. The largest assembly patch residual was
+$3.1\times10^{-15}$. Fixed-iteration qualification is not a timing baseline.
+Four unit cases independently compare public GMRES diagnostics with Eigen for
+sparse/dense real/complex systems, including failed solves, recovery and exact
+initial guesses; all pass in each build. An isolated header overlay returning
+zero for both diagnostics makes all four cases fail; the production getters
+pass without changing the solve algorithm.
+
+Matched native degree-two triangle/tetrahedron measurements use all three
+registered sizes. Eight Instruments captures isolate both operations, both
+coefficients and both geometries at nine points per axis. In selected assembly
+stacks, quadrature accounts for 88–96% of sampled CPU weight. Complex
+multiplication alone accounts for 33–48% of leaf weight. Geometry and basis
+evaluation are nested contributors, not additional disjoint percentages.
+GMRES selected stacks instead spend 79–86% in Householder operations and
+11–19% in sparse products; diagonal setup/application accounts for less than
+0.8%. The source profiles therefore do not justify treating either operation
+as uniformly sparse-product dominated. These are sampled stack weights,
+including matching warmup calls, not elapsed-time decompositions or speedups.
+
+The native assembly repeats at nine points per axis used seven repetitions
+with at least 0.8 seconds per repetition. Observed median CPU times were:
+
+| Coefficient | Triangle | Tetrahedron | CPU coefficient of variation |
+| --- | --- | --- | --- |
+| $-1/4$ | 1.352 ms | 265.163 ms | 0.65%, 1.13% |
+| $-64+i$ | 1.341 ms | 267.333 ms | 1.18%, 0.88% |
+
+At this size, triangles have 128 cells, 32 quadrature points per cell and six
+local basis functions; tetrahedra have 3,072 cells, 120 points and ten basis
+functions. Thus the entry-quadrature work proxy
+$N_{\mathrm{cell}}N_qN_b^2$ increases by 250, whereas the measured CPU time
+increases by approximately 196–199. This proxy excludes gradient dimension,
+load terms, constraints and insertion; it is not an exact operation count.
+The global row counts are 289 and 4,913 and the constrained matrix nonzero
+counts are 2,293 and 80,721. The large raw assembly gap is accompanied by a
+larger increase in actual local integration work, rather than an unexplained
+equal-work dimensional penalty.
+
+The GMRES comparison cannot use that assembly proxy. At the same size the
+low-wave case takes 112/110 iterations on triangles/tetrahedra; the shifted
+case takes 234/288, with restart 50 throughout. Dense orthogonalization depends
+on rows, restart and position within each cycle, not only matrix nonzeros.
+Longer repeats retain isolated 3D CPU-time spikes: coefficients of variation
+are approximately 20% and 11%, despite unchanged iteration counts, residuals
+and coefficient errors. The cause of those spikes remains unresolved; precise
+3D solver timing baselines and optimization claims are withheld. Raw initial
+measurements, longer repeats and traces are retained separately under
+`build-convergence/certification/helmholtz-gmres-20261013/`.
+
+P0/P0g, higher degrees, curved geometry, boundary variants, direct solves and
+PETSc/MPI policies are not covered by these scopes.
+The benchmarks remain outside CTest and the publication workflow; only the
+ordinary GMRES correctness tests are registered with CTest.
 
 # Spatial value benchmarks
 

@@ -1,3 +1,7 @@
+add_executable(RodinHelmholtzAssemblyBenchmarks EXCLUDE_FROM_ALL HelmholtzAssembly.cpp)
+target_link_libraries(RodinHelmholtzAssemblyBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
 add_executable(RodinAssemblyBenchmarks EXCLUDE_FROM_ALL Poisson.cpp)
 target_link_libraries(RodinAssemblyBenchmarks PRIVATE
   Rodin::Variational Rodin::Solver benchmark::benchmark benchmark::benchmark_main)

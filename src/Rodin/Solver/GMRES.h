@@ -201,6 +201,28 @@ namespace Rodin::Solver
       }
 
       /**
+       * @brief Returns Eigen's iteration count for the most recent solve.
+       * @returns Solver-reported iteration count, without reinterpretation.
+       */
+      size_t getIterationNumber() const
+      {
+        return m_solver.iterations();
+      }
+
+      /**
+       * @brief Returns Eigen's relative error estimate for the most recent solve.
+       *
+       * This backend estimate is not an independently evaluated true residual.
+       * Both diagnostics require a completed solve.
+       *
+       * @returns Solver-reported relative error estimate.
+       */
+      Real getError() const
+      {
+        return m_solver.error();
+      }
+
+      /**
        * @brief Returns a polymorphic copy of this solver.
        * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
@@ -320,6 +342,28 @@ namespace Rodin::Solver
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
+      }
+
+      /**
+       * @brief Returns Eigen's iteration count for the most recent solve.
+       * @returns Solver-reported iteration count, without reinterpretation.
+       */
+      size_t getIterationNumber() const
+      {
+        return m_solver.iterations();
+      }
+
+      /**
+       * @brief Returns Eigen's relative error estimate for the most recent solve.
+       *
+       * This backend estimate is not an independently evaluated true residual.
+       * Both diagnostics require a completed solve.
+       *
+       * @returns Solver-reported relative error estimate.
+       */
+      Real getError() const
+      {
+        return m_solver.error();
       }
 
       /**
