@@ -60,6 +60,10 @@ geometry, and backend variants explicitly. Current audit findings include:
   points and quadrature-associated integration points. Nonconstant quadratic
   derivatives distinguish physical evaluation locations. Doubling the
   integration-point gradient fails the complex H1 oracle.
+  Local evaluation also exercises tabulated and generic integration points.
+  The generic case crashed before repair: H1 gradient, coordinate derivative
+  and divergence lacked the null-quadrature geometric fallback already present
+  in the H1 Jacobian operator.
 - Linear elasticity: distinct trial/test space instances and shared spaces
   reproduce analytic affine strain work for real/complex P1 and quadratic H1
   fields on all seven cell geometries. Field interpolation avoids coefficient

@@ -221,6 +221,11 @@ namespace
             check(point);
             check(IntegrationPoint(point));
             check(IntegrationPoint(point, &formula, sample));
+            const Point& localPoint = useParentPoint ? childPoint : *included;
+            ASSERT_TRUE(domain.isLocalPoint(localPoint));
+            check(localPoint);
+            check(IntegrationPoint(localPoint));
+            check(IntegrationPoint(localPoint, &formula, sample));
             ++checked;
           }
         }
