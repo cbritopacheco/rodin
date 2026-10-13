@@ -471,35 +471,6 @@ namespace Rodin::Assembly
 
         PetscErrorCode ierr;
 
-        assert(A);
-        if (doMatrix)
-        {
-          ierr = PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(rows),
-            static_cast<PetscInt>(cols), static_cast<PetscInt>(rows),
-            static_cast<PetscInt>(cols), MATSEQAIJ, false});
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-        }
-
-        // Vector setup
-        assert(b);
-        if (doVector)
-        {
-          ierr = PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(rows),
-            static_cast<PetscInt>(rows), VECSEQ, true, true});
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-        }
-
-        auto& x = axb.getSolution();
-        assert(x);
-        // The solution vector carries the previous iterate as the solver's
-        // initial guess, so it must not be zeroed on reuse.
-        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(cols),
-          static_cast<PetscInt>(cols), VECSEQ, true, false});
-        assert(ierr == PETSC_SUCCESS);
-        (void)ierr;
-
         ConstraintMap<PetscScalar> constraints(std::max(rows, cols));
         using DBCBaseType = Variational::DirichletBCBase<PetscScalar>;
         using ValueDOFsType = typename DBCBaseType::ValueDOFs;
@@ -553,6 +524,35 @@ namespace Rodin::Assembly
             << "Targeted assembly is not implemented for identification DirichletBCs."
             << Alert::Raise;
         }
+
+        assert(A);
+        if (doMatrix)
+        {
+          ierr = PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(rows),
+            static_cast<PetscInt>(cols), static_cast<PetscInt>(rows),
+            static_cast<PetscInt>(cols), MATSEQAIJ, false});
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+        // Vector setup
+        assert(b);
+        if (doVector)
+        {
+          ierr = PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(rows),
+            static_cast<PetscInt>(rows), VECSEQ, true, true});
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+        auto& x = axb.getSolution();
+        assert(x);
+        // The solution vector carries the previous iterate as the solver's
+        // initial guess, so it must not be zeroed on reuse.
+        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(cols),
+          static_cast<PetscInt>(cols), VECSEQ, true, false});
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
 
         auto matrix_entry = [&](Index row, Index col, PetscScalar val) {
           const PetscScalar colValue = constraints.isIdentified(col)

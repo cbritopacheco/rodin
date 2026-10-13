@@ -244,3 +244,12 @@ set_tests_properties(RodinPETScKSPFactorizationReuseTest PROPERTIES
   LABELS "unit;petsc"
 )
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScKSPFactorizationReuseTest)
+
+add_executable(RodinPETScSingleFieldConstraintTest SingleFieldConstraintTest.cpp)
+target_link_libraries(RodinPETScSingleFieldConstraintTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScSingleFieldConstraintTest
+  COMMAND $<TARGET_FILE:RodinPETScSingleFieldConstraintTest>)
+set_tests_properties(RodinPETScSingleFieldConstraintTest PROPERTIES
+  LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScSingleFieldConstraintTest)

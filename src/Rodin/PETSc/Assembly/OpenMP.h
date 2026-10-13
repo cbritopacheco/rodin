@@ -794,40 +794,6 @@ namespace Rodin::Assembly
 
         PetscErrorCode ierr;
 
-        // ------------------------
-        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
-        // ------------------------
-        assert(A);
-        if (doMatrix)
-        {
-          ierr = PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(ncols), static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(ncols), MATSEQAIJ, false});
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-        }
-
-        // ------------------------
-        // Allocate / reset b (Seq Vec)
-        // ------------------------
-        assert(b);
-        if (doVector)
-        {
-          ierr = PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(nrows), VECSEQ, true, true});
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-        }
-
-        auto& x = axb.getSolution();
-        assert(x);
-        // The solution vector carries the previous iterate as the solver's
-        // initial guess, so it must not be zeroed on reuse.
-        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(ncols),
-          static_cast<PetscInt>(ncols), VECSEQ, true, false});
-        assert(ierr == PETSC_SUCCESS);
-        (void)ierr;
-
         ConstraintMap<PetscScalar> constraints(
           static_cast<size_t>(std::max(nrows, ncols)));
         using DBCBaseType = Variational::DirichletBCBase<PetscScalar>;
@@ -883,6 +849,40 @@ namespace Rodin::Assembly
             << "Targeted assembly is not implemented for identification DirichletBCs."
             << Alert::Raise;
         }
+
+        // ------------------------
+        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
+        // ------------------------
+        assert(A);
+        if (doMatrix)
+        {
+          ierr = PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols), static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols), MATSEQAIJ, false});
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+        // ------------------------
+        // Allocate / reset b (Seq Vec)
+        // ------------------------
+        assert(b);
+        if (doVector)
+        {
+          ierr = PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(nrows), VECSEQ, true, true});
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+        auto& x = axb.getSolution();
+        assert(x);
+        // The solution vector carries the previous iterate as the solver's
+        // initial guess, so it must not be zeroed on reuse.
+        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(ncols),
+          static_cast<PetscInt>(ncols), VECSEQ, true, false});
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
 
         using MatrixEntry = std::tuple<PetscInt, PetscInt, PetscScalar>;
         using VectorEntry = std::pair<PetscInt, PetscScalar>;

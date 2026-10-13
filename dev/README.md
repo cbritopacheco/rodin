@@ -53,6 +53,15 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- PETSc single-field affine identifications: linear and quadratic vector spaces
+  on triangles and quadrilaterals recover an exact constant mass solution and
+  the independent admissible-direction energy. Real sequential and OpenMP
+  assembly and complex sequential assembly are instantiated explicitly.
+  Targeted assembly remains unsupported for these ties; rejection now precedes
+  matrix/vector setup so the previously assembled system survives unchanged.
+  The preservation regression failed before this repair. Doubling the
+  production reconstruction offset is rejected by the exact-field and recovery
+  oracles. Tests run serially, including OpenMP at one and four threads.
 - MFEM mesh validation: the dimension keyword and bounded topological/spatial
   dimensions are validated before mesh replacement. Straight meshes require
   the separate spatial-dimension record specified by the
