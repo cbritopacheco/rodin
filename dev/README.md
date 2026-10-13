@@ -53,6 +53,13 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Parent/submesh derivative transport: real/complex P1 and quadratic H1
+  gradients, coordinate derivatives, Jacobians and divergences satisfy physical
+  polynomial oracles on all seven cell geometries. Both inclusion and
+  restriction are evaluated through geometric points, generic integration
+  points and quadrature-associated integration points. Nonconstant quadratic
+  derivatives distinguish physical evaluation locations. Doubling the
+  integration-point gradient fails the complex H1 oracle.
 - Linear elasticity: distinct trial/test space instances and shared spaces
   reproduce analytic affine strain work for real/complex P1 and quadratic H1
   fields on all seven cell geometries. Field interpolation avoids coefficient
