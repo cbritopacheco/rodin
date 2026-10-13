@@ -24,6 +24,13 @@ namespace
   template <class Operator>
   void checkPreassembledValueConstraints()
   {
+    using Scalar = typename Operator::Scalar;
+    const Scalar factor = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(1, -2);
+      else
+        return Scalar(1);
+    }();
     for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
     {
       SCOPED_TRACE(static_cast<int>(geometry));
@@ -34,9 +41,9 @@ namespace
       auto check = [&](auto& space) {
         TrialFunction u(space);
         TestFunction v(space);
-        const auto prescribed = VectorFunction(size_t(2), [](const Point& point) {
-          return Math::SpatialVector<Real>{
-            1 + point.x() + 2 * point.y(), -2 + 0.5 * point.x() - point.y()};
+        const auto prescribed = VectorFunction(size_t(2), [factor](const Point& point) {
+          return Math::SpatialVector<Scalar>{factor * (1 + point.x() + 2 * point.y()),
+            factor * (-2 + 0.5 * point.x() - point.y())};
         });
         GridFunction exact(space);
         exact = prescribed;
@@ -57,36 +64,36 @@ namespace
         auto boundary = DirichletBC(u, prescribed);
         boundary.assemble();
         const auto& fixed =
-          std::get<DirichletBCBase<Real>::ValueDOFs>(boundary.getDOFs());
+          std::get<typename DirichletBCBase<Scalar>::ValueDOFs>(boundary.getDOFs());
         ASSERT_FALSE(fixed.empty());
         const Index size = static_cast<Index>(space.getSize());
-        const Math::Matrix<Real> unconstrained = mass.getOperator();
+        const Math::Matrix<Scalar> unconstrained = mass.getOperator();
         EXPECT_LT((unconstrained * exact.getData() - load.getVector()).norm(), 1e-11);
-        Math::Matrix<Real> projection = Math::Matrix<Real>::Identity(size, size);
-        Math::Vector<Real> lifting = Math::Vector<Real>::Zero(size);
+        Math::Matrix<Scalar> projection = Math::Matrix<Scalar>::Identity(size, size);
+        Math::Vector<Scalar> lifting = Math::Vector<Scalar>::Zero(size);
         for (const auto& [index, value] : fixed)
         {
-          EXPECT_NEAR(value, exact.getData()[index], 1e-12);
+          EXPECT_LT(std::abs(value - exact.getData()[index]), 1e-12);
           projection(index, index) = 0;
           lifting[index] = value;
         }
-        EXPECT_GT(projection.trace(), 0);
-        const Math::Matrix<Real> identity = Math::Matrix<Real>::Identity(size, size);
-        const Math::Matrix<Real> expectedMatrix =
+        EXPECT_LT(fixed.size(), static_cast<size_t>(size));
+        const Math::Matrix<Scalar> identity = Math::Matrix<Scalar>::Identity(size, size);
+        const Math::Matrix<Scalar> expectedMatrix =
           projection * unconstrained * projection + identity - projection;
-        const Math::Vector<Real> expectedRHS =
+        const Math::Vector<Scalar> expectedRHS =
           projection * (load.getVector() - unconstrained * lifting) + lifting;
-        using System = Math::LinearSystem<Operator, Math::Vector<Real>>;
+        using System = Math::LinearSystem<Operator, Math::Vector<Scalar>>;
         Problem<System, decltype(u), decltype(v)> problem(u, v);
         problem = mass + boundary - load;
         for (size_t repeat = 0; repeat < 2; ++repeat)
         {
           problem.assemble();
           const auto& system = std::as_const(problem).getLinearSystem();
-          const Math::Matrix<Real> matrix = system.getOperator();
+          const Math::Matrix<Scalar> matrix = system.getOperator();
           EXPECT_LT((matrix - expectedMatrix).norm(), 1e-12);
           EXPECT_LT((system.getVector() - expectedRHS).norm(), 1e-11);
-          const Math::Vector<Real> recovered =
+          const Math::Vector<Scalar> recovered =
             matrix.fullPivLu().solve(system.getVector());
           EXPECT_LT((recovered - exact.getData()).norm(), 1e-10);
         }
@@ -94,8 +101,8 @@ namespace
         {
           problem.assemble();
           problem.assemble(target);
-          Math::Matrix<Real> targetMatrix = expectedMatrix;
-          Math::Vector<Real> targetRHS = expectedRHS;
+          Math::Matrix<Scalar> targetMatrix = expectedMatrix;
+          Math::Vector<Scalar> targetRHS = expectedRHS;
 #ifndef RODIN_USE_OPENMP
           if (target == AssemblyTarget::LHS)
             targetMatrix = projection * unconstrained + identity - projection;
@@ -104,13 +111,13 @@ namespace
 #endif
           const auto& system = std::as_const(problem).getLinearSystem();
           EXPECT_LT(
-            (Math::Matrix<Real>(system.getOperator()) - targetMatrix).norm(), 1e-12);
+            (Math::Matrix<Scalar>(system.getOperator()) - targetMatrix).norm(), 1e-12);
           EXPECT_LT((system.getVector() - targetRHS).norm(), 1e-11);
         }
       };
-      P1<Math::SpatialVector<Real>> linear(mesh, 2);
+      P1<Math::SpatialVector<Scalar>> linear(mesh, 2);
       check(linear);
-      H1<2, Math::SpatialVector<Real>> quadratic(
+      H1<2, Math::SpatialVector<Scalar>> quadratic(
         std::integral_constant<size_t, 2>{}, mesh, 2);
       check(quadratic);
     }
@@ -311,4 +318,14 @@ TEST(Rodin_Assembly_SequentialLifecycle, DensePreassembledValueConstraints)
 TEST(Rodin_Assembly_SequentialLifecycle, SparsePreassembledValueConstraints)
 {
   checkPreassembledValueConstraints<Math::SparseMatrix<Real>>();
+}
+
+TEST(Rodin_Assembly_SequentialLifecycle, ComplexDensePreassembledValueConstraints)
+{
+  checkPreassembledValueConstraints<Math::Matrix<Complex>>();
+}
+
+TEST(Rodin_Assembly_SequentialLifecycle, ComplexSparsePreassembledValueConstraints)
+{
+  checkPreassembledValueConstraints<Math::SparseMatrix<Complex>>();
 }
