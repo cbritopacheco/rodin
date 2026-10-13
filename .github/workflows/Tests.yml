@@ -32,6 +32,7 @@ jobs:
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
+      RODIN_PROFILE_STABILITY: ${{ startsWith(matrix.suite, 'pressure_') && '1' || '0' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -247,6 +248,7 @@ jobs:
     env:
       OMP_NUM_THREADS: 2
       OPENBLAS_NUM_THREADS: 1
+      RODIN_PROFILE_STABILITY: ${{ startsWith(matrix.suite, 'pressure_') && '1' || '0' }}
 
     steps:
       - uses: actions/checkout@v4

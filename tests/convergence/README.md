@@ -617,6 +617,16 @@ budgets. Their union retains every registered pair, map, quadrature
 comparison and omitted-divergence control. The budgets are scheduling
 policies motivated by the measured higher-order hierarchy cost; they are
 not algebraic error tolerances or runtime guarantees.
+Pressure jobs enable `RODIN_PROFILE_STABILITY=1`. The independent oracle
+reports reduced algebraic dimensions and phase wall intervals for Schur
+construction, factorizations, whitening, QR, eigenvalues, singular values and
+consistency checks. PETSc cases additionally report rank-local mesh/space
+setup, each physical block assembly, boundary constraints and the complete
+global-spectrum operation. That last interval includes collection and waiting
+for the rank-zero oracle; it is not an independent communication measurement.
+These opt-in diagnostics introduce no collectives and change no numerical
+budgets, refinement levels or solver settings. They locate expensive stages
+but do not replace isolated source benchmarks or controlled timing repeats.
 This scheduling policy changes neither refinement levels nor numerical
 acceptance and separates the large vector and mixed direct solves.
 Curved real-PETSc bulk execution is split into scalar, linear-elasticity and
