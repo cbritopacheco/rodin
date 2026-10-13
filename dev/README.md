@@ -53,6 +53,14 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- PETSc MEDIT vertex output: scalar, vector and rectangular matrix P1 and
+  quadratic H1 fields retain their analytic affine values in real and complex
+  builds. Public printer dispatch emits the expected version, dimension,
+  vertex count and field types, with exactly one complete component row per
+  vertex and a terminal marker. Repeated printing is checked. All twelve
+  cases pass serially; doubling printed production values fails every oracle.
+  The registered CMake target also builds and passes against freshly compiled
+  current production libraries.
 - Zero-dimensional projection: a point reference vertex now has zero active
   coordinates, matching its centroid and reference dimension. The CI Debug
   assertion in `EveryReferenceVertexIsFixed` was reproduced before repair;
