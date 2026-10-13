@@ -83,7 +83,7 @@ namespace
         "/tmp/rodin_petsc_hdf5_gf_sa_" + polytopeLabel(type) + ".h5";
 
     auto mesh = makeMesh(type);
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
 
     // Create a PETSc-backed grid function using sequential communicator
     Rodin::PETSc::Variational::GridFunction gf(fes);
@@ -137,7 +137,7 @@ namespace
         "/tmp/rodin_petsc_hdf5_gf_dofs_" + polytopeLabel(type) + ".h5";
 
     auto mesh = makeMesh(type);
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
 
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
@@ -147,7 +147,12 @@ namespace
     PetscInt n = 0;
     VecGetLocalSize(gf.getData(), &n);
     for (PetscInt i = 0; i < n; ++i)
+    {
       array[i] = static_cast<PetscScalar>(std::sin(static_cast<double>(i)));
+#if defined(PETSC_USE_COMPLEX)
+      array[i] += PetscCMPLX(0, std::cos(static_cast<double>(i)));
+#endif
+    }
     VecRestoreArray(gf.getData(), &array);
 
     gf.save(gfFile, FileFormat::HDF5);
@@ -174,6 +179,22 @@ namespace
 
     H5Sclose(dspace);
     H5Dclose(dset);
+#if defined(PETSC_USE_COMPLEX)
+    const hid_t imaginarySet =
+      H5Dopen2(h5, "/GridFunction/Values/ImaginaryData", H5P_DEFAULT);
+    ASSERT_GE(imaginarySet, 0);
+    std::vector<double> imaginary(static_cast<size_t>(count));
+    ASSERT_GE(H5Dread(imaginarySet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                imaginary.data()),
+      0);
+    for (PetscInt i = 0; i < n; ++i)
+    {
+      EXPECT_DOUBLE_EQ(
+        imaginary[static_cast<size_t>(i)], std::cos(static_cast<double>(i)))
+        << "Imaginary DOF mismatch at index " << i;
+    }
+    EXPECT_GE(H5Dclose(imaginarySet), 0);
+#endif
     H5Fclose(h5);
 
     // Round-trip: load into a new grid function
@@ -194,10 +215,7 @@ namespace
     VecGetLocalSize(gf.getData(), &localN);
     for (PetscInt i = 0; i < localN; ++i)
     {
-      EXPECT_DOUBLE_EQ(
-          static_cast<double>(PetscRealPart(loadedArray[i])),
-          static_cast<double>(PetscRealPart(origArray[i])))
-          << "Round-trip DOF mismatch at index " << i;
+      EXPECT_EQ(loadedArray[i], origArray[i]) << "Round-trip DOF mismatch at index " << i;
     }
     VecRestoreArrayRead(gf.getData(), &origArray);
     VecRestoreArrayRead(loaded.getData(), &loadedArray);

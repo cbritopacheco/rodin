@@ -1,5 +1,12 @@
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
+add_executable(RodinVariationalGridFunctionRegionQuadratureTest
+  GridFunctionRegionQuadratureTest.cpp)
+target_link_libraries(RodinVariationalGridFunctionRegionQuadratureTest
+  PRIVATE GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalGridFunctionRegionQuadratureTest
+  PROPERTIES LABELS unit TIMEOUT 30)
+
 add_executable(RodinVariationalP1HigherDerivativeTest P1HigherDerivativeTest.cpp)
 target_link_libraries(RodinVariationalP1HigherDerivativeTest
   PRIVATE GTest::gtest_main Rodin::Variational)
