@@ -1,3 +1,7 @@
+add_executable(RodinCoupledReactionDiffusionAssemblyBenchmarks EXCLUDE_FROM_ALL CoupledReactionDiffusionAssembly.cpp)
+target_link_libraries(RodinCoupledReactionDiffusionAssemblyBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
 add_executable(RodinHelmholtzAssemblyBenchmarks EXCLUDE_FROM_ALL HelmholtzAssembly.cpp)
 target_link_libraries(RodinHelmholtzAssemblyBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)

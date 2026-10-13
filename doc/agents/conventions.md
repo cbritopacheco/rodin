@@ -94,7 +94,18 @@ allocation, communication and sanitizer effects. Do not weaken numerical
 requirements or classify a case as merely slow without this analysis. Preserve
 the reproducing benchmark and numerical regressions for any resulting repair.
 
-## Error handling in PETSc-facing code
+## Error handling
+
+Use Rodin's streamable `Alert::Exception` family rather than throwing standard
+library exceptions for errors diagnosed by Rodin. Prefer
+`Alert::MemberFunctionException(*this, __func__)` for member-function failures,
+or the applicable class, namespace, or domain-specific Alert exception, so the
+diagnostic retains its context. Complete the diagnostic with `Alert::Raise`.
+Use `assert` for internal invariants, not for invalid public inputs that must
+also be diagnosed in release builds. Do not replace exceptions originating
+inside third-party libraries merely to change their type.
+
+### PETSc-facing code
 
 **Use `assert(ierr == PETSC_SUCCESS)` after PETSc calls.** This is the
 uniform house idiom. Do not introduce a checking macro, and do not convert

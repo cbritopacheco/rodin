@@ -106,8 +106,34 @@ offline parser checks are not benchmark tests, timing gates or CI registrations.
 Category patterns must identify executing methods, not merely a type appearing
 in a demangled template argument. For example, `DiagonalPreconditioner` also
 appears in GMRES expression signatures; its method pattern
-`Eigen::DiagonalPreconditioner<.*>::(factorize|_solve_impl)<` distinguishes setup
+`Eigen::DiagonalPreconditioner<(?:[^<>]|<[^<>]*>)*>::(?:factorize|_solve_impl)<`
+distinguishes setup
 and application from this incidental type occurrence.
+
+### Verification-support attribution
+
+The finite pressure-spectrum oracle is not a production Stokes solver. Its
+global collection and result broadcast intentionally surround one rank-zero
+spectral calculation. A complete native three-rank $P_4/P_3$ pyramid hierarchy
+passed all affine/curved and order-16/order-20 comparisons in 1,276.57 seconds.
+The observed algebraic dimensions and global-spectrum diagnostic intervals were:
+
+| Points per axis | Free velocity DOFs | Pressure DOFs | Global-spectrum wall interval |
+| --- | --- | --- | --- |
+| 3 | 2,565 | 559 | 1.50–1.64 s |
+| 4 | 9,177 | 1,729 | 27.85–28.54 s |
+| 5 | 22,413 | 3,925 | 276.65–290.13 s |
+
+One physical mean constraint reduces the pressure spectral dimensions to
+558, 1,728 and 3,924. Fine-grid Schur-column construction took 81–91 seconds
+and incremental QR took 95–99 seconds. These are stage wall observations from
+an instrumented test, not controlled benchmark baselines. Two short Instruments
+captures were attached sequentially to the existing run: the root capture
+selected generalized eigenspectrum work, while the peer capture selected the
+result broadcast. Neither capture covers the complete hierarchy.
+The observed rank CPU imbalance therefore does not establish a partitioning
+defect. These support profiles do not count as production assembly/solve
+profiling; the opt-in `RodinPressureOracleBenchmarks` retains that distinction.
 
 ## Hierarchical profiling ledger
 
@@ -135,8 +161,8 @@ that this performance matrix has been profiled.
 | Operator setup / Assembly | Public repeated assembly and sequential stage scopes | Sparsity discovery, allocation and replacement separated from kernels |
 | Scatter / Assembly, PETSc | Sequential triplets; complete native/PETSc insertion consumers | Isolated OpenMP buffers/merge, PETSc insertion and ownership-dependent MPI work |
 | Constraints and completion / Assembly, PETSc | Constrained scalar assembly and fixed-system solves | Vector/mixed constraints, identification, finalization and communication attribution |
-| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson; complex Helmholtz low-wave/shifted forms, 126 cases qualified in each build and selected native profiles | Coupled reaction–diffusion, Stokes, boundary variants and remaining degrees/backends |
-| Solvers / Solver, PETSc | Real/complex fixed-system CG; isolated diagonal compute/apply; projection CG profile; complex Helmholtz GMRES, 126 cases qualified in each build and selected native profiles | Direct factorization stages, remaining setup/lifetimes, mixed systems, backend scaling and memory; repeatable 3D GMRES baselines |
+| Public physical assembly / Assembly | Diffusion, conductivity, LinearElasticity, mass/reaction and nonlinear Poisson; complex Helmholtz and real/complex coupled reaction–diffusion, each with 126 cases qualified in each build and selected native profiles | Stokes, boundary variants and remaining degrees/backends; constructor/lifecycle isolation |
+| Solvers / Solver, PETSc | Real/complex fixed-system CG; isolated diagonal compute/apply; projection CG profile; complex Helmholtz GMRES and coupled reaction–diffusion CG, each with 126 cases qualified in each build and selected native profiles | Direct factorization stages, remaining setup/lifetimes, mixed saddle-point systems, backend scaling and memory; repeatable 3D GMRES baselines |
 | Complete workflows / owning modules | Consumer-level interpolation/projection and assembly profiles | Matched setup/assembly/solve/postprocessing accounting across physical contexts |
 
 The required axes are scalar field (real/complex), supported scalar/vector/matrix
@@ -875,6 +901,145 @@ P0/P0g, higher degrees, curved geometry, boundary variants, direct solves and
 PETSc/MPI policies are not covered by these scopes.
 The benchmarks remain outside CTest and the publication workflow; only the
 ordinary GMRES correctness tests are registered with CTest.
+
+### Coupled reaction--diffusion protocol
+
+`RodinCoupledReactionDiffusionAssemblyBenchmarks` and
+`RodinCoupledReactionDiffusionSolveBenchmarks` are opt-in Assembly and Solver
+targets. Their common workload retains two scalar trial fields and two scalar
+test fields, rather than replacing the coupled problem by a single scalar
+reaction term. On the unit box the physical equations are
+
+$$
+-\kappa_i\Delta u_i+u_i+\alpha u_{1-i}=f_i,
+\qquad \kappa=(1,2),\quad \alpha=0.2,\quad i\in\{0,1\}.
+$$
+
+Full manufactured Dirichlet traces are prescribed. Affine fields are selected
+at degree one and quadratic fields otherwise from `ReactionDiffusionData`.
+The real reaction matrix has eigenvalues 0.8 and 1.2; the complex-valued
+extension retains the same Hermitian operator, not a non-Hermitian shift.
+For real certified fields $u_i^0$ and sources $f_i^0$, the complex data are
+defined analytically by
+
+$$
+u_i=\eta_i u_i^0,\qquad
+f_i=\eta_i f_i^0+\alpha(\eta_{1-i}-\eta_i)u_{1-i}^0,
+\qquad (\eta_0,\eta_1)=(1+i,2-i).
+$$
+
+The distinct complex multipliers exercise both components without assuming a
+common phase. Original local kernels qualify all six operator terms. The two
+loads retain their production integration path; comparisons between formulations
+are supplemented by the analytic manufactured patch, not by an independent
+load algorithm. The complete exact coefficient vector is gathered by public block
+assembly; the component ordering is not fabricated in the benchmark.
+
+The negative control drops both coupling terms but retains analytic sources
+and prescribed traces. Its constrained system is denoted $(A_0,b_0)$; even
+with unchanged physical sources, essential elimination can change $b_0$.
+Let $c$ gather the independent scalar mass actions
+$\alpha Mx_{\star,1-i}$ at the public test offsets, with essential output
+rows masked using boundary DOF indices. Prescribed input coefficients remain
+in this action. The control requires a finite nonzero $\|c\|_2$ and rejects
+the omitted reaction through
+
+$$
+s_C=\frac{\|A_0x_\star-b_0\|_2}{\|c\|_2}>10^{-4}.
+$$
+
+Thus the sensitivity denominator measures the omitted physical term, not a
+boundary-dominated load. The correct assembled patch and full operator/load
+comparisons retain budgets $10^{-10}$ and $10^{-11}$, respectively. Public
+CG solves use tolerance $10^{-13}$, a 20,000-iteration cap, independent true
+residual budget $10^{-11}$ and coefficient budget $10^{-9}$. Zero initial
+guesses are restored outside timing; iteration counts are checked after every
+measured solve. Assembly, interpolation, field scatter and validation are
+excluded from the solve scope. Full assembly includes block bookkeeping,
+constraints and gathering the initial guess, but no solving.
+
+Each target registers real/complex H1 degrees one through three on all seven
+mesh geometries at 3, 5 and 9 points per axis: 126 operation selections.
+Quadrature order 16 is held fixed. Cell, quadrature, per-field basis, local
+entry, global row and nonzero counts distinguish the two diffusion and four
+reaction terms. All 126 selections per operation passed in each optimized build:
+504 assembly/solve selections across native and two-thread OpenMP builds. The
+126 native real-valued assembly/solve selections match the original-header
+controls exactly in all recorded numerical and work counters. Across both
+builds the largest patch residual was $3.6\times10^{-15}$, the largest solve
+true residual was $1.1\times10^{-13}$ and the largest joint coefficient error
+was $1.1\times10^{-12}$. The omitted-coupling normalized residual stayed near
+one, well above its rejection floor. Native/OpenMP iteration counts can differ;
+cross-build bitwise equality is not claimed. These targets are not CTest tests
+or publication-workflow additions.
+
+### Coupled source attribution and dimensional scaling
+
+Matched native real-valued degree-two measurements used five repetitions at
+each of the three sizes, fixed iteration counts selected by a pilot, and
+alternating original/repaired order between geometries. The constructor repair
+is outside both timed operations, so these measurements do not establish a
+speedup from that repair. At nine points per axis the repaired CPU medians and
+work counts were:
+
+| Quantity | Triangle | Tetrahedron |
+| --- | --- | --- |
+| Cells | 128 | 3,072 |
+| Quadrature points per cell | 53 | 729 |
+| Scalar basis functions per field | 6 | 10 |
+| Global rows | 578 | 9,826 |
+| Matrix nonzeros | 9,044 | 319,808 |
+| CG iterations | 94 | 103 |
+| Full assembly CPU median | 3.610 ms | 1,965.046 ms |
+| Fixed-system CG CPU median | 0.581 ms | 26.170 ms |
+
+For cell count $N_T$, quadrature count $N_q$ and scalar local basis size $N_b$,
+the local-entry work proxy $N_TN_qN_b^2$ grows by approximately 917, compared
+with an observed assembly CPU ratio of 544. This proxy does not account for
+different expression costs, load terms, geometry evaluation or insertion;
+it is not an operation count or a predicted timing. The solve CPU ratio is 45,
+while nonzeros grow by 35 and iterations by $103/94$. Dimension alone therefore
+does not isolate either cost difference.
+
+Eight sequential Instruments captures covered assembly and CG, real and complex
+fields, and triangles and tetrahedra at this degree and size. Required executing
+assembly/solver frames select production consumers; original-reference kernels
+are excluded from assembly selection. Matching untimed production warmups and
+controls can remain selected. Inclusive sampled CPU categories were:
+
+| Operation / field | Triangle | Tetrahedron |
+| --- | --- | --- |
+| Assembly / real: quadrature | 87.9% | 97.7% |
+| Assembly / complex: quadrature | 91.1% | 98.3% |
+| CG / real: sparse products | 82.2% | 92.0% |
+| CG / complex: sparse products | 75.8% | 89.9% |
+
+Geometry contributed 11.5–23.2% of selected assembly samples, overlapping the
+quadrature category. Complex multiplication contributed 35.9–47.1% of complex
+assembly samples and 63.4–78.2% of complex CG samples, overlapping their owning
+kernels. These observations locate source work; they neither prove an
+optimization nor justify changing scalar semantics. Sample percentages are not
+elapsed-time fractions and must not be added.
+
+CPU coefficients of variation in the matched measurements were at most 2.9%,
+but selected elapsed-time coefficients reached 22.2%. The elapsed/CPU discrepancy
+has not been causally resolved; elapsed baselines are withheld rather than
+attributed to scheduling, allocation or memory waits without further evidence.
+Remaining work includes construction/lifecycle isolation, the other physical
+contexts, higher degrees, curved geometry and PETSc/MPI counterparts.
+
+Complex block-problem construction initially failed because `ProblemUsBase`
+created private sequential tuple assemblers even though execution already
+uses the canonical `Assembly::Default` problem assembler. The unused tuple
+assemblers restricted scalar/storage types independently of that active path.
+The repair removes their aliases, allocations, copy/move handling and members;
+the active full/targeted assembly and solve code is unchanged. An original-header
+overlay demonstrates the compile regression for complex sparse and real dense
+systems. Mixed P0/H1 unit cases cover real/complex, sparse/dense storage, three
+H1 degrees and seven geometries, including logical block offsets, independent
+mass blocks, repeated assembly, true residuals and component solution scatter.
+No alternate complex assembler, numerical tolerance change or speedup claim
+is introduced by this construction repair.
 
 # Spatial value benchmarks
 
