@@ -283,8 +283,12 @@ namespace KelvinBall
     for (auto face = mesh.getFace(); face; ++face)
     {
       if (face->getAttribute() == Outer)
+      {
         for (const Index vertex : face->getVertices())
+        {
           EXPECT_NEAR(mesh.getVertexCoordinates(vertex)(0), 2, 1e-14);
+        }
+      }
     }
   }
 
@@ -372,7 +376,9 @@ namespace KelvinBall
     for (auto face = mesh.getFace(); face; ++face)
     {
       if (face->getAttribute() == SigmaPlus || face->getAttribute() == SigmaMinus)
+      {
         EXPECT_TRUE(mesh.getRequiredTriangles().contains(face->getIndex()));
+      }
     }
   }
 
