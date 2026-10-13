@@ -53,6 +53,11 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Cardiac recruitment: all five linear/constant segments and the two inactive
+  tails satisfy independent active-stiffness and active-stress residual and
+  tangent formulas. The instantaneous relaxation limit checks its algebraic
+  residual and both derivatives. Individual active-state entries agree with
+  central finite differences; removing the relaxation strain derivative fails.
 - Euclidean primitives: `Point2D` owns a two-component `Math::SpatialVector`,
   and displacements and segment directions use the same fixed-capacity type.
   The previous `Eigen::Vector2` storage was already fixed-size; this change

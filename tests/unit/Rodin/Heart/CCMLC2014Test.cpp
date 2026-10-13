@@ -656,6 +656,85 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
   EXPECT_LT(relativeError, 1e-3);
 }
 
+/// @brief Recruitment segments and instantaneous relaxation satisfy independent residual and tangent formulas.
+TEST(CCMLC2014Test, RecruitmentSegmentsAndInstantaneousRelaxation)
+{
+  auto input = makeGenericCardiacInput();
+  input.alpha = 0;
+  input.alphaR = 0;
+  // Keep active residual magnitudes comparable to their strain derivatives.
+  input.k0 = 1;
+  input.sigma0 = 2;
+  input.m0 = [](Real ec) { return 1.2 + 0.25 * ec; };
+  input.dm0 = [](Real) { return 0.25; };
+  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, Model::Input> system(input);
+  constexpr Real dt = 1e-3;
+  constexpr Real activation = 25;
+  constexpr Real perturbation = 1e-7;
+  constexpr std::array<Real, 7> strains{-0.45, -0.05, 0.515, 0.865, 1.15, 1.85, 2.5};
+  constexpr std::array<Real, 7> recruitment{0, 0.19, 0.56, 0.87, 1, 0.5, 0};
+  constexpr std::array<Real, 7> slopes{
+    0, 0.38 / 0.7, 0.36 / 0.43, 0.26 / 0.27, 0, -1 / 1.1, 0};
+  for (size_t i = 0; i < strains.size(); ++i)
+  {
+    SCOPED_TRACE(strains[i]);
+    auto candidate = makeCandidateState();
+    auto current = makeCurrentState();
+    auto previous = makePreviousState(current);
+    candidate[CCMLC2014Vars::FiberDeformation] = strains[i];
+    current.ec = previous.ec = strains[i];
+    Model::EvalData data;
+    system.buildEvalData(candidate, current, previous, current.t + dt, dt, data);
+    Model::DenseVector residual;
+    Model::DenseMatrix jacobian;
+    system.evaluateResidual(data, residual);
+    system.evaluateJacobian(data, jacobian, dt);
+    const Real kc = candidate[CCMLC2014Vars::ActiveStiffness];
+    const Real tauc = candidate[CCMLC2014Vars::ActiveStress];
+    const Real kcDot = (1.5 * kc - 2 * current.kc + 0.5 * previous.kc) / dt;
+    const Real taucDot = (1.5 * tauc - 2 * current.tauc + 0.5 * previous.tauc) / dt;
+    EXPECT_NEAR(residual[CCMLC2014Vars::ActiveStiffness],
+      kcDot + activation * kc - recruitment[i] * input.k0 * activation, 1e-8);
+    EXPECT_NEAR(residual[CCMLC2014Vars::ActiveStress],
+      taucDot + activation * tauc - recruitment[i] * input.sigma0 * activation, 1e-8);
+    EXPECT_NEAR(residual[CCMLC2014Vars::LoadDependentRelaxation],
+      candidate[CCMLC2014Vars::LoadDependentRelaxation] - (1.2 + 0.25 * strains[i]),
+      1e-14);
+    for (const Index column :
+      {CCMLC2014Vars::FiberDeformation, CCMLC2014Vars::LoadDependentRelaxation})
+    {
+      auto plus = candidate;
+      auto minus = candidate;
+      plus[column] += perturbation;
+      minus[column] -= perturbation;
+      Model::EvalData dataPlus, dataMinus;
+      Model::DenseVector residualPlus, residualMinus;
+      system.buildEvalData(plus, current, previous, current.t + dt, dt, dataPlus);
+      system.buildEvalData(minus, current, previous, current.t + dt, dt, dataMinus);
+      system.evaluateResidual(dataPlus, residualPlus);
+      system.evaluateResidual(dataMinus, residualMinus);
+      for (const Index row : {CCMLC2014Vars::ActiveStiffness, CCMLC2014Vars::ActiveStress,
+             CCMLC2014Vars::LoadDependentRelaxation})
+      {
+        const Real derivative =
+          (residualPlus[row] - residualMinus[row]) / (2 * perturbation);
+        EXPECT_NEAR(jacobian(row, column), derivative,
+          1e-6 * std::max<Real>(1, std::abs(derivative)));
+      }
+    }
+    EXPECT_NEAR(jacobian(CCMLC2014Vars::ActiveStiffness, CCMLC2014Vars::FiberDeformation),
+      -slopes[i] * input.k0 * activation, 1e-8);
+    EXPECT_NEAR(jacobian(CCMLC2014Vars::ActiveStress, CCMLC2014Vars::FiberDeformation),
+      -slopes[i] * input.sigma0 * activation - kc * 1.5 / dt, 1e-8);
+    EXPECT_EQ(
+      jacobian(CCMLC2014Vars::LoadDependentRelaxation, CCMLC2014Vars::FiberDeformation),
+      -0.25);
+    EXPECT_EQ(jacobian(CCMLC2014Vars::LoadDependentRelaxation,
+                CCMLC2014Vars::LoadDependentRelaxation),
+      1);
+  }
+}
+
 /// @brief Verifies windkessel residual and jacobian use branch flows and BDF 2 for CCMLC 2014 test by checking tolerance-based numerical results.
 TEST(CCMLC2014Test, WindkesselResidualAndJacobianUseBranchFlowsAndBDF2)
 {
