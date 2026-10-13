@@ -33,8 +33,9 @@ python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output buil
 ```
 
 The audit unions line hits across input reports, rejects nonproduction
-records, lists uncovered production lines, and inventories source files absent
-from the report, with template declaration locations. CI uploads this JSON
+records and records for deleted production files, lists uncovered production
+lines, and inventories source files absent from the report, with template
+declaration locations. CI uploads this JSON
 for each coverage configuration. Absence is a review candidate: declarations,
 static tables, disabled optional modules, and never-instantiated templates can
 all be absent. Constant evaluation and optimization can also remove runtime
@@ -214,12 +215,16 @@ geometry, and backend variants explicitly. Current audit findings include:
   analytic affine Rvachev/Spalding-Tucker normalization. Rvachev instantiation
   exposed an obsolete gradient-output API; the repaired call passes physical
   value checks. Perturbed signs, loads and normalization factors are rejected.
-- Affine cell geometry cache: exact skew-triangle Jacobians, inverses, metrics
-  and P1 gradients in both orientations, independent per-cell measures and
-  index maps, singular-cell rejection, and enforcement of the documented
-  planar-triangle scope. Including this previously absent header exposed
-  silent acceptance of quadrilateral cells; a failing regression preceded
-  the input validation fix.
+- Retired affine cell geometry cache: earlier checks exercised exact triangle
+  geometry and rejected unsupported input. PR #367 removes the unused cache
+  and analytic adapters; the coverage branch preserves those deletions and
+  removes cache-only tests. Active cell-deformation checks remain. Coverage
+  of the merged source requires fresh compiler notes and runtime profiles.
+- GLL nodes and angle wrappers: an absent optimized runtime record does not
+  imply missing tests. `Variational/H1/GLLTest.cpp` checks node locations,
+  ordering, symmetry and mapping; `Math/RadTest.cpp` checks angle arithmetic.
+  Declaration-only headers, type aliases and compile-time traits likewise
+  require inspection rather than fabricated runtime coverage.
 - Attribute-restricted mesh measures: analytic half-unit-box area, volume and
   exterior measures for all six 2D/3D cell geometries, including combined,
   empty and missing attribute sets. Local and MPI suites pass; the distributed

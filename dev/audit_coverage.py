@@ -17,6 +17,7 @@ def audit(root, reports, include_functions=False):
     source = root / "src" / "Rodin"
     lines = {}
     foreign = set()
+    missing = set()
     functions = {}
     for report in reports:
         current = None
@@ -37,7 +38,11 @@ def audit(root, reports, include_functions=False):
                     foreign.add(str(path))
                     current = None
                 else:
-                    lines.setdefault(current, {})
+                    if not path.is_file():
+                        missing.add("src/Rodin/" + current)
+                        current = None
+                    else:
+                        lines.setdefault(current, {})
             elif current is not None and include_functions and record.startswith("FNL:"):
                 index, start, *_ = record[4:].split(",")
                 function_lines[index] = int(start)
@@ -96,6 +101,7 @@ def audit(root, reports, include_functions=False):
     result = {"lines": total, "hits": hits,
             "coverage_percent": 100 * hits / total if total else None,
             "nonproduction_records": sorted(foreign),
+            "missing_production_sources": sorted(missing),
             "files": sorted(files, key=lambda file: len(file["uncovered_lines"]), reverse=True),
             "absent_sources": sorted(absent, key=lambda file: file["code_lines"], reverse=True),
             "limitation": "Line coverage measures compiled instantiations. Absent sources and "
@@ -130,6 +136,8 @@ def main():
         print(encoded, end="")
     if result["nonproduction_records"]:
         parser.exit(1, "Coverage contains records outside src/Rodin.\n")
+    if result["missing_production_sources"]:
+        parser.exit(1, "Coverage refers to deleted production sources; rebuild matching compiler notes.\n")
     if not result["lines"]:
         parser.exit(1, "Coverage contains no production executable lines.\n")
 

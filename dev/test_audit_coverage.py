@@ -3,6 +3,8 @@
 
 import tempfile
 import unittest
+import subprocess
+import sys
 from pathlib import Path
 
 from audit_coverage import audit
@@ -56,6 +58,19 @@ class CoverageAuditTest(unittest.TestCase):
         self.assertEqual(result["lines"], 1)
         self.assertEqual(result["hits"], 1)
         self.assertFalse(result["nonproduction_records"])
+
+    def test_deleted_production_sources_reject_stale_report_certification(self):
+        report = self.report("stale.info", "SF:src/Rodin/Example.h\nDA:1,1\nend_of_record\n"
+            "SF:src/Rodin/Deleted.h\nFN:1,removed\nFNDA:7,removed\nDA:1,7\nend_of_record\n")
+        result = audit(self.root, [report], include_functions=True)
+        self.assertEqual(result["missing_production_sources"], ["src/Rodin/Deleted.h"])
+        self.assertEqual(result["lines"], 1)
+        self.assertEqual(result["recorded_functions"], {"observed": 0, "hit": 0})
+        self.assertFalse(result["nonproduction_records"])
+        command = subprocess.run([sys.executable, str(Path(__file__).with_name("audit_coverage.py")),
+            str(report), "--root", str(self.root)], capture_output=True, text=True)
+        self.assertEqual(command.returncode, 1)
+        self.assertIn("deleted production sources", command.stderr)
 
     def test_shared_line_hits_do_not_hide_zero_count_function_variants(self):
         report = self.report("functions.info",
