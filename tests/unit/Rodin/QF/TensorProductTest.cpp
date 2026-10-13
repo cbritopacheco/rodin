@@ -107,7 +107,7 @@ namespace Rodin::Tests::Unit
    */
   TEST(TensorProduct, InvariantAccessAndExactConcatenation)
   {
-    for (const auto [ldim, rdim] :
+    for (const auto& [ldim, rdim] :
       {std::pair{0u, 0u}, {0u, 1u}, {1u, 0u}, {1u, 1u}, {1u, 2u}, {2u, 1u}})
     {
       SCOPED_TRACE(ldim);
@@ -186,7 +186,7 @@ namespace Rodin::Tests::Unit
   /// @brief Construction and copying retain zeroed inactive fixed capacity.
   TEST(TensorProduct, InactiveCapacityIsZero)
   {
-    for (const auto [leftDimension, rightDimension] : {std::pair{0u, 0u}, {0u, 1u},
+    for (const auto& [leftDimension, rightDimension] : {std::pair{0u, 0u}, {0u, 1u},
            {1u, 0u}, {0u, 2u}, {1u, 1u}, {2u, 0u}, {1u, 2u}, {2u, 1u}})
     {
       SCOPED_TRACE(leftDimension);
