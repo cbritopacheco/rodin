@@ -233,8 +233,11 @@ namespace KelvinBall
           areaTotal += area;
           for (const auto& barycentric : quadrature)
           {
-            const Geometry::Point point(
-              *face, barycentric[0] * a + barycentric[1] * b + barycentric[2] * c);
+            Math::SpatialPoint reference(2);
+            reference(0) = barycentric[1];
+            reference(1) = barycentric[2];
+            const Geometry::Point point(*face, reference,
+              barycentric[0] * a + barycentric[1] * b + barycentric[2] * c);
             const auto velocity = field.getValue(point);
             const auto normal = -fluidNormal.getValue(point);
             const Real component = velocity.dot(normal);

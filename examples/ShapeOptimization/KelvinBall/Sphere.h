@@ -102,6 +102,8 @@ namespace KelvinBall
        * Adaptation is transactional: the candidate is committed only after
        * fixed-boundary projection and cut splitting succeed. An exception
        * leaves the supplied mesh unchanged, including its MMG feature tags.
+       * Fixed-boundary projection is checked before MMG as well, so invalid
+       * cut geometry is rejected without entering the remesher.
        * @param[in,out] mesh Fitted mesh, replaced only by a valid candidate.
        * @param[in] requestedWelschScale Positive band-width override, or zero
        * for the reference-spacing default.

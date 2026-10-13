@@ -301,7 +301,7 @@ namespace KelvinBall
     const MMG::Mesh original = mesh;
     Configuration configuration;
     // Restoring the labelled cut collapses this thin tetrahedron. All MMG
-    // sizes and tolerances remain valid, isolating post-adaptation rejection.
+    // sizes and tolerances remain valid, isolating boundary validation.
     configuration.hmin = 0.1;
     configuration.hmax = 1;
     try

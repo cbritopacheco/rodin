@@ -95,7 +95,7 @@ namespace KelvinBall
             const Index parent = parentFaces[point.getPolytope().getIndex()];
             const Geometry::Point parentPoint(
               *mesh.getPolytope(mesh.getDimension() - 1, parent),
-              point.getPhysicalCoordinates());
+              point.getReferenceCoordinates(), point.getPhysicalCoordinates());
             const Math::SpatialVector<Real> normal = -fluidNormal.getValue(parentPoint);
             return normal;
           });
@@ -143,7 +143,8 @@ namespace KelvinBall
             triangle.x[k] = mesh.getVertexCoordinates(vertices[k]);
           const Math::SpatialVector<Real> midpoint =
             (triangle.x[0] + triangle.x[1] + triangle.x[2]) / 3;
-          triangle.normal = -fluidNormal.getValue(Geometry::Point(*face, midpoint));
+          triangle.normal = -fluidNormal.getValue(Geometry::Point(
+            *face, Polytope::Traits(face->getGeometry()).getCentroid(), midpoint));
           triangle.normal.normalize();
           triangle.face = face->getIndex();
           for (size_t d = 0; d < 3; ++d)
@@ -258,7 +259,10 @@ namespace KelvinBall
           {
             const Math::SpatialVector<Real> s =
               barycentric[0] * a + barycentric[1] * b + barycentric[2] * c;
-            const Geometry::Point surfacePoint(*face, s);
+            Math::SpatialPoint reference(2);
+            reference(0) = barycentric[1];
+            reference(1) = barycentric[2];
+            const Geometry::Point surfacePoint(*face, reference, s);
             const Math::SpatialVector<Real> geometricNormal =
               -fluidNormal.getValue(surfacePoint);
             for (size_t k = 0; k < 3; ++k)

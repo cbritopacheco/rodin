@@ -448,6 +448,9 @@ namespace KelvinBall
     Math::Vector<Real> diagnosticLoad = load;
     Math::Vector<Real> nominalLoad = load;
     ThicknessPenalty guarded(mesh, Real(1.5));
+    const auto projectedNormal = guarded.projectNormal(space, Real(0.1));
+    EXPECT_TRUE(projectedNormal.getData().allFinite());
+    EXPECT_GT(projectedNormal.getData().norm(), 0);
     const auto result = guarded.evaluate(mesh, space, load, Real(1.2));
     const auto diagnostic =
       guarded.evaluate(mesh, space, diagnosticLoad, Real(1.2), &diagnosticNormal);
