@@ -28,7 +28,10 @@ using namespace Rodin::Variational;
  * @f$\det R=2-|\beta|^2>0@f$, CG is applicable to both coefficient fields.
  * Three H1 degrees and all seven cell families exercise both
  * sparse and dense system representations, including repeated assembly and
- * solution scatter. Separate scalar mass forms determine every matrix block.
+ * solution scatter. Copy/move construction must retain the
+ * owned formulation, block offsets and assembled system; explicit reassembly
+ * must reproduce the original operator and load exactly.
+ * Separate scalar mass forms determine every matrix block.
  * The dimensionless true-residual and coefficient budgets are @f$10^{-11}@f$;
  * CG's requested tolerance and iteration cap are @f$10^{-13}@f$ and 20,000,
  * as in native convergence solves. Order twelve integrates degree-three basis products
@@ -167,6 +170,32 @@ void checkMixedBlockProblem()
       problem.assemble();
       EXPECT_EQ((Math::Matrix<Scalar>(system.getOperator()) - assembled).norm(), 0);
       EXPECT_EQ((system.getVector() - load).norm(), 0);
+      const auto checkTransferred = [&](auto& transferred) {
+        ASSERT_EQ(transferred.getBody().getLocalBFIs().size(),
+          problem.getBody().getLocalBFIs().size());
+        ASSERT_EQ(
+          transferred.getBody().getLFIs().size(), problem.getBody().getLFIs().size());
+        EXPECT_EQ(transferred.getTrialOffsets(), trial);
+        EXPECT_EQ(transferred.getTestOffsets(), test);
+        auto& transferredSystem = transferred.getLinearSystem();
+        EXPECT_EQ(
+          (Math::Matrix<Scalar>(transferredSystem.getOperator()) - assembled).norm(), 0);
+        EXPECT_EQ((transferredSystem.getVector() - load).norm(), 0);
+        transferred.assemble();
+        EXPECT_EQ(
+          (Math::Matrix<Scalar>(transferredSystem.getOperator()) - assembled).norm(), 0);
+        EXPECT_EQ((transferredSystem.getVector() - load).norm(), 0);
+      };
+      auto copied(problem);
+      {
+        SCOPED_TRACE("copy construction");
+        checkTransferred(copied);
+      }
+      auto moved(std::move(copied));
+      {
+        SCOPED_TRACE("move construction");
+        checkTransferred(moved);
+      }
       system.getSolution().setZero();
       Solver::CG solver(problem);
       solver.setTolerance(solverTolerance).setMaxIterations(maximumIterations);

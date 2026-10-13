@@ -1063,9 +1063,12 @@ The solve executable is explicitly built with
 `cmake --build build --target RodinConstrainedSolveBenchmarks`. It is excluded
 from the default build, CTest and benchmark publication. Available selections
 do not imply measured coverage; a small-mesh smoke run does not qualify larger
-levels, other backends, curved maps or other physical contexts. PETSc/MPI,
-complex solves, coupled systems and nonlinear solve stages remain separate
-performance batches. Numerical convergence certification is unchanged.
+levels, other backends, curved maps or other physical contexts. Real/complex
+qualification, the distinct coupled reaction–diffusion targets and selected
+source profiles are tracked in the
+[benchmark module ledger](../benchmarks/README.md#hierarchical-profiling-ledger).
+PETSc/MPI, curved maps and nonlinear solve stages remain separate performance
+batches. Numerical convergence certification is unchanged.
 
 ### Interpolation and orthogonal projection measurements
 
