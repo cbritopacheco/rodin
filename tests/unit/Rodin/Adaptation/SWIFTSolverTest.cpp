@@ -560,14 +560,12 @@ namespace Rodin::Tests::Unit
               .over(Slip);
         }
         RealFunction phi([](const Point& point) { return point.x() - Real(0.55); });
-        AnalyticVectorFunction grad(
-          [dimension](const Point&) {
-            Math::SpatialVector<Real> value(dimension);
-            value.setZero();
-            value(0) = Real(1);
-            return value;
-          },
-          dimension);
+        VectorFunction grad(dimension, [dimension](const Point&) {
+          Math::SpatialVector<Real> value(dimension);
+          value.setZero();
+          value(0) = Real(1);
+          return value;
+        });
         const auto report = solver.solve(phi, grad);
         EXPECT_GT(report.iterations, 0u) << report.getReasonString();
         EXPECT_GT(trial.getSolution().getData().norm(), Real(1e-5));

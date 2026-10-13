@@ -567,8 +567,6 @@ namespace KelvinBall
           << Alert::Notation::Number(report.minInnerAlpha) << Alert::NewLine
           << diagnosticLabel("Maximum linear iterations:")
           << Alert::Notation::Number(report.maxLinearIterations) << Alert::NewLine
-          << diagnosticLabel("Skeleton normal jump RMS:")
-          << Alert::Notation::Number(report.normalJumpRMS) << Alert::NewLine
           << diagnosticLabel("Exit reason:") << report.getReasonString() << Alert::NewLine
           << diagnosticLabel("Geometric RMS distance:")
           << Alert::Notation::Number(report.geometricRMS) << Alert::NewLine

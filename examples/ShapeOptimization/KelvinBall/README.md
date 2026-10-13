@@ -670,8 +670,10 @@ the hinge solve; the outer energy/quality line search then backtracks the
 resulting physical increment.
 The fitting and centered distribution coefficients default to
 `--swift-model-fit=1`, `--swift-model-distribution-deviatoric=0.0001`, and
-`--swift-model-distribution-divergence=0.01`. The dimensionless hinge strength
-is `--swift-model-hinge=10`. Directional Newton is enabled without a predictor
+`--swift-model-distribution-divergence=0.0001`. The dimensionless hinge strength
+is `--swift-model-hinge=100`; the Jacobian and distortion row weights are
+`--swift-model-jacobian-weight=0.1` and `--swift-model-distortion-weight=1`.
+Directional Newton is enabled without a predictor
 motion cap (`--swift-globalization-max-step-over-h=0`). The Jacobian floor and distortion
 budget are `--swift-model-jacobian=0.01` and `--swift-model-distortion=10`.
 KelvinBall retains its application-specific geometric target
@@ -695,8 +697,9 @@ mesh diagnostic; it does not rescale the fitting problem after adaptation.
 | Quantity | SWIFT default | KelvinBall policy |
 |----------|---------------|-------------------|
 | Fitting stiffness \(\kappa_F\) | \(1\) | Unchanged |
-| Distribution weights \((\kappa_{\rm dev},\kappa_{\rm div})\) | \((10^{-4},10^{-2})\) | Assembled with the common factor \(h_0\) |
-| Dimensionless hinge strength \(\widehat\mu\) | \(10\) | Unchanged |
+| Distribution weights \((\kappa_{\rm dev},\kappa_{\rm div})\) | \((10^{-4},10^{-4})\) | Assembled with the common factor \(h_0\) |
+| Dimensionless hinge strength \(\widehat\mu\) | \(100\) | Unchanged |
+| Hinge row weights \((\kappa_j,\kappa_Q)\) | \((0.1,1)\) | Unchanged |
 | Quality bounds \((j_{\rm safe},Q_{\max})\) | \((0.01,10)\) | Relative deformation invariants, independent of mesh size |
 | Guard fraction \(\gamma\) | \(0.1\) | Soft activation at \(j=0.109\), \(Q=9.1\) |
 | Geometric target | \(h^{p+1}\) | \(D_\infty\leq0.1h_0^2\) for P1 |
