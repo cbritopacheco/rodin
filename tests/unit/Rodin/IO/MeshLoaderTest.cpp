@@ -22,6 +22,107 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Member diagnostics report physical lines and restart on each load attempt.
+  TEST(Rodin_IO_MeshLoader, MFEMDiagnosticLinesAndLoaderReuse)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+    size_t expectedLine = 6;
+    for (const std::string input :
+      {"# comment\n\nMFEM mesh v1.0\n# marker\n\nvertices\n2\n",
+        "MFEM mesh v1.0\nvertices\n2\n"})
+    {
+      std::stringstream stream(input);
+      try
+      {
+        loader.load(stream);
+        FAIL() << "Missing dimension keyword was accepted";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find("In member function readDimension"), std::string::npos);
+        EXPECT_NE(message.find("on line " + std::to_string(expectedLine) + "."),
+          std::string::npos);
+      }
+      EXPECT_EQ(mesh.getVertexCount(), 4u);
+      EXPECT_EQ(mesh.getCellCount(), 2u);
+      expectedLine = 2;
+    }
+  }
+
+  /// @brief A valid-looking section cannot replace the required dimension keyword.
+  TEST(Rodin_IO_MeshLoader, MFEMRequiresDimensionKeyword)
+  {
+    for (const std::string keyword : {"elements", "boundary", "vertices"})
+    {
+      SCOPED_TRACE(keyword);
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      std::stringstream stream("MFEM mesh v1.0\n" + keyword +
+        "\n2\nelements\n1\n7 2 0 1 2\nboundary\n0\nvertices\n3\n2\n0 0\n1 0\n0 1\n");
+      MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      EXPECT_EQ(mesh.getVertexCount(), 4u);
+      EXPECT_EQ(mesh.getCellCount(), 2u);
+    }
+  }
+
+  /// @brief Straight MFEM meshes require a separate spatial-dimension record.
+  TEST(Rodin_IO_MeshLoader, MFEMRequiresExplicitSpaceDimension)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    std::stringstream stream("MFEM mesh v1.0\ndimension\n2\nelements\n1\n"
+                             "7 2 0 1 2\nboundary\n0\nvertices\n3\n0 0\n1 0\n0 1\n");
+    MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+    EXPECT_THROW(loader.load(stream), Alert::Exception);
+    EXPECT_EQ(mesh.getVertexCount(), 4u);
+    EXPECT_EQ(mesh.getCellCount(), 2u);
+  }
+
+  /// @brief Malformed keywords and spatial dimensions are rejected before replacing the mesh.
+  TEST(Rodin_IO_MeshLoader, MFEMRejectsInvalidDimensionRecords)
+  {
+    for (const std::string input :
+      {"MFEM mesh v1.0\n!\n2\n", "MFEM mesh v1.0\n", "MFEM mesh v1.0\ndimension\n4\n",
+        "MFEM mesh v1.0\ndimension\n2\nvertices\n1\n0\n",
+        "MFEM mesh v1.0\ndimension\n2\nvertices\n1\n1\n",
+        "MFEM mesh v1.0\ndimension\n2\nvertices\n1\n4\n"})
+    {
+      SCOPED_TRACE(input);
+      auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+      std::stringstream stream(input);
+      MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+      EXPECT_THROW(loader.load(stream), Alert::Exception);
+      EXPECT_EQ(mesh.getVertexCount(), 4u);
+      EXPECT_EQ(mesh.getCellCount(), 2u);
+    }
+  }
+
+  /// @brief Topological and spatial dimensions remain distinct for embedded surfaces.
+  TEST(Rodin_IO_MeshLoader, MFEMEmbeddedTriangleCoordinatesAndArea)
+  {
+    Mesh mesh;
+    std::stringstream stream(
+      "MFEM mesh v1.0\ndimension\n2\nelements\n1\n"
+      "7 2 0 1 2\nboundary\n0\nvertices\n3\n3\n0 0 1\n1 0 1\n0 1 1\n");
+    MeshLoader<FileFormat::MFEM, Context::Local> loader(mesh);
+    loader.load(stream);
+    ASSERT_EQ(mesh.getDimension(), 2u);
+    ASSERT_EQ(mesh.getSpaceDimension(), 3u);
+    ASSERT_EQ(mesh.getVertexCount(), 3u);
+    ASSERT_EQ(mesh.getCellCount(), 1u);
+    for (Index vertex = 0; vertex < 3; ++vertex)
+    {
+      const auto& point = mesh.getVertexCoordinates(vertex);
+      EXPECT_EQ(point[0], vertex == 1 ? 1 : 0);
+      EXPECT_EQ(point[1], vertex == 2 ? 1 : 0);
+      EXPECT_EQ(point[2], 1);
+    }
+    auto cell = mesh.getCell();
+    EXPECT_EQ(cell->getAttribute(), 7);
+    EXPECT_NEAR(cell->getMeasure(), 0.5, 1e-12);
+  }
+
   /// @brief Rejects malformed MFEM headers and dimensions without replacing the destination.
   TEST(Rodin_IO_MeshLoader, MFEMRejectsMalformedHeader)
   {

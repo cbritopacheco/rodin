@@ -53,6 +53,16 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- MFEM mesh validation: the dimension keyword and bounded topological/spatial
+  dimensions are validated before mesh replacement. Straight meshes require
+  the separate spatial-dimension record specified by the
+  [MFEM format](https://mfem.org/mesh-format-v1.0/); the former fallback for an
+  omitted record was unsupported and corrupted memory. All 94 MFEM resource
+  files inspected include that record. An embedded triangle checks distinct
+  topological/spatial dimensions, exact coordinates and physical area.
+  Physical-line diagnostics count comments and blank lines and restart when a
+  loader is reused. Wrong-keyword and diagnostic tests failed before repair;
+  the malformed-coordinate reproducer also aborted with an invalid free.
 - Constraint maps: real/complex affine chains carry both coefficients and
   offsets, including elimination of fixed masters and cancellation of repeated
   masters. Finalization is idempotent, and copied maps remain independent.

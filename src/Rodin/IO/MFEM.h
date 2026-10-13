@@ -1837,7 +1837,11 @@ namespace Rodin::IO
        * @param[in,out] mesh Mesh object to populate with loaded data
        */
       MeshLoader(ObjectType& mesh)
-        : MeshLoaderBase<Context::Local>(mesh)
+        : MeshLoaderBase<Context::Local>(mesh),
+          m_dimension(0),
+          m_spaceDimension(0),
+          m_currentLineNumber(0),
+          m_header()
       {}
 
       /**
