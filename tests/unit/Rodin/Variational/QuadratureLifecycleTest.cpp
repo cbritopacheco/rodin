@@ -6,6 +6,9 @@
  */
 /** @file @brief Local quadrature ownership checked against analytic field contractions. */
 #include <gtest/gtest.h>
+#include <functional>
+#include <memory>
+#include <vector>
 #include <Rodin/Variational.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
@@ -80,11 +83,17 @@ namespace
     TrialFunction u(scalarSpace), w(vectorSpace);
     TestFunction v(scalarSpace), z(vectorSpace), otherZ(otherVectorSpace);
     RealFunction coefficient([](const Point& p) { return 1 + p.x(); });
+    using BilinearBase = LocalBilinearFormIntegratorBase<Scalar>;
+    using LinearBase = LinearFormIntegratorBase<Scalar>;
+    using BilinearCheck = std::function<void(BilinearBase&, const Polytope&)>;
+    using LinearCheck = std::function<void(LinearBase&, const Polytope&)>;
+    std::vector<std::pair<std::unique_ptr<BilinearBase>, BilinearCheck>> bilinearRules;
+    std::vector<std::pair<std::unique_ptr<LinearBase>, LinearCheck>> linearRules;
     auto lifecycle = [&](auto rule, auto action, auto density) {
       using Rule = std::decay_t<decltype(rule)>;
       constexpr size_t order = 8;
       rule.setOrder(order);
-      auto verify = [&](auto& integrator, const Polytope& cell) {
+      auto verify = [action, density, order](auto& integrator, const Polytope& cell) {
         EXPECT_EQ(&integrator.getPolytope(), &cell);
         EXPECT_EQ(integrator.getOrder(cell), order);
         const auto& formula =
@@ -109,6 +118,10 @@ namespace
         clone->setPolytope(*cell);
         verify(*clone, *cell);
       }
+      if constexpr (std::is_base_of_v<BilinearBase, Rule>)
+        bilinearRules.emplace_back(std::unique_ptr<BilinearBase>(rule.copy()), verify);
+      else
+        linearRules.emplace_back(std::unique_ptr<LinearBase>(rule.copy()), verify);
     };
     auto bilinear = [&](auto rule, const auto& trial, const auto& test, auto density) {
       auto action = [&](auto& integrator, const Polytope& cell) {
@@ -179,6 +192,10 @@ namespace
       [=](const Point& p) { return Scalar(jacobianNorm * amplitude * (1 + p.x())); });
     bilinear(Integral(Div(w), Div(z)), vectorField, vectorField,
       [=](const Point&) { return Scalar(divergence * divergence * amplitude); });
+    bilinear(Integral(coefficient * Div(w), Div(z)), vectorField, vectorField,
+      [=](const Point& p) {
+        return Scalar(divergence * divergence * amplitude * (1 + p.x()));
+      });
     bilinear(Integral(Div(w), v), vectorField, scalarField, [=](const Point& p) {
       return Scalar(
         divergence * amplitude * (1 + p.x() + (dimension == 2 ? 2 * p.y() : 0)));
@@ -189,6 +206,22 @@ namespace
     });
     linear(Integral(scalarFunction, v), scalarField, scalarMass);
     linear(Integral(vectorFunction, z), vectorField, vectorMass);
+    auto checkRuntimeRules = [&](auto& rules) {
+      for (auto& [rule, verify] : rules)
+      {
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          rule->setPolytope(*cell);
+          verify(*rule, *cell);
+          using Base = typename std::remove_reference_t<decltype(rule)>::element_type;
+          std::unique_ptr<Base> copy(rule->copy());
+          copy->setPolytope(*cell);
+          verify(*copy, *cell);
+        }
+      }
+    };
+    checkRuntimeRules(bilinearRules);
+    checkRuntimeRules(linearRules);
   }
 }
 

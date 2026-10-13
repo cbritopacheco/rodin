@@ -53,6 +53,14 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Runtime-polymorphic local quadrature: independently owned linear and
+  bilinear integrator collections retain their cell bindings, explicit orders
+  and analytic field contractions after their original concrete owners are
+  destroyed. Rebinding and cloning are checked through the abstract assembly
+  interfaces. Real/complex P1 and quadratic H1 include twelve form families
+  on intervals and triangles, including weighted divergence. Doubling the
+  generic local matrix entries used by that family fails both real and complex
+  oracles; all four registered cases pass serially.
 - Polymorphic finite-element spaces: runtime collections contain scalar,
   vector and matrix P0, P0g, P1 and quadratic H1 variants in both real and
   complex configurations. Public virtual metadata agrees with independent
