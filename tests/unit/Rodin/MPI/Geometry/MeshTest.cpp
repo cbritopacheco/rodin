@@ -123,7 +123,9 @@ TEST(MPI_Geometry_Mesh, AttributeRestrictedUnitBoxMeasuresWithEmptyRoot)
     sharder.scatter(0);
     auto mesh = sharder.gather(0);
     if (world->size() > 1 && world->rank() == 0)
+    {
       EXPECT_EQ(mesh.getShard().getCellCount(), 0u);
+    }
 
     for (const Attribute attribute : {17, 23})
     {

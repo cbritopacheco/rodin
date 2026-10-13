@@ -233,7 +233,9 @@ namespace
         const auto file = H5Fopen(path().c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
         ASSERT_GE(file, 0);
         if (H5Lexists(file, name, H5P_DEFAULT) > 0)
+        {
           ASSERT_GE(H5Ldelete(file, name, H5P_DEFAULT), 0);
+        }
         const hsize_t count = values.size();
         const auto space = H5Screate_simple(1, &count, nullptr);
         ASSERT_GE(space, 0);
