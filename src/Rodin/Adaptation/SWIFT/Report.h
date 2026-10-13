@@ -173,10 +173,6 @@ namespace Rodin::Adaptation::SWIFT
       bool qualityBudgetSatisfied = false;
       /// @brief Measure of the complete interface quadrature set.
       Real interfaceMeasure = 0;
-      /// @brief RMS jump of the normal field across the interface.
-      Real normalJumpRMS = 0;
-      /// @brief Maximum jump of the normal field across the interface.
-      Real normalJumpMax = 0;
       /// @brief Final Welsch fitting energy.
       Real energy = 0;
       /// @brief Why fitting stopped; only GeometricTarget certifies the target hit.

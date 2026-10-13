@@ -14,7 +14,7 @@ set(RodinAdaptation_HEADERS
   SWIFT/Parameters.h
   SWIFT/QualitySamples.h
   SWIFT/QualityCovering.h
-  SWIFT/QualityLattice.h
+  SWIFT/WitnessLattice.h
   SWIFT/HingeForce.h
   SWIFT/HingeMetric.h
   SWIFT/Hinge.h
