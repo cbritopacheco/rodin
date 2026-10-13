@@ -10,6 +10,8 @@
  */
 #include <gtest/gtest.h>
 #include "Rodin/Variational.h"
+#include "Rodin/Variational/H1.h"
+#include "Rodin/Assembly/Default.h"
 #include "Rodin/Assembly/Sequential.h"
 
 using namespace Rodin;
@@ -18,6 +20,67 @@ using namespace Rodin::Variational;
 
 namespace
 {
+  /// @brief Within-field affine ties preserve the physical mass equation and admissible energy.
+  template <class Operator>
+  void checkSingleFieldAffineIdentification()
+  {
+    for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      auto mesh = LocalMesh::UniformGrid(geometry, {2, 2});
+      mesh.getConnectivity().compute(1, 0);
+      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(2, 1);
+      auto check = [&](auto& space) {
+        TrialFunction u(space);
+        TestFunction v(space);
+        using System = Math::LinearSystem<Operator, Math::Vector<Real>>;
+        Problem<System, decltype(u), decltype(v)> problem(u, v);
+        Math::SpatialMatrix<Real> transform(2, 2);
+        transform(0, 0) = 0;
+        transform(0, 1) = 2;
+        transform(1, 0) = 0;
+        transform(1, 1) = 1;
+        problem = Integral(u, v) - Integral(VectorFunction(5.0, 1.0), v) +
+          DirichletBC(u, MatrixFunction(transform) * u, VectorFunction(3.0, 0.0));
+        GridFunction exact(space), direction(space);
+        exact = VectorFunction(5.0, 1.0);
+        direction = VectorFunction(size_t(2), [](const Point& point) {
+          const Real value = 1 + point.x() + 2 * point.y();
+          return Math::SpatialVector<Real>{2 * value, value};
+        });
+        for (size_t repeat = 0; repeat < 2; ++repeat)
+        {
+          problem.assemble();
+          const auto& system = problem.getLinearSystem();
+          const Math::Matrix<Real> matrix = system.getOperator();
+          const Math::Vector<Real> rhs = system.getVector();
+          EXPECT_LT((matrix * exact.getData() - rhs).norm(), 1e-11);
+          const Math::Vector<Real> recovered = matrix.fullPivLu().solve(rhs);
+          EXPECT_LT((recovered - exact.getData()).norm(), 1e-10);
+          // Integral of |(2f,f)|^2 on the unit square, f = 1 + x + 2y.
+          EXPECT_NEAR(direction.getData().dot(matrix * direction.getData()),
+            Real(100) / Real(3), 1e-10);
+          for (const auto target : {AssemblyTarget::LHS, AssemblyTarget::RHS})
+          {
+#ifdef RODIN_USE_OPENMP
+            EXPECT_NO_THROW(problem.assemble(target));
+#else
+            EXPECT_THROW(problem.assemble(target), Alert::Exception);
+#endif
+            EXPECT_LT((Math::Matrix<Real>(system.getOperator()) - matrix).norm(), 1e-14);
+            EXPECT_LT((system.getVector() - rhs).norm(), 1e-14);
+          }
+        }
+      };
+      P1<Math::SpatialVector<Real>> linear(mesh, 2);
+      check(linear);
+      H1<2, Math::SpatialVector<Real>> quadratic(
+        std::integral_constant<size_t, 2>{}, mesh, 2);
+      check(quadratic);
+    }
+  }
+
   /// @brief Independently owned assemblers recover an exact two-cell mass matrix.
   template <class Scalar, class Operator>
   void checkAssemblerMatrixLifecycle()
@@ -132,4 +195,14 @@ TEST(Rodin_Assembly_SequentialLifecycle, ComplexMatricesAndVector)
   checkAssemblerMatrixLifecycle<Complex, Math::SparseMatrix<Complex>>();
   checkAssemblerMatrixLifecycle<Complex, std::vector<Math::SparseTriplet<Complex>>>();
   checkAssemblerVectorLifecycle<Complex>();
+}
+
+TEST(Rodin_Assembly_SequentialLifecycle, DenseSingleFieldAffineIdentification)
+{
+  checkSingleFieldAffineIdentification<Math::Matrix<Real>>();
+}
+
+TEST(Rodin_Assembly_SequentialLifecycle, SparseSingleFieldAffineIdentification)
+{
+  checkSingleFieldAffineIdentification<Math::SparseMatrix<Real>>();
 }

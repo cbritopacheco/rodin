@@ -53,6 +53,14 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Single-field affine identification: dense/sparse P1 and quadratic H1 vector
+  problems recover a prescribed constant field subject to an affine component
+  tie on triangle and quadrilateral meshes. An admissible affine perturbation
+  gives an independent exact mass-energy integral. Repeated assembly and
+  targeted operations preserve the system; OpenMP checks one/four threads and
+  supports targeted assembly, while sequential assembly rejects it. The latter
+  originally cleared the RHS before rejection; vector initialization now
+  follows constraint validation.
 - Parent/submesh derivative transport: real/complex P1 and quadratic H1
   gradients, coordinate derivatives, Jacobians and divergences satisfy physical
   polynomial oracles on all seven cell geometries. Both inclusion and

@@ -1623,12 +1623,6 @@ namespace Rodin::Assembly
           const size_t cols = static_cast<size_t>(trialFES.getSize());
           const size_t rows = static_cast<size_t>(testFES.getSize());
 
-          if (doVector)
-          {
-            b.resize(rows);
-            b.setZero();
-          }
-
           constexpr bool IsSparse =
             std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
 
@@ -1693,6 +1687,12 @@ namespace Rodin::Assembly
             Alert::MemberFunctionException(*this, __func__)
               << "Targeted assembly is not implemented for identification DirichletBCs."
               << Alert::Raise;
+          }
+
+          if (doVector)
+          {
+            b.resize(rows);
+            b.setZero();
           }
 
           // ------------------------------------------------------------
