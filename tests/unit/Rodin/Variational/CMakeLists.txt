@@ -822,3 +822,8 @@ add_executable(RodinVariationalSpaceLifecycleTest SpaceLifecycleTest.cpp)
 target_link_libraries(RodinVariationalSpaceLifecycleTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational)
 gtest_discover_tests(RodinVariationalSpaceLifecycleTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalQuadratureLifecycleTest QuadratureLifecycleTest.cpp)
+target_link_libraries(RodinVariationalQuadratureLifecycleTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinVariationalQuadratureLifecycleTest PROPERTIES LABELS unit)

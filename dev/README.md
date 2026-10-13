@@ -53,6 +53,15 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Local quadrature ownership: real/complex P1 and quadratic H1 rules retain
+  explicit order and current polytope bindings through copies, moves and
+  polymorphic clones. Eleven scalar/vector mass, gradient, Jacobian,
+  divergence and load families are checked on interval and triangle meshes.
+  Local coefficient contractions agree with independent integration of
+  analytic affine fields; rebinding on successive cells checks cached state.
+  One-dimensional divergence couplings and distinct-space vector Jacobians
+  are instantiated explicitly. Doubling production local matrix entries is
+  rejected in real and complex cases. All four registered cases pass serially.
 - PETSc single-field nonlocal restrictions: real and complex P1 kernels
   reproduce the outer product of independently assembled restricted moments
   and the exact action on two different affine fields. All combinations of
