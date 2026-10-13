@@ -6,6 +6,7 @@
  */
 /** @file @brief Analytic contracts for the Euclidean primitive templates. */
 #include <gtest/gtest.h>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include "Rodin/Alert/Exception.h"
@@ -160,7 +161,20 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(point.y(), Scalar(4));
     assigned = Vector{Scalar(-2), Scalar(7)};
     EXPECT_EQ(assigned, Point(Scalar(-2), Scalar(7)));
-    EXPECT_THROW((assigned = Vector{Scalar(1)}), Alert::Exception);
+    try
+    {
+      assigned = Vector{Scalar(1)};
+      FAIL() << "Invalid coordinate dimension was accepted";
+    }
+    catch (const Alert::Exception& error)
+    {
+      const std::string message = error.what();
+      EXPECT_NE(message.find("In member function requireTwoCoordinates of class "),
+        std::string::npos);
+      EXPECT_NE(message.find("Point2D"), std::string::npos);
+      EXPECT_NE(
+        message.find("Point2D requires two coordinates; received 1"), std::string::npos);
+    }
     EXPECT_EQ(assigned, Point(Scalar(-2), Scalar(7)));
     EXPECT_THROW((Point(Vector{})), Alert::Exception);
     EXPECT_THROW((Point(Vector{Scalar(1), Scalar(2), Scalar(3)})), Alert::Exception);

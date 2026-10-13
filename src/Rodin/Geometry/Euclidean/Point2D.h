@@ -14,7 +14,7 @@
 
 #include <initializer_list>
 
-#include "Rodin/Alert/Exception.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Base.h"
 
@@ -158,7 +158,7 @@ namespace Rodin::Geometry::Euclidean
       /// @brief Translates a point. @param point Initial point. @param offset Spatial displacement. @returns Translated point.
       friend Point2D operator+(const Point2D& point, const Vector& offset)
       {
-        requireTwoCoordinates(offset.size());
+        point.requireTwoCoordinates(offset.size());
         return Point2D(point.x() + offset.x(), point.y() + offset.y());
       }
 
@@ -171,7 +171,7 @@ namespace Rodin::Geometry::Euclidean
       /// @brief Subtracts a displacement. @param point Initial point. @param offset Spatial displacement. @returns Translated point.
       friend Point2D operator-(const Point2D& point, const Vector& offset)
       {
-        requireTwoCoordinates(offset.size());
+        point.requireTwoCoordinates(offset.size());
         return Point2D(point.x() - offset.x(), point.y() - offset.y());
       }
 
@@ -248,11 +248,11 @@ namespace Rodin::Geometry::Euclidean
 
     private:
       /// @brief Validates the coordinate dimension. @param size Number of active coordinates.
-      static void requireTwoCoordinates(size_t size)
+      void requireTwoCoordinates(size_t size) const
       {
         if (size != 2)
-          Alert::Exception() << "Point2D requires two coordinates; received " << size
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Point2D requires two coordinates; received " << size << Alert::Raise;
       }
 
       Vector m_coordinates;
