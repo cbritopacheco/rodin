@@ -22,6 +22,12 @@
  *   \|\mathbf{n}_F\| = 1.
  * @f]
  * Geometrically, the normal is orthogonal to the tangent space of the face.
+ * On a two-dimensional surface embedded in three dimensions, it is the
+ * outward unit conormal in the selected incident cell's tangent plane. At
+ * the physical face point, with cell Jacobian columns @f$J_0,J_1@f$ and
+ * edge tangent @f$t@f$, its direction is
+ * @f$(J_0\times J_1)\times t@f$, oriented away from the cell interior.
+ * Across a fold, conormals from the two cells need not be opposites.
  *
  * For an interior face shared by two adjacent cells @f$ K_1 @f$ and
  * @f$ K_2 @f$, the normal is defined only up to sign unless one chooses which
@@ -179,8 +185,8 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief Gets the topological dimension.
-       * @returns The topological dimension.
+       * @brief Gets the spatial vector dimension.
+       * @returns The spatial vector dimension.
        */
       constexpr
       size_t getDimension() const
@@ -196,7 +202,6 @@ namespace Rodin::Variational
       RangeType getValue(const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
-        const auto& vs = polytope.getVertices();
         const auto  d = polytope.getDimension();
         const auto  i = polytope.getIndex();
         const auto& mesh = polytope.getMesh();
@@ -214,35 +219,7 @@ namespace Rodin::Variational
         }
         else if (jacobian.rows() == 3)
         {
-          if (jacobian.cols() == 1)
-          {
-            const Index v1 = vs[0];
-            const Index v2 = vs[1];
-
-            const Math::SpatialVector<ScalarType> a =
-              mesh.getVertexCoordinates(v1) - mesh.getVertexCoordinates(v2);
-
-            Math::SpatialVector<ScalarType> n(3);
-            n[0] = jacobian(1, 0);
-            n[1] = -jacobian(0, 0);
-            n[2] = jacobian(2, 0);
-            n = n.cross(a);
-            const auto nNorm = n.norm();
-            if (!std::isfinite(nNorm) || !(nNorm > ScalarType(0)))
-            {
-              Alert::MemberFunctionException(*this, __func__)
-                << "Cannot normalize FaceNormal tangent helper on polytope ("
-                << d << ", " << i << "). Computed norm is " << nNorm << "."
-                << Alert::Raise;
-              assert(false);
-              res.setConstant(Math::nan<ScalarType>());
-              return res;
-            }
-            n /= nNorm;
-
-            res = n.cross(a) + n * (n.dot(a));
-          }
-          else if (jacobian.cols() == 2)
+          if (jacobian.cols() == 2)
           {
             res[0] =
               jacobian(1, 0) * jacobian(2, 1) - jacobian(2, 0) * jacobian(1, 1);
@@ -251,7 +228,7 @@ namespace Rodin::Variational
             res[2] =
               jacobian(0, 0) * jacobian(1, 1) - jacobian(1, 0) * jacobian(0, 1);
           }
-          else
+          else if (jacobian.cols() != 1)
           {
             Alert::MemberFunctionException(*this, __func__)
               << "Cannot compute FaceNormal from a 3D Jacobian with "
@@ -280,6 +257,22 @@ namespace Rodin::Variational
           [&](const Geometry::Polytope& cellPoly)
           {
             const auto xf = p.getCoordinates();
+
+            if (jacobian.rows() == 3 && jacobian.cols() == 1)
+            {
+              Math::SpatialPoint cellCoordinates;
+              cellPoly.getTransformation().inverse(cellCoordinates, xf);
+              const Geometry::Point cellPoint(cellPoly, std::cref(cellCoordinates), xf);
+              const auto& cellJacobian = cellPoint.getJacobian();
+              SpatialVectorType first(3), second(3), tangent(3);
+              for (size_t axis = 0; axis < 3; ++axis)
+              {
+                first[axis] = cellJacobian(axis, 0);
+                second[axis] = cellJacobian(axis, 1);
+                tangent[axis] = jacobian(axis, 0);
+              }
+              res = first.cross(second).cross(tangent);
+            }
 
             const auto rc =
               Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();

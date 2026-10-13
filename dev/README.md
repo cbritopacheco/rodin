@@ -53,6 +53,14 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Embedded-surface face normals: affine, vertical-edge and folded patches
+  select the outward conormal in each incident cell's tangent plane. A curved
+  quadratic patch checks unit length and orthogonality to independently known
+  surface normals and edge tangents at multiple points. The vertical-edge
+  regression failed before repair; the previous edge-only construction did
+  not determine the selected cell's tangent plane. The repaired path maps the
+  face point into that cell before evaluating its Jacobian. A centroid-plane
+  mutation fails the curved oracle. All four face-normal cases pass serially.
 - MMG affine cuts: a planar surface retains unit area and a unit-length
   isovalue contour. A unit-cube cut checks both material volumes, every
   interface coordinate and unit interface area while changing labels and
