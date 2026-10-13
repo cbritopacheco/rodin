@@ -1,5 +1,10 @@
 # Math module tests
 
+add_executable(RodinMathSpatialMatrixVectorTest SpatialMatrixVectorTest.cpp)
+target_link_libraries(RodinMathSpatialMatrixVectorTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Math)
+gtest_discover_tests(RodinMathSpatialMatrixVectorTest PROPERTIES LABELS unit)
+
 add_executable(RodinMathSpatialTensorTest SpatialTensorTest.cpp)
 target_link_libraries(RodinMathSpatialTensorTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Math)

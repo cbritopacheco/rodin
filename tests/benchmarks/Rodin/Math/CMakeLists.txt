@@ -1,3 +1,7 @@
+add_executable(RodinSpatialMatrixVectorBenchmarks EXCLUDE_FROM_ALL SpatialMatrixVector.cpp)
+target_link_libraries(RodinSpatialMatrixVectorBenchmarks PRIVATE
+  Rodin::Math benchmark::benchmark)
+
 add_executable(RodinMathBenchmarks EXCLUDE_FROM_ALL SpatialAlgebra.cpp)
 target_link_libraries(RodinMathBenchmarks PRIVATE
   Rodin::Math benchmark::benchmark benchmark::benchmark_main)

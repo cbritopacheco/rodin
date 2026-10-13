@@ -548,6 +548,85 @@ build/tests/benchmarks/RodinPhysicalGradientBenchmarks \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
 
+### Spatial matrix-vector initialization and its assembly consumer
+
+`RodinSpatialMatrixVectorBenchmarks`, owned by Math, measures the canonical
+runtime-shape product $y=Ax$ including result construction. All shapes
+$0\le r,c\le3$ and four real/complex operand pairs give 64 registrations.
+Mixed scalar promotion and genuinely complex products are included. Input
+padding is poisoned, while every inactive result entry must be zero.
+Independent row sums use bounded dyadic operands and at most three products,
+so equality is exact, without a numerical tolerance. Deliberately wrong values
+or dimensions must be rejected. Operand/result addresses escape on every
+iteration, preventing constant folding or discarded padding stores.
+
+The source repair removes only the second active-entry clear in the product.
+`SpatialVector` already initializes its complete storage in its constructor;
+that initialization remains mandatory and unchanged. Empty contractions retain
+zero active values, and empty/shrinking results retain zero inactive capacity.
+The new unit regression covers all 64 shape/scalar combinations, including
+poisoned destination storage. A padding-corruption mutant failed; both the
+original implementation and the restored cleanup pass. The retained
+`RodinSpatialVectorStorageBenchmarks` additionally passed all 144 native scopes;
+no constructor/storage-throughput improvement is claimed from this repair.
+
+Five-repetition native CPU medians for real $2\times2$/$3\times3$ products were
+3.926/4.290 ns before and 1.352/1.511 ns after removal. Selected $3\times3$
+mixed/complex products showed ratios approximately 1.45--1.46. The empty real
+control was unchanged within variation. Empty complex products also improved,
+although their runtime path never entered the removed loop: disassembly shows
+the common function prologue now saves six fewer registers and uses a
+144-byte rather than 176-byte stack frame. Their improvement therefore includes
+code-generation effects, not arithmetic or runtime clearing on an empty result.
+LLVM19 controls compiled with the original Git header show the same qualitative
+pattern; these are separate compiler/build measurements, not parallel scaling.
+
+Degree-two physical-gradient sweeps on triangles/tetrahedra retained all
+numerical/work counters and showed native CPU speedup ratios 1.24--1.50 across
+real/complex fields. The Assembly-owned coupled executable now also registers
+126 explicitly labeled `GenericGradientAssembly` cases, alongside its original
+126 canonical cases. Only the second diffusion block places the real factor
+two on the test operand:
+
+$$
+\int_\Omega\nabla w\cdot\overline{2\nabla z}\,\mathrm{d}x
+=\int_\Omega(2\nabla w)\cdot\overline{\nabla z}\,\mathrm{d}x.
+$$
+
+The physical problem, sources, coupling, constraints, degrees, geometries and
+three mesh sizes are unchanged. This benchmark-only expression selects the
+existing generic gradient path; it does not modify convergence formulations or
+add a production dispatch path. Canonical specialized diffusion transforms
+gradients directly and is retained as a negative timing control.
+
+Selected native real tetrahedral size-3 generic assembly measured 36.463 to
+33.686 ms CPU, with coefficients of variation 0.50%/0.25%. Canonical real and
+complex assembly and generic complex assembly remained within variation.
+The two-thread LLVM19/OpenMP generic assembly elapsed ratio was approximately
+1.03, within elapsed variation of 3.6%; no parallel assembly gain is established.
+Its default CPU clock measures the calling thread, not aggregate worker CPU.
+Before/after selected numerical/work counters were identical. Full-assembly
+profiles selected within the owning assembler show gradient preparation at
+19.2% before and 12.4% after of sampled CPU weight. The matrix-vector method
+was separately visible before and inlined afterward; missing separate frames
+must not be interpreted as zero remaining arithmetic cost.
+
+All 64 primitive cases and 126 gradient cases passed in each optimized build.
+Generic degree-two real/complex assembly qualified all seven geometries at
+size 3 natively; the OpenMP build additionally recertified those fourteen
+canonical cases. Both builds passed the exact unit regression and fourteen
+Poisson polynomial-convergence cases; fourteen existing native tensor/scalar
+product tests also passed. Wider timing, curved/matrix-field consumers and
+distributed assembly profiling remain separate workplan items. No overall
+performance completion is inferred from these selected measurements.
+
+```sh
+cmake --build build --target RodinSpatialMatrixVectorBenchmarks -j1
+build/tests/benchmarks/RodinSpatialMatrixVectorBenchmarks \
+  --benchmark_filter='SpatialMatrixVector/.*/3/3/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+```
+
 ### Mapped-point protocol
 
 `RodinMappedPointBenchmarks`, owned by Geometry, separates physical coordinates,

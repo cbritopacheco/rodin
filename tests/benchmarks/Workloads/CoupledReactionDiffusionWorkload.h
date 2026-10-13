@@ -102,6 +102,8 @@ namespace Rodin::Tests::Benchmarks
      * Both exact fields are interpolated through their own DOF functionals.
      *
      * @tparam Reference Whether original local operator kernels are requested.
+     * @tparam TestWeighted Whether the real second diffusion coefficient is
+     * placed on the test operand to exercise generic gradient expressions.
      * @tparam U First trial function type.
      * @tparam W Second trial function type.
      * @tparam V First test function type.
@@ -115,8 +117,8 @@ namespace Rodin::Tests::Benchmarks
      * @param data Manufactured real fields and physical sources.
      * @param omitCoupling Whether both off-diagonal operator terms are zeroed.
      */
-    template <bool Reference = false, class U, class W, class V, class Z,
-      class ProblemType>
+    template <bool Reference = false, bool TestWeighted = false, class U, class W,
+      class V, class Z, class ProblemType>
     static void configure(U& u, W& w, V& v, Z& z, ProblemType& problem,
       const Convergence::ReactionDiffusionData& data, bool omitCoupling = false)
     {
@@ -125,7 +127,12 @@ namespace Rodin::Tests::Benchmarks
       const Real coupling =
         omitCoupling ? Real(0) : Convergence::ReactionDiffusionData::Coupling;
       auto aUU = Integral(Grad(u), Grad(v));
-      auto aWW = Integral(Real(2) * Grad(w), Grad(z));
+      auto aWW = [&]() {
+        if constexpr (TestWeighted)
+          return Integral(Grad(w), Real(2) * Grad(z));
+        else
+          return Integral(Real(2) * Grad(w), Grad(z));
+      }();
       auto rUU = Integral(u, v), rWW = Integral(w, z);
       auto rUW = Integral(coupling * w, v), rWU = Integral(coupling * u, z);
       auto bU = Integral(getSource(data, 0), v), bW = Integral(getSource(data, 1), z);

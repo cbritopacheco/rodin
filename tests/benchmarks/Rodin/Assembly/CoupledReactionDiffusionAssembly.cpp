@@ -46,8 +46,10 @@ namespace Rodin::Tests::Benchmarks
    *
    * @tparam K Degree of both H1 component spaces.
    * @tparam Scalar Real or complex coefficient field.
+   * @tparam TestWeighted Whether the second diffusion block uses the equivalent
+   * real test-side weighting, exercising generic physical-gradient preparation.
    */
-  template <size_t K, class Scalar>
+  template <size_t K, class Scalar, bool TestWeighted = false>
   class CoupledReactionDiffusionAssembly
   {
     public:
@@ -77,9 +79,9 @@ namespace Rodin::Tests::Benchmarks
       TrialFunction u(space), w(space);
       TestFunction v(space), z(space);
       Problem problem(u, w, v, z), reference(u, w, v, z), omitted(u, w, v, z);
-      Workload::configure(u, w, v, z, problem, data);
-      Workload::template configure<true>(u, w, v, z, reference, data);
-      Workload::configure(u, w, v, z, omitted, data, true);
+      Workload::template configure<false, TestWeighted>(u, w, v, z, problem, data);
+      Workload::template configure<true, TestWeighted>(u, w, v, z, reference, data);
+      Workload::template configure<false, TestWeighted>(u, w, v, z, omitted, data, true);
       reference.assemble();
       omitted.assemble();
       problem.assemble();
@@ -193,7 +195,8 @@ namespace Rodin::Tests::Benchmarks
     static void registerCases()
     {
       CoupledReactionDiffusionWorkload<K, Scalar>::registerCases(
-        "Assembly", [](auto& state, auto geometry) { run(state, geometry); });
+        TestWeighted ? "GenericGradientAssembly" : "Assembly",
+        [](auto& state, auto geometry) { run(state, geometry); });
     }
   };
 }
@@ -207,6 +210,12 @@ int main(int argc, char** argv)
   CoupledReactionDiffusionAssembly<1, Rodin::Complex>::registerCases();
   CoupledReactionDiffusionAssembly<2, Rodin::Complex>::registerCases();
   CoupledReactionDiffusionAssembly<3, Rodin::Complex>::registerCases();
+  CoupledReactionDiffusionAssembly<1, Rodin::Real, true>::registerCases();
+  CoupledReactionDiffusionAssembly<2, Rodin::Real, true>::registerCases();
+  CoupledReactionDiffusionAssembly<3, Rodin::Real, true>::registerCases();
+  CoupledReactionDiffusionAssembly<1, Rodin::Complex, true>::registerCases();
+  CoupledReactionDiffusionAssembly<2, Rodin::Complex, true>::registerCases();
+  CoupledReactionDiffusionAssembly<3, Rodin::Complex, true>::registerCases();
   benchmark::Initialize(&argc, argv);
   if (benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;
