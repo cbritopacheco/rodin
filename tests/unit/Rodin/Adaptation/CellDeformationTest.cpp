@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/Adaptation/CellDeformation.h"
 #include "Rodin/Adaptation/CellGeomCache.h"
 
@@ -363,7 +364,7 @@ namespace Rodin::Tests::Unit
                   .vertex({2, 0})
                   .polytope(Geometry::Polytope::Type::Triangle, {{0, 1, 2}})
                   .finalize();
-    EXPECT_THROW(precomputeCellGeometry(mesh), std::runtime_error);
+    EXPECT_THROW(precomputeCellGeometry(mesh), Alert::Exception);
   }
 
   /// @brief The triangular prototype rejects a quadrilateral rather than caching wrong geometry.
@@ -378,7 +379,7 @@ namespace Rodin::Tests::Unit
                   .vertex({0, 1})
                   .polytope(Geometry::Polytope::Type::Quadrilateral, {0, 1, 2, 3})
                   .finalize();
-    EXPECT_THROW(precomputeCellGeometry(mesh), std::invalid_argument);
+    EXPECT_THROW(precomputeCellGeometry(mesh), Alert::Exception);
   }
 
   /// @brief Topological and embedding dimensions must both match the planar prototype.
@@ -391,7 +392,7 @@ namespace Rodin::Tests::Unit
                      .vertex({1})
                      .polytope(Geometry::Polytope::Type::Segment, {0, 1})
                      .finalize();
-    EXPECT_THROW(precomputeCellGeometry(segment), std::invalid_argument);
+    EXPECT_THROW(precomputeCellGeometry(segment), Alert::Exception);
     auto surface = Geometry::LocalMesh::Builder()
                      .initialize(3)
                      .nodes(3)
@@ -400,7 +401,7 @@ namespace Rodin::Tests::Unit
                      .vertex({0, 1, 0})
                      .polytope(Geometry::Polytope::Type::Triangle, {0, 1, 2})
                      .finalize();
-    EXPECT_THROW(precomputeCellGeometry(surface), std::invalid_argument);
+    EXPECT_THROW(precomputeCellGeometry(surface), Alert::Exception);
   }
 
 }

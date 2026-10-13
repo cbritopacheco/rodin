@@ -24,11 +24,10 @@
 
 #include <array>
 #include <cmath>
-#include <stdexcept>
-#include <string>
 #include <vector>
 #include <unordered_map>
 
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Geometry/PolytopeTransformation.h"
@@ -79,8 +78,9 @@ namespace Rodin::Adaptation
    * index; the second returned map gives the parent-index -> local-index
    * translation for use by the rest of the pipeline.
    *
-   * Throws std::invalid_argument for nonplanar meshes or nontriangle cells.
-   * Throws if A_K(xhat_q) is singular at any quadrature point, or if the
+   * @throws Alert::Exception For nonplanar meshes, nontriangle cells, or empty
+   * cell quadrature. Also raised if @f$ A_K(\hat{x}_q) @f$ is singular at any
+   * quadrature point, or if the
    * branch sign sigma_K(xhat_q) is inconsistent across quadrature points
    * (which would mean a curved or inverted element; this 2D affine
    * prototype rejects them).
@@ -91,7 +91,10 @@ namespace Rodin::Adaptation
   precomputeCellGeometry(const Geometry::Mesh<Rodin::Context::Local>& mesh)
   {
     if (mesh.getDimension() != 2 || mesh.getSpaceDimension() != 2)
-      throw std::invalid_argument("precomputeCellGeometry: expected a planar 2D mesh.");
+    {
+      Alert::Exception() << "precomputeCellGeometry: expected a planar 2D mesh."
+                         << Alert::Raise;
+    }
 
     std::vector<CellGeomCache> cache;
     cache.reserve(mesh.getCellCount());
@@ -102,7 +105,10 @@ namespace Rodin::Adaptation
     {
       const auto& cell = *cellIt;
       if (cell.getGeometry() != Geometry::Polytope::Type::Triangle)
-        throw std::invalid_argument("precomputeCellGeometry: expected triangle cells.");
+      {
+        Alert::Exception() << "precomputeCellGeometry: expected triangle cells."
+                           << Alert::Raise;
+      }
       const auto& vertices = cell.getVertices();
       CellGeomCache c;
       c.index = cell.getIndex();
@@ -113,7 +119,10 @@ namespace Rodin::Adaptation
       const auto& quadrature = cell.getQuadrature(qf);
       const size_t nqp = quadrature.getSize();
       if (nqp == 0)
-        throw std::runtime_error("precomputeCellGeometry: cell quadrature is empty.");
+      {
+        Alert::Exception() << "precomputeCellGeometry: cell quadrature is empty."
+                           << Alert::Raise;
+      }
 
       Real khatMeasure = 0;
       Real integralAbsDetA = 0;
@@ -128,17 +137,21 @@ namespace Rodin::Adaptation
         cell.getTransformation().jacobian(Aq, rc);
         const Real detAq = Aq.determinant();
         if (detAq == Real(0))
-          throw std::runtime_error(
-            "precomputeCellGeometry: degenerate A_K(xhat_q) at cell " +
-            std::to_string(c.index));
+        {
+          Alert::Exception() << "precomputeCellGeometry: degenerate A_K(xhat_q) at cell "
+                             << c.index << Alert::Raise;
+        }
         const int sigmaq = detAq > 0 ? 1 : -1;
         if (q == 0)
           sigmaFirst = sigmaq;
         else if (sigmaq != sigmaFirst)
-          throw std::runtime_error("precomputeCellGeometry: sigma_Kq inconsistent across "
-                                   "quadrature points at cell " +
-            std::to_string(c.index) +
-            " (the 2D affine prototype rejects curved/inverted cells).");
+        {
+          Alert::Exception()
+            << "precomputeCellGeometry: sigma_Kq inconsistent across "
+               "quadrature points at cell "
+            << c.index << " (the 2D affine prototype rejects curved/inverted cells)."
+            << Alert::Raise;
+        }
         integralAbsDetA += wq * std::abs(detAq);
       }
       c.sigmaK = sigmaFirst;
