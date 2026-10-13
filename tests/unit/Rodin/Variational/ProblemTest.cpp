@@ -4,6 +4,9 @@
  */
 #include <gtest/gtest.h>
 #include <type_traits>
+#include <array>
+#include <algorithm>
+#include <utility>
 
 #include "Rodin/Geometry.h"
 #include "Rodin/Variational.h"
@@ -13,6 +16,196 @@
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+
+/**
+ * @brief Checks mixed problem construction without legacy tuple assemblers.
+ *
+ * A cellwise P0 field and an H1 field have different block sizes. Constant
+ * manufactured fields solve a positive-definite reaction system with diagonal
+ * coefficients one and two. Complex cases use conjugate off-diagonal
+ * coefficients: @f$R=\begin{pmatrix}1&\beta\\\overline\beta&2\end{pmatrix}@f$,
+ * with @f$\beta=1/4@f$ or @f$\beta=1/4+i/8@f$. Since
+ * @f$\det R=2-|\beta|^2>0@f$, CG is applicable to both coefficient fields.
+ * Three H1 degrees and all seven cell families exercise both
+ * sparse and dense system representations, including repeated assembly and
+ * solution scatter. Separate scalar mass forms determine every matrix block.
+ * The dimensionless true-residual and coefficient budgets are @f$10^{-11}@f$;
+ * CG's requested tolerance and iteration cap are @f$10^{-13}@f$ and 20,000,
+ * as in native convergence solves. Order twelve integrates degree-three basis products
+ * and retains the established rational-pyramid quadrature policy.
+ *
+ * @tparam Scalar Real or complex coefficient field.
+ * @tparam Matrix Sparse or dense native operator representation.
+ */
+template <class Scalar, class Matrix>
+void checkMixedBlockProblem()
+{
+  using System = Math::LinearSystem<Matrix, Math::Vector<Scalar>>;
+  constexpr Real algebraicTolerance = 1e-11, solverTolerance = 1e-13;
+  constexpr size_t maximumIterations = 20000, quadratureOrder = 12;
+  const std::array<std::pair<Polytope::Type, size_t>, 7> geometries{
+    {{Polytope::Type::Segment, 1}, {Polytope::Type::Triangle, 2},
+      {Polytope::Type::Quadrilateral, 2}, {Polytope::Type::Tetrahedron, 3},
+      {Polytope::Type::Pyramid, 3}, {Polytope::Type::Hexahedron, 3},
+      {Polytope::Type::Wedge, 3}}};
+  const auto checkDegree = [&]<size_t K>() {
+    for (const auto& [geometry, dimension] : geometries)
+    {
+      SCOPED_TRACE(
+        ::testing::Message() << "geometry=" << int(geometry) << " degree=" << K);
+      Array<size_t> shape(dimension);
+      std::fill(shape.begin(), shape.end(), 2);
+      auto mesh = LocalMesh::UniformGrid(geometry, shape);
+      for (size_t from = 0; from <= dimension; ++from)
+      {
+        for (size_t to = 0; to <= dimension; ++to)
+        {
+          if (from != to)
+            mesh.getConnectivity().compute(from, to);
+        }
+      }
+      P0<Scalar> low(mesh);
+      H1<K, Scalar> high(std::integral_constant<size_t, K>{}, mesh);
+      TrialFunction u(low);
+      TrialFunction w(high);
+      TestFunction v(low);
+      TestFunction z(high);
+      const auto constant = [](Scalar value) {
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return ComplexFunction(value);
+        else
+          return RealFunction(value);
+      };
+      const Scalar first = [] {
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return Scalar(1, 1);
+        else
+          return Scalar(1);
+      }();
+      const Scalar second = [] {
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return Scalar(2, -1);
+        else
+          return Scalar(2);
+      }();
+      const Scalar coupling = [] {
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return Scalar(0.25, 0.125);
+        else
+          return Scalar(0.25);
+      }();
+      const Scalar reverse = [&] {
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return std::conj(coupling);
+        else
+          return coupling;
+      }();
+      u.getSolution() = constant(first);
+      w.getSolution() = constant(second);
+      const Math::Vector<Scalar> exactU = u.getSolution().getData();
+      const Math::Vector<Scalar> exactW = w.getSolution().getData();
+      Problem<System, decltype(u), decltype(v), decltype(w), decltype(z)> problem(
+        u, v, w, z);
+      auto aUU = Integral(u, v);
+      auto aWW = Integral(Real(2) * w, z);
+      auto aUW = Integral(coupling * w, v);
+      auto aWU = Integral(reverse * u, z);
+      auto bU = Integral(constant(first + coupling * second), v);
+      auto bW = Integral(constant(reverse * first + Scalar(2) * second), z);
+      aUU.setOrder(quadratureOrder);
+      aWW.setOrder(quadratureOrder);
+      aUW.setOrder(quadratureOrder);
+      aWU.setOrder(quadratureOrder);
+      bU.setOrder(quadratureOrder);
+      bW.setOrder(quadratureOrder);
+      problem = aUU + aUW + aWU + aWW - bU - bW;
+      problem.assemble();
+      const auto& trial = problem.getTrialOffsets();
+      const auto& test = problem.getTestOffsets();
+      EXPECT_EQ(trial[0], 0);
+      EXPECT_EQ(trial[1], low.getSize());
+      EXPECT_EQ(test, trial);
+      auto& system = problem.getLinearSystem();
+      ASSERT_EQ(system.getOperator().rows(), low.getSize() + high.getSize());
+      const Math::Vector<Scalar> exact = system.getSolution();
+      EXPECT_EQ((exact.segment(trial[0], low.getSize()) - exactU).norm(), 0);
+      EXPECT_EQ((exact.segment(trial[1], high.getSize()) - exactW).norm(), 0);
+      BilinearForm lowMass(u, v);
+      BilinearForm highMass(w, z);
+      BilinearForm crossMass(w, v);
+      auto mUU = Integral(u, v);
+      auto mWW = Integral(w, z);
+      auto mUW = Integral(w, v);
+      mUU.setOrder(quadratureOrder);
+      mWW.setOrder(quadratureOrder);
+      mUW.setOrder(quadratureOrder);
+      lowMass = mUU;
+      highMass = mWW;
+      crossMass = mUW;
+      lowMass.assemble();
+      highMass.assemble();
+      crossMass.assemble();
+      Math::Matrix<Scalar> expected =
+        Math::Matrix<Scalar>::Zero(exact.size(), exact.size());
+      expected.block(test[0], trial[0], low.getSize(), low.getSize()) =
+        lowMass.getOperator();
+      expected.block(test[1], trial[1], high.getSize(), high.getSize()) =
+        Scalar(2) * highMass.getOperator();
+      expected.block(test[0], trial[1], low.getSize(), high.getSize()) =
+        coupling * crossMass.getOperator();
+      expected.block(test[1], trial[0], high.getSize(), low.getSize()) =
+        reverse * crossMass.getOperator().adjoint();
+      const Math::Matrix<Scalar> assembled = system.getOperator();
+      const Real matrixScale = std::max(Real(1), expected.norm());
+      EXPECT_LT((assembled - expected).norm() / matrixScale, algebraicTolerance);
+      EXPECT_LT(
+        (assembled - assembled.adjoint()).norm() / matrixScale, algebraicTolerance);
+      const Math::Vector<Scalar> load = system.getVector();
+      const Real rhsScale = std::max(Real(1), load.norm());
+      EXPECT_LT(
+        (system.getOperator() * exact - load).norm() / rhsScale, algebraicTolerance);
+      problem.assemble();
+      EXPECT_EQ((Math::Matrix<Scalar>(system.getOperator()) - assembled).norm(), 0);
+      EXPECT_EQ((system.getVector() - load).norm(), 0);
+      system.getSolution().setZero();
+      Solver::CG solver(problem);
+      solver.setTolerance(solverTolerance).setMaxIterations(maximumIterations);
+      problem.solve(solver);
+      ASSERT_TRUE(solver.success());
+      EXPECT_LT((system.getOperator() * system.getSolution() - load).norm() / rhsScale,
+        algebraicTolerance);
+      EXPECT_LT(
+        (u.getSolution().getData() - exactU).norm() / std::max(Real(1), exactU.norm()),
+        algebraicTolerance);
+      EXPECT_LT(
+        (w.getSolution().getData() - exactW).norm() / std::max(Real(1), exactW.norm()),
+        algebraicTolerance);
+    }
+  };
+  checkDegree.template operator()<1>();
+  checkDegree.template operator()<2>();
+  checkDegree.template operator()<3>();
+}
+
+TEST(Rodin_Variational_Problem, MixedRealSparseP0H1)
+{
+  checkMixedBlockProblem<Real, Math::SparseMatrix<Real>>();
+}
+
+TEST(Rodin_Variational_Problem, MixedComplexSparseP0H1)
+{
+  checkMixedBlockProblem<Complex, Math::SparseMatrix<Complex>>();
+}
+
+TEST(Rodin_Variational_Problem, MixedRealDenseP0H1)
+{
+  checkMixedBlockProblem<Real, Math::Matrix<Real>>();
+}
+
+TEST(Rodin_Variational_Problem, MixedComplexDenseP0H1)
+{
+  checkMixedBlockProblem<Complex, Math::Matrix<Complex>>();
+}
 
 TEST(Rodin_Variational_Problem, BodylessAdaptersRejectCompoundAssignment)
 {

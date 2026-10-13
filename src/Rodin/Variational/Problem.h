@@ -722,7 +722,17 @@ namespace Rodin::Variational
               typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>>,
           U, V>;
 
-  /// @brief Base for mixed variational problems with three or more functions.
+  /**
+   * @brief Base for mixed variational problems with three or more functions.
+   *
+   * ## Architecture
+   *
+   * Trial/test identities and cumulative DOF offsets are passed directly to
+   * the problem assembly selected by @ref Rodin::Assembly::Default. That single
+   * assembler owns block insertion and completion. No auxiliary sequential
+   * tuple assembler is constructed: its availability must not restrict the
+   * scalar or storage types supported by the selected problem assembler.
+   */
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class ProblemUsBase : public ProblemBase<LinearSystem>
   {
@@ -879,12 +889,6 @@ namespace Rodin::Variational
       using LinearFormTuple =
         typename Utility::Wrap<TestFESTuple>::template Type<LinearFormType>;
 
-      using BilinearFormTupleSequentialAssembly =
-        Assembly::Sequential<OperatorType, BilinearFormTuple>;
-
-      using LinearFormTupleSequentialAssembly =
-        Assembly::Sequential<VectorType, LinearFormTuple>;
-
     public:
       /**
        * @brief Constructs a mixed problem from trial and test functions.
@@ -914,8 +918,6 @@ namespace Rodin::Variational
                                  uv.first().get(), uv.second().get());
                          }))
       {
-        m_bfa.reset(new BilinearFormTupleSequentialAssembly);
-        m_lfa.reset(new LinearFormTupleSequentialAssembly);
         m_us.iapply([&](size_t i, const auto& u)
             { m_trialUUIDMap.right.insert({ i, u.get().getUUID() }); });
         m_vs.iapply([&](size_t i, const auto& v)
@@ -937,8 +939,6 @@ namespace Rodin::Variational
           m_testOffsets(other.m_testOffsets),
           m_trialUUIDMap(other.m_trialUUIDMap),
           m_testUUIDMap(other.m_testUUIDMap),
-          m_bfa(other.m_bfa->copy()),
-          m_lfa(other.m_lfa->copy()),
           m_assembly(other.m_assembly)
       {}
 
@@ -957,8 +957,6 @@ namespace Rodin::Variational
           m_testOffsets(std::move(other.m_testOffsets)),
           m_trialUUIDMap(std::move(other.m_trialUUIDMap)),
           m_testUUIDMap(std::move(other.m_testUUIDMap)),
-          m_bfa(std::move(other.m_bfa)),
-          m_lfa(std::move(other.m_lfa)),
           m_assembly(std::move(other.m_assembly))
       {}
 
@@ -980,8 +978,6 @@ namespace Rodin::Variational
           m_testOffsets = other.m_testOffsets;
           m_trialUUIDMap = other.m_trialUUIDMap;
           m_testUUIDMap = other.m_testUUIDMap;
-          m_bfa.reset(other.m_bfa->copy());
-          m_lfa.reset(other.m_lfa->copy());
           m_assembly = other.m_assembly;
         }
         return *this;
@@ -1005,8 +1001,6 @@ namespace Rodin::Variational
           m_testOffsets = std::move(other.m_testOffsets);
           m_trialUUIDMap = std::move(other.m_trialUUIDMap);
           m_testUUIDMap = std::move(other.m_testUUIDMap);
-          m_bfa.reset(std::move(other.m_bfa));
-          m_lfa.reset(std::move(other.m_lfa));
           m_assembly = std::move(other.m_assembly);
         }
         return *this;
@@ -1213,12 +1207,10 @@ namespace Rodin::Variational
       boost::bimap<FormLanguage::Base::UUID, size_t> m_trialUUIDMap;
       boost::bimap<FormLanguage::Base::UUID, size_t> m_testUUIDMap;
 
-      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>>  m_bfa;
-      std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>>      m_lfa;
       AssemblyType m_assembly;
   };
 
-  /// @brief Variational problem in three or more unknown fields.
+  /// @brief Variational problem with three or more trial/test functions.
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class Problem<LinearSystem, U1, U2, U3, Us...>
     : public ProblemUsBase<LinearSystem, U1, U2, U3, Us...>
