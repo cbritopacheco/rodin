@@ -16,6 +16,11 @@ they curve) are separate layers throughout.
 - `Polytope::Type` enumerates reference geometries (Segment, Triangle,
   Quadrilateral, Tetrahedron, ...); reference nodes/centroids come from
   the type's traits.
+  Their reference-coordinate dimension is exactly the topological dimension
+  $d$, independently of physical embedding. In particular, the Point vertex
+  and centroid belong to $\mathbb{R}^0$: both are empty coordinate tuples.
+  `SpatialPoint{0}` instead constructs a one-dimensional coordinate and must
+  not represent the zero-dimensional reference point.
 
 ## Connectivity — incidence d → d′
 
