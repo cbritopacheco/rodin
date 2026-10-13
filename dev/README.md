@@ -53,6 +53,14 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Locator reference clipping: near-boundary queries on all seven
+  positive-dimensional cell families return contained reference coordinates
+  whose remapped physical residual satisfies the configured tolerance.
+  Lower boundaries, simplex sum constraints, tensor-product bounds, wedge
+  heights and pyramid side/apex bounds are checked, together with rejection
+  outside the tolerance band. All 55 locator cases pass serially; skipping
+  both production clipping calls fails the new oracle. Production sources
+  and coverage exclusions remain unchanged for this batch.
 - Matrix-space lifecycle: real/complex P0, P0g, P1 and quadratic H1 copies
   retain owned DOF and element maps after source destruction. Copy/move
   assignment replaces a different mesh and matrix shape consistently; later
