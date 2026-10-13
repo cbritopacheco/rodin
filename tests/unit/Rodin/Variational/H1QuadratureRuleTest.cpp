@@ -3,6 +3,7 @@
 #include "Rodin/Variational.h"
 #include "Rodin/Assembly/Default.h"
 #include "Rodin/Geometry/Mesh.h"
+#include "../../../QuadratureReference.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -10,6 +11,147 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /**
+   * @brief Distinguishes shared and independent physical-gradient preparation.
+   *
+   * Every local entry equals the original quadrature entry loop on affine
+   * volume cells. Equal-degree rules share reference tables, while both mixed
+   * degree directions must retain distinct gradient buffers. Rebinding across
+   * cells and changing orders must not retain the previous physical gradients.
+   */
+  TEST(Rodin_Variational_H1QuadratureRule, SharedAndDistinctGradientTables)
+  {
+    const auto check = []<size_t TrialDegree, size_t TestDegree, class Scalar>() {
+      for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+             Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+             Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+      {
+        SCOPED_TRACE(static_cast<int>(geometry));
+        SCOPED_TRACE(TrialDegree);
+        SCOPED_TRACE(TestDegree);
+        const size_t dimension = Polytope::Traits(geometry).getDimension();
+        Array<size_t> shape(dimension);
+        std::fill(shape.begin(), shape.end(), 2);
+        auto mesh = LocalMesh::UniformGrid(geometry, shape);
+        for (size_t d = 1; d <= dimension; ++d)
+        {
+          for (size_t lower = 0; lower < d; ++lower)
+            mesh.getConnectivity().compute(d, lower);
+        }
+        H1<TrialDegree, Scalar> trial(
+          std::integral_constant<size_t, TrialDegree>{}, mesh);
+        H1<TestDegree, Scalar> test(std::integral_constant<size_t, TestDegree>{}, mesh);
+        TrialFunction u(trial);
+        TestFunction v(test);
+        auto integral = Integral(Grad(u), Grad(v));
+        QuadratureReference reference(integral);
+        for (const size_t order : {size_t(8), size_t(2), size_t(4)})
+        {
+          SCOPED_TRACE(order);
+          integral.setOrder(order);
+          for (auto cell = mesh.getCell(); cell; ++cell)
+          {
+            integral.setPolytope(*cell);
+            reference.assemble(*cell, order);
+            const auto& expected = reference.getOperator();
+            for (Eigen::Index te = 0; te < expected.rows(); ++te)
+            {
+              for (Eigen::Index tr = 0; tr < expected.cols(); ++tr)
+                ASSERT_EQ(integral.integrate(tr, te), expected(te, tr));
+            }
+          }
+        }
+      }
+    };
+    check.template operator()<1, 1, Real>();
+    check.template operator()<2, 2, Real>();
+    check.template operator()<1, 2, Real>();
+    check.template operator()<2, 1, Real>();
+    check.template operator()<1, 1, Complex>();
+    check.template operator()<2, 2, Complex>();
+    check.template operator()<1, 2, Complex>();
+    check.template operator()<2, 1, Complex>();
+  }
+
+  /**
+   * @brief Preserves every component of scalar-weighted H1 mass on rebinding.
+   *
+   * A dyadic coefficient permits exact comparisons on the directly accumulated
+   * lower triangle. The unweighted kernel mirrors its upper triangle, whereas
+   * the weighted rule accumulates it independently; roundoff equality between
+   * these different upper-triangle algorithms is not required. Every diagonal
+   * must be positive, so dropping
+   * the same component in both kernels cannot satisfy the scaling identity.
+   * Component counts deliberately differ from the geometric dimension.
+   * Orders change while the same rules traverse all cells, exercising retained
+   * storage and formula replacement for scalar, vector and matrix fields.
+   */
+  TEST(Rodin_Variational_H1QuadratureRule, MassComponentContractAndRebinding)
+  {
+    const auto checkDegree = []<size_t K>() {
+      for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+             Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+             Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+      {
+        SCOPED_TRACE(static_cast<int>(geometry));
+        SCOPED_TRACE(K);
+        const size_t dimension = Polytope::Traits(geometry).getDimension();
+        Array<size_t> shape(dimension);
+        std::fill(shape.begin(), shape.end(), 2);
+        auto mesh = LocalMesh::UniformGrid(geometry, shape);
+        for (size_t d = 1; d <= dimension; ++d)
+        {
+          for (size_t lower = 0; lower < d; ++lower)
+            mesh.getConnectivity().compute(d, lower);
+        }
+        const auto checkRange = [&]<class Range>() {
+          const auto space = [&]() {
+            if constexpr (FormLanguage::IsMatrixRange<Range>::Value)
+              return H1<K, Range>(std::integral_constant<size_t, K>{}, mesh, 2, 3);
+            else if constexpr (FormLanguage::IsVectorRange<Range>::Value)
+              return H1<K, Range>(std::integral_constant<size_t, K>{}, mesh, 3);
+            else
+              return H1<K, Range>(std::integral_constant<size_t, K>{}, mesh);
+          }();
+          TrialFunction u(space);
+          TestFunction v(space);
+          auto mass = Integral(u, v);
+          auto weighted = Integral(Real(0.25) * u, v);
+          for (const size_t order : {size_t(8), size_t(2), size_t(4)})
+          {
+            SCOPED_TRACE(order);
+            mass.setOrder(order);
+            weighted.setOrder(order);
+            for (auto cell = mesh.getCell(); cell; ++cell)
+            {
+              mass.setPolytope(*cell);
+              weighted.setPolytope(*cell);
+              const size_t count = u.getDOFs(*cell);
+              for (size_t te = 0; te < count; ++te)
+              {
+                ASSERT_GT(std::real(mass.integrate(te, te)), 0);
+                ASSERT_GT(std::real(weighted.integrate(te, te)), 0);
+                for (size_t tr = 0; tr <= te; ++tr)
+                {
+                  EXPECT_EQ(
+                    weighted.integrate(tr, te), Real(0.25) * mass.integrate(tr, te));
+                }
+              }
+            }
+          }
+        };
+        checkRange.template operator()<Real>();
+        checkRange.template operator()<Complex>();
+        checkRange.template operator()<Math::SpatialVector<Real>>();
+        checkRange.template operator()<Math::SpatialVector<Complex>>();
+        checkRange.template operator()<Math::SpatialMatrix<Real>>();
+        checkRange.template operator()<Math::SpatialMatrix<Complex>>();
+      }
+    };
+    checkDegree.template operator()<1>();
+    checkDegree.template operator()<2>();
+  }
+
   /// @brief Verifies mixed order grad grad assembles for variational H1 quadrature rule by checking exact expected values, form assembly.
   TEST(Rodin_Variational_H1QuadratureRule, MixedOrder_GradGrad_Assembles)
   {

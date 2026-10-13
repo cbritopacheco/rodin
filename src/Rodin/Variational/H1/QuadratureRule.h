@@ -2878,6 +2878,17 @@ namespace Rodin::Variational
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int \nabla u \cdot \nabla v \ dx@f$ with H1 trial and test shape functions.
    *
+   * ## Physical-gradient preparation
+   *
+   * At each quadrature point, reference gradients are transformed by the
+   * current inverse Jacobian. If both operands borrow the same reference
+   * table object, their physical gradients are identical and share one
+   * scratch buffer. Distinct tables retain independent buffers. This identity
+   * is tested only while both tables are borrowed by the current bind;
+   * physical gradients are recomputed on every cell, and no table pointer
+   * is stored beyond the bind.
+   * Transform expressions and local matrix summation order are unchanged.
+   *
    * This class represents the CTAD for the expression:
    * @f[
    * \int \nabla u \cdot \nabla v \ dx \: ,
@@ -3103,10 +3114,13 @@ namespace Rodin::Variational
         }
         const auto& trTab = scalarTrial.getTabulation(*m_qf);
         const auto& teTab = scalarTest.getTabulation(*m_qf);
+        const bool sharedGradients =
+          static_cast<const void*>(&trTab) == static_cast<const void*>(&teTab);
 
         // Scratch for physical gradients at this qp.
         static thread_local std::vector<Math::SpatialVector<ScalarType>> Gtr;
-        static thread_local std::vector<Math::SpatialVector<ScalarType>> Gte;
+        static thread_local std::vector<Math::SpatialVector<ScalarType>> GteStorage;
+        auto& Gte = sharedGradients ? Gtr : GteStorage;
 
         if (Gtr.size() < scalarTrialCount)
           Gtr.resize(scalarTrialCount);
@@ -3140,7 +3154,7 @@ namespace Rodin::Variational
                   Gtr[a][k] += Jinv(l, k) * g[l];
               }
             }
-            for (size_t b = 0; b < scalarTestCount; ++b)
+            for (size_t b = 0; !sharedGradients && b < scalarTestCount; ++b)
             {
               const auto g = teTab.getGradient(qp, b);
               Gte[b].setZero();
@@ -3165,7 +3179,7 @@ namespace Rodin::Variational
               Gtr[a][1] = a01*gx + a11*gy + a21*gz;
               Gtr[a][2] = a02*gx + a12*gy + a22*gz;
             }
-            for (size_t b = 0; b < scalarTestCount; ++b)
+            for (size_t b = 0; !sharedGradients && b < scalarTestCount; ++b)
             {
               const auto g = teTab.getGradient(qp, b);
               const ScalarType gx = g[0], gy = g[1], gz = g[2];
@@ -3186,7 +3200,7 @@ namespace Rodin::Variational
               Gtr[a][0] = a00*gx + a10*gy;
               Gtr[a][1] = a01*gx + a11*gy;
             }
-            for (size_t b = 0; b < scalarTestCount; ++b)
+            for (size_t b = 0; !sharedGradients && b < scalarTestCount; ++b)
             {
               const auto g = teTab.getGradient(qp, b);
               const ScalarType gx = g[0], gy = g[1];
@@ -3202,7 +3216,7 @@ namespace Rodin::Variational
               const auto g = trTab.getGradient(qp, a);
               Gtr[a][0] = a00 * g[0];
             }
-            for (size_t b = 0; b < scalarTestCount; ++b)
+            for (size_t b = 0; !sharedGradients && b < scalarTestCount; ++b)
             {
               const auto g = teTab.getGradient(qp, b);
               Gte[b][0] = a00 * g[0];

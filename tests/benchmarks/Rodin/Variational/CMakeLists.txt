@@ -38,4 +38,8 @@ add_executable(RodinReferenceElementBenchmarks EXCLUDE_FROM_ALL ReferenceElement
 target_link_libraries(RodinReferenceElementBenchmarks PRIVATE
   Rodin::Variational benchmark::benchmark)
 
+add_executable(RodinPhysicalGradientBenchmarks EXCLUDE_FROM_ALL PhysicalGradient.cpp)
+target_link_libraries(RodinPhysicalGradientBenchmarks PRIVATE
+  Rodin::Variational benchmark::benchmark)
+
 add_subdirectory(H1)

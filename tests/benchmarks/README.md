@@ -392,15 +392,16 @@ build/tests/benchmarks/RodinBulkP1JacobianBenchmarks \
 the coupled reaction-diffusion consumer:
 
 $$
-m(u,v)=\int_\Omega uv\,\mathrm{d}x,\qquad
-m_\alpha(u,v)=\int_\Omega(\alpha u)v\,\mathrm{d}x,\qquad
-a(u,v)=\int_\Omega\nabla u\cdot\nabla v\,\mathrm{d}x,\qquad
-a_2(u,v)=\int_\Omega(2\nabla u)\cdot\nabla v\,\mathrm{d}x,
+m(u,v)=\int_\Omega u\,\overline v\,\mathrm{d}x,\qquad
+m_\alpha(u,v)=\int_\Omega(\alpha u)\overline v\,\mathrm{d}x,\qquad
+a(u,v)=\int_\Omega\nabla u\cdot\overline{\nabla v}\,\mathrm{d}x,\qquad
+a_2(u,v)=\int_\Omega(2\nabla u)\cdot\overline{\nabla v}\,\mathrm{d}x,
 \quad \alpha=0.2.
 $$
 
-Complex cases use the same Rodin expressions, not an assumed replacement by
-a sesquilinear form. Each scope includes mesh traversal, formula selection,
+Complex cases follow Rodin's trial-first, test-second sesquilinear convention;
+the overbars reduce to the identity over real fields. Each scope includes
+mesh traversal, formula selection,
 owned mapped-quadrature construction, basis preparation and local contraction.
 Reading one prepared entry prevents dead-code elimination. Global scatter,
 boundary constraints and solving are excluded; complete physical assembly
@@ -450,14 +451,100 @@ Allocation-related frames contributed less than 0.6% in either capture.
 Inlined operations remain attributed to their enclosing method; these
 profiles do not yet separate every source expression inside that method.
 Untimed guards also invoke production kernels, so selected CPU samples are
-source attribution, not timed-stage fractions. The next investigation concerns
-the scalar local contraction and gradient-transform loops, with arithmetic
-preservation and complete-assembly measurements required before any repair.
+source attribution, not timed-stage fractions. The within-cell gradient reuse
+described below removes one identified duplication without changing contraction
+arithmetic; remaining scalar contraction and gradient-expression costs still
+require source attribution and complete-assembly measurements.
 
 ```sh
 cmake --build build --target RodinQuadratureBindingBenchmarks -j1
 build/tests/benchmarks/RodinQuadratureBindingBenchmarks \
   --benchmark_filter='CoupledReactionDiffusion/Binding/.*/H1/P2/Real/Tetrahedron/5/' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5
+```
+
+### Physical-gradient preparation and within-cell reuse
+
+For reference dimension $d$, embedding dimension $s$, cached inverse/left-inverse
+$B_q\in\mathbb{R}^{d\times s}$ and reference basis gradient
+$\widehat g_a(q)$, physical basis preparation evaluates
+
+$$
+g_a(q)=B_q^{\mathsf T}\widehat g_a(q).
+$$
+
+`RodinPhysicalGradientBenchmarks` measures this preparation through the public
+H1 gradient expression, including integration-point rebinding and basis
+extraction. One affine cell and its mapped quadrature are retained; inverse
+Jacobians and reference tables are warmed. Every sample changes the quadrature
+index, so this is not a repeated-point cache-hit measurement. Mapped-quadrature
+construction, matrix contraction, scatter and solving are excluded. Specialized
+diffusion rules own their own transformation loops; expression timings are not
+an additive decomposition of those rules.
+
+Degrees one through three, real/complex scalar fields, seven volume families
+and orders 2, 8 and 16 give 126 cases. Each case reconstructs the analytic
+gradient of $f(x)=\eta(1+\sum_j(j+1)x_j)$ from DOF-functional coefficients,
+with $\eta=1$ or $1+i/2$, within a dimensionless absolute budget $10^{-10}$.
+A contributing basis perturbation must be rejected. Every prepared basis
+component is retained and must repeat exactly after timing. All 126 cases
+passed in both optimized native and OpenMP-enabled builds. Curved maps,
+embedded cells and matrix-valued gradient-expression timings are not certified
+by this benchmark matrix.
+
+Native degree-two, order-16 real CPU medians were approximately 3.20 microseconds
+per triangular sweep and 76.23 microseconds per tetrahedral sweep. These contain
+53/729 points and 6/10 basis functions, respectively. Normalizing by
+$N_qn_bd^2$ gives approximately 2.52/1.16 ns per scalar-product proxy, not a
+dimension-only slowdown. Isolated five-repetition fixed-work repeats had CPU
+coefficients of variation near 1.1%; the initial wider sweep and its noisier
+selections remain in the artifacts. In the selected tetrahedral preparation
+profile, matrix-vector multiplication carried 16.0% of CPU sample weight;
+`bzero` and explicit spatial-vector zero-storage frames together carried
+10.7%. Inlined work remains attributed to the enclosing gradient method.
+These observations motivate the next Math-owned matrix-vector and storage
+benchmarks, not unconditional removal of padding initialization.
+
+The unweighted H1 diffusion rule previously transformed both trial and test
+reference gradients even when both operands borrowed the same table object.
+It now shares one physical-gradient buffer only under that exact object
+identity during the current bind. Distinct tables retain independent buffers.
+Every cell and quadrature point still recomputes physical gradients with its
+own inverse Jacobian; physical results are not reused across cells or meshes,
+scratch storage remains thread-local, and no collective is introduced.
+Arithmetic expressions, matrix
+summation order and quadrature requirements are unchanged.
+
+Five-repetition native degree-two real binding measurements at grid size 5
+gave 32.577 to 30.041 ms on tetrahedra and 19.528 to 18.826 ms on hexahedra.
+Additional tetrahedral size-3 studies gave speedup ratios 1.06/1.27 for degree
+one real/complex and 1.09/1.19 for degree three real/complex. The LLVM 19
+OpenMP-enabled build gave 33.312 to 29.929 ms for degree-two real tetrahedral
+binding; this operation is sequential, not an OpenMP scaling measurement.
+All matched numerical/work counters remained identical. Native complete
+two-field degree-two real tetrahedral assembly measured 250.118 to 250.495 ms,
+within CPU variation of 1.3--1.7%; no end-to-end assembly speedup is established.
+
+The exact same-/mixed-degree entry regression failed when table sharing was
+forced unconditionally. The scalar/vector/matrix component regression failed
+when mass components were omitted. Restored implementations passed these tests,
+the matrix-range suite and all fourteen Poisson polynomial-convergence cases
+in both builds. Diffusion binding additionally qualified degrees one through
+three, real/complex fields and seven geometries at size 3 in both builds; the
+fourteen native degree-two full-assembly cases at that size retained their
+original numerical/work counters. These are selected recertification results,
+not full performance coverage of the convergence workplan.
+
+A separate mass-kernel prototype replaced runtime component-count division
+with the existing space accessor. Its repeated tetrahedral weighted-mass CPU
+time increased from 38.714 to 44.114 ms, so it was rejected. The production mass
+kernel is unchanged. The benchmark and rejected-prototype measurements remain
+available; no compiler flags or numerical budgets were relaxed.
+
+```sh
+cmake --build build --target RodinPhysicalGradientBenchmarks -j1
+build/tests/benchmarks/RodinPhysicalGradientBenchmarks \
+  --benchmark_filter='PhysicalGradient/H1/P2/Real/Tetrahedron/16/' \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
 
