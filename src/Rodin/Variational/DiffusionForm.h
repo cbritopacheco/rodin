@@ -216,13 +216,35 @@ namespace Rodin::Variational
                 testGradients.reserve(testFE.getCount());
                 for (size_t tr = 0; tr < trialFE.getCount(); ++tr)
                 {
-                  trialGradients.emplace_back(
-                    trialFE.getBasis(tr).getGradient()(reference));
+                  if constexpr (requires { trialFE.getBasis(tr).getGradient(); })
+                    trialGradients.emplace_back(
+                      trialFE.getBasis(tr).getGradient()(reference));
+                  else
+                  {
+                    // Constant-space bases expose directional derivatives,
+                    // not a gradient convenience wrapper.
+                    auto& gradient = trialGradients.emplace_back(reference.size());
+                    for (size_t j = 0; j < static_cast<size_t>(reference.size()); ++j)
+                    {
+                      gradient(j) =
+                        trialFE.getBasis(tr).template getDerivative<1>(j)(reference);
+                    }
+                  }
                 }
                 for (size_t te = 0; te < testFE.getCount(); ++te)
                 {
-                  testGradients.emplace_back(
-                    testFE.getBasis(te).getGradient()(reference));
+                  if constexpr (requires { testFE.getBasis(te).getGradient(); })
+                    testGradients.emplace_back(
+                      testFE.getBasis(te).getGradient()(reference));
+                  else
+                  {
+                    auto& gradient = testGradients.emplace_back(reference.size());
+                    for (size_t j = 0; j < static_cast<size_t>(reference.size()); ++j)
+                    {
+                      gradient(j) =
+                        testFE.getBasis(te).template getDerivative<1>(j)(reference);
+                    }
+                  }
                 }
               }
             }

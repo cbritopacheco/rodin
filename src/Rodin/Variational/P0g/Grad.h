@@ -187,6 +187,15 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Forwards the trial or test leaf of the constant operand.
+       * @returns The leaf borrowed by this expression.
+       */
+      constexpr const auto& getLeaf() const
+      {
+        return getOperand().getLeaf();
+      }
+
+      /**
        * @brief Gets the integration point the expression is evaluated at.
        * @returns The integration point the expression is evaluated at.
        */

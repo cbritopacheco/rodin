@@ -297,6 +297,17 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Reports a degree bound for the identically zero broken gradient.
+       * @param polytope Mesh entity; the bound does not depend on it.
+       * @returns Zero, sufficient to integrate the zero expression.
+       */
+      constexpr Optional<size_t> getOrder(
+        [[maybe_unused]] const Geometry::Polytope& polytope) const noexcept
+      {
+        return 0;
+      }
+
+      /**
        * @brief Returns the number of local basis functions for a polytope.
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.

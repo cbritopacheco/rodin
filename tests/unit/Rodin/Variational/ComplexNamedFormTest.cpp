@@ -29,15 +29,13 @@ namespace Rodin::Tests::Unit
      *
      * Nonzero imaginary coefficients must remain complex rather than being
      * offered to a numeric real-lifting overload. Mixed Helmholtz arguments
-     * exercise both function/value directions. Constant spaces exercise mass
-     * only: their basis API is not yet accepted by named diffusion. The Point
-     * case certifies algebraic values, not a
+     * exercise both function/value directions. Constant-space diffusion is
+     * identically zero. The Point case certifies algebraic values, not a
      * zero-dimensional PDE refinement rate. Trial/test functions and all
      * coefficient captures remain alive throughout assembly.
      *
      * @param space Scalar or vector complex space.
      */
-    template <bool Derivatives = true>
     void checkForms(auto& space)
     {
       using Space = std::decay_t<decltype(space)>;
@@ -93,7 +91,7 @@ namespace Rodin::Tests::Unit
       }
       // Numeric lifting remains available alongside the complex function path.
       compare(MassForm(Real(3), trial, test), massIntegral(Real(3)));
-      if constexpr (Derivatives && std::is_same_v<Range, Complex>)
+      if constexpr (std::is_same_v<Range, Complex>)
       {
         const auto diffusionIntegral = [&](const auto& coefficient) {
           auto integral = Integral(coefficient * Grad(trial), Grad(test));
@@ -137,8 +135,8 @@ namespace Rodin::Tests::Unit
     P1<Complex> linear(mesh);
     H1<1, Complex> orderOne(std::integral_constant<size_t, 1>{}, mesh);
     H1<2, Complex> quadratic(std::integral_constant<size_t, 2>{}, mesh);
-    checkForms<false>(constant);
-    checkForms<false>(globalConstant);
+    checkForms(constant);
+    checkForms(globalConstant);
     checkForms(linear);
     checkForms(orderOne);
     checkForms(quadratic);
@@ -159,6 +157,42 @@ namespace Rodin::Tests::Unit
     checkForms(linear);
     checkForms(orderOne);
     checkForms(quadratic);
+  }
+
+  /**
+   * @brief Constant bases have exactly zero broken diffusion entries.
+   *
+   * Real and complex cellwise/global constants exercise the named kernel on
+   * Point and every cell geometry. This algebraic identity requires neither a
+   * numerical tolerance nor a positive-definiteness or PDE-solve assertion.
+   */
+  TEST_P(ComplexNamedFormTest, ConstantNamedDiffusionIsZero)
+  {
+    auto mesh = makeMesh();
+    const auto check = [&](auto&& space) {
+      using Scalar =
+        typename FormLanguage::Traits<std::decay_t<decltype(space)>>::ScalarType;
+      TrialFunction trial(space);
+      TestFunction test(space);
+      DiffusionForm form(Real(2), trial, test);
+      for (size_t repeat = 0; repeat < 2; ++repeat)
+      {
+        form.assemble();
+        const Math::Matrix<Scalar> matrix = form.getOperator();
+        EXPECT_GT(matrix.rows(), 0);
+        for (Eigen::Index row = 0; row < matrix.rows(); ++row)
+        {
+          for (Eigen::Index col = 0; col < matrix.cols(); ++col)
+          {
+            EXPECT_EQ(matrix(row, col), Scalar(0));
+          }
+        }
+      }
+    };
+    check(P0<Real>(mesh));
+    check(P0g<Real, LocalMesh>(mesh));
+    check(P0<Complex>(mesh));
+    check(P0g<Complex, LocalMesh>(mesh));
   }
 
   INSTANTIATE_TEST_SUITE_P(AllGeometries, ComplexNamedFormTest,

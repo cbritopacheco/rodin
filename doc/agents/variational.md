@@ -106,6 +106,14 @@ Families:
   (H1/Grad.h, P1/Div.h, ...) plus family QuadratureRule.h with optimized
   integration paths.
 
+Scalar P0/P0g shape gradients represent the broken derivative
+$\nabla_h u_h=0$, not distributional jumps. Their expression contract still
+requires a forwarded trial/test leaf and a polynomial order bound; zero is
+sufficient for the zero expression. Named diffusion tabulates reference
+gradients through `getGradient()` when available, otherwise through the
+basis directional derivatives. This accepts constant bases without requiring
+a convenience wrapper or changing the existing P1/H1 tabulation path.
+
 `FiniteElement.h` defines the element side: `getBasis(local)`,
 `getNode(local)` (reference nodes), counts per `Polytope::Type`.
 
