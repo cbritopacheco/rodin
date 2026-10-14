@@ -159,6 +159,7 @@ namespace Rodin::Tests::Unit
       }
       size_t m_visits;
     };
+    static_assert(LoadingArchive::is_loading::value);
     StateTransformation map;
     const auto before = map.getCacheIdentity();
     LoadingArchive archive;
@@ -224,6 +225,7 @@ namespace Rodin::Tests::Unit
         return *this;
       }
     };
+    static_assert(FailingArchive::is_loading::value);
     StateTransformation map;
     const auto before = map.getCacheIdentity();
     FailingArchive archive;
