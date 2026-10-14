@@ -39,30 +39,36 @@ namespace Rodin::Tests::Unit
       class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
-          template <class Function>
-          Pushforward(Function&& function, size_t& evaluations)
-            : m_function(std::forward<Function>(function)),
-              m_evaluations(evaluations)
-          {}
+        template <class Function>
+        Pushforward(Function&& function, size_t& evaluations, bool geometric)
+          : m_function(std::forward<Function>(function)),
+            m_evaluations(evaluations),
+            m_geometric(geometric)
+        {}
 
-          Math::SpatialVector<Real> operator()(const Point& p) const
-          {
-            ++m_evaluations.get();
-            const auto value = m_function(p.getReferenceCoordinates());
-            Math::SpatialVector<Real> out(2);
-            out(0) = 2.0 * value(0) + value(1);
-            out(1) = -value(0) + 3.0 * value(1);
-            return out;
-          }
+        Math::SpatialVector<Real> operator()(const Point& p) const
+        {
+          ++m_evaluations.get();
+          const auto value = m_function(p.getReferenceCoordinates());
+          Math::SpatialVector<Real> out(2);
+          out(0) = 2.0 * value(0) + value(1);
+          out(1) = -value(0) + 3.0 * value(1);
+          if (m_geometric)
+            out *= p.getDistortion();
+          return out;
+        }
 
         private:
           Callable m_function;
           std::reference_wrapper<size_t> m_evaluations;
+          bool m_geometric;
       };
 
-      explicit RangeTransformingSpace(const LocalMesh& mesh)
+      explicit RangeTransformingSpace(const LocalMesh& mesh, bool geometric = false)
         : m_mesh(mesh),
-          m_element(Polytope::Type::Triangle, 2)
+          m_element(Polytope::Type::Triangle, 2),
+          m_pushforwardEvaluations(0),
+          m_geometric(geometric)
       {}
 
       size_t getSize() const override
@@ -95,7 +101,7 @@ namespace Rodin::Tests::Unit
       auto getPushforward(const std::pair<size_t, Index>&, Callable&& function) const
       {
         return Pushforward<Callable>(
-          std::forward<Callable>(function), m_pushforwardEvaluations);
+          std::forward<Callable>(function), m_pushforwardEvaluations, m_geometric);
       }
 
       size_t getPushforwardEvaluationCount() const
@@ -106,7 +112,8 @@ namespace Rodin::Tests::Unit
     private:
       std::reference_wrapper<const LocalMesh> m_mesh;
       P1Element<Math::SpatialVector<Real>> m_element;
-      mutable size_t m_pushforwardEvaluations = 0;
+      mutable size_t m_pushforwardEvaluations;
+      bool m_geometric;
   };
 
   /// @brief Verifies that a nontrivial range pushforward is applied once to an expansion.
@@ -645,7 +652,7 @@ namespace Rodin::Tests::Unit
       {
         const auto& point = quadrature.getPoint(qp);
         const Real expected = point.x() + 10 * point.y() + 100 * point.z();
-        EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &qf, qp)), expected, 1e-10)
+        EXPECT_NEAR(gf.getValue(IntegrationPoint(quadrature, qp)), expected, 1e-10)
           << "geometry " << static_cast<int>(geometry) << ", quadrature point " << qp;
       }
     }
@@ -681,7 +688,8 @@ namespace Rodin::Tests::Unit
     for (size_t order : {1, 2, 1})
     {
       qf.emplace(order, cell.getGeometry());
-      const Point point(cell, qf->getPoint(0));
+      const PolytopeQuadrature quadrature(cell, *qf);
+      const Point& point = quadrature.getPoint(0);
       if (previousFormula)
       {
         ASSERT_EQ(&*qf, previousFormula);
@@ -691,7 +699,7 @@ namespace Rodin::Tests::Unit
       // Repeat the evaluation to cover both invalidation and a cache hit.
       for (size_t repeat = 0; repeat < 2; ++repeat)
       {
-        EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &*qf, 0)), expected, 1e-12)
+        EXPECT_NEAR(gf.getValue(IntegrationPoint(quadrature, 0)), expected, 1e-12)
           << "quadrature order " << order;
       }
       previousFormula = &*qf;
@@ -731,11 +739,12 @@ namespace Rodin::Tests::Unit
         ASSERT_EQ(dofs.size(), previousDOFs.size());
         ASSERT_TRUE((dofs != previousDOFs).any());
       }
-      const Point point(cell, qf.getPoint(0));
+      const PolytopeQuadrature quadrature(cell, qf);
+      const Point& point = quadrature.getPoint(0);
       const Real expected = point.x() + 10 * point.y();
       for (size_t repeat = 0; repeat < 2; ++repeat)
       {
-        EXPECT_NEAR(gf->getValue(IntegrationPoint(point, &qf, 0)), expected, 1e-12)
+        EXPECT_NEAR(gf->getValue(IntegrationPoint(quadrature, 0)), expected, 1e-12)
           << "mesh resolution " << resolution;
       }
       previousFunction = &*gf;
@@ -757,10 +766,11 @@ namespace Rodin::Tests::Unit
     for (size_t order : {1, 2, 1})
     {
       qf = QF::GaussLegendre(cell.getGeometry(), order);
-      const Point point(cell, qf.getPoint(0));
+      const PolytopeQuadrature quadrature(cell, qf);
+      const Point& point = quadrature.getPoint(0);
       for (size_t repeat = 0; repeat < 2; ++repeat)
       {
-        EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &qf, 0)),
+        EXPECT_NEAR(gf.getValue(IntegrationPoint(quadrature, 0)),
           point.x() + 10 * point.y(), 1e-12);
       }
     }
@@ -776,8 +786,9 @@ namespace Rodin::Tests::Unit
     H1 p2(std::integral_constant<size_t, 2>{}, mesh);
     const Polytope cell(mesh.getDimension(), 0, mesh);
     const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
-    const Point point(cell, qf.getPoint(0));
-    const IntegrationPoint ip(point, &qf, 0);
+    const PolytopeQuadrature quadrature(cell, qf);
+    const Point& point = quadrature.getPoint(0);
+    const IntegrationPoint ip(quadrature, 0);
     auto check = [&](const auto& fes) {
       GridFunction gf(fes);
       for (Real scale : {1.0, -2.0, 0.0, 3.0})
@@ -807,8 +818,9 @@ namespace Rodin::Tests::Unit
     GridFunction target(targetSpace);
     const Polytope cell(mesh.getDimension(), 0, mesh);
     const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
-    const Point point(cell, qf.getPoint(0));
-    const IntegrationPoint ip(point, &qf, 0);
+    const PolytopeQuadrature quadrature(cell, qf);
+    const Point& point = quadrature.getPoint(0);
+    const IntegrationPoint ip(quadrature, 0);
     for (Real scale : {1.0, -2.0, 0.0, 3.0})
     {
       const auto fn = RealFunction(
@@ -835,10 +847,11 @@ namespace Rodin::Tests::Unit
     const Point arbitrary(cell, Math::SpatialPoint{0.2, 0.3});
     for (size_t sample : {0, 1, 0, 1})
     {
-      const Point point(cell, qf.getPoint(sample));
-      EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &qf, sample)), fn(point), 1e-12);
+      const PolytopeQuadrature quadrature(cell, qf);
+      const Point& point = quadrature.getPoint(sample);
+      EXPECT_NEAR(gf.getValue(IntegrationPoint(quadrature, sample)), fn(point), 1e-12);
       EXPECT_NEAR(gf.getValue(IntegrationPoint(arbitrary)), fn(arbitrary), 1e-12);
-      EXPECT_NEAR(gf.getValue(IntegrationPoint(point, &qf, sample)), fn(point), 1e-12);
+      EXPECT_NEAR(gf.getValue(IntegrationPoint(quadrature, sample)), fn(point), 1e-12);
     }
   }
 
@@ -852,8 +865,9 @@ namespace Rodin::Tests::Unit
     H1 p2(std::integral_constant<size_t, 2>{}, mesh, size_t(2));
     const Polytope cell(mesh.getDimension(), 0, mesh);
     const auto& qf = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
-    const Point point(cell, qf.getPoint(0));
-    const IntegrationPoint ip(point, &qf, 0);
+    const PolytopeQuadrature quadrature(cell, qf);
+    const Point& point = quadrature.getPoint(0);
+    const IntegrationPoint ip(quadrature, 0);
     auto check = [&](const auto& fes) {
       GridFunction gf(fes);
       for (Real scale : {1.0, -2.0, 0.0, 3.0})
@@ -884,19 +898,21 @@ namespace Rodin::Tests::Unit
     target.project(fn);
     source.project(fn);
     const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
-    const Point firstPoint(Polytope(2, 0, firstMesh), qf.getPoint(0));
-    const Point secondPoint(Polytope(2, 0, secondMesh), qf.getPoint(0));
+    const PolytopeQuadrature firstQuadrature(Polytope(2, 0, firstMesh), qf);
+    const Point& firstPoint = firstQuadrature.getPoint(0);
+    const PolytopeQuadrature secondQuadrature(Polytope(2, 0, secondMesh), qf);
+    const Point& secondPoint = secondQuadrature.getPoint(0);
     ASSERT_EQ(&firstSpace.getFiniteElement(2, 0), &secondSpace.getFiniteElement(2, 0));
     const IndexArray firstDOFs = firstSpace.getDOFs(2, 0);
     ASSERT_TRUE((firstDOFs != secondSpace.getDOFs(2, 0)).any());
     EXPECT_NEAR(
-      target.getValue(IntegrationPoint(firstPoint, &qf, 0)), fn(firstPoint), 1e-12);
+      target.getValue(IntegrationPoint(firstQuadrature, 0)), fn(firstPoint), 1e-12);
     target = std::move(source);
     EXPECT_EQ(&target.getFiniteElementSpace(), &secondSpace);
     EXPECT_NEAR(
-      target.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+      target.getValue(IntegrationPoint(secondQuadrature, 0)), fn(secondPoint), 1e-12);
     EXPECT_NEAR(
-      target.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+      target.getValue(IntegrationPoint(secondQuadrature, 0)), fn(secondPoint), 1e-12);
   }
 
   /// @brief Immutable mesh connectivity does not imply an immutable vector-space definition.
@@ -910,8 +926,9 @@ namespace Rodin::Tests::Unit
       [](const Point& p) { return 1 + p.x(); }, [](const Point& p) { return 2 + p.y(); }};
     gf.project(initial);
     const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
-    const Point point(Polytope(2, 0, mesh), qf.getPoint(0));
-    const IntegrationPoint ip(point, &qf, 0);
+    const PolytopeQuadrature quadrature(Polytope(2, 0, mesh), qf);
+    const Point& point = quadrature.getPoint(0);
+    const IntegrationPoint ip(quadrature, 0);
     EXPECT_NEAR((gf.getValue(ip) - initial(point)).norm(), 0, 1e-12);
     const auto* previousElement = &fes.getFiniteElement(2, 0);
     fes = replacement;
@@ -938,18 +955,20 @@ namespace Rodin::Tests::Unit
     const auto fn = RealFunction([](const Point& p) { return 1 + p.x() + 10 * p.y(); });
     gf.project(fn);
     const auto& qf = QF::PolytopeQuadratureFormula::get(2, Polytope::Type::Triangle);
-    const Point firstPoint(Polytope(2, 0, firstMesh), qf.getPoint(0));
-    const Point secondPoint(Polytope(2, 0, secondMesh), qf.getPoint(0));
+    const PolytopeQuadrature firstQuadrature(Polytope(2, 0, firstMesh), qf);
+    const Point& firstPoint = firstQuadrature.getPoint(0);
+    const PolytopeQuadrature secondQuadrature(Polytope(2, 0, secondMesh), qf);
+    const Point& secondPoint = secondQuadrature.getPoint(0);
     ASSERT_EQ(&fes.getFiniteElement(2, 0), &replacement.getFiniteElement(2, 0));
-    EXPECT_NEAR(gf.getValue(IntegrationPoint(firstPoint, &qf, 0)), fn(firstPoint), 1e-12);
+    EXPECT_NEAR(gf.getValue(IntegrationPoint(firstQuadrature, 0)), fn(firstPoint), 1e-12);
     fes = replacement;
     gf.getData().resize(fes.getSize());
     gf.project(fn);
     EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
     EXPECT_NEAR(
-      gf.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+      gf.getValue(IntegrationPoint(secondQuadrature, 0)), fn(secondPoint), 1e-12);
     EXPECT_NEAR(
-      gf.getValue(IntegrationPoint(secondPoint, &qf, 0)), fn(secondPoint), 1e-12);
+      gf.getValue(IntegrationPoint(secondQuadrature, 0)), fn(secondPoint), 1e-12);
   }
 
   /// @brief A face formula/index does not uniquely identify a mapped cell point.
@@ -998,8 +1017,8 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Adjacent floating-point coordinates and signed zeros cannot alias cache entries.
-  TEST(Rodin_Variational_GridFunction, CoordinateKeyUsesExactRepresentations)
+  /// @brief Unproven samples evaluate directly without numerical coordinate keys.
+  TEST(Rodin_Variational_GridFunction, UnprovenSamplesDoNotReuseBasisValues)
   {
     LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     RangeTransformingSpace fes(mesh);
@@ -1007,17 +1026,42 @@ namespace Rodin::Tests::Unit
     gf.getData().setOnes();
     const Polytope cell(2, 0, mesh);
     const auto& qf = QF::PolytopeQuadratureFormula::get(1, Polytope::Type::Segment);
-    const size_t count = fes.getFiniteElement(2, 0).getCount();
     for (Real x : {0.2, std::nextafter(Real(0.2), Real(1)), Real(0), -Real(0)})
     {
       const Point point(cell, Math::SpatialPoint{x, 0.3});
       const IntegrationPoint ip(point, &qf, 0);
       const size_t before = fes.getPushforwardEvaluationCount();
       gf.getValue(ip);
-      EXPECT_EQ(fes.getPushforwardEvaluationCount(), before + count);
+      EXPECT_EQ(fes.getPushforwardEvaluationCount(), before + 1);
       gf.getValue(ip);
-      EXPECT_EQ(fes.getPushforwardEvaluationCount(), before + count);
+      EXPECT_EQ(fes.getPushforwardEvaluationCount(), before + 2);
     }
   }
 
+  /// @brief Canonical basis reuse respects logical geometry changes in a pushforward.
+  TEST(Rodin_Variational_GridFunction, CertifiedSamplesTrackGeometryDependentPushforward)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    RangeTransformingSpace fes(mesh, true);
+    GridFunction field(fes);
+    field.getData().setOnes();
+    const auto cell = *mesh.getCell();
+    const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+    const PolytopeQuadrature before(cell, formula);
+    const IntegrationPoint first(before, 0);
+    const auto original = field.getValue(first);
+    ASSERT_GT(original.norm(), 0);
+    const size_t calls = fes.getPushforwardEvaluationCount();
+    field.getValue(first);
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls);
+    mesh.scale(2);
+    const PolytopeQuadrature after(cell, formula);
+    const IntegrationPoint second(after, 0);
+    const auto actual = field.getValue(second);
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + fes.getSize());
+    for (size_t i = 0; i < actual.size(); ++i)
+      EXPECT_EQ(actual(i), 4 * original(i));
+    field.getValue(second);
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), calls + fes.getSize());
+  }
 }

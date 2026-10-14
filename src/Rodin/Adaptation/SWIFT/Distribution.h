@@ -79,7 +79,7 @@ namespace Rodin::Adaptation::SWIFT
         for (size_t q = 0; q < quadrature.getSize(); ++q)
         {
           const auto& point = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(point, &qf, q);
+          const Variational::IntegrationPoint ip(quadrature, q);
           CellDeformation deformation(d);
           deformation.setDisplacementGradient(currentJacobian.getValue(ip));
           const Math::SpatialMatrix<Real> inverse(

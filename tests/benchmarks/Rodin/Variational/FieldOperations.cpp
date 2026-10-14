@@ -179,7 +179,7 @@ namespace Rodin::Tests::Benchmarks
           const auto& quadrature = cell->getQuadrature(formula);
           for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
           {
-            points.emplace_back(quadrature.getPoint(qp), &formula, qp);
+            points.emplace_back(quadrature, qp);
             exact.emplace_back(field(quadrature.getPoint(qp)));
           }
         }

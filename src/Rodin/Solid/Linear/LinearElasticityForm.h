@@ -211,7 +211,7 @@ namespace Rodin::Variational
             for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
             {
               const auto& point = quadrature.getPoint(qp);
-              const IntegrationPoint ip(point, &qf, qp);
+              const IntegrationPoint ip(quadrature, qp);
               const ScalarType weight =
                 static_cast<ScalarType>(qf.getWeight(qp) * point.getDistortion());
               const auto lambda = m_lambda->getValue(ip);

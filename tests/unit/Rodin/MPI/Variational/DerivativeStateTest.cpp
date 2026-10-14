@@ -47,7 +47,7 @@ namespace
       using Value = std::remove_cvref_t<decltype(cached.getBasis(size_t(0)))>;
       using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
       const PolytopeQuadrature before(cell, formula);
-      const IntegrationPoint first(before.getPoint(0), &formula, 0);
+      const IntegrationPoint first(before, 0);
       cached.setIntegrationPoint(first);
       std::vector<Value> original;
       for (size_t a = 0; a < cached.getDOFs(cell); ++a)
@@ -56,7 +56,7 @@ namespace
       mesh.scale(2);
       const PolytopeQuadrature after(cell, formula);
       EXPECT_NE(cell.getTransformation().getCacheIdentity(), identity);
-      const IntegrationPoint second(after.getPoint(0), &formula, 0);
+      const IntegrationPoint second(after, 0);
       cached.setIntegrationPoint(second);
       auto fresh = makeFresh(u);
       fresh.setIntegrationPoint(second);
@@ -126,6 +126,44 @@ TEST(MPI_DerivativeState, GeometryRebindAllGeometries)
       P1<Math::SpatialVector<Scalar>, decltype(mesh)> vector(mesh, dimension);
       checkState(mesh, scalar);
       checkState(mesh, vector);
+    };
+    fields.template operator()<Real>();
+    fields.template operator()<Complex>();
+  }
+}
+
+/**
+ * @brief Certifies H1 scalar/vector geometry rebinding through every supported order.
+ *
+ * Every rank constructs the real/complex spaces collectively before any
+ * empty-holder branch. Binding, reference association and geometry updates
+ * remain rank-local. Orders one through six and all seven cell families use
+ * the same exact dilation/fresh-expression checks as native P1.
+ */
+TEST(MPI_DerivativeState, H1GeometryRebindAllOrdersAllGeometries)
+{
+  const Context::MPI context(*environment, *world);
+  using G = Polytope::Type;
+  for (const auto geometry : {G::Segment, G::Triangle, G::Quadrilateral, G::Tetrahedron,
+         G::Pyramid, G::Hexahedron, G::Wedge})
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    auto mesh = Tests::Convergence::DistributedUniformGrid(context, geometry).makeMesh(2);
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    const auto fields = [&]<class Scalar>() {
+      const auto degree = [&]<size_t K>(std::integral_constant<size_t, K> order) {
+        SCOPED_TRACE(K);
+        H1<K, Scalar, decltype(mesh)> scalar(order, mesh);
+        H1<K, Math::SpatialVector<Scalar>, decltype(mesh)> vector(order, mesh, dimension);
+        checkState(mesh, scalar);
+        checkState(mesh, vector);
+      };
+      degree(std::integral_constant<size_t, 1>{});
+      degree(std::integral_constant<size_t, 2>{});
+      degree(std::integral_constant<size_t, 3>{});
+      degree(std::integral_constant<size_t, 4>{});
+      degree(std::integral_constant<size_t, 5>{});
+      degree(std::integral_constant<size_t, 6>{});
     };
     fields.template operator()<Real>();
     fields.template operator()<Complex>();

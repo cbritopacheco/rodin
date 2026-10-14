@@ -1,5 +1,10 @@
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
+add_executable(RodinVariationalIntegrationPointTest IntegrationPointTest.cpp)
+target_link_libraries(RodinVariationalIntegrationPointTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalIntegrationPointTest PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalWeightedH1JacobianTest WeightedH1JacobianTest.cpp)
 target_link_libraries(RodinVariationalWeightedH1JacobianTest PRIVATE
   GTest::gtest GTest::gtest_main Rodin::Variational)

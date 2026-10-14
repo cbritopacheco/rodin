@@ -78,21 +78,24 @@ namespace Rodin::Adaptation
       /**
        * @brief The moved point @f$\Phi(x)=x+u(x)@f$, located in the mesh.
        *
-       * Cached: consecutive calls with the same polytope, quadrature formula
-       * and quadrature index return the previously located point. Generic
-       * pointwise evaluations have no quadrature identity and are not cached.
+       * Consecutive calls may reuse a located point only for a certified
+       * reference sample with unchanged mesh, entity, formula version and
+       * geometry state. Sampling provenance alone does not authorize reuse.
+       * Displacement or locator updates still require @ref invalidate.
        *
        * @param ip Integration point on the reference configuration; its
-       * polytope, quadrature formula and quadrature index form the cache key.
+       * reference association and local geometry identify the source sample.
        * @returns Located point in the deformed configuration.
        */
       const Geometry::Point& getMovedPoint(const Variational::IntegrationPoint& ip) const
       {
         const auto& pt = ip.getPoint();
         const auto& polytope = pt.getPolytope();
-        const Key key{polytope.getDimension(), polytope.getIndex(),
-          ip.getQuadratureFormula(), ip.getIndex()};
-        if (!ip.getQuadratureFormula() || !m_moved || !m_key || !(*m_key == key))
+        const auto* formula = ip.getReferenceQuadratureFormula();
+        const auto identity = polytope.getTransformation().getCacheIdentity();
+        const Key key{&polytope.getMesh(), polytope.getDimension(), polytope.getIndex(),
+          formula, formula ? formula->getCacheIdentity() : 0, ip.getIndex(), identity};
+        if (!formula || !identity || !m_moved || !m_key || !(*m_key == key))
         {
             // Geometry::Point is constructible but not assignable, so the slot
             // is re-emplaced rather than overwritten.
@@ -148,21 +151,26 @@ namespace Rodin::Adaptation
 
       struct Key
       {
-          std::size_t dimension;
-          Index index;
-          const QF::QuadratureFormulaBase* quadrature;
-          std::size_t qp;
-          /**
+        const Geometry::MeshBase* mesh;
+        std::size_t dimension;
+        Index index;
+        const QF::QuadratureFormulaBase* quadrature;
+        size_t quadratureIdentity;
+        std::size_t qp;
+        Optional<size_t> transformationIdentity;
+        /**
            * @brief Compares the operands for equality.
            * @param other Object compared with this object.
            * @returns True when the operands compare equal.
            */
 
-          bool operator==(const Key& other) const
-          {
-            return dimension == other.dimension && index == other.index &&
-              quadrature == other.quadrature && qp == other.qp;
-          }
+        bool operator==(const Key& other) const
+        {
+          return mesh == other.mesh && dimension == other.dimension &&
+            index == other.index && quadrature == other.quadrature &&
+            quadratureIdentity == other.quadratureIdentity && qp == other.qp &&
+            transformationIdentity == other.transformationIdentity;
+        }
       };
 
       std::reference_wrapper<const Displacement> m_u;

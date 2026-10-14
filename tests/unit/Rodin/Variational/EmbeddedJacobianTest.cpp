@@ -76,7 +76,7 @@ TEST(EmbeddedJacobian, AmbientColumnsAndTangentAffineFields)
           const auto& point = quadrature.getPoint(qp);
           checkValue(jacobian.getValue(point));
           checkValue(jacobian.getValue(IntegrationPoint(point)));
-          const IntegrationPoint ip(point, &formula, qp);
+          const IntegrationPoint ip(quadrature, qp);
           checkValue(jacobian.getValue(ip));
           shape.setIntegrationPoint(ip);
           Math::SpatialMatrix<Scalar> reconstructed(components, ambient);
@@ -213,7 +213,7 @@ TEST(EmbeddedJacobian, P1BasisContractionAllRangesAndGeometries)
             const auto& point = points.getPoint(qp);
             const auto inverse = point.getJacobianInverse();
             const auto& reference = point.getReferenceCoordinates();
-            const IntegrationPoint indexed(point, &formula, qp);
+            const IntegrationPoint indexed(points, qp);
             const IntegrationPoint direct(point);
             for (const auto* ip : {&indexed, &direct})
             {

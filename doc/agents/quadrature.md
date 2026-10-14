@@ -130,6 +130,15 @@ Temporary matrix storage is proportional to the current formula size, not
 the number of mesh cells. Copying or moving a point preserves its owned
 geometry, and rebinding it invalidates that geometry normally.
 
+`PolytopeQuadrature` retains the formula's construction-time identity beside
+its owned samples. A variational binding constructed from this owner and a
+logical index may reuse reference tabulation only while that identity matches
+the borrowed formula. Copying/moving preserves the snapshot; formula assignment
+disables the old binding's reference association. This metadata adds no state
+to individual geometric points and requires no coordinate comparisons or MPI
+communication. Explicit point/formula/index bindings retain origin metadata
+without certifying a reference chart.
+
 `ReferenceTabulation<Element, Scalar>` owns the common bounded thread-local
 store used by scalar P1 and H1 elements. Each element type retains its own basis
 formulas and ordering, including the rational pyramid basis. The stored arrays

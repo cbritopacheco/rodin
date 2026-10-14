@@ -51,7 +51,6 @@
 #define RODIN_VARIATIONAL_GRIDFUNCTION_H
 
 #include <atomic>
-#include <cstring>
 #include <algorithm>
 #include <utility>
 #include <fstream>
@@ -863,7 +862,7 @@ namespace Rodin::Variational
       constexpr
       void interpolate(RangeType& res, const IntegrationPoint& ip) const
       {
-        if (ip.getQuadratureFormula() == nullptr)
+        if (ip.getReferenceQuadratureFormula() == nullptr)
         {
           static_cast<const Derived&>(*this).interpolate(res, ip.getPoint());
           return;
@@ -1301,36 +1300,37 @@ namespace Rodin::Variational
        */
       struct EvaluationCache
       {
-          EvaluationCache()
-            : owner(nullptr),
-              ownerIdentity(static_cast<size_t>(-1)),
-              fes(nullptr),
-              mesh(nullptr),
-              element(nullptr),
-              d(static_cast<size_t>(-1)),
-              i(static_cast<Index>(-1)),
-              hasBasisValues(false),
-              qf(nullptr),
-              qp(static_cast<size_t>(-1)),
-              qfIdentity(static_cast<size_t>(-1))
-          {}
+        EvaluationCache()
+          : owner(nullptr),
+            ownerIdentity(0),
+            fes(nullptr),
+            mesh(nullptr),
+            element(nullptr),
+            d(0),
+            i(0),
+            hasBasisValues(false),
+            qf(nullptr),
+            qp(0),
+            qfIdentity(0),
+            transformationIdentity(std::nullopt)
+        {}
 
-          const GridFunctionBase* owner;
-          size_t ownerIdentity;
-          const FES* fes;
-          const Geometry::MeshBase* mesh;
-          // Space assignments can change the element even with fixed connectivity.
-          const ElementType* element;
-          size_t d;
-          Index i;
-          std::vector<Index> dofs;
+        const GridFunctionBase* owner;
+        size_t ownerIdentity;
+        const FES* fes;
+        const Geometry::MeshBase* mesh;
+        // Space assignments can change the element even with fixed connectivity.
+        const ElementType* element;
+        size_t d;
+        Index i;
+        std::vector<Index> dofs;
 
-          bool hasBasisValues;
-          const QF::QuadratureFormulaBase* qf;
-          size_t qp;
-          size_t qfIdentity;
-          Math::SpatialPoint referenceCoordinates;
-          std::vector<RangeType> basisValues;
+        bool hasBasisValues;
+        const QF::QuadratureFormulaBase* qf;
+        size_t qp;
+        size_t qfIdentity;
+        Optional<size_t> transformationIdentity;
+        std::vector<RangeType> basisValues;
       };
       /**
        * @brief Gets the thread-local evaluation cache.
@@ -1389,25 +1389,17 @@ namespace Rodin::Variational
         auto& cache = getEvaluationCache();
         const auto* fes = &this->getFiniteElementSpace();
         const auto* element = &fes->getFiniteElement(d, i);
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
+        assert(qf);
         const size_t qfIdentity = qf->getCacheIdentity();
-        const auto& referenceCoordinates = ip.getPoint().getReferenceCoordinates();
-        bool sameReferenceCoordinates =
-          cache.referenceCoordinates.size() == referenceCoordinates.size();
-        // Mapped face samples can share a formula/index but have different cell
-        // coordinates. Exact component representations prevent approximate hits
-        // and distinguish signed zeros without allocating coordinate storage.
-        for (size_t j = 0; sameReferenceCoordinates && j < referenceCoordinates.size();
-             ++j)
-        {
-          sameReferenceCoordinates = std::memcmp(&cache.referenceCoordinates(j),
-                                       &referenceCoordinates(j), sizeof(Real)) == 0;
-        }
+        const auto transformationIdentity =
+          ip.getPoint().getPolytope().getTransformation().getCacheIdentity();
         if (!cache.hasBasisValues || cache.owner != this ||
           cache.ownerIdentity != m_identity || cache.fes != fes ||
           cache.element != element || cache.d != d || cache.i != i || cache.qf != qf ||
           cache.qfIdentity != qfIdentity || cache.qp != ip.getIndex() ||
-          !sameReferenceCoordinates)
+          !transformationIdentity ||
+          cache.transformationIdentity != transformationIdentity)
         {
           const auto& fe = *element;
           const size_t count = fe.getCount();
@@ -1422,7 +1414,7 @@ namespace Rodin::Variational
           cache.qf = qf;
           cache.qfIdentity = qfIdentity;
           cache.qp = ip.getIndex();
-          cache.referenceCoordinates = referenceCoordinates;
+          cache.transformationIdentity = transformationIdentity;
           cache.basisValues.resize(count);
           for (Index local = 0; local < count; ++local)
           {

@@ -130,6 +130,12 @@ namespace Rodin::Variational
       {
         const auto& p = ip.getPoint();
         const auto& polytope = p.getPolytope();
+        const auto* qf = ip.getReferenceQuadratureFormula();
+        if (!qf || polytope.getDimension() != polytope.getMesh().getDimension())
+        {
+          interpolate(out, p);
+          return;
+        }
         const size_t d = polytope.getDimension();
         const Index  i = polytope.getIndex();
 
@@ -139,8 +145,6 @@ namespace Rodin::Variational
 
         const H1Element<K, ScalarType> feS(polytope.getGeometry());
         const size_t nscalar = feS.getCount();
-        const auto* qf = ip.getQuadratureFormula();
-        assert(qf);
         const auto& tab = feS.getTabulation(*qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
@@ -438,7 +442,7 @@ namespace Rodin::Variational
         m_ip = &ip;
 
         const auto& p  = ip.getPoint();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();

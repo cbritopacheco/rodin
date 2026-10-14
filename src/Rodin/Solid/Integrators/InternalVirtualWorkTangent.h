@@ -227,7 +227,7 @@ namespace Rodin::Solid
         for (size_t q = 0; q < nqp; ++q)
         {
           const auto& pt = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Variational::IntegrationPoint ip(quadrature, q);
           const ScalarType wq = qf.getWeight(q);
 
           const ScalarType distortion = pt.getDistortion();
@@ -542,7 +542,7 @@ namespace Rodin::Solid
         for (size_t q = 0; q < nqp; ++q)
         {
           const auto& pt = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Variational::IntegrationPoint ip(quadrature, q);
           const ScalarType wq = qf.getWeight(q);
 
           const ScalarType distortion = pt.getDistortion();
@@ -835,7 +835,7 @@ namespace Rodin::Solid
         for (size_t q = 0; q < nqp; ++q)
         {
           const auto& pt = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Variational::IntegrationPoint ip(quadrature, q);
           const ScalarType wq = qf.getWeight(q);
 
           const ScalarType distortion = pt.getDistortion();
@@ -1077,7 +1077,7 @@ namespace Rodin::Solid
         for (size_t q = 0; q < nqp; ++q)
         {
           const auto& pt = quadrature.getPoint(q);
-          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Variational::IntegrationPoint ip(quadrature, q);
           const ScalarType wq = qf.getWeight(q);
 
           const ScalarType distortion = pt.getDistortion();

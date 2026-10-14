@@ -174,7 +174,7 @@ namespace Rodin::Tests::Benchmarks
       };
       for (size_t qp = 0; qp < formula.getSize(); ++qp)
       {
-        const IntegrationPoint ip(quadrature.getPoint(qp), &formula, qp);
+        const IntegrationPoint ip(quadrature, qp);
         gradient.setIntegrationPoint(ip);
         for (size_t a = 0; a < fe.getCount(); ++a)
           initial.push_back(gradient.getBasis(a));
@@ -252,7 +252,7 @@ namespace Rodin::Tests::Benchmarks
       {
         for (size_t qp = 0; qp < formula.getSize(); ++qp)
         {
-          const IntegrationPoint ip(quadrature.getPoint(qp), &formula, qp);
+          const IntegrationPoint ip(quadrature, qp);
           gradient.setIntegrationPoint(ip);
           for (size_t a = 0; a < fe.getCount(); ++a)
           {
@@ -269,7 +269,7 @@ namespace Rodin::Tests::Benchmarks
       }
       for (size_t qp = 0; qp < formula.getSize(); ++qp)
       {
-        const IntegrationPoint ip(quadrature.getPoint(qp), &formula, qp);
+        const IntegrationPoint ip(quadrature, qp);
         gradient.setIntegrationPoint(ip);
         for (size_t a = 0; a < fe.getCount(); ++a)
         {

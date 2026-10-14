@@ -11,8 +11,9 @@
 namespace Rodin::Geometry
 {
   PolytopeQuadrature::PolytopeQuadrature(
-      const Polytope& polytope, const QF::QuadratureFormulaBase& qf)
-    : m_qf(&qf)
+    const Polytope& polytope, const QF::QuadratureFormulaBase& qf)
+    : m_qf(&qf),
+      m_qfIdentity(qf.getCacheIdentity())
   {
     std::vector<Math::SpatialMatrix<Real>> jacobians;
     polytope.getTransformation().jacobian(jacobians, qf);

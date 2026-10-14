@@ -75,7 +75,7 @@ namespace Rodin::Tests
           const auto& p = quadrature.getPoint(qp);
           const Scalar weight = static_cast<Scalar>(m_qf->getWeight(qp)) *
             static_cast<Scalar>(p.getDistortion());
-          const Variational::IntegrationPoint ip(p, m_qf, qp);
+          const Variational::IntegrationPoint ip(quadrature, qp);
           m_integrand.setIntegrationPoint(ip);
           for (size_t tr = 0; tr < nr; ++tr)
           {

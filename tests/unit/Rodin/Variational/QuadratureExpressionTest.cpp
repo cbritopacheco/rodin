@@ -247,7 +247,7 @@ namespace Rodin::Tests::Unit
           for (size_t qp = 0; qp < formula.getSize(); ++qp)
           {
             SCOPED_TRACE(::testing::Message() << "sample " << qp);
-            const IntegrationPoint indexed(points.getPoint(qp), &formula, qp);
+            const IntegrationPoint indexed(points, qp);
             const IntegrationPoint direct(points.getPoint(qp));
             reused.setIntegrationPoint(indexed);
             auto fresh = makeFresh(u);
@@ -347,7 +347,7 @@ namespace Rodin::Tests::Unit
           using Value = std::remove_cvref_t<decltype(cached.getBasis(size_t(0)))>;
           using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
           const PolytopeQuadrature before(cell, formula);
-          const IntegrationPoint first(before.getPoint(0), &formula, 0);
+          const IntegrationPoint first(before, 0);
           cached.setIntegrationPoint(first);
           std::vector<Value> original;
           for (size_t local = 0; local < cached.getDOFs(cell); ++local)
@@ -359,7 +359,7 @@ namespace Rodin::Tests::Unit
             mesh.setVertexCoordinates(vertex, coordinates);
           }
           const PolytopeQuadrature after(cell, formula);
-          const IntegrationPoint second(after.getPoint(0), &formula, 0);
+          const IntegrationPoint second(after, 0);
           cached.setIntegrationPoint(second);
           auto fresh = makeFresh(u);
           fresh.setIntegrationPoint(second);
@@ -456,8 +456,8 @@ namespace Rodin::Tests::Unit
                 ASSERT_NE(formula->getCacheIdentity(), identity);
               }
               identity = formula->getCacheIdentity();
-              Point point(*cell, formula->getPoint(0));
-              const IntegrationPoint ip(point, &*formula, 0);
+              const PolytopeQuadrature points(*cell, *formula);
+              const IntegrationPoint ip(points, 0);
               TestFunction freshUnknown(space);
               decltype(auto) fresh = makeFresh(freshUnknown);
               cached.setIntegrationPoint(ip);

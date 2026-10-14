@@ -238,7 +238,7 @@ namespace Rodin::Variational
         m_ip = &ip;
 
         const auto& p  = ip.getPoint();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
@@ -468,8 +468,9 @@ namespace Rodin::Variational
         const auto& poly = ip.getPoint().getPolytope();
         const auto& fe = this->getFiniteElementSpace().getFiniteElement(
           poly.getDimension(), poly.getIndex());
-        if (!ip.getQuadratureFormula() || m_qf != ip.getQuadratureFormula() ||
-          m_qfIdentity != ip.getQuadratureFormula()->getCacheIdentity() ||
+        if (!ip.getReferenceQuadratureFormula() ||
+          m_qf != ip.getReferenceQuadratureFormula() ||
+          m_qfIdentity != ip.getReferenceQuadratureFormula()->getCacheIdentity() ||
           m_qp != ip.getIndex() || m_geometry != poly.getGeometry())
         {
           m_basis.resize(fe.getCount());
@@ -487,7 +488,7 @@ namespace Rodin::Variational
               basis(c / fe.getColumns(), c % fe.getColumns()) = value;
             }
           }
-          m_qf = ip.getQuadratureFormula();
+          m_qf = ip.getReferenceQuadratureFormula();
           m_qfIdentity = m_qf ? m_qf->getCacheIdentity() : 0;
           m_qp = ip.getIndex();
           m_geometry = poly.getGeometry();

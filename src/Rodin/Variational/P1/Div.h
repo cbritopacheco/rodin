@@ -549,7 +549,7 @@ namespace Rodin::Variational
 
         const auto& transformation = poly.getTransformation();
         const int transOrder = transformation.getOrder();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
 
         const auto& fes = this->getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();

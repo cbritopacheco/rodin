@@ -210,7 +210,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, &qf, qp);
+          const IntegrationPoint ip(q, qp);
           res += qf.getWeight(qp) * p.getDistortion() * f(ip);
         }
 
@@ -644,9 +644,9 @@ namespace Rodin::Variational
             * static_cast<ScalarType>(p.getDistortion());
 
           if (!m_ip)
-            m_ip = std::make_unique<IntegrationPoint>(p, m_qf, qp);
+            m_ip = std::make_unique<IntegrationPoint>(q, qp);
           else
-            *m_ip = IntegrationPoint(p, m_qf, qp);
+            *m_ip = IntegrationPoint(q, qp);
           integrand.setIntegrationPoint(*m_ip);
 
           // Each test basis value is evaluated once per point, not once per
@@ -887,9 +887,9 @@ namespace Rodin::Variational
             * static_cast<ScalarType>(p.getDistortion());
 
           if (!m_ip)
-            m_ip = std::make_unique<IntegrationPoint>(p, m_qf, qp);
+            m_ip = std::make_unique<IntegrationPoint>(q, qp);
           else
-            *m_ip = IntegrationPoint(p, m_qf, qp);
+            *m_ip = IntegrationPoint(q, qp);
           integrand.setIntegrationPoint(*m_ip);
 
           for (size_t te = 0; te < nte; ++te)

@@ -184,7 +184,8 @@ namespace Rodin::Variational
       void interpolate(SpatialMatrixType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
-        if (!ip.getQuadratureFormula())
+        if (!ip.getReferenceQuadratureFormula() ||
+          p.getPolytope().getDimension() != p.getPolytope().getMesh().getDimension())
         {
           interpolate(out, p);
           return;
@@ -200,7 +201,7 @@ namespace Rodin::Variational
 
         const auto feS = H1Element<K, ScalarType>(polytope.getGeometry());
         const size_t nscalar = feS.getCount();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         assert(qf);
         const auto& tab = feS.getTabulation(*qf);
         const auto JinvT = p.getJacobianInverse().transpose();
@@ -489,7 +490,7 @@ namespace Rodin::Variational
         m_ip = &ip;
 
         const auto& p  = ip.getPoint();
-        const auto* qf = ip.getQuadratureFormula();
+        const auto* qf = ip.getReferenceQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();

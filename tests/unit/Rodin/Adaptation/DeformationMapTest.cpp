@@ -10,7 +10,9 @@
 #include "Rodin/Geometry.h"
 #include "Rodin/Location/AABB.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/QF/GaussLegendre.h"
 #include "Rodin/Variational.h"
+#include "../../../convergence/Convergence.h"
 
 using namespace Rodin;
 using namespace Rodin::Adaptation;
@@ -98,8 +100,8 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(locator.calls, 3u);
 
       deformation.invalidate();
-      const IntegrationPoint indexedFirst(first, &firstRule, 0);
-      const IntegrationPoint indexedSecond(second, &secondRule, 0);
+      const IntegrationPoint indexedFirst(firstQuadrature, 0);
+      const IntegrationPoint indexedSecond(secondQuadrature, 0);
       check(indexedFirst, Expansion);
       const std::size_t beforeRepeat = locator.calls;
       check(indexedFirst, Expansion);
@@ -142,5 +144,81 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Adaptation_DeformationMap, P3TetrahedronPointAndQuadratureIdentity)
   {
     checkPointEvaluation<3, 3>();
+  }
+
+  /**
+   * @brief Located-point reuse follows reference association and local state.
+   *
+   * Zero displacement isolates the cache from displacement updates. Formula
+   * assignment and geometry dilation preserve entity indices but must trigger
+   * relocation. Unproven point/formula/index bindings always relocate, even
+   * when their originating index is unchanged. A counting cell locator tests
+   * this contract independently of bounding-volume hierarchy rebuilding.
+   */
+  TEST(Rodin_Adaptation_DeformationMap, ReferenceAssociationAndStateTransitions)
+  {
+    struct CellLocator
+    {
+      explicit CellLocator(const LocalMesh& mesh)
+        : mesh(mesh),
+          calls(0)
+      {}
+      Optional<Point> locate(size_t dimension, const Math::SpatialPoint& physical) const
+      {
+        ++calls;
+        const auto cell = mesh.getPolytope(dimension, 0);
+        Math::SpatialPoint reference;
+        cell->getTransformation().inverse(reference, physical);
+        return Point(*cell, reference, physical);
+      }
+      const LocalMesh& mesh;
+      mutable size_t calls;
+    };
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      auto mesh = Convergence::UniformGrid(geometry).makeMesh(2);
+      const auto cell = *mesh.getCell();
+      const size_t dimension = mesh.getDimension();
+      VectorFunction zero(dimension, [dimension](const Point&) {
+        Math::SpatialVector<Real> value(dimension);
+        value.setZero();
+        return value;
+      });
+      CellLocator locator(mesh);
+      DeformationMap deformation(zero, locator);
+      QF::GaussLegendre formula(geometry, 2);
+      const PolytopeQuadrature first(cell, formula);
+      const IntegrationPoint original(first, 0);
+      deformation.getMovedPoint(original);
+      deformation.getMovedPoint(original);
+      EXPECT_EQ(locator.calls, 1);
+      formula = QF::GaussLegendre(geometry, 4);
+      const PolytopeQuadrature second(cell, formula);
+      const IntegrationPoint reassigned(second, 0);
+      const auto secondPhysical =
+        deformation.getMovedPoint(reassigned).getPhysicalCoordinates();
+      EXPECT_EQ(locator.calls, 2);
+      for (size_t j = 0; j < dimension; ++j)
+        EXPECT_EQ(secondPhysical(j), reassigned.getPoint().getPhysicalCoordinates()(j));
+      mesh.scale(2);
+      const PolytopeQuadrature third(cell, formula);
+      const IntegrationPoint rescaled(third, 0);
+      const auto thirdPhysical =
+        deformation.getMovedPoint(rescaled).getPhysicalCoordinates();
+      EXPECT_EQ(locator.calls, 3);
+      for (size_t j = 0; j < dimension; ++j)
+        EXPECT_EQ(thirdPhysical(j), rescaled.getPoint().getPhysicalCoordinates()(j));
+      for (const size_t sample : {size_t(0), size_t(1), size_t(0)})
+      {
+        const IntegrationPoint unproven(third.getPoint(sample), &formula, 0);
+        const auto actual = deformation.getMovedPoint(unproven).getPhysicalCoordinates();
+        for (size_t j = 0; j < dimension; ++j)
+          EXPECT_EQ(actual(j), unproven.getPoint().getPhysicalCoordinates()(j));
+      }
+      EXPECT_EQ(locator.calls, 6);
+    }
   }
 }

@@ -108,6 +108,21 @@ Families:
   `L2` projection; when the distinction matters, assemble a mass-matrix
   `Problem` as described in
   [numerical-contracts.md](numerical-contracts.md).
+
+`IntegrationPoint(point, formula, index)` records the originating integration
+sample, not proof that the supplied point has that formula's reference
+coordinates. Construct from `IntegrationPoint(polytopeQuadrature, index)` to
+establish reference association with an owned mapped sample. Reference tables
+and coordinate-dependent reuse use `getReferenceQuadratureFormula()`; it
+returns null after formula assignment or for an unproven binding. The ordinary
+formula accessor remains available for sampling provenance and coefficient
+snapshots. Remapping into another cell must not promote origin metadata into
+reference association. Grid-function derivatives on facets retain the existing
+direct-point contract: evaluate in an adjacent full-dimensional cell, not with
+a tangential facet-element table. These operations remain local and
+non-collective. Geometry changes still require mapped-point reconstruction;
+logical transformation identities invalidate physical basis/located-point
+reuse, but do not update old geometric buffers.
 - Components `.x()/.y()/.z()` return component views.
 - I/O: `load`/`save` in MFEM/MEDIT formats; XDMF/HDF5 via IO module.
 - `GridFunctionBaseReference` / LazyEvaluator wraps a GridFunction for use

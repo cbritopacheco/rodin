@@ -240,7 +240,7 @@ namespace Rodin::Variational
               if constexpr (HasCoefficient)
               {
                 weight *= static_cast<ScalarType>(
-                  m_coefficient->getValue(IntegrationPoint(point, &qf, qp)));
+                  m_coefficient->getValue(IntegrationPoint(quadrature, qp)));
               }
               const auto& jacobianInverse = point.getJacobianInverse();
               const auto metric = jacobianInverse * jacobianInverse.transpose();

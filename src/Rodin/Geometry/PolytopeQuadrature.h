@@ -138,6 +138,21 @@ namespace Rodin::Geometry
       }
 
       /**
+       * @brief Identifies the formula version used to construct the owned samples.
+       *
+       * The snapshot remains unchanged if the borrowed formula is subsequently
+       * assigned. Consumers can then reject reference-table reuse without
+       * comparing point coordinates. Copying or moving the quadrature retains
+       * this association with its owned samples.
+       *
+       * @returns Logical construction-time formula identity.
+       */
+      size_t getQuadratureFormulaIdentity() const noexcept
+      {
+        return m_qfIdentity;
+      }
+
+      /**
        * @brief Gets the number of mapped quadrature points.
        * @returns Number of quadrature points
        */
@@ -158,6 +173,7 @@ namespace Rodin::Geometry
 
     private:
       const QF::QuadratureFormulaBase* m_qf; ///< Source quadrature formula
+      size_t m_qfIdentity; ///< Formula version defining the owned reference samples.
       std::vector<Point> m_ps;                         ///< Mapped quadrature points
   };
 

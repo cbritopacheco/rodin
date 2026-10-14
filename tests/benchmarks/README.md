@@ -2397,6 +2397,77 @@ each build, and the distributed state regression at one, two, three and four
 ranks in each build. These are affected-path checks, not a new full convergence
 certification or a statement about remote CI.
 
+### Sampling provenance and reference association
+
+Let $F\subset\partial K$ have charts
+$x_F:\widehat F\to F$ and $x_K:\widehat K\to K$.
+A face sample $\widehat x_q\in\widehat F$ has cell coordinates
+
+$$
+r_K=x_K^{-1}\!\left(x_F(\widehat x_q)\right).
+$$
+
+Its origin formula/index does not identify $r_K$. A cell basis must be
+evaluated at $r_K$, not at the face's reference coordinates. In particular,
+the cell gradient is $J_K(r_K)^{+\,T}\widehat\nabla\widehat u_h(r_K)$;
+it is not the tangential gradient obtained from a facet-element table.
+Grid-function derivative overloads therefore preserve the direct-point
+contract: boundary traces use an adjacent cell, and interior one-sided
+derivatives require a selected trace. Averages and jumps evaluate both mapped
+cell charts while preserving their originating sampling metadata.
+
+| Binding | Origin metadata | Reference-table authority |
+| --- | --- | --- |
+| `IntegrationPoint(point)` | None | None |
+| `IntegrationPoint(point, formula, index)` | Supplied origin | None |
+| `IntegrationPoint(quadrature, index)` | Owned sample's formula/index | Matching formula version only |
+
+`PolytopeQuadrature` stores its construction-time formula identity beside its
+owned points. `getReferenceQuadratureFormula()` permits reference reuse only
+while that identity matches the borrowed formula. Formula assignment disables
+the old association; copying/moving preserves the owned-sample snapshot.
+Legacy point/formula/index bindings remain valid, but evaluate the supplied
+coordinates directly. The ordinary formula accessor continues to enable
+per-binding coefficient snapshots, even when reference reuse is unavailable.
+Canonical assembly providers use the owner/index constructor explicitly.
+
+No geometric point grows and no identity is created per binding. The added
+metadata is bounded by active quadratures/bindings; getters are local and
+non-collective. Grid-function physical-basis and deformation-location caches
+use logical reference and geometry state instead of coordinate-byte keys.
+Geometry changes still require normal mapped-point reconstruction. Displacement
+or locator changes still require explicit deformation-cache invalidation.
+This distinction separates sampling context, reference tabulation and physical
+state; it does not introduce a new reference-table store or a backend-specific
+evaluation path.
+
+Matched LLVM 19 measurements use the archived parent binaries and the repaired
+binaries, not mixed-layout headers and libraries. The broad sweep comprises
+630 derivative cases at 0.02 seconds and three repetitions, plus fourteen
+native-P1 symmetric-gradient consumers at 0.1 seconds and five repetitions.
+The consumer median CPU ratio is 1.012, with individual ratios from 0.990 to
+1.035. This correctness repair is not presented as a performance improvement.
+
+Eight selected derivative cases were repeated in before/after/after/before
+order at 0.2 seconds and five repetitions. The initial large short-run
+outliers do not reproduce at that magnitude. Pooled H1 CPU ratios are
+1.010--1.011; selected native-P1 ratios are 0.948--1.080. The warm real segment
+gradient rises from 30.30 to 32.73 ns, while the complex tetrahedral gradient
+rises from 800.12 to 819.27 ns. Reference-authority checking changes every
+family, so H1 is not an unchanged control. These paired measurements bound
+the observed cost; they do not isolate individual branch or layout costs,
+establish a speedup, or measure whole-assembly/solver performance.
+
+Final affected-path validation passes 232 unit checks, eleven manufactured
+hyperelastic residual/tangent/Newton checks and ten selected linear-elasticity
+convergence checks in each optimized native/OpenMP build. The latter include
+all seven affine patches and three-level smooth rates on segments, triangles
+and quadrilaterals; they are not fresh full-3D rate certification. Distributed
+P1 and H1 degree 1--6 state checks pass at one through four ranks in both
+builds, including empty holders. Benchmark qualification passes 630 derivative
+and 84 integration-point field-evaluation selections per build. None of these
+local results certifies unpublished commits in remote CI.
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`
