@@ -311,6 +311,16 @@ geometry, and backend variants explicitly. Current audit findings include:
   tangent formulas. The instantaneous relaxation limit checks its algebraic
   residual and both derivatives. Individual active-state entries agree with
   central finite differences; removing the relaxation strain derivative fails.
+- Matrix derivative and Jacobian lifecycle: real/complex P0, P0g, P1 and
+  quadratic H1 owning clones preserve constant/affine derivatives on all
+  seven cell geometries. Every coordinate direction agrees with its analytic
+  derivative and with reconstruction from cloned basis expressions after
+  their originals are destroyed. The first excluded and largest unsigned
+  directions reject both field and basis evaluation through member-function
+  exceptions while preserving the field. Diagnostic tests failed before the
+  contextual repair. All cases pass individually with assertions and
+  AddressSanitizer/leak detection; doubled production Jacobian and partial
+  derivative values are rejected in both scalar configurations.
 - Matrix divergence lifecycle: real/complex P0, P0g, P1 and quadratic H1
   expressions preserve their field or leaf identity through copy, move and
   owning clones. Constant and affine fields match analytic row divergence

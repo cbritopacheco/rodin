@@ -42,6 +42,8 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 #include "Grad.h"
 #include "Rodin/Variational/IntegrationPoint.h"
@@ -583,7 +585,7 @@ namespace Rodin::Variational
         gradientExpression.traceOf(this->getTraceDomain());
         const auto gradient = gradientExpression.getValue(point);
         if (m_direction >= gradient.getDimension(2))
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Partial derivative direction exceeds the spatial dimension."
             << Alert::Raise;
         RangeType value(gradient.getDimension(0), gradient.getDimension(1));
@@ -712,7 +714,7 @@ namespace Rodin::Variational
       {
         const auto gradient = m_gradient.getBasis(local);
         if (m_direction >= gradient.getDimension(2))
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Partial derivative direction exceeds the spatial dimension."
             << Alert::Raise;
         RangeType value(gradient.getDimension(0), gradient.getDimension(1));

@@ -833,3 +833,9 @@ target_link_libraries(RodinVariationalMatrixDivLifecycleTest
   PRIVATE GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalMatrixDivLifecycleTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinVariationalMatrixDerivativeLifecycleTest MatrixDerivativeLifecycleTest.cpp)
+target_link_libraries(RodinVariationalMatrixDerivativeLifecycleTest
+  PRIVATE GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalMatrixDerivativeLifecycleTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
