@@ -2545,6 +2545,57 @@ Canonical formulas avoid generating versions repeatedly. For short-lived
 per-cell rules, owned `PolytopeQuadrature` storage avoids retaining a new
 mesh-wide formula entry at every construction.
 
+#### Cold lifecycle and source profile
+
+The same executable retains `MappedQuadratureLifecycle` scopes on all seven
+nonzero-dimensional geometries, at 3, 9 and 17 grid points per axis. First-cell
+scopes use one or twenty live formulas; full sweeps use one. `Cache` includes a
+fresh index's initialization, publication, retained objects and destruction.
+`Owned` constructs and destroys mapped quadratures directly. Formula and mesh
+construction, transformation preparation and pointwise Jacobian oracles are
+untimed. Twenty formulas exceed the eight-entry reference-table store, so those
+scopes also include retabulation: they are not isolated allocator measurements.
+
+Counters distinguish held cells, visited cells, dense slots, empty slots,
+mapped quadratures and mapped points. Slot counts describe the implementation,
+not measured resident memory. The native optimized build qualifies all 147
+registered cases without oracle errors; 126 cold cases were measured at
+0.05 seconds and three repetitions with one numerical workload and no concurrent
+compilation. The following median CPU times are in microseconds, with 17 grid
+points per axis, one formula and exactly one visited cell per iteration.
+
+| Geometry | Held cells / allocated slots | Constructed mapped points | Owned lifecycle | Cache lifecycle |
+| --- | ---: | ---: | ---: | ---: |
+| Segment | 16 | 2 | 0.115 | 0.762 |
+| Triangle | 512 | 4 | 0.162 | 1.251 |
+| Quadrilateral | 256 | 4 | 0.182 | 1.091 |
+| Tetrahedron | 24,576 | 8 | 0.187 | 28.823 |
+| Pyramid | 24,576 | 8 | 0.196 | 28.532 |
+| Hexahedron | 4,096 | 8 | 0.216 | 4.813 |
+| Wedge | 8,192 | 8 | 0.207 | 9.235 |
+
+The growth is not explained by dimension alone. With twenty formulas, the
+tetrahedral case allocates 491,520 slots but constructs only twenty mapped
+quadratures: its cache lifecycle measures 617.5 microseconds versus 10.76 for
+owned quadratures. An Instruments Time Profiler recording of 3,000 fixed
+iterations attributes 1,169 ms beneath index destruction and 659 ms beneath
+formula-entry construction, out of 1,969 ms sampled beneath the lifecycle
+driver. These disjoint stacks account for approximately 93% of driver samples;
+deque traversal, empty-slot initialization and teardown dominate. Driver
+samples include untimed preparation, and the instrumented run is diagnostic,
+not an accepted timing repetition.
+
+Full sweeps have a different lifetime contract: the index retains every mapped
+quadrature until destruction, whereas owned scopes release each immediately.
+At 17 grid points per axis, median CPU costs per constructed quadrature are
+209 ns cached versus 156 ns owned on triangles, and 304 ns versus 194 ns on
+tetrahedra. These differences cannot be interpreted as pure lookup overhead.
+No cache redesign follows from the sparse-access stress case alone. Named-form
+consumer profiles must establish whether sparse versions or teardown materially
+affect real assembly before introducing another lookup indirection or changing
+the dense representation. No library source or numerical acceptance criterion
+is changed by this benchmark batch.
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`
