@@ -53,6 +53,17 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Mixed targeted PETSc assembly: an exact two-field interval matrix combines
+  local mass blocks, constant-kernel nonlocal blocks, preassembled cross-field
+  terms and loads, and distinct nonzero Dirichlet values. Full assembly checks
+  column lifting and the recovered constant fields; matrix-only and RHS-only
+  updates check every entry and preserve the other target, through cloned
+  backends and repeated assembly. All six real/complex sequential/OpenMP runs
+  pass in both Release and assertion-enabled builds, with OpenMP at one and
+  four threads. Doubling the partial boundary diagonal fails each of the four
+  scalar/backend variants. The target is selected by explicit real/complex CI.
+  A fresh coherent CMake PETSc/OpenMP build also passes its sequential and
+  one-/four-thread OpenMP cases individually, with registration checked.
 - Index-generator ownership: bounded, vector and set generators preserve every
   remaining suffix through polymorphic copies and moves, including empty and
   exhausted sequences. Bounded copies previously discarded the cursor;
