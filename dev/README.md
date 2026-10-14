@@ -410,6 +410,14 @@ geometry, and backend variants explicitly. Current audit findings include:
   because that second evaluation introduced additional rounding. The original
   absolute tolerance \(10^{-14}\) is unchanged; doubled production exports
   fail the corrected oracle. Failed and mutation profiles are not merged.
+  Subsequent normal Debug checks also pass individually: 47 P1-element cases,
+  121 H1-element cases, 39 matrix cases, 35 mesh-format cases, six promoted
+  algebra cases and 69 high-order field IO cases. The resource-dependent
+  private builds use the existing hydrated resource directory, leaving the
+  frozen production snapshot untouched. The combined audit now retains
+  37,161 measured lines with 34,826 hits (\(93.72\%\)); another 477 hits are
+  required for \(95\%\) at this denominator. The corrected HDF5 affine oracle
+  also passes separately with Release optimization.
 - Form ownership: real/complex P1 and quadratic H1 forms reject foreign trial
   and test contributions without changing the assembled mass operator or load.
   Addition/subtraction and linear assignment exercise named-trial and unnamed
