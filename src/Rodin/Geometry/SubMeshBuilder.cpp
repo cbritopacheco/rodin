@@ -84,8 +84,13 @@ namespace Rodin::Geometry
 
     // Build the mesh object.
     m_build.nodes(nodes);
-    for (const Index& pIdx : m_s2ps[0].left)
+    for (Index child = 0; child < nodes; ++child)
+    {
+      const Index pIdx = m_s2ps[0].left[child];
       m_build.vertex(parent.getVertexCoordinates(pIdx));
+      if (const auto attribute = parent.getAttribute(0, pIdx))
+        m_build.attribute({0, child}, *attribute);
+    }
 
     // Build the connectivity for the submesh from the parent mesh.
     auto& conn = m_build.getConnectivity();

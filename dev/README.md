@@ -311,6 +311,15 @@ geometry, and backend variants explicitly. Current audit findings include:
   tangent formulas. The instantaneous relaxation limit checks its algebraic
   residual and both derivatives. Individual active-state entries agree with
   central finite differences; removing the relaxation strain derivative fails.
+- Boundary extraction and submesh ownership: segment skins and zero-dimensional
+  keep/trim selections reject unsigned-loop underflow regressions reproduced
+  as crashes before the repair. Boundary copies retain coordinates, parent
+  maps and attributes across all supported cell geometries, including vertex
+  labels introduced implicitly through closure. Nested surface selections
+  retain ancestry and point restriction after the original submesh dies.
+  Counting measure is one per point. Five new cases and 28 existing mesh and
+  submesh cases pass separately; the new cases also pass with assertions,
+  ASan and leak checks. Doubling production boundary measure fails the oracle.
 - Geometry metadata ownership: assigning sparse attributes over populated
   storage replaces both growing and shrinking extents, preserves engaged
   zero and maximum labels, and remains independent after source mutation

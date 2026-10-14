@@ -343,3 +343,9 @@ target_link_libraries(RodinGeometryMetadataLifecycleTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::QF)
 gtest_discover_tests(RodinGeometryMetadataLifecycleTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinGeometrySkinLifecycleTest SkinLifecycleTest.cpp)
+target_link_libraries(RodinGeometrySkinLifecycleTest
+  PRIVATE GTest::gtest_main Rodin::Geometry)
+gtest_discover_tests(RodinGeometrySkinLifecycleTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
