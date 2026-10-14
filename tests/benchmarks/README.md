@@ -2757,10 +2757,15 @@ common vector-element pair-loop sizes; they are not mesh dimensions or a claim
 of complete element-kernel equivalence. No symmetry is assumed.
 
 Public and Original scopes use the same inputs; Original retains the const
-dynamic Eigen block expression currently used by the public overload. Bounded
+dynamic Eigen block expression and reads dimensions from the operands, just
+as the original public overload does. KnownColumns is an experimental
+caller-managed protocol: one decision before the batch pair loop selects
+three-column Eigen views when $c=3$, retaining a dynamic row extent and total
+size. Other shapes use the public spatial-matrix dot operation. The generic
+Math API is unchanged. Bounded
 dyadic operands provide an independent exact sum, and inactive storage is
 poisoned. Output perturbation must be rejected. All guards are untimed, and
-qualification failure causes a nonzero process exit. The 512 registrations are
+qualification failure causes a nonzero process exit. The 768 registrations are
 opt-in benchmarks, not CTest tests or CI timing gates.
 
 ```sh
@@ -2791,8 +2796,10 @@ The raw ratio is 9.51 while the active-product ratio is 14.06. This primitive
 does not exhibit an additional three-dimensional penalty under that work
 normalization. Active-product count is a work proxy, not an instruction count;
 loop control, output zeroing, packetization and stores also contribute.
-Original controls measured 0.815 and 7.708 microseconds. Public and Original
-currently express the same algorithm; these differences are not speedups.
+Historical Original controls measured 0.815 and 7.708 microseconds, but then
+read fixture dimensions rather than operand dimensions. That metadata-hoisting
+difference has been removed. Those historical controls are not used as
+production before/after comparisons, and their differences are not speedups.
 
 A separate Instruments Time Profiler run selected 3,561 sample-ms under the
 real $3\times3$, $N=30$ driver. Of these, 2,300 sample-ms had an Eigen reduction
@@ -2800,8 +2807,42 @@ implementation as their leaf frame. Packet operations and scalar products
 also appear among the remaining leaf frames. This identifies reduction
 implementation as a candidate for investigation; it does not isolate assembly
 costs or establish an optimization. Instrumented timing is not an accepted
-benchmark result. All 512 cases qualify in both native and LLVM 19/OpenMP
+benchmark result. All 768 cases qualify in both native and LLVM 19/OpenMP
 builds; the primitive itself is single-threaded in both.
+
+The arithmetic regression additionally compares non-dyadic samples,
+cancellation cases, signed zeros, infinities and poisoned padding on every
+rectangular shape and scalar pair. Finite and signed-zero results are compared
+bit-for-bit; NaNs are compared by classification. Three-column views retain
+the original dynamic reduction strategy. Fully fixed blocks were rejected:
+mixed scalar products can switch from sequential reduction to a different
+unrolled tree. The regression was observed failing under that replacement.
+Independent native and GCC 14 probes found no partial-column differences in
+120,000 samples per compiler, while fully fixed mixed reductions differed in
+more than 80% of their sampled $3\times3$ cases.
+
+These experiments do not establish a production optimization. A global shape
+branch was rejected after slowing two-dimensional consumers, even though it
+accelerated three-dimensional reductions. Moving policy selection into the
+assembly consumer is being investigated separately, including its remaining
+two-dimensional code-generation effects and backend recertification.
+
+The expanded native benchmark, with five 0.2 s repetitions, measured the
+following median CPU times. KnownColumns includes the caller's batch-level
+shape decision; these are separate calling protocols, not a changed public
+Math API or accepted whole-assembly gains.
+
+| Scalar pair | Shape and count | Public | KnownColumns |
+| --- | --- | ---: | ---: |
+| Real/real | $2\times2$, $N=12$ | 0.752 microseconds | 0.799 microseconds |
+| Real/real | $3\times3$, $N=30$ | 7.674 microseconds | 3.186 microseconds |
+| Complex/complex | $2\times2$, $N=12$ | 0.725 microseconds | 0.773 microseconds |
+| Complex/complex | $3\times3$, $N=30$ | 8.252 microseconds | 5.100 microseconds |
+
+The mixed dimensional result motivates retaining the controls: exposing a
+known column extent is promising for three-dimensional batches, but the
+calling protocol can also alter compiler inlining and scheduling. A primitive
+gain alone is insufficient to approve an assembly-consumer change.
 
 # Spatial value benchmarks
 

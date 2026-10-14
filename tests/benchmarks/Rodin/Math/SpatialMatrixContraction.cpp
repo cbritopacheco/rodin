@@ -34,7 +34,13 @@ namespace Rodin::Tests::Benchmarks
    * ## Measurement boundary
    *
    * Original uses const dynamic Eigen blocks, preserving the existing public
-   * reduction expression. Both scopes retain runtime dimensions and poison
+   * reduction expression and reading dimensions from the operands. KnownColumns
+   * selects three-column views before the batch pair loop; the row extent and
+   * total size remain dynamic to retain the original reduction strategy.
+   * Other shapes retain the public spatial-matrix dot call. This experimental
+   * caller-known shape protocol models a local assembly consumer, not an
+   * optimization of the generic spatial-matrix dot API.
+   * All scopes retain runtime dimensions and poison
    * inactive storage. Bounded dyadic inputs admit an independent exact sum,
    * including mixed real/complex fields and empty rectangular shapes.
    * No operand symmetry is assumed. Counts 6, 12 and 30 cover representative
@@ -46,8 +52,9 @@ namespace Rodin::Tests::Benchmarks
    * @tparam Right Right matrix scalar type.
    * @tparam Original Whether to use the original dynamic-block expression.
    * @tparam Batch Whether to measure weighted pair accumulation.
+   * @tparam KnownColumns Whether the caller dispatches three columns once per batch.
    */
-  template <class Left, class Right, bool Original, bool Batch>
+  template <class Left, class Right, bool Original, bool Batch, bool KnownColumns = false>
   class SpatialMatrixContraction
   {
     public:
@@ -84,15 +91,23 @@ namespace Rodin::Tests::Benchmarks
         fill(left[a], a, 0);
         fill(right[a], a, 1);
       }
-      const auto original = [&](const auto& lhs, const auto& rhs) {
+      const auto original = [](const auto& lhs, const auto& rhs) {
         static_assert(std::is_const_v<std::remove_reference_t<decltype(lhs.getData())>>);
         static_assert(std::is_const_v<std::remove_reference_t<decltype(rhs.getData())>>);
-        return Math::dot(lhs.getData().topLeftCorner(rows, columns),
-          rhs.getData().topLeftCorner(rows, columns));
+        const auto activeRows = static_cast<Eigen::Index>(lhs.rows());
+        const auto activeColumns = static_cast<Eigen::Index>(lhs.cols());
+        return Math::dot(lhs.getData().topLeftCorner(activeRows, activeColumns),
+          rhs.getData().topLeftCorner(activeRows, activeColumns));
       };
-      const auto product = [&](const auto& lhs, const auto& rhs) {
+      const auto product = [&]<int Columns = Eigen::Dynamic>(
+                             const auto& lhs, const auto& rhs) {
         if constexpr (Original)
           return original(lhs, rhs);
+        else if constexpr (KnownColumns && Columns != Eigen::Dynamic)
+          return Math::dot(lhs.getData().template topLeftCorner<Eigen::Dynamic, Columns>(
+                             lhs.rows(), lhs.cols()),
+            rhs.getData().template topLeftCorner<Eigen::Dynamic, Columns>(
+              rhs.rows(), rhs.cols()));
         else
           return Math::dot(lhs, rhs);
       };
@@ -116,13 +131,27 @@ namespace Rodin::Tests::Benchmarks
           expected(b, a) = Weight * sum;
         }
       }
-      const auto evaluate = [&] {
+      const auto evaluateShape = [&]<int Columns>() {
         output.setZero();
         for (size_t b = 0; b < count; ++b)
         {
           for (size_t a = 0; a < count; ++a)
-            output(b, a) += Weight * product(left[a], right[b]);
+          {
+            output(b, a) +=
+              Weight * product.template operator()<Columns>(left[a], right[b]);
+          }
         }
+      };
+      const auto evaluate = [&] {
+        if constexpr (KnownColumns)
+        {
+          if (columns == 3)
+            evaluateShape.template operator()<3>();
+          else
+            evaluateShape.template operator()<Eigen::Dynamic>();
+        }
+        else
+          evaluateShape.template operator()<Eigen::Dynamic>();
       };
       const auto valid = [&] { return (output.array() == expected.array()).all(); };
       evaluate();
@@ -150,7 +179,14 @@ namespace Rodin::Tests::Benchmarks
         }
         else
         {
-          auto result = product(left[0], right[0]);
+          auto result = [&] {
+            if constexpr (KnownColumns)
+            {
+              if (columns == 3)
+                return product.template operator()<3>(left[0], right[0]);
+            }
+            return product(left[0], right[0]);
+          }();
           benchmark::DoNotOptimize(result);
         }
         benchmark::ClobberMemory();
@@ -176,7 +212,11 @@ namespace Rodin::Tests::Benchmarks
     static void registerCases(const char* field)
     {
       const auto name = std::string("SpatialMatrixContraction/") +
-        (Batch ? "PairBatch/" : "Scalar/") + (Original ? "Original/" : "Public/") + field;
+        (Batch ? "PairBatch/" : "Scalar/") +
+        (KnownColumns  ? "KnownColumns/"
+            : Original ? "Original/"
+                       : "Public/") +
+        field;
       auto* registration = benchmark::RegisterBenchmark(name.c_str(), &run);
       for (size_t rows = 0; rows <= 3; ++rows)
       {
@@ -212,6 +252,8 @@ namespace Rodin::Tests::Benchmarks
     SpatialMatrixContraction<Left, Right, true, false>::registerCases(field);
     SpatialMatrixContraction<Left, Right, false, true>::registerCases(field);
     SpatialMatrixContraction<Left, Right, true, true>::registerCases(field);
+    SpatialMatrixContraction<Left, Right, false, false, true>::registerCases(field);
+    SpatialMatrixContraction<Left, Right, false, true, true>::registerCases(field);
   }
 }
 

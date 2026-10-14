@@ -113,6 +113,121 @@ namespace Rodin::Tests::Unit
   }
 
   /**
+   * @brief Preserves matrix reduction order for every bounded rectangular shape.
+   *
+   * Finite results and signed zeros for all four scalar pairs are compared
+   * bit-for-bit with the original const dynamic Eigen blocks. NaNs are checked
+   * by classification, not payload. Non-dyadic samples and cancellation expose changes
+   * in reduction strategy. Empty shapes, signed zeros and infinities exercise
+   * boundary behavior; NaN padding must never enter the active contraction.
+   */
+  TEST(SpatialScalarProductTest, MatrixDotMatchesOriginalReductionExactly)
+  {
+    const auto check = []<class Left, class Right>() {
+      SCOPED_TRACE((std::is_same_v<Left, Complex>));
+      SCOPED_TRACE((std::is_same_v<Right, Complex>));
+      std::mt19937 generator(3107);
+      std::uniform_real_distribution<Real> sample(-10, 10);
+      const auto value = [&]<class Scalar>() {
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return Scalar(sample(generator), sample(generator));
+        else
+          return sample(generator);
+      };
+      const auto sameBits = [](const auto& actual, const auto& expected) {
+        const auto component = [](Real a, Real b) {
+          if (std::isnan(b))
+            EXPECT_TRUE(std::isnan(a));
+          else
+            EXPECT_EQ(std::memcmp(&a, &b, sizeof(Real)), 0) << a << " != " << b;
+        };
+        if constexpr (std::is_same_v<std::decay_t<decltype(actual)>, Complex>)
+        {
+          component(actual.real(), expected.real());
+          component(actual.imag(), expected.imag());
+        }
+        else
+          component(actual, expected);
+      };
+      for (Eigen::Index rows = 0; rows <= 3; ++rows)
+      {
+        for (Eigen::Index columns = 0; columns <= 3; ++columns)
+        {
+          SCOPED_TRACE(rows);
+          SCOPED_TRACE(columns);
+          SpatialMatrix<Left> lhs(3, 3);
+          SpatialMatrix<Right> rhs(3, 3);
+          lhs.resize(rows, columns);
+          rhs.resize(rows, columns);
+          lhs.getData().setConstant(Left(std::numeric_limits<Real>::quiet_NaN()));
+          rhs.getData().setConstant(Right(std::numeric_limits<Real>::quiet_NaN()));
+          const auto& left = lhs;
+          const auto& right = rhs;
+          const auto compare = [&] {
+            const auto original = Math::dot(left.getData().topLeftCorner(rows, columns),
+              right.getData().topLeftCorner(rows, columns));
+            sameBits(Math::dot(left, right), original);
+            if (columns == 3)
+            {
+              sameBits(
+                Math::dot(
+                  left.getData().template topLeftCorner<Eigen::Dynamic, 3>(rows, 3),
+                  right.getData().template topLeftCorner<Eigen::Dynamic, 3>(rows, 3)),
+                original);
+            }
+          };
+          for (size_t trial = 0; trial < 1000; ++trial)
+          {
+            for (Eigen::Index j = 0; j < columns; ++j)
+            {
+              for (Eigen::Index i = 0; i < rows; ++i)
+              {
+                lhs(i, j) = value.template operator()<Left>();
+                rhs(i, j) = value.template operator()<Right>();
+              }
+            }
+            compare();
+            if (::testing::Test::HasFailure())
+              return;
+          }
+          for (const Real boundary :
+            {Real(0), -Real(0), std::numeric_limits<Real>::infinity()})
+          {
+            for (Eigen::Index j = 0; j < columns; ++j)
+            {
+              for (Eigen::Index i = 0; i < rows; ++i)
+              {
+                lhs(i, j) = Left(boundary);
+                rhs(i, j) = Right(1);
+              }
+            }
+            compare();
+          }
+          if (rows == 3 && columns > 0)
+          {
+            for (Eigen::Index j = 0; j < columns; ++j)
+            {
+              for (Eigen::Index i = 0; i < rows; ++i)
+              {
+                lhs(i, j) = Left(0);
+                rhs(i, j) = Right(1);
+              }
+            }
+            lhs(0, 0) = Left(1e16);
+            lhs(1, 0) = Left(-1e16);
+            lhs(2, 0) = Left(1);
+            compare();
+          }
+        }
+      }
+    };
+    check.template operator()<Real, Real>();
+    check.template operator()<Real, Complex>();
+    check.template operator()<Complex, Real>();
+    check.template operator()<Complex, Complex>();
+  }
+
+  /**
    * @brief Preserves the original complex reduction in pair-loop calling contexts.
    *
    * Non-dyadic operands with nonzero imaginary parts exercise both conjugation
