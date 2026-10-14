@@ -34,8 +34,10 @@ namespace
     for (PetscInt i = 0; i < rows; ++i)
     {
       for (PetscInt j = 0; j < cols; ++j)
+      {
         EXPECT_EQ(
           MatGetValues(system.getOperator(), 1, &i, 1, &j, &values(i, j)), PETSC_SUCCESS);
+      }
     }
     return values;
   }
