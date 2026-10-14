@@ -827,3 +827,9 @@ add_executable(RodinVariationalQuadratureLifecycleTest QuadratureLifecycleTest.c
 target_link_libraries(RodinVariationalQuadratureLifecycleTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational)
 gtest_discover_tests(RodinVariationalQuadratureLifecycleTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalMatrixDivLifecycleTest MatrixDivLifecycleTest.cpp)
+target_link_libraries(RodinVariationalMatrixDivLifecycleTest
+  PRIVATE GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalMatrixDivLifecycleTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)

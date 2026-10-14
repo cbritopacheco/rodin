@@ -311,6 +311,15 @@ geometry, and backend variants explicitly. Current audit findings include:
   tangent formulas. The instantaneous relaxation limit checks its algebraic
   residual and both derivatives. Individual active-state entries agree with
   central finite differences; removing the relaxation strain derivative fails.
+- Matrix divergence lifecycle: real/complex P0, P0g, P1 and quadratic H1
+  expressions preserve their field or leaf identity through copy, move and
+  owning clones. Constant and affine fields match analytic row divergence
+  and independent basis reconstruction on all seven cell geometries. A valid
+  three-column field in two dimensions rejects divergence evaluation through
+  member-function exceptions without changing the field. Both diagnostic
+  tests failed before the contextual exception repair. All cases pass
+  individually with assertions, AddressSanitizer and leak detection enabled.
+  Doubling production divergence is rejected in both scalar configurations.
 - Polytope iterator ownership: cold, cached and dirty releases retain entity
   identity, ordered vertex keys and attributes after iterator destruction.
   Empty and exhausted iterators release null. Advanced cell, face and vertex
