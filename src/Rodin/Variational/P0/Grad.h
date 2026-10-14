@@ -75,20 +75,23 @@ namespace Rodin::Variational
         Grad<GridFunction<P0<Range, Mesh>, Data>>>
   {
     public:
-      /// @brief Range (evaluation value) type.
-      using RangeType = Range;
-
       /// @brief Mesh type.
-      using MeshType = Mesh;
+    using MeshType = Mesh;
 
       /// @brief Finite element space type.
-      using FESType = P0<RangeType, MeshType>;
+    using FESType = P0<Range, MeshType>;
+
+      /// @brief Scalar coefficient type.
+    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+
+      /// @brief Gradient value with one entry per ambient coordinate.
+    using RangeType = Math::SpatialVector<ScalarType>;
 
       /// @brief Operand type.
-      using OperandType = GridFunction<FESType, Data>;
+    using OperandType = GridFunction<FESType, Data>;
 
       /// @brief Parent class type.
-      using Parent = GradBase<OperandType, Grad<OperandType>>;
+    using Parent = GradBase<OperandType, Grad<OperandType>>;
 
       /**
        * @brief Constructs the gradient of a P0 function @f$ u @f$.
@@ -96,32 +99,42 @@ namespace Rodin::Variational
        *
        * @note The gradient of a P0 function is zero on each element.
        */
-      Grad(const OperandType& u)
-        : Parent(u)
-      {}
+    Grad(const OperandType& u)
+      : Parent(u)
+    {}
 
       /**
        * @brief Copy constructor.
        * @param[in] other Grad object to copy
        */
-      Grad(const Grad& other)
-        : Parent(other)
-      {}
+    Grad(const Grad& other)
+      : Parent(other)
+    {}
 
       /**
        * @brief Move constructor.
        * @param[in] other Grad object to move from
        */
-      Grad(Grad&& other)
-        : Parent(std::move(other))
-      {}
+    Grad(Grad&& other)
+      : Parent(std::move(other))
+    {}
+
+      /**
+       * @brief Interpolates the broken gradient at an integration point.
+       * @param out Storage for the computed result.
+       * @param ip Evaluation point carrying optional sampling metadata.
+       */
+    void interpolate(RangeType& out, const IntegrationPoint& ip) const
+    {
+      interpolate(out, ip.getPoint());
+    }
 
       /**
        * @brief Interpolates at a geometric point.
        * @param out Storage for the computed result.
        * @param p Point at which the operation is evaluated.
        */
-      void interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
+      void interpolate(RangeType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -147,7 +160,6 @@ namespace Rodin::Variational
           {
             assert(inc.size() == 2);
             const auto& traceDomain = this->getTraceDomain();
-            assert(traceDomain.size() > 0);
             if (traceDomain.size() == 0)
             {
               Alert::MemberFunctionException(*this, __func__)
@@ -161,7 +173,8 @@ namespace Rodin::Variational
               for (auto& idx : inc)
               {
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-                if (traceDomain.count(tracePolytope->getAttribute()))
+                const auto attribute = tracePolytope->getAttribute();
+                if (attribute && traceDomain.count(*attribute))
                 {
                   Math::SpatialPoint rc;
                   tracePolytope->getTransformation().inverse(rc, pc);
@@ -179,19 +192,8 @@ namespace Rodin::Variational
         else // Evaluating on a cell
         {
           assert(d == mesh.getDimension());
-          const auto& gf = this->getOperand();
-          const auto& fes = gf.getFiniteElementSpace();
-          const auto& fe = fes.getFiniteElement(d, i);
-          const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialVector<Real> grad(d);
-          Math::SpatialVector<Real> res(d);
-          res.setZero();
-          for (size_t local = 0; local < fe.getCount(); local++)
-          {
-            fe.getGradient(local)(grad, rc);
-            res += gf.getValue(fes.getGlobalIndex({d, i}, local)) * grad;
-          }
-          out = p.getJacobianInverse().transpose() * res;
+          out.resize(mesh.getSpaceDimension());
+          out.setZero();
         }
       }
 
