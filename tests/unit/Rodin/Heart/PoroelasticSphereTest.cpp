@@ -334,23 +334,26 @@ namespace
    * @returns Relative matrix error
    * @f$ \|J_{analytic} - J_{fd}\| / \max(\|J_{fd}\|, 10^{-14}) @f$.
    */
-  Real computeDynamicJacobianRelativeError(const Model::Input& cardiacInput,
-    const Model::DenseVector& candidateState, const Model::State& currentState,
-    const Model::State& previousState, Real dt, Real relativePerturbation)
+  template <class ModelT = Model, class PassiveLawT = PassiveLaw>
+  Real computeDynamicJacobianRelativeError(const typename ModelT::Input& cardiacInput,
+    const typename ModelT::DenseVector& candidateState,
+    const typename ModelT::State& currentState,
+    const typename ModelT::State& previousState, Real dt, Real relativePerturbation)
   {
-    using InputType = Model::Input;
-    Heart::PoroelasticSphere::Numerics::DynamicSystem<PassiveLaw, InputType>
+    using InputType = typename ModelT::Input;
+    using Model = ModelT;
+    Heart::PoroelasticSphere::Numerics::DynamicSystem<PassiveLawT, InputType>
       dynamicSystem(cardiacInput);
     const Real nextTime = currentState.t + dt;
 
-    Model::EvalData evaluationData;
+    typename Model::EvalData evaluationData;
     dynamicSystem.buildEvalData(
       candidateState, currentState, previousState, nextTime, dt, evaluationData);
 
-    Model::DenseMatrix analyticalJacobian;
+    typename Model::DenseMatrix analyticalJacobian;
     dynamicSystem.evaluateJacobian(evaluationData, analyticalJacobian, dt);
 
-    Model::DenseMatrix finiteDifferenceJacobian(
+    typename Model::DenseMatrix finiteDifferenceJacobian(
       Vars::NumberOfVariables, Vars::NumberOfVariables);
     finiteDifferenceJacobian.setZero();
 
@@ -363,15 +366,15 @@ namespace
       statePlus[j] += perturbation;
       stateMinus[j] -= perturbation;
 
-      Model::EvalData evaluationDataPlus;
-      Model::EvalData evaluationDataMinus;
+      typename Model::EvalData evaluationDataPlus;
+      typename Model::EvalData evaluationDataMinus;
       dynamicSystem.buildEvalData(
         statePlus, currentState, previousState, nextTime, dt, evaluationDataPlus);
       dynamicSystem.buildEvalData(
         stateMinus, currentState, previousState, nextTime, dt, evaluationDataMinus);
 
-      Model::DenseVector residualPlus;
-      Model::DenseVector residualMinus;
+      typename Model::DenseVector residualPlus;
+      typename Model::DenseVector residualMinus;
       dynamicSystem.evaluateResidual(evaluationDataPlus, residualPlus);
       dynamicSystem.evaluateResidual(evaluationDataMinus, residualMinus);
       finiteDifferenceJacobian.col(j) =
@@ -691,4 +694,144 @@ TEST(PoroelasticSphereTest, ExampleSetupCompletesThreeCyclesWithPhysicalState)
   EXPECT_GT(maxInflow - minInflow, 0.1 * maxInflow);
   EXPECT_LT(maxFinalResidual, 5e-2);
   EXPECT_LT(maxIterations, 20u);
+}
+
+// ---------------------------------------------------------------------------
+// Usyk skeletal law + Bruinsma pore storage (Ruz et al., Secs. 4.3-4.4).
+// ---------------------------------------------------------------------------
+namespace
+{
+  using UsykModel =
+    Heart::PoroelasticSphereT<Heart::UsykRadialLaw<Real>, Heart::UsykPassiveLaw<Real>>;
+  using UsykLaw = Heart::UsykPassiveLaw<Real>;
+
+  Heart::UsykRadialLaw<Real> makeUsykLaw()
+  {
+    Heart::UsykRadialLaw<Real>::Parameters p;
+    p.c0 = 0.88e3;
+    p.brr = 3.58;
+    p.btt = 18.5;
+    p.brt = 2.8;
+    return Heart::UsykRadialLaw<Real>(p);
+  }
+
+  UsykModel::Input makeUsykBruinsmaInput()
+  {
+    const auto base = makeGenericCardiacInput();
+    UsykModel::Input in;
+    // Copy the fields shared with the generic input, one by one, since the
+    // two Input types differ only in the passive-law template argument.
+    in.R0 = base.R0; in.d0 = base.d0; in.phi0 = base.phi0;
+    in.Es = base.Es; in.mu = base.mu; in.eta = base.eta; in.alpha = base.alpha;
+    in.k0 = base.k0; in.sigma0 = base.sigma0;
+    in.gammaAr = base.gammaAr; in.gammaVen = base.gammaVen;
+    in.Rp = base.Rp; in.Cp = base.Cp; in.Rd = base.Rd; in.Cd = base.Cd;
+    in.Kat = base.Kat; in.Kp = base.Kp; in.Kar = base.Kar;
+    in.cavityCapacity = base.cavityCapacity;
+    in.absRegularization = base.absRegularization;
+    in.wallQuadraturePoints = base.wallQuadraturePoints;
+    in.u = base.u; in.pAt = base.pAt; in.pSv = base.pSv;
+
+    in.poreStorage = UsykModel::Input::PoreStorageLaw::Bruinsma;
+    in.p0 = 1.0e4;
+    in.dPhiMax = 0.05; // p0 / dPhiMax = 2e5 = KPhi of the generic input.
+    in.passiveEnergy = makeUsykLaw();
+    return in;
+  }
+}
+
+/// @brief Usyk radial Piola components match finite differences of the energy
+/// (checks the c0/4 factor of P_{M,theta}) and of each other (tangent).
+TEST(PoroelasticSphereTest, UsykPiolaMatchesEnergyAndTangentFiniteDifference)
+{
+  const auto law = makeUsykLaw();
+  UsykLaw op;
+  const Real h = 1e-6;
+  const std::array<std::pair<Real, Real>, 3> pts{{{0.83, 1.17}, {1.05, 0.97}, {0.7, 1.3}}};
+  for (const auto& [lr, lt] : pts)
+  {
+    const auto P = op(law, lr, lt);
+    // Stress from the energy: P_RR = dW/dlr, P_tt = (1/2) dW/dlt.
+    const Real dW_dlr = (law.energy(lr + h, lt) - law.energy(lr - h, lt)) / (2 * h);
+    const Real dW_dlt = (law.energy(lr, lt + h) - law.energy(lr, lt - h)) / (2 * h);
+    const Real sP = std::max<Real>(1.0, std::abs(P.PRR) + std::abs(P.Ptt));
+    EXPECT_NEAR(P.PRR, dW_dlr, 1e-6 * sP);
+    EXPECT_NEAR(P.Ptt, 0.5 * dW_dlt, 1e-6 * sP);
+
+    const auto Prp = op(law, lr + h, lt), Prm = op(law, lr - h, lt);
+    const auto Ptp = op(law, lr, lt + h), Ptm = op(law, lr, lt - h);
+    const Real sT = std::max<Real>(1.0, std::abs(P.dPtt_dlt));
+    EXPECT_NEAR(P.dPRR_dlr, (Prp.PRR - Prm.PRR) / (2 * h), 1e-6 * sT);
+    EXPECT_NEAR(P.dPRR_dlt, (Ptp.PRR - Ptm.PRR) / (2 * h), 1e-6 * sT);
+    EXPECT_NEAR(P.dPtt_dlr, (Prp.Ptt - Prm.Ptt) / (2 * h), 1e-6 * sT);
+    EXPECT_NEAR(P.dPtt_dlt, (Ptp.Ptt - Ptm.Ptt) / (2 * h), 1e-6 * sT);
+  }
+}
+
+/// @brief Bruinsma storage: tangent matches FD, reduces to K_Phi for small
+/// deviations, and is C1-continued past the capacity cutoff.
+TEST(PoroelasticSphereTest, BruinsmaPoreStoragePressure)
+{
+  const auto in = makeUsykBruinsmaInput();
+  using Heart::PoroelasticSphere::Physics::poreStoragePressure;
+  const Real h = 1e-7;
+  for (const Real x : {1e-4, 1e-2, 0.04})
+  {
+    const auto [p, dp] = poreStoragePressure(in, in.phi0 + x);
+    const auto [pp, _1] = poreStoragePressure(in, in.phi0 + x + h);
+    const auto [pm, _2] = poreStoragePressure(in, in.phi0 + x - h);
+    EXPECT_NEAR(dp, (pp - pm) / (2 * h), 1e-5 * dp);
+    EXPECT_GT(p, 0.0);
+  }
+  const auto [pLin, dpLin] = poreStoragePressure(in, in.phi0 + 1e-6);
+  EXPECT_NEAR(pLin, (in.p0 / in.dPhiMax) * 1e-6, 1e-4 * pLin);
+  EXPECT_NEAR(dpLin, in.p0 / in.dPhiMax, 1e-4 * dpLin);
+
+  const Real xc = (1.0 - in.poreStorageCutoff) * in.dPhiMax;
+  const auto [pa, dpa] = poreStoragePressure(in, in.phi0 + xc - h);
+  const auto [pb, dpb] = poreStoragePressure(in, in.phi0 + xc + h);
+  EXPECT_TRUE(std::isfinite(pb));
+  EXPECT_NEAR(pa, pb, 1e-6 * std::abs(pa) + 4 * h * dpa);
+  EXPECT_NEAR(dpa, dpb, 4 * h / (in.poreStorageCutoff * in.dPhiMax) * dpa);
+}
+
+/// @brief Full dynamic Jacobian with Usyk + Bruinsma matches finite differences.
+TEST(PoroelasticSphereTest, UsykBruinsmaDynamicJacobianMatchesFiniteDifference)
+{
+  const auto in = makeUsykBruinsmaInput();
+  for (const Real scale : {0.5, 1.0, 2.0})
+  {
+    Model::DenseVector candidateState = makeCandidateState(scale);
+    Model::State currentState = makeCurrentState(scale);
+    Model::State previousState = makePreviousState(currentState, scale);
+    for (const Real eps : {1e-6, 1e-7})
+    {
+      const Real err = computeDynamicJacobianRelativeError<UsykModel, UsykLaw>(
+        in, candidateState, currentState, previousState, 1e-3, eps);
+      EXPECT_TRUE(std::isfinite(err));
+      EXPECT_LT(err, 2e-3) << "scale " << scale << " eps " << eps;
+    }
+  }
+}
+
+/// @brief Usyk + Bruinsma model steps and stays physical.
+TEST(PoroelasticSphereTest, UsykBruinsmaStepConverges)
+{
+  const auto in = makeUsykBruinsmaInput();
+  UsykModel model(in);
+  model.setMaxIterations(100).setAbsoluteTolerance(1e-9).setRelativeTolerance(1e-9);
+  UsykModel::State s0;
+  s0.phi = in.phi0;
+  s0.pv = 800.0;
+  s0.par = 11000.0;
+  s0.pd = 10000.0;
+  model.initialize(s0);
+  for (int i = 0; i < 50; ++i)
+  {
+    const auto rep = model.step(1e-3);
+    ASSERT_TRUE(rep.converged) << "step " << i;
+  }
+  const auto& s = model.getState();
+  EXPECT_TRUE(std::isfinite(s.pf));
+  EXPECT_LT(s.phi - in.phi0, in.dPhiMax);
 }

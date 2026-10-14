@@ -26,7 +26,10 @@
 #include "Rodin/Heart/PoroelasticSphere.h"
 
 using Real = Rodin::Real;
-using Model = Rodin::Heart::PoroelasticSphereT<>;
+// Usyk skeletal energy (Sec. 4.3) + Bruinsma pore storage (Sec. 4.4) of
+// Ruz et al., "A patient-specific perfused non-Newtonian FSI model of the LCA".
+using Model = Rodin::Heart::PoroelasticSphereT<Rodin::Heart::UsykRadialLaw<Real>,
+  Rodin::Heart::UsykPassiveLaw<Real>>;
 
 static Real periodic_activation(Real t)
 {
@@ -148,8 +151,12 @@ int main()
   in.k0 = 1.0e5;
   in.sigma0 = 1.25e5;
 
-  // Perfusion: storage modulus and two-resistor coronary source
-  in.KPhi = 2.0e5;
+  // Perfusion: Bruinsma pore storage p_P = -p0 ln(1 - (Phi - phi0)/dPhiMax)
+  // (small-deviation limit K_Phi = p0/dPhiMax = 2e5 Pa) and two-resistor
+  // coronary source.
+  in.poreStorage = Model::Input::PoreStorageLaw::Bruinsma;
+  in.p0 = 1.0e4;
+  in.dPhiMax = 0.05;
   in.gammaAr = 7.0e-10;
   in.gammaVen = 7.0e-10;
 
@@ -196,15 +203,15 @@ int main()
   in.dm0 = load_dependent_relaxation_dm0;
 
   {
+    // Usyk exponential law reduced to (lambda_r, lambda_theta). Placeholder
+    // values (Usyk et al. 2000 order of magnitude); to be calibrated.
     using PassiveEnergy = std::decay_t<decltype(in.passiveEnergy)>;
-    typename PassiveEnergy::Parameters hp;
-    hp.mu1 = 0.0;
-    hp.mu2 = 0.0;
-    hp.C0 = 1.9e3;
-    hp.C1 = 1.1e-1;
-    hp.C2 = 1.9e3;
-    hp.C3 = 1.1e-1;
-    in.passiveEnergy = PassiveEnergy(hp);
+    typename PassiveEnergy::Parameters up;
+    up.c0 = 0.88e3;  // Pa
+    up.brr = 3.58;   // transmural
+    up.btt = 18.5;   // in-plane
+    up.brt = 2.8;    // radial-circumferential coupling
+    in.passiveEnergy = PassiveEnergy(up);
   }
 
   Model model(in);

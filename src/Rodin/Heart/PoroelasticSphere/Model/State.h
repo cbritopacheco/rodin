@@ -58,6 +58,13 @@ namespace Rodin::Heart::PoroelasticSphere::Model
   /// @brief Rheology of the Windkessel branch flows (shared with CCMLC2014).
   using WindkesselRheology = CCMLC2014::Model::WindkesselRheology;
 
+  /// @brief Pore storage law @f$ \Psi_P(\Phi) @f$ (see Physics/PoreStorage.h).
+  enum class PoreStorageLaw
+  {
+    Linear,  ///< @f$ p_P = K_\Phi(\Phi - \phi_0) @f$.
+    Bruinsma ///< @f$ p_P = -p_0\ln(1 - (\Phi-\phi_0)/\Delta\Phi_{max}) @f$.
+  };
+
   /**
    * @brief Dynamic state variables at a given time.
    *
@@ -110,8 +117,16 @@ namespace Rodin::Heart::PoroelasticSphere::Model
       Scalar k0 = 0.0; ///< Active stiffness rate coefficient.
       Scalar sigma0 = 0.0; ///< Active stress rate coefficient.
 
+      using PoreStorageLaw = Model::PoreStorageLaw;
+      PoreStorageLaw poreStorage =
+        PoreStorageLaw::Linear; ///< Pore storage law selector.
       Scalar KPhi =
-        0.0; ///< Fluid storage modulus: @f$ \Psi_P(\Phi) = \tfrac12 K_\Phi (\Phi - \phi_0)^2 @f$ (0: pure Terzaghi).
+        0.0; ///< Linear fluid storage modulus: @f$ \Psi_P(\Phi) = \tfrac12 K_\Phi (\Phi - \phi_0)^2 @f$ (0: pure Terzaghi).
+      Scalar p0 = 0.0; ///< Bruinsma distension pressure @f$ p_0 = 1/\beta @f$.
+      Scalar dPhiMax =
+        0.0; ///< Bruinsma vascular capacity @f$ \Delta\Phi_{max} = C_0 p_0 @f$ (Bruinsma small-strain limit: @f$ K_\Phi = p_0/\Delta\Phi_{max} @f$).
+      Scalar poreStorageCutoff =
+        Scalar(1e-3); ///< Bruinsma: fraction of @f$ \Delta\Phi_{max} @f$ beyond which the law is continued linearly.
       Scalar gammaAr = 0.0; ///< Arterial perfusion conductance @f$ \gamma_{ar} @f$.
       Scalar gammaVen = 0.0; ///< Venous perfusion conductance @f$ \gamma_{ven} @f$.
 

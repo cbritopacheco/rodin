@@ -15,6 +15,8 @@ set(RodinHeart_HEADERS
   PoroelasticSphere.h
   PoroelasticSphere/PoroelasticSphere.h
   PoroelasticSphere/PassiveLaw.h
+  PoroelasticSphere/UsykLaw.h
+  PoroelasticSphere/Physics/PoreStorage.h
 )
 
 add_library(RodinHeart INTERFACE)

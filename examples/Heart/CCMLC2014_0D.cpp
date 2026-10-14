@@ -246,7 +246,7 @@ int main()
   }
 
   const Real dt = 1e-3;
-  const int nsteps = 3 * static_cast<int>(0.85 / dt);
+  const int nsteps = 30 * static_cast<int>(0.85 / dt);
 
   std::ofstream out("ccmlc2014_0d_cycle.csv");
   out << "t,y,v,pv,par,pd,ec,gamma,beta,w,kc,tauc,V,Q,pat\n";

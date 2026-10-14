@@ -13,6 +13,7 @@
 
 #include "Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h"
 #include "Rodin/Heart/PoroelasticSphere/PassiveLaw.h"
+#include "Rodin/Heart/PoroelasticSphere/UsykLaw.h"
 #include "Rodin/Heart/PoroelasticSphere/Solver/Stepper.h"
 
 // The user-facing PoroelasticSphereT alias (with its default law arguments)

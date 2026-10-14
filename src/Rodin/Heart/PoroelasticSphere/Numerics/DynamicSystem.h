@@ -39,6 +39,7 @@
 #include "Rodin/Heart/PoroelasticSphere/Model/State.h"
 #include "Rodin/Heart/PoroelasticSphere/Physics/Kinematics.h"
 #include "Rodin/Heart/PoroelasticSphere/Physics/WallStress.h"
+#include "Rodin/Heart/PoroelasticSphere/Physics/PoreStorage.h"
 
 namespace Rodin::Heart::PoroelasticSphere::Numerics
 {
@@ -477,9 +478,11 @@ namespace Rodin::Heart::PoroelasticSphere::Numerics
         m_wall.evaluate(data);
 
         // Interstitial pressure and perfusion source.
-        data.pf = m_input.KPhi * (data.phi - m_input.phi0) - data.lambdaBar;
+        // pf = p_P(phi) - lambdaBar (Eq. 61 / 102 of Ruz et al.).
+        const auto [pP, dpP] = Physics::poreStoragePressure(m_input, data.phi);
+        data.pf = pP - data.lambdaBar;
         data.dPf_dy = -data.dLambdaBar_dy;
-        data.dPf_dphi = m_input.KPhi - data.dLambdaBar_dphi;
+        data.dPf_dphi = dpP - data.dLambdaBar_dphi;
         data.dPf_dec = -data.dLambdaBar_dec;
         data.perfusionInflow = m_input.gammaAr * (data.par - data.pf);
         data.perfusionOutflow = m_input.gammaVen * (data.pf - data.pSvMid);
