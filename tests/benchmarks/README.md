@@ -918,8 +918,50 @@ inlining or an interposition repair. Raw traces, generated instructions,
 compiler optimization records and the explicitly noncanonical initial
 mutable-view measurements are retained in
 `build-convergence/certification/spatial-dot-batches-20261014/`.
-The one-component complex dispatch tradeoff remains a separate open source
-investigation; no production arithmetic is changed by this batch.
+### Complex one-component dispatch findings
+
+The one-component complex difference is a calling-context dispatch cost, not
+an additional complex-algebra operation or an out-of-line Eigen getter. In
+the native lower-pair loop, sampled instructions in the public path compare
+logical dimension with three, two and one before entering the one-component
+arithmetic. The historical dynamic reduction reaches its first complex packet
+after the empty-range check, followed by its reduction-loop control. Both
+paths use one-complex-value packets; their Eigen reductions differ in complete
+versus runtime unrolling. Changing only that unrolling instantiation leaves
+the surrounding dimension checks and does not remove the observed difference.
+
+Controlled source experiments retained the existing reduction formulas:
+
+| Experiment | Observation | Disposition |
+| --- | --- | --- |
+| Dynamic reduction inside the existing one-component case | No stable removal of the one-component cost | Reverted |
+| Wider dimension metadata | No consistent removal; the dimension load is already outside the inner loop | Reverted; original representation and serialization retained |
+| Separate zero/one complex range before fixed-extent dispatch | Removes the one-component penalty but slows the two-component and empty cases | Reverted |
+| Separate exact one-component condition | Optimizes back to effectively the original dispatch; no stable gain | Reverted |
+
+No shared Math repair is retained merely to improve one dimension at the
+expense of another. The benchmark scopes and all experimental observations
+remain available. Producer sites with invariant dimension require their own
+consumer-level evidence; a global branch-order or representation change is
+not justified by this microbenchmark alone.
+
+Source regression coverage now includes full complex pair batches of 4, 16
+and 64 operands after shrinking three-entry scratch to one active entry.
+Inactive entries are poisoned, both result components are compared bit-for-bit
+with the original const-view reduction, and an unconjugated result is rejected.
+The wrong-conjugation mutation was observed failing. The older randomized
+reference now also retains the original const expression types rather than
+using mutable Eigen views. All eight source tests pass under native Apple LLVM
+21, LLVM 19 and GCC 15, and all 224 benchmark scopes qualify in each Clang build.
+The GCC check is a local optimized standalone build of the same test source,
+not evidence for GCC 10/14 CI completion.
+
+The physical baseline additionally qualifies 24 local-binding and 12 coupled
+reaction--diffusion assembly selections: complex segment degrees 1–3 at
+$n\in\{3,5,9\}$, with real-segment and complex triangle/tetrahedron controls.
+No end-to-end improvement is claimed because no production repair was accepted.
+Profiles, dispatch diagnostics, rejected experiments and final regressions are
+retained under `build-convergence/certification/complex-one-dispatch-20261014/`.
 
 ### Spatial matrix-vector initialization and its assembly consumer
 

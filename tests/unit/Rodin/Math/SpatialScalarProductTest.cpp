@@ -5,12 +5,16 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 
-/** @file @brief Exact real/complex scalar promotion for spatial objects. */
+/**
+ * @file
+ * @brief Exact real/complex scalar promotion for spatial objects.
+ */
 
 #include <limits>
 #include <cstring>
 #include <random>
 #include <type_traits>
+#include <vector>
 #include <gtest/gtest.h>
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/SpatialMatrix.h"
@@ -61,11 +65,17 @@ namespace Rodin::Tests::Unit
         SCOPED_TRACE(static_cast<unsigned>(dim));
         SpatialVector<LHS> lhs(dim);
         SpatialVector<RHS> rhs(dim);
+        const auto& left = lhs;
+        const auto& right = rhs;
+        static_assert(std::is_const_v<std::remove_reference_t<decltype(left.getData())>>);
+        static_assert(
+          std::is_const_v<std::remove_reference_t<decltype(right.getData())>>);
         lhs.getData().setConstant(LHS(std::numeric_limits<Real>::quiet_NaN()));
         rhs.getData().setConstant(RHS(std::numeric_limits<Real>::quiet_NaN()));
         const auto compare = [&]() {
           const auto n = static_cast<Eigen::Index>(dim);
-          const auto original = Math::dot(lhs.getData().head(n), rhs.getData().head(n));
+          const auto original =
+            Math::dot(left.getData().head(n), right.getData().head(n));
           sameBits(Math::dot(lhs, rhs), original);
         };
         for (size_t trial = 0; trial < 1000; ++trial)
@@ -102,6 +112,51 @@ namespace Rodin::Tests::Unit
     check.template operator()<Complex, Complex>();
   }
 
+  /**
+   * @brief Preserves the original complex reduction in pair-loop calling contexts.
+   *
+   * Non-dyadic operands with nonzero imaginary parts exercise both conjugation
+   * and rounding. Growing scratch to three entries and shrinking to one leaves
+   * poisoned inactive storage. Every full-batch result must match the original
+   * const-view reduction bit-for-bit, and an unconjugated product must differ.
+   */
+  TEST(SpatialScalarProductTest, SingleComponentComplexBatchesMatchOriginalAfterResize)
+  {
+    for (const size_t count : {size_t(4), size_t(16), size_t(64)})
+    {
+      SCOPED_TRACE(count);
+      std::vector<SpatialVector<Complex>> lhs(count, SpatialVector<Complex>(3));
+      std::vector<SpatialVector<Complex>> rhs(count, SpatialVector<Complex>(3));
+      for (size_t b = 0; b < count; ++b)
+      {
+        lhs[b].resize(1);
+        rhs[b].resize(1);
+        lhs[b].getData().setConstant(Complex(std::numeric_limits<Real>::quiet_NaN()));
+        rhs[b].getData().setConstant(Complex(std::numeric_limits<Real>::quiet_NaN()));
+        lhs[b](0) = Complex(Real(b + 1) / 7, Real(b + 2) / 11);
+        rhs[b](0) = Complex(Real(b + 2) / 13, -Real(b + 1) / 17);
+      }
+      const auto& left = lhs;
+      const auto& right = rhs;
+      for (size_t b = 0; b < count; ++b)
+      {
+        for (size_t a = 0; a < count; ++a)
+        {
+          const auto n = static_cast<Eigen::Index>(left[b].size());
+          const Complex expected =
+            Math::dot(left[b].getData().head(n), right[a].getData().head(n));
+          const Complex actual = Math::dot(left[b], right[a]);
+          const auto sameBits = [](Real x, Real y) {
+            return std::memcmp(&x, &y, sizeof(Real)) == 0;
+          };
+          ASSERT_TRUE(sameBits(actual.real(), expected.real()));
+          ASSERT_TRUE(sameBits(actual.imag(), expected.imag()));
+          EXPECT_NE(actual, left[b](0) * right[a](0));
+        }
+      }
+    }
+  }
+
   template <class Coefficient, class Value>
   concept ScalesSpatial = requires(const Coefficient& coefficient, const Value& value) {
     coefficient* value;
@@ -111,7 +166,7 @@ namespace Rodin::Tests::Unit
   static_assert(!ScalesSpatial<void*, SpatialVector<Real>>);
   static_assert(!ScalesSpatial<void*, SpatialMatrix<Complex>>);
 
-/** @brief Scalar/matrix promotion preserves dimensions, entries and zero padding. */
+  /// @brief Scalar/matrix promotion preserves dimensions, entries and zero padding.
   TEST(SpatialMatrixRegression, MixedRealComplexScaling)
   {
     static_assert(std::is_same_v<decltype(Real{} * SpatialMatrix<Complex>{}),
@@ -268,7 +323,7 @@ namespace Rodin::Tests::Unit
     checkMatrixProduct<Complex>(Complex(0.25, 0.5));
   }
 
-  /** @brief Integer/float coefficients must compile without complex promotion loss. */
+  /// @brief Integer/float coefficients must compile without complex promotion loss.
   TEST(SpatialScalarProductTest, ArithmeticCoefficientsScaleComplexContainers)
   {
     checkVectorProduct<Complex>(Integer(2));
@@ -285,7 +340,7 @@ namespace Rodin::Tests::Unit
     checkMatrixProduct<Real>(2);
   }
 
-  /** @brief Real scaling must not introduce spurious NaNs through complex zero terms. */
+  /// @brief Real scaling must not introduce spurious NaNs through complex zero terms.
   TEST(SpatialScalarProductTest, RealScalingPreservesInfiniteComponent)
   {
     const Real infinity = std::numeric_limits<Real>::infinity();
