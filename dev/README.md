@@ -360,16 +360,39 @@ geometry, and backend variants explicitly. Current audit findings include:
   checks precede sorting and duplicate-key insertion. The original comparison
   failed in two dimensions because both early-exit conditions tested the same
   inequality; the second condition now rejects a larger leading coordinate.
-- Euclidean primitives: `Point2D` owns a two-component `Math::SpatialVector`,
-  and displacements and segment directions use the same fixed-capacity type.
-  The previous `Eigen::Vector2` storage was already fixed-size; this change
-  standardizes the spatial API rather than claiming an allocation reduction.
-  Float and real tests cover value semantics, invalid coordinate dimensions
-  through native Alert exceptions, affine arithmetic, segment interpolation,
-  barycenters, projections, circle intersections and rectangle corners.
-  A doubled segment direction is rejected by the interpolation test.
-  Direct Eigen inheritance and expression APIs are replaced by the point's
-  coordinate accessors, spatial-vector view and owned arithmetic results.
+- Euclidean primitives: `Point<Dimension, T>`, `LineSegment`, `Line`, `Sphere`,
+  `Hyperplane` and `Box` use `Math::FixedSizeVector` and `FixedSizeMatrix`
+  storage with compile-time dimensions. Existing planar names remain aliases.
+  Scalar/determinant/cross-product paths handle dimensions one through three;
+  higher-dimensional line calculations use column-pivoted QR with normalized
+  direction columns. Object symbols contain QR matrices only for the tested
+  higher dimensions, four and six. Zero-dimensional points and boxes have
+  their unique-point and counting-measure contracts; primitives requiring a
+  nonzero direction, distinct endpoints or nonempty sphere reject construction
+  through native member-function exceptions.
+  Float and real variants in dimensions zero, one, two, three, four and six
+  cover affine arithmetic, projections, skew distances, unique intersections,
+  tangent hyperplanes, closed-box operations and all box corners. Expressions
+  are evaluated into owned fixed storage before assignment, including reversal
+  of the point's own coordinates. Dynamic sizes and orientations are validated
+  before Eigen conversion. Small and large direction scales preserve geometry.
+  Release counterexamples exposed spurious coincident-line intersections in
+  the Gram determinant calculation; direct small-dimensional formulas and QR
+  rank checks repair them. A separate planar counterexample projected $(1,1)$
+  to $(0,1)$ with strongly unequal coefficients; anchoring on the largest normal
+  coefficient preserves the geometry. All 74 cases pass separately in Debug,
+  fresh Release CTest, and assertion-enabled ASan/LSan runs. Doubling production
+  projection and removing alias-safe assignment fail the respective float and
+  real manufactured oracles.
+  Production coverage retires all previous Euclidean implementation records
+  and captures matching fresh compiler notes. The local merged measurement is
+  32,001 of 33,867 lines (94.49%); Euclidean contributes 480 of 482 lines
+  (99.59%). Compared with the previous mesh batch, Euclidean adds 359 measured
+  lines and 357 hits; normal Debug instantiation also reveals 79 Alert formatter
+  lines (30 hits) and four Unit lines (all hit). These changes explain the larger
+  denominator and 51 additional uncovered lines. Tests, benchmarks, sanitizer
+  profiles and mutation profiles remain excluded. This measurement covers the
+  compiled float/real and dimension variants, not every possible instantiation.
 - Form ownership: real/complex P1 and quadratic H1 forms reject foreign trial
   and test contributions without changing the assembled mass operator or load.
   Addition/subtraction and linear assignment exercise named-trial and unnamed

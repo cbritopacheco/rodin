@@ -1,17 +1,26 @@
 set(RodinGeometryEuclidean_HEADERS
+  Line.h
+  Sphere.h
+  Hyperplane.h
+  Box.h
   Base.h
   Circle.h
   Concepts.h
   ForwardDecls.h
   Line2D.h
   LineSegment2D.h
+  Point.h
+  LineSegment.h
   Point2D.h
   Rectangle.h)
 
 set(RodinGeometryEuclidean_SRCS
+  Line.hpp
   Circle.hpp
   Line2D.hpp
   LineSegment2D.hpp
+  Point.hpp
+  LineSegment.hpp
   Point2D.hpp
   Rectangle.hpp)
 

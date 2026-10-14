@@ -10,10 +10,9 @@
 #include <type_traits>
 #include <utility>
 #include "Rodin/Alert/Exception.h"
-#include "Rodin/Math/SpatialVector.h"
-#include "Rodin/Geometry/Euclidean/Common.h"
-#include "Rodin/Geometry/Euclidean/Point2D.h"
-#include "Rodin/Geometry/Euclidean/Rectangle.h"
+#include "Rodin/Math/Vector.h"
+#include "Rodin/Math/Matrix.h"
+#include "Rodin/Geometry/Euclidean.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry::Euclidean;
@@ -124,25 +123,25 @@ TEST(Rodin_Geometry_Euclidean, RectangleCornersAndInclusiveContainment)
 namespace Rodin::Tests::Unit
 {
   template <class Scalar>
-  class EuclideanSpatialStorage : public ::testing::Test
+  class EuclideanFixedStorage : public ::testing::Test
   {};
 
   using EuclideanScalars = ::testing::Types<Float, Real>;
-  TYPED_TEST_SUITE(EuclideanSpatialStorage, EuclideanScalars);
+  TYPED_TEST_SUITE(EuclideanFixedStorage, EuclideanScalars);
 
   /// @brief Coordinates and directions use fixed-capacity spatial storage with value semantics.
-  TYPED_TEST(EuclideanSpatialStorage, CoordinatesAndValueSemantics)
+  TYPED_TEST(EuclideanFixedStorage, CoordinatesAndValueSemantics)
   {
     using Scalar = TypeParam;
     using Point = Point2D<Scalar>;
-    using Vector = Math::SpatialVector<Scalar>;
+    using Vector = Math::FixedSizeVector<Scalar, 2>;
     static_assert(
       std::is_same_v<std::remove_cvref_t<decltype(std::declval<Point>().asVector())>,
         Vector>);
     static_assert(
       std::is_same_v<decltype(std::declval<LineSegment2D<Scalar>>().direction()),
         Vector>);
-    static_assert(Vector::Data::RowsAtCompileTime == 3);
+    static_assert(Vector::RowsAtCompileTime == 2);
     Point origin;
     EXPECT_EQ(origin.asVector().size(), 2);
     EXPECT_EQ(origin.x(), Scalar(0));
@@ -163,30 +162,29 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(assigned, Point(Scalar(-2), Scalar(7)));
     try
     {
-      assigned = Vector{Scalar(1)};
+      assigned = Math::Vector<Scalar>::Ones(1);
       FAIL() << "Invalid coordinate dimension was accepted";
     }
     catch (const Alert::Exception& error)
     {
       const std::string message = error.what();
-      EXPECT_NE(message.find("In member function requireTwoCoordinates of class "),
-        std::string::npos);
-      EXPECT_NE(message.find("Point2D"), std::string::npos);
+      EXPECT_NE(message.find("In member function require of class "), std::string::npos);
+      EXPECT_NE(message.find("Point<"), std::string::npos);
       EXPECT_NE(
-        message.find("Point2D requires two coordinates; received 1"), std::string::npos);
+        message.find("Point requires 2 coordinates; received 1"), std::string::npos);
     }
     EXPECT_EQ(assigned, Point(Scalar(-2), Scalar(7)));
-    EXPECT_THROW((Point(Vector{})), Alert::Exception);
-    EXPECT_THROW((Point(Vector{Scalar(1), Scalar(2), Scalar(3)})), Alert::Exception);
+    EXPECT_THROW((Point(Math::Vector<Scalar>::Zero(0))), Alert::Exception);
+    EXPECT_THROW((Point(Math::Vector<Scalar>::Ones(3))), Alert::Exception);
     EXPECT_THROW((Point({Scalar(1)})), Alert::Exception);
   }
 
   /// @brief Spatial arithmetic preserves affine combinations and segment parameterization.
-  TYPED_TEST(EuclideanSpatialStorage, AffineArithmeticAndInterpolation)
+  TYPED_TEST(EuclideanFixedStorage, AffineArithmeticAndInterpolation)
   {
     using Scalar = TypeParam;
     using Point = Point2D<Scalar>;
-    using Vector = Math::SpatialVector<Scalar>;
+    using Vector = Math::FixedSizeVector<Scalar, 2>;
     constexpr Real tolerance = std::is_same_v<Scalar, Float> ? 1e-5 : 1e-12;
     const Point first(Scalar(1), Scalar(2)), last(Scalar(4), Scalar(6));
     static_assert(std::is_same_v<decltype(last - first), Vector>);
@@ -214,7 +212,7 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Projection and intersection results satisfy independent geometric equations.
-  TYPED_TEST(EuclideanSpatialStorage, ProjectionIntersectionsAndCorners)
+  TYPED_TEST(EuclideanFixedStorage, ProjectionIntersectionsAndCorners)
   {
     using Scalar = TypeParam;
     using Point = Point2D<Scalar>;
@@ -258,3 +256,636 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(rectangle.contains(Point(Scalar(4), Scalar(5))));
   }
 }
+
+namespace Rodin::Tests::Unit
+{
+  template <size_t N, class S>
+  struct EuclideanConfiguration
+  {
+      static constexpr size_t Dimension = N;
+      using Scalar = S;
+  };
+  template <class Configuration>
+  class EuclideanDimensions : public ::testing::Test
+  {};
+  using EuclideanConfigurations =
+    ::testing::Types<EuclideanConfiguration<1, Float>, EuclideanConfiguration<2, Float>,
+      EuclideanConfiguration<3, Float>, EuclideanConfiguration<4, Float>,
+      EuclideanConfiguration<6, Float>, EuclideanConfiguration<1, Real>,
+      EuclideanConfiguration<2, Real>, EuclideanConfiguration<3, Real>,
+      EuclideanConfiguration<4, Real>, EuclideanConfiguration<6, Real>>;
+  TYPED_TEST_SUITE(EuclideanDimensions, EuclideanConfigurations);
+
+  TYPED_TEST(EuclideanDimensions, CoordinatesAndAffineOperations)
+  {
+    using S = typename TypeParam::Scalar;
+    constexpr size_t N = TypeParam::Dimension;
+    using P = Geometry::Euclidean::Point<N, S>;
+    using V = typename P::Vector;
+    static_assert(P::getDimension() == N);
+    EXPECT_EQ(P::getDimension(), N);
+    static_assert(V::RowsAtCompileTime == N);
+    static_assert(V::SizeAtCompileTime == N);
+    V coordinates = V::Zero(), offset = V::Zero();
+    S squaredNorm = 0;
+    for (size_t i = 0; i < N; ++i)
+    {
+      coordinates[i] = S(i + 1);
+      offset[i] = S(2 * (i + 1));
+      squaredNorm += S((i + 1) * (i + 1));
+    }
+    const P point(coordinates);
+    const P variadic = []<size_t... I>(std::index_sequence<I...>) {
+      return P(S(I + 1)...);
+    }(std::make_index_sequence<N>{});
+    const P listed = []<size_t... I>(std::index_sequence<I...>) {
+      return P({S(I + 1)...});
+    }(std::make_index_sequence<N>{});
+    EXPECT_EQ(variadic, point);
+    EXPECT_EQ(listed, point);
+    const P copy(point);
+    P moving(point);
+    const P moved(std::move(moving));
+    P named;
+    named.x() = S(1);
+    EXPECT_EQ(std::as_const(named).x(), S(1));
+    if constexpr (N >= 2)
+    {
+      named.y() = S(2);
+      EXPECT_EQ(std::as_const(named).y(), S(2));
+    }
+    if constexpr (N >= 3)
+    {
+      named.z() = S(3);
+      EXPECT_EQ(std::as_const(named).z(), S(3));
+    }
+    static_assert((requires(P p) { p.y(); }) == (N >= 2));
+    static_assert((requires(P p) { p.z(); }) == (N >= 3));
+    if constexpr (N == 1)
+    {
+      EXPECT_EQ(P(S(1)), P({S(1)}));
+    }
+    if constexpr (N == 2)
+    {
+      EXPECT_EQ(P(S(1), S(2)), P({S(1), S(2)}));
+    }
+    if constexpr (N == 3)
+    {
+      EXPECT_EQ(P(S(1), S(2), S(3)), P({S(1), S(2), S(3)}));
+    }
+    EXPECT_EQ(point, copy);
+    EXPECT_EQ(point, moved);
+    const auto sum = point + offset;
+    EXPECT_EQ(offset + point, sum);
+    const auto middle = barycenter(point, P(offset));
+    for (size_t i = 0; i < N; ++i)
+    {
+      EXPECT_EQ(point[i], S(i + 1));
+      EXPECT_EQ(sum[i], S(3 * (i + 1)));
+      EXPECT_EQ((sum - offset)[i], point[i]);
+      EXPECT_EQ((point * S(2))[i], offset[i]);
+      EXPECT_EQ((S(2) * point / S(2))[i], point[i]);
+      EXPECT_EQ(middle[i], S(1.5) * S(i + 1));
+      EXPECT_EQ((P(offset) - point)[i], point[i]);
+    }
+    EXPECT_NEAR(point.norm(), std::sqrt(squaredNorm),
+      S(8) * std::numeric_limits<S>::epsilon() * squaredNorm);
+    P alias(point);
+    alias = alias.asVector().reverse();
+    for (size_t i = 0; i < N; ++i)
+      EXPECT_EQ(alias[i], S(N - i));
+    P changed(point);
+    changed[N - 1] += S(1);
+    EXPECT_NE(point, changed);
+    Math::Vector<S> wrong = Math::Vector<S>::Zero(N - 1);
+    EXPECT_THROW(changed = wrong, Alert::Exception);
+    EXPECT_EQ(changed[N - 1], S(N + 1));
+    EXPECT_THROW((void)P(wrong), Alert::Exception);
+    EXPECT_THROW(point + wrong, Alert::Exception);
+    if constexpr (N >= 2)
+    {
+      const Math::Matrix<S> row = Math::Matrix<S>::Ones(1, N);
+      EXPECT_THROW((void)P(row), Alert::Exception);
+      EXPECT_THROW(changed = row, Alert::Exception);
+      EXPECT_EQ(changed[N - 1], S(N + 1));
+      EXPECT_THROW((Line<N, S>(point, row)), Alert::Exception);
+      EXPECT_THROW((Hyperplane<N, S>(point, row)), Alert::Exception);
+      EXPECT_THROW((Sphere<N, S>().pointAt(row)), Alert::Exception);
+    }
+    EXPECT_THROW(P({}), Alert::Exception);
+    EXPECT_THROW(P(std::initializer_list<S>{S(1), S(2), S(3), S(4), S(5), S(6), S(7)}),
+      Alert::Exception);
+  }
+
+  TYPED_TEST(EuclideanDimensions, SegmentInterpolationAndIntersections)
+  {
+    using S = typename TypeParam::Scalar;
+    constexpr size_t N = TypeParam::Dimension;
+    using P = Geometry::Euclidean::Point<N, S>;
+    using Segment = LineSegment<N, S>;
+    P origin, end;
+    end[N - 1] = S(8);
+    Segment segment(origin, end);
+    EXPECT_EQ(segment.length(), S(8));
+    EXPECT_EQ(segment.direction()[N - 1], S(1));
+    const P middle = segment(S(0.25));
+    EXPECT_EQ(middle[N - 1], S(2));
+    EXPECT_EQ(segment.reverse()(S(0.75)), middle);
+    EXPECT_EQ(segment.project(origin - S(2) * segment.direction()), origin);
+    EXPECT_EQ(segment.project(end + S(2) * segment.direction()), end);
+    EXPECT_EQ(segment.distance(end + S(2) * segment.direction()), S(2));
+    P shortEnd, adjacentEnd;
+    shortEnd[N - 1] = S(0.1);
+    adjacentEnd[N - 1] = S(0.4);
+    const Segment shortSegment(origin, shortEnd), adjacent(shortEnd, adjacentEnd);
+    ASSERT_TRUE(shortSegment.intersect(adjacent));
+    EXPECT_EQ(*shortSegment.intersect(adjacent), shortEnd);
+    EXPECT_FALSE(segment.intersect(segment));
+    P further = end;
+    further[N - 1] = S(12);
+    const auto touch = segment.intersect(Segment(end, further));
+    ASSERT_TRUE(touch);
+    EXPECT_EQ(*touch, end);
+    if constexpr (N >= 2)
+    {
+      P low = middle, high = middle;
+      low[0] = S(-2);
+      high[0] = S(2);
+      ASSERT_TRUE(segment.intersect(Segment(low, high)));
+      EXPECT_EQ(*segment.intersect(Segment(low, high)), middle);
+      low[N - 1] = high[N - 1] = S(10);
+      EXPECT_FALSE(segment.intersect(Segment(low, high)));
+      if constexpr (N >= 3)
+      {
+        low[1] = high[1] = S(1);
+        low[N - 1] = high[N - 1] = S(2);
+        EXPECT_FALSE(segment.intersect(Segment(low, high)));
+      }
+    }
+    EXPECT_THROW(Segment(origin, origin), Alert::Exception);
+    EXPECT_THROW(segment.setStart(end), Alert::Exception);
+    EXPECT_THROW(segment.setEnd(origin), Alert::Exception);
+    EXPECT_EQ(segment.start(), origin);
+    EXPECT_EQ(segment.end(), end);
+    segment.setStart(origin + segment.direction()).setEnd(end + segment.direction());
+    EXPECT_EQ(segment.start()[N - 1], S(1));
+    EXPECT_EQ(segment.end()[N - 1], S(9));
+    EXPECT_FALSE(origin.connect(origin));
+    ASSERT_TRUE(origin.connect(end));
+    EXPECT_EQ(origin.connect(end)->length(), S(8));
+  }
+
+  TYPED_TEST(EuclideanDimensions, LineProjectionAndSkewDistance)
+  {
+    using S = typename TypeParam::Scalar;
+    constexpr size_t N = TypeParam::Dimension;
+    using P = Geometry::Euclidean::Point<N, S>;
+    using L = Line<N, S>;
+    using V = typename P::Vector;
+    P origin, end;
+    end[N - 1] = S(4);
+    L line(origin, end);
+    EXPECT_EQ(line.getDimension(), N);
+    EXPECT_EQ(line.origin(), origin);
+    EXPECT_EQ(line.direction()[N - 1], S(1));
+    EXPECT_EQ(line.pointAt(S(0.5))[N - 1], S(2));
+    EXPECT_EQ(line.project(end), end);
+    EXPECT_EQ(line.distance(end), S(0));
+    EXPECT_FALSE(end.connect(line));
+    const L scaled(origin, V::Constant(S(0.1))), sameLine(origin, V::Constant(S(0.3)));
+    EXPECT_FALSE(scaled.intersect(sameLine));
+    for (const S scale :
+      {std::numeric_limits<S>::min(), std::numeric_limits<S>::max() / S(4)})
+    {
+      V scaledDirection = V::Zero();
+      scaledDirection[N - 1] = scale;
+      const L rescaled(origin, scaledDirection);
+      EXPECT_EQ(rescaled.direction()[N - 1], S(1));
+      EXPECT_EQ(rescaled.project(end), end);
+      EXPECT_EQ(rescaled.distance(end), S(0));
+      EXPECT_FALSE(rescaled.intersect(line));
+      const Hyperplane<N, S> plane(origin, scaledDirection);
+      EXPECT_EQ(plane.project(end), origin);
+      const Sphere<N, S> sphere(origin, S(2));
+      EXPECT_EQ(sphere.pointAt(scaledDirection)[N - 1], S(2));
+    }
+    EXPECT_FALSE(line.intersect(line));
+    EXPECT_EQ(line.closestPoint(line), origin);
+    EXPECT_EQ(line.distance(line), S(0));
+    EXPECT_THROW(L(origin, V::Zero()), Alert::Exception);
+    EXPECT_THROW(L(origin, Math::Vector<S>::Zero(N - 1)), Alert::Exception);
+    if constexpr (N == 2)
+    {
+      const P query(S(1), S(1));
+      const L nearlyHorizontal(std::numeric_limits<S>::min(), S(1), S(1));
+      const L nearlyVertical(S(1), std::numeric_limits<S>::min(), S(1));
+      EXPECT_EQ(nearlyHorizontal.project(query), query);
+      EXPECT_EQ(nearlyVertical.project(query), query);
+      EXPECT_FALSE(query.connect(nearlyHorizontal));
+      EXPECT_FALSE(query.connect(nearlyVertical));
+      const L coefficients(std::initializer_list<S>{S(3), S(4), S(5)});
+      EXPECT_EQ(coefficients.a(), S(3));
+      EXPECT_EQ(coefficients.b(), S(4));
+      EXPECT_EQ(coefficients.c(), S(5));
+      EXPECT_EQ(*coefficients.slope(), S(-0.75));
+      EXPECT_EQ(*coefficients.xIntercept(), S(5) / S(3));
+      EXPECT_EQ(*coefficients.yIntercept(), S(1.25));
+      EXPECT_EQ(*coefficients(S(1)), S(0.5));
+      EXPECT_EQ(coefficients(P(S(3), S(-1))), S(0));
+      EXPECT_FALSE(coefficients.isHorizontal());
+      EXPECT_FALSE(coefficients.isVertical());
+      const L tangent = Sphere<N, S>().tangent(Math::Rad(0));
+      EXPECT_EQ(tangent(P(S(1), S(0))), S(0));
+    }
+    if constexpr (N >= 2)
+    {
+      P p = end;
+      p[0] = S(3);
+      EXPECT_EQ(line.project(p), end);
+      EXPECT_EQ(line.distance(p), S(3));
+      const auto connection = p.connect(line);
+      ASSERT_TRUE(connection);
+      EXPECT_EQ(connection->end(), end);
+      P q = p;
+      q[N - 1] = S(8);
+      const L parallel(p, q);
+      EXPECT_EQ(line.distance(parallel), S(3));
+      EXPECT_FALSE(line.intersect(parallel));
+      const L crossing(end, p);
+      ASSERT_TRUE(line.intersect(crossing));
+      EXPECT_EQ(*line.intersect(crossing), end);
+      EXPECT_EQ(line.distance(crossing), S(0));
+      if constexpr (N >= 3)
+      {
+        P a = end, b = p;
+        a[1] = b[1] = S(2);
+        const L skew(a, b);
+        EXPECT_EQ(line.distance(skew), S(2));
+        EXPECT_FALSE(line.intersect(skew));
+      }
+    }
+  }
+
+  TYPED_TEST(EuclideanDimensions, SphereSurfaceTangentsAndLineIntersections)
+  {
+    using S = typename TypeParam::Scalar;
+    constexpr size_t N = TypeParam::Dimension;
+    using P = Geometry::Euclidean::Point<N, S>;
+    using V = typename P::Vector;
+    using Ball = Sphere<N, S>;
+    using Pair = std::pair<P, P>;
+    P center;
+    for (size_t i = 0; i < N; ++i)
+      center[i] = S(i + 1);
+    Ball sphere(center, S(2));
+    EXPECT_EQ(sphere.getDimension(), N);
+    V direction = V::Zero();
+    direction[N - 1] = S(4);
+    const P surface = sphere.pointAt(direction);
+    EXPECT_EQ(surface[N - 1], center[N - 1] + S(2));
+    EXPECT_EQ(sphere(surface), S(0));
+    EXPECT_EQ(sphere(center), S(-4));
+    EXPECT_EQ(sphere.distance(center), S(2));
+    const auto tangent = sphere.tangent(direction);
+    EXPECT_EQ(tangent.getDimension(), N);
+    EXPECT_EQ(tangent(surface), S(0));
+    EXPECT_EQ(tangent.distance(center), S(2));
+    EXPECT_EQ(tangent.project(center), surface);
+    EXPECT_EQ(tangent.normal()[N - 1], S(4));
+    EXPECT_EQ(tangent.origin(), surface);
+    const Line<N, S> diameter(center, direction);
+    EXPECT_FALSE(diameter.connect(sphere));
+    const P inside = center + S(0.25) * direction;
+    ASSERT_TRUE(inside.connect(sphere));
+    EXPECT_EQ(inside.connect(sphere)->end(), surface);
+    const auto result = diameter.intersect(sphere);
+    ASSERT_TRUE(std::holds_alternative<Pair>(result));
+    const auto points = std::get<Pair>(result);
+    EXPECT_EQ(sphere(points.first), S(0));
+    EXPECT_EQ(sphere(points.second), S(0));
+    EXPECT_EQ((points.first - points.second).norm(), S(4));
+    EXPECT_FALSE(center.connect(sphere));
+    EXPECT_FALSE(surface.connect(sphere));
+    const P outside = center + direction;
+    ASSERT_TRUE(outside.connect(sphere));
+    EXPECT_EQ(outside.connect(sphere)->end(), surface);
+    EXPECT_THROW(sphere.setRadius(S(0)), Alert::Exception);
+    EXPECT_EQ(sphere.radius(), S(2));
+    EXPECT_THROW(sphere.pointAt(V::Zero()), Alert::Exception);
+    EXPECT_THROW(sphere.pointAt(Math::Vector<S>::Zero(N - 1)), Alert::Exception);
+    EXPECT_THROW((Hyperplane<N, S>(center, V::Zero())), Alert::Exception);
+    if constexpr (N >= 2)
+    {
+      P tangentOrigin = center, separatedOrigin = center;
+      tangentOrigin[0] += S(2);
+      separatedOrigin[0] += S(3);
+      const Line<N, S> tangentLine(tangentOrigin, direction),
+        separated(separatedOrigin, direction);
+      const auto touch = tangentLine.intersect(sphere);
+      ASSERT_TRUE(std::holds_alternative<P>(touch));
+      EXPECT_EQ(std::get<P>(touch), tangentOrigin);
+      EXPECT_TRUE(std::holds_alternative<std::nullopt_t>(separated.intersect(sphere)));
+      ASSERT_TRUE(separated.connect(sphere));
+      EXPECT_EQ(separated.connect(sphere)->length(), S(1));
+      EXPECT_FALSE(tangentLine.connect(sphere));
+    }
+    sphere.setCenter(P()).setRadius(S(1));
+    EXPECT_EQ(sphere.center(), P());
+    EXPECT_EQ(sphere.radius(), S(1));
+  }
+
+  TYPED_TEST(EuclideanDimensions, BoxContainmentProjectionAndIntersection)
+  {
+    using S = typename TypeParam::Scalar;
+    constexpr size_t N = TypeParam::Dimension;
+    using P = Geometry::Euclidean::Point<N, S>;
+    using B = Box<N, S>;
+    P lower, upper;
+    S measure = S(1);
+    for (size_t i = 0; i < N; ++i)
+    {
+      lower[i] = S(i + 1);
+      upper[i] = lower[i] + S(2);
+      measure *= S(2);
+    }
+    const B box(lower, upper);
+    EXPECT_EQ(box.getDimension(), N);
+    if constexpr (N == 2)
+    {
+      EXPECT_EQ(box.width(), S(2));
+      EXPECT_EQ(box.height(), S(2));
+      EXPECT_EQ(box.area(), S(4));
+    }
+    EXPECT_EQ(box.measure(), measure);
+    EXPECT_EQ(box.lower(), lower);
+    EXPECT_EQ(box.upper(), upper);
+    EXPECT_TRUE(box.contains(lower));
+    EXPECT_TRUE(box.contains(upper));
+    EXPECT_FALSE(box.contains(P()));
+    std::array<bool, N> mask{};
+    for (size_t i = 0; i < N; ++i)
+    {
+      mask[i] = true;
+      EXPECT_EQ(box.getCorner(mask)[i], upper[i]);
+      EXPECT_EQ(box.extent(i), S(2));
+    }
+    EXPECT_EQ(box.getCorner(mask), upper);
+    P outside = upper;
+    outside[N - 1] += S(3);
+    EXPECT_EQ(box.project(outside), upper);
+    EXPECT_EQ(box.distance(outside), S(3));
+    EXPECT_EQ(box.distance(lower), S(0));
+    const auto overlap = box.intersect(B(lower, lower + upper.asVector()));
+    ASSERT_TRUE(overlap);
+    EXPECT_EQ(overlap->measure(), measure);
+    const auto touch = box.intersect(B(upper, outside));
+    ASSERT_TRUE(touch);
+    EXPECT_EQ(touch->measure(), S(0));
+    P separated = upper;
+    separated[N - 1] += S(1);
+    EXPECT_FALSE(box.intersect(B(separated, outside)));
+    EXPECT_THROW(B(upper, lower), Alert::Exception);
+    EXPECT_THROW(box.extent(N), Alert::Exception);
+  }
+}
+
+namespace Rodin::Tests::Unit
+{
+  TYPED_TEST(EuclideanDimensions, ManufacturedObliqueGeometry)
+  {
+    using S = typename TypeParam::Scalar;
+    constexpr size_t N = TypeParam::Dimension;
+    using P = Geometry::Euclidean::Point<N, S>;
+    using V = typename P::Vector;
+    using L = Line<N, S>;
+    P origin;
+    V u = V::Zero(), normal = V::Zero();
+    S squared = 0;
+    for (size_t i = 0; i < N; ++i)
+    {
+      origin[i] = S(3 * (i + 1));
+      u[i] = S(i + 1);
+      squared += S((i + 1) * (i + 1));
+    }
+    const S epsilon = std::numeric_limits<S>::epsilon();
+    const S tolerance = S(64) * epsilon;
+    const L line(origin, u);
+    const auto along = origin + S(2) * u;
+    if constexpr (N >= 2)
+    {
+      normal[0] = S(2);
+      normal[1] = S(-1);
+      const auto sample = along + S(3) * normal;
+      const auto projected = line.project(sample);
+      for (size_t i = 0; i < N; ++i)
+        EXPECT_NEAR(projected[i], origin[i] + S(2 * (i + 1)), tolerance);
+      EXPECT_NEAR(line.distance(sample), S(3) * std::sqrt(S(5)), tolerance);
+      const L crossing(along, normal);
+      ASSERT_TRUE(line.intersect(crossing));
+      EXPECT_LT((*line.intersect(crossing) - along).norm(), tolerance);
+      if constexpr (N == 3)
+      {
+        const V transverse(S(3), S(6), S(-5));
+        const L skew(along + transverse, normal);
+        EXPECT_NEAR(line.distance(skew), std::sqrt(S(70)), tolerance);
+        EXPECT_FALSE(line.intersect(skew));
+      }
+    }
+    const S radius = S(2) * std::sqrt(squared);
+    const Sphere<N, S> sphere(origin, radius);
+    const auto surface = sphere.pointAt(u);
+    for (size_t i = 0; i < N; ++i)
+      EXPECT_NEAR(surface[i], origin[i] + S(2 * (i + 1)), tolerance);
+    EXPECT_NEAR(sphere(surface), S(0), tolerance * squared);
+    const auto tangent = sphere.tangent(u);
+    EXPECT_NEAR(tangent.distance(origin), radius, tolerance);
+    for (size_t i = 0; i < N; ++i)
+      EXPECT_NEAR(tangent.project(origin)[i], surface[i], tolerance);
+    const auto result = line.intersect(sphere);
+    using Pair = std::pair<P, P>;
+    ASSERT_TRUE(std::holds_alternative<Pair>(result));
+    const auto pair = std::get<Pair>(result);
+    for (size_t i = 0; i < N; ++i)
+    {
+      EXPECT_NEAR(pair.first[i], origin[i] + S(2 * (i + 1)), tolerance);
+      EXPECT_NEAR(pair.second[i], origin[i] - S(2 * (i + 1)), tolerance);
+    }
+    const Box<N, S> box(origin, origin + S(2) * u);
+    for (size_t bits = 0; bits < (size_t(1) << N); ++bits)
+    {
+      std::array<bool, N> mask{};
+      for (size_t i = 0; i < N; ++i)
+        mask[i] = (bits & (size_t(1) << i)) != 0;
+      const auto corner = box.getCorner(mask);
+      EXPECT_TRUE(box.contains(corner));
+      for (size_t i = 0; i < N; ++i)
+        EXPECT_EQ(corner[i], origin[i] + (mask[i] ? S(2 * (i + 1)) : S(0)));
+    }
+  }
+}
+
+TEST(Rodin_Geometry_Euclidean, InvalidInputsCarryMemberContext)
+{
+  const auto requireMember = [](auto operation, const std::string& member) {
+    try
+    {
+      operation();
+      FAIL() << "Expected an Alert exception";
+    }
+    catch (const Alert::Exception& error)
+    {
+      const std::string message = error.what();
+      EXPECT_NE(
+        message.find("In member function " + member + " of class "), std::string::npos)
+        << message;
+    }
+  };
+  requireMember([] { (void)Line<2>(Real(0), Real(0), Real(1)); }, "Line");
+  requireMember(
+    [] { (void)Line<2>(std::initializer_list<Real>{Real(1), Real(2)}); }, "Line");
+  requireMember(
+    [] { (void)Line<3>(Point<3>(), Math::FixedSizeVector<Real, 3>::Zero()); }, "Line");
+  requireMember(
+    [] {
+      Sphere<3> sphere;
+      sphere.setRadius(-1);
+    },
+    "setRadius");
+  requireMember(
+    [] {
+      Sphere<3> sphere;
+      (void)sphere.pointAt(Math::FixedSizeVector<Real, 3>::Zero());
+    },
+    "pointAt");
+  requireMember(
+    [] { (void)Hyperplane<3>(Point<3>(), Math::Vector<Real>::Zero(2)); }, "Hyperplane");
+  requireMember([] { (void)Box<3>({1, 2, 3}, {1, 1, 4}); }, "Box");
+  requireMember([] { (void)Box<3>({0, 0, 0}, {1, 1, 1}).extent(3); }, "extent");
+}
+
+// Instantiate every supported public member, including variants hidden by shared line coverage.
+template class Rodin::Geometry::Euclidean::Point<1, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::LineSegment<1, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Line<1, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Sphere<1, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Hyperplane<1, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Box<1, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Point<1, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::LineSegment<1, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Line<1, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Sphere<1, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Hyperplane<1, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Box<1, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Point<2, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::LineSegment<2, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Line<2, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Sphere<2, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Hyperplane<2, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Box<2, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Point<2, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::LineSegment<2, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Line<2, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Sphere<2, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Hyperplane<2, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Box<2, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Point<3, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::LineSegment<3, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Line<3, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Sphere<3, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Hyperplane<3, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Box<3, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Point<3, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::LineSegment<3, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Line<3, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Sphere<3, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Hyperplane<3, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Box<3, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Point<4, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::LineSegment<4, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Line<4, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Sphere<4, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Hyperplane<4, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Box<4, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Point<4, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::LineSegment<4, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Line<4, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Sphere<4, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Hyperplane<4, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Box<4, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Point<6, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::LineSegment<6, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Line<6, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Sphere<6, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Hyperplane<6, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Box<6, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Point<6, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::LineSegment<6, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Line<6, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Sphere<6, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Hyperplane<6, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Box<6, Rodin::Real>;
+
+namespace Rodin::Tests::Unit
+{
+  template <class Scalar>
+  class EuclideanZeroDimensions : public ::testing::Test
+  {};
+  TYPED_TEST_SUITE(EuclideanZeroDimensions, EuclideanScalars);
+
+  TYPED_TEST(EuclideanZeroDimensions, PointAndBoxCountingMeasure)
+  {
+    using S = TypeParam;
+    using P = Geometry::Euclidean::Point<0, S>;
+    using V = Math::FixedSizeVector<S, 0>;
+    using B = Box<0, S>;
+    static_assert(V::SizeAtCompileTime == 0);
+    static_assert(!(requires(P p) { p.x(); }));
+    const P origin;
+    EXPECT_EQ(P::getDimension(), 0);
+    EXPECT_EQ(origin.asVector().size(), 0);
+    EXPECT_EQ(origin.norm(), S(0));
+    EXPECT_EQ(origin, P({}));
+    EXPECT_EQ(origin, P(V::Zero()));
+    EXPECT_EQ((origin - origin).size(), 0);
+    EXPECT_EQ(origin + origin, origin);
+    EXPECT_EQ(origin + V::Zero(), origin);
+    EXPECT_EQ(V::Zero() + origin, origin);
+    EXPECT_EQ(origin - V::Zero(), origin);
+    EXPECT_EQ(origin * S(2), origin);
+    EXPECT_EQ(barycenter(origin, origin, origin), origin);
+    EXPECT_FALSE(origin.connect(origin));
+    const B box(origin, origin);
+    EXPECT_EQ(box.getDimension(), 0);
+    EXPECT_TRUE(box.contains(origin));
+    EXPECT_EQ(box.measure(), S(1));
+    EXPECT_EQ(box.getCorner(std::array<bool, 0>{}), origin);
+    EXPECT_EQ(box.project(origin), origin);
+    EXPECT_EQ(box.distance(origin), S(0));
+    const auto intersection = box.intersect(box);
+    ASSERT_TRUE(intersection);
+    EXPECT_EQ(intersection->measure(), S(1));
+    EXPECT_THROW(box.extent(0), Alert::Exception);
+    EXPECT_THROW((void)P(Math::Vector<S>::Ones(1)), Alert::Exception);
+  }
+
+  TYPED_TEST(EuclideanZeroDimensions, RejectsNonemptyPositiveDimensionalPrimitives)
+  {
+    using S = TypeParam;
+    using P = Geometry::Euclidean::Point<0, S>;
+    using V = Math::FixedSizeVector<S, 0>;
+    using L = Line<0, S>;
+    using Segment = LineSegment<0, S>;
+    using Ball = Sphere<0, S>;
+    using Plane = Hyperplane<0, S>;
+    const P origin;
+    EXPECT_THROW((void)L(origin, origin), Alert::Exception);
+    EXPECT_THROW((void)Segment(origin, origin), Alert::Exception);
+    EXPECT_THROW((void)Ball(), Alert::Exception);
+    EXPECT_THROW((void)Plane(origin, V::Zero()), Alert::Exception);
+  }
+}
+
+template class Rodin::Geometry::Euclidean::Point<0, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Point<0, Rodin::Real>;
+template class Rodin::Geometry::Euclidean::Box<0, Rodin::Float>;
+template class Rodin::Geometry::Euclidean::Box<0, Rodin::Real>;
