@@ -20,8 +20,8 @@ line, offending source, and suggested fix.
 
 ## Quick reference: the style itself
 
-- **Formatting**: 2-space indent, Allman braces, `public:` indented inside
-  the class with members one level deeper, constructor initializers one per
+- **Formatting**: 2-space indent, Allman braces, access labels and members
+  aligned one level inside a class or struct, constructor initializers one per
   line starting with `: ` on their own line, empty bodies as `{}` on their
   own line, pointers/references bind left (`Base* copy()`), includes are
   **never reordered** (order is load-bearing).

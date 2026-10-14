@@ -12,6 +12,32 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /**
+   * @brief Reference coordinates have exactly the topological dimension.
+   *
+   * The zero-dimensional reference point has one vertex in the singleton
+   * space of empty coordinate tuples, not a one-dimensional zero coordinate.
+   * The same dimension contract holds for every vertex and centroid of all
+   * reference families, independently of their physical embedding.
+   */
+  TEST(Geometry_PolytopeTraits, ReferenceCoordinateDimensions)
+  {
+    for (const auto geometry :
+      {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+        Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const Polytope::Traits traits(geometry);
+      EXPECT_EQ(traits.getCentroid().size(), traits.getDimension());
+      for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+      {
+        SCOPED_TRACE(vertex);
+        EXPECT_EQ(traits.getVertex(vertex).size(), traits.getDimension());
+      }
+    }
+  }
+
   // ============================================================================
   // Polytope::Traits Tests
   // ============================================================================

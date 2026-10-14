@@ -796,7 +796,7 @@ namespace Rodin::Geometry
     {
       case Type::Point:
       {
-        static const Math::SpatialPoint s_node{ 0 };
+        static const Math::SpatialPoint s_node{};
         return s_node;
       }
       case Type::Segment:

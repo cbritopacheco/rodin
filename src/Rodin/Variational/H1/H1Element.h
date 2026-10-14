@@ -42,6 +42,7 @@
 
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/FiniteElement.h"
+#include "Rodin/Variational/ReferenceTabulation.h"
 #include "Rodin/Variational/H1/Fekete.h"
 #include "Rodin/Variational/H1/GLL.h"
 #include "Rodin/Math/Traits.h"
@@ -146,85 +147,8 @@ namespace Rodin::Variational
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
 
       /// @brief Basis values and derivatives tabulated on the reference element.
-      struct Tabulation
-      {
-        /// @brief Number of quadrature points tabulated.
-        size_t nqp;
-        /// @brief Number of degrees of freedom tabulated.
-        size_t ndof;
-        /// @brief Spatial dimension.
-        size_t dim;
-
-        // qp-major storage
-        // phi[(qp*ndof) + a]
-        /// @brief Tabulated basis values.
-          std::vector<Scalar> phi;
-
-        // derivative in reference coordinates
-        // dphi[((qp*ndof + a)*dim) + i]
-        /// @brief Tabulated basis derivatives.
-          std::vector<Scalar> dphi;
-
-          /// @brief Constructs an empty reference tabulation.
-          Tabulation()
-            : nqp(0),
-              ndof(0),
-              dim(0),
-              phi(),
-              dphi()
-          {}
-
-        // ---------- fast path (tight loops) ----------
-        /// @brief Gets the basis function of a local degree of freedom.
-          /**
-           * @returns Value of the selected local basis function at the evaluation point.
-           * @param qp Quadrature-point index.
-           * @param a Local basis-function index.
-           */
-          const Scalar& getBasis(size_t qp, size_t a) const noexcept
-          {
-            return phi[qp * ndof + a];
-          }
-
-          /**
-           * @brief Gets the derivative of the basis function.
-           * @param i Index of the requested entry.
-           * @returns Derivative evaluated at the supplied point.
-           * @param qp Quadrature-point index.
-           * @param a Basis or lattice index in the reference element.
-           */
-          template <size_t Order>
-          const Scalar& getDerivative(size_t qp, size_t a, size_t i) const noexcept
-          {
-            if constexpr (Order == 0)
-            {
-              assert(i == 0);
-              return phi[qp * ndof + a];
-            }
-            else if constexpr (Order == 1)
-            {
-              assert(i < dim);
-              return dphi[(qp * ndof + a) * dim + i];
-            }
-            else
-            {
-            // Higher-order derivatives not implemented
-              static const Scalar zero = Scalar(0);
-              return zero;
-            }
-        }
-
-        /**
-         * @brief Gets the gradient of the basis function.
-         * @returns Derivative evaluated at the supplied point.
-         * @param qp Quadrature-point index.
-         * @param a Coordinate at which the basis is evaluated.
-         */
-        std::span<const Scalar> getGradient(size_t qp, size_t a) const noexcept
-        {
-          return std::span<const Scalar>(&dphi[(qp * ndof + a) * dim], dim);
-        }
-      };
+      using Tabulation =
+        typename ReferenceTabulation<H1Element<K, Scalar>, Scalar>::Table;
 
       friend class boost::serialization::access;
 
@@ -864,13 +788,6 @@ namespace Rodin::Variational
       {
         ar & boost::serialization::base_object<Parent>(*this);
       }
-
-    private:
-      /**
-       * @brief Gets the single thread-local reference-tabulation store.
-       * @returns The bounded store shared by construction and lookup.
-       */
-      static auto& getTabulationCache();
   };
 
   /**

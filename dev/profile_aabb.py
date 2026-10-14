@@ -69,8 +69,11 @@ def main():
     header = output / "AABBDiagnostic.h"
     header.write_text(source)
     entries = json.loads((build / "compile_commands.json").read_text())
-    source_name = "MPIAABB.cpp" if args.target == "RodinMPIAABBBenchmarks" else "AABBWorkload.cpp"
-    entry = next(e for e in entries if e["file"].endswith("/" + source_name))
+    source_path = ("tests/benchmarks/Rodin/MPI/Location/AABB.cpp"
+                   if args.target == "RodinMPIAABBBenchmarks"
+                   else "tests/benchmarks/Rodin/Location/AABBWorkload.cpp")
+    source_name = Path(source_path).name
+    entry = next(e for e in entries if e["file"].endswith("/" + source_path))
     command = shlex.split(entry["command"])
     obj = output / (args.target + "Diagnostic.o")
     command[command.index("-o") + 1] = str(obj)

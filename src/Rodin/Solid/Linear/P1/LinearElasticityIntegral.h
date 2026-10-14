@@ -77,30 +77,27 @@ namespace Rodin::Variational
   {
     public:
       /// @brief Scalar value type.
-      using ScalarType = typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType;
+    using ScalarType = typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType;
 
       /// @brief Trial finite element space type.
-      using TrialFESType = P1<Range, Mesh>;
+    using TrialFESType = P1<Range, Mesh>;
       /// @brief Test finite element space type.
-      using TestFESType  = P1<Range, Mesh>;
+    using TestFESType = P1<Range, Mesh>;
 
       /// @brief Shear modulus function type.
-      using MuType     = FunctionBase<MuDerived>;
+    using MuType = FunctionBase<MuDerived>;
       /// @brief First Lamé parameter function type.
-      using LambdaType = FunctionBase<LambdaDerived>;
+    using LambdaType = FunctionBase<LambdaDerived>;
 
       /// @brief Parent class type.
-      using Parent =
-        LocalBilinearFormIntegratorBase<ScalarType>;
+    using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
     private:
-      using MuRangeType =
-        typename FormLanguage::Traits<MuType>::RangeType;
+    using MuRangeType = typename FormLanguage::Traits<MuType>::RangeType;
 
-      using LambdaRangeType =
-        typename FormLanguage::Traits<LambdaType>::RangeType;
+    using LambdaRangeType = typename FormLanguage::Traits<LambdaType>::RangeType;
 
-      static_assert(FormLanguage::IsVectorRange<Range>::Value);
+    static_assert(FormLanguage::IsVectorRange<Range>::Value);
 
     public:
       /**
@@ -110,218 +107,212 @@ namespace Rodin::Variational
        * @param lambda First Lame parameter field.
        * @param mu Shear-modulus field.
        */
-      LinearElasticityIntegrator(
-          const TrialFunction<Solution, TrialFESType>& u,
-          const TestFunction<TestFESType>& v,
-          const LambdaType& lambda,
-          const MuType& mu)
-        : Parent(u, v),
-          m_lambda(lambda.copy()),
-          m_mu(mu.copy()),
-          m_trialfes(u.getFiniteElementSpace()),
-          m_testfes(v.getFiniteElementSpace()),
-          m_qf(nullptr),
-          m_quadrature(nullptr)
-      {}
+    LinearElasticityIntegrator(const TrialFunction<Solution, TrialFESType>& u,
+      const TestFunction<TestFESType>& v, const LambdaType& lambda, const MuType& mu)
+      : Parent(u, v),
+        m_lambda(lambda.copy()),
+        m_mu(mu.copy()),
+        m_trialfes(u.getFiniteElementSpace()),
+        m_testfes(v.getFiniteElementSpace()),
+        m_qf(nullptr),
+        m_quadrature(nullptr)
+    {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      LinearElasticityIntegrator(const LinearElasticityIntegrator& other)
-        : Parent(other),
-          m_lambda(other.m_lambda ? other.m_lambda->copy() : nullptr),
-          m_mu(other.m_mu ? other.m_mu->copy() : nullptr),
-          m_trialfes(other.m_trialfes),
-          m_testfes(other.m_testfes),
-          m_polytope(other.m_polytope),
-          m_qf(nullptr),
-          m_quadrature(nullptr),
-          m_matrix()
-      {}
+    LinearElasticityIntegrator(const LinearElasticityIntegrator& other)
+      : Parent(other),
+        m_lambda(other.m_lambda ? other.m_lambda->copy() : nullptr),
+        m_mu(other.m_mu ? other.m_mu->copy() : nullptr),
+        m_trialfes(other.m_trialfes),
+        m_testfes(other.m_testfes),
+        m_polytope(other.m_polytope),
+        m_qf(nullptr),
+        m_quadrature(nullptr),
+        m_matrix()
+    {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      LinearElasticityIntegrator(LinearElasticityIntegrator&& other)
-        : Parent(std::move(other)),
-          m_lambda(std::move(other.m_lambda)),
-          m_mu(std::move(other.m_mu)),
-          m_trialfes(other.m_trialfes),
-          m_testfes(other.m_testfes),
-          m_polytope(std::move(other.m_polytope)),
-          m_qf(std::exchange(other.m_qf, nullptr)),
-          m_quadrature(std::exchange(other.m_quadrature, nullptr)),
-          m_matrix(std::move(other.m_matrix))
-      {}
+    LinearElasticityIntegrator(LinearElasticityIntegrator&& other)
+      : Parent(std::move(other)),
+        m_lambda(std::move(other.m_lambda)),
+        m_mu(std::move(other.m_mu)),
+        m_trialfes(other.m_trialfes),
+        m_testfes(other.m_testfes),
+        m_polytope(std::move(other.m_polytope)),
+        m_qf(std::exchange(other.m_qf, nullptr)),
+        m_quadrature(std::exchange(other.m_quadrature, nullptr)),
+        m_matrix(std::move(other.m_matrix))
+    {}
 
       /**
        * @brief Returns the current polytope.
        * @returns The current polytope.
        */
-      const Geometry::Polytope& getPolytope() const final override
-      {
-        return m_polytope.value().get();
-      }
+    const Geometry::Polytope& getPolytope() const final override
+    {
+      return m_polytope.value().get();
+    }
 
       /**
        * @brief Sets the current polytope and assembles the local matrix.
        * @param polytope Mesh entity used by this operation.
        * @returns Reference to this object after the operation.
        */
-      LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) final override
+    LinearElasticityIntegrator& setPolytope(
+      const Geometry::Polytope& polytope) final override
+    {
+      m_polytope = polytope;
+
+      const size_t d = polytope.getDimension();
+      const Index idx = polytope.getIndex();
+      const auto geometry = polytope.getGeometry();
+
+      const auto& trialfes = m_trialfes.get();
+      const auto& testfes = m_testfes.get();
+
+      const auto& trialfe = trialfes.getFiniteElement(d, idx);
+      const auto& testfe = testfes.getFiniteElement(d, idx);
+
+      const size_t ntr = trialfe.getCount();
+      const size_t nte = testfe.getCount();
+
+      const size_t lambdaOrder =
+        getLameFirstParameter().getOrder(polytope).value_or(size_t(0));
+
+      const size_t muOrder = getShearModulus().getOrder(polytope).value_or(size_t(0));
+
+      const size_t order =
+        std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
+
+      m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+      m_quadrature = &polytope.getQuadrature(*m_qf);
+
+      m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
+      m_matrix.setZero();
+
+      const bool symmetric = (trialfes == testfes);
+
+      if (symmetric)
       {
-        m_polytope = polytope;
-
-        const size_t d      = polytope.getDimension();
-        const Index idx     = polytope.getIndex();
-        const auto geometry = polytope.getGeometry();
-
-        const auto& trialfes = m_trialfes.get();
-        const auto& testfes  = m_testfes.get();
-
-        const auto& trialfe = trialfes.getFiniteElement(d, idx);
-        const auto& testfe  = testfes.getFiniteElement(d, idx);
-
-        const size_t ntr = trialfe.getCount();
-        const size_t nte = testfe.getCount();
-
-        const size_t lambdaOrder =
-          getLameFirstParameter().getOrder(polytope).value_or(size_t(0));
-
-        const size_t muOrder =
-          getShearModulus().getOrder(polytope).value_or(size_t(0));
-
-        const size_t order =
-          std::max(lambdaOrder, muOrder) + trialfe.getOrder() + testfe.getOrder();
-
-        m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
-        m_quadrature = &polytope.getQuadrature(*m_qf);
-
-        m_matrix.resize(
-          static_cast<Eigen::Index>(nte),
-          static_cast<Eigen::Index>(ntr));
-        m_matrix.setZero();
-
-        const bool symmetric = (trialfes == testfes);
-
-        if (symmetric)
+        for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
         {
-          for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
+          const auto& p = m_quadrature->getPoint(qp);
+          const Variational::IntegrationPoint ip(*m_quadrature, qp);
+          const auto& rc = m_qf->getPoint(qp);
+
+          const ScalarType wdet =
+            static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+
+          const auto lambda = getLameFirstParameter().getValue(ip);
+          const auto mu = getShearModulus().getValue(ip);
+
+          for (size_t i = 0; i < nte; ++i)
           {
-            const auto& p  = m_quadrature->getPoint(qp);
-            const Variational::IntegrationPoint ip(p, m_qf, qp);
-            const auto& rc = m_qf->getPoint(qp);
+            const auto& basisI = testfe.getBasis(i);
 
-            const ScalarType wdet =
-              static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
-
-            const auto lambda = getLameFirstParameter().getValue(ip);
-            const auto mu     = getShearModulus().getValue(ip);
-
-            for (size_t i = 0; i < nte; ++i)
+            Math::SpatialMatrix<ScalarType> jacI;
+            jacI.resize(d, d);
+            for (size_t r = 0; r < d; ++r)
             {
-              const auto& basisI = testfe.getBasis(i);
-
-              Math::SpatialMatrix<ScalarType> jacI;
-              jacI.resize(d, d);
-              for (size_t r = 0; r < d; ++r)
-              {
-                for (size_t c = 0; c < d; ++c)
-                  jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
-              }
-              jacI *= p.getJacobianInverse();
-
-              const auto symI = jacI + jacI.adjoint();
-              const ScalarType divI = jacI.trace();
-
-              m_matrix(i, i) += wdet *
-                (Math::dot(lambda * divI, divI) +
-                  static_cast<ScalarType>(0.5) * Math::dot(mu * symI, symI));
-
-              for (size_t j = 0; j < i; ++j)
-              {
-                const auto& basisJ = trialfe.getBasis(j);
-
-                Math::SpatialMatrix<ScalarType> jacJ;
-                jacJ.resize(d, d);
-                for (size_t r = 0; r < d; ++r)
-                {
-                  for (size_t c = 0; c < d; ++c)
-                    jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
-                }
-                jacJ *= p.getJacobianInverse();
-
-                const auto symJ = jacJ + jacJ.adjoint();
-                const ScalarType divJ = jacJ.trace();
-
-                m_matrix(i, j) += wdet *
-                  (Math::dot(lambda * divJ, divI) +
-                    static_cast<ScalarType>(0.5) * Math::dot(mu * symJ, symI));
-              }
+              for (size_t c = 0; c < d; ++c)
+                jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
             }
-          }
+            jacI *= p.getJacobianInverse();
 
-          m_matrix.template triangularView<Eigen::Upper>() =
-            m_matrix.adjoint();
-        }
-        else
-        {
-          for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
-          {
-            const auto& p  = m_quadrature->getPoint(qp);
-            const Variational::IntegrationPoint ip(p, m_qf, qp);
-            const auto& rc = m_qf->getPoint(qp);
+            const auto symI = jacI + jacI.adjoint();
+            const ScalarType divI = jacI.trace();
 
-            const ScalarType wdet =
-              static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+            m_matrix(i, i) += wdet *
+              (Math::dot(lambda * divI, divI) +
+                static_cast<ScalarType>(0.5) * Math::dot(mu * symI, symI));
 
-            const auto lambda = getLameFirstParameter().getValue(ip);
-            const auto mu     = getShearModulus().getValue(ip);
-
-            for (size_t i = 0; i < nte; ++i)
+            for (size_t j = 0; j < i; ++j)
             {
-              const auto& basisI = testfe.getBasis(i);
+              const auto& basisJ = trialfe.getBasis(j);
 
-              Math::SpatialMatrix<ScalarType> jacI;
-              jacI.resize(d, d);
+              Math::SpatialMatrix<ScalarType> jacJ;
+              jacJ.resize(d, d);
               for (size_t r = 0; r < d; ++r)
               {
                 for (size_t c = 0; c < d; ++c)
-                  jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
+                  jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
               }
-              jacI *= p.getJacobianInverse();
+              jacJ *= p.getJacobianInverse();
 
-              const auto symI = jacI + jacI.adjoint();
-              const ScalarType divI = jacI.trace();
+              const auto symJ = jacJ + jacJ.adjoint();
+              const ScalarType divJ = jacJ.trace();
 
-              for (size_t j = 0; j < ntr; ++j)
-              {
-                const auto& basisJ = trialfe.getBasis(j);
-
-                Math::SpatialMatrix<ScalarType> jacJ;
-                jacJ.resize(d, d);
-                for (size_t r = 0; r < d; ++r)
-                {
-                  for (size_t c = 0; c < d; ++c)
-                    jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
-                }
-                jacJ *= p.getJacobianInverse();
-
-                const auto symJ = jacJ + jacJ.adjoint();
-                const ScalarType divJ = jacJ.trace();
-
-                m_matrix(i, j) += wdet *
-                  (Math::dot(lambda * divJ, divI) +
-                    static_cast<ScalarType>(0.5) * Math::dot(mu * symJ, symI));
-              }
+              m_matrix(i, j) += wdet *
+                (Math::dot(lambda * divJ, divI) +
+                  static_cast<ScalarType>(0.5) * Math::dot(mu * symJ, symI));
             }
           }
         }
 
-        return *this;
+        m_matrix.template triangularView<Eigen::Upper>() = m_matrix.adjoint();
       }
+      else
+      {
+        for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
+        {
+          const auto& p = m_quadrature->getPoint(qp);
+          const Variational::IntegrationPoint ip(*m_quadrature, qp);
+          const auto& rc = m_qf->getPoint(qp);
+
+          const ScalarType wdet =
+            static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+
+          const auto lambda = getLameFirstParameter().getValue(ip);
+          const auto mu = getShearModulus().getValue(ip);
+
+          for (size_t i = 0; i < nte; ++i)
+          {
+            const auto& basisI = testfe.getBasis(i);
+
+            Math::SpatialMatrix<ScalarType> jacI;
+            jacI.resize(d, d);
+            for (size_t r = 0; r < d; ++r)
+            {
+              for (size_t c = 0; c < d; ++c)
+                jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
+            }
+            jacI *= p.getJacobianInverse();
+
+            const auto symI = jacI + jacI.adjoint();
+            const ScalarType divI = jacI.trace();
+
+            for (size_t j = 0; j < ntr; ++j)
+            {
+              const auto& basisJ = trialfe.getBasis(j);
+
+              Math::SpatialMatrix<ScalarType> jacJ;
+              jacJ.resize(d, d);
+              for (size_t r = 0; r < d; ++r)
+              {
+                for (size_t c = 0; c < d; ++c)
+                  jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
+              }
+              jacJ *= p.getJacobianInverse();
+
+              const auto symJ = jacJ + jacJ.adjoint();
+              const ScalarType divJ = jacJ.trace();
+
+              m_matrix(i, j) += wdet *
+                (Math::dot(lambda * divJ, divI) +
+                  static_cast<ScalarType>(0.5) * Math::dot(mu * symJ, symI));
+            }
+          }
+        }
+      }
+
+      return *this;
+    }
 
       /**
        * @brief Returns an entry of the current element stiffness matrix.
@@ -329,64 +320,62 @@ namespace Rodin::Variational
        * @param te Test shape-function expression.
        * @returns Integral computed by the quadrature rule.
        */
-      ScalarType integrate(size_t tr, size_t te) final override
-      {
-        return m_matrix(te, tr);
-      }
+    ScalarType integrate(size_t tr, size_t te) final override
+    {
+      return m_matrix(te, tr);
+    }
 
       /**
        * @brief Gets the shear modulus function.
        * @returns Reference to shear modulus (second Lamé parameter) function
        */
-      constexpr
-      const MuType& getShearModulus() const
-      {
-        assert(m_mu);
-        return *m_mu;
-      }
+    constexpr const MuType& getShearModulus() const
+    {
+      assert(m_mu);
+      return *m_mu;
+    }
 
       /**
        * @brief Gets the first Lamé parameter function.
        * @returns Reference to first Lamé parameter function
        */
-      constexpr
-      const LambdaType& getLameFirstParameter() const
-      {
-        assert(m_lambda);
-        return *m_lambda;
-      }
+    constexpr const LambdaType& getLameFirstParameter() const
+    {
+      assert(m_lambda);
+      return *m_lambda;
+    }
 
       /**
        * @brief Returns the integration region.
        * @returns The integration region.
        */
-      Geometry::Region getRegion() const override
-      {
-        return Geometry::Region::Cells;
-      }
+    Geometry::Region getRegion() const override
+    {
+      return Geometry::Region::Cells;
+    }
 
       /**
        * @brief Polymorphically copies this linear-elasticity integrator.
        * @returns Pointer to a newly allocated copy; the caller owns the returned object.
        */
-      LinearElasticityIntegrator* copy() const noexcept override
-      {
-        return new LinearElasticityIntegrator(*this);
-      }
+    LinearElasticityIntegrator* copy() const noexcept override
+    {
+      return new LinearElasticityIntegrator(*this);
+    }
 
     private:
-      std::unique_ptr<LambdaType> m_lambda;
-      std::unique_ptr<MuType> m_mu;
+    std::unique_ptr<LambdaType> m_lambda;
+    std::unique_ptr<MuType> m_mu;
 
-      std::reference_wrapper<const TrialFESType> m_trialfes;
-      std::reference_wrapper<const TestFESType>  m_testfes;
+    std::reference_wrapper<const TrialFESType> m_trialfes;
+    std::reference_wrapper<const TestFESType> m_testfes;
 
-      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+    Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
 
-      const QF::QuadratureFormulaBase* m_qf;
-      const Geometry::PolytopeQuadrature* m_quadrature;
+    const QF::QuadratureFormulaBase* m_qf;
+    const Geometry::PolytopeQuadrature* m_quadrature;
 
-      Math::Matrix<ScalarType> m_matrix;
+    Math::Matrix<ScalarType> m_matrix;
   };
 }
 #endif

@@ -19,8 +19,7 @@
 #include "Rodin/Math.h"
 #include "Rodin/Copyable.h"
 #include "Rodin/Identifiable.h"
-#include "Rodin/Geometry.h"
-
+#include "Rodin/Geometry/Polytope.h"
 
 namespace Rodin::QF
 {
@@ -109,8 +108,9 @@ namespace Rodin::QF
        * @param i Index of the quadrature point
        * @return Reference to the coordinates @f$ x_i @f$ in reference space
        *
-       * @note The returned reference must remain valid for the lifetime
-       * of the quadrature formula object.
+       * @note The returned reference remains valid while the formula contents
+       * remain unchanged. Assignment may invalidate previously returned
+       * references; mapped quadratures retain their own sample coordinates.
        */
       virtual const Math::SpatialVector<Real>& getPoint(size_t i) const = 0;
 

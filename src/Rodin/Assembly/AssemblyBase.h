@@ -436,6 +436,29 @@ namespace Rodin::Assembly
       virtual ~AssemblyBase() = default;
 
       /**
+       * @brief Retains this assembler's identity during policy assignment.
+       *
+       * The complete-problem base has no execution state. Derived assemblers
+       * assign their own policy/storage without assigning FormLanguage identity.
+       * @param other Source assembler; no base execution state is transferred.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] const AssemblyBase& other) noexcept
+      {
+        return *this;
+      }
+
+      /**
+       * @brief Retains this assembler's identity during policy move assignment.
+       * @param other Source assembler; no base execution state is transferred.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] AssemblyBase&& other) noexcept
+      {
+        return *this;
+      }
+
+      /**
        * @brief Executes complete problem assembly.
        * @param out Output linear system.
        * @param input Problem assembly input.
@@ -500,6 +523,29 @@ namespace Rodin::Assembly
 
       /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
+
+      /**
+       * @brief Retains this assembler's identity during policy assignment.
+       *
+       * The complete-problem base has no execution state. Derived assemblers
+       * assign their own policy/storage without assigning FormLanguage identity.
+       * @param other Source assembler; no base execution state is transferred.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] const AssemblyBase& other) noexcept
+      {
+        return *this;
+      }
+
+      /**
+       * @brief Retains this assembler's identity during policy move assignment.
+       * @param other Source assembler; no base execution state is transferred.
+       * @returns Reference to this assembler.
+       */
+      AssemblyBase& operator=([[maybe_unused]] AssemblyBase&& other) noexcept
+      {
+        return *this;
+      }
 
       /**
        * @brief Executes complete mixed problem assembly.

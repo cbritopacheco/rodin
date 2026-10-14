@@ -121,6 +121,15 @@ calls still return mesh-owned, stable borrowed objects until geometry is
 flushed. Assembly does not evict these objects. Both lifetimes are
 backend-independent and introduce no MPI collective.
 
+The mesh-owned index keys each formula by its process-local lifetime/assignment
+identity, which uniquely identifies a version without an additional address
+comparison. Reassigning a formula or reconstructing it in reused storage selects
+a new mapped-sample entry. Earlier entries remain alive until mesh flush; an
+old reference is not silently replaced when a new version is requested. Formula
+mutation must not overlap cache access. Canonical immutable formulas retain
+their ordinary hot lookup. Storage grows with requested formula versions and
+polytope slots until the explicit flush, rather than evicting borrowed objects.
+
 Mapped-quadrature construction prepares geometric Jacobians through the
 transformation's bulk `jacobian` overload. Parametric elements reuse their
 existing logical-identity reference tables, while generic transformations
@@ -129,6 +138,22 @@ mapped points; no borrowed reference-table storage escapes the bulk call.
 Temporary matrix storage is proportional to the current formula size, not
 the number of mesh cells. Copying or moving a point preserves its owned
 geometry, and rebinding it invalidates that geometry normally.
+
+`PolytopeQuadrature` retains the formula's construction-time identity beside
+its owned samples. A variational binding constructed from this owner and a
+logical index may reuse reference tabulation only while that identity matches
+the borrowed formula. Copying/moving preserves the snapshot; formula assignment
+disables the old binding's reference association. This metadata adds no state
+to individual geometric points and requires no coordinate comparisons or MPI
+communication. Explicit point/formula/index bindings retain origin metadata
+without certifying a reference chart.
+
+`ReferenceTabulation<Element, Scalar>` owns the common bounded thread-local
+store used by scalar P1 and H1 elements. Each element type retains its own basis
+formulas and ordering, including the rational pyramid basis. The stored arrays
+contain only reference values and first derivatives; physical Jacobians are
+recomputed from each cell's control coordinates. The eight-entry eviction policy
+and logical formula identities apply equally to both element families.
 
 Physical-coordinate evaluation reuses the basis values from the same reference
 table without making coordinates eager. A mapped point owns its reference

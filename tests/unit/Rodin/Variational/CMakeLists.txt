@@ -1,5 +1,30 @@
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
+add_executable(RodinVariationalComplexNamedFormTest ComplexNamedFormTest.cpp)
+target_link_libraries(RodinVariationalComplexNamedFormTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalComplexNamedFormTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalP1DerivativeTest P1DerivativeTest.cpp)
+target_link_libraries(RodinVariationalP1DerivativeTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalP1DerivativeTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalIntegrationPointTest IntegrationPointTest.cpp)
+target_link_libraries(RodinVariationalIntegrationPointTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalIntegrationPointTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalWeightedH1JacobianTest WeightedH1JacobianTest.cpp)
+target_link_libraries(RodinVariationalWeightedH1JacobianTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalWeightedH1JacobianTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalEmbeddedJacobianTest EmbeddedJacobianTest.cpp)
+target_link_libraries(RodinVariationalEmbeddedJacobianTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalEmbeddedJacobianTest PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalWeightedComplexQuadratureTest
   WeightedComplexQuadratureTest.cpp)
 target_link_libraries(RodinVariationalWeightedComplexQuadratureTest

@@ -6,8 +6,6 @@
 #
 # Known deviations clang-format cannot express (accepted, low-churn under
 # changed-lines enforcement):
-#  - members of access-specifier-less structs (Traits blocks) sit at +2 in
-#    the codebase but IndentAccessModifiers indents them to +4;
 #  - the codebase sometimes places `constexpr` on its own line before the
 #    declaration; clang-format joins it;
 #  - manually broken template-argument lists may be repacked.
@@ -22,7 +20,10 @@ TabWidth: 2
 UseTab: Never
 ContinuationIndentWidth: 2
 NamespaceIndentation: All
-IndentAccessModifiers: true
+# Access labels and members share one two-space level inside the record.
+# IndentAccessModifiers: true adds a second level, even in plain structs.
+IndentAccessModifiers: false
+AccessModifierOffset: 0
 MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false
 

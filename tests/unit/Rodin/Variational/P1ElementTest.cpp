@@ -1,8 +1,16 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
+#include <array>
 #include <complex>
 #include "Rodin/Variational/P1.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -12,6 +20,101 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /**
+   * @brief Preserves immutable borrowed descriptors across mixed-geometry access.
+   *
+   * Real and complex descriptors retain their reference geometry and vertex
+   * index after other elements are queried and the originating element is
+   * reassigned. At every reference vertex the Kronecker values are compared
+   * exactly. Initialization cost is checked separately by the opt-in binary
+   * diagnostic; no wall-clock threshold is added to the numerical suite.
+   */
+  TEST(Rodin_Variational_RealP1Element, BorrowedBasisSurvivesMixedGeometryAccess)
+  {
+    const auto check = []<class Scalar>() {
+      const std::array geometries = {Polytope::Type::Point, Polytope::Type::Segment,
+        Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid,
+        Polytope::Type::Wedge};
+      for (const auto geometry : geometries)
+      {
+        SCOPED_TRACE(static_cast<int>(geometry));
+        P1Element<Scalar> origin(geometry);
+        const Polytope::Traits traits(geometry);
+        for (size_t a = 0; a < traits.getVertexCount(); ++a)
+        {
+          const auto& borrowed = origin.getBasis(a);
+          for (const auto otherGeometry : geometries)
+          {
+            P1Element<Scalar> other(otherGeometry);
+            for (size_t b = 0; b < other.getCount(); ++b)
+            {
+              EXPECT_EQ(
+                &other.getBasis(b), &P1Element<Scalar>(otherGeometry).getBasis(b));
+            }
+            origin = other;
+            for (size_t b = 0; b < traits.getVertexCount(); ++b)
+              EXPECT_EQ(borrowed(traits.getVertex(b)), Scalar(a == b ? 1 : 0));
+          }
+          origin = P1Element<Scalar>(geometry);
+          EXPECT_EQ(&borrowed, &origin.getBasis(a));
+        }
+      }
+    };
+    check.template operator()<Real>();
+    check.template operator()<Complex>();
+  }
+
+  /**
+   * @brief Compares real and complex reference tables with the P1 basis exactly.
+   *
+   * Every reference geometry, including the point, is exercised at two
+   * quadrature orders. Values, first derivatives and gradient spans must retain
+   * the element's vertex ordering. Repeated lookup must return the same table.
+   */
+  TEST(Rodin_Variational_RealP1Element, ReferenceTabulationAllGeometriesAndScalars)
+  {
+    const auto check = []<class Scalar>() {
+      for (const auto geometry :
+        {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+          Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+          Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+      {
+        SCOPED_TRACE(static_cast<int>(geometry));
+        P1Element<Scalar> element(geometry);
+        for (const size_t order : {size_t(8), size_t(16)})
+        {
+          SCOPED_TRACE(order);
+          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+          const auto& table = element.getTabulation(formula);
+          ASSERT_EQ(&element.getTabulation(formula), &table);
+          ASSERT_EQ(table.nqp, formula.getSize());
+          ASSERT_EQ(table.ndof, element.getCount());
+          ASSERT_EQ(table.dim, Polytope::Traits(geometry).getDimension());
+          for (size_t qp = 0; qp < formula.getSize(); ++qp)
+          {
+            for (size_t a = 0; a < element.getCount(); ++a)
+            {
+              const auto basis = element.getBasis(a);
+              EXPECT_EQ(table.getBasis(qp, a), basis(formula.getPoint(qp)));
+              const auto gradient = table.getGradient(qp, a);
+              ASSERT_EQ(gradient.size(), table.dim);
+              for (size_t i = 0; i < table.dim; ++i)
+              {
+                const auto expected =
+                  basis.template getDerivative<1>(i)(formula.getPoint(qp));
+                EXPECT_EQ(table.template getDerivative<1>(qp, a, i), expected);
+                EXPECT_EQ(gradient[i], expected);
+              }
+            }
+          }
+        }
+      }
+    };
+    check.template operator()<Real>();
+    check.template operator()<Complex>();
+  }
+
   TEST(Rodin_Variational_RealP1Element, PyramidApexGradientReproducesAffineFields)
   {
     const RealP1Element element(Polytope::Type::Pyramid);

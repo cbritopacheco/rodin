@@ -8,6 +8,13 @@ contracts that assembly/solver changes are expected to preserve.
 
 ## Assembly (src/Rodin/Assembly/)
 
+Named kernels return entries with test rows and trial columns, already using
+the trial-linear/test-conjugate-linear convention. `ScatterMap` and the PETSc
+named insertion paths insert these values unchanged on both first assembly
+and reassembly. Conjugating at insertion changes complex coefficients and is
+not a storage conversion. See the complex named-form regressions for matched
+Integral operators and the PETSc local/distributed variants.
+
 - Backends are mesh-iteration strategies: `Sequential` and `OpenMP`
   (per-thread local evaluation, then merge). `Default.h` selects by build
   configuration. The MPI and PETSc trees provide their own mirrored

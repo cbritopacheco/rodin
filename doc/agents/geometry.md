@@ -16,6 +16,11 @@ they curve) are separate layers throughout.
 - `Polytope::Type` enumerates reference geometries (Segment, Triangle,
   Quadrilateral, Tetrahedron, ...); reference nodes/centroids come from
   the type's traits.
+  Their reference-coordinate dimension is exactly the topological dimension
+  $d$, independently of physical embedding. In particular, the Point vertex
+  and centroid belong to $\mathbb{R}^0$: both are empty coordinate tuples.
+  `SpatialPoint{0}` instead constructs a one-dimensional coordinate and must
+  not represent the zero-dimensional reference point.
 
 ## Connectivity — incidence d → d′
 
@@ -47,12 +52,25 @@ compare coordinate/key sets in tests.
   reconstruct them from vertex coordinates in FES-generic code.
 - `mesh.setVertexCoordinates(...)` flushes/invalidates transformations;
   `mesh.flush()` demotes everything back to affine.
+- `PolytopeTransformation::getCacheIdentity()` supplies an optional, process-local
+  geometry-state token. Runtime construction, copy, move, assignment and loading
+  establish fresh tokens; reads are non-atomic and non-collective. These tokens
+  are not distributed entity identifiers and are not serialized. Constant-evaluated
+  and moved-from maps have no reusable token. Native P1 physical-derivative caches
+  include the token in their cell key, so geometry changes cannot be hidden by
+  unchanged entity indices, map order or quadrature indices. An absent token
+  permits evaluation but disables physical-result reuse. Derived map mutators
+  must invalidate their token; attached geometry must still be published through
+  `MeshBase::setPolytopeTransformation`, with normal point/quadrature rebinding.
+  A token does not update previously cached geometric buffers. Reference tables
+  remain keyed separately by formula identity. The form-language `Identifiable`
+  UUID has copy-stable, thread-local semantics and is not a geometry-state token.
 - `PointCloud` — sdim × n coordinate container with Eigen views, the input
   for parametric transformations.
 - `PolytopeQuadrature` caches quadrature data attached to mesh polytopes.
   Construction evaluates the cell's quadrature Jacobians in one bulk
   transformation call and stores them in the points' existing owned caches.
-  Parametric H1 geometry borrows its existing reference table only during this
+  Parametric P1 and H1 geometry borrow their reference tables only during this
   call; neither points nor transformations retain a table or formula pointer.
   Physical coordinates and derived metric quantities remain lazy. Mapped points
   own their reference coordinates and retain only the formula's logical identity

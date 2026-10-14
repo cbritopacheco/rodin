@@ -581,7 +581,7 @@ namespace Rodin::Variational
           m_assembled = other.m_assembled;
           m_pb = other.m_pb;
           m_axb = other.m_axb;
-          m_assembly.reset(other.m_assembly->copy());
+          m_assembly = other.m_assembly;
         }
         return *this;
       }
@@ -722,7 +722,23 @@ namespace Rodin::Variational
               typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>>,
           U, V>;
 
-  /// @brief Base for mixed variational problems with three or more functions.
+  /**
+   * @brief Base for mixed variational problems with three or more functions.
+   *
+   * ## Architecture
+   *
+   * Trial/test identities and cumulative DOF offsets are passed directly to
+   * the problem assembly selected by @ref Rodin::Assembly::Default. That single
+   * assembler owns block insertion and completion. No auxiliary sequential
+   * tuple assembler is constructed: its availability must not restrict the
+   * scalar or storage types supported by the selected problem assembler.
+   * The formulation and assembled system are owned; trial/test functions are
+   * borrowed. Assignment replaces these values and bindings while retaining
+   * the destination identity. Cumulative offsets are established at construction
+   * and refreshed at assembly: @f$\sigma_j^U=\sum_{i<j}\dim U_i@f$ and
+   * @f$\sigma_j^V=\sum_{i<j}\dim V_i@f$ for the ordered trial/test spaces.
+   * Unused per-block forms are not materialized.
+   */
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class ProblemUsBase : public ProblemBase<LinearSystem>
   {
@@ -788,25 +804,7 @@ namespace Rodin::Variational
         typename Assembly::Default<U1FESMeshContextType, U2FESMeshContextType>
           ::template Type<LinearSystemType, Problem<LinearSystemType, U1, U2, U3, Us...>>;
 
-    private:
-      template <class T>
-      struct GetFES;
-
-      template <class T>
-      struct GetFES<std::reference_wrapper<T>>
-      {
-        using Type = typename FormLanguage::Traits<T>::FESType;
-      };
-
-      template <class T>
-      struct GetSolution;
-
-      template <class T>
-      struct GetSolution<std::reference_wrapper<T>>
-      {
-        using Type = typename FormLanguage::Traits<T>::SolutionType;
-      };
-
+      private:
       template <class T>
       struct IsTrialFunctionReferenceWrapper
       {
@@ -849,42 +847,6 @@ namespace Rodin::Variational
             std::reference_wrapper<Us>...>>()
             .template filter<IsTestFunctionReferenceWrapper>());
 
-      using SolutionTuple = typename Utility::Extract<TrialFunctionTuple>::template Type<GetSolution>;
-
-      using TrialFESTuple = typename Utility::Extract<TrialFunctionTuple>::template Type<GetFES>;
-
-      using TestFESTuple = typename Utility::Extract<TestFunctionTuple>::template Type<GetFES>;
-
-      template<class U, class V>
-      using BilinearFormType =
-        BilinearForm<
-          typename FormLanguage::Traits<
-            std::decay_t<typename Utility::UnwrapRefDecay<U>::Type>
-          >::SolutionType,
-          typename FormLanguage::Traits<
-            std::decay_t<typename Utility::UnwrapRefDecay<U>::Type>
-          >::FESType,
-          typename FormLanguage::Traits<
-            std::decay_t<typename Utility::UnwrapRefDecay<V>::Type>
-          >::FESType,
-          OperatorType
-        >;
-
-      template <class TestFES>
-      using LinearFormType = LinearForm<TestFES, VectorType>;
-
-      using BilinearFormTuple =
-        typename Utility::Product<TrialFunctionTuple, TestFunctionTuple>::template Type<BilinearFormType>;
-
-      using LinearFormTuple =
-        typename Utility::Wrap<TestFESTuple>::template Type<LinearFormType>;
-
-      using BilinearFormTupleSequentialAssembly =
-        Assembly::Sequential<OperatorType, BilinearFormTuple>;
-
-      using LinearFormTupleSequentialAssembly =
-        Assembly::Sequential<VectorType, LinearFormTuple>;
-
     public:
       /**
        * @brief Constructs a mixed problem from trial and test functions.
@@ -893,99 +855,83 @@ namespace Rodin::Variational
        * @param u3 Trial shape functions defining the unknowns.
        * @param us Trial shape functions defining the unknowns.
        */
-      ProblemUsBase(U1& u1, U2& u2, U3& u3, Us&... us)
-        : m_assembled(false),
-          m_us(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-            .template filter<IsTrialFunctionReferenceWrapper>()),
-          m_vs(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-            .template filter<IsTestFunctionReferenceWrapper>()),
-          m_lft(m_vs.map(
-                [](const auto& v)
-                { return LinearFormType<
-                    typename std::decay_t<
-                    typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FESType>(v.get());
-                })),
-          m_bft(m_us.product([](const auto& u, const auto& v) { return Pair(u, v); }, m_vs)
-                    .map([](const auto& uv)
-                         { return BilinearFormType<
-                             decltype(uv.first()), decltype(uv.second())>(
-                                 uv.first().get(), uv.second().get());
-                         }))
-      {
-        m_bfa.reset(new BilinearFormTupleSequentialAssembly);
-        m_lfa.reset(new LinearFormTupleSequentialAssembly);
-        m_us.iapply([&](size_t i, const auto& u)
-            { m_trialUUIDMap.right.insert({ i, u.get().getUUID() }); });
-        m_vs.iapply([&](size_t i, const auto& v)
-            { m_testUUIDMap.right.insert({ i, v.get().getUUID() }); });
-      }
+    ProblemUsBase(U1& u1, U2& u2, U3& u3, Us&... us)
+      : m_assembled(false),
+        m_us(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
+               .template filter<IsTrialFunctionReferenceWrapper>()),
+        m_vs(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
+               .template filter<IsTestFunctionReferenceWrapper>()),
+        m_trialOffsets{},
+        m_testOffsets{}
+    {
+      size_t trialSize = 0, testSize = 0;
+      m_us.iapply([&](size_t i, const auto& u) {
+        m_trialOffsets[i] = trialSize;
+        trialSize += u.get().getFiniteElementSpace().getSize();
+        m_trialUUIDMap.right.insert({i, u.get().getUUID()});
+      });
+      m_vs.iapply([&](size_t i, const auto& v) {
+        m_testOffsets[i] = testSize;
+        testSize += v.get().getFiniteElementSpace().getSize();
+        m_testUUIDMap.right.insert({i, v.get().getUUID()});
+      });
+    }
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      ProblemUsBase(const ProblemUsBase& other)
-        : Parent(other),
-          m_assembled(other.m_assembled),
-          m_us(other.m_us),
-          m_vs(other.m_vs),
-          m_lft(other.m_lft),
-          m_bft(other.m_bft),
-          m_trialOffsets(other.m_trialOffsets),
-          m_testOffsets(other.m_testOffsets),
-          m_trialUUIDMap(other.m_trialUUIDMap),
-          m_testUUIDMap(other.m_testUUIDMap),
-          m_bfa(other.m_bfa->copy()),
-          m_lfa(other.m_lfa->copy()),
-          m_assembly(other.m_assembly)
-      {}
+    ProblemUsBase(const ProblemUsBase& other)
+      : Parent(other),
+        m_assembled(other.m_assembled),
+        m_us(other.m_us),
+        m_vs(other.m_vs),
+        m_pb(other.m_pb),
+        m_trialOffsets(other.m_trialOffsets),
+        m_testOffsets(other.m_testOffsets),
+        m_trialUUIDMap(other.m_trialUUIDMap),
+        m_testUUIDMap(other.m_testUUIDMap),
+        m_assembly(other.m_assembly)
+    {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-      ProblemUsBase(ProblemUsBase&& other) noexcept
-        : Parent(std::move(other)),
-          m_assembled(std::exchange(other.m_assembled, false)),
-          m_us(std::move(other.m_us)),
-          m_vs(std::move(other.m_vs)),
-          m_lft(std::move(other.m_lft)),
-          m_bft(std::move(other.m_bft)),
-          m_trialOffsets(std::move(other.m_trialOffsets)),
-          m_testOffsets(std::move(other.m_testOffsets)),
-          m_trialUUIDMap(std::move(other.m_trialUUIDMap)),
-          m_testUUIDMap(std::move(other.m_testUUIDMap)),
-          m_bfa(std::move(other.m_bfa)),
-          m_lfa(std::move(other.m_lfa)),
-          m_assembly(std::move(other.m_assembly))
-      {}
+    ProblemUsBase(ProblemUsBase&& other) noexcept
+      : Parent(std::move(other)),
+        m_assembled(std::exchange(other.m_assembled, false)),
+        m_us(std::move(other.m_us)),
+        m_vs(std::move(other.m_vs)),
+        m_pb(std::move(other.m_pb)),
+        m_trialOffsets(std::move(other.m_trialOffsets)),
+        m_testOffsets(std::move(other.m_testOffsets)),
+        m_trialUUIDMap(std::move(other.m_trialUUIDMap)),
+        m_testUUIDMap(std::move(other.m_testUUIDMap)),
+        m_assembly(std::move(other.m_assembly))
+    {}
 
       /**
        * @brief Copy assignment operator.
        * @param other Object to copy from.
        * @returns Reference to this object after the operation.
        */
-      ProblemUsBase& operator=(const ProblemUsBase& other)
+    ProblemUsBase& operator=(const ProblemUsBase& other)
+    {
+      if (this != &other)
       {
-        if (this != &other)
-        {
-          m_assembled = other.m_assembled;
-          m_us = other.m_us;
-          m_vs = other.m_vs;
-          m_lft = other.m_lft;
-          m_bft = other.m_bft;
-          m_trialOffsets = other.m_trialOffsets;
-          m_testOffsets = other.m_testOffsets;
-          m_trialUUIDMap = other.m_trialUUIDMap;
-          m_testUUIDMap = other.m_testUUIDMap;
-          m_bfa.reset(other.m_bfa->copy());
-          m_lfa.reset(other.m_lfa->copy());
-          m_assembly = other.m_assembly;
-        }
-        return *this;
+        m_assembled = other.m_assembled;
+        m_us = other.m_us;
+        m_vs = other.m_vs;
+        m_pb = other.m_pb;
+        m_trialOffsets = other.m_trialOffsets;
+        m_testOffsets = other.m_testOffsets;
+        m_trialUUIDMap = other.m_trialUUIDMap;
+        m_testUUIDMap = other.m_testUUIDMap;
+        m_assembly = other.m_assembly;
       }
+      return *this;
+    }
 
       /**
        * @brief Move assignment operator.
@@ -999,14 +945,11 @@ namespace Rodin::Variational
           m_assembled = std::exchange(other.m_assembled, false);
           m_us = std::move(other.m_us);
           m_vs = std::move(other.m_vs);
-          m_lft = std::move(other.m_lft);
-          m_bft = std::move(other.m_bft);
+          m_pb = std::move(other.m_pb);
           m_trialOffsets = std::move(other.m_trialOffsets);
           m_testOffsets = std::move(other.m_testOffsets);
           m_trialUUIDMap = std::move(other.m_trialUUIDMap);
           m_testUUIDMap = std::move(other.m_testUUIDMap);
-          m_bfa.reset(std::move(other.m_bfa));
-          m_lfa.reset(std::move(other.m_lfa));
           m_assembly = std::move(other.m_assembly);
         }
         return *this;
@@ -1202,9 +1145,6 @@ namespace Rodin::Variational
       TrialFunctionTuple  m_us;
       TestFunctionTuple   m_vs;
 
-      LinearFormTuple     m_lft;
-      BilinearFormTuple   m_bft;
-
       ProblemBody<OperatorType, VectorType, ScalarType> m_pb;
 
       std::array<size_t, TrialFunctionTuple::Size>  m_trialOffsets;
@@ -1213,12 +1153,10 @@ namespace Rodin::Variational
       boost::bimap<FormLanguage::Base::UUID, size_t> m_trialUUIDMap;
       boost::bimap<FormLanguage::Base::UUID, size_t> m_testUUIDMap;
 
-      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>>  m_bfa;
-      std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>>      m_lfa;
       AssemblyType m_assembly;
   };
 
-  /// @brief Variational problem in three or more unknown fields.
+  /// @brief Variational problem with three or more trial/test functions.
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class Problem<LinearSystem, U1, U2, U3, Us...>
     : public ProblemUsBase<LinearSystem, U1, U2, U3, Us...>

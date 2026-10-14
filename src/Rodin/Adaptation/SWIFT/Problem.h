@@ -1709,7 +1709,7 @@ namespace Rodin::Adaptation::SWIFT
             for (size_t q = 0; q < quadrature.getSize(); ++q)
             {
               const auto& point = quadrature.getPoint(q);
-              const Variational::IntegrationPoint ip(point, &qf, q);
+              const Variational::IntegrationPoint ip(quadrature, q);
               const auto value = direction.getValue(point);
               const ResidualState state(phi, grad, deformation, ip, loss);
               const Real residual = state.getResidual();
@@ -1853,7 +1853,7 @@ namespace Rodin::Adaptation::SWIFT
             for (std::size_t q = 0; q < quadrature.getSize(); ++q)
             {
               const auto& point = quadrature.getPoint(q);
-              const Variational::IntegrationPoint ip(point, &qf, q);
+              const Variational::IntegrationPoint ip(quadrature, q);
               facetAction += qf.getWeight(q) * point.getDistortion() *
                 force.getValue(ip).dot(direction.getValue(point));
             }
@@ -2118,7 +2118,7 @@ namespace Rodin::Adaptation::SWIFT
           for (std::size_t q = 0; q < quad.getSize(); ++q)
           {
             const auto& src = quad.getPoint(q);
-            const Variational::IntegrationPoint ip(src, &qf, q);
+            const Variational::IntegrationPoint ip(quad, q);
             const Real w = qf.getWeight(q) * src.getDistortion();
             const Real r = phi.getValue(deformation.getMovedPoint(ip));
             facetState.totalLen += w;
@@ -2229,7 +2229,7 @@ namespace Rodin::Adaptation::SWIFT
             for (std::size_t q = 0; q < quadrature.getSize(); ++q)
             {
               const auto& point = quadrature.getPoint(q);
-              const Variational::IntegrationPoint ip(point, &qf, q);
+              const Variational::IntegrationPoint ip(quadrature, q);
               const auto& J = point.getJacobian();
               SpatialMat mappedJacobian = J;
               const auto& rc = point.getReferenceCoordinates();

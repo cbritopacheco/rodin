@@ -47,6 +47,18 @@ Function value categories: `RealFunction`, `ComplexFunction`,
 values and lambdas lift implicitly (`RealFunction f = 1;`,
 `VectorFunction v = {f, g};`).
 
+Named-form numeric lifting must reject `FormLanguage::Base` arguments before
+instantiating `FunctionDerived<RealFunction<T>>`. A trailing deduction-guide
+return type needs an immediate-substitution guard around `FunctionDerived`
+itself: Clang 19 can instantiate that return type before checking a false
+head constraint. Numeric constructors also need the base-type exclusion as
+the first constraint, before querying the lifted type. Complex function
+coefficients must select the function path without being offered to
+`RealFunction`. The named-form complex regression checks function/function,
+both mixed function/value directions, and numeric/value construction against
+explicitly matched quadrature operators; this is not a continuum-exactness
+or refinement test.
+
 ## Shape functions and grading
 
 `ShapeFunctionBase<Derived, FES, SpaceType>` with
@@ -94,6 +106,14 @@ Families:
   (H1/Grad.h, P1/Div.h, ...) plus family QuadratureRule.h with optimized
   integration paths.
 
+Scalar P0/P0g shape gradients represent the broken derivative
+$\nabla_h u_h=0$, not distributional jumps. Their expression contract still
+requires a forwarded trial/test leaf and a polynomial order bound; zero is
+sufficient for the zero expression. Named diffusion tabulates reference
+gradients through `getGradient()` when available, otherwise through the
+basis directional derivatives. This accepts constant bases without requiring
+a convenience wrapper or changing the existing P1/H1 tabulation path.
+
 `FiniteElement.h` defines the element side: `getBasis(local)`,
 `getNode(local)` (reference nodes), counts per `Polytope::Type`.
 
@@ -108,6 +128,21 @@ Families:
   `L2` projection; when the distinction matters, assemble a mass-matrix
   `Problem` as described in
   [numerical-contracts.md](numerical-contracts.md).
+
+`IntegrationPoint(point, formula, index)` records the originating integration
+sample, not proof that the supplied point has that formula's reference
+coordinates. Construct from `IntegrationPoint(polytopeQuadrature, index)` to
+establish reference association with an owned mapped sample. Reference tables
+and coordinate-dependent reuse use `getReferenceQuadratureFormula()`; it
+returns null after formula assignment or for an unproven binding. The ordinary
+formula accessor remains available for sampling provenance and coefficient
+snapshots. Remapping into another cell must not promote origin metadata into
+reference association. Grid-function derivatives on facets retain the existing
+direct-point contract: evaluate in an adjacent full-dimensional cell, not with
+a tangential facet-element table. These operations remain local and
+non-collective. Geometry changes still require mapped-point reconstruction;
+logical transformation identities invalidate physical basis/located-point
+reuse, but do not update old geometric buffers.
 - Components `.x()/.y()/.z()` return component views.
 - I/O: `load`/`save` in MFEM/MEDIT formats; XDMF/HDF5 via IO module.
 - `GridFunctionBaseReference` / LazyEvaluator wraps a GridFunction for use
@@ -158,6 +193,17 @@ solution back into each `TrialFunction` (`u.getSolution()`).
 `getLinearSystem()` exposes the assembled A, b for direct inspection.
 Signs follow the math: `Integral(Grad(u), Grad(v)) - Integral(f, v)`
 states a(u,v) − L(v) = 0.
+
+Native single-field and mixed problems own the body and linear system while
+borrowing trial/test functions. Copy/move assignment replaces the body, system,
+bindings and assembly state but retains the destination problem identity.
+Complete-problem assembler assignment similarly retains destination identity;
+the base has no execution state, and concrete assemblers transfer their own
+policy, including the OpenMP thread setting. This does not enable assignment
+of `FormLanguage::Base` or arbitrary expression nodes. Mixed cumulative offsets
+are valid from construction, derived from the ordered space sizes, and refreshed
+by assembly. No unused per-block form tuple is constructed. These native lifetime
+contracts do not establish PETSc handle-copy or MPI collective semantics.
 
 `ProblemBase` and its concrete single/mixed-field problems also support
 `+=` and `-=` for terms supported by the existing `ProblemBody` arithmetic:

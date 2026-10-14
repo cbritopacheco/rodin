@@ -34,7 +34,19 @@ namespace Rodin::Tests
       using Scalar = typename FormLanguage::Traits<Integrand>::ScalarType;
 
       explicit QuadratureReference(const Integral& integral)
-        : m_integrand(integral.getIntegrand()),
+        : QuadratureReference(integral.getIntegrand())
+      {}
+
+      /**
+       * @brief Constructs the original-loop oracle from the expression itself.
+       *
+       * This permits qualification of public integrator specializations that
+       * do not expose their owned integrand. No production accessor is needed.
+       *
+       * @param integrand Trial/test expression to evaluate independently.
+       */
+      explicit QuadratureReference(const Integrand& integrand)
+        : m_integrand(integrand),
           m_matrix(),
           m_quadrature(),
           m_qf(nullptr),
@@ -63,7 +75,7 @@ namespace Rodin::Tests
           const auto& p = quadrature.getPoint(qp);
           const Scalar weight = static_cast<Scalar>(m_qf->getWeight(qp)) *
             static_cast<Scalar>(p.getDistortion());
-          const Variational::IntegrationPoint ip(p, m_qf, qp);
+          const Variational::IntegrationPoint ip(quadrature, qp);
           m_integrand.setIntegrationPoint(ip);
           for (size_t tr = 0; tr < nr; ++tr)
           {

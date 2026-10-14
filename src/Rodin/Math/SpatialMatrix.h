@@ -2347,7 +2347,15 @@ namespace Rodin::Math
 
   /**
    * @brief Matrix-times-vector product.
-   * @param A System matrix.
+   *
+   * The logical result has @f$r@f$ components and evaluates
+   * @f$y_i=\sum_{j=0}^{c-1}A_{ij}x_j@f$. Its constructor initializes the
+   * complete fixed-capacity storage once. Empty contractions and inactive
+   * components therefore remain zero without a second active-entry clear.
+   *
+   * @tparam LHSScalar Matrix entry field.
+   * @tparam RHSScalar Vector entry field.
+   * @param A Matrix with @f$r@f$ rows and @f$c@f$ columns.
    * @returns Product of the operands.
    * @param x Vector operand.
    */
@@ -2365,9 +2373,6 @@ namespace Rodin::Math
 
     SpatialVector<Out> y(r);
     if (r == 0) return y;
-
-    // default init (only needed if your SpatialVector doesn't default-initialize)
-    for (std::uint8_t i = 0; i < r; ++i) y[i] = Out(0);
 
     switch (c)
     {

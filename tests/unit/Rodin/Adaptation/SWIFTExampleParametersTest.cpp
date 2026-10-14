@@ -1,17 +1,56 @@
 /*
  *          Copyright Carlos BRITO PACHECO 2021 - 2026.
  * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include "Rodin/Adaptation/SWIFT/QualitySamples.h"
 #include <gtest/gtest.h>
 #include <limits>
 #include <utility>
 #include "Rodin/Adaptation/SWIFT/Admissibility.h"
 #include "Rodin/Adaptation/SWIFT/HingeProblem.h"
 #include "Rodin/Variational.h"
+#include "../../../convergence/CurvedGeometry.h"
 #include "../../../../experiments/swift_calibration/Parameters.h"
 #include "../../../../examples/Adaptation/SWIFT/Options.h"
 
 using namespace Rodin;
+
+/**
+ * @brief The directly included header selects witnesses using geometry order.
+ *
+ * Affine and quadratic charts use their advertised transformation orders when
+ * selecting the cached reference covering. The header is intentionally included
+ * before any other dependency so that a transitive geometry include cannot
+ * conceal an incomplete transformation type. This is a policy and header
+ * regression, not a continuous quality certificate.
+ */
+TEST(Rodin_Adaptation_SWIFTExampleParameters, DirectQualityHeaderUsesGeometryOrder)
+{
+  for (const bool curved : {false, true})
+  {
+    auto mesh =
+      Tests::Convergence::UniformGrid(Geometry::Polytope::Type::Triangle).makeMesh(2);
+    Tests::Convergence::CurvedGeometry geometry(mesh);
+    if (curved)
+      geometry.install<2>();
+    const auto cell = *mesh.getCell();
+    const size_t order = cell.getTransformation().getOrder();
+    EXPECT_EQ(order, curved ? size_t(2) : size_t(1));
+    const Adaptation::SWIFT::Parameters parameters;
+    const auto& formula = Adaptation::SWIFT::QualityCovering::get(
+      cell.getGeometry(), parameters.sampling.getSubdivision(1, order, true));
+    const Adaptation::SWIFT::QualitySamples samples(cell, 1, parameters);
+    size_t count = 0;
+    samples.forEach([&](const Variational::IntegrationPoint& ip, Real weight) {
+      EXPECT_EQ(ip.getQuadratureFormula(), std::addressof(formula));
+      EXPECT_GT(weight, 0);
+      ++count;
+    });
+    EXPECT_EQ(count, formula.getSize());
+  }
+}
 
 TEST(Rodin_Adaptation_SWIFTExampleParameters, ReconstructionNamedOptions)
 {

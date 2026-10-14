@@ -617,6 +617,16 @@ budgets. Their union retains every registered pair, map, quadrature
 comparison and omitted-divergence control. The budgets are scheduling
 policies motivated by the measured higher-order hierarchy cost; they are
 not algebraic error tolerances or runtime guarantees.
+Pressure jobs enable `RODIN_PROFILE_STABILITY=1`. The independent oracle
+reports reduced algebraic dimensions and phase wall intervals for Schur
+construction, factorizations, whitening, QR, eigenvalues, singular values and
+consistency checks. PETSc cases additionally report rank-local mesh/space
+setup, each physical block assembly, boundary constraints and the complete
+global-spectrum operation. That last interval includes collection and waiting
+for the rank-zero oracle; it is not an independent communication measurement.
+These opt-in diagnostics introduce no collectives and change no numerical
+budgets, refinement levels or solver settings. They locate expensive stages
+but do not replace isolated source benchmarks or controlled timing repeats.
 This scheduling policy changes neither refinement levels nor numerical
 acceptance and separates the large vector and mixed direct solves.
 Curved real-PETSc bulk execution is split into scalar, linear-elasticity and
@@ -921,11 +931,42 @@ detect the targeted defect and that numerical integration or algebraic error
 does not determine the observed rate. Expensive resolved hierarchies belong
 in explicitly timed slow tests with the required backend coverage retained.
 
-### Assembly performance workplan
+### Library performance workplan
 
 The benchmark foundation from [PR #356](https://github.com/cbritopacheco/rodin/pull/356)
 is integrated in this branch, in the existing `tests/benchmarks` module.
+Library benchmarks follow `tests/benchmarks/Rodin/<Module>/`, including
+the MPI and PETSc module mirrors. Shared mathematical workloads live in
+`Workloads/`; verification-support profilers remain separate in
+`tests/benchmarks/convergence/`. The benchmark README describes module targets
+and the compatibility publication executable.
 Performance measurements remain separate from numerical convergence assertions.
+The objective is to measure assembly, solving, interpolation, projection and
+the supporting library operations across the convergence workloads. The
+performance matrix therefore distinguishes the physical context, space,
+degree, range, geometry, refinement level and backend, as well as the timed
+operation. A profile of one Poisson assembly does not qualify solving,
+projection or a different physical context.
+
+Qualification requires an untimed numerical oracle before and after the
+timed operation, with a failing oracle making the executable return nonzero.
+These checks contribute correctness evidence for the executed workload;
+instrumented benchmark executions may also contribute source-line and branch
+coverage. Neither benchmark registrations nor successful timing runs alone
+establish source coverage or convergence certification. Timing remains opt-in,
+outside CTest and CI performance gates.
+Source-coverage runs use a separate `RODIN_CODE_COVERAGE=ON` build, explicitly
+execute the selected benchmark targets and then capture `RodinCoverage`.
+Instrumented timings are not compared with optimized performance baselines.
+
+Nodal interpolation $I_h f$ and the $L^2$ projection $P_h f$ are distinct:
+the latter satisfies $(P_h f,v_h)_{L^2}=(f,v_h)_{L^2}$ for every test function
+$v_h$ in the discrete space. Projection measurements separate mass/load
+assembly from the projection solve; interpolation measurements distinguish
+initial construction, changing-field updates and point evaluation. Supporting
+scopes include reference tabulation, mapped quadrature and Jacobians, norms,
+mesh/space setup and communication where they occur in the measured workflow.
+
 The following describes the intended final scope of the performance matrix,
 not a claim of complete implemented coverage. The physical contexts are
 Poisson, variable conductivity, complex Helmholtz, vector linear elasticity,
@@ -983,6 +1024,202 @@ constraints, and resulting solutions accompany each benchmark; an optimization
 requires baseline-equivalent numerical behavior, including solver iterations
 and residuals. Performance regression thresholds are introduced only after
 repeatability and variance have been established on a controlled runner.
+
+### Paired constrained assembly and solving
+
+`RodinConstrainedSolveBenchmarks` reuses `ConstrainedWorkload` from the
+assembly measurements rather than defining another forcing term or boundary
+condition. The initial solve scope is real scalar Poisson, variable
+conductivity and scalar reaction–diffusion on affine unit-box meshes, using
+`H1<1>`, `H1<2>` and `H1<3>`. Seven positive-dimensional geometries and
+`n=3,5,9` grid points per axis give 189 selectable solve measurements. Scalar
+reaction–diffusion is not the coupled reaction–diffusion convergence context;
+`H1<1>` does not certify performance of the distinct `P1` implementation.
+
+For the assembled constrained system $Ax=b$, the manufactured coefficient
+vector $x_\star$ supplies an algebraic oracle. The diagnostics are
+$r=\|Ax-b\|_2/\max(1,\|b\|_2)$ and
+$e=\|x-x_\star\|_2/\max(1,\|x_\star\|_2)$. These are not continuous
+finite-element error norms. The CG tolerance is $10^{-13}$, with the same
+20,000-iteration cap as native Poisson convergence; acceptance budgets are
+$r<10^{-11}$ and $e<10^{-9}$ to allow roundoff and conditioning. Operator and
+load comparisons against original-kernel assembly remain outside timing.
+
+| Measurement | Timed scope | Excluded scope |
+| --- | --- | --- |
+| Existing constrained assembly executable | Public matrix/load assembly, constraints and finalization | Setup, solves and numerical guards |
+| Constrained solve executable | Public CG linear-system solve, including diagonal-preconditioner setup and Krylov iterations | Setup, assembly, initial-guess reset, field writeback and numerical guards |
+
+Each solve starts from zero; reusing a converged guess would measure a
+different operation. Warmup and repeated solves must retain the reported
+iteration count and satisfy the same algebraic checks. The reported Eigen
+iteration count is not reinterpreted: some versions report zero when the
+first update converges. Benchmark names and grid sizes match the assembly
+executable, and JSON context identifies the timed operation. These two
+scopes can be compared on matched inputs but do not sum to complete PDE
+runtime, since setup and field/error evaluation remain excluded.
+
+The solve executable is explicitly built with
+`cmake --build build --target RodinConstrainedSolveBenchmarks`. It is excluded
+from the default build, CTest and benchmark publication. Available selections
+do not imply measured coverage; a small-mesh smoke run does not qualify larger
+levels, other backends, curved maps or other physical contexts. Real/complex
+qualification, the distinct coupled reaction–diffusion targets and selected
+source profiles are tracked in the
+[benchmark module ledger](../benchmarks/README.md#hierarchical-profiling-ledger).
+PETSc/MPI, curved maps and nonlinear solve stages remain separate performance
+batches. Numerical convergence certification is unchanged.
+
+### Interpolation and orthogonal projection measurements
+
+The opt-in `RodinFieldOperationBenchmarks` target measures distinct `P1`,
+`H1<1>` and `H1<2>` implementations with real/complex scalar and vector
+fields. Seven positive-dimensional affine geometries, three grid sizes
+`n=3,5,9` and four operations give 1,008 selectable measurements. Point
+geometry, curved maps, P0/P0g and distributed projection are not included in
+this initial feature harness. Available selections are not measured coverage.
+
+For $g(x)=1+\sum_{j=0}^{d-1}(j+1)x_j$, the scalar oracle is $f=\alpha g$
+and the vector oracle has components $f_j=(j+1)\alpha g$, with
+$\alpha=1$ or $1+i/2$. These fields are representable in every selected
+space. In addition to analytic point-value checks on every cell, projection
+checks the independently integrated mass energy. With
+$S_1=d(d+1)/2$ and $S_2=d(d+1)(2d+1)/6$,
+
+$$
+\int_{[0,1]^d}|g|^2\,dx
+=1+S_1+\frac{S_1^2}{4}+\frac{S_2}{12}.
+$$
+
+Scalar energy multiplies this expression by $|\alpha|^2$; vector energy
+also multiplies it by $S_2$. The mass projection solves $Mc=b$ without
+boundary constraints, with CG tolerance $10^{-13}$. Residual and coefficient
+budgets are $10^{-11}$ and $10^{-9}$, respectively. Analytic point values
+and relative mass energy use a $10^{-10}$ roundoff budget. A wrong-field
+control must produce an algebraic residual above $10^{-4}$.
+
+| Operation | Timed scope |
+| --- | --- |
+| Interpolation | DOF-functional assignment with an alternating additive field offset |
+| ProjectionAssembly | Public mass/load problem assembly, including finalization |
+| ProjectionSolve | CG setup and iterations on the fixed assembled mass system |
+| AssemblyAndSolve | Public assembly followed by CG setup and iterations |
+
+Mesh/space setup, warmup, initial-guess reset, field writeback and numerical
+oracles are excluded. Solves always start from zero. Order-eight quadrature
+is held fixed and reported. The executable returns nonzero on any failed
+oracle, including optimized builds, and remains outside CTest and benchmark
+publication. It can contribute executed source coverage in a separately
+instrumented build, not a convergence-rate certification.
+Assembly-only cases perform a verification solve after timing: reassembly
+imports the trial field as its initial guess, rather than preserving a
+solution obtained by directly solving the linear system. Operator and load
+snapshots check repeat assembly; a deliberately perturbed interpolation
+coefficient and a wrong projection vector check oracle sensitivity.
+
+Build explicitly with `cmake --build build --target RodinFieldOperationBenchmarks`.
+For example, select `Field/ProjectionSolve/H1/P2/Real/Scalar/Pyramid/9/`
+for a solve profile and the corresponding `ProjectionAssembly` selection
+for an assembly profile. Numerical smoke selections at `n=3` do not qualify
+timings at larger sizes or other backends.
+
+### Reference-geometry derivative reuse
+
+For control coordinates $X_{K,ja}$ and scalar reference basis $\phi_a$, mapped
+Jacobian entries are
+
+$$
+J_{K,ji}(\widehat x_q)=\sum_a X_{K,ja}\,\partial_i\phi_a(\widehat x_q).
+$$
+
+Only the reference values and derivatives can be shared across cells.
+`ReferenceTabulation<Element, Scalar>` supplies the same bounded, thread-local,
+logical-identity store to P1 and H1 geometry; each retains its own basis and
+ordering. Physical Jacobians remain cell-specific, and physical coordinates
+remain lazy. No coordinate tolerance, mapped-data cache or collective is added.
+
+The opt-in `RodinReferenceGeometryBenchmarks` target compares table-based bulk
+Jacobians with the original pointwise fallback on all eight reference
+geometries at quadrature orders 8, 12 and 20. Exact entry comparisons precede
+and follow timing. Output storage is reused; cold table construction, assembly
+and solves are excluded. This executable is not registered in CTest or CI.
+Point geometry is retained as a zero-dimensional control, not a speedup case.
+
+Pointwise transformation evaluates the same sum without a quadrature table.
+Its basis count is read once per coordinate or Jacobian evaluation, rather
+than once per loop condition. This does not cache physical data or change
+the accumulation order. A logical access-count regression covers P1 and H1
+degrees one through six, all eight reference geometries and admissible
+physical embeddings through dimension three. Exact entry comparisons accompany
+the access-count checks; interpolation timings measure the production impact
+separately from the table-backed quadrature path.
+
+Production impact is measured separately using the existing constrained
+assembly executable. Before/after comparisons retain the physical form,
+geometry, field degree, mesh, quadrature and build configuration. Original
+executables are retained for repeat measurements. The paired solve matrix
+checks identical iteration counts, residuals and coefficient errors; native
+and parallel numerical regressions remain correctness gates rather than
+timing thresholds.
+
+### Element-kernel scalar contractions
+
+Diffusion kernels repeatedly evaluate the active spatial contraction
+
+$$
+c_d(u,v)=\sum_{i=0}^{d-1}u_i\overline{v_i},\qquad 0\le d\le3.
+$$
+
+Matching scalar types use fixed-extent reductions. For three entries, the
+first two are reduced before adding the third, preserving the original
+accumulation grouping. Mixed real/complex operands retain the dynamic Eigen
+reduction: changing its block extent can change packetization and floating-point
+contraction under GCC. Inactive storage is excluded, and the empty contraction
+is zero. The unconjugated `SpatialVector::dot` member is a different operation
+and is not substituted for the free `Math::dot` function.
+
+The opt-in `RodinSpatialDotBenchmarks` target compares the public operation
+with the original dynamic reduction for every dimension and scalar pairing.
+It is excluded from the default build, CTest and benchmark publication.
+Bitwise unit comparisons include non-dyadic randomized operands, cancellation,
+signed zero and poisoned inactive storage. Production acceptance additionally
+requires paired assembly measurements and unchanged solve diagnostics;
+isolated contraction timings do not establish an assembly speedup.
+
+### Pressure-oracle profiling
+
+`RodinPressureOracleBenchmarks` isolates the complete finite-mesh pressure
+oracle from FE assembly. It consumes fixed velocity-energy, divergence and
+pressure-mass operators, logical velocity constraints and an interpolated
+pressure constant. Each timed iteration includes operator reduction,
+factorization, blocked solves, incremental QR, both spectral routes and
+residual diagnostics. Mesh/space construction, FE assembly, warmup and repeat
+checks are outside timing. This is a global-reference calculation, not a
+distributed solver or partitioning benchmark.
+
+The opt-in target covers the six applicable geometries, affine/exact quadratic
+maps, and P2/P1, P3/P2 and P4/P3 pairs. Levels are 2, 3, 5 for P2/P1 and
+3, 4, 5 for the higher pairs, with quadrature orders 16 and 20: 216 selectable
+measurements. It has no CTest registration or CI/publication invocation.
+For an initial small fixed-input measurement:
+
+```sh
+cmake -S . -B build -DRODIN_BUILD_BENCHMARKS=ON
+cmake --build build --target RodinPressureOracleBenchmarks -j 1
+build/tests/benchmarks/RodinPressureOracleBenchmarks \
+  --benchmark_filter='^Stokes/PressureOracle/Affine/P4P3/Triangle/3/16/real_time$' \
+  --benchmark_min_time=1x --benchmark_repetitions=3 \
+  --benchmark_out=pressure-oracle.json --benchmark_out_format=json
+```
+
+Report cell counts, full/free velocity DOFs, full/zero-mean pressure DOFs,
+matrix nonzeros, quadrature points, degrees and build configuration alongside
+timings. Equal grid sizes do not imply equal work across dimensions. Before
+attributing distributed CPU imbalance to partitioning, time owned-cell
+assembly separately from global operator collection and the root-only oracle.
+The existing spectral consistency and repeated-spectrum guards qualify these
+measurements; they add no convergence-credit entries. No speedup follows from
+adding the harness alone.
 
 Darcy remains deferred. Fixed-degree P0 has no p-refinement family; P0g has
 no nonconstant approximation rate. These are mathematical exclusions, not

@@ -1,8 +1,15 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <memory>
 #include <thread>
 #include <vector>
@@ -19,8 +26,10 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
-/// @brief Verifies sanity test reference triangle for geometry parametric
-/// transformation by checking tolerance-based numerical results.
+  /**
+   * @brief Verifies sanity test reference triangle for geometry parametric
+   * transformation by checking tolerance-based numerical results.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, SanityTest_ReferenceTriangle)
   {
     constexpr const size_t sdim = 2;
@@ -49,8 +58,10 @@ namespace Rodin::Tests::Unit
     }
   }
 
-/// @brief Verifies sanity test triangle 1 for geometry parametric
-/// transformation by checking tolerance-based numerical results.
+  /**
+   * @brief Verifies sanity test triangle 1 for geometry parametric
+   * transformation by checking tolerance-based numerical results.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, SanityTest_Triangle_1)
   {
     constexpr const size_t rdim = 2;
@@ -189,8 +200,10 @@ namespace Rodin::Tests::Unit
     return pm;
   }
 
-/// @brief Verifies P 2 curves interface edge for geometry parametric
-/// transformation by checking tolerance-based numerical results.
+  /**
+   * @brief Verifies P 2 curves interface edge for geometry parametric
+   * transformation by checking tolerance-based numerical results.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, P2CurvesInterfaceEdge)
   {
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
@@ -204,8 +217,10 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(std::abs(linearMidpoint.norm() - Real(1)), std::abs(x.norm() - Real(1)));
   }
 
-/// @brief Verifies P 3 curved edge improves fit for geometry parametric
-/// transformation.
+  /**
+   * @brief Verifies P 3 curved edge improves fit for geometry parametric
+   * transformation.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, P3CurvedEdgeImprovesFit)
   {
     Variational::RealH1Element<3> fe(Polytope::Type::Triangle);
@@ -223,8 +238,10 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(maxError, std::abs(linearMidpoint.norm() - Real(1)));
   }
 
-/// @brief Verifies curved triangle jacobian stays positive for geometry
-/// parametric transformation.
+  /**
+   * @brief Verifies curved triangle jacobian stays positive for geometry
+   * parametric transformation.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, CurvedTriangleJacobianStaysPositive)
   {
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
@@ -357,8 +374,10 @@ namespace Rodin::Tests::Unit
     }
   } // namespace
 
-/// @brief Checks exact agreement with scalar evaluation on all geometries and
-/// embeddings.
+  /**
+   * @brief Checks exact agreement with scalar evaluation on all geometries and
+   * embeddings.
+   */
   TEST(
     Rodin_Geometry_ParametricTransformation, AllGeometryEvaluationMatchesScalarBaseline)
   {
@@ -375,8 +394,10 @@ namespace Rodin::Tests::Unit
     }
   }
 
-/// @brief Evaluates a basis derivative once, independently of physical
-/// dimension.
+  /**
+   * @brief Evaluates a basis derivative once, independently of physical
+   * dimension.
+   */
   TEST(Rodin_Geometry_ParametricTransformation, JacobianEvaluatesDerivativeOnce)
   {
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
@@ -427,50 +448,50 @@ namespace Rodin::Tests::Unit
        * @tparam K Geometry element degree.
        * @param geometry Reference polytope type.
        */
-      template <size_t K>
-      void checkEvaluation(Polytope::Type geometry)
+    template <size_t K, class Element = Variational::RealH1Element<K>>
+    void checkEvaluation(Polytope::Type geometry)
+    {
+      SCOPED_TRACE(K);
+      Element element(geometry);
+      const size_t rdim = Polytope::Traits(geometry).getDimension();
+      for (const size_t order : {size_t(8), size_t(16)})
       {
-        SCOPED_TRACE(K);
-        Variational::RealH1Element<K> element(geometry);
-        const size_t rdim = Polytope::Traits(geometry).getDimension();
-        for (const size_t order : {size_t(8), size_t(16)})
+        SCOPED_TRACE(order);
+        const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+        for (size_t pdim = std::max(size_t(1), rdim); pdim <= 3; ++pdim)
         {
-          SCOPED_TRACE(order);
-          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
-          for (size_t pdim = std::max(size_t(1), rdim); pdim <= 3; ++pdim)
+          for (size_t cell = 0; cell < 2; ++cell)
           {
-            for (size_t cell = 0; cell < 2; ++cell)
+            PointCloud controls(pdim, element.getCount());
+            for (size_t a = 0; a < element.getCount(); ++a)
             {
-              PointCloud controls(pdim, element.getCount());
-              for (size_t a = 0; a < element.getCount(); ++a)
+              for (size_t j = 0; j < pdim; ++j)
               {
-                for (size_t j = 0; j < pdim; ++j)
-                {
-                  controls(j, a) = Real((a + 1) * (j + 1) + cell) /
-                    Real(element.getCount() + cell + 1) * (a % 2 ? -1 : 1);
-                }
+                controls(j, a) = Real((a + 1) * (j + 1) + cell) /
+                  Real(element.getCount() + cell + 1) * (a % 2 ? -1 : 1);
               }
-              ParametricTransformation transformation(controls, element);
-              const PolytopeTransformation& polymorphic = transformation;
-              std::vector<Math::SpatialMatrix<Real>> matrices;
-              polymorphic.jacobian(matrices, formula);
-              ASSERT_EQ(matrices.size(), formula.getSize());
-              for (size_t qp = 0; qp < matrices.size(); ++qp)
+            }
+            ParametricTransformation transformation(controls, element);
+            const PolytopeTransformation& polymorphic = transformation;
+            std::vector<Math::SpatialMatrix<Real>> matrices;
+            polymorphic.jacobian(matrices, formula);
+            ASSERT_EQ(matrices.size(), formula.getSize());
+            for (size_t qp = 0; qp < matrices.size(); ++qp)
+            {
+              Math::SpatialMatrix<Real> expected;
+              transformation.jacobian(expected, formula.getPoint(qp));
+              ASSERT_EQ(matrices[qp].rows(), expected.rows());
+              ASSERT_EQ(matrices[qp].cols(), expected.cols());
+              for (size_t j = 0; j < pdim; ++j)
               {
-                Math::SpatialMatrix<Real> expected;
-                transformation.jacobian(expected, formula.getPoint(qp));
-                ASSERT_EQ(matrices[qp].rows(), expected.rows());
-                ASSERT_EQ(matrices[qp].cols(), expected.cols());
-                for (size_t j = 0; j < pdim; ++j)
-                {
-                  for (size_t i = 0; i < rdim; ++i)
-                    EXPECT_EQ(matrices[qp](j, i), expected(j, i));
-                }
+                for (size_t i = 0; i < rdim; ++i)
+                  EXPECT_EQ(matrices[qp](j, i), expected(j, i));
               }
             }
           }
         }
       }
+    }
 
       class ObservedFormula final : public QF::QuadratureFormulaBase
       {
@@ -554,79 +575,153 @@ namespace Rodin::Tests::Unit
           mutable size_t m_reads;
       };
 
+      template <class Element = Variational::RealH1Element<2>>
       struct ObservedElement
       {
-          using RangeType = Real;
-          Variational::RealH1Element<2> element;
-          size_t* basisReads;
-          size_t* tableReads;
-          /**
+        using RangeType = Real;
+        Element element;
+        size_t* basisReads;
+        size_t* tableReads;
+        size_t* countReads;
+        /**
          * @brief Observes an H1 geometry element's evaluation entry points.
          * @param geometry Reference geometry type.
          * @param basis Counter for direct basis access.
          * @param table Counter for reference-table access.
+         * @param count Counter for basis-count queries.
          */
-          ObservedElement(Polytope::Type geometry, size_t& basis, size_t& table)
-            : element(geometry),
-              basisReads(&basis),
-              tableReads(&table)
-          {}
-          /**
+        ObservedElement(
+          Polytope::Type geometry, size_t& basis, size_t& table, size_t& count)
+          : element(geometry),
+            basisReads(&basis),
+            tableReads(&table),
+            countReads(&count)
+        {}
+        /**
          * @brief Gets the underlying reference geometry.
          * @returns The element geometry type.
          */
-          auto getGeometry() const
-          {
-            return element.getGeometry();
-          }
-          /**
+        auto getGeometry() const
+        {
+          return element.getGeometry();
+        }
+        /**
          * @brief Gets the underlying basis count.
          * @returns Number of scalar basis functions.
          */
-          size_t getCount() const
-          {
-            return element.getCount();
-          }
-          /**
+        size_t getCount() const
+        {
+          ++*countReads;
+          return element.getCount();
+        }
+        /**
          * @brief Gets the geometry element order.
          * @returns The element order.
          */
-          size_t getOrder() const
-          {
-            return element.getOrder();
-          }
-          /**
+        size_t getOrder() const
+        {
+          return element.getOrder();
+        }
+        /**
          * @brief Counts direct scalar basis access.
          * @param i Local scalar basis index.
          * @returns The underlying basis function.
          */
-          const auto& getBasis(size_t i) const
-          {
-            ++*basisReads;
-            return element.getBasis(i);
-          }
-          /**
+        decltype(auto) getBasis(size_t i) const
+        {
+          ++*basisReads;
+          return element.getBasis(i);
+        }
+        /**
          * @brief Counts access to the existing shared reference table.
          * @param formula Formula defining the reference sample set.
          * @returns The underlying element tabulation.
          */
-          const auto& getTabulation(const QF::QuadratureFormulaBase& formula) const
-          {
-            ++*tableReads;
-            return element.getTabulation(formula);
-          }
+        const auto& getTabulation(const QF::QuadratureFormulaBase& formula) const
+        {
+          ++*tableReads;
+          return element.getTabulation(formula);
+        }
+
+        /**
+         * @brief Observes lookup of an existing reference table.
+         * @param identity Logical formula identity, including zero.
+         * @returns Borrowed table when present on this thread.
+         */
+        auto findTabulation(size_t identity) const
+        {
+          ++*tableReads;
+          return element.findTabulation(identity);
+        }
+      };
 
     /**
-     * @brief Observes lookup of an existing reference table.
-     * @param identity Logical formula identity, including zero.
-     * @returns Borrowed table when present on this thread.
+     * @brief Certifies bounded pointwise metadata access and exact evaluation.
+     *
+     * The basis count is invariant during one map evaluation. Each operation
+     * must query it once, independently of the number of basis functions.
+     * Exact comparisons retain the reference accumulation order for every
+     * admissible physical embedding, including zero-dimensional points.
+     *
+     * @param geometry Reference polytope type.
      */
-          auto findTabulation(size_t identity) const
+    template <class Element>
+    void checkPointwiseCount(Polytope::Type geometry)
+    {
+      const Polytope::Traits traits(geometry);
+      size_t basisReads = 0, tableReads = 0, countReads = 0;
+      ObservedElement<Element> element(geometry, basisReads, tableReads, countReads);
+      const size_t count = element.element.getCount();
+      for (size_t dimension = traits.getDimension(); dimension <= 3; ++dimension)
+      {
+        SCOPED_TRACE(dimension);
+        PointCloud controls(dimension, count);
+        for (size_t a = 0; a < count; ++a)
+        {
+          for (size_t j = 0; j < dimension; ++j)
+            controls(j, a) = Real((a + 1) * (j + 1)) / count;
+        }
+        ParametricTransformation observed(controls, element);
+        for (const auto& reference : {traits.getCentroid(), traits.getVertex(0)})
+        {
+          Math::SpatialPoint actual, expected(dimension);
+          expected.setZero();
+          for (size_t a = 0; a < count; ++a)
+            expected += controls[a] * element.element.getBasis(a)(reference);
+          const size_t beforeTransform = countReads;
+          observed.transform(actual, reference);
+          EXPECT_EQ(countReads - beforeTransform, 1);
+          ASSERT_EQ(actual.size(), expected.size());
+          for (size_t j = 0; j < dimension; ++j)
+            EXPECT_EQ(actual(j), expected(j));
+
+          Math::SpatialMatrix<Real> jacobian,
+            expectedJacobian(dimension, traits.getDimension());
+          expectedJacobian.setZero();
+          for (size_t a = 0; a < count; ++a)
           {
-            ++*tableReads;
-            return element.findTabulation(identity);
+            for (size_t i = 0; i < traits.getDimension(); ++i)
+            {
+              const Real derivative =
+                element.element.getBasis(a).template getDerivative<1>(i)(reference);
+              for (size_t j = 0; j < dimension; ++j)
+                expectedJacobian(j, i) += controls(j, a) * derivative;
+            }
           }
-      };
+          const size_t beforeJacobian = countReads;
+          observed.jacobian(jacobian, reference);
+          EXPECT_EQ(countReads - beforeJacobian, 1);
+          ASSERT_EQ(jacobian.rows(), expectedJacobian.rows());
+          ASSERT_EQ(jacobian.cols(), expectedJacobian.cols());
+          for (size_t j = 0; j < dimension; ++j)
+          {
+            for (size_t i = 0; i < traits.getDimension(); ++i)
+              EXPECT_EQ(jacobian(j, i), expectedJacobian(j, i));
+          }
+        }
+      }
+      EXPECT_EQ(tableReads, 0);
+    }
 
       /**
    * @brief Certifies lazy coordinates and reference-sample ownership.
@@ -640,6 +735,7 @@ namespace Rodin::Tests::Unit
    *
    * @param geometry Positive-dimensional reference geometry.
    */
+      template <class Element = Variational::RealH1Element<2>>
       void checkLazyCoordinates(Polytope::Type geometry)
       {
         const size_t dimension = Polytope::Traits(geometry).getDimension();
@@ -648,8 +744,8 @@ namespace Rodin::Tests::Unit
         auto mesh = Mesh<Context::Local>::UniformGrid(geometry, shape);
         const auto cell = *mesh.getPolytope(dimension, 0);
         const auto otherCell = *mesh.getPolytope(dimension, 1);
-        size_t basisReads = 0, tableReads = 0;
-        ObservedElement element(geometry, basisReads, tableReads);
+        size_t basisReads = 0, tableReads = 0, countReads = 0;
+        ObservedElement<Element> element(geometry, basisReads, tableReads, countReads);
         PointCloud controls(dimension, element.getCount());
         for (size_t a = 0; a < element.getCount(); ++a)
         {
@@ -687,7 +783,13 @@ namespace Rodin::Tests::Unit
           for (size_t j = 0; j < dimension; ++j)
             EXPECT_EQ(actual(j), expected(j));
         };
+        const size_t countBeforeCoordinates = countReads;
         sameCoordinates(pending.getPhysicalCoordinates());
+#ifdef NDEBUG
+        EXPECT_EQ(countReads, countBeforeCoordinates);
+#else
+        EXPECT_EQ(countReads, countBeforeCoordinates + 1);
+#endif
         EXPECT_EQ(basisReads, 0);
         EXPECT_EQ(tableReads, 2);
         static_cast<void>(pending.getPhysicalCoordinates());
@@ -744,13 +846,14 @@ namespace Rodin::Tests::Unit
        * @brief Certifies reference-only reuse and formula lifetime invalidation.
        * @param geometry Reference polytope type.
        */
+      template <class Element = Variational::RealH1Element<2>>
       void checkReuse(Polytope::Type geometry)
       {
         const Polytope::Traits traits(geometry);
         const auto centroid = traits.getCentroid();
         const auto vertex = traits.getVertex(0);
-        size_t basisReads = 0, tableReads = 0;
-        ObservedElement element(geometry, basisReads, tableReads);
+        size_t basisReads = 0, tableReads = 0, countReads = 0;
+        ObservedElement<Element> element(geometry, basisReads, tableReads, countReads);
         PointCloud first(3, element.getCount()), second(3, element.getCount());
         for (size_t a = 0; a < element.getCount(); ++a)
         {
@@ -766,7 +869,14 @@ namespace Rodin::Tests::Unit
         const auto* address = &*formula;
         const auto initialIdentity = formula->getCacheIdentity();
         std::vector<Math::SpatialMatrix<Real>> firstMatrices, secondMatrices;
+        const size_t countBefore = countReads;
         firstMap.jacobian(firstMatrices, *formula);
+        // Only the debug compatibility assertion may query the basis count.
+#ifdef NDEBUG
+        EXPECT_EQ(countReads, countBefore);
+#else
+        EXPECT_EQ(countReads, countBefore + 1);
+#endif
         ASSERT_EQ(formula->getReads(), 1);
         secondMap.jacobian(secondMatrices, *formula);
         EXPECT_EQ(formula->getReads(), 1);
@@ -990,8 +1100,10 @@ namespace Rodin::Tests::Unit
       }
   };
 
-  /// @brief Compares bulk and pointwise Jacobians exactly on every reference
-  /// geometry.
+  /**
+   * @brief Compares bulk and pointwise Jacobians exactly on every reference
+   * geometry.
+   */
   TEST_F(QuadratureTransformationTest, AllGeometriesOrdersAndEmbeddings)
   {
     for (const auto geometry :
@@ -1000,12 +1112,187 @@ namespace Rodin::Tests::Unit
         Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(static_cast<int>(geometry));
+      checkEvaluation<1, Variational::P1Element<Real>>(geometry);
       checkEvaluation<1>(geometry);
       checkEvaluation<2>(geometry);
       checkEvaluation<3>(geometry);
       checkEvaluation<4>(geometry);
       checkEvaluation<5>(geometry);
       checkEvaluation<6>(geometry);
+    }
+  }
+
+  /**
+   * @brief Certifies retained P1 and H1 outputs across shape and formula changes.
+   *
+   * Packed input padding and all output storage are deliberately poisoned.
+   * Only active physical/reference components may enter the contraction;
+   * inactive output components remain zero after shrinking or expanding.
+   * Distinct control clouds reuse the same reference table without reusing
+   * physical Jacobians. Active entries agree exactly with pointwise evaluation.
+   * Native P1 and H1 degrees one, two and six exercise both first-order and
+   * high-order reference tables without assuming sample-invariant derivatives.
+   */
+  TEST_F(QuadratureTransformationTest, P1AndH1RetainedOutputsAndInactivePadding)
+  {
+    constexpr Real poison = 123;
+    for (const auto geometry :
+      {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+        Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const auto certify = [&]<class Element>() {
+        const Element element(geometry);
+        SCOPED_TRACE(element.getOrder());
+        const size_t d = Polytope::Traits(geometry).getDimension();
+        std::vector<Math::SpatialMatrix<Real>> matrices;
+        for (const size_t order : {size_t(16), size_t(2), size_t(8)})
+        {
+          SCOPED_TRACE(order);
+          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+          for (const size_t s : {size_t(3), std::max(size_t(1), d), size_t(3)})
+          {
+            SCOPED_TRACE(s);
+            PointCloud controls(s, element.getCount());
+            for (size_t a = 0; a < element.getCount(); ++a)
+            {
+              for (size_t j = 0; j < 3; ++j)
+              {
+                controls.point3(a)[j] =
+                  j < s ? Real((a + 1) * (j + 2) + order) / 17 : poison;
+              }
+            }
+            const ParametricTransformation transformation(controls, element);
+            for (auto& matrix : matrices)
+              matrix.getData().setConstant(poison);
+            transformation.jacobian(matrices, formula);
+            ASSERT_EQ(matrices.size(), formula.getSize());
+            for (size_t qp = 0; qp < matrices.size(); ++qp)
+            {
+              Math::SpatialMatrix<Real> expected;
+              transformation.jacobian(expected, formula.getPoint(qp));
+              ASSERT_EQ(matrices[qp].rows(), s);
+              ASSERT_EQ(matrices[qp].cols(), d);
+              for (size_t j = 0; j < 3; ++j)
+              {
+                for (size_t i = 0; i < 3; ++i)
+                {
+                  if (j < s && i < d)
+                    EXPECT_EQ(matrices[qp](j, i), expected(j, i));
+                  else
+                    EXPECT_EQ(matrices[qp].getData()(j, i), 0);
+                }
+              }
+            }
+          }
+        }
+      };
+      certify.template operator()<Variational::RealP1Element>();
+      certify.template operator()<Variational::RealH1Element<1>>();
+      certify.template operator()<Variational::RealH1Element<2>>();
+      certify.template operator()<Variational::RealH1Element<6>>();
+    }
+  }
+
+  /**
+   * @brief Preserves basis-reduction order under strongly cancelling controls.
+   *
+   * For @f$p@f$ binary significand digits, controls cycle through
+   * @f$2^{p+1}@f$, small non-dyadic values and @f$-2^{p+1}@f$.
+   * Retained bulk outputs must match the original pointwise reduction exactly.
+   * A reversed-basis oracle must differ in at least one entry, establishing
+   * that the fixture can detect reassociation. Order-four quadrature supplies
+   * deterministic interior samples; no integration-exactness claim is made.
+   */
+  TEST_F(QuadratureTransformationTest, Square3DCancellationPreservesBasisOrder)
+  {
+    constexpr size_t QuadratureOrder = 4;
+    constexpr Real Poison = 42;
+    const Real large = std::ldexp(Real(1), std::numeric_limits<Real>::digits + 1);
+    size_t reversedDifferences = 0;
+    for (const auto geometry : {Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+           Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const auto certify = [&]<class Element>() {
+        const Element element(geometry);
+        SCOPED_TRACE(element.getOrder());
+        PointCloud controls(3, element.getCount());
+        for (size_t a = 0; a < element.getCount(); ++a)
+        {
+          for (size_t j = 0; j < 3; ++j)
+          {
+            const size_t group = (a + j) % 3;
+            controls(j, a) = group == 0 ? large
+              : group == 1              ? Real(a + j + 1) / 7
+                                        : -large;
+          }
+        }
+        const auto& formula =
+          QF::PolytopeQuadratureFormula::get(QuadratureOrder, geometry);
+        const ParametricTransformation transformation(controls, element);
+        std::vector<Math::SpatialMatrix<Real>> matrices(formula.getSize());
+        for (auto& matrix : matrices)
+          matrix.getData().setConstant(Poison);
+        transformation.jacobian(matrices, formula);
+        ASSERT_EQ(matrices.size(), formula.getSize());
+        const auto& table = element.getTabulation(formula);
+        for (size_t qp = 0; qp < formula.getSize(); ++qp)
+        {
+          SCOPED_TRACE(qp);
+          Math::SpatialMatrix<Real> expected;
+          transformation.jacobian(expected, formula.getPoint(qp));
+          Math::SpatialMatrix<Real> reversed(3, 3);
+          for (size_t a = element.getCount(); a > 0; --a)
+          {
+            const auto gradient = table.getGradient(qp, a - 1);
+            for (size_t i = 0; i < 3; ++i)
+            {
+              for (size_t j = 0; j < 3; ++j)
+                reversed(j, i) += controls(j, a - 1) * gradient[i];
+            }
+          }
+          ASSERT_EQ(matrices[qp].rows(), 3);
+          ASSERT_EQ(matrices[qp].cols(), 3);
+          for (size_t j = 0; j < 3; ++j)
+          {
+            for (size_t i = 0; i < 3; ++i)
+            {
+              EXPECT_EQ(matrices[qp](j, i), expected(j, i));
+              reversedDifferences += reversed(j, i) != expected(j, i);
+            }
+          }
+        }
+      };
+      certify.template operator()<Variational::RealP1Element>();
+      certify.template operator()<Variational::RealH1Element<2>>();
+      certify.template operator()<Variational::RealH1Element<6>>();
+    }
+    EXPECT_GT(reversedDifferences, 0);
+  }
+
+  /**
+   * @brief Checks pointwise metadata access for P1 and H1 orders one to six.
+   *
+   * All eight reference geometries and physical dimensions up to three are
+   * evaluated at the centroid and a vertex with exact arithmetic oracles.
+   */
+  TEST_F(QuadratureTransformationTest, PointwiseCountIsIndependentOfBasisSize)
+  {
+    for (const auto geometry :
+      {Polytope::Type::Point, Polytope::Type::Segment, Polytope::Type::Triangle,
+        Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+        Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      checkPointwiseCount<Variational::P1Element<Real>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<1>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<2>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<3>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<4>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<5>>(geometry);
+      checkPointwiseCount<Variational::RealH1Element<6>>(geometry);
     }
   }
 
@@ -1021,8 +1308,10 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Verifies owned mapped points survive source lifetimes and invalidate
-  /// on rebinding.
+  /**
+   * @brief Verifies owned mapped points survive source lifetimes and invalidate
+   * on rebinding.
+   */
   TEST_F(QuadratureTransformationTest, PointOwnershipCopyMoveAndRebinding)
   {
     for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
@@ -1046,6 +1335,26 @@ namespace Rodin::Tests::Unit
     {
       SCOPED_TRACE(static_cast<int>(geometry));
       checkLazyCoordinates(geometry);
+    }
+  }
+
+  /**
+   * @brief Certifies P1 reference reuse, invalidation and safe lazy fallbacks.
+   *
+   * Integer access counts distinguish shared reference tables from pointwise
+   * evaluation. Exact Jacobian and coordinate comparisons cover all supported
+   * positive-dimensional geometries, including rational pyramids, as well as
+   * formula destruction, eviction, rebinding and cross-thread point transfer.
+   */
+  TEST_F(QuadratureTransformationTest, P1ReferenceReuseAndOwnedSamples)
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      checkReuse<Variational::P1Element<Real>>(geometry);
+      checkLazyCoordinates<Variational::P1Element<Real>>(geometry);
     }
   }
 } // namespace Rodin::Tests::Unit

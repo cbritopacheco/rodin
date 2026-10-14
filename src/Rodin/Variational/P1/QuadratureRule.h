@@ -460,7 +460,7 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < q.getSize(); ++qp)
           {
             const auto& p = q.getPoint(qp);
-            const IntegrationPoint ip(p, m_qf, qp);
+            const IntegrationPoint ip(q, qp);
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -479,7 +479,7 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < q.getSize(); ++qp)
           {
             const auto& p = q.getPoint(qp);
-            const IntegrationPoint ip(p, m_qf, qp);
+            const IntegrationPoint ip(q, qp);
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -1155,7 +1155,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, m_qf, qp);
+          const IntegrationPoint ip(q, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -1847,7 +1847,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, m_qf, qp);
+          const IntegrationPoint ip(q, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -2188,7 +2188,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, m_qf, qp);
+          const IntegrationPoint ip(q, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -3417,7 +3417,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, m_qf, qp);
+          const IntegrationPoint ip(q, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
           const auto& Jinv = p.getJacobianInverse();
@@ -3795,7 +3795,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, m_qf, qp);
+          const IntegrationPoint ip(q, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -4205,7 +4205,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, m_qf, qp);
+          const IntegrationPoint ip(q, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
