@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <memory>
 #include <thread>
 #include <vector>
@@ -1192,6 +1193,83 @@ namespace Rodin::Tests::Unit
       certify.template operator()<Variational::RealH1Element<2>>();
       certify.template operator()<Variational::RealH1Element<6>>();
     }
+  }
+
+  /**
+   * @brief Preserves basis-reduction order under strongly cancelling controls.
+   *
+   * For @f$p@f$ binary significand digits, controls cycle through
+   * @f$2^{p+1}@f$, small non-dyadic values and @f$-2^{p+1}@f$.
+   * Retained bulk outputs must match the original pointwise reduction exactly.
+   * A reversed-basis oracle must differ in at least one entry, establishing
+   * that the fixture can detect reassociation. Order-four quadrature supplies
+   * deterministic interior samples; no integration-exactness claim is made.
+   */
+  TEST_F(QuadratureTransformationTest, Square3DCancellationPreservesBasisOrder)
+  {
+    constexpr size_t QuadratureOrder = 4;
+    constexpr Real Poison = 42;
+    const Real large = std::ldexp(Real(1), std::numeric_limits<Real>::digits + 1);
+    size_t reversedDifferences = 0;
+    for (const auto geometry : {Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+           Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const auto certify = [&]<class Element>() {
+        const Element element(geometry);
+        SCOPED_TRACE(element.getOrder());
+        PointCloud controls(3, element.getCount());
+        for (size_t a = 0; a < element.getCount(); ++a)
+        {
+          for (size_t j = 0; j < 3; ++j)
+          {
+            const size_t group = (a + j) % 3;
+            controls(j, a) = group == 0 ? large
+              : group == 1              ? Real(a + j + 1) / 7
+                                        : -large;
+          }
+        }
+        const auto& formula =
+          QF::PolytopeQuadratureFormula::get(QuadratureOrder, geometry);
+        const ParametricTransformation transformation(controls, element);
+        std::vector<Math::SpatialMatrix<Real>> matrices(formula.getSize());
+        for (auto& matrix : matrices)
+          matrix.getData().setConstant(Poison);
+        transformation.jacobian(matrices, formula);
+        ASSERT_EQ(matrices.size(), formula.getSize());
+        const auto& table = element.getTabulation(formula);
+        for (size_t qp = 0; qp < formula.getSize(); ++qp)
+        {
+          SCOPED_TRACE(qp);
+          Math::SpatialMatrix<Real> expected;
+          transformation.jacobian(expected, formula.getPoint(qp));
+          Math::SpatialMatrix<Real> reversed(3, 3);
+          for (size_t a = element.getCount(); a > 0; --a)
+          {
+            const auto gradient = table.getGradient(qp, a - 1);
+            for (size_t i = 0; i < 3; ++i)
+            {
+              for (size_t j = 0; j < 3; ++j)
+                reversed(j, i) += controls(j, a - 1) * gradient[i];
+            }
+          }
+          ASSERT_EQ(matrices[qp].rows(), 3);
+          ASSERT_EQ(matrices[qp].cols(), 3);
+          for (size_t j = 0; j < 3; ++j)
+          {
+            for (size_t i = 0; i < 3; ++i)
+            {
+              EXPECT_EQ(matrices[qp](j, i), expected(j, i));
+              reversedDifferences += reversed(j, i) != expected(j, i);
+            }
+          }
+        }
+      };
+      certify.template operator()<Variational::RealP1Element>();
+      certify.template operator()<Variational::RealH1Element<2>>();
+      certify.template operator()<Variational::RealH1Element<6>>();
+    }
+    EXPECT_GT(reversedDifferences, 0);
   }
 
   /**

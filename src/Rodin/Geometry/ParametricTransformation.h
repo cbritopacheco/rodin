@@ -211,6 +211,9 @@ namespace Rodin::Geometry
      * without changing the local-basis accumulation order, reference samples,
      * padding initialization or ownership. Other dimensions use runtime bounds;
      * no affine-map assumption or derived-metric cache is introduced.
+     * The square-three-dimensional instance accumulates in a local fixed-capacity
+     * matrix and commits it once per sample. Runtime-bound instances write to
+     * retained output directly, avoiding an extra copy for smaller matrices.
      *
      * @param[out] jacobians Jacobian matrices in quadrature-point order.
      * @param[in] qf Reference formula identifying the element tabulation.
@@ -226,11 +229,21 @@ namespace Rodin::Geometry
         assert(table.ndof == m_fe.getCount());
         jacobians.resize(table.nqp);
         const auto contract = [&](auto referenceDimension, auto physicalDimension) {
+          constexpr bool localAccumulation = std::is_same_v<decltype(referenceDimension),
+            std::integral_constant<size_t, 3>>;
           for (size_t qp = 0; qp < table.nqp; ++qp)
           {
-            auto& matrix = jacobians[qp];
-            matrix.resize(physicalDimension, referenceDimension);
-            matrix.setZero();
+            decltype(auto) matrix = [&]() -> decltype(auto) {
+              if constexpr (localAccumulation)
+                return Math::SpatialMatrix<Real>(physicalDimension, referenceDimension);
+              else
+              {
+                auto& output = jacobians[qp];
+                output.resize(physicalDimension, referenceDimension);
+                output.setZero();
+                return (output);
+              }
+            }();
             for (size_t local = 0; local < table.ndof; ++local)
             {
               const auto gradient = table.getGradient(qp, local);
@@ -244,6 +257,8 @@ namespace Rodin::Geometry
                 }
               }
             }
+            if constexpr (localAccumulation)
+              jacobians[qp] = matrix;
           }
         };
         if (rdim == 3 && pdim == 3)

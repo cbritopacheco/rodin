@@ -1239,6 +1239,82 @@ untimed checks in opt-in executables, not CTest or CI performance gates.
 These are local compiler/backend results, not evidence of MPI numerical
 recertification or completed remote CI.
 
+### Local accumulation in square-three-dimensional geometry
+
+The spatial-bound specialization above still wrote each partial Jacobian back
+to the retained matrix after every basis contribution. A local fixed-capacity
+matrix now owns the square-three-dimensional reduction until that sample is
+complete, after which the result is assigned to retained output. The runtime-
+bound instances continue to borrow retained output directly. This storage
+distinction does not duplicate the contraction or add a cache, heap allocation,
+affine-map predicate or backend operation.
+
+In the inspected native degree-six kernel, four independent two-lane fused
+multiply-adds and one scalar fused multiply-add update the nine entries in
+registers. Stores occur after the basis loop, rather than within it. Counting
+only these scalar-result writes gives $9BN_q$ before versus $9N_q$ after;
+initialization, dimension metadata and subsequent mapped-point copies are not
+included in this count. Contributions to each entry still follow increasing
+local-basis order. The runtime-bound instruction sequence in the inspected
+degree-six method is unchanged apart from relocated branch/call targets.
+
+A blanket local-copy version was rejected: it slowed the degree-two triangle
+construction selections by approximately 7–12%. The retained implementation
+uses local accumulation only in the existing square-three-dimensional instance,
+so smaller matrices do not pay for that copy.
+Disassembly of the rejected runtime-bound instance shows stack-based partial
+updates followed by an additional full-matrix copy: the variable indices did
+not receive the register-only reduction obtained for the fixed bounds.
+
+The following native construction-and-metrics medians use the preceding map,
+degree, embedding and quadrature protocol, with five repetitions of at least
+0.1 seconds per selection. The baseline already includes the spatial-bound
+specialization; these factors describe the additional storage change only.
+
+| Geometry degree | Geometry | Before, ns/cell | After, ns/cell | Before/after |
+| --- | --- | ---: | ---: | ---: |
+| 2 | Tetrahedron | 2,317 | 1,777 | 1.30 |
+| 2 | Pyramid | 2,796 | 1,966 | 1.42 |
+| 2 | Hexahedron | 10,353 | 6,887 | 1.50 |
+| 6 | Tetrahedron | 8,116 | 5,123 | 1.58 |
+| 6 | Pyramid | 13,809 | 9,221 | 1.50 |
+| 6 | Hexahedron | 80,121 | 55,614 | 1.44 |
+
+The matched LLVM 19 build reproduced factors of 1.28–1.59 for these six
+construction-and-metrics selections. A broader native-P1 study measured all
+168 registrations at three repetitions of at least 0.05 seconds per selection,
+including every cell family, admissible registered embedding, control policy
+and quadrature order. The median factor across its 48 three-dimensional
+selections was 1.84. No lower-dimensional gain is claimed. A few owned-
+quadrature phase shifts were not reproduced in an isolated nine-repetition
+comparison against a retained-output control linked to the same consumer
+libraries; its segment and embedded-triangle medians differed by at most
+2.3%. The owned scope includes allocation and point construction, so its
+variation must not be assigned to the contraction from wall time alone.
+
+Matched native Stokes measurements used degree-two velocity, degree-one
+pressure, grid size three, quadrature order sixteen, and weighted/unweighted
+forms on all six applicable geometries. Across the four volume-cell families,
+binding median factors were approximately 1.01–1.04 and complete constrained
+assembly median factors were 1.02–1.08. Both before/after phases qualified their
+matrices and patch residuals. These are observed local medians, not solver or
+MPI scaling results; small two-dimensional variations are not claimed as gains.
+
+The new cancellation regression chooses controls with magnitudes
+$2^{p+1}$ and small non-dyadic values, where $p$ is the binary significand
+precision. Native P1 and H1 degrees two and six on all four volume-cell
+families must agree exactly with the original pointwise reduction. Its
+reversed-basis oracle must differ, and a deliberately reversed production
+loop was observed to fail the test before restoration. This protects reduction
+order without introducing a numerical tolerance or a timing gate.
+
+Final numerical gates comprised fifteen geometry tests and thirty-five
+Poisson convergence tests per compiler configuration, including the OpenMP
+run with two threads. Both configurations qualified all 417 mapped-metric and
+168 native-P1 geometry selections; the native binding and complete-assembly
+studies each qualified twelve selections. These local results do not certify
+MPI numerical execution or the still-pending remote checks.
+
 ### Arithmetic-preservation gate for pyramid reuse
 
 Pyramid nodal functions contract modal values with inverse Vandermonde columns.
