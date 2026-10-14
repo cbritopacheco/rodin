@@ -126,13 +126,19 @@ namespace Rodin::Tests::Benchmarks
    * zero. A changed output must fail qualification. This measures Math::dot
    * with pair-loop and output-store overhead, not physical gradient mapping,
    * weighted local-matrix accumulation or complete assembly.
+   * RowSnapshot scopes copy the current left vector into a local value before
+   * traversing its right-hand pairs. Ordinary Public and Original scopes keep
+   * a borrowed row. This isolates value-ownership effects without changing the
+   * reduction expression or adding a retained cache. The strategy is not an
+   * assembly timing decomposition.
    *
    * @tparam LHS Left operand scalar type.
    * @tparam RHS Right operand scalar type.
    * @tparam Original Whether to time the original dynamic reduction.
    * @tparam Lower Whether only lower-index pairs are evaluated.
+   * @tparam Snapshot Whether each left row is copied into a local value.
    */
-  template <class LHS, class RHS, bool Original, bool Lower>
+  template <class LHS, class RHS, bool Original, bool Lower, bool Snapshot = false>
   class SpatialDotBatch
   {
     public:
@@ -185,16 +191,22 @@ namespace Rodin::Tests::Benchmarks
       const auto compute = [&]() {
         for (size_t b = 0; b < count; ++b)
         {
+          const auto& row = [&]() -> decltype(auto) {
+            if constexpr (Snapshot)
+              return Math::SpatialVector<LHS>(left[b]);
+            else
+              return (left[b]);
+          }();
           for (size_t a = 0; a < (Lower ? b + 1 : count); ++a)
           {
             if constexpr (Original)
             {
-              const auto n = static_cast<Eigen::Index>(left[b].size());
+              const auto n = static_cast<Eigen::Index>(row.size());
               actual[b * count + a] =
-                Math::dot(left[b].getData().head(n), right[a].getData().head(n));
+                Math::dot(row.getData().head(n), right[a].getData().head(n));
             }
             else
-              actual[b * count + a] = Math::dot(left[b], right[a]);
+              actual[b * count + a] = Math::dot(row, right[a]);
           }
         }
       };
@@ -229,6 +241,7 @@ namespace Rodin::Tests::Benchmarks
       }
       const size_t pairs = Lower ? count * (count + 1) / 2 : count * count;
       state.counters["dimension"] = dimension;
+      state.counters["row_snapshot"] = Snapshot;
       state.counters["vectors_per_operand"] = count;
       state.counters["pairs"] = pairs;
       state.counters["scalar_products"] = pairs * dimension;
@@ -244,7 +257,10 @@ namespace Rodin::Tests::Benchmarks
     static void registerCases(const char* label)
     {
       const std::string name = std::string("SpatialDot/Batch/") +
-        (Original ? "Original/" : "Public/") + (Lower ? "Lower/" : "Full/") + label;
+        (Snapshot      ? "RowSnapshot/"
+            : Original ? "Original/"
+                       : "Public/") +
+        (Lower ? "Lower/" : "Full/") + label;
       for (const size_t dimension : {size_t(0), size_t(1), size_t(2), size_t(3)})
       {
         for (const size_t count : {size_t(4), size_t(16), size_t(64)})
@@ -270,6 +286,8 @@ namespace Rodin::Tests::Benchmarks
     SpatialDotBatch<LHS, RHS, true, false>::registerCases(label);
     SpatialDotBatch<LHS, RHS, false, true>::registerCases(label);
     SpatialDotBatch<LHS, RHS, true, true>::registerCases(label);
+    SpatialDotBatch<LHS, RHS, false, false, true>::registerCases(label);
+    SpatialDotBatch<LHS, RHS, false, true, true>::registerCases(label);
   }
 }
 

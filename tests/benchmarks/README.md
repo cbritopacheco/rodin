@@ -918,6 +918,47 @@ inlining or an interposition repair. Raw traces, generated instructions,
 compiler optimization records and the explicitly noncanonical initial
 mutable-view measurements are retained in
 `build-convergence/certification/spatial-dot-batches-20261014/`.
+### Gradient-row ownership and local contraction
+
+The Math executable additionally retains 96 `RowSnapshot` scopes, giving
+320 registrations. Each left vector is copied once before traversing its
+right-hand pairs; the public dot reduction and output order are unchanged.
+Both full and lower pair loops, all four scalar pairs, dimensions zero through
+three and vector counts 4, 16 and 64 are included. All 320 registrations qualify
+under native Apple LLVM 21 and LLVM 19: 640 scope/build combinations, without
+CTest registrations.
+
+For three-component operands, paired five-repetition measurements with a
+100 ms minimum window give the following ratios of borrowed-row time to
+snapshot-row time. Ratios above one favor the snapshot; these are observations
+of the isolated Math batches, not source repair speedups.
+
+| Build | Real, full | Real, lower | Complex, full | Complex, lower |
+| --- | ---: | ---: | ---: | ---: |
+| Native, 16 vectors | 1.001 | 1.004 | 1.006 | 1.011 |
+| Native, 64 vectors | 0.975 | 0.972 | 1.002 | 1.003 |
+| LLVM 19, 16 vectors | 1.026 | 1.069 | 1.003 | 1.012 |
+| LLVM 19, 64 vectors | 1.000 | 1.049 | 1.018 | 1.004 |
+
+A separate native source experiment copied each physical test-gradient row
+inside the existing weighted and unweighted H1 vector-diffusion kernels.
+Twelve P2/P1 real Stokes binding selections over six two- and three-dimensional
+families gave ratios approximately 1.00--1.02, with the weighted wedge at 0.997.
+That source change was reverted: the isolated ownership strategy does not
+establish a useful, portable consumer improvement.
+
+The weighted P2/P1 pyramid binding profile contains 5,448 selected CPU samples.
+Its Eigen accessor label accounts for 21.75% of selected leaf samples but
+resolves, after image-UUID verification and address rebasing, to an inline
+third-component input load in `QuadratureRule::setPolytope`. Vector-array
+indexing accounts for 4.52% of leaf samples; geometry and metric preparation
+appear in 5.40% and 2.83% of inclusive samples. These overlapping sample
+categories are not additive elapsed-time fractions, and the binding workload
+includes untimed qualification calls. No out-of-line accessor repair is
+justified by this trace. Measurements, rejected source experiment and trace
+are retained under
+`build-convergence/certification/assembly-gradient-profile-20261014/`.
+
 ### Complex one-component dispatch findings
 
 The one-component complex difference is a calling-context dispatch cost, not
