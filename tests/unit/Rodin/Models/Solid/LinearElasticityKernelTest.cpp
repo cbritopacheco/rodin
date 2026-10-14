@@ -56,10 +56,9 @@ namespace Rodin::Tests::Unit
       for (size_t q = 0; q < formula.getSize(); ++q)
       {
         const auto& point = quadrature.getPoint(q);
-        const IntegrationPoint ip(quadrature, q);
         const Scalar weight = Scalar(formula.getWeight(q) * point.getDistortion());
-        const auto first = lambda.getValue(ip);
-        const auto shear = mu.getValue(ip);
+        const auto first = lambda.getValue(point);
+        const auto shear = mu.getValue(point);
         for (size_t a = 0; a < count; ++a)
         {
           Math::SpatialMatrix<Scalar> reference(dimension, dimension);
@@ -275,6 +274,64 @@ namespace Rodin::Tests::Unit
       };
       check.template operator()<Real>();
       check.template operator()<Complex>();
+    }
+  }
+
+  /**
+   * @brief Complex integrators preserve material values and scalar promotion.
+   *
+   * P1 and H1 degree two are compared with the independent pairwise oracle
+   * on native and quadratic geometry. All real/complex Lamé parameter pairs
+   * act on complex fields. Nonreal parameters produce a non-Hermitian operator;
+   * coincident spaces alone must not trigger adjoint reconstruction. This test
+   * does not require a complex PETSc installation.
+   */
+  TEST_P(LinearElasticityKernelTest, ComplexIntegralParameterPromotion)
+  {
+    /// @brief Relative Frobenius roundoff budget on dimensionless reference meshes.
+    constexpr Real IntegralTolerance = 1e-11;
+    const RealFunction realLambda(Real(2)), realMu(Real(3));
+    const ComplexFunction complexLambda(Complex(2, 0.75)), complexMu(Complex(3, -0.25));
+    for (const bool curved : {false, true})
+    {
+      auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(2);
+      Convergence::CurvedGeometry geometry(mesh);
+      if (curved)
+        geometry.template install<2>();
+      const auto check = [&](auto& space) {
+        TrialFunction trial(space);
+        TestFunction test(space);
+        const auto verify = [&](const auto& lambda, const auto& mu) {
+          auto integrator = LinearElasticityIntegral(trial, test)(lambda, mu);
+          const auto cell = *mesh.getCell();
+          integrator.setPolytope(cell);
+          const auto expected = pairwiseOperator(space, cell, lambda, mu);
+          Math::Matrix<Complex> actual(expected.rows(), expected.cols());
+          for (Eigen::Index row = 0; row < actual.rows(); ++row)
+          {
+            for (Eigen::Index col = 0; col < actual.cols(); ++col)
+              actual(row, col) = integrator.integrate(col, row);
+          }
+          EXPECT_LE((actual - expected).norm(),
+            IntegralTolerance * std::max(Real(1), expected.norm()));
+          using FirstRange = typename std::decay_t<decltype(lambda)>::ScalarType;
+          using ShearRange = typename std::decay_t<decltype(mu)>::ScalarType;
+          if constexpr (std::is_same_v<FirstRange, Real> &&
+            std::is_same_v<ShearRange, Real>)
+            EXPECT_EQ((actual - actual.adjoint()).norm(), 0);
+          else
+            EXPECT_GT((actual - actual.adjoint()).norm(), 0);
+        };
+        verify(realLambda, realMu);
+        verify(realLambda, complexMu);
+        verify(complexLambda, realMu);
+        verify(complexLambda, complexMu);
+      };
+      P1<Math::SpatialVector<Complex>> linear(mesh, mesh.getSpaceDimension());
+      H1<2, Math::SpatialVector<Complex>> quadratic(
+        std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+      check(linear);
+      check(quadratic);
     }
   }
 

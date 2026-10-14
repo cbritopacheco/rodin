@@ -98,6 +98,12 @@ namespace Rodin::Variational
     using LambdaRangeType = typename FormLanguage::Traits<LambdaType>::RangeType;
 
     static_assert(FormLanguage::IsVectorRange<Range>::Value);
+    static_assert(
+      std::is_same_v<typename FormLanguage::Mult<MuRangeType, ScalarType>::Type,
+        ScalarType>);
+    static_assert(
+      std::is_same_v<typename FormLanguage::Mult<LambdaRangeType, ScalarType>::Type,
+        ScalarType>);
 
     public:
       /**
@@ -161,6 +167,12 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets the current polytope and assembles the local matrix.
+       *
+       * Hermitian reconstruction is used only for coincident spaces with
+       * real-valued Lamé parameter ranges. Complex parameter ranges evaluate
+       * both triangles. Scalar promotion admits real parameters on complex
+       * fields without permitting complex values to be narrowed into real storage.
+       *
        * @param polytope Mesh entity used by this operation.
        * @returns Reference to this object after the operation.
        */
@@ -196,7 +208,8 @@ namespace Rodin::Variational
       m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
       m_matrix.setZero();
 
-      const bool symmetric = (trialfes == testfes);
+      const bool symmetric = (trialfes == testfes) &&
+        std::is_same_v<LambdaRangeType, Real> && std::is_same_v<MuRangeType, Real>;
 
       if (symmetric)
       {
@@ -223,7 +236,10 @@ namespace Rodin::Variational
               for (size_t c = 0; c < d; ++c)
                 jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
             }
-            jacI *= p.getJacobianInverse();
+            if constexpr (std::is_same_v<ScalarType, Complex>)
+              jacI = jacI * p.getJacobianInverse();
+            else
+              jacI *= p.getJacobianInverse();
 
             const auto symI = jacI + jacI.adjoint();
             const ScalarType divI = jacI.trace();
@@ -243,7 +259,10 @@ namespace Rodin::Variational
                 for (size_t c = 0; c < d; ++c)
                   jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
               }
-              jacJ *= p.getJacobianInverse();
+              if constexpr (std::is_same_v<ScalarType, Complex>)
+                jacJ = jacJ * p.getJacobianInverse();
+              else
+                jacJ *= p.getJacobianInverse();
 
               const auto symJ = jacJ + jacJ.adjoint();
               const ScalarType divJ = jacJ.trace();
@@ -282,7 +301,10 @@ namespace Rodin::Variational
               for (size_t c = 0; c < d; ++c)
                 jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
             }
-            jacI *= p.getJacobianInverse();
+            if constexpr (std::is_same_v<ScalarType, Complex>)
+              jacI = jacI * p.getJacobianInverse();
+            else
+              jacI *= p.getJacobianInverse();
 
             const auto symI = jacI + jacI.adjoint();
             const ScalarType divI = jacI.trace();
@@ -298,7 +320,10 @@ namespace Rodin::Variational
                 for (size_t c = 0; c < d; ++c)
                   jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
               }
-              jacJ *= p.getJacobianInverse();
+              if constexpr (std::is_same_v<ScalarType, Complex>)
+                jacJ = jacJ * p.getJacobianInverse();
+              else
+                jacJ *= p.getJacobianInverse();
 
               const auto symJ = jacJ + jacJ.adjoint();
               const ScalarType divJ = jacJ.trace();

@@ -1,7 +1,7 @@
 add_executable(RodinPETScComplexNamedFormTest ComplexNamedFormTest.cpp)
 target_link_libraries(RodinPETScComplexNamedFormTest PRIVATE GTest::gtest Rodin::PETSc)
 add_test(NAME RodinPETScComplexNamedFormTest
-  COMMAND $<TARGET_FILE:RodinPETScComplexNamedFormTest> --gtest_filter=PETSc_ComplexNamedForm.Local)
+  COMMAND $<TARGET_FILE:RodinPETScComplexNamedFormTest> --gtest_filter=PETSc_ComplexNamedForm.Local*)
 set_tests_properties(RodinPETScComplexNamedFormTest PROPERTIES LABELS "unit;petsc" TIMEOUT 120)
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScComplexNamedFormTest)
 
@@ -102,7 +102,7 @@ if (RODIN_USE_MPI)
     add_test(NAME RodinPETScComplexNamedFormTest_np${np}
       COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
         ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinPETScComplexNamedFormTest>
-        --gtest_filter=PETSc_ComplexNamedForm.Distributed)
+        --gtest_filter=PETSc_ComplexNamedForm.Distributed*)
     set_tests_properties(RodinPETScComplexNamedFormTest_np${np}
       PROPERTIES LABELS "unit;petsc;distributed" TIMEOUT 120 PROCESSORS ${np})
     rodin_suppress_external_mpi_lsan_for_test(RodinPETScComplexNamedFormTest_np${np})
