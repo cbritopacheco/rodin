@@ -53,6 +53,15 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Distributed mixed PETSc targets: the local exact block oracle now gathers
+  owned matrix rows and vector entries across the system communicator. Real
+  and complex runs at one, two, three, four and eight ranks check full,
+  matrix-only and RHS-only updates, including an empty root shard and
+  additional empty ranks. All 20 Release/assertion-enabled MPI runs and all
+  twelve retained local backend/thread runs pass individually. Wrong partial
+  boundary diagonals fail both scalar variants at two and four ranks. Fresh
+  CMake builds register the five MPI configurations and the local target;
+  all eight fresh-binary checks also pass serially.
 - Mixed targeted PETSc assembly: an exact two-field interval matrix combines
   local mass blocks, constant-kernel nonlocal blocks, preassembled cross-field
   terms and loads, and distinct nonzero Dirichlet values. Full assembly checks

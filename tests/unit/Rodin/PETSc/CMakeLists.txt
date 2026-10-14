@@ -245,6 +245,21 @@ set_tests_properties(RodinPETScKSPFactorizationReuseTest PROPERTIES
 )
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScKSPFactorizationReuseTest)
 
+if(RODIN_USE_MPI)
+  add_executable(RodinPETScMPIMixedTargetAssemblyTest MPIMixedTargetAssemblyTest.cpp)
+  target_link_libraries(RodinPETScMPIMixedTargetAssemblyTest PRIVATE
+    GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI Rodin::PETSc)
+  foreach(np 1 2 3 4 8)
+    add_test(NAME RodinPETScMPIMixedTargetAssemblyTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+        $<TARGET_FILE:RodinPETScMPIMixedTargetAssemblyTest>)
+    set_tests_properties(RodinPETScMPIMixedTargetAssemblyTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed" TIMEOUT 120)
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIMixedTargetAssemblyTest_np${np})
+  endforeach()
+endif()
+
 add_executable(RodinPETScMixedTargetAssemblyTest MixedTargetAssemblyTest.cpp)
 target_link_libraries(RodinPETScMixedTargetAssemblyTest PRIVATE
   GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)

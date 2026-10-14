@@ -984,11 +984,12 @@ jobs:
           RodinPETScIOHDF5IOTest RodinPETScIOMEDITIOTest
           RodinPETScSingleFieldConstraintTest RodinPETScRestrictedNonlocalTest
           RodinPETScMixedTargetAssemblyTest
+          RodinPETScMPIMixedTargetAssemblyTest
 
       - name: Run PETSc matrix-range and I/O tests
         run: >-
           ctest --test-dir build/tests
-          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4]|RodinPETScMPISubMeshGridFunctionTest_np[124]|RodinPETScIO(HDF5IO|MEDITIO)Test|RodinPETScSingleFieldConstraintTest|RodinPETScRestrictedNonlocalTest|RodinPETScMixedTargetAssemblyTest)$'
+          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4]|RodinPETScMPISubMeshGridFunctionTest_np[124]|RodinPETScIO(HDF5IO|MEDITIO)Test|RodinPETScSingleFieldConstraintTest|RodinPETScRestrictedNonlocalTest|RodinPETScMixedTargetAssemblyTest|RodinPETScMPIMixedTargetAssemblyTest_np[12348])$'
           --output-on-failure --no-tests=error -j 1
 
   Unit:

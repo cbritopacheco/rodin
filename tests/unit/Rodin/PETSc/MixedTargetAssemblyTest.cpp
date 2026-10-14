@@ -18,6 +18,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/PETSc.h>
+#include "MixedTargetAssembly.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -25,20 +26,14 @@ using namespace Rodin::Variational;
 
 namespace
 {
-  /// @brief Mixed local, nonlocal and preassembled terms obey separate target updates.
-  template <template <class, class> class Assembler, class Scalar = PetscScalar>
-  void checkMixedTargetAssembly()
+  /// @brief Builds the exact interval fixture for local assembly backends.
+  template <template <class, class> class Assembler>
+  void checkLocalMixedTargets()
   {
-    const Scalar factor = [] {
-      if constexpr (std::is_same_v<Scalar, Complex>)
-        return Scalar(1, -0.5);
-      else
-        return Scalar(1);
-    }();
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
     mesh.scale(Real(0.5));
     mesh.getConnectivity().compute(0, 1);
-    P1<Scalar> space(mesh);
+    P1<PetscScalar> space(mesh);
     ASSERT_EQ(space.getSize(), 3u);
     std::vector<std::pair<Real, Index>> positions;
     for (auto vertex = mesh.getVertex(); vertex; ++vertex)
@@ -51,156 +46,22 @@ namespace
         mesh.setAttribute(vertex.key(), 12);
     }
     std::sort(positions.begin(), positions.end());
-    ASSERT_EQ(positions.size(), 3u);
-    for (size_t i = 0; i < positions.size(); ++i)
-      ASSERT_EQ(positions[i].first, Real(i) / Real(2));
-    PETSc::Variational::TrialFunction u(space), p(space);
-    PETSc::Variational::TestFunction v(space), q(space);
-    using System = PETSc::Math::LinearSystem;
-    using ProblemType =
-      Problem<System, decltype(u), decltype(v), decltype(p), decltype(q)>;
-    using Body = typename ProblemType::ProblemBodyType;
-    using Backend = Assembler<System, ProblemType>;
-    const auto kernel00 = [](const Point&, const Point&) { return Scalar(0.5); };
-    const auto kernel01 = [](const Point&, const Point&) { return Scalar(-1); };
-    const auto kernel10 = [](const Point&, const Point&) { return Scalar(2); };
-    const auto kernel11 = [](const Point&, const Point&) { return Scalar(0.25); };
-    PETSc::Variational::BilinearForm preassembled(u, q);
-    preassembled = Integral(Scalar(1.25) * u, q);
-    preassembled.assemble();
-    PETSc::Variational::LinearForm preassembledLoad(q);
-    preassembledLoad = Integral(Scalar(3) * factor * q);
-    preassembledLoad.assemble();
-    const auto boundaryValue = [factor](Real value) {
-      if constexpr (std::is_same_v<Scalar, Complex>)
-        return ComplexFunction(Scalar(value) * factor);
-      else
-        return RealFunction(Scalar(value) * factor);
-    };
-    Body body = Integral(Scalar(2) * u, v) + Integral(Scalar(3) * p, v) - Integral(u, q) +
-      Integral(Scalar(5) * p, q) + Integral(Potential(kernel00, u), v) +
-      Integral(Potential(kernel01, p), v) + Integral(Potential(kernel10, u), q) +
-      Integral(Potential(kernel11, p), q) - Integral(Scalar(-1.5) * factor * v) -
-      Integral(Scalar(-11.25) * factor * q) + DirichletBC(u, boundaryValue(1)).on(11) +
-      DirichletBC(p, boundaryValue(-2)).on(12);
-    body.getBFs().add(preassembled);
-    body.getLFs().add(preassembledLoad);
-    Tuple<std::reference_wrapper<decltype(u)>, std::reference_wrapper<decltype(p)>>
-      trials(std::ref(u), std::ref(p));
-    Tuple<std::reference_wrapper<decltype(v)>, std::reference_wrapper<decltype(q)>> tests(
-      std::ref(v), std::ref(q));
-    std::array<size_t, 2> trialOffsets{0, 3}, testOffsets{0, 3};
-    boost::bimap<FormLanguage::Base::UUID, size_t> trialMap, testMap;
-    trialMap.insert({u.getUUID(), 0});
-    trialMap.insert({p.getUUID(), 1});
-    testMap.insert({v.getUUID(), 0});
-    testMap.insert({q.getUUID(), 1});
-    Assembly::ProblemAssemblyInput<Body, decltype(u), decltype(v), decltype(p),
-      decltype(q)>
-      input(body, trials, tests, trialOffsets, testOffsets, trialMap, testMap, 6, 6);
-    System system(PETSC_COMM_SELF);
-    std::unique_ptr<Backend> backend;
-    {
-      Backend original;
-      Backend copied(original);
-      Backend moved(std::move(copied));
-      backend.reset(moved.copy());
-    }
-    constexpr PetscInt size = 6;
-    std::array<PetscInt, size> indices;
-    std::iota(indices.begin(), indices.end(), PetscInt(0));
-    auto matrix = [&] {
-      Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> values(
-        size, size);
-      EXPECT_EQ(MatGetValues(system.getOperator(), size, indices.data(), size,
-                  indices.data(), values.data()),
-        PETSC_SUCCESS);
-      return Math::Matrix<Scalar>(values);
-    };
-    auto vector = [&] {
-      Math::Vector<Scalar> values(size);
-      EXPECT_EQ(VecGetValues(system.getVector(), size, indices.data(), values.data()),
-        PETSC_SUCCESS);
-      return values;
-    };
-    Math::Matrix<Scalar> raw(size, size);
-    Math::Vector<Scalar> load(size), exact(size);
-    const Real mass[3][3] = {{Real(1) / 6, Real(1) / 12, 0},
-      {Real(1) / 12, Real(1) / 3, Real(1) / 12}, {0, Real(1) / 12, Real(1) / 6}};
-    const Real moments[3] = {Real(1) / 4, Real(1) / 2, Real(1) / 4};
-    const Real local[2][2] = {{2, 3}, {Real(0.25), 5}};
-    const Real nonlocal[2][2] = {{Real(0.5), -1}, {2, Real(0.25)}};
-    for (size_t testBlock = 0; testBlock < 2; ++testBlock)
-    {
-      for (size_t i = 0; i < positions.size(); ++i)
-      {
-        const Index row = 3 * testBlock + positions[i].second;
-        load[row] =
-          Scalar(moments[i] * (testBlock == 0 ? Real(-1.5) : Real(-8.25))) * factor;
-        exact[row] = Scalar(testBlock == 0 ? 1 : -2) * factor;
-        for (size_t trialBlock = 0; trialBlock < 2; ++trialBlock)
-        {
-          for (size_t j = 0; j < positions.size(); ++j)
-          {
-            const Index col = 3 * trialBlock + positions[j].second;
-            raw(row, col) = Scalar(local[testBlock][trialBlock] * mass[i][j] +
-              nonlocal[testBlock][trialBlock] * moments[i] * moments[j]);
-          }
-        }
-      }
-    }
-    ASSERT_LT((raw * exact - load).norm(), 1e-13);
-    const std::array<Index, 2> fixed{
-      positions.front().second, 3 + positions.back().second};
-    auto full = raw;
-    auto rowOnly = raw;
-    auto fullLoad = load;
-    auto rowLoad = load;
-    for (const auto dof : fixed)
-    {
-      fullLoad -= raw.col(dof) * exact[dof];
-      full.row(dof).setZero();
-      full.col(dof).setZero();
-      full(dof, dof) = 1;
-      rowOnly.row(dof).setZero();
-      rowOnly(dof, dof) = 1;
-      rowLoad[dof] = exact[dof];
-    }
-    for (const auto dof : fixed)
-      fullLoad[dof] = exact[dof];
-    for (size_t repeat = 0; repeat < 2; ++repeat)
-    {
-      SCOPED_TRACE(repeat);
-      backend->execute(system, input);
-      EXPECT_LT((matrix() - full).norm(), 1e-12);
-      EXPECT_LT((vector() - fullLoad).norm(), 1e-12);
-      const Math::Vector<Scalar> recovered = matrix().fullPivLu().solve(vector());
-      EXPECT_LT((recovered - exact).norm(), 1e-11);
-      ASSERT_EQ(VecSet(system.getVector(), Scalar(11) * factor), PETSC_SUCCESS);
-      backend->execute(system, input, AssemblyTarget::LHS);
-      EXPECT_LT((matrix() - rowOnly).norm(), 1e-12);
-      EXPECT_LT(
-        (vector() - Math::Vector<Scalar>::Constant(size, Scalar(11) * factor)).norm(),
-        1e-12);
-      ASSERT_EQ(MatScale(system.getOperator(), 3), PETSC_SUCCESS);
-      backend->execute(system, input, AssemblyTarget::RHS);
-      EXPECT_LT((matrix() - Scalar(3) * rowOnly).norm(), 1e-12);
-      EXPECT_LT((vector() - rowLoad).norm(), 1e-12);
-    }
+    Rodin::Tests::Unit::checkMixedTargetAssembly<Assembler>(
+      space, positions, PETSC_COMM_SELF);
   }
 }
 
 /// @brief Sequential assembly preserves the other target and exact constrained block values.
 TEST(PETSc_MixedTargetAssembly, Sequential)
 {
-  checkMixedTargetAssembly<PETSc::Assembly::Sequential>();
+  checkLocalMixedTargets<PETSc::Assembly::Sequential>();
 }
 
 #ifdef RODIN_USE_OPENMP
 /// @brief OpenMP assembly preserves the other target and exact constrained block values.
 TEST(PETSc_MixedTargetAssembly, OpenMP)
 {
-  checkMixedTargetAssembly<PETSc::Assembly::OpenMP>();
+  checkLocalMixedTargets<PETSc::Assembly::OpenMP>();
 }
 #endif
 
