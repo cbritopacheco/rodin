@@ -153,6 +153,27 @@ if (RODIN_USE_PETSC AND RODIN_USE_MPI)
     target_link_libraries(Atrium PUBLIC Rodin::Scotch)
   endif()
 
+  # Same 3D atrium, 0D ventricle and flow as Atrium, with the precursor- and
+  # inhibitor-conserving P-T-A-G coagulation model (prothrombin, thrombin,
+  # antithrombin, fibrinogen) of LeftAtrium2DPTAG: four SUPG transports, an
+  # endocardial reaction layer, a nodal Patankar reaction step and a
+  # fibrin-dependent Brinkman drag in the momentum equation.
+  add_executable(AtriumPTAG AtriumPTAG.cpp)
+  target_link_libraries(AtriumPTAG
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::MPI
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+  target_include_directories(AtriumPTAG PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(AtriumPTAG PUBLIC Rodin::Scotch)
+  endif()
+
   # Two-dimensional left atrium with a rectangular appendage. Same stabilised
   # P1/P1 formulation and coagulation kinetics as Atrium, but driven by the two
   # measured pressure waveforms in resources/examples/Heart rather than by a 0D
