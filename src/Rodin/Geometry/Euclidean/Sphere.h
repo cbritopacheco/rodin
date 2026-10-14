@@ -24,6 +24,7 @@ namespace Rodin::Geometry::Euclidean
   class Sphere : public Base<Sphere<Dimension, T>, T>
   {
     public:
+      /// @brief Fixed-size coordinate vector in the ambient dimension.
       using Vector = typename Point<Dimension, T>::Vector;
       /// @brief Constructs a sphere. @param center Center. @param radius Positive radius.
       Sphere(const Point<Dimension, T>& center = Point<Dimension, T>(), T radius = T(1))

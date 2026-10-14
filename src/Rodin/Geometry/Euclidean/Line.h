@@ -34,7 +34,9 @@ namespace Rodin::Geometry::Euclidean
   class Line : public Base<Line<Dimension, T>, T>
   {
     public:
+      /// @brief Fixed-size coordinate vector in the ambient dimension.
       using Vector = typename Point<Dimension, T>::Vector;
+      /// @brief Empty, single-point or two-point intersection with a sphere.
       using Intersections = std::variant<std::nullopt_t, Point<Dimension, T>,
         std::pair<Point<Dimension, T>, Point<Dimension, T>>>;
 

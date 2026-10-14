@@ -1004,7 +1004,7 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   (\(94.3013\%\)), adding 24 hits without reducing the denominator. There
   are 275 remaining hits needed for \(95\%\) at this denominator.
 - Bracketed root endpoints: float and real regressions expose a valid exact left
-  endpoint being discarded before the bracket check, returning no result for
+  endpoint being discarded by the first interior bracket update, returning no result for
   a linear function. Both new typed endpoint cases fail on the preserved
   pre-fix binary, while its fourteen other cases pass. Endpoint roots are now
   accepted before any interior iteration; the header also owns its required
@@ -1033,3 +1033,23 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   fixtures, tolerances and timeout are unchanged. Doubling measured quadrature
   weights fails all six new ownership oracles. All private diagnostic, sanitizer
   and mutation profiles remain excluded from coverage.
+- Euclidean CI repair: Style run 38601562645 reports three naming violations
+  in the operation-detection traits and nine undocumented aliases. Detection
+  structs now use `HasIntersectMethod`, `HasDistanceMethod` and
+  `HasConnectMethod`; positive/negative static assertions check their public
+  signatures. The five planar aliases, three fixed-coordinate vector aliases
+  and line/sphere intersection result alias now have documentation. Local
+  clang-tidy 19 naming checks pass for the affected header. Targeted Doxygen
+  1.9.1 XML confirms descriptions for all nine reported aliases; the pinned
+  1.14.0 remote ratchet remains required. All 148 existing Euclidean Debug and
+  Release cases pass individually. Changed-line formatting and whitespace
+  checks pass. Remote Format and StyleLint passed before this repair.
+  Final snapshot run102 verifies all 570 production files. The audit retires
+  all prior NewtonRaphson and GaussLobatto hits/function hits and the changed
+  GaussLegendre point builder. Other retained executable lines are byte-identical;
+  Euclidean comments map without changing code, and renamed trait declarations
+  carry no previous executable records. The 215-report run104 measurement is
+  37,137 of 39,338 production lines (\(94.4049\%\)), with no nonproduction
+  or missing-source records. Compared with run93, it adds 101 measured lines
+  and 160 hits; 235 further hits are required for \(95\%\). Tests, benchmarks,
+  sanitizer, pre-fix, failed-run and mutation profiles remain excluded.

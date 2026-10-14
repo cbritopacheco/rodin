@@ -30,14 +30,34 @@ namespace Rodin::Geometry::Euclidean
   class Hyperplane;
   template <size_t Dimension, class T = Real>
   class Box;
+  /**
+   * @brief Point in the Euclidean plane.
+   * @tparam T Coordinate scalar type.
+   */
   template <class T>
   using Point2D = Point<2, T>;
+  /**
+   * @brief Line segment in the Euclidean plane.
+   * @tparam T Coordinate scalar type.
+   */
   template <class T>
   using LineSegment2D = LineSegment<2, T>;
+  /**
+   * @brief Affine line in the Euclidean plane.
+   * @tparam T Coordinate scalar type.
+   */
   template <class T>
   using Line2D = Line<2, T>;
+  /**
+   * @brief Circle in the Euclidean plane.
+   * @tparam T Coordinate scalar type.
+   */
   template <class T>
   using Circle = Sphere<2, T>;
+  /**
+   * @brief Axis-aligned box in the Euclidean plane.
+   * @tparam T Coordinate scalar type.
+   */
   template <class T>
   using Rectangle = Box<2, T>;
 }

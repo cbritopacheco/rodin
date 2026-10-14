@@ -20,6 +20,7 @@ namespace Rodin::Geometry::Euclidean
   class Hyperplane : public Base<Hyperplane<Dimension, T>, T>
   {
     public:
+      /// @brief Fixed-size coordinate vector in the ambient dimension.
       using Vector = typename Point<Dimension, T>::Vector;
       /// @brief Constructs a hyperplane. @param origin Anchor point. @param normal Nonzero normal with Dimension components.
       template <class Derived>

@@ -17,6 +17,13 @@
 using namespace Rodin;
 using namespace Rodin::Geometry::Euclidean;
 
+static_assert(HasIntersectMethod<Line<3>, Line<3>>::value);
+static_assert(!HasIntersectMethod<Line<3>, int>::value);
+static_assert(HasDistanceMethod<Line<4>, Point<4>>::value);
+static_assert(!HasDistanceMethod<Line<4>, int>::value);
+static_assert(HasConnectMethod<Point<3>, Line<3>>::value);
+static_assert(!HasConnectMethod<Point<3>, int>::value);
+
 TEST(Rodin_Geometry_Euclidean, LinesAndSegments)
 {
   const Point2D<Real> origin(0, 0), endpoint(3, 4);
