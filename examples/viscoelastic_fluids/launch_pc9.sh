@@ -12,7 +12,8 @@
 #    3d   with run_3d.sh, 30 ranks each:
 #         S75 Re 600 N, then S75 Re 300 N | S75 Re 600 D | A200 Re 600 N then D
 #                                                                       -> 90 cores
-#  Usage: bash launch_pc9.sh [all | axi | 3d | 3d-restart | 3d-one | 3d-a200]   (default all)
+#  Usage: bash launch_pc9.sh [all | axi | 3d | 3d-restart | 3d-one | 3d-a200 | axi-wave]
+#         (default all)
 #         3d-restart stops the running 3D jobs (only those) and relaunches them
 #         from scratch with the current code; finished 3D cases (DONE) are kept.
 #         3d-one stops the running 3D jobs and launches only the key case,
@@ -20,6 +21,10 @@
 #         GMRES (falls back to MUMPS by itself if GMRES fails).
 #         3d-a200 adds (stops nothing) A200 Re 600 viscoelastic, same settings
 #         as 3d-one: the aneurysm counterpart of the S75 case.
+#         axi-wave runs the axisymmetric S75 and A200 at Re 300, Wo 4 with the
+#         physiological carotid waveform in WAVEFORM (default
+#         resources/examples/viscoelastic_fluids/waveform_cca.dat), fluids
+#         N, D, CY and R (8 cases, 40 cores); output Re300_Wo4_<file name>.
 #  Environment: BUILD=build-gcc12  OUT=$HOME/Results/axi_jfm  CORES=200
 #               FORCE=1 launches even if the machine looks busy
 #  Logs: $OUT/logs/*.log ; per case: <case folder>/run.log, case.csv
@@ -27,7 +32,9 @@
 # =============================================================================
 set -u
 WHAT="${1:-all}"
-case "$WHAT" in all|axi|3d|3d-restart|3d-one|3d-a200) ;; *) sed -n '2,32p' "$0"; exit 1 ;; esac
+case "$WHAT" in all|axi|3d|3d-restart|3d-one|3d-a200|axi-wave) ;; *) sed -n '2,38p' "$0"; exit 1 ;; esac
+WAVE=0
+if [[ "$WHAT" == axi-wave ]]; then WHAT=axi; WAVE=1; fi
 RESTART=0; ONE=0
 if [[ "$WHAT" == 3d-restart ]]; then WHAT=3d; RESTART=1; fi
 if [[ "$WHAT" == 3d-one ]]; then WHAT=3d; RESTART=1; ONE=1; fi
@@ -74,7 +81,8 @@ done
 
 # ---- meshes -------------------------------------------------------------------
 need=()
-[[ "$WHAT" != 3d ]] && need+=(A125_axi_medium A150_axi_medium)
+if [[ $WAVE == 1 ]]; then need+=(S75_axi_medium A200_axi_medium)
+elif [[ "$WHAT" != 3d ]]; then need+=(A125_axi_medium A150_axi_medium); fi
 [[ "$WHAT" != axi ]] && need+=(S75_pipe_medium A200_pipe_medium)
 for m in "${need[@]}"; do
   f="$MESH/$m.mesh"
@@ -106,7 +114,8 @@ fi
 
 # ---- free cores -----------------------------------------------------------------
 want=0
-[[ "$WHAT" != 3d ]] && want=$(( want + 96 ))
+if [[ $WAVE == 1 ]]; then want=$(( want + 40 ))
+elif [[ "$WHAT" != 3d ]]; then want=$(( want + 96 )); fi
 if [[ "$WHAT" != axi ]]; then
   if [[ $ONE == 1 ]]; then want=$(( want + NP3D )); else want=$(( want + 90 )); fi
 fi
@@ -123,8 +132,21 @@ launch() {   # log-name, then the command (env assignments allowed via env)
   echo "   started $name (pid $!) -> $LOG/$name.log"
 }
 
+# ---- axisymmetric, physiological waveform ---------------------------------------------
+if [[ $WAVE == 1 ]]; then
+  WF="${WAVEFORM:-$MESH/waveform_cca.dat}"
+  if [[ ! -f "$WF" ]]; then
+    echo "Waveform file not found: $WF  (set WAVEFORM=<file with columns t Q>)"; exit 1
+  fi
+  echo "== axisymmetric S75 and A200, Re 300, Wo 4, waveform $WF"
+  for G in S75 A200; do
+    launch "Re300_${G}_wave_R"    env WAVEFORM="$WF" FLUIDS=R        NP=12 bash "$S" 300 "$G"
+    launch "Re300_${G}_wave_DNCY" env WAVEFORM="$WF" FLUIDS="D N CY" NP=8  bash "$S" 300 "$G"
+  done
+fi
+
 # ---- axisymmetric aneurysms ------------------------------------------------------
-if [[ "$WHAT" != 3d ]]; then
+if [[ "$WHAT" != 3d && $WAVE == 0 ]]; then
   echo "== axisymmetric aneurysms A125 A150"
   for RE in 100 300; do
     for G in A125 A150; do
@@ -151,7 +173,10 @@ fi
 sleep 5
 echo
 echo "== running solver processes now: $(pgrep -f "ArterialLesion(Axi|3D)_viscous_logarithmic_implicit -al_" | wc -l)"
-if [[ $ONE == 1 ]]; then
+if [[ $WAVE == 1 ]]; then
+  echo "Follow:   tail -f $LOG/Re300_S75_wave_R.log"
+  echo "Cases:    $OUT/Re300_Wo4_$(basename "${WF%.*}")/{S75,A200}/{N,Wi2,CY,R}"
+elif [[ $ONE == 1 ]]; then
   echo "Follow:   tail -f $LOG/3D_${GEO1}_Re600_D.log"
   echo "3D ETA:   grep -E 'timing|ETA' $OUT/3D/Re600_Wo5.5/$GEO1/Wi2/run.log | tail -2     (after ~15 min)"
 else

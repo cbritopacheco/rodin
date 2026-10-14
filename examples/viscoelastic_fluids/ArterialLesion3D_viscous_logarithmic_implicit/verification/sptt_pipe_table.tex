@@ -1,0 +1,22 @@
+% Written by run_sptt_pipe.sh as $OUT/table.tex: replace this file with it.
+% PRELIMINARY (container, 2 ranks): the two coarsest meshes only.
+\begin{table}
+  \centering
+  \begin{tabular}{cccccccc}
+    \toprule
+    $h/D$ & $e_{\boldsymbol{u}}$ & $p$ & $e_{\boldsymbol{\sigma}}$ & $p$
+      & $|G_h/G-1|$ & $p$ & $\tau_{w,h}/\tau_w-1$ (\%) \\
+    \midrule
+    \multicolumn{8}{l}{Oldroyd-B ($\varepsilon=0$)} \\
+    0.200 & $6.58{\times}10^{-2}$ & -- & $4.62{\times}10^{-1}$ & -- & $1.65{\times}10^{-1}$ & -- & $+10.9$ \\
+    0.143 & $3.58{\times}10^{-2}$ & 1.81 & $1.73{\times}10^{-1}$ & 2.93 & $7.56{\times}10^{-2}$ & 2.31 & $+0.8$ \\
+    \multicolumn{8}{l}{sPTT ($\varepsilon=0.25$)} \\
+    0.200 & $6.38{\times}10^{-2}$ & -- & $1.39{\times}10^{-1}$ & -- & $1.15{\times}10^{-1}$ & -- & $-4.4$ \\
+    0.143 & $3.11{\times}10^{-2}$ & 2.13 & $7.37{\times}10^{-2}$ & 1.88 & $5.44{\times}10^{-2}$ & 2.22 & $-4.3$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Fully developed pipe flow: relative $L^2$ errors of velocity and
+  polymer stress over $5\le z/D\le10$, error of the pressure gradient and mean
+  error of the wall shear stress, with observed orders $p$.}
+  \label{tab:sptt-pipe}
+\end{table}

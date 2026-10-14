@@ -802,14 +802,24 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_q(m_sh),
       m_uOld(m_vh),
       m_uIt(m_vh),
+      m_uNm1(m_vh),
+      m_uHist(m_vh),
+      m_uAdv(m_vh),
+      m_pN(m_sh),
+      m_pNm1(m_sh),
+      m_pIt(m_sh),
       m_psi(m_tauh),
       m_chi(m_tauh),
       m_psiOld(m_tauh),
       m_psiIt(m_tauh),
+      m_psiNm1(m_tauh),
+      m_psiHist(m_tauh),
       m_psiT(m_sh),
       m_chiT(m_sh),
       m_psiTOld(m_sh),
       m_psiTIt(m_sh),
+      m_psiTNm1(m_sh),
+      m_psiTHist(m_sh),
       m_sigma(m_tauh),
       m_sigmaT(m_sh),
       m_wTrial(m_vh),
@@ -896,6 +906,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     const Real omega = 4.0 * m_cfg.womersley * m_cfg.womersley * eta0 / (rho * D * D);
     m_period = 2.0 * M_PI / omega;
     m_dt = m_period / static_cast<Real>(m_cfg.stepsPerCycle);
+    if (m_cfg.timeOrder != 1 && m_cfg.timeOrder != 2)
+      throw std::runtime_error("timeOrder must be 1 (BDF1) or 2 (BDF2).");
 
     if (m_cfg.deborah > 0.0)
       ob.lambda = m_cfg.deborah * m_period;
@@ -954,7 +966,7 @@ namespace Rodin::Examples::ViscoelasticFluids
       }
       Alert::Info() << "[inflow] D=" << D << " m  Ubar=" << m_meanVelocity
                     << " m/s  T=" << m_period << " s  lambda=" << ob.lambda
-                    << " s  lambda0=" << lambda0() << " s  dt=" << m_dt << " s  q_peak="
+                    << " s  lambda0=" << lambda0() << " s  dt=" << m_dt << " s  BDF" << m_cfg.timeOrder << "  q_peak="
                     << m_inflow.getPeak() << "  modes="
                     << (m_cfg.flowWaveformPath.empty() ? std::string("sinusoid")
                                                        : m_cfg.flowWaveformPath)
@@ -1146,10 +1158,11 @@ namespace Rodin::Examples::ViscoelasticFluids
   ArterialLesionAxiViscousLogImplicit::Real
   ArterialLesionAxiViscousLogImplicit::shearRateAt(const Point& p) const
   {
-    const auto J = Jacobian(m_uOld).getValue(p);
+    // At u^n (BDF1) or u* (BDF2).
+    const auto J = Jacobian(m_uAdv).getValue(p);
     const Real exx = J(0, 0), err = J(1, 1), exr = 0.5 * (J(0, 1) + J(1, 0));
     const Real r = p.getPhysicalCoordinates()(1);
-    const Real ett = r > 1.0e-300 ? m_uOld.getValue(p)(1) / r : err;
+    const Real ett = r > 1.0e-300 ? m_uAdv.getValue(p)(1) / r : err;
     return std::sqrt(2.0 * (exx * exx + err * err + ett * ett + 2.0 * exr * exr));
   }
 
@@ -1249,6 +1262,66 @@ namespace Rodin::Examples::ViscoelasticFluids
     (void)ierr;
   }
 
+  void ArterialLesionAxiViscousLogImplicit::combine(
+    Real a, const ::Vec& x, Real b, const ::Vec& y, ::Vec& z)
+  {
+    // z = b y, then z += a x; z may alias neither x nor y.
+    PetscErrorCode ierr = VecCopy(y, z);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecScale(z, b);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecAXPY(z, a, x);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecGhostUpdateBegin(z, INSERT_VALUES, SCATTER_FORWARD);
+    assert(ierr == PETSC_SUCCESS);
+    ierr = VecGhostUpdateEnd(z, INSERT_VALUES, SCATTER_FORWARD);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+  }
+
+  ArterialLesionAxiViscousLogImplicit::Real ArterialLesionAxiViscousLogImplicit::massStep() const
+  {
+    return m_cfg.timeOrder == 2 ? 2.0 * m_dt / 3.0 : m_dt;
+  }
+
+  void ArterialLesionAxiViscousLogImplicit::advanceHistory()
+  {
+    const bool psi = !isGeneralizedNewtonian();
+    if (m_cfg.timeOrder == 2)
+    {
+      // x^{n-1} <- x^n, x^n <- x^{n+1}; history (4 x^n - x^{n-1})/3 and
+      // u* = 2 u^n - u^{n-1}.
+      m_uNm1.setData(m_uOld.getData());
+      m_uOld.setData(m_uIt.getData());
+      combine(4.0 / 3.0, m_uOld.getData(), -1.0 / 3.0, m_uNm1.getData(), m_uHist.getData());
+      combine(2.0, m_uOld.getData(), -1.0, m_uNm1.getData(), m_uAdv.getData());
+      m_pNm1.setData(m_pN.getData());
+      m_pN.setData(m_p.getSolution().getData());
+      if (psi)
+      {
+        m_psiNm1.setData(m_psiOld.getData());
+        m_psiOld.setData(m_psiIt.getData());
+        m_psiTNm1.setData(m_psiTOld.getData());
+        m_psiTOld.setData(m_psiTIt.getData());
+        combine(4.0 / 3.0, m_psiOld.getData(), -1.0 / 3.0, m_psiNm1.getData(), m_psiHist.getData());
+        combine(4.0 / 3.0, m_psiTOld.getData(), -1.0 / 3.0, m_psiTNm1.getData(), m_psiTHist.getData());
+      }
+    }
+    else
+    {
+      m_uOld.setData(m_uIt.getData());
+      m_uHist.setData(m_uIt.getData());
+      m_uAdv.setData(m_uIt.getData());
+      if (psi)
+      {
+        m_psiOld.setData(m_psiIt.getData());
+        m_psiHist.setData(m_psiIt.getData());
+        m_psiTOld.setData(m_psiTIt.getData());
+        m_psiTHist.setData(m_psiTIt.getData());
+      }
+    }
+  }
+
   ArterialLesionAxiViscousLogImplicit& ArterialLesionAxiViscousLogImplicit::initialize()
   {
     setupSpaces();
@@ -1280,12 +1353,22 @@ namespace Rodin::Examples::ViscoelasticFluids
 
     m_uOld = zeroVector;
     m_uIt = zeroVector;
+    m_uNm1 = zeroVector;
+    m_uHist = zeroVector;
+    m_uAdv = zeroVector;
+    m_pN = Real(0);
+    m_pNm1 = Real(0);
+    m_pIt = Real(0);
     m_subOld = zeroVector;
     m_sub.get() = zeroVector;
     m_psiOld = zeroTensor;
     m_psiIt = zeroTensor;
+    m_psiNm1 = zeroTensor;
+    m_psiHist = zeroTensor;
     m_psiTOld = Real(0);
     m_psiTIt = Real(0);
+    m_psiTNm1 = Real(0);
+    m_psiTHist = Real(0);
     ++m_psiRevision;
     m_wss = zeroVector;
     m_netShear = zeroVector;
@@ -1354,6 +1437,8 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto normal = BoundaryNormal(m_mesh);
     const Real rho = m_cfg.rho;
     const Real dt = m_dt;
+    // BDF mass terms (x - x_hist)/dtM: dtM = dt (BDF1) or 2 dt/3 (BDF2).
+    const Real dtM = massStep();
     const auto& ob = m_cfg.oldroydB;
     const Real eta0 = referenceViscosity();
     const Real l0 = lambda0();
@@ -1372,12 +1457,12 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto ur = Component(m_u, 1);
     const auto vr = Component(m_v, 1);
 
-    const auto convU = Mult(Jacobian(m_u), m_uOld);
+    const auto convU = Mult(Jacobian(m_u), m_uAdv);
     // r div u^n = r div_P u^n + u^n_r, in the skew-symmetric (Temam) term.
-    const auto temam = (r * Div(m_uOld) + Dot(m_uOld, unit(1))) * Dot(m_u, m_v);
+    const auto temam = (r * Div(m_uAdv) + Dot(m_uAdv, unit(1))) * Dot(m_u, m_v);
 
     const auto outletBackflow =
-      0.5 * rho * m_cfg.outletBackflowStabilization * Max(-Dot(m_uOld, normal), 0.0);
+      0.5 * rho * m_cfg.outletBackflowStabilization * Max(-Dot(m_uAdv, normal), 0.0);
     const Real axisGamma = m_cfg.axisPenalty * eta0 / m_cfg.diameter;
 
     RealFunction pOutFn = [this](const Point&) { return m_cfg.outletPressure; };
@@ -1431,7 +1516,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto N = at(LogN, [](const LogPoint& q) { return q.N; });
     const auto JNT = at(LogJNT, [](const LogPoint& q) { return q.JNT; });
     const auto known = N - JN(m_psiIt) - JNT * m_psiTIt - Gu(m_uIt)
-      - (1.0 / dt) * tensor(m_psiOld) - advection(m_psiIt, m_uIt);
+      - (1.0 / dtM) * tensor(m_psiHist) - advection(m_psiIt, m_uIt);
 
     // Hoop psi equation: r [d_t psi_t + u . grad psi_t + g] + a u_r = 0,
     // linearised about (psi^k, u^k); a L_t is bilinear in (psi_t, u).
@@ -1444,7 +1529,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto gPsi = [&](const auto& w) {
       return gP(0) * Component(w, 0) + gP(1) * Component(w, 1) + gP(2) * Component(w, 2); };
     const auto knownT =
-      r * (gV - gT * m_psiTIt - gPsi(m_psiIt) - (1.0 / dt) * m_psiTOld
+      r * (gV - gT * m_psiTIt - gPsi(m_psiIt) - (1.0 / dtM) * m_psiTHist
         - Dot(m_uIt, Grad(m_psiTIt)))
       - daT * Dot(m_uIt, unit(1)) * m_psiTIt;
 
@@ -1455,7 +1540,7 @@ namespace Rodin::Examples::ViscoelasticFluids
 
     const auto body =
       // ---- Momentum (weighted by r) ----------------------------------------
-        (rho / dt) * Integral(r * m_u, m_v) - (rho / dt) * Integral(r * m_uOld, m_v)
+        (rho / dtM) * Integral(r * m_u, m_v) - (rho / dtM) * Integral(r * m_uHist, m_v)
       + rho * Integral(r * convU, m_v) + 0.5 * rho * Integral(temam)
       + 2.0 * Integral(r * (etaS * symU), symV) + 2.0 * Integral((etaS * invR) * ur, vr)
       + s * Integral(r * T, symV) + s * Integral(r * C, symV) - s * Integral(r * I, symV)
@@ -1467,13 +1552,13 @@ namespace Rodin::Examples::ViscoelasticFluids
       + m_cfg.pressurePenalty * Integral(r * m_p, m_q)
 
       // ---- In-plane psi equation ----------------------------------------------
-      + Integral(r * ((1.0 / dt) * tensor(m_psi) + JN(m_psi) + advection(m_psi, m_uIt)), X)
+      + Integral(r * ((1.0 / dtM) * tensor(m_psi) + JN(m_psi) + advection(m_psi, m_uIt)), X)
       + Integral(r * (JNT * m_psiT), X)
       + Integral(r * (advection(m_psiIt, m_u) + Gu(m_u)), X)
       + Integral(r * known, X)
 
       // ---- Hoop psi equation --------------------------------------------------
-      + Integral(r * ((1.0 / dt) * m_psiT + gT * m_psiT + Dot(m_uIt, Grad(m_psiT))), m_chiT)
+      + Integral(r * ((1.0 / dtM) * m_psiT + gT * m_psiT + Dot(m_uIt, Grad(m_psiT))), m_chiT)
       + Integral(daT * Dot(m_uIt, unit(1)) * m_psiT, m_chiT)
       + Integral(r * gPsi(m_psi), m_chiT)
       + Integral(r * Dot(m_u, Grad(m_psiTIt)), m_chiT)
@@ -1540,6 +1625,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto normal = BoundaryNormal(m_mesh);
     const Real rho = m_cfg.rho;
     const Real dt = m_dt;
+    const Real dtM = massStep();
     const Real eta0 = referenceViscosity();
     const auto& r = m_radius;
     const auto invR = inverseRadius();
@@ -1551,11 +1637,11 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto ur = Component(m_u, 1);
     const auto vr = Component(m_v, 1);
 
-    const auto convU = Mult(Jacobian(m_u), m_uOld);
-    const auto temam = (r * Div(m_uOld) + Dot(m_uOld, unit(1))) * Dot(m_u, m_v);
+    const auto convU = Mult(Jacobian(m_u), m_uAdv);
+    const auto temam = (r * Div(m_uAdv) + Dot(m_uAdv, unit(1))) * Dot(m_u, m_v);
 
     const auto outletBackflow =
-      0.5 * rho * m_cfg.outletBackflowStabilization * Max(-Dot(m_uOld, normal), 0.0);
+      0.5 * rho * m_cfg.outletBackflowStabilization * Max(-Dot(m_uAdv, normal), 0.0);
     const Real axisGamma = m_cfg.axisPenalty * eta0 / m_cfg.diameter;
 
     RealFunction pOutFn = [this](const Point&) { return m_cfg.outletPressure; };
@@ -1570,7 +1656,7 @@ namespace Rodin::Examples::ViscoelasticFluids
     const auto divV = Div(m_v) + invR * vr;
 
     m_flowGN =
-        (rho / dt) * Integral(r * m_u, m_v) - (rho / dt) * Integral(r * m_uOld, m_v)
+        (rho / dtM) * Integral(r * m_u, m_v) - (rho / dtM) * Integral(r * m_uHist, m_v)
       + rho * Integral(r * convU, m_v) + 0.5 * rho * Integral(temam)
       + 2.0 * Integral(r * (etaS * symU), symV) + 2.0 * Integral((etaS * invR) * ur, vr)
       - Integral(r * m_p, Div(m_v)) - Integral(m_p, vr)
@@ -1653,22 +1739,42 @@ namespace Rodin::Examples::ViscoelasticFluids
           out(c) = tau * rho * (old(c) / dt - (conv(c) - proj(c)));
         return out;
       }));
-    m_piDiv.project(Div(m_uOld) + inverseRadius() * Dot(m_uOld, unit(1)));
-    m_piGradP.project(Grad(m_p.getSolution()));
+    // BDF2 projects in solveFlow, from the extrapolation (Config::bdf2Extrapolate).
+    if (m_cfg.timeOrder == 1)
+      projectConsistent(false, 0u);
+  }
+
+  void ArterialLesionAxiViscousLogImplicit::projectConsistent(bool iterate, unsigned mask)
+  {
+    // Source of each projection: step n, or the iterate (the extrapolation
+    // (u*, p*, psi*) at the first iterate of a BDF2 step).
+    const auto pick = [iterate, mask](unsigned bit) { return iterate && (mask & bit); };
+    const VectorGridFunctionType& uDiv = pick(1u) ? m_uIt : m_uOld;
+    const ScalarGridFunctionType& pr = pick(2u) ? m_pIt : m_p.getSolution();
+    m_piDiv.project(Div(uDiv) + inverseRadius() * Dot(uDiv, unit(1)));
+    m_piGradP.project(Grad(pr));
     if (isGeneralizedNewtonian())
       return;
+    const bool sigmaIt = pick(4u);
+    const VectorGridFunctionType& psiS = sigmaIt ? m_psiIt : m_psiOld;
+    const ScalarGridFunctionType& psiTS = sigmaIt ? m_psiTIt : m_psiTOld;
+    const VectorGridFunctionType& uS = sigmaIt ? m_uIt : m_uOld;
+    const VectorGridFunctionType& uE = pick(8u) ? m_uIt : m_uOld;
+    const VectorGridFunctionType& psiA = pick(16u) ? m_psiIt : m_psiOld;
+    const ScalarGridFunctionType& psiTA = pick(32u) ? m_psiTIt : m_psiTOld;
     const auto& ob = m_cfg.oldroydB;
     const Real l0 = lambda0();
     const Real s = ob.etaP / l0;
     const LogModel model{ ob.lambda, l0, ob.pttEpsilon, 2.0 * (1.0 - l0 / ob.lambda) };
-    const auto Dexp = [this, model](const auto& w) {
-      return dexp(m_psiOld, m_psiTOld, m_uOld, model, m_psiRevision, w); };
-    const auto twoEpsN = Jacobian(m_uOld) + Transpose(Jacobian(m_uOld));
-    m_piDivSigma.project(s * (Mult(Dexp(Mult(Jacobian(m_psiOld), unit(0))), unit(0)) +
-      Mult(Dexp(Mult(Jacobian(m_psiOld), unit(1))), unit(1))));
+    const auto Dexp = [this, model, &psiS, &psiTS, &uS](const auto& w) {
+      return dexp(psiS, psiTS, uS, model, m_psiRevision, w); };
+    m_piDivSigma.project(s * (Mult(Dexp(Mult(Jacobian(psiS), unit(0))), unit(0)) +
+      Mult(Dexp(Mult(Jacobian(psiS), unit(1))), unit(1))));
+    const auto twoEpsN = Jacobian(uE) + Transpose(Jacobian(uE));
     m_piEps.project(voigt(0.5 * twoEpsN));
-    m_piAdvPsi.project(Mult(Jacobian(m_psiOld), m_uOld));
-    m_piAdvPsiT.project(Dot(m_uOld, Grad(m_psiTOld)));
+    // The advecting velocity of the S3 psi terms is u^n on both sides.
+    m_piAdvPsi.project(Mult(Jacobian(psiA), m_uOld));
+    m_piAdvPsiT.project(Dot(m_uOld, Grad(psiTA)));
   }
 
   bool ArterialLesionAxiViscousLogImplicit::solveFlow()
@@ -1698,6 +1804,13 @@ namespace Rodin::Examples::ViscoelasticFluids
                      << (m_vh.getSize() + m_sh.getSize()) << " unknowns) ..." << Alert::Raise;
         std::cout.flush();
       }
+      // BDF2: the projections of the step from the extrapolation (u*, p*).
+      if (m_cfg.timeOrder == 2)
+      {
+        m_uIt.setData(m_uAdv.getData());
+        combine(2.0, m_pN.getData(), -1.0, m_pNm1.getData(), m_pIt.getData());
+        projectConsistent(true, static_cast<unsigned>(m_cfg.bdf2Extrapolate));
+      }
       const auto assemblyStart = CoronaryClock::now();
       m_flowGN.assemble();
       m_timing.assembly = secondsSince(assemblyStart);
@@ -1717,8 +1830,8 @@ namespace Rodin::Examples::ViscoelasticFluids
       m_conformationIts = 1;
       m_psiIncrement = 0.0;
 
-      m_uOld.setData(m_u.getSolution().getData());
-      m_uIt.setData(m_uOld.getData());
+      m_uIt.setData(m_u.getSolution().getData());
+      advanceHistory();
       if (m_cfg.useVMS)
         m_subOld.setData(m_sub.get().getData());
       m_speed = std::max(std::abs(m_uOld.max()), std::abs(m_uOld.min()));
@@ -1749,9 +1862,28 @@ namespace Rodin::Examples::ViscoelasticFluids
     m_timing.assembly = 0.0;
     m_timing.solve = 0.0;
     m_conformationIts = 0;
-    m_uIt.setData(m_uOld.getData());
+    // Newton starts from x^n (BDF1) or from 2 x^n - x^{n-1} (BDF2). The
+    // extrapolation of psi is skipped on the second step: the start from rest
+    // with a non-zero inlet conformation makes psi^1 - psi^0 a jump, and 2 psi^1
+    // a poor guess (Newton diverged for the "gsptt" fluid).
+    m_uIt.setData(m_uAdv.getData());
+    if (m_cfg.timeOrder == 2)
+      combine(2.0, m_pN.getData(), -1.0, m_pNm1.getData(), m_pIt.getData());
+    if (m_cfg.timeOrder == 2 && m_step >= 2)
+    {
+      combine(2.0, m_psiOld.getData(), -1.0, m_psiNm1.getData(), m_psiIt.getData());
+      combine(2.0, m_psiTOld.getData(), -1.0, m_psiTNm1.getData(), m_psiTIt.getData());
+      ++m_psiRevision;
+    }
     for (int k = 0; k < std::max(1, m_cfg.conformationIterations); ++k)
     {
+      if (m_cfg.timeOrder == 2 && k == 0)
+      {
+        // The projections of the step, from the extrapolation (u*, p*, psi*).
+        const auto projStart = CoronaryClock::now();
+        projectConsistent(true, static_cast<unsigned>(m_cfg.bdf2Extrapolate));
+        m_timing.vms += secondsSince(projStart);
+      }
       const auto assemblyStart = CoronaryClock::now();
       m_flow.assemble();
       m_timing.assembly += secondsSince(assemblyStart);
@@ -1821,11 +1953,9 @@ namespace Rodin::Examples::ViscoelasticFluids
       Alert::Warning() << "[log] Newton stopped after " << m_conformationIts
                        << " iterations with max|dpsi| = " << m_psiIncrement << Alert::Raise;
 
-    m_uOld.setData(m_uIt.getData());
+    advanceHistory();
     m_u.getSolution().setData(m_uIt.getData());
-    m_psiOld.setData(m_psiIt.getData());
     m_psi.getSolution().setData(m_psiIt.getData());
-    m_psiTOld.setData(m_psiTIt.getData());
     m_psiT.getSolution().setData(m_psiTIt.getData());
     ++m_psiRevision;
     updateConformation();
@@ -2173,6 +2303,8 @@ int main(int argc, char** argv)
       getInt("-al_harmonics", cfg.harmonics);
       getInt("-al_steps_per_cycle", cfg.stepsPerCycle);
       getInt("-al_cycles", cfg.cycles);
+      getInt("-al_time_order", cfg.timeOrder);
+      getInt("-al_bdf2_extrapolate", cfg.bdf2Extrapolate);
       getInt("-al_output_every", cfg.outputEvery);
 
       getReal("-al_outlet_pressure", cfg.outletPressure);

@@ -1,0 +1,99 @@
+% =============================================================================
+%  Pulsatile Oldroyd-B pipe flow: exact solution used to verify the time
+%  integrator (BDF1/BDF2) together with the space discretisation. For \input
+%  after sptt_pipe_solution.tex (same notation: z axial, r radial, R = D/2,
+%  polymer extra stress \boldsymbol{\sigma}). Tables: womersley_table.tex,
+%  written by run_womersley.sh. Citation keys in sptt_pipe_solution.bib.
+% =============================================================================
+
+\subsection{Pulsatile pipe flow of the Oldroyd-B fluid}\label{sec:womersley-ob}
+
+The pipe test of \S\,\ref{sec:sptt-pipe} is steady and therefore blind to the
+time integrator. For $\varepsilon=0$ the pulsatile problem also has an exact
+solution, which verifies both. For $\boldsymbol{u}=u(r,t)\,\boldsymbol{e}_z$
+the upper-convected terms of the shear stress vanish
+($\sigma_{rr}=\sigma_{\theta\theta}=0$), and the shear stress obeys the linear
+Maxwell equation
+\begin{equation}
+  \sigma_{rz} + \lambda\,\partial_t\sigma_{rz} = \eta_p\,\partial_r u ,
+  \qquad
+  \rho\,\partial_t u = G(t) + \frac1r\,\partial_r\!\left[r\left(\eta_s\,\partial_r u
+    + \sigma_{rz}\right)\right],
+  \label{eq:ob-shear}
+\end{equation}
+for any amplitude. Each harmonic $\mathrm{e}^{\mathrm{i}n\omega t}$ is
+therefore the Womersley flow of a fluid with the complex viscosity
+$\eta^\ast(n\omega)=\eta_s+\eta_p/(1+\mathrm{i}n\omega\lambda)$. For the flow
+rate $Q(t)=\pi R^2\bar u\,q(t)$ with $q(t)=1+A\sin\omega t
+=1+2\,\mathrm{Re}[c_1\mathrm{e}^{\mathrm{i}\omega t}]$, $c_1=-\mathrm{i}A/2$,
+\begin{equation}
+  \frac{u}{\bar u} = 2\left(1-\frac{r^2}{R^2}\right)
+    + 2\,\mathrm{Re}\!\left[c_1\,\phi(r)\,\mathrm{e}^{\mathrm{i}\omega t}\right],
+  \qquad
+  \phi(r) = \frac{1-I_0(kr)/I_0(kR)}{1-2I_1(kR)/\left(kR\,I_0(kR)\right)},
+  \qquad
+  k^2=\frac{\mathrm{i}\omega\rho}{\eta^\ast(\omega)},
+  \label{eq:womersley-u}
+\end{equation}
+where $\phi$ has unit cross-sectional mean. The shear stress is
+\begin{equation}
+  \sigma_{rz} = s_0 + 2\,\mathrm{Re}\!\left[s_1\mathrm{e}^{\mathrm{i}\omega t}\right],
+  \qquad
+  s_0=-\frac{4\eta_p\bar u\,r}{R^2},\quad
+  s_1=\frac{\eta_p\,g_1}{1+\mathrm{i}\omega\lambda},\quad
+  g_1=\bar u\,c_1\,\phi'(r),
+  \label{eq:womersley-s}
+\end{equation}
+and the shear rate is $\dot\gamma=g_0+2\,\mathrm{Re}[g_1\mathrm{e}^{\mathrm{i}\omega t}]$
+with $g_0=-4\bar u r/R^2$. The normal stress solves
+$\sigma_{zz}+\lambda(\partial_t\sigma_{zz}-2\dot\gamma\sigma_{rz})=0$, whose
+periodic solution contains the harmonics $0$, $1$ and $2$ of the product
+$\dot\gamma\sigma_{rz}$:
+\begin{equation}
+  \sigma_{zz} = 2\lambda\left\{P_0
+    + 2\,\mathrm{Re}\!\left[\frac{P_1\,\mathrm{e}^{\mathrm{i}\omega t}}{1+\mathrm{i}\omega\lambda}\right]
+    + 2\,\mathrm{Re}\!\left[\frac{P_2\,\mathrm{e}^{2\mathrm{i}\omega t}}{1+2\mathrm{i}\omega\lambda}\right]\right\},
+  \label{eq:womersley-n}
+\end{equation}
+with $P_0=g_0s_0+2\,\mathrm{Re}(g_1\bar s_1)$, $P_1=g_0s_1+g_1s_0$ and
+$P_2=g_1s_1$. The inflow profile of the solver is
+\eqref{eq:womersley-u}. For Oldroyd-B, once the start-up transient has
+decayed, the whole pipe carries this solution apart from the development of
+$\boldsymbol{\psi}$ near the inlet, where $\boldsymbol{\psi}=\boldsymbol{0}$
+is imposed.
+
+\paragraph{Test set-up.}
+The pipe and meshes are those of \S\,\ref{sec:sptt-pipe}, with $\beta=0.5$,
+$\varepsilon=0$, $\mathit{Re}=10$, $\mathit{Wo}=3$, $A=0.5$ and
+$\lambda\omega=1$ ($\mathit{De}=\lambda/T=1/2\pi$). The flow rate is ramped up
+over half a period and four periods are computed. The last one is compared
+with \eqref{eq:womersley-u}--\eqref{eq:womersley-n} at eight phases, over
+$5\le z/D\le 10$. The periodicity residual between the last two periods,
+$\|\boldsymbol{u}(4T)-\boldsymbol{u}(3T)\|/\|\boldsymbol{u}\|$, is about
+$10^{-8}$. Two studies are made:
+\begin{itemize}
+  \item \emph{space}: BDF2 with $T/\Delta t=128$ on each mesh, giving errors
+    against the exact solution;
+  \item \emph{time}: BDF1 and BDF2 on one mesh with $T/\Delta t=16,\dots,128$.
+    Here the self-convergence differences
+    $d_{\Delta t}=\|x_{\Delta t}-x_{\Delta t/2}\|/\|x\|$ at $t=4T$, which
+    exclude the spatial error, give the order of the integrator.
+\end{itemize}
+
+In the BDF2 scheme the time derivative is
+$(3x^{n+1}-4x^n+x^{n-1})/(2\Delta t)$ in the momentum and $\boldsymbol{\psi}$
+equations. The Galerkin convection uses the extrapolated velocity
+$\boldsymbol{u}^\ast=2\boldsymbol{u}^n-\boldsymbol{u}^{n-1}$, and the
+$\boldsymbol{\psi}$ equation, solved by Newton's method, is implicit in
+$(\boldsymbol{u},\boldsymbol{\psi})$. The orthogonal-subscale projections are
+explicit. The one with the largest weight, $\Pi_h[\boldsymbol{\varepsilon}(\boldsymbol{u})]$
+(weight $\approx\eta_p/2$, which does not vanish with $h$), is evaluated at
+$\boldsymbol{u}^\ast$. The other projections stay lagged at $t^n$, since extrapolating them was
+unstable in our tests (the advection projection of $\boldsymbol{\psi}$ with the gsPTT
+blood model). Lagged, they leave consistency errors $O(\Delta t)$ weighted by
+their stabilisation parameters. These parameters are $O(h^2)$ for the pressure-gradient and
+stress-divergence projections, which dominate the velocity error on coarse
+meshes; the observed order therefore approaches two only as the mesh is
+refined.
+
+\input{womersley_table}

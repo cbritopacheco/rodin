@@ -60,7 +60,7 @@
  *            Carreau-Yasuda viscosity eta_CY(gd) = eta_inf + (eta_0 - eta_inf)
  *            [1 + (lambda_CY gd)^a]^((n-1)/a), gd = sqrt(2 eps:eps) including
  *            the hoop strain u_r/r. No psi: (u, p) only, one solve per step,
- *            eta_CY evaluated at u^n (lagged, first order like BDF1);
+ *            eta_CY evaluated at u^n (BDF1) or u* = 2 u^n - u^{n-1} (BDF2);
  *  - "gsptt" one sPTT mode plus a shear-thinning solvent, eta_s(gd) =
  *            eta_CY(gd) - eta_p/f(gd), f the steady-shear sPTT factor
  *            (f^3 - f^2 - 2 eps lambda^2 gd^2 = 0), so that the steady shear
@@ -290,6 +290,32 @@ namespace Rodin::Examples::ViscoelasticFluids
 
           int stepsPerCycle = 400;
           int cycles = 5;
+          /// @brief Time integrator: 1 = BDF1 (backward Euler), 2 = BDF2.
+          ///        BDF2 discretises d/dt by (3 x^{n+1} - 4 x^n + x^{n-1})/(2 dt)
+          ///        in the momentum and psi equations, the Galerkin convection
+          ///        advects with u* = 2 u^n - u^{n-1}, and Newton starts from
+          ///        (u*, p*, psi*).
+          ///        The "cy" and "gsptt" viscosities are evaluated at u*. The orthogonal projections of the split-OSS
+          ///        stabilisation are explicit; see bdf2Extrapolate. The
+          ///        stabilisation parameters, the streamline directions,
+          ///        Pi[(grad u) u] and the dynamic subscale stay at step n. The
+          ///        first step takes x^{-1} = x^0, exact for a start from rest
+          ///        with the (1 - cos) ramp.
+          int timeOrder = 1;
+          /// @brief BDF2: the projections taken at the extrapolation (u*, p*,
+          ///        psi*) instead of step n, as a bit mask: Pi[div u] 1,
+          ///        Pi[grad p] 2, Pi[div sigma] 4, Pi[eps(u)] 8,
+          ///        Pi[(u^n . grad) psi] 16, Pi[u^n . grad psi_t] 32
+          ///        (axisymmetric). A projection lagged at step n leaves an
+          ///        O(dt) error times its weight. The default 8 extrapolates
+          ///        Pi[eps(u)], whose weight alpha3 ~ eta_p/2 does not vanish with
+          ///        h. Extrapolating the others diverged: Pi[grad p], Pi[div u]
+          ///        and Pi[div sigma] (masks 2, 3, 6) in the axisymmetric
+          ///        pulsatile Oldroyd-B test after 2 to 3 periods, and the psi
+          ///        advection projection (16) with the "gsptt" blood model within
+          ///        the first period. Lagged, Pi[grad p] and Pi[div sigma]
+          ///        (weights O(h^2)) leave an O(h^2 dt) error.
+          int bdf2Extrapolate = 8;
 
           /// @brief XDMF output period, in steps; every cycle boundary is
           ///        written regardless, and 0 keeps only those. The CSV is
@@ -404,6 +430,22 @@ namespace Rodin::Examples::ViscoelasticFluids
 
       static void axpy(Real a, const ::Vec& x, ::Vec& y);
 
+      /// @brief z <- a x + b y, with the ghost values refreshed.
+      static void combine(Real a, const ::Vec& x, Real b, const ::Vec& y, ::Vec& z);
+
+      /// @brief The time step of the BDF mass terms: dt (BDF1) or 2 dt/3 (BDF2).
+      Real massStep() const;
+
+      /// @brief After a step (m_uIt, the psi iterates and the pressure solution
+      ///        hold x^{n+1}): shifts x^n, x^{n-1}, rebuilds the BDF history and
+      ///        u* of the next step.
+      void advanceHistory();
+
+      /// @brief The orthogonal projections Pi[grad p], Pi[div sigma] and, if
+      ///        strain, Pi[div u], Pi[eps(u)] and Pi[(u^n . grad) psi], at step n
+      ///        (iterate = false) or at the Newton iterate (u^k, p^k, psi^k).
+      void projectConsistent(bool iterate, unsigned mask);
+
       bool solveFlow();
       void computeWallShear();
       void closeCycle(Real elapsed);
@@ -463,18 +505,35 @@ namespace Rodin::Examples::ViscoelasticFluids
       ScalarTrialFunctionType m_p;
       VectorTestFunctionType m_v;
       ScalarTestFunctionType m_q;
+      /// @brief u^n: the stabilisation parameters are evaluated at it.
       VectorGridFunctionType m_uOld;
       VectorGridFunctionType m_uIt;
+      /// @brief u^{n-1} (BDF2); the BDF history, u^n or (4 u^n - u^{n-1})/3, so
+      ///        that d/dt u ~ (u - m_uHist)/dt_eff, dt_eff = dt or 2 dt/3; and
+      ///        u^n or u*, the advecting velocity of the Galerkin convection and
+      ///        the argument of the viscosities.
+      VectorGridFunctionType m_uNm1;
+      VectorGridFunctionType m_uHist;
+      VectorGridFunctionType m_uAdv;
+      /// @brief p^n, p^{n-1} (BDF2) and the pressure iterate p^k.
+      ScalarGridFunctionType m_pN;
+      ScalarGridFunctionType m_pNm1;
+      ScalarGridFunctionType m_pIt;
       /// @brief psi_P (Voigt), its test function, psi_P^n and psi_P^k.
       VectorTrialFunctionType m_psi;
       VectorTestFunctionType m_chi;
       VectorGridFunctionType m_psiOld;
       VectorGridFunctionType m_psiIt;
+      /// @brief psi_P^{n-1} and the BDF history of psi_P, as for u.
+      VectorGridFunctionType m_psiNm1;
+      VectorGridFunctionType m_psiHist;
       /// @brief psi_t = psi_thetatheta, its test function, psi_t^n and psi_t^k.
       ScalarTrialFunctionType m_psiT;
       ScalarTestFunctionType m_chiT;
       ScalarGridFunctionType m_psiTOld;
       ScalarGridFunctionType m_psiTIt;
+      ScalarGridFunctionType m_psiTNm1;
+      ScalarGridFunctionType m_psiTHist;
       std::uint64_t m_psiRevision = 0;
       /// @brief sigma_P (Voigt) and sigma_t at the nodes.
       VectorGridFunctionType m_sigma;

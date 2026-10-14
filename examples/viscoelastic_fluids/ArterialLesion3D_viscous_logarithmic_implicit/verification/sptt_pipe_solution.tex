@@ -1,0 +1,122 @@
+% =============================================================================
+%  Fully developed sPTT pipe flow with a Newtonian solvent: analytical
+%  solution used to verify the solver.  For \input in the article (appendix or
+%  verification subsection).  Citation keys: OliveiraPinho1999,
+%  Cruz2005, Pacheco2023 (see sptt_pipe_solution.bib).
+%  Notation: z axial, r radial, R = D/2, polymer extra stress \boldsymbol{\sigma}.
+% =============================================================================
+
+\subsection{Fully developed pipe flow of the sPTT fluid}\label{sec:sptt-pipe}
+
+The solver is verified against the steady, fully developed flow of the
+constitutive model of \S\,2 in a straight pipe of radius $R=D/2$. The total
+extra stress is $\boldsymbol{T}=2\eta_s\boldsymbol{D}+\boldsymbol{\sigma}$,
+with the polymer contribution obeying the linear simplified
+Phan-Thien--Tanner law
+\begin{equation}
+  f(\operatorname{tr}\boldsymbol{\sigma})\,\boldsymbol{\sigma}
+  + \lambda\,\overset{\triangledown}{\boldsymbol{\sigma}} = 2\eta_p\boldsymbol{D},
+  \qquad
+  f = 1 + \frac{\varepsilon\lambda}{\eta_p}\operatorname{tr}\boldsymbol{\sigma},
+  \label{eq:sptt}
+\end{equation}
+where $\overset{\triangledown}{\boldsymbol{\sigma}}$ is the upper-convected
+derivative; $\varepsilon=0$ recovers the Oldroyd-B model.
+
+For $\boldsymbol{u}=u(r)\,\boldsymbol{e}_z$ the only non-zero velocity
+gradient is the shear rate $\dot\gamma=\mathrm{d}u/\mathrm{d}r\le 0$, the
+material derivative of $\boldsymbol{\sigma}$ vanishes and
+\eqref{eq:sptt} reduces to
+\begin{equation}
+  f\,\sigma_{rz} = \eta_p\dot\gamma, \qquad
+  f\,\sigma_{zz} = 2\lambda\dot\gamma\,\sigma_{rz}, \qquad
+  \sigma_{rr}=\sigma_{\theta\theta}=0 ,
+  \label{eq:sptt-components}
+\end{equation}
+so that
+\begin{equation}
+  \sigma_{zz} = \frac{2\lambda}{\eta_p}\,\sigma_{rz}^2, \qquad
+  f = 1 + a\,\sigma_{rz}^2, \qquad a = \frac{2\varepsilon\lambda^2}{\eta_p^2}.
+  \label{eq:sptt-normal}
+\end{equation}
+The axial momentum balance with pressure gradient $\mathrm{d}p/\mathrm{d}z=-G$
+fixes the total shear stress,
+\begin{equation}
+  \eta_s\dot\gamma + \sigma_{rz} = \tau(r) = -\tfrac12 G r .
+  \label{eq:momentum}
+\end{equation}
+Eliminating $\dot\gamma=f\sigma_{rz}/\eta_p$ between
+\eqref{eq:sptt-components} and \eqref{eq:momentum} gives, with
+$\kappa=\eta_s/\eta_p$, a cubic for the polymer shear stress
+$s=\sigma_{rz}$ \citep{Cruz2005},
+\begin{equation}
+  \kappa a\, s^3 + (1+\kappa)\, s - \tau = 0 .
+  \label{eq:cubic}
+\end{equation}
+Its left-hand side is strictly increasing in $s$, so \eqref{eq:cubic} has a
+single real root, given by Cardano's formula
+\begin{equation}
+  s = \sqrt[3]{-\frac{q}{2}+\sqrt{\Delta}} + \sqrt[3]{-\frac{q}{2}-\sqrt{\Delta}},
+  \label{eq:cardano}
+\end{equation}
+with
+$p = (1+\kappa)/(\kappa a)$, $q = -\tau/(\kappa a)$ and
+$\Delta = q^2/4 + p^3/27 > 0$.
+The shear rate is $\dot\gamma = (1+a s^2)\,s/\eta_p$, and velocity and flow rate
+follow from single quadratures,
+\begin{equation}
+  u(r) = -\int_r^R \dot\gamma(r')\,\mathrm{d}r', \qquad
+  Q = 2\pi\int_0^R u\,r\,\mathrm{d}r = -\pi\int_0^R r^2\dot\gamma\,\mathrm{d}r ,
+  \label{eq:velocity}
+\end{equation}
+the second by parts. Since $Q(G)$ is monotone, the pressure gradient for a
+prescribed flow rate is obtained by bisection; we evaluate
+\eqref{eq:velocity} with 64-point Gauss--Legendre quadrature, which reproduces
+the closed-form limits below to machine precision. The wall shear stress is
+$\tau_w = GR/2$ for any rheology; the rheology enters through $G(Q)$.
+
+Two limits have closed forms. For $\varepsilon=0$ (Oldroyd-B) the velocity is the
+Poiseuille profile of the total viscosity $\eta_0=\eta_s+\eta_p$,
+$u = 2\bar u\,(1-r^2/R^2)$ with $G=32\eta_0\bar u/D^2$, and
+$\sigma_{rz}=\eta_p\dot\gamma$, $\sigma_{zz}=2\lambda\eta_p\dot\gamma^2$.
+Without solvent ($\eta_s=0$), $s=\tau$ and \citep{OliveiraPinho1999}
+\begin{equation}
+  u(r) = \frac{G}{4\eta_p}\,(R^2-r^2)
+       + \frac{\varepsilon\lambda^2G^3}{16\,\eta_p^3}\,(R^4-r^4),
+  \qquad
+  Q = \frac{\pi G R^4}{8\eta_p} + \frac{\pi\varepsilon\lambda^2 G^3 R^6}{24\,\eta_p^3}.
+  \label{eq:op}
+\end{equation}
+
+\paragraph{Test set-up.}
+A straight pipe of length $14D$ (inlet at $z=-2D$, outlet at $z=12D$) is
+discretised with quasi-uniform tetrahedral meshes of size
+$h/D = 0.143,\ 0.1,\ 0.071,\ 0.05$. The fluid has $\beta=\eta_s/\eta_0=0.5$,
+$\mathit{Wi}=\lambda\bar u/D=0.5$ and $\varepsilon\in\{0,\,0.25\}$, at
+$\mathit{Re}=10$. The inlet imposes the Newtonian parabola and a relaxed
+polymer ($\boldsymbol{\psi}=\boldsymbol{0}$), so the flow must develop its
+viscoelastic profile inside the domain; the outlet carries a zero traction.
+The flow rate is ramped up over the first of two periods
+$T=\pi\rho D^2/(2\eta_0)$ ($\mathit{Wo}=1$), with 20 BDF1 steps per period;
+the final time is $3.1\,\rho D^2/\eta_0 = 63\lambda$, and the Newton increment
+of $\boldsymbol{\psi}$ at the last step is at round-off level, so the
+solution compared is the steady one. Relative $L^2$ errors of $\boldsymbol{u}$
+and of the full tensor $\boldsymbol{\sigma}$ are integrated over the developed
+region $5\le z/D\le 10$, where the reference solution is evaluated at the flow
+rate carried by the discrete solution; the pressure gradient $G_h$ is the
+least-squares slope of $p_h$ over the same region, and $\tau_{w,h}$ is the
+wall shear stress at the wall nodes of the region. Table~\ref{tab:sptt-pipe} lists the errors and the
+observed orders $p=\ln(e_{k-1}/e_k)/\ln(h_{k-1}/h_k)$.
+
+\input{sptt_pipe_table}
+
+\paragraph{Remark on manufactured solutions.}
+The closed-form unsteady family of \citet{Pacheco2023} for the Oldroyd-B
+model, with $\sigma_{11}=\sigma_{22}=\sigma(t)$, $\sigma_{12}=0$ and the
+time-dependent relaxation time $\lambda(t)=(\beta-1)\nu_0/\sigma(t)$, cannot be
+used with the log-conformation formulation: it implies
+$\lambda\boldsymbol{\sigma}/\eta_p=-\boldsymbol{I}$, that is, a conformation
+tensor $\boldsymbol{c}=\boldsymbol{I}+\lambda\boldsymbol{\sigma}/\eta_p\equiv\boldsymbol{0}$,
+which has no logarithm. Their remaining test, the ramped-up Oldroyd-B channel
+flow compared with its steady state (their \S\,5.1.4), is the planar
+counterpart of the $\varepsilon=0$ case above.

@@ -12,7 +12,8 @@
  *
  * Formulation. T = 2 eta_s eps(u) + sigma, sigma = (eta_p/lambda0)(exp(psi)
  * - I), the psi equation solved by Newton together with (u, p), P1 spaces,
- * BDF1, and the lagged split-OSS stabilisation (S1 dynamic convection,
+ * BDF1 or BDF2 (-al_time_order), and the split-OSS stabilisation (S1 dynamic
+ * convection,
  * pressure and div sigma; S2 grad-div; S3 u-psi compatibility and psi
  * advection). The only changes from the planar driver are those of the
  * dimension:
@@ -50,6 +51,17 @@
  * linear-viscoelastic limit for sPTT. psi = 0 is imposed on the inlet.
  *
  * Outlet. Traction p_out n plus the directional do-nothing (backflow) term.
+ *
+ * Fluids (Config::fluid), as in the axisymmetric driver:
+ *  - "sptt"  constant solvent viscosity eta_s (Newtonian: Wi -> 0);
+ *  - "gsptt" one sPTT mode plus the shear-thinning solvent eta_s(gd) =
+ *            eta_CY(gd) - eta_p/f(gd), whose steady shear viscosity is exactly
+ *            the Carreau-Yasuda eta_CY; eta_s at u^n (u* with BDF2);
+ *  - "cy"    Carreau-Yasuda: here the "gsptt" system with a vanishing polymer
+ *            (eta_p = 1e-6 eta_inf, De = 1e-3), so eta_s = eta_CY to 1e-6; the
+ *            psi unknowns are kept (same cost as "gsptt").
+ * For "cy" and "gsptt" the inlet mean mode is the developed steady
+ * Carreau-Yasuda profile and Re, Wo use eta_ref (default eta_inf).
  *
  * Dimensionless groups, with eta_0 = eta_s + eta_p:
  *   Re = rho Ubar D/eta_0,  Wo = (D/2) sqrt(omega rho/eta_0),
@@ -118,6 +130,11 @@ namespace Rodin::Examples::ViscoelasticFluids
       /// @brief U(r, t)/Ubar.
       Real velocity(Real r, Real t) const;
 
+      /// @brief Replaces the mean mode phi_0 = 2 (1 - r^2/R^2) by a tabulated
+      ///        profile of unit cross-sectional mean (r ascending, from 0 to
+      ///        R): the developed steady profile of a shear-thinning fluid.
+      PulsatilePipeInflow& setMeanProfile(std::vector<Real> r, std::vector<Real> phi);
+
       /// @brief max_t q(t), sampled.
       Real getPeak() const;
 
@@ -135,6 +152,8 @@ namespace Rodin::Examples::ViscoelasticFluids
 
       std::vector<Complex> m_c{ Complex(1.0) };
       std::vector<Complex> m_k;
+      std::vector<Real> m_meanR;
+      std::vector<Real> m_meanPhi;
       Real m_omega = 0.0;
       Real m_radius = 1.0;
   };
@@ -212,8 +231,29 @@ namespace Rodin::Examples::ViscoelasticFluids
           Attribute lesion = 5;
       };
 
+      /// @brief Carreau-Yasuda viscosity of whole blood (Cho & Kensey 1991).
+      struct CarreauYasuda
+      {
+          Real etaZero = 0.056;    ///< zero-shear viscosity (Pa s)
+          Real etaInf = 0.00345;   ///< infinite-shear viscosity (Pa s)
+          Real lambda = 1.902;     ///< time constant (s)
+          Real n = 0.22;
+          Real a = 1.25;
+      };
+
       struct Config
       {
+          /// @brief "sptt", "gsptt" or "cy" (file header).
+          std::string fluid = "sptt";
+          CarreauYasuda carreauYasuda;
+          /// @brief Viscosity defining Re and Wo (Pa s); 0 means eta_s + eta_p
+          ///        for "sptt" and eta_inf for "cy" and "gsptt".
+          Real etaRef = 0.0;
+          /// @brief Impose on the inlet the steady simple-shear conformation of
+          ///        the developed mean profile instead of psi = 0 (requires
+          ///        lambda0 = lambda).
+          bool inletDevelopedConformation = false;
+
           /// @brief Tetrahedral MEDIT "Dimension 3" mesh in units of D.
           std::string meshPath =
             "../resources/examples/viscoelastic_fluids/S75_pipe_coarse.mesh";
@@ -262,6 +302,31 @@ namespace Rodin::Examples::ViscoelasticFluids
           ///        uses dt = T/stepsPerCycle.
           Real timeStep = 0.0;
           int cycles = 5;
+          /// @brief Time integrator: 1 = BDF1 (backward Euler), 2 = BDF2.
+          ///        BDF2 discretises d/dt by (3 x^{n+1} - 4 x^n + x^{n-1})/(2 dt)
+          ///        in the momentum and psi equations, the Galerkin convection
+          ///        advects with u* = 2 u^n - u^{n-1}, and Newton starts from
+          ///        (u*, p*, psi*). The orthogonal projections of the split-OSS
+          ///        stabilisation are explicit; see bdf2Extrapolate. The
+          ///        stabilisation parameters, the streamline directions,
+          ///        Pi[(grad u) u] and the dynamic subscale stay at step n. The
+          ///        first step takes x^{-1} = x^0, exact for a start from rest
+          ///        with the (1 - cos) ramp.
+          int timeOrder = 1;
+          /// @brief BDF2: the projections taken at the extrapolation (u*, p*,
+          ///        psi*) instead of step n, as a bit mask: Pi[div u] 1,
+          ///        Pi[grad p] 2, Pi[div sigma] 4, Pi[eps(u)] 8,
+          ///        Pi[(u^n . grad) psi] 16, Pi[u^n . grad psi_t] 32
+          ///        (axisymmetric). A projection lagged at step n leaves an
+          ///        O(dt) error times its weight. The default 8 extrapolates
+          ///        Pi[eps(u)], whose weight alpha3 ~ eta_p/2 does not vanish with
+          ///        h. Extrapolating the others diverged: Pi[grad p], Pi[div u]
+          ///        and Pi[div sigma] (masks 2, 3, 6) in the axisymmetric
+          ///        pulsatile Oldroyd-B test after 2 to 3 periods, and the psi
+          ///        advection projection (16) with the "gsptt" blood model within
+          ///        the first period. Lagged, Pi[grad p] and Pi[div sigma]
+          ///        (weights O(h^2)) leave an O(h^2 dt) error.
+          int bdf2Extrapolate = 8;
 
           /// @brief XDMF output period, in steps; cycle boundaries always.
           int outputEvery = 20;
@@ -360,6 +425,22 @@ namespace Rodin::Examples::ViscoelasticFluids
       /// @brief y <- y + a x, with the ghost values refreshed.
       static void axpy(Real a, const ::Vec& x, ::Vec& y);
 
+      /// @brief z <- a x + b y, with the ghost values refreshed.
+      static void combine(Real a, const ::Vec& x, Real b, const ::Vec& y, ::Vec& z);
+
+      /// @brief The time step of the BDF mass terms: dt (BDF1) or 2 dt/3 (BDF2).
+      Real massStep() const;
+
+      /// @brief After a step (m_uIt, the psi iterates and the pressure solution
+      ///        hold x^{n+1}): shifts x^n, x^{n-1}, rebuilds the BDF history and
+      ///        u* of the next step.
+      void advanceHistory();
+
+      /// @brief The orthogonal projections Pi[grad p], Pi[div sigma] and, if
+      ///        strain, Pi[div u], Pi[eps(u)] and Pi[(u^n . grad) psi], at step n
+      ///        (iterate = false) or at the Newton iterate (u^k, p^k, psi^k).
+      void projectConsistent(bool iterate, unsigned mask);
+
       bool solveFlow();
       void computeWallShear();
       void closeCycle(Real elapsed);
@@ -377,6 +458,26 @@ namespace Rodin::Examples::ViscoelasticFluids
 
       /// @brief Codina tau_1 on eta_s, as in the 2D driver.
       Real tau1At(const Rodin::Geometry::Point& p) const;
+
+      // ---- Fluids "gsptt" and "cy" -----------------------------------------
+      Real carreauYasuda(Real gammaDot) const;
+      /// @brief Steady-shear sPTT factor: f^3 - f^2 - 2 eps lambda^2 gd^2 = 0.
+      Real steadyPTTFactor(Real gammaDot) const;
+      /// @brief eta_s(gd): eta_s ("sptt"), eta_CY ("cy"), eta_CY - eta_p/f ("gsptt").
+      Real solventViscosity(Real gammaDot) const;
+      /// @brief gd = sqrt(2 eps:eps) of u^n (BDF1) or u* (BDF2).
+      Real shearRateAt(const Rodin::Geometry::Point& p) const;
+      Real solventViscosityAt(const Rodin::Geometry::Point& p) const;
+      Real referenceViscosity() const;
+      /// @brief Developed steady Carreau-Yasuda pipe flow at the mean flow rate:
+      ///        m_inletR, m_inletPhi (u/Ubar) and m_inletShear (gd >= 0).
+      void computeDevelopedProfile();
+      /// @brief Linear interpolation of a table on m_inletR.
+      Real interpolateInlet(const std::vector<Real>& table, Real r) const;
+      /// @brief log c of steady simple shear at the inlet point p (radial shear
+      ///        du_x/dr of the developed mean profile), D and O blocks.
+      Rodin::Math::SpatialVector<Real> inletLogConformation(
+        const Rodin::Geometry::Point& p, bool offDiagonal) const;
       /// @brief alpha3, with the PTT factor at psi^n.
       Real alpha3At(const Rodin::Geometry::Point& p) const;
 
@@ -398,6 +499,9 @@ namespace Rodin::Examples::ViscoelasticFluids
       Config m_cfg;
 
       PulsatilePipeInflow m_inflow;
+      std::vector<Real> m_inletR;
+      std::vector<Real> m_inletPhi;
+      std::vector<Real> m_inletShear;
       /// @brief Mean inlet velocity Ubar (m/s) and period T (s).
       Real m_meanVelocity = 0.0;
       Real m_period = 0.0;
@@ -418,9 +522,20 @@ namespace Rodin::Examples::ViscoelasticFluids
       ScalarTrialFunctionType m_p;
       VectorTestFunctionType m_v;
       ScalarTestFunctionType m_q;
+      /// @brief u^n: the stabilisation parameters are evaluated at it.
       VectorGridFunctionType m_uOld;
       /// @brief Newton velocity u^k of the constitutive equation.
       VectorGridFunctionType m_uIt;
+      /// @brief u^{n-1} (BDF2); the BDF history, u^n or (4 u^n - u^{n-1})/3, so
+      ///        that d/dt u ~ (u - m_uHist)/dt_eff, dt_eff = dt or 2 dt/3; and the
+      ///        advecting velocity of the Galerkin convection, u^n or u*.
+      VectorGridFunctionType m_uNm1;
+      VectorGridFunctionType m_uHist;
+      VectorGridFunctionType m_uAdv;
+      /// @brief p^n, p^{n-1} (BDF2) and the pressure iterate p^k.
+      ScalarGridFunctionType m_pN;
+      ScalarGridFunctionType m_pNm1;
+      ScalarGridFunctionType m_pIt;
       /// @brief psi = log(tau): diagonal (xx, yy, zz) and off-diagonal
       ///        (xy, xz, yz) blocks; the test tensor chi likewise.
       VectorTrialFunctionType m_psiD;
@@ -429,6 +544,11 @@ namespace Rodin::Examples::ViscoelasticFluids
       VectorTestFunctionType m_chiO;
       VectorGridFunctionType m_psiOldD;
       VectorGridFunctionType m_psiOldO;
+      /// @brief psi^{n-1} and the BDF history of psi, as for u.
+      VectorGridFunctionType m_psiNm1D;
+      VectorGridFunctionType m_psiNm1O;
+      VectorGridFunctionType m_psiHistD;
+      VectorGridFunctionType m_psiHistO;
       /// @brief Linearisation point psi^k of the Newton iterations.
       VectorGridFunctionType m_psiItD;
       VectorGridFunctionType m_psiItO;
