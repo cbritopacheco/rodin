@@ -26,7 +26,8 @@ namespace Rodin::Tests::Benchmarks
     Inverse,
     Distortion,
     Construction,
-    ConstructionAndCoordinates
+    ConstructionAndCoordinates,
+    ConstructionAndMetrics
   };
 
   /**
@@ -57,7 +58,10 @@ namespace Rodin::Tests::Benchmarks
    * Construction measures fresh owned mapped quadrature, including allocation,
    * bulk Jacobians and destruction/replacement, with reference tables warmed.
    * ConstructionAndCoordinates additionally consumes every lazy physical map;
-   * it is not an isolated coordinate-access latency. No mesh-owned quadrature
+   * ConstructionAndMetrics consumes distortion followed by inverse, matching
+   * diffusion binding, while retaining all inverse entries and measure values.
+   * A point consumes only its unit measure. These combined scopes are not
+   * isolated access latencies. No mesh-owned quadrature
    * lookup, reference-table miss, assembly, solver or MPI operation is timed.
    * Mesh/space creation, analytic guards and sample preparation are untimed.
    *
@@ -122,7 +126,8 @@ namespace Rodin::Tests::Benchmarks
       for (size_t qp = 0; qp < formula.getSize(); ++qp)
         points.emplace_back(cell, formula.getPoint(qp));
       const bool construction = operation == PointOperation::Construction ||
-        operation == PointOperation::ConstructionAndCoordinates;
+        operation == PointOperation::ConstructionAndCoordinates ||
+        operation == PointOperation::ConstructionAndMetrics;
       Optional<PolytopeQuadrature> mapped;
       std::vector<Real> expected;
       for (size_t qp = 0; qp < formula.getSize(); ++qp)
@@ -143,12 +148,20 @@ namespace Rodin::Tests::Benchmarks
               expected.push_back(j == i ? 1 + 2 * alpha * r(i) : 0);
           }
         }
-        else if (operation == PointOperation::Inverse)
+        else if (operation == PointOperation::Inverse ||
+          operation == PointOperation::ConstructionAndMetrics)
         {
           for (size_t i = 0; i < d; ++i)
           {
             for (size_t j = 0; j < s; ++j)
               expected.push_back(j == i ? 1 / (1 + 2 * alpha * r(i)) : 0);
+          }
+          if (operation == PointOperation::ConstructionAndMetrics)
+          {
+            Real measure = 1;
+            for (size_t i = 0; i < d; ++i)
+              measure *= 1 + 2 * alpha * r(i);
+            expected.push_back(measure);
           }
         }
         else
@@ -178,6 +191,20 @@ namespace Rodin::Tests::Benchmarks
               output[pos++] = jacobian(j, i);
           }
         }
+        else if (operation == PointOperation::ConstructionAndMetrics)
+        {
+          const Real measure = point.getDistortion();
+          if (d > 0)
+          {
+            const auto& inverse = point.getJacobianInverse();
+            for (size_t i = 0; i < d; ++i)
+            {
+              for (size_t j = 0; j < s; ++j)
+                output[pos++] = inverse(i, j);
+            }
+          }
+          output[pos++] = measure;
+        }
         else if (operation == PointOperation::Inverse)
         {
           const auto& inverse = point.getJacobianInverse();
@@ -195,7 +222,8 @@ namespace Rodin::Tests::Benchmarks
         if (construction)
         {
           mapped.emplace(cell, formula);
-          if (operation == PointOperation::ConstructionAndCoordinates)
+          if (operation == PointOperation::ConstructionAndCoordinates ||
+            operation == PointOperation::ConstructionAndMetrics)
           {
             for (size_t qp = 0; qp < mapped->getSize(); ++qp)
               consume(mapped->getPoint(qp), pos);
@@ -238,6 +266,10 @@ namespace Rodin::Tests::Benchmarks
             const auto& point = mapped->getPoint(qp);
             if (point.getReferenceCoordinates().size() != d ||
               point.getJacobian().rows() != s || point.getJacobian().cols() != d)
+              return false;
+            if (operation == PointOperation::ConstructionAndMetrics && d > 0 &&
+              (point.getJacobianInverse().rows() != d ||
+                point.getJacobianInverse().cols() != s))
               return false;
           }
           if (operation == PointOperation::Construction)
@@ -310,14 +342,16 @@ namespace Rodin::Tests::Benchmarks
               {PointOperation::Inverse, "Inverse"},
               {PointOperation::Distortion, "Distortion"},
               {PointOperation::Construction, "Construction"},
-              {PointOperation::ConstructionAndCoordinates, "ConstructionAndCoordinates"}})
+              {PointOperation::ConstructionAndCoordinates, "ConstructionAndCoordinates"},
+              {PointOperation::ConstructionAndMetrics, "ConstructionAndMetrics"}})
           {
             if (d == 0 && operation == PointOperation::Inverse)
               continue;
             for (const bool warm : {false, true})
             {
               const bool construction = operation == PointOperation::Construction ||
-                operation == PointOperation::ConstructionAndCoordinates;
+                operation == PointOperation::ConstructionAndCoordinates ||
+                operation == PointOperation::ConstructionAndMetrics;
               if (construction && warm)
                 continue;
               const std::string name = "MappedPoint/" + std::string(operationLabel) +

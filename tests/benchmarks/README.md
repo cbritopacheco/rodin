@@ -1055,7 +1055,11 @@ Jacobian evaluation are pointwise rather than reference-table operations.
 `Construction` measures fresh owned `PolytopeQuadrature` allocation, bulk
 Jacobians and destruction/replacement with warmed reference tables.
 `ConstructionAndCoordinates` additionally consumes all lazy physical
-coordinates. These are separate scopes, not independent additive costs.
+coordinates. `ConstructionAndMetrics` consumes each point's measure and then
+its left inverse, in the order used by diffusion binding, and writes every
+inverse entry and measure to retained output storage. Point cells consume only
+their unit measure. These are separate scopes, not independent additive costs;
+subtracting their timings does not isolate an accessor's latency.
 Mesh-owned cache lookup, first-use basis initialization, reference-table
 eviction, assembly and solving are excluded. Zero-dimensional cases check
 empty Jacobian dimensions and unit measure; their inverse sweeps are omitted.
@@ -1065,7 +1069,8 @@ admissible embedding through dimension three, and orders 2, 4 and 8 are
 registered. Each workload has one cell; quadrature-order sweeps are sample-count
 studies, not mesh refinement. Affine maps use $\alpha=0$, and quadratic maps use
 $\alpha=1/8$ at degrees two through six. Quadratic maps are omitted for point
-cells, leaving 4,062 registrations. The independent analytic map is
+cells, leaving 4,479 registrations, including 417 construction-and-metrics
+selections. The independent analytic map is
 
 $$
 x_j(\widehat x)=
@@ -1103,10 +1108,59 @@ reduced their coefficients of variation to approximately 0.8–1.6%. The retaine
 raw results distinguish elapsed time from CPU time rather than silently dropping
 the original samples.
 
+A subsequent construction-and-metrics study held the embedding dimension at
+three, the quadrature order at eight, and the quadratic map policy fixed.
+Five repetitions of at least 0.1 seconds per selection on Apple LLVM 21,
+`RelWithDebInfo`, gave the following medians. Each workload contains one cell;
+the triangle is an embedded surface, whereas the other rows are volume cells.
+The metric operation therefore uses a left pseudoinverse on the triangle and
+a square inverse on the volume cells. This is not a pure dimension-only
+comparison. With $N_q$ quadrature points, $B$ basis functions, reference
+dimension $d$ and embedding dimension $s$, the dense Jacobian contraction
+performs $N_q B d s$ scalar multiplications. Normalization by $N_q B$ measures cost
+per basis/sample pair, not cost per arithmetic operation.
+
+| Geometry degree | Geometry | Basis functions | Quadrature points | Construction + metrics, ns/cell | $t/(N_q B)$, ns |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 2 | Triangle | 6 | 16 | 1,032 | 10.74 |
+| 2 | Tetrahedron | 10 | 44 | 3,693 | 8.39 |
+| 2 | Pyramid | 14 | 47 | 5,049 | 7.67 |
+| 2 | Hexahedron | 27 | 125 | 22,996 | 6.81 |
+| 6 | Triangle | 28 | 16 | 2,767 | 6.18 |
+| 6 | Tetrahedron | 84 | 44 | 22,452 | 6.07 |
+| 6 | Pyramid | 140 | 47 | 39,302 | 5.97 |
+| 6 | Hexahedron | 343 | 125 | 249,680 | 5.82 |
+
+At geometry degree six, the hexahedron takes approximately 90 times the
+triangle's elapsed time but contracts approximately 96 times as many
+basis/sample pairs. The construction-only companion scopes cost 5.11–5.78 ns
+per basis/sample at this degree. Coefficients of variation for all sixteen
+construction-only and construction-and-metrics selections were below 1.1%.
+These observations locate the large raw gap in the represented work; they do
+not establish that the contraction is optimal or attribute a difference of
+two timings to inverse evaluation alone. The analytic guards qualify every
+inverse entry and measure before and after timing, and reject deliberately
+perturbed outputs. No source optimization is implied by these measurements.
+
+Separate Instruments captures of the hexahedron's construction-and-metrics
+scope selected stacks containing both `MappedPoint` and either mapped
+quadrature construction, inverse evaluation or measure evaluation. At geometry
+degrees two and six, respectively, 88.5% and 98.9% of this selected CPU sample
+weight included the bulk `ParametricTransformation::jacobian` call. Inverse
+evaluation accounted inclusively for 4.2% and 0.34%; measure/determinant
+evaluation accounted for 2.4% and 0.34%. The captures contained 6,327 and 6,968
+selected samples. These percentages are source-stack attributions, not fractions
+of benchmark wall time; categories can overlap, output writes outside the
+selected frames are excluded, and matching untimed initialization/guard calls
+are retained. In particular, initial reference-table construction must not be
+interpreted as repeated modal evaluation in the warmed contraction loop.
+The next optimization investigation consequently targets the bulk contraction
+before adding derived-metric caches or changing their lazy semantics.
+
 ```sh
 cmake --build build --target RodinMappedPointBenchmarks -j1
 build/tests/benchmarks/RodinMappedPointBenchmarks \
-  --benchmark_filter='MappedPoint/(Construction|Jacobian/Rebound)/Quadratic/P2/Pyramid/3/8/' \
+  --benchmark_filter='MappedPoint/(Construction|ConstructionAndMetrics)/Quadratic/P2/Pyramid/3/8/' \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
 
