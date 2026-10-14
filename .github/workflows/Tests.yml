@@ -975,17 +975,19 @@ jobs:
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
 
-      - name: Build distributed finite element tests
+      - name: Build PETSc matrix-range and I/O tests
         run: >-
           cmake --build build -j 2 --target
           RodinMPIMatrixRangeTest RodinPETScGridFunctionTest
           RodinPETScMPIGridFunctionTest RodinPETScMPIP0P0gTest
           RodinPETScMPISubMeshGridFunctionTest
+          RodinPETScIOHDF5IOTest RodinPETScIOMEDITIOTest
+          RodinPETScSingleFieldConstraintTest RodinPETScRestrictedNonlocalTest
 
-      - name: Run distributed finite element tests
+      - name: Run PETSc matrix-range and I/O tests
         run: >-
           ctest --test-dir build/tests
-          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4]|RodinPETScMPISubMeshGridFunctionTest_np[124])$'
+          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4]|RodinPETScMPISubMeshGridFunctionTest_np[124]|RodinPETScIO(HDF5IO|MEDITIO)Test|RodinPETScSingleFieldConstraintTest|RodinPETScRestrictedNonlocalTest)$'
           --output-on-failure --no-tests=error -j 1
 
   Unit:
