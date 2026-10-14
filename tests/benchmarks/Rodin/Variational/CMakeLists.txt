@@ -28,7 +28,7 @@ target_link_libraries(RodinGridFunctionBenchmarks PRIVATE
 
 add_executable(RodinNamedFormBenchmarks EXCLUDE_FROM_ALL NamedFormEvaluation.cpp)
 target_link_libraries(RodinNamedFormBenchmarks PRIVATE
-  Rodin::Variational Rodin::Solid benchmark::benchmark benchmark::benchmark_main)
+  Rodin::Variational Rodin::Solid benchmark::benchmark)
 
 add_executable(RodinQuadratureExpressionBenchmarks EXCLUDE_FROM_ALL QuadratureExpressions.cpp)
 target_link_libraries(RodinQuadratureExpressionBenchmarks PRIVATE

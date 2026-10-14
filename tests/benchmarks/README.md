@@ -2596,6 +2596,80 @@ affect real assembly before introducing another lookup indirection or changing
 the dense representation. No library source or numerical acceptance criterion
 is changed by this benchmark batch.
 
+### Named-form geometry-state consumers
+
+`RodinNamedFormBenchmarks` retains complete sparse assembly measurements for
+mass, diffusion, Helmholtz, vector mass and linear elasticity, at native P1 and
+H1 degree two, with constant and represented field coefficients. This consumer
+matrix currently covers triangles and tetrahedra in the native sequential
+build; it does not establish all-geometry or distributed performance coverage.
+The former `Elasticity` registration is named `LinearElasticity` explicitly.
+The standalone target remains excluded from the default build and CTest.
+
+Each assembled operator is compared with a frozen `Integral` operator using
+the existing dimensionless unit-box budget
+
+$$
+E_A=\frac{\|A-A_{\mathrm{Integral}}\|_F}
+{\max(1,\|A_{\mathrm{Integral}}\|_F)}\leq 10^{-11}.
+$$
+
+An oracle failure now produces a nonzero executable exit as well as a benchmark
+error. All 480 registered cases pass their initial and final guards. `First`
+includes form construction and destruction; `Warm` retains the form. Three
+orthogonal geometry protocols are retained:
+
+- `NamedEvaluation`: mapped geometry is retained;
+- `NamedEvaluationTimingControl`: pause/resume occurs before every assembly,
+  without changing library state;
+- `NamedEvaluationColdGeometry`: public `mesh.flush()` runs outside timing,
+  clearing transformations and mapped quadratures, which assembly reconstructs.
+
+The last protocol is not an isolated cache-allocation latency: invalidation
+changes allocation history and cache state, and its destruction cost is
+excluded. No solve or error integration is timed. Counters report cells,
+global and local DOFs, components, coefficient degree, quadrature points,
+stored nonzeros and local scatter slots. Linear elasticity's implemented
+quadrature order is coefficient degree plus both basis orders, not the reduced
+derivative order used by diffusion. That policy is preserved.
+
+An initial eighty-case named-reassembly sweep used 0.1 seconds and three
+repetitions in the optimized native build. For degree-two field coefficients,
+the linear-elasticity geometry comparison is:
+
+| Quantity | Triangle | Tetrahedron |
+| --- | ---: | ---: |
+| Cells $C$ | 512 | 384 |
+| Global DOFs | 2,178 | 2,187 |
+| Local DOFs $n$ | 12 | 30 |
+| Quadrature points $q$ | 11 | 23 |
+| Local pair-quadrature contributions $W=Cqn^2$ | 811,008 | 7,948,800 |
+| Median retained-geometry CPU time, ms | 7.261 | 82.478 |
+| Median invalidated-geometry CPU time, ms | 7.491 | 82.821 |
+
+The raw retained-geometry ratio is 11.36, while $W_3/W_2=9.80$. This work proxy
+counts local contributions, not FLOPs, and does not remove the differing
+kinematic contraction costs. Instruments recordings at 400 fixed iterations
+in two dimensions and forty in three locate the cost in
+`LinearElasticityForm::Kernel::compute`: 2,847 of 2,926 driver sample-ms in 2D,
+and 3,456 of 4,173 in 3D. Driver samples include untimed oracle/setup work.
+No index samples are observed in 2D, and three sample-ms are recorded in 3D;
+these counts do not bound unsampled work. The sparse first-cell slot stress
+case is not representative of the observed consumer profile. In 3D, Eigen
+product reductions account for 1,622 kernel sample-ms,
+and scalar--spatial-matrix multiplication for 256. Repeated weighting inside
+the basis-pair loop is a concrete source-reuse candidate; no quadrature reduction
+or library optimization is claimed from this profiling batch.
+
+The geometry-state investigation is not complete. A longer Helmholtz control
+at 0.3 seconds and five repetitions reports 4.600 ms retained, 4.585 ms with
+pause/resume only and 4.198 ms after invalidation. Both elapsed and CPU timings
+show the difference. Timer boundaries alone do not explain it, and no cache
+miss, allocation-layout or frequency cause has been established. Hardware
+bottleneck recordings are retained for further analysis; the difference is not
+accepted as a source speedup or subtracted to estimate geometry cost. Finer
+state-preparation controls remain necessary alongside the elasticity repair.
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`
