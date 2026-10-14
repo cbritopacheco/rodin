@@ -1053,3 +1053,30 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   or missing-source records. Compared with run93, it adds 101 measured lines
   and 160 hits; 235 further hits are required for \(95\%\). Tests, benchmarks,
   sanitizer, pre-fix, failed-run and mutation profiles remain excluded.
+- PETSc target refresh: all four existing real/complex single-field target cases
+  pass separately in fresh normal Debug builds against snapshot run102. The
+  219-report run107 audit measures 37,234 of 39,386 production lines
+  (\(94.5361\%\)), restoring 97 matching-source hits while exposing 48 more
+  measured lines. The denominator is retained; 183 further hits are needed
+  for \(95\%\) at this point.
+- Public PETSc problem lifecycle: new single/mixed interval mass-system cases
+  check copies, moves, assignments, polymorphic clones, destruction of one
+  owner, const access, partial target updates and lazy full reassembly before
+  solving an assigned body. Independent closed-form mass matrices and loads
+  verify nonzero value constraints and the solution written to borrowed fields.
+  PETSc LinearSystem copies explicitly share reference-counted matrix/vector
+  handles: updates are therefore checked through both owners. The first private
+  diagnostic incorrectly assumed deep system copies; it is excluded and no
+  production behavior is changed to satisfy that assumption.
+  All eight normal real/complex Debug/Release runs pass individually. Both
+  complex ASan cases pass with external leak detection disabled under the PETSc
+  policy. An isolated mutation retains the stale assembled flag on body
+  assignment; both cases reject the resulting wrong solution. CTest JSON
+  verifies the real/complex registrations, labels and 120-second timeout.
+  The 227-report run109 audit measures 37,300 of 39,425 production lines
+  (\(94.6100\%\)), with no nonproduction or missing-source records. It adds
+  39 measured lines and 66 hits relative to run107, leaving 154 further hits
+  needed for \(95\%\) at that denominator. Production sources remain
+  byte-identical to run102 for this batch; failed-oracle, sanitizer and mutation
+  profiles are excluded. The subsequent Flow repair requires separate fresh
+  observations before its coverage can be certified.

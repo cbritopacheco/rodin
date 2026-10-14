@@ -21,6 +21,14 @@ set_tests_properties(RodinPETScNamedFormTest PROPERTIES
 )
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScNamedFormTest)
 
+add_executable(RodinPETScProblemLifecycleTest ProblemLifecycleTest.cpp)
+target_link_libraries(RodinPETScProblemLifecycleTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScProblemLifecycleTest
+  COMMAND $<TARGET_FILE:RodinPETScProblemLifecycleTest>)
+set_tests_properties(RodinPETScProblemLifecycleTest PROPERTIES LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScProblemLifecycleTest)
+
 add_executable(RodinPETScGridFunctionTest GridFunctionTest.cpp)
 target_link_libraries(RodinPETScGridFunctionTest
   PUBLIC
