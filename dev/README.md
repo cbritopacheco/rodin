@@ -431,6 +431,17 @@ geometry, and backend variants explicitly. Current audit findings include:
   captured. The matching-source merge covers 34,935 of 37,233 production lines
   (\(93.83\%\)); the formatter header contributes 14 of 14 lines. Tests,
   pre-fix failures and sanitizer profiles remain outside the measured sources.
+- Region interpolation: real/complex P1 and P2 scalar/vector fields reproduce
+  independent affine traces on a selected face or interface, preserve every
+  unselected vertex, ignore false predicates and preserve the result on repeated
+  interpolation. Selected submeshes accept retained parent-cell points and
+  reject other parent cells while preserving coefficients. The fixtures compute
+  the incidence relations required by H1 explicitly. All four typed cases pass
+  separately in normal Debug, fresh Release CTest and assertion-enabled
+  ASan/LSan builds. Routing faces to cells or interfaces to the boundary fails
+  both real and complex numerical cases for each mutation. This batch adds 11
+  production line hits without enlarging the denominator: 34,946 of 37,233
+  lines (\(93.86\%\)). Mutation and sanitizer profiles remain excluded.
 - Form ownership: real/complex P1 and quadratic H1 forms reject foreign trial
   and test contributions without changing the assembled mass operator or load.
   Addition/subtraction and linear assignment exercise named-trial and unnamed
