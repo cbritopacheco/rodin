@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include "Rodin/Geometry/ParametricTransformation.h"
 #include "Rodin/Variational.h"
 #include "../../../QuadratureReference.h"
 

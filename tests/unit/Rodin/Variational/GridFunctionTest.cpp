@@ -1,4 +1,11 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
+#include "Rodin/Geometry/ParametricTransformation.h"
 #include <cmath>
 #include "Rodin/Test/Random.h"
 
@@ -192,9 +199,12 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Verifies that copy-assignment on one space carries the
-  /// coefficients over verbatim, including states that are not the
-  /// interpolant of a smooth function.
+  /**
+   * @brief Checks coefficient preservation on the identical space.
+   *
+   * Copy assignment carries coefficients verbatim, including states that
+   * are not interpolants of smooth functions.
+   */
   TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentOnTheSameSpaceCopies)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -218,8 +228,12 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(target[i], source[i], RODIN_FUZZY_CONSTANT);
   }
 
-  /// @brief Verifies that assigning between grid functions of the same type on
-  /// two spaces interpolates the source rather than copying its coefficients.
+  /**
+   * @brief Checks assignment between distinct space objects.
+   *
+   * The expected value is the interpolated source field rather than a
+   * coefficient-index contract between the two spaces.
+   */
   TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentBetweenSpacesInterpolates)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -241,9 +255,12 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(target(p), 2.0 * p.x() + 3.0 * p.y(), 1e-12);
   }
 
-  /// @brief Pins the limit of assignment across meshes: the source cannot be
-  /// evaluated at points of another mesh, so the interpolation is rejected
-  /// rather than silently copying coefficients that index a different basis.
+  /**
+   * @brief Rejects assignment across unrelated mesh objects.
+   *
+   * This interface cannot evaluate the source at target-mesh points. Copying
+   * coefficients instead would associate them with a different basis.
+   */
   TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentAcrossMeshesIsRejected)
   {
     Mesh coarse = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
