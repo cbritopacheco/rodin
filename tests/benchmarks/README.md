@@ -2736,6 +2736,48 @@ named-form performance qualification, complete convergence recertification,
 or remote CI evidence. The separate Helmholtz geometry-state investigation
 remains open.
 
+#### Shared-space physical mapping control
+
+When trial and test borrow the identical space object, their physical basis
+Jacobians coincide: $G^{\mathrm{trial}}_{a,q}=G^{\mathrm{test}}_{a,q}$.
+A source experiment mapped each Jacobian once and filled the existing test
+buffers from that unweighted result. Distinct space objects retained independent
+mapping. Eligibility used exact object identity, not coordinate tolerances or
+DOF-layout assumptions. No new cache or collective was introduced.
+
+The first variant also materialized a symmetric-gradient temporary. Although
+six assembly contexts reduced CPU time by 3.4--6.8%, quadratic 3D assembly with
+a field coefficient increased by 4.4%. A second variant retained the original
+trial-weighting expression and reused only the mapped Jacobian. The following
+native sequential CPU timings are pooled medians of ten iteration samples per
+version, collected before/after/after/before with a 0.2 s minimum and five
+repetitions per pass. No compilation or other numerical workload overlapped
+the timings. Both versions used the same meshes, quadrature and coefficients.
+
+| Degree / coefficient | Triangle before (ms) | Triangle candidate (ms) | Tetrahedron before (ms) | Tetrahedron candidate (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| P1 / constant | 0.4895 | 0.4818 | 2.4353 | 2.3860 |
+| P1 / field | 0.7637 | 0.7610 | 3.8054 | 3.7114 |
+| H1 degree 2 / constant | 2.9781 | 2.9017 | 35.9155 | 35.5256 |
+| H1 degree 2 / field | 5.9988 | 5.9789 | 77.4194 | 77.8948 |
+
+The second variant changes CPU time by -2.6% to +0.6%; this is insufficient
+evidence for a generally useful assembly improvement. Neither source variant
+is retained. Materialization and compiler code generation remain possible
+explanations for the difference between variants, not established causes.
+Halving basis mappings does not halve assembly work: pair contractions still
+scale as $q n_{\mathrm{trial}}n_{\mathrm{test}}$, while mappings scale linearly
+in the basis counts. The contraction benchmarks and assembly consumers remain
+available for the dominant-cost investigation.
+
+The exact local regression suite now includes separate copied trial/test space
+objects on all seven positive-dimensional cell families, with native and
+quadratic geometry, P1 and H1 degree two, real/complex fields and weights,
+coefficient changes, cell changes and kernel copies. These copied spaces have
+the same basis definition; arbitrary different basis definitions are not
+certified by this control. Deliberately zeroing the test divergence makes the
+new segment case fail. Every comparison remains exact, not tolerance based.
+
 # Conjugating spatial-matrix contractions
 
 `RodinSpatialMatrixContractionBenchmarks`, under `Rodin/Math`, measures the

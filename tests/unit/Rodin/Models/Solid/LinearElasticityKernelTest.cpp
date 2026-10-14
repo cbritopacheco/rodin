@@ -92,9 +92,10 @@ namespace Rodin::Tests::Unit
     /**
      * @brief Certifies varying real/complex weights, cell changes and kernel copies.
      * @tparam RealCoefficients Whether coefficients stay real for complex fields.
+     * @tparam DistinctSpaces Whether test functions borrow a separate copied space.
      * @param space Vector space on native or prescribed quadratic geometry.
      */
-    template <bool RealCoefficients = false>
+    template <bool RealCoefficients = false, bool DistinctSpaces = false>
     void checkWeighting(auto& space)
     {
       using Scalar =
@@ -131,10 +132,20 @@ namespace Rodin::Tests::Unit
       };
       const auto lambda = function(first);
       const auto mu = function(shear);
+      Optional<std::decay_t<decltype(space)>> separate;
+      if constexpr (DistinctSpaces)
+        separate.emplace(space);
+      auto& testSpace = [&]() -> auto& {
+        if constexpr (DistinctSpaces)
+          return *separate;
+        else
+          return space;
+      }();
       TrialFunction trial(space);
-      TestFunction test(space);
+      TestFunction test(testSpace);
       using Form = decltype(LinearElasticityForm(lambda, mu, trial, test));
-      typename Form::Kernel kernel(space, space, lambda, mu);
+      typename Form::Kernel kernel(space, testSpace, lambda, mu);
+      EXPECT_EQ(std::addressof(space) == std::addressof(testSpace), !DistinctSpaces);
       const auto check = [&](auto& selected, const Polytope& cell) {
         lambdaCalls = muCalls = 0;
         typename Form::Kernel::MatrixType actual;
@@ -190,6 +201,40 @@ namespace Rodin::Tests::Unit
         {
           checkWeighting<true>(linear);
           checkWeighting<true>(quadratic);
+        }
+      };
+      check.template operator()<Real>();
+      check.template operator()<Complex>();
+    }
+  }
+
+  /**
+   * @brief Distinct space objects preserve the original pairwise result.
+   *
+   * A copied space has the same basis definition but different object identity.
+   * The original pairwise oracle therefore remains applicable, providing a
+   * separate-object control for shared-space reuse experiments. Native and
+   * quadratic geometry, real/complex weights, coefficient changes, cell changes and copies are
+   * checked on all seven positive-dimensional cell families.
+   */
+  TEST_P(LinearElasticityKernelTest, DistinctSpacesPairwiseWeightingAndState)
+  {
+    for (const bool curved : {false, true})
+    {
+      auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(3);
+      Convergence::CurvedGeometry geometry(mesh);
+      if (curved)
+        geometry.template install<2>();
+      const auto check = [&]<class Scalar>() {
+        P1<Math::SpatialVector<Scalar>> linear(mesh, mesh.getSpaceDimension());
+        H1<2, Math::SpatialVector<Scalar>> quadratic(
+          std::integral_constant<size_t, 2>{}, mesh, mesh.getSpaceDimension());
+        checkWeighting<false, true>(linear);
+        checkWeighting<false, true>(quadratic);
+        if constexpr (std::is_same_v<Scalar, Complex>)
+        {
+          checkWeighting<true, true>(linear);
+          checkWeighting<true, true>(quadratic);
         }
       };
       check.template operator()<Real>();
