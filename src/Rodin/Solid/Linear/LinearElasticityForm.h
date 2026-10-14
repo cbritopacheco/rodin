@@ -129,6 +129,15 @@ namespace Rodin::Variational
        * and combined into divergences and symmetric gradients. The kernel
        * owns copies of the Lamé parameters, so that each thread assembling
        * with its own copy of the kernel evaluates its own copies.
+       *
+       * ## Trial-side weighting
+       *
+       * At each quadrature point, trial divergences are multiplied by the
+       * first Lamé parameter and trial symmetric gradients by the shear
+       * modulus before visiting test functions. The resulting arguments of
+       * @ref Math::dot are reused without changing conjugation, quadrature
+       * order or the local entry accumulation sequence. No additional buffer
+       * or cross-point physical cache is introduced.
        */
       class Kernel
       {
@@ -148,7 +157,12 @@ namespace Rodin::Variational
             : m_trialFES(trialFES),
               m_testFES(testFES),
               m_lambda(lambda.copy()),
-              m_mu(mu.copy())
+              m_mu(mu.copy()),
+              m_cached(false),
+              m_geometry(Geometry::Polytope::Type::Point),
+              m_order(0),
+              m_trialCount(0),
+              m_testCount(0)
           {}
 
           /**
@@ -159,7 +173,12 @@ namespace Rodin::Variational
             : m_trialFES(other.m_trialFES),
               m_testFES(other.m_testFES),
               m_lambda(other.m_lambda->copy()),
-              m_mu(other.m_mu->copy())
+              m_mu(other.m_mu->copy()),
+              m_cached(false),
+              m_geometry(Geometry::Polytope::Type::Point),
+              m_order(0),
+              m_trialCount(0),
+              m_testCount(0)
           {}
 
           /**
@@ -204,8 +223,8 @@ namespace Rodin::Variational
 
             out.resize(testCount, trialCount);
             out.setZero();
-            m_trialSymmetric.resize(trialCount);
-            m_trialDivergence.resize(trialCount);
+            m_weightedTrialSymmetric.resize(trialCount);
+            m_weightedTrialDivergence.resize(trialCount);
             m_testSymmetric.resize(testCount);
             m_testDivergence.resize(testCount);
             for (size_t qp = 0; qp < quadrature.getSize(); ++qp)
@@ -221,8 +240,8 @@ namespace Rodin::Variational
               {
                 const Math::SpatialMatrix<ScalarType> jacobian =
                   m_trialDerivatives[qp][tr] * jacobianInverse;
-                m_trialSymmetric[tr] = jacobian + jacobian.adjoint();
-                m_trialDivergence[tr] = jacobian.trace();
+                m_weightedTrialSymmetric[tr] = mu * (jacobian + jacobian.adjoint());
+                m_weightedTrialDivergence[tr] = lambda * jacobian.trace();
               }
               for (size_t te = 0; te < testCount; ++te)
               {
@@ -236,9 +255,9 @@ namespace Rodin::Variational
                 for (size_t tr = 0; tr < trialCount; ++tr)
                 {
                   out(te, tr) += weight *
-                    (Math::dot(lambda * m_trialDivergence[tr], m_testDivergence[te]) +
+                    (Math::dot(m_weightedTrialDivergence[tr], m_testDivergence[te]) +
                       static_cast<ScalarType>(0.5) *
-                        Math::dot(mu * m_trialSymmetric[tr], m_testSymmetric[te]));
+                        Math::dot(m_weightedTrialSymmetric[tr], m_testSymmetric[te]));
                 }
               }
             }
@@ -276,15 +295,15 @@ namespace Rodin::Variational
           std::reference_wrapper<const FES> m_testFES;
           std::unique_ptr<LambdaType> m_lambda;
           std::unique_ptr<MuType> m_mu;
-          bool m_cached = false;
-          Geometry::Polytope::Type m_geometry = Geometry::Polytope::Type::Point;
-          size_t m_order = 0;
-          size_t m_trialCount = 0;
-          size_t m_testCount = 0;
+          bool m_cached;
+          Geometry::Polytope::Type m_geometry;
+          size_t m_order;
+          size_t m_trialCount;
+          size_t m_testCount;
           std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_trialDerivatives;
           std::vector<std::vector<Math::SpatialMatrix<ScalarType>>> m_testDerivatives;
-          std::vector<Math::SpatialMatrix<ScalarType>> m_trialSymmetric;
-          std::vector<ScalarType> m_trialDivergence;
+          std::vector<Math::SpatialMatrix<ScalarType>> m_weightedTrialSymmetric;
+          std::vector<ScalarType> m_weightedTrialDivergence;
           std::vector<Math::SpatialMatrix<ScalarType>> m_testSymmetric;
           std::vector<ScalarType> m_testDivergence;
       };
@@ -501,13 +520,14 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class LambdaDerived, class M, class Solution, class FES>
-    requires(!std::is_base_of_v<FormLanguage::Base, M>)
   LinearElasticityForm(const FunctionBase<LambdaDerived>& lambda, const M& mu,
     const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Traits<FES>::ScalarType>::Type,
-      LambdaDerived, typename FormLanguage::FunctionDerived<RealFunction<M>>::Type>;
+      LambdaDerived,
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, M>,
+        FormLanguage::FunctionDerived<RealFunction<M>>>::Type>;
 
   /**
    * @brief Deduction guide for a lifted first parameter and a function shear modulus.
@@ -517,13 +537,14 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class L, class MuDerived, class Solution, class FES>
-    requires(!std::is_base_of_v<FormLanguage::Base, L>)
   LinearElasticityForm(const L& lambda, const FunctionBase<MuDerived>& mu,
     const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Traits<FES>::ScalarType>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<L>>::Type, MuDerived>;
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, L>,
+        FormLanguage::FunctionDerived<RealFunction<L>>>::Type,
+      MuDerived>;
 
   /**
    * @brief Deduction guide for two lifted Lamé parameters.
@@ -533,15 +554,17 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class L, class M, class Solution, class FES>
-    requires(!std::is_base_of_v<FormLanguage::Base, L> &&
-              !std::is_base_of_v<FormLanguage::Base, M>)
   LinearElasticityForm(const L& lambda, const M& mu,
     const TrialFunction<Solution, FES>& u, const TestFunction<FES>& v)
     -> LinearElasticityForm<Solution, FES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Traits<FES>::ScalarType>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<L>>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<M>>::Type>;
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, L> &&
+          !std::is_base_of_v<FormLanguage::Base, M>,
+        FormLanguage::FunctionDerived<RealFunction<L>>>::Type,
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, L> &&
+          !std::is_base_of_v<FormLanguage::Base, M>,
+        FormLanguage::FunctionDerived<RealFunction<M>>>::Type>;
 }
 
 #endif

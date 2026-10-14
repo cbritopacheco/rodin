@@ -2670,6 +2670,72 @@ bottleneck recordings are retained for further analysis; the difference is not
 accepted as a source speedup or subtracted to estimate geometry cost. Finer
 state-preparation controls remain necessary alongside the elasticity repair.
 
+#### Trial-side Lamé weighting reuse
+
+For physical basis Jacobians $G_{a,q}$, retain the kernel's existing definitions
+$D_{a,q}=\operatorname{tr}G_{a,q}$ and $S_{a,q}=G_{a,q}+G_{a,q}^{*}$.
+The trial arguments are now prepared once per basis and quadrature point:
+
+$$
+\widetilde D_{a,q}=\lambda(x_q)D_{a,q},\qquad
+\widetilde S_{a,q}=\mu(x_q)S_{a,q}.
+$$
+
+These stored arguments replace identical products inside the test--trial pair
+loop. The `Math::dot` argument order, adjoints, outer quadrature weight, entry
+accumulation order and quadrature policy are unchanged. Existing trial buffers
+are reused, not supplemented by a new cache. Source-level coefficient products
+are reduced from $q n_{\mathrm{trial}}n_{\mathrm{test}}$ to
+$q n_{\mathrm{trial}}$ per cell; generated instruction savings remain compiler
+dependent. Kernel state is initialized in its constructors, including copies.
+
+Archived native binaries were measured in before/after/after/before order,
+at 0.2 seconds and five repetitions per case, with no concurrent numerical
+workload or compilation. The table pools the two median CPU measurements per
+version; times are milliseconds for complete retained-form assembly, not
+isolated kernel calls.
+
+| Degree / coefficient | Triangle before | Triangle after | Tetrahedron before | Tetrahedron after |
+| --- | ---: | ---: | ---: | ---: |
+| P1 / constant | 0.535 | 0.475 | 2.581 | 2.412 |
+| P1 / field | 0.822 | 0.757 | 3.961 | 3.750 |
+| H1 degree 2 / constant | 3.636 | 2.945 | 39.179 | 35.244 |
+| H1 degree 2 / field | 7.276 | 5.938 | 84.153 | 75.617 |
+
+The observed gains span 5.3--19.0%. These are real-valued native sequential
+assembly results, not complex, distributed or solver speedups. A diagnostic
+forty-iteration 3D recording reduces scalar--matrix multiplication leaf sample
+weight from 256 to 75 ms; reductions remain dominant. Instrumented totals are
+not accepted timing comparisons or precise operation-cost estimates.
+
+Nine new regression cases compare every local matrix entry with the original
+pairwise-weighting expression by exact scalar equality, without a numerical
+tolerance. Coverage includes native P1 and H1 degree two, all seven nonzero
+reference geometries, native and quadratic maps, real/complex fields, real
+coefficients on complex fields, variable weights, cell transitions and kernel
+copies. A mixed triangle/quad mesh exercises reference-family/count changes;
+degrees three through six are additionally checked on curved segments, not
+claimed certified in 3D. Coefficient callbacks must still execute once per
+quadrature point. The operator oracle uses direct element derivatives rather
+than production weighted buffers and certifies the implemented rule, not
+polynomial exactness on curved cells.
+
+This complex coverage exposed a Clang 19 deduction defect: rejected numeric
+lifting candidates formed an incompatible `RealFunction<ComplexFunction<...>>`
+before their constraints removed them. Immediate return-type substitution
+guards now reject those candidates without instantiating the real wrapper.
+The admission predicate and real-valued numeric lifting policy are unchanged;
+complex functions are not converted to real data. The same regression calls
+compile and pass on the native and LLVM/OpenMP builds.
+
+Final affected-path validation passes the nine exact regressions, 35 named-form
+comparisons and seventeen local real-PETSc checks in each optimized build, with
+the existing 1D elasticity skip in the comparison suite. All 480 standalone
+benchmark oracle cases qualify in each build. This is not new distributed
+named-form performance qualification, complete convergence recertification,
+or remote CI evidence. The separate Helmholtz geometry-state investigation
+remains open.
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`
