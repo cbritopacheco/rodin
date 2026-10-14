@@ -11,8 +11,7 @@
  * @file Derivative.h
  * @brief Partial derivative operator specialization for P1 functions.
  *
- * This file provides specialized implementations of the partial derivative
- * operator for P1 GridFunctions and ShapeFunctions.
+ * This file provides the partial derivative of scalar P1 GridFunctions.
  *
  * For a scalar P1 function @f$ u @f$, the partial derivative with respect
  * to coordinate @f$ x_i @f$ is computed as:
@@ -20,7 +19,8 @@
  *   \frac{\partial u}{\partial x_i} = (\nabla u) \cdot \mathbf{e}_i
  * @f]
  *
- * For P1 elements, partial derivatives are piecewise constant on each element.
+ * Derivatives are constant on affine simplices. Other reference geometries
+ * and non-affine physical maps may produce point-dependent derivatives.
  *
  * @see <a href="_derivative_8h.html">Derivative</a>
  * @see <a href="_grad_8h.html">Grad</a>
@@ -173,7 +173,6 @@ namespace Rodin::Variational
           {
             assert(inc.size() == 2);
             const auto& traceDomain = this->getTraceDomain();
-            assert(traceDomain.size() > 0);
             if (traceDomain.size() == 0)
             {
               Alert::MemberFunctionException(*this, __func__)
@@ -187,7 +186,8 @@ namespace Rodin::Variational
               for (auto& idx : inc)
               {
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-                if (traceDomain.count(tracePolytope->getAttribute()))
+                const auto attribute = tracePolytope->getAttribute();
+                if (attribute && traceDomain.count(*attribute))
                 {
                   Math::SpatialPoint rc;
                   tracePolytope->getTransformation().inverse(rc, pc);
@@ -209,15 +209,15 @@ namespace Rodin::Variational
           const auto& fes = gf.getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          SpatialVectorType grad(d);
           SpatialVectorType res(d);
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            fe.getGradient(local)(grad, rc);
-            res += gf.getValue(fes.getGlobalIndex({d, i}, local)) * grad;
+            const auto& basis = fe.getBasis(local);
+            res += basis.getGradient()(rc) * gf[fes.getGlobalIndex({d, i}, local)];
           }
-          out = (p.getJacobianInverse().transpose() * res).eval().coeff(m_i);
+          const SpatialVectorType transformed = p.getJacobianInverse().transpose() * res;
+          out = transformed(m_i);
         }
       }
 
