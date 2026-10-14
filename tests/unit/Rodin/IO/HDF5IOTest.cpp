@@ -598,12 +598,12 @@ namespace Rodin::Tests::Unit
       H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, nodeValues.data()),
       0);
     const auto nodes = HDF5::getXDMFReferenceNodes(Polytope::Type::Triangle, 2);
-    const auto& trans = mesh.getPolytopeTransformation(2, 0);
     for (size_t i = 0; i < nodes.size(); ++i)
     {
-      Math::SpatialPoint pc;
-      trans.transform(pc, nodes[i]);
-      EXPECT_NEAR(nodeValues[i], 2.0 * pc(0) + 3.0 * pc(1), 1e-14);
+      // The affine triangle maps (r, s) to (2r, 3s); use its exact field
+      // rather than reevaluating the quadratic transformation under test.
+      const Real expected = 4 * nodes[i][0] + 9 * nodes[i][1];
+      EXPECT_NEAR(nodeValues[i], expected, 1e-14);
     }
     H5Sclose(dspace);
     H5Dclose(dset);

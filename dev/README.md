@@ -385,7 +385,7 @@ geometry, and backend variants explicitly. Current audit findings include:
   projection and removing alias-safe assignment fail the respective float and
   real manufactured oracles.
   Production coverage retires all previous Euclidean implementation records
-  and captures matching fresh compiler notes. The local merged measurement is
+  and captures matching fresh compiler notes. The Euclidean batch measurement is
   32,001 of 33,867 lines (94.49%); Euclidean contributes 480 of 482 lines
   (99.59%). Compared with the previous mesh batch, Euclidean adds 359 measured
   lines and 357 hits; normal Debug instantiation also reveals 79 Alert formatter
@@ -393,6 +393,23 @@ geometry, and backend variants explicitly. Current audit findings include:
   denominator and 51 additional uncovered lines. Tests, benchmarks, sanitizer
   profiles and mutation profiles remain excluded. This measurement covers the
   compiled float/real and dimension variants, not every possible instantiation.
+- Debug instrumentation audit: existing independent Alert formatting, named-form,
+  HDF5 and periodic-boundary oracles are also compiled without optimization.
+  All four Alert cases, 35 applicable named-form cases, 99 HDF5 cases and both
+  periodic cases pass individually; segment linear elasticity is explicitly
+  skipped because its contract requires dimension two or three. The complete
+  merged measurement becomes 34,213 of 36,606 lines (\(93.46\%\)). Relative to
+  the Euclidean batch, 2,739 additional production lines become measurable,
+  with 2,212 additional hits. These compiler notes remain in the denominator,
+  including newly exposed unexecuted bodies and failure paths. Reusing the
+  older denominator would conceal this instrumentation gap.
+  The curved HDF5 node-attribute oracle now uses the exact affine reference
+  field \(4r+9s\) on the triangle mapped by \((r,s)\mapsto(2r,3s)\), instead
+  of reevaluating the quadratic transformation under test. The previous
+  expected value differed by approximately \(1.07\times10^{-14}\) in Debug
+  because that second evaluation introduced additional rounding. The original
+  absolute tolerance \(10^{-14}\) is unchanged; doubled production exports
+  fail the corrected oracle. Failed and mutation profiles are not merged.
 - Form ownership: real/complex P1 and quadratic H1 forms reject foreign trial
   and test contributions without changing the assembled mass operator or load.
   Addition/subtraction and linear assignment exercise named-trial and unnamed
