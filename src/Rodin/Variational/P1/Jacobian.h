@@ -581,6 +581,13 @@ namespace Rodin::Variational
        * basis Jacobian at another reference sample. Tensor-product and
        * pyramidal reference derivatives retain sample-indexed reuse.
        *
+       * For the scalar basis @f$\hat\varphi_v@f$ and component @f$c@f$,
+       * @f$(J\psi_{v,c})_{rj}=\delta_{rc}\sum_k
+       * (\partial_k\hat\varphi_v)(J^+)_{kj}@f$. The scalar physical gradient
+       * is contracted once per vertex, in the original summation order, then
+       * copied into each component row. Reference and physical scratch vectors
+       * have fixed-capacity stack storage; no per-bind heap scratch is needed.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -667,39 +674,25 @@ namespace Rodin::Variational
           // J^{-1} at this integration point
           const auto Jinv = pt.getJacobianInverse();
 
-          // Precompute scalar reference gradients ghat_v (size d) for each vertex basis
-          // then fill structured Jacobians.
-          std::vector<Math::SpatialVector<ScalarType>> ghat;
-          ghat.resize(nv);
+          Math::SpatialVector<ScalarType> ghat(d), gphys(spaceDimension);
           for (size_t v = 0; v < nv; ++v)
           {
-            ghat[v].resize(d);
             for (size_t k = 0; k < d; ++k)
-              ghat[v](k) = feScalar.getBasis(v).template getDerivative<1>(k)(rc);
-          }
-
-          // Fill each vector basis Jacobian:
-          // local = v*vdim + c
-          // Jhat has only row c = ghat[v]^T
-          // Jphys = Jhat * Jinv
-          for (size_t v = 0; v < nv; ++v)
-          {
+              ghat(k) = feScalar.getBasis(v).template getDerivative<1>(k)(rc);
+            for (size_t col = 0; col < spaceDimension; ++col)
+            {
+              ScalarType s = ScalarType(0);
+              for (size_t k = 0; k < d; ++k)
+                s += ghat(k) * Jinv(k, col);
+              gphys(col) = s;
+            }
             for (size_t c = 0; c < vdim; ++c)
             {
               const size_t local = v * vdim + c;
               auto& Jphys = m_cache.jac[local];
               Jphys.setZero();
-
-              // row c of Jhat is ghat[v]^T, so
-              // row c of Jphys = ghat[v]^T * Jinv
-              // The inverse has one column per ambient coordinate.
               for (size_t col = 0; col < spaceDimension; ++col)
-              {
-                ScalarType s = ScalarType(0);
-                for (size_t k = 0; k < d; ++k)
-                  s += ghat[v](k) * Jinv(k, col);
-                Jphys(c, col) = s;
-              }
+                Jphys(c, col) = gphys(col);
             }
           }
         }

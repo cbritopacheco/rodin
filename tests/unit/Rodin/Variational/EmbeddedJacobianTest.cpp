@@ -6,6 +6,8 @@
  */
 #include <gtest/gtest.h>
 #include "Rodin/Variational.h"
+#include "../../../convergence/Convergence.h"
+#include "../../../convergence/CurvedGeometry.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -173,4 +175,109 @@ TEST(EmbeddedJacobian, AmbientColumnsAndTangentAffineFields)
   Math::SpatialMatrix<Real> zero(3, 3);
   zero.setZero();
   checkMesh(pointBuilder.finalize(), zero);
+}
+
+/**
+ * @brief Checks native P1 Jacobian contractions independently of component reuse.
+ *
+ * For each vector-valued reference basis function, every ambient derivative is
+ * formed directly as @f$\sum_k (\partial_k\hat\varphi_a)_c(J^+)_{kj}@f$.
+ * The reference does not assume a component DOF layout or share the production
+ * scalar-gradient contraction. Indexed and direct bindings must agree exactly
+ * at every sample, including zero rows, real/complex fields, one through three
+ * components, curved cells, embedded cells and the empty reference derivative
+ * on points. No coordinate matching or numerical tolerance is used.
+ */
+TEST(EmbeddedJacobian, P1BasisContractionAllRangesAndGeometries)
+{
+  const auto checkMesh = [](const LocalMesh& mesh) {
+    const size_t ambient = mesh.getSpaceDimension();
+    const auto fields = [&]<class Scalar>() {
+      for (size_t components = 1; components <= 3; ++components)
+      {
+        SCOPED_TRACE(::testing::Message() << "components=" << components);
+        P1<Math::SpatialVector<Scalar>> space(mesh, components);
+        TrialFunction u(space);
+        auto jacobian = Jacobian(u);
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          SCOPED_TRACE(static_cast<int>(cell->getGeometry()));
+          const auto& element =
+            space.getFiniteElement(cell->getDimension(), cell->getIndex());
+          const auto& formula =
+            QF::PolytopeQuadratureFormula::get(4, cell->getGeometry());
+          const PolytopeQuadrature points(*cell, formula);
+          for (size_t qp = 0; qp < formula.getSize(); ++qp)
+          {
+            SCOPED_TRACE(qp);
+            const auto& point = points.getPoint(qp);
+            const auto inverse = point.getJacobianInverse();
+            const auto& reference = point.getReferenceCoordinates();
+            const IntegrationPoint indexed(point, &formula, qp);
+            const IntegrationPoint direct(point);
+            for (const auto* ip : {&indexed, &direct})
+            {
+              jacobian.setIntegrationPoint(*ip);
+              for (size_t a = 0; a < element.getCount(); ++a)
+              {
+                const auto actual = jacobian.getBasis(a);
+                ASSERT_EQ(actual.rows(), components);
+                ASSERT_EQ(actual.cols(), ambient);
+                for (size_t row = 0; row < components; ++row)
+                {
+                  for (size_t col = 0; col < ambient; ++col)
+                  {
+                    Scalar expected = Scalar(0);
+                    for (size_t k = 0; k < cell->getDimension(); ++k)
+                    {
+                      const auto derivative =
+                        element.getBasis(a).template getDerivative<1>(row, k)(reference);
+                      expected += derivative * inverse(k, col);
+                    }
+                    ASSERT_EQ(actual(row, col), expected);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+    fields.template operator()<Real>();
+    fields.template operator()<Complex>();
+  };
+  for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+  {
+    auto mesh = Rodin::Tests::Convergence::UniformGrid(geometry).makeMesh(2);
+    checkMesh(mesh);
+    Rodin::Tests::Convergence::CurvedGeometry<LocalMesh> curved(mesh);
+    curved.install<2>();
+    checkMesh(mesh);
+  }
+  for (const size_t ambient : {size_t(2), size_t(3)})
+  {
+    auto builder = LocalMesh::Builder();
+    builder.initialize(ambient).nodes(2);
+    Math::SpatialPoint zero(ambient), one(ambient);
+    zero.setZero();
+    one.setConstant(1);
+    builder.vertex(zero).vertex(one).polytope(Polytope::Type::Segment, {0, 1});
+    checkMesh(builder.finalize());
+  }
+  for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
+  {
+    auto builder = LocalMesh::Builder();
+    builder.initialize(3).nodes(4);
+    builder.vertex({0, 0, 0}).vertex({1, 0, 1}).vertex({0, 1, 1}).vertex({1, 1, 2});
+    if (geometry == Polytope::Type::Triangle)
+      builder.polytope(geometry, {0, 1, 2});
+    else
+      builder.polytope(geometry, {0, 1, 3, 2});
+    checkMesh(builder.finalize());
+  }
+  auto pointBuilder = LocalMesh::Builder();
+  pointBuilder.initialize(3).nodes(1).vertex({0, 0, 0});
+  checkMesh(pointBuilder.finalize());
 }

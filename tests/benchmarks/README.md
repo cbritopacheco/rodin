@@ -987,12 +987,13 @@ claimed, and the incorrect identity-pyramid path supplies no valid baseline.
 `warm_affine_reuse` identifies warmed native-P1 simplex cache hits. The
 `gradient_transform_products` counter is a logical scalar-gradient proxy,
 not a count of executed instructions: warmed affine reuse performs no new
-transforms, while the present native Jacobian loop repeats a scalar contraction
+transforms, while the original native Jacobian loop repeated a scalar contraction
 for each vector component. With $n_b$ scalar basis functions, $m$ field
 components and reference/embedding dimensions $d=s$, that loop contains
 $N_qn_bmsd$ products. At order 16, the degree-one real quadrilateral/pyramid
-sweeps use 81/729 points and 4/5 scalar basis functions. Their current native
-Jacobian contraction counts are 2,592/98,415, and their measured times are
+sweeps use 81/729 points and 4/5 scalar basis functions. Their native Jacobian
+contraction counts before scalar-gradient reuse were 2,592/98,415, and their
+measured times were
 10.42/197.98 microseconds: approximately 38.0 times the contraction work and
 19.0 times the elapsed time.
 
@@ -1006,6 +1007,96 @@ repair. Geometry mutation invalidation and remapped-point provenance are not
 certified by these fixed-chart cases. Evidence and matched baseline headers are
 retained under
 `build-convergence/certification/assembly-gradient-profile-20261014/`.
+
+### Native P1 Jacobian scalar-gradient contraction
+
+The vector basis has the product form $\psi_{v,c}=\hat\varphi_v e_c$.
+With reference dimension $d$, ambient dimension $s$ and $m$ field components,
+the physical derivative is
+
+$$
+(J\psi_{v,c})_{rj}=\delta_{rc}g_{v,j},\qquad
+g_{v,j}=\sum_{k=0}^{d-1}\partial_k\hat\varphi_v\,(J^+)_{kj}.
+$$
+
+The contracted scalar gradient does not depend on the component index $c$.
+Native P1 binding now computes it once per scalar basis function and copies
+it into each component's active row. The reference and physical scratch vectors
+use existing fixed-capacity spatial storage rather than a heap vector of all
+reference gradients. The summation order and complete zero rows are preserved;
+no physical cache, ownership rule, collective or backend-specific path is added.
+
+For a non-reused sweep with $N_q$ samples and $n_b$ scalar basis functions,
+the contraction products decrease from $N_qn_bmsd$ to $N_qn_bsd$.
+Output zeroing and owned basis extraction still scale with the full vector
+Jacobian storage; the contraction reduction is not a bound on total speedup.
+Warmed affine-simplex reuse remains unchanged. The existing
+`RodinPhysicalGradientBenchmarks` and `RodinQuadratureExpressionBenchmarks`
+retain their module-level registrations and stay outside CTest. The former
+isolates derivative binding/extraction; the latter measures the local
+symmetric-gradient matrix consumer, not global sparse assembly or solving.
+
+The independent P1 regression contracts the public vector-basis derivatives
+with the geometric inverse without assuming the production component layout.
+Every entry must agree exactly for real/complex fields, one through three
+components, all seven positive-dimensional geometries with native and quadratic
+maps, embedded segments and surfaces, and points. Indexed and direct bindings
+are both exercised. A deliberately zeroed production contraction was observed
+to fail this regression before the correct implementation was restored.
+
+Matched LLVM 19 measurements use `RelWithDebInfo`, two OpenMP threads, five
+repetitions, 0.05 seconds per derivative selection and 0.1 seconds per consumer
+selection. All 126 selected derivative cases and fourteen real/complex P1
+consumer cases pass their numerical guards. Non-reused native/default and
+identity-map cases have median after/before CPU ratios 0.725 and 0.730;
+warmed affine-simplex medians are 0.997 and 1.001. Unchanged H1 degree-one
+controls have median 1.003. These are ratios over the stated registrations,
+not weights for a complete assembly workload.
+
+The real, default-map, order-sixteen preparation measurements are:
+
+| Geometry | Samples | Scalar basis functions | Field components | CPU before / after (microseconds) |
+| --- | ---: | ---: | ---: | ---: |
+| Quadrilateral | 81 | 4 | 2 | 10.70 / 7.60 |
+| Pyramid | 729 | 5 | 3 | 192.90 / 137.30 |
+| Hexahedron | 729 | 8 | 3 | 317.88 / 245.55 |
+| Wedge | 477 | 6 | 3 | 152.60 / 110.68 |
+
+The remaining pyramid/quadrilateral raw ratio is approximately 18.1, but this
+is not equal work: their new contraction counts are 32,805/1,296 (ratio 25.3),
+and full Jacobian storage/extraction counts differ by a factor of approximately
+38.0. Reference functions and matrix dimensions also differ. The native
+Instruments captures select 1,864/3,121 binding samples before/after; allocation
+frames occur in 139/0 selected samples. Reference-derivative and zero-fill
+categories remain and overlap their owning methods. Sample fractions are not
+elapsed-time fractions, allocation counts or directly comparable CPU totals.
+
+The symmetric-gradient local matrix consumer has CPU ratios 0.887/0.878 on
+real/complex quadrilaterals, 0.916/0.947 on pyramids, 0.935/0.971 on hexahedra
+and 0.900/0.925 on wedges. Simplex ratios range from 0.975 to 1.010. Smaller
+consumer gains are consistent with unchanged local matrix contraction and
+geometric preparation; no global assembly or solver gain is claimed.
+
+Six longer controls run in before/after/after/before order at 0.2 seconds and
+five repetitions. Pooled quadrilateral/pyramid/hexahedron preparation CPU
+ratios are 0.731/0.724/0.751. The selected complex segment cache-hit ratios
+are 1.037/1.024 for default/identity maps, with an unchanged H1 control at
+1.007: no universal cache-hit speedup or no-regression claim is made.
+Disassembly establishes a larger complex function frame (272 to 432 bytes)
+and newly emitted stack-canary loads/checks, including on cache hits. Those
+instructions establish added fast-path work, but do not isolate its exact
+latency from register allocation or code layout. In-place contraction using
+existing result storage remains a candidate for reducing this stack cost;
+stack-protection flags are not weakened.
+
+Final qualification includes 81 affected unit checks and 630 derivative
+selections per optimized build, the distributed state regression at one
+through four ranks in each build, and ten native/OpenMP linear-elasticity
+checks per build: all seven affine P1 patches and the segment/triangle/
+quadrilateral three-level P1 rate tests. Higher-dimensional rate tests were
+not rerun for this batch. Binaries, JSON measurements, compressed mutation
+failure output and Instruments captures are retained locally under
+`build-convergence/certification/p1-jacobian-contraction-20261014/`.
 
 ### Spatial dot batch protocol
 
