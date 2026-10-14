@@ -2869,6 +2869,42 @@ accelerated three-dimensional reductions. Moving policy selection into the
 assembly consumer is being investigated separately, including its remaining
 two-dimensional code-generation effects and backend recertification.
 
+A narrower source control dispatches only the test--trial pair loop, leaving
+mapping and coefficient preparation outside the templated closure. Native
+before/after/after/before measurements, pooling ten CPU samples per version
+with a 0.2 s minimum, give the following complete retained-form assembly times.
+
+| Degree / coefficient | Triangle before (ms) | Triangle candidate (ms) | Tetrahedron before (ms) | Tetrahedron candidate (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| P1 / constant | 0.4735 | 0.4853 | 2.4357 | 1.3127 |
+| P1 / field | 0.7637 | 0.7732 | 3.7876 | 2.1006 |
+| H1 degree 2 / constant | 2.9768 | 3.1164 | 35.9096 | 17.7227 |
+| H1 degree 2 / field | 6.0028 | 6.4969 | 76.7471 | 40.6305 |
+
+The 3D reductions of 44.5--50.6% do not justify accepting the accompanying
+2D increases of 1.2--8.2%. Removing three-column dispatch while retaining the
+closure gives quadratic 2D controls of 2.9273 to 3.0195 ms for constant weights
+and 5.9046 to 5.9626 ms for field weights in a separate counterbalanced run.
+The narrower control therefore does not establish that shape dispatch alone
+causes the entire 2D change. Native compiler missed-inline reports do not
+identify a rejected pair closure in the inspected constant quadratic kernel;
+an out-of-line closure call is not an established explanation.
+
+An Instruments recording of the dynamic-only control selects 7,016 sample-ms
+under the quadratic constant-coefficient driver and elasticity kernel. Eigen
+reduction frames account for 3,039 leaf sample-ms. Inline debug-frame attribution
+does not prove a newly introduced function call, and these sample totals are
+not accepted timing comparisons. The original source expression is retained;
+the mixed-dimensional tradeoff remains an open code-generation investigation.
+All benchmark protocols remain opt-in, outside CTest and CI timing gates.
+
+Constant-vector kernel coverage additionally checks $P_0$ and $P_{0g}$ on all
+seven positive-dimensional geometries with native and quadratic maps and
+real/complex coefficients. Every entry must be exactly zero independently of
+the derivative-based oracle. A deliberately injected nonzero entry is rejected
+by the new segment case. These checks certify zero derivatives, not broken
+constant-space conformity or convergence.
+
 The expanded native benchmark, with five 0.2 s repetitions, measured the
 following median CPU times. KnownColumns includes the caller's batch-level
 shape decision; these are separate calling protocols, not a changed public

@@ -150,6 +150,8 @@ namespace Rodin::Tests::Unit
         lambdaCalls = muCalls = 0;
         typename Form::Kernel::MatrixType actual;
         selected.compute(actual, cell);
+        if (space.getFiniteElement(cell.getDimension(), cell.getIndex()).getOrder() == 0)
+          EXPECT_TRUE((actual.array() == Scalar(0)).all());
         const size_t order =
           2 * space.getFiniteElement(cell.getDimension(), cell.getIndex()).getOrder();
         const auto& formula =
@@ -235,6 +237,40 @@ namespace Rodin::Tests::Unit
         {
           checkWeighting<true, true>(linear);
           checkWeighting<true, true>(quadratic);
+        }
+      };
+      check.template operator()<Real>();
+      check.template operator()<Complex>();
+    }
+  }
+
+  /**
+   * @brief Constant vector bases retain exactly zero elasticity kernels.
+   *
+   * Broken and global constants exercise small pair counts independently of
+   * the physical dimension. The original derivative-based oracle checks native
+   * and quadratic maps, real/complex coefficients, state changes and copies.
+   * This is a local zero-derivative contract, not a conforming approximation
+   * or convergence claim for the broken constant space.
+   */
+  TEST_P(LinearElasticityKernelTest, ConstantVectorSpaces)
+  {
+    for (const bool curved : {false, true})
+    {
+      auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(3);
+      Convergence::CurvedGeometry geometry(mesh);
+      if (curved)
+        geometry.template install<2>();
+      const auto check = [&]<class Scalar>() {
+        P0<Math::SpatialVector<Scalar>> broken(mesh, mesh.getSpaceDimension());
+        P0g<Math::SpatialVector<Scalar>, LocalMesh> global(
+          mesh, mesh.getSpaceDimension());
+        checkWeighting(broken);
+        checkWeighting(global);
+        if constexpr (std::is_same_v<Scalar, Complex>)
+        {
+          checkWeighting<true>(broken);
+          checkWeighting<true>(global);
         }
       };
       check.template operator()<Real>();
