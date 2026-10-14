@@ -949,6 +949,9 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
   void MMG5::destroyMesh(MMG5_pMesh mesh)
   {
     assert(mesh);
+    // The bundled MMG cleanup omits the level-set base-reference array.
+    if (mesh->info.br)
+      MMG5_DEL_MEM(mesh, mesh->info.br);
     if (isSurfaceMesh(mesh))
     {
       MMGS_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);

@@ -492,6 +492,11 @@ geometry, and backend variants explicitly. Current audit findings include:
   lifecycle cases also pass under AddressSanitizer, and deliberate adjacency
   and coordinate corruption fail the new oracle. Sanitizer and mutation
   profiles are excluded from the production coverage merge.
+  Leak-enabled CI also exposed omitted cleanup of level-set base-reference
+  arrays in the bundled MMG dependency. The material-copy and repeated volume
+  cut leaks were reproduced locally; Rodin now releases the array before
+  native mesh cleanup. All 115 cases pass individually with AddressSanitizer
+  and leak detection enabled.
 - Flow boundary starts: signed inward characteristics on every boundary face
   of all seven positive-dimensional cell geometries agree with exact constant
   velocity trajectories. Outward starts stop immediately at the same physical
