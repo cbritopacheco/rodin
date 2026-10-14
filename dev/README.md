@@ -53,6 +53,21 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Native MEDIT loading: scalar, vector and rectangular matrix P1/quadratic
+  H1 fields are checked against analytic values on all eight cell families
+  in real and complex arithmetic. Malformed metadata and truncated payloads
+  preserve existing coefficients; repeated failures have stable member
+  diagnostics and valid input recovers on the same loader. P1 now validates
+  and stages its complete payload before committing. H1 uses native
+  interpolation of the parsed P1 field, replacing obsolete scalar-only DOF
+  injection and covering hexahedra. Truncated P1 overwrite and the Debug H1
+  vector node-count assertion were reproduced before repair. All twelve
+  cases pass separately in Release and Debug; scaled production payloads fail
+  every analytic oracle.
+  Fresh CMake builds pass all twelve new cases and all 22 existing P1 and
+  spatial-matrix I/O cases, each executed separately. Explicit real/complex
+  PETSc CI also builds and selects the I/O, affine-constraint and nonlocal
+  regression targets.
 - PETSc MEDIT vertex output: scalar, vector and rectangular matrix P1 and
   quadratic H1 fields retain their analytic affine values in real and complex
   builds. Public printer dispatch emits the expected version, dimension,
