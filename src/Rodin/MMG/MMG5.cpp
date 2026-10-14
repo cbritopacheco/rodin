@@ -85,11 +85,15 @@ namespace Rodin::MMG
     // Fields which have been deprecated (or seem to have anyways)
     dst->ipar = nullptr;
 
-    // int* : mesh->adja
+    // MMG5_int* : mesh->adja
     if (src->adja)
     {
-      MMG5_SAFE_CALLOC(dst->adja, 4 * src->ne + 5, int, /* No op */);
-      std::copy(src->adja, src->adja + 4 * src->ne + 5, dst->adja);
+      const size_t entriesPerCell = src->dim == 2 || isSurfaceMesh(src) ? 3 : 4;
+      const size_t cellCount = entriesPerCell == 3 ? src->nt : src->ne;
+      constexpr size_t adjacencyPadding = 5;
+      const size_t adjacencySize = entriesPerCell * cellCount + adjacencyPadding;
+      MMG5_SAFE_CALLOC(dst->adja, adjacencySize, MMG5_int, /* No op */);
+      std::copy(src->adja, src->adja + adjacencySize, dst->adja);
     }
     else
       dst->adja = nullptr;

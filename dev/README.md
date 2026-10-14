@@ -479,6 +479,16 @@ geometry, and backend variants explicitly. Current audit findings include:
   independent ownership after source mutation and destruction. Native material
   queries recover the prescribed parent and split references. All 110 MMG
   tests pass; copied sizing and material-reference mutations fail the new test.
+- MMG cached adjacency and solution ownership: planar triangles, embedded
+  surface triangles and tetrahedra retain independent cached neighbors after
+  source destruction, checked against Rodin face incidence and exact geometric
+  measures. The tetrahedron-only adjacency allocation was observed overrunning
+  its buffer under AddressSanitizer before the repair. Named scalar/vector/tensor
+  solutions preserve independent payloads and names; empty solutions copy and
+  swap ownership correctly. All 115 MMG cases pass serially, the three new
+  lifecycle cases also pass under AddressSanitizer, and deliberate adjacency
+  and coordinate corruption fail the new oracle. Sanitizer and mutation
+  profiles are excluded from the production coverage merge.
 - Flow boundary starts: signed inward characteristics on every boundary face
   of all seven positive-dimensional cell geometries agree with exact constant
   velocity trajectories. Outward starts stop immediately at the same physical

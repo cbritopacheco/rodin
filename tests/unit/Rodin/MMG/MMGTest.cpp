@@ -3455,3 +3455,166 @@ TEST(Rodin_MMG_LevelSetDiscretizer, AffineSurfaceCutPreservesAreaAndContour)
   EXPECT_NEAR(area, 1, 1e-10);
   EXPECT_NEAR(contourLength, 1, 1e-10);
 }
+
+/// @brief Native copies retain cached neighbors and geometry after source destruction.
+TEST(MMG5Lifecycle, CachedAdjacencyCopiesMatchTopology)
+{
+  using Native = MMG::MMG5;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  for (const size_t configuration : {0u, 1u, 2u})
+  {
+    SCOPED_TRACE(configuration);
+    auto mesh = [&]() -> LocalMesh {
+      if (configuration == 1)
+      {
+        return LocalMesh::Builder()
+          .initialize(3)
+          .nodes(4)
+          .vertex({0, 0, 0})
+          .vertex({1, 0, 1})
+          .vertex({1, 1, 2})
+          .vertex({0, 1, 1})
+          .polytope(Polytope::Type::Triangle, {0, 1, 2})
+          .polytope(Polytope::Type::Triangle, {0, 2, 3})
+          .finalize();
+      }
+      auto grid = configuration == 0
+        ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3})
+        : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+      grid.scale(Real(0.5));
+      return grid;
+    }();
+    const size_t dimension = mesh.getDimension();
+    mesh.getConnectivity().compute(dimension, dimension - 1);
+    mesh.getConnectivity().compute(dimension - 1, dimension);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+      mesh.setAttribute(cell.key(), 17 + cell->getIndex());
+    Owner source(Native::rodinToMesh(mesh), Native::destroyMesh);
+    auto neighbors = [configuration](MMG5_pMesh native, MMG5_int cell, MMG5_int* result) {
+      if (configuration == 0)
+        return MMG2D_Get_adjaTri(native, cell, result);
+      if (configuration == 1)
+        return MMGS_Get_adjaTri(native, cell, result);
+      return MMG3D_Get_adjaTet(native, cell, result);
+    };
+    std::array<MMG5_int, 4> first{};
+    ASSERT_EQ(neighbors(source.get(), 1, first.data()), 1);
+    ASSERT_NE(source->adja, nullptr);
+    Owner copy(
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+    ASSERT_NE(copy, nullptr);
+    Native::copyMesh(source.get(), copy.get());
+    ASSERT_NE(copy->adja, nullptr);
+    EXPECT_NE(copy->adja, source->adja);
+    const size_t faces = dimension + 1;
+    const size_t count = faces * mesh.getCellCount() + 5;
+    for (size_t slot = 0; slot < count; ++slot)
+      EXPECT_EQ(copy->adja[slot], source->adja[slot]);
+    const auto cached = copy->adja[1];
+    source->adja[1] = cached == 0 ? 1 : 0;
+    EXPECT_EQ(copy->adja[1], cached);
+    source.reset();
+    for (Index cell = 0; cell < mesh.getCellCount(); ++cell)
+    {
+      std::array<MMG5_int, 4> adjacent{};
+      ASSERT_EQ(neighbors(copy.get(), cell + 1, adjacent.data()), 1);
+      FlatSet<MMG5_int> actual, expected;
+      for (size_t face = 0; face < faces; ++face)
+      {
+        if (adjacent[face] != 0)
+          actual.insert(adjacent[face]);
+      }
+      for (const auto face :
+        mesh.getConnectivity().getIncidence(dimension, dimension - 1).at(cell))
+      {
+        for (const auto other :
+          mesh.getConnectivity().getIncidence(dimension - 1, dimension).at(face))
+        {
+          if (other != cell)
+            expected.insert(other + 1);
+        }
+      }
+      EXPECT_EQ(actual, expected);
+    }
+    const auto restored = Native::meshToRodin(copy.get());
+    EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
+    for (Index cell = 0; cell < mesh.getCellCount(); ++cell)
+      EXPECT_EQ(
+        restored.getAttribute(dimension, cell), mesh.getAttribute(dimension, cell));
+    const Real expectedMeasure = configuration == 1 ? std::sqrt(Real(3)) : Real(1);
+    const Real measure = dimension == 3 ? restored.getVolume() : restored.getArea();
+    EXPECT_NEAR(measure, expectedMeasure, 1e-12);
+  }
+}
+
+/// @brief Copied solution payloads and file names remain owned after releasing the source.
+TEST(MMG5Lifecycle, NamedSolutionCopyOwnsPayloadAndNames)
+{
+  using Native = MMG::MMG5;
+  using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  using SolOwner = std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)>;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  MeshOwner native(Native::rodinToMesh(mesh), Native::destroyMesh);
+  for (const size_t components : {1u, 2u, 3u})
+  {
+    SolOwner source(
+      Native::createSolution(native.get(), components), Native::destroySolution);
+    ASSERT_NE(source, nullptr);
+    ASSERT_EQ(MMG2D_Set_inputSolName(native.get(), source.get(), "metric.input.sol"), 1);
+    ASSERT_EQ(
+      MMG2D_Set_outputSolName(native.get(), source.get(), "metric.output.sol"), 1);
+    const size_t count = components * (source->np + 1);
+    for (size_t index = 0; index < count; ++index)
+      source->m[index] = Real(0.25) * index;
+    SolOwner copy(
+      static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), Native::destroySolution);
+    ASSERT_NE(copy, nullptr);
+    Native::copySolution(source.get(), copy.get());
+    EXPECT_NE(copy->m, source->m);
+    EXPECT_NE(copy->namein, source->namein);
+    EXPECT_NE(copy->nameout, source->nameout);
+    EXPECT_EQ(copy->np, source->np);
+    EXPECT_EQ(copy->size, source->size);
+    source->m[1] = -1;
+    source->namein[0] = 'X';
+    source->nameout[0] = 'Y';
+    source.reset();
+    for (size_t index = 0; index < count; ++index)
+      EXPECT_EQ(copy->m[index], Real(0.25) * index);
+    EXPECT_STREQ(copy->namein, "metric.input.sol");
+    EXPECT_STREQ(copy->nameout, "metric.output.sol");
+  }
+}
+
+/// @brief Empty optional solutions copy and exchange ownership with populated solutions.
+TEST(MMG5Lifecycle, EmptySolutionCopiesAndSwaps)
+{
+  using Native = MMG::MMG5;
+  using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  using SolOwner = std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)>;
+  MeshOwner emptyMesh(Native::createMesh(2, 2), Native::destroyMesh);
+  SolOwner empty(Native::createSolution(emptyMesh.get(), 1), Native::destroySolution);
+  ASSERT_NE(empty, nullptr);
+  EXPECT_EQ(empty->np, 0);
+  EXPECT_EQ(empty->m, nullptr);
+  SolOwner copied(
+    static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), Native::destroySolution);
+  Native::copySolution(empty.get(), copied.get());
+  EXPECT_EQ(copied->np, 0);
+  EXPECT_EQ(copied->size, 1);
+  EXPECT_EQ(copied->m, nullptr);
+  EXPECT_EQ(copied->namein, nullptr);
+  EXPECT_EQ(copied->nameout, nullptr);
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  MeshOwner native(Native::rodinToMesh(mesh), Native::destroyMesh);
+  SolOwner populated(Native::createSolution(native.get(), 1), Native::destroySolution);
+  populated->m[1] = Real(1.5);
+  const auto payload = populated->m;
+  Native::swapSolution(copied.get(), populated.get());
+  EXPECT_EQ(copied->m, payload);
+  EXPECT_EQ(copied->np, mesh.getVertexCount());
+  EXPECT_EQ(copied->m[1], Real(1.5));
+  EXPECT_EQ(populated->np, 0);
+  EXPECT_EQ(populated->m, nullptr);
+}
