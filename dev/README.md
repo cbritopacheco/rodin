@@ -261,6 +261,9 @@ geometry, and backend variants explicitly. Current audit findings include:
   instantiation exposed eight unsupported mixed-scalar in-place spatial-matrix
   products; assigning the promoted product repairs both integrator families.
   Doubling the generic distinct-space shear term fails the strain-work oracle.
+  Debug CI exposed a constructor assertion that rejected the implemented
+  distinct-space path. Both real/complex aborts were reproduced locally;
+  the constructor now permits distinct spaces as the assembly code requires.
 - Cardiac recruitment: all five linear/constant segments and the two inactive
   tails satisfy independent active-stiffness and active-stress residual and
   tangent formulas. The instantaneous relaxation limit checks its algebraic

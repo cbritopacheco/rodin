@@ -94,6 +94,9 @@ namespace Rodin::Variational
     public:
       /**
        * @brief Constructs the linear elasticity integrator.
+       *
+       * Trial and test spaces may be distinct instances on the integration
+       * mesh. Matrix symmetry is used only when the spaces coincide.
        * @param u Trial function (displacement)
        * @param v Test function
        * @param lambda First Lamé parameter function
@@ -108,9 +111,7 @@ namespace Rodin::Variational
           m_testfes(v.getFiniteElementSpace()),
           m_qf(nullptr),
           m_quadrature(nullptr)
-      {
-        assert(u.getFiniteElementSpace() == v.getFiniteElementSpace());
-      }
+      {}
 
       /**
        * @brief Copy constructor.
