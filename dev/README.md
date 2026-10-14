@@ -53,6 +53,19 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Single-field PETSc targets: scalar, vector and rectangular matrix P1 and
+  quadratic H1 fields match exact interval mass matrices, load moments and
+  nonzero boundary values. Coordinate/component labels recover the nodal map
+  without assuming coefficient ordering. Complex cases use non-real mass
+  coefficients and boundary values. Direct and preassembled contributions,
+  cloned backends, repeated full assembly and separate matrix/RHS updates
+  preserve their exact contracts. All six scalar/backend/thread combinations
+  pass in Release, assertion-enabled and AddressSanitizer builds; fresh CMake
+  checks also pass individually. Every range/degree variant rejects doubled
+  partial boundary diagonals in both scalar and backend modes. The GCC/AArch64
+  P1 vector-load warning reflects its unconstrained byte-sized length bound
+  in Release; the configured dimension two is within capacity three, and the
+  focused path also passes O3/NDEBUG AddressSanitizer checks in both scalar modes.
 - Distributed mixed PETSc targets: the local exact block oracle now gathers
   owned matrix rows and vector entries across the system communicator. Real
   and complex runs at one, two, three, four and eight ranks check full,
@@ -547,6 +560,11 @@ geometry, and backend variants explicitly. Current audit findings include:
 - IDRstab's wrapper names `Eigen::IDRSTABL`, which is absent in Eigen 3.4's
   unsupported iterative solver module. This remains an API/dependency gap,
   rather than a variant certified by the runtime coverage percentage.
+- The legacy `Variational/TraceOperator.h` wrapper cannot be included against
+  the current templated `FunctionBase`. A fresh standalone compile, including
+  `Variational.h` first, fails at its template/type mismatch. Its documentation
+  example does not establish an available API; the absent-source audit records
+  this wrapper separately from the runtime line percentage.
 - Nonlocal `Potential` quadrature currently specializes matching P1 trial/test
   families. Instantiating a P0 trial with a P1 test fails because its
   `QuadratureRule` is undefined; mixed P0/P1 nonlocal forms are an API gap,

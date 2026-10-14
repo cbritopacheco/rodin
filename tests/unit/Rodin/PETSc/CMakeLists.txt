@@ -269,6 +269,15 @@ set_tests_properties(RodinPETScMixedTargetAssemblyTest PROPERTIES
   LABELS "unit;petsc" TIMEOUT 120)
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScMixedTargetAssemblyTest)
 
+add_executable(RodinPETScSingleFieldTargetAssemblyTest SingleFieldTargetAssemblyTest.cpp)
+target_link_libraries(RodinPETScSingleFieldTargetAssemblyTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScSingleFieldTargetAssemblyTest
+  COMMAND $<TARGET_FILE:RodinPETScSingleFieldTargetAssemblyTest>)
+set_tests_properties(RodinPETScSingleFieldTargetAssemblyTest PROPERTIES
+  LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScSingleFieldTargetAssemblyTest)
+
 add_executable(RodinPETScSingleFieldConstraintTest SingleFieldConstraintTest.cpp)
 target_link_libraries(RodinPETScSingleFieldConstraintTest PRIVATE
   GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
