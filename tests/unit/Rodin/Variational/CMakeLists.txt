@@ -475,6 +475,11 @@ gtest_discover_tests(RodinVariationalFlowTest
     LABELS unit
 )
 
+add_executable(RodinVariationalFlowCrossingTest FlowCrossingTest.cpp)
+target_link_libraries(RodinVariationalFlowCrossingTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinVariationalFlowCrossingTest PROPERTIES LABELS unit TIMEOUT 120)
+
 add_executable(RodinVariationalJumpTest JumpTest.cpp)
 target_link_libraries(RodinVariationalJumpTest
   PUBLIC

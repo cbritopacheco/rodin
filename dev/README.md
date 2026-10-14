@@ -1080,3 +1080,27 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   byte-identical to run102 for this batch; failed-oracle, sanitizer and mutation
   profiles are excluded. The subsequent Flow repair requires separate fresh
   observations before its coverage can be certified.
+
+- Flow boundary and scalar regressions: a continuing boundary callback that
+  changes neither time, cell, coordinates nor correction now stops at a
+  zero-time boundary hit, using the existing finite-time progress criterion.
+  The unchanged implementation fails the boundary oracle in Debug and Release;
+  its interior-start counterpart already passes. Complex scalar composition
+  previously fails to compile because the exit value fixes the deduced return
+  type to Real. The zero value now has the type of operand plus real correction,
+  retaining Boolean-to-Real promotion. Real, complex, Boolean, copy and correction
+  checks pass in all fourteen Debug, Release and native ASan/LSan cases.
+  Private guard removal fails the boundary case; doubled field evaluation fails
+  both scalar-composition cases. The three unaffected mutation counterparts pass.
+  Seven further oblique-characteristic cases cross internal faces and corners on
+  all supported positive-dimensional cell geometries. Exact straight trajectories
+  and affine field values agree in both time directions in Debug, Release and
+  native ASan/LSan, one case at a time. Halving the returned reference
+  coordinates fails every geometry's physical-position oracle in isolation.
+  All old Flow hits and function hits are retired before collecting matching
+  observations against snapshot run114. The 235-report run118 audit measures
+  37,497 of 39,637 production lines (\(94.6010\%\)); no nonproduction or
+  missing-source records remain. Newly exposed executable lines are retained,
+  leaving 159 further hits needed for \(95\%\). Sanitizer, pre-fix, diagnostic
+  and mutation profiles remain excluded. Remote Style, Documentation and
+  Installation checks pass for head 518e2b172; Build and Tests remain queued.

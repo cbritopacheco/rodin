@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <type_traits>
 
 #include "Rodin/Variational.h"
 #include "Rodin/Advection/Lagrangian.h"
@@ -364,4 +365,95 @@ TEST(Rodin_Variational_Flow, BoundaryFaceStartsRespectSignedCharacteristics)
     }
     EXPECT_GT(checked, 0u);
   }
+}
+
+/// @brief A continuing boundary policy must make progress or the trace stops at the hit.
+TEST(Rodin_Variational_Flow, ContinuingBoundaryPolicyWithoutProgressStops)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  mesh.getConnectivity().compute(0, 1);
+  const auto cell = mesh.getPolytope(1, 0);
+  const auto operand = RealFunction([](const Point& point) { return 2 + 3 * point(0); });
+  const auto velocity = [](const Point&) { return Math::SpatialVector<Real>{-1}; };
+  constexpr size_t WorkLimit = 64;
+  for (const Real coordinate : {0.0, 0.4})
+  {
+    SCOPED_TRACE(coordinate);
+    const Point start(*cell, Math::SpatialPoint{coordinate});
+    size_t calls = 0;
+    const auto unchanged = [&calls](const BoundaryHit&) {
+      ++calls;
+      return true;
+    };
+    Flow flow(1.0, operand, velocity, Math::RungeKutta::RK4{}, unchanged);
+    flow.setMaxOuterIterations(WorkLimit).setStepSafety(1);
+    const auto trace = flow.trace(start);
+    EXPECT_TRUE(trace.exited());
+    EXPECT_NEAR(trace.getTime(), 1 - coordinate, 1e-6);
+    EXPECT_NEAR(trace.getPoint()(0), 0, 1e-6);
+    EXPECT_DOUBLE_EQ(trace.getCorrection(), 0);
+    EXPECT_GE(calls, 1u);
+    EXPECT_LE(calls, 2u);
+    calls = 0;
+    Flow reconstructed(1.0, operand, velocity, flow.getStep(), flow.getBoundaryPolicy());
+    reconstructed.setMaxOuterIterations(WorkLimit).setStepSafety(1);
+    EXPECT_DOUBLE_EQ(reconstructed(start), 0);
+    EXPECT_GE(calls, 1u);
+    EXPECT_LE(calls, 2u);
+  }
+}
+
+/// @brief Complex scalar functions compose with real characteristics and retain typed boundary zeros.
+TEST(Rodin_Variational_Flow, ComplexScalarCompositionAndBoundaryCorrection)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
+  mesh.getConnectivity().compute(0, 1);
+  const auto operand = ComplexFunction(
+    [](const Point& point) { return Complex(2, -3) + Complex(1, 2) * point(0); });
+  const auto velocity = [](const Point&) { return Math::SpatialVector<Real>{1}; };
+  const auto cell = mesh.getPolytope(1, 1);
+  const Point start(*cell, Math::SpatialPoint{0.4});
+  for (const Real time : {-0.2, 0.2})
+  {
+    Flow flow(time, operand, velocity);
+    const Complex expected = Complex(2, -3) + Complex(1, 2) * (start(0) + time);
+    EXPECT_LT(std::abs(flow(start) - expected), 1e-6);
+    std::unique_ptr<decltype(flow)> clone(flow.copy());
+    EXPECT_LT(std::abs((*clone)(start)-expected), 1e-6);
+  }
+  const auto firstCell = mesh.getPolytope(1, 0);
+  const Point nearBoundary(*firstCell, Math::SpatialPoint{0.4});
+  const auto outward = [](const Point&) { return Math::SpatialVector<Real>{-1}; };
+  Flow stopped(1.0, operand, outward);
+  EXPECT_EQ(stopped(nearBoundary), Complex(0));
+  const auto consumeRemainder = [](const BoundaryHit& hit) {
+    hit.tau = 0;
+    hit.correction += 2.5;
+    return true;
+  };
+  Flow completed(1.0, operand, outward, Math::RungeKutta::RK4{}, consumeRemainder);
+  EXPECT_LT(std::abs(completed(nearBoundary) - Complex(4.5, -3)), 1e-6);
+}
+
+/// @brief Boolean operands keep their existing real promotion under additive boundary correction.
+TEST(Rodin_Variational_Flow, BooleanOperandPreservesScalarPromotion)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  mesh.getConnectivity().compute(0, 1);
+  const auto cell = mesh.getPolytope(1, 0);
+  const Point start(*cell, Math::SpatialPoint{0.4});
+  const BooleanFunction operand(true);
+  const auto velocity = [](const Point&) { return Math::SpatialVector<Real>{-1}; };
+  Flow interior(0.1, operand, velocity);
+  static_assert(std::is_same_v<decltype(interior(start)), Real>);
+  EXPECT_DOUBLE_EQ(interior(start), 1);
+  Flow stopped(1.0, operand, velocity);
+  EXPECT_DOUBLE_EQ(stopped(start), 0);
+  const auto correction = [](const BoundaryHit& hit) {
+    hit.tau = 0;
+    hit.correction += 0.5;
+    return true;
+  };
+  Flow completed(1.0, operand, velocity, Math::RungeKutta::RK4{}, correction);
+  EXPECT_DOUBLE_EQ(completed(start), 1.5);
 }
