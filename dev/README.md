@@ -311,6 +311,16 @@ geometry, and backend variants explicitly. Current audit findings include:
   tangent formulas. The instantaneous relaxation limit checks its algebraic
   residual and both derivatives. Individual active-state entries agree with
   central finite differences; removing the relaxation strain derivative fails.
+- Geometry metadata ownership: assigning sparse attributes over populated
+  storage replaces both growing and shrinking extents, preserves engaged
+  zero and maximum labels, and remains independent after source mutation
+  and destruction. Interface tracing respects current face selection and
+  unordered material pairs, preserves exterior faces, and skips missing
+  material attributes. Embedded line and surface samples own cached
+  Jacobians and reference coordinates after their inputs and formulas die;
+  physical maps, pseudoinverses and Gram metrics agree with affine formulas.
+  All three cases pass individually with assertions and sanitizer checks.
+  Doubling the production embedded determinant fails the metric oracle.
 - Matrix derivative and Jacobian lifecycle: real/complex P0, P0g, P1 and
   quadratic H1 owning clones preserve constant/affine derivatives on all
   seven cell geometries. Every coordinate direction agrees with its analytic
