@@ -385,14 +385,15 @@ namespace Rodin::Variational
    */
   template <class DiffusionDerived, class C, class Solution, class TrialFES,
     class TestFES>
-    requires(!std::is_base_of_v<FormLanguage::Base, C>)
   HelmholtzForm(const FunctionBase<DiffusionDerived>& a, const C& c,
     const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
-      DiffusionDerived, typename FormLanguage::FunctionDerived<RealFunction<C>>::Type>;
+      DiffusionDerived,
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, C>,
+        FormLanguage::FunctionDerived<RealFunction<C>>>::Type>;
 
   /**
    * @brief Deduction guide for a lifted diffusion and a function mass coefficient.
@@ -402,14 +403,15 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class A, class MassDerived, class Solution, class TrialFES, class TestFES>
-    requires(!std::is_base_of_v<FormLanguage::Base, A>)
   HelmholtzForm(const A& a, const FunctionBase<MassDerived>& c,
     const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<A>>::Type, MassDerived>;
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, A>,
+        FormLanguage::FunctionDerived<RealFunction<A>>>::Type,
+      MassDerived>;
 
   /**
    * @brief Deduction guide for two lifted coefficients.
@@ -419,16 +421,18 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class A, class C, class Solution, class TrialFES, class TestFES>
-    requires(!std::is_base_of_v<FormLanguage::Base, A> &&
-              !std::is_base_of_v<FormLanguage::Base, C>)
   HelmholtzForm(const A& a, const C& c, const TrialFunction<Solution, TrialFES>& u,
     const TestFunction<TestFES>& v)
     -> HelmholtzForm<Solution, TrialFES, TestFES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<A>>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<C>>::Type>;
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, A> &&
+          !std::is_base_of_v<FormLanguage::Base, C>,
+        FormLanguage::FunctionDerived<RealFunction<A>>>::Type,
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, A> &&
+          !std::is_base_of_v<FormLanguage::Base, C>,
+        FormLanguage::FunctionDerived<RealFunction<C>>>::Type>;
 }
 
 #endif

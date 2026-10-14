@@ -295,7 +295,8 @@ namespace Rodin::Variational
        * @param[in] v Test function.
        */
       template <class L>
-        requires std::is_same_v<CoefficientDerived,
+        requires(!std::is_base_of_v<FormLanguage::Base, L>) &&
+        std::is_same_v<CoefficientDerived,
           typename FormLanguage::FunctionDerived<RealFunction<L>>::Type>
       MassForm(const L& c, const TrialFunction<SolutionType, TrialFESType>& u,
         const TestFunction<TestFESType>& v)
@@ -478,14 +479,14 @@ namespace Rodin::Variational
    * @param v Test function.
    */
   template <class L, class Solution, class TrialFES, class TestFES>
-    requires(!std::is_base_of_v<FormLanguage::Base, L>)
   MassForm(const L& c, const TrialFunction<Solution, TrialFES>& u,
     const TestFunction<TestFES>& v)
     -> MassForm<Solution, TrialFES, TestFES,
       typename FormLanguage::NamedFormOperatorType<Solution,
         typename FormLanguage::Mult<typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type>::Type,
-      typename FormLanguage::FunctionDerived<RealFunction<L>>::Type>;
+      typename std::enable_if_t<!std::is_base_of_v<FormLanguage::Base, L>,
+        FormLanguage::FunctionDerived<RealFunction<L>>>::Type>;
 }
 
 #endif

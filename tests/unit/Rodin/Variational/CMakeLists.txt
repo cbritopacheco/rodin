@@ -1,5 +1,10 @@
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
+add_executable(RodinVariationalComplexNamedFormTest ComplexNamedFormTest.cpp)
+target_link_libraries(RodinVariationalComplexNamedFormTest PRIVATE
+  GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalComplexNamedFormTest PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalP1DerivativeTest P1DerivativeTest.cpp)
 target_link_libraries(RodinVariationalP1DerivativeTest PRIVATE
   GTest::gtest GTest::gtest_main Rodin::Variational)

@@ -119,7 +119,7 @@ namespace Rodin::Assembly
               for (Index c = 0; c < static_cast<Index>(cols.size()); ++c)
               {
                 buffer.emplace_back(static_cast<PetscInt>(rows[r]),
-                  static_cast<PetscInt>(cols[c]), Math::conj(local(r, c)));
+                  static_cast<PetscInt>(cols[c]), local(r, c));
               }
             }
           }

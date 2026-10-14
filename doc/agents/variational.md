@@ -47,6 +47,18 @@ Function value categories: `RealFunction`, `ComplexFunction`,
 values and lambdas lift implicitly (`RealFunction f = 1;`,
 `VectorFunction v = {f, g};`).
 
+Named-form numeric lifting must reject `FormLanguage::Base` arguments before
+instantiating `FunctionDerived<RealFunction<T>>`. A trailing deduction-guide
+return type needs an immediate-substitution guard around `FunctionDerived`
+itself: Clang 19 can instantiate that return type before checking a false
+head constraint. Numeric constructors also need the base-type exclusion as
+the first constraint, before querying the lifted type. Complex function
+coefficients must select the function path without being offered to
+`RealFunction`. The named-form complex regression checks function/function,
+both mixed function/value directions, and numeric/value construction against
+explicitly matched quadrature operators; this is not a continuum-exactness
+or refinement test.
+
 ## Shape functions and grading
 
 `ShapeFunctionBase<Derived, FES, SpaceType>` with
