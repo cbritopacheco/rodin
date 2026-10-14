@@ -9,6 +9,11 @@ gtest_discover_tests(RodinIOMeshLoaderTest
     LABELS unit
 )
 
+add_executable(RodinIOFileFormatTest FileFormatTest.cpp)
+target_link_libraries(RodinIOFileFormatTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::IO)
+gtest_discover_tests(RodinIOFileFormatTest PROPERTIES LABELS unit)
+
 add_executable(RodinIOH1GridFunctionIOTest H1GridFunctionIOTest.cpp)
 target_link_libraries(RodinIOH1GridFunctionIOTest
   PUBLIC

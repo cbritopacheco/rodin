@@ -149,7 +149,9 @@ namespace Rodin::IO
    * @param[in] fmt File format to output
    * @returns Reference to the output stream
    *
-   * Writes the string representation of the file format to the stream.
+   * Writes the name of a known file format, or the numeric value of an
+   * unrecognized format. Numeric fallback preserves diagnostics without
+   * inserting a null string into the stream.
    *
    * ## Example
    * ```cpp
@@ -159,7 +161,10 @@ namespace Rodin::IO
   inline
   std::ostream& operator<<(std::ostream& os, FileFormat fmt)
   {
-    os << toCharString(fmt);
+    if (const auto* name = toCharString(fmt))
+      os << name;
+    else
+      os << static_cast<int>(fmt);
     return os;
   }
 }

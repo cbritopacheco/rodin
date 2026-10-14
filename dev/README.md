@@ -418,6 +418,19 @@ geometry, and backend variants explicitly. Current audit findings include:
   37,161 measured lines with 34,826 hits (\(93.72\%\)); another 477 hits are
   required for \(95\%\) at this denominator. The corrected HDF5 affine oracle
   also passes separately with Release optimization.
+- File-format diagnostics: all known enum values retain their format names;
+  unknown values are streamed numerically instead of passing a null string
+  to the stream. Both regressions fail before the fix: the stream enters a
+  failed state and grid-function exceptions lose the rejected format value.
+  Scalar/vector fields retain their coefficients and create no output directory
+  after unsupported load/save requests. The native member-function context is
+  checked. Both cases pass individually in normal Debug, fresh Release CTest
+  and assertion-enabled ASan/LSan builds; all 38 existing grid-function cases
+  also pass individually in normal Debug. Every previous coverage record for
+  the changed formatter header is retired before fresh compiler notes are
+  captured. The matching-source merge covers 34,935 of 37,233 production lines
+  (\(93.83\%\)); the formatter header contributes 14 of 14 lines. Tests,
+  pre-fix failures and sanitizer profiles remain outside the measured sources.
 - Form ownership: real/complex P1 and quadratic H1 forms reject foreign trial
   and test contributions without changing the assembled mass operator or load.
   Addition/subtraction and linear assignment exercise named-trial and unnamed
