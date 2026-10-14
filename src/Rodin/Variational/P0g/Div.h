@@ -238,13 +238,15 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets the integration point the expression is evaluated at.
+       *
+       * The zero derivative is independent of operand values. Binding updates
+       * only this expression; the borrowed const operand need not be bound.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
       Div& setIntegrationPoint(const IntegrationPoint& ip)
       {
-        // keep operand aligned
-        m_u.get().setIntegrationPoint(ip);
         m_ip = &ip;
         m_zero = ScalarType(0);
         return *this;
