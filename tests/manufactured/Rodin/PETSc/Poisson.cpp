@@ -24,11 +24,14 @@
  * `Variational::Problem<PETSc::Math::LinearSystem, U, V>` and solved with
  * `PETSc::Solver::CG` (conjugate gradient).
  *
- * Each test verifies numerical correctness by comparing the FE solution
- * against the known manufactured solution in the @f$ L^2 @f$ norm.
+ * Fixed-grid checks integrate the nodal squared-error interpolant. The
+ * refinement checks integrate the physical squared error independently.
+ * Complex PETSc builds use amplitude @f$ 1-2i @f$; errors are normalized by
+ * its magnitude so the real and complex acceptance criteria agree.
  */
 
 #include <cmath>
+#include <complex>
 #include <limits>
 #include <gtest/gtest.h>
 
@@ -81,6 +84,61 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
         mesh.getConnectivity().compute(D - 1, 0);
         return mesh;
       }
+
+      /// @brief Returns a real unit amplitude or a genuinely complex phase.
+      static PetscScalar amplitudeValue()
+      {
+#ifdef PETSC_USE_COMPLEX
+        return PetscScalar(1, -2);
+#else
+        return PetscScalar(1);
+#endif
+      }
+
+      /// @brief Constructs the coefficient function for the configured scalar field.
+      static auto amplitude()
+      {
+#ifdef PETSC_USE_COMPLEX
+        return ComplexFunction(amplitudeValue());
+#else
+        return RealFunction(amplitudeValue());
+#endif
+      }
+
+      /// @brief Returns the squared magnitude used to normalize squared errors.
+      static Real amplitudeSquared()
+      {
+        return std::norm(amplitudeValue());
+      }
+
+      /**
+       * @brief Integrates physical squared error independently of assembly.
+       * @tparam Field Computed scalar grid-function type.
+       * @tparam Exact Analytic solution expression type.
+       * @param field Computed solution.
+       * @param exact Analytic solution.
+       * @param order Quadrature order used for error integration.
+       * @returns Squared physical error divided by the squared amplitude.
+       */
+      template <class Field, class Exact>
+      Real normalizedSquaredL2Error(
+        const Field& field, const Exact& exact, size_t order) const
+      {
+        Real result = 0;
+        const auto& mesh = field.getFiniteElementSpace().getMesh();
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const auto& formula =
+            QF::PolytopeQuadratureFormula::get(order, cell->getGeometry());
+          for (size_t sample = 0; sample < formula.getSize(); ++sample)
+          {
+            const Point point(*cell, formula.getPoint(sample));
+            result += formula.getWeight(sample) * point.getDistortion() *
+              std::norm(field.getValue(point) - exact(point));
+          }
+        }
+        return result / amplitudeSquared();
+      }
   };
 
   // Resolution aliases.
@@ -115,10 +173,10 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
   {
     auto mesh = this->getMesh();
 
-    P1 vh(mesh);
+    P1<PetscScalar> vh(mesh);
 
-    auto solution = F::x + 2 * F::y + 1;
-    auto f = Zero(); // -Δ(affine) = 0
+    auto solution = this->amplitude() * (F::x + 2 * F::y + 1);
+    auto f = Zero<PetscScalar>(); // -Δ(affine) = 0
 
     PETSc::Variational::TrialFunction u(vh);
     PETSc::Variational::TestFunction  v(vh);
@@ -153,13 +211,27 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
       EXPECT_NEAR(static_cast<Real>(rnorm) / scale, 0, 1e-10);
     }
 
-    // Check L² error.
-    GridFunction u_exact(vh);
+    // Check the projected exact-solution residual and nodal squared error.
+    PETSc::Variational::GridFunction u_exact(vh);
     u_exact = solution;
+
+    {
+      auto& system = poisson.getLinearSystem();
+      ::Vec residual = nullptr;
+      ASSERT_EQ(VecDuplicate(system.getVector(), &residual), PETSC_SUCCESS);
+      ASSERT_EQ(
+        MatMult(system.getOperator(), u_exact.getData(), residual), PETSC_SUCCESS);
+      ASSERT_EQ(VecAXPY(residual, -1, system.getVector()), PETSC_SUCCESS);
+      PetscReal residualNorm = 0, loadNorm = 0;
+      ASSERT_EQ(VecNorm(residual, NORM_2, &residualNorm), PETSC_SUCCESS);
+      ASSERT_EQ(VecNorm(system.getVector(), NORM_2, &loadNorm), PETSC_SUCCESS);
+      ASSERT_EQ(VecDestroy(&residual), PETSC_SUCCESS);
+      EXPECT_LE(residualNorm / std::max(PetscReal(1), loadNorm), PetscReal(1e-12));
+    }
 
     P1 sh(mesh);
     GridFunction diff(sh);
-    diff = Pow(u.getSolution() - solution, 2);
+    diff = Pow(Abs(u.getSolution() - solution), 2) / this->amplitudeSquared();
     EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
   }
 
@@ -182,25 +254,24 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     const auto pi = Math::Constants::pi();
     auto mesh = this->getMesh();
 
-    P1 vh(mesh);
-    auto f = 2 * pi * pi * sin(pi * F::x) * sin(pi * F::y);
+    P1<PetscScalar> vh(mesh);
+    auto f = this->amplitude() * (2 * pi * pi * sin(pi * F::x) * sin(pi * F::y));
 
     PETSc::Variational::TrialFunction u(vh);
     PETSc::Variational::TestFunction  v(vh);
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
+    poisson =
+      Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero<PetscScalar>());
 
     PETSc::Solver::CG solver(poisson);
     solver.solve();
 
-    auto solution = sin(pi * F::x) * sin(pi * F::y);
+    auto solution = this->amplitude() * (sin(pi * F::x) * sin(pi * F::y));
 
     P1 sh(mesh);
     GridFunction diff(sh);
-    diff = Pow(u.getSolution() - solution, 2);
+    diff = Pow(Abs(u.getSolution() - solution), 2) / this->amplitudeSquared();
     EXPECT_NEAR(Integral(diff).compute(), 0, RODIN_FUZZY_CONSTANT);
   }
 
@@ -214,25 +285,24 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     const auto pi = Math::Constants::pi();
     auto mesh = this->getMesh();
 
-    P1 vh(mesh);
-    auto f = 2 * pi * pi * sin(pi * F::x) * sin(pi * F::y);
+    P1<PetscScalar> vh(mesh);
+    auto f = this->amplitude() * (2 * pi * pi * sin(pi * F::x) * sin(pi * F::y));
 
     PETSc::Variational::TrialFunction u(vh);
     PETSc::Variational::TestFunction  v(vh);
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
+    poisson =
+      Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero<PetscScalar>());
 
     PETSc::Solver::CG solver(poisson);
     solver.solve();
 
-    auto solution = sin(pi * F::x) * sin(pi * F::y);
+    auto solution = this->amplitude() * (sin(pi * F::x) * sin(pi * F::y));
 
     P1 sh(mesh);
     GridFunction diff(sh);
-    diff = Pow(u.getSolution() - solution, 2);
+    diff = Pow(Abs(u.getSolution() - solution), 2) / this->amplitudeSquared();
     EXPECT_NEAR(Integral(diff).compute(), 0, RODIN_FUZZY_CONSTANT);
   }
 
@@ -251,25 +321,24 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
   {
     auto mesh = this->getMesh();
 
-    P1 vh(mesh);
-    auto f = 2 * F::y * (1 - F::y) + 2 * F::x * (1 - F::x);
+    P1<PetscScalar> vh(mesh);
+    auto f = this->amplitude() * (2 * F::y * (1 - F::y) + 2 * F::x * (1 - F::x));
 
     PETSc::Variational::TrialFunction u(vh);
     PETSc::Variational::TestFunction  v(vh);
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
+    poisson =
+      Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero<PetscScalar>());
 
     PETSc::Solver::CG solver(poisson);
     solver.solve();
 
-    auto solution = F::x * (1 - F::x) * F::y * (1 - F::y);
+    auto solution = this->amplitude() * (F::x * (1 - F::x) * F::y * (1 - F::y));
 
     P1 sh(mesh);
     GridFunction diff(sh);
-    diff = Pow(u.getSolution() - solution, 2);
+    diff = Pow(Abs(u.getSolution() - solution), 2) / this->amplitudeSquared();
     EXPECT_NEAR(Integral(diff).compute(), 0, RODIN_FUZZY_CONSTANT);
   }
 
@@ -291,8 +360,8 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     const auto pi = Math::Constants::pi();
     auto mesh = this->getMesh();
 
-    P1 vh(mesh);
-    auto solution = cos(pi * F::x) * cos(pi * F::y);
+    P1<PetscScalar> vh(mesh);
+    auto solution = this->amplitude() * (cos(pi * F::x) * cos(pi * F::y));
     auto f = 2 * pi * pi * solution;
 
     PETSc::Variational::TrialFunction u(vh);
@@ -308,7 +377,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
 
     P1 sh(mesh);
     GridFunction diff(sh);
-    diff = Pow(u.getSolution() - solution, 2);
+    diff = Pow(Abs(u.getSolution() - solution), 2) / this->amplitudeSquared();
     EXPECT_NEAR(Integral(diff).compute(), 0, RODIN_FUZZY_CONSTANT);
   }
 
@@ -327,31 +396,79 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     const auto pi = Math::Constants::pi();
     auto mesh = this->getMesh();
 
-    P1 vh(mesh);
-    auto f = 2 * pi * pi * sin(pi * F::x) * sin(pi * F::y);
+    P1<PetscScalar> vh(mesh);
+    auto f = this->amplitude() * (2 * pi * pi * sin(pi * F::x) * sin(pi * F::y));
 
     PETSc::Variational::TrialFunction u(vh);
     PETSc::Variational::TestFunction  v(vh);
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
+    poisson =
+      Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero<PetscScalar>());
 
     PETSc::Solver::GMRES solver(poisson);
     solver.solve();
 
-    auto solution = sin(pi * F::x) * sin(pi * F::y);
+    auto solution = this->amplitude() * (sin(pi * F::x) * sin(pi * F::y));
 
     P1 sh(mesh);
     GridFunction diff(sh);
-    diff = Pow(u.getSolution() - solution, 2);
+    diff = Pow(Abs(u.getSolution() - solution), 2) / this->amplitudeSquared();
     EXPECT_NEAR(Integral(diff).compute(), 0, RODIN_FUZZY_CONSTANT);
   }
 
   // =========================================================================
   // Test suite instantiation
   // =========================================================================
+
+  /**
+   * @brief Verifies second-order physical L2 convergence for a complex-phase sine solution.
+   *
+   * Independent order-eight and order-ten error quadratures must agree. The
+   * expected P1/Q1 L2 order is two; the interval allows pre-asymptotic effects.
+   */
+  TEST_P(PETSc_Manufactured_Poisson_16x16, SinePhysicalL2Convergence)
+  {
+    constexpr size_t errorOrder = 8, verificationOrder = 10;
+    constexpr Real quadratureRelativeTolerance = 1e-8;
+    constexpr Real minimumOrder = 1.8, maximumOrder = 2.2;
+    Optional<std::pair<Real, Real>> previous;
+    const auto pi = Math::Constants::pi();
+    const auto solution = this->amplitude() * (sin(pi * F::x) * sin(pi * F::y));
+    const auto forcing = 2 * pi * pi * solution;
+    for (size_t resolution : {size_t(16), size_t(32), size_t(64)})
+    {
+      SCOPED_TRACE(resolution);
+      auto mesh = LocalMesh::UniformGrid(GetParam(), {resolution, resolution});
+      const Real h = Real(1) / Real(resolution - 1);
+      mesh.scale(h);
+      mesh.getConnectivity().compute(1, 2);
+      P1<PetscScalar> space(mesh);
+      PETSc::Variational::TrialFunction u(space);
+      PETSc::Variational::TestFunction v(space);
+      Problem poisson(u, v);
+      poisson = Integral(Grad(u), Grad(v)) - Integral(forcing, v) +
+        DirichletBC(u, Zero<PetscScalar>());
+      PETSc::Solver::CG solver(poisson);
+      solver.setTolerances(1e-12, 1e-14, 1e5, 10000);
+      solver.solve();
+      const Real error =
+        std::sqrt(this->normalizedSquaredL2Error(u.getSolution(), solution, errorOrder));
+      const Real verified = std::sqrt(
+        this->normalizedSquaredL2Error(u.getSolution(), solution, verificationOrder));
+      ASSERT_GT(verified, 0);
+      ASSERT_TRUE(std::isfinite(error));
+      EXPECT_LE(std::abs(error - verified), quadratureRelativeTolerance * verified);
+      if (previous)
+      {
+        const Real order =
+          std::log(previous->second / error) / std::log(previous->first / h);
+        EXPECT_GE(order, minimumOrder);
+        EXPECT_LE(order, maximumOrder);
+      }
+      previous = std::make_pair(h, error);
+    }
+  }
 
   struct PolytopeNameGenerator
   {

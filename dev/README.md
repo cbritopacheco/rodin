@@ -842,3 +842,34 @@ be committed.
 Every resource file belongs under `resources/` and must be tracked through Git
 LFS. Before committing a new resource file, check `git check-attr filter --
 <path>` and confirm the intended state with `git lfs status`.
+- PETSc KSP ownership: six pre-fix real-scalar copy/move cases across KSP,
+  CG and GMRES fail with missing reference increments, nonempty move sources,
+  and premature context destruction. Explicit copy and move constructors now
+  retain or transfer counted context ownership, preserving shared handle
+  identity and independent stored settings. The borrowed problem and explicit
+  preconditioner matrix keep their existing lifetime contracts. A frozen
+  pre-fix compile probe also rejects the const communicator query; casting
+  the handle value fixes the qualifier error.
+  All nine lifecycle/settings/field-split cases pass individually with real
+  and complex PETSc 3.19.6, and with assertion-enabled real Debug builds.
+  Four existing factor-reuse and two SNES state cases pass with real PETSc;
+  the two SNES cases also pass with complex PETSc. Nine real lifecycle cases
+  pass under AddressSanitizer with the repository's external MPI/PETSc leak
+  detection policy (`detect_leaks=0`); explicit native reference-count oracles
+  check ownership. This is not an LSan certification.
+  Poisson manufactured fixtures use the native PETSc scalar field, including
+  complex amplitude \(1-2i\). The original fixed-grid error bounds remain;
+  an independent physical \(L^2\) check verifies order in \([1.8,2.2]\)
+  over three refinements for triangles and quadrilaterals, with order-eight
+  and order-ten error quadratures agreeing to relative \(10^{-8}\).
+  All fourteen manufactured cases pass separately in real and complex Release
+  builds. An isolated doubled-solution mutation fails all nine lifecycle
+  cases and both physical convergence cases; mutation and sanitizer profiles
+  never enter the coverage merge.
+  The source-matched audit retires all old KSP.cpp, KSP.h and Object.h records
+  and merges fresh normal Release/Debug counters against production snapshot
+  run66. The combined 143-report result is 35,296 of 37,555 production lines
+  (\(93.9848\%\)), with no nonproduction or missing-source records. Relative
+  to run64, the batch adds 244 measured lines and 217 covered lines, leaving
+  382 additional hits needed for \(95\%\) at this denominator. The expanded
+  denominator is retained rather than hiding supported template variants.

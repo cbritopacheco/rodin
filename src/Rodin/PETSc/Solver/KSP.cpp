@@ -6,6 +6,7 @@
  */
 #include <cassert>
 #include <cstring>
+#include <utility>
 #include <petsc.h>
 #include <petscsys.h>
 #include <petscksp.h>
@@ -32,6 +33,39 @@ namespace Rodin::Solver
     assert(ierr == PETSC_SUCCESS);
     (void)ierr;
   }
+
+  KSP::KSP(const KSP& other)
+    : Parent(other),
+      PETSc::Object<::KSP>(other),
+      m_ksp(other.m_ksp),
+      m_type(other.m_type),
+      m_rtol(other.m_rtol),
+      m_abstol(other.m_abstol),
+      m_dtol(other.m_dtol),
+      m_maxIt(other.m_maxIt),
+      m_preconditioner(other.m_preconditioner),
+      m_prefix(other.m_prefix)
+  {
+    if (m_ksp)
+    {
+      const auto ierr = PetscObjectReference(reinterpret_cast<PetscObject>(m_ksp));
+      assert(ierr == PETSC_SUCCESS);
+      (void)ierr;
+    }
+  }
+
+  KSP::KSP(KSP&& other) noexcept
+    : Parent(std::move(other)),
+      PETSc::Object<::KSP>(std::move(other)),
+      m_ksp(std::exchange(other.m_ksp, PETSC_NULLPTR)),
+      m_type(other.m_type),
+      m_rtol(other.m_rtol),
+      m_abstol(other.m_abstol),
+      m_dtol(other.m_dtol),
+      m_maxIt(other.m_maxIt),
+      m_preconditioner(std::move(other.m_preconditioner)),
+      m_prefix(std::move(other.m_prefix))
+  {}
 
   KSP::~KSP()
   {

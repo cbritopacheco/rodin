@@ -43,7 +43,12 @@ namespace Rodin::Solver
    *
    * Wraps the PETSc @c KSP context and inherits both
    * @ref Rodin::Solver::LinearSolverBase (for the generic solver interface)
-   * and @ref Rodin::PETSc::Object (for automatic handle cleanup).
+   * and @ref Rodin::PETSc::Object for handle and communicator access.
+   *
+   * Each wrapper owns one reference to its PETSc context. Copies retain
+   * counted ownership of the shared context and copy the stored programmatic
+   * settings. Moves transfer ownership and leave an empty source. The problem
+   * and an explicitly supplied preconditioner matrix remain borrowed.
    *
    * Combines programmatic configuration (tolerances, type, preconditioner)
    * with PETSc command-line overrides (`-ksp_type`, `-ksp_rtol`, …).
@@ -79,6 +84,18 @@ namespace Rodin::Solver
        * @param pb   Variational problem this solver will solve.
        */
       explicit KSP(ProblemBaseType& pb);
+
+      /**
+       * @brief Copies settings and retains a reference to the shared PETSc context.
+       * @param other Solver to copy, including an empty moved-from solver.
+       */
+      KSP(const KSP& other);
+
+      /**
+       * @brief Transfers the PETSc context and settings, leaving the source empty.
+       * @param other Solver whose context is transferred.
+       */
+      KSP(KSP&& other) noexcept;
 
       virtual ~KSP() override;
 

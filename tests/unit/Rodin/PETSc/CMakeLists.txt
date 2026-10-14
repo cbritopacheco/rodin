@@ -221,6 +221,13 @@ endif()
 
 add_subdirectory(IO)
 
+add_executable(RodinPETScKSPLifecycleTest KSPLifecycleTest.cpp)
+target_link_libraries(RodinPETScKSPLifecycleTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScKSPLifecycleTest COMMAND $<TARGET_FILE:RodinPETScKSPLifecycleTest>)
+set_tests_properties(RodinPETScKSPLifecycleTest PROPERTIES LABELS "unit;petsc" TIMEOUT 60)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScKSPLifecycleTest)
+
 add_executable(RodinPETScSNESStateTest SNESStateTest.cpp)
 target_link_libraries(RodinPETScSNESStateTest
   PRIVATE GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
