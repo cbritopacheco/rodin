@@ -1,3 +1,7 @@
+add_executable(RodinSpatialMatrixContractionBenchmarks EXCLUDE_FROM_ALL SpatialMatrixContraction.cpp)
+target_link_libraries(RodinSpatialMatrixContractionBenchmarks PRIVATE
+  Rodin::Math benchmark::benchmark)
+
 add_executable(RodinSpatialMatrixVectorBenchmarks EXCLUDE_FROM_ALL SpatialMatrixVector.cpp)
 target_link_libraries(RodinSpatialMatrixVectorBenchmarks PRIVATE
   Rodin::Math benchmark::benchmark)

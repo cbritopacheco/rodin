@@ -2736,6 +2736,73 @@ named-form performance qualification, complete convergence recertification,
 or remote CI evidence. The separate Helmholtz geometry-state investigation
 remains open.
 
+# Conjugating spatial-matrix contractions
+
+`RodinSpatialMatrixContractionBenchmarks`, under `Rodin/Math`, measures the
+public `Math::dot(SpatialMatrix, SpatialMatrix)` operation used by the named
+LinearElasticity kernel. It differs from the unconjugated member operation
+measured by the general spatial-algebra executable. For matrices
+$A^a,B^b\in\mathbb K^{r\times c}$, the measured scalar and pair-batch quantities are
+
+$$
+d(A,B)=\sum_{j=0}^{c-1}\sum_{i=0}^{r-1} A_{ij}\overline{B_{ij}},
+\qquad K_{ba}=\frac34 d(A^a,B^b).
+$$
+
+All sixteen rectangular shapes with $0\le r,c\le3$ are registered for real/real,
+real/complex, complex/real and complex/complex operands. Scalar scopes evaluate
+one product. PairBatch scopes evaluate all $N^2$ entries for $N\in\{6,12,30\}$,
+including output zeroing and weighted accumulation. These counts represent
+common vector-element pair-loop sizes; they are not mesh dimensions or a claim
+of complete element-kernel equivalence. No symmetry is assumed.
+
+Public and Original scopes use the same inputs; Original retains the const
+dynamic Eigen block expression currently used by the public overload. Bounded
+dyadic operands provide an independent exact sum, and inactive storage is
+poisoned. Output perturbation must be rejected. All guards are untimed, and
+qualification failure causes a nonzero process exit. The 512 registrations are
+opt-in benchmarks, not CTest tests or CI timing gates.
+
+```sh
+cmake --build build --target RodinSpatialMatrixContractionBenchmarks -j1
+build/tests/benchmarks/RodinSpatialMatrixContractionBenchmarks \
+  --benchmark_filter='^SpatialMatrixContraction/PairBatch/Public/RealReal/(2/2/12|3/3/30)/real_time$' \
+  --benchmark_min_time=0.2s --benchmark_repetitions=5 \
+  --benchmark_out=matrix-contractions.json --benchmark_out_format=json
+```
+
+Rows, columns, pairs and active entries per pair are reported separately.
+Normalize batch times by $N^2rc$ when comparing nonempty shapes. These primitive
+measurements exclude coefficient evaluation, Jacobian mapping, quadrature,
+sparse insertion and solving; the named-form benchmark remains the assembly
+consumer. A difference between scalar and batch timings is not an assembly
+decomposition.
+
+In an optimized native Apple LLVM 21 build, five repetitions with a 0.2 s
+minimum per repetition gave the following median CPU times for Public real
+batches. Each batch uses one weight and zeroes one dense output matrix.
+
+| Logical shape | Pair count | Active entry products | CPU time | Time per active entry |
+| --- | ---: | ---: | ---: | ---: |
+| $2\times2$, $N=12$ | 144 | 576 | 0.800 microseconds | 1.39 ns |
+| $3\times3$, $N=30$ | 900 | 8,100 | 7.604 microseconds | 0.94 ns |
+
+The raw ratio is 9.51 while the active-product ratio is 14.06. This primitive
+does not exhibit an additional three-dimensional penalty under that work
+normalization. Active-product count is a work proxy, not an instruction count;
+loop control, output zeroing, packetization and stores also contribute.
+Original controls measured 0.815 and 7.708 microseconds. Public and Original
+currently express the same algorithm; these differences are not speedups.
+
+A separate Instruments Time Profiler run selected 3,561 sample-ms under the
+real $3\times3$, $N=30$ driver. Of these, 2,300 sample-ms had an Eigen reduction
+implementation as their leaf frame. Packet operations and scalar products
+also appear among the remaining leaf frames. This identifies reduction
+implementation as a candidate for investigation; it does not isolate assembly
+costs or establish an optimization. Instrumented timing is not an accepted
+benchmark result. All 512 cases qualify in both native and LLVM 19/OpenMP
+builds; the primitive itself is single-threaded in both.
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`
