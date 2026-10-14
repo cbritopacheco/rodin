@@ -102,7 +102,7 @@ jobs:
           case "${{ matrix.suite }}" in
             baseline)
               ctest --test-dir build/tests -L convergence -E "$curved_pattern|^RodinConvergenceHStokesStability_" \
-                --output-on-failure --no-tests=error -j 2 ;;
+                --output-on-failure --no-tests=error -j 1 ;;
             pressure_light) pressure_exclude='_(Tetrahedron|Pyramid)$' ;;
             pressure_tetrahedron) pressure_exclude='_(Triangle|Quadrilateral|Pyramid|Hexahedron|Wedge|Utility|Workspace)$' ;;
             pressure_pyramid) pressure_exclude='_(Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge|Utility|Workspace)$' ;;
@@ -864,7 +864,7 @@ jobs:
         run: >-
           ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP)PETSc(MPI)?Helmholtz|RodinPETScSNESStateTest|RodinPETSc(MPI)?ScalarIntegralTest|Rodin_Variational_Integral'
           -E '^RodinConvergenceHPETScHelmholtzBoundary_'
-          --output-on-failure --no-tests=error -j 2
+          --output-on-failure --no-tests=error -j 1
 
       - name: Build curved complex PETSc Helmholtz suite
         if: startsWith(matrix.suite, 'curved_helmholtz')
@@ -1005,7 +1005,7 @@ jobs:
       # Instrumented SWIFT compilations exceeded 6 GiB with two compiler processes.
       MAKEFLAGS: ${{ matrix.build_type == 'Release' && matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && '-j1' || '-j2' }}
       OMP_NUM_THREADS: 2
-      CTEST_PARALLEL_LEVEL: 2
+      CTEST_PARALLEL_LEVEL: 1
       GCOV: gcov-14
       # Collect optional-backend coverage in the optimized, unsanitized runs.
       RODIN_COVERAGE: ${{ matrix.build_type == 'Release' && matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && 'ON' || 'OFF' }}
@@ -1413,7 +1413,7 @@ jobs:
     env:
       MAKEFLAGS: "-j2"
       OMP_NUM_THREADS: 2
-      CTEST_PARALLEL_LEVEL: 2
+      CTEST_PARALLEL_LEVEL: 1
       GCOV: gcov-14
 
     steps:
