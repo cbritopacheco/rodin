@@ -20,7 +20,8 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
-  template <class Scalar = Real, class Operator = Math::SparseMatrix<Scalar>>
+  template <class Scalar = Real, class Operator = Math::SparseMatrix<Scalar>,
+    bool ExplicitSequential = false>
   void checkNonlocalBlocks(
     bool restrictTrial = false, bool restrictTest = false, bool missingAttribute = false)
   {
@@ -71,7 +72,32 @@ namespace Rodin::Tests::Unit
     const Real testMoments[] = {restrictTest ? 0.0 : 0.5, restrictTest ? 0.5 : 1.0, 0.5};
     auto check = [&](auto& instance, size_t stage) {
       instance.assemble();
-      const auto& matrix = instance.getLinearSystem().getOperator();
+      System sequentialSystem;
+      if constexpr (ExplicitSequential)
+      {
+        using ProblemType = std::decay_t<decltype(problem)>;
+        Tuple<std::reference_wrapper<decltype(u)>, std::reference_wrapper<decltype(p)>>
+          trials(std::ref(u), std::ref(p));
+        Tuple<std::reference_wrapper<decltype(v)>, std::reference_wrapper<decltype(q)>>
+          tests(std::ref(v), std::ref(q));
+        std::array<size_t, 2> offsets{0, fes.getSize()};
+        boost::bimap<FormLanguage::Base::UUID, size_t> trialMap, testMap;
+        trialMap.insert({u.getUUID(), 0});
+        trialMap.insert({p.getUUID(), 1});
+        testMap.insert({v.getUUID(), 0});
+        testMap.insert({q.getUUID(), 1});
+        auto sequentialBody = instance.getBody();
+        typename ProblemType::AssemblyInput input(sequentialBody, trials, tests, offsets,
+          offsets, trialMap, testMap, 2 * fes.getSize(), 2 * fes.getSize());
+        Assembly::Sequential<System, ProblemType> assembler;
+        assembler.execute(sequentialSystem, input);
+      }
+      const auto& matrix = [&]() -> const Operator& {
+        if constexpr (ExplicitSequential)
+          return sequentialSystem.getOperator();
+        else
+          return instance.getLinearSystem().getOperator();
+      }();
       ASSERT_EQ(matrix.rows(), 6);
       ASSERT_EQ(matrix.cols(), 6);
       for (size_t row = 0; row < 6; ++row)
@@ -157,6 +183,36 @@ namespace Rodin::Tests::Unit
     checkNonlocalBlocks<Complex>(true, true, true);
   }
 
+  /// @brief Explicit Sequential mixed assembly checks each independently restricted block.
+  TEST(NonlocalBlock, SequentialSparseReal)
+  {
+    checkNonlocalBlocks<Real, Math::SparseMatrix<Real>, true>();
+    checkNonlocalBlocks<Real, Math::SparseMatrix<Real>, true>(true, false);
+    checkNonlocalBlocks<Real, Math::SparseMatrix<Real>, true>(false, true);
+    checkNonlocalBlocks<Real, Math::SparseMatrix<Real>, true>(true, true);
+    checkNonlocalBlocks<Real, Math::SparseMatrix<Real>, true>(true, true, true);
+  }
+
+  /// @brief Dense real Sequential blocks obey the exact separated moment formula.
+  TEST(NonlocalBlock, SequentialDenseReal)
+  {
+    checkNonlocalBlocks<Real, Math::Matrix<Real>, true>(true, true);
+    checkNonlocalBlocks<Real, Math::Matrix<Real>, true>(true, true, true);
+  }
+
+  /// @brief Sparse complex Sequential blocks retain the nonreal kernel coefficient.
+  TEST(NonlocalBlock, SequentialSparseComplex)
+  {
+    checkNonlocalBlocks<Complex, Math::SparseMatrix<Complex>, true>(true, true);
+    checkNonlocalBlocks<Complex, Math::SparseMatrix<Complex>, true>(true, true, true);
+  }
+
+  /// @brief Dense complex Sequential blocks obey the same independent moment oracle.
+  TEST(NonlocalBlock, SequentialDenseComplex)
+  {
+    checkNonlocalBlocks<Complex, Math::Matrix<Complex>, true>(true, true);
+    checkNonlocalBlocks<Complex, Math::Matrix<Complex>, true>(true, true, true);
+  }
 }
 
 namespace

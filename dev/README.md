@@ -968,3 +968,24 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   (\(93.7157\%\)), with no nonproduction or missing-source records.
   This adds 55 measured lines and 98 hits relative to run87; 504 further hits
   are required for \(95\%\) at this denominator.
+- Matching-source nonlocal refresh: all sixteen native nonlocal cases and both
+  complex PETSc restriction cases pass individually in normal Debug. The
+  187-report run91 audit measures 36,928 of 39,237 production lines
+  (\(94.1152\%\)), with no nonproduction or missing-source records. This
+  restores fresh observations for changed assembler specializations instead
+  of retaining their retired historic hits. A further 348 hits are needed
+  for \(95\%\) at this denominator. The configured OpenMP default means
+  mixed `Problem` fixtures do not certify explicit Sequential mixed assembly;
+  direct backend oracles are being added rather than crediting those variants
+  from the default backend's line hits.
+  Four added explicit Sequential mixed cases cover real/complex dense/sparse
+  storage against separated moment products, independent trial/test attribute
+  restrictions and unmatched attributes. All twenty native nonlocal cases pass
+  individually in normal Debug, Release and ASan/LSan. A private mutation doubles
+  mixed Sequential local/global contributions: all four new cases fail and
+  the sixteen unaffected cases pass. Its profiles are isolated and excluded.
+  The final formatting change only wraps the assembly-input constructor call;
+  executable tokens match the archived Debug/sanitizer test sources. Production
+  remains byte-identical to snapshot run84. The 191-report run93 audit measures
+  36,977 of 39,237 production lines (\(94.2401\%\)), adding 49 hits without
+  reducing the denominator; 299 additional hits are required for \(95\%\).
