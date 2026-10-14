@@ -12,6 +12,8 @@
  * @brief Parametric transformation for finite-element mesh geometry.
  */
 
+#include <type_traits>
+
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/base_object.hpp>
 
@@ -204,6 +206,11 @@ namespace Rodin::Geometry
      * Only reference derivatives are shared across cells; mapped matrices
      * remain specific to the current transformation. Generic scalar elements
      * without a table retain the default pointwise evaluation.
+     * Square three-dimensional maps instantiate the same contraction with
+     * compile-time spatial bounds. This removes repeated small-loop control
+     * without changing the local-basis accumulation order, reference samples,
+     * padding initialization or ownership. Other dimensions use runtime bounds;
+     * no affine-map assumption or derived-metric cache is introduced.
      *
      * @param[out] jacobians Jacobian matrices in quadrature-point order.
      * @param[in] qf Reference formula identifying the element tabulation.
@@ -218,22 +225,32 @@ namespace Rodin::Geometry
         assert(table.dim == rdim);
         assert(table.ndof == m_fe.getCount());
         jacobians.resize(table.nqp);
-        for (size_t qp = 0; qp < table.nqp; ++qp)
-        {
-          auto& matrix = jacobians[qp];
-          matrix.resize(pdim, rdim);
-          matrix.setZero();
-          for (size_t local = 0; local < table.ndof; ++local)
+        const auto contract = [&](auto referenceDimension, auto physicalDimension) {
+          for (size_t qp = 0; qp < table.nqp; ++qp)
           {
-            const auto gradient = table.getGradient(qp, local);
-            for (size_t i = 0; i < rdim; ++i)
+            auto& matrix = jacobians[qp];
+            matrix.resize(physicalDimension, referenceDimension);
+            matrix.setZero();
+            for (size_t local = 0; local < table.ndof; ++local)
             {
-              const Real value = gradient[i];
-              for (size_t j = 0; j < pdim && j < Math::SpatialMatrix<Real>::MaxSize; ++j)
-                matrix(j, i) += m_pm(j, local) * value;
+              const auto gradient = table.getGradient(qp, local);
+              for (size_t i = 0; i < referenceDimension; ++i)
+              {
+                const Real value = gradient[i];
+                for (size_t j = 0;
+                     j < physicalDimension && j < Math::SpatialMatrix<Real>::MaxSize; ++j)
+                {
+                  matrix(j, i) += m_pm(j, local) * value;
+                }
+              }
             }
           }
-        }
+        };
+        if (rdim == 3 && pdim == 3)
+          contract(
+            std::integral_constant<size_t, 3>{}, std::integral_constant<size_t, 3>{});
+        else
+          contract(rdim, pdim);
       }
       else
         Parent::jacobian(jacobians, qf);

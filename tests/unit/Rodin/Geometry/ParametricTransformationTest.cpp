@@ -1122,15 +1122,17 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief Certifies retained P1 bulk outputs across shape and formula changes.
+   * @brief Certifies retained P1 and H1 outputs across shape and formula changes.
    *
    * Packed input padding and all output storage are deliberately poisoned.
    * Only active physical/reference components may enter the contraction;
    * inactive output components remain zero after shrinking or expanding.
    * Distinct control clouds reuse the same reference table without reusing
    * physical Jacobians. Active entries agree exactly with pointwise evaluation.
+   * Native P1 and H1 degrees one, two and six exercise both first-order and
+   * high-order reference tables without assuming sample-invariant derivatives.
    */
-  TEST_F(QuadratureTransformationTest, P1RetainedOutputsAndInactivePadding)
+  TEST_F(QuadratureTransformationTest, P1AndH1RetainedOutputsAndInactivePadding)
   {
     constexpr Real poison = 123;
     for (const auto geometry :
@@ -1139,49 +1141,56 @@ namespace Rodin::Tests::Unit
         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(static_cast<int>(geometry));
-      const Variational::RealP1Element element(geometry);
-      const size_t d = Polytope::Traits(geometry).getDimension();
-      std::vector<Math::SpatialMatrix<Real>> matrices;
-      for (const size_t order : {size_t(16), size_t(2), size_t(8)})
-      {
-        SCOPED_TRACE(order);
-        const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
-        for (const size_t s : {size_t(3), std::max(size_t(1), d), size_t(3)})
+      const auto certify = [&]<class Element>() {
+        const Element element(geometry);
+        SCOPED_TRACE(element.getOrder());
+        const size_t d = Polytope::Traits(geometry).getDimension();
+        std::vector<Math::SpatialMatrix<Real>> matrices;
+        for (const size_t order : {size_t(16), size_t(2), size_t(8)})
         {
-          SCOPED_TRACE(s);
-          PointCloud controls(s, element.getCount());
-          for (size_t a = 0; a < element.getCount(); ++a)
+          SCOPED_TRACE(order);
+          const auto& formula = QF::PolytopeQuadratureFormula::get(order, geometry);
+          for (const size_t s : {size_t(3), std::max(size_t(1), d), size_t(3)})
           {
-            for (size_t j = 0; j < 3; ++j)
+            SCOPED_TRACE(s);
+            PointCloud controls(s, element.getCount());
+            for (size_t a = 0; a < element.getCount(); ++a)
             {
-              controls.point3(a)[j] =
-                j < s ? Real((a + 1) * (j + 2) + order) / 17 : poison;
-            }
-          }
-          const ParametricTransformation transformation(controls, element);
-          for (auto& matrix : matrices)
-            matrix.getData().setConstant(poison);
-          transformation.jacobian(matrices, formula);
-          ASSERT_EQ(matrices.size(), formula.getSize());
-          for (size_t qp = 0; qp < matrices.size(); ++qp)
-          {
-            Math::SpatialMatrix<Real> expected;
-            transformation.jacobian(expected, formula.getPoint(qp));
-            ASSERT_EQ(matrices[qp].rows(), s);
-            ASSERT_EQ(matrices[qp].cols(), d);
-            for (size_t j = 0; j < 3; ++j)
-            {
-              for (size_t i = 0; i < 3; ++i)
+              for (size_t j = 0; j < 3; ++j)
               {
-                if (j < s && i < d)
-                  EXPECT_EQ(matrices[qp](j, i), expected(j, i));
-                else
-                  EXPECT_EQ(matrices[qp].getData()(j, i), 0);
+                controls.point3(a)[j] =
+                  j < s ? Real((a + 1) * (j + 2) + order) / 17 : poison;
+              }
+            }
+            const ParametricTransformation transformation(controls, element);
+            for (auto& matrix : matrices)
+              matrix.getData().setConstant(poison);
+            transformation.jacobian(matrices, formula);
+            ASSERT_EQ(matrices.size(), formula.getSize());
+            for (size_t qp = 0; qp < matrices.size(); ++qp)
+            {
+              Math::SpatialMatrix<Real> expected;
+              transformation.jacobian(expected, formula.getPoint(qp));
+              ASSERT_EQ(matrices[qp].rows(), s);
+              ASSERT_EQ(matrices[qp].cols(), d);
+              for (size_t j = 0; j < 3; ++j)
+              {
+                for (size_t i = 0; i < 3; ++i)
+                {
+                  if (j < s && i < d)
+                    EXPECT_EQ(matrices[qp](j, i), expected(j, i));
+                  else
+                    EXPECT_EQ(matrices[qp].getData()(j, i), 0);
+                }
               }
             }
           }
         }
-      }
+      };
+      certify.template operator()<Variational::RealP1Element>();
+      certify.template operator()<Variational::RealH1Element<1>>();
+      certify.template operator()<Variational::RealH1Element<2>>();
+      certify.template operator()<Variational::RealH1Element<6>>();
     }
   }
 

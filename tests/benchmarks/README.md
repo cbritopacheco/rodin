@@ -1118,7 +1118,8 @@ a square inverse on the volume cells. This is not a pure dimension-only
 comparison. With $N_q$ quadrature points, $B$ basis functions, reference
 dimension $d$ and embedding dimension $s$, the dense Jacobian contraction
 performs $N_q B d s$ scalar multiplications. Normalization by $N_q B$ measures cost
-per basis/sample pair, not cost per arithmetic operation.
+per basis/sample pair, not cost per arithmetic operation. Here $t$ denotes the
+measured elapsed time per cell in nanoseconds.
 
 | Geometry degree | Geometry | Basis functions | Quadrature points | Construction + metrics, ns/cell | $t/(N_q B)$, ns |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -1163,6 +1164,80 @@ build/tests/benchmarks/RodinMappedPointBenchmarks \
   --benchmark_filter='MappedPoint/(Construction|ConstructionAndMetrics)/Quadratic/P2/Pyramid/3/8/' \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
+
+### Spatial bounds in bulk geometry contraction
+
+The bulk Jacobian still evaluates every reference sample and accumulates
+$J_{ji}=\sum_a P_{ja}\partial_i\phi_a$ in increasing local-basis order.
+For square three-dimensional maps, the same contraction body is instantiated
+with compile-time spatial bounds. Other dimensions retain runtime bounds.
+The change neither assumes an affine map nor adds a reference, physical or
+derived-metric cache. Native P1 and high-order H1 geometry use the same rule.
+
+On Apple LLVM 21, `RelWithDebInfo`, matched five-repetition measurements at
+quadrature order eight gave the following construction-and-metrics medians.
+The quadratic map, geometry degree, embedding dimension three, sample counts
+and basis counts are unchanged from the preceding protocol. Times include
+owned mapped-quadrature replacement and all inverse/measure output writes.
+
+| Geometry degree | Geometry | Before, ns/cell | After, ns/cell | Before/after |
+| --- | --- | ---: | ---: | ---: |
+| 2 | Tetrahedron | 3,592 | 2,311 | 1.55 |
+| 2 | Pyramid | 4,971 | 2,795 | 1.78 |
+| 2 | Hexahedron | 23,016 | 10,593 | 2.17 |
+| 6 | Tetrahedron | 21,873 | 8,168 | 2.68 |
+| 6 | Pyramid | 39,345 | 14,039 | 2.80 |
+| 6 | Hexahedron | 243,219 | 82,578 | 2.95 |
+
+The matched LLVM 19/OpenMP build, with two configured threads, reproduced
+construction-and-metrics factors of 1.57–3.15 for these six selections.
+Mapped geometry evaluation itself is serial; this compiler comparison is not
+a measurement of OpenMP scaling. All forty affine/quadratic selections were
+measured before and after in each build, rather than selecting only the
+largest observed gain.
+
+Disassembly of the degree-six bulk method confirms nine scalar fused
+multiply-add accumulators in the square-three-dimensional basis loop, with
+no inner spatial-loop branch. The local-basis and quadrature loops remain;
+the number and order of contributions to each entry are unchanged. Exact
+pointwise comparisons, retained-output resizing and inactive-padding checks
+cover native P1 and H1 geometry, including non-affine control clouds.
+
+The corresponding degree-two Stokes local-binding workloads use native P1
+geometry, not degree-six geometry. Across all four three-dimensional cell
+families, weighted and unweighted vector-diffusion binding improved by factors
+of approximately 1.02–1.07. This smaller consumer gain must not be replaced by
+the isolated high-order geometry factor when estimating whole-assembly or
+solver performance. Full coupled assembly remains independently qualified;
+no whole-assembly timing improvement is inferred from binding alone.
+
+Raw repetitions are retained, including noisy selections. One degree-two
+pyramid construction repetition measured 2,084 ns wall time versus 1,830 ns
+CPU time, exposing an off-CPU contribution. A separate sixteen-repetition
+diagnostic was substantially steadier. A triangle diagnostic also traversed
+all eight reference-table cache locations without a consistent slot-cost
+trend; the original transient CPU-time variation is not attributed to cache
+placement. No two-dimensional speedup claim is made from these short timings.
+
+A post-change degree-six hexahedron capture, with the same source-stack
+selectors as the preceding protocol, contained 5,072 selected samples.
+Bulk contraction remained present in 97.4% of their CPU sample weight; inverse
+and measure/determinant evaluation accounted inclusively for 0.97% and 0.69%.
+Disassembly still shows nine output stores per local basis contribution.
+Whether local accumulation can remove these repeated stores without changing
+arithmetic or retained-output semantics is a subsequent investigation, not
+an additional claimed optimization.
+
+Qualification comprised the fourteen-test geometry executable and all
+thirty-five Poisson convergence selections in both the native sequential and
+LLVM 19/OpenMP builds. The extended retained-output regression was observed
+to reject a perturbed degree-six hexahedron Jacobian before the perturbation
+was removed. Each build also qualified 417 mapped-metric and 168 native P1
+bulk-geometry selections; twelve local-binding and twelve coupled-assembly
+selections were qualified on the native build. Benchmark oracles remain
+untimed checks in opt-in executables, not CTest or CI performance gates.
+These are local compiler/backend results, not evidence of MPI numerical
+recertification or completed remote CI.
 
 ### Arithmetic-preservation gate for pyramid reuse
 
