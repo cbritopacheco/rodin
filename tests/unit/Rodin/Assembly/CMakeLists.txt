@@ -37,3 +37,8 @@ add_executable(RodinAssemblyContractsTest ContractsTest.cpp)
 target_link_libraries(RodinAssemblyContractsTest
   PRIVATE GTest::gtest_main Rodin::Geometry Rodin::Variational)
 gtest_discover_tests(RodinAssemblyContractsTest PROPERTIES LABELS unit)
+
+add_executable(RodinAssemblyAffineConstraintTest AffineConstraintTest.cpp)
+target_link_libraries(RodinAssemblyAffineConstraintTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinAssemblyAffineConstraintTest PROPERTIES LABELS unit)

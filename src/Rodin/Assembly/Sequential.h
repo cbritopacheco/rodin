@@ -1124,11 +1124,11 @@ namespace Rodin::Assembly
               for (const auto& r : constraints.expand(row))
               {
                 if (colValue != ScalarType(0))
-                  b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                  b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                 for (const auto& c : constraints.expand(col))
                 {
                   triplets.emplace_back(
-                    r.index, c.index, r.coefficient * val * c.coefficient);
+                    r.index, c.index, Math::conj(r.coefficient) * val * c.coefficient);
                 }
               }
             }
@@ -1137,9 +1137,9 @@ namespace Rodin::Assembly
               for (const auto& r : constraints.expand(row))
               {
                 if (colValue != ScalarType(0))
-                  b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                  b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                 for (const auto& c : constraints.expand(col))
-                  A(r.index, c.index) += r.coefficient * val * c.coefficient;
+                  A(r.index, c.index) += Math::conj(r.coefficient) * val * c.coefficient;
               }
             }
           };
@@ -1149,7 +1149,7 @@ namespace Rodin::Assembly
               return;
 
             for (const auto& r : constraints.expand(row))
-              b.coeffRef(r.index) += r.coefficient * val;
+              b.coeffRef(r.index) += Math::conj(r.coefficient) * val;
           };
 
           // ------------------------------------------------------------
@@ -1725,11 +1725,11 @@ namespace Rodin::Assembly
               for (const auto& r : constraints.expand(row))
               {
                 if (colValue != ScalarType(0))
-                  b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                  b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                 for (const auto& c : constraints.expand(col))
                 {
                   triplets.emplace_back(
-                    r.index, c.index, r.coefficient * val * c.coefficient);
+                    r.index, c.index, Math::conj(r.coefficient) * val * c.coefficient);
                 }
               }
             }
@@ -1738,9 +1738,9 @@ namespace Rodin::Assembly
               for (const auto& r : constraints.expand(row))
               {
                 if (colValue != ScalarType(0))
-                  b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                  b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                 for (const auto& c : constraints.expand(col))
-                  A(r.index, c.index) += r.coefficient * val * c.coefficient;
+                  A(r.index, c.index) += Math::conj(r.coefficient) * val * c.coefficient;
               }
             }
           };
@@ -1750,7 +1750,7 @@ namespace Rodin::Assembly
               return;
 
             for (const auto& r : constraints.expand(row))
-              b.coeffRef(r.index) += r.coefficient * val;
+              b.coeffRef(r.index) += Math::conj(r.coefficient) * val;
           };
 
           // ------------------------------------------------------------

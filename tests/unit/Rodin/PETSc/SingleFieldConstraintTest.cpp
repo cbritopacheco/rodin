@@ -28,6 +28,12 @@ namespace
       else
         return Scalar(1);
     }();
+    const Scalar coefficient = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(2, 0.5);
+      else
+        return Scalar(2);
+    }();
     for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
     {
       SCOPED_TRACE(static_cast<int>(geometry));
@@ -43,11 +49,11 @@ namespace
         using Body = typename ProblemType::ProblemBodyType;
         Math::SpatialMatrix<Scalar> transform(2, 2);
         transform(0, 0) = 0;
-        transform(0, 1) = 2;
+        transform(0, 1) = coefficient;
         transform(1, 0) = 0;
         transform(1, 1) = 1;
-        const auto load = VectorFunction(size_t(2), [factor](const Point&) {
-          return Math::SpatialVector<Scalar>{Scalar(5) * factor, factor};
+        const auto load = VectorFunction(size_t(2), [factor, coefficient](const Point&) {
+          return Math::SpatialVector<Scalar>{(coefficient + Scalar(3)) * factor, factor};
         });
         const auto offset = VectorFunction(size_t(2), [factor](const Point&) {
           return Math::SpatialVector<Scalar>{Scalar(3) * factor, Scalar(0)};
@@ -63,9 +69,9 @@ namespace
         Assembler<System, ProblemType> assembler;
         GridFunction exact(space), direction(space);
         exact = load;
-        direction = VectorFunction(size_t(2), [](const Point& point) {
+        direction = VectorFunction(size_t(2), [coefficient](const Point& point) {
           const Scalar value = Scalar(1 + point.x() + 2 * point.y());
-          return Math::SpatialVector<Scalar>{Scalar(2) * value, value};
+          return Math::SpatialVector<Scalar>{coefficient * value, value};
         });
         const PetscInt size = static_cast<PetscInt>(space.getSize());
         std::vector<PetscInt> indices(static_cast<size_t>(size));
@@ -92,9 +98,9 @@ namespace
           EXPECT_LT((assembled * exact.getData() - rhs).norm(), 1e-11);
           const Math::Vector<Scalar> recovered = assembled.fullPivLu().solve(rhs);
           EXPECT_LT((recovered - exact.getData()).norm(), 1e-10);
-          // Integral of |(2f,f)|^2 on the unit square, f = 1 + x + 2y.
+          // Integral of |(coefficient*f,f)|^2, f = 1 + x + 2y, on the unit square.
           EXPECT_LT(std::abs(direction.getData().dot(assembled * direction.getData()) -
-                      Scalar(Real(100) / Real(3))),
+                      Scalar((std::norm(coefficient) + Real(1)) * Real(20) / Real(3))),
             1e-10);
           for (const auto target : {AssemblyTarget::LHS, AssemblyTarget::RHS})
           {

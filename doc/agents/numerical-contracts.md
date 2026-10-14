@@ -143,3 +143,19 @@ Dirichlet conditions and identification conditions are structural constraints.
 Assembly eliminates or expands them through the constraint map. Do not replace
 them with penalty terms unless the mathematical model explicitly asks for a
 penalty method.
+
+
+### Affine identification over real and complex fields
+
+For an affine expansion \(x=T\hat{x}+d\), assembly distributes test rows
+through the conjugated expansion and trial columns through the original
+expansion. The constrained form and load are \(T^{*}AT\) and
+\(T^{*}(b-Ad)\), followed by explicit reconstruction rows for retained slave
+unknowns. Over real fields the adjoint reduces to the transpose. Reconstruction
+coefficients retain their original phase.
+
+PETSc targeted assembly rejects identification constraints before resetting
+any system output. For MPI assembly this rejection is collective: every rank
+rejects when any rank has identification rows, including ranks with empty
+shards. The collective belongs to the explicit partial-assembly operation;
+full assembly and local accessors do not gain this validation collective.

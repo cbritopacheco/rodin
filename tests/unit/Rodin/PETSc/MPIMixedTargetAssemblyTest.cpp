@@ -66,7 +66,8 @@ namespace
 }
 
 /// @brief Distributed targeted assembly matches exact blocks with nonzero boundary data.
-TEST(PETSc_MPIMixedTargetAssembly, EmptyShardsPreserveExactTargets)
+template <bool Affine>
+void checkDistributedMixedTargets()
 {
   Context::MPI context(*environment, *world);
   Sharder<Context::MPI> sharder(context);
@@ -116,8 +117,20 @@ TEST(PETSc_MPIMixedTargetAssembly, EmptyShardsPreserveExactTargets)
     positions.emplace_back(coordinates[dof] / counts[dof], dof);
   }
   std::sort(positions.begin(), positions.end());
-  Rodin::Tests::Unit::checkMixedTargetAssembly<Assembly::MPI>(
+  Rodin::Tests::Unit::checkMixedTargetAssembly<Assembly::MPI, Affine>(
     space, positions, MPI_COMM_WORLD);
+}
+
+/// @brief Distributed value constraints preserve exact targeted blocks with an empty root shard.
+TEST(PETSc_MPIMixedTargetAssembly, EmptyShardsPreserveExactTargets)
+{
+  checkDistributedMixedTargets<false>();
+}
+
+/// @brief Distributed affine constraints obey conjugate-transpose projection, including ranks with no cells.
+TEST(PETSc_MPIMixedTargetAssembly, EmptyShardsAffineIdentification)
+{
+  checkDistributedMixedTargets<true>();
 }
 
 int main(int argc, char** argv)

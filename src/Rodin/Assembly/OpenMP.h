@@ -1275,11 +1275,12 @@ namespace Rodin::Assembly
             for (const auto& r : constraints.expand(row))
             {
               if (colValue != ScalarType(0))
-                localRhs.emplace_back(r.index, -r.coefficient * val * colValue);
+                localRhs.emplace_back(
+                  r.index, -Math::conj(r.coefficient) * val * colValue);
               for (const auto& c : constraints.expand(col))
               {
                 localT.emplace_back(
-                  r.index, c.index, r.coefficient * val * c.coefficient);
+                  r.index, c.index, Math::conj(r.coefficient) * val * c.coefficient);
               }
             }
           };
@@ -1290,7 +1291,7 @@ namespace Rodin::Assembly
               return;
 
             for (const auto& r : constraints.expand(row))
-              localRhs.emplace_back(r.index, r.coefficient * val);
+              localRhs.emplace_back(r.index, Math::conj(r.coefficient) * val);
           };
 
           // ---------------- Local BFIs ----------------
@@ -1597,9 +1598,12 @@ namespace Rodin::Assembly
                       {
                         if (colValue != ScalarType(0))
                           localRhs[static_cast<size_t>(r.index)] -=
-                            r.coefficient * val * colValue;
+                            Math::conj(r.coefficient) * val * colValue;
                         for (const auto& c : constraints.expand(J))
-                          Alocal(r.index, c.index) += r.coefficient * val * c.coefficient;
+                        {
+                          Alocal(r.index, c.index) +=
+                            Math::conj(r.coefficient) * val * c.coefficient;
+                        }
                       }
                     }
                   }
@@ -1674,11 +1678,11 @@ namespace Rodin::Assembly
                         {
                           if (colValue != ScalarType(0))
                             localRhs[static_cast<size_t>(r.index)] -=
-                              r.coefficient * val * colValue;
+                              Math::conj(r.coefficient) * val * colValue;
                           for (const auto& c : constraints.expand(J))
                           {
                             Alocal(r.index, c.index) +=
-                              r.coefficient * val * c.coefficient;
+                              Math::conj(r.coefficient) * val * c.coefficient;
                           }
                         }
                       }
@@ -1709,9 +1713,12 @@ namespace Rodin::Assembly
                   for (const auto& r : constraints.expand(static_cast<Index>(i)))
                   {
                     if (colValue != ScalarType(0))
-                      b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                      b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                     for (const auto& c : constraints.expand(static_cast<Index>(j)))
-                      A(r.index, c.index) += r.coefficient * val * c.coefficient;
+                    {
+                      A(r.index, c.index) +=
+                        Math::conj(r.coefficient) * val * c.coefficient;
+                    }
                   }
                 }
               }
@@ -1757,7 +1764,10 @@ namespace Rodin::Assembly
                   const ScalarType val =
                     -static_cast<ScalarType>(integrator->integrate(l));
                   for (const auto& r : constraints.expand(I))
-                    localRhs[static_cast<size_t>(r.index)] += r.coefficient * val;
+                  {
+                    localRhs[static_cast<size_t>(r.index)] +=
+                      Math::conj(r.coefficient) * val;
+                  }
                 }
               }
             }
@@ -1779,7 +1789,7 @@ namespace Rodin::Assembly
             {
               const ScalarType val = static_cast<ScalarType>(vec.coeff(i));
               for (const auto& r : constraints.expand(static_cast<Index>(i)))
-                b.coeffRef(r.index) += r.coefficient * val;
+                b.coeffRef(r.index) += Math::conj(r.coefficient) * val;
             }
           }
 
@@ -2076,11 +2086,11 @@ namespace Rodin::Assembly
           {
             if (colValue != ScalarType(0))
               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                r.index, -r.coefficient * val * colValue);
+                r.index, -Math::conj(r.coefficient) * val * colValue);
             for (const auto& c : constraints.expand(col))
             {
               tchunks[static_cast<size_t>(tid)].emplace_back(
-                r.index, c.index, r.coefficient * val * c.coefficient);
+                r.index, c.index, Math::conj(r.coefficient) * val * c.coefficient);
             }
           }
         };
@@ -2160,11 +2170,11 @@ namespace Rodin::Assembly
                         {
                           if (colValue != ScalarType(0))
                             rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                              r.index, -r.coefficient * val * colValue);
+                              r.index, -Math::conj(r.coefficient) * val * colValue);
                           for (const auto& c : constraints.expand(J))
                           {
                             (*Alocal)(r.index, c.index) +=
-                              r.coefficient * val * c.coefficient;
+                              Math::conj(r.coefficient) * val * c.coefficient;
                           }
                         }
                       }
@@ -2269,11 +2279,11 @@ namespace Rodin::Assembly
                           {
                             if (colValue != ScalarType(0))
                               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                                r.index, -r.coefficient * val * colValue);
+                                r.index, -Math::conj(r.coefficient) * val * colValue);
                             for (const auto& c : constraints.expand(J))
                             {
                               (*Alocal)(r.index, c.index) +=
-                                r.coefficient * val * c.coefficient;
+                                Math::conj(r.coefficient) * val * c.coefficient;
                             }
                           }
                         }
@@ -2332,7 +2342,7 @@ namespace Rodin::Assembly
                   const ScalarType val =
                     -static_cast<ScalarType>(integrator->integrate(l));
                   for (const auto& r : constraints.expand(I))
-                    localRhs.emplace_back(r.index, r.coefficient * val);
+                    localRhs.emplace_back(r.index, Math::conj(r.coefficient) * val);
                 }
               }
             } // omp parallel
@@ -2364,7 +2374,7 @@ namespace Rodin::Assembly
           {
             const ScalarType val = static_cast<ScalarType>(vec.coeff(i));
             for (const auto& r : constraints.expand(static_cast<Index>(vOff) + i))
-              b.coeffRef(r.index) += r.coefficient * val;
+              b.coeffRef(r.index) += Math::conj(r.coefficient) * val;
           }
         }
 
@@ -2502,9 +2512,12 @@ namespace Rodin::Assembly
                   for (const auto& r : constraints.expand(I))
                   {
                     if (colValue != ScalarType(0))
-                      b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                      b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                     for (const auto& c : constraints.expand(J))
-                      A(r.index, c.index) += r.coefficient * val * c.coefficient;
+                    {
+                      A(r.index, c.index) +=
+                        Math::conj(r.coefficient) * val * c.coefficient;
+                    }
                   }
                 }
               }

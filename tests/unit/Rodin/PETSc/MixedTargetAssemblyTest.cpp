@@ -27,7 +27,7 @@ using namespace Rodin::Variational;
 namespace
 {
   /// @brief Builds the exact interval fixture for local assembly backends.
-  template <template <class, class> class Assembler>
+  template <template <class, class> class Assembler, bool Affine = false>
   void checkLocalMixedTargets()
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
@@ -46,7 +46,7 @@ namespace
         mesh.setAttribute(vertex.key(), 12);
     }
     std::sort(positions.begin(), positions.end());
-    Rodin::Tests::Unit::checkMixedTargetAssembly<Assembler>(
+    Rodin::Tests::Unit::checkMixedTargetAssembly<Assembler, Affine>(
       space, positions, PETSC_COMM_SELF);
   }
 }
@@ -62,6 +62,20 @@ TEST(PETSc_MixedTargetAssembly, Sequential)
 TEST(PETSc_MixedTargetAssembly, OpenMP)
 {
   checkLocalMixedTargets<PETSc::Assembly::OpenMP>();
+}
+#endif
+
+/// @brief Affine cross-field constraints match an independent conjugate-transpose projection.
+TEST(PETSc_MixedTargetAssembly, SequentialAffineIdentification)
+{
+  checkLocalMixedTargets<PETSc::Assembly::Sequential, true>();
+}
+
+#ifdef RODIN_USE_OPENMP
+/// @brief OpenMP affine constraints preserve projected blocks and reject partial updates atomically.
+TEST(PETSc_MixedTargetAssembly, OpenMPAffineIdentification)
+{
+  checkLocalMixedTargets<PETSc::Assembly::OpenMP, true>();
 }
 #endif
 

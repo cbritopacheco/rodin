@@ -563,7 +563,7 @@ namespace Rodin::Assembly
             const PetscInt I = static_cast<PetscInt>(r.index);
             if (colValue != PetscScalar(0))
             {
-              const PetscScalar rhsShift = -r.coefficient * val * colValue;
+              const PetscScalar rhsShift = -Math::conj(r.coefficient) * val * colValue;
               if (doVector)
               {
                 ierr = VecSetValue(b, I, rhsShift, ADD_VALUES);
@@ -576,7 +576,7 @@ namespace Rodin::Assembly
               for (const auto& c : constraints.expand(col))
               {
                 const PetscInt J = static_cast<PetscInt>(c.index);
-                const PetscScalar v = r.coefficient * val * c.coefficient;
+                const PetscScalar v = Math::conj(r.coefficient) * val * c.coefficient;
                 // Insert unconditionally. PETSc decides whether zero-valued
                 // insertions affect the pattern according to its current
                 // matrix options.
@@ -594,7 +594,7 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             const PetscInt I = static_cast<PetscInt>(r.index);
-            const PetscScalar v = r.coefficient * val;
+            const PetscScalar v = Math::conj(r.coefficient) * val;
             ierr = VecSetValue(b, I, v, ADD_VALUES);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
@@ -1028,40 +1028,6 @@ namespace Rodin::Assembly
         PetscErrorCode ierr;
 
         // ------------------------
-        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
-        // ------------------------
-        assert(A);
-        if (doMatrix)
-        {
-          ierr = PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(ncols), static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(ncols), MATSEQAIJ, false});
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-        }
-
-        // ------------------------
-        // Allocate / reset b (Seq Vec)
-        // ------------------------
-        assert(b);
-        if (doVector)
-        {
-          ierr = PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(nrows), VECSEQ, true, true});
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-        }
-
-        auto& x = axb.getSolution();
-        assert(x);
-        // The solution vector carries the previous iterate as the solver's
-        // initial guess, so it must not be zeroed on reuse.
-        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(ncols),
-          static_cast<PetscInt>(ncols), VECSEQ, true, false});
-        assert(ierr == PETSC_SUCCESS);
-        (void)ierr;
-
-        // ------------------------
         // Helpers
         // ------------------------
         const auto findTrialBlock = [&](const auto& uuid) -> size_t
@@ -1185,6 +1151,40 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
 
+        // ------------------------
+        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
+        // ------------------------
+        assert(A);
+        if (doMatrix)
+        {
+          ierr = PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols), static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols), MATSEQAIJ, false});
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+        // ------------------------
+        // Allocate / reset b (Seq Vec)
+        // ------------------------
+        assert(b);
+        if (doVector)
+        {
+          ierr = PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(nrows), VECSEQ, true, true});
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+        auto& x = axb.getSolution();
+        assert(x);
+        // The solution vector carries the previous iterate as the solver's
+        // initial guess, so it must not be zeroed on reuse.
+        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(ncols),
+          static_cast<PetscInt>(ncols), VECSEQ, true, false});
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+
         auto matrix_entry = [&](Index row, Index col, PetscScalar val) {
           const PetscScalar colValue = constraints.isIdentified(col)
             ? constraints.getIdentificationValue(col)
@@ -1194,7 +1194,7 @@ namespace Rodin::Assembly
             const PetscInt I = static_cast<PetscInt>(r.index);
             if (colValue != PetscScalar(0))
             {
-              const PetscScalar rhsShift = -r.coefficient * val * colValue;
+              const PetscScalar rhsShift = -Math::conj(r.coefficient) * val * colValue;
               ierr = VecSetValue(b, I, rhsShift, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
               (void)ierr;
@@ -1202,7 +1202,7 @@ namespace Rodin::Assembly
             for (const auto& c : constraints.expand(col))
             {
               const PetscInt J = static_cast<PetscInt>(c.index);
-              const PetscScalar v = r.coefficient * val * c.coefficient;
+              const PetscScalar v = Math::conj(r.coefficient) * val * c.coefficient;
               // Insert unconditionally. PETSc decides whether zero-valued
               // insertions affect the pattern according to its current
               // matrix options.
@@ -1219,7 +1219,7 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             const PetscInt I = static_cast<PetscInt>(r.index);
-            const PetscScalar v = r.coefficient * val;
+            const PetscScalar v = Math::conj(r.coefficient) * val;
             ierr = VecSetValue(b, I, v, ADD_VALUES);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;

@@ -26,7 +26,7 @@ namespace Rodin::Tests::Unit
   using namespace Geometry;
   using namespace Variational;
   /// @brief Mixed local, nonlocal and preassembled terms obey separate target updates.
-  template <template <class, class> class Assembler, class Space,
+  template <template <class, class> class Assembler, bool Affine = false, class Space,
     class Scalar = PetscScalar>
   void checkMixedTargetAssembly(Space& space,
     const std::vector<std::pair<Real, Index>>& positions, MPI_Comm communicator)
@@ -58,7 +58,7 @@ namespace Rodin::Tests::Unit
     PETSc::Variational::LinearForm preassembledLoad(q);
     preassembledLoad = Integral(Scalar(3) * factor * q);
     preassembledLoad.assemble();
-    const auto boundaryValue = [factor](Real value) {
+    const auto boundaryValue = [factor](Scalar value) {
       if constexpr (std::is_same_v<Scalar, Complex>)
         return ComplexFunction(Scalar(value) * factor);
       else
@@ -68,8 +68,20 @@ namespace Rodin::Tests::Unit
       Integral(Scalar(5) * p, q) + Integral(Potential(kernel00, u), v) +
       Integral(Potential(kernel01, p), v) + Integral(Potential(kernel10, u), q) +
       Integral(Potential(kernel11, p), q) - Integral(Scalar(-1.5) * factor * v) -
-      Integral(Scalar(-11.25) * factor * q) + DirichletBC(u, boundaryValue(1)).on(11) +
-      DirichletBC(p, boundaryValue(-2)).on(12);
+      Integral(Scalar(-11.25) * factor * q);
+    const Scalar coefficient = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(0.25, 0.5);
+      else
+        return Scalar(0.25);
+    }();
+    if constexpr (Affine)
+      body.getDBCs().add(DirichletBC(
+        u, coefficient * p, boundaryValue(Scalar(1) + Scalar(2) * coefficient))
+                           .on(11));
+    else
+      body.getDBCs().add(DirichletBC(u, boundaryValue(1)).on(11));
+    body.getDBCs().add(DirichletBC(p, boundaryValue(-2)).on(12));
     body.getBFs().add(preassembled);
     body.getLFs().add(preassembledLoad);
     Tuple<std::reference_wrapper<decltype(u)>, std::reference_wrapper<decltype(p)>>
@@ -162,18 +174,39 @@ namespace Rodin::Tests::Unit
     auto rowOnly = raw;
     auto fullLoad = load;
     auto rowLoad = load;
-    for (const auto dof : fixed)
+    if constexpr (Affine)
     {
-      fullLoad -= raw.col(dof) * exact[dof];
-      full.row(dof).setZero();
-      full.col(dof).setZero();
-      full(dof, dof) = 1;
-      rowOnly.row(dof).setZero();
-      rowOnly(dof, dof) = 1;
-      rowLoad[dof] = exact[dof];
+      const Index slave = fixed[0], master = 3 + positions.front().second;
+      Math::Matrix<Scalar> projection = Math::Matrix<Scalar>::Identity(size, size);
+      projection.row(slave).setZero();
+      projection(slave, master) = coefficient;
+      projection.row(fixed[1]).setZero();
+      Math::Vector<Scalar> lift = Math::Vector<Scalar>::Zero(size);
+      lift[slave] = (Scalar(1) + Scalar(2) * coefficient) * factor;
+      lift[fixed[1]] = exact[fixed[1]];
+      full = projection.adjoint() * raw * projection;
+      fullLoad = projection.adjoint() * (load - raw * lift);
+      full(slave, slave) = 1;
+      full(slave, master) = -coefficient;
+      fullLoad[slave] = lift[slave];
+      full(fixed[1], fixed[1]) = 1;
+      fullLoad[fixed[1]] = exact[fixed[1]];
     }
-    for (const auto dof : fixed)
-      fullLoad[dof] = exact[dof];
+    else
+    {
+      for (const auto dof : fixed)
+      {
+        fullLoad -= raw.col(dof) * exact[dof];
+        full.row(dof).setZero();
+        full.col(dof).setZero();
+        full(dof, dof) = 1;
+        rowOnly.row(dof).setZero();
+        rowOnly(dof, dof) = 1;
+        rowLoad[dof] = exact[dof];
+      }
+      for (const auto dof : fixed)
+        fullLoad[dof] = exact[dof];
+    }
     for (size_t repeat = 0; repeat < 2; ++repeat)
     {
       SCOPED_TRACE(repeat);
@@ -182,6 +215,16 @@ namespace Rodin::Tests::Unit
       EXPECT_LT((vector() - fullLoad).norm(), 1e-12);
       const Math::Vector<Scalar> recovered = matrix().fullPivLu().solve(vector());
       EXPECT_LT((recovered - exact).norm(), 1e-11);
+      if constexpr (Affine)
+      {
+        for (const auto target : {AssemblyTarget::LHS, AssemblyTarget::RHS})
+        {
+          EXPECT_THROW(backend->execute(system, input, target), Alert::Exception);
+          EXPECT_LT((matrix() - full).norm(), 1e-12);
+          EXPECT_LT((vector() - fullLoad).norm(), 1e-12);
+        }
+        continue;
+      }
       ASSERT_EQ(VecSet(system.getVector(), Scalar(11) * factor), PETSC_SUCCESS);
       backend->execute(system, input, AssemblyTarget::LHS);
       EXPECT_LT((matrix() - rowOnly).norm(), 1e-12);

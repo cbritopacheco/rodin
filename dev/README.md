@@ -921,3 +921,50 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   profiles remain excluded. The final lifecycle file comment was updated
   after compilation; its executable test code is identical to the archived
   validation sources.
+- Complex affine identification: independent matrix and load oracles now check
+  \(T^{*}AT\) and \(T^{*}(b-Ad)\), including native dense/sparse,
+  Sequential/OpenMP and real/complex PETSc single/mixed systems. Previous
+  transpose-only row expansion fails the complex projection and physical-energy
+  checks, although the exact constant solution can still be recovered. Row
+  factors now use conjugation; trial columns and reconstruction retain their
+  original coefficients. Local PETSc and MPI partial identification assembly
+  rejects before resetting system outputs. MPI rejection is collective, so an
+  empty shard does not continue into PETSc collectives after another rank throws.
+  Pre-fix real mixed tests demonstrate cleared outputs; complex tests also
+  reject incorrect full matrix/load values. The three-rank empty-shard case
+  times out before the collective rejection fix and passes afterward.
+  Eight native cases, sixteen local PETSc cases, twenty distributed groups
+  (real/complex, one/two/three/four/eight ranks), twenty-eight Release Poisson
+  cases and ten native lifecycle cases pass separately. Final normal Debug
+  validation passes twenty local cases and eight distributed groups. Native
+  affine tests pass ASan/LSan; six complex PETSc cases pass ASan with external
+  leak detection disabled under the PETSc test policy. Sanitizer and pre-fix
+  counters remain isolated from the coverage merge.
+  Snapshot run84 contains all 570 production files. The audit retires old
+  hits and function hits throughout every changed assembler specialization,
+  retaining byte-identical mapped lines only as zero-count denominator
+  candidates. Corrected Release counters and normal Debug counters produce
+  179 reports: 36,632 of 39,138 production lines (\(93.5970\%\)). The
+  expanded denominator and retired hits explain the decrease from run79;
+  tests, benchmarks, deleted sources and private diagnostic runs are excluded.
+  Further matching-source regression refreshes are pending; this is not a
+  \(95\%\) completion claim.
+- CI distributed timeout: Tests run 38518314738, job 115702442764
+  (`Unit (gcc-14, Debug, OFF, ON, ON)`) times out the three-rank whole
+  `RodinPETScMPIFormTest` suite after 120 seconds. The first named-form case
+  passes in about 111 seconds, leaving insufficient aggregate time for the
+  remaining thirteen cases; no numerical assertion fails. That case now has
+  its own invocation for each existing rank count, while the complementary
+  filter retains all remaining and future cases. Both registrations keep the
+  original 120-second timeout, mesh, tolerances, labels and MPI leak policy.
+  All fourteen cases pass individually in a fresh normal Debug build on three
+  ranks; CTest JSON confirms the six complementary registrations. This
+  confirmed CI failure satisfies the user's condition for resuming pushes
+  after batch validation. At the last check, 270 of 274 CI jobs passed, one
+  was cancelled, the timeout job failed, and two remained in progress.
+  Fresh normal Debug builds of the existing native Sequential/OpenMP suites
+  also pass all 139 cases individually. Their matching-source counters produce
+  the 183-report run89 audit: 36,730 of 39,193 production lines
+  (\(93.7157\%\)), with no nonproduction or missing-source records.
+  This adds 55 measured lines and 98 hits relative to run87; 504 further hits
+  are required for \(95\%\) at this denominator.
