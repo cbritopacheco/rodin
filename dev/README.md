@@ -442,6 +442,26 @@ geometry, and backend variants explicitly. Current audit findings include:
   both real and complex numerical cases for each mutation. This batch adds 11
   production line hits without enlarging the denominator: 34,946 of 37,233
   lines (\(93.86\%\)). Mutation and sanitizer profiles remain excluded.
+- MEDIT parser variants: raw-character ranges and string const iterators cover
+  all 28 keyword spellings, signed/unsigned integer limits, empty and trailing
+  input, structured declarations, vertex dimensions zero through three, and
+  entity records with one through eight vertices. Four pre-fix checks reproduce
+  the whitespace skipper joining `Triangles tail` into one word and accepting
+  split declarations such as `Dim ension 3`. Keyword lexemes now require
+  contiguous alphabetic characters while preserving surrounding whitespace
+  and whitespace before numeric values. The native unexpected-keyword
+  exception type is retained.
+  All nine parser cases pass individually in normal Debug, fresh Release
+  CTest and assertion-enabled ASan/LSan builds. All 35 public mesh-loader cases
+  and 12 real/complex P1/P2 scalar/vector/matrix field-loader cases also pass
+  individually in Release; the 12 field-loader cases additionally pass in
+  normal Debug. The coverage merge discards every old line and function record
+  for the three changed parser classes. Other records in the header are retained
+  only after verifying byte-identical source lines and unchanged positions.
+  The combined audit covers 35,079 of 37,311 production lines (\(94.02\%\));
+  MEDIT contributes 464 of 473 lines. At this denominator, another 367 hits
+  are required for \(95\%\). Tests, benchmarks, failed runs and sanitizer
+  profiles do not enter the measured sources or normal coverage evidence.
 - Form ownership: real/complex P1 and quadratic H1 forms reject foreign trial
   and test contributions without changing the assembled mass operator or load.
   Addition/subtraction and linear assignment exercise named-trial and unnamed

@@ -488,7 +488,7 @@ namespace Rodin::IO::MEDIT
 
       std::string kw;
       const auto getKeyword = [&](auto& ctx) { kw = _attr(ctx); };
-      const auto p = (+alpha)[getKeyword];
+      const auto p = boost::spirit::x3::lexeme[+alpha][getKeyword];
       const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
       if (begin != end)
         return {};
@@ -558,7 +558,7 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::alpha;
       std::string kw;
       const auto getKeyword = [&](auto& ctx) { kw = _attr(ctx); };
-      const auto pkw = (+alpha)[getKeyword];
+      const auto pkw = boost::spirit::x3::lexeme[+alpha][getKeyword];
       const bool rkw = boost::spirit::x3::phrase_parse(begin, end, pkw, space);
       if (rkw)
       {
@@ -604,7 +604,7 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::alpha;
       std::string kw;
       const auto getKeyword = [&](auto& ctx) { kw = _attr(ctx); };
-      const auto pkw = (+alpha)[getKeyword];
+      const auto pkw = boost::spirit::x3::lexeme[+alpha][getKeyword];
       const bool rkw = boost::spirit::x3::phrase_parse(begin, end, pkw, space);
       if (rkw)
       {
