@@ -804,6 +804,28 @@ passed in both optimized native and OpenMP-enabled builds. Curved maps,
 embedded cells and matrix-valued gradient-expression timings are not certified
 by this benchmark matrix.
 
+An explicit scalar H1 gradient bind now always prepares physical derivatives
+from the supplied point. A cell/formula/sample key alone cannot identify the
+geometry: mesh deformation can preserve all three while changing $B_q$.
+Reference tables remain reusable, and prepared physical vectors remain available
+for basis access and copy/move, but are not reused across binds. Exact dilation
+regressions cover seven geometries, degrees one and two, real/complex fields,
+repeated binding and retained copy/move values. Doubling the geometry must give
+$g_a^{\mathrm{new}}=g_a^{\mathrm{old}}/2$ componentwise. The old implementation
+was observed returning the unscaled segment gradients instead.
+
+All 36 H1-gradient unit tests and all 126 physical-gradient benchmark cases
+pass in both optimized compiler configurations. A native paired sweep with
+three repetitions and 20 ms minimum windows gives a median before/after time
+ratio of 1.070 across the 126 cases, with a range of 0.970--1.242. This is a
+correctness repair, not a portable speedup claim; the broad short-window sweep
+does not resolve small per-case timing changes. Other expression caches and
+remapped-reference-point provenance require separate qualification. Evidence is
+retained under
+`build-convergence/certification/assembly-gradient-profile-20261014/`.
+The freshly rebuilt native Poisson consumer also passes all 35 convergence
+tests over seven geometries, including the degree-two and degree-three rates.
+
 Native degree-two, order-16 real CPU medians were approximately 3.20 microseconds
 per triangular sweep and 76.23 microseconds per tetrahedral sweep. These contain
 53/729 points and 6/10 basis functions, respectively. Normalizing by

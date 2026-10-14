@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <gtest/gtest.h>
 #include "Rodin/Test/Random.h"
 
@@ -14,6 +20,102 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /**
+   * @brief Rebinds physical gradients after an exact uniform geometry dilation.
+   *
+   * ## State transition
+   *
+   * A dilation by two preserves topology, reference basis and quadrature
+   * identity, but halves every physical gradient. Fresh mapped points and a
+   * freshly bound expression provide independent controls. All components
+   * are compared exactly; no coordinate matching or tolerance is used.
+   *
+   * @tparam K Polynomial degree of the scalar space.
+   * @tparam Scalar Real or complex scalar field.
+   */
+  template <size_t K, class Scalar>
+  void checkGradientGeometryRebind()
+  {
+    using G = Polytope::Type;
+    for (const auto geometry : {G::Segment, G::Triangle, G::Quadrilateral, G::Tetrahedron,
+           G::Pyramid, G::Hexahedron, G::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const auto dimension = Polytope::Traits(geometry).getDimension();
+      const auto subdivisions = dimension == 1 ? std::initializer_list<size_t>{2}
+        : dimension == 2                       ? std::initializer_list<size_t>{2, 2}
+                                               : std::initializer_list<size_t>{2, 2, 2};
+      auto mesh = LocalMesh::UniformGrid(geometry, subdivisions);
+      for (size_t d = dimension; d > 0; --d)
+      {
+        mesh.getConnectivity().compute(d, d - 1);
+        mesh.getConnectivity().compute(d, 0);
+      }
+      H1<K, Scalar> space(std::integral_constant<size_t, K>{}, mesh);
+      TrialFunction u(space);
+      auto gradient = Grad(u);
+      const auto cell = *mesh.getCell();
+      const auto& formula = QF::PolytopeQuadratureFormula::get(4, geometry);
+      const PolytopeQuadrature before(cell, formula);
+      const IntegrationPoint first(before.getPoint(0), &formula, 0);
+      gradient.setIntegrationPoint(first);
+      std::vector<Math::SpatialVector<Scalar>> original;
+      for (size_t a = 0; a < gradient.getDOFs(cell); ++a)
+        original.push_back(gradient.getBasis(a));
+
+      for (Index i = 0; i < mesh.getVertexCount(); ++i)
+      {
+        auto coordinates = mesh.getVertexCoordinates(i);
+        coordinates *= 2;
+        mesh.setVertexCoordinates(i, coordinates);
+      }
+      const PolytopeQuadrature after(cell, formula);
+      const IntegrationPoint second(after.getPoint(0), &formula, 0);
+      gradient.setIntegrationPoint(second);
+      auto fresh = Grad(u);
+      fresh.setIntegrationPoint(second);
+      auto copied = gradient;
+      auto moved = std::move(copied);
+      gradient.setIntegrationPoint(second);
+      bool nonzero = false;
+      for (size_t a = 0; a < original.size(); ++a)
+      {
+        const auto actual = gradient.getBasis(a);
+        const auto expected = fresh.getBasis(a);
+        const auto retained = moved.getBasis(a);
+        ASSERT_EQ(actual.size(), dimension);
+        for (size_t j = 0; j < dimension; ++j)
+        {
+          EXPECT_EQ(actual(j), expected(j));
+          EXPECT_EQ(retained(j), expected(j));
+          EXPECT_EQ(Scalar(2) * actual(j), original[a](j));
+          nonzero = nonzero || original[a](j) != Scalar(0);
+        }
+      }
+      EXPECT_TRUE(nonzero);
+    }
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GeometryRebindRealP1)
+  {
+    checkGradientGeometryRebind<1, Real>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GeometryRebindRealP2)
+  {
+    checkGradientGeometryRebind<2, Real>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GeometryRebindComplexP1)
+  {
+    checkGradientGeometryRebind<1, Complex>();
+  }
+
+  TEST(Rodin_Variational_H1_Grad, GeometryRebindComplexP2)
+  {
+    checkGradientGeometryRebind<2, Complex>();
+  }
+
   /// @brief Verifies shape function construction for variational H1 grad.
   TEST(Rodin_Variational_H1_Grad, ShapeFunction_Construction)
   {
