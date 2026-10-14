@@ -1,0 +1,188 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/** @file @brief Independent MFEM coefficient layouts and native input diagnostics. */
+#include <gtest/gtest.h>
+#include <iomanip>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <type_traits>
+#include "Rodin/Geometry.h"
+#include "Rodin/Variational.h"
+#include "Rodin/IO.h"
+
+using namespace Rodin;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
+using namespace Rodin::IO;
+
+namespace
+{
+  template <class Scalar>
+  class MFEMCoefficients : public ::testing::Test
+  {
+    protected:
+      /// @brief Gives distinct exactly representable entries for every node and component.
+      static Scalar entry(size_t node, size_t component)
+      {
+        const Real real = 1 + 8 * Real(node) + Real(component);
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          return Scalar(real, -2 - 4 * Real(node) - Real(component));
+        else
+          return real;
+      }
+
+      /// @brief Builds an independent MFEM stream in either supported component ordering.
+      static std::string payload(
+        size_t nodes, size_t components, size_t ordering, bool discontinuous)
+      {
+        std::ostringstream stream;
+        stream << std::setprecision(std::numeric_limits<Real>::max_digits10)
+               << "# independent coefficients\nFiniteElementSpace\n"
+               << "FiniteElementCollection: " << (discontinuous ? "L2_1D_P0" : "H1_1D_P1")
+               << "\nVDim: " << components << "\nOrdering: " << ordering << "\n\n";
+        for (size_t outer = 0; outer < (ordering == 0 ? components : nodes); ++outer)
+        {
+          for (size_t inner = 0; inner < (ordering == 0 ? nodes : components); ++inner)
+          {
+            stream << entry(ordering == 0 ? inner : outer, ordering == 0 ? outer : inner)
+                   << '\n';
+          }
+        }
+        return stream.str();
+      }
+
+      /// @brief Checks independent layouts and printer output, including rectangular matrix components.
+      template <size_t Rank, bool Discontinuous>
+      void verify()
+      {
+        using Range = std::conditional_t<Rank == 0, Scalar,
+          std::conditional_t<Rank == 1, Math::SpatialVector<Scalar>,
+            Math::SpatialMatrix<Scalar>>>;
+        auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
+        using FES = std::conditional_t<Discontinuous, P0<Range>, P1<Range>>;
+        auto space = [&] {
+          if constexpr (Rank == 0)
+            return FES(mesh);
+          else if constexpr (Rank == 1)
+            return FES(mesh, 3);
+          else
+            return FES(mesh, 2, 3);
+        }();
+        const size_t nodes = Discontinuous ? mesh.getCellCount() : mesh.getVertexCount();
+        const size_t components = space.getVectorDimension();
+        GridFunction field(space);
+        GridFunctionLoader<FileFormat::MFEM, FES, Math::Vector<Scalar>> loader(field);
+        for (size_t ordering : {size_t(0), size_t(1)})
+        {
+          SCOPED_TRACE(ordering);
+          field.getData().setConstant(Scalar(-99));
+          std::istringstream input(payload(nodes, components, ordering, Discontinuous));
+          ASSERT_NO_THROW(loader.load(input));
+          for (size_t node = 0; node < nodes; ++node)
+          {
+            for (size_t component = 0; component < components; ++component)
+            {
+              const size_t index =
+                Rank == 2 ? node * components + component : node + component * nodes;
+              EXPECT_EQ(field.getData()[index], entry(node, component));
+            }
+          }
+          std::ostringstream output;
+          output << std::setprecision(std::numeric_limits<Real>::max_digits10);
+          GridFunctionPrinter<FileFormat::MFEM, FES, Math::Vector<Scalar>>(field).print(
+            output);
+          std::istringstream printed(output.str());
+          std::string line;
+          for (size_t i = 0; i < 4; ++i)
+          {
+            ASSERT_TRUE(bool(std::getline(printed, line)));
+            if (i == 2)
+            {
+              EXPECT_EQ(line, "VDim: " + std::to_string(components));
+            }
+            if (i == 3)
+            {
+              EXPECT_EQ(line, "Ordering: 0");
+            }
+          }
+          Scalar actual;
+          for (size_t component = 0; component < components; ++component)
+          {
+            for (size_t node = 0; node < nodes; ++node)
+            {
+              ASSERT_TRUE(bool(printed >> actual));
+              EXPECT_EQ(actual, entry(node, component));
+            }
+          }
+          EXPECT_FALSE(bool(printed >> actual));
+        }
+      }
+  };
+  using MFEMScalars = ::testing::Types<Real, Complex>;
+  TYPED_TEST_SUITE(MFEMCoefficients, MFEMScalars);
+
+  TYPED_TEST(MFEMCoefficients, P1ScalarBothOrderings)
+  {
+    this->template verify<0, false>();
+  }
+  TYPED_TEST(MFEMCoefficients, P1VectorBothOrderings)
+  {
+    this->template verify<1, false>();
+  }
+  TYPED_TEST(MFEMCoefficients, P1MatrixBothOrderings)
+  {
+    this->template verify<2, false>();
+  }
+  TYPED_TEST(MFEMCoefficients, P0ScalarBothOrderings)
+  {
+    this->template verify<0, true>();
+  }
+  TYPED_TEST(MFEMCoefficients, P0VectorBothOrderings)
+  {
+    this->template verify<1, true>();
+  }
+  TYPED_TEST(MFEMCoefficients, P0MatrixBothOrderings)
+  {
+    this->template verify<2, true>();
+  }
+
+  /// @brief Invalid first and truncated later P1 coefficients raise native diagnostics before changing the field.
+  TYPED_TEST(MFEMCoefficients, P1MalformedCoefficientsPreserveDestination)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
+    P1<TypeParam> space(mesh);
+    GridFunction field(space);
+    GridFunctionLoader<FileFormat::MFEM, decltype(space), Math::Vector<TypeParam>> loader(
+      field);
+    for (const std::string data : {"bad\n2\n3\n4\n", "1\n2\n", "1\nbad\n3\n4\n"})
+    {
+      SCOPED_TRACE(data);
+      field.getData().setConstant(TypeParam(-17));
+      const auto before = field.getData().eval();
+      std::istringstream input("FiniteElementSpace\nFiniteElementCollection: H1_1D_P1\n"
+                               "VDim: 1\nOrdering: 0\n\n" +
+        data);
+      try
+      {
+        loader.load(input);
+        FAIL() << "Malformed coefficient input was accepted";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find("member function"), std::string::npos);
+        EXPECT_NE(message.find("load"), std::string::npos);
+      }
+      catch (const std::exception& error)
+      {
+        ADD_FAILURE() << "Expected a native member-function diagnostic: " << error.what();
+      }
+      EXPECT_EQ(field.getData(), before);
+    }
+  }
+}

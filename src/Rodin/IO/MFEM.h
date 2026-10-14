@@ -2081,9 +2081,17 @@ namespace Rodin::IO
         std::vector<ScalarType> tmp(n);
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        tmp[0] = static_cast<ScalarType>(std::stod(line));
+        std::istringstream first(line);
+        if (!(first >> tmp[0]))
+          Alert::MemberFunctionException(*this, __func__)
+            << "Invalid first MFEM coefficient." << Alert::Raise;
         for (size_t i = 1; i < n; ++i)
-          is >> tmp[i];
+        {
+          if (!(is >> tmp[i]))
+            Alert::MemberFunctionException(*this, __func__)
+              << "Expected " << n << " MFEM coefficients; invalid or missing value at "
+              << i << "." << Alert::Raise;
+        }
 
         // Convert from MFEM file ordering -> Rodin internal (block-by-component):
         // internal index = v + c*vn

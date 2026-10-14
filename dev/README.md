@@ -873,3 +873,24 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   to run64, the batch adds 244 measured lines and 217 covered lines, leaving
   382 additional hits needed for \(95\%\) at this denominator. The expanded
   denominator is retained rather than hiding supported template variants.
+- MFEM native coefficient loading: independent real/complex scalar, vector and
+  rectangular-matrix P0/P1 inputs exercise both component orderings and check
+  printer coefficients directly against exact values. The three complex P1
+  variants fail before the fix because the first coefficient passes through
+  `std::stod`; malformed first/later and truncated inputs also demonstrate
+  standard exceptions or silent acceptance before the fix. The P1 reader now
+  extracts its native scalar type and validates every coefficient before
+  modifying the destination, raising native member-function diagnostics.
+  All fourteen cases pass individually in Release, normal Debug and ASan/LSan.
+  Eighteen existing P1 and nine P0 IO cases pass individually in fresh Release
+  builds, including all supported cell geometries. The change does not alter
+  MFEM headers, node mappings, component ordering or matrix shape conventions.
+  Source snapshot run73 verifies all 570 production files. The coverage merge
+  retires the complete changed P1 MFEM loader class and its function records;
+  retained MFEM records map only to byte-identical source before and after the
+  changed class. All other production sources match the prior audited snapshot.
+  The combined 147-report measurement is 35,372 of 37,574 production lines
+  (\(94.1396\%\)); MFEM has 1,480 of 1,540 lines covered. The batch adds
+  19 measured production lines and 76 hits, leaving 324 further hits needed
+  for \(95\%\) at the current denominator. Tests, benchmarks, sanitizer
+  counters and pre-fix counters remain excluded.
