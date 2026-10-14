@@ -989,3 +989,17 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   remains byte-identical to snapshot run84. The 191-report run93 audit measures
   36,977 of 39,237 production lines (\(94.2401\%\)), adding 49 hits without
   reducing the denominator; 299 additional hits are required for \(95\%\).
+- Explicit Sequential preassembled targets: four real/complex dense/sparse cases
+  extend the projection-and-lifting oracle to the Sequential backend regardless
+  of the configured default. P1 and quadratic H1 vector fields on triangles and
+  quadrilaterals check full assembly, repeated assembly, row-only targeted
+  elimination and preservation of the opposite system output. All fourteen
+  lifecycle cases pass individually in Release, normal Debug and ASan/LSan.
+  Doubling only Sequential preassembled insertion fails all four new cases
+  while the ten unaffected cases pass. The first private mutation compile was
+  killed under memory pressure; its isolated retry completes with one heavy
+  compiler. Sanitizer and mutation counters are excluded.
+  Before the subsequent root/quadrature repairs, production still matched
+  snapshot run84. The 195-report run95 audit measures 37,001 of 39,237 lines
+  (\(94.3013\%\)), adding 24 hits without reducing the denominator. There
+  are 275 remaining hits needed for \(95\%\) at this denominator.

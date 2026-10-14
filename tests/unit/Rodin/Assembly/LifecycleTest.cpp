@@ -21,7 +21,7 @@ using namespace Rodin::Variational;
 namespace
 {
   /// @brief Preassembled forms obey independent projection and lifting identities for value constraints.
-  template <class Operator>
+  template <class Operator, bool ExplicitSequential = false>
   void checkPreassembledValueConstraints()
   {
     using Scalar = typename Operator::Scalar;
@@ -86,10 +86,37 @@ namespace
         using System = Math::LinearSystem<Operator, Math::Vector<Scalar>>;
         Problem<System, decltype(u), decltype(v)> problem(u, v);
         problem = mass + boundary - load;
+        System sequentialSystem;
+        Assembly::Sequential<System, decltype(problem)> sequential;
+        auto assemble = [&](Optional<AssemblyTarget> target = {}) {
+          if constexpr (ExplicitSequential)
+          {
+            auto body = problem.getBody();
+            Assembly::ProblemAssemblyInput<decltype(body), decltype(u), decltype(v)>
+              input(body, u, v);
+            if (target)
+              sequential.execute(sequentialSystem, input, *target);
+            else
+              sequential.execute(sequentialSystem, input);
+          }
+          else
+          {
+            if (target)
+              problem.assemble(*target);
+            else
+              problem.assemble();
+          }
+        };
+        auto assembledSystem = [&]() -> const System& {
+          if constexpr (ExplicitSequential)
+            return sequentialSystem;
+          else
+            return std::as_const(problem).getLinearSystem();
+        };
         for (size_t repeat = 0; repeat < 2; ++repeat)
         {
-          problem.assemble();
-          const auto& system = std::as_const(problem).getLinearSystem();
+          assemble();
+          const auto& system = assembledSystem();
           const Math::Matrix<Scalar> matrix = system.getOperator();
           EXPECT_LT((matrix - expectedMatrix).norm(), 1e-12);
           EXPECT_LT((system.getVector() - expectedRHS).norm(), 1e-11);
@@ -99,17 +126,23 @@ namespace
         }
         for (const auto target : {AssemblyTarget::LHS, AssemblyTarget::RHS})
         {
-          problem.assemble();
-          problem.assemble(target);
+          assemble();
+          assemble(target);
           Math::Matrix<Scalar> targetMatrix = expectedMatrix;
           Math::Vector<Scalar> targetRHS = expectedRHS;
-#ifndef RODIN_USE_OPENMP
-          if (target == AssemblyTarget::LHS)
-            targetMatrix = projection * unconstrained + identity - projection;
-          else
-            targetRHS = projection * load.getVector() + lifting;
+#ifdef RODIN_USE_OPENMP
+          constexpr bool RowOnlyTargets = ExplicitSequential;
+#else
+          constexpr bool RowOnlyTargets = true;
 #endif
-          const auto& system = std::as_const(problem).getLinearSystem();
+          if constexpr (RowOnlyTargets)
+          {
+            if (target == AssemblyTarget::LHS)
+              targetMatrix = projection * unconstrained + identity - projection;
+            else
+              targetRHS = projection * load.getVector() + lifting;
+          }
+          const auto& system = assembledSystem();
           EXPECT_LT(
             (Math::Matrix<Scalar>(system.getOperator()) - targetMatrix).norm(), 1e-12);
           EXPECT_LT((system.getVector() - targetRHS).norm(), 1e-11);
@@ -352,6 +385,30 @@ TEST(Rodin_Assembly_SequentialLifecycle, ComplexDensePreassembledValueConstraint
 TEST(Rodin_Assembly_SequentialLifecycle, ComplexSparsePreassembledValueConstraints)
 {
   checkPreassembledValueConstraints<Math::SparseMatrix<Complex>>();
+}
+
+/// @brief Explicit Sequential dense targets retain the opposite side of a constrained system.
+TEST(Rodin_Assembly_SequentialTargets, DensePreassembledValueConstraints)
+{
+  checkPreassembledValueConstraints<Math::Matrix<Real>, true>();
+}
+
+/// @brief Explicit Sequential sparse targets obey row-only value elimination.
+TEST(Rodin_Assembly_SequentialTargets, SparsePreassembledValueConstraints)
+{
+  checkPreassembledValueConstraints<Math::SparseMatrix<Real>, true>();
+}
+
+/// @brief Complex dense targeted assembly preserves the native load phase and lifting.
+TEST(Rodin_Assembly_SequentialTargets, ComplexDensePreassembledValueConstraints)
+{
+  checkPreassembledValueConstraints<Math::Matrix<Complex>, true>();
+}
+
+/// @brief Complex sparse targeted assembly preserves the native load phase and lifting.
+TEST(Rodin_Assembly_SequentialTargets, ComplexSparsePreassembledValueConstraints)
+{
+  checkPreassembledValueConstraints<Math::SparseMatrix<Complex>, true>();
 }
 
 #ifdef RODIN_USE_OPENMP
