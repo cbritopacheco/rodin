@@ -2468,6 +2468,83 @@ builds, including empty holders. Benchmark qualification passes 630 derivative
 and 84 integration-point field-evaluation selections per build. None of these
 local results certifies unpublished commits in remote CI.
 
+### Mesh-owned mapped-quadrature lookup
+
+`RodinMappedQuadratureCacheBenchmarks` is an opt-in Geometry executable, not a
+CTest or CI timing gate. It measures the public `mesh.getQuadrature` path used
+by named mass, diffusion and elasticity kernels, without timing the kernels
+themselves. Build it explicitly with:
+
+```sh
+cmake --build build-openmp-clang -j1 --target RodinMappedQuadratureCacheBenchmarks
+build-openmp-clang/tests/benchmarks/RodinMappedQuadratureCacheBenchmarks
+```
+
+The mesh index now uses the unique process-local formula-version identity
+$\iota(Q)$ instead of its address. Formula assignment and same-storage
+reconstruction therefore select new entries without destroying earlier mapped
+samples. No identity is created on lookup, no coordinate comparison is used,
+and no collective is introduced. The QF base includes the polytope declaration
+rather than the full Geometry umbrella; MPI interpolation explicitly includes
+the region declaration it uses.
+
+Warm scopes comprise one repeated cell (`Hot`), every cell at fixed formula
+identity (`CellSweep`), and twenty distinct live formulas on one cell
+(`FormulaRotation`). The last scope exceeds the sixteen-entry fast lookup and
+exercises complete-index traversal. All rules have two Gaussian points per
+one-dimensional factor; only their identities differ. Meshes have three grid
+points per axis on each of the seven nonzero-dimensional cell families.
+Creation, mapped-coordinate checks and destruction are untimed. Counts of held
+and visited cells, formulas, quadrature points and public lookups accompany
+every measurement. These are sequential lookup scopes in an OpenMP-enabled
+build, not threaded-assembly measurements.
+
+LLVM 19 measurements use `-O2 -g -DNDEBUG`, 0.1 seconds and five repetitions
+per case, with no concurrent compilation or numerical workload. The table
+reports the median across seven geometries of each case's median CPU time,
+normalized by its actual lookup count, in ns per public lookup.
+
+| Scope | Address-only parent | Address + identity prototype | Identity-only repair |
+| --- | ---: | ---: | ---: |
+| Hot | 4.91 | 5.31 | 4.97 |
+| CellSweep | 5.07 | 5.50 | 5.12 |
+| FormulaRotation | 16.66 | 18.89 | 16.96 |
+
+The address-only parent fails version-transition regressions. The prototype
+passes them but retains an unnecessary address comparison and key word. The
+identity-only representation replaces the original pointer-sized key rather
+than enlarging it. Its median per-case after/before CPU ratios are
+1.009, 1.011 and 1.008 respectively. These measurements establish no
+whole-assembly speedup and do not isolate individual instruction costs.
+
+All three scopes on segments and tetrahedra were repeated in
+before/after/after/before order at 0.2 seconds and five repetitions. Pooled
+after/before CPU ratios span 0.986--1.014. The initial 8% short-run segment
+rotation difference decreases to 1.35% under that paired protocol; it is not
+accepted as a geometry-specific source regression. Its precise run-state
+cause is not isolated. The paired controls, rather than a single short sweep,
+are retained for subsequent comparisons.
+
+All 21 benchmark cases qualify without oracle errors in the parent, prototype
+and repaired binaries. Final numerical validation passes 155 checks in the
+optimized LLVM/OpenMP build and 54 in the optimized native build, with the
+existing one-dimensional elasticity skip in each. These include nineteen
+cache checks in each build: eight version-transition cases cover Point and
+all seven higher-dimensional families, assignment, same-storage reconstruction,
+retained samples and fast-lookup overflow; existing checks cover concurrent
+publication. Named-form comparisons cover mass, diffusion, Helmholtz and
+elasticity consumers. Both distributed P1/H1 state tests pass at four ranks in
+each build, including empty holders. This is affected-path validation, not a
+fresh complete convergence certification or a remote-CI claim.
+
+The index retains every requested version until mesh flush. For $F_d$ formula
+versions and $N_d$ entities in dimension $d$, dense slot storage scales as
+$O(\sum_d F_dN_d)$; only requested mapped quadratures are constructed. This
+benchmark measures warm access, not that allocation or retained memory.
+Canonical formulas avoid generating versions repeatedly. For short-lived
+per-cell rules, owned `PolytopeQuadrature` storage avoids retaining a new
+mesh-wide formula entry at every construction.
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`

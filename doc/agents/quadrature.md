@@ -121,6 +121,15 @@ calls still return mesh-owned, stable borrowed objects until geometry is
 flushed. Assembly does not evict these objects. Both lifetimes are
 backend-independent and introduce no MPI collective.
 
+The mesh-owned index keys each formula by its process-local lifetime/assignment
+identity, which uniquely identifies a version without an additional address
+comparison. Reassigning a formula or reconstructing it in reused storage selects
+a new mapped-sample entry. Earlier entries remain alive until mesh flush; an
+old reference is not silently replaced when a new version is requested. Formula
+mutation must not overlap cache access. Canonical immutable formulas retain
+their ordinary hot lookup. Storage grows with requested formula versions and
+polytope slots until the explicit flush, rather than evicting borrowed objects.
+
 Mapped-quadrature construction prepares geometric Jacobians through the
 transformation's bulk `jacobian` overload. Parametric elements reuse their
 existing logical-identity reference tables, while generic transformations

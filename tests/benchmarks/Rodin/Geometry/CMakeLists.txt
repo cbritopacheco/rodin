@@ -20,3 +20,7 @@ target_link_libraries(RodinReferenceGeometryBenchmarks PRIVATE
 add_executable(RodinMappedPointBenchmarks EXCLUDE_FROM_ALL MappedPoint.cpp)
 target_link_libraries(RodinMappedPointBenchmarks PRIVATE
   Rodin::Geometry Rodin::Variational benchmark::benchmark)
+
+add_executable(RodinMappedQuadratureCacheBenchmarks EXCLUDE_FROM_ALL MappedQuadratureCache.cpp)
+target_link_libraries(RodinMappedQuadratureCacheBenchmarks PRIVATE
+  Rodin::Geometry Rodin::Variational benchmark::benchmark)
