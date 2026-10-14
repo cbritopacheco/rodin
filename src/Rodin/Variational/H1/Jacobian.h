@@ -382,80 +382,11 @@ namespace Rodin::Variational
       /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
-      /// @brief Per-cell tabulation cache.
+      /// @brief Physical derivatives prepared by the current integration-point bind.
       struct Cache
       {
-          /// @brief Key identifying a cached tabulation.
-          struct Key
-          {
-              /// @brief Geometry of the cached polytope.
-              Geometry::Polytope::Type geom;
-              /// @brief Spatial dimension.
-              size_t dim;
-              /// @brief Cached cell tabulation.
-              Index cell;
-
-              /// @brief Quadrature formula the cached tabulation belongs to.
-              const QF::QuadratureFormulaBase* qf;
-              /// @brief Logical lifetime and assignment identity of the formula.
-              size_t identity;
-              /// @brief Index of the quadrature point.
-              size_t qp;
-
-              /// @brief Whether the key holds a cached entry.
-              bool valid;
-
-              /// @brief Constructs an invalid quadrature cache key.
-              Key()
-                : geom(Geometry::Polytope::Type::Point),
-                  dim(0),
-                  cell(0),
-                  qf(nullptr),
-                  identity(0),
-                  qp(0),
-                  valid(false)
-              {}
-
-              /**
-               * @brief Tests whether the key holds a cached entry.
-               * @returns True if the key identifies a cached entry; false otherwise.
-               */
-              explicit operator bool() const noexcept
-              {
-                return valid;
-              }
-
-              /**
-               * @brief Equality comparison.
-               * @returns Whether the operands compare equal.
-               * @param o Key to compare with this key.
-               */
-              bool operator==(const Key& o) const noexcept
-              {
-                if (!valid || !o.valid)
-                  return false;
-                return geom == o.geom && dim == o.dim && cell == o.cell && qf == o.qf &&
-                  identity == o.identity && qp == o.qp;
-              }
-
-              /// @brief Invalidates the cached tabulation.
-              void invalidate() noexcept
-              {
-                valid = false;
-                geom = Geometry::Polytope::Type::Point;
-                dim = 0;
-                cell = 0;
-                qf = nullptr;
-                identity = 0;
-                qp = 0;
-              }
-        };
-
-        // minimal cache: physical gradients for scalar basis indices alpha
-        /// @brief Cached physical gradients per scalar DOF (size = nscalar).
+        /// @brief Prepared physical derivatives in local basis order.
         std::vector<SpatialVectorType> gradPhys;
-        /// @brief Key identifying the cached entry.
-        Key key;
       };
 
       /**
@@ -544,6 +475,12 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets the integration point the expression is evaluated at.
+       *
+       * Every explicit bind prepares physical derivatives from the supplied
+       * point. Cell and formula identities do not identify geometry state:
+       * deformation may preserve both while changing the inverse Jacobian.
+       * Only reference tabulation and working storage are reused across binds.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -557,22 +494,7 @@ namespace Rodin::Variational
 
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
-        const size_t d   = poly.getDimension();
-        const Index  cell = poly.getIndex();
-
-        typename Cache::Key key;
-        key.geom  = geom;
-        key.dim   = d;
-        key.cell  = cell;
-        key.qf = qf;
-        key.identity = qf ? qf->getCacheIdentity() : 0;
-        key.qp    = qp;
-        key.valid = true;
-
-        if (qf && m_cache.key == key)
-          return *this;
-
-        m_cache.key = key;
+        const size_t d = poly.getDimension();
 
         // scalar element for geometry-only tabulation
         const H1Element<K, ScalarType> feS(geom);
@@ -611,8 +533,6 @@ namespace Rodin::Variational
        */
       RangeType getBasis(size_t local) const
       {
-        assert(m_cache.key);
-
         const auto& fes = this->getFiniteElementSpace();
         const std::uint8_t vdim = fes.getVectorDimension();
 

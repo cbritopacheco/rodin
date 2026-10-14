@@ -882,6 +882,67 @@ build/tests/benchmarks/RodinPhysicalGradientBenchmarks \
   --benchmark_min_time=0.2s --benchmark_repetitions=5
 ```
 
+### Vector derivative preparation and geometry rebinding
+
+`RodinPhysicalGradientBenchmarks` additionally provides `PhysicalJacobian` and
+`PhysicalDivergence` scopes. The existing 126 scalar-gradient registrations are
+retained; 252 vector-derivative registrations give 378 cases. Degrees one through
+three, both scalar fields, seven geometries and orders 2, 8 and 16 are covered.
+The vector field is represented by its DOF functionals, without assuming nodal
+coefficients or a component layout. For
+$u_c(x)=\eta(c+1)(1+\sum_j(j+1)x_j)$, the qualification identities are
+
+$$
+(\nabla u)_{cj}=\eta(c+1)(j+1),\qquad
+\operatorname{div}u=\eta\sum_j(j+1)^2.
+$$
+
+The dimensionless absolute roundoff budget is $10^{-10}$. A contributing basis
+perturbation must be rejected, and every retained basis value must repeat
+exactly after timing. Local DOF, scalar basis, field-component and quadrature
+counts distinguish reference transformation from vector-component expansion.
+Construction, interpolation and qualification remain outside timing; explicit
+binding, basis extraction and loop-bound element queries are included.
+
+H1 vector Jacobians and divergence now recompute physical derivatives on every
+explicit bind, while retaining reference-table reuse and working storage.
+Geometry-only deformation can preserve cell and quadrature identities, so those
+identities cannot justify physical-result reuse. Exact dilation regressions
+cover degrees one through six over both scalar fields and all seven geometries:
+168 operator/space/geometry state transitions. All seven parameterized tests
+were observed failing before the repair. The complete 58-test quadrature-expression
+suite passes in both compiler configurations, as do all 378 benchmark cases
+in each build and 24 native mixed-Stokes binding selections across six geometries.
+
+Native paired three-repetition sweeps give median before/after ratios 1.015 for
+Jacobian preparation and 1.027 for divergence. Five longer matched controls
+give ratios 1.000--1.036 and do not reproduce the initial short-window slowdowns.
+The repaired executable itself changes timing between those sweeps; the initial
+slowdowns therefore do not establish persistent source regressions. No portable
+speedup claim is made for this correctness repair.
+
+The degree-two real Jacobian sweep at order 16 illustrates the dimensional work
+accounting. Times below are after-repair medians; product terms are a work proxy,
+not a real-flop count or a decomposition of assembly time.
+
+| Geometry | Points | Scalar basis | Local DOFs | Transform-product terms | Sweep time |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Triangle | 53 | 6 | 12 | 1,272 | 4.59 microseconds |
+| Tetrahedron | 729 | 10 | 30 | 65,610 | 141.58 microseconds |
+
+The work proxy grows by 51.6 while elapsed time grows by 30.8. An Instruments
+capture of the tetrahedral case selects 4,127 CPU samples inside the library's
+Jacobian bind or basis-access frames: 65.81% contain basis extraction and 34.19%
+contain preparation. Zero-fill frames appear in 14.97% of selected samples,
+within those overlapping categories. Fixture-only element-count queries are
+excluded from this source selection. The capture includes qualification calls;
+sample weights are not elapsed-time fractions. Zero-fill attribution alone does
+not prove redundant initialization, nor does a frame label prove an out-of-line
+call. Profiles, matched baseline headers, numerical regressions and measurements
+are retained under
+`build-convergence/certification/assembly-gradient-profile-20261014/`.
+Native P1 caches and remapped-point provenance remain separate audit batches.
+
 ### Spatial dot batch protocol
 
 `RodinSpatialDotBenchmarks` retains its 32 single-contraction scopes and adds

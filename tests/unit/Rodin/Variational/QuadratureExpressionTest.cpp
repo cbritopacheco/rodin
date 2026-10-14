@@ -5,7 +5,9 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file @brief Generic bilinear quadrature value-reuse regression tests.
+ * @file
+ * @brief Generic bilinear quadrature value-reuse regression tests.
+ *
  * The test-only reference retains the original quadrature/trial/test loop.
  * Every local entry must agree exactly, with unchanged summation order and
  * trial-first, test-second conjugation. Assembled comparisons use DOF maps,
@@ -28,7 +30,7 @@ namespace Rodin::Tests::Unit
 {
   namespace
   {
-    /** Observes retention requests without altering mesh-cache lifetimes. */
+    /// @brief Observes retention requests without altering mesh-cache lifetimes.
     class ObservedMesh : public LocalMesh
     {
       public:
@@ -47,7 +49,7 @@ namespace Rodin::Tests::Unit
         mutable size_t requests;
     };
 
-    /** @brief Original entry evaluation, independent of the production rule. */
+    /// @brief Original entry evaluation, independent of the production rule.
     template <class I>
     auto reference(const I& integral, const Polytope& cell, size_t order)
     {
@@ -224,6 +226,84 @@ namespace Rodin::Tests::Unit
     {
       protected:
         /**
+         * @brief Checks physical vector derivatives after geometry-only mutation.
+         *
+         * The formula, sample index and cell identity remain fixed. A uniform
+         * dilation by two must halve every component of each basis Jacobian
+         * and divergence. Fresh expressions provide an independent cache-state
+         * control; comparisons are exact and use no coordinate tolerance.
+         *
+         * @param space Vector-valued finite element space.
+         * @param mesh Mutable geometry associated with the space.
+         */
+      template <class FES>
+      void checkDerivativeGeometry(FES& space, LocalMesh& mesh)
+      {
+        TestFunction u(space);
+        const auto cell = *mesh.getCell();
+        const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
+        const auto exercise = [&](auto& cached, auto makeFresh) {
+          using Value = decltype(cached.getBasis(size_t(0)));
+          using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
+          const PolytopeQuadrature before(cell, formula);
+          const IntegrationPoint first(before.getPoint(0), &formula, 0);
+          cached.setIntegrationPoint(first);
+          std::vector<Value> original;
+          for (size_t local = 0; local < cached.getDOFs(cell); ++local)
+            original.push_back(cached.getBasis(local));
+          for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+          {
+            auto coordinates = mesh.getVertexCoordinates(vertex);
+            coordinates *= 2;
+            mesh.setVertexCoordinates(vertex, coordinates);
+          }
+          const PolytopeQuadrature after(cell, formula);
+          const IntegrationPoint second(after.getPoint(0), &formula, 0);
+          cached.setIntegrationPoint(second);
+          auto fresh = makeFresh(u);
+          fresh.setIntegrationPoint(second);
+          bool nonzero = false;
+          for (size_t local = 0; local < original.size(); ++local)
+          {
+            const auto actual = cached.getBasis(local);
+            const auto expected = fresh.getBasis(local);
+            if constexpr (FormLanguage::IsMatrixRange<Value>::Value)
+            {
+              ASSERT_EQ(actual.rows(), expected.rows());
+              ASSERT_EQ(actual.cols(), expected.cols());
+              for (Eigen::Index row = 0; row < actual.rows(); ++row)
+              {
+                for (Eigen::Index column = 0; column < actual.cols(); ++column)
+                {
+                  EXPECT_EQ(actual(row, column), expected(row, column));
+                  EXPECT_EQ(
+                    Scalar(2) * actual(row, column), original[local](row, column));
+                  nonzero = nonzero || original[local](row, column) != Scalar(0);
+                }
+              }
+            }
+            else
+            {
+              EXPECT_EQ(actual, expected);
+              EXPECT_EQ(Scalar(2) * actual, original[local]);
+              nonzero = nonzero || original[local] != Scalar(0);
+            }
+          }
+          EXPECT_TRUE(nonzero);
+          for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+          {
+            auto coordinates = mesh.getVertexCoordinates(vertex);
+            coordinates *= Real(0.5);
+            mesh.setVertexCoordinates(vertex, coordinates);
+          }
+        };
+        auto jacobian = Jacobian(u);
+        exercise(jacobian, [](auto& unknown) { return Jacobian(unknown); });
+        auto divergence = Div(u);
+        exercise(divergence, [](auto& unknown) { return Div(unknown); });
+      }
+
+        /**
          * @brief Compares reused expressions with independently constructed expressions.
          *
          * Reconstruction and assignment retain the formula address and point
@@ -355,6 +435,30 @@ namespace Rodin::Tests::Unit
           checkQuadratureLifetime(h1);
           checkQuadratureLifetime(vectorH1);
           checkQuadratureLifetime(matrixH1);
+        });
+      };
+      ranges.template operator()<Real>();
+      ranges.template operator()<Complex>();
+    }
+
+    /**
+     * @brief H1 vector physical derivatives follow geometry-only rebinding.
+     *
+     * Degrees one through six, both scalar fields and all positive-dimensional
+     * reference families retain their cell and formula identities through a
+     * binary dilation. Jacobians and divergence must satisfy the exact inverse
+     * scaling law independently of any previous expression state.
+     */
+    TEST_P(QuadratureExpression, VectorDerivativesGeometryRebind)
+    {
+      const auto ranges = [&]<class Scalar>() {
+        Utility::ForIndex<6>([&](auto degree) {
+          constexpr size_t K = degree.value + 1;
+          SCOPED_TRACE(::testing::Message() << "degree " << K);
+          auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(2);
+          H1<K, Math::SpatialVector<Scalar>, LocalMesh> space(
+            std::integral_constant<size_t, K>{}, mesh, mesh.getDimension());
+          checkDerivativeGeometry(space, mesh);
         });
       };
       ranges.template operator()<Real>();
@@ -560,7 +664,7 @@ namespace Rodin::Tests::Unit
         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge));
 
-    /** @brief Reuse is established by integer counts, not timing thresholds. */
+    /// @brief Reuse is established by integer counts, not timing thresholds.
     TEST(QuadratureExpressionRegression, CountsAndCoefficientRebinds)
     {
       auto mesh = Convergence::UniformGrid(Polytope::Type::Triangle).makeMesh(3);

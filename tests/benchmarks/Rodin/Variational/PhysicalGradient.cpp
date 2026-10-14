@@ -6,7 +6,7 @@
  */
 /**
  * @file
- * @brief Reference-to-physical gradient preparation through the H1 expression.
+ * @brief Reference-to-physical derivative preparation through H1 expressions.
  */
 #include <benchmark/benchmark.h>
 #include <cmath>
@@ -16,8 +16,15 @@ namespace Rodin::Tests::Benchmarks
 {
   bool physicalGradientFailed = false;
 
+  enum class PhysicalDerivative
+  {
+    Gradient,
+    Jacobian,
+    Divergence
+  };
+
   /**
-   * @brief Measures the public gradient expression used by generic integrators.
+   * @brief Measures public physical derivative expressions used by generic integrators.
    *
    * ## Architecture
    *
@@ -31,15 +38,20 @@ namespace Rodin::Tests::Benchmarks
    * this expression scope is not a timing decomposition of those rules.
    *
    * An affine physical field @f$f(x)=\eta(1+\sum_j(j+1)x_j)@f$ is represented
-   * through element DOF functionals. Reconstructing its gradient must recover
-   * @f$\eta(1,\ldots,d)@f$; perturbing one contributing basis must fail.
+   * through element DOF functionals. The scalar gradient must recover
+   * @f$\eta(1,\ldots,d)@f$. Vector scopes use @f$u_c=(c+1)f@f$, with
+   * @f$(\nabla u)_{cj}=\eta(c+1)(j+1)@f$ and
+   * @f$\operatorname{div}u=\eta\sum_j(j+1)^2@f$.
+   * Perturbing one contributing basis must fail.
    * Every physical basis component is also retained before timing and must
    * remain exactly unchanged after the sweep.
    *
    * @tparam K Scalar H1 degree.
    * @tparam Scalar Real or complex coefficient field.
+   * @tparam Operation Physical differential expression to prepare.
    */
-  template <size_t K, class Scalar>
+  template <size_t K, class Scalar,
+    PhysicalDerivative Operation = PhysicalDerivative::Gradient>
   class PhysicalGradient
   {
     public:
@@ -57,9 +69,23 @@ namespace Rodin::Tests::Benchmarks
       auto mesh = Convergence::UniformGrid(geometry).makeMesh(2);
       const auto cell = *mesh.getCell();
       const size_t d = cell.getDimension();
-      H1<K, Scalar> space(std::integral_constant<size_t, K>{}, mesh);
+      const auto space = [&]() {
+        if constexpr (Operation == PhysicalDerivative::Gradient)
+          return H1<K, Scalar>(std::integral_constant<size_t, K>{}, mesh);
+        else
+          return H1<K, Math::SpatialVector<Scalar>>(
+            std::integral_constant<size_t, K>{}, mesh, d);
+      }();
       TrialFunction u(space);
-      auto gradient = Grad(u);
+      auto gradient = [&]() {
+        if constexpr (Operation == PhysicalDerivative::Gradient)
+          return Grad(u);
+        else if constexpr (Operation == PhysicalDerivative::Jacobian)
+          return Jacobian(u);
+        else
+          return Div(u);
+      }();
+      using Value = decltype(gradient.getBasis(size_t(0)));
       const auto& fe = space.getFiniteElement(d, cell.getIndex());
       const auto& formula = QF::PolytopeQuadratureFormula::get(state.range(0), geometry);
       const Geometry::PolytopeQuadrature quadrature(cell, formula);
@@ -77,21 +103,53 @@ namespace Rodin::Tests::Benchmarks
           Scalar value = multiplier;
           for (size_t j = 0; j < d; ++j)
             value += multiplier * Real(j + 1) * point.getPhysicalCoordinates()(j);
-          return value;
+          if constexpr (Operation == PhysicalDerivative::Gradient)
+            return value;
+          else
+          {
+            Math::SpatialVector<Scalar> vector(d);
+            for (size_t c = 0; c < d; ++c)
+              vector(c) = Scalar(c + 1) * value;
+            return vector;
+          }
         });
       }
-      std::vector<Math::SpatialVector<Scalar>> initial;
+      std::vector<Value> initial;
       const auto valid = [&](const auto& values) {
         for (size_t qp = 0; qp < formula.getSize(); ++qp)
         {
-          for (size_t j = 0; j < d; ++j)
+          if constexpr (Operation == PhysicalDerivative::Divergence)
           {
             Scalar value = 0;
             for (size_t a = 0; a < fe.getCount(); ++a)
-              value += coefficients(a) * values[qp * fe.getCount() + a](j);
-            if (!std::isfinite(std::abs(value)) ||
-              std::abs(value - multiplier * Real(j + 1)) > Tolerance)
+              value += coefficients(a) * values[qp * fe.getCount() + a];
+            Scalar expected = 0;
+            for (size_t j = 0; j < d; ++j)
+              expected += multiplier * Real((j + 1) * (j + 1));
+            if (!std::isfinite(std::abs(value)) || std::abs(value - expected) > Tolerance)
               return false;
+          }
+          else
+          {
+            for (size_t c = 0; c < (Operation == PhysicalDerivative::Gradient ? 1 : d);
+                 ++c)
+            {
+              for (size_t j = 0; j < d; ++j)
+              {
+                Scalar value = 0;
+                for (size_t a = 0; a < fe.getCount(); ++a)
+                {
+                  const auto& basis = values[qp * fe.getCount() + a];
+                  if constexpr (Operation == PhysicalDerivative::Gradient)
+                    value += coefficients(a) * basis(j);
+                  else
+                    value += coefficients(a) * basis(c, j);
+                }
+                if (!std::isfinite(std::abs(value)) ||
+                  std::abs(value - multiplier * Real((c + 1) * (j + 1))) > Tolerance)
+                  return false;
+              }
+            }
           }
         }
         return true;
@@ -113,7 +171,12 @@ namespace Rodin::Tests::Benchmarks
         state.SkipWithError("Affine coefficient representation is zero");
         return;
       }
-      wrong[perturbed](0) += Scalar(1) / coefficients(perturbed);
+      if constexpr (Operation == PhysicalDerivative::Gradient)
+        wrong[perturbed](0) += Scalar(1) / coefficients(perturbed);
+      else if constexpr (Operation == PhysicalDerivative::Jacobian)
+        wrong[perturbed](0, 0) += Scalar(1) / coefficients(perturbed);
+      else
+        wrong[perturbed] += Scalar(1) / coefficients(perturbed);
       if (!valid(initial) || valid(wrong))
       {
         physicalGradientFailed = true;
@@ -138,14 +201,34 @@ namespace Rodin::Tests::Benchmarks
         for (size_t a = 0; a < fe.getCount(); ++a)
         {
           const auto value = gradient.getBasis(a);
-          for (size_t j = 0; j < d; ++j)
-          {
-            if (value(j) != initial[qp * fe.getCount() + a](j))
+          const auto& expected = initial[qp * fe.getCount() + a];
+          const bool unchanged = [&]() {
+            if constexpr (Operation == PhysicalDerivative::Divergence)
+              return value == expected;
+            else
             {
-              physicalGradientFailed = true;
-              state.SkipWithError("Repeated gradient preparation changed a component");
-              return;
+              for (size_t c = 0; c < (Operation == PhysicalDerivative::Gradient ? 1 : d);
+                   ++c)
+              {
+                for (size_t j = 0; j < d; ++j)
+                {
+                  if constexpr (Operation == PhysicalDerivative::Gradient)
+                  {
+                    if (value(j) != expected(j))
+                      return false;
+                  }
+                  else if (value(c, j) != expected(c, j))
+                    return false;
+                }
+              }
+              return true;
             }
+          }();
+          if (!unchanged)
+          {
+            physicalGradientFailed = true;
+            state.SkipWithError("Repeated derivative preparation changed a component");
+            return;
           }
         }
       }
@@ -154,8 +237,14 @@ namespace Rodin::Tests::Benchmarks
       state.counters["degree"] = K;
       state.counters["basis_functions"] = fe.getCount();
       state.counters["quadrature_points"] = formula.getSize();
+      state.counters["field_components"] =
+        Operation == PhysicalDerivative::Gradient ? 1 : d;
+      state.counters["local_dofs"] = fe.getCount();
+      const size_t scalarBasis =
+        Operation == PhysicalDerivative::Gradient ? fe.getCount() : fe.getCount() / d;
+      state.counters["scalar_basis_functions"] = scalarBasis;
       state.counters["gradient_transform_products"] =
-        formula.getSize() * fe.getCount() * d * d;
+        formula.getSize() * scalarBasis * d * d;
     }
 
     /// @brief Registers seven volume families and three quadrature orders.
@@ -165,8 +254,12 @@ namespace Rodin::Tests::Benchmarks
       for (const auto geometry : {G::Segment, G::Triangle, G::Quadrilateral,
              G::Tetrahedron, G::Pyramid, G::Hexahedron, G::Wedge})
       {
-        const std::string name = std::string("PhysicalGradient/H1/P") +
-          std::to_string(K) + (std::is_same_v<Scalar, Complex> ? "/Complex/" : "/Real/") +
+        const std::string operation = Operation == PhysicalDerivative::Gradient
+          ? "PhysicalGradient"
+          : Operation == PhysicalDerivative::Jacobian ? "PhysicalJacobian"
+                                                      : "PhysicalDivergence";
+        const std::string name = operation + "/H1/P" + std::to_string(K) +
+          (std::is_same_v<Scalar, Complex> ? "/Complex/" : "/Real/") +
           std::string(Convergence::UniformGrid::getGeometryName(geometry));
         benchmark::RegisterBenchmark(
           name.c_str(), [geometry](auto& state) { run(state, geometry); })
@@ -189,12 +282,24 @@ int main(int argc, char** argv)
   PhysicalGradient<1, Complex>::registerCases();
   PhysicalGradient<2, Complex>::registerCases();
   PhysicalGradient<3, Complex>::registerCases();
+  PhysicalGradient<1, Real, PhysicalDerivative::Jacobian>::registerCases();
+  PhysicalGradient<2, Real, PhysicalDerivative::Jacobian>::registerCases();
+  PhysicalGradient<3, Real, PhysicalDerivative::Jacobian>::registerCases();
+  PhysicalGradient<1, Complex, PhysicalDerivative::Jacobian>::registerCases();
+  PhysicalGradient<2, Complex, PhysicalDerivative::Jacobian>::registerCases();
+  PhysicalGradient<3, Complex, PhysicalDerivative::Jacobian>::registerCases();
+  PhysicalGradient<1, Real, PhysicalDerivative::Divergence>::registerCases();
+  PhysicalGradient<2, Real, PhysicalDerivative::Divergence>::registerCases();
+  PhysicalGradient<3, Real, PhysicalDerivative::Divergence>::registerCases();
+  PhysicalGradient<1, Complex, PhysicalDerivative::Divergence>::registerCases();
+  PhysicalGradient<2, Complex, PhysicalDerivative::Divergence>::registerCases();
+  PhysicalGradient<3, Complex, PhysicalDerivative::Divergence>::registerCases();
   benchmark::Initialize(&argc, argv);
   if (benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;
   benchmark::AddCustomContext("compiler", __VERSION__);
   benchmark::AddCustomContext(
-    "scope", "One-cell physical basis-gradient sweep; warmed inverses");
+    "scope", "One-cell physical basis-derivative sweep; warmed inverses");
   const auto cases = benchmark::RunSpecifiedBenchmarks();
   benchmark::Shutdown();
   return cases == 0 || physicalGradientFailed ? 1 : 0;
