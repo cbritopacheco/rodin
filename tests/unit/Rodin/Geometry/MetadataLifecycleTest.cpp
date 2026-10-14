@@ -77,8 +77,10 @@ TEST(Geometry_MetadataLifecycle, SelectedInterfaceTracePreservesOtherFaces)
   LocalMesh::Builder builder;
   builder.initialize(2).nodes(10);
   for (size_t y = 0; y < 2; ++y)
+  {
     for (size_t x = 0; x < 5; ++x)
       builder.vertex({Real(x), Real(y)});
+  }
   for (Index x = 0; x < 4; ++x)
     builder.polytope(Polytope::Type::Quadrilateral, {x, x + 1, x + 6, x + 5});
   auto mesh = builder.finalize();
@@ -122,8 +124,10 @@ TEST(Geometry_MetadataLifecycle, SelectedInterfaceTracePreservesOtherFaces)
   mesh.trace(forward);
   check({41, 71, 71, std::nullopt});
   for (auto face = mesh.getFace(); face; ++face)
+  {
     if (interfaceIndex(*face) == 3)
       mesh.setAttribute(face.key(), 31);
+  }
   mesh.trace(forward, FlatSet<Attribute>{31});
   check({41, 71, 71, 31});
   mesh.setAttribute({2, 3}, 23);
@@ -165,11 +169,15 @@ TEST(Geometry_MetadataLifecycle, EmbeddedCachedJacobiansOwnMetricAndReferenceDat
       const std::array<Real, 6> entries{2, 0, 0, 3, 1, 2};
       const std::array<Real, 6> inverseEntries{26, -6, 9, -4, 15, 8};
       for (size_t row = 0; row < 3; ++row)
+      {
         for (size_t col = 0; col < 2; ++col)
           jacobian(row, col) = entries[2 * row + col];
+      }
       for (size_t row = 0; row < 2; ++row)
+      {
         for (size_t col = 0; col < 3; ++col)
           inverse(row, col) = inverseEntries[3 * row + col] / 61;
+      }
     }
     Math::SpatialPoint reference(static_cast<std::uint8_t>(dimension));
     reference.setConstant(Real(0.25));

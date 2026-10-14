@@ -3540,8 +3540,10 @@ TEST(MMG5Lifecycle, CachedAdjacencyCopiesMatchTopology)
     EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
     EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
     for (Index cell = 0; cell < mesh.getCellCount(); ++cell)
+    {
       EXPECT_EQ(
         restored.getAttribute(dimension, cell), mesh.getAttribute(dimension, cell));
+    }
     const Real expectedMeasure = configuration == 1 ? std::sqrt(Real(3)) : Real(1);
     const Real measure = dimension == 3 ? restored.getVolume() : restored.getArea();
     EXPECT_NEAR(measure, expectedMeasure, 1e-12);

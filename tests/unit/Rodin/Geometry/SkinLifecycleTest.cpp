@@ -23,12 +23,16 @@ namespace
       : dimension == 2         ? LocalMesh::UniformGrid(geometry, {2, 2})
                                : LocalMesh::UniformGrid(geometry, {2, 2, 2});
     for (size_t d = 1; d <= dimension; ++d)
+    {
       for (size_t lower = 0; lower < d; ++lower)
         mesh.getConnectivity().compute(d, lower);
+    }
     mesh.getConnectivity().compute(dimension - 1, dimension);
     for (size_t d = 0; d <= dimension; ++d)
+    {
       for (Index i = 0; i < mesh.getPolytopeCount(d); ++i)
         mesh.setAttribute({d, i}, Attribute(100 * d + i));
+    }
     return mesh;
   }
 

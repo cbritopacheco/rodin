@@ -37,14 +37,18 @@ namespace
     field = MatrixFunction(rows, columns, [=](const Geometry::Point& point) {
       Math::SpatialMatrix<Scalar> result(rows, columns);
       for (size_t row = 0; row < rows; ++row)
+      {
         for (size_t col = 0; col < columns; ++col)
         {
           result(row, col) = factor * Real(1 + row + col);
           if (!constant)
             for (size_t k = 0; k < dimension; ++k)
+            {
               result(row, col) += factor * Real((row + 1) * (col + 2) * (k + 1)) *
                 point.getPhysicalCoordinates()[k];
+            }
         }
+      }
       return result;
     });
     using Expression = decltype(Div(field));
@@ -107,8 +111,10 @@ namespace
         : dimension == 2         ? LocalMesh::UniformGrid(geometry, {2, 2})
                                  : LocalMesh::UniformGrid(geometry, {2, 2, 2});
       for (size_t d = 1; d <= dimension; ++d)
+      {
         for (size_t lower = 0; lower < d; ++lower)
           mesh.getConnectivity().compute(d, lower);
+      }
       checkMatrixDivergence(P0<Range>(mesh, 2, dimension), true);
       checkMatrixDivergence(P0g<Range, LocalMesh>(mesh, 2, dimension), true);
       checkMatrixDivergence(P1<Range>(mesh, 2, dimension), false);

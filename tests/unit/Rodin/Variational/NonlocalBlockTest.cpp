@@ -219,8 +219,10 @@ namespace
         for (size_t row = 0; row < 2; ++row)
         {
           for (size_t column = 0; column < 2; ++column)
+          {
             result(dofs[row], dofs[column]) +=
               Scalar(row == column ? Real(1) / 3 : Real(1) / 6);
+          }
         }
       }
       return result;

@@ -44,8 +44,10 @@ namespace Rodin::Tests::Unit
         return Scalar(1);
     }();
     for (size_t row = 0; row < 2; ++row)
+    {
       for (size_t column = 0; column < 3; ++column)
         expected(row, column) = factor * Scalar(1 + 3 * row + column);
+    }
     auto check = [&](auto factory) {
       using Space = decltype(factory(originalMesh, size_t(2), size_t(3)));
       Space copied = [&] {

@@ -71,8 +71,10 @@ namespace Rodin::Tests::Unit
       {
         Range result(2, 3);
         for (size_t row = 0; row < 2; ++row)
+        {
           for (size_t col = 0; col < 3; ++col)
             result(row, col) = entry(3 * row + col);
+        }
         return result;
       }
     };
@@ -100,8 +102,10 @@ namespace Rodin::Tests::Unit
     {
       Math::SpatialMatrix<Scalar> constant(2, 3);
       for (size_t row = 0; row < 2; ++row)
+      {
         for (size_t col = 0; col < 3; ++col)
           constant(row, col) = Scalar(3 * row + col + 1) * factor;
+      }
       return MatrixFunction(constant);
     }
   }
@@ -221,10 +225,16 @@ namespace Rodin::Tests::Unit
     constexpr Real quadratic[3][3] = {{4, 2, -1}, {2, 16, 2}, {-1, 2, 4}};
     constexpr size_t degree = Quadratic ? 2 : 1;
     for (size_t cell = 0; cell < 2; ++cell)
+    {
       for (size_t i = 0; i <= degree; ++i)
+      {
         for (size_t j = 0; j <= degree; ++j)
+        {
           nodal(degree * cell + i, degree * cell + j) +=
             Real(0.5) * (Quadratic ? quadratic[i][j] / Real(30) : linear[i][j] / Real(6));
+        }
+      }
+    }
     const Real linearMoments[3] = {Real(1) / 4, Real(1) / 2, Real(1) / 4};
     const Real quadraticMoments[5] = {
       Real(1) / 12, Real(1) / 3, Real(1) / 6, Real(1) / 3, Real(1) / 12};

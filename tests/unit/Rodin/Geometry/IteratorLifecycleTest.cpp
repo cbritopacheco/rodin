@@ -33,8 +33,10 @@ namespace
     for (size_t k = traits.getDimension(); k > 0; --k)
       mesh.getConnectivity().compute(k, k - 1);
     for (size_t k = 0; k <= traits.getDimension(); ++k)
+    {
       for (Index i = 0; i < mesh.getPolytopeCount(k); ++i)
         mesh.setAttribute({k, i}, 100 * k + i);
+    }
     return mesh;
   }
 
@@ -126,9 +128,11 @@ TEST(Geometry_IteratorLifecycle, ReleasedEntitiesSurviveIteratorDestruction)
     SCOPED_TRACE(int(geometry));
     const auto mesh = referenceMesh(geometry);
     for (size_t k = 0; k <= mesh.getDimension(); ++k)
+    {
       checkReleasedOwnership(mesh, k, [&](std::vector<Index> indices) {
         return PolytopeIterator(k, mesh, VectorIndexGenerator(std::move(indices)));
       });
+    }
     checkReleasedOwnership(mesh, mesh.getDimension(), [&](std::vector<Index> indices) {
       return CellIterator(mesh, VectorIndexGenerator(std::move(indices)));
     });
