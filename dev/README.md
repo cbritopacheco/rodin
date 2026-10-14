@@ -53,6 +53,15 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Index-generator ownership: bounded, vector and set generators preserve every
+  remaining suffix through polymorphic copies and moves, including empty and
+  exhausted sequences. Bounded copies previously discarded the cursor;
+  vector/set copies retained iterators into the source storage and were
+  observed using freed memory under AddressSanitizer. Copies now preserve
+  position within their own containers. Borrowed pointer, vector-iterator and
+  forward-list-iterator variants retain independent cursors while their
+  external range stays alive. All 34 cases pass individually in Release and
+  with assertion-enabled, leak-enabled AddressSanitizer.
 - Distributed runtime space interfaces: real/complex scalar, vector and
   rectangular matrix P0, P0g, P1 and quadratic H1 spaces retain independent
   topology counts and complete DOF maps through copies and moves. Runtime

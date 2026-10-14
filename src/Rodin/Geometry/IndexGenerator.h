@@ -71,6 +71,10 @@ namespace Rodin::Geometry
 
       /**
        * @brief Creates a copy of this generator.
+       *
+       * The copy retains the current position. Owned index containers are
+       * copied independently; iterator-backed generators continue to borrow
+       * their external range.
        * @returns Pointer to a new generator
        */
       virtual IndexGeneratorBase* copy() const noexcept override = 0;
@@ -191,10 +195,11 @@ namespace Rodin::Geometry
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-      constexpr
-      BoundedIndexGenerator(const BoundedIndexGenerator& other)
-        :  IndexGeneratorBase(other),
-          m_start(other.m_start), m_end(other.m_end), m_curr(other.m_end)
+      constexpr BoundedIndexGenerator(const BoundedIndexGenerator& other)
+        : IndexGeneratorBase(other),
+          m_start(other.m_start),
+          m_end(other.m_end),
+          m_curr(other.m_curr)
       {}
 
       /**
@@ -376,7 +381,7 @@ namespace Rodin::Geometry
       VectorIndexGenerator(const VectorIndexGenerator& other)
         : IndexGeneratorBase(other),
           m_indices(other.m_indices),
-          m_it(other.m_it)
+          m_it(m_indices.begin() + (other.m_it - other.m_indices.begin()))
       {}
 
       /**
@@ -475,7 +480,7 @@ namespace Rodin::Geometry
       SetIndexGenerator(const SetIndexGenerator& other)
         : IndexGeneratorBase(other),
           m_indices(other.m_indices),
-          m_it(other.m_it)
+          m_it(m_indices.begin() + (other.m_it - other.m_indices.begin()))
       {}
 
       /**
