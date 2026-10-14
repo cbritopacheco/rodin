@@ -53,6 +53,15 @@ This inventory does not change the measured line denominator.
 Numerical specialization tests must instantiate supported scalar, storage,
 geometry, and backend variants explicitly. Current audit findings include:
 
+- Distributed runtime space interfaces: real/complex scalar, vector and
+  rectangular matrix P0, P0g, P1 and quadratic H1 spaces retain independent
+  topology counts and complete DOF maps through copies and moves. Runtime
+  metadata, disjoint contiguous ownership, local/global round trips,
+  supported traces and complete global index coverage are checked on
+  triangular and tetrahedral meshes, including an empty root shard. All 40
+  new Release/Debug MPI runs pass at one, two, three, four and eight ranks;
+  20 existing interpolation runs pass at their registered rank counts.
+  Shifting production P0g entity indices fails all four new interface cases.
 - Native MEDIT loading: scalar, vector and rectangular matrix P1/quadratic
   H1 fields are checked against analytic values on all eight cell families
   in real and complex arithmetic. Malformed metadata and truncated payloads

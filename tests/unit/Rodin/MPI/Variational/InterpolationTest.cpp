@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <functional>
+#include <memory>
 #include <type_traits>
 #include <vector>
 
@@ -264,6 +266,185 @@ namespace
   }
 }
 
+namespace
+{
+  /// @brief Runtime simplex spaces agree with root topology, global ownership and every local DOF map.
+  template <class Scalar>
+  void checkPolymorphicSpaces(Polytope::Type geometry)
+  {
+    const Context::MPI context(*g_environment, *g_world);
+    const auto& comm = context.getCommunicator();
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    std::array<size_t, 3> counts{};
+    if (comm.rank() == 0)
+    {
+      auto original =
+        LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 3));
+      for (size_t d = 1; d <= dimension; ++d)
+      {
+        for (size_t lower = 0; lower < d; ++lower)
+          original.getConnectivity().compute(d, lower);
+      }
+      counts = {
+        original.getCellCount(), original.getVertexCount(), original.getPolytopeCount(1)};
+    }
+    boost::mpi::broadcast(comm, counts.data(), counts.size(), 0);
+    auto mesh = distribute(context, geometry);
+    auto& shard = mesh.getShard();
+    for (size_t d = 1; d <= shard.getDimension(); ++d)
+    {
+      for (size_t lower = 0; lower < d; ++lower)
+        shard.getConnectivity().compute(d, lower);
+    }
+    if (comm.size() > 1 && comm.rank() == 0)
+    {
+      EXPECT_EQ(shard.getVertexCount(), 0u);
+    }
+    using MeshType = decltype(mesh);
+    using Vector = Math::SpatialVector<Scalar>;
+    using Matrix = Math::SpatialMatrix<Scalar>;
+    struct Entry
+    {
+        std::unique_ptr<FiniteElementSpaceBase> space;
+        size_t components, scalarSize, basisCount;
+        bool traces, globalConstant;
+        std::function<std::pair<Index, Index>()> ownership;
+        std::function<size_t()> localSize;
+        std::function<Index(Index)> localToGlobal;
+        std::function<void()> reverseMapping;
+    };
+    std::vector<Entry> entries;
+    auto add = [&](auto source, size_t components, size_t scalarSize, size_t basisCount,
+                 bool traces, bool globalConstant) {
+      using Space = std::decay_t<decltype(source)>;
+      auto copied(source);
+      auto owned = std::make_unique<Space>(std::move(copied));
+      const auto* space = owned.get();
+      entries.push_back(
+        {std::move(owned), components, scalarSize, basisCount, traces, globalConstant,
+          [space] {
+            Index begin, end;
+            space->getOwnershipRange(begin, end);
+            return std::pair<Index, Index>{begin, end};
+          },
+          [space] { return space->getShard().getSize(); },
+          [space](Index local) { return space->getGlobalIndex(local); },
+          [space] {
+            if constexpr (requires { space->getLocalIndex(Index{}); })
+            {
+              for (Index local = 0; local < space->getShard().getSize(); ++local)
+              {
+                EXPECT_EQ(space->getLocalIndex(space->getGlobalIndex(local)),
+                  Optional<Index>(local));
+              }
+              EXPECT_FALSE(space->getLocalIndex(space->getSize()));
+            }
+          }});
+    };
+    add(P0<Scalar, MeshType>(mesh), 1, counts[0], 1, false, false);
+    add(P0<Vector, MeshType>(mesh, 2), 2, counts[0], 1, false, false);
+    add(P0<Matrix, MeshType>(mesh, 2, 3), 6, counts[0], 1, false, false);
+    add(P0g<Scalar, MeshType>(mesh), 1, 1, 1, true, true);
+    add(P0g<Vector, MeshType>(mesh, 2), 2, 1, 1, true, true);
+    add(P0g<Matrix, MeshType>(mesh, 2, 3), 6, 1, 1, true, true);
+    add(P1<Scalar, MeshType>(mesh), 1, counts[1], dimension + 1, true, false);
+    add(P1<Vector, MeshType>(mesh, 2), 2, counts[1], dimension + 1, true, false);
+    add(P1<Matrix, MeshType>(mesh, 2, 3), 6, counts[1], dimension + 1, true, false);
+    const size_t quadraticSize = counts[1] + counts[2];
+    const size_t quadraticBasis = (dimension + 1) * (dimension + 2) / 2;
+    add(H1<2, Scalar, MeshType>(std::integral_constant<size_t, 2>{}, mesh), 1,
+      quadraticSize, quadraticBasis, true, false);
+    add(H1<2, Vector, MeshType>(std::integral_constant<size_t, 2>{}, mesh, 2), 2,
+      quadraticSize, quadraticBasis, true, false);
+    add(H1<2, Matrix, MeshType>(std::integral_constant<size_t, 2>{}, mesh, 2, 3), 6,
+      quadraticSize, quadraticBasis, true, false);
+    for (const auto& entry : entries)
+    {
+      const auto& space = *entry.space;
+      const size_t expectedSize = entry.scalarSize * entry.components;
+      EXPECT_EQ(&space.getMesh(), static_cast<const MeshBase*>(&mesh));
+      EXPECT_EQ(space.getSize(), expectedSize);
+      EXPECT_EQ(space.getVectorDimension(), entry.components);
+      const auto ownership = entry.ownership();
+      EXPECT_LE(ownership.first, ownership.second);
+      EXPECT_LE(ownership.second, expectedSize);
+      std::vector<std::pair<Index, Index>> ranges;
+      boost::mpi::all_gather(comm, ownership, ranges);
+      Index next = 0;
+      for (const auto& range : ranges)
+      {
+        EXPECT_EQ(range.first, next);
+        next = range.second;
+      }
+      EXPECT_EQ(next, expectedSize);
+      if (entry.globalConstant)
+      {
+        EXPECT_EQ(ownership.first, comm.rank() == 0 ? 0u : expectedSize);
+        EXPECT_EQ(ownership.second, expectedSize);
+        EXPECT_EQ(entry.localSize(), entry.components);
+      }
+      else if (shard.getVertexCount() == 0)
+      {
+        EXPECT_EQ(entry.localSize(), 0u);
+        EXPECT_EQ(ownership.first, ownership.second);
+      }
+      FlatSet<Index> local;
+      if (shard.getVertexCount() > 0)
+      {
+        for (size_t d = entry.traces ? 0 : dimension; d <= dimension; ++d)
+        {
+          for (Index entity = 0; entity < shard.getPolytopeCount(d); ++entity)
+          {
+            const auto dofs = space.getDOFs(d, entity);
+            if (d == dimension)
+            {
+              EXPECT_EQ(
+                static_cast<size_t>(dofs.size()), entry.components * entry.basisCount);
+            }
+            FlatSet<Index> unique;
+            for (Index index = 0; index < static_cast<Index>(dofs.size()); ++index)
+            {
+              EXPECT_LT(dofs[index], expectedSize);
+              EXPECT_TRUE(unique.insert(dofs[index]).second);
+              EXPECT_EQ(space.getGlobalIndex({d, entity}, index), dofs[index]);
+              local.insert(dofs[index]);
+            }
+          }
+        }
+      }
+      entry.reverseMapping();
+      FlatSet<Index> storage;
+      for (Index index = 0; index < entry.localSize(); ++index)
+      {
+        const Index global = entry.localToGlobal(index);
+        EXPECT_LT(global, expectedSize);
+        EXPECT_TRUE(storage.insert(global).second);
+        if (!entry.globalConstant || shard.getVertexCount() > 0)
+        {
+          EXPECT_TRUE(local.contains(global));
+        }
+        local.insert(global);
+      }
+      for (Index owned = ownership.first; owned < ownership.second; ++owned)
+        EXPECT_TRUE(storage.contains(owned));
+      std::vector<std::vector<Index>> all;
+      const std::vector<Index> localIndices(local.begin(), local.end());
+      boost::mpi::all_gather(comm, localIndices, all);
+      FlatSet<Index> global;
+      for (const auto& values : all)
+        global.insert(values.begin(), values.end());
+      EXPECT_EQ(global.size(), expectedSize);
+      for (Index index = 0; index < expectedSize; ++index)
+        EXPECT_TRUE(global.contains(index));
+      for (const auto& other : entries)
+      {
+        EXPECT_EQ(space == *other.space, entry.space.get() == other.space.get());
+        EXPECT_EQ(space != *other.space, entry.space.get() != other.space.get());
+      }
+    }
+  }
+}
+
 namespace Rodin::Tests::Unit
 {
   /** Empty shards remain distinct from actual point cells in zero dimension. */
@@ -365,6 +546,22 @@ namespace Rodin::Tests::Unit
       EXPECT_THROW(Interpolation(scalar, region, selected), Alert::Exception);
       EXPECT_THROW(Interpolation(vector, region, selected), Alert::Exception);
     }
+  }
+  TEST(DistributedSpaceInterface, RealTriangle)
+  {
+    checkPolymorphicSpaces<Real>(Polytope::Type::Triangle);
+  }
+  TEST(DistributedSpaceInterface, ComplexTriangle)
+  {
+    checkPolymorphicSpaces<Complex>(Polytope::Type::Triangle);
+  }
+  TEST(DistributedSpaceInterface, RealTetrahedron)
+  {
+    checkPolymorphicSpaces<Real>(Polytope::Type::Tetrahedron);
+  }
+  TEST(DistributedSpaceInterface, ComplexTetrahedron)
+  {
+    checkPolymorphicSpaces<Complex>(Polytope::Type::Tetrahedron);
   }
 }
 
