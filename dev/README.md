@@ -311,6 +311,11 @@ geometry, and backend variants explicitly. Current audit findings include:
   tangent formulas. The instantaneous relaxation limit checks its algebraic
   residual and both derivatives. Individual active-state entries agree with
   central finite differences; removing the relaxation strain derivative fails.
+- Physical point ordering: exhaustive finite grids in embedding dimensions
+  one through three agree with an independent lexicographic oracle. Pairwise
+  checks precede sorting and duplicate-key insertion. The original comparison
+  failed in two dimensions because both early-exit conditions tested the same
+  inequality; the second condition now rejects a larger leading coordinate.
 - Euclidean primitives: `Point2D` owns a two-component `Math::SpatialVector`,
   and displacements and segment directions use the same fixed-capacity type.
   The previous `Eigen::Vector2` storage was already fixed-size; this change

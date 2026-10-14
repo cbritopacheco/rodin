@@ -5,6 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <algorithm>
+#include <numeric>
+#include <set>
+#include <vector>
 
 #include "Rodin/Context/Local.h"
 #include "Rodin/Geometry.h"
@@ -1277,4 +1281,78 @@ TEST(Geometry_Point, GetPolytope_ValidReference)
   const Polytope& polyRef = p.getPolytope();
   EXPECT_EQ(polyRef.getIndex(), tri.getIndex());
   EXPECT_EQ(&polyRef.getMesh(), &tri.getMesh());
+}
+
+/// @brief Physical point ordering matches an independent lexicographic grid oracle.
+TEST(Geometry_Point, PhysicalOrderingIsStrictAcrossEmbeddingDimensions)
+{
+  for (size_t dimension = 1; dimension <= 3; ++dimension)
+  {
+    SCOPED_TRACE(dimension);
+    size_t count = 1;
+    for (size_t d = 0; d < dimension; ++d)
+      count *= 3;
+    std::vector<std::vector<Real>> coordinates;
+    Mesh<Context::Local>::Builder builder;
+    builder.initialize(dimension).nodes(count);
+    for (size_t index = 0; index < count; ++index)
+    {
+      Math::SpatialPoint coordinate(static_cast<std::uint8_t>(dimension));
+      size_t remaining = index;
+      for (size_t d = 0; d < dimension; ++d)
+      {
+        coordinate[d] = Real(remaining % 3) / Real(2);
+        remaining /= 3;
+      }
+      std::vector<Real> expectedCoordinate(dimension);
+      for (size_t d = 0; d < dimension; ++d)
+        expectedCoordinate[d] = coordinate[d];
+      coordinates.push_back(std::move(expectedCoordinate));
+      builder.vertex(coordinate);
+    }
+    auto mesh = builder.finalize();
+    std::vector<Point> points;
+    for (Index vertex = 0; vertex < mesh.getVertexCount(); ++vertex)
+      points.emplace_back(*mesh.getVertex(vertex), Math::SpatialPoint{});
+    const auto less = [&](size_t lhs, size_t rhs) {
+      return std::lexicographical_compare(coordinates[lhs].data(),
+        coordinates[lhs].data() + dimension, coordinates[rhs].data(),
+        coordinates[rhs].data() + dimension);
+    };
+    for (size_t lhs = 0; lhs < count; ++lhs)
+    {
+      EXPECT_FALSE(points[lhs] < points[lhs]);
+      for (size_t rhs = 0; rhs < count; ++rhs)
+      {
+        ASSERT_EQ(points[lhs] < points[rhs], less(lhs, rhs))
+          << "lhs=" << lhs << ", rhs=" << rhs;
+        if (points[lhs] < points[rhs])
+        {
+          EXPECT_FALSE(points[rhs] < points[lhs]);
+        }
+      }
+    }
+    // Exhaustive agreement above establishes a valid comparator before STL use.
+    std::vector<size_t> expected(count);
+    std::iota(expected.begin(), expected.end(), size_t(0));
+    std::sort(expected.begin(), expected.end(), less);
+    std::vector<size_t> actualOrder(count);
+    std::iota(actualOrder.begin(), actualOrder.end(), size_t(0));
+    std::reverse(actualOrder.begin(), actualOrder.end());
+    std::sort(actualOrder.begin(), actualOrder.end(),
+      [&](size_t lhs, size_t rhs) { return points[lhs] < points[rhs]; });
+    for (size_t i = 0; i < count; ++i)
+    {
+      const auto& actual = points[actualOrder[i]].getPhysicalCoordinates();
+      for (size_t d = 0; d < dimension; ++d)
+        EXPECT_EQ(actual[d], coordinates[expected[i]][d]);
+    }
+    std::set<Point> distinct;
+    for (const auto& point : points)
+    {
+      distinct.insert(point);
+      distinct.insert(point);
+    }
+    EXPECT_EQ(distinct.size(), count);
+  }
 }
