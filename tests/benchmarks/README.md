@@ -941,7 +941,71 @@ not prove redundant initialization, nor does a frame label prove an out-of-line
 call. Profiles, matched baseline headers, numerical regressions and measurements
 are retained under
 `build-convergence/certification/assembly-gradient-profile-20261014/`.
-Native P1 caches and remapped-point provenance remain separate audit batches.
+Native P1 geometry-invalidation and remapped-point provenance remain separate
+audit batches.
+
+### Native P1 reference dependence and affine-map controls
+
+The derivative executable adds 252 native-P1 cases, giving 630 registrations.
+Scalar gradients, vector Jacobians and divergence over both scalar fields are
+measured on seven positive-dimensional geometries at orders 2, 8 and 16. Each
+family has default-map and explicitly identity-mapped retained-cell variants.
+The latter measures a local reference-chart kernel, not a conforming global
+identity-mapped mesh. The existing H1 registrations and value-return protocol
+are unchanged.
+
+An affine geometric map does not imply constant reference derivatives. On a
+pyramid, rational basis functions can satisfy
+
+$$
+J_K(\widehat x)=I,\qquad
+\nabla_x\phi_a(\widehat x_q)=\widehat\nabla\phi_a(\widehat x_q),
+$$
+
+while the right-hand side varies with the sample. P1 gradient, Jacobian and
+divergence preparation now classifies pyramidal reference derivatives as
+sample-dependent independently of map order. Valid fixed-geometry affine
+simplex reuse remains unchanged. Every indexed basis component is compared
+exactly against fresh direct-point evaluation before timing; affine-field
+reconstruction alone would not reject this stale-basis defect.
+
+Before the repair, precisely 18 identity-pyramid benchmark cases fail those
+guards; the other 612 pass. Registered sampling regressions additionally compare
+all generic local-contraction entries with a non-indexed quadrature oracle.
+The identity-pyramid case was observed rejecting both basis values and local
+matrix entries using the old headers. All 72 quadrature-expression tests and
+all 630 benchmark cases pass in both optimized compiler configurations.
+
+Native P1 borrowed basis values are materialized into owned values before a
+mutable benchmark barrier. The early deprecated const-reference-barrier timings
+are noncanonical diagnostics, not accepted comparisons. Matched final-protocol
+before/after sweeps over 126 valid default-map cases give median ratios 1.022,
+0.998 and 0.998 for gradient, Jacobian and divergence. Longer controls of the
+three initially slowest cases give 1.009, 1.014 and 0.996. No source speedup is
+claimed, and the incorrect identity-pyramid path supplies no valid baseline.
+
+`warm_affine_reuse` identifies warmed native-P1 simplex cache hits. The
+`gradient_transform_products` counter is a logical scalar-gradient proxy,
+not a count of executed instructions: warmed affine reuse performs no new
+transforms, while the present native Jacobian loop repeats a scalar contraction
+for each vector component. With $n_b$ scalar basis functions, $m$ field
+components and reference/embedding dimensions $d=s$, that loop contains
+$N_qn_bmsd$ products. At order 16, the degree-one real quadrilateral/pyramid
+sweeps use 81/729 points and 4/5 scalar basis functions. Their current native
+Jacobian contraction counts are 2,592/98,415, and their measured times are
+10.42/197.98 microseconds: approximately 38.0 times the contraction work and
+19.0 times the elapsed time.
+
+An Instruments capture of the repaired identity-pyramid Jacobian selects 5,460
+CPU samples inside library binding. Reference-derivative frames appear in
+16.37%, allocation-related frames in 6.72%, and zero-fill frames in 2.78% of
+selected samples. These overlapping sample categories are not elapsed-time
+fractions. The per-bind scratch allocation and repeated component contractions
+are retained performance candidates, not changes bundled into this correctness
+repair. Geometry mutation invalidation and remapped-point provenance are not
+certified by these fixed-chart cases. Evidence and matched baseline headers are
+retained under
+`build-convergence/certification/assembly-gradient-profile-20261014/`.
 
 ### Spatial dot batch protocol
 

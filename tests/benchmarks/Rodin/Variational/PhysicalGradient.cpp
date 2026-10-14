@@ -45,13 +45,24 @@ namespace Rodin::Tests::Benchmarks
    * Perturbing one contributing basis must fail.
    * Every physical basis component is also retained before timing and must
    * remain exactly unchanged after the sweep.
+   * Native P1 scopes additionally compare every indexed basis derivative with
+   * fresh direct-point evaluation. Identity-map scopes distinguish geometric
+   * map order from reference-basis sample dependence. On affine simplices the
+   * warmed native P1 cache is intentionally reused throughout timing; the
+   * transform-product counter is a logical work proxy, not an instruction count.
+   * Native P1 basis access is materialized into an owned value before the
+   * mutable benchmark barrier; no deprecated const-reference barrier is used.
+   * The retained H1 value-return protocol is unchanged.
    *
    * @tparam K Scalar H1 degree.
    * @tparam Scalar Real or complex coefficient field.
    * @tparam Operation Physical differential expression to prepare.
+   * @tparam NativeP1 Whether to use native P1 rather than H1.
+   * @tparam IdentityMap Whether the retained cell uses an identity transformation.
    */
   template <size_t K, class Scalar,
-    PhysicalDerivative Operation = PhysicalDerivative::Gradient>
+    PhysicalDerivative Operation = PhysicalDerivative::Gradient, bool NativeP1 = false,
+    bool IdentityMap = false>
   class PhysicalGradient
   {
     public:
@@ -69,8 +80,15 @@ namespace Rodin::Tests::Benchmarks
       auto mesh = Convergence::UniformGrid(geometry).makeMesh(2);
       const auto cell = *mesh.getCell();
       const size_t d = cell.getDimension();
+      if constexpr (IdentityMap)
+        mesh.setPolytopeTransformation(
+          {d, cell.getIndex()}, new Geometry::IdentityTransformation(d));
       const auto space = [&]() {
-        if constexpr (Operation == PhysicalDerivative::Gradient)
+        if constexpr (NativeP1 && Operation == PhysicalDerivative::Gradient)
+          return P1<Scalar>(mesh);
+        else if constexpr (NativeP1)
+          return P1<Math::SpatialVector<Scalar>>(mesh, d);
+        else if constexpr (Operation == PhysicalDerivative::Gradient)
           return H1<K, Scalar>(std::integral_constant<size_t, K>{}, mesh);
         else
           return H1<K, Math::SpatialVector<Scalar>>(
@@ -85,7 +103,7 @@ namespace Rodin::Tests::Benchmarks
         else
           return Div(u);
       }();
-      using Value = decltype(gradient.getBasis(size_t(0)));
+      using Value = std::remove_cvref_t<decltype(gradient.getBasis(size_t(0)))>;
       const auto& fe = space.getFiniteElement(d, cell.getIndex());
       const auto& formula = QF::PolytopeQuadratureFormula::get(state.range(0), geometry);
       const Geometry::PolytopeQuadrature quadrature(cell, formula);
@@ -160,6 +178,53 @@ namespace Rodin::Tests::Benchmarks
         gradient.setIntegrationPoint(ip);
         for (size_t a = 0; a < fe.getCount(); ++a)
           initial.push_back(gradient.getBasis(a));
+        if constexpr (NativeP1)
+        {
+          auto direct = [&]() {
+            if constexpr (Operation == PhysicalDerivative::Gradient)
+              return Grad(u);
+            else if constexpr (Operation == PhysicalDerivative::Jacobian)
+              return Jacobian(u);
+            else
+              return Div(u);
+          }();
+          const IntegrationPoint pointwise(quadrature.getPoint(qp));
+          direct.setIntegrationPoint(pointwise);
+          for (size_t a = 0; a < fe.getCount(); ++a)
+          {
+            const auto expected = direct.getBasis(a);
+            const auto& actual = initial[qp * fe.getCount() + a];
+            const bool equal = [&]() {
+              if constexpr (Operation == PhysicalDerivative::Divergence)
+                return actual == expected;
+              else
+              {
+                for (size_t c = 0;
+                     c < (Operation == PhysicalDerivative::Gradient ? 1 : d); ++c)
+                {
+                  for (size_t j = 0; j < d; ++j)
+                  {
+                    if constexpr (Operation == PhysicalDerivative::Gradient)
+                    {
+                      if (actual(j) != expected(j))
+                        return false;
+                    }
+                    else if (actual(c, j) != expected(c, j))
+                      return false;
+                  }
+                }
+                return true;
+              }
+            }();
+            if (!equal)
+            {
+              physicalGradientFailed = true;
+              state.SkipWithError(
+                "Indexed basis differs from fresh direct-point derivative");
+              return;
+            }
+          }
+        }
       }
       auto wrong = initial;
       size_t perturbed = 0;
@@ -190,7 +255,15 @@ namespace Rodin::Tests::Benchmarks
           const IntegrationPoint ip(quadrature.getPoint(qp), &formula, qp);
           gradient.setIntegrationPoint(ip);
           for (size_t a = 0; a < fe.getCount(); ++a)
-            benchmark::DoNotOptimize(gradient.getBasis(a));
+          {
+            if constexpr (NativeP1)
+            {
+              auto value = gradient.getBasis(a);
+              benchmark::DoNotOptimize(value);
+            }
+            else
+              benchmark::DoNotOptimize(gradient.getBasis(a));
+          }
         }
         benchmark::ClobberMemory();
       }
@@ -233,6 +306,13 @@ namespace Rodin::Tests::Benchmarks
         }
       }
       state.counters["dimension"] = d;
+      state.counters["geometry_order"] = cell.getTransformation().getOrder();
+      state.counters["identity_map"] = IdentityMap;
+      const bool affineReference = geometry == Geometry::Polytope::Type::Segment ||
+        geometry == Geometry::Polytope::Type::Triangle ||
+        geometry == Geometry::Polytope::Type::Tetrahedron;
+      state.counters["warm_affine_reuse"] =
+        NativeP1 && affineReference && cell.getTransformation().getOrder() == 1;
       state.counters["cells"] = 1;
       state.counters["degree"] = K;
       state.counters["basis_functions"] = fe.getCount();
@@ -258,7 +338,10 @@ namespace Rodin::Tests::Benchmarks
           ? "PhysicalGradient"
           : Operation == PhysicalDerivative::Jacobian ? "PhysicalJacobian"
                                                       : "PhysicalDivergence";
-        const std::string name = operation + "/H1/P" + std::to_string(K) +
+        const std::string family = NativeP1
+          ? (IdentityMap ? "/NativeP1Identity" : "/NativeP1")
+          : "/H1/P" + std::to_string(K);
+        const std::string name = operation + family +
           (std::is_same_v<Scalar, Complex> ? "/Complex/" : "/Real/") +
           std::string(Convergence::UniformGrid::getGeometryName(geometry));
         benchmark::RegisterBenchmark(
@@ -294,6 +377,18 @@ int main(int argc, char** argv)
   PhysicalGradient<1, Complex, PhysicalDerivative::Divergence>::registerCases();
   PhysicalGradient<2, Complex, PhysicalDerivative::Divergence>::registerCases();
   PhysicalGradient<3, Complex, PhysicalDerivative::Divergence>::registerCases();
+  const auto registerNative = []<class Scalar, bool Identity>() {
+    PhysicalGradient<1, Scalar, PhysicalDerivative::Gradient, true,
+      Identity>::registerCases();
+    PhysicalGradient<1, Scalar, PhysicalDerivative::Jacobian, true,
+      Identity>::registerCases();
+    PhysicalGradient<1, Scalar, PhysicalDerivative::Divergence, true,
+      Identity>::registerCases();
+  };
+  registerNative.template operator()<Real, false>();
+  registerNative.template operator()<Complex, false>();
+  registerNative.template operator()<Real, true>();
+  registerNative.template operator()<Complex, true>();
   benchmark::Initialize(&argc, argv);
   if (benchmark::ReportUnrecognizedArguments(argc, argv))
     return 1;

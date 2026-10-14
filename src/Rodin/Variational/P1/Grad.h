@@ -431,6 +431,12 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets the integration point the expression is evaluated at.
+       *
+       * Both the inverse map and the reference basis derivative determine
+       * @f$(J_K^\dagger)^T\widehat\nabla\phi_a@f$. Rational pyramidal
+       * basis derivatives vary with the reference sample even when the
+       * geometric Jacobian is constant, so they require sample-indexed reuse.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -474,11 +480,13 @@ namespace Rodin::Variational
         }
 
         // ---- decide if gradients depend on quadrature point
-        const bool tensorRef = (geom == Geometry::Polytope::Type::Quadrilateral) ||
+        const bool variableReferenceDerivative =
+          (geom == Geometry::Polytope::Type::Quadrilateral) ||
           (geom == Geometry::Polytope::Type::Wedge) ||
+          (geom == Geometry::Polytope::Type::Pyramid) ||
           (geom == Geometry::Polytope::Type::Hexahedron);
 
-        const bool needsQp = (transOrder > 1) || tensorRef;
+        const bool needsQp = (transOrder > 1) || variableReferenceDerivative;
 
         typename Cache::QpKey qkey;
         if (needsQp)

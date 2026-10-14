@@ -562,6 +562,12 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets the integration point the expression is evaluated at.
+       *
+       * Pyramidal scalar basis derivatives are rational and sample-dependent.
+       * An affine geometric map therefore does not justify reusing a vector
+       * basis Jacobian at another reference sample. Tensor-product and
+       * pyramidal reference derivatives retain sample-indexed reuse.
+       *
        * @param ip Integration point at which the expression is evaluated.
        * @returns Reference to this object after the operation.
        */
@@ -612,7 +618,8 @@ namespace Rodin::Variational
         }
 
         // ---- decide if qp needed
-        const bool needsQp = (transOrder > 1) || isTensorGeom(geom);
+        const bool needsQp = (transOrder > 1) || isTensorGeom(geom) ||
+          geom == Geometry::Polytope::Type::Pyramid;
 
         typename Cache::QpKey qkey;
         if (needsQp)
