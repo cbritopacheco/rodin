@@ -113,8 +113,6 @@ namespace Rodin::QF
     m_points.clear();
     m_weights.resize(1);
     Math::SpatialVector<Real> p;
-    p.resize(1);
-    p[0] = 0.0;
     m_points.push_back(std::move(p));
     m_weights[0] = 1.0;
   }

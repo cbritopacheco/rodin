@@ -1014,3 +1014,22 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   pass individually in Release, including branch-flow derivatives and dynamic
   Jacobian finite differences. A doubled returned-root mutation fails all four
   new initial-guess/derivative cases; endpoint and zero-budget controls pass.
+- Quadrature ownership and point dimension: six rule-family cases check copies,
+  moves and polymorphic clones against closed-form moments, finite data and
+  reference-domain membership. Clones outlive their source object and receive
+  independent cache identities. The direct Gaussian and Lobatto point rules
+  fail the pre-fix dimension oracle: both stored a one-component coordinate for
+  a zero-dimensional reference element. They now store an empty coordinate
+  with unit weight. All 94 quadrature/Lobatto normal Debug and Release cases
+  pass individually. All twenty exactness/ownership cases pass ASan/LSan using
+  seven consistently instrumented QF implementation objects.
+  The initial mixed sanitizer/library binary had incompatible Eigen allocation
+  conventions: normal allocation used plain malloc while the sanitizer-built
+  destructor expected handmade alignment metadata. A consistent private library
+  resolves that diagnostic. The counter-instrumented Debug sanitizer sweep then
+  times out at 600 seconds. An optimized, assertion-enabled sanitizer build
+  without private coverage counters passes the unchanged sweep in 0.745 seconds;
+  matching normal Debug/Release timings are 12.573 and 1.440 seconds. Numerical
+  fixtures, tolerances and timeout are unchanged. Doubling measured quadrature
+  weights fails all six new ownership oracles. All private diagnostic, sanitizer
+  and mutation profiles remain excluded from coverage.

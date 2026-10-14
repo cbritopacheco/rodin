@@ -12,6 +12,7 @@
 #include "Rodin/QF/Centroid.h"
 #include "Rodin/QF/GrundmannMoller.h"
 #include "Rodin/QF/GaussLegendre.h"
+#include "Rodin/QF/GaussLobatto.h"
 #include "Rodin/QF/TensorProduct.h"
 #include "Rodin/QF/WitherdenVincent.h"
 #include "Rodin/QF/XiaoGimbutas.h"
@@ -432,4 +433,88 @@ TEST(QuadratureExactnessTest, InteriorityCheckRejectsAnExteriorPoint)
   outside[0] = 0.25;
   outside[1] = 0.25;
   EXPECT_TRUE(isInside(Polytope::Type::Triangle, outside, 1e-13));
+}
+
+namespace
+{
+  /// @brief Owned copies retain exact moments after their original rule is destroyed.
+  template <class Rule>
+  void checkQuadratureOwnership(Rule original, Polytope::Type geometry, size_t degree)
+  {
+    const size_t originalIdentity = original.getCacheIdentity();
+    auto copied = original;
+    EXPECT_NE(copied.getCacheIdentity(), originalIdentity);
+    auto moved = std::move(copied);
+    std::unique_ptr<QuadratureFormulaBase> clone;
+    {
+      const Rule temporary = original;
+      clone.reset(temporary.copy());
+      EXPECT_NE(clone->getCacheIdentity(), temporary.getCacheIdentity());
+      EXPECT_NE(clone->getCacheIdentity(), originalIdentity);
+    }
+    auto verify = [&](const QuadratureFormulaBase& rule) {
+      ASSERT_GT(rule.getSize(), 0u);
+      EXPECT_LT(exactnessSweep(rule, geometry, degree).worstRelativeError, kExactTol);
+      for (size_t qp = 0; qp < rule.getSize(); ++qp)
+      {
+        EXPECT_TRUE(std::isfinite(rule.getWeight(qp)));
+        ASSERT_EQ(rule.getPoint(qp).size(), dimensionOf(geometry));
+        for (size_t coordinate = 0; coordinate < dimensionOf(geometry); ++coordinate)
+          EXPECT_TRUE(std::isfinite(rule.getPoint(qp)[coordinate]));
+        EXPECT_TRUE(isInside(geometry, rule.getPoint(qp), kExactTol));
+      }
+    };
+    verify(original);
+    verify(moved);
+    verify(*clone);
+    EXPECT_EQ(moved.getGeometry(), geometry);
+    EXPECT_EQ(moved.getSize(), original.getSize());
+    EXPECT_EQ(clone->getSize(), original.getSize());
+  }
+}
+
+/// @brief Delegated formulas own their rule and preserve moments across every geometry.
+TEST(QuadratureOwnership, DelegatedAllGeometries)
+{
+  for (const auto geometry : Polytope::Types)
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    checkQuadratureOwnership(PolytopeQuadratureFormula(5, geometry), geometry, 5);
+  }
+}
+
+/// @brief Grundmann-Moller copied state preserves signed simplex moment sums.
+TEST(QuadratureOwnership, GrundmannMollerSimplices)
+{
+  for (const auto geometry :
+    {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+    checkQuadratureOwnership(GrundmannMoller(2, geometry), geometry, 5);
+}
+
+/// @brief Gaussian copied rules preserve exact moments and independent cache identities.
+TEST(QuadratureOwnership, GaussLegendreAllGeometries)
+{
+  for (const auto geometry : Polytope::Types)
+    checkQuadratureOwnership(GaussLegendre(geometry, 4), geometry, 5);
+}
+
+/// @brief Lobatto copied rules retain their endpoint and collapsed-node ownership.
+TEST(QuadratureOwnership, GaussLobattoAllGeometries)
+{
+  for (const auto geometry : Polytope::Types)
+    checkQuadratureOwnership(GaussLobatto(geometry, 5), geometry, 3);
+}
+
+/// @brief Published simplex rules retain owned coordinates through deep copying.
+TEST(QuadratureOwnership, XiaoGimbutasSimplices)
+{
+  for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+    checkQuadratureOwnership(XiaoGimbutas(5, geometry), geometry, 5);
+}
+
+/// @brief Published tensor-product rules retain exact moments after cloning.
+TEST(QuadratureOwnership, WitherdenVincentTensorProducts)
+{
+  for (const auto geometry : {Polytope::Type::Quadrilateral, Polytope::Type::Hexahedron})
+    checkQuadratureOwnership(WitherdenVincent(5, geometry), geometry, 5);
 }
