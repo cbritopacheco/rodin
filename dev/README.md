@@ -894,3 +894,30 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   19 measured production lines and 76 hits, leaving 324 further hits needed
   for \(95\%\) at the current denominator. Tests, benchmarks, sanitizer
   counters and pre-fix counters remain excluded.
+- OpenMP lifecycle and spatial boundaries: exact two-cell mass plus constant-kernel
+  nonlocal matrices test real/complex dense, sparse and triplet assemblers across
+  copying, moving, polymorphic cloning and repeated assembly. Vector assemblers
+  obey independent nodal-integral values. Explicit two-thread settings survive
+  the lifecycle transitions. The ten-case lifecycle executable passes one case
+  at a time in Release, normal Debug and ASan/LSan. A private mutation doubles
+  all tested OpenMP matrix/vector contributions; both new scalar configurations
+  reject it with 24 numerical failures each, covering all four operator families,
+  three lifecycle instances and both repeated assemblies.
+  Nine additional float/real/complex cases check empty spatial vectors, streaming,
+  empty trace/determinant/inverse identities, rectangular row/column extraction,
+  and zero-input matrix-vector products across every supported boundary size.
+  They pass separately in Release, normal Debug and ASan/LSan. Existing exact
+  PETSc mixed-target assembly oracles also pass individually in normal Debug
+  with both real and complex PETSc, for Sequential and OpenMP.
+  Production sources are unchanged and byte-match all 570 files in snapshot
+  run73. Source-path normalization precedes the accepted run79 audit; the
+  unnormalized run78 diagnostic is not a certified measurement. The combined
+  159-report result is 36,075 of 38,255 production lines (\(94.3014\%\)).
+  Compared with run74, normal Debug instrumentation exposes 681 more production
+  lines and adds 703 hits. OpenMP has 631 of 658 lines covered, PETSc OpenMP
+  698 of 775, SpatialMatrix 1,167 of 1,221, and SpatialVector 327 of 355.
+  The expanded denominator is retained; 268 more hits are needed for \(95\%\)
+  at this denominator. Tests, benchmarks, sanitizer profiles and mutation
+  profiles remain excluded. The final lifecycle file comment was updated
+  after compilation; its executable test code is identical to the archived
+  validation sources.

@@ -6,7 +6,7 @@
  */
 /**
  * @file
- * @brief Numerical lifecycle oracles for sequential matrix and vector assemblers.
+ * @brief Numerical lifecycle oracles for local matrix and vector assemblers.
  */
 #include <gtest/gtest.h>
 #include "Rodin/Variational.h"
@@ -185,7 +185,8 @@ namespace
   }
 
   /// @brief Independently owned assemblers recover an exact two-cell mass matrix.
-  template <class Scalar, class Operator>
+  template <class Scalar, class Operator,
+    template <class, class> class Backend = Assembly::Sequential, bool Nonlocal = false>
   void checkAssemblerMatrixLifecycle()
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
@@ -208,10 +209,17 @@ namespace
         return RealFunction(factor);
     }();
     form = Integral(coefficient * u, v);
-    using Assembler = Assembly::Sequential<Operator, Form>;
+    if constexpr (Nonlocal)
+    {
+      const auto kernel = [](const Point&, const Point&) { return Scalar(3); };
+      form += Integral(Potential(kernel, u), v);
+    }
+    using Assembler = Backend<Operator, Form>;
     const typename Assembler::InputType input{
       space, space, form.getLocalIntegrators(), form.getGlobalIntegrators()};
     Assembler original;
+    if constexpr (requires { original.setThreadCount(size_t(2)); })
+      original.setThreadCount(2);
     auto copied = original;
     auto moved = std::move(copied);
     std::unique_ptr<Assembler> cloned(original.copy());
@@ -219,7 +227,17 @@ namespace
     expected << Scalar(1.0 / 3), Scalar(1.0 / 6), Scalar(0), Scalar(1.0 / 6),
       Scalar(2.0 / 3), Scalar(1.0 / 6), Scalar(0), Scalar(1.0 / 6), Scalar(1.0 / 3);
     expected *= factor;
+    if constexpr (Nonlocal)
+    {
+      Math::Vector<Scalar> moments(3);
+      moments << Scalar(0.5), Scalar(1), Scalar(0.5);
+      expected += Scalar(3) * moments * moments.transpose();
+    }
     auto check = [&](auto& assembler) {
+      if constexpr (requires { assembler.getThreadCount(); })
+      {
+        EXPECT_EQ(assembler.getThreadCount(), 2u);
+      }
       Operator result;
       for (size_t stage = 0; stage < 2; ++stage)
       {
@@ -242,7 +260,7 @@ namespace
   }
 
   /// @brief Vector assembler copies recover exact nodal integrals without accumulation.
-  template <class Scalar>
+  template <class Scalar, template <class, class> class Backend = Assembly::Sequential>
   void checkAssemblerVectorLifecycle()
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
@@ -262,15 +280,21 @@ namespace
         return RealFunction(factor);
     }();
     form = Integral(coefficient, v);
-    using Assembler = Assembly::Sequential<Math::Vector<Scalar>, decltype(form)>;
+    using Assembler = Backend<Math::Vector<Scalar>, decltype(form)>;
     const typename Assembler::InputType input{space, form.getIntegrators()};
     Assembler original;
+    if constexpr (requires { original.setThreadCount(size_t(2)); })
+      original.setThreadCount(2);
     auto copied = original;
     auto moved = std::move(copied);
     std::unique_ptr<Assembler> cloned(original.copy());
     Math::Vector<Scalar> expected(3);
     expected << factor * Scalar(0.5), factor, factor * Scalar(0.5);
     auto check = [&](auto& assembler) {
+      if constexpr (requires { assembler.getThreadCount(); })
+      {
+        EXPECT_EQ(assembler.getThreadCount(), 2u);
+      }
       Math::Vector<Scalar> result;
       for (size_t stage = 0; stage < 2; ++stage)
       {
@@ -329,3 +353,26 @@ TEST(Rodin_Assembly_SequentialLifecycle, ComplexSparsePreassembledValueConstrain
 {
   checkPreassembledValueConstraints<Math::SparseMatrix<Complex>>();
 }
+
+#ifdef RODIN_USE_OPENMP
+/// @brief Two-thread copies, moves and clones recover independent exact local/nonlocal matrices and vectors.
+TEST(Rodin_Assembly_OpenMPLifecycle, RealMatricesAndVector)
+{
+  checkAssemblerMatrixLifecycle<Real, Math::Matrix<Real>, Assembly::OpenMP, true>();
+  checkAssemblerMatrixLifecycle<Real, Math::SparseMatrix<Real>, Assembly::OpenMP, true>();
+  checkAssemblerMatrixLifecycle<Real, std::vector<Math::SparseTriplet<Real>>,
+    Assembly::OpenMP, true>();
+  checkAssemblerVectorLifecycle<Real, Assembly::OpenMP>();
+}
+
+/// @brief Complex local/nonlocal entries retain the imaginary part across every assembler lifecycle transition.
+TEST(Rodin_Assembly_OpenMPLifecycle, ComplexMatricesAndVector)
+{
+  checkAssemblerMatrixLifecycle<Complex, Math::Matrix<Complex>, Assembly::OpenMP, true>();
+  checkAssemblerMatrixLifecycle<Complex, Math::SparseMatrix<Complex>, Assembly::OpenMP,
+    true>();
+  checkAssemblerMatrixLifecycle<Complex, std::vector<Math::SparseTriplet<Complex>>,
+    Assembly::OpenMP, true>();
+  checkAssemblerVectorLifecycle<Complex, Assembly::OpenMP>();
+}
+#endif
