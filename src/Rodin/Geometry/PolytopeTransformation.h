@@ -8,6 +8,7 @@
 #define RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
 
 #include <vector>
+#include <type_traits>
 
 /**
  * @file
@@ -74,7 +75,7 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
     friend class PointBase;
 
-  public:
+    public:
       /**
        * @brief Constructs a transformation with given dimensions.
        * @param[in] rdim Reference dimension @f$ k @f$
@@ -82,27 +83,72 @@ namespace Rodin::Geometry
        */
     constexpr PolytopeTransformation(size_t rdim, size_t pdim)
       : m_rdim(rdim),
-        m_pdim(pdim)
+        m_pdim(pdim),
+        m_cacheIdentity(createCacheIdentity())
     {}
 
       /**
        * @brief Copy constructor.
        * @param other Object to copy from.
        */
-    constexpr PolytopeTransformation(const PolytopeTransformation& other) = default;
+    constexpr PolytopeTransformation(const PolytopeTransformation& other) noexcept
+      : Copyable(other),
+        m_rdim(other.m_rdim),
+        m_pdim(other.m_pdim),
+        m_cacheIdentity(createCacheIdentity())
+    {}
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
-    constexpr PolytopeTransformation(PolytopeTransformation&& other) = default;
+    constexpr PolytopeTransformation(PolytopeTransformation&& other) noexcept
+      : Copyable(std::move(other)),
+        m_rdim(other.m_rdim),
+        m_pdim(other.m_pdim),
+        m_cacheIdentity(createCacheIdentity())
+    {
+      if (!std::is_constant_evaluated())
+        other.m_cacheIdentity.reset();
+    }
 
       /**
        * @brief Move assignment operator.
        * @returns Reference to this object after the operation.
        * @param other Object to move from.
        */
-    PolytopeTransformation& operator=(PolytopeTransformation&& other) = default;
+    PolytopeTransformation& operator=(PolytopeTransformation&& other) noexcept
+    {
+      if (this != &other)
+      {
+        m_rdim = other.m_rdim;
+        m_pdim = other.m_pdim;
+        other.m_cacheIdentity.reset();
+      }
+      invalidateCacheIdentity();
+      return *this;
+    }
+
+    /**
+     * @brief Logical identity of this transformation state for local caches.
+     *
+     * Runtime construction, copying, moving, assignment and loading receive
+     * fresh process-local identities. Reads do not allocate, synchronize or
+     * communicate. The identity is not a distributed entity identifier and
+     * must not be serialized. Derived setters changing map parameters must
+     * call invalidateCacheIdentity(). Concurrent mutation is not supported.
+     * The token invalidates evaluation-node reuse, not existing point buffers
+     * or the mesh's quadrature cache. Attached geometry must be published through
+     * @ref MeshBase::setPolytopeTransformation and points rebound normally.
+     * Constant-evaluated and moved-from maps have no reusable identity;
+     * consumers must evaluate rather than reuse a physical result in that case.
+     *
+     * @returns Optional identity of the current map state.
+     */
+    constexpr const Optional<size_t>& getCacheIdentity() const noexcept
+    {
+      return m_cacheIdentity;
+    }
 
       /// @brief Virtual destructor.
     virtual ~PolytopeTransformation() = default;
@@ -120,11 +166,10 @@ namespace Rodin::Geometry
        * @brief Gets the physical dimension @f$ s @f$.
        * @returns Physical dimension (spatial dimension of physical element)
        */
-      constexpr
-      size_t getPhysicalDimension() const
-      {
-        return m_pdim;
-      }
+    constexpr size_t getPhysicalDimension() const
+    {
+      return m_pdim;
+    }
 
       /**
        * @brief Gets the polynomial order of the transformation.
@@ -133,7 +178,7 @@ namespace Rodin::Geometry
        * For linear transformations, returns 1. For higher-order geometric
        * approximations (e.g., quadratic elements), returns the appropriate order.
        */
-      virtual size_t getOrder() const = 0;
+    virtual size_t getOrder() const = 0;
 
       /**
        * @brief Conservative degree in each factor of the control-point basis.
@@ -144,10 +189,10 @@ namespace Rodin::Geometry
        * not be divided by the number of factors for an arbitrary transformation.
        * @returns The factor order.
        */
-      virtual size_t getFactorOrder() const
-      {
-        return getOrder();
-      }
+    virtual size_t getFactorOrder() const
+    {
+      return getOrder();
+    }
 
       /**
        * @brief Computes the physical coordinates from reference coordinates.
@@ -160,7 +205,8 @@ namespace Rodin::Geometry
        * @f]
        * The output vector is resized to the physical dimension @f$ s @f$.
        */
-      virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const = 0;
+    virtual void transform(
+      Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const = 0;
 
       /**
        * @brief Computes the Jacobian matrix of the transformation.
@@ -180,7 +226,8 @@ namespace Rodin::Geometry
        * The output matrix is resized to @f$ s \times k @f$ where @f$ k @f$ is
        * the reference dimension and @f$ s @f$ is the physical dimension.
        */
-      virtual void jacobian(Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const = 0;
+    virtual void jacobian(
+      Math::SpatialMatrix<Real>& jacobian, const Math::SpatialPoint& rc) const = 0;
 
       /**
        * @brief Computes the Jacobians at a reference quadrature's points.
@@ -193,8 +240,8 @@ namespace Rodin::Geometry
        * @param[out] jacobians Jacobian matrices, resized to the formula size.
        * @param[in] qf Reference quadrature formula defining the points.
        */
-      virtual void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
-        const QF::QuadratureFormulaBase& qf) const;
+    virtual void jacobian(std::vector<Math::SpatialMatrix<Real>>& jacobians,
+      const QF::QuadratureFormulaBase& qf) const;
 
       /**
        * @brief Computes the reference coordinates from physical coordinates.
@@ -209,19 +256,21 @@ namespace Rodin::Geometry
        * @note Default implementation assumes the reference element has origin at 0.
        * Override for more complex inverse transformations.
        */
-      virtual void inverse(Math::SpatialPoint& rc, const Math::SpatialPoint& pc) const;
+    virtual void inverse(Math::SpatialPoint& rc, const Math::SpatialPoint& pc) const;
 
       /**
        * @brief Serialization method for Boost.Serialization.
        * @param[in,out] ar Archive object
        * @param version Boost.Serialization class version; unused by this implementation.
        */
-      template <class Archive>
-      void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
-      {
-        ar & m_rdim;
-        ar & m_pdim;
-      }
+    template <class Archive>
+    void serialize(Archive& ar, [[maybe_unused]] const unsigned int version)
+    {
+      if constexpr (Archive::is_loading::value)
+        invalidateCacheIdentity();
+      ar & m_rdim;
+      ar & m_pdim;
+    }
 
       /**
        * @brief Creates a polymorphic copy of this transformation.
@@ -229,9 +278,20 @@ namespace Rodin::Geometry
        *
        * Derived classes must implement this to return a copy of their specific type.
        */
-      virtual PolytopeTransformation* copy() const noexcept override = 0;
+    virtual PolytopeTransformation* copy() const noexcept override = 0;
 
     protected:
+      /**
+       * @brief Invalidates physical results after derived map parameters change.
+       *
+       * A fresh logical state is established without inspecting coordinates.
+       * Derived mutators must invoke this operation when changing geometry.
+       */
+    void invalidateCacheIdentity() noexcept
+    {
+      m_cacheIdentity = createCacheIdentity();
+    }
+
       /**
        * @brief Maps an owned reference sample using available reference data.
        *
@@ -244,12 +304,30 @@ namespace Rodin::Geometry
        * @param identity Formula lifetime/assignment identity.
        * @param qp Logical reference-sample index.
        */
-      virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
-        size_t identity, size_t qp) const;
+    virtual void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc,
+      size_t identity, size_t qp) const;
 
     private:
-      size_t m_rdim; ///< Reference dimension @f$ k @f$
-      size_t m_pdim; ///< Physical dimension @f$ s @f$
+      /**
+       * @brief Allocates a fresh process-local runtime state identity.
+       * @returns Identity distinct from previous transformation states.
+       */
+    static size_t nextCacheIdentity() noexcept;
+
+      /**
+       * @brief Preserves constant evaluation without inventing an identity.
+       * @returns No identity in constant evaluation, otherwise a fresh identity.
+       */
+    static constexpr Optional<size_t> createCacheIdentity() noexcept
+    {
+      if (std::is_constant_evaluated())
+        return std::nullopt;
+      return nextCacheIdentity();
+    }
+
+    size_t m_rdim; ///< Reference dimension @f$ k @f$
+    size_t m_pdim; ///< Physical dimension @f$ s @f$
+    Optional<size_t> m_cacheIdentity; ///< Logical runtime map state, when reusable.
   };
 }
 

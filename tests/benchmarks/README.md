@@ -2247,6 +2247,65 @@ all seven geometries and real/complex sparse/dense storage. Remaining work
 includes other degrees/ranges, backend-specific handle lifetimes and the
 unmeasured physical-context matrix.
 
+### Transformation state and derivative reuse
+
+Native P1 physical derivatives depend on both the logical cell and the current
+geometric map. A coordinate update can replace the map without changing the
+cell index, map order, formula identity or sample index. Those keys alone do
+not establish that a cached physical gradient is reusable. The transformation
+now supplies a process-local state identity, refreshed by runtime construction,
+copy, move, assignment and loading. Derived parameter setters must refresh it
+too. An absent identity disables reuse, rather than disabling evaluation.
+The token neither identifies distributed entities nor updates existing point
+or quadrature buffers; geometry publication and rebinding remain necessary.
+
+For a dilation $F_{\mathrm{new}}=2F_{\mathrm{old}}$, the chain rule gives
+$\nabla_x\varphi_{\mathrm{new}}=\tfrac12\nabla_x\varphi_{\mathrm{old}}$.
+The rebind regressions retain the cell, formula and sample indices, reconstruct
+the mapped points after dilation, and require exact componentwise equality
+with both this relation and a fresh expression. They cover native P1 scalar
+gradients, vector Jacobians and divergence, real and complex fields, and all
+seven positive-dimensional geometries. MPI coverage additionally exercises
+empty holders without introducing collectives into local binding. Deliberately
+reusing the state token was observed to fail both local and distributed tests.
+Separate lifecycle tests cover concurrent construction, reused object storage,
+constant evaluation, moves and successful/failed loading without serializing
+the process-local token.
+
+`RodinTransformationLifecycleBenchmarks` is an opt-in Geometry executable,
+outside CTest and benchmark publication. Its twelve selections measure identity
+maps in dimensions zero through three. Construct includes one map lifetime;
+ConstructCopy and ConstructMove include both source and destination lifetimes.
+Mutable address barriers retain the values, and dimension/Jacobian checks run
+outside timing. No mesh, quadrature, allocation, assembly or solver is timed.
+The native five-repetition, 0.1-second measurements compare a namespace-isolated
+copy of the original implementation with the repair, avoiding mixed object
+layouts. Median CPU times across dimensions change from 0.486 to 2.289 ns for
+construction, 0.862 to 4.328 ns for construction/copy, and 0.862 to 4.341 ns
+for construction/move. The object grows from 24 to 40 bytes in that build.
+This is a measured correctness cost, not an optimization or an assembly-speedup
+claim. Identity reads remain ordinary local reads; only state creation uses
+an atomic counter. Concurrent mutation is not supported.
+
+The matched LLVM 19 sweep retains all 630 physical-derivative selections at
+0.02 seconds and three repetitions, with identical numerical/work guards.
+Median after/before CPU ratios by operator/space family range from 0.999 to
+1.026. Individual short-sweep outliers also occur in unchanged H1 controls;
+they are not accepted as estimates of token overhead. Eight selected native
+P1 and H1-control cases were repeated in before/after/after/before order at
+0.2 seconds and five repetitions. Pooled native P1 CPU ratios range from
+0.993 to 1.039, and H1 controls from 0.955 to 1.027. The initial 27.5% native
+tetrahedral outlier does not reproduce at that magnitude. Elapsed ratios vary
+more, and their run-state dependence is not causally isolated. No small kernel
+gain, exact hot-path overhead or whole-assembly speedup is claimed from these
+measurements. The retained paired controls are required for subsequent repairs.
+
+Final local qualification comprises 112 unit checks and twelve lifecycle
+selections in each optimized native/OpenMP build, 630 derivative selections in
+each build, and the distributed state regression at one, two, three and four
+ranks in each build. These are affected-path checks, not a new full convergence
+certification or a statement about remote CI.
+
 # Spatial value benchmarks
 
 The spatial arithmetic benchmarks are part of the existing `RodinBenchmarks`

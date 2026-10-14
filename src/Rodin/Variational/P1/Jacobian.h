@@ -100,8 +100,7 @@ namespace Rodin::Variational
    */
   template <class Data, class Mesh, class Scalar>
   class Jacobian<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>> final
-    : public JacobianBase<
-        GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>,
+    : public JacobianBase<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>,
         Jacobian<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
@@ -173,7 +172,7 @@ namespace Rodin::Variational
         if (d == meshDim - 1) // face evaluation: same logic as your original
         {
           const auto& conn = mesh.getConnectivity();
-          const auto& inc = conn.getIncidence({ meshDim - 1, meshDim }, i);
+          const auto& inc = conn.getIncidence({meshDim - 1, meshDim}, i);
           const auto& pc = p.getPhysicalCoordinates();
           assert(inc.size() == 1 || inc.size() == 2);
 
@@ -219,7 +218,8 @@ namespace Rodin::Variational
             }
 
             UndeterminedTraceDomainException(
-                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
+              *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+              << Alert::Raise;
             return;
           }
         }
@@ -275,8 +275,8 @@ namespace Rodin::Variational
        * @param polytope Mesh entity used by this operation.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const noexcept
+      constexpr Optional<size_t> getOrder(
+        const Geometry::Polytope& polytope) const noexcept
       {
         const size_t k = P1Element<ScalarType>(polytope.getGeometry()).getOrder();
         return (k == 0) ? 0 : (k - 1);
@@ -344,60 +344,78 @@ namespace Rodin::Variational
       /// @brief Per-cell tabulation cache.
       struct Cache
       {
-          /// @brief Key identifying the cell a tabulation was computed for.
-          struct CellKey
+        /// @brief Key identifying the cell a tabulation was computed for.
+        struct CellKey
+        {
+          /// @brief Mesh the cached tabulation belongs to.
+          const void* mesh;
+          /// @brief Topological dimension of the cached polytope.
+          size_t d;
+          /// @brief Index of the cached polytope.
+          Index i;
+          /// @brief Geometry of the cached polytope.
+          Geometry::Polytope::Type geom;
+          /// @brief Order of the geometric transformation.
+          int transOrder;
+          /// @brief Vector dimension of the finite element space.
+          size_t vdim;
+          /// @brief Logical state of the geometric map.
+          Optional<size_t> transformationIdentity;
+
+          /// @brief Whether the key holds a cached entry.
+          bool valid;
+
+          /// @brief Constructs an invalid cell key.
+          CellKey()
+            : mesh(nullptr),
+              d(0),
+              i(0),
+              geom(Geometry::Polytope::Type::Point),
+              transOrder(1),
+              vdim(0),
+              transformationIdentity(std::nullopt),
+              valid(false)
+          {}
+
+          /**
+           * @brief Tests whether the key holds a cached entry.
+           * @returns True if the key identifies a cached entry; false otherwise.
+           */
+          explicit operator bool() const noexcept
           {
-              /// @brief Mesh the cached tabulation belongs to.
-              const void* mesh = nullptr;
-              /// @brief Topological dimension of the cached polytope.
-              size_t d = 0;
-              /// @brief Index of the cached polytope.
-              Index i = 0;
-              /// @brief Geometry of the cached polytope.
-              Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
-              /// @brief Order of the geometric transformation.
-              int transOrder = 1;
-              /// @brief Vector dimension of the finite element space.
-              size_t vdim = 0;
-              /// @brief Whether the key holds a cached entry.
-              bool valid = false;
+            return valid;
+          }
 
-              /**
-               * @brief Tests whether the key holds a cached entry.
-               * @returns True if the key identifies a cached entry; false otherwise.
-               */
-              explicit operator bool() const noexcept
-              {
-                return valid;
-              }
+          /**
+           * @brief Equality comparison.
+           * @returns Whether the operands compare equal.
+           * @param o Key to compare with this key.
+           */
+          bool operator==(const CellKey& o) const noexcept
+          {
+            if (!valid || !o.valid || !transformationIdentity ||
+              !o.transformationIdentity)
+              return false;
+            return mesh == o.mesh && d == o.d && i == o.i && geom == o.geom &&
+              transOrder == o.transOrder &&
+              transformationIdentity == o.transformationIdentity && vdim == o.vdim;
+          }
 
-              /**
-               * @brief Equality comparison.
-               * @returns Whether the operands compare equal.
-               * @param o Key to compare with this key.
-               */
-              bool operator==(const CellKey& o) const noexcept
-              {
-                if (!valid || !o.valid)
-                  return false;
-                return mesh == o.mesh && d == o.d && i == o.i && geom == o.geom &&
-                  transOrder == o.transOrder && vdim == o.vdim;
-              }
-
-              /**
-               * @brief Resets the key, invalidating the cached entry.
-               * @param other Object to copy from.
-               */
-              void operator=(std::initializer_list<int> other) noexcept
-              {
-                valid = false;
-                mesh = nullptr;
-                d = 0;
-                i = 0;
-                geom = Geometry::Polytope::Type::Point;
-                transOrder = 1;
-                vdim = 0;
-              }
+          /**
+           * @brief Resets the key, invalidating the cached entry.
+           * @param other Object to copy from.
+           */
+          void operator=(std::initializer_list<int> other) noexcept
+          {
+            valid = false;
+            mesh = nullptr;
+            d = 0;
+            i = 0;
+            geom = Geometry::Polytope::Type::Point;
+            transOrder = 1;
+            transformationIdentity.reset();
+            vdim = 0;
+          }
         };
 
         /// @brief Key identifying the quadrature point a tabulation was computed for.
@@ -500,8 +518,7 @@ namespace Rodin::Variational
        * @brief Gets the operand function.
        * @returns The operand function.
        */
-      constexpr
-      const OperandType& getOperand() const
+      constexpr const OperandType& getOperand() const
       {
         return m_u.get();
       }
@@ -510,8 +527,7 @@ namespace Rodin::Variational
        * @brief Gets the finite element space.
        * @returns The finite element space.
        */
-      constexpr
-      const FESType& getFiniteElementSpace() const
+      constexpr const FESType& getFiniteElementSpace() const
       {
         return getOperand().getFiniteElementSpace();
       }
@@ -520,8 +536,7 @@ namespace Rodin::Variational
        * @brief Gets the operand in the shape function expression.
        * @returns The operand in the shape function expression.
        */
-      constexpr
-      const auto& getLeaf() const
+      constexpr const auto& getLeaf() const
       {
         return getOperand().getLeaf();
       }
@@ -531,8 +546,7 @@ namespace Rodin::Variational
        * @param element Finite element used by the operation.
        * @returns Number of local basis functions on the selected entity.
        */
-      constexpr
-      size_t getDOFs(const Geometry::Polytope& element) const
+      constexpr size_t getDOFs(const Geometry::Polytope& element) const
       {
         return getOperand().getDOFs(element);
       }
@@ -541,8 +555,7 @@ namespace Rodin::Variational
        * @brief Gets the integration point the expression is evaluated at.
        * @returns The integration point the expression is evaluated at.
        */
-      constexpr
-      const IntegrationPoint& getIntegrationPoint() const
+      constexpr const IntegrationPoint& getIntegrationPoint() const
       {
         assert(m_ip);
         return *m_ip;
@@ -555,9 +568,9 @@ namespace Rodin::Variational
        */
       static constexpr bool isTensorGeom(Geometry::Polytope::Type g) noexcept
       {
-        return g == Geometry::Polytope::Type::Quadrilateral
-            || g == Geometry::Polytope::Type::Wedge
-            || g == Geometry::Polytope::Type::Hexahedron;
+        return g == Geometry::Polytope::Type::Quadrilateral ||
+          g == Geometry::Polytope::Type::Wedge ||
+          g == Geometry::Polytope::Type::Hexahedron;
       }
 
       /**
@@ -575,16 +588,17 @@ namespace Rodin::Variational
       {
         m_ip = &ip;
 
-        const auto& pt   = ip.getPoint();
+        const auto& pt = ip.getPoint();
         const auto& poly = pt.getPolytope();
         const auto& mesh = poly.getMesh();
 
-        const size_t d    = poly.getDimension();
+        const size_t d = poly.getDimension();
         const size_t spaceDimension = mesh.getSpaceDimension();
-        const Index  i    = poly.getIndex();
-        const auto   geom = poly.getGeometry();
+        const Index i = poly.getIndex();
+        const auto geom = poly.getGeometry();
 
-        const int transOrder = poly.getTransformation().getOrder();
+        const auto& transformation = poly.getTransformation();
+        const int transOrder = transformation.getOrder();
         const auto* qf = ip.getQuadratureFormula();
 
         const auto& fes = this->getFiniteElementSpace();
@@ -597,6 +611,7 @@ namespace Rodin::Variational
         ckey.i = i;
         ckey.geom = geom;
         ckey.transOrder = transOrder;
+        ckey.transformationIdentity = transformation.getCacheIdentity();
         ckey.vdim = vdim;
         ckey.valid = true;
 
@@ -709,8 +724,7 @@ namespace Rodin::Variational
        * @param geom Reference geometry.
        * @returns Polynomial order on the entity, or an empty optional when no order is available.
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
         const auto k = getOperand().getOrder(geom);
         if (!k.has_value())

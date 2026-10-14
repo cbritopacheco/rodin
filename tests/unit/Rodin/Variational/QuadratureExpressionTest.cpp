@@ -344,7 +344,7 @@ namespace Rodin::Tests::Unit
         const auto cell = *mesh.getCell();
         const auto& formula = QF::PolytopeQuadratureFormula::get(4, cell.getGeometry());
         const auto exercise = [&](auto& cached, auto makeFresh) {
-          using Value = decltype(cached.getBasis(size_t(0)));
+          using Value = std::remove_cvref_t<decltype(cached.getBasis(size_t(0)))>;
           using Scalar = typename FormLanguage::Traits<FES>::ScalarType;
           const PolytopeQuadrature before(cell, formula);
           const IntegrationPoint first(before.getPoint(0), &formula, 0);
@@ -383,6 +383,16 @@ namespace Rodin::Tests::Unit
                 }
               }
             }
+            else if constexpr (FormLanguage::IsVectorRange<Value>::Value)
+            {
+              ASSERT_EQ(actual.size(), expected.size());
+              for (size_t j = 0; j < actual.size(); ++j)
+              {
+                EXPECT_EQ(actual(j), expected(j));
+                EXPECT_EQ(Scalar(2) * actual(j), original[local](j));
+                nonzero = nonzero || original[local](j) != Scalar(0);
+              }
+            }
             else
             {
               EXPECT_EQ(actual, expected);
@@ -398,10 +408,19 @@ namespace Rodin::Tests::Unit
             mesh.setVertexCoordinates(vertex, coordinates);
           }
         };
-        auto jacobian = Jacobian(u);
-        exercise(jacobian, [](auto& unknown) { return Jacobian(unknown); });
-        auto divergence = Div(u);
-        exercise(divergence, [](auto& unknown) { return Div(unknown); });
+        if constexpr (FormLanguage::IsVectorRange<
+                        typename FormLanguage::Traits<FES>::RangeType>::Value)
+        {
+          auto jacobian = Jacobian(u);
+          exercise(jacobian, [](auto& unknown) { return Jacobian(unknown); });
+          auto divergence = Div(u);
+          exercise(divergence, [](auto& unknown) { return Div(unknown); });
+        }
+        else
+        {
+          auto gradient = Grad(u);
+          exercise(gradient, [](auto& unknown) { return Grad(unknown); });
+        }
       }
 
         /**
@@ -580,6 +599,27 @@ namespace Rodin::Tests::Unit
         P1<Math::SpatialVector<Scalar>, LocalMesh> vector(mesh, mesh.getDimension());
         checkP1SampleDerivatives(scalar);
         checkP1SampleDerivatives(vector);
+      };
+      fields.template operator()<Real>();
+      fields.template operator()<Complex>();
+    }
+
+    /**
+     * @brief Native P1 physical derivatives follow geometry-only rebinding.
+     *
+     * Uniform binary dilation preserves topology, cell and quadrature indices,
+     * and map order, but halves every physical derivative. Both scalar fields
+     * and all three differential operators are checked exactly against fresh
+     * expressions, without coordinate matching or tolerances.
+     */
+    TEST_P(QuadratureExpression, P1DerivativeGeometryRebind)
+    {
+      auto mesh = Convergence::UniformGrid(GetParam()).makeMesh(2);
+      const auto fields = [&]<class Scalar>() {
+        P1<Scalar, LocalMesh> scalar(mesh);
+        P1<Math::SpatialVector<Scalar>, LocalMesh> vector(mesh, mesh.getDimension());
+        checkDerivativeGeometry(scalar, mesh);
+        checkDerivativeGeometry(vector, mesh);
       };
       fields.template operator()<Real>();
       fields.template operator()<Complex>();

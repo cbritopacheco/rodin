@@ -2,6 +2,10 @@ add_executable(RodinBulkP1JacobianBenchmarks EXCLUDE_FROM_ALL BulkP1Jacobian.cpp
 target_link_libraries(RodinBulkP1JacobianBenchmarks PRIVATE
   Rodin::Geometry Rodin::Variational benchmark::benchmark)
 
+add_executable(RodinTransformationLifecycleBenchmarks EXCLUDE_FROM_ALL TransformationLifecycle.cpp)
+target_link_libraries(RodinTransformationLifecycleBenchmarks PRIVATE
+  Rodin::Geometry benchmark::benchmark)
+
 add_executable(RodinGeometryBenchmarks EXCLUDE_FROM_ALL
   UniformGrid.cpp
   Connectivity.cpp

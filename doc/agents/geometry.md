@@ -52,6 +52,19 @@ compare coordinate/key sets in tests.
   reconstruct them from vertex coordinates in FES-generic code.
 - `mesh.setVertexCoordinates(...)` flushes/invalidates transformations;
   `mesh.flush()` demotes everything back to affine.
+- `PolytopeTransformation::getCacheIdentity()` supplies an optional, process-local
+  geometry-state token. Runtime construction, copy, move, assignment and loading
+  establish fresh tokens; reads are non-atomic and non-collective. These tokens
+  are not distributed entity identifiers and are not serialized. Constant-evaluated
+  and moved-from maps have no reusable token. Native P1 physical-derivative caches
+  include the token in their cell key, so geometry changes cannot be hidden by
+  unchanged entity indices, map order or quadrature indices. An absent token
+  permits evaluation but disables physical-result reuse. Derived map mutators
+  must invalidate their token; attached geometry must still be published through
+  `MeshBase::setPolytopeTransformation`, with normal point/quadrature rebinding.
+  A token does not update previously cached geometric buffers. Reference tables
+  remain keyed separately by formula identity. The form-language `Identifiable`
+  UUID has copy-stable, thread-local semantics and is not a geometry-state token.
 - `PointCloud` — sdim × n coordinate container with Eigen views, the input
   for parametric transformations.
 - `PolytopeQuadrature` caches quadrature data attached to mesh polytopes.
