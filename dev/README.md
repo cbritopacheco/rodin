@@ -311,6 +311,12 @@ geometry, and backend variants explicitly. Current audit findings include:
   tangent formulas. The instantaneous relaxation limit checks its algebraic
   residual and both derivatives. Individual active-state entries agree with
   central finite differences; removing the relaxation strain derivative fails.
+- Polytope iterator ownership: cold, cached and dirty releases retain entity
+  identity, ordered vertex keys and attributes after iterator destruction.
+  Empty and exhausted iterators release null. Advanced cell, face and vertex
+  iterators replace a generic iterator cache while preserving the remaining
+  cursor. All seven cell geometries pass normal and assertion-enabled
+  AddressSanitizer runs with leak detection, one case at a time.
 - Physical point ordering: exhaustive finite grids in embedding dimensions
   one through three agree with an independent lexicographic oracle. Pairwise
   checks precede sorting and duplicate-key insertion. The original comparison
