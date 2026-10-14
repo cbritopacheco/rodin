@@ -1003,3 +1003,14 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   snapshot run84. The 195-report run95 audit measures 37,001 of 39,237 lines
   (\(94.3013\%\)), adding 24 hits without reducing the denominator. There
   are 275 remaining hits needed for \(95\%\) at this denominator.
+- Bracketed root endpoints: float and real regressions expose a valid exact left
+  endpoint being discarded before the bracket check, returning no result for
+  a linear function. Both new typed endpoint cases fail on the preserved
+  pre-fix binary, while its fourteen other cases pass. Endpoint roots are now
+  accepted before any interior iteration; the header also owns its required
+  standard includes. Sixteen cases pass individually in Release, normal Debug
+  and ASan/LSan, covering invalid initial guesses, zero/absent derivative
+  safeguards and depleted work budgets. All 21 heart-model caller regressions
+  pass individually in Release, including branch-flow derivatives and dynamic
+  Jacobian finite differences. A doubled returned-root mutation fails all four
+  new initial-guess/derivative cases; endpoint and zero-budget controls pass.

@@ -119,3 +119,81 @@ TEST_F(NewtonRaphsonTest, LinearFunction)
   ASSERT_TRUE(root.has_value());
   EXPECT_NEAR(*root, 3.0, 1e-10);
 }
+
+namespace
+{
+  template <class Scalar>
+  class NewtonSafeguards : public ::testing::Test
+  {};
+  using RootScalars = ::testing::Types<Float, Real>;
+  TYPED_TEST_SUITE(NewtonSafeguards, RootScalars);
+
+  /// @brief Exact bracket endpoints are returned without evaluating an interior point.
+  TYPED_TEST(NewtonSafeguards, ExactEndpoints)
+  {
+    using Scalar = TypeParam;
+    const Scalar lo = Scalar(-2), hi = Scalar(3);
+    for (const Scalar expected : {lo, hi})
+    {
+      for (const Scalar slope : {Scalar(-3), Scalar(3)})
+      {
+        size_t calls = 0;
+        const auto function = [&](Scalar x) {
+          ++calls;
+          EXPECT_TRUE(x == lo || x == hi);
+          return std::pair{(x - expected) * slope, slope};
+        };
+        const auto root = NewtonRaphson<Scalar>().solve(function, Scalar(0), lo, hi);
+        ASSERT_TRUE(root);
+        EXPECT_EQ(*root, expected);
+        EXPECT_EQ(calls, 2u);
+      }
+    }
+  }
+
+  /// @brief Nonfinite and out-of-bracket initial guesses are replaced by a valid midpoint.
+  TYPED_TEST(NewtonSafeguards, InvalidInitialGuess)
+  {
+    using Scalar = TypeParam;
+    const auto function = [](Scalar x) { return std::pair{x - Scalar(0.25), Scalar(1)}; };
+    for (const Scalar guess : {Scalar(-10), Scalar(0), Scalar(1), Scalar(10),
+           std::numeric_limits<Scalar>::quiet_NaN()})
+    {
+      const auto root =
+        NewtonRaphson<Scalar>().solve(function, guess, Scalar(0), Scalar(1));
+      ASSERT_TRUE(root);
+      EXPECT_EQ(*root, Scalar(0.25));
+    }
+  }
+
+  /// @brief Missing or zero derivatives still converge with a valid bracket.
+  TYPED_TEST(NewtonSafeguards, DerivativeSafeguards)
+  {
+    using Scalar = TypeParam;
+    constexpr Scalar Tolerance = Scalar(64) * std::numeric_limits<Scalar>::epsilon();
+    const NewtonRaphson<Scalar> solver(Tolerance, Tolerance, Tolerance, 100);
+    for (const Scalar derivative : {Scalar(0), std::numeric_limits<Scalar>::quiet_NaN()})
+    {
+      const auto function = [derivative](Scalar x) {
+        return std::pair{x * x - Scalar(2), derivative};
+      };
+      const auto root = solver.solve(function, Scalar(1.5), Scalar(1), Scalar(2));
+      ASSERT_TRUE(root);
+      EXPECT_GE(*root, Scalar(1));
+      EXPECT_LE(*root, Scalar(2));
+      EXPECT_NEAR(*root, std::sqrt(Scalar(2)), Scalar(4) * Tolerance);
+      EXPECT_LE(std::abs(function(*root).first), Scalar(8) * Tolerance);
+    }
+  }
+
+  /// @brief A depleted work budget returns no unconverged interior result.
+  TYPED_TEST(NewtonSafeguards, ZeroWorkBudget)
+  {
+    using Scalar = TypeParam;
+    const auto function = [](Scalar x) {
+      return std::pair{x * x - Scalar(2), Scalar(2) * x};
+    };
+    const NewtonRaphson<Scalar> solver(Scalar(0), Scalar(0), Scalar(0), 0);
+    EXPECT_FALSE(solver.solve(function, Scalar(1.5), Scalar(1), Scalar(2)));
+  }
+}

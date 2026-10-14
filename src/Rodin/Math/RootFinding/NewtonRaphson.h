@@ -14,7 +14,9 @@
 #ifndef RODIN_MATH_ROOTFINDING_NEWTONRAPHSON_H
 #define RODIN_MATH_ROOTFINDING_NEWTONRAPHSON_H
 
+#include <cassert>
 #include <cmath>
+#include <limits>
 #include <optional>
 
 namespace Rodin::Math::RootFinding
@@ -124,6 +126,11 @@ namespace Rodin::Math::RootFinding
 
         if (!(fav * fbv <= 0))
           return {};
+
+        if (fav == Scalar(0) || std::fabs(fav) < m_absGTol)
+          return a;
+        if (fbv == Scalar(0) || std::fabs(fbv) < m_absGTol)
+          return b;
 
         if (!(t0 > a && t0 < b))
           t0 = 0.5 * (a + b);
