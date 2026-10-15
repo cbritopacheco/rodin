@@ -1104,3 +1104,60 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   leaving 159 further hits needed for \(95\%\). Sanitizer, pre-fix, diagnostic
   and mutation profiles remain excluded. Remote Style, Documentation and
   Installation checks pass for head 518e2b172; Build and Tests remain queued.
+
+- Native solver ownership: all forty real/complex Debug/Release case-runs pass
+  for CG (dense/sparse), BiCGSTAB (sparse), GMRES and DGMRES (dense/sparse),
+  LDLT, HouseholderQR and PartialPivLU (dense), and SimplicialLDLT,
+  SimplicialLLT and SparseQR (sparse). Explicit solutions and relative residuals
+  check changed operators/loads, cold and warm guesses, copies, moves,
+  polymorphic clones, associated problem references and original destruction.
+  Fresh compilation exposes invalid Eigen copy/move initializers in both GMRES
+  move constructors and DGMRES's dense copy and both move constructors. The
+  repair follows the existing sparse-copy fix in e15528c52: retain the problem
+  and construct fresh workspace. Tests reapply iteration options; they do not
+  certify copied option values or factors. Pre-fix compile diagnostics are
+  excluded. BiCGSTAB has no dense specialization; its failed dense instantiation
+  records an unavailable API rather than a passed or substituted algorithm.
+  Fourteen Release manufactured cases check copied GMRES/DGMRES solvers on
+  affine harmonic Dirichlet fields across all seven positive-dimensional cell
+  geometries, including every cell vertex and centroid after repeated solves.
+  All sixteen affine chart cases pass in Debug, Release and ASan/LSan for
+  tabulated P1 and pointwise-only elements across eight cell geometries and
+  admissible embeddings. The first private fixture assigned to PointCloud's
+  value-returning accessor and left its controls zero; the corrected fixture
+  writes matrix entries. That diagnostic is excluded without changing geometry.
+  Attribute initialization, sparse chart clones, connectivity-key lookup,
+  rectangular spatial identities, binary-exact scaling and contextual warnings
+  have independent value oracles. The warning's plain context and styled output
+  are checked separately; a private diagnostic incorrectly expected styled
+  output to contain the entire unstyled string contiguously and is excluded.
+  All 178 scoped normal case-runs pass. Twenty-five isolated numerical mutations
+  reject doubled algebraic solutions, mapped coordinates and manufactured fields.
+  All four changed-solver, sixteen chart and five metadata cases pass ASan/LSan.
+  All six Alert and fifteen spatial cases also pass ASan/LSan.
+  Named iteration budgets retain the tested values; four final helper smoke
+  case-runs pass. Generated CTest scripts verify fifty unique registrations,
+  with 36 unit cases, fourteen manufactured cases and 120-second timeouts.
+  Final snapshot run132 verifies all 570 production files. Old GMRES/DGMRES and
+  SubMeshBuilder hits/function hits are retired. Fresh normal observations
+  include matching out-of-line library notes and isolated successful runtime
+  profiles, retaining their complete compiler-note baselines. The 303-report
+  run137 audit measures 37,971 of 40,059 production lines (\(94.7877\%\)),
+  with no nonproduction or missing-source records. Relative to run118, it adds
+  422 measured lines and 474 hits; 86 further hits are needed for \(95\%\).
+  Failed fixtures, discovery, sanitizer, pre-fix and mutation counters remain
+  excluded. Test/benchmark/helper sources never contribute measured lines.
+- CI head 518e2b172: Build, Style, Documentation and Installation pass.
+  Tests run 38609137345 is cancelled overall, but all sixteen Unit jobs fail.
+  Representative Debug jobs 116008410521 and 116008410503 fail four cases:
+  GaussLegendreTest.PointGeometry plus the segment skin and point-cloud
+  keep/trim cases. Release job 116008410416 fails only PointGeometry.
+  The quadrature fixture expected one reference coordinate and read it; the
+  point contract has zero coordinates. The fixture now checks empty coordinates
+  and unit weight. Debug skin cases assert in Connectivity::polytope because
+  SubMesh::Builder inserts a point through the positive-dimensional API.
+  Vertex emission now belongs to finalize(), which already creates the vertex
+  map and copies labels. Initialization sets the builder dimension before its
+  first read. All forty relevant normal Debug/Release checks and all five skin
+  ASan/LSan checks pass separately. Commit fe96b663a pushes these validated
+  repairs after the observed CI failures; fresh CI is required for that head.

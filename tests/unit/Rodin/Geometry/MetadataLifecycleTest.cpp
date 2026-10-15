@@ -16,6 +16,84 @@
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
+/// @brief Repeated attribute initialization preserves values and sparse chart insertion owns clones.
+TEST(Geometry_MetadataLifecycle, IdempotentAttributesAndSparseChartClones)
+{
+  AttributeIndex attributes;
+  attributes.initialize(3);
+  PolytopeTransformationIndex transformations;
+  transformations.initialize(3);
+  constexpr Index Slot = 5;
+  for (size_t dimension = 0; dimension <= 3; ++dimension)
+  {
+    attributes.set({dimension, Slot}, Attribute(17 + dimension));
+    {
+      IdentityTransformation original(dimension);
+      IdentityTransformation copied(original);
+      IdentityTransformation moved(std::move(copied));
+      transformations.set(
+        {dimension, Slot}, std::unique_ptr<PolytopeTransformation>(moved.copy()));
+    }
+  }
+  attributes.initialize(3);
+  for (size_t dimension = 0; dimension <= 3; ++dimension)
+  {
+    SCOPED_TRACE(dimension);
+    EXPECT_EQ(
+      attributes.get({dimension, Slot}, Slot + 1), Optional<Attribute>(17 + dimension));
+    EXPECT_FALSE(attributes.get({dimension, 0}, Slot + 1));
+    EXPECT_EQ(transformations.find(dimension, 0), nullptr);
+    const auto* chart = transformations.find(dimension, Slot);
+    ASSERT_NE(chart, nullptr);
+    EXPECT_EQ(chart->getOrder(), 1u);
+    Math::SpatialPoint reference(dimension), physical;
+    for (size_t i = 0; i < dimension; ++i)
+      reference[i] = Real(i + 1) / 2;
+    chart->transform(physical, reference);
+    EXPECT_EQ(physical.size(), dimension);
+    for (size_t i = 0; i < dimension; ++i)
+      EXPECT_EQ(physical[i], reference[i]);
+    Math::SpatialMatrix<Real> jacobian;
+    chart->jacobian(jacobian, reference);
+    EXPECT_EQ(jacobian.rows(), dimension);
+    EXPECT_EQ(jacobian.cols(), dimension);
+    for (size_t i = 0; i < dimension; ++i)
+    {
+      for (size_t j = 0; j < dimension; ++j)
+        EXPECT_EQ(jacobian(i, j), Real(i == j));
+    }
+  }
+}
+
+/// @brief Connectivity lookup respects unordered keys while retaining the first orientation.
+TEST(Geometry_MetadataLifecycle, ConnectivityKeyLookupAndDuplicateInsertion)
+{
+  SequentialConnectivity connectivity;
+  connectivity.initialize(2).nodes(4);
+  const Polytope::Key first{0, 1, 2}, reversed{2, 1, 0}, second{1, 2, 3};
+  connectivity.polytope(Polytope::Type::Triangle, first);
+  connectivity.polytope(Polytope::Type::Triangle, reversed);
+  connectivity.polytope(Polytope::Type::Triangle, second);
+  ASSERT_EQ(connectivity.getCount(2), 2u);
+  EXPECT_EQ(connectivity.getIndex(2, first), Optional<Index>(0));
+  EXPECT_EQ(connectivity.getIndex(2, reversed), Optional<Index>(0));
+  EXPECT_EQ(connectivity.getIndex(2, second), Optional<Index>(1));
+  EXPECT_FALSE(connectivity.getIndex(2, Polytope::Key{0, 2, 3}));
+  const auto& index = connectivity.getIndexMap(2);
+  ASSERT_EQ(index.left.size(), 2u);
+  EXPECT_EQ(index.right.size(), 2u);
+  EXPECT_EQ(
+    IndexVector(index.left[0]->begin(), index.left[0]->end()), IndexVector({0, 1, 2}));
+  EXPECT_EQ(
+    IndexVector(index.left[1]->begin(), index.left[1]->end()), IndexVector({1, 2, 3}));
+  connectivity.discover(2, 1).restrict(1, 2);
+  EXPECT_EQ(connectivity.getCount(1), 5u);
+  size_t shared = 0;
+  for (Index i = 0; i < connectivity.getCount(1); ++i)
+    shared += connectivity.getIncidence({1, 2}, i).size() == 2;
+  EXPECT_EQ(shared, 1u);
+}
+
 /// @brief Populated attribute assignment replaces sparse extents and owns independent slots.
 TEST(Geometry_MetadataLifecycle, SparseAttributeAssignmentReplacesPopulatedStorage)
 {

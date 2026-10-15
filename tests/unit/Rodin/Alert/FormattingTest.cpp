@@ -6,12 +6,15 @@
  */
 
 #include <array>
+#include <complex>
 #include <sstream>
 #include <utility>
 
 #include <gtest/gtest.h>
 
 #include <Rodin/Alert/Color.h>
+#include <Rodin/Alert/MemberFunctionWarning.h>
+#include <Rodin/Alert/Notation.h>
 #include <Rodin/Alert/Reset.h>
 #include <Rodin/Alert/Stylize.h>
 #include <Rodin/Alert/Text.h>
@@ -19,6 +22,40 @@
 namespace Rodin::Tests::Unit
 {
   using namespace Alert;
+
+  /// @brief Generic notation owns temporary strings and handles empty and populated ranges.
+  TEST(AlertFormatting, GenericNotationValues)
+  {
+    const Notation text(std::string("owned text"));
+    EXPECT_EQ(text.getString(), "owned text");
+    EXPECT_EQ(Notation::Print(std::complex<int>(2, -3)).getString(), "(2,-3)");
+    const std::array<int, 3> values{2, -3, 7};
+    EXPECT_EQ(Notation::Set(values.begin(), values.end()).getString(), "{ 2, -3, 7 }");
+    EXPECT_EQ(Notation::Set(values.end(), values.end()).getString(), "{  }");
+  }
+
+  /// @brief Member warnings retain function/class context and emit without throwing.
+  TEST(AlertFormatting, MemberWarningContext)
+  {
+    struct WarningOrigin
+    {};
+    const WarningOrigin origin;
+    MemberFunctionWarning warning(origin, "evaluate");
+    warning << "legacy input";
+    const std::string expected = "In member function evaluate of class " +
+      boost::typeindex::type_id_with_cvr<WarningOrigin>().pretty_name() +
+      ": legacy input";
+    EXPECT_EQ(std::string(warning.what()), expected);
+    std::ostringstream output, expectedOutput;
+    warning.setOutputStream(output);
+    expectedOutput << Stylize << WarningPrefix() << ": In member function "
+                   << Identifier::Function("evaluate") << " of class "
+                   << Identifier::Class(
+                        boost::typeindex::type_id_with_cvr<WarningOrigin>().pretty_name())
+                   << ": legacy input\n";
+    EXPECT_NO_THROW(warning.raise());
+    EXPECT_EQ(output.str(), expectedOutput.str());
+  }
 
   /// @brief Every palette enum and named tag emits its prescribed ANSI code.
   TEST(AlertFormatting, PaletteAndNamedTags)

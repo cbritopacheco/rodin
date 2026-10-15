@@ -349,3 +349,9 @@ target_link_libraries(RodinGeometrySkinLifecycleTest
   PRIVATE GTest::gtest_main Rodin::Geometry)
 gtest_discover_tests(RodinGeometrySkinLifecycleTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinGeometryChartOwnershipTest ChartOwnershipTest.cpp)
+target_link_libraries(RodinGeometryChartOwnershipTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinGeometryChartOwnershipTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)

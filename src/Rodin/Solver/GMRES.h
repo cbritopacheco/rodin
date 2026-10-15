@@ -136,8 +136,7 @@ namespace Rodin::Solver
        * @param other Object to move from.
        */
       GMRES(GMRES&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
+        : Parent(std::move(other))
       {}
 
       /// @brief Destructor.
@@ -260,8 +259,7 @@ namespace Rodin::Solver
        * @param other Object to move from.
        */
       GMRES(GMRES&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
+        : Parent(std::move(other))
       {}
 
       /// @brief Destructor.

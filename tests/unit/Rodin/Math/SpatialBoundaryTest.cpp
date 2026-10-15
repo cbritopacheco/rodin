@@ -21,6 +21,58 @@ namespace
   using SpatialScalars = ::testing::Types<Float, Real, Complex>;
   TYPED_TEST_SUITE(SpatialBoundary, SpatialScalars);
 
+  /// @brief Binary-exact scaling, negation and array assignment preserve every active size.
+  TYPED_TEST(SpatialBoundary, ScalingAndArrayAssignment)
+  {
+    for (std::uint8_t size = 0; size <= 3; ++size)
+    {
+      SCOPED_TRACE(unsigned(size));
+      Math::Vector<TypeParam> entries(size);
+      for (size_t i = 0; i < size; ++i)
+      {
+        entries[i] = TypeParam(i + 1);
+        if constexpr (std::is_same_v<TypeParam, Complex>)
+          entries[i] += Complex(0, Real(i + 2));
+      }
+      SpatialVector<TypeParam> values;
+      values = entries.array();
+      ASSERT_EQ(values.size(), size);
+      const auto negative = -values;
+      const auto divided = values / TypeParam(2);
+      EXPECT_EQ(negative.size(), size);
+      EXPECT_EQ(divided.size(), size);
+      EXPECT_EQ(&(values *= TypeParam(2)), &values);
+      for (size_t i = 0; i < size; ++i)
+      {
+        EXPECT_EQ(values[i], TypeParam(2) * entries[i]);
+        EXPECT_EQ(negative[i], -entries[i]);
+        EXPECT_EQ(divided[i], entries[i] / TypeParam(2));
+      }
+      EXPECT_EQ(&(values /= TypeParam(2)), &values);
+      for (size_t i = 0; i < size; ++i)
+        EXPECT_EQ(values[i], entries[i]);
+    }
+  }
+
+  /// @brief Rectangular identity maps have exact Kronecker entries, including empty axes.
+  TYPED_TEST(SpatialBoundary, RectangularIdentity)
+  {
+    for (std::uint8_t rows = 0; rows <= 3; ++rows)
+    {
+      for (std::uint8_t columns = 0; columns <= 3; ++columns)
+      {
+        const auto identity = SpatialMatrix<TypeParam>::Identity(rows, columns);
+        EXPECT_EQ(identity.rows(), rows);
+        EXPECT_EQ(identity.cols(), columns);
+        for (size_t i = 0; i < rows; ++i)
+        {
+          for (size_t j = 0; j < columns; ++j)
+            EXPECT_EQ(identity(i, j), TypeParam(i == j));
+        }
+      }
+    }
+  }
+
   /// @brief Zero-dimensional vectors preserve empty active storage and stream no entries.
   TYPED_TEST(SpatialBoundary, EmptyVectorsAndStreaming)
   {
