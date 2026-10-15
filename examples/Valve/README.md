@@ -7,36 +7,61 @@ desplazado a la apertura pedida.
 
 ## Mallas (`resources/examples/Valve/`)
 
-| archivo | D [mm] | apertura | gap/D | vértices | tetraedros |
-|---|---|---|---|---|---|
-| FPC8_open000.mesh  | 203.2 | 0 % (asentada)   | −0.017 | 86 839 | 434 981 |
-| FPC8_open025.mesh  | 203.2 | 25 %             | 0.236 | 78 224 | 402 177 |
-| FPC8_open050.mesh  | 203.2 | 50 %             | 0.488 | 67 814 | 352 243 |
-| FPC8_open075.mesh  | 203.2 | 75 %             | 0.740 | 58 601 | 306 189 |
-| FPC8_open100.mesh  | 203.2 | 100 % (retirada) | 0.992 | 50 681 | 268 639 |
-| FPC16_open000.mesh | 382.0 | 0 %              | −0.013 | 87 216 | 436 337 |
-| FPC16_open025.mesh | 382.0 | 25 %             | 0.238 | 77 339 | 397 989 |
-| FPC16_open050.mesh | 382.0 | 50 %             | 0.490 | 67 062 | 347 980 |
-| FPC16_open075.mesh | 382.0 | 75 %             | 0.741 | 57 979 | 303 528 |
-| FPC16_open100.mesh | 382.0 | 100 %            | 0.992 | 50 415 | 267 521 |
+| archivo | D [mm] | apertura | gap/D | vértices | tetraedros | γ mín |
+|---|---|---|---|---|---|---|
+| FPC8_open000.mesh  | 203.2 | 0 % (asentada)   | −0.017 | 86 990 | 435 861 | 0.21 |
+| FPC8_open025.mesh  | 203.2 | 25 %             | 0.236 | 85 581 | 431 394 | 0.14 |
+| FPC8_open050.mesh  | 203.2 | 50 %             | 0.488 | 77 431 | 387 755 | 0.12 |
+| FPC8_open075.mesh  | 203.2 | 75 %             | 0.740 | 73 793 | 365 277 | 0.13 |
+| FPC8_open100.mesh  | 203.2 | 100 % (retirada) | 0.992 | 77 560 | 374 547 | 0.11 |
+| FPC16_open000.mesh | 382.0 | 0 %              | −0.013 | 93 696 | 454 547 | 0.20 |
+| FPC16_open025.mesh | 382.0 | 25 %             | 0.238 | 87 128 | 429 216 | 0.15 |
+| FPC16_open050.mesh | 382.0 | 50 %             | 0.490 | 78 514 | 386 738 | 0.11 |
+| FPC16_open075.mesh | 382.0 | 75 %             | 0.741 | 73 984 | 361 570 | 0.08 |
+| FPC16_open100.mesh | 382.0 | 100 %            | 0.992 | 77 326 | 371 110 | 0.10 |
 
+- **Dominio de fluido:** tubería recta del diámetro interior de la válvula
+  **unida a la cavidad interior del revestimiento** (FPC8, `REVESTIMIENTO`)
+  o de la camisa (FPC16, `CAMISA PU`) tomada del STEP, menos el cuchillo
+  desplazado a la apertura. En el plano del cuchillo la cavidad tiene:
+  - **abajo:** la ranura del asiento (radio R_k > R: 3.4 mm más profunda
+    que el diámetro en el FPC8, 5 mm en el FPC16);
+  - **arriba:** la ranura por la que sube el cuchillo, hasta 1 mm bajo el
+    tope del revestimiento (ahí sella la prensaestopa). El cuchillo la
+    llena por encima de su borde; quedan mojados los dos bolsillos
+    laterales entre el diámetro y las paredes de la ranura bajo el borde
+    del cuchillo y, en el FPC16, las cuñas entre el bisel y la pared de la
+    ranura en toda su altura.
+  - Cada bolsillo lateral termina en una cúspide (el costado del cuchillo
+    es tangente a su borde y coincide con la pared): se recorta donde es
+    más angosto que 0.0075 D (1.5 mm FPC8, 2.9 mm FPC16).
+  - `--cavity groove` deja sólo la ranura del asiento (como si los labios
+    de la camisa sellaran sobre el cuchillo); `--cavity none` vuelve a la
+    tubería recta.
+- **Consecuencia en la fuerza:** la presión de línea (150 psi) sobre las
+  cuñas del bisel del FPC16 no se compensa con el otro lado del cuchillo:
+  al 25 % da ≈ −7 kN en z, y la del borde ≈ +6 kN en y, aun sin flujo
+  (malla gruesa de prueba). Es la parte `p_out ∫ n dS` que `F_dyn` resta;
+  la parte del flujo es `F_dyn`.
 - Unidades: **metros**. Flujo en +z, carrera del cuchillo en +y (+y abre).
 - Tubería: 3D aguas arriba, 8D aguas abajo del plano del cuchillo.
 - Apertura `f`: centro del borde semicircular del cuchillo en
   `y_c = f (R + R_k − δ)`, con `δ = 0.0079 D` la protrusión residual que
   trae el CAD del FPC8 abierto (1.6 mm). `f = 0` es el cuchillo asentado en
-  la ranura del asiento (el gap es negativo porque el borde entra en la
-  ranura: la malla tiene dos regiones desconectadas y el caso es puramente
-  hidrostático, útil para verificar `F_z = Δp · A_mojada`).
-- Tamaños: `h = D/80` en el cuchillo (`D/160` en la unión cuchillo–pared,
-  donde el bisel del FPC16 deja cuñas delgadas), `D/26` en la caja del chorro
-  (−0.75D … 3D aguas abajo), `D/10` lejos. Calidad γ mínima ≥ 0.20 en todas.
-- Atributos de frontera: 1 entrada, 2 salida, 3 pared de la tubería,
+  la ranura del asiento: la malla tiene dos regiones desconectadas y el
+  caso es puramente hidrostático (`F_z = Δp · A_mojada`).
+- Tamaños: `h = D/80` en el cuchillo, `D/133` en las paredes de la cavidad
+  y `D/160` en la unión cuchillo–pared, `D/26` en la caja del chorro
+  (−0.75D … 3D aguas abajo), `D/10` lejos.
+- Caras del cuchillo: se clasifican sobre una malla superficial gruesa
+  (centro de cada triángulo desplazado según su normal, dentro o fuera del
+  cuchillo del CAD), no por coordenadas.
+- Atributos de frontera: 1 entrada, 2 salida, 3 pared (tubería y cavidad),
   4 cuchillo. Volumen: 1.
 - Regenerar / cambiar resolución: `python3 make_meshes.py FPC8.stp FPC16.stp
-  --hk 0.0125 --hm 0.0385 --hf 0.1` (requiere `pip install gmsh`). Para una
-  malla más gruesa de prueba `--hk 0.04 --hm 0.08 --hf 0.2 --ldown 5`
-  (~45 k tets, corre en segundos por paso en 1 núcleo).
+  --hk 0.0125 --hm 0.0385 --hf 0.1 [--cavity full|groove|none]` (requiere
+  `pip install gmsh`). Malla gruesa de prueba: `--hk 0.03 --hm 0.08 --hf 0.2
+  --ldown 4` (~55 k tets).
 
 ## Ejecutable `KnifeGateValve`
 
