@@ -2259,3 +2259,29 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   previously merged add865281. Its independent Jacobian/distortion strengths
   preserve the old default products. Git's merge preflight succeeds without
   conflicts; integration and validation of that newer commit remain pending.
+
+
+### Integrate the current PR367 hinge controls
+
+- Merge current PR367 head 5c2a9697a after validating the independent SubMesh
+  batch. The earlier cleanup head add865281 remains an ancestor; its removals
+  are preserved. The new commit replaces a global hinge coefficient and row
+  weights with independent Jacobian/distortion strengths. Defaults preserve
+  the old products: 100 times 0.1 equals 10, and 100 times 1 equals 100.
+- The merge is conflict-free, including the expanded solver coverage tests and
+  contextual Alert changes. Scan source, tests, examples and documentation for
+  retired weight fields and flags; the obsolete global CLI flag remains only
+  in its deliberate rejection test. The integrated develop base remains
+  cf9ff43f9, matching the current GitHub PR base.
+- Build all affected tests serially with optimized flags. Nine hinge cases,
+  48 solver cases, 13 parameter/CLI cases and six Adapt entry-point cases pass
+  individually (runs448/449/450/452). These include product-strength energy and
+  Newton-system equivalence, independent 2D/3D finite-difference tangents,
+  higher-order assembly, invalid controls and physical mesh-application checks.
+- Run447 retains current source/configuration hashes. Run453 validates all
+  four normal producers, captures their matching test-object notes/counters,
+  and inventories six changed SWIFT headers. Hinge.h's 40 measured lines and
+  Parameters.h's 18 measured lines are all hit in that scoped union. Other
+  headers retain investigation candidates; this partial file-specific union
+  establishes no aggregate goal percentage. No stale-source or sanitizer
+  profiles are included. Source inventory, production style and formatting pass.

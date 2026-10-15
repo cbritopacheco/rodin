@@ -100,7 +100,7 @@ cd /tmp/rodin-swift
   --n=16 --dimension=2 --lobes=4 --amp=0.05 --R0=0.25 \
   --classification-smoothing=0.12 \
   --model-fit=1 --model-distribution-deviatoric=1e-4 \
-  --model-distribution-divergence=1e-4 --model-hinge=100 \
+  --model-distribution-divergence=1e-4 --model-hinge-jacobian=10 --model-hinge-distortion=100 \
   --convergence-iterations-outer=30 --convergence-iterations-inner=15 \
   --linear-solver=sparse-lu --trace \
   --output=results/lobed-p2
@@ -268,12 +268,11 @@ named flags. The complete model/control mapping is:
 | `--model-fit` | `model.fit` |
 | `--model-distribution-deviatoric` | `model.distribution.deviatoric` |
 | `--model-distribution-divergence` | `model.distribution.divergence` |
-| `--model-hinge` | `model.hinge` |
 | `--model-jacobian` | `model.jacobian` |
 | `--model-distortion` | `model.distortion` |
 | `--model-quality-guard` | `model.qualityGuard` |
-| `--model-jacobian-weight` | `model.jacobianWeight` |
-| `--model-distortion-weight` | `model.distortionWeight` |
+| `--model-hinge-jacobian` | `model.hinge.jacobian` |
+| `--model-hinge-distortion` | `model.hinge.distortion` |
 | `--model-robust-scale` | `model.robustScale` |
 | `--globalization-directional-newton` | `globalization.directionalNewton` |
 | `--globalization-max-step-over-h` | `globalization.maxStepOverH` |
@@ -289,12 +288,11 @@ named flags. The complete model/control mapping is:
 | `model.fit` | Target-normal fitting stiffness, not a force multiplier | `1` |
 | `model.distribution.deviatoric` | Globally centered deviatoric-strain stiffness | `1e-4` |
 | `model.distribution.divergence` | Globally centered divergence stiffness, normalized by dimension | `1e-4` |
-| `model.hinge` | Hinge strength relative to predicted fitting improvement | `100` |
 | `model.distortion` | Spendable relative-distortion budget | `10` |
 | `model.jacobian` | Relative Jacobian floor | `1e-2` |
 | `model.qualityGuard` | Fraction of identity margins used for hinge activation | `0.1` |
-| `model.jacobianWeight` | Relative Jacobian-hinge row weight | `0.1` |
-| `model.distortionWeight` | Relative distortion-hinge row weight | `1` |
+| `model.hinge.jacobian` | Jacobian recovery strength | `10` |
+| `model.hinge.distortion` | Distortion recovery strength | `100` |
 | `model.robustScale` | Fixed Welsch scale when positive | `0`: automatic |
 | `globalization.directionalNewton` | Predictor/model directional scaling | `true` |
 | `globalization.maxStepOverH` | Optional predictor-motion cap divided by reference spacing | `0`: unrestricted |

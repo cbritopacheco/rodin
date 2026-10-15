@@ -228,9 +228,8 @@
   | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness, not a force multiplier | @f$1@f$ |
   | @f$\kappa_{\rm dev}@f$ | `model.distribution.deviatoric` | Cost of deviatoric-strain variation about its global mean | @f$10^{-4}@f$ |
   | @f$\kappa_{\rm div}@f$ | `model.distribution.divergence` | Cost of divergence variation about its global mean, normalized by @f$d@f$ | @f$10^{-4}@f$ |
-  | @f$\widehat\mu@f$ | `model.hinge` | Hinge strength relative to predicted fitting improvement | @f$100@f$ |
-  | @f$\kappa_J@f$ | `model.jacobianWeight` | Relative Jacobian-hinge row weight | @f$0.1@f$ |
-  | @f$\kappa_Q@f$ | `model.distortionWeight` | Relative distortion-hinge row weight | @f$1@f$ |
+  | @f$\mu_j@f$ | `model.hinge.jacobian` | Jacobian recovery strength | @f$10@f$ |
+  | @f$\mu_Q@f$ | `model.hinge.distortion` | Distortion recovery strength | @f$100@f$ |
   | @f$\gamma@f$ | `model.qualityGuard` | Guard fraction defining hinge activation margins | @f$0.1@f$ |
   | @f$j_{\mathrm{safe}}@f$ | `model.jacobian` | Relative Jacobian floor in the hinge and actual acceptance checks | @f$10^{-2}@f$ |
   | @f$Q_{\max}@f$ | `model.distortion` | Spendable relative-distortion budget | @f$10@f$ |
@@ -294,7 +293,7 @@
   camel-case words are separated by hyphens. Thus `sampling.subdivision`
   maps to `--sampling-subdivision`. Model flags include `--model-fit`,
   `--model-distribution-deviatoric`, `--model-distribution-divergence`,
-  `--model-hinge`, `--model-jacobian` and `--model-distortion`.
+  `--model-hinge-jacobian`, `--model-hinge-distortion`, `--model-jacobian` and `--model-distortion`.
   Iteration flags are `--convergence-iterations-outer` and `--convergence-iterations-inner`.
   Linear settings use `--linear-solver`, `--linear-threads` and
   `--convergence-tolerance-linear-relative`. Legacy spellings are rejected.
