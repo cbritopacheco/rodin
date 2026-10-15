@@ -1195,3 +1195,22 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   (\(95.0213\%\)). No nonproduction or missing-source records occur. Sanitizer,
   mutation, failed and discovery counters remain excluded. This is a local
   measured threshold; pending mode checks and remote CI remain separate gates.
+
+- Final local validation: the two formulation-clone cases pass in Release and
+  ASan/LSan with leak detection enabled. Omitting copied local bilinear terms
+  in a private production-header mutation fails both real and complex numerical
+  tests. All six builder cases pass ASan/LSan; the 38 format/math cases pass in
+  Release. All nineteen real PETSc field cases pass separately in Debug,
+  Release and ASan (external leak detection disabled under the PETSc policy).
+  The eight new cache/ParU/formulation CTest registrations preserve their unit
+  labels and 120-second per-case timeout.
+- Run166 merges 331 normal reports and retains the run159 measurement:
+  38,209 / 40,211 production lines (\(95.0213\%\)). All 570 production hashes
+  match the worktree. Their sorted compact JSON SHA-256 is
+  `f50e45a02451890ca46eb69e3d999d55ecc64b37b28a54387f29dee1f36ba271`.
+  This audit combines normal Debug and Release observations; the main remote
+  coverage job uses Release. A local threshold does not establish the current
+  remote Codecov percentage. The absent-source inventory contains 172 audit
+  candidates, including declarations, aliases, constant data, optimized
+  functions and the unsupported variants discussed above; none is silently
+  removed from the production-source scope.
