@@ -32,7 +32,7 @@ def audit(root, line_inventory):
     import tree_sitter_cpp
 
     parser = Parser(Language(tree_sitter_cpp.language()))
-    files, definitions, exceptions, recoveries = [], [], [], []
+    files, definitions, exceptions, recoveries, implicit = [], [], [], [], []
     for path in sorted((root / "src").rglob("*")):
         relative = path.relative_to(root)
         if path.suffix not in {".h", ".hpp", ".cpp", ".cc", ".cxx"}:
@@ -83,6 +83,15 @@ def audit(root, line_inventory):
             if node.type == "throw_statement":
                 exceptions.append({"file": name, "line": node.start_point.row + 1,
                                    "kind": "throw", "text": text(node)})
+            if node.type == "call_expression":
+                function = node.child_by_field_name("function")
+                spelling = text(function) if function is not None else ""
+                if re.search(r"(?:\.|->)(?:at|value)$", spelling) or re.fullmatch(
+                        r"std::(?:any_cast|get|stoi|stol|stoll|stoul|stoull|stof|stod|stold)(?:<.*>)?",
+                        spelling, flags=re.S):
+                    implicit.append({"file": name, "line": node.start_point.row + 1,
+                                     "call": spelling,
+                                     "status": "candidate: resolve callee and review preconditions"})
             if node.type != "qualified_identifier" or not re.fullmatch(
                     r"(?:Rodin::)?Alert::(?:Exception|MemberFunctionException|NamespacedException|ClassException)",
                     text(node)):
@@ -103,10 +112,12 @@ def audit(root, line_inventory):
         files.append({"file": name, "sha256": hashlib.sha256(source).hexdigest(),
                       "definitions": function_count, "parse_error": tree.root_node.has_error})
     return {"files": files, "definitions": definitions, "exceptions": exceptions,
+            "implicit_exception_candidates": implicit,
             "parse_errors": recoveries,
             "limitations": ["Syntactic inventory, independent of preprocessing and instantiation.",
                             "Parser recovery locations require review; generated macro bodies are not expanded.",
                             "Line attribution does not prove execution of each template specialization.",
+                            "Potential standard-library throws require callee/precondition review; arbitrary callback/backend exceptions are not inferred.",
                             "No source coverage percentage is inferred from this inventory."]}
 
 

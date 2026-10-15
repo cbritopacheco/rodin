@@ -2030,3 +2030,24 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   formatting and house-style checks, and verify all 565 production hashes
   still match run318: 40,595 / 42,690 lines (\(95.0925275\%\)). These changes
   do not alter production source or the local measured line inventory.
+
+
+### Implicit exception candidates
+
+- Extend the optional source inventory with calls to checked accessors,
+  optional-value access, numeric string conversions, `std::get` and
+  `std::any_cast`. Resolve callees and preconditions before treating a
+  candidate as a violation: compile-time tuple access and sparse iterator
+  values do not have the optional/variant failure modes suggested by their
+  spelling. Exclude comments and avoid counting an outer member call merely
+  because its receiver contains a nested `std::get` call.
+- Run360 records 227 candidates against the local Alert-correction source.
+  Public checked list/quadrature access and MMG numeric text conversion are
+  concrete boundary follow-ups. Internal topology-map lookups, bound-element
+  state and guarded optionals require their documented invariants to be
+  reviewed; do not fabricate inconsistent internal states for coverage.
+- Four tooling regression cases pass in separate Python processes: inactive
+  and uninstantiated definitions, instance/static/free exception context,
+  constructor-initializer attribution, implicit-call extraction, and explicit
+  parser-recovery reporting. The tooling tests report an explicit skip if
+  their optional parser dependencies are unavailable.
