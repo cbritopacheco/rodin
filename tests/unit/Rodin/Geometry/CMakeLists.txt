@@ -355,3 +355,9 @@ target_link_libraries(RodinGeometryChartOwnershipTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational)
 gtest_discover_tests(RodinGeometryChartOwnershipTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinGeometryCacheGrowthTest CacheGrowthTest.cpp)
+target_link_libraries(RodinGeometryCacheGrowthTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::QF)
+gtest_discover_tests(RodinGeometryCacheGrowthTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)

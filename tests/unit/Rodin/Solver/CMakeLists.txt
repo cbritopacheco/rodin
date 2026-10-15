@@ -66,6 +66,12 @@ gtest_discover_tests(RodinSolverConceptTest
  )
 
 if (RODIN_USE_PARU)
+  add_executable(RodinParUContractTest ParUContractTest.cpp)
+  target_link_libraries(RodinParUContractTest PRIVATE
+    GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+  gtest_discover_tests(RodinParUContractTest
+    DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
   add_executable(RodinParUTest ParUTest.cpp)
   target_link_libraries(RodinParUTest
     GTest::gtest

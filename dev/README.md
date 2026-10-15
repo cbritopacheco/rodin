@@ -1161,3 +1161,21 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   first read. All forty relevant normal Debug/Release checks and all five skin
   ASan/LSan checks pass separately. Commit fe96b663a pushes these validated
   repairs after the observed CI failures; fresh CI is required for that head.
+
+- Cache and optional ParU contracts: reference-point extensions exercise owned
+  samples, supplied Jacobians and rebinding across eight geometries and every
+  supported embedding. Quadrature cache growth preserves slots and dimension
+  buckets; an empty ambient point retains unit metric density. ParU rejects
+  nonsquare operators and invalid loads without modifying output or existing
+  factors, then recovers from a singular factorization after a same-pattern
+  value change. All six cases pass separately in Debug, Release and ASan/LSan
+  with leak detection enabled. Private mutations doubling mapped coordinates
+  or computed solutions fail the corresponding numerical oracles; unaffected
+  empty-coordinate and pre-solve validation cases remain green.
+- Fresh coverage run150 retains 315 normal initial/runtime reports and the
+  complete production-source baseline. It measures 38,097 of 40,133 production
+  lines (\(94.9269\%\)); test, benchmark, helper, failed, sanitizer and mutation
+  profiles are excluded. Current production hashes match source snapshot132.
+  Run155 adds the passing format-keyword and NaN component checks, measuring
+  38,158 of 40,184 lines (\(94.9582\%\)) across 317 reports. New observations can
+  expose additional measured template lines as well as cover old misses.
