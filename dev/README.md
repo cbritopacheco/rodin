@@ -2285,3 +2285,52 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   headers retain investigation candidates; this partial file-specific union
   establishes no aggregate goal percentage. No stale-source or sanitizer
   profiles are included. Source inventory, production style and formatting pass.
+
+
+### MMG metadata conversion errors use member-context Alerts
+
+- Centralize the six metadata numeric conversions in MeshLoader::readIndex,
+  which owns entry reading, conversion and section-specific diagnostics.
+  Translate std::stoul's invalid_argument/out_of_range categories to a local
+  MemberFunctionException and throw it explicitly on the non-void error path.
+  Preserve existing numeric conversion and one-based assignment semantics.
+- Twelve malformed-input checks (invalid text and overflow in each section)
+  reject the original implementation, while the original valid-input control
+  passes (run457). All 117 optimized MMG cases then pass individually against
+  the corrected native library (run462). Valid controls check all six metadata
+  sets, zero-based assignment, surrounding whitespace and retained topology.
+- Both focused sanitizer cases pass separately with leak detection (run464).
+  The two fixtures are copied verbatim and both they and MeshLoader.cpp are
+  instrumented; optimized native support libraries remain linked. Fixture and
+  loader hashes are retained. Red, sanitizer and failed compile profiles remain
+  excluded. Run454 is compile-only: string loop copies are corrected to const
+  references before the successful original-implementation fixture build.
+- Native MMG and its dependencies rebuild with one compiler job. Run458 retains
+  previous MMG coverage notes; earlier run431 retains the IO/QF notes before
+  their refresh. Run461 records source/configuration hashes. Run468 checks the
+  matching native loader and normal full-suite test-object profiles: all 49
+  measured MeshLoader.cpp lines and all five MeshLoader.h lines are hit. Its
+  eight required positive checks cover conversion, contextual throw and all
+  six metadata setters. GCC attributes the wrapped tetrahedron call to the
+  setter statement, leaving its continuation line unmeasured. No overall goal
+  percentage is inferred from this file-specific result.
+- Run459 inventories 216 implicit-call candidates, including the now-caught
+  std::stoul call. No generic Alert::Exception calls in parsed instance members
+  remain. Production style and changed-line formatting pass.
+
+
+### Retain completed private builds and resolve workspace output I/O wait
+
+- A full container root filesystem is relieved by archiving 15 completed
+  private builds to /build/archived-validation-run456. Every file is SHA-256
+  verified before removing its original copy, and original directory paths
+  become symlinks to the preserved archives. Normal, sanitizer and failed
+  producer classifications stay distinct; never capture the archive wholesale.
+- A private MMG compile writing to the workspace volume is observed at 356
+  seconds wall time with 31 seconds CPU and request_wait_answer wait state.
+  Stop only its verified compiler and driver, observe terminal status, retain
+  its partial output and mark it excluded with no runtime counters (run460).
+  The unchanged-source local-output rerun completes in about 73 seconds with
+  about 35 seconds child CPU (run466). These are build/storage observations,
+  not numerical-kernel performance claims. The successful normal and focused
+  sanitizer compilations use local outputs and retain their coverage notes.

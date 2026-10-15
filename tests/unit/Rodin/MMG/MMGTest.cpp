@@ -15,6 +15,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/MMG.h>
+#include <Rodin/MMG/MeshLoader.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -812,6 +813,82 @@ namespace Rodin::Tests::Unit
   // ========================================================================
   // MMG::Mesh I/O roundtrip tests (MEDIT format)
   // ========================================================================
+
+  /// @brief Invalid and overflowing metadata numbers report the section and member context.
+  TEST(Rodin_MMG_Mesh_IO, MalformedMetadataIndicesUseMemberContext)
+  {
+    auto source = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    source.getConnectivity().compute(1, 3);
+    source.getConnectivity().compute(2, 3);
+    std::ostringstream body;
+    IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Local>(source).printMesh(body, false);
+    for (const auto keyword : {IO::MEDIT::Keyword::Corners, IO::MEDIT::Keyword::Ridges,
+           IO::MEDIT::Keyword::RequiredEdges, IO::MEDIT::Keyword::RequiredVertices,
+           IO::MEDIT::Keyword::RequiredTriangles, IO::MEDIT::Keyword::RequiredTetrahedra})
+    {
+      for (const std::string& token :
+        {std::string("not-a-number"), std::string(128, '9')})
+      {
+        SCOPED_TRACE(IO::MEDIT::toCharString(keyword));
+        SCOPED_TRACE(token);
+        std::istringstream input(
+          body.str() + IO::MEDIT::toCharString(keyword) + "\n1\n" + token + "\nEnd\n");
+        MMG::Mesh loaded;
+        MMG::MeshLoader loader(loaded);
+        try
+        {
+          loader.load(input);
+          ADD_FAILURE() << "Malformed metadata numbers must be rejected.";
+        }
+        catch (const Alert::Exception& error)
+        {
+          const std::string message = error.what();
+          EXPECT_NE(message.find("In member function"), std::string::npos);
+          EXPECT_NE(message.find("readIndex"), std::string::npos);
+          EXPECT_NE(message.find(IO::MEDIT::toCharString(keyword)), std::string::npos);
+          EXPECT_NE(message.find(token), std::string::npos);
+        }
+        catch (...)
+        {
+          ADD_FAILURE() << "Metadata number errors must raise an Alert exception.";
+        }
+      }
+    }
+  }
+
+  /// @brief Every MMG metadata section retains one-based indexing and surrounding whitespace.
+  TEST(Rodin_MMG_Mesh_IO, MetadataIndicesPreserveValidSectionAssignments)
+  {
+    auto source = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    source.getConnectivity().compute(1, 3);
+    source.getConnectivity().compute(2, 3);
+    std::ostringstream body;
+    IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Local>(source).printMesh(body, false);
+    const std::array keywords{IO::MEDIT::Keyword::Corners, IO::MEDIT::Keyword::Ridges,
+      IO::MEDIT::Keyword::RequiredEdges, IO::MEDIT::Keyword::RequiredVertices,
+      IO::MEDIT::Keyword::RequiredTriangles, IO::MEDIT::Keyword::RequiredTetrahedra};
+    for (size_t section = 0; section < keywords.size(); ++section)
+    {
+      for (const std::string& token : {std::string("1"), std::string("  1  ")})
+      {
+        SCOPED_TRACE(IO::MEDIT::toCharString(keywords[section]));
+        std::istringstream input(body.str() + IO::MEDIT::toCharString(keywords[section]) +
+          "\n1\n" + token + "\nEnd\n");
+        MMG::Mesh loaded;
+        MMG::MeshLoader(loaded).load(input);
+        EXPECT_EQ(loaded.getVertexCount(), source.getVertexCount());
+        EXPECT_EQ(loaded.getCellCount(), source.getCellCount());
+        const std::array<const IndexSet*, 6> indices{&loaded.getCorners(),
+          &loaded.getRidges(), &loaded.getRequiredEdges(), &loaded.getRequiredVertices(),
+          &loaded.getRequiredTriangles(), &loaded.getRequiredTetrahedra()};
+        for (size_t i = 0; i < indices.size(); ++i)
+        {
+          EXPECT_EQ(indices[i]->size(), i == section ? 1u : 0u);
+          EXPECT_EQ(indices[i]->count(0), i == section ? 1u : 0u);
+        }
+      }
+    }
+  }
 
   /// @brief Verifies save load MEDIT roundtrip for MMG mesh IO by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITRoundtrip)

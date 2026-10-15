@@ -4,7 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#include <boost/algorithm/string.hpp>
+#include <iomanip>
+#include <stdexcept>
+#include <string>
 
 #include "Rodin/Alert.h"
 #include "Rodin/Geometry.h"
@@ -14,6 +16,23 @@
 
 namespace Rodin::MMG
 {
+  Index MeshLoader::readIndex(std::istream& is, IO::MEDIT::Keyword keyword)
+  {
+    std::string line;
+    std::getline(is, line);
+    try
+    {
+      return std::stoul(line) - 1;
+    }
+    catch (const std::logic_error& error)
+    {
+      auto diagnostic = Alert::MemberFunctionException(*this, __func__);
+      diagnostic << "Failed to parse " << std::quoted(IO::MEDIT::toCharString(keyword))
+                 << " index from " << std::quoted(line) << ": " << error.what() << '.';
+      throw diagnostic;
+    }
+  }
+
   void MeshLoader::load(std::istream& is)
   {
     Parent::load(is);
@@ -25,7 +44,6 @@ namespace Rodin::MMG
     auto& mesh = this->getObject();
 
     // We perform another pass on the file, seeking the geometric entities.
-    std::string line;
     const auto& pos = getPositionMap();
     const auto& count = getCountMap();
     auto find = pos.find(IO::MEDIT::Keyword::Corners);
@@ -34,8 +52,7 @@ namespace Rodin::MMG
       is.seekg(find->second);
       for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::Corners); i++)
       {
-        std::getline(is, line);
-        mesh.setCorner(std::stoul(line) - 1);
+        mesh.setCorner(readIndex(is, IO::MEDIT::Keyword::Corners));
       }
     }
 
@@ -45,8 +62,7 @@ namespace Rodin::MMG
       is.seekg(find->second);
       for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::Ridges); i++)
       {
-        std::getline(is, line);
-        mesh.setRidge(std::stoul(line) - 1);
+        mesh.setRidge(readIndex(is, IO::MEDIT::Keyword::Ridges));
       }
     }
 
@@ -56,8 +72,7 @@ namespace Rodin::MMG
       is.seekg(find->second);
       for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::RequiredEdges); i++)
       {
-        std::getline(is, line);
-        mesh.setRequiredEdge(std::stoul(line) - 1);
+        mesh.setRequiredEdge(readIndex(is, IO::MEDIT::Keyword::RequiredEdges));
       }
     }
 
@@ -67,8 +82,7 @@ namespace Rodin::MMG
       is.seekg(find->second);
       for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::RequiredVertices); i++)
       {
-        std::getline(is, line);
-        mesh.setRequiredVertex(std::stoul(line) - 1);
+        mesh.setRequiredVertex(readIndex(is, IO::MEDIT::Keyword::RequiredVertices));
       }
     }
 
@@ -78,8 +92,7 @@ namespace Rodin::MMG
       is.seekg(find->second);
       for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::RequiredTriangles); i++)
       {
-        std::getline(is, line);
-        mesh.setRequiredTriangle(std::stoul(line) - 1);
+        mesh.setRequiredTriangle(readIndex(is, IO::MEDIT::Keyword::RequiredTriangles));
       }
     }
 
@@ -89,8 +102,8 @@ namespace Rodin::MMG
       is.seekg(find->second);
       for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::RequiredTetrahedra); i++)
       {
-        std::getline(is, line);
-        mesh.setRequiredTetrahedron(std::stoul(line) - 1);
+        mesh.setRequiredTetrahedron(
+          readIndex(is, IO::MEDIT::Keyword::RequiredTetrahedra));
       }
     }
   }
