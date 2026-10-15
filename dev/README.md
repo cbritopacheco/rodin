@@ -1652,7 +1652,7 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   (\(94.4321\%\)): 634 recovered hits and 39 new measured lines. All 565
   retained production files match snapshot236; nonproduction and missing-source
   records remain empty. At this denominator, 242 more hits are required.
-- Add a genuinely non-real P1 manufactured cubic root to the SNES state suite:
+- Add a non-real P1 manufactured cubic root to the SNES state suite:
   \(F(u)=u+u^3-(z+z^3)\), \(z=1+i/2\), with tangent \(1+3u^2\) and an initial
   iterate near that root. Check the full complex infinity-norm error and
   zero-iteration warm-start convergence. The solver uses the same bounded
@@ -1678,3 +1678,43 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   no failures. Keep this batch local under the deferred-push condition. The
   next mesh/index/quadrature and distributed IO build remains active; the
   95% goal and published CI/Codecov verification remain incomplete.
+
+### Fresh distributed and lifecycle validation retains the full denominator
+
+- Run256/260 builds mesh/indexing/partitioning, Gauss-Lobatto, MPI geometry
+  and HDF5, PETSc linear-system/KSP lifecycle, and parser/file-interface
+  executables against the same fresh RelWithDebInfo libraries. All compiler
+  and runtime phases preserve the two-compiler and one-case-group limits.
+- Run258 passes 142 native cases. Run259 completes 325 sharder groups, eighty
+  submesh groups and 230 HDF5 groups at 1, 2, 3, 4 and 8 ranks. The existing
+  sharder rank-limit guards skip 137 complete groups, and the existing
+  submesh empty-rank guard skips one complete group at one rank. Every other
+  group passes on every participating rank. Do not count these 138 skipped
+  groups as executed numerical tests. Run261 passes 26 further linear-system,
+  KSP and file-interface/parser controls individually.
+- Run262 merges the cumulative filtered normal report, retaining 412 reports,
+  565 current production hashes and every previous source/retirement record.
+  It measures 40,281 / 42,506 production lines (\(94.7654\%\)), recovering
+  170 hits and exposing thirty further measured lines. No failed, mutation,
+  sanitizer or discovery profiles enter the report. Successful counter
+  snapshots are preserved before subsequent batches.
+- Run263/264 builds and passes one hundred more cases individually: six
+  metadata lifecycle, two iterator lifecycle, 58 connectivity, seven centroid,
+  eleven parametric-transformation and sixteen chart-ownership cases.
+  Capture begins only after all compilation and runtime work is terminal.
+- Run265 retains 413 normal reports and measures 40,323 / 42,523 production
+  lines (\(94.8263\%\)): another 42 hits and seventeen newly measured lines.
+  Nonproduction and missing-source records remain empty. All 565 production
+  files still match snapshot236. At this measured denominator, 74 additional
+  hits are required; further supported instantiations may expand it again.
+- Remaining-source inspection distinguishes legitimate gaps from invariant
+  guards and unreachable continuations after Alert::Raise. P1Element.hpp's
+  many default local-index branches reject invalid basis indices; do not
+  fabricate such states for coverage. Supported MPI H1 face-interior indexing
+  remains a useful next template-audit target. Retain all measured lines.
+- Style lint and all nine coverage-auditor tests pass. The run265 CI job read
+  has 73 successful test jobs, forty running and 161 queued, with no failures.
+  A separate all-check-run and commit-status inspection finds no failed gate
+  and no published Codecov result. Keep the commits local until CI failure or
+  completion, and keep the goal active pending both 95% coverage and remote
+  verification.
