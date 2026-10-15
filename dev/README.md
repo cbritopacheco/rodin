@@ -1346,3 +1346,32 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   records occur, and all 570 production hashes match snapshot199. The larger
   denominator remains visible. The follow-up repair remains local while CI
   validates pushed head 16e6a576b.
+
+- XDMF file-reference and vector-output contracts: two new tests check empty
+  filename placeholders with repeated path separators, normalized relative XML
+  references, static scalar data, and static vector data at both nodes and cell
+  centers. Independent HDF5 reads verify rank, extents and exact affine samples;
+  the second write changes the field to prove first-snapshot retention. XML
+  checks verify Vector metadata, centers, shapes and both snapshot references.
+- All six XDMF cases pass separately in Debug, Release and ASan/LSan with leak
+  detection enabled. A normal Debug compilation of the unchanged XDMF source
+  also passes all six cases, giving 18 normal and six sanitizer case-runs.
+  Native IO/QF dependencies were rebuilt from current source. The private
+  component source is hash-identical to snapshot199 and its coverage source
+  mapping is recorded. The first helper compilation used an incorrect header
+  search path and failed; it contributes no observations. Quoted-header lookup
+  fixes the helper without changing production code.
+- A private Scalar-for-Vector metadata mutation fails the new vector test while
+  the other five cases pass. Disabling filename separator normalization fails
+  the new filename test while the attribute-registration control passes.
+  Mutation and sanitizer profiles are excluded from the normal coverage union.
+- Run207 retains 379 normal initial/runtime reports and measures 38,330 /
+  40,338 production lines (\(95.0221\%\)), with no nonproduction or missing-source
+  records. All 570 production hashes still match snapshot199. Compared with
+  run203, XDMF.cpp exposes 65 additional measurable lines and gains 53 covered
+  lines; XDMF.h exposes two additional lines and gains six covered lines.
+  Thus 59 more covered lines accompany 67 more measured lines, and the expanded
+  denominator is retained. The batch remains local while CI checks pushed head
+  16e6a576b; the latest live job read reports 72 successes, 40 running and 162
+  queued, with no failures. Remote CI and Release-only Codecov confirmation
+  remain pending.

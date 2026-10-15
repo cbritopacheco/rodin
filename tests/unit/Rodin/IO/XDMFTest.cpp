@@ -5,6 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <fstream>
+#include <array>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -44,6 +45,126 @@ namespace Rodin::Tests::Unit
 
       boost::filesystem::path m_directory; ///< Per-test output directory.
   };
+
+  /// @brief Empty filename placeholders normalize repeated separators and preserve static data.
+  TEST_F(XDMFTest, EmptyPlaceholdersNormalizeFileReferences)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    P1 space(mesh);
+    GridFunction field(space);
+    field = 4.0;
+    boost::filesystem::create_directory(m_directory / "data");
+    XDMF writer(m_directory / "series");
+    XDMF::FilePatterns patterns;
+    patterns.xdmf = "./{grid}/{rank}//{stem}.{rank}.xdmf";
+    patterns.staticMesh = "data//./{grid}/{rank}/mesh.{index}.h5";
+    patterns.staticAttribute = "data//./{grid}/{rank}/{name}.{index}.h5";
+    writer.setFilePatterns(patterns).setMesh(mesh).add(
+      "value", field, XDMF::Center::Node, XDMF::AttributePolicy::Static);
+    writer.write(0.0);
+    field = 99.0;
+    writer.write(1.0).close();
+    EXPECT_TRUE(boost::filesystem::exists(m_directory / "data/mesh.h5"));
+    EXPECT_TRUE(boost::filesystem::exists(m_directory / "data/value.h5"));
+    std::ifstream input((m_directory / "series.xdmf").string());
+    ASSERT_TRUE(input.good());
+    const std::string xml((std::istreambuf_iterator<char>(input)), {});
+    EXPECT_NE(xml.find("data/mesh.h5:"), std::string::npos);
+    EXPECT_NE(xml.find("data/value.h5:/GridFunction/Values/Data"), std::string::npos);
+    EXPECT_EQ(xml.find("data//"), std::string::npos);
+    EXPECT_EQ(xml.find("data/./"), std::string::npos);
+    EXPECT_EQ(xml.find("..h5"), std::string::npos);
+    const auto file = HDF5::File(
+      H5Fopen((m_directory / "data/value.h5").c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    const auto dataset =
+      HDF5::DataSet(H5Dopen2(file.get(), "/GridFunction/Values/Data", H5P_DEFAULT));
+    ASSERT_TRUE(dataset);
+    const auto shape = HDF5::Space(H5Dget_space(dataset.get()));
+    ASSERT_TRUE(shape);
+    ASSERT_EQ(H5Sget_simple_extent_ndims(shape.get()), 1);
+    hsize_t count = 0;
+    ASSERT_EQ(H5Sget_simple_extent_dims(shape.get(), &count, nullptr), 1);
+    ASSERT_EQ(count, 3u);
+    std::array<Real, 3> values{};
+    ASSERT_GE(H5Dread(dataset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                values.data()),
+      0);
+    for (const Real value : values)
+      EXPECT_EQ(value, 4.0);
+  }
+
+  /// @brief Vector XML shapes and static HDF5 samples match independent node and cell-center values.
+  TEST_F(XDMFTest, VectorMetadataAndSamplesPreserveBothCenters)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    mesh.scale(0.5);
+    P1 space(mesh, 2);
+    GridFunction field(space);
+    field = [](const Point& point) {
+      return Math::SpatialVector<Real>{1 + 2 * point.x(), 3 - 4 * point.x()};
+    };
+    XDMF writer(m_directory / "vectors");
+    writer.setMesh(mesh)
+      .add("nodal", field, XDMF::Center::Node, XDMF::AttributePolicy::Static)
+      .add("cell", field, XDMF::Center::Cell, XDMF::AttributePolicy::Static);
+    writer.write(0.0);
+    // A later constant must not replace the static visualization samples.
+    field = []([[maybe_unused]] const Point& point) {
+      return Math::SpatialVector<Real>{99, 99};
+    };
+    writer.write(1.0).close();
+    std::ifstream input((m_directory / "vectors.xdmf").string());
+    ASSERT_TRUE(input.good());
+    const std::string xml((std::istreambuf_iterator<char>(input)), {});
+    for (const bool nodal : {false, true})
+    {
+      const std::string name = nodal ? "nodal" : "cell";
+      const std::string center = nodal ? "Node" : "Cell";
+      const size_t count = nodal ? 3 : 2;
+      SCOPED_TRACE(name);
+      const std::string filename = "vectors." + name + ".h5";
+      const std::string reference = filename + ":/GridFunction/Values/Data";
+      const std::string opening = "<Attribute Name=\"" + name +
+        "\" AttributeType=\"Vector\" Center=\"" + center + "\">";
+      size_t snapshots = 0, position = 0;
+      while ((position = xml.find(opening, position)) != std::string::npos)
+      {
+        const auto end = xml.find("</Attribute>", position);
+        ASSERT_NE(end, std::string::npos);
+        const auto block = xml.substr(position, end - position);
+        EXPECT_NE(block.find("Dimensions=\"" + std::to_string(count) + " 2\""),
+          std::string::npos);
+        EXPECT_NE(block.find(reference), std::string::npos);
+        ++snapshots;
+        position = end;
+      }
+      EXPECT_EQ(snapshots, 2u);
+      const auto file = HDF5::File(
+        H5Fopen((m_directory / filename).c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+      ASSERT_TRUE(file);
+      const auto dataset =
+        HDF5::DataSet(H5Dopen2(file.get(), "/GridFunction/Values/Data", H5P_DEFAULT));
+      ASSERT_TRUE(dataset);
+      const auto shape = HDF5::Space(H5Dget_space(dataset.get()));
+      ASSERT_TRUE(shape);
+      ASSERT_EQ(H5Sget_simple_extent_ndims(shape.get()), 2);
+      std::array<hsize_t, 2> dimensions{};
+      ASSERT_EQ(H5Sget_simple_extent_dims(shape.get(), dimensions.data(), nullptr), 2);
+      ASSERT_EQ(dimensions[0], count);
+      ASSERT_EQ(dimensions[1], 2u);
+      std::vector<Real> values(2 * count);
+      ASSERT_GE(H5Dread(dataset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                  values.data()),
+        0);
+      for (size_t row = 0; row < count; ++row)
+      {
+        const Real x = nodal ? Real(row) / 2 : Real(row) / 2 + 0.25;
+        EXPECT_EQ(values[2 * row], 1 + 2 * x);
+        EXPECT_EQ(values[2 * row + 1], 3 - 4 * x);
+      }
+    }
+  }
 
   /// @brief Clearing preserves mesh/options; resetting removes mesh and history.
   TEST_F(XDMFTest, ClearAndResetHaveDistinctPersistenceEffects)
