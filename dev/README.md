@@ -1605,3 +1605,35 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   Latest published f6d558fe5 has 34 successful test jobs, forty running and
   two hundred queued, with no failures. Other workflow gates have passed;
   defer pushing until the Tests run fails or completes.
+
+### Exhaustive polytope identity and fresh geometry coverage
+
+- Add one independent multiset-identity case for every supported Polytope::Key
+  size, including empty keys, unique vertices and repeated vertices. Enumerate
+  all permutations, require equality in both directions and require invariant
+  hashes. Replacing a vertex with a new value must break equality; changing
+  multiplicity must also break equality. No inequality requirement is imposed
+  on hashes of unequal keys, since collisions are permitted.
+- Run242/243 builds the final key, polytope and distributed mesh tests against
+  the fresh RelWithDebInfo libraries. Run244 passes 29 key and 55 polytope
+  cases separately, plus nine distributed mesh cases at each of 1, 2, 3, 4
+  and 8 ranks: 45 sequential MPI case groups. Each participating rank reports
+  success. Every group finishes before the next starts; native cases run only
+  after the distributed groups finish. Discovery profiles remain isolated.
+- A private Polytope.cpp mutation that makes all five-vertex keys equal fails
+  only the new exhaustive case; the other 28 key cases pass. Run247 keeps
+  mutation profiles outside the normal build. The initial private compile
+  attempt lacked the original local include directory and produced no normal
+  coverage; the corrected private compile uses the original include path.
+- Run245 merges the cumulative normal CMake coverage report, preserving all
+  565 current production hashes and all previous source/retirement history.
+  The union now contains 406 reports and measures 39,477 / 42,437 production
+  lines (\(93.0250\%\)): 905 recovered hits and four newly measured lines.
+  Nonproduction and missing-source records are empty. Keep the expanded
+  denominator; the remaining target is at least 839 more hits if it stays
+  fixed. Largest newly exposed gaps remain in Polytope/Point/Mesh methods,
+  MEDIT/MFEM IO and PETSc SNES. More fresh broad-suite runs are required.
+- Changed-line formatting, style lint and all nine auditor tests pass. The
+  latest live CI read for f6d558fe5 reports 43 successful test jobs, forty
+  running and 191 queued, without failures. Keep the batch local pending CI
+  failure or completion; the goal is still incomplete.

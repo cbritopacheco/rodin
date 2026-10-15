@@ -327,6 +327,47 @@ namespace Rodin::Tests::Unit
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Every supported key size preserves multiset identity under all permutations.
+  TEST(Geometry_PolytopeKey, EverySizePermutationAndMultiplicity)
+  {
+    const Polytope::Key::SymmetricEquality equal;
+    const Polytope::Key::SymmetricHash hash;
+    for (std::uint8_t n = 0; n <= RODIN_MAXIMUM_POLYTOPE_VERTICES; ++n)
+    {
+      for (bool repeated : {false, true})
+      {
+        SCOPED_TRACE(
+          ::testing::Message() << "size=" << int(n) << ", repeated=" << repeated);
+        Polytope::Key original(n);
+        for (std::uint8_t i = 0; i < n; ++i)
+          original[i] = repeated ? (n - 1 - i) / 2 : n - 1 - i;
+        const auto expectedHash = hash(original);
+        auto permuted = original;
+        std::sort(permuted.begin(), permuted.end());
+        do
+        {
+          EXPECT_TRUE(equal(original, permuted));
+          EXPECT_TRUE(equal(permuted, original));
+          EXPECT_EQ(hash(permuted), expectedHash);
+        } while (std::next_permutation(permuted.begin(), permuted.end()));
+        if (n > 0)
+        {
+          auto different = original;
+          different[0] = static_cast<Index>(n) + 1;
+          EXPECT_FALSE(equal(original, different));
+          EXPECT_FALSE(equal(different, original));
+        }
+        if (repeated && n >= 3)
+        {
+          auto differentMultiplicity = original;
+          differentMultiplicity[0] = original[n - 1];
+          EXPECT_FALSE(equal(original, differentMultiplicity));
+          EXPECT_FALSE(equal(differentMultiplicity, original));
+        }
+      }
+    }
+  }
+
   /// @brief Seven-vertex keys retain multiset identity through permutations and duplicates.
   TEST(Geometry_PolytopeKey, SevenVertexPermutationAndMultiplicity)
   {
