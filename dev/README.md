@@ -1544,3 +1544,27 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   mutable wrappers borrowing mutable and const referents. Const-wrapper access
   is an API gap, rather than a supported specialization certified by its four
   covered lines; no new interface or source exclusion is introduced for it.
+
+### Euclidean planar entry-point cleanup
+
+- Retain the planar aliases in ForwardDecls.h: Point2D, LineSegment2D and
+  Line2D bind the corresponding primitive to dimension two; Circle binds
+  Sphere and Rectangle binds Box. Compile-time contracts verify each alias
+  for both Float and Real in the existing fixed-storage tests.
+- Remove the five include-only planar .hpp wrappers and their CMake source
+  entries. Public .h entry points remain. Point.hpp, LineSegment.hpp and
+  Line.hpp retain actual cross-primitive template definitions.
+- Run235 passes all 75 Euclidean cases separately in Debug and all 75 in
+  Release, with one case process at a time and discovery profiles isolated.
+  All five public planar .h entry points compile in a separate consumer.
+  CMake regeneration, formatting, style lint and all nine auditor tests pass.
+- Snapshot236 contains 565 production files. Every retained file matches
+  snapshot232 byte for byte; the five removed headers contain no measured
+  executable lines, functions or branches. Run236 preserves the 404-report
+  coverage union at 38,392 / 40,384 lines (\(95.0674\%\)); nonproduction and
+  missing-source records remain empty. No implementation hits are retired.
+  These repeated validation runs add no new coverage claims. Historical
+  source snapshots and implementation-hit retirements remain preserved.
+- The live CI read for published f6d558fe5 reports 29 successful test jobs,
+  40 running and 205 queued, with no failures. Keep the cleanup local under
+  the deferred-push condition.

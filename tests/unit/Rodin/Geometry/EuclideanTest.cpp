@@ -143,6 +143,11 @@ namespace Rodin::Tests::Unit
     using Scalar = TypeParam;
     using Point = Point2D<Scalar>;
     using Vector = Math::FixedSizeVector<Scalar, 2>;
+    static_assert(std::is_same_v<Point2D<Scalar>, Geometry::Euclidean::Point<2, Scalar>>);
+    static_assert(std::is_same_v<LineSegment2D<Scalar>, LineSegment<2, Scalar>>);
+    static_assert(std::is_same_v<Line2D<Scalar>, Line<2, Scalar>>);
+    static_assert(std::is_same_v<Circle<Scalar>, Sphere<2, Scalar>>);
+    static_assert(std::is_same_v<Rectangle<Scalar>, Box<2, Scalar>>);
     static_assert(
       std::is_same_v<std::remove_cvref_t<decltype(std::declval<Point>().asVector())>,
         Vector>);
