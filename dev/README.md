@@ -1839,3 +1839,29 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   required. Keep the goal active and defer the batch push until the current
   Tests run fails or completes. Changed-line formatting, house-style lint and
   all nine coverage-auditor tests pass.
+
+### GLL absent-template audit in normal Debug
+
+- Run294 recompiles the existing GLL mathematical suite in normal Debug and
+  passes all 51 cases individually. These check analytic nodes, ordering,
+  symmetry, intervals and the affine mapping. Compiler notes and runtime
+  counters expose eight GLL.h lines, all executed. Symbol inspection retains
+  scalar access/count methods and node arrays, with no emitted compute method;
+  constant initialization is not counted as runtime execution of its algorithm.
+- Run295 retains both initial and runtime reports together with run293's
+  complete inventory. It measures 40,542 / 42,675 production lines
+  (\(95.0017575\%\)) across 430 reports and 565 matching production hashes.
+  Observed function symbols are 93,864, with 69,663 hit. The absent-source
+  inventory drops from 163 to 162; declaration-only headers, constants and
+  previously documented API gaps remain audit candidates rather than source
+  exclusions. Nonproduction and missing-source records remain empty.
+- Run296 privately changes the GLL01 affine factor from one half to one
+  quarter. MappingConsistency_K15 fails for the incorrect finite nodes;
+  KnownValues_K3 remains green. Neither the shadow header nor any mutation
+  counters enter the production measurement. The real production tree is
+  unchanged. The local target is reached; remote CI/Codecov is still pending.
+- A completed current-head optional-backend CI artifact contains 31,614 hits
+  across 33,725 measured lines, with no nonproduction or missing-source records.
+  This partial report is not merged with newer local source snapshots. The
+  regular CI coverage jobs depend on Unit/Manufactured/Slow completion, so
+  their final aggregate cannot yet be inferred from that artifact.
