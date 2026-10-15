@@ -1865,3 +1865,31 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   This partial report is not merged with newer local source snapshots. The
   regular CI coverage jobs depend on Unit/Manufactured/Slow completion, so
   their final aggregate cannot yet be inferred from that artifact.
+
+### High-order quadrilateral face orientation audit
+
+- Audit unexecuted valid reflection branches in H1.hpp rather than forcing
+  invalid-index assertions. Add 24 parameterized cases spanning all eight
+  square symmetries for hexahedron, pyramid and wedge faces, each at degrees
+  three and four. Explicitly construct the face before its volume cell and
+  verify that the requested ordering survives mesh construction.
+- Map face and cell reference nodes independently through Geometry::Point.
+  Every physical face node must match exactly one physical cell node and
+  their global DOFs must agree. The coordinate matching tolerance is far
+  below distinct node separation and allows the existing GLL node accuracy.
+  No node match is inferred from the DOF map being checked.
+- Run299 passes the preliminary 24 Debug cases; run300 passes all 24 final
+  cases individually in both normal Debug and Release. Run301 retains both
+  initial/runtime report pairs and all prior valid observations: 40,552 /
+  42,675 production lines (\(95.0251904\%\)) across 434 reports. Ten valid
+  orientation lines are recovered without expanding the denominator. Observed
+  function symbols remain 93,864, with 69,723 hit. All 565 production hashes
+  match snapshot274; nonproduction and missing-source records remain empty.
+- Run302 privately ignores the chosen bottom-face transform in the hexahedron
+  DOF assignment. The identity-orientation control passes and the reflected
+  case fails on incorrect finite global DOFs. Mutation profiles and shadow
+  headers never enter coverage, and production code remains unchanged.
+- The target is registered with the unit label so the existing unit and
+  coverage CI jobs include it. Formatting and house-style lint pass. The
+  current remote run still has no failures; keep these batches local until
+  the deferred-push condition is met and require published coverage validation.
