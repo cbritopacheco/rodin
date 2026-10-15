@@ -336,6 +336,9 @@ namespace Rodin::Math
 
       /**
        * @brief Assigns from an Eigen array expression, resizing to match.
+       *
+       * The expression is copied into fixed-capacity storage before the active
+       * coordinates are replaced, including when it references this vector.
        * @param other Object to copy from.
        * @returns Reference to this object after the operation.
        */
@@ -343,58 +346,23 @@ namespace Rodin::Math
       constexpr
       SpatialVector& operator=(const Eigen::ArrayBase<EigenDerived>& other)
       {
-        const std::uint8_t n = static_cast<std::uint8_t>(other.size());
-        assert(n <= MaxSize);
-        m_size = n;
-        zeroStorage();
-        switch (m_size)
-        {
-          case 3:
-            m_data[2] = other(static_cast<Eigen::Index>(2));
-            [[fallthrough]];
-          case 2:
-            m_data[1] = other(static_cast<Eigen::Index>(1));
-            [[fallthrough]];
-          case 1:
-            m_data[0] = other(static_cast<Eigen::Index>(0));
-            break;
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return *this;
+        const SpatialVector owned(other.matrix());
+        return *this = owned;
       }
 
       /**
        * @brief Assigns from an Eigen vector expression, resizing to match.
+       *
+       * The expression is copied into fixed-capacity storage before the active
+       * coordinates are replaced, including when it references this vector.
        * @returns Reference to this object after the operation.
        * @param v Value to assign.
        */
       template <class EigenDerived>
       SpatialVector& operator=(const Eigen::MatrixBase<EigenDerived>& v)
       {
-        const std::uint8_t n = static_cast<std::uint8_t>(v.size());
-        assert(n <= MaxSize);
-        m_size = n;
-        zeroStorage();
-        switch (m_size)
-        {
-          case 3:
-            m_data[2] = v(static_cast<Eigen::Index>(2));
-            [[fallthrough]];
-          case 2:
-            m_data[1] = v(static_cast<Eigen::Index>(1));
-            [[fallthrough]];
-          case 1:
-            m_data[0] = v(static_cast<Eigen::Index>(0));
-            break;
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return *this;
+        const SpatialVector owned(v);
+        return *this = owned;
       }
 
       /**

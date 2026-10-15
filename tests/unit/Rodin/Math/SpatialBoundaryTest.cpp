@@ -6,6 +6,7 @@
  */
 /** @file @brief Empty spatial algebra and boundary-size storage contracts. */
 #include <gtest/gtest.h>
+#include <array>
 #include <sstream>
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/SpatialVector.h"
@@ -20,6 +21,74 @@ namespace
   {};
   using SpatialScalars = ::testing::Types<Float, Real, Complex>;
   TYPED_TEST_SUITE(SpatialBoundary, SpatialScalars);
+
+  /// @brief Matrix and array expressions are evaluated before overwriting aliased coordinates.
+  TYPED_TEST(SpatialBoundary, EigenExpressionAssignmentPreservesAliasedCoordinates)
+  {
+    using Scalar = TypeParam;
+    for (std::uint8_t size = 0; size <= 3; ++size)
+    {
+      for (const bool array : {false, true})
+      {
+        SCOPED_TRACE(::testing::Message() << unsigned(size) << " array=" << array);
+        SpatialVector<Scalar> values(size);
+        std::array<Scalar, 3> original{};
+        for (size_t i = 0; i < size; ++i)
+        {
+          original[i] = Scalar(i + 1);
+          if constexpr (std::is_same_v<Scalar, Complex>)
+            original[i] += Complex(0, Real(i + 2));
+          values[i] = original[i];
+        }
+        if (array)
+          EXPECT_EQ(&(values = values.getData().head(size).array()), &values);
+        else
+          EXPECT_EQ(&(values = values.getData().head(size)), &values);
+        for (size_t i = 0; i < size; ++i)
+          EXPECT_EQ(values[i], original[i]);
+        if (array)
+          values = values.getData().head(size).array() + Scalar(2);
+        else
+          values = Scalar(2) * values.getData().head(size);
+        std::array<Scalar, 3> transformed{};
+        for (size_t i = 0; i < size; ++i)
+        {
+          transformed[i] = array ? original[i] + Scalar(2) : Scalar(2) * original[i];
+          EXPECT_EQ(values[i], transformed[i]);
+        }
+        if (array)
+          values = values.getData().head(size).array().reverse();
+        else
+          values = values.getData().head(size).reverse();
+        for (size_t i = 0; i < size; ++i)
+          EXPECT_EQ(values[i], transformed[size - 1 - i]);
+        const std::uint8_t shortened = size / 2;
+        if (array)
+          values = values.getData().head(size).head(shortened).array();
+        else
+          values = values.getData().head(size).head(shortened);
+        ASSERT_EQ(values.size(), shortened);
+        for (size_t i = 0; i < shortened; ++i)
+          EXPECT_EQ(values[i], transformed[size - 1 - i]);
+        values.resize(3);
+        for (size_t i = shortened; i < 3; ++i)
+          EXPECT_EQ(values[i], Scalar(0));
+      }
+    }
+  }
+
+  /// @brief Empty initializer lists and in-place addition retain zeroed inactive storage.
+  TYPED_TEST(SpatialBoundary, EmptyInitializerAndAddition)
+  {
+    using Scalar = TypeParam;
+    SpatialVector<Scalar> values(std::initializer_list<Scalar>{});
+    const SpatialVector<Scalar> other(std::initializer_list<Scalar>{});
+    EXPECT_EQ(&(values += other), &values);
+    EXPECT_EQ(values.size(), 0u);
+    values.resize(3);
+    for (size_t i = 0; i < 3; ++i)
+      EXPECT_EQ(values[i], Scalar(0));
+  }
 
   /// @brief Binary-exact scaling, negation and array assignment preserve every active size.
   TYPED_TEST(SpatialBoundary, ScalingAndArrayAssignment)

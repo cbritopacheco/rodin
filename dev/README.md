@@ -1255,3 +1255,36 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   excluded. Successful normal runtime captures from the two measured quadrature
   executables are included. This follow-up batch is local while CI validates
   pushed head 16e6a576b, whose documented audit remains run171.
+
+- Spatial expression assignment regression: assigning an Eigen matrix or array
+  expression that references the destination cleared its coordinates before
+  evaluating the right-hand side. Float, Real and Complex regressions fail on
+  the prior implementation, covering identity, scaling/translation, reversed
+  coordinates and shrinking views at every active size from zero to three.
+  Both assignment overloads now construct an independent fixed-capacity spatial
+  vector before copying it into the destination. The original zeroed inactive
+  storage contract is preserved, including after shortening and regrowing.
+  No dynamic allocation is introduced. Empty initializer-list construction and
+  in-place addition also receive explicit boundary checks.
+- All 21 spatial-boundary cases pass separately in Debug, Release and ASan/LSan
+  with leak detection enabled. The 74 main vector/matrix cases pass in Debug;
+  the six scalar-product cases and eight tensor cases pass in Debug, and the
+  seven enabled tensor cases pass in Release. The unsupported-access tensor
+  assertion test is intentionally Debug-only.
+- Source snapshot182 freezes all 570 current production hashes. The 343 prepared
+  reports retire old observations of both changed SpatialVector assignment
+  overloads and retain only byte-identical mapped lines elsewhere. Fresh
+  normal math profiles replace those observations. Run187 (353 reports) measures
+  38,233 / 40,223 production lines (\(95.0526\%\)); the increased template
+  denominator is retained. Pre-fix, sanitizer, failed and discovery observations
+  remain excluded. Only root/Alert archives and current header-only math code
+  are linked by these producers, so stale geometry/backend assignment objects
+  cannot enter their fresh observations.
+- Final run190 includes the 74 main vector/matrix cases in both Debug and
+  Release and all six scalar-product cases in both modes. Together with the
+  boundary/tensor checks, this batch has 217 successful normal case-runs and
+  21 successful ASan/LSan case-runs. The 359-report audit measures 38,265 /
+  40,266 production lines (\(95.0305\%\)), with no nonproduction or missing
+  production records. Fresh vector/matrix compiler notes expose 43 more
+  measured lines than run187, and that denominator is retained. The regression
+  repair and its coverage evidence remain local while CI checks 16e6a576b.
