@@ -1754,3 +1754,53 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   Latest run270 CI read: 128 successful test jobs, forty running and 106 queued,
   no failures. Keep the changes local until CI failure or completion and keep
   the goal active pending both 95% and published CI/Codecov verification.
+
+### Face-projection regressions, correction and fresh implementation coverage
+
+- Strengthen projection oracles with exact fixed-point checks on every planar
+  edge and a parameterized exterior-point sweep on all seven supported
+  positive-dimensional geometries. Independently check parent halfspace
+  inequalities and the requested face equality. The tolerance allows sixteen
+  rounding units for short coordinate projections/halfspace products.
+- Run272 observes five genuine failures before changing production code:
+  triangle/quadrilateral projections reflect parent coordinates of points
+  already on their face; tetrahedron/pyramid/wedge clipping can return points
+  outside the requested simplex face. All 26 unrelated controls pass. These
+  pre-fix profiles are excluded. History and Flow/Advection callers confirm
+  that output coordinates are consumed in the parent reference cell.
+- Preserve those parent coordinates and delegate faulty triangular clipping
+  to the existing triangle-cell projector instead of duplicating its
+  algorithm. Clarify the reference-coordinate contract. No input preconditions
+  are bypassed, and no numerical test thresholds are loosened.
+- Archive all old normal compiler notes/counters in run273 before rebuilding;
+  reset the 74 working counter files to avoid stamp/implementation mixing.
+  Snapshot274 retains 565 production files. Only Polytope.cpp and its .h
+  contract change. Retire every old Project::face DA/branch/function record
+  across all 414 prior reports (old range 1595-1910, new range 1595-1898),
+  including nested lambdas. Retain only byte-identical CPP prefix/suffix
+  locations; header documentation preserves every executable location and
+  physical line count. All other production hashes match snapshot236.
+- Run275 rebuilds current dependencies. Run276 passes 31 projector, fourteen
+  Flow, seven Flow-crossing and nine Advection cases one process at a time.
+  Run277 passes all 31 projector cases with assertions and again under native
+  ASan/LSan, with instrumentation in the changed CPP and leak detection enabled.
+  The private-copy Debug build is validation-only; its copied CPP source path
+  is not silently omitted from a claimed production measurement.
+- Run279 recompiles Debug CPP from its original production path and passes
+  all 31 cases separately. Run280 asserts that production CPP appears in both
+  its initial and runtime LCOV reports before merging; sanitizer, pre-fix and
+  discovery profiles remain excluded. It measures 40,476 / 42,665 lines
+  (\(94.8693\%\)) across 417 reports. New normal measurements add 101 hits
+  and 119 measured lines relative to the prior source audit, including a
+  legitimate complete assertion-enabled CPP baseline.
+- Run281 links existing controls to that Debug CPP object and passes 129 more
+  cases individually: 29 key, 55 polytope, 28 traits and seventeen extended
+  polytope cases. Run282 retains 419 reports and measures 40,501 / 42,665
+  production lines (\(94.9279\%\)), recovering 25 further hits without a
+  denominator change. Nonproduction and missing-source records remain empty;
+  all 565 current production hashes match snapshot274. The remaining target is
+  31 additional hits if this denominator stays fixed.
+- Changed-line formatting, style lint and all nine auditor tests pass. Latest
+  run281 CI read for f6d558fe5: 203 successful jobs, forty running and 31 queued,
+  with no failures. The goal remains active and this fix remains local until
+  the deferred-push condition is met and published CI/Codecov is verified.

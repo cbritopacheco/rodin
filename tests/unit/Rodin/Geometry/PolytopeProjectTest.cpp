@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <array>
+#include <limits>
 
 #include <Rodin/Geometry/Polytope.h>
 
@@ -13,6 +15,98 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Projection onto a triangle edge preserves every point already on that edge.
+  TEST(Geometry_PolytopeProject, TriangleFaceProjectionPreservesFacePoints)
+  {
+    const Polytope::Project project(Polytope::Type::Triangle);
+    for (Real t : {0.0, 0.25, 0.75, 1.0})
+    {
+      SCOPED_TRACE(t);
+      const std::array<Math::SpatialPoint, 3> points{
+        Math::SpatialPoint{t, 0}, Math::SpatialPoint{1 - t, t}, Math::SpatialPoint{0, t}};
+      for (size_t face = 0; face < points.size(); ++face)
+      {
+        SCOPED_TRACE(face);
+        Math::SpatialPoint result;
+        project.face(face, result, points[face]);
+        ASSERT_EQ(result.size(), 2);
+        EXPECT_DOUBLE_EQ(result[0], points[face][0]);
+        EXPECT_DOUBLE_EQ(result[1], points[face][1]);
+      }
+    }
+  }
+
+  /// @brief Projection onto a square edge preserves its parent reference coordinates.
+  TEST(Geometry_PolytopeProject, QuadrilateralFaceProjectionPreservesFacePoints)
+  {
+    const Polytope::Project project(Polytope::Type::Quadrilateral);
+    for (Real t : {0.0, 0.25, 0.75, 1.0})
+    {
+      SCOPED_TRACE(t);
+      const std::array<Math::SpatialPoint, 4> points{Math::SpatialPoint{t, 0},
+        Math::SpatialPoint{1, t}, Math::SpatialPoint{t, 1}, Math::SpatialPoint{0, t}};
+      for (size_t face = 0; face < points.size(); ++face)
+      {
+        SCOPED_TRACE(face);
+        Math::SpatialPoint result;
+        project.face(face, result, points[face]);
+        ASSERT_EQ(result.size(), 2);
+        EXPECT_DOUBLE_EQ(result[0], points[face][0]);
+        EXPECT_DOUBLE_EQ(result[1], points[face][1]);
+      }
+    }
+  }
+
+  class GeometryFaceProjectionValidity : public ::testing::TestWithParam<Polytope::Type>
+  {};
+
+  /**
+   * @brief Exterior inputs project into the requested reference face.
+   *
+   * Sixteen rounding units allow the short coordinate projections and
+   * halfspace products in dimensions one through three.
+   */
+  TEST_P(GeometryFaceProjectionValidity, ExteriorPointsStayOnRequestedFace)
+  {
+    constexpr Real tolerance = 16 * std::numeric_limits<Real>::epsilon();
+    constexpr std::array<Real, 6> coordinates{-3, -1, 0.25, 0.75, 2, 4};
+    const auto geometry = GetParam();
+    const Polytope::Traits traits(geometry);
+    const size_t dimension = traits.getDimension();
+    const auto& halfSpace = traits.getHalfSpace();
+    const Polytope::Project project(geometry);
+    size_t count = 1;
+    for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+      count *= coordinates.size();
+    for (size_t face = 0; face < static_cast<size_t>(halfSpace.vector.size()); ++face)
+    {
+      SCOPED_TRACE(face);
+      for (size_t sample = 0; sample < count; ++sample)
+      {
+        SCOPED_TRACE(sample);
+        Math::SpatialPoint input(dimension);
+        size_t remaining = sample;
+        for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+        {
+          input[coordinate] = coordinates[remaining % coordinates.size()];
+          remaining /= coordinates.size();
+        }
+        Math::SpatialPoint result;
+        project.face(face, result, input);
+        ASSERT_EQ(static_cast<size_t>(result.size()), dimension);
+        const Math::Vector<Real> residual =
+          halfSpace.matrix * result.getData().head(dimension) - halfSpace.vector;
+        ASSERT_LE(residual.maxCoeff(), tolerance);
+        ASSERT_NEAR(residual[face], 0, tolerance);
+      }
+    }
+  }
+
+  INSTANTIATE_TEST_SUITE_P(PositiveDimensions, GeometryFaceProjectionValidity,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge));
+
   // ---- Segment projections ----
 
   /// @brief Verifies segment cell for geometry polytope project by checking tolerance-based numerical results.

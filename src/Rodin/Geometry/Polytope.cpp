@@ -1635,7 +1635,7 @@ namespace Rodin::Geometry
 
         const Real y = std::clamp(rc[1], Real(0), Real(1));
         out[0] = Real(0);
-        out[1] = Real(1) - y;
+        out[1] = y;
         return;
       }
       case Type::Quadrilateral:
@@ -1651,11 +1651,15 @@ namespace Rodin::Geometry
         }
         if (local == 2) {                    // y = 1,  (1,1) → (0,1)
           const Real x = std::clamp(rc[0], Real(0), Real(1));
-          out[0] = Real(1) - x; out[1] = Real(1); return;
+          out[0] = x;
+          out[1] = Real(1);
+          return;
         }
         {                                    // x = 0,  (0,1) → (0,0)
           const Real y = std::clamp(rc[1], Real(0), Real(1));
-          out[0] = Real(0); out[1] = Real(1) - y; return;
+          out[0] = Real(0);
+          out[1] = y;
+          return;
         }
       }
       case Type::Tetrahedron:
@@ -1663,15 +1667,12 @@ namespace Rodin::Geometry
         assert(local < 4);
 
         // --- Helpers (no std::sort)
-        auto proj_edge01 = [](Real u, Real v, Real& ou, Real& ov)
-        {
-          u = std::max(u, Real(0));
-          v = std::max(v, Real(0));
-          const Real s = u + v;
-          if (s <= Real(1)) { ou = u; ov = v; return; }
-          const Real t = Real(0.5) * (s - Real(1));
-          ou = std::max(u - t, Real(0));
-          ov = std::max(v - t, Real(0));
+        auto proj_edge01 = [](Real u, Real v, Real& ou, Real& ov) {
+          const Math::SpatialPoint input{u, v};
+          Math::SpatialPoint projected;
+          Project(Type::Triangle).cell(projected, input);
+          ou = projected[0];
+          ov = projected[1];
         };
 
         // Project (a,b,c) onto {x>=0,y>=0,z>=0,x+y+z=1} without std::sort:
@@ -1800,18 +1801,11 @@ namespace Rodin::Geometry
         assert(local < 5);
 
         auto projectTri = [](Real u, Real v, Real& ou, Real& ov) {
-          u = std::max(u, Real(0));
-          v = std::max(v, Real(0));
-          const Real s = u + v;
-          if (s <= Real(1))
-          {
-            ou = u;
-            ov = v;
-            return;
-          }
-          const Real t = Real(0.5) * (s - Real(1));
-          ou = std::max(u - t, Real(0));
-          ov = std::max(v - t, Real(0));
+          const Math::SpatialPoint input{u, v};
+          Math::SpatialPoint projected;
+          Project(Type::Triangle).cell(projected, input);
+          ou = projected[0];
+          ov = projected[1];
         };
 
         if (local == 0)
@@ -1859,16 +1853,13 @@ namespace Rodin::Geometry
         assert(local < 5);
         if (local == 0)
         {
-          Real x = std::max(rc[0], Real(0));
-          Real y = std::max(rc[1], Real(0));
-          const Real s = x + y;
-          if (s > Real(1))
-          {
-            const Real t = 0.5 * (s - Real(1));
-            x = std::max(x - t, Real(0));
-            y = std::max(y - t, Real(0));
-          }
-          out[0] = x; out[1] = y; out[2] = Real(0); return;
+          const Math::SpatialPoint input{rc[0], rc[1]};
+          Math::SpatialPoint projected;
+          Project(Type::Triangle).cell(projected, input);
+          out[0] = projected[0];
+          out[1] = projected[1];
+          out[2] = Real(0);
+          return;
         }
         if (local == 1)
         {
@@ -1892,16 +1883,13 @@ namespace Rodin::Geometry
           out[0] = Real(0); out[1] = y; out[2] = z; return;
         }
         {
-          Real x = std::max(rc[0], Real(0));
-          Real y = std::max(rc[1], Real(0));
-          const Real s = x + y;
-          if (s > Real(1))
-          {
-            const Real t = 0.5 * (s - Real(1));
-            x = std::max(x - t, Real(0));
-            y = std::max(y - t, Real(0));
-          }
-          out[0] = x; out[1] = y; out[2] = Real(1); return;
+          const Math::SpatialPoint input{rc[0], rc[1]};
+          Math::SpatialPoint projected;
+          Project(Type::Triangle).cell(projected, input);
+          out[0] = projected[0];
+          out[1] = projected[1];
+          out[2] = Real(1);
+          return;
         }
       }
     }
