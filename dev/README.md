@@ -1993,3 +1993,40 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   remain visible, that helper files are excluded, and that instance/static/free
   exception contexts and direct throws are distinguished. Keep parser tooling
   optional; it is not part of Rodin's build/runtime dependencies.
+
+
+### CI timeout repair with retained test selections
+
+- Tests run 38716344479 at f6d558fe5 ends cancelled after both Slow jobs exceed
+  GitHub's six-hour limit. The failure annotations explicitly state the limit.
+  Logs also show identification watchdog failures at one/three ranks, five
+  PETSc H1 restriction watchdog failures, and accumulated manufactured-group
+  timeouts. No completed assertion-failure groups were observed. This is the
+  confirmed CI failure that releases the requested push deferral.
+- Split Slow into four partitions per thread configuration. A read-only CTest
+  guard verifies that the partitions are nonempty, disjoint and exhaustive.
+  A minimal CMake fixture validates CTest index/label selection without running
+  tests. Preserve every existing exclusion, the serial runner, and all degrees,
+  ranks, numerical assertions and watchdog values.
+- Register manufactured elasticity and Poisson groups by geometry. Generated
+  CMake filters retain all original 450 Poisson and 64 elasticity rank/case
+  combinations exactly once. Register PETSc H1 restriction by geometry at
+  ranks one, two, three, four and eight. A token comparison verifies that all
+  numerical body statements and tolerances are unchanged.
+- Run342 passes all 35 PETSc geometry/rank cases, one MPI group at a time,
+  using optimized GCC14 and complex PETSc 3.19.6. Every case stays below the
+  original 300-second watchdog. Pyramid takes approximately 131/114/85/76/109
+  seconds at the five rank counts. No geometry, order or range is dropped.
+- The identification tetrahedron case passes separately at ranks one and three
+  in approximately 154 and 64 seconds. Reduced compiler debug metadata avoids
+  a local full-debug-metadata compiler OOM while preserving optimization.
+  These timings do not establish the cause of the old CI timing differences.
+  New CI confirmation remains necessary.
+- Isolate build-time and PRE_TEST discovery profiles outside the capture tree
+  in all five coverage-producing job families. Controlled threading and MPI
+  binding settings match existing dedicated backend jobs. All other job
+  families and every production-only Codecov upload remain unchanged.
+- Regenerate actual CMake registrations, parse the complete workflow, run
+  formatting and house-style checks, and verify all 565 production hashes
+  still match run318: 40,595 / 42,690 lines (\(95.0925275\%\)). These changes
+  do not alter production source or the local measured line inventory.

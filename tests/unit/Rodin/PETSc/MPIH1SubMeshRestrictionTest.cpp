@@ -140,250 +140,255 @@ namespace
 
 namespace Rodin::Tests::Unit
 {
-  TEST(PETScMPISubMeshH1, ExplicitRestriction_AllOrdersBackendRangesAllGeometries)
+  class PETScMPISubMeshH1 : public testing::TestWithParam<Polytope::Type>
+  {};
+
+  TEST_P(PETScMPISubMeshH1, ExplicitRestriction_AllOrdersBackendRanges)
   {
     const auto& world = *g_world;
     Context::MPI context(*g_env, world);
     constexpr Real PolynomialTolerance = 1e-10;
-    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
-           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    const auto geometry = GetParam();
+    SCOPED_TRACE(polytopeName(geometry));
+    for (bool curved : {false, true})
     {
-      SCOPED_TRACE(polytopeName(geometry));
-      for (bool curved : {false, true})
-      {
-        SCOPED_TRACE(::testing::Message() << "curved=" << curved);
-        const size_t dimension = Polytope::Traits(geometry).getDimension();
-        auto parent = dimension == 1 ? distributeFromRoot(context, geometry, {2}, curved)
-          : dimension == 2 ? distributeFromRoot(context, geometry, {2, 2}, curved)
-                           : distributeFromRoot(context, geometry, {2, 2, 2}, curved);
-        const auto check = [&](const SubMesh<Context::MPI>& sub) {
-          const Mesh<Context::MPI>& mesh = sub;
-          size_t localOwned = 0;
-          for (auto cell = mesh.getCell(); cell; ++cell)
-          {
-            if (mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
-              ++localOwned;
-          }
-        // This is a global coverage assertion, not a local evaluation query.
-          EXPECT_GT(boost::mpi::all_reduce(world, localOwned, std::plus<size_t>()), 0u);
-          const auto range = [&]<size_t K, class Range>() {
-            using Space = H1<K, Range, Mesh<Context::MPI>>;
-            using Scalar = typename Space::ScalarType;
-            constexpr bool vector = std::is_same_v<Range, Math::SpatialVector<Scalar>>;
-            constexpr bool matrix = std::is_same_v<Range, Math::SpatialMatrix<Scalar>>;
-            SCOPED_TRACE((::testing::Message()
-              << "degree=" << K << " vector=" << vector << " matrix=" << matrix
-              << " complex=" << std::is_same_v<Scalar, Complex>));
-            const auto makeSpace = [](const Mesh<Context::MPI>& mesh) {
-              if constexpr (matrix)
-                return Space(std::integral_constant<size_t, K>{}, mesh, 2, 3);
-              else if constexpr (vector)
-                return Space(std::integral_constant<size_t, K>{}, mesh, 3);
+      SCOPED_TRACE(::testing::Message() << "curved=" << curved);
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      auto parent = dimension == 1 ? distributeFromRoot(context, geometry, {2}, curved)
+        : dimension == 2           ? distributeFromRoot(context, geometry, {2, 2}, curved)
+                         : distributeFromRoot(context, geometry, {2, 2, 2}, curved);
+      const auto check = [&](const SubMesh<Context::MPI>& sub) {
+        const Mesh<Context::MPI>& mesh = sub;
+        size_t localOwned = 0;
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          if (mesh.getShard().isOwned(mesh.getDimension(), cell->getIndex()))
+            ++localOwned;
+        }
+      // This is a global coverage assertion, not a local evaluation query.
+        EXPECT_GT(boost::mpi::all_reduce(world, localOwned, std::plus<size_t>()), 0u);
+        const auto range = [&]<size_t K, class Range>() {
+          using Space = H1<K, Range, Mesh<Context::MPI>>;
+          using Scalar = typename Space::ScalarType;
+          constexpr bool vector = std::is_same_v<Range, Math::SpatialVector<Scalar>>;
+          constexpr bool matrix = std::is_same_v<Range, Math::SpatialMatrix<Scalar>>;
+          SCOPED_TRACE((::testing::Message()
+            << "degree=" << K << " vector=" << vector << " matrix=" << matrix
+            << " complex=" << std::is_same_v<Scalar, Complex>));
+          const auto makeSpace = [](const Mesh<Context::MPI>& mesh) {
+            if constexpr (matrix)
+              return Space(std::integral_constant<size_t, K>{}, mesh, 2, 3);
+            else if constexpr (vector)
+              return Space(std::integral_constant<size_t, K>{}, mesh, 3);
+            else
+              return Space(std::integral_constant<size_t, K>{}, mesh);
+          };
+          const auto sourceSpace = makeSpace(parent), targetSpace = makeSpace(mesh);
+          GridFunction<Space, ::Vec> source(sourceSpace), restricted(targetSpace),
+            oracle(targetSpace), rejected(targetSpace);
+          const auto scalar = [curved](const Point& point, size_t component) {
+            Math::SpatialPoint x = point.getPhysicalCoordinates();
+            if (curved)
+            {
+              // Independent analytic inverse of the prescribed global map.
+              // This defines field data, not entity/DOF correspondence.
+              if (x.size() == 1)
+                x(0) = 2 * x(0) / (1 + std::sqrt(1 + Real(0.4) * x(0)));
               else
-                return Space(std::integral_constant<size_t, K>{}, mesh);
-            };
-            const auto sourceSpace = makeSpace(parent), targetSpace = makeSpace(mesh);
-            GridFunction<Space, ::Vec> source(sourceSpace), restricted(targetSpace),
-              oracle(targetSpace), rejected(targetSpace);
-            const auto scalar = [curved](const Point& point, size_t component) {
-              Math::SpatialPoint x = point.getPhysicalCoordinates();
-              if (curved)
-              {
-                // Independent analytic inverse of the prescribed global map.
-                // This defines field data, not entity/DOF correspondence.
-                if (x.size() == 1)
-                  x(0) = 2 * x(0) / (1 + std::sqrt(1 + Real(0.4) * x(0)));
-                else
-                  x(x.size() - 1) -= Real(0.1) * x(0) * x(0);
-              }
-              Real re = 1, im = 2;
-              for (Index j = 0; j < x.size(); ++j)
-              {
-                re += Real(j + 1) * x(j);
-                im += Real(j + 2) * x(j);
-              }
-              if constexpr (K >= 2)
-              {
-                // Normalized mixed degree-K polynomials excite higher modes
-                // without growing the dimensionless field scale with K.
-                const Real dim = Real(x.size());
-                re += std::pow((re - 1) / (dim * (dim + 1) / 2), Real(K));
-                im += std::pow((im - 2) / (dim * (dim + 3) / 2), Real(K));
-              }
-              if constexpr (std::is_same_v<Scalar, Complex>)
-                return Real(component + 1) * Complex(re, im);
-              else
-                return Real(component + 1) * re;
-            };
-            const auto data = [&] {
-              if constexpr (matrix)
-                return MatrixFunction(size_t{2}, size_t{3}, [scalar](const Point& point) {
-                  Math::SpatialMatrix<Scalar> value(2, 3);
-                  for (size_t row = 0; row < 2; ++row)
-                  {
-                    for (size_t column = 0; column < 3; ++column)
-                      value(row, column) = scalar(point, 3 * row + column);
-                  }
-                  return value;
-                });
-              else if constexpr (vector)
-                return VectorFunction(size_t{3}, [scalar](const Point& point) {
-                  Math::SpatialVector<Scalar> value(3);
-                  for (size_t component = 0; component < 3; ++component)
-                    value(component) = scalar(point, component);
-                  return value;
-                });
-              else if constexpr (std::is_same_v<Scalar, Complex>)
-                return ComplexFunction(
-                  [scalar](const Point& point) { return scalar(point, 0); });
-              else
-                return RealFunction(
-                  [scalar](const Point& point) { return scalar(point, 0); });
-            }();
-            source.project(data);
-            oracle.project(data);
-            rejected.project(data);
-            rejected *= Scalar(0);
-            // Interpolation and ghost updates change distributed state collectively.
-            restricted.project(source);
-            const auto checkValue = [&](const Point& point) {
-              const auto actual = std::as_const(restricted)(point),
-                         expected = data(point), wrong = std::as_const(rejected)(point);
-              if constexpr (matrix)
-              {
-                EXPECT_EQ(actual.rows(), 2);
-                EXPECT_EQ(actual.cols(), 3);
+                x(x.size() - 1) -= Real(0.1) * x(0) * x(0);
+            }
+            Real re = 1, im = 2;
+            for (Index j = 0; j < x.size(); ++j)
+            {
+              re += Real(j + 1) * x(j);
+              im += Real(j + 2) * x(j);
+            }
+            if constexpr (K >= 2)
+            {
+              // Normalized mixed degree-K polynomials excite higher modes
+              // without growing the dimensionless field scale with K.
+              const Real dim = Real(x.size());
+              re += std::pow((re - 1) / (dim * (dim + 1) / 2), Real(K));
+              im += std::pow((im - 2) / (dim * (dim + 3) / 2), Real(K));
+            }
+            if constexpr (std::is_same_v<Scalar, Complex>)
+              return Real(component + 1) * Complex(re, im);
+            else
+              return Real(component + 1) * re;
+          };
+          const auto data = [&] {
+            if constexpr (matrix)
+              return MatrixFunction(size_t{2}, size_t{3}, [scalar](const Point& point) {
+                Math::SpatialMatrix<Scalar> value(2, 3);
                 for (size_t row = 0; row < 2; ++row)
                 {
                   for (size_t column = 0; column < 3; ++column)
-                  {
-                    EXPECT_LT(std::abs(actual(row, column) - expected(row, column)),
-                      PolynomialTolerance);
-                    EXPECT_GT(std::abs(wrong(row, column) - expected(row, column)),
-                      PolynomialTolerance);
-                  }
+                    value(row, column) = scalar(point, 3 * row + column);
                 }
-              }
-              else if constexpr (vector)
-              {
+                return value;
+              });
+            else if constexpr (vector)
+              return VectorFunction(size_t{3}, [scalar](const Point& point) {
+                Math::SpatialVector<Scalar> value(3);
                 for (size_t component = 0; component < 3; ++component)
-                {
-                  EXPECT_LT(std::abs(actual(component) - expected(component)),
-                    PolynomialTolerance);
-                  EXPECT_GT(std::abs(wrong(component) - expected(component)),
-                    PolynomialTolerance);
-                }
-              }
-              else
-              {
-                EXPECT_LT(std::abs(actual - expected), PolynomialTolerance);
-                EXPECT_GT(std::abs(wrong - expected), PolynomialTolerance);
-              }
-            };
-            if (world.rank() == 0)
+                  value(component) = scalar(point, component);
+                return value;
+              });
+            else if constexpr (std::is_same_v<Scalar, Complex>)
+              return ComplexFunction(
+                [scalar](const Point& point) { return scalar(point, 0); });
+            else
+              return RealFunction(
+                [scalar](const Point& point) { return scalar(point, 0); });
+          }();
+          source.project(data);
+          oracle.project(data);
+          rejected.project(data);
+          rejected *= Scalar(0);
+          // Interpolation and ghost updates change distributed state collectively.
+          restricted.project(source);
+          const auto checkValue = [&](const Point& point) {
+            const auto actual = std::as_const(restricted)(point), expected = data(point),
+                       wrong = std::as_const(rejected)(point);
+            if constexpr (matrix)
             {
-              // Peers do not read fields here: synchronized held-DOF access,
-              // cached metadata and point evaluation must remain local operations.
-              EXPECT_EQ(&restricted.getFiniteElementSpace(), &targetSpace);
-              EXPECT_EQ(restricted.getSize(), targetSpace.getSize());
-              for (auto cell = mesh.getCell(); cell; ++cell)
+              EXPECT_EQ(actual.rows(), 2);
+              EXPECT_EQ(actual.cols(), 3);
+              for (size_t row = 0; row < 2; ++row)
               {
-                const IndexArray dofs =
-                  targetSpace.getDOFs(mesh.getDimension(), cell->getIndex());
-                for (Index local = 0; local < static_cast<size_t>(dofs.size()); ++local)
+                for (size_t column = 0; column < 3; ++column)
                 {
-                  EXPECT_LT(std::abs(std::as_const(restricted)[dofs(local)] -
-                              std::as_const(oracle)[dofs(local)]),
+                  EXPECT_LT(std::abs(actual(row, column) - expected(row, column)),
+                    PolynomialTolerance);
+                  EXPECT_GT(std::abs(wrong(row, column) - expected(row, column)),
                     PolynomialTolerance);
                 }
-                const Polytope::Traits traits(cell->getGeometry());
-                checkValue(Point(*cell, traits.getCentroid()));
               }
             }
-            // Test-protocol synchronization, outside the local read operation.
-            world.barrier();
+            else if constexpr (vector)
+            {
+              for (size_t component = 0; component < 3; ++component)
+              {
+                EXPECT_LT(
+                  std::abs(actual(component) - expected(component)), PolynomialTolerance);
+                EXPECT_GT(
+                  std::abs(wrong(component) - expected(component)), PolynomialTolerance);
+              }
+            }
+            else
+            {
+              EXPECT_LT(std::abs(actual - expected), PolynomialTolerance);
+              EXPECT_GT(std::abs(wrong - expected), PolynomialTolerance);
+            }
+          };
+          if (world.rank() == 0)
+          {
+            // Peers do not read fields here: synchronized held-DOF access,
+            // cached metadata and point evaluation must remain local operations.
             EXPECT_EQ(&restricted.getFiniteElementSpace(), &targetSpace);
             EXPECT_EQ(restricted.getSize(), targetSpace.getSize());
-            const size_t d = mesh.getDimension();
             for (auto cell = mesh.getCell(); cell; ++cell)
             {
-              const auto& ancestry = sub.getPolytopeMap(d).left;
-              ASSERT_LT(cell->getIndex(), ancestry.size());
-              Index ancestor = ancestry[cell->getIndex()];
-              const MeshBase* immediate = &sub.getParent();
-              while (immediate->isSubMesh())
-              {
-                const auto& upper = immediate->asSubMesh();
-                const auto& map = upper.getPolytopeMap(d).left;
-                ASSERT_LT(ancestor, map.size());
-                ancestor = map[ancestor];
-                immediate = &upper.getParent();
-              }
-              ASSERT_EQ(immediate, &parent);
-              const auto original = parent.getPolytope(d, ancestor);
-              ASSERT_TRUE(original);
-              EXPECT_EQ(original->getGeometry(), cell->getGeometry());
-              EXPECT_EQ(cell->getTransformation().getFactorOrder(),
-                original->getTransformation().getFactorOrder());
-              if (curved && d > 0)
-              {
-                EXPECT_EQ(cell->getTransformation().getFactorOrder(), 2u);
-              }
-              const IndexArray dofs = targetSpace.getDOFs(d, cell->getIndex());
+              const IndexArray dofs =
+                targetSpace.getDOFs(mesh.getDimension(), cell->getIndex());
               for (Index local = 0; local < static_cast<size_t>(dofs.size()); ++local)
               {
-                EXPECT_EQ(
-                  dofs(local), targetSpace.getGlobalIndex({d, cell->getIndex()}, local));
-                // Every held functional is checked: sparse point samples alone
-                // cannot certify a high-order polynomial restriction.
                 EXPECT_LT(std::abs(std::as_const(restricted)[dofs(local)] -
                             std::as_const(oracle)[dofs(local)]),
                   PolynomialTolerance);
               }
               const Polytope::Traits traits(cell->getGeometry());
-              const auto sample = [&](const Math::SpatialPoint& coordinates) {
-                checkValue(Point(*cell, coordinates));
-              };
-              sample(traits.getCentroid());
-              for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
-              {
-                sample(Math::SpatialPoint(
-                  (traits.getCentroid() + traits.getVertex(vertex)) / 2));
-              }
+              checkValue(Point(*cell, traits.getCentroid()));
             }
-          };
-          const auto order = [&]<size_t K>() {
-            range.template operator()<K, BackendScalar>();
-            range.template operator()<K, Math::SpatialVector<BackendScalar>>();
-            range.template operator()<K, Math::SpatialMatrix<BackendScalar>>();
-          };
-          order.template operator()<1>();
-          order.template operator()<2>();
-          order.template operator()<3>();
-          order.template operator()<4>();
-          order.template operator()<5>();
-          order.template operator()<6>();
+          }
+          // Test-protocol synchronization, outside the local read operation.
+          world.barrier();
+          EXPECT_EQ(&restricted.getFiniteElementSpace(), &targetSpace);
+          EXPECT_EQ(restricted.getSize(), targetSpace.getSize());
+          const size_t d = mesh.getDimension();
+          for (auto cell = mesh.getCell(); cell; ++cell)
+          {
+            const auto& ancestry = sub.getPolytopeMap(d).left;
+            ASSERT_LT(cell->getIndex(), ancestry.size());
+            Index ancestor = ancestry[cell->getIndex()];
+            const MeshBase* immediate = &sub.getParent();
+            while (immediate->isSubMesh())
+            {
+              const auto& upper = immediate->asSubMesh();
+              const auto& map = upper.getPolytopeMap(d).left;
+              ASSERT_LT(ancestor, map.size());
+              ancestor = map[ancestor];
+              immediate = &upper.getParent();
+            }
+            ASSERT_EQ(immediate, &parent);
+            const auto original = parent.getPolytope(d, ancestor);
+            ASSERT_TRUE(original);
+            EXPECT_EQ(original->getGeometry(), cell->getGeometry());
+            EXPECT_EQ(cell->getTransformation().getFactorOrder(),
+              original->getTransformation().getFactorOrder());
+            if (curved && d > 0)
+            {
+              EXPECT_EQ(cell->getTransformation().getFactorOrder(), 2u);
+            }
+            const IndexArray dofs = targetSpace.getDOFs(d, cell->getIndex());
+            for (Index local = 0; local < static_cast<size_t>(dofs.size()); ++local)
+            {
+              EXPECT_EQ(
+                dofs(local), targetSpace.getGlobalIndex({d, cell->getIndex()}, local));
+              // Every held functional is checked: sparse point samples alone
+              // cannot certify a high-order polynomial restriction.
+              EXPECT_LT(std::abs(std::as_const(restricted)[dofs(local)] -
+                          std::as_const(oracle)[dofs(local)]),
+                PolynomialTolerance);
+            }
+            const Polytope::Traits traits(cell->getGeometry());
+            const auto sample = [&](const Math::SpatialPoint& coordinates) {
+              checkValue(Point(*cell, coordinates));
+            };
+            sample(traits.getCentroid());
+            for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+            {
+              sample(Math::SpatialPoint(
+                (traits.getCentroid() + traits.getVertex(vertex)) / 2));
+            }
+          }
         };
-        const auto cells = makeCellSubMesh(parent);
-        check(cells);
-        const auto skin = makeBoundarySubMesh(parent);
-        check(skin);
-        SubMesh<Context::MPI>::Builder builder;
-        builder.initialize(parent);
-        for (auto cell = parent.getCell(); cell; ++cell)
-        {
-          if (parent.getShard().isOwned(dimension, cell->getIndex()) &&
-            parent.getGlobalIndex(dimension, cell->getIndex()) % 2 == 0)
-            builder.include(dimension, cell->getIndex());
-        }
-        const auto sparse = builder.finalize();
-        check(sparse);
-        const auto nested = makeCellSubMesh(sparse);
-        check(nested);
+        const auto order = [&]<size_t K>() {
+          range.template operator()<K, BackendScalar>();
+          range.template operator()<K, Math::SpatialVector<BackendScalar>>();
+          range.template operator()<K, Math::SpatialMatrix<BackendScalar>>();
+        };
+        order.template operator()<1>();
+        order.template operator()<2>();
+        order.template operator()<3>();
+        order.template operator()<4>();
+        order.template operator()<5>();
+        order.template operator()<6>();
+      };
+      const auto cells = makeCellSubMesh(parent);
+      check(cells);
+      const auto skin = makeBoundarySubMesh(parent);
+      check(skin);
+      SubMesh<Context::MPI>::Builder builder;
+      builder.initialize(parent);
+      for (auto cell = parent.getCell(); cell; ++cell)
+      {
+        if (parent.getShard().isOwned(dimension, cell->getIndex()) &&
+          parent.getGlobalIndex(dimension, cell->getIndex()) % 2 == 0)
+          builder.include(dimension, cell->getIndex());
       }
+      const auto sparse = builder.finalize();
+      check(sparse);
+      const auto nested = makeCellSubMesh(sparse);
+      check(nested);
     }
   }
+
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, PETScMPISubMeshH1,
+    testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+      Polytope::Type::Hexahedron, Polytope::Type::Wedge),
+    [](const auto& info) { return polytopeName(info.param); });
 
 }
 
