@@ -150,8 +150,12 @@ refinar — eso es lo que se controló en `conv_*` (ver abajo).
 
 Split OSS (Codina): `τ_M ρ((∇u)u^k − Π[(∇u^n)u^n], (∇v)u^k)`,
 `(τ_M/ρ)(∇p − Π[∇p^n], ∇q)`, `τ_C(div u − Π[div u^n], div v)`, con
-`τ_M = [(2|u^k|/h)² + (4ν^k/h²)²]^{−1/2}` (sin término 2/dt por defecto:
-`-kv_tau_dt true` lo agrega) y `τ_C = μ^k + ρ|u^k|h/2`. Las proyecciones
+`τ_M = [(2/dt)² + (2|u^k|/h)² + (4ν^k/h²)²]^{−1/2}` y
+`τ_C = μ^k + ρ|u^k|h/2`. El término 2/dt va por defecto: sin él, en agua a
+baja velocidad `τ_M ~ h²/4ν` (≈ 1.5 s con h = 2.5 mm) supera a dt en
+órdenes de magnitud, las proyecciones retrasadas penalizan con peso
+τ/dt ≫ 1 todo cambio dentro del paso, la presión se atrasa respecto del
+flujo y Picard se estanca (`-kv_tau_dt false` lo quita). Las proyecciones
 Π son L2 sobre P1 (`OrthogonalProjection.h`) y se actualizan una vez por
 paso (en el iterado hacen que Picard contraiga sólo como τ/(τ+dt)).
 Coeficientes (μ, τ) en P0, exactos para u en P1.

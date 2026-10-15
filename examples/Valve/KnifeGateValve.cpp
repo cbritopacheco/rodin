@@ -35,7 +35,7 @@
 //   + tau_M/rho (grad p - Pi[grad p^n], grad q)
 //   + tau_C (div u - Pi[div u^n], div v),
 //
-//   tau_M = [(2 |u^k|/h)^2 + (4 nu^k/h^2)^2 (+ (2/dt)^2)]^(-1/2),
+//   tau_M = [(2/dt)^2 + (2 |u^k|/h)^2 + (4 nu^k/h^2)^2]^(-1/2),
 //   tau_C = mu^k + rho |u^k| h / 2,   h = (6 sqrt(2) |T|)^(1/3),
 //
 // with the projections lagged at t^n (refreshed once per step: lagged at the
@@ -196,7 +196,13 @@ namespace Rodin::Examples::Valve
         int picardHard = 7;        ///< iterations above which dt shrinks
         int maxIterations = 12;
         Real tolerance = 1.0e-3;   ///< relative increment of u
-        bool tauDt = false;        ///< include 2/dt in tau_M (dynamic time scale)
+        /// Include 2/dt in tau_M. Without it tau_M ~ min(h/2|u|, h^2/4 nu) is
+        /// orders of magnitude above dt in water at low speed (h^2/4 nu ~ 1.5 s
+        /// for h = 2.5 mm), and the lagged projections Pi[grad p^n],
+        /// Pi[(grad u^n) u^n] penalise every change within the step with a
+        /// weight tau/dt >> 1: the pressure lags the flow and Picard stalls
+        /// (see examples/Heat/ForcedConvection.cpp). With it, tau_M <= dt/2.
+        bool tauDt = true;
         int maxRetries = 4;
         bool picardMonitor = false;
 
@@ -349,11 +355,15 @@ namespace Rodin::Examples::Valve
             {
               if (threw)
                 throw std::runtime_error("step failed at t = " + std::to_string(m_t));
-              break;  // unconverged Picard after all retries: accepted with a warning
+              if (!m_converged && isRoot())  // after all retries: accepted, flagged in the log
+                Alert::Warning() << "  step accepted UNCONVERGED at t = " << m_t << Alert::Raise;
+              break;
             }
             m_t -= m_dt;
             m_uIt.setData(m_uOld.getData());
             m_cfg.dt *= 0.5;
+            if (isRoot())
+              Alert::Info() << "  step rejected, retrying with dt = " << m_cfg.dt << Alert::Raise;
             retried = true;
           }
 
@@ -389,10 +399,12 @@ namespace Rodin::Examples::Valve
 
           if (m_cfg.adaptiveDt)
           {
+            // No growth during the ramp: the speed is still rising and a dt
+            // grown on the easy first steps overshoots the CFL of the jet.
             Real dt = m_cfg.dt;
             if (!m_converged || iterations > m_cfg.picardHard)
               dt *= m_cfg.dtShrink;
-            else if (iterations <= m_cfg.picardEasy && !retried)
+            else if (iterations <= m_cfg.picardEasy && !retried && m_t >= m_cfg.ramp)
               dt *= m_cfg.dtGrow;
             m_cfg.dt = std::clamp(dt, m_cfg.dtMin, m_cfg.dtMax);
           }
@@ -514,7 +526,8 @@ namespace Rodin::Examples::Valve
         }
         m_converged = false;
         if (isRoot())
-          Alert::Warning() << "Picard did not converge at t = " << m_t << Alert::Raise;
+          Alert::Warning() << "Picard did not converge at t = " << m_t << " (dt = " << m_dt << ")"
+                           << Alert::Raise;
         return k;
       }
 
