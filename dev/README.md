@@ -1637,3 +1637,44 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   latest live CI read for f6d558fe5 reports 43 successful test jobs, forty
   running and 191 queued, without failures. Keep the batch local pending CI
   failure or completion; the goal is still incomplete.
+
+### Broader optimized coverage and non-real manufactured SNES root
+
+- Run248/251 builds fresh RelWithDebInfo geometry, native IO, quadrature and
+  complex PETSc lifecycle suites. Run250/252 passes 324 additional cases as
+  separate sequential processes: 141 geometry, 35 mesh-loader, twelve MEDIT,
+  99 HDF5, fifteen Gauss-Legendre, twenty exactness/ownership and two SNES
+  cases. Compiler-note capture starts only after all compilers finish.
+  Successful counters are preserved before subsequent batches; discovery
+  profiles stay outside the normal build.
+- Run253 adds the cumulative filtered report to the global union, now 407
+  normal reports. It measures 40,111 / 42,476 production lines
+  (\(94.4321\%\)): 634 recovered hits and 39 new measured lines. All 565
+  retained production files match snapshot236; nonproduction and missing-source
+  records remain empty. At this denominator, 242 more hits are required.
+- Add a genuinely non-real P1 manufactured cubic root to the SNES state suite:
+  \(F(u)=u+u^3-(z+z^3)\), \(z=1+i/2\), with tangent \(1+3u^2\) and an initial
+  iterate near that root. Check the full complex infinity-norm error and
+  zero-iteration warm-start convergence. The solver uses the same bounded
+  iteration/evaluation budgets as the existing real-root control. The error
+  tolerance allows for assembly-scaled residual stopping, and is checked by
+  deliberate imaginary-output deletion rather than assumed sufficient.
+- Run254 passes all three complex cases against freshly rebuilt PETSc 3.19
+  dependencies in RelWithDebInfo, plus both unchanged real Release controls.
+  Run255 privately inserts VecRealPart after SNESSolve; only the new non-real
+  case fails, while both existing controls pass. Every mutation profile is
+  excluded. No production implementation changes are needed.
+- Include the SNES state executable in the existing four PETScMatrixRanges
+  jobs, so both real and complex controls execute remotely and the non-real
+  root runs in complex builds. Preserve all previous tests/ranks, serial
+  execution, compiler limits, unsanitized coverage filtering and job budget.
+  Workflow validation confirms SNES is the only added selection.
+- Run257 adds four source-matched initial/runtime reports for the successful
+  real/complex cases, retaining the run253 line counts and percentage across
+  411 reports. Observed function symbols increase to 92,303, with 68,312 hit;
+  numerical template coverage is stronger despite unchanged line coverage.
+  Formatting, style lint, workflow checks and all nine auditor tests pass.
+- Latest f6d558fe5 CI read: 56 test jobs successful, forty running, 178 queued,
+  no failures. Keep this batch local under the deferred-push condition. The
+  next mesh/index/quadrature and distributed IO build remains active; the
+  95% goal and published CI/Codecov verification remain incomplete.
