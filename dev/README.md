@@ -2487,3 +2487,60 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   including newly emitted normal Debug lines. No historical aggregate percentage
   is carried onto current source. Production code is unchanged; formatting and
   style pass.
+
+
+### PETSc field-split copy ownership
+
+- Add three public-contract tests for FieldSplits: independent names and IS
+  indices after source mutation/destruction, copy assignment releasing the old
+  owned reference and preserving self-assignment, and copying empty/unbound
+  default descriptors. The old destination IS retains an external observer
+  reference so its reference count can be checked without accessing freed data.
+- All six LinearSystem cases pass individually in optimized and
+  assertion-enabled builds (runs517/520), linked to optimized native support
+  libraries. No sanitizer run is claimed for this batch. Production is unchanged.
+- A private, safely reference-counted mutation shares source handles in copyFrom.
+  Both copy/assignment cases reject it; the other four controls pass (run524).
+  All mutation profiles remain excluded. Run523 records the current header hash,
+  passing producers and positive counts for every copyFrom statement, including
+  both nonnull and null branches. The scoped header capture hits 81 of 82 emitted
+  lines; the remaining line403 follows an always-raising unsupported-merge
+  diagnostic. No aggregate percentage is inferred.
+- The first coverage verifier (run522) used historical line positions, including
+  current braces/blank lines, and correctly failed its positive-count assertions.
+  Run523 instead checks current executable statement positions; neither verifier
+  changes runtime profiles or source. Discovery profiles remain excluded.
+
+
+### Source-wide exception idiom audit
+
+- Run518 inventories 566 production files and 6,189 definitions directly from
+  source, without preprocessing or requiring template instantiation. It retains
+  file hashes, 390 exception records, 216 possible implicit-exception calls and
+  94 parser recovery locations. Four audit-tool regressions pass separately.
+  The raw inventory and manual review are retained as
+  run518-current-exception-source-audit.json and run518-exception-review.json
+  under build-coverage-linux.
+- There are 305 MemberFunctionException references and no generic
+  Alert::Exception references classified inside instance functions. All seven
+  explicit throw statements resolve to Alert types: Alert's own self-throw,
+  MEDIT's derived UnexpectedKeywordException twice, translated MMG parsing,
+  both MPI asSubMesh overloads, and ProblemBase::getBody. The eight MPI
+  UniformGrid NamespacedException references are in a static factory, confirmed
+  against its header declaration; syntax-only out-of-line classification does
+  not recognize the static declaration elsewhere.
+- Standard checked-access calls remain a separate API-contract review. Priority
+  candidates include AttributeIndex dimension access, local/MPI finite-element
+  DOF access, MPIMesh::getGlobalIndex, PETSc ghost lookup and unbound integrator
+  getPolytope access. Their presence prevents claiming that every possible
+  escaping exception is an Alert. Previously validated List/quadrature/Scotch/
+  SubMesh checks and MMG numeric parsing already translate their public errors.
+- Several candidates are safe or unrelated: OpenMP optional thread counts and
+  QuadratureRule cached values are engagement-guarded; Point's variant access
+  follows a check of its other alternative; tuple get and Eigen iterator value
+  calls are not throwing optional/variant access. ConstitutivePoint's private
+  any values use the same Tag::Type for insertion/access, with a missing-tag
+  assertion contract. No blanket catch is added around internal invariants,
+  allocation failures, user callbacks or third-party backends. Parser recoveries
+  and macro expansion limits remain visible; this is not an exhaustive proof of
+  all transitive exception behavior.
