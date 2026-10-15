@@ -16,6 +16,37 @@
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
+/// @brief Pointer coordinates are owned and indexed lvalue insertion deduplicates cells.
+TEST(Geometry_MetadataLifecycle, BuilderOwnsPointerCoordinatesAndReturnsIndices)
+{
+  LocalMesh mesh;
+  {
+    const Real first[]{0, 0}, second[]{1, 0}, third[]{0, 1};
+    LocalMesh::Builder builder;
+    builder.initialize(2).nodes(3).vertex(first).vertex(second).vertex(third);
+    IndexArray vertices(3);
+    vertices << 0, 1, 2;
+    Index firstIndex, repeatedIndex;
+    builder.polytope(Polytope::Type::Triangle, vertices, firstIndex);
+    builder.polytope(Polytope::Type::Triangle, vertices, repeatedIndex);
+    EXPECT_EQ(firstIndex, 0u);
+    EXPECT_EQ(repeatedIndex, firstIndex);
+    mesh = builder.finalize();
+  }
+  ASSERT_EQ(mesh.getVertexCount(), 3u);
+  EXPECT_EQ(mesh.getCellCount(), 1u);
+  for (Index i = 0; i < 3; ++i)
+  {
+    const auto& point = mesh.getVertexCoordinates(i);
+    EXPECT_EQ(point[0], Real(i == 1));
+    EXPECT_EQ(point[1], Real(i == 2));
+  }
+  const auto cell = mesh.getCell(0);
+  EXPECT_EQ(cell->getGeometry(), Polytope::Type::Triangle);
+  EXPECT_EQ(IndexVector(cell->getVertices().begin(), cell->getVertices().end()),
+    IndexVector({0, 1, 2}));
+}
+
 /// @brief Repeated attribute initialization preserves values and sparse chart insertion owns clones.
 TEST(Geometry_MetadataLifecycle, IdempotentAttributesAndSparseChartClones)
 {

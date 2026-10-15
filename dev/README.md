@@ -1179,3 +1179,19 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   Run155 adds the passing format-keyword and NaN component checks, measuring
   38,158 of 40,184 lines (\(94.9582\%\)) across 317 reports. New observations can
   expose additional measured template lines as well as cover old misses.
+
+- Formulation clones preserve raw and base expressions, partially assembled
+  operators and partially assembled loads after the originals are destroyed or
+  zeroed. Real/complex and dense/sparse systems agree with an independently
+  integrated interval mass matrix and load. Builder pointer coordinates remain
+  owned after caller arrays expire; repeated indexed lvalue insertion deduplicates
+  connectivity. The six builder cases pass in Debug and Release.
+- PETSc regional interpolation checks Cells, Faces, Boundary and Interface on a
+  nine-vertex mesh against an affine field. Selected vertices equal their exact
+  values and unselected vertices retain a distinct sentinel; a false predicate
+  preserves the entire field. All nineteen affected real Debug cases pass.
+- Fresh run159 includes 325 initial/runtime reports, current production hashes
+  and the retained complete baseline: 38,209 of 40,211 production lines are hit
+  (\(95.0213\%\)). No nonproduction or missing-source records occur. Sanitizer,
+  mutation, failed and discovery counters remain excluded. This is a local
+  measured threshold; pending mode checks and remote CI remain separate gates.

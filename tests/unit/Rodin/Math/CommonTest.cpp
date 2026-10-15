@@ -17,6 +17,18 @@
 using namespace Rodin;
 using namespace Rodin::Math;
 
+/// @brief Quiet-NaN construction preserves non-finite real and complex components.
+TEST(MathCommonContracts, QuietNaNComponents)
+{
+  const auto single = Math::nan<Float>();
+  const auto real = Math::nan<Real>();
+  const auto complex = Math::nan<Complex>();
+  EXPECT_TRUE(std::isnan(single));
+  EXPECT_TRUE(std::isnan(real));
+  EXPECT_TRUE(std::isnan(complex.real()));
+  EXPECT_TRUE(std::isnan(complex.imag()));
+}
+
 class CommonTest : public ::testing::Test
 {
   protected:

@@ -16,6 +16,17 @@ using namespace Rodin::Geometry;
 using namespace Rodin::IO;
 using namespace Rodin::Variational;
 
+/// @brief MFEM section names are exact and unknown enumeration values have no spelling.
+TEST(FileFormatContracts, MFEMKeywordSpellings)
+{
+  using Keyword = MFEM::Keyword;
+  EXPECT_STREQ(MFEM::toCharString(Keyword::Dimension), "dimension");
+  EXPECT_STREQ(MFEM::toCharString(Keyword::Elements), "elements");
+  EXPECT_STREQ(MFEM::toCharString(Keyword::Boundary), "boundary");
+  EXPECT_STREQ(MFEM::toCharString(Keyword::Vertices), "vertices");
+  EXPECT_EQ(MFEM::toCharString(static_cast<Keyword>(-1)), nullptr);
+}
+
 /// @brief Known formats retain their names; unknown values retain numeric diagnostics and a usable stream.
 TEST(FileFormatContracts, KnownAndUnknownValuesStreamWithoutFailure)
 {
