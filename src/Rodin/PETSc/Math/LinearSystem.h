@@ -34,6 +34,7 @@
 #include <petscmat.h>
 #include <petscvec.h>
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Math/LinearSystem.h"
 #include "Rodin/PETSc/Math/Matrix.h"
 #include "Rodin/PETSc/Math/Vector.h"
@@ -397,7 +398,8 @@ namespace Rodin::Math
       LinearSystemBase& merge(
           const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
       {
-        throw "Unimplemented.";
+        Alert::MemberFunctionException(*this, __func__)
+          << "Periodic DOF constraint merging is not implemented." << Alert::Raise;
         return *this;
       }
 

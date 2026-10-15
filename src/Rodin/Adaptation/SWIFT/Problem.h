@@ -730,8 +730,8 @@ namespace Rodin::Adaptation::SWIFT
       Problem& operator+=(const Variational::DirichletBCBase<Real>& condition)
       {
         if (condition.getOperand().getUUID() != m_trialUUID)
-          Alert::Exception() << "SWIFT boundary conditions must use its trial function."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT boundary conditions must use its trial function." << Alert::Raise;
         m_boundaryConditions.add(condition);
         return *this;
       }
@@ -749,8 +749,8 @@ namespace Rodin::Adaptation::SWIFT
             << "SWIFT MUMPS solves require RODIN_USE_MUMPS." << Alert::Raise;
 #endif
         if (!std::isfinite(parameters.model.fit) || !(parameters.model.fit > Real(0)))
-          Alert::Exception() << "SWIFT requires a finite positive fitting weight."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires a finite positive fitting weight." << Alert::Raise;
         for (const Real value :
           {parameters.model.jacobianWeight, parameters.model.distortionWeight,
             parameters.model.distribution.deviatoric,
@@ -761,7 +761,7 @@ namespace Rodin::Adaptation::SWIFT
             parameters.convergence.tolerance.stepOverH, parameters.model.robustScale})
         {
           if (!std::isfinite(value) || value < Real(0))
-            Alert::Exception()
+            Alert::MemberFunctionException(*this, __func__)
               << "SWIFT weights and tolerances must be finite and nonnegative."
               << Alert::Raise;
         }
@@ -773,12 +773,12 @@ namespace Rodin::Adaptation::SWIFT
             parameters.globalization.armijo < Real(1)) ||
           parameters.convergence.iterations.inner == 0 ||
           parameters.convergence.iterations.stagnation == 0)
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires valid residual tolerances, budgets and line search."
             << Alert::Raise;
         if (!std::isfinite(parameters.globalization.maxStepOverH) ||
           parameters.globalization.maxStepOverH < Real(0))
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Directional Newton requires a finite nonnegative step/h bound."
             << Alert::Raise;
         if (!(parameters.model.qualityGuard > Real(0) &&
@@ -789,7 +789,7 @@ namespace Rodin::Adaptation::SWIFT
           !std::isfinite(parameters.model.hinge) || parameters.model.hinge < Real(0) ||
           !std::isfinite(parameters.convergence.tolerance.geometric) ||
           parameters.convergence.tolerance.geometric < Real(0))
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires 0 < guard,jacobian < 1, finite distortion > 1 and "
                "nonnegative penalty/fit tolerance."
             << Alert::Raise;
@@ -841,8 +841,8 @@ namespace Rodin::Adaptation::SWIFT
         Report rep;
         const Real h = p.model.h;
         if (!std::isfinite(h) || !(h > Real(0)))
-          Alert::Exception() << "SWIFT requires a finite positive reference mesh size."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires a finite positive reference mesh size." << Alert::Raise;
         assembleBoundaryConditions();
         const Real acceptedJacobianFloor = p.model.jacobian;
         const Real stepTol = p.convergence.tolerance.step;
@@ -891,8 +891,8 @@ namespace Rodin::Adaptation::SWIFT
           : geometricScale;
         if (!std::isfinite(geometricScale) || !(geometricScale > Real(0)) ||
           !std::isfinite(geometricTarget) || !(geometricTarget > Real(0)))
-          Alert::Exception() << "SWIFT requires a finite positive geometric target."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires a finite positive geometric target." << Alert::Raise;
         rep.geometricSupTarget = geometricTarget;
         const auto robustScale = getRobustScale(mesh, fes, phi, grad, interfaceFacets, h);
         if (!(robustScale.gradientScale > Real(0)) ||
@@ -2383,12 +2383,12 @@ namespace Rodin::Adaptation::SWIFT
             std::get_if<typename Variational::DirichletBCBase<Real>::ValueDOFs>(
               &condition.getDOFs());
           if (!values)
-            Alert::Exception() << "SWIFT supports homogeneous value conditions only."
-                               << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "SWIFT supports homogeneous value conditions only." << Alert::Raise;
           for (const auto& [dof, value] : *values)
           {
             if (value != Real(0))
-              Alert::Exception()
+              Alert::MemberFunctionException(*this, __func__)
                 << "SWIFT boundary increments must be zero." << Alert::Raise;
             m_fixedIncrementDOFs[dof] = Real(0);
           }

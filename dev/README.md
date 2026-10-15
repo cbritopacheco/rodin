@@ -2051,3 +2051,35 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   constructor-initializer attribution, implicit-call extraction, and explicit
   parser-recovery reporting. The tooling tests report an explicit skip if
   their optional parser dependencies are unavailable.
+
+
+### Contextual Alert exception correction
+
+- Replace five explicit standard-runtime-error throws and one string-literal
+  throw with Alert variants. Upgrade all 58 identified generic Alert sites in
+  instance members to MemberFunctionException, retaining specialized domain
+  exceptions already within the Alert hierarchy. Static/free functions remain
+  independent of an instance. Distributed downcast failures explicitly throw
+  the contextual Alert object, preserving non-returning behavior.
+- Convert SpatialTensor axis bounds failures from std::array::at to an explicit
+  member-context Alert check. Invalid resize and axis requests preserve active
+  extents and storage size. Correct Alert documentation to describe throwing
+  after diagnostic output rather than unconditional program termination.
+- Observe all three new PETSc/tensor regressions fail against the original
+  implementations, then pass individually against the correction. The new
+  MPI global-ID-cap regression also fails at both ranks against the original
+  source-hash-matched Mesh.cpp, privately linked ahead of the current archive;
+  it passes at ranks two and three against the correction. All red profiles
+  and the private original implementation are excluded from coverage.
+- Native MPI/MMG library builds and dependencies pass with one compiler job.
+  All three PETSc linear-system cases and nine Release tensor cases pass in
+  separate processes. All 330 MPI geometry case/rank invocations pass at ranks
+  one, two, three, four and eight; 140 invocations explicitly skip unsupported
+  rank counts. No runtime test groups overlap. Formatting and production style
+  checks pass.
+- Run354 hash-verifies and archives 129 old note/counter files before removing
+  obsolete runtime counters. Run362 freezes all 565 production files plus the
+  umbrella header. Normal post-correction profiles remain isolated in runs
+  364-366. The historical run318 percentage belongs to the previously
+  published production source: the changed-source batch still needs fresh
+  aggregate CI/coverage confirmation and does not inherit that percentage.

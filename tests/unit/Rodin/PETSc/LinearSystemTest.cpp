@@ -7,14 +7,38 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <string>
 
 #include <petsc.h>
 
 #include <Rodin/Types.h>
+#include <Rodin/Alert/Exception.h>
 #include <Rodin/PETSc/Math/LinearSystem.h>
 
 namespace
 {
+  /// @brief Unsupported periodic merging raises a contextual Alert without replacing handles.
+  TEST(PETSc_LinearSystem, UnsupportedMergeReportsMemberContext)
+  {
+    Rodin::PETSc::Math::LinearSystem system(PETSC_COMM_SELF);
+    const auto matrix = system.getOperator();
+    const auto vector = system.getVector();
+    const auto solution = system.getSolution();
+    Rodin::IndexMap<std::pair<Rodin::IndexArray, Rodin::Math::Vector<Rodin::Real>>> dofs;
+    try
+    {
+      system.merge(dofs);
+      FAIL() << "Unsupported periodic merging must be rejected.";
+    }
+    catch (const Rodin::Alert::Exception& error)
+    {
+      EXPECT_NE(std::string(error.what()).find("merge"), std::string::npos);
+    }
+    EXPECT_EQ(system.getOperator(), matrix);
+    EXPECT_EQ(system.getVector(), vector);
+    EXPECT_EQ(system.getSolution(), solution);
+  }
+
   /// @brief Verifies eliminate does not write locked solution vector for PET sc linear system by checking tolerance-based numerical results, exact expected values.
   TEST(PETSc_LinearSystem, EliminateDoesNotWriteLockedSolutionVector)
   {

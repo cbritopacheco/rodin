@@ -17,6 +17,7 @@
  * freedom mappings consistent across ownership and ghost layers.
  */
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <map>
 #include <mpi.h>
 #include <sys/mman.h>
@@ -970,8 +971,8 @@ namespace Rodin::Variational
       {
         if (rows == 0 || cols == 0 || rows > RODIN_MAXIMAL_SPACE_DIMENSION ||
           cols > RODIN_MAXIMAL_SPACE_DIMENSION)
-          Alert::Exception() << "SpatialMatrix ranges require 1 to 3 rows and columns."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SpatialMatrix ranges require 1 to 3 rows and columns." << Alert::Raise;
         // Distributed scalar spaces may compute their size collectively.
         // Resolve it at construction, never from a local evaluation loop.
         m_size = m_scalar.getSize() * rows * cols;

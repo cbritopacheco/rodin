@@ -178,7 +178,7 @@ namespace Rodin::Variational
        */
       virtual const ProblemBodyType& getBody() const
       {
-        Alert::Exception error;
+        Alert::MemberFunctionException error(*this, __func__);
         error << "This problem does not expose a variational body.";
         throw error;
       }

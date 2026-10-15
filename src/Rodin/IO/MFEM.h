@@ -7,6 +7,7 @@
 #ifndef RODIN_IO_MFEM_H
 #define RODIN_IO_MFEM_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <algorithm>
@@ -3935,12 +3936,14 @@ namespace Rodin::IO
         if (!(dimensionLine >> keyword >> vdim) || keyword != "VDim:" ||
           vdim != components || !(orderingLine >> keyword >> ordering) ||
           keyword != "Ordering:" || ordering > 1)
-          Alert::Exception() << "Invalid MFEM matrix field header." << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Invalid MFEM matrix field header." << Alert::Raise;
         std::vector<Scalar> values(scalar.getSize() * components);
         for (auto& value : values)
         {
           if (!(is >> value))
-            Alert::Exception() << "Truncated MFEM matrix data." << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "Truncated MFEM matrix data." << Alert::Raise;
         }
         for (size_t c = 0; c < components; ++c)
         {

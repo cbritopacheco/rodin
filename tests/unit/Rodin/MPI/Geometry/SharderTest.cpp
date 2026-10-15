@@ -1412,14 +1412,12 @@ namespace Rodin::Tests::Unit
     Context::MPI ctx(*g_env, world);
     auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
-    EXPECT_THROW(mpiMesh.asSubMesh(), std::runtime_error)
-      << "Rank " << world.rank()
-      << ": asSubMesh() should throw std::runtime_error.";
+    EXPECT_THROW(mpiMesh.asSubMesh(), Alert::Exception)
+      << "Rank " << world.rank() << ": asSubMesh() should throw Alert::Exception.";
 
     const auto& constMesh = mpiMesh;
-    EXPECT_THROW(constMesh.asSubMesh(), std::runtime_error)
-      << "Rank " << world.rank()
-      << ": const asSubMesh() should throw std::runtime_error.";
+    EXPECT_THROW(constMesh.asSubMesh(), Alert::Exception)
+      << "Rank " << world.rank() << ": const asSubMesh() should throw Alert::Exception.";
   }
 
   /// @brief Verifies get quadrature for MPI geometry mesh by checking exact expected values, true predicates, MPI behavior.
@@ -2133,7 +2131,32 @@ namespace Rodin::Tests::Unit
     opts.maxOwnerRounds = 0;
     opts.strictRoundCap = true;
 
-    EXPECT_THROW(mpiMesh.reconcile(1, opts), std::runtime_error);
+    EXPECT_THROW(mpiMesh.reconcile(1, opts), Alert::Exception);
+  }
+
+  /// @brief The global-ID round cap raises an Alert identifying the member and cap.
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_StrictGidRoundCapReportsContext)
+  {
+    const auto& world = *g_world;
+    if (world.size() < 2 || world.size() > 3)
+      GTEST_SKIP() << "Test requires 2 or 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    Mesh<Context::MPI>::ReconcileOptions opts;
+    opts.maxGidRounds = 0;
+    opts.strictRoundCap = true;
+    try
+    {
+      mpiMesh.reconcile(1, opts);
+      FAIL() << "A strict zero global-ID round cap must be rejected.";
+    }
+    catch (const Alert::Exception& error)
+    {
+      EXPECT_NE(std::string(error.what()).find("reconcile"), std::string::npos);
+      EXPECT_NE(std::string(error.what()).find("maxGidRounds"), std::string::npos);
+    }
   }
 
   /**

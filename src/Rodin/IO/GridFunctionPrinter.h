@@ -10,7 +10,7 @@
 #include <functional>
 #include <boost/filesystem.hpp>
 
-#include "Rodin/Alert/Exception.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "ForwardDecls.h"
 #include "Rodin/Variational/ForwardDecls.h"
 
@@ -48,7 +48,7 @@ namespace Rodin::IO
 
       void print(std::ostream& os) override
       {
-        Alert::Exception()
+        Alert::MemberFunctionException(*this, __func__)
           << "No GridFunctionPrinter specialization for this format/FES/Data combination."
           << Alert::Raise;
       }
@@ -113,7 +113,7 @@ namespace Rodin::IO
        */
       void print([[maybe_unused]] std::ostream& os) override
       {
-        Alert::Exception()
+        Alert::MemberFunctionException(*this, __func__)
           << "No grid-function printer for this finite element collection."
           << Alert::Raise;
       }

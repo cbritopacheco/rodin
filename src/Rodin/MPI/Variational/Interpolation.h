@@ -17,7 +17,7 @@
 #include <boost/serialization/vector.hpp>
 
 #include "Rodin/Types.h"
-#include "Rodin/Alert/Exception.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/MPI/Geometry/Mesh.h"
 #include "Rodin/Variational/Interpolation.h"
 #include "Rodin/Variational/P0/ForwardDecls.h"
@@ -91,8 +91,8 @@ namespace Rodin::Variational
                         P0<typename FES::RangeType, typename FES::MeshType>>)
         {
           if (region != Geometry::Region::Cells)
-            Alert::Exception() << "P0 interpolation requires the cell region."
-                               << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "P0 interpolation requires the cell region." << Alert::Raise;
         }
         const auto& mesh = fes.getMesh();
         const auto& shard = mesh.getShard();

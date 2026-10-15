@@ -847,8 +847,8 @@ namespace Rodin::Geometry
           {
             if (options.strictRoundCap)
             {
-              throw std::runtime_error(
-                  "MPIMesh::reconcile owner convergence exceeded maxOwnerRounds");
+              Alert::MemberFunctionException(*this, __func__)
+                << "Owner convergence exceeded maxOwnerRounds." << Alert::Raise;
             }
             roundsThisEpoch = 0;
           }
@@ -969,8 +969,8 @@ namespace Rodin::Geometry
           {
             if (options.strictRoundCap)
             {
-              throw std::runtime_error(
-                  "MPIMesh::reconcile gid convergence exceeded maxGidRounds");
+              Alert::MemberFunctionException(*this, __func__)
+                << "Global-ID convergence exceeded maxGidRounds." << Alert::Raise;
             }
             roundsThisEpoch = 0;
           }

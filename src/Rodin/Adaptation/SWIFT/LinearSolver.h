@@ -4,6 +4,7 @@
  */
 #ifndef RODIN_ADAPTATION_SWIFT_LINEARSOLVER_H
 #define RODIN_ADAPTATION_SWIFT_LINEARSOLVER_H
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -364,7 +365,8 @@ namespace Rodin::Adaptation::SWIFT
         }
         else
         {
-          Alert::Exception() << "SWIFT requires the local Eigen backend." << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires the local Eigen backend." << Alert::Raise;
           return false;
         }
       }
