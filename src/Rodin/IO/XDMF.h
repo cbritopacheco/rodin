@@ -39,7 +39,7 @@
  *   xdmf.write(time);
  * }
  *
- * xdmf.close();  // writes the XDMF XML; also called by destructor
+ * xdmf.close();  // explicitly writes the XDMF XML
  * ```
  *
  * @see <a href="_i_o_2_h_d_f5_8h.html">IO::HDF5</a>
@@ -90,7 +90,7 @@ namespace Rodin::IO
    * The writer is RAII-based:
    * - write(...) exports one new snapshot,
    * - close() finalizes the XML document,
-   * - destruction closes automatically if necessary.
+   * - close() must be called explicitly before destruction.
    *
    * Heavy data is stored in HDF5 files.
    * The XML document only references those files.
@@ -617,8 +617,8 @@ namespace Rodin::IO
        *
        * Generates the complete XDMF 3 XML referencing all recorded
        * snapshots and their HDF5 data files. This method is idempotent;
-       * subsequent calls are no-ops. The destructor calls close()
-       * automatically.
+       * subsequent calls are no-ops. Call close() explicitly before
+       * destruction; the destructor performs no file or collective operations.
        */
       void close();
 

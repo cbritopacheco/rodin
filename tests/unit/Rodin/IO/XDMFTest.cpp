@@ -6,7 +6,9 @@
  */
 #include <fstream>
 #include <array>
+#include <cstdint>
 #include <sstream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -45,6 +47,148 @@ namespace Rodin::Tests::Unit
 
       boost::filesystem::path m_directory; ///< Per-test output directory.
   };
+
+  /// @brief Failed publication preserves open state and history for flush/close recovery.
+  TEST_F(XDMFTest, OutputOpenFailurePreservesHistoryForRecovery)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    XDMF writer(m_directory / "series");
+    writer.setMesh(mesh).write(0.25);
+    const auto output = m_directory / "series.xdmf";
+    boost::filesystem::create_directory(output);
+    try
+    {
+      writer.close();
+      FAIL() << "A directory was accepted as an XML output file";
+    }
+    catch (const Alert::Exception& error)
+    {
+      const std::string message = error.what();
+      EXPECT_NE(message.find("In member function flush"), std::string::npos);
+      EXPECT_NE(message.find("Failed to open XDMF output file"), std::string::npos);
+      EXPECT_NE(message.find(output.string()), std::string::npos);
+    }
+    ASSERT_FALSE(writer.isClosed());
+    EXPECT_EQ(writer.getSnapshotCount(), 1u);
+    ASSERT_TRUE(boost::filesystem::remove(output));
+    writer.flush();
+    EXPECT_FALSE(writer.isClosed());
+    writer.write(0.75);
+    writer.flush();
+    EXPECT_FALSE(writer.isClosed());
+    EXPECT_EQ(writer.getSnapshotCount(), 2u);
+    {
+      std::ifstream input(output.string());
+      ASSERT_TRUE(input.good());
+      const std::string xml((std::istreambuf_iterator<char>(input)), {});
+      EXPECT_NE(xml.find("Time Value=\"0.25\""), std::string::npos);
+      EXPECT_NE(xml.find("Time Value=\"0.75\""), std::string::npos);
+    }
+    writer.close();
+    EXPECT_TRUE(writer.isClosed());
+    ASSERT_TRUE(boost::filesystem::remove(output));
+    writer.close();
+    EXPECT_FALSE(boost::filesystem::exists(output));
+    EXPECT_THROW(writer.write(1.0), Alert::Exception);
+    EXPECT_EQ(writer.getSnapshotCount(), 2u);
+  }
+
+  /// @brief Three-dimensional metadata and raw HDF5 coordinates/topology match an analytic tetrahedron.
+  TEST_F(XDMFTest, ThreeDimensionalGeometryAndAffineSamples)
+  {
+    auto mesh = LocalMesh::Builder()
+                  .initialize(3)
+                  .nodes(4)
+                  .vertex({0, 0, 0})
+                  .vertex({2, 0, 0})
+                  .vertex({0, 3, 0})
+                  .vertex({0, 0, 4})
+                  .polytope(Polytope::Type::Tetrahedron, {{0, 1, 2, 3}})
+                  .finalize();
+    P1 space(mesh);
+    GridFunction field(space);
+    field = [](const Point& point) {
+      return 1 + point.x() + 2 * point.y() + 4 * point.z();
+    };
+    XDMF writer(m_directory / "volume");
+    XDMF::FilePatterns patterns;
+    patterns.staticMesh = "mesh.h5";
+    patterns.attribute = "value.{index}.h5";
+    writer.setFilePatterns(patterns).setPadding(1).setMesh(mesh).add("value", field);
+    writer.write(0.0).close();
+    std::ifstream input((m_directory / "volume.xdmf").string());
+    ASSERT_TRUE(input.good());
+    const std::string xml((std::istreambuf_iterator<char>(input)), {});
+    EXPECT_NE(xml.find("GeometryType=\"XYZ\""), std::string::npos);
+    EXPECT_NE(xml.find("Dimensions=\"4 3\""), std::string::npos);
+    EXPECT_NE(
+      xml.find("TopologyType=\"Mixed\" NumberOfElements=\"1\""), std::string::npos);
+    EXPECT_NE(xml.find("Dimensions=\"5\""), std::string::npos);
+    EXPECT_NE(xml.find("mesh.h5:/Mesh/Geometry/Vertices"), std::string::npos);
+    EXPECT_NE(xml.find("value.0.h5:/GridFunction/Values/Data"), std::string::npos);
+    const auto file =
+      HDF5::File(H5Fopen((m_directory / "mesh.h5").c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    const auto vertices =
+      HDF5::DataSet(H5Dopen2(file.get(), "/Mesh/Geometry/Vertices", H5P_DEFAULT));
+    ASSERT_TRUE(vertices);
+    const auto vertexSpace = HDF5::Space(H5Dget_space(vertices.get()));
+    ASSERT_TRUE(vertexSpace);
+    ASSERT_EQ(H5Sget_simple_extent_ndims(vertexSpace.get()), 2);
+    std::array<hsize_t, 2> shape{};
+    ASSERT_EQ(H5Sget_simple_extent_dims(vertexSpace.get(), shape.data(), nullptr), 2);
+    ASSERT_EQ(shape[0], 4u);
+    ASSERT_EQ(shape[1], 3u);
+    std::array<Real, 12> coordinates{};
+    ASSERT_GE(H5Dread(vertices.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                coordinates.data()),
+      0);
+    std::set<std::array<Real, 3>> actualCoordinates;
+    for (size_t i = 0; i < 4; ++i)
+    {
+      actualCoordinates.insert(
+        {coordinates[3 * i], coordinates[3 * i + 1], coordinates[3 * i + 2]});
+    }
+    const std::set<std::array<Real, 3>> expectedCoordinates{
+      {0, 0, 0}, {2, 0, 0}, {0, 3, 0}, {0, 0, 4}};
+    EXPECT_EQ(actualCoordinates, expectedCoordinates);
+    const auto topology =
+      HDF5::DataSet(H5Dopen2(file.get(), "/Mesh/XDMF/Topology", H5P_DEFAULT));
+    ASSERT_TRUE(topology);
+    const auto topologySpace = HDF5::Space(H5Dget_space(topology.get()));
+    ASSERT_TRUE(topologySpace);
+    ASSERT_EQ(H5Sget_simple_extent_ndims(topologySpace.get()), 1);
+    hsize_t count = 0;
+    ASSERT_EQ(H5Sget_simple_extent_dims(topologySpace.get(), &count, nullptr), 1);
+    ASSERT_EQ(count, 5u);
+    std::array<std::uint64_t, 5> indices{};
+    ASSERT_GE(H5Dread(topology.get(), H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                indices.data()),
+      0);
+    EXPECT_EQ(indices[0], 6u); // External XDMF mixed-topology tetrahedron identifier.
+    EXPECT_EQ((std::set<std::uint64_t>(indices.begin() + 1, indices.end())),
+      (std::set<std::uint64_t>{0, 1, 2, 3}));
+    const auto attributeFile = HDF5::File(
+      H5Fopen((m_directory / "value.0.h5").c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+    ASSERT_TRUE(attributeFile);
+    const auto attribute = HDF5::DataSet(
+      H5Dopen2(attributeFile.get(), "/GridFunction/Values/Data", H5P_DEFAULT));
+    ASSERT_TRUE(attribute);
+    const auto attributeSpace = HDF5::Space(H5Dget_space(attribute.get()));
+    ASSERT_TRUE(attributeSpace);
+    ASSERT_EQ(H5Sget_simple_extent_ndims(attributeSpace.get()), 1);
+    ASSERT_EQ(H5Sget_simple_extent_dims(attributeSpace.get(), &count, nullptr), 1);
+    ASSERT_EQ(count, 4u);
+    std::array<Real, 4> values{};
+    ASSERT_GE(H5Dread(attribute.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                values.data()),
+      0);
+    for (size_t i = 0; i < 4; ++i)
+    {
+      EXPECT_EQ(values[i],
+        1 + coordinates[3 * i] + 2 * coordinates[3 * i + 1] + 4 * coordinates[3 * i + 2]);
+    }
+  }
 
   /// @brief Empty filename placeholders normalize repeated separators and preserve static data.
   TEST_F(XDMFTest, EmptyPlaceholdersNormalizeFileReferences)

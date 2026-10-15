@@ -1504,3 +1504,43 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   collector, not the complete backend CI matrix. At the latest live read,
   f6d558fe5 has fifteen successful test jobs, 36 running and 223 queued, with
   no failures. This collection update stays local under the deferred-push rule.
+
+- XDMF publication/recovery tests: a directory placed at the XML output path
+  causes close() to report contextual MemberFunctionException diagnostics while
+  preserving the open state and snapshot count. After removing the obstruction,
+  flush() publishes both existing and later snapshots without closing the
+  writer. Explicit close finalizes; a later close does no IO, even if the
+  generated XML has been removed, and writes remain rejected after closure.
+- A separate analytic tetrahedron test independently reads HDF5 coordinate,
+  topology and nodal-value datasets. Exact shapes are checked before reading
+  fixed buffers; coordinate sets, mixed-topology identifier/index sets, XYZ
+  metadata and affine field samples are verified against independently known
+  values. The tetrahedron identifier follows the external XDMF format table:
+  https://www.xdmf.org/index.php/XDMF_Model_and_Format#Topology . The 3D branch
+  already had runtime hits; this test strengthens its data/metadata oracle.
+- All eight XDMF cases pass separately in Debug, Release and native ASan/LSan
+  with leak detection enabled: 16 normal and eight sanitizer case-runs. Normal
+  runner discovery profiles are isolated from actual case profiles. Native
+  IO/QF dependencies were rebuilt from current headers. Closing before flush
+  succeeds fails only the new recovery test; returning XY for dimension three
+  fails only the new 3D test, with the other seven cases passing in each
+  private mutation. Neither mutation nor sanitizer counters enter coverage.
+- History confirms commit0046901a9 deliberately removed destructor close to
+  avoid MPI collective lifecycle hazards. Correct the stale auto-close wording
+  without changing executable behavior. Snapshot232 preserves all 570 production
+  hashes; only XDMF.h lifecycle comments differ from snapshot221. Physical line
+  counts stay unchanged, and every old/fresh executable coverage location maps
+  to byte-identical code at the same line. All previous implementation-hit
+  retirements remain in provenance history.
+- Run233 retains 404 normal reports and measures 38,392 / 40,384 production
+  lines (\(95.0674\%\)), with two additional publication-error diagnostic hits
+  and no denominator change. Nonproduction and missing-source records are empty.
+  Formatting, style lint and all nine auditor tests pass. The latest live CI
+  read for published f6d558fe5 has 26 successful test jobs, 40 running and 208
+  queued, with no failures; this batch remains local under the deferred-push
+  condition.
+- Additional template-audit boundary: OptionalReference currently exposes only
+  non-const pointer/dereference member functions. Its existing tests exercise
+  mutable wrappers borrowing mutable and const referents. Const-wrapper access
+  is an API gap, rather than a supported specialization certified by its four
+  covered lines; no new interface or source exclusion is introduced for it.
