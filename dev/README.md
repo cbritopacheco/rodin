@@ -2128,3 +2128,21 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   support libraries. Sanitizer, failed-timing and original-implementation red
   profiles are excluded from coverage. Current-source aggregate coverage
   remains pending fresh CI confirmation.
+
+
+### Point-element contracts from the source audit
+
+- Add six real/complex P1 point-element cases covering constant reproduction,
+  zero derivative extensions, vector component functionals at every supported
+  extent, rectangular matrix component ordering, and zero polynomial order.
+  Non-real coefficients prevent complex component loss from going unnoticed.
+  The reference point and nodal functional both have zero coordinates.
+- All 53 cases in the existing P1 executable pass separately in normal Release
+  (run384) and assertion-enabled mode (run391). No production source changes
+  are needed. Run385 privately changes the point first derivative from zero
+  to one: all six new cases reject that wrong finite value, while the segment
+  derivative control passes. Mutation headers and counters stay excluded.
+- Run396 verifies the current P1 source hashes against snapshot362, captures
+  the two normal test-object profiles, and confirms execution of the previously
+  unhit point derivative assertion/zero return and vector point-order return.
+  This is a file-specific check, not a changed-source aggregate percentage.

@@ -2,6 +2,7 @@
 #include "Rodin/Test/Random.h"
 
 #include <complex>
+#include <type_traits>
 #include "Rodin/Variational/P1.h"
 
 using namespace Rodin;
@@ -12,6 +13,124 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  template <class Scalar>
+  class PointP1ElementTest : public ::testing::Test
+  {};
+
+  using PointScalarTypes = ::testing::Types<Real, Complex>;
+  TYPED_TEST_SUITE(PointP1ElementTest, PointScalarTypes);
+
+  /// @brief Point elements reproduce constants with zero derivative extensions.
+  TYPED_TEST(PointP1ElementTest, ScalarConstantAndDerivativeConvention)
+  {
+    using Scalar = TypeParam;
+    const P1Element<Scalar> element(Polytope::Type::Point);
+    const Math::SpatialPoint reference(0);
+    ASSERT_EQ(element.getCount(), 1u);
+    EXPECT_EQ(element.getOrder(), 0u);
+    const auto& basis = element.getBasis(0);
+    EXPECT_EQ(basis(reference), Scalar(1));
+    EXPECT_EQ(basis.getGradient()(reference).size(), 0u);
+    for (size_t direction = 0; direction < 3; ++direction)
+    {
+      EXPECT_EQ(basis.template getDerivative<0>(direction)(reference), Scalar(1));
+      EXPECT_EQ(basis.template getDerivative<1>(direction)(reference), Scalar(0));
+      EXPECT_EQ(basis.template getDerivative<2>(direction)(reference), Scalar(0));
+    }
+    const Scalar coefficient = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(2, -3);
+      else
+        return Scalar(2.5);
+    }();
+    EXPECT_EQ(element.getLinearForm(0)([&](const Math::SpatialPoint& node) {
+      EXPECT_EQ(node.size(), 0u);
+      return coefficient;
+    }),
+      coefficient);
+  }
+
+  /// @brief Vector point functionals select every component without spatial variation.
+  TYPED_TEST(PointP1ElementTest, VectorComponentFunctionalsAndOrder)
+  {
+    using Scalar = TypeParam;
+    const Math::SpatialPoint reference(0);
+    const Scalar coefficient = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(2, -3);
+      else
+        return Scalar(2.5);
+    }();
+    for (size_t dimension = 1; dimension <= 3; ++dimension)
+    {
+      const P1Element<Math::SpatialVector<Scalar>> element(
+        Polytope::Type::Point, dimension);
+      EXPECT_EQ(element.getCount(), dimension);
+      EXPECT_EQ(element.getOrder(), 0u);
+      const auto data = [&](const Math::SpatialPoint& node) {
+        EXPECT_EQ(node.size(), 0u);
+        Math::SpatialVector<Scalar> value(dimension);
+        for (size_t component = 0; component < dimension; ++component)
+          value(component) = Scalar(component + 1) * coefficient;
+        return value;
+      };
+      for (size_t local = 0; local < dimension; ++local)
+      {
+        const auto& basis = element.getBasis(local);
+        const auto value = basis(reference);
+        ASSERT_EQ(value.size(), dimension);
+        for (size_t component = 0; component < dimension; ++component)
+        {
+          EXPECT_EQ(value(component), Scalar(local == component));
+          EXPECT_EQ(basis.template getDerivative<1>(component, 0)(reference), Scalar(0));
+        }
+        EXPECT_EQ(element.getLinearForm(local)(data), Scalar(local + 1) * coefficient);
+        const auto jacobian = basis.getJacobian()(reference);
+        EXPECT_EQ(jacobian.rows(), dimension);
+        EXPECT_EQ(jacobian.cols(), 0u);
+      }
+    }
+  }
+
+  /// @brief Rectangular matrix point functionals preserve complex component ordering.
+  TYPED_TEST(PointP1ElementTest, MatrixComponentFunctionalsAndDerivatives)
+  {
+    using Scalar = TypeParam;
+    const P1Element<Math::SpatialMatrix<Scalar>> element(Polytope::Type::Point, 2, 3);
+    const Math::SpatialPoint reference(0);
+    ASSERT_EQ(element.getCount(), 6u);
+    EXPECT_EQ(element.getOrder(), 0u);
+    const Scalar coefficient = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(2, -3);
+      else
+        return Scalar(2.5);
+    }();
+    const auto data = [&](const Math::SpatialPoint& node) {
+      EXPECT_EQ(node.size(), 0u);
+      Math::SpatialMatrix<Scalar> value(2, 3);
+      for (size_t row = 0; row < 2; ++row)
+      {
+        for (size_t column = 0; column < 3; ++column)
+          value(row, column) = Scalar(3 * row + column + 1) * coefficient;
+      }
+      return value;
+    };
+    for (size_t local = 0; local < 6; ++local)
+    {
+      const auto& basis = element.getBasis(local);
+      const auto value = basis(reference);
+      for (size_t row = 0; row < 2; ++row)
+      {
+        for (size_t column = 0; column < 3; ++column)
+          EXPECT_EQ(value(row, column), Scalar(local == 3 * row + column));
+      }
+      EXPECT_EQ(element.getLinearForm(local)(data), Scalar(local + 1) * coefficient);
+      for (size_t direction = 0; direction < 3; ++direction)
+        EXPECT_EQ(basis.template getDerivative<1>(direction)(reference).norm(), 0);
+    }
+  }
+
   TEST(Rodin_Variational_RealP1Element, PyramidApexGradientReproducesAffineFields)
   {
     const RealP1Element element(Polytope::Type::Pyramid);
