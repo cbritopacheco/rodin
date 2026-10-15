@@ -1718,3 +1718,39 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   and no published Codecov result. Keep the commits local until CI failure or
   completion, and keep the goal active pending both 95% coverage and remote
   verification.
+
+### Full complex H1 restriction matrix and CI coverage publication
+
+- Run267 compiles the complete PETSc MPI H1 restriction target against the
+  fresh complex PETSc 3.19 RelWithDebInfo libraries, using one compiler for
+  this large template translation unit. Run269 executes its full numerical
+  case at 1, 2, 3, 4 and 8 ranks, one distributed group at a time. All five
+  groups pass without skips and within the existing 300-second gate: 162.12,
+  133.54, 125.17, 128.77 and 204.02 seconds, respectively.
+- The case retains degrees one through six, scalar/vector/matrix backend
+  ranges, every supported positive-dimensional geometry, affine and curved
+  parents, and full/boundary/sparse/nested submesh restriction. It checks
+  every held functional and independent polynomial samples; the paired
+  getGlobalIndex overload is also checked against the returned DOF array.
+  Discovery profiles are isolated, and prior successful counters are saved
+  before execution. No assertions, combinations or rank counts are removed.
+- Run270 retains 414 source-matched normal reports. It measures
+  40,375 / 42,546 production lines (\(94.8973\%\)): 52 additional hits and
+  23 more measured lines. Observed function symbols increase from 92,317 to
+  93,818, and hit symbols from 68,327 to 69,598. This is runtime template
+  evidence, not include-only instantiation. All 565 retained production
+  hashes match snapshot236; nonproduction and missing-source records are empty.
+  The remaining line target is 44 additional hits at this denominator.
+- The two existing PETScComplexConvergence submesh jobs now capture and
+  publish production coverage rather than discard it. Select gcov-14,
+  explicitly disable sanitizers, enable coverage only for suite=submesh,
+  audit function inventories and save unique threading-specific artifacts.
+  Upload only filtered RodinCoverage.info with automatic discovery disabled.
+  Every existing build/run command, suite/rank matrix, thread setting, test
+  timeout and job budget remains unchanged. Other complex-convergence suites
+  keep coverage disabled. Local actual CMake capture validates the collector.
+- Workflow validation confirms that exact scope; existing Unit and matrix-range
+  collector checks, style lint and all nine coverage-auditor tests pass.
+  Latest run270 CI read: 128 successful test jobs, forty running and 106 queued,
+  no failures. Keep the changes local until CI failure or completion and keep
+  the goal active pending both 95% and published CI/Codecov verification.

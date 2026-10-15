@@ -817,6 +817,8 @@ jobs:
         multithreaded: [ON, OFF]
         suite: [bulk, curved_helmholtz_light, curved_helmholtz_tetrahedron, curved_helmholtz_pyramid, curved_projection, boundary, curved_boundary, submesh]
     env:
+      GCOV: gcov-14
+      RODIN_COVERAGE: ${{ matrix.suite == 'submesh' && 'ON' || 'OFF' }}
       OMP_NUM_THREADS: 2
 
     steps:
@@ -836,7 +838,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y
           libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
           libscotch-dev libmetis-dev libhdf5-dev libomp-dev
-          libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config
+          libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config lcov
 
       - name: Configure complex PETSc convergence build
         run: >-
@@ -852,6 +854,10 @@ jobs:
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
+          -DRODIN_USE_ASAN=OFF
+          -DRODIN_USE_UBSAN=OFF
+          -DRODIN_CODE_COVERAGE=${{ env.RODIN_COVERAGE }}
+          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
           -DPETSc_DIR="$(pkg-config --variable=prefix PETSc)"
 
       - name: Build complex PETSc convergence suite
@@ -926,6 +932,34 @@ jobs:
         run: >-
           ctest --test-dir build/tests -R '^RodinConvergenceIsoparametricPETScHelmholtzBoundary_'
           --output-on-failure --no-tests=error -j 1
+
+      - name: Capture complex H1 production coverage
+        if: matrix.suite == 'submesh'
+        run: |
+          cmake --build build --target RodinCoverage
+          python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
+
+      - name: Save complex H1 coverage audit
+        if: matrix.suite == 'submesh'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-audit-complex-h1-mt${{ matrix.multithreaded }}
+          path: |
+            build/coverage-audit.json
+            build/RodinCoverage.info
+
+      - name: Upload complex H1 production coverage to Codecov
+        if: matrix.suite == 'submesh'
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ github.workspace }}/build/RodinCoverage.info
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: RelWithDebInfo,mt-${{ matrix.multithreaded }},petsc-complex,h1
+          name: cov-complex-h1-mt${{ matrix.multithreaded }}
+          root_dir: ${{ github.workspace }}
+          use_pypi: true
+          fail_ci_if_error: true
 
   PETScMatrixRanges:
     # Preserve the real/complex matrix-range and coefficient-storage gates
