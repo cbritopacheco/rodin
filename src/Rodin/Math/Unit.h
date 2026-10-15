@@ -37,6 +37,8 @@ namespace Rodin::Math
    * - Compound assignments: +=, -=, *=, /=
    * - Comparison: ==, !=, <, >, <=, >=
    *
+   * Comparisons follow the stored scalar type, including unordered floating-point NaN values.
+   *
    * ## Example Usage
    * ```cpp
    * // Creating a derived unit class
@@ -180,7 +182,7 @@ namespace Rodin::Math
       constexpr
       bool operator<=(const Unit& other) const
       {
-        return !operator>(other);
+        return m_v <= other.m_v;
       }
 
       /**
@@ -191,7 +193,7 @@ namespace Rodin::Math
       constexpr
       bool operator>=(const Unit& other) const
       {
-        return !operator<(other);
+        return m_v >= other.m_v;
       }
 
       /**

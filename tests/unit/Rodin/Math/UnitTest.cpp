@@ -12,6 +12,7 @@
 #include <limits>
 #include <numbers>
 #include <type_traits>
+#include <vector>
 #include "Rodin/Types.h"
 
 using namespace Rodin;
@@ -326,5 +327,35 @@ TEST_F(UnitTest, DegreeConversionPreservesFiniteScale)
     ASSERT_TRUE(std::isfinite(actual));
     EXPECT_NEAR(actual, expected,
       RoundingAllowance * std::abs(expected) + std::numeric_limits<Real>::denorm_min());
+  }
+}
+
+/// @brief Every unit comparison agrees with its scalar, including unordered floating values.
+TYPED_TEST(ConcreteUnitTest, ComparisonsMatchStoredScalar)
+{
+  using Scalar = typename TypeParam::Type;
+  std::vector<Scalar> values{std::numeric_limits<Scalar>::lowest(), Scalar(-1), Scalar(0),
+    Scalar(1), std::numeric_limits<Scalar>::max()};
+  if constexpr (std::is_floating_point_v<Scalar>)
+  {
+    const Scalar infinity = std::numeric_limits<Scalar>::infinity();
+    values.insert(values.end(),
+      {-infinity, infinity, -Scalar(0), -std::numeric_limits<Scalar>::denorm_min(),
+        std::numeric_limits<Scalar>::denorm_min(), std::nextafter(Scalar(1), Scalar(0)),
+        std::nextafter(Scalar(1), infinity), std::numeric_limits<Scalar>::quiet_NaN()});
+  }
+  for (const Scalar left : values)
+  {
+    for (const Scalar right : values)
+    {
+      SCOPED_TRACE(::testing::Message() << left << ", " << right);
+      const TypeParam a(left), b(right);
+      EXPECT_EQ(a == b, left == right);
+      EXPECT_EQ(a != b, left != right);
+      EXPECT_EQ(a < b, left < right);
+      EXPECT_EQ(a > b, left > right);
+      EXPECT_EQ(a <= b, left <= right);
+      EXPECT_EQ(a >= b, left >= right);
+    }
   }
 }

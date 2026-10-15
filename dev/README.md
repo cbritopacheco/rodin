@@ -1441,3 +1441,30 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   setup attempts are excluded. Formatting, style lint and all nine auditor
   tests pass. The repair remains local while CI validates f6d558fe5; the latest
   live job read has four successes, 30 running and 240 queued, with no failures.
+
+- Unit comparison boundary audit: implementing <= as !(>) and >= as !(<)
+  incorrectly made floating NaN values ordered. New exact comparisons against
+  the stored scalar fail for the custom Real unit, Rad, Deg and Float storage
+  on the prior code; Integer storage and the other 21 unit cases pass.
+  Both operators now delegate directly to the scalar, preserving unordered
+  floating semantics and ordinary integer ordering. The class contract states
+  this behavior explicitly.
+- Each of the five unit types checks all six comparison operators over every
+  pair of representative values. Floating values include signed zero,
+  subnormals, adjacent representable values around one, finite extremes,
+  infinities and quiet NaN; integer values include both finite extrema. A
+  private <=-to-< mutation fails all five new cases and the existing comparison
+  case while twenty unrelated cases pass, demonstrating equality boundaries
+  are checked even for the integer control.
+- All 26 cases pass separately in Debug, Release and native ASan/LSan with leak
+  detection enabled: 52 normal case-runs and 26 sanitizer case-runs. Snapshot221
+  retains all 570 production hashes. The 395 prepared reports retire all prior
+  Unit header/function hits, retaining earlier Unit/Deg retirements in history.
+  Run223 contains 399 normal reports and measures 38,386 / 40,380 production
+  lines (\(95.0619\%\)); the line counts are unchanged although the boundary
+  semantics now have regression checks. Nonproduction and missing-source
+  records are empty; pre-fix, mutation and sanitizer observations are excluded.
+  Style lint and all nine auditor tests pass. The batch remains local while
+  CI validates f6d558fe5: six successful test jobs, 34 running and 234 queued,
+  with no failures at the latest live read. Style, Installation and
+  Documentation have passed for that published head; Build and Tests continue.
