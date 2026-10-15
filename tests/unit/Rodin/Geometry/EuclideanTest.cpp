@@ -11,6 +11,7 @@
 #include <utility>
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Math/Vector.h"
+#include "Rodin/Math/Deg.h"
 #include "Rodin/Math/Matrix.h"
 #include "Rodin/Geometry/Euclidean.h"
 
@@ -896,3 +897,23 @@ template class Rodin::Geometry::Euclidean::Point<0, Rodin::Float>;
 template class Rodin::Geometry::Euclidean::Point<0, Rodin::Real>;
 template class Rodin::Geometry::Euclidean::Box<0, Rodin::Float>;
 template class Rodin::Geometry::Euclidean::Box<0, Rodin::Real>;
+
+/// @brief Concrete degree arithmetic remains usable by the planar sphere angle API.
+TEST(Rodin_Geometry_Euclidean, DegreeArithmeticFeedsSphereParameterization)
+{
+  const Sphere<2> circle({2, 3}, 2);
+  const Math::Deg start(30), increment(60);
+  const auto quarterTurn = (start + increment).toRad();
+  const auto point = circle(quarterTurn);
+  EXPECT_NEAR(point[0], 2, 1e-12);
+  EXPECT_NEAR(point[1], 5, 1e-12);
+  const auto tangent = circle.tangent(quarterTurn);
+  EXPECT_NEAR(tangent(point), 0, 1e-12);
+  EXPECT_NEAR(tangent.distance(Point<2>(2, 7)), 2, 1e-12);
+  const auto zero = ((start + increment) - Math::Deg(90)).toRad();
+  EXPECT_NEAR(circle(zero)[0], 4, 1e-12);
+  EXPECT_NEAR(circle(zero)[1], 3, 1e-12);
+  const auto negative = (-(start + increment)).toRad();
+  EXPECT_NEAR(circle(negative)[0], 2, 1e-12);
+  EXPECT_NEAR(circle(negative)[1], 1, 1e-12);
+}

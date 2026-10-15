@@ -53,7 +53,9 @@ namespace Rodin::Math
        */
       Rad toRad() const
       {
-        return Rad(Real(*this) * Constants::pi() / Real(180));
+        // Form the radians-per-degree scale before multiplying large finite angles.
+        constexpr Real RadiansPerDegree = Constants::pi() / Real(180);
+        return Rad(Real(*this) * RadiansPerDegree);
       }
   };
 }

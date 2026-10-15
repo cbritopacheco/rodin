@@ -1407,3 +1407,37 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   production hashes match snapshot199. Formatting, style lint and all nine
   coverage-auditor tests pass. Fresh remote CI/Codecov remain required after
   publishing the local batches and the separately committed timeout fix.
+
+- Unit/angle template audit: Unit.h previously had only six measured lines,
+  despite documented arithmetic that returns concrete unit types. Binary/unary
+  arithmetic actually returned the base Unit and compound assignments returned
+  base references, preventing ordinary Rad/Deg expression composition. Tests
+  cover all six arithmetic operators and all four compound operators for a
+  custom Real unit, Rad, Deg, Float storage and Integer storage, checking exact
+  values, concrete result types and original-object references during chaining.
+  The operators now preserve Derived values/references as documented.
+- Degree conversion multiplied by pi before dividing by 180, overflowing for
+  large finite inputs whose radian result is finite. Forming the conversion
+  scale before multiplying preserves these results. The independent oracle
+  divides before multiplying and uses standard-library pi in long double;
+  its ordering also stays finite where long double has only double precision.
+  Tests include cardinal, fractional, signed, near-minimum-normal and large
+  finite degree values with rounding-scaled tolerances.
+- The final source reproduces eleven failed cases with frozen pre-fix Unit/Deg
+  headers, while the ten existing unit cases pass. All 21 final unit cases pass
+  separately in Debug, Release and native ASan/LSan with leak detection enabled.
+  A private half-angle mutation fails the conversion oracle while the other
+  twenty cases pass. Both 75-case Euclidean runs pass, including a concrete
+  angle-expression consumer checking independently known sphere points and
+  tangents; both eleven-case Rad runs pass. This batch contributes 214 successful
+  normal case-runs and 21 sanitizer case-runs. No PDE formulation changed.
+- Snapshot213 retains all 570 production hashes. The 383 prepared reports retire
+  all previous Unit/Deg header and function observations; other production
+  hashes remain identical to snapshot199. Run218 includes 395 normal reports
+  and measures 38,386 / 40,380 production lines (\(95.0619\%\)). Unit.h now
+  measures 45 covered lines instead of six, and Deg.h adds three covered lines:
+  42 additional measured lines and 42 additional hits. Nonproduction and
+  missing-source records are empty. Pre-fix, mutation, sanitizer and superseded
+  setup attempts are excluded. Formatting, style lint and all nine auditor
+  tests pass. The repair remains local while CI validates f6d558fe5; the latest
+  live job read has four successes, 30 running and 240 queued, with no failures.
