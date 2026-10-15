@@ -1893,3 +1893,18 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   coverage CI jobs include it. Formatting and house-style lint pass. The
   current remote run still has no failures; keep these batches local until
   the deferred-push condition is met and require published coverage validation.
+
+### Retained CI aggregate inputs
+
+- Save filtered RodinCoverage.info alongside coverage-audit.json in the
+  existing regular and slow coverage artifacts, matching the optional/PETSc
+  collectors. This preserves the line records needed to reproduce the final
+  same-head union independently of the external coverage service.
+- Parse the workflow and compare its complete structure before/after: only
+  the two artifact path fields change. Existing matrices, commands, test
+  selections, serial execution, dependencies and time budgets are identical.
+  All five coverage-producing job families still upload only the filtered
+  production LCOV file with automatic discovery disabled.
+- Never combine raw reports from different heads without source provenance.
+  The latest local measurement stays 40,552 / 42,675 lines
+  (\(95.0251904\%\)); this artifact-retention change does not alter it.

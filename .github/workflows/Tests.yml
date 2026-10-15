@@ -1468,7 +1468,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-audit-slow-mt${{ matrix.multithreaded }}
-          path: build/coverage-audit.json
+          path: |
+            build/coverage-audit.json
+            build/RodinCoverage.info
 
       - name: Upload slow-test coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -1590,7 +1592,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-audit-regular-mt${{ matrix.multithreaded }}
-          path: build/coverage-audit.json
+          path: |
+            build/coverage-audit.json
+            build/RodinCoverage.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
