@@ -14,6 +14,7 @@ namespace Rodin::Geometry
     const size_t dim = parent.getDimension();
     const size_t sdim = parent.getSpaceDimension();
     m_parent = parent;
+    m_dimension = 0;
     m_build.initialize(sdim);
     m_s2ps.resize(dim + 1);
     m_sidx.resize(dim + 1, 0);
@@ -40,6 +41,10 @@ namespace Rodin::Geometry
     m_s2ps[d].left.push_back(parentIdx);
     m_s2ps[d].right.insert(std::pair<Index, Index>{ parentIdx, childIdx });
     ++m_sidx[d];
+
+    // finalize() emits vertices through nodes()/vertex(), not polytope insertion.
+    if (d == 0)
+      return *this;
 
     // Remap vertices and emit polytope ONCE
     const auto& parentPolytope = conn.getPolytope(d, parentIdx);
