@@ -6,6 +6,7 @@
  */
 #include "Rodin/Math/Vector.h"
 #include <fstream>
+#include <array>
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 
@@ -21,6 +22,154 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Closed surfaces and single cells report absent face selections without changing topology.
+  TEST(Rodin_Geometry_Mesh, EmptyFaceSelectionsReportMemberContext)
+  {
+    for (bool closed : {false, true})
+    {
+      SCOPED_TRACE(closed);
+      auto mesh = closed ? LocalMesh::Box(Polytope::Type::Triangle, {2, 2, 2})
+                         : LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {2, 2});
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 2);
+      const auto vertices = mesh.getVertexCount();
+      const auto faces = mesh.getFaceCount();
+      const auto cells = mesh.getCellCount();
+      ASSERT_GT(faces, 0u);
+      for (Index face = 0; face < faces; ++face)
+      {
+        EXPECT_EQ(
+          mesh.getConnectivity().getIncidence({1, 2}, face).size(), closed ? 2u : 1u);
+        EXPECT_EQ(mesh.isBoundary(face), !closed);
+        EXPECT_EQ(mesh.isInterface(face), closed);
+      }
+      try
+      {
+        if (closed)
+          mesh.getBoundary();
+        else
+          mesh.getInterface();
+        FAIL() << "An absent face selection was accepted";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find(closed ? "In member function getBoundary"
+                                      : "In member function getInterface"),
+          std::string::npos);
+        EXPECT_NE(
+          message.find(closed ? "empty boundary" : "empty interface"), std::string::npos);
+      }
+      EXPECT_EQ(mesh.getVertexCount(), vertices);
+      EXPECT_EQ(mesh.getFaceCount(), faces);
+      EXPECT_EQ(mesh.getCellCount(), cells);
+      size_t selected = 0;
+      for (auto face = closed ? mesh.getInterface() : mesh.getBoundary(); face; ++face)
+        ++selected;
+      EXPECT_EQ(selected, faces);
+    }
+  }
+
+  /// @brief Public mesh file operations replace existing geometry and preserve physical cells and attributes.
+  TEST(Rodin_Geometry_Mesh, PublicFileOperationsRoundTripAndReplaceMesh)
+  {
+    const auto directory = boost::filesystem::temp_directory_path() /
+      boost::filesystem::unique_path("rodin-public-mesh-%%%%-%%%%-%%%%");
+    ASSERT_TRUE(boost::filesystem::create_directories(directory));
+    auto original = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    original.scale(0.5);
+    original.setAttribute({1, 0}, 17);
+    original.setAttribute({1, 1}, 23);
+    const FlatSet<Real> expectedVertices{0, 0.5, 1};
+    const FlatSet<std::array<Real, 2>> expectedCells{
+      std::array<Real, 2>{0, 0.5}, std::array<Real, 2>{0.5, 1}};
+    for (const auto format : {FileFormat::MFEM, FileFormat::MEDIT, FileFormat::HDF5})
+    {
+      SCOPED_TRACE(static_cast<int>(format));
+      const auto filename = directory /
+        (std::to_string(static_cast<int>(format)) +
+          (format == FileFormat::HDF5 ? ".h5" : ".mesh"));
+      original.save(filename, format);
+      auto loaded = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {2, 2});
+      EXPECT_EQ(&loaded.load(filename, format), &loaded);
+      EXPECT_EQ(loaded.getDimension(), 1u);
+      EXPECT_EQ(loaded.getSpaceDimension(), 1u);
+      ASSERT_EQ(loaded.getVertexCount(), 3u);
+      ASSERT_EQ(loaded.getCellCount(), 2u);
+      FlatSet<Real> actualVertices;
+      for (Index vertex = 0; vertex < loaded.getVertexCount(); ++vertex)
+        actualVertices.insert(loaded.getVertices()(0, vertex));
+      EXPECT_EQ(actualVertices, expectedVertices);
+      FlatSet<std::array<Real, 2>> actualCells;
+      for (auto cell = loaded.getCell(); cell; ++cell)
+      {
+        EXPECT_EQ(cell->getGeometry(), Polytope::Type::Segment);
+        const auto& vertices = cell->getVertices();
+        ASSERT_EQ(vertices.size(), 2u);
+        std::array<Real, 2> coordinates{
+          loaded.getVertices()(0, vertices[0]), loaded.getVertices()(0, vertices[1])};
+        std::sort(coordinates.begin(), coordinates.end());
+        actualCells.insert(coordinates);
+        EXPECT_EQ(cell->getAttribute(), coordinates[0] == 0 ? 17 : 23);
+      }
+      EXPECT_EQ(actualCells, expectedCells);
+    }
+    EXPECT_GT(boost::filesystem::remove_all(directory), 0u);
+    EXPECT_FALSE(boost::filesystem::exists(directory));
+  }
+
+  /// @brief Unsupported mesh formats report member context before touching files or mesh state.
+  TEST(Rodin_Geometry_Mesh, UnsupportedFileFormatsPreserveMeshAndFilesystem)
+  {
+    const auto directory = boost::filesystem::temp_directory_path() /
+      boost::filesystem::unique_path("rodin-unsupported-mesh-%%%%-%%%%-%%%%");
+    const auto filename = directory / "mesh";
+    ASSERT_FALSE(boost::filesystem::exists(directory));
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.setAttribute({2, 0}, 17);
+    const auto original = mesh.getVertices();
+    for (int value : {-1, 255})
+    {
+      SCOPED_TRACE(value);
+      const auto format = static_cast<FileFormat>(value);
+      for (bool loading : {true, false})
+      {
+        SCOPED_TRACE(loading);
+        try
+        {
+          if (loading)
+            mesh.load(filename, format);
+          else
+            mesh.save(filename, format);
+          FAIL() << "An unsupported mesh format was accepted";
+        }
+        catch (const Alert::Exception& error)
+        {
+          const std::string message = error.what();
+          EXPECT_NE(
+            message.find(loading ? "In member function load" : "In member function save"),
+            std::string::npos);
+          EXPECT_NE(message.find("format unsupported"), std::string::npos);
+          EXPECT_NE(message.find(std::to_string(value)), std::string::npos);
+        }
+        EXPECT_EQ(mesh.getDimension(), 2u);
+        EXPECT_EQ(mesh.getSpaceDimension(), 2u);
+        EXPECT_EQ(mesh.getCellCount(), 2u);
+        EXPECT_EQ(mesh.getAttribute(2, 0), 17);
+        ASSERT_EQ(mesh.getVertexCount(), original.getCount());
+        for (size_t vertex = 0; vertex < original.getCount(); ++vertex)
+        {
+          for (size_t coordinate = 0; coordinate < original.getDimension(); ++coordinate)
+          {
+            EXPECT_EQ(
+              mesh.getVertices()(coordinate, vertex), original(coordinate, vertex));
+          }
+        }
+        EXPECT_FALSE(boost::filesystem::exists(directory));
+      }
+    }
+  }
+
   /// @brief Failed file opens preserve mesh state and create no output.
   TEST(Rodin_Geometry_Mesh, FileOpenFailuresPreserveMeshAndFilesystem)
   {

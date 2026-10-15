@@ -1804,3 +1804,38 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   run281 CI read for f6d558fe5: 203 successful jobs, forty running and 31 queued,
   with no failures. The goal remains active and this fix remains local until
   the deferred-push condition is met and published CI/Codecov is verified.
+
+### Public mesh file and absent-face contracts
+
+- Exercise public Mesh::save/load for MFEM, MEDIT and HDF5, replacing an
+  existing two-dimensional mesh with a one-dimensional mesh. Compare physical
+  coordinate and segment sets independently of vertex numbering, and verify
+  the association between cell attributes and physical segments. Permit valid
+  format sidecars and remove all scratch output after the checks.
+- Reject unsupported format values with native member-function diagnostics
+  while preserving geometry, topology, attributes and the absent filesystem
+  destination. A closed triangular surface and a single quadrilateral also
+  verify empty boundary/interface exceptions, independent edge valences,
+  preserved topology and the complementary nonempty face selection.
+- The first file fixture assumed normalized UniformGrid spacing. Actual grid
+  spacing is one, and all formats preserved it correctly. Scale the source
+  explicitly by one half; exclude every failed run285 profile. No production
+  change was necessary for these file or face-selection contracts.
+- Run286 passes eleven mesh cases individually in both normal Debug and
+  Release. Run288 preserves their initial and runtime notes, including the
+  production Mesh.cpp records, and measures 40,515 / 42,667 lines
+  (\(94.9563\%\)) across 423 reports. The two extra measured lines remain
+  in the denominator. Run289 freshly rebuilds and passes twelve SubMesh,
+  five skin-lifecycle and three UniformGrid cases one process at a time.
+  Run290 retains their cumulative report and reaches 40,530 hits.
+- Run292 passes all twelve final mesh cases individually in each normal
+  build mode. Run293 retains both initial/runtime report pairs and all prior
+  valid reports: 40,534 / 42,667 production lines (\(95.0008203\%\)),
+  428 reports, 93,850 observed and 69,649 hit function symbols. All 565
+  production hashes match snapshot274. Nonproduction and missing-source
+  records are empty; failed, sanitizer and discovery counters stay excluded.
+- This reaches the local line target with a narrow margin. It does not prove
+  every uninstantiated template, and published CI/Codecov confirmation remains
+  required. Keep the goal active and defer the batch push until the current
+  Tests run fails or completes. Changed-line formatting, house-style lint and
+  all nine coverage-auditor tests pass.
