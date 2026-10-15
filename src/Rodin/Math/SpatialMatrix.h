@@ -175,6 +175,9 @@ namespace Rodin::Math
 
       /**
        * @brief Assigns from an Eigen array expression, resizing to match.
+       *
+       * The expression is copied into fixed-capacity storage before the active
+       * entries and shape are replaced, including when it references this matrix.
        * @param other Object to copy from.
        * @returns Reference to this object after the operation.
        */
@@ -182,87 +185,14 @@ namespace Rodin::Math
       constexpr
       SpatialMatrix& operator=(const Eigen::ArrayBase<EigenDerived>& other)
       {
-        const std::uint8_t r = static_cast<std::uint8_t>(other.rows());
-        const std::uint8_t c = static_cast<std::uint8_t>(other.cols());
-        assert(r <= MaxSize && c <= MaxSize);
-        m_rows = r;
-        m_cols = c;
-        zeroStorage();
-        switch (m_rows)
-        {
-          case 3:
-            switch (m_cols)
-            {
-              case 3:
-                m_data(2, 2) =
-                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
-                [[fallthrough]];
-              case 2:
-                m_data(2, 1) =
-                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
-                [[fallthrough]];
-              case 1:
-                m_data(2, 0) =
-                  other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
-                break;
-              case 0:
-                break;
-              default:
-                assert(false);
-            }
-            [[fallthrough]];
-          case 2:
-            switch (m_cols)
-            {
-              case 3:
-                m_data(1, 2) =
-                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
-                [[fallthrough]];
-              case 2:
-                m_data(1, 1) =
-                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
-                [[fallthrough]];
-              case 1:
-                m_data(1, 0) =
-                  other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
-                break;
-              case 0:
-                break;
-              default:
-                assert(false);
-            }
-            [[fallthrough]];
-          case 1:
-            switch (m_cols)
-            {
-              case 3:
-                m_data(0, 2) =
-                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
-                [[fallthrough]];
-              case 2:
-                m_data(0, 1) =
-                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
-                [[fallthrough]];
-              case 1:
-                m_data(0, 0) =
-                  other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
-                break;
-              case 0:
-                break;
-              default:
-                assert(false);
-            }
-            break;
-          case 0:
-            break;
-          default:
-            assert(false);
-        }
-        return *this;
+        return *this = other.matrix();
       }
 
       /**
        * @brief Assigns from an Eigen matrix expression, resizing to match.
+       *
+       * The expression is copied into fixed-capacity storage before the active
+       * entries and shape are replaced, including when it references this matrix.
        * @param other Object to copy from.
        * @returns Reference to this object after the operation.
        */
@@ -273,24 +203,22 @@ namespace Rodin::Math
         const std::uint8_t r = static_cast<std::uint8_t>(other.rows());
         const std::uint8_t c = static_cast<std::uint8_t>(other.cols());
         assert(r <= MaxSize && c <= MaxSize);
-        m_rows = r;
-        m_cols = c;
-        zeroStorage();
-        switch (m_rows)
+        SpatialMatrix owned(r, c);
+        switch (r)
         {
           case 3:
-            switch (m_cols)
+            switch (c)
             {
               case 3:
-                m_data(2, 2) =
+                owned.m_data(2, 2) =
                   other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                m_data(2, 1) =
+                owned.m_data(2, 1) =
                   other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                m_data(2, 0) =
+                owned.m_data(2, 0) =
                   other(static_cast<Eigen::Index>(2), static_cast<Eigen::Index>(0));
                 break;
               case 0:
@@ -300,18 +228,18 @@ namespace Rodin::Math
             }
             [[fallthrough]];
           case 2:
-            switch (m_cols)
+            switch (c)
             {
               case 3:
-                m_data(1, 2) =
+                owned.m_data(1, 2) =
                   other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                m_data(1, 1) =
+                owned.m_data(1, 1) =
                   other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                m_data(1, 0) =
+                owned.m_data(1, 0) =
                   other(static_cast<Eigen::Index>(1), static_cast<Eigen::Index>(0));
                 break;
               case 0:
@@ -321,18 +249,18 @@ namespace Rodin::Math
             }
             [[fallthrough]];
           case 1:
-            switch (m_cols)
+            switch (c)
             {
               case 3:
-                m_data(0, 2) =
+                owned.m_data(0, 2) =
                   other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(2));
                 [[fallthrough]];
               case 2:
-                m_data(0, 1) =
+                owned.m_data(0, 1) =
                   other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(1));
                 [[fallthrough]];
               case 1:
-                m_data(0, 0) =
+                owned.m_data(0, 0) =
                   other(static_cast<Eigen::Index>(0), static_cast<Eigen::Index>(0));
                 break;
               case 0:
@@ -346,7 +274,7 @@ namespace Rodin::Math
           default:
             assert(false);
         }
-        return *this;
+        return *this = owned;
       }
 
       /**

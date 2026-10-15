@@ -22,6 +22,92 @@ namespace
   using SpatialScalars = ::testing::Types<Float, Real, Complex>;
   TYPED_TEST_SUITE(SpatialBoundary, SpatialScalars);
 
+  /// @brief Aliased matrix expressions preserve values, rectangular shapes and zeroed inactive storage.
+  TYPED_TEST(SpatialBoundary, MatrixExpressionsPreserveAliasedCoordinates)
+  {
+    using Scalar = TypeParam;
+    for (std::uint8_t rows = 0; rows <= 3; ++rows)
+    {
+      for (std::uint8_t columns = 0; columns <= 3; ++columns)
+      {
+        for (const bool array : {false, true})
+        {
+          SCOPED_TRACE(::testing::Message()
+            << unsigned(rows) << 'x' << unsigned(columns) << " array=" << array);
+          SpatialMatrix<Scalar> values(rows, columns);
+          std::array<Scalar, 9> original{};
+          for (size_t row = 0; row < rows; ++row)
+          {
+            for (size_t column = 0; column < columns; ++column)
+            {
+              Scalar entry = Scalar(1 + 3 * row + column);
+              if constexpr (std::is_same_v<Scalar, Complex>)
+                entry += Complex(0, Real(2 + row + column));
+              original[3 * row + column] = entry;
+              values(row, column) = entry;
+            }
+          }
+          if (array)
+            EXPECT_EQ(
+              &(values = values.getData().topLeftCorner(rows, columns).array()), &values);
+          else
+            EXPECT_EQ(&(values = values.getData().topLeftCorner(rows, columns)), &values);
+          ASSERT_EQ(values.rows(), rows);
+          ASSERT_EQ(values.cols(), columns);
+          for (size_t row = 0; row < rows; ++row)
+          {
+            for (size_t column = 0; column < columns; ++column)
+              EXPECT_EQ(values(row, column), original[3 * row + column]);
+          }
+          if (array)
+            values = values.getData().topLeftCorner(rows, columns).array() + Scalar(2);
+          else
+            values = Scalar(2) * values.getData().topLeftCorner(rows, columns);
+          std::array<Scalar, 9> transformed{};
+          for (size_t row = 0; row < rows; ++row)
+          {
+            for (size_t column = 0; column < columns; ++column)
+            {
+              const Scalar entry = original[3 * row + column];
+              transformed[3 * row + column] =
+                array ? entry + Scalar(2) : Scalar(2) * entry;
+              EXPECT_EQ(values(row, column), transformed[3 * row + column]);
+            }
+          }
+          if (array)
+            values = values.getData().topLeftCorner(rows, columns).array().transpose();
+          else
+            values = values.getData().topLeftCorner(rows, columns).transpose();
+          ASSERT_EQ(values.rows(), columns);
+          ASSERT_EQ(values.cols(), rows);
+          for (size_t row = 0; row < columns; ++row)
+          {
+            for (size_t column = 0; column < rows; ++column)
+              EXPECT_EQ(values(row, column), transformed[3 * column + row]);
+          }
+          const std::uint8_t shortRows = columns / 2, shortColumns = rows / 2;
+          if (array)
+            values = values.getData().topLeftCorner(shortRows, shortColumns).array();
+          else
+            values = values.getData().topLeftCorner(shortRows, shortColumns);
+          ASSERT_EQ(values.rows(), shortRows);
+          ASSERT_EQ(values.cols(), shortColumns);
+          values.resize(3, 3);
+          for (size_t row = 0; row < 3; ++row)
+          {
+            for (size_t column = 0; column < 3; ++column)
+            {
+              const Scalar expected = row < shortRows && column < shortColumns
+                ? transformed[3 * column + row]
+                : Scalar(0);
+              EXPECT_EQ(values(row, column), expected);
+            }
+          }
+        }
+      }
+    }
+  }
+
   /// @brief Matrix and array expressions are evaluated before overwriting aliased coordinates.
   TYPED_TEST(SpatialBoundary, EigenExpressionAssignmentPreservesAliasedCoordinates)
   {

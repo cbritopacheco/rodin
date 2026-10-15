@@ -1288,3 +1288,28 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   production records. Fresh vector/matrix compiler notes expose 43 more
   measured lines than run187, and that denominator is retained. The regression
   repair and its coverage evidence remain local while CI checks 16e6a576b.
+
+- SpatialMatrix aliasing regression: both Eigen expression assignment overloads
+  shared the vector defect, clearing the destination before reading aliased
+  entries. Float, Real and Complex regressions fail on the prior matrix code
+  across every shape with row/column extents zero through three. They cover
+  self-assignment, scaling/translation, rectangular transpose, shrinking views
+  and zeroed inactive entries after regrowth. Matrix expression assignment now
+  writes into an independent fixed-capacity SpatialMatrix and only then replaces
+  the destination. The existing unrolled one/two/three-entry copy kernels remain;
+  array expressions forward to the same canonical matrix expression path.
+  The historical zeroStorage contract is preserved rather than removed.
+- All 24 spatial-boundary cases pass separately in Debug, Release and ASan/LSan
+  with leak detection enabled. Source snapshot192 retains all 570 production
+  hashes. The 359 prepared reports retire both changed matrix expression
+  assignment methods; unchanged lines retain only byte-identical mapped hits.
+  This continues the earlier vector-method retirement rather than reinstating
+  stale observations. Fresh normal math profiles will replace the retired hits.
+- Final matrix batch: all 80 main matrix/vector/scalar-product cases pass in
+  both Debug and Release. Including boundary cases, this gives 208 successful
+  normal case-runs and 24 ASan/LSan case-runs. Run196 retains 367 normal reports
+  and measures 38,267 / 40,268 production lines (\(95.0308\%\)), with no
+  nonproduction or missing-source records. All production hashes match
+  snapshot192. Pre-fix and sanitizer counters are excluded. The matrix repair
+  remains local alongside the earlier vector and XDMF follow-up batches while
+  CI validates pushed head 16e6a576b.
