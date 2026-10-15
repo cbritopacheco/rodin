@@ -27,23 +27,33 @@
 //                         p_out = 150 psi, the CWP line pressure),
 //   u = 0                 on the pipe wall and on the knife.
 //
-// Discretisation: backward Euler; P1/P1 for (u, p) with split orthogonal
-// subgrid scales (OSS, Codina 2000), the projections Pi_h being L2
-// projections onto P1 (OrthogonalProjection.h, as in examples/Heat):
+// Discretisation: variable-step BDF2 (backward Euler on the first step,
+// -kv_bdf 1 throughout); P1/P1 for (u, p) with split orthogonal subgrid
+// scales (OSS, Codina 2000), the projections Pi_h onto P1 with the lumped
+// mass matrix (-kv_lumped false: consistent L2, OrthogonalProjection.h):
 //
-//   + tau_M rho ((grad u) u^k - Pi[(grad u^n) u^n], (grad v) u^k)
+//   + tau_M rho ((grad u) a - Pi[(grad u^n) a^n], (grad v) a)
 //   + tau_M/rho (grad p - Pi[grad p^n], grad q)
 //   + tau_C (div u - Pi[div u^n], div v),
 //
 //   tau_M = [(2/dt)^2 + (2 |u^k|/h)^2 + (4 nu^k/h^2)^2]^(-1/2),
 //   tau_C = mu^k + rho |u^k| h / 2,   h = (6 sqrt(2) |T|)^(1/3),
 //
-// with the projections lagged at t^n (refreshed once per step: lagged at the
+// a the cell mean of u^k (P0; the Galerkin convection keeps (grad u) u^k),
+// and the projections lagged at t^n (refreshed once per step: lagged at the
 // iterate they make Picard contract only like tau/(tau + dt), see
 // examples/Heat/ForcedConvection.cpp). The nonlinearity is resolved by Picard
-// iterations within each step: convection velocity u^k, viscosity mu(u^k),
-// tau(u^k), all coefficients projected onto P0 (constant per cell, exact for
-// P1 velocities) so every integrand has a known polynomial order.
+// iterations within each step, starting from the linear extrapolation of
+// (u^{n-1}, u^n): convection velocity u^k, viscosity mu(u^k), tau(u^k), all
+// coefficients projected onto P0 (constant per cell, exact for P1
+// velocities) so every integrand has a known polynomial order.
+//
+// Cost. Per Picard iteration: one assembly and one MUMPS factorisation. The
+// assembly dominates (~80 % of the step on 2 ranks for the coarse test mesh,
+// ~130 us per cell and assembly): each integrator walks the mesh on its own.
+// The log prints the time per phase at every step and the load balance of
+// the partition at start-up; without Scotch the fallback partitioner can
+// leave the whole mesh on rank 0.
 //
 // Force on the gate. F = -int_knife sigma n dS (n the outward normal of the
 // fluid), the force exerted by the fluid on the knife, global axes: x
@@ -91,10 +101,11 @@
 // inlet (velocity|pressure), umean, profile (auto|laminar|turbulent|uniform), pin, pout,
 // ramp, tangential (inlet penalty, kg/(m^2 s)), total_pressure (bool), dt,
 // dtmin, dtmax, tend, adaptive_dt (bool), grow, shrink, easy, hard, maxit,
-// tol, tau_dt (bool), picard_monitor (bool), tavg, steady_tol, steady_window, output_every, scale.
+// tol, tau_dt (bool), bdf (1|2), extrapolate (bool), lumped (bool), picard_monitor (bool), tavg, steady_tol, steady_window, output_every, scale.
 // Solvers: -kv_flow_ (MUMPS LU by default), -kv_proj_* (CG + Jacobi).
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cassert>
 #include <cmath>
 #include <fstream>
@@ -147,6 +158,7 @@ namespace Rodin::Examples::Valve
       using System = PETSc::Math::LinearSystem;
       using FlowProblem = Problem<System, VectorTrial, ScalarTrial, VectorTest, ScalarTest>;
       using ScalarLF = LinearForm<ScalarFES, ::Vec>;
+      using VectorLF = LinearForm<VectorFES, ::Vec>;
       using Vec3 = std::array<Real, 3>;
 
       struct Labels
@@ -205,6 +217,9 @@ namespace Rodin::Examples::Valve
         bool tauDt = true;
         int maxRetries = 4;
         bool picardMonitor = false;
+        int bdf = 2;                  ///< 1: backward Euler; 2: BDF2 (variable step), BDF1 on the first step
+        bool extrapolate = true;      ///< Picard starts from u^n + w (u^n - u^{n-1}), w = dt/dt_prev
+        bool lumpedProjection = true; ///< OSS projections with the lumped mass matrix
 
         // Output and stopping.
         Real tAverage = -1.0;      ///< s, start of the time average (< 0: tEnd/2)
@@ -221,14 +236,17 @@ namespace Rodin::Examples::Valve
           m_sh(std::integral_constant<size_t, 1>{}, m_mesh),
           m_ch(m_mesh),
           m_u(m_vh), m_p(m_sh), m_v(m_vh), m_q(m_sh),
-          m_uOld(m_vh), m_uIt(m_vh), m_pIt(m_sh),
+          m_uOld(m_vh), m_uOld2(m_vh), m_uIt(m_vh), m_pIt(m_sh),
           m_muGF(m_ch), m_tauMGF(m_ch), m_tauMRhoGF(m_ch), m_tauCGF(m_ch),
-          m_loadX(m_sh), m_loadY(m_sh), m_loadZ(m_sh),
-          m_piConv(m_vh, "kv_proj_conv_"), m_piGradP(m_vh, "kv_proj_gradp_"),
-          m_piDiv(m_sh, "kv_proj_div_"), m_muOut(m_sh, "kv_proj_mu_"),
+          m_ax(m_ch), m_ay(m_ch), m_az(m_ch),
+          m_load(m_vh), m_comp{ VectorGF(m_vh), VectorGF(m_vh), VectorGF(m_vh) },
+          m_piConv(m_vh, "kv_proj_conv_", cfg.lumpedProjection),
+          m_piGradP(m_vh, "kv_proj_gradp_", cfg.lumpedProjection),
+          m_piDiv(m_sh, "kv_proj_div_", cfg.lumpedProjection),
+          m_muOut(m_sh, "kv_proj_mu_", cfg.lumpedProjection),
           m_flow(m_u, m_p, m_v, m_q), m_flowKSP(m_flow),
           m_z(m_sh), m_one(m_sh),
-          m_flux(m_z), m_lfArea(m_z), m_lfKnife(m_z), m_lfRes(m_z)
+          m_w(m_vh), m_flux(m_z), m_lfArea(m_w), m_lfKnife(m_w), m_lfRes(m_w), m_lfAux(m_w)
       {
         if (m_mesh.getSpaceDimension() != 3)
           throw std::runtime_error("KnifeGateValve expects a 3D tetrahedral mesh.");
@@ -236,6 +254,7 @@ namespace Rodin::Examples::Valve
         Math::SpatialVector<Real> zero(3);
         zero.setZero();
         m_uOld = zero;
+        m_uOld2 = zero;
         m_uIt = zero;
         m_pIt = 0.0;
         m_one = Real(1);
@@ -252,11 +271,21 @@ namespace Rodin::Examples::Valve
 
         // Lumped boundary areas: A_i (all boundaries; the nodal wall load
         // -R_i/A_i written to XDMF) and A_i^knife (> 0 marks the knife nodes).
-        m_lfArea = BoundaryIntegral(m_one, m_z).over(
-            FlatSet<Attribute>{ L.inlet, L.outlet, L.wall, L.knife });
-        m_lfArea.assemble();
-        m_lfKnife = BoundaryIntegral(m_one, m_z).over(L.knife);
-        m_lfKnife.assemble();
+        {
+          const VectorFunction ones{ 1.0, 1.0, 1.0 };
+          m_lfArea = BoundaryIntegral(Dot(ones, m_w)).over(
+              FlatSet<Attribute>{ L.inlet, L.outlet, L.wall, L.knife });
+          m_lfArea.assemble();
+          m_lfKnife = BoundaryIntegral(Dot(ones, m_w)).over(L.knife);
+          m_lfKnife.assemble();
+          for (size_t k = 0; k < 3; ++k)
+          {
+            Math::SpatialVector<Real> ek(3);
+            ek.setZero();
+            ek(k) = 1.0;
+            m_comp[k] = ek;  // 1 on the dofs of component k
+          }
+        }
 
         m_velocityInlet = (m_cfg.inlet == "velocity");
         if (!m_velocityInlet && m_cfg.inlet != "pressure")
@@ -296,11 +325,22 @@ namespace Rodin::Examples::Valve
         m_xdmf.add("velocity", m_u.getSolution());
         m_xdmf.add("pressure", m_p.getSolution());
         m_xdmf.add("viscosity", m_muOut.get());
-        m_xdmf.add("wall_load_x", m_loadX);  // force per area of the fluid on the walls (Pa)
-        m_xdmf.add("wall_load_y", m_loadY);
-        m_xdmf.add("wall_load_z", m_loadZ);
+        m_xdmf.add("wall_load", m_load);  // force per area of the fluid on the walls (Pa)
 
         const auto cells = m_mesh.getCellCount(), vertices = m_mesh.getVertexCount();  // collective
+        // Load balance: owned cells per rank. Without Scotch the fallback
+        // partitioner can leave (almost) the whole mesh on rank 0, and then
+        // every process but one idles: check this line first when a run is slow.
+        PetscInt ownedCells = 0;
+        {
+          PetscErrorCode ierr = VecGetLocalSize(m_muGF.getData(), &ownedCells);
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+        PetscInt minCells = 0, maxCells = 0;
+        MPI_Allreduce(&ownedCells, &minCells, 1, MPIU_INT, MPI_MIN, PETSC_COMM_WORLD);
+        MPI_Allreduce(&ownedCells, &maxCells, 1, MPIU_INT, MPI_MAX, PETSC_COMM_WORLD);
+        const int ranks = m_mesh.getContext().getCommunicator().size();
         if (isRoot())
         {
           const Real D = 2.0 * std::sqrt(m_area[0] / M_PI);
@@ -309,6 +349,19 @@ namespace Rodin::Examples::Valve
                         << Alert::NewLine << "       D=" << D << " m  V=" << m_volume << " m^3"
                         << "  A_in=" << m_area[0] << " A_out=" << m_area[1] << " A_wall=" << m_area[2]
                         << " A_knife=" << m_area[3] << " m^2" << Alert::Raise;
+          const Real imbalance = static_cast<Real>(maxCells) * ranks / static_cast<Real>(cells);
+          Alert::Info() << "[partition] " << ranks << " ranks"
+#ifdef RODIN_USE_SCOTCH
+                        << " (Scotch)"
+#else
+                        << " (no Scotch: BalancedCompactPartitioner)"
+#endif
+                        << "  owned cells per rank: min " << minCells << " max " << maxCells
+                        << "  max/mean = " << imbalance << Alert::Raise;
+          if (ranks > 1 && imbalance > 1.5)
+            Alert::Warning() << "[partition] badly balanced (max/mean = " << imbalance
+                             << "): most of the work sits on few ranks. Build Rodin with "
+                                "-DRODIN_USE_SCOTCH=ON." << Alert::Raise;
           Alert::Info() << "[fluid] rho=" << m_cfg.rho << " kg/m^3  K=" << m_cfg.K << " Pa s^n  n=" << m_cfg.n
                         << "  mu in [" << m_cfg.muMin << ", " << m_cfg.muMax << "] Pa s"
                         << Alert::NewLine << "[bc] inlet: "
@@ -368,9 +421,16 @@ namespace Rodin::Examples::Valve
           }
 
           // Forces at t^{n+1} need u^n: before the history update.
+          Timer te(m_timing.forces);
           const auto r = evaluate();
+          te.stop();
+          Timer tp(m_timing.projections);
+          m_uOld2.setData(m_uOld.getData());
           m_uOld.setData(m_u.getSolution().getData());
+          m_dtPrev = m_dt;
+          ++m_history;
           updateStabilisation();
+          tp.stop();
 
           if (m_t >= tAvg - 1.0e-12)
           {
@@ -415,6 +475,29 @@ namespace Rodin::Examples::Valve
       }
 
     private:
+      /// Wall time per step by phase (root rank), reset after each report.
+      struct Timing
+      {
+        Real setup = 0, coefficients = 0, assemble = 0, solve = 0, forces = 0, projections = 0, output = 0;
+      };
+
+      /// Adds the elapsed wall time to a Timing field on stop() or destruction.
+      class Timer
+      {
+        public:
+          explicit Timer(Real& acc) : m_acc(&acc), m_start(std::chrono::steady_clock::now()) {}
+          ~Timer() { stop(); }
+          void stop()
+          {
+            if (m_acc)
+              *m_acc += std::chrono::duration<Real>(std::chrono::steady_clock::now() - m_start).count();
+            m_acc = nullptr;
+          }
+        private:
+          Real* m_acc;
+          std::chrono::steady_clock::time_point m_start;
+      };
+
       struct Result
       {
         Vec3 F{}, Fd{}, Fp{}, Fw{}, Fdyn{};
@@ -503,11 +586,39 @@ namespace Rodin::Examples::Valve
       // ---- Picard iterations of one time step --------------------------------
       int step()
       {
+        Timer timer(m_timing.setup);
+        // Variable-step BDF2 (w = dt/dt_prev): (b0 u - b1 u^n + b2 u^{n-1})/dt,
+        // b0 = (1 + 2w)/(1 + w), b1 = 1 + w, b2 = w^2/(1 + w); BDF1 without history.
+        const bool history = m_history >= 1 && m_dtPrev > 0.0;
+        const Real w = history ? m_dt / m_dtPrev : 0.0;
+        if (m_cfg.bdf == 2 && history)
+        {
+          m_bdf[0] = (1.0 + 2.0 * w) / (1.0 + w);
+          m_bdf[1] = 1.0 + w;
+          m_bdf[2] = w * w / (1.0 + w);
+        }
+        else
+        {
+          m_bdf[0] = 1.0;
+          m_bdf[1] = 1.0;
+          m_bdf[2] = 0.0;
+        }
+        // Picard starts from the linear extrapolation of (u^{n-1}, u^n).
+        m_uIt.setData(m_uOld.getData());
+        if (m_cfg.extrapolate && history)
+        {
+          m_uIt.axpy(w, m_uOld);
+          m_uIt.axpy(-w, m_uOld2);
+        }
         setupFlow();  // holds 1/dt and p_in(t^{n+1})
+        timer.stop();
         int k = 0;
         for (; k < m_cfg.maxIterations; ++k)
         {
-          updateCoefficients();  // mu, tau at u^k
+          {
+            Timer tc(m_timing.coefficients);
+            updateCoefficients();  // mu, tau at u^k
+          }
           solve();
           // Relative increment, with a velocity floor of 1e-3 U_B (U_B the
           // Bernoulli velocity of p_in - p_out): a closed gate has u ~ 0 and a
@@ -537,8 +648,10 @@ namespace Rodin::Examples::Valve
         const Real rho = m_cfg.rho, dt = m_dt;
         const auto n = BoundaryNormal(m_mesh);
 
-        const auto convU = Mult(Jacobian(m_u), m_uIt);    // (grad u) u^k
-        const auto streamV = Mult(Jacobian(m_v), m_uIt);  // (grad v) u^k
+        const auto convU = Mult(Jacobian(m_u), m_uIt);    // (grad u) u^k (Galerkin)
+        const auto adv = VectorFunction(m_ax, m_ay, m_az);  // P0 mean of u^k (OSS)
+        const auto convA = Mult(Jacobian(m_u), adv);
+        const auto streamV = Mult(Jacobian(m_v), adv);
         const auto symU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
         const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
         const auto tangentialU = m_u - Dot(m_u, n) * n;
@@ -546,14 +659,16 @@ namespace Rodin::Examples::Valve
         const Real pIn = inletPressure(), pOut = m_cfg.pOut;
         const Real totalPressure = m_cfg.totalPressure ? 1.0 : 0.0;
 
-        auto body = (rho / dt) * Integral(m_u, m_v) - (rho / dt) * Integral(m_uOld, m_v)
+        const Real b0 = m_bdf[0], b1 = m_bdf[1], b2 = m_bdf[2];
+        auto body = (rho * b0 / dt) * Integral(m_u, m_v)
+               - (rho / dt) * Integral(b1 * m_uOld - b2 * m_uOld2, m_v)
                + rho * Integral(convU, m_v)
                + 2.0 * Integral(m_muGF * symU, symV)
                - Integral(m_p, Div(m_v))
                + Integral(Div(m_u), m_q)
 
                // Split OSS, projections at t^n.
-               + rho * Integral(m_tauMGF * convU, streamV)
+               + rho * Integral(m_tauMGF * convA, streamV)
                - rho * Integral(m_tauMGF * m_piConv.get(), streamV)
                + Integral(m_tauMRhoGF * Grad(m_p), Grad(m_q))
                - Integral(m_tauMRhoGF * m_piGradP.get(), Grad(m_q))
@@ -591,8 +706,13 @@ namespace Rodin::Examples::Valve
 
       void solve()
       {
-        m_flow.assemble();
+        {
+          Timer ta(m_timing.assemble);
+          m_flow.assemble();
+        }
+        Timer ts(m_timing.solve);
         m_flow.solve(m_flowKSP);
+        ts.stop();
         ::KSPConvergedReason reason;
         PetscErrorCode ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
         assert(ierr == PETSC_SUCCESS);
@@ -642,6 +762,7 @@ namespace Rodin::Examples::Valve
           const Real c = 4.0 * muAt(p) / (rho * h * h);
           return 1.0 / std::sqrt(a * a + b * b + c * c);
         };
+        updateAdvection();
         m_muGF.project(RealFunction(muAt));
         m_tauMGF.project(RealFunction(tauAt));
         m_tauMRhoGF.project(RealFunction([&tauAt, rho](const Point& p) { return tauAt(p) / rho; }));
@@ -650,10 +771,26 @@ namespace Rodin::Examples::Valve
           return muAt(p) + 0.5 * rho * std::sqrt(Math::dot(u, u)) * cellSize(p); }));
       }
 
+      /// Advection velocity a of the OSS convective terms, constant per cell:
+      /// the cell mean of u^k (its value at the centroid, exact for P1).
+      /// tau_M rho ((grad u) a - Pi, (grad v) a) with a in P0 instead of u^k in
+      /// P1: the same O(h) consistency, and the integrand no longer evaluates
+      /// the P1 grid function u^k twice at every quadrature point and for
+      /// every pair of basis functions, which made this one term ~30 % of the
+      /// assembly. The Galerkin convection keeps u^k.
+      void updateAdvection()
+      {
+        m_ax.project(RealFunction([this](const Point& p) { return m_uIt.getValue(p)(0); }));
+        m_ay.project(RealFunction([this](const Point& p) { return m_uIt.getValue(p)(1); }));
+        m_az.project(RealFunction([this](const Point& p) { return m_uIt.getValue(p)(2); }));
+      }
+
       /// OSS projections Pi_h at the converged state of the step (t^n of the next).
       void updateStabilisation()
       {
-        m_piConv.project(Mult(Jacobian(m_uIt), m_uIt));
+        updateAdvection();
+        const auto adv = VectorFunction(m_ax, m_ay, m_az);
+        m_piConv.project(Mult(Jacobian(m_uIt), adv));
         m_piGradP.project(Grad(m_pIt));
         m_piDiv.project(Div(m_uIt));
       }
@@ -668,33 +805,27 @@ namespace Rodin::Examples::Valve
         const Real rho = m_cfg.rho, dt = m_dt;
         Result r;
 
-        // (1) Consistent reaction. R_k(z) = a((u_h, p_h), z e_k): the momentum
-        // rows of setupFlow() for the test v = z e_k, without boundary terms.
-        // Integrands: P1/P0 grid functions and P1 test functions only.
+        // (1) Consistent reaction. R(w) = a((u_h, p_h), w): the momentum rows
+        // of setupFlow() for every P1 vector test w, without boundary terms,
+        // one assembly for the three components. Integrands: P1/P0 grid
+        // functions and P1 test functions only.
         const auto J = Jacobian(u);
         const auto conv = Mult(J, u);
-        const auto stress = m_muGF * (J + Transpose(J));  // 2 mu e(u)
-        ScalarGF* loads[3] = { &m_loadX, &m_loadY, &m_loadZ };
-        for (size_t k = 0; k < 3; ++k)
-        {
-          const VectorFunction e{ Real(k == 0), Real(k == 1), Real(k == 2) };
-          const auto row = VectorFunction(
-              Component(stress, k, 0), Component(stress, k, 1), Component(stress, k, 2));
-          m_lfRes = Integral((rho / dt) * (Dot(e, u) - Dot(e, m_uOld)), m_z)
-                  + Integral(rho * Dot(e, conv), m_z)
-                  + Integral(row, Grad(m_z))
-                  + Integral(-1.0 * p * e, Grad(m_z))
-                  + Integral(rho * m_tauMGF * (Dot(e, conv) - Dot(e, m_piConv.get())) * u, Grad(m_z))
-                  + Integral(m_tauCGF * (Div(u) - m_piDiv.get()) * e, Grad(m_z));
-          m_lfRes.assemble();
-          // Pressure of the pipe wall on each node, int_wall p n_k phi_i: the
-          // wall share of the reaction at the knife-wall junction nodes.
-          m_lfAux = BoundaryIntegral(p * Dot(n, e), m_z).over(L.wall);
-          m_lfAux.assemble();
-          const auto [knife, junction] = reaction(*loads[k]);
-          r.F[k] = knife;
-          r.Fw[k] = junction;
-        }
+        const auto adv = VectorFunction(m_ax, m_ay, m_az);
+        const auto convA = Mult(J, adv);
+        const Real b0 = m_bdf[0], b1 = m_bdf[1], b2 = m_bdf[2];
+        m_lfRes = Integral((rho / dt) * (b0 * u - b1 * m_uOld + b2 * m_uOld2), m_w)
+                + Integral(rho * conv, m_w)
+                + Integral(m_muGF * (J + Transpose(J)), Jacobian(m_w))  // 2 mu e(u) : e(w)
+                + Integral(-1.0 * p, Div(m_w))
+                + Integral(rho * m_tauMGF * (convA - m_piConv.get()), Mult(Jacobian(m_w), adv))
+                + Integral(m_tauCGF * (Div(u) - m_piDiv.get()), Div(m_w));
+        m_lfRes.assemble();
+        // Pressure of the pipe wall on each node, int_wall p (n . w): the wall
+        // share of the reaction at the knife-wall junction nodes.
+        m_lfAux = BoundaryIntegral(p * Dot(n, m_w)).over(L.wall);
+        m_lfAux.assemble();
+        reaction(r);
 
         // (2) Direct surface integral, gradient from the incident cell (Point path).
         for (size_t k = 0; k < 3; ++k)
@@ -723,8 +854,9 @@ namespace Rodin::Examples::Valve
         return r;
       }
 
-      /// From the assembled residual R_k (m_lfRes) and the wall pressure
-      /// P_k,i = int_wall p n_k phi_i (m_lfAux):
+      /// From the assembled residual R (m_lfRes, one entry per velocity dof
+      /// (node i, component k)) and the wall pressure P_k,i = int_wall p n_k
+      /// phi_i (m_lfAux):
       ///
       ///   F_k = -sum_{i on the knife} (R_k,i + P_k,i).
       ///
@@ -734,50 +866,57 @@ namespace Rodin::Examples::Valve
       /// exactly (P1 p, same faces), so what is left of the wall is its shear
       /// on a strip one cell wide. (Weighting R_k,i by A_i^knife/A_i instead
       /// loses the knife part of the junction reaction: -1.7% of the thrust of
-      /// the closed FPC8 on the coarse mesh.) Also writes the nodal wall load
-      /// -R_k,i/A_i (lumped, Pa) into @p load, for visualisation only.
-      ///
-      /// @returns (F_k, sum_{i on the knife} P_k,i), the second being the
-      ///          junction correction that was applied.
-      std::pair<Real, Real> reaction(ScalarGF& load)
+      /// the closed FPC8 on the coarse mesh.) The component of each dof comes
+      /// from the interpolants of e_k (m_comp). Also writes the nodal wall load
+      /// -R_k,i/A_i (lumped, Pa) into m_load, for visualisation only.
+      void reaction(Result& out)
       {
         const ::Vec R = m_lfRes.getVector(), A = m_lfArea.getVector();
-        const ::Vec Ak = m_lfKnife.getVector(), Aw = m_lfAux.getVector();
+        const ::Vec Ak = m_lfKnife.getVector(), P = m_lfAux.getVector();
         ::Vec t;
         PetscErrorCode ierr = VecDuplicate(R, &t);
         assert(ierr == PETSC_SUCCESS);
         PetscInt nloc = 0;
         ierr = VecGetLocalSize(R, &nloc);
         assert(ierr == PETSC_SUCCESS);
-        const PetscScalar *r, *a, *ak, *aw;
+        const PetscScalar *r, *a, *ak, *pw, *e[3];
         PetscScalar* tt;
         VecGetArrayRead(R, &r);
         VecGetArrayRead(A, &a);
         VecGetArrayRead(Ak, &ak);
-        VecGetArrayRead(Aw, &aw);
+        VecGetArrayRead(P, &pw);
+        for (size_t k = 0; k < 3; ++k)
+          VecGetArrayRead(m_comp[k].getData(), &e[k]);
         VecGetArray(t, &tt);
-        Real local[2] = { 0.0, 0.0 };
+        Real local[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         for (PetscInt i = 0; i < nloc; ++i)
         {
           tt[i] = (a[i] > 0.0) ? -r[i] / a[i] : 0.0;  // interior nodes: no load
-          if (ak[i] > 0.0)                             // node of the knife
-          {
-            local[0] -= r[i] + aw[i];
-            local[1] += aw[i];
-          }
+          if (ak[i] > 0.0)                             // dof of a knife node
+            for (size_t k = 0; k < 3; ++k)
+            {
+              local[k] -= e[k][i] * (r[i] + pw[i]);
+              local[3 + k] += e[k][i] * pw[i];
+            }
         }
         VecRestoreArray(t, &tt);
-        VecRestoreArrayRead(Aw, &aw);
+        for (size_t k = 0; k < 3; ++k)
+          VecRestoreArrayRead(m_comp[k].getData(), &e[k]);
+        VecRestoreArrayRead(P, &pw);
         VecRestoreArrayRead(Ak, &ak);
         VecRestoreArrayRead(A, &a);
         VecRestoreArrayRead(R, &r);
-        Real global[2];
-        MPI_Allreduce(local, global, 2, MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
-        load.setData(t);
+        Real global[6];
+        MPI_Allreduce(local, global, 6, MPI_DOUBLE, MPI_SUM, PETSC_COMM_WORLD);
+        for (size_t k = 0; k < 3; ++k)
+        {
+          out.F[k] = global[k];
+          out.Fw[k] = global[3 + k];
+        }
+        m_load.setData(t);
         ierr = VecDestroy(&t);
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
-        return { global[0], global[1] };
       }
 
       void report(int step, int iterations, const Result& r)
@@ -800,7 +939,12 @@ namespace Rodin::Examples::Valve
                       << "   pressure = (" << r.Fp[0] << ", " << r.Fp[1] << ", " << r.Fp[2] << ") N"
                       << Alert::NewLine
                       << "   F_dyn (F - p_out int n) = (" << r.Fdyn[0] << ", " << r.Fdyn[1] << ", "
-                      << r.Fdyn[2] << ") N" << Alert::Raise;
+                      << r.Fdyn[2] << ") N" << Alert::NewLine
+                      << "   time [s]: setup " << m_timing.setup << "  coefficients " << m_timing.coefficients
+                      << "  assemble " << m_timing.assemble << "  solve " << m_timing.solve
+                      << "  forces " << m_timing.forces << "  projections " << m_timing.projections
+                      << "  output " << m_timing.output << Alert::Raise;
+        m_timing = Timing{};
       }
 
       void summary(bool steady, const Result& r)
@@ -824,6 +968,7 @@ namespace Rodin::Examples::Valve
 
       void write()
       {
+        Timer tw(m_timing.output);
         m_muOut.project(m_muGF);
         m_xdmf.write(m_t).flush();
       }
@@ -918,10 +1063,12 @@ namespace Rodin::Examples::Valve
       VectorTest m_v;
       ScalarTest m_q;
 
-      VectorGF m_uOld, m_uIt;  ///< time level n, Picard iterate k
+      VectorGF m_uOld, m_uOld2, m_uIt;  ///< time levels n, n-1, Picard iterate k
       ScalarGF m_pIt;
       CellGF m_muGF, m_tauMGF, m_tauMRhoGF, m_tauCGF;
-      ScalarGF m_loadX, m_loadY, m_loadZ;  ///< wall load -sigma n (Pa), consistent reaction
+      CellGF m_ax, m_ay, m_az;  ///< advection velocity of the OSS terms: cell mean of u^k
+      VectorGF m_load;     ///< wall load -sigma n (Pa), consistent reaction (lumped)
+      VectorGF m_comp[3];  ///< interpolants of e_k: component of each velocity dof
 
       OrthogonalProjection<VectorFES> m_piConv, m_piGradP;
       OrthogonalProjection<ScalarFES> m_piDiv, m_muOut;
@@ -931,10 +1078,14 @@ namespace Rodin::Examples::Valve
 
       ScalarTest m_z;
       ScalarGF m_one;
-      ScalarLF m_flux, m_lfArea, m_lfKnife, m_lfRes;
-      ScalarLF m_lfAux{ m_z };
+      VectorTest m_w;  ///< test of the reaction forms
+      ScalarLF m_flux;
+      VectorLF m_lfArea, m_lfKnife, m_lfRes, m_lfAux;
 
       Real m_t = 0.0, m_dt = 0.0;
+      Real m_dtPrev = 0.0;                  ///< dt of the last accepted step
+      int m_history = 0;                    ///< accepted steps (BDF2 and extrapolation need 1)
+      Real m_bdf[3] = { 1.0, 1.0, 0.0 };    ///< (b0 u - b1 u^n + b2 u^{n-1})/dt of this step
       bool m_converged = true;
       Real m_area[4] = { 0.0, 0.0, 0.0, 0.0 };
       Real m_volume = 0.0;
@@ -948,6 +1099,7 @@ namespace Rodin::Examples::Valve
       Vec3 m_lastF{}, m_avgF{}, m_avgFd{};
       Real m_lastQ = 0.0, m_avgQ = 0.0, m_avgTime = 0.0;
       Result m_last;
+      Timing m_timing;
       std::ofstream m_csv;
   };
 }
@@ -1044,6 +1196,9 @@ int main(int argc, char** argv)
     boolean("-kv_tau_dt", cfg.tauDt);
     integer("-kv_retries", cfg.maxRetries);
     boolean("-kv_picard_monitor", cfg.picardMonitor);
+    integer("-kv_bdf", cfg.bdf);
+    boolean("-kv_extrapolate", cfg.extrapolate);
+    boolean("-kv_lumped", cfg.lumpedProjection);
     real("-kv_tavg", cfg.tAverage);
     real("-kv_steady_tol", cfg.steadyTolerance);
     integer("-kv_steady_window", cfg.steadyWindow);

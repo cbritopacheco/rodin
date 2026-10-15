@@ -59,7 +59,7 @@ Opciones (prefijo `-kv_`): `mesh`, `out`, `rho`, `K` (Pa·sⁿ), `n`, `gdmin`,
 `mumin`, `mumax`, `inlet` (`velocity`|`pressure`), `umean`, `profile`
 (`auto`|`laminar`|`turbulent`|`uniform`), `pin`, `pout`, `ramp`,
 `total_pressure`, `dt`, `dtmin`, `dtmax`, `tend`, `adaptive_dt`, `easy`,
-`hard`, `maxit`, `tol`, `tau_dt`, `picard_monitor`, `tavg`, `steady_tol`,
+`hard`, `maxit`, `tol`, `tau_dt`, `bdf`, `extrapolate`, `lumped`, `picard_monitor`, `tavg`, `steady_tol`,
 `steady_window`, `output_every`.
 Solver: `-kv_flow_*` (MUMPS LU por defecto; si no hay MUMPS,
 `-kv_flow_pc_factor_mat_solver_type superlu_dist` o `-kv_flow_ksp_type gmres
@@ -103,7 +103,7 @@ cuerpo), no la caída de presión a través de la válvula abierta. Por eso:
 `<out>.csv` (t, dt, iteraciones Picard, Q_in, Q_out, p medias, **F**
 consistente, **F_direct**, **F_pressure**, corrección de unión, **F_dyn**,
 ζ) y `<out>.xdmf` (velocidad, presión, viscosidad y la carga nodal sobre
-las paredes `wall_load_{x,y,z}` en Pa). Al final imprime el promedio
+las paredes `wall_load`, vector en Pa). Al final imprime el promedio
 temporal de F y F_dyn sobre la segunda mitad del intervalo (`-kv_tavg`).
 Con `-kv_steady_tol/-kv_steady_window` se detiene si (F, Q) se congelan.
 
@@ -148,17 +148,42 @@ refinar — eso es lo que se controló en `conv_*` (ver abajo).
 
 ## Estabilización
 
-Split OSS (Codina): `τ_M ρ((∇u)u^k − Π[(∇u^n)u^n], (∇v)u^k)`,
+Split OSS (Codina): `τ_M ρ((∇u)a − Π[(∇u^n)a^n], (∇v)a)`,
 `(τ_M/ρ)(∇p − Π[∇p^n], ∇q)`, `τ_C(div u − Π[div u^n], div v)`, con
-`τ_M = [(2/dt)² + (2|u^k|/h)² + (4ν^k/h²)²]^{−1/2}` y
-`τ_C = μ^k + ρ|u^k|h/2`. El término 2/dt va por defecto: sin él, en agua a
-baja velocidad `τ_M ~ h²/4ν` (≈ 1.5 s con h = 2.5 mm) supera a dt en
-órdenes de magnitud, las proyecciones retrasadas penalizan con peso
-τ/dt ≫ 1 todo cambio dentro del paso, la presión se atrasa respecto del
-flujo y Picard se estanca (`-kv_tau_dt false` lo quita). Las proyecciones
-Π son L2 sobre P1 (`OrthogonalProjection.h`) y se actualizan una vez por
-paso (en el iterado hacen que Picard contraiga sólo como τ/(τ+dt)).
-Coeficientes (μ, τ) en P0, exactos para u en P1.
+`τ_M = [(2/dt)² + (2|u^k|/h)² + (4ν^k/h²)²]^{−1/2}`,
+`τ_C = μ^k + ρ|u^k|h/2` y `a` la media por celda de `u^k` (P0; la
+convección de Galerkin mantiene `(∇u)u^k`). El término 2/dt va por
+defecto: sin él, en agua a baja velocidad `τ_M ~ h²/4ν` (≈ 1.5 s con
+h = 2.5 mm) supera a dt en órdenes de magnitud, las proyecciones
+retrasadas penalizan con peso τ/dt ≫ 1 todo cambio dentro del paso, la
+presión se atrasa respecto del flujo y Picard se estanca
+(`-kv_tau_dt false` lo quita). Las proyecciones Π van sobre P1 con masa
+concentrada (`-kv_lumped false`: L2 consistente) y se actualizan una vez
+por paso (en el iterado hacen que Picard contraiga sólo como τ/(τ+dt)).
+Coeficientes (μ, τ, a) en P0, exactos para u en P1.
+
+Tiempo: BDF2 de paso variable (BDF1 en el primer paso; `-kv_bdf 1` para
+Euler implícito). Picard parte de la extrapolación lineal de
+(u^{n−1}, u^n) (`-kv_extrapolate false` la quita).
+
+## Rendimiento
+
+El log imprime en cada paso el tiempo por fase (`time [s]: setup,
+coefficients, assemble, solve, forces, projections, output`) y al inicio el
+balance de la partición (`[partition] ... max/mean`).
+
+- **Partición.** Sin Scotch, el particionador de respaldo puede dejar casi
+  toda la malla en el rank 0 (medido aquí: 41 510 de 41 514 celdas con 2 y
+  3 procesos), y los demás procesos quedan ociosos. Con
+  `-DRODIN_USE_SCOTCH=ON` queda balanceada (max/mean = 1.01). Si el log
+  muestra max/mean > 1.5, ese es el problema.
+- **Ensamblaje.** Es ~80 % del paso: cada integrador recorre la malla por
+  separado (~130 µs por celda y ensamblaje en 2 procesos). La factorización
+  MUMPS es ~10 % en la malla gruesa de prueba.
+- Medido en la malla gruesa de prueba (FPC8 25 %, 41 k tetraedros, 2
+  procesos, Picard = 2): 16.2 s por paso antes, 11.5 s con advección P0 en
+  la OSS, reacción en un solo ensamblaje y proyección concentrada, 6.7 s
+  además con la partición de Scotch.
 
 ## Notas de uso
 
