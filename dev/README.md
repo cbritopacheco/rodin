@@ -29,6 +29,22 @@ Sanitizer configurations never contribute coverage profiles. Debug compiler
 notes retain assertion-enabled implementations that optimized builds can erase.
 CI audits include function inventories for supported-template review.
 
+`audit_source.py` separately inventories source function bodies and exception
+sites without preprocessing or instantiation. Install its optional developer
+dependencies (`tree-sitter`, `tree-sitter-cpp`) outside the project, then run:
+
+```sh
+python3 dev/audit_source.py --output /tmp/rodin-source-inventory.json
+```
+
+The optional `--line-inventory` accepts JSON mapping repository-relative source
+paths to line-number/hit dictionaries. This permits comparing bodies with the
+validated LCOV union, including bodies absent from otherwise measured headers.
+Absence is an investigation candidate: inlining and constant evaluation can
+remove attribution. Parser recovery locations and unexpanded macro bodies
+remain explicit review limitations. This inventory does not certify all template
+specializations or produce an alternative coverage percentage.
+
 ```sh
 cmake --build build --target RodinCoverage
 python3 dev/audit_coverage.py build/RodinCoverage.info --output build/coverage-audit.json
@@ -1946,3 +1962,34 @@ LFS. Before committing a new resource file, check `git check-attr filter --
 - The remaining current-head CI jobs are the two slow-test configurations;
   272 jobs have succeeded, with no observed failure. Published coverage and
   the deferred push remain pending.
+
+
+### Source-body and exception inventory independent of instantiation
+
+- Run341 syntactically scans all 565 production files plus the umbrella header,
+  retaining inactive preprocessor branches and uninstantiated template bodies.
+  The inventory contains 6,188 function bodies, 4,933 enclosed by template
+  declarations. Comparing against the validated run318 line union identifies
+  1,200 nonempty bodies with no attributed lines and 155 measured bodies with
+  no hits. These are review candidates, not a new coverage denominator:
+  constant evaluation and inlining can erase attribution.
+- The scanner reports 94 parser recovery locations across 32 files. None spans
+  more than two source lines after blanking the declaration-generating
+  BOOST_SERIALIZATION_SPLIT_MEMBER spelling. Macro-generated bodies are not
+  expanded, and parser recovery sites still require review. Empty/defaulted
+  bodies, lambdas nested in ordinary bodies, and type-only declarations are
+  not independently counted as semantic runtime functions.
+- The exception scan confirms five direct standard runtime-error throws and
+  one string-literal throw, plus 58 generic Alert exception sites in instance
+  members that should carry member-function context. The MEDIT, MMG, Scotch
+  and variational custom exception classes already derive from Alert.
+  Static/free functions remain distinct from members with an instance.
+  Complete-definition counters also include constructor initializers: 1,394
+  definitions have initializer lists; 1,491 nonempty or initialized definitions
+  have no attributed lines, and 152 measured definitions have no hits.
+  These counts refine the body-only candidates above without treating
+  initializer execution as an empty constructor body.
+- A focused synthetic fixture verifies that uninstantiated and inactive bodies
+  remain visible, that helper files are excluded, and that instance/static/free
+  exception contexts and direct throws are distinguished. Keep parser tooling
+  optional; it is not part of Rodin's build/runtime dependencies.
