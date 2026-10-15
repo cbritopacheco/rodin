@@ -2459,3 +2459,31 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   This is file-specific evidence, not a new aggregate percentage. Formatting
   and style pass. Run505 archives three completed private builds with verified
   checksums and original-path symlinks, retaining producer classifications.
+
+
+### Starling-envelope branches and active-state equilibrium
+
+- Add RodinSolidActiveFiberLawTest with a bounded, continuous normalized-envelope
+  check and five segment/plateau equilibrium cases. Expected calibration gains
+  initialize independent stationary states satisfying $\gamma^2=n_0k_0$ and
+  $\gamma\beta=n_0\sigma_0$. Positive constant activation and zero extension change
+  must preserve these states across four time steps and two activation levels.
+  This couples the gain branches to physical state evolution rather than merely
+  comparing the piecewise implementation with itself.
+- All six cases pass separately in normal Release, assertion-enabled and
+  AddressSanitizer modes (runs508/512/513), with leak detection enabled and
+  optimized native support libraries linked. Discovery and sanitizer profiles
+  remain excluded. The first fixture compile's dangling-else warnings are
+  corrected with explicit braces around GoogleTest assertions before validation.
+- A private header mutation scales only the 0.3-to-0.73 segment by 0.9. The
+  continuity case and that segment's stationary-state case reject the defect;
+  all four other segment/plateau controls pass. Failed state values remain
+  finite and positive (run514). Private mutation artifacts remain excluded.
+- Run515 captures the two current normal producers and confirms positive hits
+  on all eight previously missed Starling lines. Historical run318 file evidence
+  is used only after verifying current header bytes equal retained snapshot274
+  and checking the saved run338 line inventory agrees exactly with run318's
+  97-line/89-hit record. The scoped union now hits all 117 measured header lines,
+  including newly emitted normal Debug lines. No historical aggregate percentage
+  is carried onto current source. Production code is unchanged; formatting and
+  style pass.

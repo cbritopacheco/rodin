@@ -12,3 +12,8 @@ add_executable(RodinSolidLocalCallbacksTest Local/CallbacksTest.cpp)
 target_link_libraries(RodinSolidLocalCallbacksTest
   PRIVATE GTest::gtest_main Rodin::Solid)
 gtest_discover_tests(RodinSolidLocalCallbacksTest PROPERTIES LABELS unit)
+
+add_executable(RodinSolidActiveFiberLawTest Constitutive/ActiveFiberLawTest.cpp)
+target_link_libraries(RodinSolidActiveFiberLawTest
+  PRIVATE GTest::gtest_main Rodin::Solid)
+gtest_discover_tests(RodinSolidActiveFiberLawTest PROPERTIES LABELS unit)
