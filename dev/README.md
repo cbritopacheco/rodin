@@ -2408,3 +2408,54 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   pass; production sources are unchanged in this batch.
 - Run494 preserves nine further completed private builds with checksum-verified
   archives and original-path symlinks, retaining normal/excluded classifications.
+
+
+### Expand the independently audited CI collector union
+
+- Run495 downloads seven newly completed coverage artifacts, validating every
+  artifact's workflow-run identity and published head ba57395. Run496 adds them
+  to the three retained PETSc collectors and verifies the frozen source snapshot
+  byte-for-byte against git archive of that head. Raw artifact IDs/checksums and
+  normalized reports are retained separately from local, newer-source profiles.
+- The ten-collector partial union measures 39,367 production lines and hits
+  35,581 (90.3828 percent), with no nonproduction records or missing sources.
+  Main and other collectors are unfinished; these counts are neither the final
+  CI aggregate nor certification of the newer local commits.
+- Run499 inventories all 6,188 definitions on that exact published source against
+  the partial line union, retaining inactive/uninstantiated bodies. It identifies
+  1,636 nonempty/initialized definitions without attribution and 257 measured
+  definitions with no hits, plus 94 parser recoveries. These are partial-report
+  investigation candidates, not a semantic uncovered-function count. Current
+  local forwarding, guard and parsing closures retain their separate evidence.
+
+
+### MPI coordinate and transformation setter contracts
+
+- Add dimension-aware affine coordinate updates through the scalar setter for
+  every held vertex, including ghost copies. Check each coordinate, fresh cell
+  physical coordinates/Jacobians after warming caches, and distributed area/
+  volume scaling by six/twenty-four in two/three dimensions. All shared copies
+  receive the same physical transformation before collective measure queries.
+- Register a geometry-preserving tracked transformation only on the final rank.
+  Check local map identity, unchanged physical/Jacobian values, and exactly one
+  destruction after the mesh releases its ownership. Other ranks proceed to an
+  explicit test barrier: registration and mapping queries remain non-collective.
+- The first fixture incorrectly calls the dimension-three volume API on a
+  dimension-two mesh and crashes before setter evaluation. Symbolized frames
+  locate this in getVolume/isOwned. Correct the fixture to select area or volume
+  by dimension, confirm no live MPI launcher remains, and retain the entire
+  failed producer/profiles under excluded labels (run498).
+- Run501 completes all 340 case/rank invocations, one group at a time at ranks
+  one, two, three, four and eight. Existing pass/skip contracts are preserved,
+  including 793 rank-local skips in older cases. Both new cases execute at every
+  rank count without skips. No production source changes are needed.
+- A private native Mesh.cpp mutation adds 0.125 to scalar-assigned coordinates.
+  At two ranks the new geometry case rejects finite physical-coordinate errors,
+  while measure scaling stays correct. The transformation-ownership and original
+  vector-setter controls pass (run504). Mutated source, commands and profiles
+  remain excluded; the original native library is unchanged.
+- Run506 checks the matching native source hash and successful producer, then
+  confirms positive counts at both setter entries and their forwarding calls.
+  This is file-specific evidence, not a new aggregate percentage. Formatting
+  and style pass. Run505 archives three completed private builds with verified
+  checksums and original-path symlinks, retaining producer classifications.
