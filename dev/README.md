@@ -1386,3 +1386,24 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   tests, refinement levels, assertions and ctest -j1 execution are unchanged.
   The revised workflow parses as YAML; completion still requires fresh CI.
   This observed CI timeout satisfies the user's deferred-push condition.
+
+- Common file-interface template audit: the generic Loader and Printer file-path
+  overloads had compiler notes but zero runtime hits. New public-interface
+  tests use base references to concrete MFEM/MEDIT mesh and P1 field codecs.
+  Mesh checks independently verify coordinates, dimensions, cell attributes,
+  replacement of old output, and missing-file rejection without changing mesh
+  counts. Field checks cover scalar, vector and rectangular-matrix ranges and
+  verify each coefficient against independently assigned integer values.
+- All six format-contract cases pass separately in Debug, Release and native
+  ASan/LSan with leak detection enabled: 12 final normal case-runs and six final
+  sanitizer case-runs. An append-instead-of-truncate mutation fails both new
+  cases cleanly while the four existing cases pass. Fatal stale-output checks
+  prevent the deliberately malformed output from reaching format parsers.
+  Superseded compile attempts, mutation runs and sanitizer counters are excluded.
+- Run211 retains 383 normal initial/runtime reports and measures 38,344 /
+  40,338 production lines (\(95.0568\%\)). Four previously unhit Loader lines,
+  four Printer lines and six MEDIT lines now execute. No additional measured
+  lines, nonproduction records or missing-source records occur. All 570
+  production hashes match snapshot199. Formatting, style lint and all nine
+  coverage-auditor tests pass. Fresh remote CI/Codecov remain required after
+  publishing the local batches and the separately committed timeout fix.

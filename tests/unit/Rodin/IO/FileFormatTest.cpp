@@ -6,6 +6,8 @@
  */
 #include <gtest/gtest.h>
 #include <array>
+#include <fstream>
+#include <set>
 #include <tuple>
 #include <sstream>
 #include <string>
@@ -117,4 +119,122 @@ TEST(FileFormatContracts, GridFunctionRejectsUnsupportedFormatsWithoutSideEffect
   };
   check(P1(mesh));
   check(P1(mesh, 2));
+}
+
+namespace
+{
+  /// @brief Owns files used to exercise the common stream/file interface.
+  class FileInterfaceContracts : public ::testing::Test
+  {
+    protected:
+      void SetUp() override
+      {
+        directory = boost::filesystem::temp_directory_path() /
+          boost::filesystem::unique_path("rodin-file-interface-%%%%-%%%%");
+        boost::filesystem::create_directory(directory);
+      }
+
+      void TearDown() override
+      {
+        boost::filesystem::remove_all(directory);
+      }
+
+      boost::filesystem::path directory;
+  };
+}
+
+/// @brief Generic mesh file overloads dispatch to concrete text formats and truncate old output.
+TEST_F(FileInterfaceContracts, MeshFilesDispatchAndTruncate)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  mesh.setAttribute({2, 0}, 17);
+  mesh.setAttribute({2, 1}, 23);
+  const auto check = [&]<FileFormat Format>() {
+    SCOPED_TRACE(static_cast<int>(Format));
+    const auto path = directory / "mesh";
+    const std::string stale(16384, '!');
+    {
+      std::ofstream old(path.string());
+      old << stale;
+    }
+    MeshPrinter<Format, Context::Local> concretePrinter(mesh);
+    Printer<LocalMesh>& printer = concretePrinter;
+    EXPECT_EQ(&printer.getObject(), &mesh);
+    printer.print(path);
+    std::ifstream input(path.string());
+    ASSERT_TRUE(input.good());
+    const std::string text((std::istreambuf_iterator<char>(input)), {});
+    ASSERT_EQ(text.find('!'), std::string::npos);
+    EXPECT_NE(
+      text.find(Format == FileFormat::MFEM ? "MFEM mesh" : "MeshVersionFormatted"),
+      std::string::npos);
+    LocalMesh loaded;
+    MeshLoader<Format, Context::Local> concreteLoader(loaded);
+    Loader<LocalMesh>& loader = concreteLoader;
+    loader.load(path);
+    ASSERT_EQ(loaded.getDimension(), 2u);
+    ASSERT_EQ(loaded.getSpaceDimension(), 2u);
+    ASSERT_EQ(loaded.getVertexCount(), 4u);
+    ASSERT_EQ(loaded.getCellCount(), 2u);
+    std::set<std::pair<Real, Real>> coordinates;
+    for (Index i = 0; i < 4; ++i)
+    {
+      const auto& point = loaded.getVertexCoordinates(i);
+      coordinates.emplace(point[0], point[1]);
+    }
+    const std::set<std::pair<Real, Real>> expected{{0, 0}, {1, 0}, {0, 1}, {1, 1}};
+    EXPECT_EQ(coordinates, expected);
+    std::set<Attribute> attributes;
+    for (auto cell = loaded.getCell(); cell; ++cell)
+    {
+      const auto attribute = cell->getAttribute();
+      ASSERT_TRUE(attribute);
+      attributes.insert(*attribute);
+    }
+    EXPECT_EQ(attributes, (std::set<Attribute>{17, 23}));
+    EXPECT_THROW(loader.load(directory / "absent"), Alert::Exception);
+    EXPECT_EQ(loaded.getVertexCount(), 4u);
+    EXPECT_EQ(loaded.getCellCount(), 2u);
+  };
+  check.template operator()<FileFormat::MFEM>();
+  check.template operator()<FileFormat::MEDIT>();
+}
+
+/// @brief Generic field file overloads preserve each coefficient across scalar/vector/matrix formats.
+TEST_F(FileInterfaceContracts, FieldFilesDispatchAndTruncate)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  const auto check = [&]<FileFormat Format>(const auto& space) {
+    using FES = std::decay_t<decltype(space)>;
+    GridFunction field(space), loaded(space);
+    for (Index i = 0; i < field.getSize(); ++i)
+      field.getData()(i) = 3 + i;
+    loaded.getData().setConstant(-1);
+    const auto path = directory / "field";
+    {
+      std::ofstream old(path.string());
+      old << std::string(16384, '!');
+    }
+    GridFunctionPrinter<Format, FES, Math::Vector<Real>> concretePrinter(field);
+    Printer<decltype(field)>& printer = concretePrinter;
+    EXPECT_EQ(&printer.getObject(), &field);
+    printer.print(path);
+    std::ifstream input(path.string());
+    ASSERT_TRUE(input.good());
+    const std::string text((std::istreambuf_iterator<char>(input)), {});
+    ASSERT_EQ(text.find('!'), std::string::npos);
+    GridFunctionLoader<Format, FES, Math::Vector<Real>> concreteLoader(loaded);
+    Loader<decltype(loaded)>& loader = concreteLoader;
+    loader.load(path);
+    ASSERT_EQ(loaded.getSize(), field.getSize());
+    for (Index i = 0; i < loaded.getSize(); ++i)
+      EXPECT_EQ(loaded.getData()(i), 3 + i);
+  };
+  const auto checkSpaces = [&]<FileFormat Format>() {
+    check.template operator()<Format>(P1(mesh));
+    check.template operator()<Format>(P1(mesh, 2));
+    check.template operator()<Format>(P1(mesh, 2, 3));
+  };
+  checkSpaces.template operator()<FileFormat::MFEM>();
+  checkSpaces.template operator()<FileFormat::MEDIT>();
 }
