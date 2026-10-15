@@ -1908,3 +1908,41 @@ LFS. Before committing a new resource file, check `git check-attr filter --
 - Never combine raw reports from different heads without source provenance.
   The latest local measurement stays 40,552 / 42,675 lines
   (\(95.0251904\%\)); this artifact-retention change does not alter it.
+
+### Dense preassembled mixed-block manufactured checks
+
+- Add four manufactured cases: Sequential/OpenMP assembly on triangle and
+  quadrilateral meshes, coupling an affine P1 field and a constant P0 field
+  through four dense blocks with coefficients two, three, five and seven.
+  Compare the complete matrix/vector against integral-only assembly, then
+  independently check the manufactured coefficient vector's residual and the
+  solved coefficients. Explicit tuples, offsets and UUID maps follow the
+  mixed assembly input contract; each bilinear form uses its trial's solution
+  type. This exercises rectangular off-diagonal block placement.
+- The first runtime fixture (run314) shows matching assembly paths but an
+  incorrect manufactured residual: its arbitrary callable supplies no known
+  polynomial order, leaving the automatic load rule underintegrated. Declare
+  integration order two for affine forcing times P1 and one for affine
+  forcing times P0. Preserve the tight numerical tolerances; no production
+  change is needed. Exclude the entire failed runtime producer.
+- Run317's first corrected compile exhausts the container filesystem without
+  a compiler diagnostic. Hash-verified recoverable archives run319/run321 move
+  only old validation executables and object files to the host build mount.
+  Preserve all compiler notes, counters, reports, source snapshots and logs.
+  Retry the exact command only after matching the fixture bytes, verifying
+  usable space and confirming that no runtime counters exist for this build.
+- Run317 then passes all four corrected cases one process at a time in normal
+  RelWithDebInfo with two OpenMP workers. Run318 retains initial and runtime
+  compiler-note reports alongside all earlier valid evidence: 40,595 / 42,690
+  production lines (\(95.0925275\%\)), 436 reports and 565 matching hashes.
+  The broader denominator gains fifteen lines, while hits increase by 43.
+  Function inventories record 94,064 observed and 69,877 hit symbols.
+  Nonproduction and missing-source records remain empty.
+- Run316 privately doubles dense preassembled coefficients in Sequential
+  insertion. The numerical test fails on incorrect finite results, while the
+  unaffected OpenMP control passes. Mutation and failed-fixture counters stay
+  excluded. Run322 builds the actual CMake target and registers all four cases
+  with the manufactured label. Formatting and house-style lint pass.
+- The remaining current-head CI jobs are the two slow-test configurations;
+  272 jobs have succeeded, with no observed failure. Published coverage and
+  the deferred push remain pending.
