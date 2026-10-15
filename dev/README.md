@@ -1313,3 +1313,36 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   snapshot192. Pre-fix and sanitizer counters are excluded. The matrix repair
   remains local alongside the earlier vector and XDMF follow-up batches while
   CI validates pushed head 16e6a576b.
+
+- Root-solver numerical contracts: multiplying finite residuals to compare
+  signs underflows for small function scales, loses the bracket and returns a
+  coordinate near one for the analytic root three quarters. A zero function
+  tolerance also misses an exact interior zero, while summing large finite
+  bounds overflows midpoint construction. Float and Real tests reproduce all
+  three defects (four failed cases and two finite-value assertion failures).
+  Direct sign comparisons now preserve the bracket without residual products;
+  exact interior zeros terminate independently of tolerance; all three midpoint
+  sites use overflow-safe `std::midpoint`. The former endpoint, safeguard and
+  iteration-budget contracts remain tested.
+- Scaling checks use a linear function with independently known root, both
+  slope signs, initial guesses on both sides and ordinary/small/large finite
+  scales. Function tolerances scale with the function, and coordinate accuracy
+  is checked separately. Large positive and negative bounds exercise invalid
+  initial guesses, safeguarded iterations and interval-tolerance exits.
+  A distinct narrow-bracket test verifies the returned midpoint, its error
+  bound and early termination. A private wrong-midpoint mutation fails all four
+  midpoint-sensitive cases; exact-zero cases remain green.
+- All 24 root cases pass separately in Debug, Release and ASan/LSan with leak
+  detection enabled. All 21 cardiac-model caller cases pass separately in
+  Release. Snapshot199 retains all 570 production hashes; the 367 prepared
+  reports retire all prior root-header hits and function hits before fresh
+  normal root/caller counters replace them. Pre-fix, sanitizer and mutation
+  observations are excluded from the merge.
+- Final root batch: 69 normal case-runs and 24 ASan/LSan case-runs pass.
+  Test work budgets allow all binary64 bisection levels plus safeguarded startup
+  steps; coordinate tolerances include rounding margin for scaled residuals.
+  Run203 includes 373 normal initial/runtime reports and measures 38,271 /
+  40,271 production lines (\(95.0336\%\)). No nonproduction or missing-source
+  records occur, and all 570 production hashes match snapshot199. The larger
+  denominator remains visible. The follow-up repair remains local while CI
+  validates pushed head 16e6a576b.

@@ -17,6 +17,7 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include <numeric>
 #include <optional>
 
 namespace Rodin::Math::RootFinding
@@ -38,11 +39,14 @@ namespace Rodin::Math::RootFinding
    * - **Interval bracketing**: Maintains a bracket @f$ [a, b] @f$ where @f$ f(a)f(b) \leq 0 @f$
    * - **Safeguards**: Falls back to bisection if Newton step goes outside bracket
    * - **Secant fallback**: Uses secant method if derivative is too small
+   * - **Bracket signs**: Compares residual signs directly without multiplying them
+   * - **Midpoint safety**: Forms finite midpoints without overflowing finite endpoints
    * - **Convergence checks**: Multiple criteria for termination
    *
    * ## Convergence Criteria
    * The algorithm terminates when any of these conditions are met:
-   * 1. **Function tolerance**: @f$ |f(x)| < \varepsilon_{\text{abs}} @f$
+   * 1. **Function tolerance**: @f$ f(x)=0 @f$ or
+   *    @f$ |f(x)| < \varepsilon_{\text{abs}} @f$
    * 2. **Interval tolerance**: @f$ |b - a| < \varepsilon_{\text{abs}} + \varepsilon_{\text{rel}} |x| @f$
    * 3. **Maximum iterations**: Iteration count exceeds maximum
    *
@@ -70,7 +74,8 @@ namespace Rodin::Math::RootFinding
        *
        * @param[in] absTTol Absolute tolerance for interval width (default: @f$ 10^{-12} @f$)
        * @param[in] relTTol Relative tolerance for interval width (default: @f$ 10^{-9} @f$)
-       * @param[in] absGTol Absolute tolerance for function value (default: @f$ 10^{-12} @f$)
+       * @param[in] absGTol Absolute tolerance for function value (default: @f$ 10^{-12} @f$).
+       * Exact zeros are accepted also when this tolerance is zero.
        * @param[in] maxIter Maximum number of iterations (default: 25)
        */
       NewtonRaphson(Scalar absTTol = DefaultAbsoluteIntervalTolerance,
@@ -122,9 +127,11 @@ namespace Rodin::Math::RootFinding
         assert(std::isfinite(fav) && std::isfinite(fbv));
 
         // either already bracketed or caller misused the API
-        assert(fav * fbv <= 0); // Root not bracketed at [lo, hi]
+        const bool bracketed = (fav <= Scalar(0) && fbv >= Scalar(0)) ||
+          (fav >= Scalar(0) && fbv <= Scalar(0));
+        assert(bracketed);
 
-        if (!(fav * fbv <= 0))
+        if (!bracketed)
           return {};
 
         if (fav == Scalar(0) || std::fabs(fav) < m_absGTol)
@@ -133,7 +140,7 @@ namespace Rodin::Math::RootFinding
           return b;
 
         if (!(t0 > a && t0 < b))
-          t0 = 0.5 * (a + b);
+          t0 = std::midpoint(a, b);
 
         Scalar t = t0, tPrev = t;
         Scalar gPrev = std::numeric_limits<Scalar>::quiet_NaN();
@@ -149,15 +156,15 @@ namespace Rodin::Math::RootFinding
           assert(std::isfinite(fv));
           assert(std::isfinite(fg) || std::isnan(fg)); // allow NaN to trigger safeguards
 
-          if (std::fabs(fv) < m_absGTol)
+          if (fv == Scalar(0) || std::fabs(fv) < m_absGTol)
             return t;
 
           const Scalar at = m_absTTol + m_relTTol * std::fabs(t);
           if ((b - a) < at)
-            return 0.5 * (a + b);
+            return std::midpoint(a, b);
 
           // Maintain bracket using *current* endpoint values
-          if (fv * fav < 0)
+          if ((fv < Scalar(0)) != (fav < Scalar(0)))
           {
             b = t;
             fbv = fv;
@@ -174,7 +181,8 @@ namespace Rodin::Math::RootFinding
           if (std::fabs(fbv) < m_absGTol)
             return b;
 
-          if (fav * fbv > 0)
+          if ((fav < Scalar(0) && fbv < Scalar(0)) ||
+            (fav > Scalar(0) && fbv > Scalar(0)))
             return {};
 
           // Newton step with scale-aware guard on gp
@@ -201,7 +209,7 @@ namespace Rodin::Math::RootFinding
           Scalar tNew = t + dt;
 
           // Safeguard: keep inside (a,b). If outside or too big, bisect.
-          const Scalar mid = 0.5 * (a + b);
+          const Scalar mid = std::midpoint(a, b);
           const Scalar half = 0.5 * (b - a);
 
           if (tNew <= a || tNew >= b || std::fabs(tNew - t) > half)

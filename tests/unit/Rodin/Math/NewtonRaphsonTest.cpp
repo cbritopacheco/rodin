@@ -186,6 +186,129 @@ namespace
     }
   }
 
+  /// @brief Rescaling a finite linear function preserves its bracket and analytic root.
+  TYPED_TEST(NewtonSafeguards, FiniteFunctionScalingPreservesBracket)
+  {
+    using Scalar = TypeParam;
+    constexpr Scalar CoordinateTolerance =
+      Scalar(64) * std::numeric_limits<Scalar>::epsilon();
+    // Covers all binary64 bisection levels plus safeguarded startup steps.
+    constexpr size_t WorkBudget = 100;
+    constexpr Scalar Exact = Scalar(0.75);
+    // The small scale keeps evaluations finite while their products underflow.
+    for (const Scalar scale : {Scalar(1), Scalar(4) * std::numeric_limits<Scalar>::min(),
+           std::numeric_limits<Scalar>::max() / Scalar(4)})
+    {
+      for (const Scalar sign : {Scalar(-1), Scalar(1)})
+      {
+        for (const Scalar initial : {Scalar(0.125), Scalar(0.875)})
+        {
+          SCOPED_TRACE(::testing::Message()
+            << "scale=" << scale << " sign=" << sign << " initial=" << initial);
+          const Scalar functionTolerance = scale * CoordinateTolerance;
+          const auto function = [&](Scalar x) {
+            EXPECT_GE(x, Scalar(0));
+            EXPECT_LE(x, Scalar(1));
+            return std::pair{sign * scale * (x - Exact), sign * scale};
+          };
+          const NewtonRaphson<Scalar> solver(
+            CoordinateTolerance, Scalar(0), functionTolerance, WorkBudget);
+          const auto root = solver.solve(function, initial, Scalar(0), Scalar(1));
+          ASSERT_TRUE(root);
+          EXPECT_NEAR(*root, Exact, CoordinateTolerance);
+          EXPECT_LE(std::abs(function(*root).first), functionTolerance);
+        }
+      }
+    }
+  }
+
+  /// @brief Exact interior roots terminate even when the function tolerance is zero.
+  TYPED_TEST(NewtonSafeguards, ExactInteriorRootWithZeroFunctionTolerance)
+  {
+    using Scalar = TypeParam;
+    constexpr Scalar CoordinateTolerance =
+      Scalar(64) * std::numeric_limits<Scalar>::epsilon();
+    // Covers all binary64 bisection levels plus safeguarded startup steps.
+    constexpr size_t WorkBudget = 100;
+    constexpr Scalar Exact = Scalar(0.75);
+    const auto function = [](Scalar x) { return std::pair{x - Exact, Scalar(1)}; };
+    const NewtonRaphson<Scalar> solver(
+      CoordinateTolerance, Scalar(0), Scalar(0), WorkBudget);
+    for (const Scalar initial : {Exact, Scalar(0.875)})
+    {
+      const auto root = solver.solve(function, initial, Scalar(0), Scalar(1));
+      ASSERT_TRUE(root);
+      EXPECT_EQ(*root, Exact);
+    }
+  }
+
+  /// @brief Finite large brackets keep every midpoint finite and inside the supplied bounds.
+  TYPED_TEST(NewtonSafeguards, LargeFiniteBoundsHaveFiniteMidpoints)
+  {
+    using Scalar = TypeParam;
+    constexpr Scalar Magnitude = std::numeric_limits<Scalar>::max();
+    constexpr Scalar Tolerance =
+      Magnitude * (Scalar(64) * std::numeric_limits<Scalar>::epsilon());
+    // Covers all binary64 bisection levels plus safeguarded startup steps.
+    constexpr size_t WorkBudget = 100;
+    for (const Scalar sign : {Scalar(-1), Scalar(1)})
+    {
+      const Scalar lower = sign > 0 ? Magnitude / Scalar(2) : -Magnitude;
+      const Scalar upper = sign > 0 ? Magnitude : -Magnitude / Scalar(2);
+      const Scalar exact = sign * (Magnitude / Scalar(4)) * Scalar(3);
+      const Scalar interior = lower + (upper - lower) / Scalar(4);
+      for (const bool coarse : {false, true})
+      {
+        for (const Scalar initial : {Scalar(0), interior})
+        {
+          SCOPED_TRACE(::testing::Message()
+            << "sign=" << sign << " coarse=" << coarse << " initial=" << initial);
+          const auto function = [&](Scalar x) {
+            EXPECT_TRUE(std::isfinite(x));
+            EXPECT_GE(x, lower);
+            EXPECT_LE(x, upper);
+            return std::pair{x - exact, std::numeric_limits<Scalar>::quiet_NaN()};
+          };
+          const NewtonRaphson<Scalar> solver(
+            coarse ? Magnitude : Tolerance, Scalar(0), Tolerance, WorkBudget);
+          const auto root = solver.solve(function, initial, lower, upper);
+          ASSERT_TRUE(root);
+          EXPECT_TRUE(std::isfinite(*root));
+          EXPECT_GE(*root, lower);
+          EXPECT_LE(*root, upper);
+          EXPECT_NEAR(*root, exact, Tolerance);
+          EXPECT_LE(std::abs(function(*root).first), Tolerance);
+        }
+      }
+    }
+  }
+
+  /// @brief A bracket narrower than the coordinate tolerance returns its midpoint and error bound.
+  TYPED_TEST(NewtonSafeguards, IntervalToleranceReturnsMidpoint)
+  {
+    using Scalar = TypeParam;
+    constexpr Scalar Width = Scalar(1) / Scalar(128);
+    constexpr Scalar Lower = Scalar(1), Upper = Lower + Width;
+    constexpr Scalar Exact = Lower + Scalar(3) * Width / Scalar(4);
+    constexpr Scalar Initial = Lower + Width / Scalar(4);
+    constexpr Scalar AbsoluteIntervalTolerance = Scalar(2) * Width;
+    constexpr Scalar FunctionTolerance = std::numeric_limits<Scalar>::epsilon();
+    size_t calls = 0;
+    const auto function = [&](Scalar x) {
+      ++calls;
+      EXPECT_GE(x, Lower);
+      EXPECT_LE(x, Upper);
+      return std::pair{x - Exact, Scalar(1)};
+    };
+    const NewtonRaphson<Scalar> solver(
+      AbsoluteIntervalTolerance, Scalar(0), FunctionTolerance);
+    const auto root = solver.solve(function, Initial, Lower, Upper);
+    ASSERT_TRUE(root);
+    EXPECT_EQ(*root, (Lower + Upper) / Scalar(2));
+    EXPECT_LE(std::abs(*root - Exact), Width / Scalar(2));
+    EXPECT_EQ(calls, 3u);
+  }
+
   /// @brief A depleted work budget returns no unconverged interior result.
   TYPED_TEST(NewtonSafeguards, ZeroWorkBudget)
   {
