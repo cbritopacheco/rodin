@@ -2230,3 +2230,32 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   valid return. No overall percentage is inferred from this file-specific check.
   Run418 reduces the remaining implicit-call inventory to 223 candidates;
   public local/MPI SubMesh dimension access and MMG numeric parsing remain open.
+
+
+### Local and distributed SubMesh checked map dimensions
+
+- Replace both SubMesh getPolytopeMap checked-container forwarders with
+  MemberFunctionException. Preserve stored map capacity: builders retain empty
+  slots above the selected submesh dimension, so rejection is based on vector
+  size rather than the submesh's topological dimension. The local builder uses
+  parent topological dimension; the MPI builder uses ambient dimension.
+- The new local regression fails against the original implementation (run427).
+  All 13 local cases pass individually in normal Release (run436), and all 85
+  MPI case/rank invocations pass individually at ranks one, two, three, four
+  and eight (run438). The new MPI regression runs at every rank count without
+  skipping and performs its maximum-index query only on rank zero, followed by
+  an explicit test barrier. Guard rejection introduces no collective operation.
+- All 13 local assertion-enabled AddressSanitizer cases pass separately with
+  leak detection (run441). The test object is instrumented; optimized native
+  support libraries remain linked. Red and sanitizer profiles stay excluded.
+  Native dependencies are rebuilt serially against the final formatted headers;
+  runs428/431 retain hash-verified copies of previous coverage notes first.
+- Run439 records source/configuration hashes. Run442 checks the two normal
+  producers and confirms positive guard, Alert and valid-return counts against
+  matching local/MPI SubMesh header hashes. This is file-specific evidence;
+  aggregate current-source coverage remains pending. Run435 inventories 221
+  remaining implicit-call candidates, including MMG numeric parsing.
+- The PR367 integration audit identifies one newer commit, 5c2a9697a, after
+  previously merged add865281. Its independent Jacobian/distortion strengths
+  preserve the old default products. Git's merge preflight succeeds without
+  conflicts; integration and validation of that newer commit remain pending.
