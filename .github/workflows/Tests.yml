@@ -934,8 +934,18 @@ jobs:
           OPENBLAS_NUM_THREADS: 1
           OMPI_MCA_hwloc_base_binding_policy: none
         run: >-
-          ctest --test-dir build/tests -R '^RodinPETScMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)_(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)$'
+          ctest --test-dir build/tests -R '^RodinPETScMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)_(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)_(Affine|Curved)_K[1-6]$'
           --output-on-failure --no-tests=error -j 1
+
+      - name: Retain complex H1 restriction diagnostics
+        if: always() && matrix.suite == 'submesh'
+        uses: actions/upload-artifact@v4
+        with:
+          name: petsc-complex-h1-restriction-diagnostics-mt${{ matrix.multithreaded }}
+          path: |
+            build/tests/Testing/Temporary/LastTest.log
+            build/tests/Testing/Temporary/LastTestsFailed.log
+          if-no-files-found: ignore
 
       - name: Build curved complex PETSc Helmholtz boundary suite
         if: matrix.suite == 'curved_boundary'

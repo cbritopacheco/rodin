@@ -2083,3 +2083,48 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   364-366. The historical run318 percentage belongs to the previously
   published production source: the changed-source batch still needs fresh
   aggregate CI/coverage confirmation and does not inherit that percentage.
+
+
+### Degree/mapping isolation for the remaining complex restriction timeout
+
+- New-head Tests run 38775961397 at 7c2c18013 reports one complex ON/submesh
+  failure: one-rank Pyramid exceeds the 300-second watchdog. The two-rank
+  Pyramid case passes at 298 seconds; the other 34 geometry/rank cases pass.
+  The confirmed job failure releases the next deferred push.
+- Split the existing matrix into degree, mapping and geometry parameters at
+  every existing rank. All 420 CTest/GTest cases retain exactly the original
+  5,040 scalar/vector/matrix and full/boundary/sparse/nested configurations.
+  Numerical oracle statements, coefficient/physical samples, tolerances and
+  the rank-zero local-read protocol are byte-identical ignoring whitespace
+  and timer declarations. The watchdog remains 300 seconds.
+- Optional diagnostics measure space construction, field setup, projection
+  and verification, with local held-cell/DOF-slot/sample counts and cached
+  global DOF sizes. Diagnostics add no collectives. Retain CTest logs in the
+  complex collector even on failure; production coverage filtering is unchanged.
+- Run370's initial test compile exposes structured-binding commas within a
+  GoogleTest macro argument; parenthesize the name-generator lambda. No
+  runtime counters exist for that failed compile. Run373 then exposes a
+  diagnostic bug: a rank-zero count call is collective, causing the two-rank
+  case to hang. Replace all diagnostic count calls with local iterator counts.
+  Preserve the entire failed producer under its explicit excluded label and
+  confirm that no live MPI children remain. The corrected two-rank control
+  completes in about 0.23 seconds with all 24 range records.
+- Run376 passes all 420 cases, one MPI group at a time, and verifies every
+  range/submesh configuration actually executes. It records all 18,144
+  rank-local range records. Observed maximum case durations at ranks one,
+  two, three, four and eight are approximately 58, 45, 36, 36 and 36 seconds.
+  These are validation timings, including permitted compilation during part
+  of the run, rather than a production performance-improvement claim.
+- Single-rank diagnostic data locate the large Pyramid cost in projection.
+  Cell/DOF-slot counts alone do not explain its ratio to tensor-product
+  hexahedra. Preserve phase/work data for further investigation; no numerical
+  kernel optimization or tolerance change is introduced by this repair.
+- Regenerate and verify all 420 exact CTest filters, timing environment and
+  watchdog properties. The workflow changes only the complex collector's
+  selection and diagnostic retention; all existing test families remain.
+- Additional native tensor validation passes all ten assertion-enabled cases
+  and all ten AddressSanitizer cases individually with leak detection enabled.
+  Tensor/header object instrumentation links the existing optimized native
+  support libraries. Sanitizer, failed-timing and original-implementation red
+  profiles are excluded from coverage. Current-source aggregate coverage
+  remains pending fresh CI confirmation.

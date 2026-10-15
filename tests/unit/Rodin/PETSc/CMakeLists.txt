@@ -189,16 +189,21 @@ if (RODIN_USE_MPI)
   # The watchdog bounds protocol failures, not polynomial approximation error.
   foreach(np 1 2 3 4 8)
     foreach(geometry Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
-      set(_h1_restriction_test
-        RodinPETScMPIH1SubMeshRestrictionTest_np${np}_${geometry})
-      add_test(NAME ${_h1_restriction_test}
-        COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-          ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-          $<TARGET_FILE:RodinPETScMPIH1SubMeshRestrictionTest>
-          "--gtest_filter=AllGeometries/PETScMPISubMeshH1.ExplicitRestriction_AllOrdersBackendRanges/${geometry}")
-      set_tests_properties(${_h1_restriction_test} PROPERTIES
-        LABELS "unit;petsc;distributed;slow" TIMEOUT 300 PROCESSORS ${np})
-      rodin_suppress_external_mpi_lsan_for_test(${_h1_restriction_test})
+      foreach(mapping Affine Curved)
+        foreach(degree RANGE 1 6)
+          set(_h1_restriction_test
+            RodinPETScMPIH1SubMeshRestrictionTest_np${np}_${geometry}_${mapping}_K${degree})
+          add_test(NAME ${_h1_restriction_test}
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinPETScMPIH1SubMeshRestrictionTest>
+              "--gtest_filter=AllGeometriesAndDegrees/PETScMPISubMeshH1.ExplicitRestriction_AllOrdersBackendRanges/${geometry}_${mapping}_K${degree}")
+          set_tests_properties(${_h1_restriction_test} PROPERTIES
+            LABELS "unit;petsc;distributed;slow" TIMEOUT 300 PROCESSORS ${np})
+          rodin_suppress_external_mpi_lsan_for_test(${_h1_restriction_test}
+            "RODIN_TEST_TIMING=1")
+        endforeach()
+      endforeach()
     endforeach()
   endforeach()
   target_link_libraries(RodinPETScMPISubMeshGridFunctionTest
