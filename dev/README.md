@@ -2146,3 +2146,22 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   the two normal test-object profiles, and confirms execution of the previously
   unhit point derivative assertion/zero return and vector point-order return.
   This is a file-specific check, not a changed-source aggregate percentage.
+
+
+### Public checked-list bounds use contextual Alerts
+
+- The implicit exception audit identifies FormLanguage::List::at as a public
+  checked accessor explicitly forwarding std::out_of_range. Replace mutable
+  and const bounds failures with MemberFunctionException and preserve the
+  selected owned object for valid indices. Empty, one-past-end and maximum
+  size_t requests are rejected without changing size, value or object identity.
+- Both new regressions fail against the original behavior (run390), then all
+  22 list cases pass individually in normal Release, assertion-enabled and
+  AddressSanitizer validation (runs394/399/400). Leak detection is enabled for
+  sanitizer validation; those profiles and all red profiles remain excluded.
+- Declare Rodin::Alert as a public FormLanguage dependency so consumers receive
+  the necessary termcolor include path and exception implementation linkage.
+  The actual CMake target builds with one compiler job and discovery profiles
+  isolated outside capture. Formatting, production style and the source
+  exception-context scan pass. Aggregate current-source coverage remains
+  pending; no historical percentage is carried onto the changed header.

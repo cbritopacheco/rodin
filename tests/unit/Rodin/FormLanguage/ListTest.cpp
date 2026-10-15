@@ -5,7 +5,10 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <limits>
+#include <string>
 
+#include "Rodin/Alert/Exception.h"
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/FormLanguage/Base.h"
 
@@ -54,6 +57,67 @@ class TestElement : public Rodin::FormLanguage::Base
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Mutable checked access raises contextual Alert errors without changing ownership.
+  TEST(FormLanguage_List, MutableBoundsErrorsUseMemberContext)
+  {
+    FormLanguage::List<TestElement> list;
+    EXPECT_THROW(list.at(0), Alert::Exception);
+    TestElement value(42);
+    list.add(value);
+    const auto* stored = &list.at(0);
+    for (size_t index : {size_t{1}, std::numeric_limits<size_t>::max()})
+    {
+      try
+      {
+        list.at(index);
+        ADD_FAILURE() << "Out-of-range checked access must be rejected.";
+      }
+      catch (const Alert::Exception& error)
+      {
+        EXPECT_NE(
+          std::string(error.what()).find("In member function"), std::string::npos);
+      }
+      catch (...)
+      {
+        ADD_FAILURE() << "Checked access must raise an Alert exception.";
+      }
+    }
+    ASSERT_EQ(list.size(), 1u);
+    EXPECT_EQ(&list.at(0), stored);
+    EXPECT_EQ(list.at(0).getValue(), 42);
+  }
+
+  /// @brief Const checked access retains its referent after empty and oversized requests.
+  TEST(FormLanguage_List, ConstBoundsErrorsUseMemberContext)
+  {
+    FormLanguage::List<TestElement> list;
+    const auto& view = list;
+    EXPECT_THROW(view.at(0), Alert::Exception);
+    TestElement value(99);
+    list.add(value);
+    const auto* stored = &view.at(0);
+    for (size_t index : {size_t{1}, std::numeric_limits<size_t>::max()})
+    {
+      try
+      {
+        view.at(index);
+        ADD_FAILURE() << "Out-of-range checked access must be rejected.";
+      }
+      catch (const Alert::Exception& error)
+      {
+        EXPECT_NE(
+          std::string(error.what()).find("In member function"), std::string::npos);
+      }
+      catch (...)
+      {
+        ADD_FAILURE() << "Checked access must raise an Alert exception.";
+      }
+    }
+    ASSERT_EQ(view.size(), 1u);
+    EXPECT_EQ(&view.at(0), stored);
+    EXPECT_EQ(view.at(0).getValue(), 99);
+  }
+
   //=== Construction Tests ===================================================
 
   /// @brief Verifies default construction for form language list by checking exact expected values, true predicates.
