@@ -1375,3 +1375,14 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   16e6a576b; the latest live job read reports 72 successes, 40 running and 162
   queued, with no failures. Remote CI and Release-only Codecov confirmation
   remain pending.
+
+- CI baseline-convergence timeout on pushed head16e6a576b: job116321006178
+  reports "The job has exceeded the maximum execution time of 45m0s".
+  Setup/build occupied about 24 minutes. The serial convergence run reached
+  397 of 427 cases, with 396 completed passes and no reported failed case,
+  before cancellation during HP Stokes on Hexahedron. Completed case timings
+  total 1,285.11 seconds. Increase the baseline job budget from 45 to 90 minutes
+  to accommodate setup/build plus the complete numerical gate. All selected
+  tests, refinement levels, assertions and ctest -j1 execution are unchanged.
+  The revised workflow parses as YAML; completion still requires fresh CI.
+  This observed CI timeout satisfies the user's deferred-push condition.

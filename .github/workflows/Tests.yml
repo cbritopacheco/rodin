@@ -23,7 +23,10 @@ jobs:
     # modes exhausted 45 minutes while the pyramid P0 projection was active.
     # Both combined curved-scalar jobs exhausted three hours. Separate physics
     # and the two expensive cell families without dropping refinement cases.
-    timeout-minutes: ${{ matrix.suite == 'baseline' && 45 || 180 }}
+    # Baseline OFF exhausted 45 minutes after setup/build (~24 minutes) and
+    # 397 of 427 sequential cases; HP Stokes was still running without a failure.
+    # Preserve the complete gate and allow build plus refinement headroom.
+    timeout-minutes: ${{ matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
       fail-fast: false
       matrix:
