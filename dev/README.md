@@ -2165,3 +2165,43 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   isolated outside capture. Formatting, production style and the source
   exception-context scan pass. Aggregate current-source coverage remains
   pending; no historical percentage is carried onto the changed header.
+
+
+### Quadrature bounds and instantiation-independent audit follow-up
+
+- Replace PolytopeQuadrature::getPoint's standard checked-container exception
+  with MemberFunctionException. The new invalid-index regression fails against
+  the original implementation (run404), then all 12 quadrature-index cases
+  pass individually in Release, assertion-enabled and AddressSanitizer modes
+  (runs411/412/414). Leak detection is enabled. The sanitizer test object links
+  optimized native support libraries; its profiles and the red profiles are
+  excluded from coverage. Native Geometry dependencies are rebuilt serially,
+  with their previous coverage notes retained in run407 before replacement.
+- Run410 inventories all 566 production files and 6,188 function definitions
+  without preprocessing or template instantiation. No explicit standard/string
+  throws or generic Alert::Exception calls in instance members remain in the
+  parsed inventory. Custom exceptions also derive from Alert; Scotch's variant
+  already derives from MemberFunctionException. Specialized domain exceptions
+  need a separate context review rather than being classified solely by name.
+- The inventory still reports 224 potential implicit exception calls and 94
+  parser recoveries. These are review candidates, not 224 proven violations.
+  Remaining public checked-container forwarders include Scotch::Partitioner's
+  getPartition and Geometry::SubMesh's getPolytopeMap. AttributeIndex dimension
+  access needs contract review. MMG::MeshLoader has six std::stoul parsing sites
+  that can propagate invalid_argument/out_of_range. Internal maps, guarded
+  optionals, tuple get and typed any_cast must be reviewed by their actual
+  preconditions; invalid internal states are not manufactured for coverage.
+- Run409 uses four sequential syntax-only probes, producing no coverage notes
+  or runtime counters. Including IDRSTABL fails because configured Eigen lacks
+  Eigen::IDRSTABL. Including legacy TraceOperator fails on its obsolete
+  FunctionBase template argument. Derived Solid Input/Output examples with
+  explicit default constructors fail conversion to their std::function aliases:
+  populate/extract do not supply a call operator. These findings concern usable
+  source/API support, independently of whether coverage tools emit lines.
+- Fresh CI run38790622528 artifacts are audited against an exact archive of
+  published head ba57395, not the subsequently modified working tree. Run408's
+  union of three PETSc matrix-range collectors measures 23,576 lines and hits
+  14,730 (62.4788 percent), with no nonproduction records or missing sources.
+  This is a partial collector union: regular, slow and complex-H1 results are
+  still needed. It establishes neither final coverage nor a coverage regression.
+  Current-source aggregate confirmation remains pending.

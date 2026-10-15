@@ -150,10 +150,15 @@ namespace Rodin::Geometry
        * @brief Gets a mapped quadrature point by index.
        * @param[in] i Quadrature point index
        * @returns Reference to the mapped point
+       * @throws Alert::Exception If the point index is outside the realized rule.
        */
       const Point& getPoint(size_t i) const
       {
-        return m_ps.at(i);
+        if (i >= m_ps.size())
+          Alert::MemberFunctionException(*this, __func__)
+            << "Quadrature point index " << i << " is outside rule size " << m_ps.size()
+            << '.' << Alert::Raise;
+        return m_ps[i];
       }
 
     private:
