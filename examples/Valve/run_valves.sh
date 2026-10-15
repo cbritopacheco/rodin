@@ -20,7 +20,7 @@
 # Usage (from anywhere):
 #   bash examples/Valve/run_valves.sh
 # Overrides through the environment, e.g.
-#   NP=12 UMEAN=2.5 T_CONV=30 VALVES="FPC16" OPENINGS="25 50" bash examples/Valve/run_valves.sh
+#   NP=8 UMEAN=2.5 T_CONV=30 VALVES="FPC16" OPENINGS="25 50" bash examples/Valve/run_valves.sh
 #
 # Times are set in convective units D/U (D the bore, U the mean velocity),
 # so FPC8 and FPC16 get the same number of flow passes and of time steps:
@@ -41,7 +41,7 @@ EXE="${EXE:-$RODIN_ROOT/build/examples/Valve/KnifeGateValve}"
 MESH_DIR="${MESH_DIR:-$RODIN_ROOT/resources/examples/Valve}"
 OUT_DIR="${OUT_DIR:-$PWD/runs}"
 
-NP="${NP:-12}"                        # MPI processes
+NP="${NP:-8}"                         # MPI processes (8 on the Mac)
 VALVES="${VALVES:-FPC8 FPC16}"
 OPENINGS="${OPENINGS:-0 25 50 75 100}"
 OUTPUT_EVERY="${OUTPUT_EVERY:-10}"    # XDMF every N time steps
@@ -79,7 +79,7 @@ for valve in $VALVES; do
       echo "[$tag] mesh not found: $mesh (skipped)"; failed+=("$tag"); continue
     fi
     mkdir -p "$dir"
-    if [ -f "$log" ] && grep -q "average over the last\|Steady state reached\|End of the time interval" "$log"; then
+    if [ -f "$log" ] && grep -qE "average over the last|Steady state reached|End of the time interval" "$log"; then
       echo "[$tag] already done (skipped)"; continue
     fi
     case "$valve" in
