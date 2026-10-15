@@ -2334,3 +2334,36 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   about 35 seconds child CPU (run466). These are build/storage observations,
   not numerical-kernel performance claims. The successful normal and focused
   sanitizer compilations use local outputs and retain their coverage notes.
+
+
+### Instantiate Solid CRTP input/output forwarding contracts
+
+- The instantiation-independent audit finds Input::populate and Output::extract
+  absent from runtime attribution. Their documented direct conversion of CRTP
+  objects to std::function fails the earlier run409 probes. Correct both examples
+  to capture a concrete object in a lambda and call through its const CRTP base;
+  provide an explicit derived default constructor to avoid protected-base
+  aggregate initialization. Production tokens outside comments are unchanged.
+- Add the native RodinSolidLocalCallbacksTest target. Three cases cover owned
+  input payloads surviving callback copies, mutation of the original point,
+  preservation of unrelated tags and kinematics, and output forwarding for
+  NeoHookean and Yeoh cache types in two and three dimensions. Independent
+  diagonal-deformation Jacobian/invariant values and original object addresses
+  check the forwarded cache and point, rather than only callback invocation.
+- All three cases pass separately in normal Release, assertion-enabled and
+  AddressSanitizer validation (runs470/473/474). Leak detection is enabled;
+  header/test-object instrumentation links optimized native support libraries.
+  The first fixture compile's linked-list indexing error is corrected to
+  iteration before any runtime validation. Discovery profiles stay excluded.
+- Private input mutation overwrites the populated activation with zero: only
+  the input case fails. Private output mutation forwards a cache copy with its
+  invariant increased by one: both cache-type cases fail on wrong finite values
+  and reference identity, while the input control passes (runs481/482). Preserve
+  private headers, commands and logs; all mutation/sanitizer profiles are excluded.
+- Run476 successfully compiles both corrected documentation adapter forms with
+  syntax-only probes and verifies no coverage notes/counters are emitted.
+  Run475 retains source hashes. Run479 checks matching normal Release/Debug
+  notes and profiles: Input's forwarding line79 has four hits, Output's line89
+  has sixteen. All three measured lines in each header are hit in this scoped
+  union. This closes the two forwarding-body audit candidates without making
+  an aggregate coverage claim. Source inventory, style and formatting pass.

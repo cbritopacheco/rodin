@@ -7,3 +7,8 @@ add_executable(RodinSolidFollowerPressureTest Integrators/FollowerPressureTest.c
 target_link_libraries(RodinSolidFollowerPressureTest
   PRIVATE GTest::gtest GTest::gtest_main Rodin::Solid Rodin::Variational)
 gtest_discover_tests(RodinSolidFollowerPressureTest PROPERTIES LABELS unit)
+
+add_executable(RodinSolidLocalCallbacksTest Local/CallbacksTest.cpp)
+target_link_libraries(RodinSolidLocalCallbacksTest
+  PRIVATE GTest::gtest_main Rodin::Solid)
+gtest_discover_tests(RodinSolidLocalCallbacksTest PROPERTIES LABELS unit)

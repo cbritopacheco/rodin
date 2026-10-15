@@ -19,6 +19,8 @@
  * @code
  * struct MyInput : Solid::Input<MyInput>
  * {
+ *   MyInput() = default;
+ *
  *   void populate(Solid::ConstitutivePoint& cp) const
  *   {
  *     // e.g., interpolate fiber direction from a GridFunction
@@ -28,7 +30,10 @@
  * };
  *
  * Solid::InternalVirtualWorkResidual force(law, v, displacement);
- * force.setInput(MyInput{});
+ * force.setInput([input = MyInput{}](Solid::ConstitutivePoint& cp) {
+ *   const Solid::Input<MyInput>& base = input;
+ *   base.populate(cp);
+ * });
  * @endcode
  *
  * ## Usage with lambda / std::function
