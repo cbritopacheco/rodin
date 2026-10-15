@@ -2367,3 +2367,44 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   has sixteen. All three measured lines in each header are hit in this scoped
   union. This closes the two forwarding-body audit candidates without making
   an aggregate coverage claim. Source inventory, style and formatting pass.
+
+
+### Rectangular SWIFT hinge integrators and bound-copy contracts
+
+- Add a mixed P1 trial/P2 test-space regression in two and three dimensions,
+  exercising previously uninstantiated integrator variants and HingeMetric's
+  distinct-space test-Jacobian branch. Explicit common witness subdivisions
+  define one frozen discrete energy for both spaces; no degree-exact continuum
+  quadrature or convergence claim is made. Field coefficients are obtained
+  through public interpolation, without assumptions about high-order DOF layout.
+- Check the rectangular assembled tangent against the mixed second directional
+  finite difference of pointwise hinge energy, and the assembled Newton residual
+  against its first directional derivative. Frozen current states have positive
+  Jacobians and satisfy their distortion budget; both hinge curvatures remain
+  active throughout the perturbations. These energy evaluations do not call
+  the assembled metric or load being checked.
+- Bind, query and clone both integrators. Check all cached local entries, then
+  change the referenced Jacobian strength and rebind the copies. Fresh bindings
+  match the copies, cached originals remain unchanged, and both copied local
+  systems change. This checks retained parameter references and independent
+  matrix/vector storage rather than only clone allocation.
+- All ten hinge cases pass individually in optimized normal Release, optimized
+  assertion-enabled and optimized AddressSanitizer modes (runs485/489/490).
+  Leak detection is enabled; instrumented header/test objects link optimized
+  native support libraries. The first mixed fixture compile's inconsistent
+  multi-declarator CTAD is corrected by separating different space types; no
+  runtime profiles exist for that failed compile.
+- A private mutation scales both distinct-space test rows by 1.5. Only the new
+  case fails, with finite nonzero tangent values disagreeing with the independent
+  energy curvature in both dimensions; all nine prior controls pass (run491).
+  Preserve private headers, commands and logs; sanitizer and mutation profiles
+  stay excluded from coverage.
+- Run492 validates matching source hashes and two normal ten-case producers.
+  Hinge.h hits all 40 measured lines; HingeForce.h hits 33 of 34, HingeMetric.h
+  57 of 58. All distinct-space assembly statements and bound-polytope assertion/
+  return lines are hit. The two remaining misses are the inadmissible frozen-
+  deformation skips; no invalid internal state is manufactured to hit them.
+  These scoped counts establish no aggregate percentage. Formatting and style
+  pass; production sources are unchanged in this batch.
+- Run494 preserves nine further completed private builds with checksum-verified
+  archives and original-path symlinks, retaining normal/excluded classifications.
