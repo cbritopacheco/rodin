@@ -1013,8 +1013,9 @@ jobs:
       OMP_NUM_THREADS: 2
       CTEST_PARALLEL_LEVEL: 1
       GCOV: gcov-14
-      # Collect optional-backend coverage in the optimized, unsanitized runs.
-      RODIN_COVERAGE: ${{ matrix.build_type == 'Release' && matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && 'ON' || 'OFF' }}
+      # Collect both normal build modes; Debug retains assertion-enabled code
+      # that optimization can erase. Sanitizer profiles never enter coverage.
+      RODIN_COVERAGE: ${{ matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && 'ON' || 'OFF' }}
       # A standalone Ubuntu/Open MPI repro reports PMIx leaks under ASan even
       # without MUMPS, including when MPI_Finalize is called. Keep MUMPS out
       # of ASan jobs while testing it under UBSan and the SuiteSparse solvers
@@ -1170,16 +1171,29 @@ jobs:
         if: env.RODIN_COVERAGE == 'ON'
         run: |
           cmake --build build --target RodinCoverage
-          python3 dev/audit_coverage.py build/RodinCoverage.info --output build/coverage-audit.json
+          python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
 
       - name: Save optional-backend coverage audit
         if: env.RODIN_COVERAGE == 'ON'
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-audit-optional-mt${{ matrix.multithreaded }}
+          name: coverage-audit-optional-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}
           path: |
             build/coverage-audit.json
             build/RodinCoverage.info
+
+      - name: Upload optional-backend production coverage to Codecov
+        if: env.RODIN_COVERAGE == 'ON'
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ github.workspace }}/build/RodinCoverage.info
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }},optional
+          name: cov-optional-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}
+          root_dir: ${{ github.workspace }}
+          use_pypi: true
+          fail_ci_if_error: true
 
 
   Manufactured:
@@ -1385,7 +1399,7 @@ jobs:
       - name: Audit production sources and absent template headers
         run: >-
           python3 dev/audit_coverage.py build/RodinCoverage.info
-          --output build/coverage-audit.json
+          --functions --output build/coverage-audit.json
 
       - uses: actions/upload-artifact@v4
         with:
@@ -1507,7 +1521,7 @@ jobs:
       - name: Audit production sources and absent template headers
         run: >-
           python3 dev/audit_coverage.py build/RodinCoverage.info
-          --output build/coverage-audit.json
+          --functions --output build/coverage-audit.json
 
       - uses: actions/upload-artifact@v4
         with:

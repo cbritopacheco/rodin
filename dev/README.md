@@ -22,9 +22,12 @@ hits, then extracts only `src/Rodin/` records. Compiled source units that no
 test executes remain in the denominator. Tests, benchmarks,
 examples, library-side test helpers (`src/Rodin/Test/`), and dependencies
 may execute production code but never enter the
-coverage denominator. The regular and slow CI reports are merged by Codecov.
-Optimized optional-backend unit jobs also save audited production coverage
-artifacts in GitHub Actions for inspection and offline merging.
+coverage denominator. The regular, slow and optional-backend CI reports are merged by Codecov.
+Unsanitized Debug and Release optional-backend unit jobs save audited production
+coverage artifacts in GitHub Actions and upload only the filtered LCOV report.
+Sanitizer configurations never contribute coverage profiles. Debug compiler
+notes retain assertion-enabled implementations that optimized builds can erase.
+CI audits include function inventories for supported-template review.
 
 ```sh
 cmake --build build --target RodinCoverage
@@ -1468,3 +1471,36 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   CI validates f6d558fe5: six successful test jobs, 34 running and 234 queued,
   with no failures at the latest live read. Style, Installation and
   Documentation have passed for that published head; Build and Tests continue.
+
+- CI coverage-collection audit: normal optional-backend Release reports were
+  saved only as artifacts, while assertion-enabled Debug implementations never
+  contributed CI coverage. The Unit job now collects both unsanitized build
+  modes and uploads only the filtered RodinCoverage.info file to Codecov.
+  Artifact/report names include the build mode to keep all four threading/mode
+  combinations distinct. Sanitizer profiles remain excluded. Unit, Slow and
+  Coverage audits now include function inventories. The 95% floor and production
+  source filters are unchanged; additional Debug notes can expand the measured
+  denominator and must remain visible.
+- Workflow validation confirms exactly four normal Unit coverage combinations,
+  excludes sanitizer uploads, verifies unique artifact names, restricts uploads
+  to the filtered LCOV file with discovery disabled, and checks function-audit
+  collection in all three reporting jobs. YAML parsing, style lint and all nine
+  coverage-auditor tests pass. This is configuration verification, with actual
+  optional-backend CI/Codecov validation still pending after publication.
+- An end-to-end native CMake Debug smoke build explicitly matches GCC14/gcov14,
+  builds Unit, Rad and OptionalReference tests, and passes all forty registered
+  cases one at a time. Build-time discovery counters use a separate excluded
+  GCOV_PREFIX; runtime commands come from CTest JSON without executing binary
+  discovery. The actual RodinCoverage target captures initial plus runtime
+  notes and emits only production records; its function audit remains enabled
+  in the merge. An earlier local smoke used the default GCC13 with gcov14;
+  collection correctly rejected that mismatch, and none of it is merged.
+- Run228 adds the valid CMake Debug report to the 399-report source221 union,
+  retaining 400 reports and all 570 matching production hashes. It measures
+  38,390 / 40,384 production lines (\(95.0624\%\)), with no nonproduction or
+  missing-source records. OptionalReference contributes four newly measured,
+  covered lines; existing identity/mutation/const-referent assertions exercise
+  its previously absent runtime methods. The partial native smoke validates the
+  collector, not the complete backend CI matrix. At the latest live read,
+  f6d558fe5 has fifteen successful test jobs, 36 running and 223 queued, with
+  no failures. This collection update stays local under the deferred-push rule.
