@@ -1214,3 +1214,16 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   candidates, including declarations, aliases, constant data, optimized
   functions and the unsupported variants discussed above; none is silently
   removed from the production-source scope.
+
+- Final complex PETSc validation uses freshly rebuilt current Geometry, IO,
+  QF and PETSc libraries. All nineteen field cases pass separately in Debug
+  and Release, including preservation and non-real analytic values on every
+  regional projection path. Run171 adds both normal producers to the merge:
+  335 reports retain 38,209 / 40,211 production lines (\(95.0213\%\)).
+  Function observations expand to 91,852, with 67,833 hit; line coverage does
+  not conceal the separate zero-hit-function inventory. All 570 production
+  hashes also match tracked committed files, with no production worktree diff.
+- The nineteen complex field cases also pass individually under ASan, with
+  external leak detection disabled under the PETSc policy. These profiles are
+  excluded from run171. All local validation for the final coverage batch is
+  complete; fresh remote CI/Codecov remains required after pushing it.
