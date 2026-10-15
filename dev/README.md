@@ -1227,3 +1227,31 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   external leak detection disabled under the PETSc policy. These profiles are
   excluded from run171. All local validation for the final coverage batch is
   complete; fresh remote CI/Codecov remains required after pushing it.
+
+- CI head fe96b663a, Slow job 116290790575: GitHub's failure annotation states
+  that the hosted runner lost communication with the server. Build remains the
+  last in-progress step; no slow test started. Logs stop while the instrumented
+  DistinctSpaceQuadrature and WeightedComplexQuadrature units compile. This is
+  not evidence of a numerical failure or a 60-minute workflow timeout.
+  Separate current-source ARM64 GCC14 Release/coverage recompilations succeed:
+  compiler peak RSS is 3,095,936 KiB and 3,049,824 KiB, respectively, with wall
+  times 127.73 s and 159.88 s. All 21 distinct-space and seven weighted-complex
+  cases pass individually. These local measurements do not establish the cause
+  of an x86 hosted runner's communication loss. Existing CI build parallelism
+  remains unchanged; the new head supplies a fresh CI attempt.
+- XDMF topology vocabulary: an external protocol oracle checks linear mixed
+  identifiers, quadratic mixed identifiers and quadratic topology names for
+  all eight cell geometries, independently of the writer's helper outputs.
+  Values are taken from the published
+  [XDMF topology table](https://www.xdmf.org/index.php/XDMF_Model_and_Format#Topology).
+  All four format-contract cases pass separately in Debug and Release. A private
+  mutation mapping Segment to Polygon's mixed identifier fails the new test,
+  while the three unrelated format cases remain green. No production code or
+  measured-source exclusion changes in this batch.
+- Fresh run179 retains 343 normal initial/runtime reports and all production
+  hashes: 38,214 / 40,211 production lines (\(95.0337\%\)). The five additional
+  line hits come from the format checks; the measured denominator is unchanged.
+  Mutation, sanitizer, failed/discovery and compiler-resource-only profiles are
+  excluded. Successful normal runtime captures from the two measured quadrature
+  executables are included. This follow-up batch is local while CI validates
+  pushed head 16e6a576b, whose documented audit remains run171.

@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <array>
+#include <tuple>
 #include <sstream>
 #include <string>
 #include "Rodin/Geometry.h"
@@ -15,6 +17,34 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::IO;
 using namespace Rodin::Variational;
+
+/**
+ * @brief Topology codes match the external XDMF mixed-stream vocabulary.
+ *
+ * Expected identifiers come from the XDMF Model and Format topology table,
+ * https://www.xdmf.org/index.php/XDMF_Model_and_Format#Topology .
+ * The file writers must not validate emitted identifiers against the same
+ * mapping helper that produced them.
+ */
+TEST(FileFormatContracts, XDMFTopologyVocabulary)
+{
+  using Type = Polytope::Type;
+  const std::array cases{std::tuple{Type::Point, 1u, 1u, "Polyvertex"},
+    std::tuple{Type::Segment, 2u, 34u, "Edge_3"},
+    std::tuple{Type::Triangle, 4u, 36u, "Triangle_6"},
+    std::tuple{Type::Quadrilateral, 5u, 35u, "Quadrilateral_9"},
+    std::tuple{Type::Tetrahedron, 6u, 38u, "Tetrahedron_10"},
+    std::tuple{Type::Pyramid, 7u, 39u, "Pyramid_13"},
+    std::tuple{Type::Wedge, 8u, 41u, "Wedge_18"},
+    std::tuple{Type::Hexahedron, 9u, 50u, "Hexahedron_27"}};
+  for (const auto& [geometry, linear, quadratic, name] : cases)
+  {
+    SCOPED_TRACE(int(geometry));
+    EXPECT_EQ(HDF5::getXDMFMixedTopologyId(geometry), linear);
+    EXPECT_EQ(HDF5::getXDMFQuadraticMixedTopologyId(geometry), quadratic);
+    EXPECT_STREQ(HDF5::getXDMFQuadraticTopologyName(geometry), name);
+  }
+}
 
 /// @brief MFEM section names are exact and unknown enumeration values have no spelling.
 TEST(FileFormatContracts, MFEMKeywordSpellings)
