@@ -393,8 +393,8 @@ namespace
     cAxpy.flush();
   }
 
-  /// @brief Verifies the 2-, 1- and infinity-norms of the coefficient vector by
-  ///        checking exact expected values.
+  /// @brief Verifies the 2-, 1- and infinity-norms against analytic scalar
+  ///        magnitudes, including nonzero imaginary coefficients in complex builds.
   TEST(PETSc_GridFunction, SequentialNormMatchesHandComputedValues)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -402,14 +402,25 @@ namespace
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     gf = static_cast<PetscScalar>(0.0);
+#if defined(PETSC_USE_COMPLEX)
+    gf[0] = PetscScalar(3, 4);
+    gf[1] = PetscScalar(0, -12);
+    constexpr Real expectedTwoNorm = 13;
+    constexpr Real expectedOneNorm = 17;
+    constexpr Real expectedInfinityNorm = 12;
+#else
     gf[0] = static_cast<PetscScalar>(3.0);
     gf[1] = static_cast<PetscScalar>(-4.0);
+    constexpr Real expectedTwoNorm = 5;
+    constexpr Real expectedOneNorm = 7;
+    constexpr Real expectedInfinityNorm = 4;
+#endif
     gf.flush();
 
-    EXPECT_DOUBLE_EQ(gf.norm(), 5.0);
-    EXPECT_DOUBLE_EQ(gf.norm(NORM_2), 5.0);
-    EXPECT_DOUBLE_EQ(gf.norm(NORM_1), 7.0);
-    EXPECT_DOUBLE_EQ(gf.norm(NORM_INFINITY), 4.0);
+    EXPECT_DOUBLE_EQ(gf.norm(), expectedTwoNorm);
+    EXPECT_DOUBLE_EQ(gf.norm(NORM_2), expectedTwoNorm);
+    EXPECT_DOUBLE_EQ(gf.norm(NORM_1), expectedOneNorm);
+    EXPECT_DOUBLE_EQ(gf.norm(NORM_INFINITY), expectedInfinityNorm);
   }
 
   /// @brief Verifies that the norm of a zero grid function vanishes.

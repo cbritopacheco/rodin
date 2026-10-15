@@ -1568,3 +1568,40 @@ LFS. Before committing a new resource file, check `git check-attr filter --
 - The live CI read for published f6d558fe5 reports 29 successful test jobs,
   40 running and 205 queued, with no failures. Keep the cleanup local under
   the deferred-push condition.
+
+### PETSc scalar-variant collection and broader compiler measurement
+
+- Enable production coverage in the existing four PETScMatrixRanges jobs:
+  real/complex storage and OpenMP on/off. Keep RelWithDebInfo, the same target
+  and test selection, MPI ranks, two compiler jobs, sequential CTest execution
+  and 45-minute budget. Explicitly disable ASan/UBSan; install lcov and select
+  gcov-14. Capture through RodinCoverage, audit function inventories, save
+  uniquely named scalar/threading artifacts and upload only filtered LCOV
+  with automatic discovery disabled. The production source scope is unchanged.
+- Strengthen the existing coefficient-norm test in complex builds: coefficients
+  3+4i and -12i give analytic 2-, 1- and infinity-norms 13, 17 and 12. The real
+  control retains its previous coefficients and expected values. Run238 builds
+  fresh complex PETSc 3.19 dependencies and the test in RelWithDebInfo using
+  GCC/gcov14. All nineteen complex cases and nineteen real controls pass as
+  separate sequential processes. A private coefficient mutation stripping
+  imaginary parts fails only the norm case; eighteen controls pass. All
+  discovery and mutation profiles remain outside the normal collector.
+- Run239 exercises the actual CMake RodinCoverage target on the clean complex
+  build and verifies 69 hit complex GridFunction symbols. All 565 retained
+  production hashes match snapshot236; no nonproduction or missing-source
+  records occur. Workflow checks verify four unique unsanitized uploads,
+  unchanged test selection/ranks/concurrency/budget, and function inventories.
+- Run241 merges this verified combined initial/runtime report into the global
+  union, now 405 normal reports. It measures 38,572 / 42,433 production lines
+  (\(90.9009\%\)). Hits increase by 180, but the fresh RelWithDebInfo compiler
+  notes expose 2,049 additional measured lines. Largest additions are
+  Polytope.cpp (482), MPI Mesh.cpp (325), local Mesh.cpp (154), MEDIT.cpp (86),
+  Shard.cpp (72) and MPI HDF5.h (66). The scalar smoke does not exercise many
+  of these library paths. This broader union supersedes the narrower run236
+  percentage; retain its denominator and run broader suites against the fresh
+  libraries. No production implementation has changed or been excluded.
+- Current goal remains incomplete: recover at least 1,740 additional hits if
+  the denominator stays fixed, then verify the published CI/Codecov result.
+  Latest published f6d558fe5 has 34 successful test jobs, forty running and
+  two hundred queued, with no failures. Other workflow gates have passed;
+  defer pushing until the Tests run fails or completes.

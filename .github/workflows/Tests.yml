@@ -939,6 +939,7 @@ jobs:
         scalar: [real, complex]
         multithreaded: [ON, OFF]
     env:
+      GCOV: gcov-14
       OMP_NUM_THREADS: 2
       OMP_WAIT_POLICY: PASSIVE
       # Allow each MPI rank to schedule its OpenMP workers.
@@ -961,7 +962,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y
           libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
           libscotch-dev libmetis-dev libhdf5-dev
-          libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev
+          libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev lcov
 
       - name: Configure PETSc matrix-range build
         run: >-
@@ -977,6 +978,10 @@ jobs:
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
+          -DRODIN_USE_ASAN=OFF
+          -DRODIN_USE_UBSAN=OFF
+          -DRODIN_CODE_COVERAGE=ON
+          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
 
       - name: Build PETSc matrix-range and I/O tests
         run: >-
@@ -995,6 +1000,31 @@ jobs:
           ctest --test-dir build/tests
           -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4]|RodinPETScMPISubMeshGridFunctionTest_np[124]|RodinPETScIO(HDF5IO|MEDITIO)Test|RodinPETScSingleFieldConstraintTest|RodinPETScRestrictedNonlocalTest|RodinPETScMixedTargetAssemblyTest|RodinPETScMPIMixedTargetAssemblyTest_np[12348]|RodinPETScSingleFieldTargetAssemblyTest)$'
           --output-on-failure --no-tests=error -j 1
+
+      - name: Capture PETSc scalar-variant production coverage
+        run: |
+          cmake --build build --target RodinCoverage
+          python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
+
+      - name: Save PETSc scalar-variant coverage audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-audit-petsc-${{ matrix.scalar }}-mt${{ matrix.multithreaded }}
+          path: |
+            build/coverage-audit.json
+            build/RodinCoverage.info
+
+      - name: Upload PETSc scalar-variant production coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ github.workspace }}/build/RodinCoverage.info
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: RelWithDebInfo,mt-${{ matrix.multithreaded }},petsc-${{ matrix.scalar }}
+          name: cov-petsc-${{ matrix.scalar }}-mt${{ matrix.multithreaded }}
+          root_dir: ${{ github.workspace }}
+          use_pypi: true
+          fail_ci_if_error: true
 
   Unit:
     runs-on: ubuntu-latest
