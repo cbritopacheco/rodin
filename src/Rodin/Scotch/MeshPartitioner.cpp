@@ -111,6 +111,10 @@ namespace Rodin::Scotch
 
   size_t Partitioner::getPartition(Index index) const
   {
-    return m_partition.at(index);
+    if (index >= m_partition.size())
+      Alert::MemberFunctionException(*this, __func__)
+        << "Partition assignment index " << index << " is outside assignment count "
+        << m_partition.size() << '.' << Alert::Raise;
+    return m_partition[index];
   }
 }

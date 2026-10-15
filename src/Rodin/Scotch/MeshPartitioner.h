@@ -57,6 +57,12 @@ namespace Rodin::Scotch
 
       void partition(size_t numPartitions, size_t d) override;
 
+      /**
+       * @brief Gets a stored partition assignment.
+       * @param index Entity index in the most recently partitioned dimension.
+       * @return Partition index for the selected entity.
+       * @throws Alert::Exception If no assignment exists for @p index.
+       */
       size_t getPartition(Index index) const override;
 
       /**

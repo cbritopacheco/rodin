@@ -7,6 +7,7 @@
 /** @file @brief Scotch partition coverage, lifecycle and strategy ownership checks. */
 #include <gtest/gtest.h>
 #include <limits>
+#include <string>
 #include "Rodin/Scotch/MeshPartitioner.h"
 
 using namespace Rodin;
@@ -113,7 +114,45 @@ namespace Rodin::Tests::Unit
       Alert::Exception);
     EXPECT_THROW(partitioner.partition(2, 2), Alert::Exception);
     partitioner.partition(2);
-    EXPECT_THROW(partitioner.getPartition(mesh.getCellCount()), std::out_of_range);
+    EXPECT_THROW(partitioner.getPartition(mesh.getCellCount()), Alert::Exception);
+  }
+
+  /// @brief Checked assignment queries report member context without changing partitions.
+  TEST(ScotchPartitioner, CheckedAssignmentBounds)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {9});
+    mesh.getConnectivity().compute(1, 1);
+    Scotch::Partitioner partitioner(mesh);
+    for (size_t count : {size_t{0}, size_t{2}})
+    {
+      if (count != 0)
+        partitioner.partition(count);
+      std::vector<size_t> assignments;
+      for (Index i = 0; count != 0 && i < mesh.getCellCount(); ++i)
+        assignments.push_back(partitioner.getPartition(i));
+      const size_t size = assignments.size();
+      for (Index index : {size, std::numeric_limits<Index>::max()})
+      {
+        try
+        {
+          partitioner.getPartition(index);
+          ADD_FAILURE() << "An unavailable assignment must be rejected.";
+        }
+        catch (const Alert::Exception& error)
+        {
+          EXPECT_NE(std::string(error.what()).find("getPartition"), std::string::npos);
+          EXPECT_NE(
+            std::string(error.what()).find("In member function"), std::string::npos);
+        }
+        catch (...)
+        {
+          ADD_FAILURE() << "Checked assignment access must raise an Alert exception.";
+        }
+      }
+      EXPECT_EQ(partitioner.getCount(), count);
+      for (Index i = 0; i < assignments.size(); ++i)
+        EXPECT_EQ(partitioner.getPartition(i), assignments[i]);
+    }
   }
 
 }

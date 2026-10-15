@@ -2205,3 +2205,28 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   This is a partial collector union: regular, slow and complex-H1 results are
   still needed. It establishes neither final coverage nor a coverage regression.
   Current-source aggregate confirmation remains pending.
+
+
+### Scotch checked-assignment exception contract
+
+- Replace Partitioner::getPartition's std::out_of_range forwarding with
+  MemberFunctionException. Document that an entity must have a stored assignment.
+  Exercise access before the first partition, one-past-end and maximum indices,
+  member context, and preservation of every valid assignment after rejection.
+  The previous InvalidArguments test now expects the public Alert contract.
+- The new case rejects the original implementation (run416); all eight Scotch
+  cases pass separately in normal Release (run420) and assertion-enabled ASan
+  with leak detection (run422). Sanitizer and red profiles remain excluded.
+  Both the Scotch wrapper and test object are sanitizer-instrumented, linking
+  the existing optimized support libraries and external Scotch library.
+- The complex local build has Scotch disabled, so private commands compile the
+  current wrapper and test explicitly and link Scotch. The inherited test flags
+  promote GCC's existing fclose deleter attribute warning to an error; retain
+  the initial diagnostic and demote that warning for private validation only.
+  This does not establish a Scotch-enabled CMake configuration check.
+- Run419 retains current production/configuration source hashes. Run423 checks
+  the normal producer's eight passing cases and matching Scotch source hash,
+  then confirms positive coverage counts on the bounds guard, Alert path and
+  valid return. No overall percentage is inferred from this file-specific check.
+  Run418 reduces the remaining implicit-call inventory to 223 candidates;
+  public local/MPI SubMesh dimension access and MMG numeric parsing remain open.
