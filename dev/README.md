@@ -2704,3 +2704,30 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   introduced. This is specialization-specific evidence, not a global percentage.
   Production is unchanged. Formatting/style pass, and the local batch remains
   unpushed until the current published-head CI fails or completes.
+
+
+### Spatial-matrix dynamic-vector product scalar pairings
+
+- Confirm the candidate overloads are active code, then exercise direct products
+  with dynamic vectors. Existing all-shape checks use a spatial-vector operand,
+  leaving these separate overloads without attribution in the historical guide.
+  Add all four Real/Complex scalar pairings and all sixteen row/column shapes
+  from zero through three, including zero-row and zero-inner-dimension products.
+- Check coefficient scalar promotion at compile time and output rows/columns at
+  runtime. Expected real/imaginary components are computed explicitly from the
+  input-generating constants, including the unconjugated complex-product signs.
+  Verify both inputs and full matrix storage remain unchanged after evaluation.
+- The first fixture assumes a size() accessor shared by both result types and
+  fails to compile. Same-scalar products return a dynamic vector; mixed products
+  return a spatial matrix with rows/cols accessors. Correct the fixture to check
+  their common shape interface. Run586 is retained under a failed/excluded label
+  with its original path preserved; no test executes from that build.
+- All 43 cases pass individually in optimized, assertion-enabled and
+  AddressSanitizer modes (runs590/591/592), with leak detection enabled and
+  optimized support libraries linked. Sanitizer/discovery counters are excluded.
+- Run593 verifies positive normal entry counts for four product specializations,
+  spanning the same-scalar and mixed-scalar overload families. Numerical checks
+  cover all legal shapes without forcing internal invariant defaults. The raw
+  reports and matching source hash are retained. This is specialization-specific
+  evidence, not a global aggregate. Production is unchanged; formatting/style
+  pass. The local batch remains unpushed pending current CI failure/completion.

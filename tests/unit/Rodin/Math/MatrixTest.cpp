@@ -803,3 +803,77 @@ TEST_F(MatrixTest, SpatialMatrixRectangularPseudoInverse)
     }
   }
 }
+
+/// @brief Dynamic-vector products preserve shape, scalar promotion and both inputs.
+template <class ScalarPair>
+class SpatialMatrixDynamicVectorProductTest : public ::testing::Test
+{};
+using SpatialMatrixDynamicVectorScalars = ::testing::Types<std::pair<Real, Real>,
+  std::pair<Real, Complex>, std::pair<Complex, Real>, std::pair<Complex, Complex>>;
+TYPED_TEST_SUITE(
+  SpatialMatrixDynamicVectorProductTest, SpatialMatrixDynamicVectorScalars);
+
+TYPED_TEST(SpatialMatrixDynamicVectorProductTest, AllShapesAndScalarPairings)
+{
+  using MatrixScalar = typename TypeParam::first_type;
+  using VectorScalar = typename TypeParam::second_type;
+  using OutputScalar = std::conditional_t<std::is_same_v<MatrixScalar, Complex> ||
+      std::is_same_v<VectorScalar, Complex>,
+    Complex, Real>;
+  for (std::uint8_t rows = 0; rows <= 3; ++rows)
+  {
+    for (std::uint8_t cols = 0; cols <= 3; ++cols)
+    {
+      SCOPED_TRACE(::testing::Message() << unsigned(rows) << "x" << unsigned(cols));
+      SpatialMatrix<MatrixScalar> matrix(3, 3);
+      matrix.setConstant(MatrixScalar(91));
+      matrix.resize(rows, cols);
+      Vector<VectorScalar> vector(cols);
+      for (std::uint8_t i = 0; i < rows; ++i)
+      {
+        for (std::uint8_t j = 0; j < cols; ++j)
+        {
+          const Real re = Real(2 * (i + 1) + j + 1);
+          if constexpr (std::is_same_v<MatrixScalar, Complex>)
+            matrix(i, j) = MatrixScalar(re, Real(i) - Real(j));
+          else
+            matrix(i, j) = re;
+        }
+      }
+      for (std::uint8_t j = 0; j < cols; ++j)
+      {
+        if constexpr (std::is_same_v<VectorScalar, Complex>)
+          vector(j) = VectorScalar(Real(j + 2), Real(j + 1));
+        else
+          vector(j) = Real(j + 2);
+      }
+      const auto storage = matrix.getData();
+      const auto operand = vector;
+      const auto result = matrix * vector;
+      static_assert(
+        std::is_same_v<std::remove_cvref_t<decltype(result(0, 0))>, OutputScalar>);
+      ASSERT_EQ(result.rows(), rows);
+      ASSERT_EQ(result.cols(), 1);
+      for (std::uint8_t i = 0; i < rows; ++i)
+      {
+        Real expectedReal = 0, expectedImaginary = 0;
+        for (std::uint8_t j = 0; j < cols; ++j)
+        {
+          const Real ar = Real(2 * (i + 1) + j + 1);
+          const Real ai =
+            std::is_same_v<MatrixScalar, Complex> ? Real(i) - Real(j) : Real(0);
+          const Real xr = Real(j + 2);
+          const Real xi = std::is_same_v<VectorScalar, Complex> ? Real(j + 1) : Real(0);
+          expectedReal += ar * xr - ai * xi;
+          expectedImaginary += ar * xi + ai * xr;
+        }
+        EXPECT_DOUBLE_EQ(std::real(result(i, 0)), expectedReal);
+        EXPECT_DOUBLE_EQ(std::imag(result(i, 0)), expectedImaginary);
+      }
+      EXPECT_EQ(matrix.rows(), rows);
+      EXPECT_EQ(matrix.cols(), cols);
+      EXPECT_EQ(matrix.getData(), storage);
+      EXPECT_EQ(vector, operand);
+    }
+  }
+}
