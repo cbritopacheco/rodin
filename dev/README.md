@@ -2544,3 +2544,33 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   allocation failures, user callbacks or third-party backends. Parser recoveries
   and macro expansion limits remain visible; this is not an exhaustive proof of
   all transitive exception behavior.
+
+
+### Individual MPI identification geometry watchdogs
+
+- Published-head Tests run38790622528 fails in Slow multithreaded partition2:
+  166 of 167 entries pass; RodinMPIAssemblyIdentificationSlowTest_np3 exhausts
+  its shared 600-second timer. The verbose rerun passes tetrahedron in about
+  462 seconds, pyramid in about43 seconds and hexahedron in about42 seconds,
+  then expires during wedge. The job logs and monitor trigger are retained.
+- Replace each four-geometry identification group with four individual entries
+  at ranks one, two, three, four and eight. Preserve every filter/input, numerical
+  check and 600-second watchdog. Set each entry's processor count explicitly.
+  Run526 proves that the original geometry-filter union is unchanged and that
+  the four Slow partitions remain nonempty, exhaustive and disjoint. Other
+  registration command multisets are unchanged. Eight existing connectivity
+  parameter names contain ASLR-dependent raw pointer bytes, so names alone are
+  unsuitable for the unchanged-command comparison.
+- The first local launcher (run527) finds no MPI assembly executable in the
+  partial native build; no test case executes. Retain this failed launch under
+  excluded labels. Run528 builds the current test source with one optimized
+  compiler job, and run529 passes all twenty geometry/rank cases separately,
+  one MPI group at a time. The maximum local case time is about155 seconds;
+  this is local execution evidence, not a cross-machine performance comparison.
+  The dedicated normal producer is retained, with discovery/failed-launch
+  profiles isolated. Support libraries remain optimized; no sanitizer claim
+  is made for this registration repair.
+- Runs531/532 archive completed private validation builds only, with verified
+  checksums and original-path symlinks. Producer classifications are preserved;
+  these mixed archives must never be captured wholesale. The current-head CI
+  failure satisfies the user's condition for pushing the accumulated batches.
