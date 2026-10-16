@@ -2574,3 +2574,47 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   checksums and original-path symlinks. Producer classifications are preserved;
   these mixed archives must never be captured wholesale. The current-head CI
   failure satisfies the user's condition for pushing the accumulated batches.
+
+
+### Euclidean source and specialization attribution audit
+
+- Revisit the two historical Box misses against byte-identical current source.
+  All 75 existing cases pass individually in a fresh assertion-enabled build
+  (runs538/539). Run540 captures 472 of 475 measured Euclidean lines, including
+  the same Box misses and one LineSegment continuation-line miss. These scoped
+  numbers are not a current global aggregate.
+- GCC's per-specialization block graph explains all three lines: Box.h81/125
+  and LineSegment.hpp128 contain blocks whose incoming edges are exclusively
+  zero-count exception edges in otherwise executed functions. Run541 verifies
+  30 such records. Run551 repeats the proof against the final normal producer.
+  Keep the raw misses and denominator; no exclusion or invalid-state test is
+  introduced to force compiler-generated exceptional cleanup.
+- Raw zero-count functions also need interpretation: the initial capture has
+  106 zero-count symbols, but grouping identical source locations/C++ signatures
+  to expose ABI duplicates leaves 32 zero-count source-signature groups. This
+  grouping is an audit aid, not a semantic coverage proof (run542).
+- Add Float/Real zero-dimensional ownership checks: mutable/const coordinate
+  access borrows the same fixed storage; valid empty affine expressions construct
+  and assign the unique point; box corners and copied corners are separately
+  owned subobjects. All 77 cases pass individually with assertions and under
+  AddressSanitizer with leak detection enabled (runs546/547), linking optimized
+  support libraries. Sanitizer/discovery counters remain excluded. Run543 is a
+  superseded test-object compile with no runtime producer, and is not captured.
+- A private mutation aliases lower() to the upper corner only in dimension zero.
+  Both new scalar cases reject the alias, while four original zero-dimensional
+  controls pass (run553). The entire mutation producer remains excluded.
+- Run549 confirms ten previously zero-count source-signature groups now execute.
+  It classifies all 22 remaining groups: four index accesses have no valid index
+  in dimension zero, six private tolerance helpers are unused by their dimension
+  dispatch paths, and twelve operations require zero-dimensional lines/spheres
+  rejected by construction. No rejected internal object is fabricated. Raw
+  zero-count symbols fall to 96; ABI duplicates remain explicitly retained.
+- The source-only audit reports 105 Euclidean definitions, zero parser recoveries
+  in this module, and no nonempty/initialized definition without line attribution
+  in the fresh normal capture (run550). Compiler-absent bodies are checked from
+  source rather than silently omitted. The scoped line result stays 472/475 even
+  though ten specialization groups are closed, illustrating why source-line
+  coverage alone does not certify template coverage. Production is unchanged.
+- Run537 preserves the completed MPI build with checksum-verified archival and
+  original-path links. This test/audit batch stays local until the current
+  published-head CI fails or completes.

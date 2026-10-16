@@ -881,6 +881,39 @@ namespace Rodin::Tests::Unit
     EXPECT_THROW((void)P(Math::Vector<S>::Ones(1)), Alert::Exception);
   }
 
+  /// @brief The unique zero-dimensional point and box still own distinct coordinate objects.
+  TYPED_TEST(EuclideanZeroDimensions, StorageAndBoxCornersRemainOwned)
+  {
+    using S = TypeParam;
+    using P = Geometry::Euclidean::Point<0, S>;
+    using B = Box<0, S>;
+    P point;
+    auto& coordinates = point.asVector();
+    EXPECT_EQ(coordinates.rows(), 0);
+    EXPECT_EQ(coordinates.cols(), 1);
+    EXPECT_EQ(coordinates.size(), 0);
+    using V = Math::FixedSizeVector<S, 0>;
+    const V base = V::Zero(), offset = V::Zero();
+    const auto affine = base + S(2) * offset / S(3);
+    const P constructed(affine);
+    EXPECT_EQ(constructed, point);
+    EXPECT_EQ(&(point = affine), &point);
+    const P& view = point;
+    EXPECT_EQ(&coordinates, &view.asVector());
+    const B box(point, point);
+    EXPECT_EQ(box.lower(), point);
+    EXPECT_EQ(box.upper(), point);
+    EXPECT_NE(&box.lower(), &point);
+    EXPECT_NE(&box.upper(), &point);
+    EXPECT_NE(&box.lower(), &box.upper());
+    const B copied(box);
+    EXPECT_EQ(copied.lower(), point);
+    EXPECT_EQ(copied.upper(), point);
+    EXPECT_NE(&copied.lower(), &box.lower());
+    EXPECT_NE(&copied.upper(), &box.upper());
+    EXPECT_NE(&copied.lower(), &copied.upper());
+  }
+
   TYPED_TEST(EuclideanZeroDimensions, RejectsNonemptyPositiveDimensionalPrimitives)
   {
     using S = TypeParam;
