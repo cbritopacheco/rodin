@@ -121,6 +121,8 @@ namespace Rodin::Examples::Heart
       m_pNext(m_sh), m_tNext(m_sh), m_aNext(m_sh), m_gNext(m_sh),
       m_fibrin(m_sh), m_tat(m_sh), m_drag(m_sh), m_drift(m_sh),
       m_eT(m_sh), m_vE(m_sh), m_layer(m_sh),
+      m_wallArea(m_sh),
+      m_wssRec(m_vh),
       m_wss(m_vh),
       m_gradRec0(m_vh),
       m_gradRec1(m_vh),
@@ -502,7 +504,7 @@ namespace Rodin::Examples::Heart
     m_model.initialize(s0);
 
     const auto zeroVector = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
-    for (auto* g : { &m_uOld, &m_subOld, &m_sub, &m_convProjection, &m_wss,
+    for (auto* g : { &m_uOld, &m_subOld, &m_sub, &m_convProjection, &m_wss, &m_wssRec,
                      &m_netShear, &m_gradRec0, &m_gradRec1, &m_gradRec2 })
       *g = zeroVector;
     for (auto* g : { &m_piTilde, &m_absShear, &m_shearMagnitude, &m_tawss, &m_osi,
@@ -556,8 +558,21 @@ namespace Rodin::Examples::Heart
     m_xdmf.add("activation", m_activation);
     m_xdmf.add("activationLayer", m_layer);
     m_xdmf.add("shearStress", m_wss);
+    m_xdmf.add("wallArea", m_wallArea);
 
     m_outletArea = boundaryArea(m_cfg.outlet);
+
+    // Nodal wall indicator from the assembled wall measure (ADD-assembled
+    // across ranks, then ghost-refreshed by setData): consistent on every
+    // rank, which a Region::Boundary projection is not.
+    m_flux = BoundaryIntegral(m_one, m_qFlux).over(m_cfg.wall);
+    m_flux.assemble();
+    m_wallArea.setData(m_flux.getVector());
+    // Interpolating a P1 field at its own node leaves O(1e-21) round-off at
+    // the nodes where it is zero, so the indicator is tested against a
+    // threshold well below any wall nodal area and well above that noise.
+    m_wallAreaThreshold = 1.0e-6 * m_wallArea.max();
+
     m_pIn = m_cfg.inletPressureMean;
     m_pOut = m_model.getState().pv;
     m_outletPressure = m_pIn;
@@ -577,6 +592,11 @@ namespace Rodin::Examples::Heart
                     << " m, reaction layer delta=" << k.layerThickness << " m"
                     << Alert::Raise;
     }
+  }
+
+  bool AtriumPTAG::onWallNode(const Point& p) const
+  {
+    return m_wallArea.getValue(p) > m_wallAreaThreshold;
   }
 
   AtriumPTAG::Real AtriumPTAG::boundaryArea(Attribute tag)
@@ -1058,26 +1078,23 @@ namespace Rodin::Examples::Heart
 
     // Keep the wall only: off it the regularised projection carries a
     // sign-alternating tail that would poison the cycle accumulators (see
-    // Atrium.cpp for the argument).
+    // Atrium.cpp for the argument). Projected over the cells with the nodal
+    // wall indicator, so every rank writes every local node consistently.
     const size_t sdim = m_mesh.getSpaceDimension();
-    const size_t wallFaceDim = m_mesh.getDimension() - 1;
-    const auto onWallFacet = [this, wallFaceDim](const Polytope& facet) {
-      const auto a = m_mesh.getAttribute(wallFaceDim, facet.getIndex());
-      return a && *a == m_cfg.wall;
-    };
-
-    const auto& wssSol = m_wssTrial.getSolution();
-    m_wss = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
-    m_wss.project(Region::Boundary,
-      VectorFunction(sdim,
-        [&wssSol, sdim](const Point& p) -> Math::SpatialVector<Real> {
-          const auto w = wssSol.getValue(p);
-          Math::SpatialVector<Real> out(sdim);
-          for (Index c = 0; c < static_cast<Index>(sdim); ++c)
-            out(c) = w(c);
+    m_wssRec.setData(m_wssTrial.getSolution().getData());
+    m_wss.project(VectorFunction(sdim,
+      [this, sdim](const Point& p) -> Math::SpatialVector<Real> {
+        Math::SpatialVector<Real> out(sdim);
+        if (!onWallNode(p))
+        {
+          out.setZero();
           return out;
-        }),
-      onWallFacet);
+        }
+        const auto w = m_wssRec.getValue(p);
+        for (Index c = 0; c < static_cast<Index>(sdim); ++c)
+          out(c) = w(c);
+        return out;
+      }));
 
     // Cycle accumulators: int tau_w dt (vector) and int |tau_w| dt (nodal
     // magnitude, never an L2 projection, which can go negative).
@@ -1093,45 +1110,36 @@ namespace Rodin::Examples::Heart
     if (elapsed <= 0.0)
       return;
 
-    // TAWSS, OSI and E live on the wall and nowhere else; all three are nodal.
-    const size_t faceDim = m_mesh.getDimension() - 1;
-    const auto onWall = [this, faceDim](const Polytope& facet) {
-      const auto a = m_mesh.getAttribute(faceDim, facet.getIndex());
-      return a && *a == m_cfg.wall;
-    };
+    // TAWSS, OSI and E live on the wall and nowhere else; all three are nodal
+    // and are projected over the cells with the wall indicator (never over
+    // Region::Boundary, see m_wallArea).
+    m_tawss.project(RealFunction([this, elapsed](const Point& p) -> Real {
+      return onWallNode(p) ? m_absShear.getValue(p) / elapsed : 0.0;
+    }));
 
-    m_tawss = Real(0);
-    m_osi = Real(0);
-    m_activation = Real(0);
-
-    m_tawss.project(Region::Boundary,
-      RealFunction([this, elapsed](const Point& p) -> Real {
-        return m_absShear.getValue(p) / elapsed;
-      }),
-      onWall);
-
-    m_osi.project(Region::Boundary, RealFunction([this](const Point& p) -> Real {
+    m_osi.project(RealFunction([this](const Point& p) -> Real {
+      if (!onWallNode(p))
+        return 0.0;
       const Real abs = m_absShear.getValue(p);
       if (abs <= 0.0)
         return 0.0;
       const auto net = m_netShear.getValue(p);
       const Real mag = std::sqrt(Math::dot(net, net));
       return std::clamp<Real>(0.5 * (1.0 - mag / abs), 0.0, 0.5);
-    }),
-      onWall);
+    }));
 
     // E = sigma_low(TAWSS) * min(2 OSI, 1): a logistic in the measured
     // endothelial switch (~0.4 Pa) times the oscillatory index. Bounded in
     // [0,1], so the wall exchange can never become a sink of thrombin.
     const Real tauA = m_cfg.kinetics.activationShearStress;
     const Real width = std::max<Real>(m_cfg.kinetics.activationShearWidth, 1e-12);
-    m_activation.project(Region::Boundary,
-      RealFunction([this, tauA, width](const Point& p) -> Real {
-        const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
-        const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
-        return std::clamp<Real>(low * osi, 0.0, 1.0);
-      }),
-      onWall);
+    m_activation.project(RealFunction([this, tauA, width](const Point& p) -> Real {
+      if (!onWallNode(p))
+        return 0.0;
+      const Real low = 1.0 / (1.0 + std::exp((m_tawss.getValue(p) - tauA) / width));
+      const Real osi = std::clamp<Real>(2.0 * m_osi.getValue(p), 0.0, 1.0);
+      return std::clamp<Real>(low * osi, 0.0, 1.0);
+    }));
 
     // The ghost entries must be zeroed too, or the next accumulation reads a
     // stale halo.

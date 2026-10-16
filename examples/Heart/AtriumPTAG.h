@@ -482,6 +482,8 @@ namespace Rodin::Examples::Heart
       void setupSpecies();
       void setupWallShear();
       void setupLayer();
+      /// @brief Whether the point is a wall node (see m_wallArea).
+      bool onWallNode(const Rodin::Geometry::Point& p) const;
       /// @brief Extend E into the endocardial layer and fix the dose scale.
       void extendActivation();
 
@@ -604,6 +606,20 @@ namespace Rodin::Examples::Heart
       Real m_layerScale = 1.0;
 
       // ---- Wall shear indices ----------------------------------------------
+      /// @brief int_Gw phi_i dA: positive exactly at the wall nodes. Nodal
+      ///        indicator used to restrict the cycle indices to the wall.
+      /// @details The wall quantities are projected over the cells, never
+      ///          over Region::Boundary: that iterator visits only the owned
+      ///          boundary faces, so a rank that holds a wall node as a ghost
+      ///          without owning a wall face at it never writes that slot,
+      ///          and the reverse scatter of GridFunction::flush() (ghost
+      ///          wins) then overwrites the owner's value with the stale
+      ///          one. The result was a dashed line of zeros along every
+      ///          partition seam in TAWSS, OSI and E.
+      ScalarGridFunctionType m_wallArea;
+      Real m_wallAreaThreshold = 0.0;
+      /// @brief Ghost-consistent copy of the recovered traction.
+      VectorGridFunctionType m_wssRec;
       VectorGridFunctionType m_wss;
       VectorGridFunctionType m_gradRec0;
       VectorGridFunctionType m_gradRec1;
