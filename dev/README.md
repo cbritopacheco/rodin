@@ -2731,3 +2731,27 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   reports and matching source hash are retained. This is specialization-specific
   evidence, not a global aggregate. Production is unchanged; formatting/style
   pass. The local batch remains unpushed pending current CI failure/completion.
+
+
+### CI prepared-report upload repair (run645)
+
+- At published head a8ee3733e, Unit Debug with multithreading and sanitizers
+  disabled passes its build, unit, distributed and all 35 slow MPI geometry
+  cases. Production coverage capture and artifact upload also pass. The final
+  Codecov step receives a runner shutdown signal and exits 143. The origin of
+  that shutdown is not established; no test failure is inferred from it.
+- Its upload log shows Codecov CLI 11.3.1 running gcov over build notes,
+  including third-party and test objects, despite receiving RodinCoverage.info
+  with coverage-file search disabled. RodinCoverage has already captured both
+  compiler-note baselines and successful normal runtime counters with gcov-14,
+  restricted to production sources and excluding src/Rodin/Test.
+- Set the official Codecov action's plugins input to noop in all five upload
+  steps, so the prepared LCOV report is uploaded without plugin recollection.
+  Keep explicit report paths, disabled file search and fail-on-error behavior.
+  This does not weaken the 95% production threshold or alter test execution.
+- Run645 compares parsed workflows before and after removing the five new
+  plugin inputs: all remaining content is identical, including every matrix,
+  test command and capture. Official action input documentation and source are
+  retained with blob provenance. Production style and diff whitespace pass.
+  The new-head CI upload still requires confirmation. Failed test, discovery,
+  sanitizer, mutation and pre-fix profiles remain excluded from coverage.

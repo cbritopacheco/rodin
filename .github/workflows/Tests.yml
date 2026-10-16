@@ -978,6 +978,8 @@ jobs:
         with:
           files: ${{ github.workspace }}/build/RodinCoverage.info
           disable_search: true
+          # RodinCoverage already runs the matching gcov and filters production sources.
+          plugins: noop
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: RelWithDebInfo,mt-${{ matrix.multithreaded }},petsc-complex,h1
           name: cov-complex-h1-mt${{ matrix.multithreaded }}
@@ -1086,6 +1088,8 @@ jobs:
         with:
           files: ${{ github.workspace }}/build/RodinCoverage.info
           disable_search: true
+          # RodinCoverage already runs the matching gcov and filters production sources.
+          plugins: noop
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: RelWithDebInfo,mt-${{ matrix.multithreaded }},petsc-${{ matrix.scalar }}
           name: cov-petsc-${{ matrix.scalar }}-mt${{ matrix.multithreaded }}
@@ -1295,6 +1299,8 @@ jobs:
         with:
           files: ${{ github.workspace }}/build/RodinCoverage.info
           disable_search: true
+          # RodinCoverage already runs the matching gcov and filters production sources.
+          plugins: noop
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }},optional
           name: cov-optional-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}
@@ -1549,6 +1555,8 @@ jobs:
         with:
           files: ${{ github.workspace }}/build/RodinCoverage.info
           disable_search: true
+          # RodinCoverage already runs the matching gcov and filters production sources.
+          plugins: noop
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }},slow-part-${{ matrix.partition }}
           name: cov-slow-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}-part${{ matrix.partition }}
@@ -1684,6 +1692,8 @@ jobs:
           # Upload only the LCOV report filtered by RodinCoverage. Automatic
           # discovery also uploads raw gcov files, undoing its exclusions.
           disable_search: true
+          # RodinCoverage already runs the matching gcov and filters production sources.
+          plugins: noop
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }}
           name: cov-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}
