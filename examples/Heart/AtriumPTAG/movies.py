@@ -24,8 +24,12 @@ Salida (en --out):
     <escena>.mp4                    video (si hay ffmpeg en el PATH)
     snapshots/<escena>_{first,mid,last}.png  tres instantáneas en alta resolución
 
+Sirve sobre una corrida en curso (lee los pasos ya escritos en el XDMF). Con
+muchos pasos conviene --every N; --smooth 2 esconde las costuras de la
+partición MPI de corridas hechas antes del arreglo de los índices de pared.
+
 En macOS el pvpython está dentro de la app, p. ej.
-    /Applications/ParaView-5.12.0.app/Contents/bin/pvpython
+    /Applications/ParaView-5.13.3.app/Contents/bin/pvpython
 """
 import argparse
 import math
@@ -122,6 +126,10 @@ def parse_args():
                    help="resolución del remuestreo para el render volumétrico (n^3)")
     p.add_argument("--range-samples", type=int, default=4,
                    help="pasos de tiempo usados para fijar el rango de color (0 = todos)")
+    p.add_argument("--smooth", type=int, default=0,
+                   help="pasadas de suavizado nodal (punto->celda->punto) antes de dibujar; "
+                        "esconde las costuras de la partición MPI de corridas antiguas "
+                        "(difumina ligeramente los campos)")
     p.add_argument("--no-video", action="store_true", help="sólo fotogramas y snapshots")
     p.add_argument("--light", action="store_true", help="fondo claro en vez de oscuro")
     return p.parse_args()
@@ -170,6 +178,19 @@ def add_fields(src, needed):
         p0 = needed["prothrombin_depletion"]
         cur = Calculator(Input=cur, ResultArrayName="prothrombin_depletion",
                          Function="100*(%.9g-prothrombin)/%.9g" % (p0, p0))
+    return cur
+
+
+def smooth(src, passes):
+    """Promedio nodal repetido: cada pasada reemplaza el valor de un nodo por
+    la media de las celdas que lo rodean. Una línea de un nodo de ancho (la
+    costura de una partición) se diluye en dos o tres pasadas."""
+    cur = src
+    for _ in range(passes):
+        cells = PointDatatoCellData(Input=cur)
+        cells.PassPointData = 0
+        cur = CellDatatoPointData(Input=cells)
+        cur.PassCellData = 0
     return cur
 
 
@@ -417,6 +438,9 @@ def main():
         else:
             needed[f] = None
     data = add_fields(clean, needed)
+    if args.smooth > 0:
+        log("suavizado nodal: %d pasadas" % args.smooth)
+        data = smooth(data, args.smooth)
     data.UpdatePipeline(times[0])
     bounds = data.GetDataInformation().GetBounds()
     log("nodos:", data.GetDataInformation().GetNumberOfPoints(), " bounds:", bounds)
