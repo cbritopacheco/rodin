@@ -84,7 +84,7 @@ Opciones (prefijo `-kv_`): `mesh`, `out`, `rho`, `K` (Pa·sⁿ), `n`, `gdmin`,
 `mumin`, `mumax`, `inlet` (`velocity`|`pressure`), `umean`, `profile`
 (`auto`|`laminar`|`turbulent`|`uniform`), `pin`, `pout`, `ramp`,
 `total_pressure`, `dt`, `dtmin`, `dtmax`, `tend`, `adaptive_dt`, `easy`,
-`hard`, `maxit`, `tol`, `tau_dt`, `bdf`, `extrapolate`, `lumped`, `picard_monitor`, `tavg`, `steady_tol`,
+`hard`, `maxit`, `tol`, `tau_dt`, `bdf`, `extrapolate`, `lumped`, `refactor_every`, `refactor_its`, `picard_monitor`, `tavg`, `steady_tol`,
 `steady_window`, `output_every`.
 Solver: `-kv_flow_*` (MUMPS LU por defecto; si no hay MUMPS,
 `-kv_flow_pc_factor_mat_solver_type superlu_dist` o `-kv_flow_ksp_type gmres
@@ -205,6 +205,13 @@ balance de la partición (`[partition] ... max/mean`).
 - **Ensamblaje.** Es ~80 % del paso: cada integrador recorre la malla por
   separado (~130 µs por celda y ensamblaje en 2 procesos). La factorización
   MUMPS es ~10 % en la malla gruesa de prueba.
+- **Solver lineal.** GMRES precondicionado con factores MUMPS que se
+  reutilizan entre iteraciones de Picard y entre pasos; se refactoriza cada
+  20 resoluciones (`-kv_refactor_every`) o cuando GMRES pasa de 15
+  iteraciones (`-kv_refactor_its`). En FPC16 25 % grueso: 1.9 → 0.4 s de
+  resolución por paso, fuerzas idénticas a 1e-6. `-kv_refactor_every 1
+  -kv_flow_ksp_type preonly` es la resolución directa de antes. El log dice
+  cuántas factorizaciones e iteraciones de GMRES hubo en cada paso.
 - Medido en la malla gruesa de prueba (FPC8 25 %, 41 k tetraedros, 2
   procesos, Picard = 2): 16.2 s por paso antes, 11.5 s con advección P0 en
   la OSS, reacción en un solo ensamblaje y proyección concentrada, 6.7 s

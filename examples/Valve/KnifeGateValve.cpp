@@ -48,9 +48,13 @@
 // coefficients projected onto P0 (constant per cell, exact for P1
 // velocities) so every integrand has a known polynomial order.
 //
-// Cost. Per Picard iteration: one assembly and one MUMPS factorisation. The
-// assembly dominates (~80 % of the step on 2 ranks for the coarse test mesh,
-// ~130 us per cell and assembly): each integrator walks the mesh on its own.
+// Cost. Per Picard iteration: one assembly and one linear solve, GMRES
+// preconditioned by MUMPS factors that are reused while GMRES converges in
+// a few iterations (-kv_refactor_every, -kv_refactor_its): the factorisation
+// was ~40 % of the step on an 8-core Mac (FPC8 25 %, 430 k cells), the
+// lagged factors cut the solve 4-5x with the same forces to 1e-6. The
+// assembly then dominates (~130-185 us per cell and assembly): each
+// integrator walks the mesh on its own.
 // The log prints the time per phase at every step and the load balance of
 // the partition at start-up; without Scotch the fallback partitioner can
 // leave the whole mesh on rank 0.
@@ -101,7 +105,7 @@
 // inlet (velocity|pressure), umean, profile (auto|laminar|turbulent|uniform), pin, pout,
 // ramp, tangential (inlet penalty, kg/(m^2 s)), total_pressure (bool), dt,
 // dtmin, dtmax, tend, adaptive_dt (bool), grow, shrink, easy, hard, maxit,
-// tol, tau_dt (bool), bdf (1|2), extrapolate (bool), lumped (bool), picard_monitor (bool), tavg, steady_tol, steady_window, output_every, scale.
+// tol, tau_dt (bool), bdf (1|2), extrapolate (bool), lumped (bool), refactor_every, refactor_its, picard_monitor (bool), tavg, steady_tol, steady_window, output_every, scale.
 // Solvers: -kv_flow_ (MUMPS LU by default), -kv_proj_* (CG + Jacobi).
 #include <algorithm>
 #include <array>
@@ -220,6 +224,11 @@ namespace Rodin::Examples::Valve
         int bdf = 2;                  ///< 1: backward Euler; 2: BDF2 (variable step), BDF1 on the first step
         bool extrapolate = true;      ///< Picard starts from u^n + w (u^n - u^{n-1}), w = dt/dt_prev
         bool lumpedProjection = true; ///< OSS projections with the lumped mass matrix
+        /// Lagged LU: refactor every refactorEvery solves (1: every solve,
+        /// direct solver only) or when GMRES with the old factors needs more
+        /// than refactorIterations iterations.
+        int refactorEvery = 20;
+        int refactorIterations = 15;
 
         // Output and stopping.
         Real tAverage = -1.0;      ///< s, start of the time average (< 0: tEnd/2)
@@ -479,6 +488,7 @@ namespace Rodin::Examples::Valve
       struct Timing
       {
         Real setup = 0, coefficients = 0, assemble = 0, solve = 0, forces = 0, projections = 0, output = 0;
+        int factorizations = 0, kspIterations = 0;
       };
 
       /// Adds the elapsed wall time to a Timing field on stop() or destruction.
@@ -711,11 +721,43 @@ namespace Rodin::Examples::Valve
           m_flow.assemble();
         }
         Timer ts(m_timing.solve);
-        m_flow.solve(m_flowKSP);
-        ts.stop();
-        ::KSPConvergedReason reason;
-        PetscErrorCode ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
+        // Lagged LU: the MUMPS factors of an earlier matrix precondition
+        // GMRES on the current one (Picard iterations and steps change the
+        // matrix little). Refactor every refactorEvery solves, or as soon as
+        // GMRES needs more than refactorIterations iterations or fails.
+        ::KSP ksp = m_flowKSP.getHandle();
+        const bool reuse = m_cfg.refactorEvery > 1 && m_factored
+                         && m_solvesSinceFactor < m_cfg.refactorEvery;
+        PetscErrorCode ierr = KSPSetReusePreconditioner(ksp, reuse ? PETSC_TRUE : PETSC_FALSE);
         assert(ierr == PETSC_SUCCESS);
+        m_flow.solve(m_flowKSP);
+        ::KSPConvergedReason reason;
+        PetscInt its = 0;
+        ierr = KSPGetConvergedReason(ksp, &reason);
+        assert(ierr == PETSC_SUCCESS);
+        ierr = KSPGetIterationNumber(ksp, &its);
+        assert(ierr == PETSC_SUCCESS);
+        if (reuse && (reason < 0 || its > m_cfg.refactorIterations))
+        {
+          ierr = KSPSetReusePreconditioner(ksp, PETSC_FALSE);
+          assert(ierr == PETSC_SUCCESS);
+          m_flow.solve(m_flowKSP);
+          ierr = KSPGetConvergedReason(ksp, &reason);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = KSPGetIterationNumber(ksp, &its);
+          assert(ierr == PETSC_SUCCESS);
+          m_solvesSinceFactor = 0;
+          ++m_timing.factorizations;
+        }
+        else if (!reuse)
+        {
+          m_solvesSinceFactor = 0;
+          ++m_timing.factorizations;
+        }
+        m_factored = true;
+        ++m_solvesSinceFactor;
+        m_timing.kspIterations += static_cast<int>(its);
+        ts.stop();
         (void)ierr;
         if (reason < 0)
           throw std::runtime_error("KSP diverged at t = " + std::to_string(m_t));
@@ -942,6 +984,7 @@ namespace Rodin::Examples::Valve
                       << r.Fdyn[2] << ") N" << Alert::NewLine
                       << "   time [s]: setup " << m_timing.setup << "  coefficients " << m_timing.coefficients
                       << "  assemble " << m_timing.assemble << "  solve " << m_timing.solve
+                      << " (" << m_timing.factorizations << " LU, " << m_timing.kspIterations << " GMRES its)"
                       << "  forces " << m_timing.forces << "  projections " << m_timing.projections
                       << "  output " << m_timing.output << Alert::Raise;
         m_timing = Timing{};
@@ -1084,6 +1127,8 @@ namespace Rodin::Examples::Valve
 
       Real m_t = 0.0, m_dt = 0.0;
       Real m_dtPrev = 0.0;                  ///< dt of the last accepted step
+      bool m_factored = false;              ///< MUMPS factors available for reuse
+      int m_solvesSinceFactor = 0;
       int m_history = 0;                    ///< accepted steps (BDF2 and extrapolation need 1)
       Real m_bdf[3] = { 1.0, 1.0, 0.0 };    ///< (b0 u - b1 u^n + b2 u^{n-1})/dt of this step
       bool m_converged = true;
@@ -1118,7 +1163,14 @@ int main(int argc, char** argv)
   };
   // Flow: direct (MUMPS). This MUMPS build faults in its distributed RHS
   // scatter: keep the right-hand side and the solution centralised.
-  setDefault("-kv_flow_ksp_type", "preonly");
+  // GMRES preconditioned by (possibly lagged) MUMPS factors; with fresh
+  // factors it converges in one iteration. -kv_refactor_every 1 together
+  // with -kv_flow_ksp_type preonly is the plain direct solve.
+  setDefault("-kv_flow_ksp_type", "gmres");
+  setDefault("-kv_flow_ksp_rtol", "1e-9");
+  setDefault("-kv_flow_ksp_atol", "1e-14");
+  setDefault("-kv_flow_ksp_max_it", "40");
+  setDefault("-kv_flow_ksp_gmres_restart", "40");
   setDefault("-kv_flow_pc_type", "lu");
   setDefault("-kv_flow_pc_factor_mat_solver_type", "mumps");
   setDefault("-kv_flow_mat_mumps_icntl_20", "0");
@@ -1199,6 +1251,8 @@ int main(int argc, char** argv)
     integer("-kv_bdf", cfg.bdf);
     boolean("-kv_extrapolate", cfg.extrapolate);
     boolean("-kv_lumped", cfg.lumpedProjection);
+    integer("-kv_refactor_every", cfg.refactorEvery);
+    integer("-kv_refactor_its", cfg.refactorIterations);
     real("-kv_tavg", cfg.tAverage);
     real("-kv_steady_tol", cfg.steadyTolerance);
     integer("-kv_steady_window", cfg.steadyWindow);
