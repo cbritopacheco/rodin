@@ -2618,3 +2618,41 @@ LFS. Before committing a new resource file, check `git check-attr filter --
 - Run537 preserves the completed MPI build with checksum-verified archival and
   original-path links. This test/audit batch stays local until the current
   published-head CI fails or completes.
+
+
+### CellDeformation alias-safe gradient replacement
+
+- The historical source-attribution guide is restricted to byte-identical files
+  and excludes explicitly superseded historical ranges. Run557 initially matches
+  515 files; after this production repair, run567 excludes CellDeformation and
+  matches 514 files. Its 1,261 unattributed definitions, including 891 without
+  constexpr in their signatures, are investigation candidates rather than a
+  semantic uncovered-body count. Inlining, constant evaluation, parser recovery
+  and unsupported APIs still require individual review. No historical percentage
+  is reused to certify current source.
+- Inspect the setter's history before changing its established formula. A valid
+  public call passes getDeformationGradient() back as the displacement-gradient
+  input. The old implementation overwrites that borrowed input with identity
+  before adding it, silently producing $2I$ rather than $I+F_{old}$. Run559 observes
+  finite wrong entries/Jacobians in dimensions one, two and three; the original
+  nonaliasing displacement-gradient control passes. The entire pre-fix producer
+  and profiles remain excluded, with the old header/hash retained.
+- Evaluate Identity + H as an owned SpatialMatrix value before assigning m_F.
+  The existing operator+ returns owned stack storage, so input aliasing is safe
+  and nonaliasing arithmetic remains the same. Document that the input may alias
+  the owned gradient. Preserve cache invalidation and the setter's return value.
+- The regression checks each updated matrix entry, analytic triangular Jacobians,
+  stable borrowed-gradient identity, inverse consistency, and independence of a
+  copied state whose caches were populated before mutation. All thirteen cases
+  pass separately in optimized and assertion-enabled modes (runs563/564), and
+  in the final AddressSanitizer build with leak detection enabled (run569).
+  Adaptation is header-only; support libraries remain optimized.
+- The style check catches missing braces around the new nested assertion loops.
+  Add Allman braces without changing their statements before the final sanitizer
+  compile. Run562 is a superseded sanitizer compile with no runtime producer;
+  run568 builds the final braced fixture. Sanitizer/discovery profiles are excluded.
+- Run566 captures only corrected normal producers with matching current header
+  bytes: all 74 emitted header lines are hit, including the getter and all four
+  cache resets. This is file-specific evidence, not a new global aggregate.
+  Published-head CI artifacts for the earlier header are superseded for this
+  file. The local batch remains unpushed until that CI run fails or completes.
