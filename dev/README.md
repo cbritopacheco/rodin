@@ -2680,3 +2680,27 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   the public template overload, not a new global aggregate. Production is unchanged;
   formatting and style pass. The local batch stays unpushed under the current
   CI deferral condition.
+
+
+### Spatial-vector Eigen-expression compound updates
+
+- Existing compound-update tests use spatial-vector operands. Add Real/Complex
+  Eigen-expression cases covering column and row views in every active size from
+  zero through three. Reverse and scale an external fixed-size operand, check
+  each expected entry independently, and subtract the same expression to recover
+  the initial vector. Verify returned object identity, unchanged logical size,
+  preserved inactive storage and an unchanged external operand.
+- Inactive values are populated through a valid three-component vector followed
+  by public shrinking, and observed through the documented full-storage accessor.
+  No private or invalid internal state is constructed. The expressions borrow
+  external operands that remain alive throughout each synchronous check.
+- All 37 cases pass individually in optimized, assertion-enabled and
+  AddressSanitizer modes (runs580/581/582), with leak detection enabled and
+  optimized support libraries linked. Sanitizer/discovery counters are excluded.
+- Run583 validates positive normal entry counts for all eight compound-expression
+  specializations: addition/subtraction, row/column expression forms and both
+  scalar types. All four legal sizes execute for each expression form. Internal
+  invariant defaults are retained; no artificial state or coverage exclusion is
+  introduced. This is specialization-specific evidence, not a global percentage.
+  Production is unchanged. Formatting/style pass, and the local batch remains
+  unpushed until the current published-head CI fails or completes.
