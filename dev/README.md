@@ -2656,3 +2656,27 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   cache resets. This is file-specific evidence, not a new global aggregate.
   Published-head CI artifacts for the earlier header are superseded for this
   file. The local batch remains unpushed until that CI run fails or completes.
+
+
+### Public tensor conjugation and contraction instantiations
+
+- The unchanged-source guide identifies Math::conj(SpatialTensor) without source
+  attribution. Existing exhaustive tensor tests call the member conjugate()
+  directly, leaving the public free overload uninstantiated in that evidence.
+  Route existing numerical contracts through Math::conj and Math::dot, retaining
+  member coverage transitively and all axis-extent combinations, including zeros.
+- Compute expected complex conjugates/contractions from explicit real/imaginary
+  components; expected squared norms use component squares. The oracle no longer
+  invokes the same scalar conjugation helper used by the tensor implementation.
+  Check conjugate shape/size and involution in addition to every active entry.
+- All nine optimized cases and all ten assertion-enabled cases pass individually
+  (runs573/574). The extra case is assertion-only. All ten AddressSanitizer cases
+  pass separately with leak detection enabled (run575), linking optimized support
+  libraries. Sanitizer/discovery counters remain excluded.
+- Run576 captures only matching normal producers and confirms positive return-line
+  attribution plus entry counts for all six public conjugation specializations:
+  Real/Complex tensors at ranks three, four and five. Raw optimized and Debug
+  notes, reports and per-specialization data are retained. This is evidence for
+  the public template overload, not a new global aggregate. Production is unchanged;
+  formatting and style pass. The local batch stays unpushed under the current
+  CI deferral condition.

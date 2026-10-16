@@ -95,8 +95,16 @@ namespace Rodin::Tests::Unit
           a[i] = Scalar(i + 1);
           b[i] = Scalar(i % 5 + 1);
         }
-        expectedDot += a[i] * Math::conj(b[i]);
-        expectedSquaredNorm += std::real(a[i] * Math::conj(a[i]));
+        if constexpr (std::is_same_v<Scalar, Complex>)
+        {
+          expectedDot += a[i] * Scalar(b[i].real(), -b[i].imag());
+          expectedSquaredNorm += a[i].real() * a[i].real() + a[i].imag() * a[i].imag();
+        }
+        else
+        {
+          expectedDot += a[i] * b[i];
+          expectedSquaredNorm += a[i] * a[i];
+        }
         typename Tensor::Extents indices;
         size_t offset = i;
         for (size_t axis = Rank; axis-- > 0;)
@@ -109,12 +117,15 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(
           std::apply([&](auto... index) { return readOnly(index...); }, indices), a[i]);
       }
-      EXPECT_EQ(a.dot(b), expectedDot);
+      EXPECT_EQ(Math::dot(a, b), expectedDot);
       EXPECT_EQ(a.squaredNorm(), expectedSquaredNorm);
       EXPECT_EQ(a.norm(), std::sqrt(expectedSquaredNorm));
       const auto sum = a + b, difference = a - b, negative = -a;
       const auto scaled = 2 * a, divided = a / 2;
-      const auto conjugated = a.conjugate();
+      const auto conjugated = Math::conj(a);
+      const auto restored = Math::conj(conjugated);
+      EXPECT_EQ(conjugated.getExtents(), extents);
+      EXPECT_EQ(conjugated.size(), count);
       auto added = a, subtracted = a;
       added += b;
       subtracted -= b;
@@ -127,7 +138,15 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(negative[i], -a[i]);
         EXPECT_EQ(scaled[i], Scalar(2) * a[i]);
         EXPECT_EQ(divided[i], a[i] / Scalar(2));
-        EXPECT_EQ(conjugated[i], Math::conj(a[i]));
+        if constexpr (std::is_same_v<Scalar, Complex>)
+        {
+          EXPECT_EQ(conjugated[i], Scalar(a[i].real(), -a[i].imag()));
+        }
+        else
+        {
+          EXPECT_EQ(conjugated[i], a[i]);
+        }
+        EXPECT_EQ(restored[i], a[i]);
       }
       EXPECT_EQ(sum.getExtents(), extents);
       const auto copy = a;
