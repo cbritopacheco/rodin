@@ -1252,12 +1252,18 @@ jobs:
           import subprocess
           args = ["ctest", "--test-dir", "build/tests", "-L", "unit",
                   "-LE", "slow|distributed", "--show-only=json-v1"]
-          def names(extra):
+          def cases(extra):
               report = json.loads(subprocess.check_output(args + extra, text=True))
-              return {test["name"] for test in report["tests"]}
+              # Different component executables may share a GTest name.
+              # Backtrace indices belong to the selected report, not the invocation.
+              identities = [json.dumps(
+                  {key: value for key, value in test.items() if key != "backtrace"},
+                  sort_keys=True) for test in report["tests"]]
+              assert len(set(identities)) == len(identities), "Duplicate unit-test invocations"
+              return set(identities)
           count = int(os.environ["UNIT_PARTITIONS"])
-          original = names([])
-          partitions = [names(["-I", f"{part},,{count}"]) for part in range(1, count + 1)]
+          original = cases([])
+          partitions = [cases(["-I", f"{part},,{count}"]) for part in range(1, count + 1)]
           assert original and all(partitions), "Empty unit-test selection"
           assert set.union(*partitions) == original, "Unit-test partition loses cases"
           assert sum(map(len, partitions)) == len(original), "Unit-test partitions overlap"

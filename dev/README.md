@@ -3138,3 +3138,25 @@ production source remains unchanged and all mutation counters are excluded.
 The initial run751 mutation harness failed compilation because an ordinary
 include directory could shadow system `hdf5.h` with Rodin `HDF5.h`; a quote-only
 include directory fixes the isolated harness without changing normal builds.
+
+### CI unit-partition identity repair (run754)
+
+Published d3aa5f0 failed job 117371174442 after a successful build and discovery,
+before runtime tests, at `Unit-test partitions overlap`. The verifier compared
+only GTest names. Distinct component executables share names: the P1 executable
+and the separate LinearForm, TestFunction and TrialFunction executables each
+register matching named cases. CTest partitions invocation registrations, so
+name-only sets can report overlap even when executable selections are disjoint.
+
+Compare the full invocation/property record, excluding the report-local
+backtrace index, and reject duplicate identical invocation records explicitly.
+The runtime commands, labels, index stride, MPI ranks and partition placement
+are unchanged. Run754 extracts the exact published and repaired workflow
+snippets: a six-case CTest fixture with a name repeated across distinct
+component invocations makes the published verifier fail and the repaired
+verifier pass with two sets of three. Deliberately overlapping partitions and
+omitting a case still fail. The configured optimized complex inventory also
+passes with 397 + 397 distinct invocations. Slow/distributed fixture cases stay
+excluded. These are discovery checks, with no accepted runtime coverage.
+The durable audit is `build-coverage-linux/run754-partition-verifier-audit.json`.
+Fresh CI must confirm the repair against its complete configured inventory.
