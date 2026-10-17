@@ -2902,3 +2902,37 @@ enabled. Its private compile matches Eigen's allocation ABI to the reused
 optimized support archive; the test translation unit is instrumented while
 that archive remains optimized. No whole-library sanitizer claim is made,
 and sanitizer profiles remain excluded from measured coverage.
+
+### Marginal coverage and next priorities (run699)
+
+Verify that all production sources remain unchanged from `6eec68ed4`, then
+merge the eight final normal reports from runs672, 680, 689 and 696 with the
+17 available CI collectors for that source snapshot. Check every local raw
+report hash and source-header hash before normalizing paths. This diagnostic
+hybrid contains no tests, benchmarks or library test helpers; review, failed,
+sanitizer and discovery producers remain excluded. It is not current-head CI
+confirmation and the three missing CI collectors still prevent completeness.
+
+The incomplete baseline has 44,965 hits among 47,737 measured lines. The local
+batches add 58 hit lines and 56 measured lines, giving 45,023 / 47,793 (94.2042%).
+The Eigen matrix-view batch adds eight measured/hit lines; the MFEM matrix
+rejection batch covers four previously uncovered lines; row-vector products
+add 48 measured lines and 46 hits. The native HDF5 batch adds no line hits to
+this union while independently verifying twenty template/helper variants and
+schema/resource contracts. Template validation and line coverage gains must
+therefore be reported separately. Adding tests can expand the measured code
+through newly instantiated bodies, including unexecuted fallback statements.
+
+Prioritize reachable line gaps next. The 306 lines in wholly-zero files include
+Scotch and manufactured distance/Solid code whose existing tests belong to the
+missing regular collectors; do not add duplicate tests just to compensate for
+an incomplete report. Suitable independent candidates are native rejection of
+MPI-backed fields by HDF5's convenience attribute exporters and duplicate-group
+rejection by its direct open-file visualization helpers. Do not exercise
+invalid internal geometry indices, synthesize impossible dataspace failures,
+or treat compiler cleanup attribution as an untested numerical algorithm.
+
+The detailed marginal/source provenance is retained in
+`run699-marginal-coverage.json`, with normalized diagnostic inputs under the
+run699 scratch audit. The fixed-denominator shortfall to 96% is only a guide;
+new collectors or instantiated code can change both numerator and denominator.
