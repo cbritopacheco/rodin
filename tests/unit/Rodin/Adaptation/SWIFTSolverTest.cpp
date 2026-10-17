@@ -3,7 +3,10 @@
  * Distributed under the Boost Software License, Version 1.0.
  */
 #include <gtest/gtest.h>
+#include <cmath>
 #include <functional>
+#include <limits>
+#include <string>
 #include <sstream>
 #include <type_traits>
 
@@ -1116,6 +1119,10 @@ namespace Rodin::Tests::Unit
       EXPECT_DOUBLE_EQ(state.report.geometricConstant,
         state.report.geometricSup / std::pow(Real(0.25), order + 1));
       EXPECT_NE(state.report.geometricSupTarget, std::pow(Real(0.25), order + 1));
+      EXPECT_EQ(state.report.reason, SWIFT::Report::Reason::GeometricTarget);
+      EXPECT_DOUBLE_EQ(state.report.geometricSupTarget, Real(1));
+      EXPECT_EQ(state.report.linearSolveCount, 0u);
+      EXPECT_EQ(state.displacement.norm(), Real(0));
     };
     // Stop at the initial state with a deliberately non-mesh-scaled target.
     check(solveTranslatedLine<1>(Real(1), 0, false, Real(1)), 1);
@@ -1349,6 +1356,46 @@ namespace Rodin::Tests::Unit
                    SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
                    [](SWIFT::Parameters& p) { p.model.h = 0; }),
       Alert::Exception);
+  }
+
+  /// @brief Finite reference sizes must still yield representable geometric scales.
+  TEST(Rodin_Adaptation_SWIFTSolver, RejectsNonrepresentableGeometricScale)
+  {
+    const auto check = []<std::size_t Order>(std::integral_constant<std::size_t, Order>) {
+      SCOPED_TRACE(Order);
+      for (const Real h :
+        {std::numeric_limits<Real>::min(), std::numeric_limits<Real>::max()})
+      {
+        SCOPED_TRACE(h);
+        ASSERT_TRUE(std::isfinite(h));
+        ASSERT_GT(h, Real(0));
+        for (const Real target : {Real(0), Real(0.25)})
+        {
+          SCOPED_TRACE(target);
+          try
+          {
+            solveTranslatedLine<Order>(Real(1), 0, false, 0, false, 1000, true,
+              SWIFT::Parameters::LinearSolver::SparseLU, false, Real(1e-3), Real(90),
+              [=](SWIFT::Parameters& parameters) {
+                parameters.model.h = h;
+                parameters.convergence.tolerance.geometric = target;
+                parameters.convergence.iterations.outer = 0;
+              });
+            FAIL() << "An unrepresentable geometric scale was accepted";
+          }
+          catch (const Alert::Exception& error)
+          {
+            const std::string message = error.what();
+            EXPECT_NE(message.find("In member function solve"), std::string::npos);
+            EXPECT_NE(
+              message.find("finite positive geometric target"), std::string::npos);
+          }
+        }
+      }
+    };
+    check(std::integral_constant<std::size_t, 1>{});
+    check(std::integral_constant<std::size_t, 2>{});
+    check(std::integral_constant<std::size_t, 3>{});
   }
 
   /// @brief A rejected outer trial preserves the accepted displacement.

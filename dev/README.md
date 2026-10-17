@@ -3252,3 +3252,56 @@ the tested tree rather than relying solely on the workflow's reported head SHA.
 The durable attestation is
 `build-coverage-linux/run779-ci-source-identity.json`. This proves source
 identity, not coverage completeness or CI completion.
+
+### SWIFT representable geometric-scale guard batch (run797)
+
+Exercise finite positive reference sizes whose FE-order geometric scale
+underflows to zero or overflows to infinity. Both automatic and explicit
+positive geometric tolerances must reject those unusable reference scales
+with native solve-member diagnostics. Reuse the existing translated-line
+fixture at P1 and H1 orders two and three for twelve rejection combinations.
+Strengthen the separate existing geometric-constant control case to check the
+initial-target reason, explicit target, no linear solve and zero displacement.
+Its three positive solves are not repeated in the new rejection case. No
+production code or solver template body changes are needed.
+
+All final 49 SWIFTSolver cases passed individually in optimized run792; both
+focused cases passed with assertions in run794. Focused validation contains
+verbatim includes, fixture and positive/negative test blocks from the full test
+source, with hashes and complete original snapshots retained. This does not
+claim that full and focused translation units are byte-identical. The controls
+perform geometry checks and initial-target exits, not unoptimized iterative
+PDE solves.
+
+Run797 verifies the three existing default-fixture solver specializations and
+positive counts on exception lines 892 and 893. Raw final-source normal reports
+and successful runtime records are retained in
+`build-coverage-linux/run797-swift-scale-inputs/`. Pre-review, failed, discovery,
+mutation, diagnostic and sanitizer profiles are excluded. Three additional
+MUMPS-availability guard lines are also positive from an existing case in the
+full suite; they are not attributed to the new test. No project-wide percentage
+is inferred from this file-specific capture.
+
+The initial fixture duplicated the existing positive controls after its
+rejections. Its default ASan run passed but took about 117 seconds; the same
+immutable binary reproduced about 119 seconds wall/119 seconds user time,
+zero major faults and no swap. Two stopped GDB samples landed in ASan's
+FakeStack::Allocate through Eigen evaluator construction, SpatialVector zero
+storage and H1 Jacobian quality sampling. Changing only the fake-stack option
+in an excluded diagnostic reduced the same case to about 0.76 seconds, with
+leak detection still enabled. Retain the extra positive assertions in their
+existing case and isolate the new rejections so the PR adds no duplicate
+quality-sampling work. Production code and normal sanitizer settings remain
+unchanged. Original default-ASan acceptance passed before diagnosis; the
+changed-option control and intentionally killed GDB run are not acceptance or
+coverage evidence. The causal record and stack log are retained in
+`build-coverage-linux/run798-swift-scale-asan-cause-audit.json` and its referenced
+excluded diagnostic records.
+
+Run796 passed both final focused cases individually under the normal
+`ASAN_OPTIONS=detect_leaks=1` setting. The final focused Debug/ASan manifests
+match the complete optimized source snapshot and each verbatim fixture/control/
+rejection block. The private ASan TU retains matching Eigen allocation ABI and
+optimized support archives; it does not establish whole-library sanitizer
+coverage. Only final normal runs 792/794 feed the run797 capture; all pre-review,
+ASan, changed-option timing controls and GDB profiles remain excluded.
