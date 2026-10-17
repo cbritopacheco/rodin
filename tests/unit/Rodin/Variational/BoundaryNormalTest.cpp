@@ -328,3 +328,82 @@ TEST(Rodin_Variational_BoundaryNormal, ParentAndSubmeshPointTransport)
     EXPECT_THROW(retainedNormal.getValue(unrelatedPoint), Alert::Exception);
   }
 }
+
+/// @brief Missing corner/edge traces raise member diagnostics and permit later trace selection.
+TEST(Rodin_Variational_BoundaryNormal, MissingTraceRaisesAndPermitsRecovery)
+{
+  for (const size_t dimension : {size_t(2), size_t(3)})
+  {
+    SCOPED_TRACE(dimension);
+    auto builder = LocalMesh::Builder();
+    builder.initialize(dimension).nodes(dimension + 1);
+    for (size_t vertex = 0; vertex <= dimension; ++vertex)
+    {
+      Math::SpatialPoint coordinate(dimension);
+      coordinate.setZero();
+      if (vertex != 0)
+        coordinate(vertex - 1) = 1;
+      builder.vertex(coordinate);
+    }
+    if (dimension == 2)
+      builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
+    else
+      builder.polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3});
+    auto mesh = builder.finalize();
+    mesh.getConnectivity().compute(dimension - 2, dimension - 1);
+    mesh.getConnectivity().compute(dimension - 1, dimension);
+    const auto entity = mesh.getPolytope(dimension - 2, 0);
+    const Point point(*entity, Polytope::Traits(entity->getGeometry()).getCentroid());
+    const auto& incident =
+      mesh.getConnectivity().getIncidence({dimension - 2, dimension - 1}, 0);
+    ASSERT_EQ(incident.size(), 2u);
+    BoundaryNormal normal(mesh);
+    Math::SpatialVector<Real> spatial(dimension);
+    Math::Vector<Real> dynamic(dimension);
+    const auto requireDiagnostic = [&](auto& output) {
+      try
+      {
+        normal.interpolate(output, point);
+        FAIL() << "A normal with two incident traces needs an explicit selection";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find("member function"), std::string::npos);
+        EXPECT_NE(message.find("interpolate"), std::string::npos);
+        EXPECT_NE(message.find("No trace domain provided"), std::string::npos);
+      }
+    };
+    requireDiagnostic(spatial);
+    requireDiagnostic(dynamic);
+    EXPECT_EQ(normal.getTraceDomain().size(), 0u);
+
+    const Index faceIndex = *incident.begin();
+    mesh.setAttribute({dimension - 1, faceIndex}, 17);
+    normal.traceOf(17);
+    const auto face = mesh.getPolytope(dimension - 1, faceIndex);
+    size_t missingVertex = 0;
+    for (; missingVertex <= dimension; ++missingVertex)
+    {
+      bool found = false;
+      for (const Index vertex : face->getVertices())
+        found |= vertex == missingVertex;
+      if (!found)
+        break;
+    }
+    ASSERT_LE(missingVertex, dimension);
+    Math::SpatialVector<Real> expected(dimension);
+    expected.setZero();
+    if (missingVertex == 0)
+      expected.setConstant(Real(1) / std::sqrt(Real(dimension)));
+    else
+      expected[missingVertex - 1] = -1;
+    normal.interpolate(spatial, point);
+    normal.interpolate(dynamic, point);
+    for (size_t axis = 0; axis < dimension; ++axis)
+    {
+      EXPECT_NEAR(spatial[axis], expected[axis], 1e-12);
+      EXPECT_NEAR(dynamic[axis], expected[axis], 1e-12);
+    }
+  }
+}
