@@ -3825,3 +3825,59 @@ the header declarations establish their static context. No production exception
 change follows from those flags. The 216 potential indirect exception sites
 remain callee/precondition candidates, not findings or a whole-program proof.
 CI continues without test-job failures at this check.
+
+### Dense/sparse merge offsets and lifecycle coverage (run973)
+
+The source audit's unmeasured public merge templates pass syntax probes but
+fail independent numerical checks for their documented nonzero offset. Four
+real/complex dense/sparse cases agree at zero offset and reject offset two in
+run953. The oracle forms $T^*AT$ and $T^*b$, imposes the constraint equation,
+and checks the full operator, right-hand side, solved vector and projected
+residual. Constraint weights are real, including positive and negative values.
+The stored solution vector is preserved. Empty maps are no-ops.
+
+Both implementations ignored the offset. Preserve local indices in the graph
+queue/map and apply the offset to every constrained/supporting matrix and
+vector index, including final constraint rows. No algorithm or exception
+policy changes. The regression body observed failing before the correction is
+byte-identical in the final expanded unit source; run976 retains its proof.
+The excluded four-case failure evidence is retained in
+`build-coverage-linux/run953-merge-prefix-failures-excluded.json`.
+
+All nineteen initial cases pass optimized run955, Debug run957 and ASan run959;
+all four existing manufactured mixed-assembly cases pass individually in
+optimized run961 against the corrected header. These preliminary unit profiles
+are superseded in the final capture. Run962/963 initially replace the header
+with 242 measured/hit lines, but run964 identifies 31 previously measured,
+unchanged sparse lifecycle/const-access lines absent from that attribution.
+Its final mapping uses the native header's full path to exclude PETSc.
+
+Add real/complex dense/sparse copy construction, copy assignment, move
+construction, move assignment and self-assignment checks, with all three arrays
+verified through const access. Clear source arrays after copying to establish
+independent ownership. All 23 final cases pass individually in optimized
+run968, Debug run970 and ASan run972 with leak detection and matching Eigen
+allocation ABI. Remaining support archives stay optimized; their counters are
+not captured. The four manufactured cases need no repeat: production header
+and manufactured source are unchanged after their successful run.
+
+Run973 captures only final normal unit producers 968/970 and manufactured
+producer 961. It verifies four merge instantiations and 32 entries. Exact test
+snapshots and fixed-header hashes/timestamps are retained. All 39 older native
+LinearSystem header records are discarded rather than reused across the change.
+Run975 confirms that fresh profiles recover all 31 attribution gaps. Final
+inputs/provenance are retained in
+`build-coverage-linux/run973-merge-lifecycle-inputs/` and its file audit companion.
+Tests, benchmarks, library helpers, discovery, pre-fix, preliminary unit and
+sanitizer profiles are excluded from the final capture.
+
+Run974 retains the existing BoundaryNormal reset and freezes the same sixteen
+current CI inputs. It reports 48,207 measured and 45,872 hit lines, approximately
+95.1563 percent. The fixed native header has 273 measured/hit lines. Relative
+to run947 the union adds 145 measured lines and 148 hits; the other three hits
+are two OpenMP assembly lines and one Sum line. Another 407 hits would reach
+96 percent at this denominator. This is incomplete diagnostic CI/local evidence,
+not final exact-head confirmation. Run977 refreshes the preprocessing-independent
+source audit against final counters; uninstantiated and inactive variants still
+require classification even when a measured header reports complete coverage.
+The latest CI snapshot has 245 successful jobs and no test-job failures.

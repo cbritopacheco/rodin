@@ -472,3 +472,139 @@ TEST_F(LinearSystemTest, DenseEliminateThenSolve)
   EXPECT_DOUBLE_EQ(ls.getOperator()(1, 1), 2.0);
   EXPECT_NEAR(ls.getVector()(1), 1.0, 1e-10);
 }
+
+namespace
+{
+  template <class Operator>
+  class LinearSystemMergeTest : public ::testing::Test
+  {};
+
+  using MergeOperators = ::testing::Types<Matrix<Real>, SparseMatrix<Real>,
+    Matrix<Complex>, SparseMatrix<Complex>>;
+  TYPED_TEST_SUITE(LinearSystemMergeTest, MergeOperators);
+
+  /// @brief Constraint merging agrees with an independent change of coordinates, including block offsets.
+  TYPED_TEST(LinearSystemMergeTest, WeightedConstraintMatchesIndependentTransformation)
+  {
+    using Operator = TypeParam;
+    using Scalar = typename Operator::Scalar;
+    constexpr Index Size = 6;
+    Matrix<Scalar> original = Matrix<Scalar>::Zero(Size, Size);
+    Vector<Scalar> rhs(Size);
+    for (Index i = 0; i < Size; ++i)
+    {
+      original(i, i) = Scalar(4 + i);
+      rhs(i) = Scalar(1 + 2 * i);
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        rhs(i) += Scalar(0, Real(i + 1) / 4);
+      if (i + 1 < Size)
+      {
+        Scalar coupling(-1);
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          coupling += Scalar(0, 0.125);
+        original(i, i + 1) = coupling;
+        original(i + 1, i) = Math::conj(coupling);
+      }
+    }
+    for (const size_t offset : {0u, 2u})
+    {
+      SCOPED_TRACE(offset);
+      LinearSystem<Operator, Vector<Scalar>> system;
+      if constexpr (std::is_same_v<Operator, SparseMatrix<Scalar>>)
+        system.getOperator() = original.sparseView();
+      else
+        system.getOperator() = original;
+      system.getVector() = rhs;
+      system.getSolution() = Vector<Scalar>::Constant(Size, Scalar(-7));
+      IndexMap<std::pair<IndexArray, Vector<Real>>> constraints;
+      EXPECT_EQ(&system.merge(constraints, offset), &system);
+      EXPECT_EQ((Matrix<Scalar>(system.getOperator()) - original).norm(), 0);
+      EXPECT_EQ((system.getVector() - rhs).norm(), 0);
+      IndexArray children(2);
+      children << 1, 2;
+      Vector<Real> coefficients(2);
+      coefficients << 0.25, -0.5;
+      constraints.emplace(0, std::pair{children, coefficients});
+
+      const Index parent = static_cast<Index>(offset);
+      Matrix<Scalar> transform = Matrix<Scalar>::Identity(Size, Size);
+      transform.row(parent).setZero();
+      transform(parent, parent + 1) = Scalar(0.25);
+      transform(parent, parent + 2) = Scalar(-0.5);
+      Matrix<Scalar> expected = transform.adjoint() * original * transform;
+      Vector<Scalar> expectedRHS = transform.adjoint() * rhs;
+      expected.row(parent).setZero();
+      expected(parent, parent) = Scalar(1);
+      expected(parent, parent + 1) = Scalar(-0.25);
+      expected(parent, parent + 2) = Scalar(0.5);
+      const Vector<Scalar> expectedSolution = expected.fullPivLu().solve(expectedRHS);
+
+      EXPECT_EQ(&system.merge(constraints, offset), &system);
+      const Matrix<Scalar> actual = system.getOperator();
+      EXPECT_LT((actual - expected).norm(), 1e-12);
+      EXPECT_LT((system.getVector() - expectedRHS).norm(), 1e-12);
+      const Vector<Scalar> solution = actual.fullPivLu().solve(system.getVector());
+      EXPECT_LT((solution - expectedSolution).norm(), 1e-12);
+      EXPECT_LT((transform.adjoint() * (original * solution - rhs)).norm(), 1e-12);
+      EXPECT_LT(std::abs(solution(parent) - Scalar(0.25) * solution(parent + 1) +
+                  Scalar(0.5) * solution(parent + 2)),
+        1e-12);
+      EXPECT_EQ(
+        (system.getSolution() - Vector<Scalar>::Constant(Size, Scalar(-7))).norm(), 0);
+    }
+  }
+
+  /// @brief Copies own all three arrays and moves retain their values for dense and sparse scalar types.
+  TYPED_TEST(LinearSystemMergeTest, CopyAndMoveOwnOperatorLoadAndStoredSolution)
+  {
+    using Operator = TypeParam;
+    using Scalar = typename Operator::Scalar;
+    using System = LinearSystem<Operator, Vector<Scalar>>;
+    Matrix<Scalar> expected(3, 3);
+    expected << 4, -1, 0, -1, 5, 2, 0, 2, 6;
+    Vector<Scalar> load(3), solution(3);
+    load << 1, 2, 3;
+    solution << -1, -2, -3;
+    if constexpr (std::is_same_v<Scalar, Complex>)
+    {
+      expected(0, 1) += Scalar(0, 0.25);
+      expected(1, 0) -= Scalar(0, 0.25);
+      load(0) += Scalar(0, 0.5);
+      solution(2) += Scalar(0, 0.75);
+    }
+    const auto verify = [&](const System& value) {
+      EXPECT_EQ((Matrix<Scalar>(value.getOperator()) - expected).norm(), 0);
+      EXPECT_EQ((value.getVector() - load).norm(), 0);
+      EXPECT_EQ((value.getSolution() - solution).norm(), 0);
+    };
+    System original;
+    if constexpr (std::is_same_v<Operator, SparseMatrix<Scalar>>)
+      original.getOperator() = expected.sparseView();
+    else
+      original.getOperator() = expected;
+    original.getVector() = load;
+    original.getSolution() = solution;
+    System copied(original);
+    original.getOperator().setZero();
+    original.getVector().setZero();
+    original.getSolution().setZero();
+    verify(copied);
+    System assigned;
+    EXPECT_EQ(&(assigned = copied), &assigned);
+    copied.getOperator().setZero();
+    copied.getVector().setZero();
+    copied.getSolution().setZero();
+    verify(assigned);
+    System moved(std::move(assigned));
+    verify(moved);
+    System destination;
+    EXPECT_EQ(&(destination = std::move(moved)), &destination);
+    verify(destination);
+    auto* alias = &destination;
+    EXPECT_EQ(&(destination = *alias), &destination);
+    verify(destination);
+    EXPECT_EQ(&(destination = std::move(*alias)), &destination);
+    verify(destination);
+  }
+
+}

@@ -381,14 +381,15 @@ namespace Rodin::Math
         // Perform breadth-first traversal
         while (q.size() > 0)
         {
-          const Index parent = q.back();
+          const Index localParent = q.back();
+          const Index parent = localParent + static_cast<Index>(offset);
           assert(stiffness.rows() >= 0);
           assert(stiffness.cols() >= 0);
           assert(parent < static_cast<size_t>(stiffness.rows()));
           assert(parent < static_cast<size_t>(stiffness.cols()));
           q.pop_back();
 
-          auto find = dofs.find(parent);
+          auto find = dofs.find(localParent);
           if (find == dofs.end())
             continue;
 
@@ -405,7 +406,7 @@ namespace Rodin::Math
           for (size_t i = 0; i < count; i++)
           {
             const MatrixScalar coeff = coeffs.coeff(i);
-            const Index child = children.coeff(i);
+            const Index child = children.coeff(i) + static_cast<Index>(offset);
             stiffness.col(child) += coeff * stiffness.col(parent);
           }
 
@@ -439,7 +440,7 @@ namespace Rodin::Math
                 {
                   for (size_t i = 0; i < count; i++)
                   {
-                    const Index child = children.coeff(i);
+                    const Index child = children.coeff(i) + static_cast<Index>(offset);
                     if (row == child)
                     {
                       childrenLookup[i][col] = it.value();
@@ -462,7 +463,7 @@ namespace Rodin::Math
 
           for (size_t i = 0; i < count; i++)
           {
-            const Index child = children.coeff(i);
+            const Index child = children.coeff(i) + static_cast<Index>(offset);
             for (const auto& [col, value] : childrenLookup[i])
               stiffness.coeffRef(child, col) = value;
           }
@@ -471,21 +472,22 @@ namespace Rodin::Math
           for (size_t i = 0; i < count; i++)
           {
             const MatrixScalar coeff = coeffs.coeff(i);
-            const Index child = children.coeff(i);
+            const Index child = children.coeff(i) + static_cast<Index>(offset);
             mass.coeffRef(child) += coeff * mass.coeff(parent);
           }
           mass.coeffRef(parent) = 0;
         }
 
-        for (const auto& [parent, node] : dofs)
+        for (const auto& [localParent, node] : dofs)
         {
+          const Index parent = localParent + static_cast<Index>(offset);
           stiffness.coeffRef(parent, parent) = 1.0;
           const auto& [children, coeffs] = node;
           assert(children.size() >= 0);
           for (size_t i = 0; i < static_cast<size_t>(children.size()); i++)
           {
             const MatrixScalar coeff = coeffs.coeff(i);
-            const Index child = children.coeff(i);
+            const Index child = children.coeff(i) + static_cast<Index>(offset);
             stiffness.coeffRef(parent, child) = -coeff;
           }
         }
@@ -724,14 +726,15 @@ namespace Rodin::Math
         // Perform breadth-first traversal
         while (q.size() > 0)
         {
-          const Index parent = q.back();
+          const Index localParent = q.back();
+          const Index parent = localParent + static_cast<Index>(offset);
           assert(stiffness.rows() >= 0);
           assert(stiffness.cols() >= 0);
           assert(parent < static_cast<size_t>(stiffness.rows()));
           assert(parent < static_cast<size_t>(stiffness.cols()));
           q.pop_back();
 
-          auto find = dofs.find(parent);
+          auto find = dofs.find(localParent);
           if (find == dofs.end())
             continue;
 
@@ -748,7 +751,7 @@ namespace Rodin::Math
           for (size_t i = 0; i < count; i++)
           {
             const DOFScalar coeff = coeffs.coeff(i);
-            const Index child = children.coeff(i);
+            const Index child = children.coeff(i) + static_cast<Index>(offset);
             stiffness.col(child) += coeff * stiffness.col(parent);
           }
 
@@ -780,7 +783,7 @@ namespace Rodin::Math
                 {
                   for (size_t i = 0; i < count; i++)
                   {
-                    const Index child = children.coeff(i);
+                    const Index child = children.coeff(i) + static_cast<Index>(offset);
                     if (row == child)
                     {
                       childrenLookup[i][col] = it.value();
@@ -803,7 +806,7 @@ namespace Rodin::Math
 
           for (size_t i = 0; i < count; i++)
           {
-            const Index child = children.coeff(i);
+            const Index child = children.coeff(i) + static_cast<Index>(offset);
             for (const auto& [col, value] : childrenLookup[i])
               stiffness.coeffRef(child, col) = value;
           }
@@ -812,21 +815,22 @@ namespace Rodin::Math
           for (size_t i = 0; i < count; i++)
           {
             const DOFScalar coeff = coeffs.coeff(i);
-            const Index child = children.coeff(i);
+            const Index child = children.coeff(i) + static_cast<Index>(offset);
             mass.coeffRef(child) += coeff * mass.coeff(parent);
           }
           mass.coeffRef(parent) = 0;
         }
 
-        for (const auto& [parent, node] : dofs)
+        for (const auto& [localParent, node] : dofs)
         {
+          const Index parent = localParent + static_cast<Index>(offset);
           stiffness.coeffRef(parent, parent) = 1.0;
           const auto& [children, coeffs] = node;
           assert(children.size() >= 0);
           for (size_t i = 0; i < static_cast<size_t>(children.size()); i++)
           {
             const DOFScalar coeff = coeffs.coeff(i);
-            const Index child = children.coeff(i);
+            const Index child = children.coeff(i) + static_cast<Index>(offset);
             stiffness.coeffRef(parent, child) = -coeff;
           }
         }
