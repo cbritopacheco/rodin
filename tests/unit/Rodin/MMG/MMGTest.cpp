@@ -22,6 +22,85 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Unsupported positive volume dimensions reject without leaking native storage.
+TEST(MMG5Lifecycle, UnsupportedVolumeDimensionsDoNotLeak)
+{
+  using Native = MMG::MMG5;
+  for (const size_t dimension :
+    {size_t(1), size_t(4), std::numeric_limits<size_t>::max()})
+  {
+    SCOPED_TRACE(dimension);
+    try
+    {
+      std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> mesh(
+        Native::createMesh(2, dimension, dimension), Native::destroyMesh);
+      FAIL() << "Unsupported MMG dimensions must be rejected.";
+    }
+    catch (const Alert::Exception& error)
+    {
+      const std::string message = error.what();
+      EXPECT_NE(
+        message.find("In createMesh of class Rodin::MMG::MMG5:"), std::string::npos);
+      EXPECT_NE(message.find("Unsupported MMG mesh dimensions"), std::string::npos);
+      EXPECT_NE(message.find("topology " + std::to_string(dimension)), std::string::npos);
+      EXPECT_NE(
+        message.find("embedding " + std::to_string(dimension)), std::string::npos);
+    }
+  }
+}
+
+/// @brief Invalid embeddings reject before changing the supported backend paths.
+TEST(MMG5Lifecycle, InvalidDimensionsPermitSupportedMeshRecovery)
+{
+  using Native = MMG::MMG5;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  for (const auto& [dimension, embedding] :
+    {std::pair<size_t, size_t>{0, 0}, {1, 2}, {2, 0}, {2, 1}, {2, 4}, {3, 2}, {3, 4}})
+  {
+    SCOPED_TRACE(::testing::Message() << dimension << ':' << embedding);
+    try
+    {
+      Owner mesh(Native::createMesh(2, dimension, embedding), Native::destroyMesh);
+      FAIL() << "Unsupported MMG dimensions must be rejected.";
+    }
+    catch (const Alert::Exception& error)
+    {
+      const std::string message = error.what();
+      EXPECT_NE(
+        message.find("In createMesh of class Rodin::MMG::MMG5:"), std::string::npos);
+      EXPECT_NE(message.find("Unsupported MMG mesh dimensions"), std::string::npos);
+      EXPECT_NE(message.find("topology " + std::to_string(dimension)), std::string::npos);
+      EXPECT_NE(
+        message.find("embedding " + std::to_string(embedding)), std::string::npos);
+    }
+  }
+  for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    const auto source =
+      LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+    Owner mesh(Native::rodinToMesh(source), Native::destroyMesh);
+    ASSERT_NE(mesh, nullptr);
+    EXPECT_EQ(mesh->dim, static_cast<int>(dimension));
+    EXPECT_EQ(mesh->np, source.getVertexCount());
+    EXPECT_EQ(dimension == 2 ? mesh->nt : mesh->ne, source.getCellCount());
+  }
+  const auto surface = LocalMesh::Build()
+                         .initialize(3)
+                         .nodes(3)
+                         .vertex({0, 0, 0})
+                         .vertex({1, 0, 0})
+                         .vertex({0, 1, 1})
+                         .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                         .finalize();
+  Owner mesh(Native::rodinToMesh(surface), Native::destroyMesh);
+  ASSERT_NE(mesh, nullptr);
+  EXPECT_EQ(mesh->dim, 3);
+  EXPECT_EQ(mesh->np, 3);
+  EXPECT_EQ(mesh->nt, 1);
+  EXPECT_EQ(mesh->ne, 0);
+}
+
 /// @brief Native mesh copies own their arrays and survive source destruction.
 TEST(MMG5Lifecycle, MeshCopyIsIndependent)
 {

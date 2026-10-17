@@ -23,15 +23,20 @@ namespace Rodin::MMG
 
   MMG5_pMesh MMG5::createMesh(size_t version, size_t dim, Optional<size_t> spaceDim)
   {
+    const size_t embedding = spaceDim.value_or(dim);
+    if (!((dim == 2 && (embedding == 2 || embedding == 3)) ||
+          (dim == 3 && embedding == 3)))
+    {
+      MMG5Exception(__func__)
+        << "Unsupported MMG mesh dimensions: topology " << dim << ", embedding "
+        << embedding << ". Supported topology/embedding dimensions are 2/2, 2/3, and 3/3."
+        << Alert::Raise;
+    }
+
     MMG5_pMesh res;
     MMG5_SAFE_CALLOC(res, 1, MMG5_Mesh,
       MMG5Exception(__func__) << "Failed to allocate memory for the mesh." << Alert::Raise);
-    assert(dim > 0);
-    if (!spaceDim)
-      spaceDim = dim;
-    assert(spaceDim > 0);
-    const bool isSurface = (*spaceDim - 1) == dim;
-    assert(isSurface || (dim == *spaceDim));
+    const bool isSurface = dim == 2 && embedding == 3;
     if (isSurface)
     {
       MMGS_Set_commonFunc();
@@ -42,20 +47,15 @@ namespace Rodin::MMG
       MMG2D_Set_commonFunc();
       MMG2D_Init_parameters(res);
     }
-    else if (dim == 3)
+    else
     {
       MMG3D_Set_commonFunc();
       MMG3D_Init_parameters(res);
     }
-    else
-    {
-      MMG5Exception(__func__) << "Unhandled case." << Alert::Raise;
-      return nullptr;
-    }
     res->np = 0;
     res->npmax = std::max({MMG2D_NPMAX, MMG3D_NPMAX, MMGS_NPMAX});
     res->ver = version;
-    res->dim = *spaceDim;
+    res->dim = embedding;
     res->info.imprim = getMMGVerbosityLevel();
     return res;
   }

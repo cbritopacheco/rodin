@@ -77,9 +77,12 @@ namespace Rodin::MMG
       /**
        * @brief Allocates and initializes an MMG mesh object.
        * @param[in] version MMG mesh version.
-       * @param[in] dim Topological mesh dimension.
-       * @param[in] spaceDim Optional embedding space dimension.
-       * @returns Newly allocated MMG mesh pointer.
+       * @param[in] dim Topological dimension of a planar, surface, or volume mesh.
+       * @param[in] spaceDim Embedding dimension, defaulting to @p dim. Supported
+       * topology/embedding pairs are @f$(2,2)@f$, @f$(2,3)@f$ and @f$(3,3)@f$.
+       * @returns Newly allocated mesh, owned by the caller and released with
+       * @ref destroyMesh.
+       * @throws Alert::Exception if the supplied dimensions are unsupported.
        */
       static MMG5_pMesh createMesh(size_t version, size_t dim, Optional<size_t> spaceDim = {});
 

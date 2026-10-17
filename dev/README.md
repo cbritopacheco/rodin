@@ -4091,3 +4091,54 @@ lines 1237 and 1238, with no measured-line expansion. The diagnostic union is
 48,294 measured and 46,000 hit lines, approximately 95.2499 percent; another
 363 hits reach 96 percent at this denominator. It is not final exact-head
 CI confirmation. The paired delta artifact identifies both newly hit lines.
+
+### Reject unsupported MMG dimensions before allocation (run1085)
+
+The audit candidate in run1070 is confirmed by an isolated leak-enabled
+probe: createMesh with a one-dimensional volume reaches the unsupported
+backend exception after allocating a native mesh and leaks 568 bytes. The
+exact new regression bodies reject three positive unsupported dimensions,
+including the largest size_t, against the pre-fix implementation and expose
+1,704 leaked bytes in three allocations (run1076). Both diagnostic producers
+and the earlier failed compile are excluded from coverage. Their pre-fix
+sources, bodies and leak reports are retained in the run1072/run1076 evidence
+folders. A copied structured binding warning in the first regression compile
+was corrected before validation.
+
+Validate topology/embedding pairs before allocation or backend initialization.
+Only planar 2D, surface 2D in 3D, and volume 3D are supported. Unsupported and
+zero dimensions now receive the existing class/function-qualified MMG Alert
+exception with supplied dimensions; the static factory has no instance for a
+MemberFunctionException. Document native ownership and supported dimensions.
+The tests also reject invalid embeddings and recover through all three
+supported conversion paths. The accepted backend initialization and ownership
+paths are unchanged.
+
+All 122 MMG component cases pass individually in optimized run1082, Debug
+run1083 and ASan run1084. Both the native MMG5.cpp and test translation units
+are compiled freshly; their objects precede the static MMG archive at link.
+ASan instruments both units with matching Eigen allocation ABI and leak
+detection enabled. Vendor and other support archives remain optimized. The
+exact regression bodies match the observed pre-fix failure. No numerical
+tolerances change.
+
+Discard every historical MMG5.cpp and MMG5.h record before the new capture;
+the previous three source resets remain intact. Run1085 captures only the
+current successful normal native and test objects. The first intermediate
+union lacked reverse solution-copy template counters instantiated in Adapt.cpp.
+Refresh that unchanged consumer, rerun all 122 cases individually (run1090),
+and capture only its successful Debug object (run1091). Its reused native and
+test objects have matching current source identities; their duplicate profiles
+are not admitted. Do not use the incomplete intermediate percentage as a gain.
+
+Run1093 verifies that every previously hit unchanged line in both files is
+measured and hit by current-source profiles. MMG5.cpp now has 610 measured/562
+hit lines and MMG5.h 44/40. The parser audit still inventories 566 files,
+6,189 definitions and 390 exception references, with 94 recoveries; it is not
+a whole-program instantiation proof. Tests, benchmarks, helpers, pre-fix
+diagnostics, failed compile, discovery and sanitizer counters are excluded.
+
+The final diagnostic union (run1092) has 48,293 measured and 46,008 hit lines,
+approximately 95.2685 percent. Another 354 hits reach 96 percent at that
+denominator. It remains incomplete diagnostic evidence, not final exact-head
+CI confirmation.
