@@ -3487,3 +3487,48 @@ hits to 95 percent and 490 to 96 percent. This retains the changed-header
 counter reset from run833 and remains an incomplete old-CI/local diagnostic,
 not current-head CI confirmation. Detailed provenance and gaps are retained
 in `build-coverage-linux/run844-current-normal-union.json` and its audit companion.
+
+### Public mixed targeted assembly with independent block orders (run853)
+
+Extend the dense P1/P0 manufactured fixture through the public virtual
+ProblemBase::assemble(target) entry point. Keep trial blocks ordered P1/P0
+but order test blocks P0/P1, whose sizes differ on both meshes. Assert trial
+and test offsets independently and compare against an explicit row permutation
+of the already verified manufactured system. Start a fresh problem for each
+target, without prior full assembly, seed unrelated matrix/vector values,
+repeat the call, and require exact opposite-side preservation.
+
+Public Problem chooses its backend at configuration time, so this block runs
+only in the fixture case matching that default: OpenMP locally, Sequential
+in a configuration without OpenMP. The direct assembler checks continue to
+exercise both enabled backends; this does not claim a public Sequential run
+under the local OpenMP configuration.
+
+All four manufactured cases passed individually in optimized run847 and ASan
+run849 with leak detection enabled. Run852 also passed the two OpenMP cases
+individually with two worker threads. ASan uses matching Eigen allocation ABI
+and optimized support archives; it does not establish whole-library sanitizer
+coverage. Final optimized, ASan and mutation test snapshots match exactly.
+
+Run850 force-includes a private Problem header that reverses only the public
+mixed target dispatch, with valid indices. The new public checks rejected it
+with eight failed expectations in run851; both selected-side numerical values
+and opposite-side preservation are checked. Workspace production sources stay
+unchanged. The excluded mutation log is retained in
+`build-coverage-linux/run851-public-mixed-target-mutation-excluded.log`.
+
+Run853 confirms eight executed calls to the permuted mixed public target
+specialization. Only successful normal run847 contributes to its production
+capture; tests, benchmarks, library test helpers, failed, discovery, mutation
+and sanitizer producers are excluded. Raw reports, source hashes, function
+execution counts and runtime records are retained in
+`build-coverage-linux/run853-public-mixed-target-inputs/` and its file audit.
+
+Run854 adds twenty-three previously missed Problem.h lines without increasing
+the measured denominator. The diagnostic union is 47,810 measured and 45,431
+hit lines, approximately 95.0241 percent. It crosses the local 95 percent
+planning threshold; another 467 hits would reach 96 percent at this fixed
+denominator. The changed-header reset from run833 remains in effect. This is
+still an incomplete old-CI/local diagnostic, not current-head CI confirmation.
+Detailed provenance and gaps are retained in
+`build-coverage-linux/run854-current-normal-union.json` and its audit companion.

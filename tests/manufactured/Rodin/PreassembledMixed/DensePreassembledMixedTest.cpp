@@ -6,6 +6,7 @@
  */
 /// @file @brief Affine manufactured fields for dense preassembled mixed blocks.
 #include <array>
+#include <type_traits>
 #include <boost/bimap.hpp>
 #include <gtest/gtest.h>
 #include "Rodin/Assembly.h"
@@ -139,6 +140,54 @@ namespace
               EXPECT_EQ((targeted.getOperator() - previousMatrix).norm(), 0);
               EXPECT_LT((targeted.getVector() - b).norm() / std::max<Real>(1, b.norm()),
                 assemblyTolerance);
+            }
+          }
+        }
+
+        if constexpr (std::is_same_v<Assembler<System, Mixed>,
+                        typename Mixed::AssemblyType>)
+        {
+          // Trial blocks remain P1/P0, but test blocks are P0/P1. Their sizes
+          // differ, so public assembly must compute the two offset arrays independently.
+          using Permuted =
+            Problem<System, decltype(u), decltype(q), decltype(p), decltype(v)>;
+          Matrix permutedMatrix(total, total);
+          permutedMatrix.topRows(second.getSize()) = a.bottomRows(second.getSize());
+          permutedMatrix.bottomRows(first.getSize()) = a.topRows(first.getSize());
+          Math::Vector<Real> permutedRHS(total);
+          permutedRHS.head(second.getSize()) = b.tail(second.getSize());
+          permutedRHS.tail(first.getSize()) = b.head(first.getSize());
+          ASSERT_NE(first.getSize(), second.getSize());
+          for (const auto target : {AssemblyTarget::LHS, AssemblyTarget::RHS})
+          {
+            SCOPED_TRACE(static_cast<int>(target));
+            Permuted problem(u, q, p, v);
+            problem = preassembled;
+            auto& system = problem.getLinearSystem();
+            system.getOperator() = previousMatrix;
+            system.getVector() = previousRHS;
+            ProblemBase<System>& interface = problem;
+            for (size_t repeat = 0; repeat < 2; ++repeat)
+            {
+              SCOPED_TRACE(repeat);
+              EXPECT_EQ(&interface.assemble(target), &interface);
+              EXPECT_EQ(problem.getTrialOffsets(), trialOffsets);
+              EXPECT_EQ(
+                problem.getTestOffsets(), (std::array<size_t, 2>{0, second.getSize()}));
+              if (target == AssemblyTarget::LHS)
+              {
+                EXPECT_LT((system.getOperator() - permutedMatrix).norm() /
+                    std::max<Real>(1, permutedMatrix.norm()),
+                  assemblyTolerance);
+                EXPECT_EQ((system.getVector() - previousRHS).norm(), 0);
+              }
+              else
+              {
+                EXPECT_EQ((system.getOperator() - previousMatrix).norm(), 0);
+                EXPECT_LT((system.getVector() - permutedRHS).norm() /
+                    std::max<Real>(1, permutedRHS.norm()),
+                  assemblyTolerance);
+              }
             }
           }
         }
