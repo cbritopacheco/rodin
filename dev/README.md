@@ -4058,3 +4058,36 @@ approximately 95.2458 percent. It includes 19 current published-head CI
 artifacts and 67 successful local normal reports, in addition to the older
 verified inputs. Another 365 hits would reach 96 percent at this denominator;
 this remains incomplete diagnostic evidence rather than exact-head CI proof.
+
+### Invalid HDF5 current extents (run1067)
+
+Audit existing dataset-helper misses before adding tests. Missing paths,
+read-only files, duplicate datasets and incompatible numeric conversions
+already have coverage. The focused guard inventory in run1066 distinguishes
+backend-failure-only guards from a reachable invalid-current-extent path.
+
+Exercise unlimited current row, column and depth extents with zero payload
+cardinality. Native HDF5 rejects these current extents before dataset creation.
+Require the Alert dataspace diagnostic, no new link or file-owned handles,
+unchanged original matrix values and shape, and a successful subsequent write.
+No production code or numerical tolerances change.
+
+All 102 HDF5 component cases pass individually in optimized run1061, Debug
+run1063 and ASan run1065. Leak detection is enabled with matching Eigen
+allocation ABI. The first sanitizer-launch permission review expired before
+process creation; the authorized retry completed normally. Support archives
+remain optimized, and sanitizer/discovery counters are excluded.
+
+Run1067 retains exact source/producer hashes and only the two successful
+normal Test profiles. It verifies all four matrix-dataset scalar variants;
+the new case checks three invalid extents in each normal configuration. The
+diagnostic insertion line has six hits, while the Raise line is attributed
+only by Debug (three hits). Do not interpret lexical line counters as a
+one-to-one event count. Raw reports are retained in
+`build-coverage-linux/run1067-hdf5-extents-inputs/`.
+
+Run1068 preserves all source resets and adds two existing hits at HDF5.h
+lines 1237 and 1238, with no measured-line expansion. The diagnostic union is
+48,294 measured and 46,000 hit lines, approximately 95.2499 percent; another
+363 hits reach 96 percent at this denominator. It is not final exact-head
+CI confirmation. The paired delta artifact identifies both newly hit lines.

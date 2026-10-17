@@ -1907,6 +1907,47 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(boost::filesystem::exists(output));
   }
 
+  /// @brief Invalid current extents preserve existing data and permit subsequent writes.
+  TEST_F(HDF5InvalidPayload, InvalidMatrixExtentsPreserveDataAndHandles)
+  {
+    auto file =
+      HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    const std::vector<HDF5::F64> original{2, -3, 5, 7};
+    HDF5::writeMatrixDataset(file.get(), "/Original", original, 2, 2);
+    const auto handles = H5Fget_obj_count(file.get(), H5F_OBJ_ALL);
+    ASSERT_GE(handles, 0);
+    for (const auto shape : {std::array<hsize_t, 3>{H5S_UNLIMITED, 0, 0},
+           {0, H5S_UNLIMITED, 0}, {0, 2, H5S_UNLIMITED}})
+    {
+      SCOPED_TRACE(
+        ::testing::Message() << shape[0] << ':' << shape[1] << ':' << shape[2]);
+      try
+      {
+        HDF5::writeMatrixDataset<HDF5::F64>(
+          file.get(), "/Invalid", {}, shape[0], shape[1], shape[2]);
+        FAIL() << "An unlimited current extent must be rejected.";
+      }
+      catch (const Alert::Exception& error)
+      {
+        EXPECT_NE(std::string(error.what())
+                    .find("Failed to create HDF5 dataspace for dataset: /Invalid"),
+          std::string::npos);
+      }
+      EXPECT_EQ(H5Lexists(file.get(), "/Invalid", H5P_DEFAULT), 0);
+      EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+      EXPECT_EQ(HDF5::readVectorDataset<HDF5::F64>(file.get(), "/Original"), original);
+      EXPECT_EQ(HDF5::readMatrixShape(file.get(), "/Original"),
+        (std::pair<hsize_t, hsize_t>{2, 2}));
+    }
+    HDF5::writeMatrixDataset<HDF5::F64>(file.get(), "/Recovery", {11, -13}, 1, 2);
+    EXPECT_EQ(HDF5::readVectorDataset<HDF5::F64>(file.get(), "/Recovery"),
+      (std::vector<HDF5::F64>{11, -13}));
+    EXPECT_EQ(HDF5::readMatrixShape(file.get(), "/Recovery"),
+      (std::pair<hsize_t, hsize_t>{1, 2}));
+    EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+  }
+
   /// @brief Native dataset helpers preserve schema, boundary values and handle ownership.
   TEST_F(HDF5InvalidPayload, NativeDatasetTypesAndEmptyShapes)
   {
