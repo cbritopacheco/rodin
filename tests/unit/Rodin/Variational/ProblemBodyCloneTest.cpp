@@ -98,6 +98,31 @@ namespace
       assembled.getVector().setZero();
       verify(*clone);
     }
+    mesh.getConnectivity().compute(0, 1);
+    mesh.setAttribute({0, 0}, 11);
+    auto constrainedBody = [&] {
+      auto integrators = mass + Integral(Function(Scalar(2) * weight) * u, v);
+      auto condition = DirichletBC(u, Function(force));
+      condition.on(11);
+      auto body = integrators + condition;
+      integrators.clear();
+      return body;
+    }();
+    EXPECT_EQ(constrainedBody.getLocalBFIs().size(), 2);
+    EXPECT_EQ(constrainedBody.getDBCs().size(), 1);
+    Math::Matrix<Scalar> constrained = Scalar(3) * expected;
+    Vector constrainedLoad = -constrained.col(0) * force;
+    constrainedLoad[0] = force;
+    constrained.row(0).setZero();
+    constrained.col(0).setZero();
+    constrained(0, 0) = 1;
+    Problem<System, decltype(u), decltype(v)> problem(u, v);
+    problem = constrainedBody;
+    problem.assemble();
+    const auto& system = problem.getLinearSystem();
+    EXPECT_LT((Math::Matrix<Scalar>(system.getOperator()) - constrained).norm(),
+      AssemblyTolerance);
+    EXPECT_LT((system.getVector() - constrainedLoad).norm(), AssemblyTolerance);
   }
 
   /// @brief Real clones preserve raw, base, operator-only and load-only bodies in both storages.

@@ -3968,3 +3968,32 @@ c65b9848cefbdae9059f4b3576ccd95a918d6d1f completed successfully, including their
 coverage stages. This validates the earlier partition repair, not the later
 local commits. Their exact CI jobs and step conclusions are retained in
 `build-coverage-linux/run1016-ci-debug-split-confirmation.json`.
+
+### Integrator-list and boundary-condition ownership (run1025)
+
+The previously unexecuted list-plus-Dirichlet ProblemBody overload now has
+independent constrained-mass checks for real and complex scalars in dense and
+sparse storage. Destroy the source list and condition before assembly, verify
+two retained integrators and one condition, then compare the complete operator
+and nonzero boundary-induced load against analytic P1 mass coefficients.
+
+Both component cases pass individually in optimized run1015, Debug run1018
+and ASan run1020, with leak detection enabled and matching Eigen allocation
+ABI. Support archives remain optimized and their counters are not captured.
+An isolated header mutation drops the second integrator; both real and complex
+cases reject it through the matrix and load oracles (run1022). Mutation,
+discovery and sanitizer profiles are excluded. No production files changed.
+
+Run1025 confirms both scalar overload instantiations execute four times each
+across the normal configurations. Its raw reports and source/producer hashes
+are retained under `build-coverage-linux/run1025-problem-body-inputs/`. The
+first capture attempt used an incorrect test-source path and produced no
+admitted report; the capture verifier was then corrected to check executable
+statements rather than the closing brace, which remains a zero-count compiler
+attribution even on successful returns.
+
+Run1026 preserves the source resets and verifies every production file against
+the unchanged snapshot. Five existing misses become hits, with no measured-line
+expansion: 48,224 measured, 45,905 hit, approximately 95.1912 percent. Another
+391 hits reach 96 percent at that denominator. This is diagnostic CI/local
+evidence, not final exact-head CI confirmation.
