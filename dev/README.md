@@ -2936,3 +2936,40 @@ The detailed marginal/source provenance is retained in
 `run699-marginal-coverage.json`, with normalized diagnostic inputs under the
 run699 scratch audit. The fixed-denominator shortfall to 96% is only a guide;
 new collectors or instantiated code can change both numerator and denominator.
+
+### MPI convenience-export guards and datatype-cache lifecycle (run715)
+
+Use a valid WORLD-distributed segment mesh with 17 cells to check HDF5's
+convenience node/cell attribute exporters on real scalar, two-component vector
+and rectangular matrix P1 fields. Each convenience overload must reject the
+MPI-backed FES with native guidance to pass a shard explicitly, preserve every
+coefficient, and create no file. The full existing MPI IO suite runs one case
+per process group at one rank; the new case additionally runs at ranks 2, 3, 4
+and 8. No groups overlap, and the full CI rank registration remains unchanged.
+
+The first leak-enabled ASan run706 passed all one-rank cases, then reported a
+cached derived MPI datatype after the new two-rank case's assertions passed.
+P1's nonblocking requests already have matching receives and wait_all; the
+leak is not an outstanding Rodin request. The test main manually initialized
+and finalized MPI, so no owning Boost environment cleared its datatype cache
+before shutdown. The installed Boost destructor explicitly clears that cache
+before MPI_Finalize when it owns initialization. A minimal two-rank Boost-only
+control in run708 reproduces the derived-type leak with manual initialization
+and passes with Boost-owned initialization; it does not link Rodin.
+
+Change only this test executable's main to use boost::mpi::environment ownership,
+following existing distributed test harnesses. Run710 then passes all 51 MPI
+groups with leak detection enabled and the unchanged external-runtime patterns
+in cmake/lsan.supp. The controlled old/new test-source comparison differs only
+in main's lifecycle handling. No production FES, library code, CI sanitizer
+settings or leak suppression patterns are changed. The private test translation
+unit is instrumented with the matching Eigen allocation ABI; reused support
+archives remain optimized, so this is not whole-library sanitizer coverage.
+
+Final optimized run712 and assertion-enabled run714 also pass all 51 MPI groups.
+Run715 captures only their post-repair normal profiles and verifies six exporter
+specializations at HDF5.h entries 1726/1780, plus both native rejection guards
+at lines 1733/1738 and 1798/1803. Final optimized, Debug and ASan test snapshots
+are byte-identical. Failed, sanitizer, discovery, standalone-control and all
+pre-repair producers are excluded from measured coverage. No project-wide
+percentage is inferred from this focused capture.

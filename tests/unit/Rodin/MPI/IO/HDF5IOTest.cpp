@@ -18,6 +18,7 @@
 #include <Rodin/IO.h>
 #include <Rodin/MPI/Geometry/Mesh.h>
 #include <Rodin/MPI/IO.h>
+#include <Rodin/MPI/Variational/P1.h>
 
 #include <hdf5.h>
 
@@ -150,6 +151,62 @@ namespace
       EXPECT_EQ(loaded.getDimension(), 0u);
       boost::filesystem::remove(path);
     }
+  }
+
+  /// @brief Convenience exporters reject MPI-backed fields before filesystem effects.
+  TEST(ShardMetadata, ConvenienceAttributeExportRequiresExplicitShard)
+  {
+    boost::mpi::environment environment;
+    boost::mpi::communicator communicator;
+    const Context::MPI context(environment, communicator);
+    auto mesh =
+      Geometry::Mesh<Context::MPI>::UniformGrid(context, Polytope::Type::Segment, {17});
+    const auto path = rankTempPath("rodin-mpi-attribute-" +
+      boost::filesystem::unique_path("%%%%-%%%%-%%%%.h5").string());
+    ASSERT_FALSE(boost::filesystem::exists(path));
+    const auto verify = [&]<class Range>() {
+      using FES = P1<Range, Geometry::Mesh<Context::MPI>>;
+      auto space = [&] {
+        if constexpr (FormLanguage::IsMatrixRange<Range>::Value)
+          return FES(mesh, 2, 3);
+        else if constexpr (FormLanguage::IsVectorRange<Range>::Value)
+          return FES(mesh, 2);
+        else
+          return FES(mesh);
+      }();
+      GridFunction field(space);
+      field.getData().setConstant(-17);
+      const auto before = field.getData().eval();
+      for (const bool node : {false, true})
+      {
+        SCOPED_TRACE(node ? "node" : "cell");
+        try
+        {
+          if (node)
+            HDF5::writeXDMFNodeAttribute(field, path);
+          else
+            HDF5::writeXDMFCellAttribute(field, path);
+          FAIL() << "A convenience exporter accepted an MPI-backed field";
+        }
+        catch (const Alert::Exception& error)
+        {
+          const std::string message = error.what();
+          EXPECT_NE(
+            message.find("mesh is not a Mesh<Context::Local>"), std::string::npos);
+          EXPECT_NE(message.find("shard"), std::string::npos);
+        }
+        catch (const std::exception& error)
+        {
+          ADD_FAILURE() << "Expected a native exporter diagnostic: " << error.what();
+        }
+        EXPECT_EQ(field.getData(), before);
+        EXPECT_FALSE(boost::filesystem::exists(path));
+        boost::filesystem::remove(path);
+      }
+    };
+    verify.template operator()<Real>();
+    verify.template operator()<Math::SpatialVector<Real>>();
+    verify.template operator()<Math::SpatialMatrix<Real>>();
   }
 
   // Parameterized test fixture
@@ -611,11 +668,7 @@ namespace
 
 int main(int argc, char** argv)
 {
-  int mpiErr = MPI_Init(&argc, &argv);
-  if (mpiErr != MPI_SUCCESS)
-    return 1;
+  boost::mpi::environment environment(argc, argv);
   ::testing::InitGoogleTest(&argc, argv);
-  int result = RUN_ALL_TESTS();
-  MPI_Finalize();
-  return result;
+  return RUN_ALL_TESTS();
 }
