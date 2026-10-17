@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 /**
  * @file BoundaryNormalTest.cpp
  * @brief Tests for the BoundaryNormal class.
@@ -77,4 +83,144 @@ TEST(Rodin_Variational_BoundaryNormal, UnitNormalOnBoundary)
     }
   }
   EXPECT_TRUE(foundBoundary);
+}
+
+/// @brief On the unit cube, outward normals agree with the coordinate planes.
+TEST(Rodin_Variational_BoundaryNormal, AllCubeFacesHaveExactOutwardNormals)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Hexahedron, {2, 2, 2});
+  mesh.getConnectivity().compute(2, 3);
+  BoundaryNormal normal(mesh);
+  size_t count = 0;
+  for (auto face = mesh.getBoundary(); face; ++face)
+  {
+    Point point(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+    const auto actual = normal.getValue(point);
+    const auto coordinates = point.getCoordinates();
+    Math::SpatialVector<Real> expected(3);
+    expected.setZero();
+    for (size_t axis = 0; axis < 3; ++axis)
+    {
+      if (std::abs(coordinates[axis]) < 1e-12)
+        expected[axis] = -1;
+      else if (std::abs(coordinates[axis] - 1) < 1e-12)
+        expected[axis] = 1;
+    }
+    EXPECT_LT((actual - expected).norm(), 1e-12);
+    ++count;
+  }
+  EXPECT_EQ(count, 6);
+}
+
+/// @brief Corner normals require a selected incident boundary trace.
+TEST(Rodin_Variational_BoundaryNormal, CornerTraceSelectsIncidentEdge)
+{
+  auto mesh = LocalMesh::Builder()
+                .initialize(2)
+                .nodes(3)
+                .vertex({0, 0})
+                .vertex({1, 0})
+                .vertex({0, 1})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
+  mesh.getConnectivity().compute(0, 1);
+  mesh.getConnectivity().compute(1, 2);
+  for (auto edge = mesh.getPolytope(1); edge; ++edge)
+    mesh.setAttribute({1, edge->getIndex()}, edge->getIndex() + 1);
+  auto vertex = mesh.getPolytope(0, 0);
+  Point corner(*vertex, Math::SpatialPoint(0));
+  const auto& incident = mesh.getConnectivity().getIncidence({0, 1}, 0);
+  size_t checked = 0;
+  for (auto index : incident)
+  {
+    if (!mesh.isBoundary(index))
+      continue;
+    auto edge = mesh.getPolytope(1, index);
+    Point midpoint(*edge, Polytope::Traits(edge->getGeometry()).getCentroid());
+    BoundaryNormal normal(mesh);
+    const auto expected = normal.getValue(midpoint);
+    normal.traceOf(index + 1);
+    EXPECT_LT((normal.getValue(corner) - expected).norm(), 1e-12);
+    ++checked;
+  }
+  EXPECT_EQ(checked, 2);
+  BoundaryNormal invalid(mesh);
+  invalid.traceOf(999);
+  EXPECT_THROW(invalid.getValue(corner), Alert::Exception);
+}
+
+/// @brief Parent and retained-submesh points give exact normals on their own boundaries.
+TEST(Rodin_Variational_BoundaryNormal, ParentAndSubmeshPointTransport)
+{
+  for (const auto geometry :
+    {Polytope::Type::Triangle, Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    auto parent = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 3));
+    parent.getConnectivity().compute(dimension - 1, dimension);
+    for (auto cell = parent.getCell(); cell; ++cell)
+    {
+      const Point center(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      parent.setAttribute({dimension, cell->getIndex()}, center(0) < 1 ? 17 : 23);
+    }
+    auto retained = parent.keep(17);
+    retained.getConnectivity().compute(dimension - 1, dimension);
+    BoundaryNormal parentNormal(parent), retainedNormal(retained);
+    auto copied = retainedNormal;
+    auto moved = std::move(copied);
+    std::unique_ptr<BoundaryNormal> cloned(retainedNormal.copy());
+    size_t restrictedCount = 0, includedCount = 0;
+    for (auto face = retained.getBoundary(); face; ++face)
+    {
+      const Point point(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+      Math::SpatialVector<Real> expected(dimension);
+      expected.setZero();
+      for (size_t axis = 0; axis < dimension; ++axis)
+      {
+        const Real upper = axis == 0 ? 1 : 2;
+        if (std::abs(point(axis)) < 1e-12)
+          expected[axis] = -1;
+        else if (std::abs(point(axis) - upper) < 1e-12)
+          expected[axis] = 1;
+      }
+      ASSERT_NEAR(expected.norm(), 1, 1e-12);
+      EXPECT_LT((retainedNormal.getValue(point) - expected).norm(), 1e-12);
+      const auto included = parent.inclusion(point);
+      ASSERT_TRUE(included);
+      EXPECT_LT((retainedNormal.getValue(*included) - expected).norm(), 1e-12);
+      EXPECT_LT((moved.getValue(*included) - expected).norm(), 1e-12);
+      EXPECT_LT((cloned->getValue(*included) - expected).norm(), 1e-12);
+      ++restrictedCount;
+      if (parent.isBoundary(included->getPolytope().getIndex()))
+      {
+        EXPECT_LT((parentNormal.getValue(point) - expected).norm(), 1e-12);
+        ++includedCount;
+      }
+    }
+    EXPECT_GT(restrictedCount, 0);
+    EXPECT_GT(includedCount, 0);
+    bool checkedExcluded = false;
+    for (auto face = parent.getBoundary(); face; ++face)
+    {
+      const Point point(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+      if (std::abs(point(0) - 2) < 1e-12)
+      {
+        EXPECT_THROW(retainedNormal.getValue(point), Alert::Exception);
+        checkedExcluded = true;
+        break;
+      }
+    }
+    EXPECT_TRUE(checkedExcluded);
+    auto unrelated =
+      LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+    unrelated.getConnectivity().compute(dimension - 1, dimension);
+    auto face = unrelated.getBoundary();
+    ASSERT_TRUE(face);
+    const Point unrelatedPoint(
+      *face, Polytope::Traits(face->getGeometry()).getCentroid());
+    EXPECT_THROW(parentNormal.getValue(unrelatedPoint), Alert::Exception);
+    EXPECT_THROW(retainedNormal.getValue(unrelatedPoint), Alert::Exception);
+  }
 }

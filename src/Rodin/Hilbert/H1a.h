@@ -9,6 +9,10 @@
 
 #include "Rodin/Solver/CG.h"
 
+#include "Rodin/Variational/Grad.h"
+#include "Rodin/Variational/Jacobian.h"
+#include "Rodin/Variational/TrialFunction.h"
+#include "Rodin/Variational/TestFunction.h"
 #include "Rodin/Variational/Problem.h"
 #include "Rodin/Variational/Integral.h"
 #include "Rodin/Variational/DirichletBC.h"
@@ -45,36 +49,37 @@ namespace Rodin::Hilbert
 
     /// Linear system type for the regularized problem
     using LinearSystemType =
-      Math::LinearSystem<Math::SparseMatrix<FESRange>, Math::Vector<FESRange>>;
+      Math::LinearSystem<Math::SparseMatrix<ScalarType>, Math::Vector<ScalarType>>;
 
     /// Solver type (Conjugate Gradient)
     using SolverType = Solver::CG<LinearSystemType>;
 
     static_assert(std::is_same_v<FESRange, Real> ||
-        std::is_same_v<FESRange, Math::Vector<Real>>);
+      std::is_same_v<FESRange, Math::SpatialVector<Real>>);
 
-    public:
+  public:
       /**
        * @brief Constructs an H1a extension operator.
        * @param fes Finite element space for the problem
        */
-      H1a(const FES& fes)
-        : m_fes(fes),
-          m_trial(fes), m_test(fes),
-          m_pb(m_trial, m_test),
-          m_alpha(1)
-      {}
+    H1a(const FES& fes)
+      : m_fes(fes),
+        m_trial(fes),
+        m_test(fes),
+        m_pb(m_trial, m_test),
+        m_alpha(1)
+    {}
 
       /**
        * @brief Sets the regularization parameter @f$ \alpha @f$.
        * @param alpha Regularization length-scale parameter
        * @return Reference to this object for method chaining
        */
-      H1a& setAlpha(Real alpha)
-      {
-        m_alpha = alpha;
-        return *this;
-      }
+    H1a& setAlpha(Real alpha)
+    {
+      m_alpha = alpha;
+      return *this;
+    }
 
       /**
        * @brief Applies the extension operator to a differential form.
@@ -82,38 +87,25 @@ namespace Rodin::Hilbert
        * @param lf Linear functional to extend
        * @return Solution of the regularized extension problem
        */
-      template <class Differential>
-      auto operator()(const Differential& lf) const
-      {
-        const auto& fes = getFiniteElementSpace();
+    template <class Differential>
+    auto operator()(const Differential& lf) const
+    {
+      auto body = [&]() {
         if constexpr (std::is_same_v<FESRange, Real>)
-        {
-          Variational::TrialFunction g(fes);
-          Variational::TestFunction  w(fes);
-          Variational::Problem hilbert(g, w);
-          hilbert = Integral(m_alpha * m_alpha * Grad(g), Grad(w))
-                  + Integral(g, w)
-                  - lf;
-          hilbert.solve(m_solver);
-          return g.getSolution();
-        }
-        else if constexpr (std::is_same_v<FESRange, Math::Vector<Real>>)
-        {
-          Variational::TrialFunction g(fes);
-          Variational::TestFunction  w(fes);
-          Variational::Problem hilbert(g, w);
-          hilbert = Integral(m_alpha * m_alpha * Jacobian(g), Jacobian(w))
-                  + Integral(g, w)
-                  - lf;
-          hilbert.solve(m_solver);
-          return g.getSolution();
-        }
+          return Variational::Integral(m_alpha * m_alpha * Variational::Grad(m_trial),
+                   Variational::Grad(m_test)) +
+            Variational::Integral(m_trial, m_test) - lf;
         else
-        {
-          assert(false);
-          return void();
-        }
-      }
+          return Variational::Integral(m_alpha * m_alpha * Variational::Jacobian(m_trial),
+                   Variational::Jacobian(m_test)) +
+            Variational::Integral(m_trial, m_test) - lf;
+      }();
+      body.getDBCs() = m_pb.getBody().getDBCs();
+      m_pb = body;
+      SolverType solver(m_pb);
+      m_pb.solve(solver);
+      return m_trial.getSolution();
+    }
 
       /**
        * @brief Adds a Dirichlet boundary condition to the problem.
@@ -172,18 +164,15 @@ namespace Rodin::Hilbert
       }
 
     private:
-      std::reference_wrapper<const FES>           m_fes;    ///< Reference to finite element space
-      Variational::TrialFunction<Solution, FES>   m_trial;  ///< Trial function for the formulation
-      Variational::TestFunction<FES>              m_test;   ///< Test function for the formulation
-      Variational::Problem<
-        FES, FES, Context::Local, Math::SparseMatrix<Real>, Math::Vector<Real>> m_pb; ///< Underlying variational problem
+      std::reference_wrapper<const FES> m_fes;    ///< Reference to finite element space
+      mutable Variational::TrialFunction<Solution, FES>
+        m_trial;  ///< Trial function for the formulation
+      Variational::TestFunction<FES> m_test;   ///< Test function for the formulation
+      mutable Variational::Problem<LinearSystemType,
+        Variational::TrialFunction<Solution, FES>, Variational::TestFunction<FES>>
+        m_pb; ///< Underlying variational problem
       Real m_alpha;        ///< Regularization parameter @f$ \alpha @f$
-      SolverType m_solver; ///< Conjugate gradient solver
   };
 }
 
 #endif
-
-
-
-

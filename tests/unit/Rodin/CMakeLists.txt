@@ -103,6 +103,7 @@ add_subdirectory(IO)
 add_subdirectory(QF)
 add_subdirectory(Context)
 add_subdirectory(Threads)
+add_subdirectory(Utility)
 add_subdirectory(Geometry)
 add_subdirectory(Location)
 add_subdirectory(Variational)
@@ -122,4 +123,10 @@ endif()
 
 if (RODIN_USE_PETSC)
   add_subdirectory(PETSc)
+endif()
+
+add_subdirectory(Solid)
+
+if (RODIN_USE_SCOTCH)
+  add_subdirectory(Scotch)
 endif()

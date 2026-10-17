@@ -23,7 +23,10 @@ jobs:
     # modes exhausted 45 minutes while the pyramid P0 projection was active.
     # Both combined curved-scalar jobs exhausted three hours. Separate physics
     # and the two expensive cell families without dropping refinement cases.
-    timeout-minutes: ${{ matrix.suite == 'baseline' && 45 || 180 }}
+    # Baseline OFF exhausted 45 minutes after setup/build (~24 minutes) and
+    # 397 of 427 sequential cases; HP Stokes was still running without a failure.
+    # Preserve the complete gate and allow build plus refinement headroom.
+    timeout-minutes: ${{ matrix.suite == 'baseline' && 90 || 180 }}
     strategy:
       fail-fast: false
       matrix:
@@ -102,7 +105,7 @@ jobs:
           case "${{ matrix.suite }}" in
             baseline)
               ctest --test-dir build/tests -L convergence -E "$curved_pattern|^RodinConvergenceHStokesStability_" \
-                --output-on-failure --no-tests=error -j 2 ;;
+                --output-on-failure --no-tests=error -j 1 ;;
             pressure_light) pressure_exclude='_(Tetrahedron|Pyramid)$' ;;
             pressure_tetrahedron) pressure_exclude='_(Triangle|Quadrilateral|Pyramid|Hexahedron|Wedge|Utility|Workspace)$' ;;
             pressure_pyramid) pressure_exclude='_(Triangle|Quadrilateral|Tetrahedron|Hexahedron|Wedge|Utility|Workspace)$' ;;
@@ -191,7 +194,7 @@ jobs:
       - name: Run complete native MPI restriction matrix
         run: >-
           ctest --test-dir build/tests
-          -R '^RodinMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
+          -R '^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$'
           --no-tests=error --output-on-failure -j 1
 
   PETScConvergence:
@@ -814,6 +817,8 @@ jobs:
         multithreaded: [ON, OFF]
         suite: [bulk, curved_helmholtz_light, curved_helmholtz_tetrahedron, curved_helmholtz_pyramid, curved_projection, boundary, curved_boundary, submesh]
     env:
+      GCOV: gcov-14
+      RODIN_COVERAGE: ${{ matrix.suite == 'submesh' && 'ON' || 'OFF' }}
       OMP_NUM_THREADS: 2
 
     steps:
@@ -833,7 +838,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y
           libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
           libscotch-dev libmetis-dev libhdf5-dev libomp-dev
-          libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config
+          libpetsc-complex3.19-dev openmpi-bin libopenmpi-dev pkg-config lcov
 
       - name: Configure complex PETSc convergence build
         run: >-
@@ -849,6 +854,10 @@ jobs:
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
+          -DRODIN_USE_ASAN=OFF
+          -DRODIN_USE_UBSAN=OFF
+          -DRODIN_CODE_COVERAGE=${{ env.RODIN_COVERAGE }}
+          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
           -DPETSc_DIR="$(pkg-config --variable=prefix PETSc)"
 
       - name: Build complex PETSc convergence suite
@@ -864,7 +873,7 @@ jobs:
         run: >-
           ctest --test-dir build/tests -R 'RodinConvergence(H|P|HP)PETSc(MPI)?Helmholtz|RodinPETScSNESStateTest|RodinPETSc(MPI)?ScalarIntegralTest|Rodin_Variational_Integral'
           -E '^RodinConvergenceHPETScHelmholtzBoundary_'
-          --output-on-failure --no-tests=error -j 2
+          --output-on-failure --no-tests=error -j 1
 
       - name: Build curved complex PETSc Helmholtz suite
         if: startsWith(matrix.suite, 'curved_helmholtz')
@@ -906,13 +915,37 @@ jobs:
 
       - name: Build complex PETSc SubMesh restriction matrix
         if: matrix.suite == 'submesh'
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
         run: cmake --build build -j 2 --target RodinPETScMPIH1SubMeshRestrictionTest
+
+      - name: Discover coverage tests without runtime profiles
+        if: matrix.suite == 'submesh'
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
+        run: |
+          mkdir -p coverage-discovery-excluded
+          ctest --test-dir build/tests --show-only=json-v1 > coverage-discovery-excluded/tests.json
 
       - name: Run complex PETSc SubMesh restriction matrix
         if: matrix.suite == 'submesh'
+        env:
+          OMP_WAIT_POLICY: PASSIVE
+          OPENBLAS_NUM_THREADS: 1
+          OMPI_MCA_hwloc_base_binding_policy: none
         run: >-
-          ctest --test-dir build/tests -R '^RodinPETScMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
+          ctest --test-dir build/tests -R '^RodinPETScMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)_(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)_(Affine|Curved)_K[1-6]$'
           --output-on-failure --no-tests=error -j 1
+
+      - name: Retain complex H1 restriction diagnostics
+        if: always() && matrix.suite == 'submesh'
+        uses: actions/upload-artifact@v4
+        with:
+          name: petsc-complex-h1-restriction-diagnostics-mt${{ matrix.multithreaded }}
+          path: |
+            build/tests/Testing/Temporary/LastTest.log
+            build/tests/Testing/Temporary/LastTestsFailed.log
+          if-no-files-found: ignore
 
       - name: Build curved complex PETSc Helmholtz boundary suite
         if: matrix.suite == 'curved_boundary'
@@ -923,6 +956,36 @@ jobs:
         run: >-
           ctest --test-dir build/tests -R '^RodinConvergenceIsoparametricPETScHelmholtzBoundary_'
           --output-on-failure --no-tests=error -j 1
+
+      - name: Capture complex H1 production coverage
+        if: matrix.suite == 'submesh'
+        run: |
+          cmake --build build --target RodinCoverage
+          python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
+
+      - name: Save complex H1 coverage audit
+        if: matrix.suite == 'submesh'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-audit-complex-h1-mt${{ matrix.multithreaded }}
+          path: |
+            build/coverage-audit.json
+            build/RodinCoverage.info
+
+      - name: Upload complex H1 production coverage to Codecov
+        if: matrix.suite == 'submesh'
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ github.workspace }}/build/RodinCoverage.info
+          disable_search: true
+          # RodinCoverage already runs the matching gcov and filters production sources.
+          plugins: noop
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: RelWithDebInfo,mt-${{ matrix.multithreaded }},petsc-complex,h1
+          name: cov-complex-h1-mt${{ matrix.multithreaded }}
+          root_dir: ${{ github.workspace }}
+          use_pypi: true
+          fail_ci_if_error: true
 
   PETScMatrixRanges:
     # Preserve the real/complex matrix-range and coefficient-storage gates
@@ -936,6 +999,7 @@ jobs:
         scalar: [real, complex]
         multithreaded: [ON, OFF]
     env:
+      GCOV: gcov-14
       OMP_NUM_THREADS: 2
       OMP_WAIT_POLICY: PASSIVE
       # Allow each MPI rank to schedule its OpenMP workers.
@@ -958,7 +1022,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y
           libboost1.74-all-dev libsuitesparse-dev libeigen3-dev
           libscotch-dev libmetis-dev libhdf5-dev
-          libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev
+          libpetsc-${{ matrix.scalar }}-dev libomp-dev mpi-default-dev lcov
 
       - name: Configure PETSc matrix-range build
         run: >-
@@ -974,19 +1038,64 @@ jobs:
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
+          -DRODIN_USE_ASAN=OFF
+          -DRODIN_USE_UBSAN=OFF
+          -DRODIN_CODE_COVERAGE=ON
+          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
 
-      - name: Build distributed finite element tests
+      - name: Build PETSc matrix-range and I/O tests
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
         run: >-
           cmake --build build -j 2 --target
           RodinMPIMatrixRangeTest RodinPETScGridFunctionTest
           RodinPETScMPIGridFunctionTest RodinPETScMPIP0P0gTest
           RodinPETScMPISubMeshGridFunctionTest
+          RodinPETScIOHDF5IOTest RodinPETScIOMEDITIOTest
+          RodinPETScSingleFieldConstraintTest RodinPETScRestrictedNonlocalTest
+          RodinPETScMixedTargetAssemblyTest
+          RodinPETScMPIMixedTargetAssemblyTest
+          RodinPETScSingleFieldTargetAssemblyTest RodinPETScSNESStateTest
 
-      - name: Run distributed finite element tests
+      - name: Discover coverage tests without runtime profiles
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
+        run: |
+          mkdir -p coverage-discovery-excluded
+          ctest --test-dir build/tests --show-only=json-v1 > coverage-discovery-excluded/tests.json
+
+      - name: Run PETSc matrix-range and I/O tests
         run: >-
           ctest --test-dir build/tests
-          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4]|RodinPETScMPISubMeshGridFunctionTest_np[124])$'
+          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4]|RodinPETScMPISubMeshGridFunctionTest_np[124]|RodinPETScIO(HDF5IO|MEDITIO)Test|RodinPETScSingleFieldConstraintTest|RodinPETScRestrictedNonlocalTest|RodinPETScMixedTargetAssemblyTest|RodinPETScMPIMixedTargetAssemblyTest_np[12348]|RodinPETScSingleFieldTargetAssemblyTest|RodinPETScSNESStateTest)$'
           --output-on-failure --no-tests=error -j 1
+
+      - name: Capture PETSc scalar-variant production coverage
+        run: |
+          cmake --build build --target RodinCoverage
+          python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
+
+      - name: Save PETSc scalar-variant coverage audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-audit-petsc-${{ matrix.scalar }}-mt${{ matrix.multithreaded }}
+          path: |
+            build/coverage-audit.json
+            build/RodinCoverage.info
+
+      - name: Upload PETSc scalar-variant production coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ github.workspace }}/build/RodinCoverage.info
+          disable_search: true
+          # RodinCoverage already runs the matching gcov and filters production sources.
+          plugins: noop
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: RelWithDebInfo,mt-${{ matrix.multithreaded }},petsc-${{ matrix.scalar }}
+          name: cov-petsc-${{ matrix.scalar }}-mt${{ matrix.multithreaded }}
+          root_dir: ${{ github.workspace }}
+          use_pypi: true
+          fail_ci_if_error: true
 
   Unit:
     runs-on: ubuntu-latest
@@ -997,12 +1106,29 @@ jobs:
         multithreaded: [ON, OFF]
         asan: [ON, OFF]
         ubsan: [ON, OFF]
+        partition: [1]
+        include:
+          # This normal Debug job exceeded the six-hour runner limit after
+          # its tests passed. Split only its serial unit selection; retain
+          # every distributed rank and slow geometry case in partition 1.
+          - compiler: gcc-14
+            build_type: Debug
+            multithreaded: ON
+            asan: OFF
+            ubsan: OFF
+            partition: 2
       fail-fast: false
 
     env:
-      MAKEFLAGS: "-j2"
+      # Instrumented SWIFT compilations exceeded 6 GiB with two compiler processes.
+      MAKEFLAGS: ${{ matrix.build_type == 'Release' && matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && '-j1' || '-j2' }}
       OMP_NUM_THREADS: 2
-      CTEST_PARALLEL_LEVEL: 2
+      CTEST_PARALLEL_LEVEL: 1
+      UNIT_PARTITIONS: ${{ matrix.build_type == 'Debug' && matrix.multithreaded == 'ON' && matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && 2 || 1 }}
+      GCOV: gcov-14
+      # Collect both normal build modes; Debug retains assertion-enabled code
+      # that optimization can erase. Sanitizer profiles never enter coverage.
+      RODIN_COVERAGE: ${{ matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && 'ON' || 'OFF' }}
       # A standalone Ubuntu/Open MPI repro reports PMIx leaks under ASan even
       # without MUMPS, including when MPI_Finalize is called. Keep MUMPS out
       # of ASan jobs while testing it under UBSan and the SuiteSparse solvers
@@ -1099,17 +1225,57 @@ jobs:
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_UNIT_TESTS=ON
           -DRODIN_BUILD_MANUFACTURED_TESTS=ON
-          -DRODIN_CODE_COVERAGE=OFF
+          -DRODIN_CODE_COVERAGE=${{ env.RODIN_COVERAGE }}
+          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
 
       - name: Build
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
         run: cmake --build ${{ github.workspace }}/build
+
+      - name: Discover coverage tests without runtime profiles
+        if: env.RODIN_COVERAGE == 'ON'
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
+        run: |
+          mkdir -p coverage-discovery-excluded
+          ctest --test-dir build/tests --show-only=json-v1 > coverage-discovery-excluded/tests.json
+
+      - name: Verify exhaustive disjoint unit-test partitions
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
+        run: |
+          python3 - <<'PYTEST'
+          import json
+          import os
+          import subprocess
+          args = ["ctest", "--test-dir", "build/tests", "-L", "unit",
+                  "-LE", "slow|distributed", "--show-only=json-v1"]
+          def cases(extra):
+              report = json.loads(subprocess.check_output(args + extra, text=True))
+              # Different component executables may share a GTest name.
+              # Backtrace indices belong to the selected report, not the invocation.
+              identities = [json.dumps(
+                  {key: value for key, value in test.items() if key != "backtrace"},
+                  sort_keys=True) for test in report["tests"]]
+              assert len(set(identities)) == len(identities), "Duplicate unit-test invocations"
+              return set(identities)
+          count = int(os.environ["UNIT_PARTITIONS"])
+          original = cases([])
+          partitions = [cases(["-I", f"{part},,{count}"]) for part in range(1, count + 1)]
+          assert original and all(partitions), "Empty unit-test selection"
+          assert set.union(*partitions) == original, "Unit-test partition loses cases"
+          assert sum(map(len, partitions)) == len(original), "Unit-test partitions overlap"
+          print("Unit-test partition counts:", list(map(len, partitions)))
+          PYTEST
 
       - name: Run unit tests
         id: unit_tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -LE "slow|distributed"
+          -I ${{ matrix.partition }},,${{ env.UNIT_PARTITIONS }}
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -1118,10 +1284,12 @@ jobs:
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -LE "slow|distributed"
+          -I ${{ matrix.partition }},,${{ env.UNIT_PARTITIONS }}
           --rerun-failed -V --output-on-failure
 
       - name: Run distributed tests
         id: distributed_tests
+        if: matrix.partition == 1
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -L distributed -LE slow
@@ -1141,6 +1309,7 @@ jobs:
       # Slow (PETSc real) optimized builds; complex PETSc has its own submesh gate.
       - name: Run slow MPI geometry tests
         id: slow_mpi_geometry
+        if: matrix.partition == 1
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow -R '^RodinMPIAssemblyGeometrySlowTest_np(1|2|3|4|8)_(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)$'
@@ -1152,6 +1321,37 @@ jobs:
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow -R '^RodinMPIAssemblyGeometrySlowTest_np(1|2|3|4|8)_(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)$'
           --rerun-failed -V --output-on-failure
+
+      - name: Capture optional-backend production coverage
+        if: env.RODIN_COVERAGE == 'ON'
+        run: |
+          cmake --build build --target RodinCoverage
+          python3 dev/audit_coverage.py build/RodinCoverage.info --functions --output build/coverage-audit.json
+
+      - name: Save optional-backend coverage audit
+        if: env.RODIN_COVERAGE == 'ON'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-audit-optional-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}-part${{ matrix.partition }}
+          path: |
+            build/coverage-audit.json
+            build/RodinCoverage.info
+
+      - name: Upload optional-backend production coverage to Codecov
+        if: env.RODIN_COVERAGE == 'ON'
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ github.workspace }}/build/RodinCoverage.info
+          disable_search: true
+          # RodinCoverage already runs the matching gcov and filters production sources.
+          plugins: noop
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }},optional
+          name: cov-optional-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}-part${{ matrix.partition }}
+          root_dir: ${{ github.workspace }}
+          use_pypi: true
+          fail_ci_if_error: true
+
 
   Manufactured:
     runs-on: ubuntu-latest
@@ -1268,12 +1468,17 @@ jobs:
         multithreaded: [ON, OFF]
         asan: [OFF]
         ubsan: [OFF]
+        partition: [1, 2, 3, 4]
       fail-fast: false
 
     env:
       MAKEFLAGS: "-j2"
       OMP_NUM_THREADS: 2
+      OMP_WAIT_POLICY: PASSIVE
+      OPENBLAS_NUM_THREADS: 1
+      OMPI_MCA_hwloc_base_binding_policy: none
       CTEST_PARALLEL_LEVEL: 1
+      GCOV: gcov-14
 
     steps:
       - uses: actions/checkout@v4
@@ -1311,6 +1516,10 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
+          -DRODIN_USE_SCOTCH=ON
+          -DRODIN_USE_UMFPACK=ON
+          -DRODIN_USE_CHOLMOD=ON
+          -DRODIN_USE_SPQR=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -1321,18 +1530,43 @@ jobs:
           -DRODIN_BUILD_SRC=ON
           -DRODIN_BUILD_UNIT_TESTS=ON
           -DRODIN_BUILD_MANUFACTURED_TESTS=ON
-          -DRODIN_CODE_COVERAGE=OFF
+          -DRODIN_LCOV_FLAGS="--ignore-errors gcov,gcov --ignore-errors mismatch --ignore-errors unused"
+          -DRODIN_CODE_COVERAGE=ON
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
 
       - name: Build
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
         run: cmake --build ${{ github.workspace }}/build
+
+      - name: Verify exhaustive disjoint slow-test partitions
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
+        run: |
+          python3 - <<'PY'
+          import json
+          import subprocess
+          args = ["ctest", "--test-dir", "build/tests", "-L", "slow", "-E",
+                  r"^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$",
+                  "--show-only=json-v1"]
+          def names(extra):
+              report = json.loads(subprocess.check_output(args + extra, text=True))
+              return {test["name"] for test in report["tests"]}
+          original = names([])
+          partitions = [names(["-I", f"{part},,4"]) for part in range(1, 5)]
+          assert original and all(partitions), "Empty slow-test selection"
+          assert set.union(*partitions) == original, "Slow-test partition loses cases"
+          assert sum(map(len, partitions)) == len(original), "Slow-test partitions overlap"
+          print("Slow-test partition counts:", list(map(len, partitions)))
+          PY
 
       - name: Run slow tests
         id: slow_tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow
-          -E '^RodinMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
+          -E '^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$'
+          -I ${{ matrix.partition }},,4
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -1341,8 +1575,38 @@ jobs:
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow
-          -E '^RodinMPIH1SubMeshRestrictionTest_np(1|2|3|4|8)$'
+          -E '^RodinMPIH1SubMeshRestrictionTest_.*_np(1|2|3|4|8)$'
+          -I ${{ matrix.partition }},,4
           --rerun-failed -V --output-on-failure
+
+      - name: Make slow-test coverage
+        run: cmake --build ${{ github.workspace }}/build --target RodinCoverage
+
+      - name: Audit production sources and absent template headers
+        run: >-
+          python3 dev/audit_coverage.py build/RodinCoverage.info
+          --functions --output build/coverage-audit.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-audit-slow-mt${{ matrix.multithreaded }}-part${{ matrix.partition }}
+          path: |
+            build/coverage-audit.json
+            build/RodinCoverage.info
+
+      - name: Upload slow-test coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ${{ github.workspace }}/build/RodinCoverage.info
+          disable_search: true
+          # RodinCoverage already runs the matching gcov and filters production sources.
+          plugins: noop
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }},slow-part-${{ matrix.partition }}
+          name: cov-slow-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}-part${{ matrix.partition }}
+          root_dir: ${{ github.workspace }}
+          use_pypi: true
+          fail_ci_if_error: true
 
   Coverage:
     runs-on: ubuntu-latest
@@ -1359,7 +1623,7 @@ jobs:
     env:
       MAKEFLAGS: "-j2"
       OMP_NUM_THREADS: 2
-      CTEST_PARALLEL_LEVEL: 2
+      CTEST_PARALLEL_LEVEL: 1
       GCOV: gcov-14
 
     steps:
@@ -1399,6 +1663,10 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DRODIN_USE_MPI=ON
           -DRODIN_USE_PETSC=ON
+          -DRODIN_USE_SCOTCH=ON
+          -DRODIN_USE_UMFPACK=ON
+          -DRODIN_USE_CHOLMOD=ON
+          -DRODIN_USE_SPQR=ON
           -DRODIN_USE_ASAN=${{ matrix.asan }}
           -DRODIN_USE_UBSAN=${{ matrix.ubsan }}
           -DRODIN_BUILD_DOC=OFF
@@ -1414,7 +1682,16 @@ jobs:
           -DRODIN_MULTITHREADED=${{ matrix.multithreaded }}
 
       - name: Build
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
         run: cmake --build ${{ github.workspace }}/build
+
+      - name: Discover coverage tests without runtime profiles
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
+        run: |
+          mkdir -p coverage-discovery-excluded
+          ctest --test-dir build/tests --show-only=json-v1 > coverage-discovery-excluded/tests.json
 
       - name: Run unit tests (coverage build)
         run: >
@@ -1440,6 +1717,18 @@ jobs:
       - name: Make coverage
         run: cmake --build ${{ github.workspace }}/build --target RodinCoverage
 
+      - name: Audit production sources and absent template headers
+        run: >-
+          python3 dev/audit_coverage.py build/RodinCoverage.info
+          --functions --output build/coverage-audit.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-audit-regular-mt${{ matrix.multithreaded }}
+          path: |
+            build/coverage-audit.json
+            build/RodinCoverage.info
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -1447,6 +1736,8 @@ jobs:
           # Upload only the LCOV report filtered by RodinCoverage. Automatic
           # discovery also uploads raw gcov files, undoing its exclusions.
           disable_search: true
+          # RodinCoverage already runs the matching gcov and filters production sources.
+          plugins: noop
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }}
           name: cov-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}

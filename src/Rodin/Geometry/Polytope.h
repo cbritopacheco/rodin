@@ -302,8 +302,8 @@ namespace Rodin::Geometry
       /**
        * @brief Projection operations for polytope sub-entities.
        *
-       * Provides methods to project points from one polytope's reference
-       * coordinates to another (e.g., from a face to its parent cell).
+       * Returns points on the requested reference-cell sub-entity in the
+       * parent reference coordinates; points already on it remain fixed.
        */
       struct Project
       {
@@ -540,7 +540,7 @@ namespace Rodin::Geometry
        *
        * | Dimension | Measure    |
        * |-----------|------------|
-       * | 0         | Always 0   |
+       * | 0         | Always 1   |
        * | 1         | Length     |
        * | 2         | Area       |
        * | 3         | Volume     |

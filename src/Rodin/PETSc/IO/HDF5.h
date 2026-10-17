@@ -32,6 +32,7 @@
  * @see <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html">Rodin::PETSc::Variational::GridFunction</a>
  */
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <petscvec.h>
 #include <petscsys.h>
 #include <petscmath.h>
@@ -190,9 +191,8 @@ namespace Rodin::IO
         const auto file = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
         if (file < 0)
         {
-          Alert::Exception()
-            << "Failed to open HDF5 file for reading: " << filename
-            << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to open HDF5 file for reading: " << filename << Alert::Raise;
         }
 
         const auto values = Internal::readVectorDouble(file, "/GridFunction/Values/Data");
@@ -203,17 +203,16 @@ namespace Rodin::IO
         if (imaginary.size() != values.size())
         {
           H5Fclose(file);
-          Alert::Exception() << "Incompatible HDF5 imaginary coefficient count."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Incompatible HDF5 imaginary coefficient count." << Alert::Raise;
         }
 
         if (static_cast<PetscInt>(values.size()) != localN)
         {
           H5Fclose(file);
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Local DOF count mismatch: file has " << values.size()
-            << ", local Vec portion has " << localN << "."
-            << Alert::Raise;
+            << ", local Vec portion has " << localN << "." << Alert::Raise;
         }
 
         if constexpr (FormLanguage::IsMatrixRange<
@@ -224,7 +223,8 @@ namespace Rodin::IO
           if (rows != gf.getRows() || cols != gf.getColumns())
           {
             H5Fclose(file);
-            Alert::Exception() << "HDF5 matrix range shape mismatch." << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "HDF5 matrix range shape mismatch." << Alert::Raise;
           }
         }
         H5Fclose(file);
@@ -239,8 +239,8 @@ namespace Rodin::IO
             PetscCMPLX(values[static_cast<size_t>(i)], imaginary[static_cast<size_t>(i)]);
 #else
           if (imaginary[static_cast<size_t>(i)] != 0)
-            Alert::Exception() << "Complex HDF5 coefficients require complex PETSc."
-                               << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "Complex HDF5 coefficients require complex PETSc." << Alert::Raise;
           localValues[static_cast<size_t>(i)] = values[static_cast<size_t>(i)];
 #endif
         }
@@ -340,9 +340,8 @@ namespace Rodin::IO
         const auto file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         if (file < 0)
         {
-          Alert::Exception()
-            << "Failed to create HDF5 file: " << filename
-            << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to create HDF5 file: " << filename << Alert::Raise;
         }
 
         const auto gfGroup = H5Gcreate2(file, "/GridFunction", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

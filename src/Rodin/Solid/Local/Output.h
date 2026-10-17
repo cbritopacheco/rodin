@@ -26,6 +26,8 @@
  * @code
  * struct MyOutput : Solid::Output<MyOutput>
  * {
+ *   MyOutput() = default;
+ *
  *   void extract(const Solid::ConstitutivePoint& cp, const Cache& cache) const
  *   {
  *     // e.g., commit an internal variable
@@ -34,7 +36,11 @@
  *   }
  * };
  *
- * ivw.setOutput(MyOutput{});
+ * ivw.setOutput([output = MyOutput{}](const Solid::ConstitutivePoint& cp,
+ *                                  const auto& cache) {
+ *   const Solid::Output<MyOutput>& base = output;
+ *   base.extract(cp, cache);
+ * });
  * @endcode
  *
  * ## Usage with lambda / std::function

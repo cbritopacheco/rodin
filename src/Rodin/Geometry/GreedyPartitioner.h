@@ -86,7 +86,8 @@ namespace Rodin::Geometry
       size_t getCount() const override;
 
     private:
-      size_t m_count;
+      /// @brief Requested partition count, zero before the first partitioning.
+      size_t m_count = 0;
       std::reference_wrapper<const MeshType> m_mesh;
       std::vector<size_t> m_partition;
   };

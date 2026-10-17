@@ -9,6 +9,15 @@ gtest_discover_tests(RodinIOMeshLoaderTest
     LABELS unit
 )
 
+add_executable(RodinIOFileFormatTest FileFormatTest.cpp)
+target_link_libraries(RodinIOFileFormatTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::IO)
+gtest_discover_tests(RodinIOFileFormatTest PROPERTIES LABELS unit)
+
+add_executable(RodinIOMEDITParserTest MEDITParserTest.cpp)
+target_link_libraries(RodinIOMEDITParserTest PRIVATE GTest::gtest_main Rodin::IO)
+gtest_discover_tests(RodinIOMEDITParserTest PROPERTIES LABELS unit)
+
 add_executable(RodinIOH1GridFunctionIOTest H1GridFunctionIOTest.cpp)
 target_link_libraries(RodinIOH1GridFunctionIOTest
   PUBLIC
@@ -65,3 +74,18 @@ add_executable(RodinIOSpatialMatrixTest SpatialMatrixTest.cpp)
 target_link_libraries(RodinIOSpatialMatrixTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::IO Rodin::Variational)
 gtest_discover_tests(RodinIOSpatialMatrixTest PROPERTIES LABELS unit)
+
+add_executable(RodinIOXDMFTest XDMFTest.cpp)
+target_link_libraries(RodinIOXDMFTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::IO Rodin::Variational)
+gtest_discover_tests(RodinIOXDMFTest PROPERTIES LABELS unit)
+
+add_executable(RodinIOMEDITLoaderTest MEDITLoaderTest.cpp)
+target_link_libraries(RodinIOMEDITLoaderTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::IO)
+gtest_discover_tests(RodinIOMEDITLoaderTest PROPERTIES LABELS unit)
+
+add_executable(RodinIOMFEMCoefficientTest MFEMCoefficientTest.cpp)
+target_link_libraries(RodinIOMFEMCoefficientTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::IO)
+gtest_discover_tests(RodinIOMFEMCoefficientTest PROPERTIES LABELS unit)

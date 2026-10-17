@@ -729,8 +729,21 @@ namespace Rodin::Variational
 
               if (mesh.isBoundary(f))
               {
+                const Real tauBeforeBp = tau;
+                const Index cellBeforeBp = sCell;
+                const Math::SpatialPoint rcBeforeBp = sRc;
+                const Real correctionBeforeBp = correction;
                 BoundaryHit bh{tau, sCell, sRc, best, correction};
                 if (!m_bp(bh))
+                {
+                  exitTrace.emplace(true, tau, Geometry::Point(cell, sRc), correction);
+                  return false;
+                }
+                const Real rcMove2 = (sRc - rcBeforeBp).squaredNorm();
+                const bool progressed = (tau < tauBeforeBp) || (sCell != cellBeforeBp) ||
+                  (rcMove2 > ReferenceProgressRoundoffFactorSquared * epsMachine) ||
+                  (correction != correctionBeforeBp);
+                if (!progressed)
                 {
                   exitTrace.emplace(true, tau, Geometry::Point(cell, sRc), correction);
                   return false;
@@ -1081,16 +1094,18 @@ namespace Rodin::Variational
        * @brief Evaluates the flowed function at a point.
        *
        * If tracing exits or aborts before completion, this default implementation
-       * returns zero.
+       * returns zero in the result's scalar field.
        * @param p Point at which the operation is evaluated.
        * @returns Value of the expression at the supplied evaluation point.
        */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
+        using RangeType = typename FormLanguage::Traits<Operand>::RangeType;
+        using ValueType = decltype(std::declval<RangeType>() + Real(0));
         const auto tr = this->trace(p);
         if (tr.exited())
-          return Real(0);
+          return ValueType(0);
         return m_operand->getValue(tr.getPoint()) + tr.getCorrection();
       }
 

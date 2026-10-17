@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include <algorithm>
+#include <set>
 
 #include <Rodin/Geometry.h>
 
@@ -1281,8 +1283,99 @@ namespace Rodin::Tests::Unit
     // Both should have same incidence relations
     for (size_t i = 0; i < 2; ++i)
     {
-      EXPECT_EQ(conn1.getIncidence({2, 1}, i).size(),
-                conn2.getIncidence({2, 1}, i).size());
+      EXPECT_EQ(
+        conn1.getIncidence({2, 1}, i).size(), conn2.getIncidence({2, 1}, i).size());
     }
   }
+  struct SubPolytopeCase
+  {
+      Polytope::Type geometry;
+      std::vector<size_t> counts;
+  };
+
+  class ConnectivitySubPolytopes : public testing::TestWithParam<SubPolytopeCase>
+  {};
+
+  /// @brief Every dimension has the known cell counts and unique vertex subsets.
+  TEST_P(ConnectivitySubPolytopes, CompleteBoundary)
+  {
+    const auto& data = GetParam();
+    const size_t dimension = data.counts.size() - 1;
+    const size_t vertexCount = data.counts[0];
+    Connectivity<Context::Local> connectivity;
+    connectivity.initialize(dimension).nodes(vertexCount);
+    Polytope::Key key(vertexCount);
+    for (size_t i = 0; i < vertexCount; ++i)
+      key[i] = i;
+    if (dimension > 0)
+    {
+      Index index = 999;
+      connectivity.polytope(data.geometry, key, index);
+      EXPECT_EQ(index, 0);
+      // Insertion through the const-key overload must deduplicate vertex permutations.
+      Polytope::Key reversed(vertexCount);
+      for (size_t i = 0; i < vertexCount; ++i)
+        reversed[i] = vertexCount - 1 - i;
+      connectivity.polytope(data.geometry, reversed, index);
+      EXPECT_EQ(index, 0);
+      EXPECT_EQ(connectivity.getCount(dimension), 1);
+    }
+    EXPECT_EQ(
+      connectivity.getIndexMap(dimension).left.size(), connectivity.getCount(dimension));
+    for (size_t d = 0; d <= dimension; ++d)
+    {
+      SCOPED_TRACE(d);
+      std::vector<Connectivity<Context::Local>::SubPolytope> boundary(20);
+      connectivity.getSubPolytopes(boundary, 0, d);
+      ASSERT_EQ(boundary.size(), data.counts[d]);
+      std::set<std::vector<Index>> unique;
+      for (const auto& sub : boundary)
+      {
+        const Polytope::Traits traits(sub.geometry);
+        EXPECT_EQ(traits.getDimension(), d);
+        EXPECT_EQ(sub.vertices.size(), traits.getVertexCount());
+        std::vector<Index> vertices;
+        for (size_t i = 0; i < sub.vertices.size(); ++i)
+        {
+          EXPECT_LT(sub.vertices[i], vertexCount);
+          vertices.push_back(sub.vertices[i]);
+        }
+        std::sort(vertices.begin(), vertices.end());
+        EXPECT_EQ(std::adjacent_find(vertices.begin(), vertices.end()), vertices.end());
+        EXPECT_TRUE(unique.insert(vertices).second);
+      }
+      if (d == dimension)
+      {
+        ASSERT_EQ(boundary.size(), 1);
+        EXPECT_EQ(boundary[0].geometry, data.geometry);
+        for (size_t i = 0; i < vertexCount; ++i)
+          EXPECT_EQ(boundary[0].vertices[i], key[i]);
+      }
+    }
+  }
+
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, ConnectivitySubPolytopes,
+    testing::Values(SubPolytopeCase{Polytope::Type::Point, {1}},
+      SubPolytopeCase{Polytope::Type::Segment, {2, 1}},
+      SubPolytopeCase{Polytope::Type::Triangle, {3, 3, 1}},
+      SubPolytopeCase{Polytope::Type::Quadrilateral, {4, 4, 1}},
+      SubPolytopeCase{Polytope::Type::Tetrahedron, {4, 6, 4, 1}},
+      SubPolytopeCase{Polytope::Type::Pyramid, {5, 8, 5, 1}},
+      SubPolytopeCase{Polytope::Type::Wedge, {6, 9, 5, 1}},
+      SubPolytopeCase{Polytope::Type::Hexahedron, {8, 12, 6, 1}}));
+
+  /// @brief Invalid dirty-flag dimensions throw while valid flags retain their previous state.
+  TEST(Rodin_Geometry_Connectivity, DirtyFlagDimensionValidation)
+  {
+    Connectivity<Context::Local> connectivity;
+    connectivity.initialize(2).nodes(3);
+    connectivity.setDirty(2, 1, false);
+    EXPECT_THROW(connectivity.setDirty(3, 1, true), Alert::Exception);
+    EXPECT_THROW(connectivity.setDirty(1, 3, true), Alert::Exception);
+    EXPECT_THROW(connectivity.isDirty(3, 1), Alert::Exception);
+    EXPECT_THROW(connectivity.isDirty(1, 3), Alert::Exception);
+    EXPECT_FALSE(connectivity.isDirty(2, 1));
+    EXPECT_EQ(connectivity.getMaximalDimension(), 2);
+  }
+
 }

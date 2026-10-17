@@ -187,7 +187,8 @@ namespace Rodin::Variational
               for (auto& idx : inc)
               {
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-                if (traceDomain.count(tracePolytope->getAttribute()))
+                const auto attribute = tracePolytope->getAttribute();
+                if (attribute && traceDomain.contains(*attribute))
                 {
                   Math::SpatialPoint rc;
                   tracePolytope->getTransformation().inverse(rc, pc);
@@ -197,7 +198,8 @@ namespace Rodin::Variational
                 }
               }
               UndeterminedTraceDomainException(
-                  *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end()) << Alert::Raise;
+                *this, __func__, {d, i}, traceDomain.begin(), traceDomain.end())
+                << Alert::Raise;
             }
             return;
           }
@@ -214,11 +216,22 @@ namespace Rodin::Variational
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            fe.getGradient(local)(grad, rc);
-            res += gf.getValue(fes.getGlobalIndex({d, i}, local)) * grad;
+            grad = fe.getBasis(local).getGradient()(rc);
+            res += gf[fes.getGlobalIndex({d, i}, local)] * grad;
           }
-          out = (p.getJacobianInverse().transpose() * res).eval().coeff(m_i);
+          out = (p.getJacobianInverse().transpose() * res)[m_i];
         }
+      }
+
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param geom Reference geometry.
+       * @returns Polynomial order of the derivative on the entity.
+       */
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
+      {
+        const size_t k = P1Element<ScalarType>(geom.getGeometry()).getOrder();
+        return (k == 0) ? 0 : (k - 1);
       }
 
       /**

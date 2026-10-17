@@ -505,6 +505,53 @@ namespace
 #endif
 }
 
+/// @brief Mixed mass/nonlocal equations recover affine fields on three interval meshes.
+TEST(PETSc_TargetedAssembly, MixedAffineManufacturedSolution)
+{
+  for (const size_t nodeCount : {3u, 5u, 9u})
+  {
+    SCOPED_TRACE(nodeCount);
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {nodeCount});
+    mesh.scale(2.0 / (nodeCount - 1));
+    mesh.getConnectivity().compute(0, 1);
+    P1<PetscScalar> space(mesh);
+    PETSc::Variational::TrialFunction u(space), p(space);
+    PETSc::Variational::TestFunction v(space), q(space);
+    Problem problem(u, v, p, q);
+    const auto k00 = [](const Point&, const Point&) { return PetscScalar(2); };
+    const auto k01 = [](const Point&, const Point&) { return PetscScalar(-3); };
+    const auto k10 = [](const Point&, const Point&) { return PetscScalar(0.5); };
+    const auto k11 = [](const Point&, const Point&) { return PetscScalar(4); };
+    // The exact fields 1+x and 2-x have interval integrals 4 and 2.
+    const auto f = RealFunction([](const Point& x) { return 3 + x.x(); });
+    const auto g = RealFunction([](const Point& x) { return 12 - x.x(); });
+    const auto boundary = RealFunction([](const Point& x) { return 2 - x.x(); });
+    problem = Integral(u, v) + Integral(p, q) + Integral(Potential(k00, u), v) +
+      Integral(Potential(k01, p), v) + Integral(Potential(k10, u), q) +
+      Integral(Potential(k11, p), q) - Integral(f, v) - Integral(g, q) +
+      DirichletBC(u, -p, RealFunction(3)) + DirichletBC(p, boundary);
+    auto copied = problem;
+    PETSc::Solver::KSP solver(copied);
+    solver.setType(KSPPREONLY);
+    ::PC preconditioner = nullptr;
+    ASSERT_EQ(KSPGetPC(solver.getHandle(), &preconditioner), PETSC_SUCCESS);
+    ASSERT_EQ(PCSetType(preconditioner, PCLU), PETSC_SUCCESS);
+    solver.solve();
+    for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+    {
+      const auto& x = vertex->getCoordinates();
+      const PetscInt dof = space.getDOFs(0, vertex->getIndex())[0];
+      PetscScalar actualU, actualP;
+      ASSERT_EQ(
+        VecGetValues(u.getSolution().getData(), 1, &dof, &actualU), PETSC_SUCCESS);
+      ASSERT_EQ(
+        VecGetValues(p.getSolution().getData(), 1, &dof, &actualP), PETSC_SUCCESS);
+      EXPECT_LT(PetscAbsScalar(actualU - (1 + x[0])), 1e-11);
+      EXPECT_LT(PetscAbsScalar(actualP - (2 - x[0])), 1e-11);
+    }
+  }
+}
+
 /// @brief Initializes the test runtime and runs the GoogleTest suite.
 int main(int argc, char** argv)
 {

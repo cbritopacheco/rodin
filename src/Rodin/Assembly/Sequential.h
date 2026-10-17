@@ -411,7 +411,8 @@ namespace Rodin::Assembly
                 continue;
             }
             const auto testPolytope = testseq.getPolytope(te);
-            const auto& rows = input.getTestFES().getDOFs(td, te);
+            // Preserve test indices: getDOFs may reuse scratch storage on the next call.
+            const auto rows = input.getTestFES().getDOFs(td, te);
             for (Index tr = 0; tr < rcount; ++tr)
             {
               if (!trialseq.filter(tr))
@@ -670,7 +671,7 @@ namespace Rodin::Assembly
                 continue;
             }
             const auto testPolytope = testseq.getPolytope(te);
-            const auto& rows = input.getTestFES().getDOFs(td, te);
+            const auto rows = input.getTestFES().getDOFs(td, te);
             for (Index tr = 0; tr < rcount; ++tr)
             {
               if (!trialseq.filter(tr))
@@ -1123,11 +1124,11 @@ namespace Rodin::Assembly
               for (const auto& r : constraints.expand(row))
               {
                 if (colValue != ScalarType(0))
-                  b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                  b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                 for (const auto& c : constraints.expand(col))
                 {
                   triplets.emplace_back(
-                    r.index, c.index, r.coefficient * val * c.coefficient);
+                    r.index, c.index, Math::conj(r.coefficient) * val * c.coefficient);
                 }
               }
             }
@@ -1136,9 +1137,9 @@ namespace Rodin::Assembly
               for (const auto& r : constraints.expand(row))
               {
                 if (colValue != ScalarType(0))
-                  b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                  b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                 for (const auto& c : constraints.expand(col))
-                  A(r.index, c.index) += r.coefficient * val * c.coefficient;
+                  A(r.index, c.index) += Math::conj(r.coefficient) * val * c.coefficient;
               }
             }
           };
@@ -1148,7 +1149,7 @@ namespace Rodin::Assembly
               return;
 
             for (const auto& r : constraints.expand(row))
-              b.coeffRef(r.index) += r.coefficient * val;
+              b.coeffRef(r.index) += Math::conj(r.coefficient) * val;
           };
 
           // ------------------------------------------------------------
@@ -1260,7 +1261,7 @@ namespace Rodin::Assembly
                   }
 
                   const auto testPolytope = testseq.getPolytope(te);
-                  const auto& rows = vFES.getDOFs(td, te);
+                  const auto rows = vFES.getDOFs(td, te);
 
                   for (Index tr = 0; tr < rcount; ++tr)
                   {
@@ -1622,12 +1623,6 @@ namespace Rodin::Assembly
           const size_t cols = static_cast<size_t>(trialFES.getSize());
           const size_t rows = static_cast<size_t>(testFES.getSize());
 
-          if (doVector)
-          {
-            b.resize(rows);
-            b.setZero();
-          }
-
           constexpr bool IsSparse =
             std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
 
@@ -1694,6 +1689,12 @@ namespace Rodin::Assembly
               << Alert::Raise;
           }
 
+          if (doVector)
+          {
+            b.resize(rows);
+            b.setZero();
+          }
+
           // ------------------------------------------------------------
           // Matrix init
           // ------------------------------------------------------------
@@ -1724,11 +1725,11 @@ namespace Rodin::Assembly
               for (const auto& r : constraints.expand(row))
               {
                 if (colValue != ScalarType(0))
-                  b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                  b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                 for (const auto& c : constraints.expand(col))
                 {
                   triplets.emplace_back(
-                    r.index, c.index, r.coefficient * val * c.coefficient);
+                    r.index, c.index, Math::conj(r.coefficient) * val * c.coefficient);
                 }
               }
             }
@@ -1737,9 +1738,9 @@ namespace Rodin::Assembly
               for (const auto& r : constraints.expand(row))
               {
                 if (colValue != ScalarType(0))
-                  b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                  b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                 for (const auto& c : constraints.expand(col))
-                  A(r.index, c.index) += r.coefficient * val * c.coefficient;
+                  A(r.index, c.index) += Math::conj(r.coefficient) * val * c.coefficient;
               }
             }
           };
@@ -1749,7 +1750,7 @@ namespace Rodin::Assembly
               return;
 
             for (const auto& r : constraints.expand(row))
-              b.coeffRef(r.index) += r.coefficient * val;
+              b.coeffRef(r.index) += Math::conj(r.coefficient) * val;
           };
 
           // ------------------------------------------------------------
@@ -1817,7 +1818,7 @@ namespace Rodin::Assembly
                 }
 
                 const auto testPolytope = testseq.getPolytope(te);
-                const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto rowsDOF = testFES.getDOFs(td, te);
 
                 for (Index tr = 0; tr < rcount; ++tr)
                 {

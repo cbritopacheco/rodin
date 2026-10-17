@@ -702,3 +702,60 @@ TEST_F(VectorTest, SpatialVector0D)
   EXPECT_DOUBLE_EQ(v.norm(), 0.0);
   EXPECT_DOUBLE_EQ(v.squaredNorm(), 0.0);
 }
+
+/// @brief Eigen expression updates preserve active size, inactive storage and external operands.
+template <class Scalar>
+class SpatialVectorEigenExpressionTest : public ::testing::Test
+{};
+using SpatialVectorEigenExpressionScalars = ::testing::Types<Real, Complex>;
+TYPED_TEST_SUITE(SpatialVectorEigenExpressionTest, SpatialVectorEigenExpressionScalars);
+
+TYPED_TEST(SpatialVectorEigenExpressionTest, CompoundUpdatesPreserveStorageAndOperands)
+{
+  using Scalar = TypeParam;
+  for (std::uint8_t d = 0; d <= 3; ++d)
+  {
+    SCOPED_TRACE(d);
+    SpatialVector<Scalar> initial(3);
+    const Scalar inactive(91);
+    initial.setConstant(inactive);
+    initial.resize(d);
+    Eigen::Matrix<Scalar, 3, 1> external;
+    for (std::uint8_t i = 0; i < 3; ++i)
+    {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        external(i) = Scalar(i + 4, -Real(i + 1));
+      else
+        external(i) = Scalar(i + 4);
+      if (i < d)
+        initial[i] = Scalar(i + 1);
+    }
+    const auto saved = external;
+    const auto check = [&](const auto& expression) {
+      SpatialVector<Scalar> updated(initial);
+      EXPECT_EQ(&(updated += expression), &updated);
+      EXPECT_EQ(updated.size(), d);
+      for (std::uint8_t i = 0; i < d; ++i)
+      {
+        EXPECT_EQ(updated[i], Scalar(i + 1) + Scalar(2) * saved(d - i - 1));
+      }
+      for (std::uint8_t i = d; i < 3; ++i)
+      {
+        EXPECT_EQ(updated.getData()(i), inactive);
+      }
+      EXPECT_EQ(&(updated -= expression), &updated);
+      EXPECT_EQ(updated.size(), d);
+      for (std::uint8_t i = 0; i < d; ++i)
+      {
+        EXPECT_EQ(updated[i], Scalar(i + 1));
+      }
+      for (std::uint8_t i = d; i < 3; ++i)
+      {
+        EXPECT_EQ(updated.getData()(i), inactive);
+      }
+      EXPECT_EQ(external, saved);
+    };
+    check(Scalar(2) * external.head(d).reverse());
+    check(Scalar(2) * external.transpose().head(d).reverse());
+  }
+}

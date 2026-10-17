@@ -82,8 +82,8 @@ namespace Rodin::Alert
        * @brief Raises the exception to the user.
        *
        * Outputs a formatted error message to the configured stream and
-       * terminates the program by calling std::abort(). The message includes
-       * the exception prefix and any accumulated message content.
+       * throws a copy of this exception. The message includes the exception
+       * prefix and any accumulated message content.
        */
       virtual void raise() const override;
 

@@ -16,6 +16,7 @@
 #include <type_traits>
 
 #include "Rodin/Math/Common.h"
+#include "Rodin/Types.h"
 
 #include "Concepts.h"
 

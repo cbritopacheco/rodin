@@ -121,8 +121,7 @@ namespace Rodin::Solver
        * @param other Object to move from.
        */
       DGMRES(DGMRES&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
+        : Parent(std::move(other))
       {}
 
       /// @brief Destructor.
@@ -248,8 +247,7 @@ namespace Rodin::Solver
        * @param other Object to copy from.
        */
       DGMRES(const DGMRES& other)
-        : Parent(other),
-          m_solver(other.m_solver)
+        : Parent(other)
       {}
 
       /**
@@ -257,8 +255,7 @@ namespace Rodin::Solver
        * @param other Object to move from.
        */
       DGMRES(DGMRES&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
+        : Parent(std::move(other))
       {}
 
       /// @brief Destructor.

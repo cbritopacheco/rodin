@@ -1,3 +1,29 @@
+foreach(algorithm CG BiCGSTAB GMRES DGMRES LDLT HouseholderQR PartialPivLU
+    SimplicialLDLT SimplicialLLT SparseQR)
+  set(target Rodin${algorithm}OwnershipTest)
+  add_executable(${target} OwnershipTest.cpp)
+  target_link_libraries(${target} PRIVATE
+    GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+  target_compile_definitions(${target} PRIVATE
+    RODIN_TEST_SOLVER=${algorithm}
+    RODIN_TEST_SOLVER_HEADER="Rodin/Solver/${algorithm}.h")
+  if(algorithm MATCHES "^(CG|GMRES|DGMRES|LDLT|HouseholderQR|PartialPivLU)$")
+    target_compile_definitions(${target} PRIVATE RODIN_TEST_DENSE)
+  endif()
+  if(algorithm MATCHES "^(CG|BiCGSTAB|GMRES|DGMRES|SimplicialLDLT|SimplicialLLT|SparseQR)$")
+    target_compile_definitions(${target} PRIVATE RODIN_TEST_SPARSE)
+  endif()
+  gtest_discover_tests(${target} TEST_PREFIX "${algorithm}."
+    DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+endforeach()
+
+add_executable(RodinIterativeSolverTest IterativeSolverTest.cpp)
+target_link_libraries(RodinIterativeSolverTest
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+gtest_discover_tests(RodinIterativeSolverTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES LABELS unit)
+
 add_executable(RodinNewtonSolverTest NewtonSolverTest.cpp)
 target_link_libraries(RodinNewtonSolverTest
   PUBLIC
@@ -40,6 +66,12 @@ gtest_discover_tests(RodinSolverConceptTest
  )
 
 if (RODIN_USE_PARU)
+  add_executable(RodinParUContractTest ParUContractTest.cpp)
+  target_link_libraries(RodinParUContractTest PRIVATE
+    GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+  gtest_discover_tests(RodinParUContractTest
+    DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
   add_executable(RodinParUTest ParUTest.cpp)
   target_link_libraries(RodinParUTest
     GTest::gtest

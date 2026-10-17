@@ -153,7 +153,57 @@ namespace Rodin::Tests::Unit::Solver
     expectRefused(solver, singular);
   }
 
+  template <class Scalar, template <class> class SolverType>
+  void checkOptionalSolverLifecycle()
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    P1<Scalar> space(mesh);
+    TrialFunction u(space);
+    TestFunction v(space);
+    Problem problem(u, v);
+    using System = Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>;
+    System system;
+    system.getOperator().resize(3, 3);
+    const Scalar offDiagonal = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(1, 0.5);
+      else
+        return Scalar(1);
+    }();
+    for (Eigen::Index i = 0; i < 3; ++i)
+      system.getOperator().insert(i, i) = Scalar(4 + i);
+    system.getOperator().insert(0, 1) = offDiagonal;
+    system.getOperator().insert(1, 0) = Eigen::numext::conj(offDiagonal);
+    system.getOperator().insert(1, 2) = Scalar(-1);
+    system.getOperator().insert(2, 1) = Scalar(-1);
+    system.getOperator().makeCompressed();
+    Math::Vector<Scalar> expected(3);
+    expected << Scalar(1), Scalar(-2), Scalar(3);
+    system.getVector() = system.getOperator() * expected;
+    SolverType<System> solver(problem);
+    auto check = [&](auto& candidate) {
+      system.getSolution() = Math::Vector<Scalar>::Constant(3, Scalar(7));
+      candidate.solve(system);
+      EXPECT_TRUE(candidate.success());
+      EXPECT_NEAR((system.getSolution() - expected).norm(), 0.0, 1e-12);
+    };
+    check(solver);
+    auto copied = solver;
+    check(copied);
+    auto moved = std::move(copied);
+    check(moved);
+    std::unique_ptr<SolverType<System>> cloned(solver.copy());
+    check(*cloned);
+  }
+
 #ifdef RODIN_USE_CHOLMOD
+  /// @brief Real and complex CHOLMOD solvers retain the problem through copy and move.
+  TEST_F(Rodin_Solver_Info, CholmodLifecycle)
+  {
+    checkOptionalSolverLifecycle<Real, Rodin::Solver::CHOLMOD::SupernodalLLT>();
+    checkOptionalSolverLifecycle<Complex, Rodin::Solver::CHOLMOD::SupernodalLLT>();
+  }
+
   /// @brief A successful factorization is retained and reported.
   TEST_F(Rodin_Solver_Info, CholmodSupernodalLLTReportsASuccessfulFactorization)
   {
@@ -169,6 +219,13 @@ namespace Rodin::Tests::Unit::Solver
 #endif
 
 #ifdef RODIN_USE_SPQR
+  /// @brief Real and complex SPQR solvers retain the problem through copy and move.
+  TEST_F(Rodin_Solver_Info, SPQRLifecycle)
+  {
+    checkOptionalSolverLifecycle<Real, Rodin::Solver::SPQR>();
+    checkOptionalSolverLifecycle<Complex, Rodin::Solver::SPQR>();
+  }
+
   /// @brief A successful factorization is retained and reported.
   TEST_F(Rodin_Solver_Info, SPQRReportsASuccessfulFactorization)
   {

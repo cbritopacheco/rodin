@@ -7,6 +7,7 @@
 #ifndef RODIN_ADAPTATION_DEFORMATIONMAP_H
 #define RODIN_ADAPTATION_DEFORMATIONMAP_H
 
+#include "Rodin/Alert/NamespacedException.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Types.h"
@@ -137,7 +138,9 @@ namespace Rodin::Adaptation
                                    .getIncidence(dimension - 1, dimension)
                                    .at(sourcePolytope.getIndex());
           if (adjacent.empty())
-            throw std::runtime_error("Deformation map source face has no adjacent cell.");
+            Alert::NamespacedException(
+              "Rodin::Adaptation::DeformationMap::makeMovedPoint")
+              << "Deformation map source face has no adjacent cell." << Alert::Raise;
           cell = *adjacent.begin();
         }
 

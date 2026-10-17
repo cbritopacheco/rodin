@@ -85,11 +85,15 @@ namespace Rodin::MMG
     // Fields which have been deprecated (or seem to have anyways)
     dst->ipar = nullptr;
 
-    // int* : mesh->adja
+    // MMG5_int* : mesh->adja
     if (src->adja)
     {
-      MMG5_SAFE_CALLOC(dst->adja, 4 * src->ne + 5, int, /* No op */);
-      std::copy(src->adja, src->adja + 4 * src->ne + 5, dst->adja);
+      const size_t entriesPerCell = src->dim == 2 || isSurfaceMesh(src) ? 3 : 4;
+      const size_t cellCount = entriesPerCell == 3 ? src->nt : src->ne;
+      constexpr size_t adjacencyPadding = 5;
+      const size_t adjacencySize = entriesPerCell * cellCount + adjacencyPadding;
+      MMG5_SAFE_CALLOC(dst->adja, adjacencySize, MMG5_int, /* No op */);
+      std::copy(src->adja, src->adja + adjacencySize, dst->adja);
     }
     else
       dst->adja = nullptr;
@@ -269,12 +273,22 @@ namespace Rodin::MMG
       dst->info.invmat.lookup = nullptr;
 
     // char* : mesh->namein
-    MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein) + 1, char, /* No op */);
-    std::strcpy(dst->namein, src->namein);
+    if (src->namein)
+    {
+      MMG5_SAFE_CALLOC(dst->namein, std::strlen(src->namein) + 1, char, /* No op */);
+      std::strcpy(dst->namein, src->namein);
+    }
+    else
+      dst->namein = nullptr;
 
     // char* : mesh->nameout
-    MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout) + 1, char, /* No op */);
-    std::strcpy(dst->nameout, src->nameout);
+    if (src->nameout)
+    {
+      MMG5_SAFE_CALLOC(dst->nameout, std::strlen(src->nameout) + 1, char, /* No op */);
+      std::strcpy(dst->nameout, src->nameout);
+    }
+    else
+      dst->nameout = nullptr;
   }
 
   MMG5_pSol MMG5::createSolution(MMG5_pMesh mesh, size_t vdim)
@@ -935,6 +949,9 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
   void MMG5::destroyMesh(MMG5_pMesh mesh)
   {
     assert(mesh);
+    // The bundled MMG cleanup omits the level-set base-reference array.
+    if (mesh->info.br)
+      MMG5_DEL_MEM(mesh, mesh->info.br);
     if (isSurfaceMesh(mesh))
     {
       MMGS_Free_all(MMG5_ARG_start, MMG5_ARG_ppMesh, &mesh, MMG5_ARG_end);

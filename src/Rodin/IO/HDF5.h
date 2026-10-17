@@ -2568,58 +2568,102 @@ namespace Rodin::IO
         {
           const auto g = HDF5::Group(
             H5Gcreate2(file, HDF5::Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh group." << Alert::Raise;
+          }
         }
         {
           const auto g = HDF5::Group(H5Gcreate2(
             file, HDF5::Path::MeshMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh/Meta group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/Meta group." << Alert::Raise;
+          }
         }
         {
           const auto g = HDF5::Group(H5Gcreate2(
             file, HDF5::Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh/Geometry group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/Geometry group." << Alert::Raise;
+          }
         }
         {
           const auto g = HDF5::Group(H5Gcreate2(
             file, HDF5::Path::MeshConnectivity, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/Connectivity group." << Alert::Raise;
+          }
         }
         {
           const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityMeta,
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Meta group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/Connectivity/Meta group." << Alert::Raise;
+          }
         }
         {
           const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityCounts,
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Counts group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/Connectivity/Counts group." << Alert::Raise;
+          }
         }
         {
           const auto g = HDF5::Group(H5Gcreate2(file,
             HDF5::Path::MeshConnectivityEntities, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Entities group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/Connectivity/Entities group." << Alert::Raise;
+          }
         }
         {
           const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityState,
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/State group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/Connectivity/State group." << Alert::Raise;
+          }
         }
         {
           const auto g =
             HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityIncidence,
               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Incidence group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/Connectivity/Incidence group." << Alert::Raise;
+          }
         }
         {
           const auto g = HDF5::Group(H5Gcreate2(
             file, HDF5::Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh/Attributes group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/Attributes group." << Alert::Raise;
+          }
         }
         {
           const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshTransformations,
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-          if (!g) { Alert::Exception() << "Failed to create /Mesh/Transformations group." << Alert::Raise; }
+          if (!g)
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to create /Mesh/Transformations group." << Alert::Raise;
+          }
         }
       }
       /**
@@ -2941,7 +2985,8 @@ namespace Rodin::IO
           const auto cols =
             HDF5::readScalarDataset<HDF5::U64>(file.get(), "/GridFunction/Meta/Columns");
           if (rows != gf.getRows() || cols != gf.getColumns())
-            Alert::Exception() << "HDF5 matrix range shape mismatch." << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "HDF5 matrix range shape mismatch." << Alert::Raise;
         }
         std::vector<HDF5::F64> imaginary(values.size(), 0);
         if (H5Lexists(file.get(), "/GridFunction/Values/ImaginaryData", H5P_DEFAULT) > 0)
@@ -2949,7 +2994,8 @@ namespace Rodin::IO
           imaginary = HDF5::readVectorDataset<HDF5::F64>(
             file.get(), "/GridFunction/Values/ImaginaryData");
           if (imaginary.size() != values.size())
-            Alert::Exception() << "Invalid imaginary field data size." << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "Invalid imaginary field data size." << Alert::Raise;
         }
         auto& data = gf.getData();
         for (size_t i = 0; i < values.size(); ++i)
@@ -2959,7 +3005,7 @@ namespace Rodin::IO
           else
           {
             if (imaginary[i] != 0)
-              Alert::Exception()
+              Alert::MemberFunctionException(*this, __func__)
                 << "Complex field cannot be loaded into real coefficients."
                 << Alert::Raise;
             data[i] = values[i];

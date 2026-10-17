@@ -340,6 +340,72 @@ namespace Rodin::Assembly
             }
           } // end parallel
         }
+
+        for (auto& bfi : input.getGlobalBFIs())
+        {
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs = bfi.getTestAttributes();
+          OpenMPIteration testseq(mesh, bfi.getTestRegion());
+          const Index td = testseq.getDimension();
+          const Index count = testseq.getCount();
+          const int tc = static_cast<int>(getThreadCount());
+          std::vector<OperatorType> chunks(static_cast<size_t>(tc));
+
+#pragma omp parallel num_threads(tc)
+          {
+            const int tid = omp_get_thread_num();
+            std::unique_ptr<GlobalBilinearFormIntegratorBaseType> integrator(bfi.copy());
+            OperatorType local;
+            OpenMPIteration trialseq(mesh, integrator->getTrialRegion());
+            const Index rd = trialseq.getDimension();
+            const Index rcount = trialseq.getCount();
+
+#pragma omp for
+            for (Index te = 0; te < count; ++te)
+            {
+              if (!testseq.filter(te))
+                continue;
+              if (!testAttrs.empty())
+              {
+                const auto attribute = mesh.getAttribute(td, te);
+                if (!attribute || !testAttrs.contains(*attribute))
+                  continue;
+              }
+              const auto testPolytope = testseq.getPolytope(te);
+              // A subsequent DOF lookup may reuse the same scratch storage.
+              const auto rows = input.getTestFES().getDOFs(td, te);
+              for (Index tr = 0; tr < rcount; ++tr)
+              {
+                if (!trialseq.filter(tr))
+                  continue;
+                if (!trialAttrs.empty())
+                {
+                  const auto attribute = mesh.getAttribute(rd, tr);
+                  if (!attribute || !trialAttrs.contains(*attribute))
+                    continue;
+                }
+                const auto trialPolytope = trialseq.getPolytope(tr);
+                integrator->setPolytope(trialPolytope, testPolytope);
+                const auto& cols = input.getTrialFES().getDOFs(rd, tr);
+                for (Eigen::Index r = 0; r < rows.size(); ++r)
+                {
+                  for (Eigen::Index c = 0; c < cols.size(); ++c)
+                  {
+                    const ScalarType value = integrator->integrate(c, r);
+                    if (value != ScalarType(0))
+                      local.emplace_back(rows(r), cols(c), value);
+                  }
+                }
+              }
+            }
+            chunks[static_cast<size_t>(tid)] = std::move(local);
+          }
+          for (auto& chunk : chunks)
+          {
+            res.insert(res.end(), std::make_move_iterator(chunk.begin()),
+              std::make_move_iterator(chunk.end()));
+          }
+        }
       }
 
       /**
@@ -691,7 +757,8 @@ namespace Rodin::Assembly
                 const auto trialPolytope = trialseq.getPolytope(tr);
                 gbfi->setPolytope(trialPolytope, testPolytope);
 
-                const auto& rows = input.getTestFES().getDOFs(d, i);
+                // Preserve test indices: getDOFs may reuse scratch storage on the next call.
+                const auto rows = input.getTestFES().getDOFs(d, i);
                 const auto& cols = input.getTrialFES().getDOFs(rd, tr);
                 for (Eigen::Index r = 0; r < rows.size(); ++r)
                 {
@@ -1208,11 +1275,12 @@ namespace Rodin::Assembly
             for (const auto& r : constraints.expand(row))
             {
               if (colValue != ScalarType(0))
-                localRhs.emplace_back(r.index, -r.coefficient * val * colValue);
+                localRhs.emplace_back(
+                  r.index, -Math::conj(r.coefficient) * val * colValue);
               for (const auto& c : constraints.expand(col))
               {
                 localT.emplace_back(
-                  r.index, c.index, r.coefficient * val * c.coefficient);
+                  r.index, c.index, Math::conj(r.coefficient) * val * c.coefficient);
               }
             }
           };
@@ -1223,7 +1291,7 @@ namespace Rodin::Assembly
               return;
 
             for (const auto& r : constraints.expand(row))
-              localRhs.emplace_back(r.index, r.coefficient * val);
+              localRhs.emplace_back(r.index, Math::conj(r.coefficient) * val);
           };
 
           // ---------------- Local BFIs ----------------
@@ -1302,7 +1370,7 @@ namespace Rodin::Assembly
                   if (!a || !testAttrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto rowsDOF = testFES.getDOFs(td, te);
                 const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
@@ -1530,9 +1598,12 @@ namespace Rodin::Assembly
                       {
                         if (colValue != ScalarType(0))
                           localRhs[static_cast<size_t>(r.index)] -=
-                            r.coefficient * val * colValue;
+                            Math::conj(r.coefficient) * val * colValue;
                         for (const auto& c : constraints.expand(J))
-                          Alocal(r.index, c.index) += r.coefficient * val * c.coefficient;
+                        {
+                          Alocal(r.index, c.index) +=
+                            Math::conj(r.coefficient) * val * c.coefficient;
+                        }
                       }
                     }
                   }
@@ -1571,7 +1642,7 @@ namespace Rodin::Assembly
                   if (!a || !testAttrs.contains(*a)) continue; // or testAttrs.count(*a)==0
                 }
 
-                const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto rowsDOF = testFES.getDOFs(td, te);
                 const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
@@ -1607,11 +1678,11 @@ namespace Rodin::Assembly
                         {
                           if (colValue != ScalarType(0))
                             localRhs[static_cast<size_t>(r.index)] -=
-                              r.coefficient * val * colValue;
+                              Math::conj(r.coefficient) * val * colValue;
                           for (const auto& c : constraints.expand(J))
                           {
                             Alocal(r.index, c.index) +=
-                              r.coefficient * val * c.coefficient;
+                              Math::conj(r.coefficient) * val * c.coefficient;
                           }
                         }
                       }
@@ -1642,9 +1713,12 @@ namespace Rodin::Assembly
                   for (const auto& r : constraints.expand(static_cast<Index>(i)))
                   {
                     if (colValue != ScalarType(0))
-                      b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                      b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                     for (const auto& c : constraints.expand(static_cast<Index>(j)))
-                      A(r.index, c.index) += r.coefficient * val * c.coefficient;
+                    {
+                      A(r.index, c.index) +=
+                        Math::conj(r.coefficient) * val * c.coefficient;
+                    }
                   }
                 }
               }
@@ -1690,7 +1764,10 @@ namespace Rodin::Assembly
                   const ScalarType val =
                     -static_cast<ScalarType>(integrator->integrate(l));
                   for (const auto& r : constraints.expand(I))
-                    localRhs[static_cast<size_t>(r.index)] += r.coefficient * val;
+                  {
+                    localRhs[static_cast<size_t>(r.index)] +=
+                      Math::conj(r.coefficient) * val;
+                  }
                 }
               }
             }
@@ -1712,7 +1789,7 @@ namespace Rodin::Assembly
             {
               const ScalarType val = static_cast<ScalarType>(vec.coeff(i));
               for (const auto& r : constraints.expand(static_cast<Index>(i)))
-                b.coeffRef(r.index) += r.coefficient * val;
+                b.coeffRef(r.index) += Math::conj(r.coefficient) * val;
             }
           }
 
@@ -2009,11 +2086,11 @@ namespace Rodin::Assembly
           {
             if (colValue != ScalarType(0))
               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                r.index, -r.coefficient * val * colValue);
+                r.index, -Math::conj(r.coefficient) * val * colValue);
             for (const auto& c : constraints.expand(col))
             {
               tchunks[static_cast<size_t>(tid)].emplace_back(
-                r.index, c.index, r.coefficient * val * c.coefficient);
+                r.index, c.index, Math::conj(r.coefficient) * val * c.coefficient);
             }
           }
         };
@@ -2093,11 +2170,11 @@ namespace Rodin::Assembly
                         {
                           if (colValue != ScalarType(0))
                             rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                              r.index, -r.coefficient * val * colValue);
+                              r.index, -Math::conj(r.coefficient) * val * colValue);
                           for (const auto& c : constraints.expand(J))
                           {
                             (*Alocal)(r.index, c.index) +=
-                              r.coefficient * val * c.coefficient;
+                              Math::conj(r.coefficient) * val * c.coefficient;
                           }
                         }
                       }
@@ -2161,7 +2238,7 @@ namespace Rodin::Assembly
                     if (!a || !testAttrs.contains(*a)) continue;
                   }
 
-                  const auto& rows = vFES.getDOFs(td, te);
+                  const auto rows = vFES.getDOFs(td, te);
                   const auto testPolytope = testseq.getPolytope(te);
 
                   const Index rd = trialseq.getDimension();
@@ -2202,11 +2279,11 @@ namespace Rodin::Assembly
                           {
                             if (colValue != ScalarType(0))
                               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                                r.index, -r.coefficient * val * colValue);
+                                r.index, -Math::conj(r.coefficient) * val * colValue);
                             for (const auto& c : constraints.expand(J))
                             {
                               (*Alocal)(r.index, c.index) +=
-                                r.coefficient * val * c.coefficient;
+                                Math::conj(r.coefficient) * val * c.coefficient;
                             }
                           }
                         }
@@ -2265,7 +2342,7 @@ namespace Rodin::Assembly
                   const ScalarType val =
                     -static_cast<ScalarType>(integrator->integrate(l));
                   for (const auto& r : constraints.expand(I))
-                    localRhs.emplace_back(r.index, r.coefficient * val);
+                    localRhs.emplace_back(r.index, Math::conj(r.coefficient) * val);
                 }
               }
             } // omp parallel
@@ -2297,7 +2374,7 @@ namespace Rodin::Assembly
           {
             const ScalarType val = static_cast<ScalarType>(vec.coeff(i));
             for (const auto& r : constraints.expand(static_cast<Index>(vOff) + i))
-              b.coeffRef(r.index) += r.coefficient * val;
+              b.coeffRef(r.index) += Math::conj(r.coefficient) * val;
           }
         }
 
@@ -2435,9 +2512,12 @@ namespace Rodin::Assembly
                   for (const auto& r : constraints.expand(I))
                   {
                     if (colValue != ScalarType(0))
-                      b.coeffRef(r.index) -= r.coefficient * val * colValue;
+                      b.coeffRef(r.index) -= Math::conj(r.coefficient) * val * colValue;
                     for (const auto& c : constraints.expand(J))
-                      A(r.index, c.index) += r.coefficient * val * c.coefficient;
+                    {
+                      A(r.index, c.index) +=
+                        Math::conj(r.coefficient) * val * c.coefficient;
+                    }
                   }
                 }
               }

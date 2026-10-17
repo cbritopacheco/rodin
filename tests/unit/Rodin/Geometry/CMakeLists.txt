@@ -315,3 +315,49 @@ gtest_discover_tests(RodinGeometryMinSTCutTest
   PROPERTIES
     LABELS unit
 )
+add_executable(RodinGeometryEuclideanTest EuclideanTest.cpp)
+target_link_libraries(RodinGeometryEuclideanTest GTest::gtest_main Rodin::Geometry)
+gtest_discover_tests(RodinGeometryEuclideanTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES LABELS unit)
+
+add_executable(RodinGeometryGreedyPartitionerTest GreedyPartitionerTest.cpp)
+target_link_libraries(RodinGeometryGreedyPartitionerTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Geometry)
+gtest_discover_tests(RodinGeometryGreedyPartitionerTest PROPERTIES LABELS unit)
+
+add_executable(RodinGeometryShardBuilderContractTest ShardBuilderContractTest.cpp)
+target_link_libraries(RodinGeometryShardBuilderContractTest
+  PRIVATE GTest::gtest_main Rodin::Geometry)
+gtest_discover_tests(RodinGeometryShardBuilderContractTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinGeometryIteratorLifecycleTest IteratorLifecycleTest.cpp)
+target_link_libraries(RodinGeometryIteratorLifecycleTest
+  PRIVATE GTest::gtest_main Rodin::Geometry)
+gtest_discover_tests(RodinGeometryIteratorLifecycleTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinGeometryMetadataLifecycleTest MetadataLifecycleTest.cpp)
+target_link_libraries(RodinGeometryMetadataLifecycleTest
+  PRIVATE GTest::gtest_main Rodin::Geometry Rodin::QF)
+gtest_discover_tests(RodinGeometryMetadataLifecycleTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinGeometrySkinLifecycleTest SkinLifecycleTest.cpp)
+target_link_libraries(RodinGeometrySkinLifecycleTest
+  PRIVATE GTest::gtest_main Rodin::Geometry)
+gtest_discover_tests(RodinGeometrySkinLifecycleTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinGeometryChartOwnershipTest ChartOwnershipTest.cpp)
+target_link_libraries(RodinGeometryChartOwnershipTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinGeometryChartOwnershipTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinGeometryCacheGrowthTest CacheGrowthTest.cpp)
+target_link_libraries(RodinGeometryCacheGrowthTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::QF)
+gtest_discover_tests(RodinGeometryCacheGrowthTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)

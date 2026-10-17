@@ -34,7 +34,15 @@ namespace Rodin::Tests
       using Scalar = typename FormLanguage::Traits<Integrand>::ScalarType;
 
       explicit QuadratureReference(const Integral& integral)
-        : m_integrand(integral.getIntegrand()),
+        : QuadratureReference(integral.getIntegrand())
+      {}
+
+      /**
+       * @brief Evaluates an explicit integrand when an integral hides its expression.
+       * @param integrand Trial/test expression copied into the independent evaluator.
+       */
+      explicit QuadratureReference(const Integrand& integrand)
+        : m_integrand(integrand),
           m_matrix(),
           m_quadrature(),
           m_qf(nullptr),

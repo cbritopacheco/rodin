@@ -21,6 +21,7 @@
 #include <type_traits>
 
 #include "Rodin/Configure.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Polytope.h"
@@ -781,20 +782,24 @@ namespace Rodin::Geometry
 
       /**
        * @brief Submesh downcast is unsupported for distributed meshes.
-       * @throws std::runtime_error always.
+       * @throws Alert::Exception always.
        */
       SubMeshBase& asSubMesh() override
       {
-        throw std::runtime_error("asSubMesh() not implemented");
+        Alert::MemberFunctionException error(*this, __func__);
+        error << "Submesh downcast is unsupported for distributed meshes.";
+        throw error;
       }
 
       /**
        * @brief Const submesh downcast is unsupported for distributed meshes.
-       * @throws std::runtime_error always.
+       * @throws Alert::Exception always.
        */
       const SubMeshBase& asSubMesh() const override
       {
-        throw std::runtime_error("asSubMesh() not implemented");
+        Alert::MemberFunctionException error(*this, __func__);
+        error << "Submesh downcast is unsupported for distributed meshes.";
+        throw error;
       }
 
       /// @brief Returns mutable connectivity data of the local shard.

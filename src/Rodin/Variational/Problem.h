@@ -178,7 +178,7 @@ namespace Rodin::Variational
        */
       virtual const ProblemBodyType& getBody() const
       {
-        Alert::Exception error;
+        Alert::MemberFunctionException error(*this, __func__);
         error << "This problem does not expose a variational body.";
         throw error;
       }
@@ -879,12 +879,6 @@ namespace Rodin::Variational
       using LinearFormTuple =
         typename Utility::Wrap<TestFESTuple>::template Type<LinearFormType>;
 
-      using BilinearFormTupleSequentialAssembly =
-        Assembly::Sequential<OperatorType, BilinearFormTuple>;
-
-      using LinearFormTupleSequentialAssembly =
-        Assembly::Sequential<VectorType, LinearFormTuple>;
-
     public:
       /**
        * @brief Constructs a mixed problem from trial and test functions.
@@ -895,31 +889,18 @@ namespace Rodin::Variational
        */
       ProblemUsBase(U1& u1, U2& u2, U3& u3, Us&... us)
         : m_assembled(false),
-          m_us(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-            .template filter<IsTrialFunctionReferenceWrapper>()),
-          m_vs(
-            Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-            .template filter<IsTestFunctionReferenceWrapper>()),
-          m_lft(m_vs.map(
-                [](const auto& v)
-                { return LinearFormType<
-                    typename std::decay_t<
-                    typename Utility::UnwrapRefDecay<decltype(v)>::Type>::FESType>(v.get());
-                })),
-          m_bft(m_us.product([](const auto& u, const auto& v) { return Pair(u, v); }, m_vs)
-                    .map([](const auto& uv)
-                         { return BilinearFormType<
-                             decltype(uv.first()), decltype(uv.second())>(
-                                 uv.first().get(), uv.second().get());
-                         }))
+          m_us(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
+                 .template filter<IsTrialFunctionReferenceWrapper>()),
+          m_vs(Tuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
+                 .template filter<IsTestFunctionReferenceWrapper>()),
+          m_assembly(std::make_unique<AssemblyType>())
       {
-        m_bfa.reset(new BilinearFormTupleSequentialAssembly);
-        m_lfa.reset(new LinearFormTupleSequentialAssembly);
-        m_us.iapply([&](size_t i, const auto& u)
-            { m_trialUUIDMap.right.insert({ i, u.get().getUUID() }); });
-        m_vs.iapply([&](size_t i, const auto& v)
-            { m_testUUIDMap.right.insert({ i, v.get().getUUID() }); });
+        m_us.iapply([&](size_t i, const auto& u) {
+          m_trialUUIDMap.right.insert({i, u.get().getUUID()});
+        });
+        m_vs.iapply([&](size_t i, const auto& v) {
+          m_testUUIDMap.right.insert({i, v.get().getUUID()});
+        });
       }
 
       /**
@@ -931,15 +912,12 @@ namespace Rodin::Variational
           m_assembled(other.m_assembled),
           m_us(other.m_us),
           m_vs(other.m_vs),
-          m_lft(other.m_lft),
-          m_bft(other.m_bft),
+          m_pb(other.m_pb),
           m_trialOffsets(other.m_trialOffsets),
           m_testOffsets(other.m_testOffsets),
           m_trialUUIDMap(other.m_trialUUIDMap),
           m_testUUIDMap(other.m_testUUIDMap),
-          m_bfa(other.m_bfa->copy()),
-          m_lfa(other.m_lfa->copy()),
-          m_assembly(other.m_assembly)
+          m_assembly(other.m_assembly->copy())
       {}
 
       /**
@@ -951,14 +929,11 @@ namespace Rodin::Variational
           m_assembled(std::exchange(other.m_assembled, false)),
           m_us(std::move(other.m_us)),
           m_vs(std::move(other.m_vs)),
-          m_lft(std::move(other.m_lft)),
-          m_bft(std::move(other.m_bft)),
+          m_pb(std::move(other.m_pb)),
           m_trialOffsets(std::move(other.m_trialOffsets)),
           m_testOffsets(std::move(other.m_testOffsets)),
           m_trialUUIDMap(std::move(other.m_trialUUIDMap)),
           m_testUUIDMap(std::move(other.m_testUUIDMap)),
-          m_bfa(std::move(other.m_bfa)),
-          m_lfa(std::move(other.m_lfa)),
           m_assembly(std::move(other.m_assembly))
       {}
 
@@ -974,15 +949,12 @@ namespace Rodin::Variational
           m_assembled = other.m_assembled;
           m_us = other.m_us;
           m_vs = other.m_vs;
-          m_lft = other.m_lft;
-          m_bft = other.m_bft;
+          m_pb = other.m_pb;
           m_trialOffsets = other.m_trialOffsets;
           m_testOffsets = other.m_testOffsets;
           m_trialUUIDMap = other.m_trialUUIDMap;
           m_testUUIDMap = other.m_testUUIDMap;
-          m_bfa.reset(other.m_bfa->copy());
-          m_lfa.reset(other.m_lfa->copy());
-          m_assembly = other.m_assembly;
+          m_assembly.reset(other.m_assembly->copy());
         }
         return *this;
       }
@@ -999,14 +971,11 @@ namespace Rodin::Variational
           m_assembled = std::exchange(other.m_assembled, false);
           m_us = std::move(other.m_us);
           m_vs = std::move(other.m_vs);
-          m_lft = std::move(other.m_lft);
-          m_bft = std::move(other.m_bft);
+          m_pb = std::move(other.m_pb);
           m_trialOffsets = std::move(other.m_trialOffsets);
           m_testOffsets = std::move(other.m_testOffsets);
           m_trialUUIDMap = std::move(other.m_trialUUIDMap);
           m_testUUIDMap = std::move(other.m_testUUIDMap);
-          m_bfa.reset(std::move(other.m_bfa));
-          m_lfa.reset(std::move(other.m_lfa));
           m_assembly = std::move(other.m_assembly);
         }
         return *this;
@@ -1054,16 +1023,14 @@ namespace Rodin::Variational
 
         size_t cols =
           m_us
-            .map([](const auto& u)
-            {
+            .map([](const auto& u) {
               return static_cast<size_t>(u.get().getFiniteElementSpace().getSize());
             })
             .reduce([](size_t a, size_t b) { return a + b; });
 
-        AssemblyInput input(
-            m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
-            m_trialUUIDMap, m_testUUIDMap, cols, rows);
-        m_assembly.execute(axb, input);
+        AssemblyInput input(m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
+          m_trialUUIDMap, m_testUUIDMap, cols, rows);
+        m_assembly->execute(axb, input);
 
         // Establish the initial guess: gather the trial function data into
         // the solution vector at the trial offsets.
@@ -1126,7 +1093,7 @@ namespace Rodin::Variational
 
         AssemblyInput input(m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
           m_trialUUIDMap, m_testUUIDMap, cols, rows);
-        m_assembly.execute(axb, input, target);
+        m_assembly->execute(axb, input, target);
 
         m_assembled = true;
 
@@ -1199,23 +1166,19 @@ namespace Rodin::Variational
     private:
       Boolean m_assembled;
 
-      TrialFunctionTuple  m_us;
-      TestFunctionTuple   m_vs;
-
-      LinearFormTuple     m_lft;
-      BilinearFormTuple   m_bft;
+      TrialFunctionTuple m_us;
+      TestFunctionTuple m_vs;
 
       ProblemBody<OperatorType, VectorType, ScalarType> m_pb;
 
-      std::array<size_t, TrialFunctionTuple::Size>  m_trialOffsets;
-      std::array<size_t, TestFunctionTuple::Size>   m_testOffsets;
+      std::array<size_t, TrialFunctionTuple::Size> m_trialOffsets;
+      std::array<size_t, TestFunctionTuple::Size> m_testOffsets;
 
       boost::bimap<FormLanguage::Base::UUID, size_t> m_trialUUIDMap;
       boost::bimap<FormLanguage::Base::UUID, size_t> m_testUUIDMap;
 
-      std::unique_ptr<Assembly::AssemblyBase<OperatorType, BilinearFormTuple>>  m_bfa;
-      std::unique_ptr<Assembly::AssemblyBase<VectorType, LinearFormTuple>>      m_lfa;
-      AssemblyType m_assembly;
+      /// @brief Owned backend, reconstructed when assigning a nonassignable assembler.
+      std::unique_ptr<AssemblyType> m_assembly;
   };
 
   /// @brief Variational problem in three or more unknown fields.

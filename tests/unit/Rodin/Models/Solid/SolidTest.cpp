@@ -6,6 +6,8 @@
  */
 #include <gtest/gtest.h>
 #include <cmath>
+#include <complex>
+#include <type_traits>
 
 #include <Rodin/Solid.h>
 #include <Rodin/Geometry.h>
@@ -2115,5 +2117,135 @@ namespace Rodin::Tests::Unit
     // tangent were near zero.
     EXPECT_GT(std::abs(cacheA.active.tangent), 1e-8);
     EXPECT_NEAR(cacheB.active.tangent, 0.5 * cacheA.active.tangent, 1e-9);
+  }
+}
+
+namespace Rodin::Tests::Unit
+{
+  template <class Scalar>
+  class DistinctSpaceElasticity : public ::testing::Test
+  {};
+
+  using ElasticityScalars = ::testing::Types<Real, Complex>;
+  TYPED_TEST_SUITE(DistinctSpaceElasticity, ElasticityScalars);
+
+  /// @brief Distinct spaces reproduce affine strain work without nodal-layout assumptions.
+  TYPED_TEST(DistinctSpaceElasticity, AffineStrainWork)
+  {
+    using Scalar = TypeParam;
+    auto value = [](Real real, Real imaginary = 0) -> Scalar {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(real, imaginary);
+      else
+        return real;
+    };
+    auto conjugate = [](Scalar scalar) -> Scalar {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return std::conj(scalar);
+      else
+        return scalar;
+    };
+    auto coefficient = [](Real scalar) {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Variational::ComplexFunction(Complex(scalar));
+      else
+        return Variational::RealFunction(scalar);
+    };
+    for (const auto geometry : {Geometry::Polytope::Type::Segment,
+           Geometry::Polytope::Type::Triangle, Geometry::Polytope::Type::Quadrilateral,
+           Geometry::Polytope::Type::Tetrahedron, Geometry::Polytope::Type::Hexahedron,
+           Geometry::Polytope::Type::Pyramid, Geometry::Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Geometry::Polytope::Traits(geometry).getDimension();
+      auto mesh =
+        Geometry::LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+      for (size_t d = 1; d <= dimension; ++d)
+      {
+        mesh.getConnectivity().compute(dimension, d);
+        for (size_t lower = 0; lower < d; ++lower)
+          mesh.getConnectivity().compute(d, lower);
+      }
+      Math::SpatialMatrix<Scalar> first(dimension, dimension),
+        second(dimension, dimension);
+      Scalar divergenceFirst = 0, divergenceSecond = 0, strainWork = 0;
+      for (size_t row = 0; row < dimension; ++row)
+      {
+        for (size_t col = 0; col < dimension; ++col)
+        {
+          first(row, col) =
+            value(Real(0.2) * (row + 1) + Real(0.3) * col, Real(0.1) * (row + col + 1));
+          second(row, col) = value(Real(0.4) * (col + 1) - Real(0.15) * row,
+            Real(-0.2) * (row + 1) + Real(0.05) * col);
+        }
+        divergenceFirst += first(row, row);
+        divergenceSecond += second(row, row);
+      }
+      for (size_t row = 0; row < dimension; ++row)
+      {
+        for (size_t col = 0; col < dimension; ++col)
+        {
+          const Scalar firstStrain = (first(row, col) + first(col, row)) / Real(2);
+          const Scalar secondStrain = (second(row, col) + second(col, row)) / Real(2);
+          strainWork += firstStrain * conjugate(secondStrain);
+        }
+      }
+      const Scalar expected =
+        Real(2) * divergenceFirst * conjugate(divergenceSecond) + Real(6) * strainWork;
+      auto check = [&](auto makeSpace) {
+        auto trialSpace = makeSpace();
+        auto testSpace = makeSpace();
+        ASSERT_FALSE(trialSpace == testSpace);
+        Variational::TrialFunction trial(trialSpace);
+        Variational::TestFunction test(testSpace);
+        Variational::GridFunction testField(testSpace);
+        trial.getSolution() = Variational::VectorFunction(
+          dimension, [first, value](const Geometry::Point& point) {
+            Math::SpatialVector<Scalar> result = first * point.getPhysicalCoordinates();
+            for (size_t i = 0; i < result.size(); ++i)
+              result[i] += value(Real(0.7), Real(-0.3));
+            return result;
+          });
+        testField = Variational::VectorFunction(
+          dimension, [second, value](const Geometry::Point& point) {
+            Math::SpatialVector<Scalar> result = second * point.getPhysicalCoordinates();
+            for (size_t i = 0; i < result.size(); ++i)
+              result[i] += value(Real(-0.2), Real(0.4));
+            return result;
+          });
+        Variational::BilinearForm form(trial, test);
+        form = Variational::LinearElasticityIntegral(trial, test)(
+          coefficient(Real(2)), coefficient(Real(3)));
+        for (size_t repeat = 0; repeat < 2; ++repeat)
+        {
+          form.assemble();
+          const Scalar actual =
+            testField.getData().dot(form.getOperator() * trial.getSolution().getData());
+          EXPECT_LT(std::abs(actual - expected), Real(1e-10));
+        }
+        Variational::TestFunction sharedTest(trialSpace);
+        Variational::GridFunction sharedField(trialSpace);
+        sharedField = Variational::VectorFunction(
+          dimension, [second, value](const Geometry::Point& point) {
+            Math::SpatialVector<Scalar> result = second * point.getPhysicalCoordinates();
+            for (size_t i = 0; i < result.size(); ++i)
+              result[i] += value(Real(-0.2), Real(0.4));
+            return result;
+          });
+        Variational::BilinearForm sharedForm(trial, sharedTest);
+        sharedForm = Variational::LinearElasticityIntegral(trial, sharedTest)(
+          coefficient(Real(2)), coefficient(Real(3)));
+        sharedForm.assemble();
+        const Scalar sharedAction = sharedField.getData().dot(
+          sharedForm.getOperator() * trial.getSolution().getData());
+        EXPECT_LT(std::abs(sharedAction - expected), Real(1e-10));
+      };
+      check(
+        [&] { return Variational::P1<Math::SpatialVector<Scalar>>(mesh, dimension); });
+      check([&] {
+        return Variational::H1<2, Math::SpatialVector<Scalar>>(
+          std::integral_constant<size_t, 2>{}, mesh, dimension);
+      });
+    }
   }
 }

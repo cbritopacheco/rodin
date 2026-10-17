@@ -43,12 +43,10 @@ target_link_libraries(RodinAdaptationSWIFTAdaptTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
 gtest_discover_tests(RodinAdaptationSWIFTAdaptTest PROPERTIES LABELS unit)
 
-if(TARGET Rodin::MMG)
-  add_executable(RodinAdaptationSWIFTExampleParametersTest SWIFTExampleParametersTest.cpp)
-  target_link_libraries(RodinAdaptationSWIFTExampleParametersTest
-    PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation Rodin::MMG)
-  gtest_discover_tests(RodinAdaptationSWIFTExampleParametersTest PROPERTIES LABELS unit)
-endif()
+add_executable(RodinAdaptationSWIFTExampleParametersTest SWIFTExampleParametersTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTExampleParametersTest
+  PUBLIC GTest::gtest GTest::gtest_main Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationSWIFTExampleParametersTest PROPERTIES LABELS unit)
 
 add_executable(RodinAdaptationSWIFTRegularityMetricTest SWIFTRegularityMetricTest.cpp)
 add_executable(RodinAdaptationSWIFTDirectionalNewtonTest SWIFTDirectionalNewtonTest.cpp)

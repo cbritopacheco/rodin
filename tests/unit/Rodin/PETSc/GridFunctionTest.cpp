@@ -19,6 +19,63 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Local regional interpolation updates exactly the vertices in each face set.
+TEST(PETSc_GridFunction, RegionalProjectionPreservesUnselectedVertices)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {3, 3});
+  mesh.scale(0.5);
+  mesh.getConnectivity().compute(1, 2);
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::GridFunction field(space);
+  const auto value = [](const Point& point) {
+    PetscScalar result = 5 + 3 * point.x() + 2 * point.y();
+#if defined(PETSC_USE_COMPLEX)
+    result += PetscScalar(0, 2 + point.x() - point.y());
+#endif
+    return result;
+  };
+#if defined(PETSC_USE_COMPLEX)
+  const ComplexFunction prescribed(value);
+  const PetscScalar initial(-7, -3);
+#else
+  const RealFunction prescribed(value);
+  const PetscScalar initial = -7;
+#endif
+  for (const auto region :
+    {Region::Cells, Region::Faces, Region::Boundary, Region::Interface})
+  {
+    SCOPED_TRACE(int(region));
+    const bool whole = region == Region::Cells || region == Region::Faces;
+    field = initial;
+    EXPECT_EQ(
+      &field.project(region, prescribed, [](const Polytope&) { return true; }), &field);
+    size_t selected = 0;
+    for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+    {
+      const Point point(*vertex, Math::SpatialPoint(0));
+      const bool boundary =
+        point.x() == 0 || point.x() == 1 || point.y() == 0 || point.y() == 1;
+      const bool interiorFace = point.x() == 0.5 || point.y() == 0.5;
+      const bool included =
+        whole || (region == Region::Boundary ? boundary : interiorFace);
+      selected += included;
+      EXPECT_EQ(field(point), included ? value(point) : initial);
+    }
+    EXPECT_EQ(selected, whole ? 9u : region == Region::Boundary ? 8u : 5u);
+    field.project(region, prescribed, [](const Polytope&) { return false; });
+    for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+    {
+      const Point point(*vertex, Math::SpatialPoint(0));
+      const bool boundary =
+        point.x() == 0 || point.x() == 1 || point.y() == 0 || point.y() == 1;
+      const bool interiorFace = point.x() == 0.5 || point.y() == 0.5;
+      const bool included =
+        whole || (region == Region::Boundary ? boundary : interiorFace);
+      EXPECT_EQ(field(point), included ? value(point) : initial);
+    }
+  }
+}
+
 namespace
 {
   /// @brief Returns the PETSc object id of a vector.
@@ -336,8 +393,8 @@ namespace
     cAxpy.flush();
   }
 
-  /// @brief Verifies the 2-, 1- and infinity-norms of the coefficient vector by
-  ///        checking exact expected values.
+  /// @brief Verifies the 2-, 1- and infinity-norms against analytic scalar
+  ///        magnitudes, including nonzero imaginary coefficients in complex builds.
   TEST(PETSc_GridFunction, SequentialNormMatchesHandComputedValues)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -345,14 +402,25 @@ namespace
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
     gf = static_cast<PetscScalar>(0.0);
+#if defined(PETSC_USE_COMPLEX)
+    gf[0] = PetscScalar(3, 4);
+    gf[1] = PetscScalar(0, -12);
+    constexpr Real expectedTwoNorm = 13;
+    constexpr Real expectedOneNorm = 17;
+    constexpr Real expectedInfinityNorm = 12;
+#else
     gf[0] = static_cast<PetscScalar>(3.0);
     gf[1] = static_cast<PetscScalar>(-4.0);
+    constexpr Real expectedTwoNorm = 5;
+    constexpr Real expectedOneNorm = 7;
+    constexpr Real expectedInfinityNorm = 4;
+#endif
     gf.flush();
 
-    EXPECT_DOUBLE_EQ(gf.norm(), 5.0);
-    EXPECT_DOUBLE_EQ(gf.norm(NORM_2), 5.0);
-    EXPECT_DOUBLE_EQ(gf.norm(NORM_1), 7.0);
-    EXPECT_DOUBLE_EQ(gf.norm(NORM_INFINITY), 4.0);
+    EXPECT_DOUBLE_EQ(gf.norm(), expectedTwoNorm);
+    EXPECT_DOUBLE_EQ(gf.norm(NORM_2), expectedTwoNorm);
+    EXPECT_DOUBLE_EQ(gf.norm(NORM_1), expectedOneNorm);
+    EXPECT_DOUBLE_EQ(gf.norm(NORM_INFINITY), expectedInfinityNorm);
   }
 
   /// @brief Verifies that the norm of a zero grid function vanishes.

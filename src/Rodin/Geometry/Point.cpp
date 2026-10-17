@@ -63,7 +63,7 @@ namespace Rodin::Geometry
     {
       if (lhs(i) < rhs(i))
         return true;
-      if (rhs(i) > lhs(i))
+      if (rhs(i) < lhs(i))
         return false;
     }
     return (lhs(lhs.size() - 1) < rhs(rhs.size() - 1));

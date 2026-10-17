@@ -203,7 +203,7 @@ namespace Rodin::Geometry
 
       build.include(D, i);
 
-      for (size_t d = 1; d <= D - 1; ++d)
+      for (size_t d = 1; d < D; ++d)
       {
         const auto& inc = this->getConnectivity().getIncidence(D, d);
         if (inc.size() > 0)
@@ -224,7 +224,7 @@ namespace Rodin::Geometry
     {
       const Index i = it->getIndex();
       build.include(D - 1, i);
-      for (size_t d = 1; d <= D - 2; d++)
+      for (size_t d = 1; d + 1 < D; ++d)
       {
         const auto& inc = getConnectivity().getIncidence(D - 1, d);
         if (inc.size() > 0)
@@ -264,7 +264,7 @@ namespace Rodin::Geometry
 
       build.include(D, i);
 
-      for (size_t d = 1; d <= D - 1; ++d)
+      for (size_t d = 1; d < D; ++d)
       {
         const auto& inc = this->getConnectivity().getIncidence(D, d);
         if (inc.size() > 0)

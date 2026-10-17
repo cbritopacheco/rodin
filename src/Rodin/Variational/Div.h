@@ -27,6 +27,8 @@
 #ifndef RODIN_VARIATIONAL_DIV_H
 #define RODIN_VARIATIONAL_DIV_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 #include "Grad.h"
 
@@ -352,7 +354,7 @@ namespace Rodin::Variational
         RangeType value(gradient.getDimension(0));
         value.setZero();
         if (gradient.getDimension(1) != gradient.getDimension(2))
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Matrix divergence requires columns equal to the spatial dimension."
             << Alert::Raise;
         for (size_t row = 0; row < gradient.getDimension(0); ++row)
@@ -477,7 +479,7 @@ namespace Rodin::Variational
         RangeType value(gradient.getDimension(0));
         value.setZero();
         if (gradient.getDimension(1) != gradient.getDimension(2))
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Matrix divergence requires columns equal to the spatial dimension."
             << Alert::Raise;
         for (size_t row = 0; row < gradient.getDimension(0); ++row)

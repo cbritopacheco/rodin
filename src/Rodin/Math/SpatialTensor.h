@@ -16,7 +16,7 @@
 #include <cmath>
 #include <type_traits>
 
-#include "Rodin/Alert/Exception.h"
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "SpatialMatrix.h"
 
 namespace Rodin::Math
@@ -84,8 +84,8 @@ namespace Rodin::Math
         for (auto extent : extents)
         {
           if (extent > MaxSize)
-            Alert::Exception() << "SpatialTensor extent exceeds spatial capacity."
-                               << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "SpatialTensor extent exceeds spatial capacity." << Alert::Raise;
         }
         m_extents = extents;
         m_size = 1;
@@ -108,7 +108,11 @@ namespace Rodin::Math
        */
       size_t getDimension(size_t axis) const
       {
-        return m_extents.at(axis);
+        if (axis >= Rank)
+          Alert::MemberFunctionException(*this, __func__)
+            << "Tensor axis " << axis << " is outside rank " << Rank << '.'
+            << Alert::Raise;
+        return m_extents[axis];
       }
       /**
        * @brief Returns the number of active tensor entries.

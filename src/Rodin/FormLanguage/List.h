@@ -33,6 +33,8 @@
 #include <vector>
 #include <memory>
 
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "Base.h"
 
 #ifndef RODIN_FORMLANGUAGE_LIST_H
@@ -261,22 +263,30 @@ namespace Rodin::FormLanguage
        * @brief Accesses element at specified index with bounds checking.
        * @param[in] i Index of element to access
        * @return Reference to element at index i
-       * @throws std::out_of_range if i >= size()
+       * @throws Alert::Exception if i >= size()
        */
       constexpr reference at(size_t i)
       {
-        return *m_list.at(i);
+        if (i >= m_list.size())
+          Alert::MemberFunctionException(*this, __func__)
+            << "Element index " << i << " is outside list size " << m_list.size() << '.'
+            << Alert::Raise;
+        return *m_list[i];
       }
 
       /**
        * @brief Accesses element at specified index with bounds checking (const version).
        * @param[in] i Index of element to access
        * @return Const reference to element at index i
-       * @throws std::out_of_range if i >= size()
+       * @throws Alert::Exception if i >= size()
        */
       constexpr const_reference at(size_t i) const
       {
-        return *m_list.at(i);
+        if (i >= m_list.size())
+          Alert::MemberFunctionException(*this, __func__)
+            << "Element index " << i << " is outside list size " << m_list.size() << '.'
+            << Alert::Raise;
+        return *m_list[i];
       }
 
       /**

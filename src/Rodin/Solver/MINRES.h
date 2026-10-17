@@ -128,18 +128,24 @@ namespace Rodin::Solver
        * @param other Object to copy from.
        */
       MINRES(const MINRES& other)
-        : Parent(other),
-          m_solver(other.m_solver)
-      {}
+        : Parent(other)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+      }
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
       MINRES(MINRES&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+        : Parent(std::move(other))
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+      }
 
       /// @brief Destructor.
       ~MINRES() = default;
@@ -162,6 +168,7 @@ namespace Rodin::Solver
        */
       MINRES& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -198,6 +205,7 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t> m_maxIterations; ///< Explicit iteration limit, if set.
       Eigen::MINRES<OperatorType> m_solver;
   };
 
@@ -240,18 +248,24 @@ namespace Rodin::Solver
        * @param other Object to copy from.
        */
       MINRES(const MINRES& other)
-        : Parent(other),
-          m_solver(other.m_solver)
-      {}
+        : Parent(other)
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+      }
 
       /**
        * @brief Move constructor.
        * @param other Object to move from.
        */
       MINRES(MINRES&& other)
-        : Parent(std::move(other)),
-          m_solver(std::move(other.m_solver))
-      {}
+        : Parent(std::move(other))
+      {
+        setTolerance(other.m_solver.tolerance());
+        if (other.m_maxIterations)
+          setMaxIterations(*other.m_maxIterations);
+      }
 
       /// @brief Destructor.
       ~MINRES() = default;
@@ -274,6 +288,7 @@ namespace Rodin::Solver
        */
       MINRES& setMaxIterations(size_t maxIt)
       {
+        m_maxIterations = maxIt;
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
@@ -310,6 +325,7 @@ namespace Rodin::Solver
       }
 
     private:
+      Optional<size_t> m_maxIterations; ///< Explicit iteration limit, if set.
       Eigen::MINRES<OperatorType> m_solver;
   };
 }

@@ -68,17 +68,19 @@ foreach(np 1 2 3 4 8)
       RodinMPIAssemblyGeometrySlowTest_np${np}_${geometry})
   endforeach()
 
-  add_test(
-    NAME RodinMPIAssemblyIdentificationSlowTest_np${np}
-    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-            $<TARGET_FILE:RodinMPIAssemblyTest>
-            "--gtest_filter=${_RODIN_MPI_SLOW_IDENTIFICATION_FILTER}")
-  set_tests_properties(RodinMPIAssemblyIdentificationSlowTest_np${np} PROPERTIES
-    LABELS "unit;distributed;slow"
-    TIMEOUT 600
-  )
-  rodin_suppress_external_mpi_lsan_for_test(RodinMPIAssemblyIdentificationSlowTest_np${np})
+  # Each geometry gets the existing watchdog independently. CI's np3
+  # tetrahedron passes in 462 seconds, but the combined four-case process
+  # exhausts 600 seconds during Wedge. Keep every case and rank count.
+  foreach(geometry Tetrahedron Pyramid Hexahedron Wedge)
+    add_test(NAME RodinMPIAssemblyIdentificationSlowTest_np${np}_${geometry}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG} $<TARGET_FILE:RodinMPIAssemblyTest>
+        "--gtest_filter=AllGeometries/MPITraceGeometryTest.IdentificationRowsReachRequiredDOFs/${geometry}")
+    set_tests_properties(RodinMPIAssemblyIdentificationSlowTest_np${np}_${geometry}
+      PROPERTIES LABELS "unit;distributed;slow" TIMEOUT 600 PROCESSORS ${np})
+    rodin_suppress_external_mpi_lsan_for_test(
+      RodinMPIAssemblyIdentificationSlowTest_np${np}_${geometry})
+  endforeach()
 
   # Matrix traces add real/complex 2x3 ranges through H1 degree six. Keep
   # their logical checks separate from the legacy 120-second protocol gate.

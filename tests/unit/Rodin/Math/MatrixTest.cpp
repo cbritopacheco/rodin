@@ -684,3 +684,299 @@ TEST_F(MatrixTest, SpatialMatrixBinarySubtractNonSquare)
   EXPECT_DOUBLE_EQ(c(1, 1), 3.0);
   EXPECT_DOUBLE_EQ(c(1, 2), 5.0);
 }
+
+namespace
+{
+  template <class Scalar>
+  Matrix<Scalar> dense(const SpatialMatrix<Scalar>& value)
+  {
+    return value.getData().topLeftCorner(value.rows(), value.cols());
+  }
+
+  template <class Scalar>
+  void checkSpatialMatrixShapes()
+  {
+    constexpr Real tolerance = 1e-12;
+    for (size_t rows = 0; rows <= 3; ++rows)
+    {
+      for (size_t cols = 0; cols <= 3; ++cols)
+      {
+        SCOPED_TRACE(::testing::Message() << rows << "x" << cols);
+        Matrix<Scalar> a(rows, cols), b(rows, cols);
+        for (size_t i = 0; i < rows; ++i)
+        {
+          for (size_t j = 0; j < cols; ++j)
+          {
+            a(i, j) = Scalar(1 + 2 * i + j);
+            b(i, j) = Scalar(3 + i + 4 * j);
+            if constexpr (std::is_same_v<Scalar, Complex>)
+            {
+              a(i, j) += Complex(0, Real(i) - Real(j) + 0.5);
+              b(i, j) += Complex(0, Real(i) + Real(j) - 0.25);
+            }
+          }
+        }
+        SpatialMatrix<Scalar> sa, sb;
+        sa = a;
+        sb = b;
+        EXPECT_LE((dense(sa) - a).norm(), tolerance);
+        EXPECT_LE((dense(sa + sb) - (a + b)).norm(), tolerance);
+        EXPECT_LE((dense(sa - sb) - (a - b)).norm(), tolerance);
+        EXPECT_LE((dense(-sa) + a).norm(), tolerance);
+        EXPECT_LE((dense(sa.transpose()) - a.transpose()).norm(), tolerance);
+        EXPECT_LE((dense(sa.adjoint()) - a.adjoint()).norm(), tolerance);
+        EXPECT_NEAR(sa.squaredNorm(), a.squaredNorm(), tolerance);
+        EXPECT_NEAR(
+          std::abs(sa.dot(sb) - (a.cwiseProduct(b.conjugate())).sum()), 0, tolerance);
+        auto accumulated = sa;
+        accumulated += sb;
+        EXPECT_LE((dense(accumulated) - (a + b)).norm(), tolerance);
+        accumulated = sa;
+        accumulated *= Scalar(2);
+        EXPECT_LE((dense(accumulated) - 2 * a).norm(), tolerance);
+        SpatialVector<Scalar> x(cols);
+        Vector<Scalar> ex(cols);
+        for (size_t j = 0; j < cols; ++j)
+          x(j) = ex(j) = Scalar(j + 1);
+        const auto y = sa * x;
+        EXPECT_LE((y.getData().head(y.size()) - a * ex).norm(), tolerance);
+
+        for (size_t outCols = 0; outCols <= 3; ++outCols)
+        {
+          Matrix<Scalar> right(cols, outCols);
+          for (size_t i = 0; i < cols; ++i)
+          {
+            for (size_t j = 0; j < outCols; ++j)
+              right(i, j) = Scalar(2 + i + 3 * j);
+          }
+          SpatialMatrix<Scalar> sr(right);
+          const Matrix<Scalar> expected = a * right;
+          EXPECT_LE((dense(sa * sr) - expected).norm(), tolerance);
+          auto inPlace = sa;
+          inPlace *= sr;
+          EXPECT_EQ(inPlace.rows(), rows);
+          EXPECT_EQ(inPlace.cols(), outCols);
+          EXPECT_LE((dense(inPlace) - expected).norm(), tolerance);
+        }
+        if (rows == cols)
+        {
+          auto aliased = sa;
+          aliased *= aliased;
+          EXPECT_LE((dense(aliased) - a * a).norm(), tolerance);
+        }
+      }
+    }
+  }
+}
+
+/// @brief Checks every active matrix shape against independent Eigen arithmetic.
+TEST_F(MatrixTest, SpatialMatrixAllShapesRealAndComplex)
+{
+  checkSpatialMatrixShapes<Real>();
+  checkSpatialMatrixShapes<Complex>();
+}
+
+/// @brief Checks full-rank rectangular pseudoinverses through Moore-Penrose identities.
+TEST_F(MatrixTest, SpatialMatrixRectangularPseudoInverse)
+{
+  constexpr Real tolerance = 1e-12;
+  for (size_t rows = 1; rows <= 3; ++rows)
+  {
+    for (size_t cols = 1; cols <= 3; ++cols)
+    {
+      SCOPED_TRACE(::testing::Message() << rows << "x" << cols);
+      RealMatrix a = RealMatrix::Constant(rows, cols, 0.125);
+      for (size_t i = 0; i < std::min(rows, cols); ++i)
+        a(i, i) += 1;
+      SpatialMatrix<Real> sa(a);
+      const RealMatrix inverse = dense(sa.pseudoInverse());
+      EXPECT_LE((a * inverse * a - a).norm(), tolerance);
+      EXPECT_LE((inverse * a * inverse - inverse).norm(), tolerance);
+      EXPECT_LE((a * inverse - (a * inverse).transpose()).norm(), tolerance);
+      EXPECT_LE((inverse * a - (inverse * a).transpose()).norm(), tolerance);
+      if (rows == cols)
+      {
+        EXPECT_NEAR(sa.determinant(), a.determinant(), tolerance);
+        EXPECT_LE(
+          (dense(sa.inverse()) * a - RealMatrix::Identity(rows, rows)).norm(), tolerance);
+      }
+    }
+  }
+}
+
+/// @brief Dynamic-vector products preserve shape, scalar promotion and both inputs.
+template <class ScalarPair>
+class SpatialMatrixDynamicVectorProductTest : public ::testing::Test
+{};
+using SpatialMatrixDynamicVectorScalars = ::testing::Types<std::pair<Real, Real>,
+  std::pair<Real, Complex>, std::pair<Complex, Real>, std::pair<Complex, Complex>>;
+TYPED_TEST_SUITE(
+  SpatialMatrixDynamicVectorProductTest, SpatialMatrixDynamicVectorScalars);
+
+TYPED_TEST(SpatialMatrixDynamicVectorProductTest, AllShapesAndScalarPairings)
+{
+  using MatrixScalar = typename TypeParam::first_type;
+  using VectorScalar = typename TypeParam::second_type;
+  using OutputScalar = std::conditional_t<std::is_same_v<MatrixScalar, Complex> ||
+      std::is_same_v<VectorScalar, Complex>,
+    Complex, Real>;
+  for (std::uint8_t rows = 0; rows <= 3; ++rows)
+  {
+    for (std::uint8_t cols = 0; cols <= 3; ++cols)
+    {
+      SCOPED_TRACE(::testing::Message() << unsigned(rows) << "x" << unsigned(cols));
+      SpatialMatrix<MatrixScalar> matrix(3, 3);
+      matrix.setConstant(MatrixScalar(91));
+      matrix.resize(rows, cols);
+      Vector<VectorScalar> vector(cols);
+      for (std::uint8_t i = 0; i < rows; ++i)
+      {
+        for (std::uint8_t j = 0; j < cols; ++j)
+        {
+          const Real re = Real(2 * (i + 1) + j + 1);
+          if constexpr (std::is_same_v<MatrixScalar, Complex>)
+            matrix(i, j) = MatrixScalar(re, Real(i) - Real(j));
+          else
+            matrix(i, j) = re;
+        }
+      }
+      for (std::uint8_t j = 0; j < cols; ++j)
+      {
+        if constexpr (std::is_same_v<VectorScalar, Complex>)
+          vector(j) = VectorScalar(Real(j + 2), Real(j + 1));
+        else
+          vector(j) = Real(j + 2);
+      }
+      const auto storage = matrix.getData();
+      const auto operand = vector;
+      const auto result = matrix * vector;
+      static_assert(
+        std::is_same_v<std::remove_cvref_t<decltype(result(0, 0))>, OutputScalar>);
+      ASSERT_EQ(result.rows(), rows);
+      ASSERT_EQ(result.cols(), 1);
+      for (std::uint8_t i = 0; i < rows; ++i)
+      {
+        Real expectedReal = 0, expectedImaginary = 0;
+        for (std::uint8_t j = 0; j < cols; ++j)
+        {
+          const Real ar = Real(2 * (i + 1) + j + 1);
+          const Real ai =
+            std::is_same_v<MatrixScalar, Complex> ? Real(i) - Real(j) : Real(0);
+          const Real xr = Real(j + 2);
+          const Real xi = std::is_same_v<VectorScalar, Complex> ? Real(j + 1) : Real(0);
+          expectedReal += ar * xr - ai * xi;
+          expectedImaginary += ar * xi + ai * xr;
+        }
+        EXPECT_DOUBLE_EQ(std::real(result(i, 0)), expectedReal);
+        EXPECT_DOUBLE_EQ(std::imag(result(i, 0)), expectedImaginary);
+      }
+      EXPECT_EQ(matrix.rows(), rows);
+      EXPECT_EQ(matrix.cols(), cols);
+      EXPECT_EQ(matrix.getData(), storage);
+      EXPECT_EQ(vector, operand);
+    }
+  }
+}
+
+/// @brief Eigen views multiply spatial matrices with unconjugated scalar promotion.
+TYPED_TEST(SpatialMatrixDynamicVectorProductTest, EigenMatrixViewsAllShapes)
+{
+  using LeftScalar = typename TypeParam::first_type;
+  using RightScalar = typename TypeParam::second_type;
+  using OutputScalar = std::conditional_t<std::is_same_v<LeftScalar, Complex> ||
+      std::is_same_v<RightScalar, Complex>,
+    Complex, Real>;
+  for (std::uint8_t rows = 0; rows <= 3; ++rows)
+  {
+    for (std::uint8_t inner = 0; inner <= 3; ++inner)
+    {
+      for (std::uint8_t cols = 0; cols <= 3; ++cols)
+      {
+        SCOPED_TRACE(::testing::Message()
+          << unsigned(rows) << "x" << unsigned(inner) << "x" << unsigned(cols));
+        Matrix<LeftScalar> left(rows, inner);
+        Matrix<RightScalar> right(inner, cols);
+        SpatialMatrix<LeftScalar> spatialLeft(3, 3);
+        SpatialMatrix<RightScalar> spatialRight(3, 3);
+        spatialLeft.setConstant(LeftScalar(91));
+        spatialRight.setConstant(RightScalar(91));
+        spatialLeft.resize(rows, inner);
+        spatialRight.resize(inner, cols);
+        for (std::uint8_t i = 0; i < rows; ++i)
+        {
+          for (std::uint8_t j = 0; j < inner; ++j)
+          {
+            const Real re = Real(1 + 2 * i + j);
+            if constexpr (std::is_same_v<LeftScalar, Complex>)
+              left(i, j) = LeftScalar(re, Real(i) - Real(j) + 1);
+            else
+              left(i, j) = re;
+            spatialLeft(i, j) = left(i, j);
+          }
+        }
+        for (std::uint8_t i = 0; i < inner; ++i)
+        {
+          for (std::uint8_t j = 0; j < cols; ++j)
+          {
+            const Real re = Real(2 + i + 3 * j);
+            if constexpr (std::is_same_v<RightScalar, Complex>)
+              right(i, j) = RightScalar(re, Real(i) + Real(j) + 2);
+            else
+              right(i, j) = re;
+            spatialRight(i, j) = right(i, j);
+          }
+        }
+        const auto leftBefore = left;
+        const auto rightBefore = right;
+        const auto leftStorage = spatialLeft.getData();
+        const auto rightStorage = spatialRight.getData();
+        const auto eigenLeftProduct = left.reverse() * spatialRight;
+        const auto eigenRightProduct = spatialLeft * right.reverse();
+        static_assert(std::is_same_v<std::remove_cvref_t<decltype(eigenLeftProduct)>,
+          SpatialMatrix<OutputScalar>>);
+        static_assert(std::is_same_v<std::remove_cvref_t<decltype(eigenRightProduct)>,
+          SpatialMatrix<OutputScalar>>);
+        for (const auto* product : {&eigenLeftProduct, &eigenRightProduct})
+        {
+          EXPECT_EQ(product->rows(), rows);
+          EXPECT_EQ(product->cols(), cols);
+        }
+        for (std::uint8_t i = 0; i < rows; ++i)
+        {
+          for (std::uint8_t j = 0; j < cols; ++j)
+          {
+            Real expectedLeftReal = 0, expectedLeftImaginary = 0;
+            Real expectedRightReal = 0, expectedRightImaginary = 0;
+            for (std::uint8_t k = 0; k < inner; ++k)
+            {
+              const auto a = left(rows - 1 - i, inner - 1 - k);
+              const auto b = right(k, j);
+              expectedLeftReal +=
+                std::real(a) * std::real(b) - std::imag(a) * std::imag(b);
+              expectedLeftImaginary +=
+                std::real(a) * std::imag(b) + std::imag(a) * std::real(b);
+              const auto c = left(i, k);
+              const auto d = right(inner - 1 - k, cols - 1 - j);
+              expectedRightReal +=
+                std::real(c) * std::real(d) - std::imag(c) * std::imag(d);
+              expectedRightImaginary +=
+                std::real(c) * std::imag(d) + std::imag(c) * std::real(d);
+            }
+            EXPECT_DOUBLE_EQ(std::real(eigenLeftProduct(i, j)), expectedLeftReal);
+            EXPECT_DOUBLE_EQ(std::imag(eigenLeftProduct(i, j)), expectedLeftImaginary);
+            EXPECT_DOUBLE_EQ(std::real(eigenRightProduct(i, j)), expectedRightReal);
+            EXPECT_DOUBLE_EQ(std::imag(eigenRightProduct(i, j)), expectedRightImaginary);
+          }
+        }
+        EXPECT_EQ(left, leftBefore);
+        EXPECT_EQ(right, rightBefore);
+        EXPECT_EQ(spatialLeft.rows(), rows);
+        EXPECT_EQ(spatialLeft.cols(), inner);
+        EXPECT_EQ(spatialRight.rows(), inner);
+        EXPECT_EQ(spatialRight.cols(), cols);
+        EXPECT_EQ(spatialLeft.getData(), leftStorage);
+        EXPECT_EQ(spatialRight.getData(), rightStorage);
+      }
+    }
+  }
+}

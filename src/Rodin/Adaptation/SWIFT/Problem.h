@@ -7,10 +7,10 @@
 #ifndef RODIN_ADAPTATION_SWIFT_PROBLEM_H
 #define RODIN_ADAPTATION_SWIFT_PROBLEM_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <cstdint>
 #include <functional>
 #include <iomanip>
 #include <iostream>
@@ -170,7 +170,7 @@ namespace Rodin::Adaptation::SWIFT
    * parameters.model.fit = 1;
    * parameters.model.distribution.deviatoric = Real(1e-4);
    * parameters.model.distribution.divergence = Real(1e-2);
-   * parameters.model.hinge = 10;
+   * parameters.model.hinge = {.jacobian = 1, .distortion = 10};
    * parameters.model.distortion = 10;
    * parameters.model.jacobian = Real(0.01);
    * // These are work budgets; zero geometric tolerance selects the automatic target.
@@ -345,10 +345,10 @@ namespace Rodin::Adaptation::SWIFT
    * @f]
    * With @f$(t)_+=\max(t,0)@f$, the affine squared-hinge penalty is
    * @f[
-   * B_k(v)=\frac{\mu_k}{2}\sum_K\sum_{s\in\mathcal S_K}
-   *   \left[w^J_{K,s}\kappa_J\left(1-\frac{s_J(v)}{\delta_J}\right)_+^2
-   *        +w^Q_{K,s}\kappa_Q\left(1-\frac{s_Q(v)}{\delta_Q}\right)_+^2\right]_{K,s},
-   * \qquad \mu_k=\widehat\mu\frac{f_k[\bar p_k]}{2|\Omega_0|}.
+   * B_k(v)=\frac{\gamma_k}{2}\sum_K\sum_{s\in\mathcal S_K}
+   *   \left[w^J_{K,s}\mu_j\left(1-\frac{s_J(v)}{\delta_J}\right)_+^2
+   *        +w^Q_{K,s}\mu_Q\left(1-\frac{s_Q(v)}{\delta_Q}\right)_+^2\right]_{K,s},
+   * \qquad \gamma_k=\frac{f_k[\bar p_k]}{2|\Omega_0|}.
    * @f]
    * The set @f$\mathcal S_K@f$ contains the same closed-form reference covering
    * points as the actual-quality checks. For each constraint, @ref QualitySamples
@@ -422,10 +422,9 @@ namespace Rodin::Adaptation::SWIFT
    * | @f$h@f$ | `model.h` | Background reference size; scales distribution, motion limit and geometric target | Required |
    * | @f$\kappa_F@f$ | `model.fit` | Target-normal motion stiffness, not a force multiplier | @f$1@f$ |
    * | @f$\kappa_{\rm dev}@f$ | `model.distribution.deviatoric` | Cost of deviatoric-strain variation about its global mean | @f$10^{-4}@f$ |
-   * | @f$\kappa_{\rm div}@f$ | `model.distribution.divergence` | Cost of divergence variation about its global mean, normalized by @f$d@f$ | @f$10^{-2}@f$ |
-   * | @f$\widehat\mu@f$ | `model.hinge` | Hinge strength relative to predicted fitting improvement | @f$10@f$ |
-   * | @f$\kappa_J@f$ | `model.jacobianWeight` | Relative Jacobian-hinge row weight | @f$1@f$ |
-   * | @f$\kappa_Q@f$ | `model.distortionWeight` | Relative distortion-hinge row weight | @f$1@f$ |
+   * | @f$\kappa_{\rm div}@f$ | `model.distribution.divergence` | Cost of divergence variation about its global mean, normalized by @f$d@f$ | @f$10^{-4}@f$ |
+   * | @f$\mu_j@f$ | `model.hinge.jacobian` | Jacobian recovery strength | @f$10@f$ |
+   * | @f$\mu_Q@f$ | `model.hinge.distortion` | Distortion recovery strength | @f$100@f$ |
    * | @f$\gamma@f$ | `model.qualityGuard` | Guard fraction defining hinge activation margins | @f$0.1@f$ |
    * | @f$j_{\mathrm{safe}}@f$ | `model.jacobian` | Relative Jacobian floor in the hinge and actual acceptance checks | @f$10^{-2}@f$ |
    * | @f$Q_{\max}@f$ | `model.distortion` | Maximum admissible relative distortion | @f$10@f$ |
@@ -470,15 +469,15 @@ namespace Rodin::Adaptation::SWIFT
    * automatic scale, which remains fixed during the solve.
    *
    * @subsection swift-quality-controls Quality recovery and admissibility
-   * @ref Parameters::Model::hinge scales the finite hinge penalty relative to
-   * the predicted fitting improvement. Increasing @f$\widehat\mu@f$ strengthens
+   * @ref Parameters::Model::Hinge sets the two independent penalty strengths
+   * relative to predicted fitting improvement. Increasing either strengthens
    * recovery when hinges are active; it has no effect on inactive hinges and
    * does not guarantee nonlinear feasibility.
    * @ref Parameters::Model::qualityGuard sets their activation margins relative
    * to the identity margins. A wider guard reacts earlier, but also changes
    * the slack normalization and hence the penalty curvature.
-   * @ref Parameters::Model::jacobianWeight and @ref Parameters::Model::distortionWeight set the
-   * relative importance of the Jacobian and distortion hinge rows.
+   * @ref Parameters::Model::Hinge::jacobian and @ref Parameters::Model::Hinge::distortion set the
+   * Jacobian and distortion recovery strengths, respectively.
    *
    * @ref Parameters::Model::distortion is a spendable distortion budget, not a
    * quantity that must be minimized. @ref Parameters::Model::jacobian protects
@@ -656,21 +655,6 @@ namespace Rodin::Adaptation::SWIFT
           Real residualSup = 0;
       };
 
-      /**
-       * @brief Kink of the discrete interface across facet boundaries.
-       *
-       * These statistics describe the classified interface only; they do not
-       * alter the geometric target or the solver tolerances.
-       */
-      struct NormalJump
-      {
-          /// @brief Measure-weighted RMS angle between adjacent facet normals.
-          Real rms = 0;
-
-          /// @brief Largest angle between adjacent facet normals.
-          Real max = 0;
-      };
-
     public:
       /**
        * @brief Constructs the fitting problem from trial and test functions.
@@ -745,8 +729,8 @@ namespace Rodin::Adaptation::SWIFT
       Problem& operator+=(const Variational::DirichletBCBase<Real>& condition)
       {
         if (condition.getOperand().getUUID() != m_trialUUID)
-          Alert::Exception() << "SWIFT boundary conditions must use its trial function."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT boundary conditions must use its trial function." << Alert::Raise;
         m_boundaryConditions.add(condition);
         return *this;
       }
@@ -760,14 +744,14 @@ namespace Rodin::Adaptation::SWIFT
       {
 #ifndef RODIN_USE_MUMPS
         if (parameters.linear.solver == Parameters::LinearSolver::MUMPS)
-          Alert::Exception() << "SWIFT MUMPS solves require RODIN_USE_MUMPS."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT MUMPS solves require RODIN_USE_MUMPS." << Alert::Raise;
 #endif
         if (!std::isfinite(parameters.model.fit) || !(parameters.model.fit > Real(0)))
-          Alert::Exception() << "SWIFT requires a finite positive fitting weight."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires a finite positive fitting weight." << Alert::Raise;
         for (const Real value :
-          {parameters.model.jacobianWeight, parameters.model.distortionWeight,
+          {parameters.model.hinge.jacobian, parameters.model.hinge.distortion,
             parameters.model.distribution.deviatoric,
             parameters.model.distribution.divergence,
             parameters.convergence.tolerance.innerAbsolute,
@@ -776,7 +760,7 @@ namespace Rodin::Adaptation::SWIFT
             parameters.convergence.tolerance.stepOverH, parameters.model.robustScale})
         {
           if (!std::isfinite(value) || value < Real(0))
-            Alert::Exception()
+            Alert::MemberFunctionException(*this, __func__)
               << "SWIFT weights and tolerances must be finite and nonnegative."
               << Alert::Raise;
         }
@@ -788,12 +772,12 @@ namespace Rodin::Adaptation::SWIFT
             parameters.globalization.armijo < Real(1)) ||
           parameters.convergence.iterations.inner == 0 ||
           parameters.convergence.iterations.stagnation == 0)
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires valid residual tolerances, budgets and line search."
             << Alert::Raise;
         if (!std::isfinite(parameters.globalization.maxStepOverH) ||
           parameters.globalization.maxStepOverH < Real(0))
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Directional Newton requires a finite nonnegative step/h bound."
             << Alert::Raise;
         if (!(parameters.model.qualityGuard > Real(0) &&
@@ -801,10 +785,9 @@ namespace Rodin::Adaptation::SWIFT
           !(parameters.model.jacobian > Real(0) && parameters.model.jacobian < Real(1)) ||
           !(parameters.model.distortion > Real(1)) ||
           !std::isfinite(parameters.model.distortion) ||
-          !std::isfinite(parameters.model.hinge) || parameters.model.hinge < Real(0) ||
           !std::isfinite(parameters.convergence.tolerance.geometric) ||
           parameters.convergence.tolerance.geometric < Real(0))
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "SWIFT requires 0 < guard,jacobian < 1, finite distortion > 1 and "
                "nonnegative penalty/fit tolerance."
             << Alert::Raise;
@@ -856,8 +839,8 @@ namespace Rodin::Adaptation::SWIFT
         Report rep;
         const Real h = p.model.h;
         if (!std::isfinite(h) || !(h > Real(0)))
-          Alert::Exception() << "SWIFT requires a finite positive reference mesh size."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires a finite positive reference mesh size." << Alert::Raise;
         assembleBoundaryConditions();
         const Real acceptedJacobianFloor = p.model.jacobian;
         const Real stepTol = p.convergence.tolerance.step;
@@ -899,9 +882,6 @@ namespace Rodin::Adaptation::SWIFT
           rep.reason = Report::Reason::EmptyInterface;
           return finish(rep);
         }
-        const auto normalJump = getNormalJump(mesh, fes, interfaceFacets, meshDim);
-        rep.normalJumpRMS = normalJump.rms;
-        rep.normalJumpMax = normalJump.max;
         const Real geometricScale = std::pow(
           h, fes.getFiniteElement(meshDim - 1, interfaceFacets.front()).getOrder() + 1);
         const Real geometricTarget = p.convergence.tolerance.geometric > Real(0)
@@ -909,8 +889,8 @@ namespace Rodin::Adaptation::SWIFT
           : geometricScale;
         if (!std::isfinite(geometricScale) || !(geometricScale > Real(0)) ||
           !std::isfinite(geometricTarget) || !(geometricTarget > Real(0)))
-          Alert::Exception() << "SWIFT requires a finite positive geometric target."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "SWIFT requires a finite positive geometric target." << Alert::Raise;
         rep.geometricSupTarget = geometricTarget;
         const auto robustScale = getRobustScale(mesh, fes, phi, grad, interfaceFacets, h);
         if (!(robustScale.gradientScale > Real(0)) ||
@@ -1191,9 +1171,8 @@ namespace Rodin::Adaptation::SWIFT
 
           {
             const Real modelDecrease = Real(0.5) * std::max(Real(0), predictorAction);
-            const Real hingeCoefficient = domainMeasure > Real(0)
-              ? p.model.hinge * modelDecrease / domainMeasure
-              : Real(0);
+            const Real hingeCoefficient =
+              domainMeasure > Real(0) ? modelDecrease / domainMeasure : Real(0);
             rep.hingeCoefficient = hingeCoefficient;
             const size_t innerIterations = p.convergence.iterations.inner;
             const Real predictorNorm =
@@ -1385,7 +1364,7 @@ namespace Rodin::Adaptation::SWIFT
                             << "  rel=" << relativeCorrection << "  alpha=" << innerAlpha
                             << "  linear_ok=1  cg_it=" << linearIterations
                             << "  cg_err=" << linearError
-                            << "  mu_eff=" << hingeCoefficient << std::endl;
+                            << "  hinge_scale=" << hingeCoefficient << std::endl;
                   std::cout.precision(precision);
                 }
                 scratch *= innerAlpha;
@@ -2327,142 +2306,6 @@ namespace Rodin::Adaptation::SWIFT
       }
 
       /**
-       * @brief Normal-jump statistics of the discrete interface.
-       *
-       * Facets are adjacent when they share a vertex in two dimensions or an
-       * edge in three, and each adjacent pair contributes the angle between its
-       * normals weighted by the mean of the two facet measures. Normals are
-       * compared up to sign, since facet orientation is not consistent across
-       * the interface.
-       */
-      /**
-       * @brief Computes jumps between averaged adjacent interface normals.
-       * @param mesh Fixed reference mesh.
-       * @param fes Displacement finite element space defining quadrature orders.
-       * @param interfaceFacets Indices of the classified interface facets.
-       * @param dimension Spatial dimension.
-       * @returns Measure-weighted RMS and maximum normal-angle jumps.
-       */
-      template <class Mesh, class FES>
-      NormalJump getNormalJump(const Mesh& mesh, const FES& fes,
-        const std::vector<Index>& interfaceFacets, std::size_t dimension) const
-      {
-        // Averaged unit normal and measure of each facet. The normal is the
-        // quadrature average of the pointwise unit normals, so a curved facet
-        // contributes its mean orientation; a facet degenerate throughout
-        // falls back to a fixed direction rather than a null vector.
-        constexpr Real degenerate = Real(1e-30);
-        std::vector<Math::SpatialVector<Real>> normals(interfaceFacets.size());
-        std::vector<Real> measures(interfaceFacets.size(), Real(0));
-
-        for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-        {
-          const auto face = mesh.getFace(interfaceFacets[i]);
-          const auto& qf = getQuadrature(*face, fes);
-          const auto& quad = face->getQuadrature(qf);
-
-          Math::SpatialVector<Real> n = Math::SpatialVector<Real>::Zero(dimension);
-          Real measure = 0;
-          for (std::size_t q = 0; q < quad.getSize(); ++q)
-          {
-            const auto& pt = quad.getPoint(q);
-            const Real w = qf.getWeight(q) * pt.getDistortion();
-            const auto& J = pt.getJacobian();
-            // The facet normal: in 2D the tangent rotated a quarter turn, in
-            // 3D the cross product of the two tangents.
-            Math::SpatialVector<Real> nq;
-            if (dimension == 2)
-            {
-              nq.resize(2);
-              nq(0) = J(1, 0);
-              nq(1) = -J(0, 0);
-            }
-            else
-            {
-              Math::SpatialVector<Real> a = Math::SpatialVector<Real>::Zero(dimension);
-              Math::SpatialVector<Real> b = Math::SpatialVector<Real>::Zero(dimension);
-              for (std::size_t r = 0; r < dimension; ++r)
-              {
-                a(static_cast<Eigen::Index>(r)) = J(r, 0);
-                b(static_cast<Eigen::Index>(r)) = J(r, 1);
-              }
-              nq = a.cross(b);
-            }
-            const Real norm = nq.norm();
-            if (norm > degenerate)
-            {
-              n += w * (nq / norm);
-              measure += w;
-            }
-          }
-
-          if (n.norm() <= degenerate)
-          {
-            n.setZero();
-            n(0) = Real(1);
-          }
-          else
-          {
-            n /= n.norm();
-          }
-          measures[i] = measure;
-          normals[i] = n;
-        }
-
-        const auto edgeKey = [](Index a, Index b) -> std::uint64_t {
-          const auto lo = static_cast<std::uint64_t>(std::min(a, b));
-          const auto hi = static_cast<std::uint64_t>(std::max(a, b));
-          return (lo << 32) ^ hi;
-        };
-
-        // Facets sharing an incidence, keyed by the shared entity.
-        UnorderedMap<std::uint64_t, std::vector<std::size_t>> incident;
-        if (dimension == 2)
-        {
-          incident.reserve(2 * interfaceFacets.size());
-          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-          {
-            for (const Index v : mesh.getFace(interfaceFacets[i])->getVertices())
-              incident[static_cast<std::uint64_t>(v)].push_back(i);
-          }
-        }
-        else if (dimension == 3)
-        {
-          incident.reserve(3 * interfaceFacets.size());
-          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-          {
-            const auto& vv = mesh.getFace(interfaceFacets[i])->getVertices();
-            incident[edgeKey(vv[0], vv[1])].push_back(i);
-            incident[edgeKey(vv[1], vv[2])].push_back(i);
-            incident[edgeKey(vv[2], vv[0])].push_back(i);
-          }
-        }
-
-        NormalJump jump;
-        Real squared = 0;
-        Real weight = 0;
-        for (const auto& [key, faces] : incident)
-        {
-          (void)key;
-          for (std::size_t a = 0; a < faces.size(); ++a)
-          {
-            for (std::size_t b = a + 1; b < faces.size(); ++b)
-            {
-              const auto ia = faces[a], ib = faces[b];
-              const Real dot = std::abs(normals[ia].dot(normals[ib]));
-              const Real theta = std::acos(std::max(Real(-1), std::min(Real(1), dot)));
-              const Real w = Real(0.5) * (measures[ia] + measures[ib]);
-              squared += w * theta * theta;
-              weight += w;
-              jump.max = std::max(jump.max, theta);
-            }
-          }
-        }
-        jump.rms = weight > Real(0) ? std::sqrt(squared / weight) : Real(0);
-        return jump;
-      }
-
-      /**
        * @brief Robust scale @f$\sigma@f$ of the interface residual.
        *
        * The loss weight requires a scale separating the residuals to be fitted
@@ -2537,12 +2380,12 @@ namespace Rodin::Adaptation::SWIFT
             std::get_if<typename Variational::DirichletBCBase<Real>::ValueDOFs>(
               &condition.getDOFs());
           if (!values)
-            Alert::Exception() << "SWIFT supports homogeneous value conditions only."
-                               << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "SWIFT supports homogeneous value conditions only." << Alert::Raise;
           for (const auto& [dof, value] : *values)
           {
             if (value != Real(0))
-              Alert::Exception()
+              Alert::MemberFunctionException(*this, __func__)
                 << "SWIFT boundary increments must be zero." << Alert::Raise;
             m_fixedIncrementDOFs[dof] = Real(0);
           }

@@ -8,6 +8,7 @@
 #include <numeric>
 #include <cstdio>
 #include <limits>
+#include <memory>
 #include <stdexcept>
 
 #include <gtest/gtest.h>
@@ -39,6 +40,59 @@ static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
+  /// @brief A geometry-preserving extension records ownership of a registered map.
+  class TrackedTransformation final : public PolytopeTransformation
+  {
+    public:
+      TrackedTransformation(
+        const PolytopeTransformation& original, const std::shared_ptr<Index>& destroyed)
+        : PolytopeTransformation(original),
+          m_map(original.copy()),
+          m_destroyed(destroyed)
+      {}
+
+      TrackedTransformation(const TrackedTransformation& other)
+        : TrackedTransformation(*other.m_map, other.m_destroyed)
+      {}
+
+      ~TrackedTransformation() override
+      {
+        ++*m_destroyed;
+      }
+
+      size_t getOrder() const override
+      {
+        return m_map->getOrder();
+      }
+
+      void transform(
+        Math::SpatialPoint& physical, const Math::SpatialPoint& reference) const override
+      {
+        m_map->transform(physical, reference);
+      }
+
+      void jacobian(Math::SpatialMatrix<Real>& jacobian,
+        const Math::SpatialPoint& reference) const override
+      {
+        m_map->jacobian(jacobian, reference);
+      }
+
+      void inverse(
+        Math::SpatialPoint& reference, const Math::SpatialPoint& physical) const override
+      {
+        m_map->inverse(reference, physical);
+      }
+
+      TrackedTransformation* copy() const noexcept override
+      {
+        return new TrackedTransformation(*this);
+      }
+
+    private:
+      std::unique_ptr<PolytopeTransformation> m_map;
+      std::shared_ptr<Index> m_destroyed;
+  };
+
   /**
    * @brief Creates a local mesh with the incidences required for sharding.
    */
@@ -1221,6 +1275,89 @@ namespace Rodin::Tests::Unit
   // MPI Mesh — getArea() for 2D triangle mesh
   // =========================================================================
 
+  /// @brief Component setters update held vertices, cached cell maps and dimensional measure.
+  TEST(Rodin_MPI_Geometry_Mesh, ScalarCoordinateSettersRefreshAffineGeometry)
+  {
+    Context::MPI ctx(*g_env, *g_world);
+    for (size_t dimension : {2u, 3u})
+    {
+      auto mesh = dimension == 2
+        ? distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4})
+        : distributeFromRoot(ctx, Polytope::Type::Tetrahedron, {3, 3, 3});
+      const auto& shard = mesh.getShard();
+      const auto measure = [&]() {
+        return dimension == 2 ? mesh.getArea() : mesh.getVolume();
+      };
+      const Real initialMeasure = measure();
+      ASSERT_GT(initialMeasure, Real(0));
+      const auto cell = mesh.getCell(0);
+      Math::SpatialPoint reference(dimension);
+      for (size_t d = 0; d < dimension; ++d)
+        reference(d) = Real(1) / Real(dimension + 2);
+      const auto evaluate = [&]() {
+        const Point point(*cell, reference);
+        return std::pair{point.getPhysicalCoordinates(), point.getJacobian()};
+      };
+      const auto before = evaluate();
+      for (Index local = 0; local < shard.getVertexCount(); ++local)
+      {
+        const auto old = mesh.getVertexCoordinates(local);
+        Math::SpatialPoint updated(dimension);
+        for (size_t d = 0; d < dimension; ++d)
+          updated(d) = Real(d + 2) * old(d) + Real(d + 1) / Real(4);
+        for (size_t d = 0; d < dimension; ++d)
+          EXPECT_EQ(&mesh.setVertexCoordinates(local, updated(d), d), &mesh);
+        EXPECT_NEAR(
+          (mesh.getVertexCoordinates(local) - updated).norm(), Real(0), Real(1e-14));
+      }
+      const auto after = evaluate();
+      Math::SpatialPoint expected(dimension);
+      for (size_t d = 0; d < dimension; ++d)
+        expected(d) = Real(d + 2) * before.first(d) + Real(d + 1) / Real(4);
+      EXPECT_NEAR((after.first - expected).norm(), Real(0), Real(1e-12));
+      auto expectedJacobian = before.second;
+      for (size_t i = 0; i < dimension; ++i)
+      {
+        for (size_t j = 0; j < dimension; ++j)
+          expectedJacobian(i, j) *= Real(i + 2);
+      }
+      EXPECT_NEAR((after.second - expectedJacobian).norm(), Real(0), Real(1e-12));
+      EXPECT_NEAR(measure(), Real(dimension == 2 ? 6 : 24) * initialMeasure, Real(1e-10));
+    }
+  }
+
+  /// @brief Registering a local transformation is non-collective and transfers ownership.
+  TEST(Rodin_MPI_Geometry_Mesh, RegisteredTransformationPreservesMapAndOwnsLifetime)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    const auto destroyed = std::make_shared<Index>(0);
+    const bool selected = world.rank() == world.size() - 1;
+    {
+      auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+      if (selected)
+      {
+        const auto cell = mesh.getCell(0);
+        const Math::SpatialPoint reference{Real(0.2), Real(0.3)};
+        const auto evaluate = [&]() {
+          const Point point(*cell, reference);
+          return std::pair{point.getPhysicalCoordinates(), point.getJacobian()};
+        };
+        const auto before = evaluate();
+        auto* transformation =
+          new TrackedTransformation(mesh.getPolytopeTransformation(2, 0), destroyed);
+        EXPECT_EQ(&mesh.setPolytopeTransformation({2, 0}, transformation), &mesh);
+        EXPECT_EQ(&mesh.getPolytopeTransformation(2, 0), transformation);
+        const auto after = evaluate();
+        EXPECT_NEAR((after.first - before.first).norm(), Real(0), Real(1e-14));
+        EXPECT_NEAR((after.second - before.second).norm(), Real(0), Real(1e-14));
+        EXPECT_EQ(*destroyed, 0u);
+      }
+      world.barrier();
+    }
+    EXPECT_EQ(*destroyed, selected ? 1u : 0u);
+  }
+
   /**
    * @brief Verifies that MPIMesh::getArea() returns the correct total area
    * for a distributed 2D triangle mesh, matching the parent mesh area.
@@ -1412,14 +1549,12 @@ namespace Rodin::Tests::Unit
     Context::MPI ctx(*g_env, world);
     auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
-    EXPECT_THROW(mpiMesh.asSubMesh(), std::runtime_error)
-      << "Rank " << world.rank()
-      << ": asSubMesh() should throw std::runtime_error.";
+    EXPECT_THROW(mpiMesh.asSubMesh(), Alert::Exception)
+      << "Rank " << world.rank() << ": asSubMesh() should throw Alert::Exception.";
 
     const auto& constMesh = mpiMesh;
-    EXPECT_THROW(constMesh.asSubMesh(), std::runtime_error)
-      << "Rank " << world.rank()
-      << ": const asSubMesh() should throw std::runtime_error.";
+    EXPECT_THROW(constMesh.asSubMesh(), Alert::Exception)
+      << "Rank " << world.rank() << ": const asSubMesh() should throw Alert::Exception.";
   }
 
   /// @brief Verifies get quadrature for MPI geometry mesh by checking exact expected values, true predicates, MPI behavior.
@@ -2133,7 +2268,32 @@ namespace Rodin::Tests::Unit
     opts.maxOwnerRounds = 0;
     opts.strictRoundCap = true;
 
-    EXPECT_THROW(mpiMesh.reconcile(1, opts), std::runtime_error);
+    EXPECT_THROW(mpiMesh.reconcile(1, opts), Alert::Exception);
+  }
+
+  /// @brief The global-ID round cap raises an Alert identifying the member and cap.
+  TEST(Rodin_MPI_Geometry_Mesh, Reconcile_Edges2D_StrictGidRoundCapReportsContext)
+  {
+    const auto& world = *g_world;
+    if (world.size() < 2 || world.size() > 3)
+      GTEST_SKIP() << "Test requires 2 or 3 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mpiMesh = Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Triangle, {4, 4});
+    mpiMesh.getConnectivity().compute(1, 2);
+    Mesh<Context::MPI>::ReconcileOptions opts;
+    opts.maxGidRounds = 0;
+    opts.strictRoundCap = true;
+    try
+    {
+      mpiMesh.reconcile(1, opts);
+      FAIL() << "A strict zero global-ID round cap must be rejected.";
+    }
+    catch (const Alert::Exception& error)
+    {
+      EXPECT_NE(std::string(error.what()).find("reconcile"), std::string::npos);
+      EXPECT_NE(std::string(error.what()).find("maxGidRounds"), std::string::npos);
+    }
   }
 
   /**

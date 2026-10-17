@@ -8,7 +8,9 @@
 
 #include <array>
 #include <atomic>
+#include <limits>
 #include <memory>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -38,6 +40,40 @@ namespace Rodin::Tests::Unit
         .polytope(Polytope::Type::Triangle, {0, 1, 2})
         .finalize();
     }
+  }
+
+  /// @brief Rejected point indices preserve the mapped point and reference formula.
+  TEST(Geometry_PolytopeQuadrature, CheckedPointBoundsUseMemberContext)
+  {
+    auto mesh = makeTriangleMesh();
+    const auto polytope = *mesh.getPolytope(2, 0);
+    const QF::Centroid formula(Polytope::Type::Triangle);
+    const PolytopeQuadrature quadrature(polytope, formula);
+    ASSERT_EQ(quadrature.getSize(), 1u);
+    const auto* stored = &quadrature.getPoint(0);
+    const auto coordinates = stored->getPhysicalCoordinates();
+    for (size_t index : {size_t{1}, std::numeric_limits<size_t>::max()})
+    {
+      try
+      {
+        quadrature.getPoint(index);
+        ADD_FAILURE() << "Out-of-range quadrature points must be rejected.";
+      }
+      catch (const Alert::Exception& error)
+      {
+        EXPECT_NE(std::string(error.what()).find("getPoint"), std::string::npos);
+        EXPECT_NE(
+          std::string(error.what()).find("In member function"), std::string::npos);
+      }
+      catch (...)
+      {
+        ADD_FAILURE() << "Checked point access must raise an Alert exception.";
+      }
+    }
+    EXPECT_EQ(quadrature.getSize(), 1u);
+    EXPECT_EQ(&quadrature.getQuadratureFormula(), &formula);
+    EXPECT_EQ(&quadrature.getPoint(0), stored);
+    EXPECT_EQ((stored->getPhysicalCoordinates() - coordinates).norm(), 0);
   }
 
   /// @brief Verifies caches single formula per polytope for geometry polytope quadrature index by checking exact expected values.

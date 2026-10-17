@@ -1,3 +1,11 @@
+ignore:
+  - "tests/**"
+  - "src/Rodin/Test/**"
+  - "benchmarks/**"
+  - "third-party/**"
+  - "examples/**"
+  - "experiments/**"
+
 coverage:
   status:
     project:
@@ -5,10 +13,10 @@ coverage:
         # Compare library sources on both sides, matching RodinCoverage's
         # existing exclusion of test bodies and third-party dependencies.
         paths:
-          - "src/"
-        # Keep project coverage enforced, but allow tiny report jitter from
-        # documentation/comment-heavy changes and coverage upload variance.
-        threshold: 0.05%
+          - "src/Rodin/"
+        # Enforce the library coverage floor on the merged production report.
+        target: 95%
+        threshold: 0%
     patch:
       default:
         # Documentation and formatting PRs can touch executable headers without

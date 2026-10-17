@@ -97,6 +97,12 @@ gtest_discover_tests(RodinVariationalH1FaceConformityTest
     LABELS unit
 )
 
+add_executable(RodinVariationalH1FaceOrientationTest FaceOrientationTest.cpp)
+target_link_libraries(RodinVariationalH1FaceOrientationTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalH1FaceOrientationTest
+  PROPERTIES LABELS unit)
+
 add_executable(RodinVariationalH1GradTest GradTest.cpp)
 target_link_libraries(RodinVariationalH1GradTest
   PUBLIC

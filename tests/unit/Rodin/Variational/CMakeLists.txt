@@ -1,5 +1,32 @@
 rodin_add_compile_options(LANG CXX OPTIONS -Wno-error=use-after-free)
 
+add_executable(RodinVariationalGridFunctionRegionInterpolationTest
+  GridFunctionRegionInterpolationTest.cpp)
+target_link_libraries(RodinVariationalGridFunctionRegionInterpolationTest
+  PRIVATE GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalGridFunctionRegionInterpolationTest
+  PROPERTIES LABELS unit TIMEOUT 30)
+
+add_executable(RodinVariationalGridFunctionRegionQuadratureTest
+  GridFunctionRegionQuadratureTest.cpp)
+target_link_libraries(RodinVariationalGridFunctionRegionQuadratureTest
+  PRIVATE GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalGridFunctionRegionQuadratureTest
+  PROPERTIES LABELS unit TIMEOUT 30)
+
+add_executable(RodinVariationalP1HigherDerivativeTest P1HigherDerivativeTest.cpp)
+target_link_libraries(RodinVariationalP1HigherDerivativeTest
+  PRIVATE GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalP1HigherDerivativeTest
+  PROPERTIES LABELS unit TIMEOUT 30)
+
+add_executable(RodinVariationalDistinctSpaceQuadratureTest
+  DistinctSpaceQuadratureTest.cpp)
+target_link_libraries(RodinVariationalDistinctSpaceQuadratureTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalDistinctSpaceQuadratureTest
+  PROPERTIES LABELS unit TIMEOUT 300)
+
 add_executable(RodinVariationalWeightedComplexQuadratureTest
   WeightedComplexQuadratureTest.cpp)
 target_link_libraries(RodinVariationalWeightedComplexQuadratureTest
@@ -448,6 +475,11 @@ gtest_discover_tests(RodinVariationalFlowTest
     LABELS unit
 )
 
+add_executable(RodinVariationalFlowCrossingTest FlowCrossingTest.cpp)
+target_link_libraries(RodinVariationalFlowCrossingTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinVariationalFlowCrossingTest PROPERTIES LABELS unit TIMEOUT 120)
+
 add_executable(RodinVariationalJumpTest JumpTest.cpp)
 target_link_libraries(RodinVariationalJumpTest
   PUBLIC
@@ -772,3 +804,56 @@ add_executable(RodinVariationalCoefficientEvaluationTest CoefficientEvaluationTe
 target_link_libraries(RodinVariationalCoefficientEvaluationTest
   PUBLIC GTest::gtest GTest::gtest_main Rodin::Variational)
 gtest_discover_tests(RodinVariationalCoefficientEvaluationTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalFaceNormalTest FaceNormalTest.cpp)
+target_link_libraries(RodinVariationalFaceNormalTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalFaceNormalTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalP1DerivativeTest P1DerivativeTest.cpp)
+target_link_libraries(RodinVariationalP1DerivativeTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalP1DerivativeTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalDerivativeTraceTest DerivativeTraceTest.cpp)
+target_link_libraries(RodinVariationalDerivativeTraceTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalDerivativeTraceTest PROPERTIES LABELS unit TIMEOUT 300)
+
+add_executable(RodinVariationalPeriodicBCTest PeriodicBCTest.cpp)
+target_link_libraries(RodinVariationalPeriodicBCTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalPeriodicBCTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalNonlocalBlockTest NonlocalBlockTest.cpp)
+target_link_libraries(RodinVariationalNonlocalBlockTest
+  PRIVATE GTest::gtest GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalNonlocalBlockTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalSpaceLifecycleTest SpaceLifecycleTest.cpp)
+target_link_libraries(RodinVariationalSpaceLifecycleTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinVariationalSpaceLifecycleTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalQuadratureLifecycleTest QuadratureLifecycleTest.cpp)
+target_link_libraries(RodinVariationalQuadratureLifecycleTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinVariationalQuadratureLifecycleTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalMatrixDivLifecycleTest MatrixDivLifecycleTest.cpp)
+target_link_libraries(RodinVariationalMatrixDivLifecycleTest
+  PRIVATE GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalMatrixDivLifecycleTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinVariationalMatrixDerivativeLifecycleTest MatrixDerivativeLifecycleTest.cpp)
+target_link_libraries(RodinVariationalMatrixDerivativeLifecycleTest
+  PRIVATE GTest::gtest_main Rodin::Variational)
+gtest_discover_tests(RodinVariationalMatrixDerivativeLifecycleTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinVariationalProblemBodyCloneTest ProblemBodyCloneTest.cpp)
+target_link_libraries(RodinVariationalProblemBodyCloneTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinVariationalProblemBodyCloneTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)

@@ -15,6 +15,8 @@
 #ifndef RODIN_SCOTCH_MESHPARTITIONER_H
 #define RODIN_SCOTCH_MESHPARTITIONER_H
 
+#include <string>
+
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/MeshPartitioner.h"
 
@@ -55,11 +57,19 @@ namespace Rodin::Scotch
 
       void partition(size_t numPartitions, size_t d) override;
 
+      /**
+       * @brief Gets a stored partition assignment.
+       * @param index Entity index in the most recently partitioned dimension.
+       * @return Partition index for the selected entity.
+       * @throws Alert::Exception If no assignment exists for @p index.
+       */
       size_t getPartition(Index index) const override;
 
       /**
        * @brief Sets the SCOTCH partitioning strategy.
-       * @param strat Strategy object used by SCOTCH.
+       * Strategy contents are copied; the caller retains ownership of @p strat
+       * and may release it immediately after this call.
+       * @param strat Graph mapping strategy object used by SCOTCH.
        * @return Reference to this partitioner.
        */
       Partitioner& setStrategy(const SCOTCH_Strat& strat);
@@ -70,12 +80,15 @@ namespace Rodin::Scotch
       }
 
     private:
+      /// @brief Requested count of the most recent successful partition operation.
       size_t m_numPartitions;
+      /// @brief Mesh whose incidence graph is partitioned.
       std::reference_wrapper<const MeshType> m_mesh;
+      /// @brief Most recent successful assignment, indexed by mesh entity.
       std::vector<SCOTCH_Num> m_partition;
 
-      SCOTCH_Graph m_graph;
-      Optional<SCOTCH_Strat> m_strat;
+      /// @brief Independent serialized mapping strategy, absent for the Scotch default.
+      Optional<std::string> m_strategy;
   };
 }
 

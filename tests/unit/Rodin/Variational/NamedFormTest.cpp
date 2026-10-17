@@ -54,12 +54,14 @@ namespace Rodin::Tests::Unit
       return mesh;
     }
 
-    /// @brief Unit square as two triangles, split along one diagonal or the other.
-    ///
-    /// The two meshes have the same vertices, the same vertex count, the same
-    /// cell count and the same number of matrix nonzeros; only the diagonal
-    /// differs. That makes them indistinguishable by size alone, which is what
-    /// the scatter map's fingerprint has to catch.
+    /**
+     * @brief Unit square as two triangles, split along one diagonal or the other.
+     *
+     * The two meshes have the same vertices, the same vertex count, the same
+     * cell count and the same number of matrix nonzeros; only the diagonal
+     * differs. That makes them indistinguishable by size alone, which is what
+     * the scatter map's fingerprint has to catch.
+     */
     LocalMesh flippedSquare(bool flipped)
     {
       LocalMesh::Builder builder;
@@ -392,11 +394,13 @@ namespace Rodin::Tests::Unit
 #endif
   }
 
-  /// @brief Verifies an edge flip invalidates the cached scatter map.
-  ///
-  /// The flipped mesh matches the original in every count the validity check
-  /// looks at, so a pattern keyed on shape alone would be reused and would
-  /// scatter each cell matrix into the wrong entries.
+  /**
+   * @brief Verifies an edge flip invalidates the cached scatter map.
+   *
+   * The flipped mesh matches the original in every count the validity check
+   * looks at, so a pattern keyed on shape alone would be reused and would
+   * scatter each cell matrix into the wrong entries.
+   */
   TEST(Rodin_Variational_NamedForm, EdgeFlipInvalidatesScatterMap)
   {
     auto mesh = flippedSquare(false);
@@ -440,10 +444,12 @@ namespace Rodin::Tests::Unit
 #endif
   }
 
-  /// @brief Verifies the flip is also caught for a space with cached DOF maps.
-  ///
-  /// P1 rebuilds its map from the connectivity on every call; H1 order 2 hands
-  /// back a stored array. The fingerprint has to see through both.
+  /**
+   * @brief Verifies the flip is also caught for a space with cached DOF maps.
+   *
+   * P1 rebuilds its map from the connectivity on every call; H1 order 2 hands
+   * back a stored array. The fingerprint has to see through both.
+   */
   TEST(Rodin_Variational_NamedForm, EdgeFlipInvalidatesScatterMapH1P2)
   {
     auto mesh = flippedSquare(false);
@@ -493,4 +499,152 @@ namespace Rodin::Tests::Unit
 
     expectNear(problem.getLinearSystem().getOperator(), expected.getOperator());
   }
+}
+
+namespace
+{
+  /// @brief Foreign shape functions fail before changing valid assembled form state.
+  template <class Scalar>
+  void checkFormFunctionMismatches()
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    P1<Scalar> space(mesh);
+    TrialFunction u(space), foreignTrial(space);
+    TestFunction v(space), foreignTest(space);
+    BilinearForm bilinear(u, v);
+    bilinear = Integral(u, v);
+    bilinear.assemble();
+    const Math::Matrix<Scalar> originalOperator(bilinear.getOperator());
+    LinearForm linear(v);
+    linear = Integral(v);
+    linear.assemble();
+    const Math::Vector<Scalar> originalVector(linear.getVector());
+    const auto kernel = [](const Point&, const Point&) { return Scalar(1); };
+    for (const bool named : {false, true})
+    {
+      if (named)
+        foreignTrial.setName("foreign-trial");
+      const auto wrongTrial = Integral(foreignTrial, v);
+      const auto wrongTest = Integral(u, foreignTest);
+      const auto wrongGlobalTrial = Integral(Potential(kernel, foreignTrial), v);
+      const auto wrongGlobalTest = Integral(Potential(kernel, u), foreignTest);
+      EXPECT_THROW(bilinear += wrongTrial, Alert::Exception);
+      EXPECT_THROW(bilinear -= wrongTrial, Alert::Exception);
+      EXPECT_THROW(bilinear += wrongTest, Alert::Exception);
+      EXPECT_THROW(bilinear -= wrongTest, Alert::Exception);
+      EXPECT_THROW(bilinear += wrongGlobalTrial, Alert::Exception);
+      EXPECT_THROW(bilinear -= wrongGlobalTrial, Alert::Exception);
+      EXPECT_THROW(bilinear += wrongGlobalTest, Alert::Exception);
+      EXPECT_THROW(bilinear -= wrongGlobalTest, Alert::Exception);
+      EXPECT_THROW(linear = Integral(foreignTest), Alert::Exception);
+      EXPECT_THROW(linear += Integral(foreignTest), Alert::Exception);
+      EXPECT_THROW(linear -= Integral(foreignTest), Alert::Exception);
+      EXPECT_EQ(bilinear.getLocalIntegrators().size(), 1);
+      EXPECT_TRUE(bilinear.getGlobalIntegrators().empty());
+      EXPECT_EQ(linear.getIntegrators().size(), 1);
+      bilinear.assemble();
+      linear.assemble();
+      EXPECT_EQ(
+        (Math::Matrix<Scalar>(bilinear.getOperator()) - originalOperator).norm(), 0);
+      EXPECT_EQ((linear.getVector() - originalVector).norm(), 0);
+    }
+  }
+}
+
+TEST(Rodin_Variational_FormFunctionMismatch, RealFormsPreserveState)
+{
+  checkFormFunctionMismatches<Real>();
+}
+
+TEST(Rodin_Variational_FormFunctionMismatch, ComplexFormsPreserveState)
+{
+  checkFormFunctionMismatches<Complex>();
+}
+
+namespace
+{
+  /// @brief A constant kernel has the independently known outer-product matrix.
+  template <class Scalar>
+  void checkGlobalNegation()
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    P1<Scalar> space(mesh);
+    TrialFunction u(space);
+    TestFunction v(space);
+    const Scalar coefficient = [] {
+      if constexpr (std::is_same_v<Scalar, Complex>)
+        return Scalar(0.125, 0.25);
+      else
+        return Scalar(0.125);
+    }();
+    const auto kernel = [coefficient](const Point&, const Point&) { return coefficient; };
+    const auto integral = Integral(Potential(kernel, u), v);
+    UnaryMinus negative(integral);
+    auto copied = negative;
+    auto moved = std::move(copied);
+    std::unique_ptr<decltype(negative)> cloned(negative.copy());
+    Math::Vector<Scalar> moments(3);
+    moments << Scalar(0.5), Scalar(1), Scalar(0.5);
+    const Math::Matrix<Scalar> expected = -coefficient * moments * moments.transpose();
+    auto check = [&](const auto& expression) {
+      BilinearForm form(u, v);
+      form += expression;
+      form.assemble();
+      EXPECT_LT((Math::Matrix<Scalar>(form.getOperator()) - expected).norm(), 1e-12);
+    };
+    check(negative);
+    check(moved);
+    check(*cloned);
+    check(-integral);
+    FormLanguage::List<GlobalBilinearFormIntegratorBase<Scalar>> list;
+    list.add(integral);
+    auto negativeList = -list;
+    auto copiedList = negativeList;
+    auto movedList = std::move(copiedList);
+    std::unique_ptr<decltype(negativeList)> clonedList(negativeList.copy());
+    check(negativeList);
+    check(movedList);
+    check(*clonedList);
+    BilinearForm subtracted(u, v);
+    subtracted -= integral;
+    subtracted.assemble();
+    EXPECT_LT((Math::Matrix<Scalar>(subtracted.getOperator()) - expected).norm(), 1e-12);
+    BilinearForm subtractedList(u, v);
+    subtractedList -= list;
+    subtractedList.assemble();
+    EXPECT_LT(
+      (Math::Matrix<Scalar>(subtractedList.getOperator()) - expected).norm(), 1e-12);
+    auto restricted = Integral(Potential(kernel, u), v);
+    restricted.setTrialAttributes({17});
+    restricted.setTestAttributes({23});
+    BilinearForm selected(u, v);
+    selected += -restricted;
+    selected.assemble();
+    EXPECT_EQ(selected.getOperator().norm(), 0);
+    mesh.setAttribute({1, 0}, 17);
+    mesh.setAttribute({1, 1}, 23);
+    selected.assemble();
+    Math::Vector<Scalar> trialMoments(3), testMoments(3);
+    trialMoments << Scalar(0.5), Scalar(0.5), Scalar(0);
+    testMoments << Scalar(0), Scalar(0.5), Scalar(0.5);
+    const Math::Matrix<Scalar> selectedExpected =
+      -coefficient * testMoments * trialMoments.transpose();
+    EXPECT_LT(
+      (Math::Matrix<Scalar>(selected.getOperator()) - selectedExpected).norm(), 1e-12);
+    restricted.setTrialAttributes({999});
+    selected.getGlobalIntegrators().clear();
+    selected += -restricted;
+    selected.assemble();
+    EXPECT_EQ(selected.getOperator().norm(), 0);
+  }
+}
+
+TEST(Rodin_Variational_GlobalNegation, RealConstantKernel)
+{
+  checkGlobalNegation<Real>();
+}
+
+TEST(Rodin_Variational_GlobalNegation, ComplexConstantKernel)
+{
+  checkGlobalNegation<Complex>();
 }

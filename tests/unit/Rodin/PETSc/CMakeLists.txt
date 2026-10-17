@@ -21,6 +21,14 @@ set_tests_properties(RodinPETScNamedFormTest PROPERTIES
 )
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScNamedFormTest)
 
+add_executable(RodinPETScProblemLifecycleTest ProblemLifecycleTest.cpp)
+target_link_libraries(RodinPETScProblemLifecycleTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScProblemLifecycleTest
+  COMMAND $<TARGET_FILE:RodinPETScProblemLifecycleTest>)
+set_tests_properties(RodinPETScProblemLifecycleTest PROPERTIES LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScProblemLifecycleTest)
+
 add_executable(RodinPETScGridFunctionTest GridFunctionTest.cpp)
 target_link_libraries(RodinPETScGridFunctionTest
   PUBLIC
@@ -124,17 +132,31 @@ if (RODIN_USE_MPI)
     Rodin::MPI
     Rodin::PETSc)
 
+  # The named P2 matrix comparisons use most of the Debug suite's timeout.
+  # Give that case its own MPI invocation; retain all remaining and future
+  # cases in the complementary filter without increasing either timeout.
+  set(_RODIN_MPI_NAMED_FORM_CASE
+    "PETSc_MPI_Form.NamedScalarAndVectorP1AndP2MatchIntegrals")
   foreach(np 2 3 4)
+    add_test(
+      NAME RodinPETScMPINamedFormTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinPETScMPIFormTest>
+              "--gtest_filter=${_RODIN_MPI_NAMED_FORM_CASE}")
     add_test(
       NAME RodinPETScMPIFormTest_np${np}
       COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
               ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-              $<TARGET_FILE:RodinPETScMPIFormTest>)
-    set_tests_properties(RodinPETScMPIFormTest_np${np} PROPERTIES
-      LABELS "unit;petsc;distributed"
-      TIMEOUT 120
-    )
-    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIFormTest_np${np})
+              $<TARGET_FILE:RodinPETScMPIFormTest>
+              "--gtest_filter=-${_RODIN_MPI_NAMED_FORM_CASE}")
+    foreach(test RodinPETScMPINamedFormTest_np${np} RodinPETScMPIFormTest_np${np})
+      set_tests_properties(${test} PROPERTIES
+        LABELS "unit;petsc;distributed"
+        TIMEOUT 120
+      )
+      rodin_suppress_external_mpi_lsan_for_test(${test})
+    endforeach()
   endforeach()
 
   add_executable(RodinPETScMPIP0P0gTest MPIP0P0gTest.cpp)
@@ -166,13 +188,23 @@ if (RODIN_USE_MPI)
   # Separate the full order/range matrix from short legacy SubMesh checks.
   # The watchdog bounds protocol failures, not polynomial approximation error.
   foreach(np 1 2 3 4 8)
-    add_test(NAME RodinPETScMPIH1SubMeshRestrictionTest_np${np}
-      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
-        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
-        $<TARGET_FILE:RodinPETScMPIH1SubMeshRestrictionTest>)
-    set_tests_properties(RodinPETScMPIH1SubMeshRestrictionTest_np${np} PROPERTIES
-      LABELS "unit;petsc;distributed;slow" TIMEOUT 300 PROCESSORS ${np})
-    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIH1SubMeshRestrictionTest_np${np})
+    foreach(geometry Segment Triangle Quadrilateral Tetrahedron Pyramid Hexahedron Wedge)
+      foreach(mapping Affine Curved)
+        foreach(degree RANGE 1 6)
+          set(_h1_restriction_test
+            RodinPETScMPIH1SubMeshRestrictionTest_np${np}_${geometry}_${mapping}_K${degree})
+          add_test(NAME ${_h1_restriction_test}
+            COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+              ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+              $<TARGET_FILE:RodinPETScMPIH1SubMeshRestrictionTest>
+              "--gtest_filter=AllGeometriesAndDegrees/PETScMPISubMeshH1.ExplicitRestriction_AllOrdersBackendRanges/${geometry}_${mapping}_K${degree}")
+          set_tests_properties(${_h1_restriction_test} PROPERTIES
+            LABELS "unit;petsc;distributed;slow" TIMEOUT 300 PROCESSORS ${np})
+          rodin_suppress_external_mpi_lsan_for_test(${_h1_restriction_test}
+            "RODIN_TEST_TIMING=1")
+        endforeach()
+      endforeach()
+    endforeach()
   endforeach()
   target_link_libraries(RodinPETScMPISubMeshGridFunctionTest
     PUBLIC
@@ -221,6 +253,13 @@ endif()
 
 add_subdirectory(IO)
 
+add_executable(RodinPETScKSPLifecycleTest KSPLifecycleTest.cpp)
+target_link_libraries(RodinPETScKSPLifecycleTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScKSPLifecycleTest COMMAND $<TARGET_FILE:RodinPETScKSPLifecycleTest>)
+set_tests_properties(RodinPETScKSPLifecycleTest PROPERTIES LABELS "unit;petsc" TIMEOUT 60)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScKSPLifecycleTest)
+
 add_executable(RodinPETScSNESStateTest SNESStateTest.cpp)
 target_link_libraries(RodinPETScSNESStateTest
   PRIVATE GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
@@ -244,3 +283,53 @@ set_tests_properties(RodinPETScKSPFactorizationReuseTest PROPERTIES
   LABELS "unit;petsc"
 )
 rodin_suppress_external_mpi_lsan_for_test(RodinPETScKSPFactorizationReuseTest)
+
+if(RODIN_USE_MPI)
+  add_executable(RodinPETScMPIMixedTargetAssemblyTest MPIMixedTargetAssemblyTest.cpp)
+  target_link_libraries(RodinPETScMPIMixedTargetAssemblyTest PRIVATE
+    GTest::gtest Rodin::Geometry Rodin::Variational Rodin::MPI Rodin::PETSc)
+  foreach(np 1 2 3 4 8)
+    add_test(NAME RodinPETScMPIMixedTargetAssemblyTest_np${np}
+      COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+        ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+        $<TARGET_FILE:RodinPETScMPIMixedTargetAssemblyTest>)
+    set_tests_properties(RodinPETScMPIMixedTargetAssemblyTest_np${np} PROPERTIES
+      LABELS "unit;petsc;distributed" TIMEOUT 120)
+    rodin_suppress_external_mpi_lsan_for_test(RodinPETScMPIMixedTargetAssemblyTest_np${np})
+  endforeach()
+endif()
+
+add_executable(RodinPETScMixedTargetAssemblyTest MixedTargetAssemblyTest.cpp)
+target_link_libraries(RodinPETScMixedTargetAssemblyTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScMixedTargetAssemblyTest
+  COMMAND $<TARGET_FILE:RodinPETScMixedTargetAssemblyTest>)
+set_tests_properties(RodinPETScMixedTargetAssemblyTest PROPERTIES
+  LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScMixedTargetAssemblyTest)
+
+add_executable(RodinPETScSingleFieldTargetAssemblyTest SingleFieldTargetAssemblyTest.cpp)
+target_link_libraries(RodinPETScSingleFieldTargetAssemblyTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScSingleFieldTargetAssemblyTest
+  COMMAND $<TARGET_FILE:RodinPETScSingleFieldTargetAssemblyTest>)
+set_tests_properties(RodinPETScSingleFieldTargetAssemblyTest PROPERTIES
+  LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScSingleFieldTargetAssemblyTest)
+
+add_executable(RodinPETScSingleFieldConstraintTest SingleFieldConstraintTest.cpp)
+target_link_libraries(RodinPETScSingleFieldConstraintTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScSingleFieldConstraintTest
+  COMMAND $<TARGET_FILE:RodinPETScSingleFieldConstraintTest>)
+set_tests_properties(RodinPETScSingleFieldConstraintTest PROPERTIES
+  LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScSingleFieldConstraintTest)
+
+add_executable(RodinPETScRestrictedNonlocalTest RestrictedNonlocalTest.cpp)
+target_link_libraries(RodinPETScRestrictedNonlocalTest PRIVATE
+  GTest::gtest Rodin::Geometry Rodin::Variational Rodin::PETSc)
+add_test(NAME RodinPETScRestrictedNonlocalTest
+  COMMAND $<TARGET_FILE:RodinPETScRestrictedNonlocalTest>)
+set_tests_properties(RodinPETScRestrictedNonlocalTest PROPERTIES LABELS "unit;petsc" TIMEOUT 120)
+rodin_suppress_external_mpi_lsan_for_test(RodinPETScRestrictedNonlocalTest)

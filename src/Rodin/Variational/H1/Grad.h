@@ -18,6 +18,7 @@
  * where @f$ \phi_i @f$ are the H1<K> basis functions.
  */
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Math/Vector.h"
@@ -80,6 +81,11 @@ namespace Rodin::Variational
       void interpolate(SpatialVectorType& out, const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
+        if (!ip.getQuadratureFormula())
+        {
+          this->interpolate(out, p);
+          return;
+        }
         const auto& polytope = p.getPolytope();
         const size_t d = polytope.getDimension();
         const Index  i = polytope.getIndex();
@@ -667,8 +673,8 @@ namespace Rodin::Variational
           if (mesh.isSubMesh())
             if (auto restricted = mesh.asSubMesh().restriction(point))
               return getDerivativePoint(*restricted);
-          Alert::Exception() << "Derivative point is outside the finite element mesh."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Derivative point is outside the finite element mesh." << Alert::Raise;
         }
         const auto& poly = point.getPolytope();
         const size_t dimension = mesh.getDimension();
@@ -687,8 +693,8 @@ namespace Rodin::Variational
           cell->getTransformation().inverse(reference, point.getPhysicalCoordinates());
           return Geometry::Point(*cell, reference);
         }
-        Alert::Exception() << "Matrix derivative requires a determined trace domain."
-                           << Alert::Raise;
+        Alert::MemberFunctionException(*this, __func__)
+          << "Matrix derivative requires a determined trace domain." << Alert::Raise;
         return point;
       }
 

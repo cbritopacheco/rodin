@@ -15,6 +15,8 @@
 #include <optional>
 #include <functional>
 
+#include "Rodin/Types.h"
+
 namespace Rodin::Utility
 {
   /**

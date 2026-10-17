@@ -89,6 +89,8 @@ namespace Rodin::MMG
        * @param[out] dst Destination MMG mesh.
        *
        * Performs deep-copy allocation for dynamically owned MMG arrays.
+       * Cached cell adjacencies use MMG's three entries per triangle or four
+       * entries per tetrahedron, with five additional array entries.
        */
       static void copyMesh(const MMG5_pMesh src, MMG5_pMesh dst);
 

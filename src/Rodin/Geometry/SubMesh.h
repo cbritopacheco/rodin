@@ -15,6 +15,8 @@
 #include <functional>
 #include <boost/bimap.hpp>
 
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 #include "Mesh.h"
 
@@ -82,6 +84,7 @@ namespace Rodin::Geometry
        * @brief Gets the polytope index mapping for a dimension.
        * @param[in] d Dimension
        * @returns Bidirectional mapping between submesh and parent indices
+       * @throws Alert::Exception If no map slot exists for @p d.
        */
       virtual const PolytopeMap& getPolytopeMap(size_t d) const = 0;
 
@@ -293,7 +296,11 @@ namespace Rodin::Geometry
        */
       const PolytopeMap& getPolytopeMap(size_t d) const override
       {
-        return m_s2ps.at(d);
+        if (d >= m_s2ps.size())
+          Alert::MemberFunctionException(*this, __func__)
+            << "Polytope map dimension " << d << " is outside map count " << m_s2ps.size()
+            << '.' << Alert::Raise;
+        return m_s2ps[d];
       }
 
       /**

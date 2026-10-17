@@ -21,6 +21,7 @@
 #include <set>
 #include <limits>
 #include <numeric>
+#include <string>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -84,6 +85,48 @@ namespace
 }
 
 // ---------------------------------------------------------------------------
+
+/// @brief Dimension rejection is rank-local and preserves distributed submesh maps.
+TEST(MPI_Geometry_SubMesh, CheckedMapDimensionUsesMemberContext)
+{
+  Context::MPI ctx(*g_env, *g_world);
+  auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
+  SubMesh<Context::MPI>::Builder builder;
+  builder.initialize(mesh);
+  for (auto it = mesh.getBoundary(); it; ++it)
+    builder.include(mesh.getDimension() - 1, it->getIndex());
+  const auto boundary = builder.finalize();
+  const size_t d = boundary.getDimension();
+  const auto& map = boundary.getPolytopeMap(d);
+  const auto left = map.left;
+  const auto right = map.right;
+  EXPECT_TRUE(boundary.getPolytopeMap(mesh.getSpaceDimension()).left.empty());
+  for (size_t dimension :
+    {mesh.getSpaceDimension() + 1, std::numeric_limits<size_t>::max()})
+  {
+    if (dimension == std::numeric_limits<size_t>::max() && g_world->rank() != 0)
+      continue;
+    try
+    {
+      boundary.getPolytopeMap(dimension);
+      ADD_FAILURE() << "An unavailable map dimension must be rejected.";
+    }
+    catch (const Alert::Exception& error)
+    {
+      EXPECT_NE(std::string(error.what()).find("getPolytopeMap"), std::string::npos);
+      EXPECT_NE(std::string(error.what()).find("In member function"), std::string::npos);
+    }
+    catch (...)
+    {
+      ADD_FAILURE() << "Checked map access must raise an Alert exception.";
+    }
+  }
+  EXPECT_EQ(&boundary.getPolytopeMap(d), &map);
+  EXPECT_EQ(map.left, left);
+  EXPECT_EQ(map.right, right);
+  EXPECT_EQ(&boundary.getParent(), &mesh);
+  g_world->barrier();
+}
 
 /// @brief Verifies is sub mesh for MPI geometry sub mesh by checking true predicates, MPI behavior.
 TEST(MPI_Geometry_SubMesh, IsSubMesh)

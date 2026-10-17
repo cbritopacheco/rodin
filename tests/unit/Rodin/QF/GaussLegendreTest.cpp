@@ -67,8 +67,7 @@ TEST_F(GaussLegendreTest, PointGeometry)
   EXPECT_EQ(gl_point.getGeometry(), Polytope::Type::Point);
 
   const auto& point = gl_point.getPoint(0);
-  EXPECT_EQ(point.size(), 1);
-  EXPECT_DOUBLE_EQ(point[0], 0.0);
+  EXPECT_EQ(point.size(), 0);
   EXPECT_DOUBLE_EQ(gl_point.getWeight(0), 1.0);
 }
 

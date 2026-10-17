@@ -796,7 +796,7 @@ namespace Rodin::Geometry
     {
       case Type::Point:
       {
-        static const Math::SpatialPoint s_node{ 0 };
+        static const Math::SpatialPoint s_node{};
         return s_node;
       }
       case Type::Segment:
@@ -1192,15 +1192,10 @@ namespace Rodin::Geometry
       }
       case Type::Triangle:
       {
-        Real x = std::max(rc[0], Real(0));
-        Real y = std::max(rc[1], Real(0));
-        const Real s = x + y;
-        if (s <= Real(1)) { out[0] = x; out[1] = y; return; }
-        const Real t = 0.5 * (s - Real(1));
-        x = std::max(x - t, Real(0));
-        y = std::max(y - t, Real(0));
-        out[0] = std::clamp(x, Real(0), Real(1));
-        out[1] = std::clamp(y, Real(0), Real(1));
+        if (rc[0] >= 0 && rc[1] >= 0 && rc[0] + rc[1] <= 1)
+          out = rc;
+        else
+          boundary(out, rc);
         return;
       }
       case Type::Quadrilateral:
@@ -1251,17 +1246,13 @@ namespace Rodin::Geometry
       }
       case Type::Wedge:
       {
-        Real x = std::max(rc[0], Real(0));
-        Real y = std::max(rc[1], Real(0));
-        const Real s = x + y;
-        if (s > Real(1))
-        {
-          const Real t = 0.5 * (s - Real(1));
-          x = std::max(x - t, Real(0));
-          y = std::max(y - t, Real(0));
-        }
-        const Real z = std::clamp(rc[2], Real(0), Real(1));
-        out[0] = x; out[1] = y; out[2] = z;
+        Math::SpatialPoint input(2), projected;
+        input[0] = rc[0];
+        input[1] = rc[1];
+        Project(Type::Triangle).cell(projected, input);
+        out[0] = projected[0];
+        out[1] = projected[1];
+        out[2] = std::clamp(rc[2], Real(0), Real(1));
         return;
       }
     }
@@ -1387,15 +1378,15 @@ namespace Rodin::Geometry
         // ---------------------------
         // Face 1: x = 0, y>=0, z>=0, y+z <= 1
         {
-          Real y = std::max(rc[1], Real(0));
-          Real z = std::max(rc[2], Real(0));
-          const Real s = y + z;
-          if (s > Real(1))
-          {
-            const Real t = Real(0.5) * (s - Real(1));
-            y = std::max(y - t, Real(0));
-            z = std::max(z - t, Real(0));
-          }
+          Math::SpatialPoint faceInput(2), facePoint;
+          faceInput[0] = rc[1];
+          faceInput[1] = rc[2];
+          if (faceInput[0] >= 0 && faceInput[1] >= 0 && faceInput[0] + faceInput[1] <= 1)
+            facePoint = faceInput;
+          else
+            Project(Type::Triangle).boundary(facePoint, faceInput);
+          const Real y = facePoint[0];
+          const Real z = facePoint[1];
           const Real x = Real(0);
 
           const Real dx = rc[0] - x;
@@ -1413,15 +1404,15 @@ namespace Rodin::Geometry
         // ---------------------------
         // Face 2: y = 0, x>=0, z>=0, x+z <= 1
         {
-          Real x = std::max(rc[0], Real(0));
-          Real z = std::max(rc[2], Real(0));
-          const Real s = x + z;
-          if (s > Real(1))
-          {
-            const Real t = Real(0.5) * (s - Real(1));
-            x = std::max(x - t, Real(0));
-            z = std::max(z - t, Real(0));
-          }
+          Math::SpatialPoint faceInput(2), facePoint;
+          faceInput[0] = rc[0];
+          faceInput[1] = rc[2];
+          if (faceInput[0] >= 0 && faceInput[1] >= 0 && faceInput[0] + faceInput[1] <= 1)
+            facePoint = faceInput;
+          else
+            Project(Type::Triangle).boundary(facePoint, faceInput);
+          const Real x = facePoint[0];
+          const Real z = facePoint[1];
           const Real y = Real(0);
 
           const Real dx = rc[0] - x;
@@ -1439,15 +1430,15 @@ namespace Rodin::Geometry
         // ---------------------------
         // Face 3: z = 0, x>=0, y>=0, x+y <= 1
         {
-          Real x = std::max(rc[0], Real(0));
-          Real y = std::max(rc[1], Real(0));
-          const Real s = x + y;
-          if (s > Real(1))
-          {
-            const Real t = Real(0.5) * (s - Real(1));
-            x = std::max(x - t, Real(0));
-            y = std::max(y - t, Real(0));
-          }
+          Math::SpatialPoint faceInput(2), facePoint;
+          faceInput[0] = rc[0];
+          faceInput[1] = rc[1];
+          if (faceInput[0] >= 0 && faceInput[1] >= 0 && faceInput[0] + faceInput[1] <= 1)
+            facePoint = faceInput;
+          else
+            Project(Type::Triangle).boundary(facePoint, faceInput);
+          const Real x = facePoint[0];
+          const Real y = facePoint[1];
           const Real z = Real(0);
 
           const Real dx = rc[0] - x;
@@ -1512,18 +1503,12 @@ namespace Rodin::Geometry
       {
         auto sq = [](Real v) { return v * v; };
         auto projectTri = [](Real u, Real v, Real& ou, Real& ov) {
-          u = std::max(u, Real(0));
-          v = std::max(v, Real(0));
-          const Real s = u + v;
-          if (s <= Real(1))
-          {
-            ou = u;
-            ov = v;
-            return;
-          }
-          const Real t = Real(0.5) * (s - Real(1));
-          ou = std::max(u - t, Real(0));
-          ov = std::max(v - t, Real(0));
+          Math::SpatialPoint input(2), projected;
+          input[0] = u;
+          input[1] = v;
+          Project(Type::Triangle).cell(projected, input);
+          ou = projected[0];
+          ov = projected[1];
         };
 
         Real bestd = std::numeric_limits<Real>::infinity();
@@ -1563,15 +1548,12 @@ namespace Rodin::Geometry
       }
       case Type::Wedge:
       {
-        Real g0x = std::max(rc[0], Real(0));
-        Real g0y = std::max(rc[1], Real(0));
-        Real s = g0x + g0y;
-        if (s > Real(1))
-        {
-          const Real t0 = 0.5 * (s - Real(1));
-          g0x = std::max(g0x - t0, Real(0));
-          g0y = std::max(g0y - t0, Real(0));
-        }
+        Math::SpatialPoint input(2), projected;
+        input[0] = rc[0];
+        input[1] = rc[1];
+        Project(Type::Triangle).cell(projected, input);
+        const Real g0x = projected[0];
+        const Real g0y = projected[1];
         const Real g0z = Real(0);
 
         const Real g1x = std::clamp(rc[0], Real(0), Real(1));
@@ -1590,15 +1572,8 @@ namespace Rodin::Geometry
         const Real g3y = std::clamp(rc[1], Real(0), Real(1));
         const Real g3z = std::clamp(rc[2], Real(0), Real(1));
 
-        Real g4x = std::max(rc[0], Real(0));
-        Real g4y = std::max(rc[1], Real(0));
-        s = g4x + g4y;
-        if (s > Real(1))
-        {
-          const Real t1 = 0.5 * (s - Real(1));
-          g4x = std::max(g4x - t1, Real(0));
-          g4y = std::max(g4y - t1, Real(0));
-        }
+        const Real g4x = g0x;
+        const Real g4y = g0y;
         const Real g4z = Real(1);
 
         const Real d0 = (rc[0] - g0x) * (rc[0] - g0x) + (rc[1] - g0y) * (rc[1] - g0y) + (rc[2] - g0z) * (rc[2] - g0z);
@@ -1660,7 +1635,7 @@ namespace Rodin::Geometry
 
         const Real y = std::clamp(rc[1], Real(0), Real(1));
         out[0] = Real(0);
-        out[1] = Real(1) - y;
+        out[1] = y;
         return;
       }
       case Type::Quadrilateral:
@@ -1676,11 +1651,15 @@ namespace Rodin::Geometry
         }
         if (local == 2) {                    // y = 1,  (1,1) → (0,1)
           const Real x = std::clamp(rc[0], Real(0), Real(1));
-          out[0] = Real(1) - x; out[1] = Real(1); return;
+          out[0] = x;
+          out[1] = Real(1);
+          return;
         }
         {                                    // x = 0,  (0,1) → (0,0)
           const Real y = std::clamp(rc[1], Real(0), Real(1));
-          out[0] = Real(0); out[1] = Real(1) - y; return;
+          out[0] = Real(0);
+          out[1] = y;
+          return;
         }
       }
       case Type::Tetrahedron:
@@ -1688,15 +1667,12 @@ namespace Rodin::Geometry
         assert(local < 4);
 
         // --- Helpers (no std::sort)
-        auto proj_edge01 = [](Real u, Real v, Real& ou, Real& ov)
-        {
-          u = std::max(u, Real(0));
-          v = std::max(v, Real(0));
-          const Real s = u + v;
-          if (s <= Real(1)) { ou = u; ov = v; return; }
-          const Real t = Real(0.5) * (s - Real(1));
-          ou = std::max(u - t, Real(0));
-          ov = std::max(v - t, Real(0));
+        auto proj_edge01 = [](Real u, Real v, Real& ou, Real& ov) {
+          const Math::SpatialPoint input{u, v};
+          Math::SpatialPoint projected;
+          Project(Type::Triangle).cell(projected, input);
+          ou = projected[0];
+          ov = projected[1];
         };
 
         // Project (a,b,c) onto {x>=0,y>=0,z>=0,x+y+z=1} without std::sort:
@@ -1825,18 +1801,11 @@ namespace Rodin::Geometry
         assert(local < 5);
 
         auto projectTri = [](Real u, Real v, Real& ou, Real& ov) {
-          u = std::max(u, Real(0));
-          v = std::max(v, Real(0));
-          const Real s = u + v;
-          if (s <= Real(1))
-          {
-            ou = u;
-            ov = v;
-            return;
-          }
-          const Real t = Real(0.5) * (s - Real(1));
-          ou = std::max(u - t, Real(0));
-          ov = std::max(v - t, Real(0));
+          const Math::SpatialPoint input{u, v};
+          Math::SpatialPoint projected;
+          Project(Type::Triangle).cell(projected, input);
+          ou = projected[0];
+          ov = projected[1];
         };
 
         if (local == 0)
@@ -1884,16 +1853,13 @@ namespace Rodin::Geometry
         assert(local < 5);
         if (local == 0)
         {
-          Real x = std::max(rc[0], Real(0));
-          Real y = std::max(rc[1], Real(0));
-          const Real s = x + y;
-          if (s > Real(1))
-          {
-            const Real t = 0.5 * (s - Real(1));
-            x = std::max(x - t, Real(0));
-            y = std::max(y - t, Real(0));
-          }
-          out[0] = x; out[1] = y; out[2] = Real(0); return;
+          const Math::SpatialPoint input{rc[0], rc[1]};
+          Math::SpatialPoint projected;
+          Project(Type::Triangle).cell(projected, input);
+          out[0] = projected[0];
+          out[1] = projected[1];
+          out[2] = Real(0);
+          return;
         }
         if (local == 1)
         {
@@ -1917,16 +1883,13 @@ namespace Rodin::Geometry
           out[0] = Real(0); out[1] = y; out[2] = z; return;
         }
         {
-          Real x = std::max(rc[0], Real(0));
-          Real y = std::max(rc[1], Real(0));
-          const Real s = x + y;
-          if (s > Real(1))
-          {
-            const Real t = 0.5 * (s - Real(1));
-            x = std::max(x - t, Real(0));
-            y = std::max(y - t, Real(0));
-          }
-          out[0] = x; out[1] = y; out[2] = Real(1); return;
+          const Math::SpatialPoint input{rc[0], rc[1]};
+          Math::SpatialPoint projected;
+          Project(Type::Triangle).cell(projected, input);
+          out[0] = projected[0];
+          out[1] = projected[1];
+          out[2] = Real(1);
+          return;
         }
       }
     }

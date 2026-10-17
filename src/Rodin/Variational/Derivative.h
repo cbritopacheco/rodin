@@ -42,6 +42,8 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "Rodin/Alert/MemberFunctionException.h"
+
 #include "ForwardDecls.h"
 #include "Grad.h"
 #include "Rodin/Variational/IntegrationPoint.h"
@@ -265,6 +267,17 @@ namespace Rodin::Variational
       const OperandType& getOperand() const
       {
         return m_u.get();
+      }
+
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param polytope Mesh entity used by this operation.
+       * @returns Polynomial order on the entity, or an empty optional when unavailable.
+       */
+      constexpr Optional<size_t> getOrder(
+        const Geometry::Polytope& polytope) const noexcept
+      {
+        return static_cast<const Derived&>(*this).getOrder(polytope);
       }
 
       /**
@@ -572,7 +585,7 @@ namespace Rodin::Variational
         gradientExpression.traceOf(this->getTraceDomain());
         const auto gradient = gradientExpression.getValue(point);
         if (m_direction >= gradient.getDimension(2))
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Partial derivative direction exceeds the spatial dimension."
             << Alert::Raise;
         RangeType value(gradient.getDimension(0), gradient.getDimension(1));
@@ -701,7 +714,7 @@ namespace Rodin::Variational
       {
         const auto gradient = m_gradient.getBasis(local);
         if (m_direction >= gradient.getDimension(2))
-          Alert::Exception()
+          Alert::MemberFunctionException(*this, __func__)
             << "Partial derivative direction exceeds the spatial dimension."
             << Alert::Raise;
         RangeType value(gradient.getDimension(0), gradient.getDimension(1));

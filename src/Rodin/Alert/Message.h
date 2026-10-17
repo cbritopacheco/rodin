@@ -254,7 +254,7 @@ namespace Rodin::Alert
        *
        * Default behavior outputs the formatted message to the configured
        * output stream. Derived classes may override this to add additional
-       * behavior (e.g., Exception terminates the program).
+       * behavior (e.g., Exception throws after writing the diagnostic).
        */
       virtual void raise() const
       {

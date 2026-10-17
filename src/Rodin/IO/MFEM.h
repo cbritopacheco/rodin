@@ -7,6 +7,7 @@
 #ifndef RODIN_IO_MFEM_H
 #define RODIN_IO_MFEM_H
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include <boost/bimap.hpp>
 #include <boost/spirit/home/x3.hpp>
 #include <algorithm>
@@ -1837,7 +1838,11 @@ namespace Rodin::IO
        * @param[in,out] mesh Mesh object to populate with loaded data
        */
       MeshLoader(ObjectType& mesh)
-        : MeshLoaderBase<Context::Local>(mesh)
+        : MeshLoaderBase<Context::Local>(mesh),
+          m_dimension(0),
+          m_spaceDimension(0),
+          m_currentLineNumber(0),
+          m_header()
       {}
 
       /**
@@ -2077,9 +2082,17 @@ namespace Rodin::IO
         std::vector<ScalarType> tmp(n);
 
         line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
-        tmp[0] = static_cast<ScalarType>(std::stod(line));
+        std::istringstream first(line);
+        if (!(first >> tmp[0]))
+          Alert::MemberFunctionException(*this, __func__)
+            << "Invalid first MFEM coefficient." << Alert::Raise;
         for (size_t i = 1; i < n; ++i)
-          is >> tmp[i];
+        {
+          if (!(is >> tmp[i]))
+            Alert::MemberFunctionException(*this, __func__)
+              << "Expected " << n << " MFEM coefficients; invalid or missing value at "
+              << i << "." << Alert::Raise;
+        }
 
         // Convert from MFEM file ordering -> Rodin internal (block-by-component):
         // internal index = v + c*vn
@@ -3923,12 +3936,14 @@ namespace Rodin::IO
         if (!(dimensionLine >> keyword >> vdim) || keyword != "VDim:" ||
           vdim != components || !(orderingLine >> keyword >> ordering) ||
           keyword != "Ordering:" || ordering > 1)
-          Alert::Exception() << "Invalid MFEM matrix field header." << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Invalid MFEM matrix field header." << Alert::Raise;
         std::vector<Scalar> values(scalar.getSize() * components);
         for (auto& value : values)
         {
           if (!(is >> value))
-            Alert::Exception() << "Truncated MFEM matrix data." << Alert::Raise;
+            Alert::MemberFunctionException(*this, __func__)
+              << "Truncated MFEM matrix data." << Alert::Raise;
         }
         for (size_t c = 0; c < components; ++c)
         {

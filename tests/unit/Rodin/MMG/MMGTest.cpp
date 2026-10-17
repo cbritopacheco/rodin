@@ -8,14 +8,280 @@
 #include <sstream>
 #include <cmath>
 #include <vector>
+#include <array>
+#include <algorithm>
+#include <set>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
 #include <Rodin/MMG.h>
+#include <Rodin/MMG/MeshLoader.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
+
+/// @brief Native mesh copies own their arrays and survive source destruction.
+TEST(MMG5Lifecycle, MeshCopyIsIndependent)
+{
+  using Native = MMG::MMG5;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  for (auto type : {Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
+  {
+    const bool volume = type == Polytope::Type::Tetrahedron;
+    auto mesh = volume ? LocalMesh::UniformGrid(type, {2, 2, 2})
+                       : LocalMesh::UniformGrid(type, {2, 2});
+    Owner source(Native::rodinToMesh(mesh), Native::destroyMesh);
+    Owner copy(
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+    ASSERT_NE(copy, nullptr);
+    Native::copyMesh(source.get(), copy.get());
+    EXPECT_EQ(copy->np, source->np);
+    EXPECT_EQ(copy->nt, source->nt);
+    EXPECT_EQ(copy->ne, source->ne);
+    EXPECT_NE(copy->point, source->point);
+    if (source->namein)
+    {
+      EXPECT_NE(copy->namein, source->namein);
+    }
+    EXPECT_STREQ(copy->namein, source->namein);
+    EXPECT_STREQ(copy->nameout, source->nameout);
+    for (int i = 1; i <= source->np; ++i)
+    {
+      for (int axis = 0; axis < 3; ++axis)
+        EXPECT_EQ(copy->point[i].c[axis], source->point[i].c[axis]);
+    }
+    const auto coordinate = copy->point[1].c[0];
+    source->point[1].c[0] += 10;
+    EXPECT_EQ(copy->point[1].c[0], coordinate);
+    source.reset();
+    auto restored = Native::meshToRodin(copy.get());
+    EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
+  }
+}
+
+/// @brief Mesh copies retain independently owned remeshing and material policies.
+TEST(MMG5Lifecycle, MeshCopyPreservesMaterialPoliciesAfterSourceDestruction)
+{
+  using Native = MMG::MMG5;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  Owner source(Native::rodinToMesh(mesh), Native::destroyMesh);
+  ASSERT_EQ(MMG3D_Set_inputMeshName(source.get(), "source.mesh"), 1);
+  ASSERT_EQ(MMG3D_Set_outputMeshName(source.get(), "adapted.mesh"), 1);
+  ASSERT_EQ(
+    MMG3D_Set_iparameter(source.get(), nullptr, MMG3D_IPARAM_numberOfLocalParam, 1), 1);
+  ASSERT_EQ(MMG3D_Set_localParameter(
+              source.get(), nullptr, MMG5_Tetrahedron, 17, 0.125, 0.75, 0.0625),
+    1);
+  ASSERT_EQ(
+    MMG3D_Set_iparameter(source.get(), nullptr, MMG3D_IPARAM_numberOfLSBaseReferences, 1),
+    1);
+  ASSERT_EQ(MMG3D_Set_lsBaseReference(source.get(), nullptr, 31), 1);
+  ASSERT_EQ(MMG3D_Set_iparameter(source.get(), nullptr, MMG3D_IPARAM_numberOfMat, 2), 1);
+  ASSERT_EQ(MMG3D_Set_multiMat(source.get(), nullptr, 17, MMG5_MMAT_Split, 71, 73), 1);
+  ASSERT_EQ(MMG3D_Set_multiMat(source.get(), nullptr, 23, MMG5_MMAT_NoSplit, 23, 23), 1);
+  Owner copy(
+    static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+  ASSERT_NE(copy, nullptr);
+  Native::copyMesh(source.get(), copy.get());
+  ASSERT_NE(source->info.par, nullptr);
+  ASSERT_NE(source->info.br, nullptr);
+  ASSERT_NE(source->info.mat, nullptr);
+  ASSERT_NE(source->info.invmat.lookup, nullptr);
+  ASSERT_NE(copy->info.par, nullptr);
+  ASSERT_NE(copy->info.br, nullptr);
+  ASSERT_NE(copy->info.mat, nullptr);
+  ASSERT_NE(copy->info.invmat.lookup, nullptr);
+  EXPECT_NE(copy->info.par, source->info.par);
+  EXPECT_NE(copy->info.br, source->info.br);
+  EXPECT_NE(copy->info.mat, source->info.mat);
+  EXPECT_NE(copy->info.invmat.lookup, source->info.invmat.lookup);
+  EXPECT_NE(copy->namein, source->namein);
+  EXPECT_NE(copy->nameout, source->nameout);
+  source->info.par[0].hmin = 0.25;
+  source->info.mat[0].rin = 79;
+  ASSERT_EQ(MMG3D_Set_inputMeshName(source.get(), "changed.mesh"), 1);
+  ASSERT_EQ(MMG3D_Set_outputMeshName(source.get(), "changed-output.mesh"), 1);
+  source.reset();
+  EXPECT_STREQ(copy->namein, "source.mesh");
+  EXPECT_STREQ(copy->nameout, "adapted.mesh");
+  ASSERT_EQ(copy->info.npar, 1);
+  EXPECT_EQ(copy->info.par[0].elt, MMG5_Tetrahedron);
+  EXPECT_EQ(copy->info.par[0].ref, 17);
+  EXPECT_DOUBLE_EQ(copy->info.par[0].hmin, 0.125);
+  EXPECT_DOUBLE_EQ(copy->info.par[0].hmax, 0.75);
+  EXPECT_DOUBLE_EQ(copy->info.par[0].hausd, 0.0625);
+  ASSERT_EQ(copy->info.nbr, 1);
+  EXPECT_EQ(copy->info.br[0], 31);
+  MMG5_int interior = 0, exterior = 0;
+  EXPECT_EQ(MMG5_isSplit(copy.get(), 17, &interior, &exterior), 1);
+  EXPECT_EQ(interior, 71);
+  EXPECT_EQ(exterior, 73);
+  EXPECT_EQ(MMG5_isSplit(copy.get(), 23, &interior, &exterior), 0);
+  MMG5_int parent = 0;
+  ASSERT_EQ(MMG5_getStartRef(copy.get(), 71, &parent), 1);
+  EXPECT_EQ(parent, 17);
+  ASSERT_EQ(MMG5_getStartRef(copy.get(), 73, &parent), 1);
+  EXPECT_EQ(parent, 17);
+  const auto restored = Native::meshToRodin(copy.get());
+  EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
+  EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
+  EXPECT_NEAR(restored.getVolume(), 1, 1e-12);
+}
+
+/// @brief Scalar/vector native solution copies and swaps preserve ownership.
+TEST(MMG5Lifecycle, SolutionCopyAndSwap)
+{
+  using Native = MMG::MMG5;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> native(
+    Native::rodinToMesh(mesh), Native::destroyMesh);
+  using Owner = std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)>;
+  EXPECT_EQ(Native::createSolution(native.get(), 0), nullptr);
+  EXPECT_EQ(Native::createSolution(native.get(), 4), nullptr);
+  for (size_t dimension : {1, 2, 3})
+  {
+    Owner source(
+      Native::createSolution(native.get(), dimension), Native::destroySolution);
+    Owner copy(
+      static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), Native::destroySolution);
+    ASSERT_NE(source, nullptr);
+    ASSERT_NE(copy, nullptr);
+    const size_t count = dimension * (source->np + 1);
+    for (size_t i = 0; i < count; ++i)
+      source->m[i] = 0.25 + i;
+    Native::copySolution(source.get(), copy.get());
+    EXPECT_NE(copy->m, source->m);
+    for (size_t i = 0; i < count; ++i)
+      EXPECT_EQ(copy->m[i], source->m[i]);
+    source->m[1] = -100;
+    EXPECT_EQ(copy->m[1], 1.25);
+    Native::swapSolution(source.get(), copy.get());
+    EXPECT_EQ(source->m[1], 1.25);
+    EXPECT_EQ(copy->m[1], -100);
+    source.reset();
+    EXPECT_EQ(copy->m[count - 1], 0.25 + count - 1);
+  }
+  Native::destroySolution(nullptr);
+}
+
+/// @brief Surface conversion retains coordinates, triangles and attributed edge references.
+TEST(MMG5Lifecycle, SurfaceConversionPreservesGeometryAndAttributes)
+{
+  using Native = MMG::MMG5;
+  auto volume = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  volume.getConnectivity().compute(2, 3);
+  auto surface = volume.skin();
+  surface.getConnectivity().compute(1, 2);
+  for (auto cell = surface.getCell(); cell; ++cell)
+    surface.setAttribute({2, cell->getIndex()}, 17);
+  size_t attributedEdges = 0;
+  for (auto edge = surface.getFace(); edge; ++edge)
+  {
+    if (edge->getIndex() % 2 == 0)
+    {
+      surface.setAttribute({1, edge->getIndex()}, 23);
+      ++attributedEdges;
+    }
+  }
+  std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> native(
+    Native::rodinToMesh(surface), Native::destroyMesh);
+  ASSERT_TRUE(Native::isSurfaceMesh(native.get()));
+  EXPECT_EQ(native->np, surface.getVertexCount());
+  EXPECT_EQ(native->nt, surface.getCellCount());
+  EXPECT_EQ(native->na, attributedEdges);
+  for (int i = 1; i <= native->nt; ++i)
+    EXPECT_EQ(native->tria[i].ref, 17);
+  for (int i = 1; i <= native->na; ++i)
+    EXPECT_EQ(native->edge[i].ref, 23);
+  auto restored = Native::meshToRodin(native.get());
+  EXPECT_EQ(restored.getDimension(), 2u);
+  EXPECT_EQ(restored.getSpaceDimension(), 3u);
+  EXPECT_EQ(restored.getVertexCount(), surface.getVertexCount());
+  EXPECT_EQ(restored.getCellCount(), surface.getCellCount());
+  std::set<std::array<Real, 3>> expected, actual;
+  for (auto vertex = surface.getVertex(); vertex; ++vertex)
+  {
+    const auto& x = vertex->getCoordinates();
+    expected.insert({x[0], x[1], x[2]});
+  }
+  for (auto vertex = restored.getVertex(); vertex; ++vertex)
+  {
+    const auto& x = vertex->getCoordinates();
+    actual.insert({x[0], x[1], x[2]});
+  }
+  EXPECT_EQ(actual, expected);
+  for (auto cell = restored.getCell(); cell; ++cell)
+    EXPECT_EQ(cell->getAttribute(), Optional<Attribute>(17));
+  restored.getConnectivity().compute(1, 2);
+  size_t restoredReferences = 0;
+  for (auto edge = restored.getFace(); edge; ++edge)
+  {
+    if (edge->getAttribute() == Optional<Attribute>(23))
+      ++restoredReferences;
+  }
+  EXPECT_EQ(restoredReferences, attributedEdges);
+  const auto keys = [](const LocalMesh& mesh, size_t dimension, Attribute attribute) {
+    std::set<std::vector<std::array<Real, 3>>> result;
+    for (auto polytope = mesh.getPolytope(dimension); polytope; ++polytope)
+    {
+      if (polytope->getAttribute() != Optional<Attribute>(attribute))
+        continue;
+      std::vector<std::array<Real, 3>> vertices;
+      for (const auto index : polytope->getVertices())
+      {
+        const auto& x = mesh.getVertexCoordinates(index);
+        vertices.push_back({x[0], x[1], x[2]});
+      }
+      std::sort(vertices.begin(), vertices.end());
+      result.insert(std::move(vertices));
+    }
+    return result;
+  };
+  EXPECT_EQ(keys(restored, 2, 17), keys(surface, 2, 17));
+  EXPECT_EQ(keys(restored, 1, 23), keys(surface, 1, 23));
+}
+
+/// @brief All three native backends receive the configured remeshing parameters.
+TEST(MMG5Lifecycle, ParameterForwardingMatchesEveryBackend)
+{
+  /// @brief Exposes parameter forwarding without invoking a remeshing algorithm.
+  class Parameters : public MMG::MMG5
+  {
+    public:
+      using MMG::MMG5::setParameters;
+  };
+  using Native = MMG::MMG5;
+  auto planar = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  auto volume = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+  volume.getConnectivity().compute(2, 3);
+  auto surface = volume.skin();
+  surface.getConnectivity().compute(1, 2);
+  const auto check = [](const LocalMesh& mesh) {
+    std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)> native(
+      Native::rodinToMesh(mesh), Native::destroyMesh);
+    Parameters parameters;
+    parameters.setHMin(0.125)
+      .setHMax(0.75)
+      .setHausdorff(0.0625)
+      .setGradation(1.75)
+      .setAngleDetection(false);
+    EXPECT_EQ(&parameters.setParameters(native.get()), &parameters);
+    EXPECT_DOUBLE_EQ(native->info.hmin, 0.125);
+    EXPECT_DOUBLE_EQ(native->info.hmax, 0.75);
+    EXPECT_DOUBLE_EQ(native->info.hausd, 0.0625);
+    EXPECT_NEAR(native->info.hgrad, std::log(1.75), 1e-14);
+    EXPECT_EQ(native->info.dhd, -1);
+    parameters.setAngleDetection(true);
+    parameters.setParameters(native.get());
+    EXPECT_GT(native->info.dhd, 0);
+  };
+  check(planar);
+  check(surface);
+  check(volume);
+}
 
 namespace Rodin::Tests::Unit
 {
@@ -547,6 +813,82 @@ namespace Rodin::Tests::Unit
   // ========================================================================
   // MMG::Mesh I/O roundtrip tests (MEDIT format)
   // ========================================================================
+
+  /// @brief Invalid and overflowing metadata numbers report the section and member context.
+  TEST(Rodin_MMG_Mesh_IO, MalformedMetadataIndicesUseMemberContext)
+  {
+    auto source = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    source.getConnectivity().compute(1, 3);
+    source.getConnectivity().compute(2, 3);
+    std::ostringstream body;
+    IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Local>(source).printMesh(body, false);
+    for (const auto keyword : {IO::MEDIT::Keyword::Corners, IO::MEDIT::Keyword::Ridges,
+           IO::MEDIT::Keyword::RequiredEdges, IO::MEDIT::Keyword::RequiredVertices,
+           IO::MEDIT::Keyword::RequiredTriangles, IO::MEDIT::Keyword::RequiredTetrahedra})
+    {
+      for (const std::string& token :
+        {std::string("not-a-number"), std::string(128, '9')})
+      {
+        SCOPED_TRACE(IO::MEDIT::toCharString(keyword));
+        SCOPED_TRACE(token);
+        std::istringstream input(
+          body.str() + IO::MEDIT::toCharString(keyword) + "\n1\n" + token + "\nEnd\n");
+        MMG::Mesh loaded;
+        MMG::MeshLoader loader(loaded);
+        try
+        {
+          loader.load(input);
+          ADD_FAILURE() << "Malformed metadata numbers must be rejected.";
+        }
+        catch (const Alert::Exception& error)
+        {
+          const std::string message = error.what();
+          EXPECT_NE(message.find("In member function"), std::string::npos);
+          EXPECT_NE(message.find("readIndex"), std::string::npos);
+          EXPECT_NE(message.find(IO::MEDIT::toCharString(keyword)), std::string::npos);
+          EXPECT_NE(message.find(token), std::string::npos);
+        }
+        catch (...)
+        {
+          ADD_FAILURE() << "Metadata number errors must raise an Alert exception.";
+        }
+      }
+    }
+  }
+
+  /// @brief Every MMG metadata section retains one-based indexing and surrounding whitespace.
+  TEST(Rodin_MMG_Mesh_IO, MetadataIndicesPreserveValidSectionAssignments)
+  {
+    auto source = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    source.getConnectivity().compute(1, 3);
+    source.getConnectivity().compute(2, 3);
+    std::ostringstream body;
+    IO::MeshPrinter<IO::FileFormat::MEDIT, Context::Local>(source).printMesh(body, false);
+    const std::array keywords{IO::MEDIT::Keyword::Corners, IO::MEDIT::Keyword::Ridges,
+      IO::MEDIT::Keyword::RequiredEdges, IO::MEDIT::Keyword::RequiredVertices,
+      IO::MEDIT::Keyword::RequiredTriangles, IO::MEDIT::Keyword::RequiredTetrahedra};
+    for (size_t section = 0; section < keywords.size(); ++section)
+    {
+      for (const std::string& token : {std::string("1"), std::string("  1  ")})
+      {
+        SCOPED_TRACE(IO::MEDIT::toCharString(keywords[section]));
+        std::istringstream input(body.str() + IO::MEDIT::toCharString(keywords[section]) +
+          "\n1\n" + token + "\nEnd\n");
+        MMG::Mesh loaded;
+        MMG::MeshLoader(loaded).load(input);
+        EXPECT_EQ(loaded.getVertexCount(), source.getVertexCount());
+        EXPECT_EQ(loaded.getCellCount(), source.getCellCount());
+        const std::array<const IndexSet*, 6> indices{&loaded.getCorners(),
+          &loaded.getRidges(), &loaded.getRequiredEdges(), &loaded.getRequiredVertices(),
+          &loaded.getRequiredTriangles(), &loaded.getRequiredTetrahedra()};
+        for (size_t i = 0; i < indices.size(); ++i)
+        {
+          EXPECT_EQ(indices[i]->size(), i == section ? 1u : 0u);
+          EXPECT_EQ(indices[i]->count(0), i == section ? 1u : 0u);
+        }
+      }
+    }
+  }
 
   /// @brief Verifies save load MEDIT roundtrip for MMG mesh IO by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITRoundtrip)
@@ -3081,4 +3423,277 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(gf[i], static_cast<Real>(i * 2), 1e-14);
     }
   }
+}
+
+/// @brief Reusing a volume cutter applies the current labels and exact affine interface.
+TEST(Rodin_MMG_LevelSetDiscretizer, ReusedAffineVolumeCutUsesCurrentMaterialLabels)
+{
+  constexpr Attribute material = 17;
+  constexpr Attribute boundary = 71;
+  constexpr Real isovalue = 0.37;
+  MMG::Mesh mesh;
+  mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+  mesh.scale(0.5);
+  for (auto cell = mesh.getCell(); cell; ++cell)
+    mesh.setAttribute({3, cell->getIndex()}, material);
+  P1 space(mesh);
+  MMG::RealGridFunction levelSet(space);
+  levelSet = [](const Point& point) { return point.x(); };
+  MMG::LevelSetDiscretizer cutter;
+  cutter.setLevelSet(isovalue)
+    .setBoundaryReference(boundary)
+    .setRMC(0)
+    .setBaseReferences(material)
+    .setHMax(0.4);
+  for (const auto labels : {MMG::Split{41, 42}, MMG::Split{51, 52}, MMG::Split{41, 42}})
+  {
+    cutter.setSplit({{material, labels}});
+    auto result = cutter.discretize(levelSet);
+    ASSERT_FALSE(result.isEmpty());
+    EXPECT_EQ(result.getDimension(), 3);
+    Real inside = 0, outside = 0, interfaceArea = 0;
+    for (auto cell = result.getCell(); cell; ++cell)
+    {
+      const auto attribute = cell->getAttribute();
+      ASSERT_TRUE(attribute);
+      const Real measure = cell->getMeasure();
+      if (*attribute == labels.interior)
+      {
+        inside += measure;
+        for (const auto vertex : cell->getVertices())
+          EXPECT_LE(result.getVertexCoordinates(vertex).x(), isovalue + 1e-10);
+      }
+      else
+      {
+        EXPECT_EQ(*attribute, labels.exterior);
+        outside += measure;
+        for (const auto vertex : cell->getVertices())
+          EXPECT_GE(result.getVertexCoordinates(vertex).x(), isovalue - 1e-10);
+      }
+    }
+    for (auto face = result.getFace(); face; ++face)
+    {
+      if (face->getAttribute() != boundary)
+        continue;
+      interfaceArea += face->getMeasure();
+      for (const auto vertex : face->getVertices())
+        EXPECT_NEAR(result.getVertexCoordinates(vertex).x(), isovalue, 1e-10);
+    }
+    EXPECT_NEAR(inside, isovalue, 1e-10);
+    EXPECT_NEAR(outside, 1 - isovalue, 1e-10);
+    EXPECT_NEAR(interfaceArea, 1, 1e-10);
+  }
+}
+
+/// @brief Surface cutting preserves a planar square and emits the exact affine contour.
+TEST(Rodin_MMG_LevelSetDiscretizer, AffineSurfaceCutPreservesAreaAndContour)
+{
+  constexpr Attribute boundary = 71;
+  constexpr Real isovalue = 0.37;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  mesh.scale(0.5);
+  Mesh<Context::Local>::Builder builder;
+  builder.initialize(3).nodes(mesh.getVertexCount());
+  for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+  {
+    const auto& coordinates = vertex->getCoordinates();
+    builder.vertex({coordinates.x(), coordinates.y(), 0});
+  }
+  for (auto cell = mesh.getCell(); cell; ++cell)
+  {
+    const auto& vertices = cell->getVertices();
+    builder.polytope(Polytope::Type::Triangle, {vertices[0], vertices[1], vertices[2]});
+  }
+  auto surface = builder.finalize();
+  surface.getConnectivity().compute(1, 2);
+  P1 space(surface);
+  MMG::RealGridFunction levelSet(space);
+  levelSet = [](const Point& point) { return point.x(); };
+  auto result = MMG::LevelSetDiscretizer()
+                  .setLevelSet(isovalue)
+                  .setBoundaryReference(boundary)
+                  .setHMax(0.3)
+                  .discretize(levelSet);
+  ASSERT_FALSE(result.isEmpty());
+  EXPECT_TRUE(result.isSurface());
+  Real area = 0, contourLength = 0;
+  for (auto cell = result.getCell(); cell; ++cell)
+    area += cell->getMeasure();
+  for (auto edge = result.getFace(); edge; ++edge)
+  {
+    if (edge->getAttribute() != boundary)
+      continue;
+    contourLength += edge->getMeasure();
+    for (const auto vertex : edge->getVertices())
+      EXPECT_NEAR(result.getVertexCoordinates(vertex).x(), isovalue, 1e-10);
+  }
+  for (auto vertex = result.getVertex(); vertex; ++vertex)
+    EXPECT_NEAR(vertex->getCoordinates().z(), 0, 1e-10);
+  EXPECT_NEAR(area, 1, 1e-10);
+  EXPECT_NEAR(contourLength, 1, 1e-10);
+}
+
+/// @brief Native copies retain cached neighbors and geometry after source destruction.
+TEST(MMG5Lifecycle, CachedAdjacencyCopiesMatchTopology)
+{
+  using Native = MMG::MMG5;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  for (const size_t configuration : {0u, 1u, 2u})
+  {
+    SCOPED_TRACE(configuration);
+    auto mesh = [&]() -> LocalMesh {
+      if (configuration == 1)
+      {
+        return LocalMesh::Builder()
+          .initialize(3)
+          .nodes(4)
+          .vertex({0, 0, 0})
+          .vertex({1, 0, 1})
+          .vertex({1, 1, 2})
+          .vertex({0, 1, 1})
+          .polytope(Polytope::Type::Triangle, {0, 1, 2})
+          .polytope(Polytope::Type::Triangle, {0, 2, 3})
+          .finalize();
+      }
+      auto grid = configuration == 0
+        ? LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3})
+        : LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
+      grid.scale(Real(0.5));
+      return grid;
+    }();
+    const size_t dimension = mesh.getDimension();
+    mesh.getConnectivity().compute(dimension, dimension - 1);
+    mesh.getConnectivity().compute(dimension - 1, dimension);
+    for (auto cell = mesh.getCell(); cell; ++cell)
+      mesh.setAttribute(cell.key(), 17 + cell->getIndex());
+    Owner source(Native::rodinToMesh(mesh), Native::destroyMesh);
+    auto neighbors = [configuration](MMG5_pMesh native, MMG5_int cell, MMG5_int* result) {
+      if (configuration == 0)
+        return MMG2D_Get_adjaTri(native, cell, result);
+      if (configuration == 1)
+        return MMGS_Get_adjaTri(native, cell, result);
+      return MMG3D_Get_adjaTet(native, cell, result);
+    };
+    std::array<MMG5_int, 4> first{};
+    ASSERT_EQ(neighbors(source.get(), 1, first.data()), 1);
+    ASSERT_NE(source->adja, nullptr);
+    Owner copy(
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+    ASSERT_NE(copy, nullptr);
+    Native::copyMesh(source.get(), copy.get());
+    ASSERT_NE(copy->adja, nullptr);
+    EXPECT_NE(copy->adja, source->adja);
+    const size_t faces = dimension + 1;
+    const size_t count = faces * mesh.getCellCount() + 5;
+    for (size_t slot = 0; slot < count; ++slot)
+      EXPECT_EQ(copy->adja[slot], source->adja[slot]);
+    const auto cached = copy->adja[1];
+    source->adja[1] = cached == 0 ? 1 : 0;
+    EXPECT_EQ(copy->adja[1], cached);
+    source.reset();
+    for (Index cell = 0; cell < mesh.getCellCount(); ++cell)
+    {
+      std::array<MMG5_int, 4> adjacent{};
+      ASSERT_EQ(neighbors(copy.get(), cell + 1, adjacent.data()), 1);
+      FlatSet<MMG5_int> actual, expected;
+      for (size_t face = 0; face < faces; ++face)
+      {
+        if (adjacent[face] != 0)
+          actual.insert(adjacent[face]);
+      }
+      for (const auto face :
+        mesh.getConnectivity().getIncidence(dimension, dimension - 1).at(cell))
+      {
+        for (const auto other :
+          mesh.getConnectivity().getIncidence(dimension - 1, dimension).at(face))
+        {
+          if (other != cell)
+            expected.insert(other + 1);
+        }
+      }
+      EXPECT_EQ(actual, expected);
+    }
+    const auto restored = Native::meshToRodin(copy.get());
+    EXPECT_EQ(restored.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(restored.getCellCount(), mesh.getCellCount());
+    for (Index cell = 0; cell < mesh.getCellCount(); ++cell)
+    {
+      EXPECT_EQ(
+        restored.getAttribute(dimension, cell), mesh.getAttribute(dimension, cell));
+    }
+    const Real expectedMeasure = configuration == 1 ? std::sqrt(Real(3)) : Real(1);
+    const Real measure = dimension == 3 ? restored.getVolume() : restored.getArea();
+    EXPECT_NEAR(measure, expectedMeasure, 1e-12);
+  }
+}
+
+/// @brief Copied solution payloads and file names remain owned after releasing the source.
+TEST(MMG5Lifecycle, NamedSolutionCopyOwnsPayloadAndNames)
+{
+  using Native = MMG::MMG5;
+  using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  using SolOwner = std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)>;
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  MeshOwner native(Native::rodinToMesh(mesh), Native::destroyMesh);
+  for (const size_t components : {1u, 2u, 3u})
+  {
+    SolOwner source(
+      Native::createSolution(native.get(), components), Native::destroySolution);
+    ASSERT_NE(source, nullptr);
+    ASSERT_EQ(MMG2D_Set_inputSolName(native.get(), source.get(), "metric.input.sol"), 1);
+    ASSERT_EQ(
+      MMG2D_Set_outputSolName(native.get(), source.get(), "metric.output.sol"), 1);
+    const size_t count = components * (source->np + 1);
+    for (size_t index = 0; index < count; ++index)
+      source->m[index] = Real(0.25) * index;
+    SolOwner copy(
+      static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), Native::destroySolution);
+    ASSERT_NE(copy, nullptr);
+    Native::copySolution(source.get(), copy.get());
+    EXPECT_NE(copy->m, source->m);
+    EXPECT_NE(copy->namein, source->namein);
+    EXPECT_NE(copy->nameout, source->nameout);
+    EXPECT_EQ(copy->np, source->np);
+    EXPECT_EQ(copy->size, source->size);
+    source->m[1] = -1;
+    source->namein[0] = 'X';
+    source->nameout[0] = 'Y';
+    source.reset();
+    for (size_t index = 0; index < count; ++index)
+      EXPECT_EQ(copy->m[index], Real(0.25) * index);
+    EXPECT_STREQ(copy->namein, "metric.input.sol");
+    EXPECT_STREQ(copy->nameout, "metric.output.sol");
+  }
+}
+
+/// @brief Empty optional solutions copy and exchange ownership with populated solutions.
+TEST(MMG5Lifecycle, EmptySolutionCopiesAndSwaps)
+{
+  using Native = MMG::MMG5;
+  using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  using SolOwner = std::unique_ptr<MMG5_Sol, decltype(&Native::destroySolution)>;
+  MeshOwner emptyMesh(Native::createMesh(2, 2), Native::destroyMesh);
+  SolOwner empty(Native::createSolution(emptyMesh.get(), 1), Native::destroySolution);
+  ASSERT_NE(empty, nullptr);
+  EXPECT_EQ(empty->np, 0);
+  EXPECT_EQ(empty->m, nullptr);
+  SolOwner copied(
+    static_cast<MMG5_pSol>(mycalloc(1, sizeof(MMG5_Sol))), Native::destroySolution);
+  Native::copySolution(empty.get(), copied.get());
+  EXPECT_EQ(copied->np, 0);
+  EXPECT_EQ(copied->size, 1);
+  EXPECT_EQ(copied->m, nullptr);
+  EXPECT_EQ(copied->namein, nullptr);
+  EXPECT_EQ(copied->nameout, nullptr);
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  MeshOwner native(Native::rodinToMesh(mesh), Native::destroyMesh);
+  SolOwner populated(Native::createSolution(native.get(), 1), Native::destroySolution);
+  populated->m[1] = Real(1.5);
+  const auto payload = populated->m;
+  Native::swapSolution(copied.get(), populated.get());
+  EXPECT_EQ(copied->m, payload);
+  EXPECT_EQ(copied->np, mesh.getVertexCount());
+  EXPECT_EQ(copied->m[1], Real(1.5));
+  EXPECT_EQ(populated->np, 0);
+  EXPECT_EQ(populated->m, nullptr);
 }

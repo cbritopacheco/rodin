@@ -16,6 +16,201 @@ using namespace Rodin::Advection;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief The inward shift and Taylor correction recover exact affine boundary data.
+  TEST(Rodin_Advection_TaylorBoundaryShift, AffineBoundaryRecoveryOnEveryGeometry)
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      auto mesh = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+      mesh.getConnectivity().compute(dimension - 1, dimension);
+      mesh.getConnectivity().compute(dimension, dimension - 1);
+      P1 space(mesh);
+      GridFunction field(space);
+      const auto exact = [dimension](const Point& p) {
+        Real value = 2;
+        for (size_t axis = 0; axis < dimension; ++axis)
+          value += (axis + 1) * p(axis);
+        return value;
+      };
+      field = exact;
+      size_t checked = 0;
+      for (auto face = mesh.getBoundary(); face; ++face)
+      {
+        SCOPED_TRACE(face->getIndex());
+        const Point boundary(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+        Math::SpatialVector<Real> normal(dimension);
+        normal.setZero();
+        size_t normalAxes = 0;
+        for (size_t axis = 0; axis < dimension; ++axis)
+        {
+          if (std::abs(boundary(axis)) < 1e-12)
+          {
+            normal(axis) = -1;
+            ++normalAxes;
+          }
+          else if (std::abs(boundary(axis) - 1) < 1e-12)
+          {
+            normal(axis) = 1;
+            ++normalAxes;
+          }
+        }
+        ASSERT_EQ(normalAxes, 1u);
+        const Index originalCell = mesh.getConnectivity()
+                                     .getIncidence(dimension - 1, dimension)
+                                     .at(face->getIndex())[0];
+        const auto& faces =
+          mesh.getConnectivity().getIncidence(dimension, dimension - 1).at(originalCell);
+        size_t localFace = 0;
+        while (localFace < faces.size() && faces[localFace] != face->getIndex())
+          ++localFace;
+        ASSERT_LT(localFace, faces.size());
+        const auto cell = mesh.getCell(originalCell);
+        for (const Real timeStep : {1.0, 0.2, -0.2})
+        {
+          SCOPED_TRACE(timeStep);
+          constexpr Real requestedOffset = 0.0625;
+          const Real offset = std::min(requestedOffset, Real(0.1) * std::abs(timeStep));
+          TaylorBoundaryShiftPolicy policy(timeStep, mesh, field, requestedOffset);
+          Real remaining = 0.3;
+          Index currentCell = originalCell;
+          Math::SpatialPoint reference;
+          cell->getTransformation().inverse(reference, boundary.getPhysicalCoordinates());
+          Real correction = 1.25;
+          BoundaryHit hit{remaining, currentCell, reference, localFace, correction};
+          EXPECT_TRUE(policy(hit));
+          EXPECT_DOUBLE_EQ(remaining, 0);
+          EXPECT_EQ(currentCell, originalCell);
+          const Point shifted(*cell, reference);
+          EXPECT_LT((shifted.getPhysicalCoordinates() -
+                      (boundary.getPhysicalCoordinates() - offset * normal))
+                      .norm(),
+            1e-10);
+          Real normalDerivative = 0;
+          for (size_t axis = 0; axis < dimension; ++axis)
+            normalDerivative += (axis + 1) * normal(axis);
+          EXPECT_NEAR(correction, 1.25 + offset * normalDerivative, 1e-10);
+          EXPECT_NEAR(
+            field.getValue(shifted) + correction, exact(boundary) + 1.25, 1e-10);
+          const auto previousReference = reference;
+          const Real previousCorrection = correction;
+          EXPECT_TRUE(policy(hit));
+          EXPECT_LT((reference - previousReference).norm(), 1e-12);
+          EXPECT_DOUBLE_EQ(correction, previousCorrection);
+        }
+        ++checked;
+      }
+      EXPECT_GT(checked, 0u);
+    }
+  }
+
+  /// @brief The stop policy applies the physical offset without changing the traced value.
+  TEST(Rodin_Advection_StopInside, PhysicalInwardOffsetOnEveryGeometry)
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      auto mesh = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+      mesh.getConnectivity().compute(dimension - 1, dimension);
+      mesh.getConnectivity().compute(dimension, dimension - 1);
+      size_t checked = 0;
+      for (auto face = mesh.getBoundary(); face; ++face)
+      {
+        SCOPED_TRACE(face->getIndex());
+        const Point boundary(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+        Math::SpatialVector<Real> normal(dimension);
+        normal.setZero();
+        size_t normalAxes = 0;
+        for (size_t axis = 0; axis < dimension; ++axis)
+        {
+          if (std::abs(boundary(axis)) < 1e-12)
+          {
+            normal(axis) = -1;
+            ++normalAxes;
+          }
+          else if (std::abs(boundary(axis) - 1) < 1e-12)
+          {
+            normal(axis) = 1;
+            ++normalAxes;
+          }
+        }
+        ASSERT_EQ(normalAxes, 1u);
+        const Index originalCell = mesh.getConnectivity()
+                                     .getIncidence(dimension - 1, dimension)
+                                     .at(face->getIndex())[0];
+        const auto& faces =
+          mesh.getConnectivity().getIncidence(dimension, dimension - 1).at(originalCell);
+        size_t localFace = 0;
+        while (localFace < faces.size() && faces[localFace] != face->getIndex())
+          ++localFace;
+        ASSERT_LT(localFace, faces.size());
+        const auto cell = mesh.getCell(originalCell);
+        for (const Real timeStep : {1.0, 0.2, -0.2})
+        {
+          SCOPED_TRACE(timeStep);
+          constexpr Real requestedOffset = 0.0625;
+          const Real offset = std::min(requestedOffset, Real(0.1) * std::abs(timeStep));
+          StopInsideBoundaryPolicy policy(timeStep, mesh, requestedOffset);
+          Real remaining = 0.3;
+          Index currentCell = originalCell;
+          Math::SpatialPoint reference;
+          cell->getTransformation().inverse(reference, boundary.getPhysicalCoordinates());
+          Real correction = 1.25;
+          BoundaryHit hit{remaining, currentCell, reference, localFace, correction};
+          EXPECT_TRUE(policy(hit));
+          EXPECT_DOUBLE_EQ(remaining, 0);
+          EXPECT_EQ(currentCell, originalCell);
+          const Point shifted(*cell, reference);
+          EXPECT_LT((shifted.getPhysicalCoordinates() -
+                      (boundary.getPhysicalCoordinates() - offset * normal))
+                      .norm(),
+            1e-10);
+          EXPECT_DOUBLE_EQ(correction, 1.25);
+          const auto previousReference = reference;
+          const Real previousCorrection = correction;
+          EXPECT_TRUE(policy(hit));
+          EXPECT_LT((reference - previousReference).norm(), 1e-12);
+          EXPECT_DOUBLE_EQ(correction, previousCorrection);
+        }
+        ++checked;
+      }
+      EXPECT_GT(checked, 0u);
+    }
+  }
+
+  /// @brief Exhausted time and an invalid local face stop without modifying other state.
+  TEST(Rodin_Advection_StopInside, ExhaustedTimeAndInvalidFacePreserveState)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    StopInsideBoundaryPolicy policy(Real(0.2), mesh);
+    const auto cell = mesh.getCell(0);
+    const auto original = Polytope::Traits(cell->getGeometry()).getCentroid();
+    for (const Real time : {Real(0), Real(-0.25), Real(0.25)})
+    {
+      SCOPED_TRACE(time);
+      Real remaining = time;
+      Index currentCell = 0;
+      auto reference = original;
+      Real correction = 1.25;
+      const size_t invalidFace =
+        Polytope::Traits(cell->getGeometry()).getHalfSpace().vector.size();
+      BoundaryHit hit{remaining, currentCell, reference, invalidFace, correction};
+      EXPECT_TRUE(policy(hit));
+      EXPECT_DOUBLE_EQ(remaining, time > 0 ? Real(0) : time);
+      EXPECT_EQ(currentCell, 0u);
+      ASSERT_EQ(reference.size(), original.size());
+      for (size_t axis = 0; axis < reference.size(); ++axis)
+        EXPECT_DOUBLE_EQ(reference(axis), original(axis));
+      EXPECT_DOUBLE_EQ(correction, 1.25);
+    }
+  }
+
   /**
    * @brief Unit tests for Lagrangian class basic functionality
    */

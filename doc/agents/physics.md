@@ -82,7 +82,8 @@ couple elements. With both distribution coefficients positive, distribution
 controls \(H^1\) modulo global affine fields on a fixed connected Lipschitz domain;
 it is not a full-space norm or an unconditional uniform refinement bound.
 The defaults are `model.fit = 1`, `model.distribution.deviatoric = 1e-4`,
-`model.distribution.divergence = 1e-2` and `model.hinge = 10`.
+`model.distribution.divergence = 1e-4` and
+`model.hinge = {.jacobian = 10, .distortion = 100}`.
 D retains the mesh factor \(h\); there is no shape or constraint Hessian in the metric.
 The fitting energy/force remain robust Welsch. Minimizing this integral is not
 equivalent to minimizing the maximum geometric residual. Power-loss experiments
@@ -121,9 +122,9 @@ so triangular direct solvers and the true-residual test use the same operator.
 Metric and hinge Problems and metric forms are retained, but deformation-dependent forms are
 reassembled per outer iteration. MUMPS retains symbolic analysis while the
 augmented sparsity pattern is unchanged and numeric factors for identical systems.
-`AnalyticFunctionAdapters.h` lifts analytic lambdas into FunctionBase;
-`CellGeomCache` caches per-cell geometry. Historical experimental comparisons
-remain in experiments/swift_calibration; they are not current implementations.
+Analytic targets use the native callable `VectorFunction` and `MatrixFunction`
+interfaces. Calibration uses the shared reconstruction examples; there is no
+separate legacy fitting driver or affine-triangle geometry cache.
 
 Standing principle regardless of branch: interface-fitting constraints
 inside variational solves are smooth penalties, never hard projections

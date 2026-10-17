@@ -3207,7 +3207,7 @@ namespace Rodin::Variational
    *
    * Assembles
    * @f[
-   *   \int_K (A : \mathbf{J}\,u)\,(B : \mathbf{J}\,v)\ dx,
+   *   \int_K (A : \mathbf{J}\,u)\,\overline{(B : \mathbf{J}\,v)}\ dx,
    * @f]
    * the outer product of Frobenius contractions of matrix coefficients @f$A@f$
    * and @f$B@f$ against the Jacobians of the trial and test functions.
@@ -3470,7 +3470,7 @@ namespace Rodin::Variational
           {
             for (size_t te = 0; te < nte; ++te)
             {
-              const ScalarType at = wdet * m_trialAction[te];
+              const ScalarType at = wdet * Math::conj(m_trialAction[te]);
               for (size_t tr = 0; tr <= te; ++tr)
                 m_matrix(te, tr) += at * m_trialAction[tr];
             }
@@ -3479,7 +3479,7 @@ namespace Rodin::Variational
           {
             for (size_t te = 0; te < nte; ++te)
             {
-              const ScalarType at = wdet * m_testAction[te];
+              const ScalarType at = wdet * Math::conj(m_testAction[te]);
               for (size_t tr = 0; tr < ntr; ++tr)
                 m_matrix(te, tr) += at * m_trialAction[tr];
             }
@@ -3489,7 +3489,7 @@ namespace Rodin::Variational
         if (trialfes == testfes && sharedCoefficient)
         {
           m_matrix.template triangularView<Eigen::Upper>() =
-            m_matrix.transpose().template triangularView<Eigen::Upper>();
+            m_matrix.adjoint().template triangularView<Eigen::Upper>();
         }
 
         return *this;

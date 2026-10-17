@@ -305,6 +305,7 @@ namespace Rodin::Variational
         : Parent(other),
           m_u(other.m_u),
           m_v(other.m_u.get().getFiniteElementSpace()),
+          m_attrs(other.m_attrs),
           m_lf(m_v)
       {}
 
@@ -316,7 +317,8 @@ namespace Rodin::Variational
         : Parent(std::move(other)),
           m_u(std::move(other.m_u)),
           m_v(std::move(other.m_v)),
-          m_lf(std::move(other.m_lf))
+          m_attrs(std::move(other.m_attrs)),
+          m_lf(m_v)
       {}
 
       /**

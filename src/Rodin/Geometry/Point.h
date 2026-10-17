@@ -236,7 +236,8 @@ namespace Rodin::Geometry
       }
 
       /**
-       * @brief Lexicographical comparison operator.
+       * @brief Lexicographical comparison of physical coordinates.
+       * @pre Both points have the same physical dimension.
        * @param[in] p Point to compare with
        * @returns True if this point is lexicographically less than p
        */

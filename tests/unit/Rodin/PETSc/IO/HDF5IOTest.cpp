@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <cmath>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
@@ -82,7 +83,7 @@ namespace
         "/tmp/rodin_petsc_hdf5_gf_sa_" + polytopeLabel(type) + ".h5";
 
     auto mesh = makeMesh(type);
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
 
     // Create a PETSc-backed grid function using sequential communicator
     Rodin::PETSc::Variational::GridFunction gf(fes);
@@ -136,7 +137,7 @@ namespace
         "/tmp/rodin_petsc_hdf5_gf_dofs_" + polytopeLabel(type) + ".h5";
 
     auto mesh = makeMesh(type);
-    P1 fes(mesh);
+    P1<PetscScalar> fes(mesh);
 
     Rodin::PETSc::Variational::GridFunction gf(fes);
 
@@ -146,7 +147,12 @@ namespace
     PetscInt n = 0;
     VecGetLocalSize(gf.getData(), &n);
     for (PetscInt i = 0; i < n; ++i)
+    {
       array[i] = static_cast<PetscScalar>(std::sin(static_cast<double>(i)));
+#if defined(PETSC_USE_COMPLEX)
+      array[i] += PetscCMPLX(0, std::cos(static_cast<double>(i)));
+#endif
+    }
     VecRestoreArray(gf.getData(), &array);
 
     gf.save(gfFile, FileFormat::HDF5);
@@ -173,6 +179,22 @@ namespace
 
     H5Sclose(dspace);
     H5Dclose(dset);
+#if defined(PETSC_USE_COMPLEX)
+    const hid_t imaginarySet =
+      H5Dopen2(h5, "/GridFunction/Values/ImaginaryData", H5P_DEFAULT);
+    ASSERT_GE(imaginarySet, 0);
+    std::vector<double> imaginary(static_cast<size_t>(count));
+    ASSERT_GE(H5Dread(imaginarySet, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                imaginary.data()),
+      0);
+    for (PetscInt i = 0; i < n; ++i)
+    {
+      EXPECT_DOUBLE_EQ(
+        imaginary[static_cast<size_t>(i)], std::cos(static_cast<double>(i)))
+        << "Imaginary DOF mismatch at index " << i;
+    }
+    EXPECT_GE(H5Dclose(imaginarySet), 0);
+#endif
     H5Fclose(h5);
 
     // Round-trip: load into a new grid function
@@ -193,15 +215,231 @@ namespace
     VecGetLocalSize(gf.getData(), &localN);
     for (PetscInt i = 0; i < localN; ++i)
     {
-      EXPECT_DOUBLE_EQ(
-          static_cast<double>(PetscRealPart(loadedArray[i])),
-          static_cast<double>(PetscRealPart(origArray[i])))
-          << "Round-trip DOF mismatch at index " << i;
+      EXPECT_EQ(loadedArray[i], origArray[i]) << "Round-trip DOF mismatch at index " << i;
     }
     VecRestoreArrayRead(gf.getData(), &origArray);
     VecRestoreArrayRead(loaded.getData(), &loadedArray);
 
     std::remove(gfFile.c_str());
+  }
+
+  /// @brief Isolates malformed checkpoint files and suppresses expected HDF5 diagnostics.
+  class PETScHDF5Contracts : public ::testing::Test
+  {
+    protected:
+      void SetUp() override
+      {
+        m_path = boost::filesystem::temp_directory_path() /
+          boost::filesystem::unique_path("rodin-petsc-hdf5-%%%%-%%%%-%%%%.h5");
+        ASSERT_GE(H5Eget_auto2(H5E_DEFAULT, &m_errorHandler, &m_errorData), 0);
+        ASSERT_GE(H5Eset_auto2(H5E_DEFAULT, nullptr, nullptr), 0);
+      }
+
+      void TearDown() override
+      {
+        std::remove(m_path.c_str());
+        EXPECT_GE(H5Eset_auto2(H5E_DEFAULT, m_errorHandler, m_errorData), 0);
+      }
+
+      const boost::filesystem::path& path() const
+      {
+        return m_path;
+      }
+
+      void replaceDataset(const char* name, const std::vector<double>& values)
+      {
+        const auto file = H5Fopen(path().c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+        ASSERT_GE(file, 0);
+        if (H5Lexists(file, name, H5P_DEFAULT) > 0)
+        {
+          ASSERT_GE(H5Ldelete(file, name, H5P_DEFAULT), 0);
+        }
+        const hsize_t count = values.size();
+        const auto space = H5Screate_simple(1, &count, nullptr);
+        ASSERT_GE(space, 0);
+        const auto dataset = H5Dcreate2(
+          file, name, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        ASSERT_GE(dataset, 0);
+        ASSERT_GE(H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                    values.data()),
+          0);
+        EXPECT_GE(H5Dclose(dataset), 0);
+        EXPECT_GE(H5Sclose(space), 0);
+        EXPECT_GE(H5Fclose(file), 0);
+      }
+
+      template <class Field>
+      void expectCoefficients(const Field& field, bool constant = false)
+      {
+        PetscInt size = 0;
+        ASSERT_EQ(VecGetSize(field.getData(), &size), PETSC_SUCCESS);
+        const PetscScalar* data = nullptr;
+        ASSERT_EQ(VecGetArrayRead(field.getData(), &data), PETSC_SUCCESS);
+        for (PetscInt i = 0; i < size; ++i)
+        {
+          PetscScalar expected = constant ? PetscScalar(7) : PetscScalar(1 + 2 * i);
+#if defined(PETSC_USE_COMPLEX)
+          if (!constant)
+            expected += PetscCMPLX(0, -0.5 * i);
+#endif
+          EXPECT_LT(PetscAbsScalar(data[i] - expected), 1e-12) << i;
+        }
+        ASSERT_EQ(VecRestoreArrayRead(field.getData(), &data), PETSC_SUCCESS);
+      }
+
+      template <class Field>
+      void fillCoefficients(Field& field)
+      {
+        PetscInt size = 0;
+        ASSERT_EQ(VecGetSize(field.getData(), &size), PETSC_SUCCESS);
+        PetscScalar* data = nullptr;
+        ASSERT_EQ(VecGetArray(field.getData(), &data), PETSC_SUCCESS);
+        for (PetscInt i = 0; i < size; ++i)
+        {
+          data[i] = PetscScalar(1 + 2 * i);
+#if defined(PETSC_USE_COMPLEX)
+          data[i] += PetscCMPLX(0, -0.5 * i);
+#endif
+        }
+        ASSERT_EQ(VecRestoreArray(field.getData(), &data), PETSC_SUCCESS);
+      }
+
+    private:
+      /// @brief Unique checkpoint path owned by this test.
+      boost::filesystem::path m_path;
+      /// @brief HDF5 error callback restored after the test.
+      H5E_auto2_t m_errorHandler = nullptr;
+      /// @brief Original callback context.
+      void* m_errorData = nullptr;
+  };
+
+  /// @brief Matrix checkpoints retain shape and reject equal-size transposed ranges.
+  TEST_F(PETScHDF5Contracts, MatrixPersistencePreservesShapeAndCoefficients)
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      auto mesh = makeMesh(geometry);
+      P1<Math::SpatialMatrix<PetscScalar>> space(mesh, 2, 3);
+      Rodin::PETSc::Variational::GridFunction field(space), loaded(space);
+      fillCoefficients(field);
+      field.save(path(), FileFormat::HDF5);
+      loaded.load(path(), FileFormat::HDF5);
+      expectCoefficients(loaded);
+      const auto file = H5Fopen(path().c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+      ASSERT_GE(file, 0);
+      for (const auto& [name, expected] : {std::pair{"/GridFunction/Meta/Rows", 2ULL},
+             std::pair{"/GridFunction/Meta/Columns", 3ULL}})
+      {
+        const auto dataset = H5Dopen2(file, name, H5P_DEFAULT);
+        ASSERT_GE(dataset, 0);
+        unsigned long long value = 0;
+        ASSERT_GE(
+          H5Dread(dataset, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value), 0);
+        EXPECT_EQ(value, expected);
+        EXPECT_GE(H5Dclose(dataset), 0);
+      }
+      EXPECT_GE(H5Fclose(file), 0);
+      P1<Math::SpatialMatrix<PetscScalar>> transposedSpace(mesh, 3, 2);
+      Rodin::PETSc::Variational::GridFunction transposed(transposedSpace);
+      ASSERT_EQ(VecSet(transposed.getData(), 7), PETSC_SUCCESS);
+      EXPECT_THROW(transposed.load(path(), FileFormat::HDF5), std::exception);
+      expectCoefficients(transposed, true);
+      expectCoefficients(field);
+    }
+  }
+
+  /// @brief Invalid coefficient counts are rejected before changing destination values.
+  TEST_F(PETScHDF5Contracts, IncompatiblePayloadPreservesDestination)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    P1<PetscScalar> space(mesh);
+    Rodin::PETSc::Variational::GridFunction field(space), loaded(space);
+    fillCoefficients(field);
+    for (const bool imaginary : {false, true})
+    {
+      SCOPED_TRACE(imaginary);
+      field.save(path(), FileFormat::HDF5);
+      replaceDataset(
+        imaginary ? "/GridFunction/Values/ImaginaryData" : "/GridFunction/Values/Data",
+        {9, 10});
+#if defined(PETSC_USE_COMPLEX)
+      if (!imaginary)
+        replaceDataset("/GridFunction/Values/ImaginaryData", {0, 0});
+#endif
+      ASSERT_EQ(VecSet(loaded.getData(), 7), PETSC_SUCCESS);
+      EXPECT_THROW(loaded.load(path(), FileFormat::HDF5), std::exception);
+      expectCoefficients(loaded, true);
+      expectCoefficients(field);
+    }
+#if !defined(PETSC_USE_COMPLEX)
+    field.save(path(), FileFormat::HDF5);
+    replaceDataset("/GridFunction/Values/ImaginaryData", {0, 1, 0});
+    EXPECT_THROW(loaded.load(path(), FileFormat::HDF5), std::exception);
+    expectCoefficients(loaded, true);
+#endif
+  }
+
+  /// @brief Real-only legacy files load into every range with zero imaginary coefficients.
+  TEST_F(PETScHDF5Contracts, RealOnlyLegacyPayloadLoadsWithZeroImaginaryPart)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    const auto check = [&](auto& space) {
+      Rodin::PETSc::Variational::GridFunction field(space), loaded(space);
+      ASSERT_EQ(VecSet(field.getData(), 7), PETSC_SUCCESS);
+      field.save(path(), FileFormat::HDF5);
+      const auto file = H5Fopen(path().c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+      ASSERT_GE(file, 0);
+      if (H5Lexists(file, "/GridFunction/Values/ImaginaryData", H5P_DEFAULT) > 0)
+      {
+        ASSERT_GE(H5Ldelete(file, "/GridFunction/Values/ImaginaryData", H5P_DEFAULT), 0);
+      }
+      EXPECT_GE(H5Fclose(file), 0);
+      ASSERT_EQ(VecSet(loaded.getData(), -1), PETSC_SUCCESS);
+      loaded.load(path(), FileFormat::HDF5);
+      expectCoefficients(loaded, true);
+    };
+    P1<PetscScalar> scalar(mesh);
+    P1<Math::SpatialVector<PetscScalar>> vector(mesh, 2);
+    P1<Math::SpatialMatrix<PetscScalar>> matrix(mesh, 2, 3);
+    check(scalar);
+    check(vector);
+    check(matrix);
+  }
+
+  /// @brief Unsupported streams and failed opens preserve scalar, vector and matrix fields.
+  TEST_F(PETScHDF5Contracts, StreamsAndFailedOpensPreserveFields)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    const auto check = [&](auto& space) {
+      Rodin::PETSc::Variational::GridFunction field(space);
+      fillCoefficients(field);
+      using Space = std::remove_cvref_t<decltype(space)>;
+      GridFunctionLoader<FileFormat::HDF5, Space, ::Vec> loader(field);
+      GridFunctionPrinter<FileFormat::HDF5, Space, ::Vec> printer(field);
+      std::istringstream input("untouched");
+      std::ostringstream output;
+      EXPECT_THROW(loader.load(input), std::exception);
+      EXPECT_THROW(printer.print(output), std::exception);
+      EXPECT_EQ(input.tellg(), std::streampos(0));
+      EXPECT_TRUE(output.str().empty());
+      EXPECT_FALSE(boost::filesystem::exists(path()));
+      EXPECT_THROW(field.load(path(), FileFormat::HDF5), std::exception);
+      const auto missing =
+        boost::filesystem::path(path().string() + ".missing") / "field.h5";
+      EXPECT_THROW(field.save(missing, FileFormat::HDF5), std::exception);
+      EXPECT_FALSE(boost::filesystem::exists(missing.parent_path()));
+      EXPECT_FALSE(boost::filesystem::exists(path()));
+      expectCoefficients(field);
+    };
+    P1<PetscScalar> scalar(mesh);
+    P1<Math::SpatialVector<PetscScalar>> vector(mesh, 2);
+    P1<Math::SpatialMatrix<PetscScalar>> matrix(mesh, 2, 3);
+    check(scalar);
+    check(vector);
+    check(matrix);
   }
 
   struct PETScPolytopeNameGenerator

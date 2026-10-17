@@ -33,6 +33,7 @@
 #include <mpi.h>
 #include <petsc.h>
 #include <petscsys.h>
+#include <memory>
 #include <type_traits>
 #include <utility>
 
@@ -554,10 +555,11 @@ namespace Rodin::Variational
       Problem(U1& u1, U2& u2, U3& u3, Us&... us)
         : m_assembled(false),
           m_us(AllTuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-                .template filter<IsTrialFunctionReferenceWrapper>()),
+                 .template filter<IsTrialFunctionReferenceWrapper>()),
           m_vs(AllTuple{std::ref(u1), std::ref(u2), std::ref(u3), std::ref(us)...}
-                .template filter<IsTestFunctionReferenceWrapper>()),
-          m_axb(deduceCommunicator())
+                 .template filter<IsTestFunctionReferenceWrapper>()),
+          m_axb(deduceCommunicator()),
+          m_assembly(std::make_unique<AssemblyType>())
       {
         buildUUIDMaps();
       }
@@ -579,7 +581,7 @@ namespace Rodin::Variational
           m_totalTrial(other.m_totalTrial),
           m_totalTest(other.m_totalTest),
           m_axb(other.m_axb),
-          m_assembly(other.m_assembly)
+          m_assembly(std::make_unique<AssemblyType>(*other.m_assembly))
       {}
 
       /**
@@ -611,7 +613,6 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          Parent::operator=(other);
           m_assembled    = other.m_assembled;
           m_us           = other.m_us;
           m_vs           = other.m_vs;
@@ -623,7 +624,7 @@ namespace Rodin::Variational
           m_totalTrial   = other.m_totalTrial;
           m_totalTest    = other.m_totalTest;
           m_axb          = other.m_axb;
-          m_assembly     = other.m_assembly;
+          m_assembly = std::make_unique<AssemblyType>(*other.m_assembly);
         }
         return *this;
       }
@@ -637,7 +638,6 @@ namespace Rodin::Variational
       {
         if (this != &other)
         {
-          Parent::operator=(std::move(other));
           m_assembled    = std::exchange(other.m_assembled, false);
           m_us           = std::move(other.m_us);
           m_vs           = std::move(other.m_vs);
@@ -692,7 +692,7 @@ namespace Rodin::Variational
           m_totalTrial, m_totalTest
         };
 
-        m_assembly.execute(m_axb, in);
+        m_assembly->execute(m_axb, in);
 
         // Gather each trial field's data into the block solution vector, so
         // it holds the initial guess. This is the reverse of the scatter-back
@@ -752,7 +752,7 @@ namespace Rodin::Variational
         AssemblyInput in{m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets, m_trialUUIDMap,
           m_testUUIDMap, m_totalTrial, m_totalTest};
 
-        m_assembly.execute(m_axb, in, target);
+        m_assembly->execute(m_axb, in, target);
 
         m_assembled = true;
         return *this;
@@ -1038,7 +1038,8 @@ namespace Rodin::Variational
       size_t m_totalTest  = 0;  ///< Total test DOF count.
 
       LinearSystemType m_axb;    ///< The assembled linear system.
-      AssemblyType     m_assembly;  ///< The assembly strategy.
+      std::unique_ptr<AssemblyType>
+        m_assembly; ///< Independently owned assembly strategy.
   };
 
   template <class T>

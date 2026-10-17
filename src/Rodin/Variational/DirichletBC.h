@@ -142,24 +142,24 @@
  *   @f]
  *   Every matrix entry @f$ A_{ij}\mathrel{+}=a @f$ is assembled as
  *   @f[
- *     A_{r,c}\mathrel{+}= \alpha_r\,a\,\alpha_c
+ *     A_{r,c}\mathrel{+}= \overline{\alpha_r}\,a\,\alpha_c
  *     \quad\forall(r,\alpha_r)\in\operatorname{expand}(i),\;
  *          (c,\alpha_c)\in\operatorname{expand}(j),
  *   @f]
  *   and every vector entry @f$ b_i\mathrel{+}=f @f$ as
  *   @f[
- *     b_r\mathrel{+}= \alpha_r f
+ *     b_r\mathrel{+}= \overline{\alpha_r} f
  *     \quad\forall(r,\alpha_r)\in\operatorname{expand}(i).
  *   @f]
  *   For homogeneous identifications this is the variational transformation
  *   @f[
- *     A \leftarrow T^T A T,\qquad b \leftarrow T^T b.
+ *     A \leftarrow T^* A T,\qquad b \leftarrow T^* b.
  *   @f]
  *   For affine identifications @f$ x = T\hat{x}+\hat{d} @f$, the known
  *   defect also shifts the RHS:
  *   @f[
- *     A \leftarrow T^T A T,\qquad
- *     b \leftarrow T^T\!\left(b - A\hat{d}\right).
+ *     A \leftarrow T^* A T,\qquad
+ *     b \leftarrow T^*\!\left(b - A\hat{d}\right).
  *   @f]
  *   If slave DOFs remain in the unknown vector, reconstruction rows are then
  *   written as
@@ -782,11 +782,11 @@ namespace Rodin::Variational
    * distributes every matrix and vector contribution through the expansion
    * map.  In the homogeneous case this implements
    * @f[
-   *   A \leftarrow T^T A T,\qquad b \leftarrow T^T b,
+   *   A \leftarrow T^* A T,\qquad b \leftarrow T^* b,
    * @f]
    * while an affine defect @f$ d @f$ uses
    * @f[
-   *   b \leftarrow T^T(b - A\hat{d}).
+   *   b \leftarrow T^*(b - A\hat{d}).
    * @f]
    * Equivalently, every matrix column contribution through an identified slave
    * subtracts the known value @f$ A_{:,g_s}d_{g_s} @f$ from the assembled RHS.

@@ -161,6 +161,43 @@ namespace Rodin::Tests::Unit::Solver
     expectSolution(system, expected);
   }
 
+  /// @brief Copied, moved and cloned solvers rebuild independent backend resources.
+  TEST(Rodin_Solver_MUMPS, IndependentCopiesPreserveConfiguration)
+  {
+    auto mesh = makeMesh(Polytope::Type::Segment);
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction v(fes);
+    Problem problem(u, v);
+    auto system = makeUnsymmetricSystem();
+    MUMPSSolver source(problem);
+    source.setMaxThreads(2)
+      .setOrdering(MUMPSSolver::Ordering::AMD)
+      .setWorkspacePercentage(120)
+      .solve(system);
+    ASSERT_TRUE(source.success());
+    MUMPSSolver copied(source);
+    source.clear(Factorization::Symbolic);
+    auto check = [&](auto& solver) {
+      EXPECT_EQ(solver.getMaxThreads(), 2);
+      EXPECT_EQ(solver.getOrdering(), MUMPSSolver::Ordering::AMD);
+      EXPECT_EQ(solver.getWorkspacePercentage(), 120);
+      expectResourceState(solver, false, false, false, {});
+      system.getSolution().setZero();
+      solver.solve(system);
+      ASSERT_TRUE(solver.success());
+      Math::Vector<Real> expected(3);
+      expected << 1, 2, 3;
+      expectSolution(system, expected);
+    };
+    check(copied);
+    MUMPSSolver moved(std::move(copied));
+    check(moved);
+    std::unique_ptr<MUMPSSolver> clone(moved.copy());
+    moved.clear(Factorization::Symbolic);
+    check(*clone);
+  }
+
   TEST(Rodin_Solver_MUMPS, DefaultWorkspaceMarginIsPreservedAndRestored)
   {
     auto mesh = makeMesh(Polytope::Type::Segment);

@@ -19,11 +19,10 @@ namespace Rodin::IO::MFEM
   std::string skipEmptyLinesAndComments(std::istream& is, size_t& currentLineNumber)
   {
     std::string line;
-    while (getline(is, line))
+    while (MFEM::getline(is, line, currentLineNumber))
     {
       if (!MFEM::ParseEmptyLineOrComment()(line.begin(), line.end()))
         break;
-      currentLineNumber++;
     }
     return line;
   }
@@ -49,7 +48,7 @@ namespace Rodin::IO
   {
     auto line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     auto kw = MFEM::ParseKeyword()(line.begin(), line.end());
-    if (!kw && *kw != MFEM::Keyword::Dimension)
+    if (!kw || *kw != MFEM::Keyword::Dimension)
     {
       Alert::MemberFunctionException(*this, __func__)
         << "Expected " << std::quoted(toCharString(MFEM::Keyword::Dimension))
@@ -57,7 +56,7 @@ namespace Rodin::IO
     }
     line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     auto dimension = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
-    if (!dimension)
+    if (!dimension || *dimension > Math::SpatialPoint::MaxSize)
     {
       Alert::MemberFunctionException(*this, __func__) << "Failed to determine mesh dimension on line "
                          << m_currentLineNumber << "."
@@ -183,27 +182,18 @@ namespace Rodin::IO
           connectivity.nodes(*count);
           MFEM::getline(is, line, m_currentLineNumber);
           auto vdim = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
-          if (vdim)
+          if (!vdim || *vdim < m_dimension || *vdim > Math::SpatialPoint::MaxSize)
           {
-            m_spaceDimension = *vdim;
-            m_build.initialize(m_spaceDimension).nodes(*count);
-            for (size_t i = 0; i < *count; i++)
-            {
-              MFEM::getline(is, line, m_currentLineNumber);
-              auto x = MFEM::ParseVertex(m_spaceDimension)(line.begin(), line.end());
-              if (!x)
-              {
-                Alert::MemberFunctionException(*this, __func__)
-                  << "Failed to parse vertex on line " << m_currentLineNumber
-                  << Alert::Raise;
-              }
-              m_build.vertex(std::move(*x));
-            }
+            Alert::MemberFunctionException(*this, __func__)
+              << "Invalid MFEM spatial dimension on line " << m_currentLineNumber
+              << "; expected an integer between " << m_dimension << " and "
+              << static_cast<size_t>(Math::SpatialPoint::MaxSize) << "." << Alert::Raise;
           }
-          else
+          m_spaceDimension = *vdim;
+          m_build.initialize(m_spaceDimension).nodes(*count);
+          for (size_t i = 0; i < *count; i++)
           {
-            m_spaceDimension = m_dimension;
-            m_build.initialize(m_spaceDimension).nodes(m_spaceDimension);
+            MFEM::getline(is, line, m_currentLineNumber);
             auto x = MFEM::ParseVertex(m_spaceDimension)(line.begin(), line.end());
             if (!x)
             {
@@ -212,17 +202,6 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             m_build.vertex(std::move(*x));
-            for (size_t i = 1; i < *count; i++)
-            {
-              auto x = MFEM::ParseVertex(m_spaceDimension)(line.begin(), line.end());
-              if (!x)
-              {
-                Alert::MemberFunctionException(*this, __func__)
-                  << "Failed to parse vertex on line " << m_currentLineNumber
-                  << Alert::Raise;
-              }
-              m_build.vertex(std::move(*x));
-            }
           }
           continue;
         }
@@ -241,6 +220,7 @@ namespace Rodin::IO
 
   void MeshLoader<IO::FileFormat::MFEM, Context::Local>::load(std::istream &is)
   {
+    m_currentLineNumber = 0;
     readHeader(is);
     readDimension(is);
     readMesh(is);

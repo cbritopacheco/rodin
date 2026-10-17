@@ -10,6 +10,59 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief A constant nonlocal kernel has an independently known rank-one matrix.
+  TEST(Rodin_Variational_P1QuadratureRule, NonlocalDenseAndSparseFormsMatchExactMoments)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+    P1<Real> space(mesh);
+    TrialFunction u(space);
+    TestFunction v(space);
+    BilinearForm sparse(u, v);
+    BilinearForm<typename decltype(u)::SolutionType, decltype(space), decltype(space),
+      Math::Matrix<Real>>
+      dense(u, v);
+    auto kernel = [](const Point&, const Point&) { return 2.0; };
+    auto integral = Integral(Potential(kernel, u), v);
+    Math::Vector<Real> moments(3);
+    moments << 0.5, 1.0, 0.5;
+    const Math::Matrix<Real> expected = 2 * moments * moments.transpose();
+    sparse += integral;
+    dense += integral;
+    for (int repeat = 0; repeat < 2; ++repeat)
+    {
+      sparse.assemble();
+      dense.assemble();
+      EXPECT_LT((Math::Matrix<Real>(sparse.getOperator()) - expected).norm(), 1e-12);
+      EXPECT_LT((dense.getOperator() - expected).norm(), 1e-12) << dense.getOperator();
+    }
+    auto excluded = integral;
+    excluded.setTrialAttributes({999});
+    sparse.getGlobalIntegrators().clear();
+    sparse += excluded;
+    dense.getGlobalIntegrators().clear();
+    dense += excluded;
+    sparse.assemble();
+    dense.assemble();
+    EXPECT_EQ(sparse.getOperator().norm(), 0);
+    EXPECT_EQ(dense.getOperator().norm(), 0);
+    auto excludedTest = integral;
+    excludedTest.setTestAttributes({999});
+    sparse.getGlobalIntegrators().clear();
+    sparse += excludedTest;
+    dense.getGlobalIntegrators().clear();
+    dense += excludedTest;
+    sparse.assemble();
+    dense.assemble();
+    EXPECT_EQ(sparse.getOperator().norm(), 0);
+    EXPECT_EQ(dense.getOperator().norm(), 0);
+    Problem problem(u, v);
+    problem = integral;
+    problem.assemble();
+    EXPECT_LT(
+      (Math::Matrix<Real>(problem.getLinearSystem().getOperator()) - expected).norm(),
+      1e-12);
+  }
+
   /// @brief Verifies linear form scalar linear coefficient uses multi point quadrature for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, LinearForm_ScalarLinearCoefficient_UsesMultiPointQuadrature)
   {

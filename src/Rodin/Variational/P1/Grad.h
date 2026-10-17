@@ -18,6 +18,7 @@
  * where @f$ \phi_i @f$ are the P1 basis functions and @f$ n @f$ is the spatial dimension.
  */
 
+#include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/Grad.h"
@@ -731,8 +732,8 @@ namespace Rodin::Variational
           if (mesh.isSubMesh())
             if (auto restricted = mesh.asSubMesh().restriction(point))
               return getDerivativePoint(*restricted);
-          Alert::Exception() << "Derivative point is outside the finite element mesh."
-                             << Alert::Raise;
+          Alert::MemberFunctionException(*this, __func__)
+            << "Derivative point is outside the finite element mesh." << Alert::Raise;
         }
         const auto& poly = point.getPolytope();
         const size_t dimension = mesh.getDimension();
@@ -751,8 +752,8 @@ namespace Rodin::Variational
           cell->getTransformation().inverse(reference, point.getPhysicalCoordinates());
           return Geometry::Point(*cell, reference);
         }
-        Alert::Exception() << "Matrix derivative requires a determined trace domain."
-                           << Alert::Raise;
+        Alert::MemberFunctionException(*this, __func__)
+          << "Matrix derivative requires a determined trace domain." << Alert::Raise;
         return point;
       }
 
