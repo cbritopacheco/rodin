@@ -3532,3 +3532,39 @@ denominator. The changed-header reset from run833 remains in effect. This is
 still an incomplete old-CI/local diagnostic, not current-head CI confirmation.
 Detailed provenance and gaps are retained in
 `build-coverage-linux/run854-current-normal-union.json` and its audit companion.
+
+### Nonmatrix P0 MFEM coefficient-count errors (run862)
+
+Cover real/complex scalar and vector P0 loaders with empty, truncated,
+overlong, first-invalid and partially invalid coefficient payloads in both
+MFEM layouts. Require the native load-member diagnostic with exact expected
+and observed counts, preserve distinct existing field coefficients, then reuse
+the loader for both independent valid layouts. The new typed cases perform
+forty rejections and eighty recovery loads per build.
+
+All twenty MFEM coefficient cases passed individually in optimized run857,
+assertion-enabled run859 and ASan run861 with leak detection enabled. ASan
+retains matching Eigen allocation ABI and optimized support archives; it does
+not establish whole-library sanitizer coverage. All final test snapshots match.
+Run862 verifies the four nonmatrix P0 loader variants and positive counts on
+all three previously missed count-diagnostic lines. Successful normal inputs,
+source hashes and runtime records are retained in
+`build-coverage-linux/run862-mfem-p0-count-inputs/` and its file audit.
+
+Run866 uses a private-header mutation that clears the destination immediately
+before raising the native count exception. Both typed cases reject it in
+run867, with twenty failed preservation checks each. The audit is retained in
+`build-coverage-linux/run867-mfem-p0-count-mutation-audit.json`. The first
+mutation compile in run863 used a normal include path for Rodin/IO, causing
+the system hdf5.h lookup to select Rodin's HDF5.h on the mounted source tree.
+Use quote-only lookup for that private dependency directory. The failed
+compile has no runtime or coverage role. No workspace production code changes.
+
+Run865 adds three hit lines without changing the measured denominator:
+47,810 measured and 45,434 hit lines, approximately 95.0303 percent. Another
+464 hits would reach 96 percent at that fixed denominator. The changed-header
+reset from run833 remains in effect; this is still an incomplete old-CI/local
+diagnostic, not current-head CI confirmation. Detailed provenance and gaps are
+retained in `build-coverage-linux/run865-current-normal-union.json` and its audit
+companion. Failed, mutation, discovery and sanitizer producers remain excluded,
+together with tests, benchmarks and library test helpers.

@@ -125,6 +125,81 @@ namespace
         }
       }
 
+      /// @brief Wrong P0 coefficient counts preserve scalar/vector data and permit reuse.
+      template <size_t Rank>
+      void verifyMalformedP0Coefficients()
+      {
+        using Range = std::conditional_t<Rank == 0, Scalar, Math::SpatialVector<Scalar>>;
+        auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
+        auto space = [&] {
+          if constexpr (Rank == 0)
+            return P0<Range>(mesh);
+          else
+            return P0<Range>(mesh, 3);
+        }();
+        GridFunction field(space);
+        GridFunctionLoader<FileFormat::MFEM, decltype(space), Math::Vector<Scalar>>
+          loader(field);
+        const size_t nodes = mesh.getCellCount();
+        const size_t components = space.getVectorDimension();
+        const size_t count = nodes * components;
+        for (const size_t ordering : {size_t(0), size_t(1)})
+        {
+          SCOPED_TRACE(ordering);
+          const std::string valid = payload(nodes, components, ordering, true);
+          const std::string header = valid.substr(0, valid.find("\n\n") + 2);
+          std::vector<std::pair<std::string, size_t>> invalid{{header + "bad\n", 0}};
+          std::ostringstream partial;
+          partial << header << entry(0, 0) << "\nbad\n";
+          invalid.emplace_back(partial.str(), 1);
+          for (const size_t found : {size_t(0), count - 1, count + 1})
+          {
+            std::ostringstream stream;
+            stream << header;
+            for (size_t i = 0; i < found; ++i)
+              stream << entry(i % nodes, i / nodes) << '\n';
+            invalid.emplace_back(stream.str(), found);
+          }
+          for (const auto& [data, found] : invalid)
+          {
+            SCOPED_TRACE(data);
+            for (size_t i = 0; i < count; ++i)
+              field.getData()[i] = -entry(i % nodes, i / nodes);
+            const auto before = field.getData().eval();
+            std::istringstream input(data);
+            try
+            {
+              loader.load(input);
+              FAIL() << "Wrong P0 coefficient count was accepted";
+            }
+            catch (const Alert::Exception& error)
+            {
+              const std::string message = error.what();
+              EXPECT_NE(message.find("In member function"), std::string::npos);
+              EXPECT_NE(message.find("load"), std::string::npos);
+              EXPECT_NE(message.find("Expected " + std::to_string(count) +
+                          " coefficient values, but found " + std::to_string(found)),
+                std::string::npos);
+            }
+            EXPECT_EQ(field.getData(), before);
+            for (const size_t recoveryOrdering : {size_t(0), size_t(1)})
+            {
+              std::istringstream recovery(
+                payload(nodes, components, recoveryOrdering, true));
+              ASSERT_NO_THROW(loader.load(recovery));
+              for (size_t node = 0; node < nodes; ++node)
+              {
+                for (size_t component = 0; component < components; ++component)
+                {
+                  EXPECT_EQ(
+                    field.getData()[node + component * nodes], entry(node, component));
+                }
+              }
+            }
+          }
+        }
+      }
+
       /// @brief Rejects malformed matrix headers and coefficients before modifying data.
       template <bool Discontinuous>
       void verifyMalformedMatrix()
@@ -249,6 +324,12 @@ namespace
   TYPED_TEST(MFEMCoefficients, P0MalformedMatrixPreservesDestinationAndRecovers)
   {
     this->template verifyMalformedMatrix<true>();
+  }
+
+  TYPED_TEST(MFEMCoefficients, P0MalformedScalarAndVectorPreserveDestinationAndRecover)
+  {
+    this->template verifyMalformedP0Coefficients<0>();
+    this->template verifyMalformedP0Coefficients<1>();
   }
 
   /// @brief Invalid first and truncated later P1 coefficients raise native diagnostics before changing the field.
