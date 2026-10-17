@@ -98,3 +98,8 @@ if(TARGET SWIFT_ReconstructionP1)
     endforeach()
   endforeach()
 endif()
+
+add_executable(RodinAdaptationSWIFTReportTest SWIFTReportTest.cpp)
+target_link_libraries(RodinAdaptationSWIFTReportTest PRIVATE
+  GTest::gtest_main Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationSWIFTReportTest PROPERTIES LABELS unit)
