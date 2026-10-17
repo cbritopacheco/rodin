@@ -3000,3 +3000,36 @@ enabled. Optimized, Debug and ASan test snapshots are byte-identical. The privat
 ASan translation unit uses the matching Eigen allocation ABI with the reused
 optimized support archive; this is not whole-library sanitizer coverage and
 its profiles remain excluded.
+
+### Full normal translation-unit coverage refresh (run725)
+
+Expand the six batches' diagnostic captures from their focused headers to all
+production headers emitted by their twelve final normal test translation units.
+Verify every report hash and every recorded production source against both the
+worktree and the frozen `6eec68ed4` source snapshot. Exclude test/benchmark code,
+Rodin/Test helpers, sanitizer, discovery, review, failed and pre-repair producers.
+Out-of-line support-library counters are not included in these private TU
+captures; the incomplete seventeen-collector CI baseline remains separate in
+provenance. This hybrid is not current-head CI confirmation.
+
+The result is 45,039 hits among 47,795 measured production lines (94.2337%).
+Against that incomplete CI baseline, the six batches add 74 hits and 58 measured
+lines. The MPI guard batch adds six hits and two measured lines; the direct
+HDF5 group batch adds ten hits, closing its nine rejection statements and the
+previously unhit attribute-assignment line 1627. The fixed-denominator shortfall
+to 96% is 845 hits, but the missing CI collectors can still change the result.
+
+All raw normal inputs and per-source hashes are retained in
+`run723-full-normal-inputs`; the diagnostic marginal audit is
+`run725-full-normal-union.json`. Completed sanitizer build directories were
+copied, hash-verified and replaced by archive symlinks in run724 to preserve
+failure/repair evidence while recovering Docker capacity.
+
+Further Flow audit distinguishes the existing all-geometry cell/face tracking
+checks from an untested lower-dimensional start fallback: valid vertices in
+2D/3D and edges in 3D are below the supported starting cell/face dimensions.
+A focused contract test can check failure/zero results, unchanged input-point
+identity and absence of operand/velocity evaluation, without invalid internal
+geometry indices or a tolerance chosen only to hit a branch. The tangential
+face-selection rounding fallback requires a separate numerical justification;
+it should not be forced by inconsistent cached physical/reference coordinates.
