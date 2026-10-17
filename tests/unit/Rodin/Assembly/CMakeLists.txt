@@ -42,3 +42,8 @@ add_executable(RodinAssemblyAffineConstraintTest AffineConstraintTest.cpp)
 target_link_libraries(RodinAssemblyAffineConstraintTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational)
 gtest_discover_tests(RodinAssemblyAffineConstraintTest PROPERTIES LABELS unit)
+
+add_executable(RodinAssemblyRegionSelectionTest RegionSelectionTest.cpp)
+target_link_libraries(RodinAssemblyRegionSelectionTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Solver)
+gtest_discover_tests(RodinAssemblyRegionSelectionTest PROPERTIES LABELS unit)
