@@ -2939,7 +2939,8 @@ new collectors or instantiated code can change both numerator and denominator.
 
 ### MPI convenience-export guards and datatype-cache lifecycle (run715)
 
-Use a valid WORLD-distributed segment mesh with 17 cells to check HDF5's
+Use a valid WORLD-distributed segment mesh with 17 grid points (16 cells) to
+check HDF5's
 convenience node/cell attribute exporters on real scalar, two-component vector
 and rectangular matrix P1 fields. Each convenience overload must reject the
 MPI-backed FES with native guidance to pass a shard explicitly, preserve every
@@ -2973,3 +2974,29 @@ at lines 1733/1738 and 1798/1803. Final optimized, Debug and ASan test snapshots
 are byte-identical. Failed, sanitizer, discovery, standalone-control and all
 pre-repair producers are excluded from measured coverage. No project-wide
 percentage is inferred from this focused capture.
+
+### Direct HDF5 duplicate-group rejection batch (run722)
+
+Write topology, coordinates and region attributes from a valid triangle mesh
+to an open writable file with its mesh parent group. Attempt each direct writer
+again with a quadrilateral mesh having different vertex count, coordinates,
+topology and labels. Require native path-specific duplicate-group diagnostics,
+then compare the original topology and its size, coordinate shape and values,
+attributes in every dimension, an unrelated sentinel dataset, and the baseline
+file-associated object count. This exercises public duplicate-write errors;
+no invalid handles, corrupted internal mesh state or allocation failure
+injection are used. Production code is unchanged.
+
+All 101 HDF5 unit cases passed individually in optimized run718 and
+assertion-enabled run719. Source-matched run722 captures verify the three
+writer entries at HDF5.h 1374, 1504 and 1582, and positive counters on all nine
+targeted rejection lines (1382–1384, 1511–1513 and 1589–1591). Compiler line
+counters prove execution, not unique exception-event counts. Only successful
+normal producers enter the capture; sanitizer and discovery profiles are
+excluded. No project-wide percentage is inferred from this focused audit.
+
+Run721 also passed all 101 cases individually under ASan with leak detection
+enabled. Optimized, Debug and ASan test snapshots are byte-identical. The private
+ASan translation unit uses the matching Eigen allocation ABI with the reused
+optimized support archive; this is not whole-library sanitizer coverage and
+its profiles remain excluded.

@@ -4,7 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <array>
 #include <cstdio>
+#include <limits>
+#include <vector>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -1998,5 +2001,95 @@ namespace Rodin::Tests::Unit
     verify.template operator()<HDF5::F64>("F64", H5T_NATIVE_DOUBLE);
     verify.template operator()<HDF5::U8>("U8", H5T_NATIVE_UCHAR);
     EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), 1);
+  }
+
+  /// @brief Direct visualization writers reject duplicate groups without replacing data.
+  TEST_F(HDF5InvalidPayload, DuplicateVisualizationGroupsPreserveExistingData)
+  {
+    auto original = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    auto replacement = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {3, 2});
+    for (auto* mesh : {&original, &replacement})
+    {
+      mesh->getConnectivity().compute(2, 1);
+      for (Index cell = 0; cell < mesh->getCellCount(); ++cell)
+        mesh->setAttribute({2, cell}, mesh == &original ? 11 : 22);
+    }
+    auto file =
+      HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    const auto parent = HDF5::Group(
+      H5Gcreate2(file.get(), HDF5::Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+    ASSERT_TRUE(parent);
+    HDF5::writeVectorDataset<HDF5::U64>(file.get(), "/Mesh/Keep", {12345});
+    HDF5::writeXDMFTopology(file.get(), original);
+    HDF5::writeXDMFVertices(file.get(), original);
+    HDF5::writeXDMFRegionAttribute(file.get(), original);
+    const auto topology =
+      HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopology);
+    const auto topologySize =
+      HDF5::readScalarDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopologySize);
+    const auto vertices =
+      HDF5::readVectorDataset<HDF5::F64>(file.get(), HDF5::Path::MeshGeometryVertices);
+    const auto vertexShape =
+      HDF5::readMatrixShape(file.get(), HDF5::Path::MeshGeometryVertices);
+    std::array<std::vector<HDF5::U64>, 3> attributes;
+    for (size_t dimension = 0; dimension < attributes.size(); ++dimension)
+    {
+      attributes[dimension] =
+        HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::attributePath(dimension));
+    }
+    ASSERT_FALSE(topology.empty());
+    ASSERT_EQ(topologySize, topology.size());
+    ASSERT_EQ(vertexShape.first, original.getVertexCount());
+    ASSERT_EQ(vertexShape.second, original.getSpaceDimension());
+    ASSERT_EQ(attributes[2], std::vector<HDF5::U64>(original.getCellCount(), 11));
+    const auto handles = H5Fget_obj_count(file.get(), H5F_OBJ_ALL);
+    ASSERT_GE(handles, 0);
+    const std::array<std::string, 3> groups{
+      HDF5::Path::MeshXDMF, HDF5::Path::MeshGeometry, HDF5::Path::MeshAttributes};
+    for (size_t operation = 0; operation < groups.size(); ++operation)
+    {
+      SCOPED_TRACE(groups[operation]);
+      try
+      {
+        if (operation == 0)
+          HDF5::writeXDMFTopology(file.get(), replacement);
+        else if (operation == 1)
+          HDF5::writeXDMFVertices(file.get(), replacement);
+        else
+          HDF5::writeXDMFRegionAttribute(file.get(), replacement);
+        FAIL() << "A visualization writer accepted a duplicate group";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find("Failed to create " + groups[operation] + " group."),
+          std::string::npos);
+      }
+      catch (const std::exception& error)
+      {
+        ADD_FAILURE() << "Expected a native group-creation diagnostic: " << error.what();
+      }
+      EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+      EXPECT_EQ(
+        HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopology),
+        topology);
+      EXPECT_EQ(
+        HDF5::readScalarDataset<HDF5::U64>(file.get(), HDF5::Path::MeshXDMFTopologySize),
+        topologySize);
+      EXPECT_EQ(
+        HDF5::readVectorDataset<HDF5::F64>(file.get(), HDF5::Path::MeshGeometryVertices),
+        vertices);
+      EXPECT_EQ(
+        HDF5::readMatrixShape(file.get(), HDF5::Path::MeshGeometryVertices), vertexShape);
+      for (size_t dimension = 0; dimension < attributes.size(); ++dimension)
+      {
+        EXPECT_EQ(
+          HDF5::readVectorDataset<HDF5::U64>(file.get(), HDF5::attributePath(dimension)),
+          attributes[dimension]);
+      }
+      EXPECT_EQ(HDF5::readVectorDataset<HDF5::U64>(file.get(), "/Mesh/Keep"),
+        std::vector<HDF5::U64>{12345});
+    }
   }
 }
