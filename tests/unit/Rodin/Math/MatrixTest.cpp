@@ -1185,3 +1185,17 @@ TYPED_TEST(SpatialMatrixConjugationTest, SmallTriangularSystemsRecoverExactSolut
     EXPECT_EQ(rhs.getData(), rhsBefore);
   }
 }
+
+/// @brief Empty square matrices preserve the neutral trace, determinant and inverse conventions.
+TYPED_TEST(SpatialMatrixConjugationTest, EmptySquareMatrixIdentities)
+{
+  const SpatialMatrix<TypeParam> matrix(0, 0);
+  EXPECT_EQ(matrix.trace(), TypeParam(0));
+  EXPECT_EQ(matrix.determinant(), TypeParam(1));
+  const auto inverse = matrix.inverse();
+  EXPECT_EQ(inverse.rows(), 0);
+  EXPECT_EQ(inverse.cols(), 0);
+  EXPECT_EQ(inverse.getData().rows(), matrix.getData().rows());
+  EXPECT_EQ(matrix.rows(), 0);
+  EXPECT_EQ(matrix.cols(), 0);
+}

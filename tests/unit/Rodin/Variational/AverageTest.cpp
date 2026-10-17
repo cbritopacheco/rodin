@@ -120,3 +120,69 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(avg_f.getValue(p), 10.0, 1e-10);
   }
 }
+
+/// @brief Quadrature-associated interface values retain distinct traces and P0 basis values.
+TEST(Rodin_Variational_Average, DiscontinuousIntegrationPointTracesAllGeometries)
+{
+  const auto check = []<class Scalar>() {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge, Polytope::Type::Hexahedron})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const auto dimension = Polytope::Traits(geometry).getDimension();
+      auto mesh = dimension == 1 ? LocalMesh::UniformGrid(geometry, {3})
+        : dimension == 2         ? LocalMesh::UniformGrid(geometry, {3, 3})
+                                 : LocalMesh::UniformGrid(geometry, {3, 3, 3});
+      mesh.getConnectivity().compute(dimension - 1, dimension);
+      P0<Scalar> fes(mesh);
+      GridFunction field(fes);
+      for (Index cell = 0; cell < mesh.getCellCount(); ++cell)
+      {
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          field[cell] = Complex(Real(2 + 2 * cell), Real(3 + cell));
+        else
+          field[cell] = Real(2 + 2 * cell);
+      }
+      auto average = Average(field);
+      auto jump = Jump(field);
+      TrialFunction trial(fes);
+      auto averageBasis = Average(trial);
+      auto jumpBasis = Jump(trial);
+      bool checked = false;
+      for (auto face = mesh.getFace(); face; ++face)
+      {
+        const auto& incidence = mesh.getConnectivity().getIncidence(
+          {dimension - 1, dimension}, face->getIndex());
+        if (incidence.size() != 2)
+          continue;
+        const Index first = *incidence.begin();
+        const Index second = *std::next(incidence.begin());
+        const auto& quadrature =
+          QF::PolytopeQuadratureFormula::get(2, face->getGeometry());
+        const auto& points = face->getQuadrature(quadrature);
+        for (size_t q = 0; q < points.getSize(); ++q)
+        {
+          const IntegrationPoint point(points.getPoint(q), &quadrature, q);
+          const Scalar firstValue = field[first];
+          const Scalar secondValue = field[second];
+          EXPECT_EQ(average.getValue(point), Real(0.5) * (firstValue + secondValue));
+          EXPECT_EQ(jump.getValue(point), firstValue - secondValue);
+          EXPECT_EQ(average.getValue(point.getPoint()), average.getValue(point));
+          EXPECT_EQ(jump.getValue(point.getPoint()), jump.getValue(point));
+          EXPECT_EQ(&averageBasis.setIntegrationPoint(point), &averageBasis);
+          EXPECT_EQ(&jumpBasis.setIntegrationPoint(point), &jumpBasis);
+          EXPECT_EQ(&averageBasis.getIntegrationPoint(), &point);
+          EXPECT_EQ(&jumpBasis.getIntegrationPoint(), &point);
+          EXPECT_EQ(averageBasis.getBasis(0), Scalar(1));
+          EXPECT_EQ(jumpBasis.getBasis(0), Scalar(0));
+        }
+        checked = true;
+        break;
+      }
+      EXPECT_TRUE(checked);
+    }
+  };
+  check.template operator()<Real>();
+  check.template operator()<Complex>();
+}
