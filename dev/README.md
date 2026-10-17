@@ -3160,3 +3160,55 @@ passes with 397 + 397 distinct invocations. Slow/distributed fixture cases stay
 excluded. These are discovery checks, with no accepted runtime coverage.
 The durable audit is `build-coverage-linux/run754-partition-verifier-audit.json`.
 Fresh CI must confirm the repair against its complete configured inventory.
+
+### Matrix reference-element guards and source priorities (run767/run768)
+
+Directly exercise the public matrix-range guards of P0Element, P0gElement,
+P1Element and H1Element through order three for Real and Complex, on Point,
+Segment, Triangle, Quadrilateral, Tetrahedron, Pyramid, Wedge and Hexahedron.
+Both geometry and scalar-element constructor overloads reject zero or excessive
+extents with native member-function diagnostics. Every local functional rejects
+empty and incompatible values, including a transposed shape with the same flat
+component count, before reading a component. The same functional then recovers
+with a valid nonsymmetric real/complex matrix, checked against its scalar
+functional. Element dimensions and order remain unchanged. No internal indices
+or mesh incidence tables are fabricated.
+
+All 22 MatrixRange cases passed individually in optimized run761; the new
+case also passed alone with assertions in run764. Source-matched run767 captures
+verify 12 constructor variants, 24 rejection/recovery functional variants and
+all 20 targeted exception lines. Those 20 lines were unhit in the incomplete
+run725 diagnostic. The captured production-only files include four matrix
+reference headers and their two included scalar implementation headers;
+LCOV's header include patterns also select the latter. Exact allowed-source
+hashes and raw reports are retained in
+`build-coverage-linux/run767-matrix-element-inputs/`. No project-wide percentage
+is inferred from this marginal result. Failed fixtures and discovery profiles
+are excluded. Run757 failed a range-loop-copy warning and was stopped after
+that fatal diagnostic; run758 revealed a noncopyable scalar P1 functional.
+The final fixture uses references for both without changing production code.
+
+Source-priority audit run768 classifies 249 gaps from the incomplete run725
+baseline with current/frozen source hashes matched. All 138 P1Element.hpp gaps
+are invalid-index/coordinate/geometry fallback markers, asserts or NaN returns.
+Of 61 SpatialMatrix.h gaps, 57 are incompatible-size/capacity or unsupported
+operation fallbacks, three zero-row subcases are bypassed by the earlier
+zero-row return, and one closing-brace counter needs compiler-block attribution.
+The 49 H1.hpp gaps contain 46 invalid-index/transform/incidence fallbacks, one
+reachable pyramid face-order skip candidate, and two skips incompatible with
+valid pyramid/hex face sets. XDMF's empty piece-name return is bypassed by its
+sole caller normalizing empty grid names to `mesh`. This is a prioritization
+audit, not a blanket claim that invalid public inputs are untestable. Counters,
+filters and the coverage denominator are unchanged; further valid-path tests
+should follow the completed CI union rather than manufacture invariant failures.
+The durable source classification is
+`build-coverage-linux/run768-source-gap-priorities.json`.
+
+Run766 passed the new case alone under ASan with leak detection enabled. The
+final optimized, Debug and ASan translation-unit snapshots are byte-identical.
+The private ASan translation unit uses the matching Eigen allocation ABI with
+optimized support archives; it does not establish whole-library sanitizer
+coverage, and its profiles are excluded. The completed normal builds and raw
+capture directory are checksum-archived with retained symlinks in run769;
+the original immutable normal-capture manifest remains separate from the later
+sanitizer validation metadata.
