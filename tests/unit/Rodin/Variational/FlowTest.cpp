@@ -457,3 +457,61 @@ TEST(Rodin_Variational_Flow, BooleanOperandPreservesScalarPromotion)
   Flow completed(1.0, operand, velocity, Math::RungeKutta::RK4{}, correction);
   EXPECT_DOUBLE_EQ(completed(start), 1.5);
 }
+
+/// @brief Starts below cell/face dimension abort without evaluating either field.
+TEST(Rodin_Variational_Flow, LowerDimensionalStartsPreservePointAndSkipFields)
+{
+  for (const auto geometry :
+    {Polytope::Type::Triangle, Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    const size_t dimension = Polytope::Traits(geometry).getDimension();
+    auto mesh = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 2));
+    mesh.getConnectivity().compute(dimension, 1);
+    size_t operandCalls = 0, velocityCalls = 0;
+    const RealFunction operand([&](const Point&) {
+      ++operandCalls;
+      return Real(7);
+    });
+    const auto velocity = [&](const Point&) {
+      ++velocityCalls;
+      Math::SpatialVector<Real> result(dimension);
+      result.setConstant(1);
+      return result;
+    };
+    for (size_t startDimension = 0; startDimension + 1 < dimension; ++startDimension)
+    {
+      SCOPED_TRACE(startDimension);
+      ASSERT_GT(mesh.getPolytopeCount(startDimension), 0u);
+      const auto polytope = mesh.getPolytope(startDimension, 0);
+      const auto reference = Polytope::Traits(polytope->getGeometry()).getCentroid();
+      const Point start(*polytope, reference);
+      for (const Real time : {-0.25, 0.25})
+      {
+        SCOPED_TRACE(time);
+        const Flow flow(time, operand, velocity);
+        const auto trace = flow.trace(start);
+        EXPECT_TRUE(trace.exited());
+        EXPECT_DOUBLE_EQ(trace.getTime(), 0);
+        EXPECT_DOUBLE_EQ(trace.getCorrection(), 0);
+        EXPECT_EQ(&trace.getPoint().getPolytope().getMesh(), &mesh);
+        EXPECT_EQ(trace.getPoint().getPolytope().getDimension(), startDimension);
+        EXPECT_EQ(trace.getPoint().getPolytope().getIndex(), polytope->getIndex());
+        const auto& tracedReference = trace.getPoint().getReferenceCoordinates();
+        ASSERT_EQ(tracedReference.size(), reference.size());
+        EXPECT_DOUBLE_EQ(flow(start), 0);
+        ASSERT_EQ(start.getReferenceCoordinates().size(), reference.size());
+        for (size_t component = 0; component < static_cast<size_t>(reference.size());
+             ++component)
+        {
+          EXPECT_DOUBLE_EQ(tracedReference[component], reference[component]);
+          EXPECT_DOUBLE_EQ(
+            start.getReferenceCoordinates()[component], reference[component]);
+        }
+        EXPECT_EQ(operandCalls, 0u);
+        EXPECT_EQ(velocityCalls, 0u);
+      }
+    }
+  }
+}

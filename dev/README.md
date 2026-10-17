@@ -3033,3 +3033,29 @@ identity and absence of operand/velocity evaluation, without invalid internal
 geometry indices or a tolerance chosen only to hit a branch. The tangential
 face-selection rounding fallback requires a separate numerical justification;
 it should not be forced by inconsistent cached physical/reference coordinates.
+
+### Flow lower-dimensional start contract batch (run733)
+
+Use valid vertices in 2D/3D and edges in 3D to exercise the existing trace
+fallback below the supported cell/face starting dimensions. Across six cell
+geometries and both nonzero time signs, twenty combinations must abort with
+zero result/correction and preserve the starting mesh, polytope and reference
+coordinates. A nonzero operand and nonzero velocity track callback counts;
+neither may be evaluated on this fallback. Empty reference points are checked
+by size and active components rather than reading inactive spatial storage.
+No invalid internal indices or inconsistent physical/reference caches are used.
+
+All 15 Flow cases passed individually in optimized run729 and assertion-enabled
+run730. Source-matched run733 captures verify the new Flow specialization at
+entry 338 and 80 normal executions of the previously unhit fallback line 518.
+The initial run726 fixture compile used an unsupported spatial-point equality
+operator; it produced no runtime evidence and remains excluded. Final normal
+captures use only the corrected component-wise fixture. Sanitizer, failed and
+discovery profiles are excluded, and no global percentage is inferred here.
+Production code is unchanged.
+
+Run732 also passed all 15 cases individually under ASan with leak detection
+enabled. Final optimized, Debug and ASan test snapshots are byte-identical.
+The private ASan translation unit uses the matching Eigen allocation ABI with
+an optimized support archive; its profiles remain excluded and it does not
+establish whole-library sanitizer coverage.
