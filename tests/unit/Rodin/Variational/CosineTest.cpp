@@ -381,3 +381,54 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_sq_plus_cos_sq.getValue(p), 1.0, 1e-10);
   }
 }
+
+/// @brief Cosine preserves known constant order but does not invent polynomial metadata.
+TEST(Rodin_Variational_Cos, PolynomialOrderDistinguishesConstantLinearAndUnknownOperands)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  P0 constants(mesh);
+  GridFunction constantField(constants);
+  constantField = RealFunction(0.25);
+  P1 linears(mesh);
+  GridFunction linearField(linears);
+  linearField = RealFunction([](const Point& point) { return 1 + point.x(); });
+  const RealFunction known(0.25);
+  const RealFunction unknown([](const Point&) { return Real(0.25); });
+  for (auto cell = mesh.getCell(); cell; ++cell)
+  {
+    const Point point(*cell, Math::SpatialPoint{0.3});
+    const auto check = [&](const auto& operand, Optional<size_t> order) {
+      const auto expression = Cos(operand);
+      EXPECT_EQ(expression.getOrder(*cell), order);
+      EXPECT_EQ(GetOrderIfConstant(operand, *cell), order);
+      EXPECT_NEAR(expression(point), std::cos(operand(point)), 1e-12);
+    };
+    check(known, size_t(0));
+    check(constantField, size_t(0));
+    check(linearField, std::nullopt);
+    check(unknown, std::nullopt);
+    EXPECT_EQ(linearField.getOrder(*cell), Optional<size_t>(1));
+    EXPECT_EQ(unknown(point), known(point));
+    EXPECT_FALSE(unknown.getOrder(*cell));
+  }
+}
+
+/// @brief Automatic quadrature integrates the cosine of cellwise constant data exactly.
+TEST(Rodin_Variational_Cos, ConstantOrderControlsAutomaticQuadrature)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  mesh.scale(Real(0.5));
+  mesh.getConnectivity().compute(0, 1);
+  P0 space(mesh);
+  GridFunction field(space);
+  field = RealFunction([](const Point& point) { return point.x(); });
+  const auto expression = Cos(field);
+  TestFunction v(space);
+  LinearForm load(v);
+  load = Integral(expression, v);
+  load.assemble();
+  const Real expected = Real(0.5) * (std::cos(Real(0.25)) + std::cos(Real(0.75)));
+  EXPECT_NEAR(load.getVector().sum(), expected, 1e-12);
+  for (auto cell = mesh.getCell(); cell; ++cell)
+    EXPECT_EQ(expression.getOrder(*cell), Optional<size_t>(0));
+}

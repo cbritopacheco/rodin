@@ -3702,3 +3702,36 @@ Run909 adds nine hits in MeshBuilder.cpp, with no denominator expansion:
 CI inputs are frozen for this comparison; this remains incomplete diagnostic
 CI/local evidence. Detailed provenance and the delta are retained in run909
 artifacts. CI has 164 successful jobs and no test-job failures at this check.
+
+### Cosine polynomial-order template batch (run918)
+
+Exercise cosine order metadata for literal constants, P0 fields, positive-degree
+P1 fields and unknown-order callbacks. Equal-valued constant and unknown-order
+operands must retain distinct metadata. Verify GetOrderIfConstant on the same
+public function variants, compare point values with the standard cosine, and
+check the analytic integral of the cosine of two cellwise constant values under
+automatic quadrature.
+
+All 23 cosine cases pass individually in optimized run913, Debug run915 and
+ASan run917. Leak detection is enabled and the Eigen allocation ABI matches the
+optimized support archives; their counters are not captured. Both new cases
+reject an isolated sign-reversed cosine implementation in run920. Production
+headers remain unchanged; the excluded mutation evidence is retained in
+`build-coverage-linux/run920-cosine-sign-mutation-excluded.json`.
+
+Run918 captures only successful final optimized and Debug Test objects and
+confirms thirteen executed order-method variants across Cos and
+GetOrderIfConstant. A null-state check and retry-directory handling in the
+capture script were repaired before its successful capture; runtime producers
+and their profiles were unchanged. Raw reports and source/producers are retained
+in `build-coverage-linux/run918-cosine-order-inputs/` with the file audit
+companion. Tests, benchmarks, library test helpers, discovery, sanitizer and
+mutation counters are excluded.
+
+Run922 freezes the preceding fifteen current CI reports and adds ten hits,
+five each in Cosine.h and Function.h, without denominator expansion. The
+diagnostic is 48,062 measured and 45,710 hit lines, approximately 95.1063 percent;
+another 430 hits would reach 96 percent at this denominator. It remains
+incomplete CI/local evidence. Provenance and per-file delta are retained in
+run922 artifacts. The latest CI snapshot has 167 successful jobs and no
+test-job failures; CI confirmation remains pending.
