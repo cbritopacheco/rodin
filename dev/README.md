@@ -3442,3 +3442,48 @@ explicit in `build-coverage-linux/run833-current-source-audit.json`. This keeps
 inactive configurations and uninstantiated definitions visible; it does not
 claim execution of every specialization or convert the inventory into a
 source-coverage percentage.
+
+### Power-degree metadata and automatic quadrature (run841)
+
+Exercise the public Pow degree query with signed, unsigned, boolean and
+floating exponent types on real P1 fields. Cover zero, negative and fractional
+exponents, unknown base degree, maximum representable degree, and the exact
+boundary before degree multiplication overflows. Construct large degrees by
+nested expressions rather than a fabricated metadata provider. Huge powers
+are queried only for degree metadata; they are never evaluated or passed to
+quadrature. Check the conservative unknown-order policy explicitly.
+
+Use automatic quadrature to integrate powers of the affine field 1+x over
+the unit interval for exponents zero, one, two, three, six and nine. Sum the
+P0 load entries and compare against the independent antiderivative formula,
+computed with ldexp rather than Pow. No quadrature-order override is used.
+All nineteen cases passed individually in optimized run836, assertion-enabled
+run838 and ASan run840 with leak detection enabled. ASan retains the matching
+Eigen allocation ABI and optimized support archives. The optimized test
+snapshot differs only in one verified EXPECT_EQ argument line wrap; its C++
+tokens are unchanged. Final Debug, ASan and mutation test snapshots match.
+
+An isolated private-header mutation returning degree zero for every ordinary
+nonzero integral power was rejected by the new automatic-quadrature case in
+run843: fourteen expectations failed, including integral-value comparisons.
+The workspace production header is unchanged; the mutation log is retained
+in `build-coverage-linux/run843-pow-order-mutation-excluded.log`.
+
+Run841 confirms seven executed degree-query specializations spanning int,
+unsigned int, size_t, bool and Real exponents, with positive unknown-base,
+negative, zero, overflow and product-return counters. Raw successful normal
+reports and source hashes are retained in `build-coverage-linux/run841-pow-order-inputs/`
+and its file audit. Failed, discovery, mutation and sanitizer producers are
+excluded, together with tests, benchmarks and library test helpers.
+
+Run844 adds seventeen hit lines and two measured lines to run833. All sixteen
+previously missed Pow lines become positive; its floating-exponent unknown-order
+return is newly measured and hit. The other new measured line is the empty
+OpenMP linear-form copy-constructor body, emitted but unhit for this workload.
+Both attributions are retained in `build-coverage-linux/run844-new-line-attribution.json`.
+The diagnostic union is 47,810 measured and 45,408 hit lines, approximately
+94.9759 percent. At this fixed denominator the planning shortfalls are twelve
+hits to 95 percent and 490 to 96 percent. This retains the changed-header
+counter reset from run833 and remains an incomplete old-CI/local diagnostic,
+not current-head CI confirmation. Detailed provenance and gaps are retained
+in `build-coverage-linux/run844-current-normal-union.json` and its audit companion.
