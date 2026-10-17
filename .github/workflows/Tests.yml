@@ -1051,7 +1051,7 @@ jobs:
           RodinMPIMatrixRangeTest RodinPETScGridFunctionTest
           RodinPETScMPIGridFunctionTest RodinPETScMPIP0P0gTest
           RodinPETScMPISubMeshGridFunctionTest
-          RodinPETScIOHDF5IOTest RodinPETScIOMEDITIOTest
+          RodinPETScIOHDF5IOTest RodinPETScIOMEDITIOTest RodinPETScIOMFEMIOTest RodinPETScIOMFEMMPIIOTest
           RodinPETScSingleFieldConstraintTest RodinPETScRestrictedNonlocalTest
           RodinPETScMixedTargetAssemblyTest
           RodinPETScMPIMixedTargetAssemblyTest
@@ -1067,7 +1067,7 @@ jobs:
       - name: Run PETSc matrix-range and I/O tests
         run: >-
           ctest --test-dir build/tests
-          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4]|RodinPETScMPISubMeshGridFunctionTest_np[124]|RodinPETScIO(HDF5IO|MEDITIO)Test|RodinPETScSingleFieldConstraintTest|RodinPETScRestrictedNonlocalTest|RodinPETScMixedTargetAssemblyTest|RodinPETScMPIMixedTargetAssemblyTest_np[12348]|RodinPETScSingleFieldTargetAssemblyTest|RodinPETScSNESStateTest)$'
+          -R '^(RodinMPIMatrixRangeTest_np[1-4]|RodinPETScGridFunctionTest|RodinPETScMPIGridFunctionTest_np[1-4]|RodinPETScMPIP0P0gTest_np[1-4]|RodinPETScMPISubMeshGridFunctionTest_np[124]|RodinPETScIO(HDF5IO|MEDITIO|MFEMIO)Test|RodinPETScIOMFEMMPIIOTest_np[12348]|RodinPETScSingleFieldConstraintTest|RodinPETScRestrictedNonlocalTest|RodinPETScMixedTargetAssemblyTest|RodinPETScMPIMixedTargetAssemblyTest_np[12348]|RodinPETScSingleFieldTargetAssemblyTest|RodinPETScSNESStateTest)$'
           --output-on-failure --no-tests=error -j 1
 
       - name: Capture PETSc scalar-variant production coverage
