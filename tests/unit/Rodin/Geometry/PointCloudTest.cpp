@@ -201,4 +201,68 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pc(0, 50), 50.0, 1e-14);
     EXPECT_NEAR(pc(1, 50), 100.0, 1e-14);
   }
+
+  /// @brief Empty and zero-dimensional coordinate sets preserve shape and inactive packed rows.
+  TEST(Geometry_PointCloud, EmptyCoordinateOperationsPreserveShapeAndInactiveRows)
+  {
+    for (auto dimension :
+      {std::uint8_t{0}, std::uint8_t{1}, std::uint8_t{2}, std::uint8_t{3}})
+    {
+      for (size_t count : {size_t{0}, size_t{3}})
+      {
+        SCOPED_TRACE(static_cast<unsigned>(dimension));
+        SCOPED_TRACE(count);
+        PointCloud cloud(dimension, count);
+        cloud.getPackedMatrix().setConstant(9);
+        cloud.setZero();
+        for (size_t point = 0; point < count; ++point)
+        {
+          EXPECT_EQ(cloud[point].size(), dimension);
+          for (size_t row = 0; row < 3; ++row)
+            EXPECT_EQ(cloud.getPackedMatrix()(row, point), row < dimension ? 0 : 9);
+        }
+        cloud.setConstant(5);
+        for (size_t point = 0; point < count; ++point)
+        {
+          for (size_t row = 0; row < 3; ++row)
+            EXPECT_EQ(cloud.getPackedMatrix()(row, point), row < dimension ? 5 : 9);
+          for (size_t row = 0; row < dimension; ++row)
+            cloud(row, point) = static_cast<Real>(1 + 10 * point + row);
+        }
+        EXPECT_EQ(&(cloud *= Real(2)), &cloud);
+        const auto left = Real(3) * cloud;
+        const auto right = cloud * Real(3);
+        for (const auto* result : {&left, &right})
+        {
+          EXPECT_EQ(result->getDimension(), dimension);
+          EXPECT_EQ(result->getCount(), count);
+          EXPECT_EQ(result->getMatrix().rows(), dimension);
+          EXPECT_EQ(result->getMatrix().cols(), static_cast<Eigen::Index>(count));
+          for (size_t point = 0; point < count; ++point)
+          {
+            for (size_t row = 0; row < dimension; ++row)
+            {
+              EXPECT_EQ(
+                (*result)(row, point), Real(6) * static_cast<Real>(1 + 10 * point + row));
+            }
+            if (dimension != 0)
+            {
+              for (size_t row = dimension; row < 3; ++row)
+                EXPECT_EQ(result->getPackedMatrix()(row, point), 9);
+            }
+          }
+        }
+        for (size_t point = 0; point < count; ++point)
+        {
+          for (size_t row = 0; row < 3; ++row)
+          {
+            EXPECT_EQ(cloud.getPackedMatrix()(row, point),
+              row < dimension ? Real(2) * static_cast<Real>(1 + 10 * point + row)
+                              : Real(9));
+          }
+        }
+      }
+    }
+  }
+
 }
