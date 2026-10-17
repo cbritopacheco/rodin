@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 #include <sstream>
 #include <cmath>
+#include <limits>
 #include <vector>
 #include <array>
 #include <algorithm>
@@ -3696,4 +3697,79 @@ TEST(MMG5Lifecycle, EmptySolutionCopiesAndSwaps)
   EXPECT_EQ(copied->m[1], Real(1.5));
   EXPECT_EQ(populated->np, 0);
   EXPECT_EQ(populated->m, nullptr);
+}
+
+/// @brief Surface optimization improves a distorted patch while preserving its plane and corners.
+TEST(Rodin_MMG_Optimizer, EmbeddedSurfaceImprovesQualityAndPreservesGeometry)
+{
+  auto mesh = MMG::Mesh::Builder()
+                .initialize(3)
+                .nodes(5)
+                .vertex({0, 0, 0})
+                .vertex({1, 0, 1})
+                .vertex({1, 1, 3})
+                .vertex({0, 1, 2})
+                .vertex({0.08, 0.12, 0.32})
+                .polytope(Polytope::Type::Triangle, {0, 1, 4})
+                .polytope(Polytope::Type::Triangle, {1, 2, 4})
+                .polytope(Polytope::Type::Triangle, {2, 3, 4})
+                .polytope(Polytope::Type::Triangle, {3, 0, 4})
+                .corner(0)
+                .corner(1)
+                .corner(2)
+                .corner(3)
+                .finalize();
+  for (auto cell = mesh.getCell(); cell; ++cell)
+    mesh.setAttribute(cell.key(), 17);
+  const Math::SpatialVector<Real> normal{-1, -2, 1};
+  const std::array<Math::SpatialPoint, 4> corners{
+    {{0, 0, 0}, {1, 0, 1}, {1, 1, 3}, {0, 1, 2}}};
+  const auto geometry = [&] {
+    Real area = 0;
+    Real quality = std::numeric_limits<Real>::infinity();
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      EXPECT_EQ(cell->getGeometry(), Polytope::Type::Triangle);
+      EXPECT_EQ(cell->getAttribute(), Optional<Attribute>(17));
+      const auto vertices = cell->getVertices();
+      EXPECT_EQ(vertices.size(), 3);
+      if (vertices.size() != 3)
+        continue;
+      const auto a = mesh.getVertexCoordinates(vertices[0]);
+      const auto b = mesh.getVertexCoordinates(vertices[1]);
+      const auto c = mesh.getVertexCoordinates(vertices[2]);
+      const auto cross = (b - a).cross(c - a);
+      EXPECT_GT(cross.dot(normal), 0);
+      const Real sum =
+        (b - a).squaredNorm() + (c - b).squaredNorm() + (a - c).squaredNorm();
+      EXPECT_GT(sum, 0);
+      area += cross.norm() / 2;
+      quality = std::min(quality,
+        2 * std::sqrt(Real(3)) * cross.norm() /
+          std::max(sum, std::numeric_limits<Real>::min()));
+    }
+    return std::pair{area, quality};
+  };
+  const auto before = geometry();
+  EXPECT_NEAR(before.first, std::sqrt(Real(6)), 1e-12);
+  MMG::Optimizer().optimize(mesh);
+  ASSERT_FALSE(mesh.isEmpty());
+  EXPECT_TRUE(mesh.isSurface());
+  EXPECT_EQ(mesh.getDimension(), 2);
+  EXPECT_EQ(mesh.getSpaceDimension(), 3);
+  const auto after = geometry();
+  EXPECT_NEAR(after.first, std::sqrt(Real(6)), 1e-10);
+  EXPECT_GT(after.second, before.second);
+  for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+  {
+    const auto coordinate = vertex->getCoordinates();
+    EXPECT_NEAR(coordinate.z() - coordinate.x() - 2 * coordinate.y(), 0, 1e-10);
+  }
+  for (const auto& expected : corners)
+  {
+    size_t found = 0;
+    for (auto vertex = mesh.getVertex(); vertex; ++vertex)
+      found += (vertex->getCoordinates() - expected).norm() < 1e-12;
+    EXPECT_EQ(found, 1);
+  }
 }

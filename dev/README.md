@@ -3638,3 +3638,38 @@ provenance and gaps are retained in
 Run884 refreshes the source audit against these counters, retaining 566 files,
 6,189 definitions, 390 exception references and the explicit parser/reachability
 limitations in its audit and prioritization artifacts.
+
+### Embedded MMGS surface optimization batch (run893)
+
+Exercise the previously unhit surface optimizer on a distorted four-triangle
+patch in the plane $z=x+2y$. An independent triangle calculation checks positive
+orientation, total area $\sqrt{6}$, strictly improved minimum triangle quality,
+material references and preservation of the four corner coordinates. Compare
+coordinate sets after rebuilding rather than assuming stable mesh indices.
+
+All 118 MMG cases pass individually in optimized assertion-enabled run888.
+The verbatim focused case passes Debug run890 and ASan run892 with leak
+detection and matching Eigen allocation ABI. All nine native MMG C++ wrappers
+are rebuilt for each configuration; other support archives and the MMG C
+backend remain optimized. The initial optimized smoke is excluded from capture.
+The isolated run895 mutation skips MMGS while reporting success; precisely the
+quality-improvement assertion rejects the unchanged patch. Production sources
+remain unchanged. Its log is retained in
+`build-coverage-linux/run895-mmg-surface-mutation-excluded.log`.
+
+Run893 captures only the two successful normal producers, retaining full test
+snapshots, focused-block hashes, current native-source hashes and paired
+objects/profiles. It confirms two executions of optimizeMMGS. Tests, benchmarks,
+library test helpers, discovery, initial smoke, sanitizer and mutation profiles
+are excluded from measured sources. Inputs and provenance are retained in
+`build-coverage-linux/run893-mmg-surface-inputs/` with its file audit companion.
+
+Run896 freezes the same fifteen current CI inputs used by run881. The batch
+adds twelve hits: eleven native optimizer lines and one dispatcher line. A
+newly measured, uncovered MMG5.h line increases the denominator by one. The
+result is 48,062 measured and 45,691 hit lines, approximately 95.0668 percent;
+another 449 hits would reach 96 percent at this fixed denominator. The union
+still combines incomplete CI with successful local runs, not final CI proof.
+Detailed provenance and the per-file delta are retained in the run896 audit
+and delta artifacts. The current CI watcher reports no test-job failures;
+normal Debug partition two passes while partition one remains in progress.
