@@ -3346,3 +3346,47 @@ reports; it is not current-head CI confirmation. Failed, review, discovery,
 mutation and sanitizer profiles remain excluded, as do tests, benchmarks and
 library test helpers. Detailed deltas and remaining gaps are retained in
 `build-coverage-linux/run807-current-normal-union.json` and its audit companion.
+
+### Targeted dense mixed manufactured assembly (run816)
+
+Extend the existing affine P1/P0 dense mixed manufactured workload to call
+both LHS-only and RHS-only assembly, twice each, starting from unrelated
+matrix/vector values. Compare the selected side with the full system already
+verified against the manufactured field; require exact preservation of the
+opposite side. Cover Sequential and OpenMP on triangles and quadrilaterals.
+The existing full-system residual and recovered-solution checks remain in place.
+
+All four cases passed individually in optimized run811 and optimized ASan
+run815 with leak detection enabled. Run818 also passed the two OpenMP cases
+individually with two worker threads. ASan uses the matching Eigen allocation
+ABI and optimized support archives; this does not claim whole-library
+sanitizer coverage. Final normal, mutation and sanitizer test snapshots match
+the current source. The earlier run809 compile-only snapshot precedes a
+formatting adjustment and has no acceptance or coverage role.
+
+Run812 force-includes private copies of the two assembler headers with only
+the final mixed target branch changed to always select the matrix. Both
+backend mutation cases failed, with four expectations each, in run813.
+Workspace production sources remain unchanged. Mutation profiles are excluded.
+
+Run816 records eight calls to each supported targeted dense mixed backend
+variant. Optimized Eigen moves have no separate assignment-line counters;
+the function, full-assembly call, target branch and return line are positive.
+Selected-side values and opposite-side preservation are established by the
+numerical assertions and the mutation check. Source hashes, successful normal
+runtime records and the production-only report are retained in
+`build-coverage-linux/run816-dense-mixed-target-inputs/` and its file audit.
+Only the final normal run811 contributes to this capture; discovery, sanitizer,
+mutation and pre-review profiles are excluded, together with tests, benchmarks
+and library test helpers.
+
+Run817 adds that report to the previous diagnostic union: 47,803 measured
+lines and 45,378 hits, approximately 94.9271 percent. The additional 36 hits
+comprise eight previously missed targeted-overload lines, twenty-four other
+previously missed lines from the existing full-assembly workload, and four
+newly measured hit lines. Do not attribute all 36 to the new assertions.
+At this fixed denominator the remaining planning shortfalls are 35 hits to
+95 percent and 513 to 96 percent. The union still contains seventeen incomplete
+old-run CI collectors; it is not current-head CI confirmation. Detailed deltas
+and remaining gaps are retained in
+`build-coverage-linux/run817-current-normal-union.json` and its audit companion.

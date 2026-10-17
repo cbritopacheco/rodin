@@ -113,6 +113,35 @@ namespace
         const Math::Vector<Real> solution = factorization.solve(b);
         EXPECT_LT(
           (solution - exact).norm() / std::max<Real>(1, exact.norm()), solutionTolerance);
+
+        // Targeted assembly must preserve the opposite side, including when
+        // called repeatedly on a system containing unrelated previous values.
+        const Matrix previousMatrix = Matrix::Constant(total, total, -17);
+        const Math::Vector<Real> previousRHS = Math::Vector<Real>::Constant(total, 23);
+        for (const auto target : {AssemblyTarget::LHS, AssemblyTarget::RHS})
+        {
+          SCOPED_TRACE(static_cast<int>(target));
+          System targeted;
+          targeted.getOperator() = previousMatrix;
+          targeted.getVector() = previousRHS;
+          for (size_t repeat = 0; repeat < 2; ++repeat)
+          {
+            SCOPED_TRACE(repeat);
+            assembler.execute(targeted, assembledInput, target);
+            if (target == AssemblyTarget::LHS)
+            {
+              EXPECT_LT((targeted.getOperator() - a).norm() / std::max<Real>(1, a.norm()),
+                assemblyTolerance);
+              EXPECT_EQ((targeted.getVector() - previousRHS).norm(), 0);
+            }
+            else
+            {
+              EXPECT_EQ((targeted.getOperator() - previousMatrix).norm(), 0);
+              EXPECT_LT((targeted.getVector() - b).norm() / std::max<Real>(1, b.norm()),
+                assemblyTolerance);
+            }
+          }
+        }
       }
   };
 
