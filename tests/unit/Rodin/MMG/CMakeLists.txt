@@ -10,3 +10,9 @@ gtest_discover_tests(RodinMMGTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinMMGLevelSetDiscretizerTest LevelSetDiscretizerTest.cpp)
+target_link_libraries(RodinMMGLevelSetDiscretizerTest PRIVATE
+  GTest::gtest_main Rodin::Rodin Rodin::MMG)
+gtest_discover_tests(RodinMMGLevelSetDiscretizerTest
+  DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)

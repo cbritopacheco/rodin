@@ -4,6 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <memory>
+
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Utility/Overloaded.h"
 
@@ -348,14 +350,18 @@ namespace Rodin::MMG
       requiredTetrahedra = inputMesh->getRequiredTetrahedra();
     }
 
-    MMG5_pMesh mmgMesh = nullptr;
-    mmgMesh = rodinToMesh(ls.getFiniteElementSpace().getMesh());
+    using MeshOwner = std::unique_ptr<MMG5_Mesh, decltype(&MMG5::destroyMesh)>;
+    using SolutionOwner = std::unique_ptr<MMG5_Sol, decltype(&MMG5::destroySolution)>;
+    MeshOwner meshOwner(rodinToMesh(mesh), &MMG5::destroyMesh);
+    MMG5_pMesh mmgMesh = meshOwner.get();
 
     // Erase boundary elements which have the isoref
     if (m_isoref)
       deleteBoundaryRef(mmgMesh, *m_isoref);
 
-    MMG5_pSol sol = createSolution(mmgMesh, ls.getFiniteElementSpace().getVectorDimension());
+    SolutionOwner solutionOwner(
+      createSolution(mmgMesh, fes.getVectorDimension()), &MMG5::destroySolution);
+    MMG5_pSol sol = solutionOwner.get();
     copySolution(ls, sol);
     MMG5::setParameters(mmgMesh);
     const bool isSurface = ls.getFiniteElementSpace().getMesh().isSurface();
@@ -434,8 +440,8 @@ namespace Rodin::MMG
       if (idx < tetrahedronCount)
         rodinMesh.setRequiredTetrahedron(idx);
     }
-    destroySolution(sol);
-    destroyMesh(mmgMesh);
+    solutionOwner.reset();
+    meshOwner.reset();
 
     // Recover original attributes
     if (!isSurface)
@@ -455,7 +461,11 @@ namespace Rodin::MMG
         if (attrIt != m_g2om.end())
           rodinMesh.setAttribute({ d, idx }, attrIt->second);
         else
-          assert(std::holds_alternative<NoSplitT>(m_split.at(attr)));
+        {
+          // MMG's default region references need no explicit split policy.
+          assert(m_split.count(attr) == 0 ||
+            std::holds_alternative<NoSplitT>(m_split.at(attr)));
+        }
       }
     }
 
