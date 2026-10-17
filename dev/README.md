@@ -3933,3 +3933,38 @@ the preprocessing-independent inventory: 566 files, 6,189 definitions, 390
 exception references and 94 retained parser recoveries. CI continues without
 test-job failures; coverage capture for the first normal Debug partition remains
 in progress at this check.
+
+### Unsupported MFEM collection diagnostics (run1010)
+
+Exercise the existing fallback loader and printer for scalar-real, vector-real
+and scalar-complex global-constant spaces. Reject MFEM with the specific
+member-qualified Alert messages, without changing coefficient data, input
+position/state or an existing output prefix. Save and reload the same fields
+through HDF5 afterward to verify supported persistence still works.
+
+The initial private compile used a nonexistent vector P0g deduction guide;
+run1003 is excluded. Use the existing explicit SpatialVector range instead.
+All seven IO format cases pass individually in optimized run1005, Debug run1007
+and ASan run1009. Leak detection is enabled with matching Eigen allocation ABI;
+support archives remain optimized and their counters are not captured. No
+production changes or numerical tolerance changes are involved.
+
+Run1010 confirms six executed rejection variants, with two entries each across
+the normal configurations. Successful final normal profiles and exact source/
+producer hashes are retained in `build-coverage-linux/run1010-mfem-fallback-inputs/`
+and its file audit companion. Tests, benchmarks, library helpers, failed compile,
+discovery and sanitizer profiles are excluded.
+
+Run1011 verifies that production sources still match the frozen run1000 source
+snapshot, preserves both changed-header resets and appends only the two new
+normal reports. Seven prior misses in GridFunctionLoader.h and four in
+GridFunctionPrinter.h become hits, with no denominator expansion. The diagnostic
+is 48,224 measured and 45,900 hit lines, approximately 95.1808 percent; another
+396 hits would reach 96 percent at that denominator. It remains incomplete
+CI/local evidence, not final exact-head confirmation.
+
+Run1016 separately confirms that both normal Debug partitions on published head
+c65b9848cefbdae9059f4b3576ccd95a918d6d1f completed successfully, including their
+coverage stages. This validates the earlier partition repair, not the later
+local commits. Their exact CI jobs and step conclusions are retained in
+`build-coverage-linux/run1016-ci-debug-split-confirmation.json`.
