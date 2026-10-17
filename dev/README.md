@@ -3212,3 +3212,43 @@ coverage, and its profiles are excluded. The completed normal builds and raw
 capture directory are checksum-archived with retained symlinks in run769;
 the original immutable normal-capture manifest remains separate from the later
 sanitizer validation metadata.
+
+### Existing-workload calibration and current source identity (run778/run779)
+
+Rebuild and run the existing Distance (7 cases), Hilbert (3), Scotch (8) and
+P1 HyperElasticity (11) workloads from current source, one runtime case at a
+time, with optimized numerical builds. All 29 pass. Scotch's current wrapper
+and tests are compiled explicitly with retained snapshots and the established
+private ignored-attributes warning demotion; this is not a Scotch-enabled
+CMake configuration check. No test or production source changes are needed.
+Run778 preserves four normal captures, source hashes and complete successful
+runtime records in `build-coverage-linux/run778-model-gap-inputs/`.
+
+Run779 re-audits the 17 incomplete old-head CI collectors plus 24 successful
+source-equivalent local normal reports. Every local source hash matches both
+the current production tree and the frozen 6eec68ed4 snapshot. The earlier
+run725 checkpoint reproduces exactly before adding the newer reports. The
+combined diagnostic measures 47,799 production lines with 45,331 hit
+(94.836712%). Existing workloads contribute 250 additional hit lines and four
+additional measured lines; the newer Flow/advection/XDMF/reference-element
+batches contribute another 42 hit lines without increasing that checkpoint's
+denominator. Thus whole-file zero-hit gaps in these models were substantially
+missing-producer evidence, not a reason to duplicate their existing tests.
+
+At this diagnostic's fixed denominator, 79 additional hits would reach 95%
+and 557 would reach 96%. Neither number establishes the final CI shortfall:
+normal Debug and regular aggregate reports are still missing from the old CI
+baseline. The current published-head run must supply all 21 collectors before
+its union can confirm the target. Tests, benchmarks, library test helpers,
+failed, mutation, discovery and sanitizer producers remain excluded. Raw input
+provenance, the detailed delta and remaining gaps are retained in
+`build-coverage-linux/run779-current-normal-union.json` and its audit companion.
+
+Current-run source normalization is independently checked: completed job
+117392874622 checked out synthetic merge da9b5c8364253286c7fb61698497a7ffb7526f96.
+Its GitHub Git tree exactly equals published head c65b9848c, and current develop
+cf9ff43f9 is an ancestor of that head. The coverage snapshot therefore represents
+the tested tree rather than relying solely on the workflow's reported head SHA.
+The durable attestation is
+`build-coverage-linux/run779-ci-source-identity.json`. This proves source
+identity, not coverage completeness or CI completion.
