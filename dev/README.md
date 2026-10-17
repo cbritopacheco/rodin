@@ -3673,3 +3673,32 @@ still combines incomplete CI with successful local runs, not final CI proof.
 Detailed provenance and the per-file delta are retained in the run896 audit
 and delta artifacts. The current CI watcher reports no test-job failures;
 normal Debug partition two passes while partition one remains in progress.
+
+### MMG builder move-assignment batch (run908)
+
+Move a three-dimensional two-tetrahedron builder into a populated planar
+builder, destroy the source, then finalize the destination. Check replacement
+of geometry, dimension, coordinates, cell count and all six MMG constraint
+sets against explicit expected values. The assignment returns the destination
+reference. Different old and new indices expose stale or missing metadata.
+
+All 119 MMG cases pass individually in optimized run901; the focused case
+passes Debug run903 and ASan run905 with leak detection. Native MMG objects
+are reused from the preceding source-hashed current builds with matching
+configuration and Eigen allocation ABI; test objects are rebuilt from exact
+current snapshots. The C backend and remaining support archives stay optimized.
+Run907 omits the required-triangle move in an isolated private implementation;
+the new test rejects the stale index set. Its excluded log is retained in
+`build-coverage-linux/run907-mmg-builder-mutation-excluded.log`.
+
+Run908 pairs the successful normal profiles with their actual test/native
+objects and verifies two builder move-assignment executions. No sanitizer,
+mutation or discovery counters enter coverage. Tests, benchmarks and library
+test helpers remain excluded. Retain raw inputs and source/producers in
+`build-coverage-linux/run908-mmg-builder-inputs/` and its file audit companion.
+Run909 adds nine hits in MeshBuilder.cpp, with no denominator expansion:
+48,062 measured and 45,700 hit lines, approximately 95.0855 percent. Another
+440 hits would reach 96 percent at that denominator. The same fifteen current
+CI inputs are frozen for this comparison; this remains incomplete diagnostic
+CI/local evidence. Detailed provenance and the delta are retained in run909
+artifacts. CI has 164 successful jobs and no test-job failures at this check.

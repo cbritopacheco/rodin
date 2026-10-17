@@ -3773,3 +3773,61 @@ TEST(Rodin_MMG_Optimizer, EmbeddedSurfaceImprovesQualityAndPreservesGeometry)
     EXPECT_EQ(found, 1);
   }
 }
+
+/// @brief Moving a builder replaces prior geometry and every MMG constraint set.
+TEST(Rodin_MMG_Mesh_Builder, MoveAssignmentReplacesGeometryAndConstraints)
+{
+  MMG::Mesh::Builder target;
+  target.initialize(2)
+    .nodes(3)
+    .vertex({0, 0})
+    .vertex({1, 0})
+    .vertex({0, 1})
+    .polytope(Polytope::Type::Segment, {0, 1})
+    .polytope(Polytope::Type::Triangle, {0, 1, 2})
+    .corner(0)
+    .ridge(0)
+    .requiredVertex(0)
+    .requiredEdge(0)
+    .requiredTriangle(0);
+  {
+    MMG::Mesh::Builder source;
+    source.initialize(3)
+      .nodes(5)
+      .vertex({0, 0, 0})
+      .vertex({2, 0, 0})
+      .vertex({0, 3, 0})
+      .vertex({0, 0, 4})
+      .vertex({0, 0, -4})
+      .polytope(Polytope::Type::Segment, {0, 1})
+      .polytope(Polytope::Type::Segment, {0, 2})
+      .polytope(Polytope::Type::Triangle, {0, 1, 2})
+      .polytope(Polytope::Type::Triangle, {0, 1, 3})
+      .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+      .polytope(Polytope::Type::Tetrahedron, {0, 2, 1, 4})
+      .corner(3)
+      .corner(4)
+      .ridge(1)
+      .requiredVertex(2)
+      .requiredVertex(4)
+      .requiredEdge(1)
+      .requiredTriangle(1)
+      .requiredTetrahedron(1);
+    EXPECT_EQ(&(target = std::move(source)), &target);
+  }
+  const auto mesh = target.finalize();
+  EXPECT_EQ(mesh.getDimension(), 3);
+  EXPECT_EQ(mesh.getSpaceDimension(), 3);
+  ASSERT_EQ(mesh.getVertexCount(), 5);
+  EXPECT_EQ(mesh.getCellCount(), 2);
+  const std::array<Math::SpatialPoint, 5> expected{
+    {{0, 0, 0}, {2, 0, 0}, {0, 3, 0}, {0, 0, 4}, {0, 0, -4}}};
+  for (size_t i = 0; i < expected.size(); ++i)
+    EXPECT_EQ((mesh.getVertexCoordinates(i) - expected[i]).norm(), 0);
+  EXPECT_EQ(mesh.getCorners(), (IndexSet{3, 4}));
+  EXPECT_EQ(mesh.getRidges(), (IndexSet{1}));
+  EXPECT_EQ(mesh.getRequiredVertices(), (IndexSet{2, 4}));
+  EXPECT_EQ(mesh.getRequiredEdges(), (IndexSet{1}));
+  EXPECT_EQ(mesh.getRequiredTriangles(), (IndexSet{1}));
+  EXPECT_EQ(mesh.getRequiredTetrahedra(), (IndexSet{1}));
+}
