@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 /**
  * @file ComplexFunctionTest.cpp
  * @brief Tests for the ComplexFunction class.
@@ -5,6 +11,7 @@
 #include <gtest/gtest.h>
 #include <cmath>
 #include <complex>
+#include <memory>
 
 #include "Rodin/QF/Centroid.h"
 #include "Rodin/Variational.h"
@@ -245,4 +252,66 @@ TEST(Rodin_Variational_ComplexFunction, RealAndImagParts_UseIntegrationPointFast
   EXPECT_NEAR(f.getValue(p).imag(), 2.0, 1e-10);
   EXPECT_NEAR(f.getValue(ip).real(), 14.0, 1e-10);
   EXPECT_NEAR(f.getValue(ip).imag(), 24.0, 1e-10);
+}
+
+/// @brief Polymorphic constant copies retain values and independent trace selections.
+TEST(Rodin_Variational_ComplexFunction, PolymorphicConstantCopiesOwnTraceMetadata)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  const auto cell = *mesh.getCell();
+  QF::Centroid qf(Polytope::Type::Triangle);
+  const Point point(cell, qf.getPoint(0));
+  const IntegrationPoint ip(point, &qf, 0);
+  const FlatSet<Attribute> selected{Attribute(7), Attribute(11)};
+  const auto check = [&](auto source, Complex expected) {
+    using Function = decltype(source);
+    source.traceOf(selected);
+    ComplexFunctionBase<Function>& base = source;
+    std::unique_ptr<ComplexFunctionBase<Function>> copied(base.copy());
+    source.traceOf(Attribute(19));
+    EXPECT_EQ(copied->getValue(point), expected);
+    EXPECT_EQ(copied->getValue(ip), expected);
+    EXPECT_EQ(copied->getOrder(cell), Optional<size_t>(0));
+    EXPECT_EQ(copied->getTraceDomain(), selected);
+    copied->traceOf(Attribute(23));
+    EXPECT_TRUE(source.getTraceDomain().contains(Attribute(19)));
+    EXPECT_FALSE(source.getTraceDomain().contains(Attribute(23)));
+  };
+  check(ComplexFunction(Integer(-3)), Complex(-3, 0));
+  check(ComplexFunction(Real(2.5)), Complex(2.5, 0));
+  check(ComplexFunction(Complex(-2, 3)), Complex(-2, 3));
+}
+
+/// @brief A copied pair of callables outlives its source and keeps integration-point dispatch.
+TEST(Rodin_Variational_ComplexFunction, PolymorphicCallablePairOutlivesSource)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  const auto cell = *mesh.getCell();
+  QF::Centroid qf(Polytope::Type::Triangle);
+  const Point point(cell, qf.getPoint(0));
+  const IntegrationPoint ip(point, &qf, 0);
+  struct Part
+  {
+      Real m_offset;
+      Real operator()(const Point&) const
+      {
+        return m_offset;
+      }
+      Real operator()(const IntegrationPoint& sample) const
+      {
+        return m_offset + 10 + static_cast<Real>(sample.getIndex());
+      }
+  };
+  using Function = decltype(ComplexFunction(Part{3}, Part{-2}));
+  std::unique_ptr<ComplexFunctionBase<Function>> copied;
+  {
+    Function source(Part{3}, Part{-2});
+    source.traceOf(Attribute(31));
+    copied.reset(source.copy());
+  }
+  ASSERT_TRUE(copied);
+  EXPECT_EQ(copied->getValue(point), Complex(3, -2));
+  EXPECT_EQ(copied->getValue(ip), Complex(13, 8));
+  EXPECT_FALSE(copied->getOrder(cell));
+  EXPECT_TRUE(copied->getTraceDomain().contains(Attribute(31)));
 }
