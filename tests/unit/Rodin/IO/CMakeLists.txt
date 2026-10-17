@@ -89,3 +89,14 @@ add_executable(RodinIOMFEMCoefficientTest MFEMCoefficientTest.cpp)
 target_link_libraries(RodinIOMFEMCoefficientTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::IO)
 gtest_discover_tests(RodinIOMFEMCoefficientTest PROPERTIES LABELS unit)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  add_executable(RodinIOHDF5FailureTest HDF5FailureTest.cpp)
+  target_link_libraries(RodinIOHDF5FailureTest PRIVATE
+    GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::IO)
+  foreach(operation IN ITEMS H5Screate_simple H5Dget_space
+      H5Sget_simple_extent_ndims H5Sget_simple_extent_dims H5Dwrite H5Gcreate2)
+    target_link_options(RodinIOHDF5FailureTest PRIVATE "LINKER:--wrap=${operation}")
+  endforeach()
+  gtest_discover_tests(RodinIOHDF5FailureTest PROPERTIES LABELS unit)
+endif()
