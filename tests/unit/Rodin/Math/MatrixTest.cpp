@@ -1077,3 +1077,111 @@ TYPED_TEST(SpatialMatrixConjugationTest, EigenViewsMatchSpatialFrobeniusProduct)
     }
   }
 }
+
+/// @brief Factory, expression assignment and row products preserve rectangular shapes.
+TYPED_TEST(SpatialMatrixConjugationTest, FactoriesAndRowProductsAllShapes)
+{
+  for (std::uint8_t rows = 0; rows <= 3; ++rows)
+  {
+    for (std::uint8_t cols = 0; cols <= 3; ++cols)
+    {
+      SCOPED_TRACE(::testing::Message() << unsigned(rows) << "x" << unsigned(cols));
+      const auto identity = SpatialMatrix<TypeParam>::Identity(rows, cols);
+      ASSERT_EQ(identity.rows(), rows);
+      ASSERT_EQ(identity.cols(), cols);
+      Matrix<TypeParam> dense(rows, cols);
+      for (std::uint8_t i = 0; i < rows; ++i)
+      {
+        for (std::uint8_t j = 0; j < cols; ++j)
+        {
+          EXPECT_EQ(identity(i, j), TypeParam(i == j ? 1 : 0));
+          if constexpr (std::is_same_v<TypeParam, Complex>)
+            dense(i, j) = Complex(Real(2 + 2 * i + 4 * j), Real(2 + 4 * i + 2 * j));
+          else
+            dense(i, j) = Real(2 + 2 * i + 4 * j);
+        }
+      }
+      SpatialMatrix<TypeParam> assigned(3, 3);
+      assigned.setConstant(TypeParam(91));
+      assigned = dense.array();
+      auto moved = std::move(assigned);
+      SpatialMatrix<TypeParam> matrix;
+      matrix = std::move(moved);
+      ASSERT_EQ(matrix.rows(), rows);
+      ASSERT_EQ(matrix.cols(), cols);
+      SpatialVector<TypeParam> vector(rows);
+      for (std::uint8_t i = 0; i < rows; ++i)
+        vector(i) = TypeParam(i + 1);
+      const auto product = vector * matrix;
+      ASSERT_EQ(product.rows(), 1);
+      ASSERT_EQ(product.cols(), cols);
+      const auto divided = matrix / Real(2);
+      ASSERT_EQ(divided.rows(), rows);
+      ASSERT_EQ(divided.cols(), cols);
+      for (std::uint8_t j = 0; j < cols; ++j)
+      {
+        TypeParam expected = 0;
+        const auto column = matrix.col(j);
+        ASSERT_EQ(column.size(), rows);
+        for (std::uint8_t i = 0; i < rows; ++i)
+        {
+          EXPECT_EQ(matrix(i, j), dense(i, j));
+          EXPECT_EQ(column(i), dense(i, j));
+          EXPECT_EQ(divided(i, j), dense(i, j) / Real(2));
+          expected += TypeParam(i + 1) * dense(i, j);
+        }
+        EXPECT_EQ(product(0, j), expected);
+      }
+      for (std::uint8_t i = 0; i < rows; ++i)
+      {
+        const auto row = matrix.row(i);
+        ASSERT_EQ(row.size(), cols);
+        for (std::uint8_t j = 0; j < cols; ++j)
+          EXPECT_EQ(row(j), dense(i, j));
+      }
+    }
+  }
+}
+
+/// @brief Unit triangular systems recover exact integer solutions in each supported size.
+TYPED_TEST(SpatialMatrixConjugationTest, SmallTriangularSystemsRecoverExactSolutions)
+{
+  for (std::uint8_t size = 1; size <= 3; ++size)
+  {
+    SCOPED_TRACE(unsigned(size));
+    auto matrix = SpatialMatrix<TypeParam>::Identity(size, size);
+    SpatialVector<TypeParam> expected(size);
+    SpatialVector<TypeParam> rhs(size);
+    for (std::uint8_t i = 0; i < size; ++i)
+    {
+      expected(i) = TypeParam(i + 1);
+      for (std::uint8_t j = i + 1; j < size; ++j)
+      {
+        if constexpr (std::is_same_v<TypeParam, Complex>)
+          matrix(i, j) = Complex(Real(i + j + 1), Real(1 + j - i));
+        else
+          matrix(i, j) = TypeParam(i + j + 1);
+      }
+    }
+    for (std::uint8_t i = 0; i < size; ++i)
+    {
+      rhs(i) = 0;
+      for (std::uint8_t j = 0; j < size; ++j)
+        rhs(i) += matrix(i, j) * expected(j);
+    }
+    const auto matrixBefore = matrix.getData();
+    const auto rhsBefore = rhs.getData();
+    const auto solution = matrix.solve(rhs);
+    ASSERT_EQ(solution.size(), size);
+    for (std::uint8_t i = 0; i < size; ++i)
+    {
+      EXPECT_EQ(solution(i), expected(i));
+      TypeParam recovered = 0;
+      for (std::uint8_t j = 0; j < size; ++j)
+        recovered += matrix(i, j) * solution(j);
+      EXPECT_EQ(recovered, rhs(i));
+    }
+    EXPECT_EQ(matrix.getData(), matrixBefore);
+    EXPECT_EQ(rhs.getData(), rhsBefore);
+  }
+}
