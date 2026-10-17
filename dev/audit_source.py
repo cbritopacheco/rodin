@@ -51,7 +51,7 @@ def audit(root, line_inventory):
         def text(node):
             return source[node.start_byte:node.end_byte].decode()
 
-        observed = {int(line): hit for line, hit in line_inventory.get(name, {}).items()}
+        observed = {int(line): hit > 0 for line, hit in line_inventory.get(name, {}).items()}
         function_count = 0
         for node in nodes:
             if node.type == "function_definition":

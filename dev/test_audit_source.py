@@ -44,7 +44,7 @@ void inactive() { Alert::Exception(); }
 
     def test_constructor_initializers_have_separate_attribution(self):
         result = self.inventory("struct A {\n A()\n : value(3)\n {}\n int value;\n};\n",
-                                {"src/Rodin/A.h": {"3": True}})
+                                {"src/Rodin/A.h": {"3": 100}})
         constructor, = result["definitions"]
         self.assertTrue(constructor["has_initializers"])
         self.assertTrue(constructor["empty_body"])
