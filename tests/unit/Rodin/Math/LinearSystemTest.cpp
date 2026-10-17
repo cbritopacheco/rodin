@@ -607,4 +607,73 @@ namespace
     verify(destination);
   }
 
+  /// @brief The public base interface forwards mutable/const access and offset constraints to the concrete system.
+  TYPED_TEST(LinearSystemMergeTest, BaseInterfaceForwardsAccessAndConstraints)
+  {
+    using Operator = TypeParam;
+    using Scalar = typename Operator::Scalar;
+    using System = LinearSystem<Operator, Vector<Scalar>>;
+    System system;
+    typename System::Parent& base = system;
+    const typename System::Parent& constBase = base;
+    const System& constSystem = system;
+    EXPECT_EQ(&base.getOperator(), &system.getOperator());
+    EXPECT_EQ(&base.getVector(), &system.getVector());
+    EXPECT_EQ(&base.getSolution(), &system.getSolution());
+    EXPECT_EQ(&constBase.getOperator(), &constSystem.getOperator());
+    EXPECT_EQ(&constBase.getVector(), &constSystem.getVector());
+    EXPECT_EQ(&constBase.getSolution(), &constSystem.getSolution());
+    Matrix<Scalar> original(4, 4);
+    original << 4, -1, 0, 0, -1, 4, -0.5, 0, 0, -0.5, 4, -1, 0, 0, -1, 4;
+    Vector<Scalar> rhs(4);
+    rhs << 1, 3, 5, 7;
+    Scalar prescribed(2);
+    if constexpr (std::is_same_v<Scalar, Complex>)
+    {
+      rhs(1) += Scalar(0, 0.5);
+      prescribed += Scalar(0, 1);
+    }
+    if constexpr (std::is_same_v<Operator, SparseMatrix<Scalar>>)
+      base.getOperator() = original.sparseView();
+    else
+      base.getOperator() = original;
+    base.getVector() = rhs;
+    base.getSolution() = Vector<Scalar>::Constant(4, Scalar(-9));
+    EXPECT_EQ((Matrix<Scalar>(constBase.getOperator()) - original).norm(), 0);
+    EXPECT_EQ((constBase.getVector() - rhs).norm(), 0);
+    IndexArray children(1);
+    children << 1;
+    Vector<Real> weights(1);
+    weights << 0.5;
+    IndexMap<std::pair<IndexArray, Vector<Real>>> constraints;
+    constraints.emplace(0, std::pair{children, weights});
+    Matrix<Scalar> transform = Matrix<Scalar>::Identity(4, 4);
+    transform.row(1).setZero();
+    transform(1, 2) = Scalar(0.5);
+    Matrix<Scalar> expected = transform.adjoint() * original * transform;
+    Vector<Scalar> expectedRHS = transform.adjoint() * rhs;
+    expected.row(1).setZero();
+    expected(1, 1) = Scalar(1);
+    expected(1, 2) = Scalar(-0.5);
+    EXPECT_EQ(&base.merge(constraints, 1), &base);
+    EXPECT_LT((Matrix<Scalar>(constBase.getOperator()) - expected).norm(), 1e-12);
+    EXPECT_LT((constBase.getVector() - expectedRHS).norm(), 1e-12);
+    IndexMap<Scalar> essential;
+    essential.emplace(0, prescribed);
+    expectedRHS -= expected.col(3) * prescribed;
+    expectedRHS(3) = prescribed;
+    expected.row(3).setZero();
+    expected.col(3).setZero();
+    expected(3, 3) = Scalar(1);
+    EXPECT_EQ(&base.eliminate(essential, 3), &base);
+    const Matrix<Scalar> actual = constBase.getOperator();
+    EXPECT_LT((actual - expected).norm(), 1e-12);
+    EXPECT_LT((constBase.getVector() - expectedRHS).norm(), 1e-12);
+    const Vector<Scalar> result = actual.fullPivLu().solve(constBase.getVector());
+    EXPECT_LT((actual * result - expectedRHS).norm(), 1e-12);
+    EXPECT_LT(std::abs(result(1) - Scalar(0.5) * result(2)), 1e-12);
+    EXPECT_LT(std::abs(result(3) - prescribed), 1e-12);
+    EXPECT_EQ(
+      (constBase.getSolution() - Vector<Scalar>::Constant(4, Scalar(-9))).norm(), 0);
+  }
 }

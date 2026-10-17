@@ -3881,3 +3881,55 @@ not final exact-head confirmation. Run977 refreshes the preprocessing-independen
 source audit against final counters; uninstantiated and inactive variants still
 require classification even when a measured header reports complete coverage.
 The latest CI snapshot has 245 successful jobs and no test-job failures.
+
+### Public linear-system base forwarding and sparse storage (run994)
+
+Instantiate mutable and const accessors, merge and elimination through each
+real/complex dense/sparse system's public Parent interface. Verify object
+identity, independent transformed operators/right-hand sides, an offset weighted
+constraint followed by an offset essential condition, solved residuals and
+preservation of the stored solution vector.
+
+Run981 fails to compile the complete new test source because the CRTP derived
+argument names LinearSystem of the scalar types rather than the concrete
+matrix/vector system. Correct the two inheritance declarations and two Parent
+aliases. The dense case then passes, but the sparse case crashes after merge
+in run983. GDB run984 identifies raw outer-column traversal in eliminate.
+Diagnostic run985 shows uncompressed columns with unused reserved capacity:
+capacities 4/5/6/4 versus active counts 3/3/4/2. Raw compressed-array traversal
+reads those unused slots as row indices. Establish compressed storage before
+obtaining elimination's raw pointers. No constraint algebra changes.
+
+Retain the excluded pre-fix compile log, intermediate crash audit, GDB trace and
+storage diagnostic in the run981/run983/run984/run985 artifacts. The same final
+test source observed failing before repair passes afterward. All 27 unit cases
+pass individually in optimized run987, Debug run989 and ASan run991, with leak
+detection and matching Eigen allocation ABI. Both original public-base syntax
+probes also pass in run998. The four existing manufactured mixed-assembly cases
+pass individually in optimized run993 against the final header. Support archives
+remain optimized; their counters are not captured.
+
+Run994 captures only successful final current-header normal unit/manufactured
+producers. It confirms 32 base-forwarder instantiations (eight methods across
+four system types) and four merge variants with forty entries. Retain exact test
+snapshots, header hashes/timestamps, inputs and provenance in
+`build-coverage-linux/run994-base-storage-fixed-inputs/` and its file audit
+companion. Failed compile/crash runs, GDB, diagnostics, discovery, sanitizer,
+tests, benchmarks and library test helpers are excluded from measured sources.
+
+Run995 discards all 42 preceding native LinearSystem header records. Run1000
+separately adds the seventeenth current CI report, optional-Release-mtOFF-part1,
+with no additional measured lines or hits. Its old-header resets discard 43
+LinearSystem records and 34 BoundaryNormal records. Fresh profiles supply 290
+measured/hit native header lines. Run1001 verifies that all 273 previously
+measured unchanged lines remain measured and hit, using source correspondence
+without historical counter reuse.
+
+The diagnostic is 48,224 measured and 45,889 hit lines, approximately 95.1580
+percent. This batch adds seventeen measured lines and seventeen hits; another
+407 hits would reach 96 percent at this denominator. The percentage remains
+incomplete CI/local evidence, not final exact-head confirmation. Run1002 refreshes
+the preprocessing-independent inventory: 566 files, 6,189 definitions, 390
+exception references and 94 retained parser recoveries. CI continues without
+test-job failures; coverage capture for the first normal Debug partition remains
+in progress at this check.
