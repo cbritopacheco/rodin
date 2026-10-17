@@ -4,6 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <array>
+#include <vector>
+
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 
@@ -337,6 +340,76 @@ TEST(MPI_Geometry_Mesh, ReconciliationWithEmptyRootAcrossGeometries)
       mesh.reconcile(d);
       EXPECT_EQ(mesh.getShard().getPolytopeMap(d).left, indices);
       EXPECT_EQ(mesh.getDimension(), dimension);
+    }
+  }
+}
+
+/**
+ * @brief Non-strict finite caps preserve fully propagated IDs and ownership metadata.
+ */
+TEST(MPI_Geometry_Mesh, NonStrictRoundCapsPreserveConvergedEntities)
+{
+  boost::mpi::communicator self(MPI_COMM_SELF, boost::mpi::comm_attach);
+  for (const bool independent : {true, false})
+  {
+    SCOPED_TRACE(independent);
+    const auto& communicator = independent ? self : *world;
+    const Context::MPI context(*environment, communicator);
+    const size_t cap = independent ? 0 : static_cast<size_t>(communicator.size());
+    for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+           Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      const Array<size_t> shape = Array<size_t>::Constant(dimension, 4);
+      auto mesh = Mesh<Context::MPI>::UniformGrid(context, geometry, shape);
+      auto reference = LocalMesh::UniformGrid(geometry, shape);
+      for (size_t d = 1; d < dimension; ++d)
+      {
+        SCOPED_TRACE(d);
+        mesh.getConnectivity().compute(dimension, d);
+        mesh.getConnectivity().compute(d, 0);
+        mesh.getConnectivity().compute(d, dimension);
+        reference.getConnectivity().compute(d, dimension);
+        mesh.reconcile(d);
+        const auto& shard = mesh.getShard();
+        const auto indices = shard.getPolytopeMap(d).left;
+        const auto owners = shard.getOwner(d);
+        const auto halo = shard.getHalo(d);
+        std::vector<std::array<bool, 3>> states;
+        for (Index i = 0; i < shard.getPolytopeCount(d); ++i)
+        {
+          states.push_back(
+            {shard.isOwned(d, i), shard.isShared(d, i), shard.isGhost(d, i)});
+        }
+        Mesh<Context::MPI>::ReconcileOptions options;
+        options.maxOwnerRounds = cap;
+        options.maxGidRounds = cap;
+        options.globalCheckPeriod = cap + 1;
+        options.strictRoundCap = false;
+        // A rank graph has diameter at most size-1. The larger check period
+        // makes the first epoch use the finite cap; SELF needs no exchange.
+        for (size_t repeat = 0; repeat < 2; ++repeat)
+        {
+          SCOPED_TRACE(repeat);
+          mesh.reconcile(d, options);
+          EXPECT_EQ(mesh.getPolytopeCount(d), reference.getPolytopeCount(d));
+          EXPECT_EQ(shard.getPolytopeMap(d).left, indices);
+          EXPECT_EQ(shard.getOwner(d), owners);
+          EXPECT_EQ(shard.getHalo(d), halo);
+          EXPECT_EQ(shard.getPolytopeCount(d), states.size());
+          if (shard.getPolytopeCount(d) == states.size())
+          {
+            for (Index i = 0; i < states.size(); ++i)
+            {
+              EXPECT_EQ(shard.isOwned(d, i), states[i][0]);
+              EXPECT_EQ(shard.isShared(d, i), states[i][1]);
+              EXPECT_EQ(shard.isGhost(d, i), states[i][2]);
+            }
+          }
+        }
+      }
     }
   }
 }

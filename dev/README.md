@@ -3305,3 +3305,44 @@ rejection block. The private ASan TU retains matching Eigen allocation ABI and
 optimized support archives; it does not establish whole-library sanitizer
 coverage. Only final normal runs 792/794 feed the run797 capture; all pre-review,
 ASan, changed-option timing controls and GDB profiles remain excluded.
+
+### Finite non-strict MPI reconciliation caps (run806)
+
+Check that repeated reconciliation with finite non-strict owner/global-ID
+round caps preserves a fully converged mesh. Cover triangle, quadrilateral,
+tetrahedron, hexahedron, pyramid and wedge intermediate entities. Compare
+global entity counts against an independent local mesh, and compare global
+IDs, owners, halo maps and owned/shared/ghost flags against the converged
+distributed baseline. Compute the required connectivity explicitly before
+reconciliation. SELF uses zero rounds; WORLD uses its communicator size with
+a larger check period to exercise finite epoch clipping. These checks concern
+preservation of converged metadata, not convergence from insufficient rounds.
+
+Optimized run801 and assertion-enabled run803 each passed fourteen sequential
+MPI process groups: all ten MeshTest cases at one rank and the new case at
+two, three, four and eight ranks. Both the test TU and MPI Mesh.cpp were freshly
+compiled in each configuration; their snapshots match the current sources.
+Run806 captures only these successful normal producers, excludes test/helper
+sources, and verifies positive counts on six previously uncovered finite-cap
+lines: 853, 857, 859, 975, 979 and 981. Raw reports, source hashes and runtime
+records are retained in `build-coverage-linux/run806-mpi-cap-inputs/` and the
+companion file audit. No production change or coverage-filter change is made.
+
+ASan run805 also passed all fourteen sequential groups with leak detection
+enabled and the unchanged external MPI-library suppressions. Both the private
+test and MPI Mesh.cpp objects are instrumented, using matching Eigen allocation
+ABI; the remaining support archives are optimized. This does not establish
+whole-library sanitizer coverage. The final optimized, Debug and ASan test and
+implementation snapshots all match the current files. Sanitizer profiles are
+excluded from the coverage capture.
+
+The run807 diagnostic union adds the final SWIFT normal reports and these MPI
+reports to run779: 47,799 measured lines and 45,342 hit lines, approximately
+94.8597 percent. The denominator is unchanged; the two batches add five and
+six hit lines respectively. At this fixed denominator, another 68 hits would
+reach 95 percent and another 546 would reach 96 percent. This combines seventeen
+incomplete old-run CI collectors with thirty source-matched local normal
+reports; it is not current-head CI confirmation. Failed, review, discovery,
+mutation and sanitizer profiles remain excluded, as do tests, benchmarks and
+library test helpers. Detailed deltas and remaining gaps are retained in
+`build-coverage-linux/run807-current-normal-union.json` and its audit companion.
