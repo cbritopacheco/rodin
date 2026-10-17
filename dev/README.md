@@ -3568,3 +3568,73 @@ diagnostic, not current-head CI confirmation. Detailed provenance and gaps are
 retained in `build-coverage-linux/run865-current-normal-union.json` and its audit
 companion. Failed, mutation, discovery and sanitizer producers remain excluded,
 together with tests, benchmarks and library test helpers.
+
+### Current CI calibration and PETSc signed body snapshots (run881)
+
+Run870 incorporates fifteen successful collectors from current published-head
+CI alongside the seventeen older collectors and source-matched local reports.
+The additional CI data expose 249 measured lines and 212 hits: the prior
+95.0303 percent diagnostic becomes 94.9791 percent at 48,059 measured/45,646
+hit lines. This is denominator expansion, not evidence that the tests stopped
+executing previously covered code. Source hashes match; all thirty-two older
+records for the changed BoundaryNormal header are discarded. The detailed
+per-file delta is retained in `build-coverage-linux/run870-current-ci-delta.json`.
+
+Run873 associates that incomplete line inventory with the preprocessing-
+independent source audit. Twelve fully unhit definitions have at least four
+measured body lines, excluding parser recoveries. Candidates include the two
+PETSc body operations exercised below; definitions and lambdas overlap, so
+their counts must not be summed as project gaps. The absent IDRSTABL and
+legacy TraceOperator findings already documented above remain unchanged.
+Run869 independently reproduces the configured Eigen IDRSTABL include failure
+with a syntax-only probe and no runtime profiles.
+
+Add an exact P1 mass-system check for PETSc body-minus-bilinear-form and
+body-plus-linear-form operations. The expected operator is twice a prescribed
+scalar times the analytic two-element mass matrix; the residual convention
+gives the negative prescribed load moments. Change the original preassembled
+matrix/vector after forming the body to verify snapshot ownership, and assemble
+twice. The complex case uses nonzero imaginary coefficients.
+
+The first private named-form compile selected complex PETSc for the existing
+real-valued-space component and failed the intended scalar compatibility
+checks; run871 has no runtime or coverage role. Run872 freshly compiles all
+54 current native support units needed by the real component, excluding the
+unneeded MMG/Scotch backends, with one compiler, optimization and assertions.
+All twenty-two named-form cases pass individually against that support in
+run873. Only the 24 linked fresh native objects with runtime profiles, plus
+the test object, feed the real capture.
+
+Run875 passes the new complex case using verbatim includes, test block and
+main from the complete source; full snapshots and block hashes are retained.
+Its optimized configured complex support archive counters are not captured.
+Run877 also passes the focused complex case under ASan with leak detection,
+matching Eigen allocation ABI and unchanged external MPI suppressions. The
+support archives remain optimized; this is not whole-library sanitizer coverage.
+An isolated private-header mutation dropping both negative scaling signs is
+rejected by twenty numerical expectations in run880. No production source
+changes. The excluded mutation log is retained in
+`build-coverage-linux/run880-petsc-body-sign-mutation-excluded.log`.
+
+Run878 confirms four executed body-operator variants (two operations, real
+and complex) and sixteen named-form OpenMP execution variants. Successful
+normal reports and source/producers are retained in
+`build-coverage-linux/run878-petsc-body-inputs/` and its file audit. Discovery,
+failed, mutation and sanitizer producers are excluded, together with tests,
+benchmarks and library test helpers.
+
+Run881 freezes the same fifteen current CI inputs for an attributable delta:
+33 additional hits and two measured lines. Sixteen previously missed PETSc
+body-operation lines and sixteen PETSc OpenMP assertion lines become positive.
+The remaining hit and new miss are compiler-generated class-declaration
+attributions in AssemblyBase and TrialFunctionMismatchException respectively.
+Detailed deltas and attribution are retained in
+`build-coverage-linux/run881-petsc-delta.json` and its new-line companion.
+The diagnostic is 48,061 measured and 45,679 hit lines, approximately 95.0438
+percent; another 460 hits would reach 96 percent at this fixed denominator.
+This remains incomplete CI/local evidence, not final CI confirmation. Detailed
+provenance and gaps are retained in
+`build-coverage-linux/run881-current-normal-union.json` and its audit companion.
+Run884 refreshes the source audit against these counters, retaining 566 files,
+6,189 definitions, 390 exception references and the explicit parser/reachability
+limitations in its audit and prioritization artifacts.

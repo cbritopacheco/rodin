@@ -459,6 +459,68 @@ TEST(Rodin_PETSc_NamedForm, MixedAffineConstraintsSurviveProblemLifecycle)
   }
 }
 
+/// @brief PETSc body subtraction/addition own snapshots and preserve residual signs.
+TEST(Rodin_PETSc_NamedForm, BodyOperatorsOwnSignedPreassembledSnapshots)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {3});
+  P1<PetscScalar> space(mesh);
+  PETSc::Variational::TrialFunction u(space);
+  PETSc::Variational::TestFunction v(space);
+  PetscScalar alpha = 2, beta = -3;
+#if defined(PETSC_USE_COMPLEX)
+  alpha = PetscCMPLX(2, 3);
+  beta = PetscCMPLX(-3, 2);
+#endif
+  const auto coefficient = []<class Scalar>(Scalar value) {
+    if constexpr (std::is_same_v<Scalar, Complex>)
+      return ComplexFunction(value);
+    else
+      return RealFunction(value);
+  };
+  BilinearForm metric(u, v);
+  LinearForm load(v);
+  metric = Integral(coefficient(alpha) * u, v);
+  load = Integral(coefficient(beta), v);
+  metric.assemble();
+  load.assemble();
+  using Body = ProblemBody<::Mat, ::Vec, PetscScalar>;
+  const Body seed(Integral(coefficient(PetscReal(3) * alpha) * u, v));
+  const BilinearFormBase<::Mat>& metricBase = metric;
+  const LinearFormBase<::Vec>& loadBase = load;
+  const auto body = seed - metricBase + loadBase;
+  ASSERT_EQ(MatScale(metric.getOperator(), 7), PETSC_SUCCESS);
+  ASSERT_EQ(VecScale(load.getVector(), 11), PETSC_SUCCESS);
+  Problem problem(u, v);
+  problem = body;
+  // Two unit-length elements: the assembled P1 mass matrix and basis moments
+  // are known independently of either preassembled operand.
+  const PetscReal mass[3][3] = {{PetscReal(1) / 3, PetscReal(1) / 6, 0},
+    {PetscReal(1) / 6, PetscReal(2) / 3, PetscReal(1) / 6},
+    {0, PetscReal(1) / 6, PetscReal(1) / 3}};
+  const PetscReal moments[] = {0.5, 1, 0.5};
+  const PetscInt indices[] = {0, 1, 2};
+  for (size_t repeat = 0; repeat < 2; ++repeat)
+  {
+    SCOPED_TRACE(repeat);
+    problem.assemble();
+    const auto& system = std::as_const(problem).getLinearSystem();
+    PetscScalar entries[9], values[3];
+    ASSERT_EQ(
+      MatGetValues(system.getOperator(), 3, indices, 3, indices, entries), PETSC_SUCCESS);
+    ASSERT_EQ(VecGetValues(system.getVector(), 3, indices, values), PETSC_SUCCESS);
+    for (size_t row = 0; row < 3; ++row)
+    {
+      EXPECT_LT(PetscAbsScalar(values[row] + beta * moments[row]), 1e-12);
+      for (size_t column = 0; column < 3; ++column)
+      {
+        EXPECT_LT(PetscAbsScalar(
+                    entries[3 * row + column] - PetscReal(2) * alpha * mass[row][column]),
+          1e-12);
+      }
+    }
+  }
+}
+
 int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, nullptr, nullptr);
