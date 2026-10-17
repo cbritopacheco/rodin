@@ -2874,3 +2874,31 @@ enabled. Its private compile matches Eigen's allocation ABI to the reused
 optimized support archive, following the controlled run682 diagnosis. The test
 translation unit is instrumented; the support archive is optimized, so this is
 not whole-library sanitizer coverage. These profiles remain excluded.
+
+### Native HDF5 dataset helper template batch (run696)
+
+Check all four documented native storage types (U64, I32, F64 and U8) using
+numeric lowest/maximum values and independent raw HDF5 type, shape and data
+reads. Each type writes nine datasets: empty/single/vector/scalar datasets,
+three rank-two shapes including zero rows or columns, and two rank-three
+shapes including a zero extent. Duplicate vector and matrix writes attempt
+different data, must raise native diagnostics, and preserve the existing
+schema and values. File-associated object counts return to their baseline
+after both successful helper calls and rejected duplicates; this count does
+not measure unrelated global HDF5 resources. Scalar readers reject empty and
+multi-element datasets. Production code is unchanged.
+
+All 100 HDF5 unit cases passed individually in final optimized run698 and
+assertion-enabled run693. Run696 captures verify twenty helper specializations:
+four native types for vector/scalar reads and vector/scalar/matrix writes, at
+HDF5.h entries 1093, 1140, 1160, 1206 and 1222. These captures include only
+successful final normal producers. Their test snapshots are byte-identical;
+the earlier review run690/run692, sanitizer and discovery profiles are excluded.
+The fixture directly checks 36 datasets; it does not claim all possible shapes
+or numeric values. No project-wide percentage is inferred from this audit.
+
+Run695 also passed all 100 cases individually under ASan with leak detection
+enabled. Its private compile matches Eigen's allocation ABI to the reused
+optimized support archive; the test translation unit is instrumented while
+that archive remains optimized. No whole-library sanitizer claim is made,
+and sanitizer profiles remain excluded from measured coverage.

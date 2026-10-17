@@ -1903,4 +1903,100 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(boost::filesystem::exists(missing));
     EXPECT_FALSE(boost::filesystem::exists(output));
   }
+
+  /// @brief Native dataset helpers preserve schema, boundary values and handle ownership.
+  TEST_F(HDF5InvalidPayload, NativeDatasetTypesAndEmptyShapes)
+  {
+    auto file =
+      HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+    ASSERT_TRUE(file);
+    const auto verify = [&]<class T>(const std::string& name, hid_t nativeType) {
+      SCOPED_TRACE(name);
+      const std::string base = "/" + name;
+      const auto group = HDF5::Group(
+        H5Gcreate2(file.get(), base.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+      ASSERT_TRUE(group);
+      const auto handles = H5Fget_obj_count(file.get(), H5F_OBJ_ALL);
+      ASSERT_GE(handles, 0);
+      const T lowest = std::numeric_limits<T>::lowest();
+      const T highest = std::numeric_limits<T>::max();
+      const std::vector<T> values{lowest, highest, T(0), T(1), T(2), T(3)};
+      const auto inspect = [&](const std::string& path, const std::vector<hsize_t>& shape,
+                             const std::vector<T>& expected) {
+        SCOPED_TRACE(path);
+        const auto dataset =
+          HDF5::DataSet(H5Dopen2(file.get(), path.c_str(), H5P_DEFAULT));
+        ASSERT_TRUE(dataset);
+        const auto type = HDF5::Handle(H5Dget_type(dataset.get()), H5Tclose);
+        ASSERT_TRUE(type);
+        EXPECT_GT(H5Tequal(type.get(), nativeType), 0);
+        const auto space = HDF5::Space(H5Dget_space(dataset.get()));
+        ASSERT_TRUE(space);
+        ASSERT_EQ(
+          H5Sget_simple_extent_ndims(space.get()), static_cast<int>(shape.size()));
+        std::vector<hsize_t> actualShape(shape.size());
+        ASSERT_EQ(H5Sget_simple_extent_dims(space.get(), actualShape.data(), nullptr),
+          static_cast<int>(shape.size()));
+        EXPECT_EQ(actualShape, shape);
+        EXPECT_EQ(H5Sget_simple_extent_npoints(space.get()),
+          static_cast<hssize_t>(expected.size()));
+        std::vector<T> actual(expected.size());
+        if (!actual.empty())
+        {
+          ASSERT_GE(H5Dread(dataset.get(), nativeType, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                      actual.data()),
+            0);
+        }
+        EXPECT_EQ(actual, expected);
+        EXPECT_EQ(HDF5::readDatasetShape(file.get(), path), shape);
+        EXPECT_EQ(HDF5::readVectorDataset<T>(file.get(), path), expected);
+      };
+      HDF5::writeVectorDataset<T>(file.get(), base + "/Empty", {});
+      inspect(base + "/Empty", {0}, {});
+      HDF5::writeVectorDataset<T>(file.get(), base + "/One", {highest});
+      inspect(base + "/One", {1}, {highest});
+      EXPECT_EQ(HDF5::readScalarDataset<T>(file.get(), base + "/One"), highest);
+      HDF5::writeVectorDataset<T>(file.get(), base + "/Vector", values);
+      inspect(base + "/Vector", {6}, values);
+      HDF5::writeScalarDataset<T>(file.get(), base + "/Scalar", lowest);
+      inspect(base + "/Scalar", {1}, {lowest});
+      EXPECT_EQ(HDF5::readScalarDataset<T>(file.get(), base + "/Scalar"), lowest);
+      for (const auto shape : {std::array<hsize_t, 2>{0, 3}, {2, 0}, {2, 3}})
+      {
+        const auto path =
+          base + "/Matrix" + std::to_string(shape[0]) + "x" + std::to_string(shape[1]);
+        const auto data = shape[0] * shape[1] == 0 ? std::vector<T>{} : values;
+        HDF5::writeMatrixDataset<T>(file.get(), path, data, shape[0], shape[1]);
+        inspect(path, {shape[0], shape[1]}, data);
+        EXPECT_EQ(
+          HDF5::readMatrixShape(file.get(), path), std::make_pair(shape[0], shape[1]));
+      }
+      for (const hsize_t rows : {hsize_t(0), hsize_t(2)})
+      {
+        const auto path = base + "/Tensor" + std::to_string(rows);
+        const auto data = rows == 0 ? std::vector<T>{} : values;
+        HDF5::writeMatrixDataset<T>(file.get(), path, data, rows, 1, 3);
+        inspect(path, {rows, 1, 3}, data);
+      }
+      EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+      EXPECT_THROW(
+        HDF5::readScalarDataset<T>(file.get(), base + "/Empty"), Alert::Exception);
+      EXPECT_THROW(
+        HDF5::readScalarDataset<T>(file.get(), base + "/Vector"), Alert::Exception);
+      EXPECT_THROW(HDF5::writeVectorDataset<T>(file.get(), base + "/Vector", {T(7)}),
+        Alert::Exception);
+      EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+      inspect(base + "/Vector", {6}, values);
+      EXPECT_THROW(HDF5::writeMatrixDataset<T>(
+                     file.get(), base + "/Matrix2x3", std::vector<T>(6, T(7)), 2, 3),
+        Alert::Exception);
+      EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), handles);
+      inspect(base + "/Matrix2x3", {2, 3}, values);
+    };
+    verify.template operator()<HDF5::U64>("U64", H5T_NATIVE_ULLONG);
+    verify.template operator()<HDF5::I32>("I32", H5T_NATIVE_INT);
+    verify.template operator()<HDF5::F64>("F64", H5T_NATIVE_DOUBLE);
+    verify.template operator()<HDF5::U8>("U8", H5T_NATIVE_UCHAR);
+    EXPECT_EQ(H5Fget_obj_count(file.get(), H5F_OBJ_ALL), 1);
+  }
 }
