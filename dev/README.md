@@ -3735,3 +3735,46 @@ another 430 hits would reach 96 percent at this denominator. It remains
 incomplete CI/local evidence. Provenance and per-file delta are retained in
 run922 artifacts. The latest CI snapshot has 167 successful jobs and no
 test-job failures; CI confirmation remains pending.
+
+### Native hybrid MMG copy ownership batch (run932)
+
+Construct disjoint tetrahedral and prismatic cells through the native MMG API,
+with triangle, quadrilateral and edge boundary records. Supply the public native
+boundary-cache records without running a remesher. Copy the mesh, verify distinct
+allocations, change the source references and boundary data, destroy the source,
+then check retained coordinates, connectivity, references and cache indices.
+This tests native snapshot ownership, not remeshing support for hybrid cells.
+
+All 120 MMG cases pass individually in optimized run925. The verbatim focused
+case passes Debug run927 and ASan run929 with leak detection and matching Eigen
+allocation ABI. Current native wrapper objects are reused only after their
+source hashes match; matching ASan wrapper objects instrument allocation and
+copy operations. The C backend and other support archives remain optimized.
+Run931 omits quadrilateral copying in a private implementation; the new case
+rejects the null destination allocation. Production sources remain unchanged.
+The excluded mutation log is retained in
+`build-coverage-linux/run931-mmg-hybrid-mutation-excluded.log`.
+
+Run932 confirms execution of all six formerly missed native buffer-copy
+branches and eight total copyMesh calls across its successful normal producers.
+Inputs and source/producers are retained in
+`build-coverage-linux/run932-mmg-hybrid-inputs/` with the file audit companion.
+Tests, benchmarks, library helpers, discovery, sanitizer and mutation counters
+are excluded. Run933 adds twelve hits in MMG5.cpp without adding measured lines:
+48,062 measured and 45,722 hit lines, approximately 95.1313 percent. Another
+418 hits would reach 96 percent at this denominator. Run936 separately adds the
+sixteenth current CI report, slow-mtON-part4, with no additional lines or hits.
+Neither union is final CI confirmation.
+
+Run937 refreshes the preprocessing-independent source inventory against those
+counters: 566 files, 6,189 definitions and 390 exception references, retaining
+94 parser recoveries. Six fully unhit measured definitions have at least four
+body lines after excluding parser recoveries. A separate list retains 706
+unmeasured template definitions for classification; this is not a count of
+missing runtime tests, because constant evaluation, inlining and inactive or
+unsupported variants can suppress compiler attribution. Definitions and lambdas
+overlap. Inventory, limitations and priorities are retained in the run937
+artifacts. The default host Python lacked the parser modules; the audit succeeds
+with the existing source-audit dependency directory on PYTHONPATH. CI has 183
+successful jobs and no test-job failures at this check; the first normal Debug
+partition has passed its serial unit stage and is running distributed cases.

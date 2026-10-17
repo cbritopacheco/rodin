@@ -3831,3 +3831,99 @@ TEST(Rodin_MMG_Mesh_Builder, MoveAssignmentReplacesGeometryAndConstraints)
   EXPECT_EQ(mesh.getRequiredTriangles(), (IndexSet{1}));
   EXPECT_EQ(mesh.getRequiredTetrahedra(), (IndexSet{1}));
 }
+
+/// @brief Native hybrid cells and boundary caches are independently owned after copying.
+TEST(MMG5Lifecycle, NativeHybridPayloadCopiesOutliveSource)
+{
+  using Native = MMG::MMG5;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  Owner source(Native::createMesh(2, 3), Native::destroyMesh);
+  ASSERT_EQ(MMG3D_Set_meshSize(source.get(), 10, 1, 1, 1, 1, 1), 1);
+  const std::array<std::array<Real, 3>, 10> coordinates{{{0, 0, 0}, {1, 0, 0}, {0, 1, 0},
+    {0, 0, 1}, {1, 0, 1}, {0, 1, 1}, {3, 0, 0}, {4, 0, 0}, {3, 1, 0}, {3, 0, 1}}};
+  for (size_t i = 0; i < coordinates.size(); ++i)
+  {
+    const auto& x = coordinates[i];
+    ASSERT_EQ(MMG3D_Set_vertex(source.get(), x[0], x[1], x[2], 11 + i, i + 1), 1);
+  }
+  ASSERT_EQ(MMG3D_Set_tetrahedron(source.get(), 7, 8, 9, 10, 17, 1), 1);
+  ASSERT_EQ(MMG3D_Set_prism(source.get(), 1, 2, 3, 4, 5, 6, 23, 1), 1);
+  ASSERT_EQ(MMG3D_Set_triangle(source.get(), 1, 2, 3, 31, 1), 1);
+  ASSERT_EQ(MMG3D_Set_quadrilateral(source.get(), 1, 2, 5, 4, 37, 1), 1);
+  ASSERT_EQ(MMG3D_Set_edge(source.get(), 1, 2, 41, 1), 1);
+
+  // Boundary caches are public MMG records; no remeshing operation is performed.
+  source->xp = 1;
+  source->xt = 1;
+  source->xpoint = static_cast<MMG5_pxPoint>(mycalloc(2, sizeof(MMG5_xPoint)));
+  source->xtetra = static_cast<MMG5_pxTetra>(mycalloc(2, sizeof(MMG5_xTetra)));
+  source->xprism = static_cast<MMG5_pxPrism>(mycalloc(2, sizeof(MMG5_xPrism)));
+  ASSERT_NE(source->xpoint, nullptr);
+  ASSERT_NE(source->xtetra, nullptr);
+  ASSERT_NE(source->xprism, nullptr);
+  source->point[1].xp = 1;
+  source->tetra[1].xt = 1;
+  source->prism[1].xpr = 1;
+  source->xpoint[1].n1[2] = -1;
+  source->xtetra[1].ref[0] = 43;
+  source->xtetra[1].edg[0] = 47;
+  source->xprism[1].ref[0] = 53;
+  source->xprism[1].edg[0] = 59;
+
+  Owner copy(
+    static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+  ASSERT_NE(copy, nullptr);
+  Native::copyMesh(source.get(), copy.get());
+  ASSERT_NE(copy->prism, nullptr);
+  ASSERT_NE(copy->quadra, nullptr);
+  ASSERT_NE(copy->edge, nullptr);
+  ASSERT_NE(copy->xpoint, nullptr);
+  ASSERT_NE(copy->xtetra, nullptr);
+  ASSERT_NE(copy->xprism, nullptr);
+  EXPECT_NE(copy->prism, source->prism);
+  EXPECT_NE(copy->quadra, source->quadra);
+  EXPECT_NE(copy->edge, source->edge);
+  EXPECT_NE(copy->xpoint, source->xpoint);
+  EXPECT_NE(copy->xtetra, source->xtetra);
+  EXPECT_NE(copy->xprism, source->xprism);
+  source->prism[1].ref = 101;
+  source->quadra[1].ref = 103;
+  source->edge[1].ref = 107;
+  source->xpoint[1].n1[2] = 1;
+  source->xtetra[1].ref[0] = 109;
+  source->xtetra[1].edg[0] = 113;
+  source->xprism[1].ref[0] = 127;
+  source->xprism[1].edg[0] = 131;
+  source.reset();
+
+  EXPECT_EQ(copy->np, 10);
+  EXPECT_EQ(copy->ne, 1);
+  EXPECT_EQ(copy->nprism, 1);
+  EXPECT_EQ(copy->nquad, 1);
+  EXPECT_EQ(copy->na, 1);
+  for (size_t i = 0; i < coordinates.size(); ++i)
+  {
+    for (size_t j = 0; j < 3; ++j)
+      EXPECT_EQ(copy->point[i + 1].c[j], coordinates[i][j]);
+    EXPECT_EQ(copy->point[i + 1].ref, 11 + i);
+  }
+  const std::array<MMG5_int, 6> prism{1, 2, 3, 4, 5, 6};
+  for (size_t i = 0; i < prism.size(); ++i)
+    EXPECT_EQ(copy->prism[1].v[i], prism[i]);
+  const std::array<MMG5_int, 4> quad{1, 2, 5, 4};
+  for (size_t i = 0; i < quad.size(); ++i)
+    EXPECT_EQ(copy->quadra[1].v[i], quad[i]);
+  EXPECT_EQ(copy->prism[1].ref, 23);
+  EXPECT_EQ(copy->quadra[1].ref, 37);
+  EXPECT_EQ(copy->edge[1].a, 1);
+  EXPECT_EQ(copy->edge[1].b, 2);
+  EXPECT_EQ(copy->edge[1].ref, 41);
+  EXPECT_EQ(copy->point[1].xp, 1);
+  EXPECT_EQ(copy->tetra[1].xt, 1);
+  EXPECT_EQ(copy->prism[1].xpr, 1);
+  EXPECT_DOUBLE_EQ(copy->xpoint[1].n1[2], -1);
+  EXPECT_EQ(copy->xtetra[1].ref[0], 43);
+  EXPECT_EQ(copy->xtetra[1].edg[0], 47);
+  EXPECT_EQ(copy->xprism[1].ref[0], 53);
+  EXPECT_EQ(copy->xprism[1].edg[0], 59);
+}
