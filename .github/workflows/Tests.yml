@@ -1106,6 +1106,17 @@ jobs:
         multithreaded: [ON, OFF]
         asan: [ON, OFF]
         ubsan: [ON, OFF]
+        partition: [1]
+        include:
+          # This normal Debug job exceeded the six-hour runner limit after
+          # its tests passed. Split only its serial unit selection; retain
+          # every distributed rank and slow geometry case in partition 1.
+          - compiler: gcc-14
+            build_type: Debug
+            multithreaded: ON
+            asan: OFF
+            ubsan: OFF
+            partition: 2
       fail-fast: false
 
     env:
@@ -1113,6 +1124,7 @@ jobs:
       MAKEFLAGS: ${{ matrix.build_type == 'Release' && matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && '-j1' || '-j2' }}
       OMP_NUM_THREADS: 2
       CTEST_PARALLEL_LEVEL: 1
+      UNIT_PARTITIONS: ${{ matrix.build_type == 'Debug' && matrix.multithreaded == 'ON' && matrix.asan == 'OFF' && matrix.ubsan == 'OFF' && 2 || 1 }}
       GCOV: gcov-14
       # Collect both normal build modes; Debug retains assertion-enabled code
       # that optimization can erase. Sanitizer profiles never enter coverage.
@@ -1230,11 +1242,34 @@ jobs:
           mkdir -p coverage-discovery-excluded
           ctest --test-dir build/tests --show-only=json-v1 > coverage-discovery-excluded/tests.json
 
+      - name: Verify exhaustive disjoint unit-test partitions
+        env:
+          GCOV_PREFIX: ${{ github.workspace }}/coverage-discovery-excluded
+        run: |
+          python3 - <<'PYTEST'
+          import json
+          import os
+          import subprocess
+          args = ["ctest", "--test-dir", "build/tests", "-L", "unit",
+                  "-LE", "slow|distributed", "--show-only=json-v1"]
+          def names(extra):
+              report = json.loads(subprocess.check_output(args + extra, text=True))
+              return {test["name"] for test in report["tests"]}
+          count = int(os.environ["UNIT_PARTITIONS"])
+          original = names([])
+          partitions = [names(["-I", f"{part},,{count}"]) for part in range(1, count + 1)]
+          assert original and all(partitions), "Empty unit-test selection"
+          assert set.union(*partitions) == original, "Unit-test partition loses cases"
+          assert sum(map(len, partitions)) == len(original), "Unit-test partitions overlap"
+          print("Unit-test partition counts:", list(map(len, partitions)))
+          PYTEST
+
       - name: Run unit tests
         id: unit_tests
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -LE "slow|distributed"
+          -I ${{ matrix.partition }},,${{ env.UNIT_PARTITIONS }}
           --output-on-failure
           -j ${{ env.CTEST_PARALLEL_LEVEL }}
 
@@ -1243,10 +1278,12 @@ jobs:
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -LE "slow|distributed"
+          -I ${{ matrix.partition }},,${{ env.UNIT_PARTITIONS }}
           --rerun-failed -V --output-on-failure
 
       - name: Run distributed tests
         id: distributed_tests
+        if: matrix.partition == 1
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L unit -L distributed -LE slow
@@ -1266,6 +1303,7 @@ jobs:
       # Slow (PETSc real) optimized builds; complex PETSc has its own submesh gate.
       - name: Run slow MPI geometry tests
         id: slow_mpi_geometry
+        if: matrix.partition == 1
         run: >
           ctest --test-dir ${{ github.workspace }}/build/tests
           -L slow -R '^RodinMPIAssemblyGeometrySlowTest_np(1|2|3|4|8)_(Segment|Triangle|Quadrilateral|Tetrahedron|Pyramid|Hexahedron|Wedge)$'
@@ -1288,7 +1326,7 @@ jobs:
         if: env.RODIN_COVERAGE == 'ON'
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-audit-optional-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}
+          name: coverage-audit-optional-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}-part${{ matrix.partition }}
           path: |
             build/coverage-audit.json
             build/RodinCoverage.info
@@ -1303,7 +1341,7 @@ jobs:
           plugins: noop
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }},optional
-          name: cov-optional-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}
+          name: cov-optional-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}-part${{ matrix.partition }}
           root_dir: ${{ github.workspace }}
           use_pypi: true
           fail_ci_if_error: true

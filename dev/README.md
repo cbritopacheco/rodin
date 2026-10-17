@@ -2755,3 +2755,36 @@ LFS. Before committing a new resource file, check `git check-attr filter --
   retained with blob provenance. Production style and diff whitespace pass.
   The new-head CI upload still requires confirmation. Failed test, discovery,
   sanitizer, mutation and pre-fix profiles remain excluded from coverage.
+
+### Normal Debug unit coverage partition repair (run661)
+
+The normal Debug, multithreaded Unit job at `6eec68ed4` passed its unit,
+distributed and slow MPI geometry tests, then reached the six-hour runner
+limit during coverage capture. The job lasted 21,623 seconds; its unit phase
+alone took 12,391 seconds. This is a job budget failure, not a failing numerical
+case. No cancelled capture is included in coverage evidence.
+
+Split only that configuration's serial unit selection into two alternating
+CTest index partitions. Keep all other configurations as one partition, and
+retain the complete distributed and slow geometry selections in partition 1.
+Every runtime command remains sequential. Each job checks that its discovered
+unit partitions are nonempty, disjoint and exhaustive before running tests.
+Coverage artifacts include the partition number; each retains the compiled
+baseline, including unexecuted production lines. The collector count becomes
+21 when all producer jobs finish.
+
+The configured local optimized complex inventory contains 794 selected unit
+cases; its two partitions each contain 397 cases with exact disjoint union.
+The workflow matrix grows from 16 to 17 entries, only the affected normal Debug
+configuration is duplicated, and every other workflow job is unchanged.
+The selection audit ran discovery only, with profiles redirected away from
+runtime coverage. Fresh CI must still confirm the affected job's elapsed time
+and upload completion.
+
+Recovering the completed run's available reports gives 44,965 hits among
+47,737 measured production lines (94.1932%), from 17 of the previous 20
+collectors. Tests, benchmarks and library test helpers are excluded. The
+missing Debug multithreaded collector and two dependent regular aggregates
+make this incomplete evidence, not the final project percentage. The next
+coverage target is 96%; prioritize gaps only after accounting for these
+missing producers and the source-level template audit.
