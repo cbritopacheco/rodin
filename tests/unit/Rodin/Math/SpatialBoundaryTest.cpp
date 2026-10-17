@@ -312,4 +312,64 @@ namespace
       }
     }
   }
+
+  /// @brief Row-vector products preserve active shapes and use unconjugated arithmetic.
+  TYPED_TEST(SpatialBoundary, RowVectorMatrixProductsAllShapes)
+  {
+    using Scalar = TypeParam;
+    for (std::uint8_t rows = 0; rows <= 3; ++rows)
+    {
+      for (std::uint8_t cols = 0; cols <= 3; ++cols)
+      {
+        SCOPED_TRACE(::testing::Message() << unsigned(rows) << "x" << unsigned(cols));
+        SpatialMatrix<Scalar> matrix(3, 3);
+        SpatialVector<Scalar> vector(3);
+        matrix.setConstant(Scalar(91));
+        vector.setConstant(Scalar(73));
+        matrix.resize(rows, cols);
+        vector.resize(rows);
+        for (std::uint8_t i = 0; i < rows; ++i)
+        {
+          if constexpr (std::is_same_v<Scalar, Complex>)
+            vector[i] = Scalar(Real(2 + i), Real(1 + i));
+          else
+            vector[i] = Scalar(2 + i);
+          for (std::uint8_t j = 0; j < cols; ++j)
+          {
+            if constexpr (std::is_same_v<Scalar, Complex>)
+              matrix(i, j) = Scalar(Real(1 + 2 * i + j), Real(i) - Real(j) + 2);
+            else
+              matrix(i, j) = Scalar(1 + 2 * i + j);
+          }
+        }
+        const auto matrixStorage = matrix.getData();
+        const auto vectorStorage = vector.getData();
+        const auto product = vector * matrix;
+        static_assert(
+          std::is_same_v<std::remove_cvref_t<decltype(product)>, SpatialMatrix<Scalar>>);
+        ASSERT_EQ(product.rows(), 1);
+        ASSERT_EQ(product.cols(), cols);
+        for (std::uint8_t j = 0; j < cols; ++j)
+        {
+          Real expectedReal = 0, expectedImaginary = 0;
+          for (std::uint8_t i = 0; i < rows; ++i)
+          {
+            const Real ar = Real(2 + i), br = Real(1 + 2 * i + j);
+            const Real ai = std::is_same_v<Scalar, Complex> ? Real(1 + i) : Real(0);
+            const Real bi =
+              std::is_same_v<Scalar, Complex> ? Real(i) - Real(j) + 2 : Real(0);
+            expectedReal += ar * br - ai * bi;
+            expectedImaginary += ar * bi + ai * br;
+          }
+          EXPECT_EQ(std::real(product(0, j)), expectedReal);
+          EXPECT_EQ(std::imag(product(0, j)), expectedImaginary);
+        }
+        EXPECT_EQ(matrix.rows(), rows);
+        EXPECT_EQ(matrix.cols(), cols);
+        EXPECT_EQ(vector.size(), rows);
+        EXPECT_EQ(matrix.getData(), matrixStorage);
+        EXPECT_EQ(vector.getData(), vectorStorage);
+      }
+    }
+  }
 }

@@ -2851,3 +2851,26 @@ build's allocation ABI, not production code or CI flags. The test translation
 unit is instrumented and the support archive remains optimized, so no
 whole-library sanitizer claim is made. Failed, sanitizer and discovery profiles
 remain excluded from coverage.
+
+### Spatial row-vector product template batch (run689)
+
+Exercise spatial row-vector times spatial matrix multiplication for Float,
+Real and Complex over every legal row/column shape, including zero inner
+extent and the single-row empty result. The 48 products use independent exact
+real/imaginary scalar sums, with nonzero complex parts to distinguish ordinary
+multiplication from conjugation. Shape and complete operand storage snapshots
+check active bounds and input preservation. No invalid internal states or
+production changes are introduced.
+
+All 27 spatial-boundary cases passed individually in optimized run685 and
+assertion-enabled run686. Source-matched run689 captures verify three product
+specializations at SpatialMatrix.h entry 2399, each with 32 positive calls
+across those two normal producers. This verifies the named scalar variants;
+it does not claim every possible scalar template instantiation. Sanitizer and
+discovery profiles are excluded, and no project-wide percentage is inferred.
+
+Run688 also passed all 27 cases individually under ASan with leak detection
+enabled. Its private compile matches Eigen's allocation ABI to the reused
+optimized support archive, following the controlled run682 diagnosis. The test
+translation unit is instrumented; the support archive is optimized, so this is
+not whole-library sanitizer coverage. These profiles remain excluded.
