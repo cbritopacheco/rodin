@@ -3408,6 +3408,8 @@ namespace Rodin::IO
         const auto& gf = this->getObject();
         const auto& vec = gf.getData();
         const auto* data = vec.data();
+        using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+        os << std::setprecision(std::numeric_limits<RealScalar>::max_digits10);
         assert(vec.size() >= 0);
         for (size_t i = 0; i < static_cast<size_t>(vec.size()); i++)
           os << data[i] << '\n';
@@ -3456,8 +3458,9 @@ namespace Rodin::IO
        */
       void printData(std::ostream& os) override
       {
-        // Set maximum precision for floating-point output to avoid precision loss
-        os << std::setprecision(std::numeric_limits<Scalar>::max_digits10);
+        // Complex coefficients require the precision of their real component.
+        using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
+        os << std::setprecision(std::numeric_limits<RealScalar>::max_digits10);
 
         const auto& gf   = this->getObject();
         const auto& fes  = gf.getFiniteElementSpace();

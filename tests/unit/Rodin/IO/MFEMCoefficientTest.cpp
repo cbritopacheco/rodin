@@ -292,6 +292,37 @@ namespace
   using MFEMScalars = ::testing::Types<Real, Complex>;
   TYPED_TEST_SUITE(MFEMCoefficients, MFEMScalars);
 
+  /// @brief Default output streams preserve nonintegral real and complex coefficients.
+  TYPED_TEST(MFEMCoefficients, DefaultStreamPreservesCoefficientPrecision)
+  {
+    auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
+    const auto verify = [&]<class FES>(const FES& space) {
+      GridFunction<FES, Math::Vector<TypeParam>> field(space);
+      for (size_t i = 0; i < space.getSize(); ++i)
+      {
+        const Real real = Real(i + 1) / 7;
+        if constexpr (std::is_same_v<TypeParam, Complex>)
+          field.getData()[i] = TypeParam(real, -Real(i + 2) / 11);
+        else
+          field.getData()[i] = real;
+      }
+      std::ostringstream output;
+      GridFunctionPrinter<FileFormat::MFEM, FES, Math::Vector<TypeParam>>(field).print(
+        output);
+      GridFunction<FES, Math::Vector<TypeParam>> restored(space);
+      restored.getData().setConstant(TypeParam(-99));
+      std::istringstream input(output.str());
+      GridFunctionLoader<FileFormat::MFEM, FES, Math::Vector<TypeParam>>(restored).load(
+        input);
+      EXPECT_EQ(restored.getData(), field.getData());
+      input >> std::ws;
+      EXPECT_TRUE(input.eof());
+    };
+    verify(P0<TypeParam>(mesh));
+    verify(P1<TypeParam>(mesh));
+    verify(H1<3, TypeParam>(std::integral_constant<size_t, 3>{}, mesh));
+  }
+
   TYPED_TEST(MFEMCoefficients, P1ScalarBothOrderings)
   {
     this->template verify<0, false>();
