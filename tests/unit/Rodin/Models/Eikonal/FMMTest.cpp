@@ -726,3 +726,45 @@ namespace Rodin::Tests::Unit
     }
   }
 }
+
+/// @brief All interface seeds participate before trial arrivals are computed.
+TEST(FMMSeedRegression, CompleteInterfaceIsIndependentOfSeedOrder)
+{
+  for (bool embedded : {false, true})
+  {
+    SCOPED_TRACE(embedded);
+    auto mesh = embedded ? LocalMesh::Builder()
+                             .initialize(3)
+                             .nodes(3)
+                             .vertex({0, 0, 0})
+                             .vertex({2, 0, 0})
+                             .vertex({0.5, 1, 0})
+                             .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                             .finalize()
+                         : LocalMesh::Builder()
+                             .initialize(2)
+                             .nodes(3)
+                             .vertex({0, 0})
+                             .vertex({2, 0})
+                             .vertex({0.5, 1})
+                             .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                             .finalize();
+    mesh.getConnectivity().compute(0, 0);
+    mesh.getConnectivity().compute(0, 2);
+    mesh.getConnectivity().compute(2, 0);
+    P1 space(mesh);
+    GridFunction solution(space);
+    const auto speed = [](const Geometry::Point&) { return Real(1); };
+    Eikonal::FMM solver(solution, speed);
+    for (const std::vector<Index>& seeds :
+      {std::vector<Index>{0, 1}, std::vector<Index>{1, 0}, std::vector<Index>{0, 1, 0},
+        std::vector<Index>{std::numeric_limits<Index>::max(), 0, 1}})
+    {
+      solution = Real(-99);
+      solver.seed(seeds).solve();
+      EXPECT_DOUBLE_EQ(solution[0], 0);
+      EXPECT_DOUBLE_EQ(solution[1], 0);
+      EXPECT_DOUBLE_EQ(solution[2], 1);
+    }
+  }
+}

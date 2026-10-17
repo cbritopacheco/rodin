@@ -123,6 +123,9 @@ namespace Rodin::Eikonal
        *
        * Seeds are the starting vertices where the arrival time is set to zero.
        * The method will propagate from these points throughout the domain.
+       * All valid seeds are accepted before neighboring trial values are
+       * computed, so seed ordering and duplicate indices do not affect the
+       * initialized interface.
        *
        * @tparam Seed Type of seed container (e.g., std::vector<Index>)
        * @param[in] seed Container of vertex indices to use as seeds
@@ -150,7 +153,12 @@ namespace Rodin::Eikonal
           m_labels[s] = Label::Accepted;
           u[s] = 0.0;
           assert(!std::isnan(u[s]));
+        }
 
+        for (Index s = 0; s < nV; ++s)
+        {
+          if (m_labels[s] != Label::Accepted)
+            continue;
           assert(s < conn.getIncidence(0, 0).size());
           const auto& N = conn.getIncidence(0, 0).at(s);
           for (Index nb : N)
