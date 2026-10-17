@@ -3390,3 +3390,55 @@ At this fixed denominator the remaining planning shortfalls are 35 hits to
 old-run CI collectors; it is not current-head CI confirmation. Detailed deltas
 and remaining gaps are retained in
 `build-coverage-linux/run817-current-normal-union.json` and its audit companion.
+
+### Boundary-normal error diagnostics and geometry recovery (run830)
+
+Test collapsed triangle edges and tetrahedron faces through both stack and
+dynamic output overloads. Require the native normalize-member diagnostic,
+repair the shared mesh coordinates, then reuse the same normal object and
+check the independently known outward coordinate vector. Separately check
+both endpoints of a one-dimensional mesh: this implementation rejects their
+one-row Jacobians with a native member-function diagnostic.
+
+The endpoint test was observed red in optimized run822: SpatialMatrix::rows()
+returns an eight-bit integer, which streamed as a control character instead
+of the number one. Cast that diagnostic value to size_t before insertion.
+No numerical algorithm or exception family changes. The exact row-count
+expectation now passes. The retained pre-fix log is
+`build-coverage-linux/run832-boundary-normal-before-fix.log`.
+
+All nine cases passed individually in optimized run825, assertion-enabled
+run827 and ASan run829. ASan retains leak detection and the matching Eigen
+allocation ABI; optimized support archives remain outside its instrumentation.
+An isolated private-header reversal of the normalized vector was rejected
+by four new recovery expectations in run832. No mutation touches workspace
+production sources; the excluded failure log is retained alongside the
+pre-fix log. Final optimized, Debug, ASan and mutation test snapshots match.
+Run821's failed pre-fix producer and run823's pre-fix compile-only snapshot
+have no acceptance or coverage role.
+
+Run830 verifies positive counts on all eight error-diagnostic lines in the
+two guards. Raw successful fixed-source normal reports, source hashes and
+runtime records are retained in `build-coverage-linux/run830-boundary-normal-inputs/`
+and its file audit. Failed, pre-fix, discovery, mutation and sanitizer profiles
+are excluded, as are tests, benchmarks and library test helpers.
+
+The production-header change invalidates its older counters. Run833 discards
+all nineteen old BoundaryNormal records before adding only fresh successful
+normal runs for that header. Every other production source remains hash-matched
+to the frozen CI source; the changed header has an explicit new source snapshot.
+The replacement header has 130 measured/112 hit lines versus the old 125/99.
+The resulting diagnostic union is 47,808 measured and 45,391 hit lines,
+approximately 94.9444 percent: another 27 hits would reach 95 percent and 505
+would reach 96 percent at that fixed denominator. This is still an incomplete
+old-CI/local diagnostic, not current-head CI confirmation. Detailed replacement
+provenance and gaps are retained in
+`build-coverage-linux/run833-current-normal-union.json` and its audit companion.
+
+Refresh the preprocessing-independent source inventory after the header fix:
+566 files, 6,189 definitions, 390 exception references and 216 implicit exception
+candidates. The 94 parser recovery locations and other limitations remain
+explicit in `build-coverage-linux/run833-current-source-audit.json`. This keeps
+inactive configurations and uninstantiated definitions visible; it does not
+claim execution of every specialization or convert the inventory into a
+source-coverage percentage.

@@ -10,6 +10,7 @@
  */
 #include <gtest/gtest.h>
 #include <cmath>
+#include <string>
 
 #include "Rodin/Variational.h"
 
@@ -147,6 +148,109 @@ TEST(Rodin_Variational_BoundaryNormal, CornerTraceSelectsIncidentEdge)
   BoundaryNormal invalid(mesh);
   invalid.traceOf(999);
   EXPECT_THROW(invalid.getValue(corner), Alert::Exception);
+}
+
+/// @brief Zero-measure boundaries report native diagnostics and recover after geometry repair.
+TEST(Rodin_Variational_BoundaryNormal, CollapsedBoundaryRejectsAndRecovers)
+{
+  for (const size_t dimension : {2u, 3u})
+  {
+    SCOPED_TRACE(dimension);
+    auto builder = LocalMesh::Builder();
+    builder.initialize(dimension).nodes(dimension + 1);
+    for (size_t vertex = 0; vertex <= dimension; ++vertex)
+    {
+      Math::SpatialPoint coordinate(dimension);
+      coordinate.setZero();
+      if (vertex > 1)
+        coordinate[vertex - 1] = 1;
+      builder.vertex(coordinate);
+    }
+    if (dimension == 2)
+      builder.polytope(Polytope::Type::Triangle, {0, 1, 2});
+    else
+      builder.polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3});
+    auto mesh = builder.finalize();
+    mesh.getConnectivity().compute(dimension - 1, dimension);
+    Optional<Index> selected;
+    for (auto face = mesh.getBoundary(); face; ++face)
+    {
+      bool containsLastVertex = false;
+      for (const Index vertex : face->getVertices())
+        containsLastVertex |= vertex == dimension;
+      if (!containsLastVertex)
+        selected = face->getIndex();
+    }
+    ASSERT_TRUE(selected);
+    const auto face = mesh.getPolytope(dimension - 1, *selected);
+    const auto reference = Polytope::Traits(face->getGeometry()).getCentroid();
+    const Point collapsed(*face, reference);
+    BoundaryNormal normal(mesh);
+    Math::SpatialVector<Real> spatial;
+    Math::Vector<Real> dynamic;
+    const auto reject = [&](auto& output) {
+      try
+      {
+        normal.interpolate(output, collapsed);
+        FAIL() << "A collapsed boundary has no unit normal.";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find("In member function"), std::string::npos);
+        EXPECT_NE(message.find("Cannot normalize BoundaryNormal"), std::string::npos);
+      }
+    };
+    reject(spatial);
+    reject(dynamic);
+
+    mesh.setVertexCoordinates(1, 1, 0);
+    const Point repaired(*face, reference);
+    Math::SpatialVector<Real> expected(dimension);
+    expected.setZero();
+    expected[dimension - 1] = -1;
+    normal.interpolate(spatial, repaired);
+    normal.interpolate(dynamic, repaired);
+    ASSERT_EQ(spatial.size(), dimension);
+    ASSERT_EQ(dynamic.size(), dimension);
+    for (Index component = 0; component < dimension; ++component)
+    {
+      EXPECT_NEAR(spatial[component], expected[component], 1e-12);
+      EXPECT_NEAR(dynamic[component], expected[component], 1e-12);
+    }
+  }
+}
+
+/// @brief Unsupported endpoint Jacobians are rejected through both output-storage overloads.
+TEST(Rodin_Variational_BoundaryNormal, OneDimensionalBoundaryReportsUnsupportedJacobian)
+{
+  auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {2});
+  mesh.getConnectivity().compute(0, 1);
+  BoundaryNormal normal(mesh);
+  size_t checked = 0;
+  for (auto face = mesh.getBoundary(); face; ++face)
+  {
+    const Point point(*face, Math::SpatialPoint(0));
+    Math::SpatialVector<Real> spatial;
+    Math::Vector<Real> dynamic;
+    const auto reject = [&](auto& output) {
+      try
+      {
+        normal.interpolate(output, point);
+        FAIL() << "A one-row boundary Jacobian is unsupported.";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find("In member function"), std::string::npos);
+        EXPECT_NE(message.find("boundary Jacobian with 1 rows"), std::string::npos);
+      }
+    };
+    reject(spatial);
+    reject(dynamic);
+    ++checked;
+  }
+  EXPECT_EQ(checked, 2);
 }
 
 /// @brief Parent and retained-submesh points give exact normals on their own boundaries.

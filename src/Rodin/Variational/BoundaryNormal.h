@@ -227,8 +227,8 @@ namespace Rodin::Variational
           {
             Alert::MemberFunctionException(*this, __func__)
               << "Cannot compute BoundaryNormal from a boundary Jacobian with "
-              << jacobian.rows() << " rows on polytope (" << d << ", " << i << ")."
-              << Alert::Raise;
+              << static_cast<size_t>(jacobian.rows()) << " rows on polytope (" << d
+              << ", " << i << ")." << Alert::Raise;
             assert(false);
             res.setConstant(Math::nan<ScalarType>());
             return;
