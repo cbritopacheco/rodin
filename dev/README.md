@@ -3778,3 +3778,50 @@ artifacts. The default host Python lacked the parser modules; the audit succeeds
 with the existing source-audit dependency directory on PYTHONPATH. CI has 183
 successful jobs and no test-job failures at this check; the first normal Debug
 partition has passed its serial unit stage and is running distributed cases.
+
+### Analytic rotating Flow characteristics and template audit (run946)
+
+Trace the autonomous field $v=(1/2-y,x-1/2)$ through triangle and quadrilateral
+meshes. Compare signed quarter turns and full revolutions against the analytic
+rotation about $(1/2,1/2)$, including the transported affine operand, zero
+unconsumed time/correction, no boundary callbacks and preservation of the start
+point. Fixed RK4 substeps and tight face-bisection settings isolate curved
+characteristics from the existing constant-velocity tests.
+
+All sixteen Flow cases pass individually in optimized run939, Debug run941 and
+ASan run943. Leak detection is enabled and Eigen allocation ABI matches the
+optimized support archives; their counters are not captured. Run945 reverses
+the signed velocity in a private header; the analytic coordinate and operand
+checks reject it. The excluded log is retained in
+`build-coverage-linux/run945-flow-rotation-mutation-excluded.log`.
+
+Run946 captures only the successful final normal Test profiles, retaining exact
+current test snapshots and production-source hashes. The actual new trace
+method executes 32 times across the two configurations. Its audit distinguishes
+that method from 65 related emitted allocator/lambda functions whose demangled
+names also contain the outer trace signature. Inputs and provenance are retained
+in `build-coverage-linux/run946-flow-rotation-inputs/` with the file audit
+companion. Discovery, sanitizer, mutation, tests, benchmarks and library helpers
+are excluded from measured sources.
+
+Run947 adds two hits at Flow.h lines 848 and 872: bracket-expansion exhaustion
+and unsuccessful face-bracketing return. Other tracing paths were already
+covered. The diagnostic is 48,062 measured and 45,724 hit lines, approximately
+95.1355 percent, using the same sixteen current CI reports. Another 416 hits
+would reach 96 percent at this fixed denominator; this is not final CI proof.
+The per-file delta is retained alongside its union/provenance artifacts.
+
+Run950 independently instantiates the public dense and sparse LinearSystem
+merge templates with an offset argument. Both compile with the configured
+compiler/dependencies; this is syntax-only evidence, with no runtime or profiles,
+not numerical validation. Full probe sources, commands and diagnostics are
+retained in its excluded audit artifact for the next runtime audit.
+
+Run951 classifies all seven explicit production throw expressions as Alert
+exception construction or forwarding, including MEDIT's Alert-derived
+UnexpectedKeywordException. Eight NamespacedException sites flagged by the
+syntactic instance-member heuristic belong to static MPI UniformGrid methods;
+the header declarations establish their static context. No production exception
+change follows from those flags. The 216 potential indirect exception sites
+remain callee/precondition candidates, not findings or a whole-program proof.
+CI continues without test-job failures at this check.

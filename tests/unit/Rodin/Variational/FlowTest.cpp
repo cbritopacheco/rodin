@@ -515,3 +515,60 @@ TEST(Rodin_Variational_Flow, LowerDimensionalStartsPreservePointAndSkipFields)
     }
   }
 }
+
+/// @brief Rotating characteristics agree with the analytic map across triangle and quadrilateral cells.
+TEST(
+  Rodin_Variational_Flow, RotatingCharacteristicsCrossCellsAndCloseInBothTimeDirections)
+{
+  constexpr Real PositionTolerance = 2e-5;
+  const Real pi = std::acos(Real(-1));
+  for (const auto geometry : {Polytope::Type::Triangle, Polytope::Type::Quadrilateral})
+  {
+    SCOPED_TRACE(static_cast<int>(geometry));
+    auto mesh = LocalMesh::UniformGrid(geometry, {5, 5});
+    mesh.scale(Real(0.25));
+    mesh.getConnectivity().compute(1, 2);
+    bool checked = false;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point start(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      const auto initial = start.getPhysicalCoordinates();
+      const Real dx = initial.x() - Real(0.5);
+      const Real dy = initial.y() - Real(0.5);
+      if (!(dx > 0 && dy < 0 && dx * dx + dy * dy < Real(0.0625)))
+        continue;
+      const RealFunction operand(
+        [](const Point& point) { return 2 + 3 * point.x() - 2 * point.y(); });
+      const auto velocity = [](const Point& point) {
+        return Math::SpatialVector<Real>{Real(0.5) - point.y(), point.x() - Real(0.5)};
+      };
+      for (const Real time : {-2 * pi, -pi / 2, pi / 2, 2 * pi})
+      {
+        SCOPED_TRACE(time);
+        size_t boundaryHits = 0;
+        const auto boundary = [&](const BoundaryHit&) {
+          ++boundaryHits;
+          return false;
+        };
+        Flow flow(time, operand, velocity, Math::RungeKutta::RK4{}, boundary);
+        flow.setStepSafety(0.05).setTolFactor(2).setMaxBisections(32);
+        const Math::SpatialPoint expected{
+          Real(0.5) + std::cos(time) * dx - std::sin(time) * dy,
+          Real(0.5) + std::sin(time) * dx + std::cos(time) * dy};
+        const auto trace = flow.trace(start);
+        ASSERT_FALSE(trace.exited());
+        EXPECT_DOUBLE_EQ(trace.getTime(), 0);
+        EXPECT_DOUBLE_EQ(trace.getCorrection(), 0);
+        EXPECT_LT((trace.getPoint().getPhysicalCoordinates() - expected).norm(),
+          PositionTolerance);
+        EXPECT_NEAR(
+          flow(start), 2 + 3 * expected.x() - 2 * expected.y(), 5 * PositionTolerance);
+        EXPECT_EQ(boundaryHits, 0u);
+        EXPECT_EQ((start.getPhysicalCoordinates() - initial).norm(), 0);
+      }
+      checked = true;
+      break;
+    }
+    EXPECT_TRUE(checked);
+  }
+}
