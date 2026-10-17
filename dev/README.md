@@ -2788,3 +2788,29 @@ missing Debug multithreaded collector and two dependent regular aggregates
 make this incomplete evidence, not the final project percentage. The next
 coverage target is 96%; prioritize gaps only after accounting for these
 missing producers and the source-level template audit.
+
+
+### Eigen matrix-view product template batch (run672)
+
+Add exact-value tests for both operand orders between Eigen reverse views and
+spatial matrices, for Real/Real, Real/Complex, Complex/Real and Complex/Complex.
+Each variant checks all 64 legal dimension triples, including empty inner
+products and zero result extents. Together they check 512 products. Independent
+real/imaginary scalar sums verify unconjugated multiplication and promotion;
+poisoned inactive storage and complete input snapshots verify shape, active
+bounds and operand preservation. No unsupported dimensions or invalid internal
+states are introduced, and production code is unchanged.
+
+All 47 matrix unit cases passed individually in optimized run667 and
+assertion-enabled run669. Source-matched normal captures in run672 verify eight
+product specializations at SpatialMatrix.h entries 2488 and 2511, each with
+128 positive calls across those producers. These are finite supported template
+variants, not a claim that every possible Eigen expression has been covered.
+The optimized snapshot differs from the formatted test only in whitespace.
+Sanitizer and discovery profiles are excluded; no project-wide percentage is
+inferred from the focused captures.
+
+Run671 also passed all 47 cases individually under AddressSanitizer with
+`detect_leaks=1`. The test translation unit is instrumented, while the reused
+Rodin support archive is optimized; this does not establish whole-library
+sanitizer coverage. Its profiles remain excluded from measured coverage.

@@ -877,3 +877,106 @@ TYPED_TEST(SpatialMatrixDynamicVectorProductTest, AllShapesAndScalarPairings)
     }
   }
 }
+
+/// @brief Eigen views multiply spatial matrices with unconjugated scalar promotion.
+TYPED_TEST(SpatialMatrixDynamicVectorProductTest, EigenMatrixViewsAllShapes)
+{
+  using LeftScalar = typename TypeParam::first_type;
+  using RightScalar = typename TypeParam::second_type;
+  using OutputScalar = std::conditional_t<std::is_same_v<LeftScalar, Complex> ||
+      std::is_same_v<RightScalar, Complex>,
+    Complex, Real>;
+  for (std::uint8_t rows = 0; rows <= 3; ++rows)
+  {
+    for (std::uint8_t inner = 0; inner <= 3; ++inner)
+    {
+      for (std::uint8_t cols = 0; cols <= 3; ++cols)
+      {
+        SCOPED_TRACE(::testing::Message()
+          << unsigned(rows) << "x" << unsigned(inner) << "x" << unsigned(cols));
+        Matrix<LeftScalar> left(rows, inner);
+        Matrix<RightScalar> right(inner, cols);
+        SpatialMatrix<LeftScalar> spatialLeft(3, 3);
+        SpatialMatrix<RightScalar> spatialRight(3, 3);
+        spatialLeft.setConstant(LeftScalar(91));
+        spatialRight.setConstant(RightScalar(91));
+        spatialLeft.resize(rows, inner);
+        spatialRight.resize(inner, cols);
+        for (std::uint8_t i = 0; i < rows; ++i)
+        {
+          for (std::uint8_t j = 0; j < inner; ++j)
+          {
+            const Real re = Real(1 + 2 * i + j);
+            if constexpr (std::is_same_v<LeftScalar, Complex>)
+              left(i, j) = LeftScalar(re, Real(i) - Real(j) + 1);
+            else
+              left(i, j) = re;
+            spatialLeft(i, j) = left(i, j);
+          }
+        }
+        for (std::uint8_t i = 0; i < inner; ++i)
+        {
+          for (std::uint8_t j = 0; j < cols; ++j)
+          {
+            const Real re = Real(2 + i + 3 * j);
+            if constexpr (std::is_same_v<RightScalar, Complex>)
+              right(i, j) = RightScalar(re, Real(i) + Real(j) + 2);
+            else
+              right(i, j) = re;
+            spatialRight(i, j) = right(i, j);
+          }
+        }
+        const auto leftBefore = left;
+        const auto rightBefore = right;
+        const auto leftStorage = spatialLeft.getData();
+        const auto rightStorage = spatialRight.getData();
+        const auto eigenLeftProduct = left.reverse() * spatialRight;
+        const auto eigenRightProduct = spatialLeft * right.reverse();
+        static_assert(std::is_same_v<std::remove_cvref_t<decltype(eigenLeftProduct)>,
+          SpatialMatrix<OutputScalar>>);
+        static_assert(std::is_same_v<std::remove_cvref_t<decltype(eigenRightProduct)>,
+          SpatialMatrix<OutputScalar>>);
+        for (const auto* product : {&eigenLeftProduct, &eigenRightProduct})
+        {
+          EXPECT_EQ(product->rows(), rows);
+          EXPECT_EQ(product->cols(), cols);
+        }
+        for (std::uint8_t i = 0; i < rows; ++i)
+        {
+          for (std::uint8_t j = 0; j < cols; ++j)
+          {
+            Real expectedLeftReal = 0, expectedLeftImaginary = 0;
+            Real expectedRightReal = 0, expectedRightImaginary = 0;
+            for (std::uint8_t k = 0; k < inner; ++k)
+            {
+              const auto a = left(rows - 1 - i, inner - 1 - k);
+              const auto b = right(k, j);
+              expectedLeftReal +=
+                std::real(a) * std::real(b) - std::imag(a) * std::imag(b);
+              expectedLeftImaginary +=
+                std::real(a) * std::imag(b) + std::imag(a) * std::real(b);
+              const auto c = left(i, k);
+              const auto d = right(inner - 1 - k, cols - 1 - j);
+              expectedRightReal +=
+                std::real(c) * std::real(d) - std::imag(c) * std::imag(d);
+              expectedRightImaginary +=
+                std::real(c) * std::imag(d) + std::imag(c) * std::real(d);
+            }
+            EXPECT_DOUBLE_EQ(std::real(eigenLeftProduct(i, j)), expectedLeftReal);
+            EXPECT_DOUBLE_EQ(std::imag(eigenLeftProduct(i, j)), expectedLeftImaginary);
+            EXPECT_DOUBLE_EQ(std::real(eigenRightProduct(i, j)), expectedRightReal);
+            EXPECT_DOUBLE_EQ(std::imag(eigenRightProduct(i, j)), expectedRightImaginary);
+          }
+        }
+        EXPECT_EQ(left, leftBefore);
+        EXPECT_EQ(right, rightBefore);
+        EXPECT_EQ(spatialLeft.rows(), rows);
+        EXPECT_EQ(spatialLeft.cols(), inner);
+        EXPECT_EQ(spatialRight.rows(), inner);
+        EXPECT_EQ(spatialRight.cols(), cols);
+        EXPECT_EQ(spatialLeft.getData(), leftStorage);
+        EXPECT_EQ(spatialRight.getData(), rightStorage);
+      }
+    }
+  }
+}
