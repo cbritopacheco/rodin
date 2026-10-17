@@ -4006,3 +4006,112 @@ TEST(MMG5Lifecycle, NativeHybridPayloadCopiesOutliveSource)
   EXPECT_EQ(copy->xprism[1].ref[0], 53);
   EXPECT_EQ(copy->xprism[1].edg[0], 59);
 }
+
+/// @brief Copies own optional adjacency caches and geometric hash records through source destruction.
+TEST(MMG5Lifecycle, OptionalAdjacencyAndHashCachesAreIndependent)
+{
+  using Native = MMG::MMG5;
+  using Owner = std::unique_ptr<MMG5_Mesh, decltype(&Native::destroyMesh)>;
+  for (bool volume : {false, true})
+  {
+    SCOPED_TRACE(volume);
+    Owner source(Native::createMesh(2, volume ? 3 : 2), Native::destroyMesh);
+    if (volume)
+    {
+      ASSERT_EQ(MMG3D_Set_meshSize(source.get(), 10, 1, 1, 1, 1, 1), 1);
+      const std::array<std::array<Real, 3>, 10> points{{{0, 0, 0}, {1, 0, 0}, {0, 1, 0},
+        {0, 0, 1}, {1, 0, 1}, {0, 1, 1}, {3, 0, 0}, {4, 0, 0}, {3, 1, 0}, {3, 0, 1}}};
+      for (size_t i = 0; i < points.size(); ++i)
+      {
+        ASSERT_EQ(MMG3D_Set_vertex(
+                    source.get(), points[i][0], points[i][1], points[i][2], 1, i + 1),
+          1);
+      }
+      ASSERT_EQ(MMG3D_Set_tetrahedron(source.get(), 7, 8, 9, 10, 17, 1), 1);
+      ASSERT_EQ(MMG3D_Set_prism(source.get(), 1, 2, 3, 4, 5, 6, 23, 1), 1);
+      ASSERT_EQ(MMG3D_Set_triangle(source.get(), 1, 2, 3, 31, 1), 1);
+      ASSERT_EQ(MMG3D_Set_quadrilateral(source.get(), 1, 2, 5, 4, 37, 1), 1);
+      ASSERT_EQ(MMG3D_Set_edge(source.get(), 1, 2, 41, 1), 1);
+    }
+    else
+    {
+      ASSERT_EQ(MMG2D_Set_meshSize(source.get(), 7, 1, 1, 0), 1);
+      const std::array<std::array<Real, 2>, 7> points{
+        {{0, 0}, {1, 0}, {1, 1}, {0, 1}, {0, 2}, {1, 2}, {0, 3}}};
+      for (size_t i = 0; i < points.size(); ++i)
+      {
+        ASSERT_EQ(
+          MMG2D_Set_vertex(source.get(), points[i][0], points[i][1], 1, i + 1), 1);
+      }
+      ASSERT_EQ(MMG2D_Set_triangle(source.get(), 5, 6, 7, 17, 1), 1);
+      ASSERT_EQ(MMG2D_Set_quadrilateral(source.get(), 1, 2, 3, 4, 23, 1), 1);
+    }
+    const size_t triangleSize = 3 * source->nt + 4;
+    ASSERT_EQ(source->adjt, nullptr);
+    source->adjt = static_cast<int*>(mycalloc(triangleSize, sizeof(int)));
+    ASSERT_NE(source->adjt, nullptr);
+    for (size_t i = 0; i < triangleSize; ++i)
+      source->adjt[i] = 11 + i;
+    const size_t secondarySize = volume ? 5 * source->nprism + 6 : 4 * source->nquad + 5;
+    auto& secondary = volume ? source->adjapr : source->adjq;
+    ASSERT_EQ(secondary, nullptr);
+    secondary = static_cast<int*>(mycalloc(secondarySize, sizeof(int)));
+    ASSERT_NE(secondary, nullptr);
+    for (size_t i = 0; i < secondarySize; ++i)
+      secondary[i] = 31 + i;
+    if (volume)
+    {
+      source->htab.max = 2;
+      source->htab.siz = 2;
+      source->htab.nxt = 1;
+      ASSERT_EQ(source->htab.geom, nullptr);
+      source->htab.geom = static_cast<MMG5_hgeom*>(mycalloc(3, sizeof(MMG5_hgeom)));
+      ASSERT_NE(source->htab.geom, nullptr);
+      for (size_t i = 0; i < 3; ++i)
+      {
+        source->htab.geom[i].a = i + 1;
+        source->htab.geom[i].b = i + 2;
+        source->htab.geom[i].ref = 53 + i;
+        source->htab.geom[i].nxt = i == 2 ? 0 : i + 1;
+        source->htab.geom[i].tag = 67 + i;
+      }
+    }
+    Owner copy(
+      static_cast<MMG5_pMesh>(mycalloc(1, sizeof(MMG5_Mesh))), Native::destroyMesh);
+    ASSERT_NE(copy, nullptr);
+    Native::copyMesh(source.get(), copy.get());
+    ASSERT_NE(copy->adjt, nullptr);
+    EXPECT_NE(copy->adjt, source->adjt);
+    const auto copiedSecondary = volume ? copy->adjapr : copy->adjq;
+    ASSERT_NE(copiedSecondary, nullptr);
+    EXPECT_NE(copiedSecondary, secondary);
+    if (volume)
+    {
+      ASSERT_NE(copy->htab.geom, nullptr);
+      EXPECT_NE(copy->htab.geom, source->htab.geom);
+      EXPECT_EQ(copy->htab.max, source->htab.max);
+      EXPECT_EQ(copy->htab.siz, source->htab.siz);
+      EXPECT_EQ(copy->htab.nxt, source->htab.nxt);
+    }
+    source->adjt[0] = -1;
+    secondary[secondarySize - 1] = -2;
+    if (volume)
+      source->htab.geom[2].ref = -3;
+    source.reset();
+    for (size_t i = 0; i < triangleSize; ++i)
+      EXPECT_EQ(copy->adjt[i], 11 + i);
+    for (size_t i = 0; i < secondarySize; ++i)
+      EXPECT_EQ(copiedSecondary[i], 31 + i);
+    if (volume)
+    {
+      for (size_t i = 0; i < 3; ++i)
+      {
+        EXPECT_EQ(copy->htab.geom[i].a, i + 1);
+        EXPECT_EQ(copy->htab.geom[i].b, i + 2);
+        EXPECT_EQ(copy->htab.geom[i].ref, 53 + i);
+        EXPECT_EQ(copy->htab.geom[i].nxt, i == 2 ? 0 : i + 1);
+        EXPECT_EQ(copy->htab.geom[i].tag, 67 + i);
+      }
+    }
+  }
+}
