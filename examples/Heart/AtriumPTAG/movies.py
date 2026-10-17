@@ -68,8 +68,8 @@ SCENES = {
     "velocity_volume": dict(
         title="Velocidad de la sangre (render volumétrico)",
         field="speed", label="Velocidad", unit="cm/s", source="velocity",
-        preset=None, lut=LUT_FLOW, species=False, range_scale=0.5,
-        opacity=[(0.0, 0.0), (0.06, 0.0), (0.25, 0.2), (0.6, 0.7), (1.0, 1.0)]),
+        preset=None, lut=LUT_FLOW, species=False, range_scale=0.4, unit_scale=1.0,
+        opacity=[(0.0, 0.0), (0.05, 0.0), (0.2, 0.05), (0.5, 0.16), (1.0, 0.4)]),
     "thrombin_wall": dict(
         title="Trombina sobre el endocardio",
         field="thrombin_nM", label="Trombina", unit="nM", source="thrombin",
@@ -119,9 +119,17 @@ def parse_args():
     p.add_argument("--zoom", type=float, default=1.0)
     p.add_argument("--wall-opacity", type=float, default=0.12,
                    help="opacidad de la pared fantasma en las escenas de volumen/líneas")
-    p.add_argument("--seeds", type=int, default=500, help="semillas de las líneas de corriente")
-    p.add_argument("--tube", type=float, default=0.0045,
+    p.add_argument("--seeds", type=int, default=1000,
+                   help="semillas de las líneas de corriente (nodos de la malla al azar, "
+                        "por lo tanto también dentro de la orejuela)")
+    p.add_argument("--tube", type=float, default=0.0016,
                    help="radio de los tubos, como fracción de la diagonal del dominio")
+    p.add_argument("--min-length", type=float, default=0.03,
+                   help="descarta líneas más cortas que esta fracción de la diagonal")
+    p.add_argument("--volume-opacity", type=float, default=1.0,
+                   help="multiplica la opacidad de los render volumétricos (0.5 = más transparente)")
+    p.add_argument("--speed-max", type=float, default=0.0,
+                   help="tope del rango de color de la velocidad en cm/s (0 = automático)")
     p.add_argument("--volume-dims", type=int, default=160,
                    help="resolución del remuestreo para el render volumétrico (n^3)")
     p.add_argument("--range-samples", type=int, default=4,
@@ -314,7 +322,7 @@ def apply_colors(field, cfg, lut_range):
     return lut
 
 
-def volume_rep(resampled, view, field, lut_range, cfg, opacity_curve, diag):
+def volume_rep(resampled, view, field, lut_range, cfg, opacity_curve, diag, opacity_mult=1.0):
     rep = Show(resampled, view)
     rep.SetRepresentationType("Volume")
     ColorBy(rep, ("POINTS", field))
@@ -323,13 +331,13 @@ def volume_rep(resampled, view, field, lut_range, cfg, opacity_curve, diag):
     lo, hi = lut_range
     pts = []
     for frac, alpha in opacity_curve:
-        pts += [lo + frac * (hi - lo), alpha, 0.5, 0.0]
+        pts += [lo + frac * (hi - lo), min(1.0, alpha * opacity_mult), 0.5, 0.0]
     pwf.Points = pts
     pwf.ScalarRangeInitialized = 1
     rep.Shade = 1
     # Opacidad acumulada por unidad de longitud: con el valor por defecto el
     # volumen queda demasiado tenue sobre el fondo oscuro.
-    rep.ScalarOpacityUnitDistance = 0.5 * rep.ScalarOpacityUnitDistance
+    rep.ScalarOpacityUnitDistance = cfg.get("unit_scale", 0.5) * rep.ScalarOpacityUnitDistance
     try:
         rep.VolumeRenderingMode = "Smart"
     except Exception:
@@ -345,28 +353,49 @@ def build_scene(name, cfg, args, data, view, bounds, diag, ranges, dark):
     surface = ExtractSurface(Input=data)
     field = cfg["field"]
     lo, hi = ranges[field]
-    hi = lo + cfg.get("range_scale", 1.0) * (hi - lo)   # saturar los chorros de entrada
+    if not (field == "speed" and args.speed_max > 0):
+        hi = lo + cfg.get("range_scale", 1.0) * (hi - lo)   # saturar los chorros de entrada
 
     if name == "streamlines":
         ghost_wall(surface, view, args.wall_opacity)
-        tracer = StreamTracer(Input=data, SeedType="Point Cloud")
+        # Semillas: nodos de la malla al azar, así cubren toda la cavidad y
+        # la orejuela (una nube esférica centrada en el dominio no llega a ella).
+        seeds = MaskPoints(Input=data)
+        seeds.OnRatio = 1
+        seeds.MaximumNumberofPoints = args.seeds
+        seeds.RandomSampling = 1
+        seeds.RandomSamplingMode = "Randomized Id Strides"
+        seeds.GenerateVertices = 1
+        seeds.SingleVertexPerCell = 1
+        tracer = StreamTracerWithCustomSource(Input=data, SeedSource=seeds)
         tracer.Vectors = ["POINTS", "velocity"]
-        tracer.SeedType.Center = [0.5 * (bounds[0] + bounds[1]), 0.5 * (bounds[2] + bounds[3]),
-                                  0.5 * (bounds[4] + bounds[5])]
-        tracer.SeedType.Radius = 0.42 * diag
-        tracer.SeedType.NumberOfPoints = args.seeds
         tracer.IntegrationDirection = "BOTH"
         tracer.MaximumStreamlineLength = 2.0 * diag
-        tracer.MaximumSteps = 4000
+        tracer.MaximumSteps = 3000
         tracer.ComputeVorticity = 0
-        tube = Tube(Input=tracer, Radius=args.tube * diag, NumberofSides=10, Capping=1)
+        # Paso de integración en longitudes de celda: con el paso por defecto
+        # cada línea lleva miles de puntos y los tubos agotan la memoria.
+        tracer.IntegrationStepUnit = "Cell Length"
+        tracer.InitialStepLength = 0.5
+        tracer.MinimumStepLength = 0.2
+        tracer.MaximumStepLength = 1.0
+        # Las líneas muy cortas (semillas pegadas a la pared) sólo ensucian.
+        lengths = CellSize(Input=tracer, ComputeLength=1, ComputeArea=0, ComputeVolume=0,
+                           ComputeVertexCount=0)
+        long_ = Threshold(Input=lengths)
+        long_.Scalars = ["CELLS", "Length"]
+        long_.LowerThreshold = args.min_length * diag
+        long_.UpperThreshold = 1e30
+        # Threshold devuelve una malla no estructurada; Tube necesita polydata.
+        lines = ExtractSurface(Input=long_)
+        tube = Tube(Input=lines, Radius=args.tube * diag, NumberofSides=6, Capping=1)
         rep = Show(tube, view)
         ColorBy(rep, ("POINTS", field))
         lut = apply_colors(field, cfg, (lo, hi))
         rep.Specular = 0.5
         rep.SpecularPower = 30.0
         style_scalar_bar(rep, view, lut, cfg["label"], cfg["unit"], dark)
-        return lut, [tracer]
+        return lut, [tracer, long_]
 
     if "opacity" in cfg:
         # Render volumétrico dentro de la pared fantasma; el campo se remuestrea
@@ -374,7 +403,8 @@ def build_scene(name, cfg, args, data, view, bounds, diag, ranges, dark):
         ghost_wall(surface, view, args.wall_opacity)
         n = args.volume_dims
         resampled = ResampleToImage(Input=data, SamplingDimensions=[n, n, n], UseInputBounds=1)
-        rep, lut = volume_rep(resampled, view, field, (lo, hi), cfg, cfg["opacity"], diag)
+        rep, lut = volume_rep(resampled, view, field, (lo, hi), cfg, cfg["opacity"], diag,
+                              args.volume_opacity)
         style_scalar_bar(rep, view, lut, cfg["label"], cfg["unit"], dark)
         return lut, [resampled]
 
@@ -456,6 +486,8 @@ def main():
         hi = max(hi, 1e-12)
         if f == "prothrombin_depletion":
             hi = min(hi, 100.0)
+        if f == "speed" and args.speed_max > 0:
+            hi = args.speed_max
         ranges[f] = (lo, hi)
         log("rango de %s: [%g, %g]" % (f, lo, hi))
 
