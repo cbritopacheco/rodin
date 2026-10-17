@@ -11,6 +11,8 @@
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include <utility>
+#include <vector>
 #include "Rodin/Geometry.h"
 #include "Rodin/Variational.h"
 #include "Rodin/IO.h"
@@ -122,6 +124,95 @@ namespace
           EXPECT_FALSE(bool(printed >> actual));
         }
       }
+
+      /// @brief Rejects malformed matrix headers and coefficients before modifying data.
+      template <bool Discontinuous>
+      void verifyMalformedMatrix()
+      {
+        using Range = Math::SpatialMatrix<Scalar>;
+        using FES = std::conditional_t<Discontinuous, P0<Range>, P1<Range>>;
+        auto mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, {4});
+        FES space(mesh, 2, 3);
+        GridFunction field(space);
+        GridFunctionLoader<FileFormat::MFEM, FES, Math::Vector<Scalar>> loader(field);
+        const size_t nodes = space.getScalarSpace().getSize();
+        const size_t components = space.getVectorDimension();
+        const auto header = [&](
+                              const std::string& dimension, const std::string& ordering) {
+          return std::string("FiniteElementSpace\nFiniteElementCollection: ") +
+            (Discontinuous ? "L2_1D_P0" : "H1_1D_P1") + "\n" + dimension + "\n" +
+            ordering + "\n\n";
+        };
+        std::vector<std::pair<std::string, std::string>> invalid;
+        for (const std::string dimension :
+          {"Dimension: 6", "VDim: bad", "VDim: 5", "VDim:"})
+        {
+          invalid.emplace_back(
+            header(dimension, "Ordering: 0"), "Invalid MFEM matrix field header");
+        }
+        for (const std::string ordering :
+          {"Order: 0", "Ordering: bad", "Ordering: 2", "Ordering:"})
+        {
+          invalid.emplace_back(
+            header("VDim: 6", ordering), "Invalid MFEM matrix field header");
+        }
+        for (const size_t ordering : {size_t(0), size_t(1)})
+        {
+          for (const size_t validValues : {size_t(0), size_t(1), nodes * components - 1})
+          {
+            std::ostringstream data;
+            data << header("VDim: 6", "Ordering: " + std::to_string(ordering));
+            for (size_t i = 0; i < validValues; ++i)
+              data << Scalar(1 + i) << '\n';
+            invalid.emplace_back(data.str(), "Truncated MFEM matrix data");
+            invalid.emplace_back(data.str() + "bad\n", "Truncated MFEM matrix data");
+          }
+        }
+        for (const auto& [data, diagnostic] : invalid)
+        {
+          SCOPED_TRACE(data);
+          for (Index i = 0; i < static_cast<size_t>(field.getData().size()); ++i)
+          {
+            if constexpr (std::is_same_v<Scalar, Complex>)
+              field.getData()[i] = Scalar(-17 - i, 3 + i);
+            else
+              field.getData()[i] = Scalar(-17 - i);
+          }
+          const auto before = field.getData().eval();
+          std::istringstream input(data);
+          try
+          {
+            loader.load(input);
+            FAIL() << "Malformed matrix input was accepted";
+          }
+          catch (const Alert::Exception& error)
+          {
+            const std::string message = error.what();
+            EXPECT_NE(message.find("member function"), std::string::npos);
+            EXPECT_NE(message.find("load"), std::string::npos);
+            EXPECT_NE(message.find(diagnostic), std::string::npos);
+          }
+          catch (const std::exception& error)
+          {
+            ADD_FAILURE() << "Expected a native member-function diagnostic: "
+                          << error.what();
+          }
+          EXPECT_EQ(field.getData(), before);
+          for (const size_t ordering : {size_t(0), size_t(1)})
+          {
+            std::istringstream valid(payload(nodes, components, ordering, Discontinuous));
+            ASSERT_NO_THROW(loader.load(valid));
+            for (size_t node = 0; node < nodes; ++node)
+            {
+              for (size_t component = 0; component < components; ++component)
+              {
+                EXPECT_EQ(
+                  field.getData()[node * components + component], entry(node, component));
+              }
+            }
+          }
+        }
+      }
   };
   using MFEMScalars = ::testing::Types<Real, Complex>;
   TYPED_TEST_SUITE(MFEMCoefficients, MFEMScalars);
@@ -149,6 +240,15 @@ namespace
   TYPED_TEST(MFEMCoefficients, P0MatrixBothOrderings)
   {
     this->template verify<2, true>();
+  }
+
+  TYPED_TEST(MFEMCoefficients, P1MalformedMatrixPreservesDestinationAndRecovers)
+  {
+    this->template verifyMalformedMatrix<false>();
+  }
+  TYPED_TEST(MFEMCoefficients, P0MalformedMatrixPreservesDestinationAndRecovers)
+  {
+    this->template verifyMalformedMatrix<true>();
   }
 
   /// @brief Invalid first and truncated later P1 coefficients raise native diagnostics before changing the field.

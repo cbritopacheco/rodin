@@ -2814,3 +2814,40 @@ Run671 also passed all 47 cases individually under AddressSanitizer with
 `detect_leaks=1`. The test translation unit is instrumented, while the reused
 Rodin support archive is optimized; this does not establish whole-library
 sanitizer coverage. Its profiles remain excluded from measured coverage.
+
+
+### MFEM matrix diagnostics and loader recovery batch (run680)
+
+Add real/complex P0/P1 matrix-field rejection tests using the existing
+independent MFEM coefficient fixture. For each of four supported variants,
+eight malformed dimension/ordering headers and twelve empty, truncated or
+nonnumeric coefficient payloads must raise a native member-function diagnostic
+and leave distinct destination coefficients unchanged. After every rejection,
+the same loader accepts independent valid data in both component orderings and
+matches every expected coefficient. This checks 80 invalid payloads and 160
+valid recovery loads per build. Production code is unchanged.
+
+All 18 MFEM coefficient unit cases passed individually in optimized run675
+and assertion-enabled run676. The final optimized build is run679; the earlier
+run673 compile-only snapshot precedes loop-style/include/warning cleanup and is
+excluded. Only successful final normal profiles enter the run680 source-matched
+capture. It verifies all four matrix loader specializations at MFEM.h entry
+3922 and positive counters for both native header and coefficient rejection
+statements. Compiler line counters combine block/template attributions and
+are used as execution evidence, not as unique exception-event counts.
+Sanitizer and discovery profiles are excluded; the capture does not establish
+a new project-wide percentage.
+
+The initial private ASan run678 failed in the pre-existing scalar round-trip
+control before reaching the new tests: an Eigen allocation using the handmade
+aligned convention was freed by optimized support code using the direct-malloc
+convention. Preprocessor checks showed `EIGEN_MALLOC_ALREADY_ALIGNED=0` for the
+ASan translation unit and `=1` for the optimized support archive. Run681 changes
+only that macro to `1` in the private ASan compile command; the test source is
+byte-identical. Run682 then passed all 18 cases individually with leak detection
+still enabled. The controlled command/source comparison and result are retained
+in `run682-mfem-asan-compatibility-audit.json`. This corrects the private mixed
+build's allocation ABI, not production code or CI flags. The test translation
+unit is instrumented and the support archive remains optimized, so no
+whole-library sanitizer claim is made. Failed, sanitizer and discovery profiles
+remain excluded from coverage.
