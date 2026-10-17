@@ -3059,3 +3059,36 @@ enabled. Final optimized, Debug and ASan test snapshots are byte-identical.
 The private ASan translation unit uses the matching Eigen allocation ABI with
 an optimized support archive; its profiles remain excluded and it does not
 establish whole-library sanitizer coverage.
+
+### Advection stop-inside boundary contract batch (run741)
+
+Exercise the previously untested `StopInsideBoundaryPolicy` directly on every
+boundary face of Segment, Triangle, Quadrilateral, Tetrahedron, Pyramid,
+Hexahedron and Wedge grids. An independent axis-aligned physical normal fixes
+the expected displacement, checking the requested inward offset and its time-step
+cap for positive and negative time steps. The policy must consume the remaining
+time, retain the cell and additive value correction, and become idempotent.
+Separate exhausted-time and documented invalid-local-face checks preserve the
+reference coordinates, cell and correction. No degenerate mesh is fabricated.
+
+All 11 advection cases passed individually in optimized run735 and
+assertion-enabled run737. Source-matched run741 captures from these two normal
+producers show 16 previously uncovered lines executed relative to the run725
+diagnostic. Raw reports and source hashes are retained in
+`build-coverage-linux/run741-advection-inputs/`. This is marginal execution
+evidence against an incomplete baseline, not final CI coverage confirmation.
+Only production sources are captured; discovery and mutation profiles are
+excluded. Production code is unchanged.
+
+In isolated run738, replacing the inward displacement with zero makes the new
+physical-offset test fail with 126 rejected offset assertions. The shadow header
+and its profiles remain separate from normal producers; no production-header
+edit was needed to establish sensitivity.
+
+Run740 passed all 11 cases individually under ASan with leak detection enabled.
+The optimized, Debug and ASan test snapshots are byte-identical. The private
+ASan translation unit uses the matching Eigen allocation ABI with optimized
+support archives; this does not establish whole-library sanitizer coverage.
+Its profiles are excluded. Existing manufactured advection tests also exercise
+this policy indirectly, so the 16-line diagnostic delta is not a claim of 16
+additional lines in the eventual complete CI union.
