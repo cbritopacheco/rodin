@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <memory>
 #include <type_traits>
 #include <utility>
 
@@ -16,6 +17,105 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Discontinuous constants have zero cell and one-sided face gradients.
+  template <class Scalar>
+  void checkPiecewiseConstantGradients()
+  {
+    for (const auto geometry : {Polytope::Type::Segment, Polytope::Type::Triangle,
+           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
+    {
+      SCOPED_TRACE(static_cast<int>(geometry));
+      const size_t dimension = Polytope::Traits(geometry).getDimension();
+      auto mesh = LocalMesh::UniformGrid(geometry, Array<size_t>::Constant(dimension, 3));
+      mesh.getConnectivity().compute(dimension - 1, dimension);
+      P0<Scalar> space(mesh);
+      GridFunction field(space);
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        mesh.setAttribute({dimension, cell->getIndex()}, cell->getIndex() + 1);
+        Scalar coefficient(cell->getIndex() + 2);
+        if constexpr (std::is_same_v<Scalar, Complex>)
+          coefficient += Scalar(0, 3 * cell->getIndex() + 1);
+        field.getData()[space.getGlobalIndex({dimension, cell->getIndex()}, 0)] =
+          coefficient;
+      }
+      const auto check = [&](const auto& gradient, const Point& point) {
+        const auto value = gradient.getValue(point);
+        ASSERT_EQ(value.size(), dimension);
+        for (size_t axis = 0; axis < dimension; ++axis)
+          EXPECT_EQ(value[axis], Scalar(0));
+      };
+      auto gradient = Grad(field);
+      for (auto cell = mesh.getCell(); cell; ++cell)
+      {
+        const Point point(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+        check(gradient, point);
+      }
+      bool checkedMissingTrace = false;
+      for (auto face = mesh.getFace(); face; ++face)
+      {
+        const Point point(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+        const auto& cells = mesh.getConnectivity().getIncidence(
+          {dimension - 1, dimension}, face->getIndex());
+        if (cells.size() == 1)
+          check(gradient, point);
+        for (const auto index : cells)
+        {
+          auto traced = Grad(field);
+          traced.traceOf(index + 1);
+          auto copied = traced;
+          auto moved = std::move(copied);
+          std::unique_ptr<decltype(traced)> cloned(moved.copy());
+          EXPECT_EQ(&cloned->getOperand(), &field);
+          check(*cloned, point);
+        }
+        if (cells.size() == 2 && !checkedMissingTrace)
+        {
+          auto invalid = Grad(field);
+          invalid.traceOf(mesh.getCellCount() + 1);
+          EXPECT_THROW(invalid.getValue(point), Alert::Exception);
+          checkedMissingTrace = true;
+        }
+      }
+      EXPECT_TRUE(checkedMissingTrace);
+      mesh.setAttribute({dimension, 0}, std::nullopt);
+      bool checkedUnattributedTrace = false;
+      for (auto face = mesh.getInterface(); face; ++face)
+      {
+        const auto& cells = mesh.getConnectivity().getIncidence(
+          {dimension - 1, dimension}, face->getIndex());
+        if (std::find(cells.begin(), cells.end(), Index(0)) == cells.end())
+          continue;
+        const Point point(*face, Polytope::Traits(face->getGeometry()).getCentroid());
+        for (const auto index : cells)
+        {
+          auto traced = Grad(field);
+          traced.traceOf(index + 1);
+          if (index == 0)
+            EXPECT_THROW(traced.getValue(point), Alert::Exception);
+          else
+            check(traced, point);
+        }
+        checkedUnattributedTrace = true;
+        break;
+      }
+      EXPECT_TRUE(checkedUnattributedTrace);
+    }
+  }
+
+  /// @brief Real cellwise jumps retain zero gradients on each selected side.
+  TEST(Rodin_Variational_Grad, PiecewiseConstantReal)
+  {
+    checkPiecewiseConstantGradients<Real>();
+  }
+
+  /// @brief Complex cellwise jumps retain zero gradients on each selected side.
+  TEST(Rodin_Variational_Grad, PiecewiseConstantComplex)
+  {
+    checkPiecewiseConstantGradients<Complex>();
+  }
+
   /// @brief Verifies that basis forwarding preserves cached references and values.
   TEST(Rodin_Variational_Grad, ShapeFunctionBasisValueCategories)
   {

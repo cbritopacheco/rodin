@@ -3997,3 +3997,64 @@ the unchanged snapshot. Five existing misses become hits, with no measured-line
 expansion: 48,224 measured, 45,905 hit, approximately 95.1912 percent. Another
 391 hits reach 96 percent at that denominator. This is diagnostic CI/local
 evidence, not final exact-head CI confirmation.
+
+### Instantiated scalar P0 gradient contracts
+
+The source audit identified an exposed but unmeasured scalar P0 gradient
+specialization. Instantiating real and complex point evaluation failed against
+the existing implementation (run1027): the complex output was hardcoded real,
+P0Element no longer provided getGradient, GridFunction no longer accepted a
+coefficient index through getValue, and an Optional attribute was passed to a
+set of concrete attributes. Preserve the failed compile, test source and exact
+pre-fix header in `build-coverage-linux/run1027-p0-gradient-prefix-evidence/`;
+no counters from that producer are admitted.
+
+Use the operand scalar field for gradient storage, the existing basis
+getDerivative interface, indexed coefficient access, and explicit optional
+attribute handling. Preserve one-sided trace selection and Alert diagnostics.
+The new real and complex tests assign distinct cell constants, including
+nonzero imaginary coefficients, then check exact zero gradients on cells,
+boundaries and each selected interface side across all seven positive-
+dimensional geometries. Copies, moves and clones retain the original field;
+missing and removed attributes reject the requested trace.
+
+All 17 gradient cases pass individually in optimized run1030, Debug run1032
+and ASan run1034. Leak detection is enabled with matching Eigen allocation ABI;
+linked support archives remain optimized and their counters are not captured.
+A private header mutation adds a spurious unit derivative, and both new tests
+reject it through exact value checks (run1042). The first mutation harness
+forced the specialization ahead of its required declarations and failed to
+compile; that attempt is excluded. The successful harness substitutes the
+private header after the public declarations without editing production files.
+
+Refresh existing matrix tests sharing the header: 22 optimized matrix-range
+cases, four optimized and four Debug matrix derivative lifecycle cases, and
+12 Debug derivative-trace cases all pass individually. Fresh normal counters
+replace every historical P0/Grad.h record; earlier BoundaryNormal and
+LinearSystem resets remain in force. Source hashes, producer results and
+executed variants are retained in the run1039, run1046 and run1053 input
+folders. Tests, benchmarks, library test helpers, failed builds, discovery,
+mutation and sanitizer counters are excluded.
+
+The broad Debug matrix-quadrature refresh was narrowed after encountering an
+unrelated potential quadrature case. The entire interrupted run1055 producer
+is excluded, including its completed first case. Run1059 instead executes the
+existing complex Jacobian and curved/embedded/point Jacobian cases individually
+with fresh profiles; no tests or numerical tolerances are changed for this
+refresh.
+
+Two further published-head Debug CI artifacts add 29 previously missed hits
+in run1043. Those reports reset all three locally changed headers before
+normalization. The final local repair still requires exact-head CI after a
+later authorized push.
+
+Run1057 proves that all 117 previously hit matrix lines remain measured and
+hit after their verified five-line source shift. No historical P0 header
+counters are reused. The refreshed source audit still inventories 566 files,
+6,189 definitions and 390 exception references, with 94 parser recoveries.
+
+The final diagnostic union (run1056) has 48,294 measured and 45,998 hit lines,
+approximately 95.2458 percent. It includes 19 current published-head CI
+artifacts and 67 successful local normal reports, in addition to the older
+verified inputs. Another 365 hits would reach 96 percent at this denominator;
+this remains incomplete diagnostic evidence rather than exact-head CI proof.

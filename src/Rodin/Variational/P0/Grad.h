@@ -91,6 +91,9 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
+      /// @brief Gradient vector over the operand's scalar field.
+      using SpatialVectorType = typename Parent::SpatialVectorType;
+
       /**
        * @brief Constructs the gradient of a P0 function @f$ u @f$.
        * @param[in] u P0 GridFunction (piecewise constant)
@@ -122,7 +125,7 @@ namespace Rodin::Variational
        * @param out Storage for the computed result.
        * @param p Point at which the operation is evaluated.
        */
-      void interpolate(Math::SpatialVector<Real>& out, const Geometry::Point& p) const
+      void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {
         const auto& polytope = p.getPolytope();
         const auto& d = polytope.getDimension();
@@ -162,7 +165,8 @@ namespace Rodin::Variational
               for (auto& idx : inc)
               {
                 const auto& tracePolytope = mesh.getPolytope(meshDim, idx);
-                if (traceDomain.count(tracePolytope->getAttribute()))
+                const auto attribute = tracePolytope->getAttribute();
+                if (attribute && traceDomain.contains(*attribute))
                 {
                   Math::SpatialPoint rc;
                   tracePolytope->getTransformation().inverse(rc, pc);
@@ -184,13 +188,14 @@ namespace Rodin::Variational
           const auto& fes = gf.getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          Math::SpatialVector<Real> grad(d);
-          Math::SpatialVector<Real> res(d);
+          SpatialVectorType res(d);
           res.setZero();
           for (size_t local = 0; local < fe.getCount(); local++)
           {
-            fe.getGradient(local)(grad, rc);
-            res += gf.getValue(fes.getGlobalIndex({d, i}, local)) * grad;
+            const auto basis = fe.getBasis(local);
+            const auto coefficient = gf[fes.getGlobalIndex({d, i}, local)];
+            for (size_t axis = 0; axis < d; ++axis)
+              res[axis] += coefficient * basis.template getDerivative<1>(axis)(rc);
           }
           out = p.getJacobianInverse().transpose() * res;
         }
