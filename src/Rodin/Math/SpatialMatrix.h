@@ -611,6 +611,8 @@ namespace Rodin::Math
       constexpr
       ScalarType dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
       {
+        if constexpr (std::is_same_v<ScalarType, Complex>)
+          return Math::dot(m_data.topLeftCorner(m_rows, m_cols), other);
         ScalarType s = ScalarType(0);
         switch (m_rows)
         {

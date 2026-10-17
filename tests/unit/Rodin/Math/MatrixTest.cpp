@@ -980,3 +980,100 @@ TYPED_TEST(SpatialMatrixDynamicVectorProductTest, EigenMatrixViewsAllShapes)
     }
   }
 }
+
+/// @brief Conjugation and Eigen-expression contractions preserve every active shape.
+template <class Scalar>
+class SpatialMatrixConjugationTest : public ::testing::Test
+{};
+using SpatialMatrixConjugationScalars = ::testing::Types<Real, Complex>;
+TYPED_TEST_SUITE(SpatialMatrixConjugationTest, SpatialMatrixConjugationScalars);
+
+TYPED_TEST(SpatialMatrixConjugationTest, ConjugateAllShapes)
+{
+  for (std::uint8_t rows = 0; rows <= 3; ++rows)
+  {
+    for (std::uint8_t cols = 0; cols <= 3; ++cols)
+    {
+      SCOPED_TRACE(::testing::Message() << unsigned(rows) << "x" << unsigned(cols));
+      SpatialMatrix<TypeParam> matrix(3, 3);
+      matrix.setConstant(TypeParam(91));
+      matrix.resize(rows, cols);
+      for (std::uint8_t i = 0; i < rows; ++i)
+      {
+        for (std::uint8_t j = 0; j < cols; ++j)
+        {
+          if constexpr (std::is_same_v<TypeParam, Complex>)
+            matrix(i, j) = Complex(Real(1 + 2 * i + j), Real(2 + i + 3 * j));
+          else
+            matrix(i, j) = Real(1 + 2 * i + j);
+        }
+      }
+      const auto before = matrix.getData();
+      const auto result = matrix.conjugate();
+      ASSERT_EQ(result.rows(), rows);
+      ASSERT_EQ(result.cols(), cols);
+      for (std::uint8_t i = 0; i < rows; ++i)
+      {
+        for (std::uint8_t j = 0; j < cols; ++j)
+        {
+          EXPECT_DOUBLE_EQ(std::real(result(i, j)), std::real(matrix(i, j)));
+          EXPECT_DOUBLE_EQ(std::imag(result(i, j)), -std::imag(matrix(i, j)));
+        }
+      }
+      EXPECT_EQ(result.conjugate().getData().topLeftCorner(rows, cols),
+        before.topLeftCorner(rows, cols));
+      EXPECT_EQ(matrix.getData(), before);
+    }
+  }
+}
+
+TYPED_TEST(SpatialMatrixConjugationTest, EigenViewsMatchSpatialFrobeniusProduct)
+{
+  for (std::uint8_t rows = 0; rows <= 3; ++rows)
+  {
+    for (std::uint8_t cols = 0; cols <= 3; ++cols)
+    {
+      SCOPED_TRACE(::testing::Message() << unsigned(rows) << "x" << unsigned(cols));
+      SpatialMatrix<TypeParam> lhs(3, 3);
+      lhs.setConstant(TypeParam(91));
+      lhs.resize(rows, cols);
+      Matrix<TypeParam> rhs(rows, cols);
+      for (std::uint8_t i = 0; i < rows; ++i)
+      {
+        for (std::uint8_t j = 0; j < cols; ++j)
+        {
+          if constexpr (std::is_same_v<TypeParam, Complex>)
+          {
+            lhs(i, j) = Complex(Real(1 + 2 * i + j), Real(2 + i + 3 * j));
+            rhs(i, j) = Complex(Real(3 + i + j), Real(1 + 2 * i + j));
+          }
+          else
+          {
+            lhs(i, j) = Real(1 + 2 * i + j);
+            rhs(i, j) = Real(3 + i + j);
+          }
+        }
+      }
+      const auto lhsBefore = lhs.getData();
+      const auto rhsBefore = rhs;
+      TypeParam expected = 0;
+      for (std::uint8_t i = 0; i < rows; ++i)
+      {
+        for (std::uint8_t j = 0; j < cols; ++j)
+        {
+          const auto a = lhs(i, j);
+          const auto b = rhs(rows - 1 - i, cols - 1 - j);
+          if constexpr (std::is_same_v<TypeParam, Complex>)
+            expected += a * std::conj(b);
+          else
+            expected += a * b;
+        }
+      }
+      const auto result = lhs.dot(rhs.reverse());
+      EXPECT_DOUBLE_EQ(std::real(result), std::real(expected));
+      EXPECT_DOUBLE_EQ(std::imag(result), std::imag(expected));
+      EXPECT_EQ(lhs.getData(), lhsBefore);
+      EXPECT_EQ(rhs, rhsBefore);
+    }
+  }
+}
