@@ -5,6 +5,8 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 #include <gtest/gtest.h>
+#include <limits>
+#include <string>
 
 #include "Rodin/Assembly.h"
 #include "Rodin/Geometry/Mesh.h"
@@ -535,4 +537,65 @@ namespace Rodin::Tests::Unit::Solver
     ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge));
+
+  /// @brief Rejected options preserve retained factors and permit another right-hand side.
+  TEST(Rodin_Solver_MUMPS, InvalidOptionsPreserveFactorizationAndPermitRecovery)
+  {
+    auto mesh = makeMesh(Polytope::Type::Segment);
+    P1 fes(mesh);
+    TrialFunction trial(fes);
+    TestFunction test(fes);
+    Problem problem(trial, test);
+    MUMPSSolver solver(problem);
+    auto system = makeUnsymmetricSystem();
+    solver.setMaxThreads(1).setWorkspacePercentage(40).solve(system);
+    ASSERT_TRUE(solver.success());
+    const auto reject = [&](auto&& configure, const char* method) {
+      try
+      {
+        configure();
+        FAIL() << "Out-of-range MUMPS option was accepted";
+      }
+      catch (const Alert::Exception& error)
+      {
+        const std::string message = error.what();
+        EXPECT_NE(message.find("member function"), std::string::npos);
+        EXPECT_NE(message.find(method), std::string::npos);
+      }
+      EXPECT_EQ(solver.getMaxThreads(), 1u);
+      EXPECT_EQ(solver.getWorkspacePercentage(), 40);
+      expectResourceState(solver, true, true, true, Factorization::Numeric);
+    };
+    if constexpr (std::numeric_limits<Index>::max() >
+      static_cast<Index>(std::numeric_limits<MUMPS_INT>::max()))
+    {
+      reject(
+        [&] {
+          solver.setMaxThreads(
+            static_cast<Index>(std::numeric_limits<MUMPS_INT>::max()) + 1);
+        },
+        "setMaxThreads");
+    }
+    reject([&] { solver.setWorkspacePercentage(-1); }, "setWorkspacePercentage");
+    if constexpr (std::numeric_limits<Integer>::max() >
+      std::numeric_limits<MUMPS_INT>::max())
+    {
+      reject(
+        [&] {
+          Integer percentage = std::numeric_limits<MUMPS_INT>::max();
+          ++percentage;
+          solver.setWorkspacePercentage(percentage);
+        },
+        "setWorkspacePercentage");
+    }
+    Math::Vector<Real> expected(3);
+    expected << -2, Real(0.5), 4;
+    system.getVector() = system.getOperator() * expected;
+    system.getSolution().setConstant(-99);
+    solver.solve(system);
+    ASSERT_TRUE(solver.success());
+    expectSolution(system, expected);
+    EXPECT_LT(
+      (system.getOperator() * system.getSolution() - system.getVector()).norm(), 1e-12);
+  }
 }
