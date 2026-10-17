@@ -857,3 +857,8 @@ target_link_libraries(RodinVariationalProblemBodyCloneTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational)
 gtest_discover_tests(RodinVariationalProblemBodyCloneTest
   DISCOVERY_MODE PRE_TEST PROPERTIES LABELS unit TIMEOUT 120)
+
+add_executable(RodinVariationalH1AdvectionTest H1AdvectionTest.cpp)
+target_link_libraries(RodinVariationalH1AdvectionTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Assembly)
+gtest_discover_tests(RodinVariationalH1AdvectionTest PROPERTIES LABELS unit)
