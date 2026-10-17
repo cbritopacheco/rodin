@@ -4,6 +4,9 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <array>
+#include <algorithm>
+#include <vector>
 #include <cstdio>
 #include <fstream>
 #include <sstream>
@@ -656,6 +659,150 @@ namespace
     const auto xml = buf.str();
     EXPECT_NE(xml.find("field.u.r0.000000.h5"), std::string::npos);
 
+    boost::filesystem::remove_all(testDir);
+  }
+
+  /// @brief Every rank retains its shapes, static values and transient snapshots.
+  TEST(MPIDistributedXDMFSeries, MixedShapesWithNonzeroPublishingRoot)
+  {
+    const int rank = worldRank();
+    int ranks = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &ranks);
+    const int root = ranks - 1;
+    std::array<char, 256> directory{};
+    if (rank == root)
+    {
+      const auto path = (boost::filesystem::temp_directory_path() /
+        boost::filesystem::unique_path("rodin-mpi-series-%%%%-%%%%"))
+                          .string();
+      ASSERT_LT(path.size(), directory.size());
+      std::copy(path.begin(), path.end(), directory.begin());
+      boost::filesystem::create_directory(path);
+    }
+    MPI_Bcast(directory.data(), directory.size(), MPI_CHAR, root, MPI_COMM_WORLD);
+    const boost::filesystem::path testDir(directory.data());
+    auto mesh = LocalMesh::UniformGrid(
+      Polytope::Type::Triangle, {static_cast<size_t>(rank + 2), 2});
+    P1 tensorSpace(mesh, 3, 3);
+    P0 matrixSpace(mesh, 2, 3);
+    P1 vectorSpace(mesh, 2);
+    GridFunction tensor(tensorSpace);
+    GridFunction matrix(matrixSpace);
+    GridFunction vector(vectorSpace);
+    Math::SpatialMatrix<Real> tensorValue(3, 3);
+    Math::SpatialMatrix<Real> matrixValue(2, 3);
+    for (size_t i = 0; i < 3; ++i)
+    {
+      for (size_t j = 0; j < 3; ++j)
+        tensorValue(i, j) = 100 * rank + 10 * i + j + 1;
+    }
+    for (size_t i = 0; i < 2; ++i)
+    {
+      for (size_t j = 0; j < 3; ++j)
+        matrixValue(i, j) = 100 * rank + 10 * i + j + 2;
+    }
+    tensor = tensorValue;
+    matrix = matrixValue;
+    vector = Math::SpatialVector<Real>{Real(rank + 3), Real(-rank - 4)};
+    XDMF output(MPI_COMM_WORLD, testDir / "series", root);
+    XDMF::FilePatterns patterns;
+    patterns.transientMesh = "mesh-r{rank}-{index}.h5";
+    patterns.staticAttribute = "{name}-r{rank}-fixed.h5";
+    patterns.attribute = "{name}-r{rank}-{index}.h5";
+    output.setFilePatterns(patterns)
+      .setPadding(1)
+      .setMesh(mesh, XDMF::MeshPolicy::Transient)
+      .add("tensor", tensor, XDMF::Center::Node, XDMF::AttributePolicy::Static)
+      .add("matrix", matrix, XDMF::Center::Cell)
+      .add("vector", vector, XDMF::Center::Node);
+    output.write(Real(0.25));
+    tensor = Real(1000) * tensorValue;
+    for (size_t i = 0; i < 2; ++i)
+    {
+      for (size_t j = 0; j < 3; ++j)
+        matrixValue(i, j) += Real(1000);
+    }
+    matrix = matrixValue;
+    vector = Math::SpatialVector<Real>{Real(rank + 13), Real(-rank + 6)};
+    output.write(Real(0.75)).close();
+    EXPECT_EQ(output.getSnapshotCount(), 2u);
+    EXPECT_EQ(output.getRootRank(), static_cast<size_t>(root));
+    EXPECT_EQ(output.getNumRanks(), static_cast<size_t>(ranks));
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (rank != root)
+      return;
+    std::ifstream input((testDir / "series.xdmf").string());
+    ASSERT_TRUE(input.good());
+    const std::string xml((std::istreambuf_iterator<char>(input)), {});
+    EXPECT_NE(xml.find("Time Value=\"0.25\""), std::string::npos);
+    EXPECT_NE(xml.find("Time Value=\"0.75\""), std::string::npos);
+    for (int piece = 0; piece < ranks; ++piece)
+    {
+      SCOPED_TRACE(piece);
+      const size_t vertices = 2 * (piece + 2);
+      const size_t cells = 2 * (piece + 1);
+      for (size_t step = 0; step < 2; ++step)
+      {
+        SCOPED_TRACE(step);
+        const auto meshName =
+          "mesh-r" + std::to_string(piece) + "-" + std::to_string(step) + ".h5";
+        EXPECT_TRUE(boost::filesystem::exists(testDir / meshName));
+        EXPECT_NE(xml.find(meshName + ":/Mesh/Geometry/Vertices"), std::string::npos);
+        for (const std::string name : {"tensor", "matrix", "vector"})
+        {
+          SCOPED_TRACE(name);
+          const bool isTensor = name == "tensor";
+          const bool isMatrix = name == "matrix";
+          const size_t count = isMatrix ? cells : vertices;
+          const size_t rows = isTensor ? 3 : 2;
+          const size_t columns = name == "vector" ? 1 : 3;
+          const auto fileName = name + "-r" + std::to_string(piece) +
+            (isTensor ? "-fixed.h5" : "-" + std::to_string(step) + ".h5");
+          const std::string dimensions = std::to_string(count) + " " +
+            std::to_string(rows) + (columns == 1 ? "" : " " + std::to_string(columns));
+          const std::string dataItem = "Dimensions=\"" + dimensions + "\">" + fileName +
+            ":/GridFunction/Values/Data</DataItem>";
+          EXPECT_NE(xml.find(dataItem), std::string::npos);
+          const auto file = HDF5::File(
+            H5Fopen((testDir / fileName).c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+          ASSERT_TRUE(file);
+          const auto dataset =
+            HDF5::DataSet(H5Dopen2(file.get(), "/GridFunction/Values/Data", H5P_DEFAULT));
+          ASSERT_TRUE(dataset);
+          const auto space = HDF5::Space(H5Dget_space(dataset.get()));
+          ASSERT_TRUE(space);
+          std::array<hsize_t, 3> shape{};
+          ASSERT_EQ(H5Sget_simple_extent_dims(space.get(), shape.data(), nullptr),
+            columns == 1 ? 2 : 3);
+          EXPECT_EQ(shape[0], count);
+          EXPECT_EQ(shape[1], rows);
+          if (columns != 1)
+          {
+            EXPECT_EQ(shape[2], columns);
+          }
+          std::vector<double> values(count * rows * columns);
+          ASSERT_GE(H5Dread(dataset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
+                      H5P_DEFAULT, values.data()),
+            0);
+          for (size_t entity = 0; entity < count; ++entity)
+          {
+            for (size_t i = 0; i < rows; ++i)
+            {
+              for (size_t j = 0; j < columns; ++j)
+              {
+                const Real expected = columns == 1
+                  ? (i == 0 ? piece + 3 : -piece - 4) + Real(10 * step)
+                  : 100 * piece + 10 * i + j + (isTensor ? 1 : 2 + 1000 * step);
+                EXPECT_DOUBLE_EQ(values[(entity * rows + i) * columns + j], expected);
+              }
+            }
+          }
+        }
+      }
+    }
+    EXPECT_NE(xml.find("AttributeType=\"Tensor\" Center=\"Node\""), std::string::npos);
+    EXPECT_NE(xml.find("AttributeType=\"Matrix\" Center=\"Cell\""), std::string::npos);
+    EXPECT_NE(xml.find("AttributeType=\"Vector\" Center=\"Node\""), std::string::npos);
     boost::filesystem::remove_all(testDir);
   }
 

@@ -3092,3 +3092,49 @@ support archives; this does not establish whole-library sanitizer coverage.
 Its profiles are excluded. Existing manufactured advection tests also exercise
 this policy indirectly, so the 16-line diagnostic delta is not a claim of 16
 additional lines in the eventual complete CI union.
+
+### Distributed XDMF shape and time-series contract batch (run750)
+
+Use MPI WORLD with independently sized triangular pieces and the last rank as
+publisher. A two-snapshot transient mesh series carries a static node tensor,
+a transient rectangular cell matrix and a transient node vector. Explicit
+rank-aware patterns keep every piece distinct. Check each rank's XML dimensions
+and heavy-data references, raw HDF5 dataset ranks/shapes and all nonsymmetric
+matrix entries. Changing all fields after the first snapshot must retain the
+original static tensor while updating the other values. Rank-dependent values
+and piece cardinalities distinguish swapped, duplicated or omitted pieces.
+
+Optimized run744 and assertion-enabled run747 each passed 52 sequential MPI
+groups: the full 48-case I/O executable at one rank, followed by the new WORLD
+case at ranks 2, 3, 4 and 8. The original CI rank matrix is unchanged. Run749
+also passed the same 52 groups under ASan with leak detection enabled and the
+unchanged external-library suppression file. The ASan test translation unit
+uses the matching Eigen allocation ABI with optimized support archives; this
+is not whole-library sanitizer coverage.
+
+Run743 freshly compiled the current XDMF implementation and linked it into
+both normal test binaries, so run750 captures include attributable out-of-line
+XML execution as well as header templates. Raw production-only reports and
+source hashes are preserved in `build-coverage-linux/run750-mpi-series-inputs/`.
+Four executed attribute helper specializations include local P1 scalar, vector
+and matrix node output and P0 matrix cell output. Five previously uncovered
+XDMF lines are positive relative to the incomplete run725 diagnostic: the
+non-publisher early return and distributed static-file, tensor/matrix and
+vector-shape output. This is not final CI coverage confirmation. Shared header
+lines add no marginal line coverage, despite the additional supported types.
+
+The first run742 fixture failed compilation because a GTest macro needed
+explicit braces; it produced no runtime evidence. The run750 audit initially
+asserted counters at a declaration without a counter and an empty-name helper
+fallback. Inspection established that `flush()` replaces an empty grid name
+with `mesh` before calling `makeGridPieceName`, so its empty-name return is
+unreachable through this caller. The corrected audit verifies actual recorded
+XML lines without modifying coverage filters or production code. Failed
+fixtures, discovery, sanitizer and mutation profiles remain excluded.
+
+In isolated run752, forcing every snapshot to overwrite the static attribute
+makes the new two-rank case fail with 180 rejected value assertions. The
+production source remains unchanged and all mutation counters are excluded.
+The initial run751 mutation harness failed compilation because an ordinary
+include directory could shadow system `hdf5.h` with Rodin `HDF5.h`; a quote-only
+include directory fixes the isolated harness without changing normal builds.
