@@ -883,12 +883,23 @@ namespace Rodin::Variational
         H1<KTest, Scalar, Mesh>, TestSpace>>>;
 
   /**
-   * @internal
    * @brief Certifies the plain-leaf operands of an H1 weighted mass expression.
    *
    * Only a direct H1 trial leaf has the component support used by the mass
    * rule. Nested products, traces and transformed shapes retain generic
    * integration. This metadata neither rewrites nor owns an expression.
+   *
+   * ## Specializations
+   *
+   * In the table, @f$C@f$ denotes a coefficient expression and @f$U@f$ a
+   * direct H1 trial leaf. Eligibility retains operand order; it does not
+   * assert that a general coefficient commutes with the trial field.
+   *
+   * | Specialization | Description |
+   * | --- | --- |
+   * | @ref H1MassOperands "H1MassOperands<Expression>" | Rejects expressions without a recognized plain-leaf structure. |
+   * | @ref H1MassOperands "H1MassOperands<Mult<C, U>>" | Preserves left-coefficient eligibility for nontensor coefficient ranges. |
+   * | @ref H1MassOperands "H1MassOperands<Mult<U, C>>" | Selects scalar right scaling of vector or matrix trial carriers. |
    *
    * @tparam Expression Multiplication expression to classify.
    */
@@ -900,8 +911,8 @@ namespace Rodin::Variational
   };
 
   /**
-   * @internal
    * @brief Retains the existing left-coefficient mass applicability.
+   *
    * @tparam K Trial degree.
    * @tparam CoefficientDerived Coefficient expression.
    * @tparam Derived Plain trial-leaf reference.
@@ -927,7 +938,6 @@ namespace Rodin::Variational
   };
 
   /**
-   * @internal
    * @brief Certifies scalar right scaling of aggregate H1 carriers.
    *
    * Scalar-valued leaves retain the generic rule, which reuses each scaled
