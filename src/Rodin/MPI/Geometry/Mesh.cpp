@@ -513,6 +513,7 @@ namespace Rodin::Geometry
     auto& shard = this->getShard();
     assert(localIdx < shard.getVertexCount());
     shard.setVertexCoordinates(localIdx, s, i);
+    m_quadratures.clear();
     return *this;
   }
 
@@ -521,6 +522,7 @@ namespace Rodin::Geometry
     auto& shard = this->getShard();
     assert(localIdx < shard.getVertexCount());
     shard.setVertexCoordinates(localIdx, coords);
+    m_quadratures.clear();
     return *this;
   }
 
@@ -531,6 +533,7 @@ namespace Rodin::Geometry
     auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(d));
     shard.setPolytopeTransformation({ d, localIdx }, trans);
+    m_quadratures.clear();
     return *this;
   }
 

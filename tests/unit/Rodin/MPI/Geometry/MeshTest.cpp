@@ -17,6 +17,8 @@
 #include <Rodin/MPI/Geometry/SubMesh.h>
 #include <Rodin/MPI/IO.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
+#include <Rodin/QF/Centroid.h>
+#include <Rodin/Variational/H1/H1Element.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -487,7 +489,7 @@ TEST(MPI_Geometry_Mesh, QuadratureCacheTracksScalingWithEmptyRoot)
     Real expectedVolume = 1;
     for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
       expectedVolume *= 2;
-    for (size_t phase = 0; phase < 2; ++phase)
+    for (size_t phase = 0; phase < 4; ++phase)
     {
       SCOPED_TRACE(phase);
       Real localVolume = 0;
@@ -510,14 +512,67 @@ TEST(MPI_Geometry_Mesh, QuadratureCacheTracksScalingWithEmptyRoot)
       }
       const Real volume = boost::mpi::all_reduce(*world, localVolume, std::plus<Real>());
       EXPECT_NEAR(volume, expectedVolume, tolerance * expectedVolume);
-      if (phase == 0)
+      if (phase < 3)
       {
-        EXPECT_EQ(&mesh.scale(2), &mesh);
+        if (phase == 0)
+          EXPECT_EQ(&mesh.scale(2), &mesh);
+        else
+        {
+          for (Index vertex = 0; vertex < shard.getVertexCount(); ++vertex)
+          {
+            const Math::SpatialPoint coordinates = mesh.getVertexCoordinates(vertex);
+            if (phase == 1)
+              EXPECT_EQ(&mesh.setVertexCoordinates(vertex, Real(2) * coordinates), &mesh);
+            else
+              for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
+                EXPECT_EQ(&mesh.setVertexCoordinates(
+                            vertex, Real(2) * coordinates[coordinate], coordinate),
+                  &mesh);
+          }
+        }
         for (size_t coordinate = 0; coordinate < dimension; ++coordinate)
           expectedVolume *= 2;
       }
     }
   }
+}
+
+/// @brief Replacing a cell map invalidates cached physical quadrature coordinates.
+TEST(MPI_Geometry_Mesh, QuadratureCacheTracksReplacementTransformationWithEmptyRoot)
+{
+  auto mesh = distribute(Polytope::Type::Segment);
+  const Variational::RealH1Element<2> element(Polytope::Type::Segment);
+  const QF::Centroid rule(Polytope::Type::Segment);
+  // The quadratic map fixes both endpoints and has positive derivative on [0, 1].
+  constexpr Real curvature = 0.25;
+  constexpr Real tolerance = 1e-12;
+  size_t localCount = 0;
+  for (Index cell = 0; cell < mesh.getShard().getCellCount(); ++cell)
+  {
+    const auto& original = mesh.getPolytopeTransformation(1, cell);
+    Math::SpatialPoint left, right;
+    original.transform(left, Math::SpatialPoint{0});
+    original.transform(right, Math::SpatialPoint{1});
+    const Real center =
+      mesh.getQuadrature(1, cell, rule).getPoint(0).getPhysicalCoordinates()[0];
+    PointCloud nodes(1, element.getCount());
+    for (size_t node = 0; node < element.getCount(); ++node)
+    {
+      const Real t = element.getNode(node)[0];
+      nodes(0, node) = left[0] + (right[0] - left[0]) * (t + curvature * t * (1 - t));
+    }
+    EXPECT_EQ(&mesh.setPolytopeTransformation({1, cell},
+                new ParametricTransformation<Variational::RealH1Element<2>>(
+                  std::move(nodes), element)),
+      &mesh);
+    const auto& quadrature = mesh.getQuadrature(1, cell, rule);
+    EXPECT_EQ(&mesh.getQuadrature(1, cell, rule), &quadrature);
+    EXPECT_EQ(&quadrature.getPoint(0).getPolytope().getMesh(), &mesh);
+    EXPECT_NEAR(quadrature.getPoint(0).getPhysicalCoordinates()[0],
+      center + (right[0] - left[0]) * curvature / 4, tolerance);
+    ++localCount;
+  }
+  EXPECT_GT(boost::mpi::all_reduce(*world, localCount, std::plus<size_t>()), 0u);
 }
 
 int main(int argc, char** argv)
