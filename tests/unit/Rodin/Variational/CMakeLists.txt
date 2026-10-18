@@ -862,3 +862,8 @@ add_executable(RodinVariationalH1AdvectionTest H1AdvectionTest.cpp)
 target_link_libraries(RodinVariationalH1AdvectionTest PRIVATE
   GTest::gtest_main Rodin::Geometry Rodin::Variational Rodin::Assembly)
 gtest_discover_tests(RodinVariationalH1AdvectionTest PROPERTIES LABELS unit)
+
+add_executable(RodinVariationalProductEvaluationTest ProductEvaluationTest.cpp)
+target_link_libraries(RodinVariationalProductEvaluationTest PRIVATE
+  GTest::gtest_main Rodin::Geometry Rodin::Variational)
+gtest_discover_tests(RodinVariationalProductEvaluationTest PROPERTIES LABELS unit)
