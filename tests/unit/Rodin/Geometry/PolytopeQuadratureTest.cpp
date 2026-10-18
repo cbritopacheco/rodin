@@ -167,7 +167,11 @@ namespace Rodin::Tests::Unit
        * @brief Checks bounded metadata work, sample order and copied Jacobians.
        *
        * A cold reference fill may read size once; construction adds at most one
-       * further query. Perturbed vertex controls exercise sample-dependent
+       * further non-diagnostic query. Assertion-enabled builds additionally
+       * read size once for the container's consistency check and once for
+       * each point's index check. Those diagnostic reads are counted explicitly;
+       * the bound on production metadata reads is unchanged.
+       * Perturbed vertex controls exercise sample-dependent
        * native tensor, wedge and pyramid Jacobians. Retained matrices must
        * reproduce the complete bulk output, including inactive storage bits.
        * @param warm Whether the native element's reference table is prefilled.
@@ -212,7 +216,11 @@ namespace Rodin::Tests::Unit
               element.getTabulation(formula);
             formula.resetObservations();
             const PolytopeQuadrature quadrature(cell, formula);
-            EXPECT_LE(formula.getSizeQueries(), size_t(1) + !warm);
+            size_t sizeQueryBudget = size_t(1) + !warm;
+#ifndef NDEBUG
+            sizeQueryBudget += expectedSize + 1;
+#endif
+            EXPECT_LE(formula.getSizeQueries(), sizeQueryBudget);
             EXPECT_EQ(formula.getWeightQueries(), 0u);
             EXPECT_EQ(formula.getCacheIdentity(), identity);
             EXPECT_EQ(quadrature.getQuadratureFormulaIdentity(), identity);
